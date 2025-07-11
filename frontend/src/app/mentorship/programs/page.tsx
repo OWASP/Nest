@@ -11,7 +11,7 @@ import React, { useEffect, useState, useMemo } from 'react'
 
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { GET_PROGRAM_DATA } from 'server/queries/programsQueries'
-import { Program, SessionWithRole } from 'types/program'
+import { Program, ExtendedSession } from 'types/program'
 import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'
 
@@ -92,7 +92,7 @@ const ProgramsSearchPage: React.FC = () => {
   }, [error])
 
   const handleMyProgramsClick = () => {
-    const githubLogin = (session as SessionWithRole)?.user?.login
+    const githubLogin = (session as ExtendedSession)?.user?.login
     if (githubLogin) {
       setMentor(githubLogin)
       setPage(1)

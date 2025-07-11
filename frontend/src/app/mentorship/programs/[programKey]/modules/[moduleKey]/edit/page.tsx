@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_PROGRAM_ADMINS_AND_MODULES, UPDATE_MODULE } from 'server/queries/moduleQueries'
-import { SessionWithRole } from 'types/program'
+import { ExtendedSession } from 'types/program'
 import { formatDateForInput } from 'utils/dateFormatter'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/mainmoduleCard'
@@ -55,7 +55,7 @@ const EditModulePage = () => {
       return
     }
 
-    const currentUserLogin = (sessionData as SessionWithRole)?.user?.login
+    const currentUserLogin = (sessionData as ExtendedSession)?.user?.login
     const isAdmin = data.program.admins?.some(
       (admin: { login: string }) => admin.login === currentUserLogin
     )

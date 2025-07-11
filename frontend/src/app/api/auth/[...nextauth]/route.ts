@@ -1,8 +1,6 @@
-// pages/api/auth/[...nextauth].ts
-
 import NextAuth, { type AuthOptions } from 'next-auth'
 import GitHubProvider from 'next-auth/providers/github'
-import { SessionWithRole } from 'types/program'
+import { ExtendedSession } from 'types/program'
 import {
   GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET,
@@ -20,7 +18,7 @@ if (IS_GITHUB_AUTH_ENABLED) {
       profile(profile) {
         return {
           id: profile.id.toString(),
-          name: profile.name || profile.login,
+          name: profile.name,
           email: profile.email,
           image: profile.avatar_url,
           login: profile.login,
@@ -54,9 +52,9 @@ export const authOptions: AuthOptions = {
     },
 
     async session({ session, token }) {
-      session.accessToken = token.accessToken as string
+      ;(session as ExtendedSession).accessToken = token.accessToken as string
       if (session.user) {
-        ;(session as SessionWithRole).user.login = token.login as string
+        ;(session as ExtendedSession).user.login = token.login as string
       }
       return session
     },

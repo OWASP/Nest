@@ -20,7 +20,9 @@ def get_user_entities_by_github_username(
     Returns a (GithubUser, NestUser) tuple, or None if not found.
     """
     try:
-        nest_user = NestUser.objects.select_related("github_user").get(github_user__login=username)
+        nest_user = NestUser.objects.select_related("github_user").get(
+            github_user__login__iexact=username
+        )
     except ObjectDoesNotExist:
         return None
 

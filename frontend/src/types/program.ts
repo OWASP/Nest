@@ -43,7 +43,7 @@ export interface Module {
   tags: string[]
 }
 
-export type SessionWithRole = {
+export type ExtendedSession = {
   accessToken?: string
   user?: {
     login?: string

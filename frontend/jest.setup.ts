@@ -33,16 +33,16 @@ beforeAll(() => {
     })
 
     Object.defineProperty(window, 'runAnimationFrameCallbacks', {
-      value: () => {},
+      value: () => { },
       configurable: true,
       writable: true,
     })
   }
 
   global.ResizeObserver = class {
-    disconnect() {}
-    observe() {}
-    unobserve() {}
+    disconnect() { }
+    observe() { }
+    unobserve() { }
   }
 })
 

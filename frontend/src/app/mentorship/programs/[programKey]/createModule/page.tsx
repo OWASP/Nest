@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react'
 import { ErrorDisplay } from 'app/global-error'
 import { CREATE_MODULE } from 'server/queries/moduleQueries'
 import { GET_PROGRAM_ADMIN_DETAILS } from 'server/queries/programsQueries'
-import { SessionWithRole } from 'types/program'
+import { ExtendedSession } from 'types/program'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/mainmoduleCard'
 
@@ -54,7 +54,7 @@ const CreateModulePage = () => {
       return
     }
 
-    const currentUserLogin = (sessionData as SessionWithRole)?.user?.login
+    const currentUserLogin = (sessionData as ExtendedSession)?.user?.login
     const isAdmin = programData.program.admins?.some(
       (admin: { login: string }) => admin.login === currentUserLogin
     )

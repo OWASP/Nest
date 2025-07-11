@@ -10,7 +10,7 @@ import {
   GET_PROGRAM_AND_MODULES,
   UPDATE_PROGRAM_STATUS_MUTATION,
 } from 'server/queries/programsQueries'
-import { Module, type Program, ProgramStatusEnum, SessionWithRole } from 'types/program'
+import { Module, type Program, ProgramStatusEnum, ExtendedSession } from 'types/program'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
@@ -34,7 +34,7 @@ const ProgramDetailsPage = () => {
     },
   })
 
-  const username = (session as SessionWithRole)?.user?.login
+  const username = (session as ExtendedSession)?.user?.login
   const isAdmin = useMemo(
     () => !!program?.admins?.some((admin) => admin.login === username),
     [program, username]

@@ -7,7 +7,7 @@ import type React from 'react'
 import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_PROGRAM_DETAILS, UPDATE_PROGRAM } from 'server/queries/programsQueries'
-import { SessionWithRole } from 'types/program'
+import { ExtendedSession } from 'types/program'
 import { formatDateForInput } from 'utils/dateFormatter'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/programCard'
@@ -48,7 +48,7 @@ const EditProgramPage = () => {
     }
 
     const isAdmin = data.program.admins?.some(
-      (admin: { login: string }) => admin.login === (session as SessionWithRole)?.user?.login
+      (admin: { login: string }) => admin.login === (session as ExtendedSession)?.user?.login
     )
 
     if (isAdmin) {

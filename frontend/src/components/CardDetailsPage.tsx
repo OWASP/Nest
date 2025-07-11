@@ -13,7 +13,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import type { DetailsCardProps } from 'types/card'
-import { SessionWithRole } from 'types/program'
+import { ExtendedSession } from 'types/program'
 import { capitalize } from 'utils/capitalize'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/credentials'
 import { getSocialIcon } from 'utils/urlIconMappings'
@@ -85,7 +85,7 @@ const DetailsCard = ({
             <h1 className="text-4xl font-bold">{title}</h1>
             {type === 'program' &&
               admins?.some(
-                (admin) => admin.login === ((data as SessionWithRole)?.user?.login as string)
+                (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
               ) && (
                 <div className="flex gap-2">
                   <ActionButton
@@ -109,7 +109,7 @@ const DetailsCard = ({
 
             {type === 'module' &&
               admins?.some(
-                (admin) => admin.login === ((data as SessionWithRole)?.user?.login as string)
+                (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
               ) && (
                 <button
                   className="flex items-center justify-center gap-2 text-nowrap rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-[#0D6EFD] text-blue-600 transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
