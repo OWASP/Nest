@@ -11,7 +11,6 @@ export const mockCommitteeData = {
       topContributors: [
         {
           avatarUrl: 'https://avatars.githubusercontent.com/u/20112179?v=4',
-          contributionsCount: 165,
           login: 'securestep9',
           name: 'Sam Stepanyan',
         },

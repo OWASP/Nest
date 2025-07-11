@@ -13,7 +13,6 @@ export const mockChapterData = {
       topContributors: [
         {
           avatarUrl: 'https://avatars.githubusercontent.com/u/58754211?v=4',
-          contributionsCount: 286,
           login: 'Isanori-Sakanashi',
           name: 'Isanori Sakanashi',
         },

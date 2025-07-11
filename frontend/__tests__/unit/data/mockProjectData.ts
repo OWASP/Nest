@@ -10,7 +10,6 @@ export const mockProjectData = {
       topContributors: [
         {
           avatarUrl: 'https://avatars.githubusercontent.com/avatar1.png',
-          contributionsCount: 10,
           login: 'contributor1',
           name: 'Contributor 1',
         },

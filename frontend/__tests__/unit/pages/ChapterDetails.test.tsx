@@ -84,7 +84,9 @@ describe('chapterDetailsPage Component', () => {
     await waitFor(() => {
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
     })
-    expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
+    expect(screen.getByText('Contributor 10')).toBeInTheDocument()
+    expect(screen.getByText('Contributor 12')).toBeInTheDocument()
+    expect(screen.queryByText('Contributor 13')).not.toBeInTheDocument()
   })
 
   test('renders chapter URL as clickable link', async () => {
@@ -104,7 +106,6 @@ describe('chapterDetailsPage Component', () => {
         {
           name: 'Contributor 1',
           avatarUrl: 'https://example.com/avatar1.jpg',
-          contributionsCount: 30,
         },
       ],
     }
