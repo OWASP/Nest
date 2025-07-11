@@ -105,7 +105,6 @@ class TestRestoreBackupCommand:
         mock_atomic.return_value.__enter__ = MagicMock()
         mock_atomic.return_value.__exit__ = MagicMock()
         mock_call_command.side_effect = Exception("Register indexing failed")
-        mock_call_command.return_value = None
 
         command = Command()
         with suppress(Exception):

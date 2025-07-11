@@ -32,24 +32,14 @@ class DisableIndexing:
         self.register_indexes()
 
     def register_indexes(self) -> None:
-        """Register indexes.
-
-        Args:
-            app_names (tuple): A tuple of app names to register indexes for.
-
-        """
+        """Register indexes."""
         for app_name in self.app_names:
             for model in apps.get_app_config(app_name).get_models():
                 with contextlib.suppress(RegistrationError):
                     register(model)
 
     def unregister_indexes(self) -> None:
-        """Unregister indexes.
-
-        Args:
-            app_names (tuple): A tuple of app names to unregister indexes for.
-
-        """
+        """Unregister indexes."""
         for app_name in self.app_names:
             for model in apps.get_app_config(app_name).get_models():
                 with contextlib.suppress(RegistrationError):
