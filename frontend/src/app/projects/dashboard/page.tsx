@@ -1,5 +1,6 @@
 'use client'
 import { useQuery } from '@apollo/client'
+import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import {
   faCheck,
   faWarning,
@@ -49,7 +50,11 @@ const ProjectsDashboardPage: FC = () => {
       </div>
     )
   }
-  const projectsCardsItems = [
+  const projectsCardsItems: {
+    type: 'healthy' | 'needsAttention' | 'unhealthy'
+    count: number
+    icon: IconProp
+  }[] = [
     {
       type: 'healthy',
       count: stats.projectsCountHealthy,

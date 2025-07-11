@@ -6,20 +6,19 @@ import { FC } from 'react'
 import SecondaryCard from 'components/SecondaryCard'
 
 const ProjectTypeDashboardCard: FC<{
-  type: string
+  type: 'healthy' | 'needsAttention' | 'unhealthy'
   count: number
   icon: IconProp
 }> = ({ type, count, icon }) => {
-  let title = 'Healthy'
-  if (type === 'unhealthy') {
-    title = 'Unhealthy'
-  } else if (type === 'needsAttention') {
-    title = 'Need Attention'
+  const titleMapping = {
+    healthy: 'Healthy',
+    needsAttention: 'Need Attention',
+    unhealthy: 'Unhealthy',
   }
 
   return (
     <SecondaryCard
-      title={title}
+      title={titleMapping[type]}
       icon={icon}
       className={clsx('overflow-hidden transition-colors duration-300', {
         'bg-green-100 text-green-800 hover:bg-green-200 hover:text-green-800 dark:bg-green-800 dark:text-green-400 dark:hover:bg-green-700':
