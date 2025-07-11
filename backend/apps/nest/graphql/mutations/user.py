@@ -5,6 +5,7 @@ import logging
 import requests
 import strawberry
 from django.contrib.auth import login, logout
+from django.core.exceptions import SuspiciousOperation
 from github import Github
 
 from apps.github.models import User as GithubUser
@@ -13,6 +14,15 @@ from apps.nest.graphql.permissions import IsAuthenticated
 from apps.nest.models import User
 
 logger = logging.getLogger(__name__)
+
+
+@strawberry.type
+class LogoutResult:
+    """Payload for logout mutation."""
+
+    ok: bool
+    code: str | None = None
+    message: str | None = None
 
 
 @strawberry.type
@@ -54,7 +64,6 @@ class UserMutations:
             if auth_user:
                 auth_user.backend = "django.contrib.auth.backends.ModelBackend"
                 login(info.context.request, auth_user)
-                logger.info("User %s successfully logged into Django session.", auth_user.username)
 
             return GitHubAuthResult(auth_user=auth_user)
 
@@ -63,12 +72,19 @@ class UserMutations:
             return GitHubAuthResult(auth_user=None)
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
-    def logout_user(self, info) -> bool:
-        """Logs the current user out of their Django session."""
+    def logout_user(self, info) -> LogoutResult:
+        """Logout the current user out of their Django session."""
         try:
-            logger.info(f"User {info.context.request.user.username} is logging out.")
             logout(info.context.request)
-            return True
-        except Exception as e:
-            logger.error(f"Logout failed: {e}")
-            return False
+            return LogoutResult(
+                ok=True,
+                code="SUCCESS",
+                message="User logged out successfully.",
+            )
+        except SuspiciousOperation as exc:
+            logger.warning("Logout failed: %s", exc)
+            return LogoutResult(
+                ok=False,
+                code="INVALID_SESSION",
+                message="Invalid session.",
+            )

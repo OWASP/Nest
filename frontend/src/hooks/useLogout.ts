@@ -3,7 +3,6 @@ import { signOut } from 'next-auth/react'
 import { useState } from 'react'
 import { LOGOUT_DJANGO_MUTATION } from 'server/queries/authQueries'
 
-
 export const useLogout = () => {
   const [logoutUser, { loading, client }] = useMutation(LOGOUT_DJANGO_MUTATION)
   const [isLoggingOut, setIsLoggingOut] = useState(false)

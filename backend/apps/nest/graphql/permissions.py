@@ -2,6 +2,7 @@
 
 from typing import Any
 
+from graphql import GraphQLError
 from strawberry.permission import BasePermission
 from strawberry.types import Info
 
@@ -15,6 +16,6 @@ class IsAuthenticated(BasePermission):
         """Check if the user is authenticated."""
         return info.context.request.user.is_authenticated
 
-    def on_unauthorized(self) -> Any | None:
+    def on_unauthorized(self) -> Any:
         """Handle unauthorized access."""
-        raise Exception(self.message)
+        return GraphQLError(self.message, extensions={"code": "UNAUTHORIZED"})

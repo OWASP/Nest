@@ -1,5 +1,5 @@
 export default function ApiKeysSkeleton() {
-  const totalRows = 3;
+  const totalRows = 3
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse">
