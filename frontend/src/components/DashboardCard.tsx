@@ -12,9 +12,9 @@ const DashboardCard: React.FC<{
   return (
     <SecondaryCard
       title={<AnchorTitle title={title} />}
-      className="overflow-hidden transition-colors duration-300 hover:bg-blue-200 dark:hover:bg-blue-700"
+      className="overflow-hidden transition-colors duration-300 hover:bg-blue-100 dark:hover:bg-blue-950"
     >
-      <span className="flex items-start gap-2 text-2xl font-light">
+      <span className="flex items-center gap-2 text-2xl font-light">
         <FontAwesomeIcon icon={icon} />
         <p>{stats}</p>
       </span>

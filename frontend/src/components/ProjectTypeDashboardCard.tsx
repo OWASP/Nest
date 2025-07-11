@@ -10,11 +10,11 @@ const ProjectTypeDashboardCard: FC<{
   count: number
   icon: IconProp
 }> = ({ type, count, icon }) => {
-  let title = 'Healthy Projects'
+  let title = 'Healthy'
   if (type === 'unhealthy') {
-    title = 'Unhealthy Projects'
+    title = 'Unhealthy'
   } else if (type === 'needsAttention') {
-    title = 'Projects Needing Attention'
+    title = 'Need Attention'
   }
 
   return (

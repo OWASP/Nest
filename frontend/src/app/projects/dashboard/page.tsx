@@ -73,17 +73,17 @@ const ProjectsDashboardPage: FC = () => {
       stats: `${stats.averageScore.toFixed(1)}`,
     },
     {
-      title: 'Total Contributors',
+      title: 'Contributors',
       icon: faUsers,
       stats: millify(stats.totalContributors),
     },
     {
-      title: 'Total Forks',
+      title: 'Forks',
       icon: faCodeBranch,
       stats: millify(stats.totalForks),
     },
     {
-      title: 'Total Stars',
+      title: 'Stars',
       icon: faStar,
       stats: millify(stats.totalStars),
     },
