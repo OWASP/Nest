@@ -54,7 +54,7 @@ class UserMutations:
             if auth_user:
                 auth_user.backend = "django.contrib.auth.backends.ModelBackend"
                 login(info.context.request, auth_user)
-                logger.info(f"User {auth_user.username} successfully logged into Django session.")
+                logger.info("User %s successfully logged into Django session.", auth_user.username)
 
             return GitHubAuthResult(auth_user=auth_user)
 

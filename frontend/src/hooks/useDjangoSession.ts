@@ -9,10 +9,6 @@ declare module 'next-auth' {
   }
 }
 
-export type ExtendedSession = {
-  accessToken?: string
-}
-
 export const useDjangoSession = () => {
   const { data: session, status } = useSession()
   const [syncSession, { loading }] = useMutation(SYNC_DJANGO_SESSION_MUTATION)
@@ -30,11 +26,9 @@ export const useDjangoSession = () => {
           variables: {
             accessToken: session.accessToken,
           },
+        }).catch((error) => {
+          throw new Error(`Failed to sync Django session: ${error.message}`)
         })
-          .then()
-          .catch((error) => {
-            throw new Error(`Failed to sync Django session: ${error.message}`)
-          })
       }
     }
   }, [status, session, syncSession])

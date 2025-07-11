@@ -27,7 +27,7 @@ class ApiKeyAuth(APIKeyHeader):
         key_hash = APIKey.generate_hash_key(key)
 
         try:
-            api_key = APIKey.objects.get(key_hash=key_hash)
+            api_key = APIKey.objects.get(hash=key_hash)
             if api_key.is_valid():
                 return api_key
         except APIKey.DoesNotExist as err:

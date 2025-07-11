@@ -1,3 +1,5 @@
+"""GraphQL permissions classes for authentication."""
+
 from typing import Any
 
 from strawberry.permission import BasePermission
@@ -10,7 +12,9 @@ class IsAuthenticated(BasePermission):
     message = "You must be logged in to perform this action."
 
     def has_permission(self, source, info: Info, **kwargs) -> bool:
+        """Check if the user is authenticated."""
         return info.context.request.user.is_authenticated
 
     def on_unauthorized(self) -> Any | None:
+        """Handle unauthorized access."""
         raise Exception(self.message)

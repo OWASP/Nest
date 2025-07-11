@@ -63,7 +63,7 @@ class APIKey(models.Model):
 
     def is_valid(self):
         """Check if the API key is valid."""
-        return not self.revoked and (not self.expires_at or timezone.now() < self.expires_at)
+        return not self.is_revoked and (not self.expires_at or timezone.now() < self.expires_at)
 
     def __str__(self):
         """Human-readable representation of the API key."""
