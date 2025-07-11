@@ -22,6 +22,8 @@ const MetricsPage: FC = () => {
   const [ordering, setOrdering] = useState<HealthMetricsOrdering>({
     scoreOrdering: { score: 'DESC' },
   })
+  const [activeFilterKey, setActiveFilterKey] = useState<string>('reset')
+  const [activeOrderingKey, setActiveOrderingKey] = useState<string>('scoreDESC')
   const {
     data,
     error: graphQLRequestError,
@@ -138,22 +140,22 @@ const MetricsPage: FC = () => {
       scoreOrdering: { score: 'ASC' },
     },
     starsCountDESC: {
-      scoreOrdering: { starsCount: 'DESC' },
+      starsOrdering: { starsCount: 'DESC' },
     },
     starsCountASC: {
-      scoreOrdering: { starsCount: 'ASC' },
+      starsOrdering: { starsCount: 'ASC' },
     },
     forksCountDESC: {
-      scoreOrdering: { forksCount: 'DESC' },
+      forksOrdering: { forksCount: 'DESC' },
     },
     forksCountASC: {
-      scoreOrdering: { forksCount: 'ASC' },
+      forksOrdering: { forksCount: 'ASC' },
     },
     contributorsCountDESC: {
-      scoreOrdering: { contributorsCount: 'DESC' },
+      contributorsOrdering: { contributorsCount: 'DESC' },
     },
     contributorsCountASC: {
-      scoreOrdering: { contributorsCount: 'ASC' },
+      contributorsOrdering: { contributorsCount: 'ASC' },
     },
   }
 
@@ -171,14 +173,13 @@ const MetricsPage: FC = () => {
             icon={faFilter}
             sections={filteringSections}
             selectionMode="single"
-            selectedKeys={Object.keys(filtersMapping).filter(
-              (key) => JSON.stringify(filtersMapping[key]) === JSON.stringify(filters)
-            )}
+            selectedKeys={[activeFilterKey]}
             onAction={async (key: string) => {
               // Because how apollo caches pagination, we need to reset the pagination.
               const newPagination = { offset: 0, limit: PAGINATION_LIMIT }
               setPagination(newPagination)
               setFilters(filtersMapping[key])
+              setActiveFilterKey(key)
               await refetch({
                 filters: filtersMapping[key],
                 pagination: newPagination,
@@ -192,14 +193,13 @@ const MetricsPage: FC = () => {
             icon={faSort}
             sections={orderingSections}
             selectionMode="single"
-            selectedKeys={Object.keys(orderingMapping).filter(
-              (key) => JSON.stringify(ordering) === JSON.stringify(orderingMapping[key])
-            )}
+            selectedKeys={[activeOrderingKey]}
             onAction={async (key: string) => {
               // Reset pagination to the first page when changing ordering
               const newPagination = { offset: 0, limit: PAGINATION_LIMIT }
               setPagination(newPagination)
               setOrdering(orderingMapping[key])
+              setActiveOrderingKey(key)
               await refetch({
                 filters,
                 pagination: newPagination,
