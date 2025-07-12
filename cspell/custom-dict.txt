@@ -2,6 +2,7 @@ Agsoc
 Aichi
 Aissue
 Aupdated
+BOTTOMPADDING
 CCSP
 CISSP
 Cañón
@@ -86,6 +87,7 @@ nosniff
 openstreetmap
 owasppcitoolkit
 owtf
+pdfgen
 pentest
 pentesting
 pgvector
