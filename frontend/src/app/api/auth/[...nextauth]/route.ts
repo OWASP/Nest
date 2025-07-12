@@ -18,7 +18,7 @@ if (IS_GITHUB_AUTH_ENABLED) {
       profile(profile) {
         return {
           id: profile.id.toString(),
-          name: profile.Iname,
+          name: profile.name,
           email: profile.email,
           image: profile.avatar_url,
           login: profile.login,
