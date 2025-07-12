@@ -3,7 +3,7 @@
 from ninja.errors import HttpError
 from ninja.security import APIKeyHeader
 
-from apps.nest.models.api_key import APIKey
+from apps.nest.models.api_key import ApiKey
 
 
 class ApiKeyAuth(APIKeyHeader):
@@ -11,7 +11,7 @@ class ApiKeyAuth(APIKeyHeader):
 
     param_name = "X-API-Key"
 
-    def authenticate(self, request, key: str) -> APIKey:
+    def authenticate(self, request, key: str) -> ApiKey:
         """Authenticate the API key from the request header.
 
         Args:
@@ -24,13 +24,12 @@ class ApiKeyAuth(APIKeyHeader):
         """
         if not key:
             raise HttpError(401, "Missing API key in 'X-API-Key' header")
-        key_hash = APIKey.generate_hash_key(key)
 
         try:
-            api_key = APIKey.objects.get(hash=key_hash)
+            api_key = ApiKey.objects.get(hash=ApiKey.generate_hash_key(key))
             if api_key.is_valid():
                 return api_key
-        except APIKey.DoesNotExist as err:
+        except ApiKey.DoesNotExist as err:
             raise HttpError(401, "Invalid API key") from err
 
         raise HttpError(401, "Invalid API key")

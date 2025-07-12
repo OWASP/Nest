@@ -7,6 +7,7 @@ import strawberry
 from django.contrib.auth import login, logout
 from django.core.exceptions import SuspiciousOperation
 from github import Github
+from strawberry.types import Info
 
 from apps.github.models import User as GithubUser
 from apps.nest.graphql.nodes.user import AuthUserNode
@@ -37,7 +38,7 @@ class UserMutations:
     """GraphQL mutations related to user."""
 
     @strawberry.mutation
-    def github_auth(self, info, access_token: str) -> GitHubAuthResult:
+    def github_auth(self, info: Info, access_token: str) -> GitHubAuthResult:
         """Authenticate via GitHub OAuth2."""
         try:
             github = Github(access_token)

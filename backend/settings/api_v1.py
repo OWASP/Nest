@@ -1,7 +1,7 @@
 """OWASP Nest API v1 configuration."""
 
 from ninja import NinjaAPI
-from ninja.throttling import AnonRateThrottle, AuthRateThrottle
+from ninja.throttling import AuthRateThrottle
 
 from apps.core.api.ninja import ApiKeyAuth
 from apps.github.api.v1.urls import router as github_router
@@ -13,7 +13,6 @@ api = NinjaAPI(
     version="1.0.0",
     auth=ApiKeyAuth(),
     throttle=[
-        AnonRateThrottle("1/s"),
         AuthRateThrottle("10/s"),
     ],
 )

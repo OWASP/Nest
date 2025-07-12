@@ -1,2 +1,2 @@
-from .api_key import APIKey
+from .api_key import ApiKey
 from .user import User

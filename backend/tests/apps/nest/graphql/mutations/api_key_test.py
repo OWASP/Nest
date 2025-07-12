@@ -6,11 +6,11 @@ from django.db.utils import IntegrityError
 from django.utils import timezone
 
 from apps.nest.graphql.mutations.api_key import (
-    APIKeyMutations,
-    CreateAPIKeyResult,
-    RevokeAPIKeyResult,
+    ApiKeyMutations,
+    CreateApiKeyResult,
+    RevokeApiKeyResult,
 )
-from apps.nest.models import APIKey
+from apps.nest.models import ApiKey
 
 
 def fake_info() -> MagicMock:
@@ -24,15 +24,15 @@ def fake_info() -> MagicMock:
     return info
 
 
-class TestAPIKeyMutations:
-    """Test cases for the APIKeyMutations class."""
+class TestApiKeyMutations:
+    """Test cases for the ApiKeyMutations class."""
 
     @pytest.fixture
-    def api_key_mutations(self) -> APIKeyMutations:
+    def api_key_mutations(self) -> ApiKeyMutations:
         """Pytest fixture to return an instance of the mutation class."""
-        return APIKeyMutations()
+        return ApiKeyMutations()
 
-    @patch("apps.nest.graphql.mutations.api_key.APIKey.create")
+    @patch("apps.nest.graphql.mutations.api_key.ApiKey.create")
     def test_create_api_key_success(self, mock_api_key_create, api_key_mutations):
         """Test the successful creation of an API key."""
         info = fake_info()
@@ -41,21 +41,21 @@ class TestAPIKeyMutations:
         expires_at = timezone.now() + timedelta(days=30)
         raw_key = "a_super_secret_and_randomly_generated_key"
 
-        mock_instance = MagicMock(spec=APIKey)
+        mock_instance = MagicMock(spec=ApiKey)
         mock_api_key_create.return_value = (mock_instance, raw_key)
 
         result = api_key_mutations.create_api_key(info, name=name, expires_at=expires_at)
 
         mock_api_key_create.assert_called_once_with(user=user, name=name, expires_at=expires_at)
 
-        assert isinstance(result, CreateAPIKeyResult)
+        assert isinstance(result, CreateApiKeyResult)
         assert result.ok is True
         assert result.code == "SUCCESS"
         assert result.message == "API key created successfully."
         assert result.api_key == mock_instance
         assert result.raw_key == raw_key
 
-    @patch("apps.nest.graphql.mutations.api_key.APIKey.create", return_value=None)
+    @patch("apps.nest.graphql.mutations.api_key.ApiKey.create", return_value=None)
     def test_create_api_key_limit_reached(self, mock_api_key_create, api_key_mutations):
         """Test creating an API key when the user has reached their active key limit."""
         info = fake_info()
@@ -66,14 +66,14 @@ class TestAPIKeyMutations:
 
         mock_api_key_create.assert_called_once_with(user=user, name=name, expires_at=None)
 
-        assert isinstance(result, CreateAPIKeyResult)
+        assert isinstance(result, CreateApiKeyResult)
         assert result.ok is False
         assert result.code == "LIMIT_REACHED"
         assert result.message == "You can have at most 5 active API keys."
         assert result.api_key is None
         assert result.raw_key is None
 
-    @patch("apps.nest.graphql.mutations.api_key.APIKey.create", side_effect=IntegrityError)
+    @patch("apps.nest.graphql.mutations.api_key.ApiKey.create", side_effect=IntegrityError)
     @patch("apps.nest.graphql.mutations.api_key.logger")
     def test_create_api_key_integrity_error(
         self, mock_logger, mock_api_key_create, api_key_mutations
@@ -87,21 +87,21 @@ class TestAPIKeyMutations:
         mock_api_key_create.assert_called_once()
         mock_logger.warning.assert_called_once()
 
-        assert isinstance(result, CreateAPIKeyResult)
+        assert isinstance(result, CreateApiKeyResult)
         assert result.ok is False
         assert result.code == "ERROR"
         assert result.message == "Something went wrong."
         assert result.api_key is None
         assert result.raw_key is None
 
-    @patch("apps.nest.graphql.mutations.api_key.APIKey.objects.get")
+    @patch("apps.nest.graphql.mutations.api_key.ApiKey.objects.get")
     def test_revoke_api_key_success(self, mock_objects_get, api_key_mutations):
         """Test the successful revocation of an existing API key."""
         info = fake_info()
         user = info.context.request.user
         key_id_to_revoke = 42
 
-        mock_api_key = MagicMock(spec=APIKey)
+        mock_api_key = MagicMock(spec=ApiKey)
         mock_objects_get.return_value = mock_api_key
 
         result = api_key_mutations.revoke_api_key(info, key_id=key_id_to_revoke)
@@ -111,13 +111,13 @@ class TestAPIKeyMutations:
         assert mock_api_key.is_revoked is True
         mock_api_key.save.assert_called_once_with(update_fields=["is_revoked"])
 
-        assert isinstance(result, RevokeAPIKeyResult)
+        assert isinstance(result, RevokeApiKeyResult)
         assert result.ok is True
         assert result.code == "SUCCESS"
         assert result.message == "API key revoked successfully."
 
     @patch(
-        "apps.nest.graphql.mutations.api_key.APIKey.objects.get", side_effect=APIKey.DoesNotExist
+        "apps.nest.graphql.mutations.api_key.ApiKey.objects.get", side_effect=ApiKey.DoesNotExist
     )
     @patch("apps.nest.graphql.mutations.api_key.logger")
     def test_revoke_api_key_not_found(self, mock_logger, mock_objects_get, api_key_mutations):
@@ -132,7 +132,7 @@ class TestAPIKeyMutations:
 
         mock_logger.warning.assert_called_once_with("API Key does not exist")
 
-        assert isinstance(result, RevokeAPIKeyResult)
+        assert isinstance(result, RevokeApiKeyResult)
         assert result.ok is False
         assert result.code == "NOT_FOUND"
         assert result.message == "API key not found."

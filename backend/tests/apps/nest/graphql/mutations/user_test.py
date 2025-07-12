@@ -8,7 +8,7 @@ from apps.github.models import User as GitHubUser
 from apps.nest.graphql.mutations.user import GitHubAuthResult, UserMutations
 
 
-def fake_info() -> MagicMock:
+def mock_info() -> MagicMock:
     """Return a minimal mock of strawberry `Info` with request on context."""
     info = MagicMock()
     info.context = MagicMock()
@@ -56,7 +56,7 @@ class TestUserMutations:
             patch("apps.nest.graphql.mutations.user.GithubUser.update_data") as mock_update_data,
             patch("apps.nest.graphql.mutations.user.login"),
         ):
-            info = fake_info()
+            info = mock_info()
             mock_github = MagicMock()
             mock_github.get_user.return_value = mock_github_user
             mock_github_class.return_value = mock_github
@@ -86,7 +86,7 @@ class TestUserMutations:
                 },
                 username=mock_github_user.login,
             )
-            info = fake_info()
+            info = mock_info()
 
             assert isinstance(result, GitHubAuthResult)
             assert result.auth_user == mock_created_user
@@ -98,7 +98,7 @@ class TestUserMutations:
             patch("apps.nest.graphql.mutations.user.GithubUser.update_data") as mock_update_data,
             patch("apps.nest.graphql.mutations.user.login"),
         ):
-            info = fake_info()
+            info = mock_info()
             mock_github = MagicMock()
             mock_github.get_user.return_value = mock_github_user
             mock_github_class.return_value = mock_github
