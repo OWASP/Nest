@@ -1,9 +1,15 @@
 """A command to generate a PDF overview of OWASP project health metrics."""
 
+from io import BytesIO
+from pathlib import Path
+
+from django.conf import settings
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus.tables import Table, TableStyle
 
+import settings.base
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 
@@ -13,11 +19,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         metrics_stats = ProjectHealthMetrics.get_stats()
 
-        pdf_file_path = "owasp_project_metrics_overview.pdf"
-        canvas = Canvas(pdf_file_path)
+        buffer = BytesIO()
+        canvas = Canvas(buffer)
         canvas.setFont("Helvetica", 12)
         canvas.setTitle("OWASP Project Health Metrics Overview")
         canvas.drawCentredString(300, 800, "OWASP Project Health Metrics Overview")
+
         table_data = [
             ["Metric", "Value"],
             ["Healthy Projects", f"{metrics_stats.projects_count_healthy}"],
@@ -53,5 +60,12 @@ class Command(BaseCommand):
         )
         table.wrapOn(canvas, 400, 600)
         table.drawOn(canvas, 100, 570)
+        canvas.drawCentredString(
+            300, 540, f"Generated on: {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        canvas.showPage()
         canvas.save()
-        self.stdout.write(self.style.SUCCESS(f"PDF overview generated at {pdf_file_path}"))
+        pdf_path = Path(settings.base.Base.BASE_DIR) / "owasp_project_health_metrics_overview.pdf"
+        pdf_path.write_bytes(buffer.getvalue())
+        buffer.close()
+        self.stdout.write(self.style.SUCCESS("PDF overview generated successfully."))
