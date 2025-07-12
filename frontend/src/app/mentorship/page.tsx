@@ -65,7 +65,12 @@ const RoleApplicationPage = () => {
   const isContributor = roles.includes('contributor')
   const isMentor = roles.includes('mentor')
 
-  if (sessionStatus === 'loading') return <LoadingSpinner />
+  if (sessionStatus === 'loading')
+    return (
+      <div role="status" aria-label="Loading spinner">
+        <LoadingSpinner />
+      </div>
+    )
 
   if (sessionStatus === 'unauthenticated') {
     return (

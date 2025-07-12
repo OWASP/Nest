@@ -28,7 +28,7 @@ class ProgramMutation:
     @transaction.atomic
     def create_program(self, info: strawberry.Info, input_data: CreateProgramInput) -> ProgramNode:
         """Create a new mentorship program."""
-        username = info.context.request.user
+        username = str(info.context.request.user)
         user_entities = get_user_entities_by_github_username(username)
 
         if not user_entities:
@@ -80,7 +80,7 @@ class ProgramMutation:
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     def update_program(self, info: strawberry.Info, input_data: UpdateProgramInput) -> ProgramNode:
         """Update an existing mentorship program. Only admins can update."""
-        username = info.context.request.user
+        username = str(info.context.request.user)
         user_entities = get_user_entities_by_github_username(username)
 
         if not user_entities:

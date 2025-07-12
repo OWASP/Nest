@@ -27,7 +27,8 @@ class MentorshipMutations:
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     def apply_as_mentee(self, info: strawberry.Info) -> ApplyAsRoleResult:
         """Register the authenticated user as a mentee."""
-        username = info.context.request.user
+        username = str(info.context.request.user)
+
         user_entities = get_user_entities_by_github_username(username)
 
         if not user_entities:
@@ -48,7 +49,7 @@ class MentorshipMutations:
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     def apply_as_mentor(self, info: strawberry.Info) -> ApplyAsRoleResult:
         """Check for project leadership and register the user as a mentor."""
-        username = info.context.request.user
+        username = str(info.context.request.user)
         user_entities = get_user_entities_by_github_username(username)
 
         if not user_entities:

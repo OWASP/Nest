@@ -14,7 +14,7 @@ jest.mock('next-auth/react', () => {
     ...jest.requireActual('next-auth/react'),
     useSession: () => ({
       data: {
-        user: { name: 'Test User', email: 'test@example.com' },
+        user: { name: 'Test User', email: 'test@example.com', login: 'testuser' },
         expires: '2099-01-01T00:00:00.000Z',
       },
       status: 'authenticated',
@@ -33,16 +33,16 @@ beforeAll(() => {
     })
 
     Object.defineProperty(window, 'runAnimationFrameCallbacks', {
-      value: () => { },
+      value: () => {},
       configurable: true,
       writable: true,
     })
   }
 
   global.ResizeObserver = class {
-    disconnect() { }
-    observe() { }
-    unobserve() { }
+    disconnect() {}
+    observe() {}
+    unobserve() {}
   }
 })
 

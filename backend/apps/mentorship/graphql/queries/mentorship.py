@@ -23,7 +23,7 @@ class MentorshipQuery:
     @strawberry.field(permission_classes=[IsAuthenticated])
     def current_user_roles(self, info: strawberry.Info) -> UserRolesResult:
         """Get the mentorship roles for the currently authenticated user."""
-        username = info.context.request.user
+        username = str(info.context.request.user)
 
         user_entities = get_user_entities_by_github_username(username)
 

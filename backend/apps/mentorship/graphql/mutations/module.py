@@ -45,7 +45,7 @@ class ModuleMutation:
     @transaction.atomic
     def create_module(self, info: strawberry.Info, input_data: CreateModuleInput) -> ModuleNode:
         """Create a new mentorship module. User must be an admin of the program."""
-        username = info.context.request.user
+        username = str(info.context.request.user)
         user_entities = get_user_entities_by_github_username(username)
 
         if not user_entities:
@@ -102,7 +102,7 @@ class ModuleMutation:
     @transaction.atomic
     def update_module(self, info: strawberry.Info, input_data: UpdateModuleInput) -> ModuleNode:
         """Update an existing mentorship module. User must be an admin of the program."""
-        username = info.context.request.user
+        username = str(info.context.request.user)
         user_entities = get_user_entities_by_github_username(username)
 
         if not user_entities:
