@@ -25,9 +25,8 @@ from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
         "unassigned_issues_count",
     ],
     filters=ProjectHealthMetricsFilter,
-    pagination=True,
 )
-class ProjectHealthMetricsNode:
+class ProjectHealthMetricsNode(strawberry.relay.Node):
     """Project health metrics node."""
 
     @strawberry.field
