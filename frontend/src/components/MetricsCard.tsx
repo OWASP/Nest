@@ -10,7 +10,14 @@ const MetricsCard: FC<{ metric: HealthMetricsProps }> = ({ metric }) => {
     >
       <div className="grid grid-cols-[4fr_1fr_1fr_1fr_1.5fr_1fr] rounded-lg bg-white p-4 transition-colors duration-200 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700">
         <div className="truncate">
-          <p className="text-md">{metric.projectName}</p>
+          <p
+            className={clsx(
+              'text-md font-semibold',
+              metric.projectName === '' ? 'text-gray-500' : 'text-gray-800 dark:text-gray-200'
+            )}
+          >
+            {metric.projectName === '' ? 'No name' : metric.projectName}
+          </p>
         </div>
         <div className="truncate">
           <p className="text-md">{metric.starsCount}</p>
