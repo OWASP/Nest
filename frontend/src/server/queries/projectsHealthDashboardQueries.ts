@@ -29,6 +29,7 @@ export const GET_PROJECT_HEALTH_METRICS_LIST = gql`
       contributorsCount
       forksCount
       id
+      projectKey
       projectName
       score
       starsCount

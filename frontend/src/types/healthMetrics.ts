@@ -35,6 +35,7 @@ export type HealthMetricsProps = {
   openIssuesCount: number
   openPullRequestsCount: number
   projectName: string
+  projectKey: string
   score: number
   starsCount: number
   unassignedIssuesCount: number

@@ -30,6 +30,7 @@ class TestProjectHealthMetricsNode:
             "open_issues_count",
             "open_pull_requests_count",
             "owasp_page_last_update_days",
+            "project_key",
             "project_name",
             "recent_releases_count",
             "score",

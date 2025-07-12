@@ -5,7 +5,7 @@ import { HealthMetricsProps } from 'types/healthMetrics'
 const MetricsCard: FC<{ metric: HealthMetricsProps }> = ({ metric }) => {
   return (
     <Link
-      href={`/projects/dashboard/metrics/${metric.id}`}
+      href={`/projects/dashboard/metrics/${metric.projectKey}`}
       className="text-gray-800 no-underline dark:text-gray-200"
     >
       <div className="grid grid-cols-[4fr_1fr_1fr_1fr_1.5fr_1fr] rounded-lg bg-white p-4 transition-colors duration-200 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700">

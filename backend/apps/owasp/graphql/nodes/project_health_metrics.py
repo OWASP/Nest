@@ -65,6 +65,11 @@ class ProjectHealthMetricsNode(strawberry.relay.Node):
         return self.last_release_days_requirement
 
     @strawberry.field
+    def project_key(self) -> str:
+        """Resolve project key."""
+        return self.project.nest_key
+
+    @strawberry.field
     def project_name(self) -> str:
         """Resolve project name."""
         return self.project.name
