@@ -3,7 +3,7 @@
 import logging
 
 from django.core.management.base import BaseCommand
-from django.db.models import Sum
+from django.db.models import Q, Sum
 
 from apps.common.models import BATCH_SIZE
 from apps.github.models.repository_contributor import RepositoryContributor
@@ -37,9 +37,13 @@ class Command(BaseCommand):
         offset = options["offset"]
         user_contributions = {
             item["user_id"]: item["total_contributions"]
-            for item in RepositoryContributor.objects.values("user_id").annotate(
-                total_contributions=Sum("contributions_count")
+            for item in RepositoryContributor.objects.exclude(
+                Q(repository__is_fork=True)
+                | Q(repository__organization__is_owasp_related_organization=False)
+                | Q(user__login__in=User.get_non_indexable_logins()),
             )
+            .values("user_id")
+            .annotate(total_contributions=Sum("contributions_count"))
         }
         users = []
         for idx, user in enumerate(active_users[offset:]):

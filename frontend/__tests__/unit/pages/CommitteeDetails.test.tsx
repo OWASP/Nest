@@ -86,7 +86,6 @@ describe('CommitteeDetailsPage Component', () => {
       topContributors: [
         {
           avatarUrl: 'https://example.com/avatar1.jpg',
-          contributionsCount: 30,
           login: 'Contributor 1',
           name: '',
         },

@@ -251,6 +251,7 @@ jobs:
           docker run --env-file frontend/.env.example owasp/nest:test-frontend-e2e-latest pnpm run test:e2e
 
   set-release-version:
+    name: Set release version
     runs-on: ubuntu-latest
     outputs:
       release_version: ${{ steps.set.outputs.release_version }}
