@@ -3,6 +3,7 @@
 import { useApolloClient } from '@apollo/client'
 import clsx from 'clsx'
 import debounce from 'lodash/debounce'
+import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState, useEffect, useCallback } from 'react'
 import { SEARCH_PROJECTS } from 'server/queries/projectQueries'
@@ -44,6 +45,7 @@ const ModuleForm = ({
   isEdit,
   submitText = 'Save',
 }: ModuleFormProps) => {
+  const router = useRouter()
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -220,7 +222,7 @@ const ModuleForm = ({
               <div className="flex flex-col justify-end gap-4 sm:flex-row">
                 <button
                   type="button"
-                  onClick={() => history.back()}
+                  onClick={() => router.back()}
                   className="rounded-lg border px-6 py-3 font-medium text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
                 >
                   Cancel
@@ -317,10 +319,7 @@ const ProjectSelector = ({ value, defaultName, onProjectChange }: ProjectSelecto
         }}
         onBlur={handleBlur}
         className={clsx(
-          'w-48 rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:bg-gray-800 dark:text-gray-200',
-          {
-            'border-red-500 focus:border-red-500': error,
-          }
+          'w-96 rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:bg-gray-800 dark:text-gray-200'
         )}
       />
       {showSuggestions && suggestions.length > 0 && (

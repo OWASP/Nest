@@ -164,7 +164,9 @@ const ProgramsSearchPage: React.FC = () => {
         </div>
 
         {totalPages === 0 && (
-          <div className="text m-4 flex text-xl dark:text-white">No programs found.</div>
+          <div className="text m-4 flex h-[60vh] w-full items-center justify-center text-xl dark:text-white">
+            No programs found.
+          </div>
         )}
 
         {programs.map(renderProgramCard)}

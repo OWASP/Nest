@@ -1,9 +1,10 @@
 import { useQuery, useMutation } from '@apollo/client'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { screen, fireEvent, waitFor } from '@testing-library/react'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import type React from 'react'
+import { render } from 'wrappers/testUtil'
 import EditProgramPage from 'app/mentorship/programs/[programKey]/edit/page'
-
 
 jest.mock('next-auth/react', () => ({
   ...jest.requireActual('next-auth/react'),
@@ -31,7 +32,12 @@ jest.mock('app/global-error', () => ({
   handleAppError: jest.fn(),
 }))
 jest.mock('components/LoadingSpinner', () => () => <div>Loading...</div>)
-jest.mock('components/programCard', () => (props: any) => (
+type ProgramCardMockProps = {
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
+  submitText: string
+}
+
+jest.mock('components/programCard', () => (props: ProgramCardMockProps) => (
   <form onSubmit={props.onSubmit}>
     <button type="submit">{props.submitText}</button>
   </form>

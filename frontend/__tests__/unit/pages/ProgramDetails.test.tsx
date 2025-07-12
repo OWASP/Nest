@@ -1,7 +1,8 @@
 import { useQuery, useMutation } from '@apollo/client'
-import { screen, render, waitFor, fireEvent } from '@testing-library/react'
+import { screen, waitFor, fireEvent } from '@testing-library/react'
 import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { render } from 'wrappers/testUtil'
 import { handleAppError } from 'app/global-error'
 import ProgramDetailsPage from 'app/mentorship/programs/[programKey]/page'
 

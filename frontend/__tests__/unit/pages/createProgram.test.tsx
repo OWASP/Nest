@@ -1,8 +1,10 @@
 import { useMutation } from '@apollo/client'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { screen, fireEvent, waitFor } from '@testing-library/react'
 import { useUserRoles } from 'hooks/useUserRoles'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import type React from 'react'
+import { render } from 'wrappers/testUtil'
 import CreateProgramPage from 'app/mentorship/programs/create/page'
 
 jest.mock('next-auth/react', () => ({
@@ -29,7 +31,11 @@ jest.mock('@apollo/client', () => {
 
 jest.mock('@heroui/toast', () => ({ addToast: jest.fn() }))
 jest.mock('components/LoadingSpinner', () => () => <div>Loading...</div>)
-jest.mock('components/programCard', () => (props: any) => (
+type ProgramCardMockProps = {
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
+}
+
+jest.mock('components/programCard', () => (props: ProgramCardMockProps) => (
   <form onSubmit={props.onSubmit}>
     <button type="submit">Submit</button>
   </form>

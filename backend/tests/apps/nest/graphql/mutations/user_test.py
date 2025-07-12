@@ -8,6 +8,14 @@ from apps.github.models import User as GitHubUser
 from apps.nest.graphql.mutations.user import GitHubAuthResult, UserMutations
 
 
+def fake_info() -> MagicMock:
+    """Return a minimal mock of strawberry `Info` with request on context."""
+    info = MagicMock()
+    info.context = MagicMock()
+    info.context.request = MagicMock()
+    return info
+
+
 class TestGitHubAuthResult:
     """Test cases for GitHubAuthResult."""
 
@@ -46,7 +54,9 @@ class TestUserMutations:
             patch("apps.nest.graphql.mutations.user.Github") as mock_github_class,
             patch("apps.nest.graphql.mutations.user.User.objects") as mock_user_objects,
             patch("apps.nest.graphql.mutations.user.GithubUser.update_data") as mock_update_data,
+            patch("apps.nest.graphql.mutations.user.login"),
         ):
+            info = fake_info()
             mock_github = MagicMock()
             mock_github.get_user.return_value = mock_github_user
             mock_github_class.return_value = mock_github
@@ -66,7 +76,7 @@ class TestUserMutations:
             mock_created_user = MagicMock()
             mock_user_objects.get_or_create.return_value = (mock_created_user, True)
 
-            result = user_mutations.github_auth("valid_token")
+            result = user_mutations.github_auth(info, "valid_token")
 
             mock_update_data.assert_called_once_with(mock_github_user, email="user@example.com")
             mock_user_objects.get_or_create.assert_called_once_with(
@@ -76,6 +86,7 @@ class TestUserMutations:
                 },
                 username=mock_github_user.login,
             )
+            info = fake_info()
 
             assert isinstance(result, GitHubAuthResult)
             assert result.auth_user == mock_created_user
@@ -85,12 +96,14 @@ class TestUserMutations:
         with (
             patch("apps.nest.graphql.mutations.user.Github") as mock_github_class,
             patch("apps.nest.graphql.mutations.user.GithubUser.update_data") as mock_update_data,
+            patch("apps.nest.graphql.mutations.user.login"),
         ):
+            info = fake_info()
             mock_github = MagicMock()
             mock_github.get_user.return_value = mock_github_user
             mock_github_class.return_value = mock_github
 
             mock_update_data.return_value = None
 
-            result = user_mutations.github_auth("token")
+            result = user_mutations.github_auth(info, "token")
             assert result.auth_user is None

@@ -1,42 +1,46 @@
-import { gql, useMutation } from '@apollo/client'
+import { useMutation } from '@apollo/client'
 import { useSession } from 'next-auth/react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useState } from 'react'
+import { SYNC_DJANGO_SESSION_MUTATION } from 'server/queries/authQueries'
 import { ExtendedSession } from 'types/program'
 
-const SYNC_DJANGO_SESSION_MUTATION = gql`
-  mutation SyncDjangoSession($accessToken: String!) {
-    githubAuth(accessToken: $accessToken) {
-      authUser {
-        username
-      }
-    }
-  }
-`
+const SYNC_STATUS_KEY = 'django_session_synced'
 
 export const useDjangoSession = () => {
   const { data: session, status } = useSession()
   const [syncSession, { loading }] = useMutation(SYNC_DJANGO_SESSION_MUTATION)
-  const syncAttempted = useRef(false)
+  const [isSyncing, setIsSyncing] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      syncAttempted.current = false
+      sessionStorage.removeItem(SYNC_STATUS_KEY)
+      return
     }
 
-    if (status === 'authenticated' && (session as ExtendedSession)?.accessToken) {
-      if (!syncAttempted.current) {
-        syncAttempted.current = true
-        syncSession({
-          variables: {
-            accessToken: (session as ExtendedSession).accessToken,
-          },
+    const shouldSync =
+      status === 'authenticated' &&
+      (session as ExtendedSession)?.accessToken &&
+      !sessionStorage.getItem(SYNC_STATUS_KEY)
+
+    if (shouldSync) {
+      setIsSyncing(true)
+
+      syncSession({
+        variables: {
+          accessToken: (session as ExtendedSession).accessToken,
+        },
+      })
+        .then(() => {
+          sessionStorage.setItem(SYNC_STATUS_KEY, 'true')
         })
-          .then()
-          .catch((error) => {
-            throw new Error(`Failed to sync Django session: ${error.message}`)
-          })
-      }
+        .catch(() => {
+          throw new Error()
+        })
+        .finally(() => {
+          setIsSyncing(false)
+        })
     }
   }, [status, session, syncSession])
-  return { isSyncing: loading }
+
+  return { isSyncing: loading || isSyncing }
 }

@@ -5,7 +5,6 @@ import { useSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import CreateModulePage from 'app/mentorship/programs/[programKey]/createModule/page'
 
-
 jest.mock('next-auth/react', () => ({
   ...jest.requireActual('next-auth/react'),
   useSession: jest.fn(),

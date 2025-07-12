@@ -1,7 +1,8 @@
 import { useQuery } from '@apollo/client'
-import { render, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import { mockModuleData } from '@unit/data/mockModuleData'
 import { useParams } from 'next/navigation'
+import { render } from 'wrappers/testUtil'
 import { handleAppError } from 'app/global-error'
 import ModuleDetailsPage from 'app/mentorship/programs/[programKey]/modules/[moduleKey]/page'
 
