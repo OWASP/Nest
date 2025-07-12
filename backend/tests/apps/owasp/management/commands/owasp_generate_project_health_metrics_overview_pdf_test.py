@@ -29,6 +29,7 @@ class TestOwaspGenerateProjectHealthMetricsOverviewPdf:
             projects_percentage_need_attention=20.00,
             projects_percentage_unhealthy=13.33,
             monthly_overall_scores=[],
+            monthly_overall_scores_months=[],
         )
         table_data = [
             ["Metric", "Value"],
