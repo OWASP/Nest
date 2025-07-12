@@ -409,6 +409,7 @@ jobs:
       github.ref == 'refs/heads/main'
     needs:
       - scan-staging-images
+      - set-release-version
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -639,6 +640,7 @@ jobs:
       github.event.action == 'published'
     needs:
       - scan-production-images
+      - set-release-version
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
