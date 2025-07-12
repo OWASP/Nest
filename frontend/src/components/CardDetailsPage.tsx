@@ -283,7 +283,6 @@ const DetailsCard = ({
             contributors={admins}
             maxInitialDisplay={6}
             label="Admins"
-            type="admin"
           />
         )}
         {mentors && mentors.length > 0 && (
@@ -292,7 +291,6 @@ const DetailsCard = ({
             contributors={mentors}
             maxInitialDisplay={6}
             label="Mentors"
-            type="mentor"
           />
         )}
         {(type === 'project' ||

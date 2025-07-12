@@ -2,6 +2,7 @@
 
 import strawberry
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 from django.db.models import Q
 
 from apps.mentorship.models import Mentee, Mentor
@@ -25,6 +26,7 @@ class MentorshipMutations:
     """GraphQL mutations related to the mentorship module."""
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
     def apply_as_mentee(self, info: strawberry.Info) -> ApplyAsRoleResult:
         """Register the authenticated user as a mentee."""
         username = str(info.context.request.user)
@@ -47,6 +49,7 @@ class MentorshipMutations:
         )
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
     def apply_as_mentor(self, info: strawberry.Info) -> ApplyAsRoleResult:
         """Check for project leadership and register the user as a mentor."""
         username = str(info.context.request.user)
@@ -71,7 +74,7 @@ class MentorshipMutations:
 
         Mentor.objects.get_or_create(
             nest_user=user,
-            defaults={"github_user": user.github_user},
+            defaults={"github_user": github_user},
         )
 
         return ApplyAsRoleResult(
