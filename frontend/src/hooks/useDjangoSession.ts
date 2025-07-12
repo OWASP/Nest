@@ -1,36 +1,46 @@
 import { useMutation } from '@apollo/client'
 import { useSession } from 'next-auth/react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { SYNC_DJANGO_SESSION_MUTATION } from 'server/queries/authQueries'
+import { ExtendedSession } from 'types/auth'
 
-declare module 'next-auth' {
-  interface Session {
-    accessToken?: string
-  }
-}
+const SYNC_STATUS_KEY = 'django_session_synced'
 
 export const useDjangoSession = () => {
   const { data: session, status } = useSession()
   const [syncSession, { loading }] = useMutation(SYNC_DJANGO_SESSION_MUTATION)
-  const syncAttempted = useRef(false)
+  const [isSyncing, setIsSyncing] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      syncAttempted.current = false
+      sessionStorage.removeItem(SYNC_STATUS_KEY)
+      return
     }
 
-    if (status === 'authenticated' && session?.accessToken) {
-      if (!syncAttempted.current) {
-        syncAttempted.current = true
-        syncSession({
-          variables: {
-            accessToken: session.accessToken,
-          },
-        }).catch((error) => {
-          throw new Error(`Failed to sync Django session: ${error.message}`)
+    const shouldSync =
+      status === 'authenticated' &&
+      (session as ExtendedSession)?.accessToken &&
+      !sessionStorage.getItem(SYNC_STATUS_KEY)
+
+    if (shouldSync) {
+      setIsSyncing(true)
+
+      syncSession({
+        variables: {
+          accessToken: (session as ExtendedSession).accessToken,
+        },
+      })
+        .then(() => {
+          sessionStorage.setItem(SYNC_STATUS_KEY, 'true')
         })
-      }
+        .catch((err) => {
+          throw new Error('Failed to sync Django session: ' + err.message)
+        })
+        .finally(() => {
+          setIsSyncing(false)
+        })
     }
   }, [status, session, syncSession])
-  return { isSyncing: loading }
+
+  return { isSyncing: loading || isSyncing }
 }

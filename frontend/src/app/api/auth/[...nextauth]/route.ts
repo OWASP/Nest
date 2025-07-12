@@ -1,13 +1,11 @@
-// import { gql } from '@apollo/client'
-import NextAuth from 'next-auth'
+import NextAuth, { type AuthOptions } from 'next-auth'
 import GitHubProvider from 'next-auth/providers/github'
-// import { apolloClient } from 'server/apolloClient'
+import { ExtendedSession } from 'types/auth'
 import {
   GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET,
   IS_GITHUB_AUTH_ENABLED,
   NEXTAUTH_SECRET,
-  NEXTAUTH_URL,
 } from 'utils/credentials'
 
 const providers = []
@@ -17,39 +15,51 @@ if (IS_GITHUB_AUTH_ENABLED) {
     GitHubProvider({
       clientId: GITHUB_CLIENT_ID,
       clientSecret: GITHUB_CLIENT_SECRET,
+      profile(profile) {
+        return {
+          id: profile.id.toString(),
+          name: profile.Iname,
+          email: profile.email,
+          image: profile.avatar_url,
+          login: profile.login,
+        }
+      },
     })
   )
 }
 
-const authOptions = {
+type ExtendedProfile = {
+  login: string
+}
+export const authOptions: AuthOptions = {
   providers,
   session: {
-    strategy: 'jwt' as const,
+    strategy: 'jwt',
   },
   callbacks: {
     async signIn({ account }) {
-      if (account?.provider === 'github') {
-        return true
-      }
-      return false
+      return !!(account?.provider === 'github' && account.access_token)
     },
 
-    async jwt({ token, account }) {
+    async jwt({ token, account, profile }) {
       if (account?.access_token) {
         token.accessToken = account.access_token
+      }
+      if ((profile as ExtendedProfile)?.login) {
+        token.login = (profile as ExtendedProfile)?.login
       }
       return token
     },
 
     async session({ session, token }) {
-      if (token?.accessToken) {
-        session.accessToken = token.accessToken
+      ;(session as ExtendedSession).accessToken = token.accessToken as string
+      if (session.user) {
+        ;(session as ExtendedSession).user.login = token.login as string
       }
       return session
     },
   },
   secret: NEXTAUTH_SECRET,
-  url: NEXTAUTH_URL,
 }
 
 const handler = NextAuth(authOptions)
