@@ -9,6 +9,7 @@ import { ErrorDisplay } from 'app/global-error'
 import { CREATE_MODULE } from 'server/queries/moduleQueries'
 import { GET_PROGRAM_ADMIN_DETAILS } from 'server/queries/programsQueries'
 import { ExtendedSession } from 'types/program'
+import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/mainmoduleCard'
 
@@ -84,21 +85,12 @@ const CreateModulePage = () => {
         experienceLevel: formData.experienceLevel,
         startedAt: formData.startedAt || null,
         endedAt: formData.endedAt || null,
-        domains: formData.domains
-          .split(',')
-          .map((d) => d.trim())
-          .filter(Boolean),
-        tags: formData.tags
-          .split(',')
-          .map((t) => t.trim())
-          .filter(Boolean),
+        domains: parseCommaSeparated(formData.domains),
+        tags: parseCommaSeparated(formData.tags),
         programKey: programKey,
         projectId: formData.projectId,
         projectName: formData.projectName,
-        mentorLogins: formData.mentorLogins
-          .split(',')
-          .map((login) => login.trim())
-          .filter(Boolean),
+        mentorLogins: parseCommaSeparated(formData.mentorLogins),
       }
 
       await createModule({ variables: { input } })

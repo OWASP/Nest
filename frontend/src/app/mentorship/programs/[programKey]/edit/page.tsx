@@ -9,6 +9,7 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_PROGRAM_DETAILS, UPDATE_PROGRAM } from 'server/queries/programsQueries'
 import { ExtendedSession } from 'types/program'
 import { formatDateForInput } from 'utils/dateFormatter'
+import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/programCard'
 const EditProgramPage = () => {
@@ -97,18 +98,9 @@ const EditProgramPage = () => {
         startedAt: formData.startedAt,
         endedAt: formData.endedAt,
         experienceLevels: formData.experienceLevels,
-        tags: formData.tags
-          .split(',')
-          .map((t) => t.trim())
-          .filter(Boolean),
-        domains: formData.domains
-          .split(',')
-          .map((d) => d.trim())
-          .filter(Boolean),
-        adminLogins: formData.adminLogins
-          .split(',')
-          .map((login) => login.trim())
-          .filter(Boolean),
+        tags: parseCommaSeparated(formData.tags),
+        domains: parseCommaSeparated(formData.domains),
+        adminLogins: parseCommaSeparated(formData.adminLogins),
         status: formData.status,
       }
 

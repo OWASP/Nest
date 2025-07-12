@@ -9,6 +9,7 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_PROGRAM_ADMINS_AND_MODULES, UPDATE_MODULE } from 'server/queries/moduleQueries'
 import { ExtendedSession } from 'types/program'
 import { formatDateForInput } from 'utils/dateFormatter'
+import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/mainmoduleCard'
 
@@ -105,20 +106,11 @@ const EditModulePage = () => {
         experienceLevel: formData.experienceLevel,
         startedAt: formData.startedAt || null,
         endedAt: formData.endedAt || null,
-        domains: formData.domains
-          .split(',')
-          .map((d: string) => d.trim())
-          .filter(Boolean),
-        tags: formData.tags
-          .split(',')
-          .map((t: string) => t.trim())
-          .filter(Boolean),
+        domains: parseCommaSeparated(formData.domains),
+        tags: parseCommaSeparated(formData.tags),
         projectName: formData.projectName,
         projectId: formData.projectId,
-        mentorLogins: formData.mentorLogins
-          .split(',')
-          .map((login: string) => login.trim())
-          .filter(Boolean),
+        mentorLogins: parseCommaSeparated(formData.mentorLogins),
       }
 
       await updateModule({ variables: { input } })

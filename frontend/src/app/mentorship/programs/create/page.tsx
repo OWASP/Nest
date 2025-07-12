@@ -8,6 +8,7 @@ import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 
 import { CREATE_PROGRAM } from 'server/queries/programsQueries'
+import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/programCard'
 
@@ -57,14 +58,8 @@ const CreateProgramPage = () => {
         startedAt: formData.startedAt,
         endedAt: formData.endedAt,
         experienceLevels: formData.experienceLevels,
-        tags: formData.tags
-          .split(',')
-          .map((t) => t.trim())
-          .filter(Boolean),
-        domains: formData.domains
-          .split(',')
-          .map((d) => d.trim())
-          .filter(Boolean),
+        tags: parseCommaSeparated(formData.tags),
+        domains: parseCommaSeparated(formData.domains),
         status: formData.status,
       }
 
