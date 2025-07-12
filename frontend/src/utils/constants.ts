@@ -13,6 +13,14 @@ export const headerLinks: Link[] = [
     ],
   },
   {
+    text: 'Mentorship',
+    href: '/mentorship',
+  },
+  {
+    text: 'Program',
+    href: '/mentorship/programs',
+  },
+  {
     text: 'Projects',
     href: '/projects',
   },

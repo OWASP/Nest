@@ -8,6 +8,7 @@ import type { Icon } from 'types/icon'
 import type { Issue } from 'types/issue'
 import type { Level } from 'types/level'
 import type { Milestone } from 'types/milestone'
+import type { Module } from 'types/program'
 import type { RepositoryCardProps } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
@@ -22,6 +23,10 @@ export type CardProps = {
   social?: { title: string; icon: string; url: string }[]
   summary: string
   title: string
+  timeline?: {
+    start: string | Date
+    end: string | Date
+  }
   tooltipLabel?: string
   topContributors?: Contributor[]
   url: string
@@ -36,18 +41,24 @@ type Stats = {
 export interface DetailsCardProps {
   description?: string
   details?: { label: string; value: string | JSX.Element }[]
+  domains?: string[]
   entityKey?: string
   geolocationData?: Chapter[]
   healthMetricsData?: HealthMetricsProps[]
   heatmap?: JSX.Element
   isActive?: boolean
+  isDraft?: boolean
+  setPublish?: () => void
   languages?: string[]
+  mentors?: Contributor[]
+  admins?: Contributor[]
   projectName?: string
   pullRequests?: PullRequest[]
   recentIssues?: Issue[]
   recentMilestones?: Milestone[]
   recentReleases?: Release[]
   repositories?: RepositoryCardProps[]
+  modules?: Module[]
   showAvatar?: boolean
   socialLinks?: string[]
   stats?: Stats[]
@@ -55,6 +66,7 @@ export interface DetailsCardProps {
   title?: string
   topContributors?: Contributor[]
   topics?: string[]
+  tags?: string[]
   type: string
   userSummary?: JSX.Element
 }

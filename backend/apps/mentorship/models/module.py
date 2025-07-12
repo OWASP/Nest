@@ -5,7 +5,11 @@ from __future__ import annotations
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.mentorship.models.common import ExperienceLevel, MatchingAttributes, StartEndRange
+from apps.mentorship.models.common import (
+    ExperienceLevel,
+    MatchingAttributes,
+    StartEndRange,
+)
 
 
 class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedModel):
@@ -27,6 +31,7 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         blank=True,
         default="",
     )
+    key = models.CharField(verbose_name="Key", max_length=200, unique=True)
 
     # FKs.
     program = models.ForeignKey(
@@ -63,7 +68,6 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
     def save(self, *args, **kwargs):
         """Save module."""
         if self.program:
-            # Set default dates from program if not provided.
             self.started_at = self.started_at or self.program.started_at
             self.ended_at = self.ended_at or self.program.ended_at
 

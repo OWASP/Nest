@@ -6,6 +6,7 @@ const config: Config = {
     'src/**/*.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',
     '!src/app/api/**',
+    '!src/app/mentorship/page.tsx',
     '!src/app/**/layout.tsx',
     '!src/components/**',
     '!src/hooks/**',
