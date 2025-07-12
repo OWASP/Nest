@@ -31,7 +31,7 @@ if (IS_GITHUB_AUTH_ENABLED) {
 type ExtendedProfile = {
   login: string
 }
-export const authOptions: AuthOptions = {
+const authOptions: AuthOptions = {
   providers,
   session: {
     strategy: 'jwt',
