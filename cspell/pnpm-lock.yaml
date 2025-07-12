@@ -15,8 +15,8 @@ importers:
         specifier: ^2.0.9
         version: 2.0.9
       '@cspell/dict-en_us':
-        specifier: ^4.4.14
-        version: 4.4.14
+        specifier: ^4.4.15
+        version: 4.4.15
       '@cspell/dict-fullstack':
         specifier: ^3.2.7
         version: 3.2.7
@@ -116,8 +116,8 @@ packages:
   '@cspell/dict-en-gb@1.1.33':
     resolution: {integrity: sha512-tKSSUf9BJEV+GJQAYGw5e+ouhEe2ZXE620S7BLKe3ZmpnjlNG9JqlnaBhkIMxKnNFkLY2BP/EARzw31AZnOv4g==}
 
-  '@cspell/dict-en_us@4.4.14':
-    resolution: {integrity: sha512-3JYC4XTc1I88ZC1SlZE9MssWljgJ1SmEVSfA8JiQDY5Mv7X9zo7Jvwjjq795oIJTkmdIW9yNX8ikKRt+cV7CIQ==}
+  '@cspell/dict-en_us@4.4.15':
+    resolution: {integrity: sha512-mhWaLui5aq0pgM4oIqAJNbOW/wQG3epe4nu22eqYTLQN+ztdzyn7aFpE+9yTtZTNvldK0xtN7jgk2mtHZ9w+1A==}
 
   '@cspell/dict-filetypes@3.0.13':
     resolution: {integrity: sha512-g6rnytIpQlMNKGJT1JKzWkC+b3xCliDKpQ3ANFSq++MnR4GaLiifaC4JkVON11Oh/UTplYOR1nY3BR4X30bswA==}
@@ -471,7 +471,7 @@ snapshots:
       '@cspell/dict-elixir': 4.0.8
       '@cspell/dict-en-common-misspellings': 2.1.3
       '@cspell/dict-en-gb': 1.1.33
-      '@cspell/dict-en_us': 4.4.14
+      '@cspell/dict-en_us': 4.4.15
       '@cspell/dict-filetypes': 3.0.13
       '@cspell/dict-flutter': 1.1.1
       '@cspell/dict-fonts': 4.0.5
@@ -563,7 +563,7 @@ snapshots:
 
   '@cspell/dict-en-gb@1.1.33': {}
 
-  '@cspell/dict-en_us@4.4.14': {}
+  '@cspell/dict-en_us@4.4.15': {}
 
   '@cspell/dict-filetypes@3.0.13': {}
 
