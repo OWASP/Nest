@@ -61,11 +61,16 @@ class Command(BaseCommand):
         table.wrapOn(canvas, 400, 600)
         table.drawOn(canvas, 100, 570)
         canvas.drawCentredString(
-            300, 540, f"Generated on: {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            300, 100, f"Generated on: {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}"
         )
         canvas.showPage()
         canvas.save()
-        pdf_path = Path(settings.base.Base.BASE_DIR) / "owasp_project_health_metrics_overview.pdf"
+        pdf_path = (
+            Path(settings.base.Base.BASE_DIR)
+            / "reports"
+            / "owasp_project_health_metrics_overview.pdf"
+        )
+        pdf_path.parent.mkdir(parents=True, exist_ok=True)
         pdf_path.write_bytes(buffer.getvalue())
         buffer.close()
         self.stdout.write(self.style.SUCCESS("PDF overview generated successfully."))
