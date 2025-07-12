@@ -3,11 +3,17 @@
 import strawberry
 
 from apps.github.graphql.nodes.repository_contributor import RepositoryContributorNode
+from apps.github.graphql.nodes.user import UserNode
 
 
 @strawberry.type
 class GenericEntityNode:
     """Base node class for OWASP entities with common fields and resolvers."""
+
+    @strawberry.field
+    def leaders_temp(self) -> list[UserNode]:
+        """Resolve leaders logins."""
+        return self.leaders.all()
 
     @strawberry.field
     def leaders(self) -> list[str]:
