@@ -32,7 +32,6 @@ class ProgramMutation:
         user_entities = get_user_entities_by_github_username(username)
 
         if not user_entities:
-            # FIX: Use a specific Django exception and assign the message to a variable.
             msg = "Logic error: Authenticated user not found in the database."
             raise ObjectDoesNotExist(msg)
 

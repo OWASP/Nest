@@ -30,7 +30,6 @@ def _resolve_mentors_from_logins(logins: list[str]) -> set[Mentor]:
             mentor, _ = Mentor.objects.get_or_create(github_user=github_user)
             mentors.add(mentor)
         except GithubUser.DoesNotExist as e:
-            # Using ValueError for invalid input, as it's a standard Python/Django pattern.
             msg = f"GitHub user '{login}' not found."
             logger.warning(msg, exc_info=True)
             raise ValueError(msg) from e
@@ -58,11 +57,9 @@ class ModuleMutation:
             project = Project.objects.get(id=input_data.project_id)
             creator_as_mentor = Mentor.objects.get(nest_user=user)
         except (Program.DoesNotExist, Project.DoesNotExist) as e:
-            # Grouping not-found errors into a single specific exception type.
             msg = f"{e.__class__.__name__} matching query does not exist."
             raise ObjectDoesNotExist(msg) from e
         except Mentor.DoesNotExist as e:
-            # PermissionDenied is the correct Django exception for role/status checks.
             msg = "Only mentors can create modules."
             raise PermissionDenied(msg) from e
 
@@ -75,7 +72,6 @@ class ModuleMutation:
             and input_data.started_at
             and input_data.ended_at <= input_data.started_at
         ):
-            # ValidationError is the standard Django exception for invalid data.
             msg = "End date must be after start date."
             raise ValidationError(msg)
 
