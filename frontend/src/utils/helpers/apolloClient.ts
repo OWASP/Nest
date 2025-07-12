@@ -17,10 +17,12 @@ const createApolloClient = () => {
   })
 
   const authLink = setContext(async (_, { headers }) => {
+    const csrfToken = await getCsrfToken()
+
     return {
       headers: {
         ...headers,
-        'X-CSRFToken': (await getCsrfToken()) || '',
+        'X-CSRFToken': csrfToken || '',
       },
     }
   })

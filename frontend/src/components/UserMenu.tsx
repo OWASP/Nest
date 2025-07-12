@@ -2,8 +2,9 @@
 
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useLogout } from 'hooks/useLogout'
 import Image from 'next/image'
-import { useSession, signIn, signOut } from 'next-auth/react'
+import { useSession, signIn } from 'next-auth/react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { userAuthStatus } from 'utils/constants'
 
@@ -13,6 +14,7 @@ export default function UserMenu({
   readonly isGitHubAuthEnabled: boolean
 }) {
   const { data: session, status } = useSession()
+  const { logout, isLoggingOut } = useLogout()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const dropdownId = useId()
@@ -51,6 +53,11 @@ export default function UserMenu({
     )
   }
 
+  const handleLogout = () => {
+    logout()
+    setIsOpen(false)
+  }
+
   return (
     <div ref={dropdownRef} className="relative flex items-center justify-center">
       <button
@@ -59,6 +66,7 @@ export default function UserMenu({
         aria-haspopup="true"
         aria-controls={dropdownId}
         className="w-auto focus:outline-none"
+        disabled={isLoggingOut}
       >
         <div className="h-10 w-10 overflow-hidden rounded-full">
           <Image
@@ -77,13 +85,11 @@ export default function UserMenu({
           className="absolute right-0 top-full z-20 mt-2 w-48 overflow-hidden rounded-md bg-white shadow-lg dark:bg-slate-800"
         >
           <button
-            onClick={() => {
-              signOut({ callbackUrl: '/' })
-              setIsOpen(false)
-            }}
+            onClick={handleLogout}
+            disabled={isLoggingOut}
             className="block w-full px-4 py-2 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white"
           >
-            Sign out
+            {isLoggingOut ? 'Signing out...' : 'Sign out'}
           </button>
         </div>
       )}
