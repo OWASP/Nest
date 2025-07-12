@@ -44,7 +44,7 @@ const DonutBarChart: React.FC<{
               show: false,
             },
             colors: [greenColor, orangeColor, redColor],
-            labels: ['Healthy Projects', 'Projects Needing Attention', 'Unhealthy Projects'],
+            labels: ['Healthy', 'Need Attention', 'Unhealthy'],
           }}
           series={series.map((value) => round(value, 1))}
           height={250}
