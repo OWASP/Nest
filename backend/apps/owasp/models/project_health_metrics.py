@@ -200,7 +200,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         )
         return ProjectHealthStatsNode(
             average_score=aggregation.get("average_score", 0.0),
-            # We used all metrics instead of latest metrics to get the monthly trend
+            # We use all metrics instead of latest metrics to get the monthly trend
             monthly_overall_scores=list(monthly_overall_metrics.values_list("score", flat=True)),
             monthly_overall_scores_months=list(
                 monthly_overall_metrics.values_list("month", flat=True)
