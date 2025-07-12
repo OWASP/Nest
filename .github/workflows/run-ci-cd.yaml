@@ -402,6 +402,7 @@ jobs:
       ANSIBLE_HOST_KEY_CHECKING: false
       NEST_HOST_IP_ADDRESS: ${{ secrets.NEST_HOST_IP_ADDRESS }}
       NEST_SSH_PRIVATE_KEY_PATH: ${{ vars.NEST_SSH_PRIVATE_KEY_PATH }}
+      RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
     environment: staging
     if: |
       github.repository == 'OWASP/Nest' &&
@@ -631,6 +632,7 @@ jobs:
       ANSIBLE_HOST_KEY_CHECKING: false
       NEST_HOST_IP_ADDRESS: ${{ secrets.NEST_HOST_IP_ADDRESS }}
       NEST_SSH_PRIVATE_KEY_PATH: ${{ vars.NEST_SSH_PRIVATE_KEY_PATH }}
+      RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
     environment: production
     if: |
       github.event_name == 'release' &&
