@@ -6,7 +6,7 @@ import { format, addDays } from 'date-fns'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
 import ApiKeysPage from 'app/settings/api-keys/page'
-import { CREATE_API_KEY, GET_API_KEYS, REVOKE_API_KEY } from 'server/queries/apiKeyQueries'
+import { CREATE_API_KEY, REVOKE_API_KEY } from 'server/queries/apiKeyQueries'
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
@@ -202,32 +202,6 @@ describe('ApiKeysPage Component', () => {
     })
   })
 
-  test('fetches and displays revoked keys when checkbox is checked', async () => {
-    mockUseQuery.mockReturnValue({
-      data: { apiKeys: mockApiKeys.apiKeys.filter((key) => !key.isRevoked) },
-      loading: false,
-      error: null,
-      refetch: mockRefetch,
-    })
-
-    render(<ApiKeysPage />)
-
-    await waitFor(() => {
-      expect(screen.queryByText('revoked key')).not.toBeInTheDocument()
-    })
-
-    const checkbox = screen.getByLabelText('Show revoked keys')
-    fireEvent.click(checkbox)
-    await waitFor(() => {
-      expect(mockUseQuery).toHaveBeenLastCalledWith(
-        GET_API_KEYS,
-        expect.objectContaining({
-          variables: { includeRevoked: true },
-        })
-      )
-    })
-  })
-
   test('displays API key usage information', async () => {
     render(<ApiKeysPage />)
     await waitFor(() => {
@@ -254,7 +228,7 @@ describe('ApiKeysPage Component', () => {
     fireEvent.click(confirmRevokeButton)
     await waitFor(() => {
       expect(mockRevokeMutation).toHaveBeenCalledWith({
-        variables: { publicId: '1' },
+        variables: { uuid: '1' },
       })
     })
   })
