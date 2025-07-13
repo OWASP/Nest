@@ -1,10 +1,11 @@
-"""Mentorship Module GraphQL Mutations."""
+"""GraphQL mutations for mentorship modules in the mentorship app."""
 
 import logging
 
 import strawberry
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import transaction
+from django.utils.timezone import is_naive, make_aware
 
 from apps.common.utils import slugify
 from apps.github.models import User as GithubUser
@@ -36,9 +37,33 @@ def _resolve_mentors_from_logins(logins: list[str]) -> set[Mentor]:
     return mentors
 
 
+def _validate_module_dates(started_at, ended_at, program_started_at, program_ended_at) -> tuple:
+    """Validate and normalize module start/end dates against program constraints."""
+    if started_at is None or ended_at is None:
+        msg = "Both start and end dates are required."
+        raise ValidationError(message=msg)
+
+    if is_naive(started_at):
+        started_at = make_aware(started_at)
+    if is_naive(ended_at):
+        ended_at = make_aware(ended_at)
+
+    if ended_at <= started_at:
+        msg = "End date must be after start date."
+        raise ValidationError(message=msg)
+    if started_at < program_started_at:
+        msg = "Module start date cannot be before program start date."
+        raise ValidationError(message=msg)
+    if program_ended_at and ended_at > program_ended_at:
+        msg = "Module end date cannot be after program end date."
+        raise ValidationError(message=msg)
+
+    return started_at, ended_at
+
+
 @strawberry.type
 class ModuleMutation:
-    """GraphQL mutations related to module."""
+    """GraphQL mutations related to the mentorship Module model."""
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
@@ -52,6 +77,7 @@ class ModuleMutation:
             raise ObjectDoesNotExist(msg)
 
         github_user, user = user_entities
+
         try:
             program = Program.objects.get(key=input_data.program_key)
             project = Project.objects.get(id=input_data.project_id)
@@ -67,21 +93,20 @@ class ModuleMutation:
             msg = "You must be an admin of this program to create a module."
             raise PermissionDenied(msg)
 
-        if (
-            input_data.ended_at
-            and input_data.started_at
-            and input_data.ended_at <= input_data.started_at
-        ):
-            msg = "End date must be after start date."
-            raise ValidationError(msg)
+        started_at, ended_at = _validate_module_dates(
+            input_data.started_at,
+            input_data.ended_at,
+            program.started_at,
+            program.ended_at,
+        )
 
         module = Module.objects.create(
             name=input_data.name,
             key=slugify(input_data.name),
             description=input_data.description or "",
             experience_level=input_data.experience_level.value,
-            started_at=input_data.started_at or program.started_at,
-            ended_at=input_data.ended_at or program.ended_at,
+            started_at=started_at,
+            ended_at=ended_at,
             domains=input_data.domains,
             tags=input_data.tags,
             program=program,
@@ -137,9 +162,15 @@ class ModuleMutation:
         if input_data.tags is not None:
             module.tags = input_data.tags
 
-        if module.ended_at and module.started_at and module.ended_at <= module.started_at:
-            msg = "End date must be after start date."
-            raise ValidationError(msg)
+        started_at, ended_at = _validate_module_dates(
+            module.started_at,
+            module.ended_at,
+            module.program.started_at,
+            module.program.ended_at,
+        )
+
+        module.started_at = started_at
+        module.ended_at = ended_at
 
         if input_data.project_id is not None:
             try:

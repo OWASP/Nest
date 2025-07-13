@@ -12,8 +12,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import type { ExtendedSession } from 'types/auth'
 import type { DetailsCardProps } from 'types/card'
-import { ExtendedSession } from 'types/program'
 import { capitalize } from 'utils/capitalize'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/credentials'
 import { getSocialIcon } from 'utils/urlIconMappings'
@@ -112,6 +112,7 @@ const DetailsCard = ({
                 (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
               ) && (
                 <button
+                  type="button"
                   className="flex items-center justify-center gap-2 text-nowrap rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-[#0D6EFD] text-blue-600 transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
                   onClick={() => {
                     router.push(`${window.location.pathname}/edit`)
@@ -256,12 +257,12 @@ const DetailsCard = ({
         )}
         {(type === 'program' || type === 'module') && (
           <div
-            className={`mb-8 grid grid-cols-1 gap-6 ${tags?.length === 0 || domains?.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
+            className={`mb-8 grid grid-cols-1 gap-6 ${(tags?.length || 0) === 0 || (domains?.length || 0) === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
           >
-            {tags.length !== 0 && (
+            {tags?.length > 0 && (
               <ToggleableList items={tags} icon={faTags} label={<AnchorTitle title="Tags" />} />
             )}
-            {domains.length !== 0 && (
+            {domains?.length > 0 && (
               <ToggleableList
                 items={domains}
                 icon={faChartPie}

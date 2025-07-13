@@ -7,11 +7,11 @@ import type React from 'react'
 import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_PROGRAM_DETAILS, UPDATE_PROGRAM } from 'server/queries/programsQueries'
-import { ExtendedSession } from 'types/program'
+import type { ExtendedSession } from 'types/auth'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
-import ProgramForm from 'components/programCard'
+import ProgramForm from 'components/ProgramForm'
 const EditProgramPage = () => {
   const router = useRouter()
   const { programKey } = useParams() as { programKey: string }

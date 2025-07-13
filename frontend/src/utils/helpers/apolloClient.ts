@@ -2,7 +2,7 @@ import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { getSession } from 'next-auth/react'
 import { AppError, handleAppError } from 'app/global-error'
-import { ExtendedSession } from 'types/program'
+import { ExtendedSession } from 'types/auth'
 import { GRAPHQL_URL } from 'utils/credentials'
 import { getCsrfToken } from 'utils/utility'
 const createApolloClient = () => {

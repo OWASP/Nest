@@ -124,7 +124,7 @@ class ProgramMutation:
             logger.warning("Validation error updating program '%s': %s", program.key, msg)
             raise ValidationError(msg)
 
-        simple_fields = {
+        field_mapping = {
             "name": input_data.name,
             "description": input_data.description,
             "mentees_limit": input_data.mentees_limit,
@@ -134,12 +134,14 @@ class ProgramMutation:
             "tags": input_data.tags,
         }
 
-        for field, value in simple_fields.items():
+        for field, value in field_mapping.items():
             if value is not None:
                 setattr(program, field, value)
 
         if input_data.name is not None:
-            program.key = slugify(input_data.name)
+            new_key = slugify(input_data.name)
+            if new_key != program.key:
+                program.key = new_key
 
         if input_data.experience_levels is not None:
             program.experience_levels = [lvl.value for lvl in input_data.experience_levels]

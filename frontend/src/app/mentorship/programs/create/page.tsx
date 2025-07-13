@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react'
 import { CREATE_PROGRAM } from 'server/queries/programsQueries'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
-import ProgramForm from 'components/programCard'
+import ProgramForm from 'components/ProgramForm'
 
 const CreateProgramPage = () => {
   const router = useRouter()

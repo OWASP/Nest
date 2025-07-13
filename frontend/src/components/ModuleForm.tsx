@@ -290,12 +290,13 @@ const ProjectSelector = ({ value, defaultName, onProjectChange }: ProjectSelecto
   }
 
   const handleBlur = () => {
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       setShowSuggestions(false)
       if (searchText && !value) {
         setError('Project not found. Please select a valid project from the list.')
       }
     }, 200)
+    return () => clearTimeout(timeoutId)
   }
 
   return (

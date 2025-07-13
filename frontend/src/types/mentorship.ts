@@ -13,7 +13,7 @@ export enum ProgramStatusEnum {
 }
 
 // Main Program type
-export interface Program {
+export type Program = {
   id: string
   key: string
   name: string
@@ -29,7 +29,7 @@ export interface Program {
   modules: Module[]
 }
 
-export interface Module {
+export type Module = {
   id: string
   key: string
   name: string
@@ -43,9 +43,15 @@ export interface Module {
   tags: string[]
 }
 
-export type ExtendedSession = {
-  accessToken?: string
-  user?: {
-    login?: string
-  }
+export type ModuleFormData = {
+  name: string
+  description: string
+  experienceLevel: string
+  startedAt: string
+  endedAt: string
+  domains: string
+  tags: string
+  projectName: string
+  projectId: string
+  mentorLogins: string
 }

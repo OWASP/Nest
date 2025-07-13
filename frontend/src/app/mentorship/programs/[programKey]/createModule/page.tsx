@@ -8,10 +8,10 @@ import React, { useEffect, useState } from 'react'
 import { ErrorDisplay } from 'app/global-error'
 import { CREATE_MODULE } from 'server/queries/moduleQueries'
 import { GET_PROGRAM_ADMIN_DETAILS } from 'server/queries/programsQueries'
-import { ExtendedSession } from 'types/program'
+import type { ExtendedSession } from 'types/auth'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
-import ModuleForm from 'components/mainmoduleCard'
+import ModuleForm from 'components/ModuleForm'
 
 const CreateModulePage = () => {
   const router = useRouter()
@@ -103,7 +103,7 @@ const CreateModulePage = () => {
         timeout: 3000,
       })
 
-      router.push(`/mentorship/programs`)
+      router.push(`/mentorship/programs/${programKey}`)
     } catch (err) {
       addToast({
         title: 'Creation Failed',

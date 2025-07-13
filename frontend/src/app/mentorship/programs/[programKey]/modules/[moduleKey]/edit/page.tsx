@@ -7,29 +7,17 @@ import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_PROGRAM_ADMINS_AND_MODULES, UPDATE_MODULE } from 'server/queries/moduleQueries'
-import { ExtendedSession } from 'types/program'
+import type { ExtendedSession } from 'types/auth'
+import type { ModuleFormData } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
-import ModuleForm from 'components/mainmoduleCard'
+import ModuleForm from 'components/ModuleForm'
 
 const EditModulePage = () => {
   const { programKey, moduleKey } = useParams() as { programKey: string; moduleKey: string }
   const router = useRouter()
   const { data: sessionData, status: sessionStatus } = useSession()
-
-  type ModuleFormData = {
-    name: string
-    description: string
-    experienceLevel: string
-    startedAt: string
-    endedAt: string
-    domains: string
-    tags: string
-    projectName: string
-    projectId: string
-    mentorLogins: string
-  }
 
   const [formData, setFormData] = useState<ModuleFormData | null>(null)
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')

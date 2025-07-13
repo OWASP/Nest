@@ -37,7 +37,7 @@ type ProgramCardMockProps = {
   submitText: string
 }
 
-jest.mock('components/programCard', () => (props: ProgramCardMockProps) => (
+jest.mock('components/ProgramForm', () => (props: ProgramCardMockProps) => (
   <form onSubmit={props.onSubmit}>
     <button type="submit">{props.submitText}</button>
   </form>

@@ -8,7 +8,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import type { Module } from 'types/program'
+import type { Module } from 'types/mentorship'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import { TextInfoItem } from 'components/InfoItem'
@@ -29,6 +29,7 @@ const ModuleCard = ({ modules }: { modules: Module[] }) => {
       {modules.length > 4 && (
         <div className="mt-6 flex items-center justify-center text-center">
           <button
+            type="button"
             onClick={() => setShowAllModule(!showAllModule)}
             className="mt-4 flex items-center justify-center text-blue-400 hover:underline"
           >
@@ -57,6 +58,7 @@ const ModuleItem = ({ details }: { details: Module }) => {
   return (
     <div className="h-46 flex w-full flex-col gap-3 rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <button
+        type="button"
         onClick={handleClick}
         className="text-start font-semibold text-blue-400 hover:underline"
       >
@@ -82,6 +84,9 @@ export default ModuleCard
 export const getSimpleDuration = (start: string, end: string): string => {
   const startDate = new Date(start)
   const endDate = new Date(end)
+  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    return 'Invalid duration'
+  }
 
   const ms = endDate.getTime() - startDate.getTime()
   const days = Math.floor(ms / (1000 * 60 * 60 * 24))

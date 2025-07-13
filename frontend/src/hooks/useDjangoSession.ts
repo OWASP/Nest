@@ -2,7 +2,7 @@ import { useMutation } from '@apollo/client'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import { SYNC_DJANGO_SESSION_MUTATION } from 'server/queries/authQueries'
-import { ExtendedSession } from 'types/program'
+import { ExtendedSession } from 'types/auth'
 
 const SYNC_STATUS_KEY = 'django_session_synced'
 

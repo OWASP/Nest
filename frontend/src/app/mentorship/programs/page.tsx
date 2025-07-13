@@ -11,7 +11,8 @@ import React, { useEffect, useState, useMemo } from 'react'
 
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { GET_PROGRAM_DATA } from 'server/queries/programsQueries'
-import { Program, ExtendedSession } from 'types/program'
+import type { ExtendedSession } from 'types/auth'
+import type { Program } from 'types/mentorship'
 import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'
 
@@ -35,7 +36,7 @@ const ProgramsSearchPage: React.FC = () => {
     return debounce((query: string) => {
       setDebouncedQuery(query)
     }, 500)
-  }, []) // if setDebouncedQuery is from props or context, include it in deps
+  }, [])
 
   useEffect(() => {
     debounceSearch(searchQuery)

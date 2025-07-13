@@ -8,8 +8,9 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToast } from '@heroui/toast'
-import { useUserRoles, GET_USER_ROLES } from 'hooks/useUserRoles'
+import { useUserRoles } from 'hooks/useUserRoles'
 import { useSession } from 'next-auth/react'
+import { GET_USER_ROLES } from 'server/queries/authQueries'
 import { APPLY_AS_MENTEE, APPLY_AS_MENTOR } from 'server/queries/mentorshipQueries'
 import LoadingSpinner from 'components/LoadingSpinner'
 
@@ -103,21 +104,19 @@ const RoleApplicationPage = () => {
           <RoleCard
             icon={faUserGraduate}
             title="Contributor"
-            description="Learn from experienced mentors, collaborate on real-world open source projects, and build your portfolio with meaningful work."
+            description="Learn from experienced mentors, collaborate on real-world open source projects. Build your portfolio with meaningful contributions."
             isApplied={isContributor}
             onApply={applyAsMentee}
             loading={loadingMentee}
-            color="blue"
           />
 
           <RoleCard
             icon={faChalkboardTeacher}
             title="Mentor"
-            description="Support contributors, grow leadership skills, and help shape the next generation of open source developers. Must be a project maintainer or experienced contributor."
+            description="Support contributors, grow leadership skills, and help shape the next generation of open source developers. Be part of impactful open source growth."
             isApplied={isMentor}
             onApply={applyAsMentor}
             loading={loadingMentor}
-            color="purple"
           />
         </div>
       )}
@@ -128,7 +127,6 @@ const RoleApplicationPage = () => {
 const MiniSpinner = () => (
   <div className="animate-spin inline-block h-4 w-4 rounded-full border-2 border-white border-t-transparent" />
 )
-
 const RoleCard = ({
   icon,
   title,
@@ -136,7 +134,6 @@ const RoleCard = ({
   isApplied,
   onApply,
   loading,
-  color,
 }: {
   icon: IconDefinition
   title: 'Contributor' | 'Mentor'
@@ -144,12 +141,11 @@ const RoleCard = ({
   isApplied: boolean
   onApply: () => void
   loading: boolean
-  color: 'blue' | 'purple'
 }) => {
   return (
     <div className="rounded-xl border border-gray-300 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <div className="flex items-center gap-3">
-        <FontAwesomeIcon icon={icon} className={`h-8 w-8 text-${color}-500`} />
+        <FontAwesomeIcon icon={icon} className="h-8 w-8 text-blue-500" />
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Apply as {title}</h2>
       </div>
       <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{description}</p>
@@ -160,9 +156,10 @@ const RoleCard = ({
           </div>
         ) : (
           <button
+            type="button"
             onClick={onApply}
             disabled={loading}
-            className={`w-full rounded-md bg-${color}-600 hover:bg-${color}-500 flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50`}
+            className="flex w-full items-center justify-center gap-2 text-nowrap rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-[#0D6EFD] text-blue-600 transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
           >
             {loading ? <MiniSpinner /> : `Apply as ${title}`}
           </button>

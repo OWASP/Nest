@@ -10,7 +10,9 @@ import {
   GET_PROGRAM_AND_MODULES,
   UPDATE_PROGRAM_STATUS_MUTATION,
 } from 'server/queries/programsQueries'
-import { Module, type Program, ProgramStatusEnum, ExtendedSession } from 'types/program'
+import type { ExtendedSession } from 'types/auth'
+import type { Module, Program } from 'types/mentorship'
+import { ProgramStatusEnum } from 'types/mentorship'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
