@@ -3,13 +3,13 @@
 from io import BytesIO
 from pathlib import Path
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Table, TableStyle
 
-import settings.base
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 
@@ -91,11 +91,7 @@ class Command(BaseCommand):
         pdf.showPage()
         pdf.save()
 
-        pdf_path = (
-            Path(settings.base.Base.BASE_DIR)
-            / "reports"
-            / f"{project_key}_health_metrics_report.pdf"
-        )
+        pdf_path = Path(settings.BASE_DIR) / "reports" / f"{project_key}_health_metrics_report.pdf"
 
         pdf_path.parent.mkdir(parents=True, exist_ok=True)
         pdf_path.write_bytes(buffer.getvalue())
