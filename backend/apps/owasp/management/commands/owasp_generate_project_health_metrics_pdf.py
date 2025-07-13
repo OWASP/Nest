@@ -53,8 +53,6 @@ class Command(BaseCommand):
             ["Last Release (days)", metrics.last_release_days],
             ["Last Release Requirement (days)", metrics.last_release_days_requirement],
             ["OWASP Page Last Update (days)", metrics.owasp_page_last_update_days],
-            ["Unassigned Issues", metrics.unassigned_issues_count],
-            ["Unanswered Issues", metrics.unanswered_issues_count],
             ["Open Issues", metrics.open_issues_count],
             ["Total Issues", metrics.total_issues_count],
             ["Open Pull Requests", metrics.open_pull_requests_count],
@@ -63,8 +61,14 @@ class Command(BaseCommand):
             ["Total Releases", metrics.total_releases_count],
             ["Forks", metrics.forks_count],
             ["Stars", metrics.stars_count],
-            ["Is Funding Requirements Compliant", metrics.is_funding_requirements_compliant],
-            ["Is Leader Requirements Compliant", metrics.is_leader_requirements_compliant],
+            ["Contributors", metrics.contributors_count],
+            ["Unassigned Issues", metrics.unassigned_issues_count],
+            ["Unanswered Issues", metrics.unanswered_issues_count],
+            ["Has funding issues", "No" if metrics.is_funding_requirements_compliant else "Yes"],
+            [
+                "Has leadership issues",
+                "No" if metrics.is_leader_requirements_compliant else "Yes",
+            ],
         ]
         table = Table(table_data, colWidths="*")
         table.setStyle(
