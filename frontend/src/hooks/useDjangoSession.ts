@@ -33,8 +33,8 @@ export const useDjangoSession = () => {
         .then(() => {
           sessionStorage.setItem(SYNC_STATUS_KEY, 'true')
         })
-        .catch((err) => {
-          throw new Error('Failed to sync Django session: ' + err.message)
+        .catch(() => {
+          throw new Error('Failed to sync Django session')
         })
         .finally(() => {
           setIsSyncing(false)

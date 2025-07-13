@@ -73,7 +73,7 @@ class UserMutations:
             return GitHubAuthResult(auth_user=None)
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
-    def logout_user(self, info) -> LogoutResult:
+    def logout_user(self, info: Info) -> LogoutResult:
         """Logout the current user out of their Django session."""
         try:
             logout(info.context.request)
