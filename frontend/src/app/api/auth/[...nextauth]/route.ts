@@ -1,6 +1,6 @@
 import NextAuth, { type AuthOptions } from 'next-auth'
 import GitHubProvider from 'next-auth/providers/github'
-import { ExtendedSession } from 'types/auth'
+import { ExtendedProfile, ExtendedSession } from 'types/auth'
 import {
   GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET,
@@ -17,20 +17,17 @@ if (IS_GITHUB_AUTH_ENABLED) {
       clientSecret: GITHUB_CLIENT_SECRET,
       profile(profile) {
         return {
-          id: profile.id.toString(),
-          name: profile.name,
           email: profile.email,
+          id: profile.id.toString(),
           image: profile.avatar_url,
           login: profile.login,
+          name: profile.name,
         }
       },
     })
   )
 }
 
-type ExtendedProfile = {
-  login: string
-}
 const authOptions: AuthOptions = {
   providers,
   session: {
@@ -38,7 +35,7 @@ const authOptions: AuthOptions = {
   },
   callbacks: {
     async signIn({ account }) {
-      return !!(account?.provider === 'github' && account.access_token)
+      return Boolean(account?.provider === 'github' && account.access_token)
     },
 
     async jwt({ token, account, profile }) {

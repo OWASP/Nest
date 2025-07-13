@@ -1,4 +1,4 @@
-"""GraphQL node for APIKey model."""
+"""GraphQL node for ApiKey model."""
 
 import strawberry_django
 

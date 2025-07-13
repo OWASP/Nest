@@ -1,4 +1,4 @@
-"""GraphQL query for API keys."""
+"""GraphQL queries for API keys."""
 
 import strawberry
 from strawberry.directive import DirectiveValue
@@ -16,8 +16,7 @@ class ApiKeyQueries:
     @strawberry.field(permission_classes=[IsAuthenticated])
     def active_api_key_count(self, info: Info) -> int:
         """Return count of active API keys for user."""
-        user = info.context.request.user
-        return ApiKey.active_count_for_user(user)
+        return info.context.request.user.active_api_keys.count()
 
     @strawberry.field(permission_classes=[IsAuthenticated])
     def api_keys(

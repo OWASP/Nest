@@ -8,7 +8,8 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
-MAX_ACTIVE_KEYS = 5
+API_KEY_LENGTH = 32
+MAX_ACTIVE_KEYS = 3
 
 
 class ApiKey(models.Model):
@@ -39,10 +40,20 @@ class ApiKey(models.Model):
         """Human-readable representation of the API key."""
         return f"{self.name} ({'revoked' if self.is_revoked else 'active'})"
 
+    @property
+    def is_expired(self):
+        """Check if the API key has expired."""
+        return self.expires_at <= timezone.now()
+
+    @property
+    def is_valid(self):
+        """Check if the API key is valid."""
+        return not self.is_revoked and not self.is_expired
+
     @classmethod
     def create(cls, user, name, expires_at=None):
         """Create a new API key instance."""
-        if cls.active_count_for_user(user) >= MAX_ACTIVE_KEYS:
+        if user.active_api_keys.count() >= MAX_ACTIVE_KEYS:
             return None
 
         raw_key = cls.generate_raw_key()
@@ -55,12 +66,6 @@ class ApiKey(models.Model):
             user=user,
         )
         return instance, raw_key
-
-    @classmethod
-    def active_count_for_user(cls, user) -> int:
-        """Return active API keys for the user."""
-        now = timezone.now()
-        return cls.objects.filter(user=user, is_revoked=False, expires_at__gt=now).count()
 
     @classmethod
     def authenticate(cls, raw_key: str) -> "ApiKey | None":
@@ -78,15 +83,11 @@ class ApiKey(models.Model):
         return None
 
     @staticmethod
-    def generate_raw_key():
-        """Generate a secure random API key."""
-        return secrets.token_urlsafe(32)
-
-    @staticmethod
     def generate_hash_key(raw_key: str) -> str:
         """Generate a SHA-256 hash of the raw API key."""
         return hashlib.sha256(raw_key.encode()).hexdigest()
 
-    def is_valid(self):
-        """Check if the API key is valid."""
-        return not self.is_revoked and self.expires_at > timezone.now()
+    @staticmethod
+    def generate_raw_key():
+        """Generate a secure random API key."""
+        return secrets.token_urlsafe(API_KEY_LENGTH)

@@ -42,16 +42,20 @@ class ApiKeyMutations:
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     def create_api_key(self, info: Info, name: str, expires_at: datetime) -> CreateApiKeyResult:
         """Create a new API key for the authenticated user."""
-        user = info.context.request.user
-
         try:
-            result = ApiKey.create(user=user, name=name, expires_at=expires_at)
-            if result is None:
+            if not (
+                result := ApiKey.create(
+                    expires_at=expires_at,
+                    name=name,
+                    user=info.context.request.user,
+                )
+            ):
                 return CreateApiKeyResult(
                     ok=False,
                     code="LIMIT_REACHED",
                     message="You can have at most 5 active API keys.",
                 )
+
             instance, raw_key = result
             return CreateApiKeyResult(
                 ok=True,
@@ -71,9 +75,11 @@ class ApiKeyMutations:
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     def revoke_api_key(self, info: Info, public_id: UUID) -> RevokeApiKeyResult:
         """Revoke an API key for the authenticated user."""
-        user = info.context.request.user
         try:
-            api_key = ApiKey.objects.get(public_id=public_id, user=user)
+            api_key = ApiKey.objects.get(
+                public_id=public_id,
+                user=info.context.request.user,
+            )
             api_key.is_revoked = True
             api_key.save(update_fields=["is_revoked"])
         except ApiKey.DoesNotExist:

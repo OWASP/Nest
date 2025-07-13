@@ -5,7 +5,6 @@ import logging
 import requests
 import strawberry
 from django.contrib.auth import login, logout
-from django.core.exceptions import SuspiciousOperation
 from github import Github
 from strawberry.types import Info
 
@@ -62,10 +61,11 @@ class UserMutations:
                 username=gh_user.login,
             )
 
-            #  Log the user in (attaches backend + writes session cookie)
+            # Log the user in and attach it to a session.
+            # https://docs.djangoproject.com/en/5.2/topics/auth/default/#django.contrib.auth.login
+            # https://docs.djangoproject.com/en/5.2/topics/http/sessions/
             login(info.context.request, auth_user)
 
-            # Return the response with SET-COOKIE header and user data
             return GitHubAuthResult(auth_user=auth_user)
 
         except requests.exceptions.RequestException as e:
@@ -74,19 +74,13 @@ class UserMutations:
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     def logout_user(self, info: Info) -> LogoutResult:
-        """Logout the current user out of their Django session."""
-        try:
-            # Log the user out (clears session cookie)
-            logout(info.context.request)
-            return LogoutResult(
-                ok=True,
-                code="SUCCESS",
-                message="User logged out successfully.",
-            )
-        except SuspiciousOperation as exc:
-            logger.warning("Logout failed: %s", exc)
-            return LogoutResult(
-                ok=False,
-                code="INVALID_SESSION",
-                message="Invalid session.",
-            )
+        """Logout the current user."""
+        # Log the user out and clear the session.
+        # https://docs.djangoproject.com/en/5.2/topics/auth/default/#django.contrib.auth.logout
+        logout(info.context.request)
+
+        return LogoutResult(
+            ok=True,
+            code="SUCCESS",
+            message="User logged out successfully.",
+        )

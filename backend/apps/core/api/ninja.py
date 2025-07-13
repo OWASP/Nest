@@ -1,5 +1,7 @@
 """API key authentication class for Django Ninja."""
 
+from http import HTTPStatus
+
 from ninja.errors import HttpError
 from ninja.security import APIKeyHeader
 
@@ -23,12 +25,9 @@ class ApiKeyAuth(APIKeyHeader):
 
         """
         if not key:
-            raise HttpError(401, "Missing API key in 'X-API-Key' header")
+            raise HttpError(HTTPStatus.UNAUTHORIZED, "Missing API key in 'X-API-Key' header")
 
-        # The authenticate method will return the key if it is valid,
-        # or None if it's not found or invalid.
-        api_key = ApiKey.authenticate(raw_key=key)
-        if api_key:
+        if api_key := ApiKey.authenticate(raw_key=key):
             return api_key
 
-        raise HttpError(401, "Invalid API key")
+        raise HttpError(HTTPStatus.UNAUTHORIZED, "Invalid API key")

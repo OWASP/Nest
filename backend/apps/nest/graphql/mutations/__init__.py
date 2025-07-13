@@ -1,4 +1,4 @@
-"""Core User mutations."""
+"""Nest app mutations."""
 
 import strawberry
 

@@ -2,12 +2,20 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
+
+    from apps.nest.models.api_key import ApiKey
 
 
 class User(AbstractUser):
-    """User model for GitHub-authenticated users."""
+    """Nest user model."""
 
     class Meta:
         db_table = "nest_users"
@@ -33,3 +41,8 @@ class User(AbstractUser):
 
         """
         return self.username
+
+    @property
+    def active_api_keys(self) -> QuerySet[ApiKey]:
+        """Return active API keys for the user."""
+        return self.api_keys.filter(is_revoked=False, expires_at__gt=timezone.now())
