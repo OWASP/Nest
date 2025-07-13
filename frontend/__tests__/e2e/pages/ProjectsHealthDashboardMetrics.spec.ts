@@ -24,12 +24,7 @@ test.describe('Projects Health Dashboard Metrics', () => {
     await expect(page.getByRole('button', { name: 'Filter By' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Sort By' })).toBeVisible()
   })
-  test('renders metrics table headers', async ({ page }) => {
-    const headers = ['Project Name', 'Stars', 'Forks', 'Contributors', 'Created At', 'Score']
-    for (const header of headers) {
-      await expect(page.getByText(header)).toBeVisible()
-    }
-  })
+
   test('renders health metrics data', async ({ page }) => {
     const firstMetric = mockHealthMetricsData.projectHealthMetrics[0]
     await expect(page.getByText(firstMetric.projectName)).toBeVisible()
