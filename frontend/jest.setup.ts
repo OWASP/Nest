@@ -1,5 +1,3 @@
-// jest.setup.ts or jest.setup.js
-
 import '@testing-library/jest-dom'
 import { TextEncoder } from 'util'
 import React from 'react'
@@ -8,7 +6,6 @@ import 'core-js/actual/structured-clone'
 global.React = React
 global.TextEncoder = TextEncoder
 
-// ✅ Mock next-auth globally (must be top-level)
 jest.mock('next-auth/react', () => {
   return {
     ...jest.requireActual('next-auth/react'),
