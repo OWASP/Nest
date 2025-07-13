@@ -15,7 +15,7 @@ class ApiKeyAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "user",
-        "public_id",
+        "uuid",
         "is_revoked",
         "expires_at",
         "created_at",
@@ -29,7 +29,7 @@ class ApiKeyAdmin(admin.ModelAdmin):
     ordering = ("-created_at",)
     search_fields = (
         "name",
-        "public_id",
+        "uuid",
         "user__username",
     )
 

@@ -18,7 +18,7 @@ class TestApiKeyNode:
             "is_revoked",
             "expires_at",
             "name",
-            "public_id",
+            "uuid",
         }
 
         assert defined_fields == expected_fields
@@ -26,7 +26,7 @@ class TestApiKeyNode:
     def test_api_key_node_field_types(self):
         """Tests for ApiKeyNode field types."""
         fields_map = {f.name: f for f in ApiKeyNode.__strawberry_definition__.fields}
-        assert fields_map["public_id"].type is uuid.UUID
+        assert fields_map["uuid"].type is uuid.UUID
         assert fields_map["name"].type is str
         assert fields_map["is_revoked"].type is bool
         assert fields_map["created_at"].type is datetime.datetime

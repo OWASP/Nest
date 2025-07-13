@@ -11,7 +11,7 @@ export type ApiKey = {
   isRevoked: boolean
   createdAt: string
   expiresAt: string
-  publicId: string
+  uuid: string
 }
 
 export type ApiKeyPageContentProps = {

@@ -5,11 +5,12 @@ import secrets
 import uuid
 
 from django.conf import settings
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 
 API_KEY_LENGTH = 32
 MAX_ACTIVE_KEYS = 3
+MAX_WORD_LENGTH = 100
 
 
 class ApiKey(models.Model):
@@ -25,8 +26,8 @@ class ApiKey(models.Model):
     hash = models.CharField(max_length=64, unique=True)
     is_revoked = models.BooleanField(default=False)
     last_used_at = models.DateTimeField(null=True, blank=True)
-    name = models.CharField(max_length=100)
-    public_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    name = models.CharField(max_length=MAX_WORD_LENGTH)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     # FKs.
@@ -51,9 +52,10 @@ class ApiKey(models.Model):
         return not self.is_revoked and not self.is_expired
 
     @classmethod
+    @transaction.atomic
     def create(cls, user, name, expires_at=None):
         """Create a new API key instance."""
-        if user.active_api_keys.count() >= MAX_ACTIVE_KEYS:
+        if user.active_api_keys.select_for_update().count() >= MAX_ACTIVE_KEYS:
             return None
 
         raw_key = cls.generate_raw_key()
@@ -75,9 +77,8 @@ class ApiKey(models.Model):
         except cls.DoesNotExist:
             return None
 
-        if api_key.is_valid():
+        if api_key.is_valid:
             cls.objects.filter(pk=api_key.pk).update(last_used_at=timezone.now())
-            api_key.last_used_at = timezone.now()
             return api_key
 
         return None

@@ -6,11 +6,12 @@ from uuid import UUID
 
 import strawberry
 from django.db.utils import IntegrityError
+from django.utils import timezone
 from strawberry.types import Info
 
 from apps.nest.graphql.nodes.api_key import ApiKeyNode
 from apps.nest.graphql.permissions import IsAuthenticated
-from apps.nest.models import ApiKey
+from apps.nest.models.api_key import MAX_ACTIVE_KEYS, MAX_WORD_LENGTH, ApiKey
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,17 @@ class ApiKeyMutations:
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     def create_api_key(self, info: Info, name: str, expires_at: datetime) -> CreateApiKeyResult:
         """Create a new API key for the authenticated user."""
+        if not name or not name.strip():
+            return CreateApiKeyResult(ok=False, code="INVALID_NAME", message="Name is required")
+
+        if len(name.strip()) > MAX_WORD_LENGTH:
+            return CreateApiKeyResult(ok=False, code="INVALID_NAME", message="Name too long")
+
+        if expires_at <= timezone.now():
+            return CreateApiKeyResult(
+                ok=False, code="INVALID_DATE", message="Expiry date must be in future"
+            )
+
         try:
             if not (
                 result := ApiKey.create(
@@ -53,7 +65,7 @@ class ApiKeyMutations:
                 return CreateApiKeyResult(
                     ok=False,
                     code="LIMIT_REACHED",
-                    message="You can have at most 5 active API keys.",
+                    message=f"You can have at most {MAX_ACTIVE_KEYS} active API keys.",
                 )
 
             instance, raw_key = result
@@ -73,11 +85,11 @@ class ApiKeyMutations:
             )
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
-    def revoke_api_key(self, info: Info, public_id: UUID) -> RevokeApiKeyResult:
+    def revoke_api_key(self, info: Info, uuid: UUID) -> RevokeApiKeyResult:
         """Revoke an API key for the authenticated user."""
         try:
             api_key = ApiKey.objects.get(
-                public_id=public_id,
+                uuid=uuid,
                 user=info.context.request.user,
             )
             api_key.is_revoked = True

@@ -2,7 +2,7 @@
 
 import strawberry_django
 
-from apps.nest.models import ApiKey
+from apps.nest.models.api_key import ApiKey
 
 
 @strawberry_django.type(
@@ -12,7 +12,7 @@ from apps.nest.models import ApiKey
         "is_revoked",
         "expires_at",
         "name",
-        "public_id",
+        "uuid",
     ],
 )
 class ApiKeyNode:

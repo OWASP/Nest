@@ -11,7 +11,7 @@ from apps.nest.graphql.mutations.api_key import (
     CreateApiKeyResult,
     RevokeApiKeyResult,
 )
-from apps.nest.models import ApiKey
+from apps.nest.models.api_key import MAX_ACTIVE_KEYS, ApiKey
 
 
 def fake_info() -> MagicMock:
@@ -71,7 +71,7 @@ class TestApiKeyMutations:
         assert isinstance(result, CreateApiKeyResult)
         assert result.ok is False
         assert result.code == "LIMIT_REACHED"
-        assert result.message == "You can have at most 5 active API keys."
+        assert result.message == f"You can have at most {MAX_ACTIVE_KEYS} active API keys."
         assert result.api_key is None
         assert result.raw_key is None
 
@@ -102,14 +102,14 @@ class TestApiKeyMutations:
         """Test the successful revocation of an existing API key."""
         info = fake_info()
         user = info.context.request.user
-        public_id_to_revoke = uuid4()
+        uuid_to_revoke = uuid4()
 
         mock_api_key = MagicMock(spec=ApiKey)
         mock_objects_get.return_value = mock_api_key
 
-        result = api_key_mutations.revoke_api_key(info, public_id=public_id_to_revoke)
+        result = api_key_mutations.revoke_api_key(info, uuid=uuid_to_revoke)
 
-        mock_objects_get.assert_called_once_with(public_id=public_id_to_revoke, user=user)
+        mock_objects_get.assert_called_once_with(uuid=uuid_to_revoke, user=user)
 
         assert mock_api_key.is_revoked is True
         mock_api_key.save.assert_called_once_with(update_fields=["is_revoked"])
@@ -129,9 +129,9 @@ class TestApiKeyMutations:
         user = info.context.request.user
         non_existent_public_id = uuid4()
 
-        result = api_key_mutations.revoke_api_key(info, public_id=non_existent_public_id)
+        result = api_key_mutations.revoke_api_key(info, uuid=non_existent_public_id)
 
-        mock_objects_get.assert_called_once_with(public_id=non_existent_public_id, user=user)
+        mock_objects_get.assert_called_once_with(uuid=non_existent_public_id, user=user)
 
         mock_logger.warning.assert_called_once_with("API Key does not exist")
 

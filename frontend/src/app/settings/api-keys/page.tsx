@@ -5,11 +5,11 @@ import {
   faSpinner,
   faKey,
   faPlus,
-  faTrash,
   faCopy,
   faEye,
   faEyeSlash,
   faInfoCircle,
+  faTrash,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
@@ -29,11 +29,9 @@ export default function Page() {
   const [newKeyExpiry, setNewKeyExpiry] = useState('')
   const [showNewKey, setShowNewKey] = useState(false)
   const [newlyCreatedKey, setNewlyCreatedKey] = useState<string | null>(null)
-  const [includeRevoked, setIncludeRevoked] = useState(false)
   const [keyToRevoke, setKeyToRevoke] = useState<ApiKey | null>(null)
 
   const { loading, error, data, refetch } = useQuery(GET_API_KEYS, {
-    variables: { includeRevoked },
     notifyOnNetworkStatusChange: true,
     errorPolicy: 'all',
   })
@@ -108,7 +106,7 @@ export default function Page() {
 
   const handleRevokeKey = async () => {
     if (keyToRevoke) {
-      await revokeApiKey({ variables: { publicId: keyToRevoke.publicId } })
+      await revokeApiKey({ variables: { uuid: keyToRevoke.uuid } })
       setKeyToRevoke(null)
     }
   }
@@ -140,7 +138,8 @@ export default function Page() {
                 <strong>{activeKeyCount}/5 active keys</strong>.
                 {!canCreateNewKey && (
                   <span className="mt-1 block">
-                    To create a new key, you need to revoke one of your existing active keys first.
+                    You've reached the maximum number of API keys. Delete an existing key to create
+                    a new one.
                   </span>
                 )}
               </p>
@@ -149,27 +148,14 @@ export default function Page() {
         </SecondaryCard>
 
         <SecondaryCard>
-          <div className="mb-4 flex items-center gap-3">
-            <FontAwesomeIcon icon={faKey} className="text-gray-600 dark:text-gray-400" />
-            <h2 className="text-xl font-semibold">Your API Keys</h2>
-          </div>
-
-          <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="show-revoked"
-                checked={includeRevoked}
-                onChange={() => setIncludeRevoked(!includeRevoked)}
-                className="mr-2 h-4 w-4 rounded border-gray-300"
-              />
-              <label htmlFor="show-revoked" className="text-sm text-gray-600 dark:text-gray-400">
-                Show revoked keys
-              </label>
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <FontAwesomeIcon icon={faKey} className="text-gray-600 dark:text-gray-400" />
+              <h2 className="text-xl font-semibold">Your API Keys</h2>
             </div>
             <Button
               onPress={openCreateModal}
-              isDisabled={!canCreateNewKey || includeRevoked}
+              isDisabled={!canCreateNewKey}
               className="rounded-sm bg-black font-medium text-white transition-colors hover:bg-gray-900/90 disabled:bg-gray-300 disabled:text-gray-500"
             >
               <FontAwesomeIcon icon={faPlus} className="mr-1" />
@@ -198,44 +184,27 @@ export default function Page() {
                     <th className="py-3 text-left font-semibold">ID</th>
                     <th className="py-3 text-left font-semibold">Created</th>
                     <th className="py-3 text-left font-semibold">Expires</th>
-                    <th className="py-3 text-left font-semibold">Status</th>
                     <th className="py-3 text-right font-semibold">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.apiKeys.map((key: ApiKey) => (
-                    <tr
-                      key={key.publicId}
-                      className={`border-b border-gray-200 dark:border-gray-700 ${key.isRevoked ? 'opacity-60' : ''}`}
-                    >
+                    <tr key={key.uuid} className="border-b border-gray-200 dark:border-gray-700">
                       <td className="py-3">{key.name}</td>
-                      <td className="py-3 font-mono text-sm">{key.publicId}</td>
+                      <td className="py-3 font-mono text-sm">{key.uuid}</td>
                       <td className="py-3">{format(new Date(key.createdAt), 'PP')}</td>
                       <td className="py-3">
                         {key.expiresAt ? format(new Date(key.expiresAt), 'PP') : 'Never'}
                       </td>
-                      <td>
-                        <span
-                          className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-                            key.isRevoked
-                              ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                              : 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                          }`}
-                        >
-                          {key.isRevoked ? 'Revoked' : 'Active'}
-                        </span>
-                      </td>
                       <td className="py-3 text-right">
-                        {!key.isRevoked && (
-                          <Button
-                            variant="light"
-                            size="sm"
-                            onPress={() => setKeyToRevoke(key)}
-                            className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                          >
-                            <FontAwesomeIcon icon={faTrash} />
-                          </Button>
-                        )}
+                        <Button
+                          variant="light"
+                          size="sm"
+                          onPress={() => setKeyToRevoke(key)}
+                          className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        >
+                          <FontAwesomeIcon icon={faTrash} />
+                        </Button>
                       </td>
                     </tr>
                   ))}
@@ -261,7 +230,7 @@ export default function Page() {
             <div className="rounded-md border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900/30 dark:bg-yellow-900/10">
               <p className="text-yellow-800 dark:text-yellow-400">
                 <strong>Important:</strong> Keep your API keys secure and never share them publicly.
-                If a key is compromised, revoke it immediately and create a new one.
+                If a key is compromised, delete it immediately and create a new one.
               </p>
             </div>
           </div>

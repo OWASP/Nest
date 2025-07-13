@@ -1,13 +1,13 @@
 import { gql } from '@apollo/client'
 
 export const GET_API_KEYS = gql`
-  query GetApiKeys($includeRevoked: Boolean!) {
-    apiKeys(includeRevoked: $includeRevoked) {
+  query GetApiKeys {
+    apiKeys {
       name
       isRevoked
       createdAt
       expiresAt
-      publicId
+      uuid
     }
     activeApiKeyCount
   }
@@ -20,7 +20,7 @@ export const CREATE_API_KEY = gql`
       code
       message
       apiKey {
-        publicId
+        uuid
         name
         isRevoked
         createdAt
@@ -32,8 +32,8 @@ export const CREATE_API_KEY = gql`
 `
 
 export const REVOKE_API_KEY = gql`
-  mutation RevokeApiKey($publicId: UUID!) {
-    revokeApiKey(publicId: $publicId) {
+  mutation RevokeApiKey($uuid: UUID!) {
+    revokeApiKey(uuid: $uuid) {
       ok
       code
       message
