@@ -3,6 +3,7 @@
 import { useQuery } from '@apollo/client'
 import { faFilter, faSort } from '@fortawesome/free-solid-svg-icons'
 import { Pagination } from '@heroui/react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
 import { GET_PROJECT_HEALTH_METRICS_LIST } from 'server/queries/projectsHealthDashboardQueries'
@@ -15,9 +16,44 @@ import ProjectsDashboardDropDown from 'components/ProjectsDashboardDropDown'
 const PAGINATION_LIMIT = 10
 
 const MetricsPage: FC = () => {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const paramsFilter = searchParams.get('health') || searchParams.get('level') || 'reset'
+  const filtersMapping = {
+    incubator: {
+      level: 'incubator',
+    },
+    lab: {
+      level: 'lab',
+    },
+    production: {
+      level: 'production',
+    },
+    flagship: {
+      level: 'flagship',
+    },
+    healthy: {
+      score: {
+        gte: 75,
+      },
+    },
+    needsAttention: {
+      score: {
+        gte: 50,
+        lt: 75,
+      },
+    },
+    unhealthy: {
+      score: {
+        lt: 50,
+      },
+    },
+    reset: {},
+  }
+
   const [metrics, setMetrics] = useState<HealthMetricsProps[]>([])
   const [metricsLength, setMetricsLength] = useState<number>(0)
-  const [filters, setFilters] = useState<HealthMetricsFilter>({})
+  const [filters, setFilters] = useState<HealthMetricsFilter>(filtersMapping[paramsFilter] || {})
   const [pagination, setPagination] = useState({ offset: 0, limit: PAGINATION_LIMIT })
   const [ordering, setOrdering] = useState<HealthMetricsOrdering>({
     scoreOrdering: { score: 'DESC' },
@@ -92,8 +128,8 @@ const MetricsPage: FC = () => {
       title: 'Project Health',
       items: [
         { label: 'Healthy Projects', key: 'healthy' },
-        { label: 'Projects Needing Attention', key: 'warning' },
-        { label: 'Unhealthy Projects', key: 'critical' },
+        { label: 'Projects Needing Attention', key: 'needsAttention' },
+        { label: 'Unhealthy Projects', key: 'unhealthy' },
       ],
     },
     {
@@ -101,37 +137,7 @@ const MetricsPage: FC = () => {
       items: [{ label: 'Reset All Filters', key: 'reset' }],
     },
   ]
-  const filtersMapping = {
-    incubator: {
-      level: 'incubator',
-    },
-    lab: {
-      level: 'lab',
-    },
-    production: {
-      level: 'production',
-    },
-    flagship: {
-      level: 'flagship',
-    },
-    healthy: {
-      score: {
-        gte: 75,
-      },
-    },
-    warning: {
-      score: {
-        gte: 50,
-        lt: 75,
-      },
-    },
-    critical: {
-      score: {
-        lt: 50,
-      },
-    },
-    reset: {},
-  }
+
   const orderingMapping = {
     scoreDESC: {
       scoreOrdering: { score: 'DESC' },
@@ -185,6 +191,17 @@ const MetricsPage: FC = () => {
                 pagination: newPagination,
                 ordering: Object.values(ordering),
               })
+              const paramsMapping = {
+                healthy: '?health=healthy',
+                needsAttention: '?health=needsAttention',
+                unhealthy: '?health=unhealthy',
+                reset: '',
+                incubator: '?level=incubator',
+                lab: '?level=lab',
+                production: '?level=production',
+                flagship: '?level=flagship',
+              }
+              router.push(`/projects/dashboard/metrics${paramsMapping[key] || ''}`)
             }}
           />
 

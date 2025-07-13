@@ -41,7 +41,7 @@ const MetricsCard: FC<{ metric: HealthMetricsProps }> = ({ metric }) => {
             }
           )}
         >
-          <p className="text-center text-xl font-semibold">%{metric.score}</p>
+          <p className="text-center text-xl font-semibold">{metric.score}</p>
         </div>
       </div>
     </Link>
