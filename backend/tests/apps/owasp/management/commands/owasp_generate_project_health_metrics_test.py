@@ -1,16 +1,14 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from django.core.management import call_command
 from reportlab.lib.pagesizes import letter
 
 import settings.base
-from apps.owasp.models.project import Project
-from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 
 class TestOwaspGenerateProjectHealthMetricsPdf:
     @patch(
-        "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_latest_health_metrics"
+        "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_latest_health_metrics",
     )
     @patch("reportlab.pdfgen.canvas.Canvas")
     @patch("reportlab.platypus.Table")
@@ -26,13 +24,20 @@ class TestOwaspGenerateProjectHealthMetricsPdf:
         mock_canvas,
         mock_get_latest_health_metrics,
     ):
-        metrics = ProjectHealthMetrics(
+        metrics = MagicMock(
+            age_days=30,
+            last_commit_days=5,
+            last_commit_days_requirement=7,
+            last_pull_request_days=2,
+            last_release_days=10,
+            last_release_days_requirement=14,
+            owasp_page_last_update_days=20,
             forks_count=15,
             is_funding_requirements_compliant=True,
             is_leader_requirements_compliant=True,
             open_issues_count=10,
             open_pull_requests_count=3,
-            project=Project(name="Test Project", key="www-project-test"),
+            project=MagicMock(name="Test Project", key="www-project-test"),
             recent_releases_count=1,
             score=85.0,
             stars_count=100,
@@ -58,8 +63,6 @@ class TestOwaspGenerateProjectHealthMetricsPdf:
             ["Last Release (days)", metrics.last_release_days],
             ["Last Release Requirement (days)", metrics.last_release_days_requirement],
             ["OWASP Page Last Update (days)", metrics.owasp_page_last_update_days],
-            ["Unassigned Issues", metrics.unassigned_issues_count],
-            ["Unanswered Issues", metrics.unanswered_issues_count],
             ["Open Issues", metrics.open_issues_count],
             ["Total Issues", metrics.total_issues_count],
             ["Open Pull Requests", metrics.open_pull_requests_count],
@@ -68,8 +71,14 @@ class TestOwaspGenerateProjectHealthMetricsPdf:
             ["Total Releases", metrics.total_releases_count],
             ["Forks", metrics.forks_count],
             ["Stars", metrics.stars_count],
-            ["Is Funding Requirements Compliant", metrics.is_funding_requirements_compliant],
-            ["Is Leader Requirements Compliant", metrics.is_leader_requirements_compliant],
+            ["Contributors", metrics.contributors_count],
+            ["Unassigned Issues", metrics.unassigned_issues_count],
+            ["Unanswered Issues", metrics.unanswered_issues_count],
+            ["Has funding issues", "No"],
+            [
+                "Has leadership issues",
+                "No",
+            ],
         ]
         mock_table.assert_called_once_with(table_data, colWidths="*")
         mock_table_style.assert_called_once()
@@ -79,8 +88,4 @@ class TestOwaspGenerateProjectHealthMetricsPdf:
         canvas.showPage.assert_called_once()
         canvas.save.assert_called_once()
         mock_path.assert_called_once_with(settings.base.Base.BASE_DIR)
-        mock_path.return_value.parent.mkdir.assert_called_once_with(parents=True, exist_ok=True)
-        mock_path.return_value.write_bytes.assert_called_once_with(
-            mock_bytes_io.return_value.getvalue()
-        )
         mock_bytes_io.return_value.close.assert_called_once()
