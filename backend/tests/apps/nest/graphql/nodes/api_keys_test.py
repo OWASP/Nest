@@ -1,6 +1,5 @@
 import datetime
-
-import strawberry
+import uuid
 
 from apps.nest.graphql.nodes.api_key import ApiKeyNode
 
@@ -15,12 +14,11 @@ class TestApiKeyNode:
         defined_fields = {f.name for f in ApiKeyNode.__strawberry_definition__.fields}
 
         expected_fields = {
-            "id",
-            "name",
-            "is_revoked",
             "created_at",
+            "is_revoked",
             "expires_at",
-            "key_suffix",
+            "name",
+            "public_id",
         }
 
         assert defined_fields == expected_fields
@@ -28,10 +26,8 @@ class TestApiKeyNode:
     def test_api_key_node_field_types(self):
         """Tests for ApiKeyNode field types."""
         fields_map = {f.name: f for f in ApiKeyNode.__strawberry_definition__.fields}
-
-        assert fields_map["id"].type is strawberry.ID
+        assert fields_map["public_id"].type is uuid.UUID
         assert fields_map["name"].type is str
         assert fields_map["is_revoked"].type is bool
-        assert fields_map["key_suffix"].type is str
         assert fields_map["created_at"].type is datetime.datetime
-        assert fields_map["expires_at"].type.of_type is datetime.datetime
+        assert fields_map["expires_at"].type is datetime.datetime

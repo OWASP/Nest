@@ -2,10 +2,10 @@
 
 import hashlib
 import secrets
+import uuid
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Q
 from django.utils import timezone
 
 MAX_ACTIVE_KEYS = 5
@@ -20,11 +20,13 @@ class ApiKey(models.Model):
         ordering = ["-created_at"]
 
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(blank=True, null=True)
+    expires_at = models.DateTimeField()
     hash = models.CharField(max_length=64, unique=True)
     is_revoked = models.BooleanField(default=False)
-    key_suffix = models.CharField(max_length=4, blank=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
     name = models.CharField(max_length=100)
+    public_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     # FKs.
     user = models.ForeignKey(
@@ -45,10 +47,10 @@ class ApiKey(models.Model):
 
         raw_key = cls.generate_raw_key()
         key_hash = cls.generate_hash_key(raw_key)
+
         instance = cls.objects.create(
             expires_at=expires_at,
             hash=key_hash,
-            key_suffix=raw_key[-4:],
             name=name,
             user=user,
         )
@@ -58,14 +60,7 @@ class ApiKey(models.Model):
     def active_count_for_user(cls, user) -> int:
         """Return active API keys for the user."""
         now = timezone.now()
-        return (
-            cls.objects.filter(
-                user=user,
-                is_revoked=False,
-            )
-            .filter(Q(expires_at__isnull=True) | Q(expires_at__gt=now))
-            .count()
-        )
+        return cls.objects.filter(user=user, is_revoked=False, expires_at__gt=now).count()
 
     @classmethod
     def authenticate(cls, raw_key: str) -> "ApiKey | None":
@@ -75,7 +70,12 @@ class ApiKey(models.Model):
         except cls.DoesNotExist:
             return None
 
-        return api_key if api_key.is_valid() else None
+        if api_key.is_valid():
+            cls.objects.filter(pk=api_key.pk).update(last_used_at=timezone.now())
+            api_key.last_used_at = timezone.now()
+            return api_key
+
+        return None
 
     @staticmethod
     def generate_raw_key():
@@ -89,4 +89,4 @@ class ApiKey(models.Model):
 
     def is_valid(self):
         """Check if the API key is valid."""
-        return not self.is_revoked and (not self.expires_at or self.expires_at > timezone.now())
+        return not self.is_revoked and self.expires_at > timezone.now()

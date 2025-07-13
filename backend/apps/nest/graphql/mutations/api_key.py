@@ -2,6 +2,7 @@
 
 import logging
 from datetime import datetime
+from uuid import UUID
 
 import strawberry
 from django.db.utils import IntegrityError
@@ -39,9 +40,7 @@ class ApiKeyMutations:
     """GraphQL mutation class for API keys."""
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
-    def create_api_key(
-        self, info: Info, name: str, expires_at: datetime | None = None
-    ) -> CreateApiKeyResult:
+    def create_api_key(self, info: Info, name: str, expires_at: datetime) -> CreateApiKeyResult:
         """Create a new API key for the authenticated user."""
         user = info.context.request.user
 
@@ -70,11 +69,11 @@ class ApiKeyMutations:
             )
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
-    def revoke_api_key(self, info: Info, key_id: int) -> RevokeApiKeyResult:
+    def revoke_api_key(self, info: Info, public_id: UUID) -> RevokeApiKeyResult:
         """Revoke an API key for the authenticated user."""
         user = info.context.request.user
         try:
-            api_key = ApiKey.objects.get(id=key_id, user=user)
+            api_key = ApiKey.objects.get(public_id=public_id, user=user)
             api_key.is_revoked = True
             api_key.save(update_fields=["is_revoked"])
         except ApiKey.DoesNotExist:

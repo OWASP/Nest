@@ -111,9 +111,7 @@ describe('ApiKeysPage Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText('mock key 1')).toBeInTheDocument()
-      expect(screen.getByText('...SmQs')).toBeInTheDocument()
       expect(screen.getByText('mock key 2')).toBeInTheDocument()
-      expect(screen.getByText('...feh4')).toBeInTheDocument()
       expect(screen.queryByText('revoked key')).not.toBeInTheDocument()
     })
   })
@@ -256,7 +254,7 @@ describe('ApiKeysPage Component', () => {
     fireEvent.click(confirmRevokeButton)
     await waitFor(() => {
       expect(mockRevokeMutation).toHaveBeenCalledWith({
-        variables: { keyId: 1 }, //
+        variables: { publicId: '1' },
       })
     })
   })

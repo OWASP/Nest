@@ -25,11 +25,10 @@ class ApiKeyAuth(APIKeyHeader):
         if not key:
             raise HttpError(401, "Missing API key in 'X-API-Key' header")
 
-        try:
-            api_key = ApiKey.objects.get(hash=ApiKey.generate_hash_key(key))
-            if api_key.is_valid():
-                return api_key
-        except ApiKey.DoesNotExist as err:
-            raise HttpError(401, "Invalid API key") from err
+        # The authenticate method will return the key if it is valid,
+        # or None if it's not found or invalid.
+        api_key = ApiKey.authenticate(raw_key=key)
+        if api_key:
+            return api_key
 
         raise HttpError(401, "Invalid API key")

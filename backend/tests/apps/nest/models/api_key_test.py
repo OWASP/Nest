@@ -60,49 +60,52 @@ class TestApiKeyModel:
             call_args = mock_create.call_args[1]
             assert call_args["user"] == mock_user
             assert call_args["name"] == name
-            assert call_args["key_suffix"] == "1234"
+            assert call_args["expires_at"] == expires_at
             assert "hash" in call_args
 
     @patch("apps.nest.models.ApiKey.active_count_for_user", return_value=MAX_ACTIVE_KEYS)
     def test_create_failure_max_keys_reached(self, mock_active_count, mock_user):
         """Test that key creation fails when the user has reached the max active key limit."""
-        result = ApiKey.create(user=mock_user, name="Another Key")
+        expires_at = timezone.now() + timedelta(days=30)
+        result = ApiKey.create(user=mock_user, name="Another Key", expires_at=expires_at)
         assert result is None
         mock_active_count.assert_called_once_with(mock_user)
 
     @patch("apps.nest.models.ApiKey.objects")
     def test_active_count_for_user(self, mock_objects, mock_user):
         """Test the `active_count_for_user` method with proper filtering."""
-        mock_objects.filter.return_value.filter.return_value.count.return_value = 3
+        mock_objects.filter.return_value.count.return_value = 3
 
         count = ApiKey.active_count_for_user(mock_user)
 
         assert count == 3
-        user_filter_call = mock_objects.filter.call_args_list[0][1]
-        assert user_filter_call["user"] == mock_user
-        assert user_filter_call["is_revoked"] is False
+        # Check that filter was called correctly
+        mock_objects.filter.assert_called_once()
+        filter_kwargs = mock_objects.filter.call_args[1]
+        assert filter_kwargs["user"] == mock_user
+        assert filter_kwargs["is_revoked"] is False
+        assert "expires_at__gt" in filter_kwargs
 
-        expiry_filter_call = mock_objects.filter.return_value.filter.call_args_list[0][0][0]
-        assert "expires_at__isnull" in str(expiry_filter_call)
-        assert "expires_at__gt" in str(expiry_filter_call)
-
+    @patch("apps.nest.models.ApiKey.objects.filter")
     @patch("apps.nest.models.ApiKey.objects.get")
-    def test_authenticate_success(self, mock_get):
+    def test_authenticate_success(self, mock_get, mock_filter):
         """Test successful authentication with a valid raw key."""
         raw_key = "valid_key"
         mock_api_key = MagicMock(spec=ApiKey)
         mock_api_key.is_valid.return_value = True
         mock_get.return_value = mock_api_key
+        mock_filter.return_value.update.return_value = 1
 
         result = ApiKey.authenticate(raw_key)
 
         assert result is mock_api_key
         mock_api_key.is_valid.assert_called_once()
         mock_get.assert_called_once()
+        mock_filter.return_value.update.assert_called_once()
 
     @patch("apps.nest.models.ApiKey.objects.get")
     def test_authenticate_failure_invalid_key(self, mock_get):
-        """Test authentication failure when the key is not valid (e.g., revoked)."""
+        """Test authentication failure when the key is not valid."""
         raw_key = "invalid_key"
         mock_api_key = MagicMock(spec=ApiKey)
         mock_api_key.is_valid.return_value = False
@@ -123,12 +126,17 @@ class TestApiKeyModel:
 
     def test_is_valid_active_key(self):
         """Test that a non-revoked, non-expired key is valid."""
-        key = ApiKey(is_revoked=False, expires_at=None)
+        key = ApiKey(is_revoked=False, expires_at=timezone.now() + timedelta(days=1))
         assert key.is_valid() is True
+
+    def test_is_valid_expired_key(self):
+        """Test that an expired key is not valid."""
+        key = ApiKey(is_revoked=False, expires_at=timezone.now() - timedelta(days=1))
+        assert key.is_valid() is False
 
     def test_is_valid_revoked_key(self):
         """Test that a revoked key is not valid."""
-        key = ApiKey(is_revoked=True, expires_at=None)
+        key = ApiKey(is_revoked=True, expires_at=timezone.now() + timedelta(days=1))
         assert key.is_valid() is False
 
     def test_str_representation_active(self):

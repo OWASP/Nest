@@ -42,7 +42,7 @@ export function ApiKeysSkeleton() {
               <thead>
                 <tr className="border-b border-gray-200 dark:border-gray-700">
                   <th className="py-3 text-left font-semibold">Name</th>
-                  <th className="py-3 text-left font-semibold">Key Suffix</th>
+                  <th className="py-3 text-left font-semibold">Id</th>
                   <th className="py-3 text-left font-semibold">Created</th>
                   <th className="py-3 text-left font-semibold">Expires</th>
                   <th className="py-3 text-left font-semibold">Status</th>

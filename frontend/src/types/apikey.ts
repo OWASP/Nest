@@ -4,12 +4,11 @@ export type CreateApiKeyResult = {
 }
 
 export type ApiKey = {
-  id: number
   name: string
   isRevoked: boolean
   createdAt: string
   expiresAt: string
-  keySuffix: string
+  publicId: string
 }
 
 export type ApiKeyPageContentProps = {

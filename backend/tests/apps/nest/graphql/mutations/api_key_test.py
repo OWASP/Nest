@@ -1,5 +1,6 @@
 from datetime import timedelta
 from unittest.mock import MagicMock, patch
+from uuid import uuid4
 
 import pytest
 from django.db.utils import IntegrityError
@@ -61,10 +62,11 @@ class TestApiKeyMutations:
         info = fake_info()
         user = info.context.request.user
         name = "This key should not be created"
+        expires_at = timezone.now() + timedelta(days=30)
 
-        result = api_key_mutations.create_api_key(info, name=name)
+        result = api_key_mutations.create_api_key(info, name=name, expires_at=expires_at)
 
-        mock_api_key_create.assert_called_once_with(user=user, name=name, expires_at=None)
+        mock_api_key_create.assert_called_once_with(user=user, name=name, expires_at=expires_at)
 
         assert isinstance(result, CreateApiKeyResult)
         assert result.ok is False
@@ -81,8 +83,9 @@ class TestApiKeyMutations:
         """Test the mutation's behavior when an IntegrityError is raised."""
         info = fake_info()
         name = "A key that causes a DB error"
+        expires_at = timezone.now() + timedelta(days=30)
 
-        result = api_key_mutations.create_api_key(info, name=name)
+        result = api_key_mutations.create_api_key(info, name=name, expires_at=expires_at)
 
         mock_api_key_create.assert_called_once()
         mock_logger.warning.assert_called_once()
@@ -99,14 +102,14 @@ class TestApiKeyMutations:
         """Test the successful revocation of an existing API key."""
         info = fake_info()
         user = info.context.request.user
-        key_id_to_revoke = 42
+        public_id_to_revoke = uuid4()
 
         mock_api_key = MagicMock(spec=ApiKey)
         mock_objects_get.return_value = mock_api_key
 
-        result = api_key_mutations.revoke_api_key(info, key_id=key_id_to_revoke)
+        result = api_key_mutations.revoke_api_key(info, public_id=public_id_to_revoke)
 
-        mock_objects_get.assert_called_once_with(id=key_id_to_revoke, user=user)
+        mock_objects_get.assert_called_once_with(public_id=public_id_to_revoke, user=user)
 
         assert mock_api_key.is_revoked is True
         mock_api_key.save.assert_called_once_with(update_fields=["is_revoked"])
@@ -124,11 +127,11 @@ class TestApiKeyMutations:
         """Test revoking a key that does not exist or belong to the user."""
         info = fake_info()
         user = info.context.request.user
-        non_existent_key_id = 999
+        non_existent_public_id = uuid4()
 
-        result = api_key_mutations.revoke_api_key(info, key_id=non_existent_key_id)
+        result = api_key_mutations.revoke_api_key(info, public_id=non_existent_public_id)
 
-        mock_objects_get.assert_called_once_with(id=non_existent_key_id, user=user)
+        mock_objects_get.assert_called_once_with(public_id=non_existent_public_id, user=user)
 
         mock_logger.warning.assert_called_once_with("API Key does not exist")
 

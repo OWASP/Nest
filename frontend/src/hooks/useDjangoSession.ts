@@ -12,7 +12,8 @@ Purpose:
   1. Wait for NextAuth to finish (status == 'authenticated')
   2. Grab Github `accessToken` from JWT.
   3. Fire SYNC_DJANGO_SESSION_MUTATION with the accessToken.
-  4. Resolved request from the Django will return with cookie that automatically handled by the client and the cookie will be fixed
+  4. Resolved request from the Django will return with cookie
+     that automatically handled by the client and the cookie will be fixed
   5. Store a flag in sessionStorage to indicate that the Django session has been synced
 
 */

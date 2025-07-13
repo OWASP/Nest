@@ -108,7 +108,7 @@ export default function Page() {
 
   const handleRevokeKey = async () => {
     if (keyToRevoke) {
-      await revokeApiKey({ variables: { keyId: Number(keyToRevoke.id) } })
+      await revokeApiKey({ variables: { publicId: keyToRevoke.publicId } })
       setKeyToRevoke(null)
     }
   }
@@ -195,7 +195,7 @@ export default function Page() {
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-gray-700">
                     <th className="py-3 text-left font-semibold">Name</th>
-                    <th className="py-3 text-left font-semibold">Key Suffix</th>
+                    <th className="py-3 text-left font-semibold">ID</th>
                     <th className="py-3 text-left font-semibold">Created</th>
                     <th className="py-3 text-left font-semibold">Expires</th>
                     <th className="py-3 text-left font-semibold">Status</th>
@@ -205,11 +205,11 @@ export default function Page() {
                 <tbody>
                   {data.apiKeys.map((key: ApiKey) => (
                     <tr
-                      key={key.id}
+                      key={key.publicId}
                       className={`border-b border-gray-200 dark:border-gray-700 ${key.isRevoked ? 'opacity-60' : ''}`}
                     >
                       <td className="py-3">{key.name}</td>
-                      <td className="py-3 font-mono text-sm">...{key.keySuffix}</td>
+                      <td className="py-3 font-mono text-sm">{key.publicId}</td>
                       <td className="py-3">{format(new Date(key.createdAt), 'PP')}</td>
                       <td className="py-3">
                         {key.expiresAt ? format(new Date(key.expiresAt), 'PP') : 'Never'}
@@ -334,8 +334,7 @@ export default function Page() {
                     min={format(new Date(), 'yyyy-MM-dd')}
                   />
                   <p className="mt-1 text-xs text-gray-500">
-                    Default: 30 days from today ({format(addDays(new Date(), 30), 'PP')}). Leave
-                    empty for no expiration.
+                    Default: 30 days from today ({format(addDays(new Date(), 30), 'PP')}).
                   </p>
                   <div className="mt-2 flex gap-2">
                     <Button
@@ -353,9 +352,6 @@ export default function Page() {
                       }
                     >
                       1 year
-                    </Button>
-                    <Button size="sm" variant="bordered" onPress={() => setNewKeyExpiry('')}>
-                      Never expires
                     </Button>
                   </div>
                 </div>
@@ -375,7 +371,7 @@ export default function Page() {
                 <Button
                   color="primary"
                   onPress={handleCreateKey}
-                  isDisabled={createLoading || !newKeyName.trim()}
+                  isDisabled={createLoading || !newKeyName.trim() || !newKeyExpiry}
                 >
                   {createLoading && <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />}
                   Create API Key

@@ -8,12 +8,11 @@ from apps.nest.models import ApiKey
 @strawberry_django.type(
     ApiKey,
     fields=[
-        "id",
-        "name",
-        "is_revoked",
         "created_at",
+        "is_revoked",
         "expires_at",
-        "key_suffix",
+        "name",
+        "public_id",
     ],
 )
 class ApiKeyNode:
