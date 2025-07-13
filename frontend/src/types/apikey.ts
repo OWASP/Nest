@@ -1,6 +1,9 @@
 export type CreateApiKeyResult = {
+  ok: boolean
   apiKey: ApiKey
   rawKey: string
+  code?: string
+  message?: string
 }
 
 export type ApiKey = {

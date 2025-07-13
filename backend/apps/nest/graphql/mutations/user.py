@@ -62,10 +62,10 @@ class UserMutations:
                 username=gh_user.login,
             )
 
-            if auth_user:
-                auth_user.backend = "django.contrib.auth.backends.ModelBackend"
-                login(info.context.request, auth_user)
+            #  Log the user in (attaches backend + writes session cookie)
+            login(info.context.request, auth_user)
 
+            # Return the response with SET-COOKIE header and user data
             return GitHubAuthResult(auth_user=auth_user)
 
         except requests.exceptions.RequestException as e:
@@ -76,6 +76,7 @@ class UserMutations:
     def logout_user(self, info: Info) -> LogoutResult:
         """Logout the current user out of their Django session."""
         try:
+            # Log the user out (clears session cookie)
             logout(info.context.request)
             return LogoutResult(
                 ok=True,
