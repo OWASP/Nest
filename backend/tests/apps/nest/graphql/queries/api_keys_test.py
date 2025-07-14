@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -36,17 +36,12 @@ class TestApiKeyQueries:
         user.active_api_keys.count.assert_called_once()
         assert result == 3
 
-    @patch("apps.nest.graphql.queries.api_key.ApiKey.objects")
-    def test_api_keys_resolver(self, mock_objects, api_key_queries):
+    def test_api_keys_resolver(self, api_key_queries):
         """Tests the api_keys resolver with its default behavior."""
         info = fake_info()
-        user = info.context.request.user
-        mock_active_keys_queryset = MagicMock()
-
-        mock_objects.filter.return_value.order_by.return_value = mock_active_keys_queryset
+        qs = MagicMock(name="qs")
+        info.context.request.user.active_api_keys.order_by.return_value = qs
         result = api_key_queries.api_keys(info)
 
-        mock_objects.filter.assert_called_once_with(user=user, is_revoked=False)
-        mock_objects.filter.return_value.order_by.assert_called_once_with("-created_at")
-
-        assert result == mock_active_keys_queryset
+        info.context.request.user.active_api_keys.order_by.assert_called_once_with("-created_at")
+        assert result is qs

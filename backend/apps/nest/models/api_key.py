@@ -44,7 +44,7 @@ class ApiKey(models.Model):
     @property
     def is_expired(self):
         """Check if the API key has expired."""
-        return self.expires_at <= timezone.now()
+        return self.expires_at < timezone.now()
 
     @property
     def is_valid(self):
@@ -53,7 +53,7 @@ class ApiKey(models.Model):
 
     @classmethod
     @transaction.atomic
-    def create(cls, user, name, expires_at=None):
+    def create(cls, user, name, expires_at):
         """Create a new API key instance."""
         if user.active_api_keys.select_for_update().count() >= MAX_ACTIVE_KEYS:
             return None

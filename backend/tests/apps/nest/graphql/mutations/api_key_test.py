@@ -112,7 +112,7 @@ class TestApiKeyMutations:
         mock_objects_get.assert_called_once_with(uuid=uuid_to_revoke, user=user)
 
         assert mock_api_key.is_revoked is True
-        mock_api_key.save.assert_called_once_with(update_fields=["is_revoked"])
+        mock_api_key.save.assert_called_once_with(update_fields=["is_revoked", "updated_at"])
 
         assert isinstance(result, RevokeApiKeyResult)
         assert result.ok is True

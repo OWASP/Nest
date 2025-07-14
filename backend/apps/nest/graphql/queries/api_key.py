@@ -5,7 +5,6 @@ from strawberry.types import Info
 
 from apps.nest.graphql.nodes.api_key import ApiKeyNode
 from apps.nest.graphql.permissions import IsAuthenticated
-from apps.nest.models import ApiKey
 
 
 @strawberry.type
@@ -28,7 +27,4 @@ class ApiKeyQueries:
             list[ApiKeyNode]: List of API keys associated with the authenticated user.
 
         """
-        return ApiKey.objects.filter(
-            user=info.context.request.user,
-            is_revoked=False,
-        ).order_by("-created_at")
+        return info.context.request.user.active_api_keys.order_by("-created_at")

@@ -93,7 +93,8 @@ class ApiKeyMutations:
                 user=info.context.request.user,
             )
             api_key.is_revoked = True
-            api_key.save(update_fields=["is_revoked"])
+            api_key.updated_at = timezone.now()
+            api_key.save(update_fields=["is_revoked", "updated_at"])
         except ApiKey.DoesNotExist:
             logger.warning("API Key does not exist")
             return RevokeApiKeyResult(

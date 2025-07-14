@@ -19,9 +19,11 @@ import { addToast } from '@heroui/toast'
 import { format, addDays } from 'date-fns'
 import { useState } from 'react'
 import { CREATE_API_KEY, GET_API_KEYS, REVOKE_API_KEY } from 'server/queries/apiKeyQueries'
-import type { ApiKey } from 'types/apikey'
+import type { ApiKey } from 'types/apiKey'
 import SecondaryCard from 'components/SecondaryCard'
 import { ApiKeysSkeleton } from 'components/skeletons/ApiKeySkelton'
+
+const MAX_ACTIVE_KEYS = 3
 
 export default function Page() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -71,7 +73,7 @@ export default function Page() {
   })
 
   const activeKeyCount = data?.activeApiKeyCount || 0
-  const canCreateNewKey = activeKeyCount < 5
+  const canCreateNewKey = activeKeyCount < MAX_ACTIVE_KEYS
   const defaultExpiryDate = format(addDays(new Date(), 30), 'yyyy-MM-dd')
 
   const handleCreateKey = () => {
@@ -134,8 +136,12 @@ export default function Page() {
             <div>
               <h3 className="font-semibold text-blue-800 dark:text-blue-300">API Key Limits</h3>
               <p className="mt-1 text-sm text-blue-700 dark:text-blue-400">
-                You can have a maximum of <strong>5 active API keys</strong> at any time. Currently:{' '}
-                <strong>{activeKeyCount}/5 active keys</strong>.
+                You can have a maximum of <strong>{MAX_ACTIVE_KEYS} active API keys</strong> at any
+                time. Currently:{' '}
+                <strong>
+                  {activeKeyCount}/{MAX_ACTIVE_KEYS} active keys
+                </strong>
+                .
                 {!canCreateNewKey && (
                   <span className="mt-1 block">
                     You've reached the maximum number of API keys. Delete an existing key to create
@@ -159,7 +165,7 @@ export default function Page() {
               className="rounded-sm bg-black font-medium text-white transition-colors hover:bg-gray-900/90 disabled:bg-gray-300 disabled:text-gray-500"
             >
               <FontAwesomeIcon icon={faPlus} className="mr-1" />
-              Create New Key ({activeKeyCount}/5)
+              Create New Key ({activeKeyCount}/{MAX_ACTIVE_KEYS})
             </Button>
           </div>
 
