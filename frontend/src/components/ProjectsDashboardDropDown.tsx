@@ -12,7 +12,7 @@ import {
 import { FC } from 'react'
 import { DropDownSectionProps } from 'types/DropDownSectionProps'
 const ProjectsDashboardDropDown: FC<{
-  onAction: (key: string) => Promise<void>
+  onAction: (key: string) => void
   selectedKeys?: string[]
   selectionMode: 'single' | 'multiple'
   icon: IconProp

@@ -8,7 +8,7 @@ import { FC, useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
 import { GET_PROJECT_HEALTH_METRICS_LIST } from 'server/queries/projectsHealthDashboardQueries'
 import { DropDownSectionProps } from 'types/DropDownSectionProps'
-import { HealthMetricsProps, HealthMetricsFilter, HealthMetricsOrdering } from 'types/healthMetrics'
+import { HealthMetricsProps, HealthMetricsOrdering } from 'types/healthMetrics'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetricsCard from 'components/MetricsCard'
 import ProjectsDashboardDropDown from 'components/ProjectsDashboardDropDown'
@@ -18,20 +18,7 @@ const PAGINATION_LIMIT = 10
 const MetricsPage: FC = () => {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const paramsFilter = searchParams.get('health') || searchParams.get('level') || 'reset'
-  const filtersMapping = {
-    incubator: {
-      level: 'incubator',
-    },
-    lab: {
-      level: 'lab',
-    },
-    production: {
-      level: 'production',
-    },
-    flagship: {
-      level: 'flagship',
-    },
+  const healthFiltersMapping = {
     healthy: {
       score: {
         gte: 75,
@@ -48,22 +35,86 @@ const MetricsPage: FC = () => {
         lt: 50,
       },
     },
-    reset: {},
+  }
+  const levelFiltersMapping = {
+    incubator: {
+      level: 'incubator',
+    },
+    lab: {
+      level: 'lab',
+    },
+    production: {
+      level: 'production',
+    },
+    flagship: {
+      level: 'flagship',
+    },
+  }
+
+  const orderingMapping = {
+    scoreDESC: {
+      scoreOrdering: { score: 'DESC' },
+    },
+    scoreASC: {
+      scoreOrdering: { score: 'ASC' },
+    },
+    starsCountDESC: {
+      starsCountOrdering: { starsCount: 'DESC' },
+    },
+    starsCountASC: {
+      starsCountOrdering: { starsCount: 'ASC' },
+    },
+    forksCountDESC: {
+      forksCountOrdering: { forksCount: 'DESC' },
+    },
+    forksCountASC: {
+      forksCountOrdering: { forksCount: 'ASC' },
+    },
+    contributorsCountDESC: {
+      contributorsCountOrdering: { contributorsCount: 'DESC' },
+    },
+    contributorsCountASC: {
+      contributorsCountOrdering: { contributorsCount: 'ASC' },
+    },
+  }
+
+  let currentFilters = {}
+  let currentOrdering: HealthMetricsOrdering = {
+    scoreOrdering: { score: 'DESC' },
+  }
+  const healthFilter = searchParams.get('health')
+  const levelFilter = searchParams.get('level')
+  const orderingParam = searchParams.get('order')
+
+  if (healthFilter) {
+    currentFilters = {
+      ...healthFiltersMapping[healthFilter],
+    }
+  }
+  if (levelFilter) {
+    currentFilters = {
+      ...currentFilters,
+      ...levelFiltersMapping[levelFilter],
+    }
+  }
+  if (orderingParam) {
+    currentOrdering = orderingMapping[orderingParam] || currentOrdering
   }
 
   const [metrics, setMetrics] = useState<HealthMetricsProps[]>([])
   const [metricsLength, setMetricsLength] = useState<number>(0)
-  const [filters, setFilters] = useState<HealthMetricsFilter>(filtersMapping[paramsFilter] || {})
   const [pagination, setPagination] = useState({ offset: 0, limit: PAGINATION_LIMIT })
-  const [ordering, setOrdering] = useState<HealthMetricsOrdering>({
-    scoreOrdering: { score: 'DESC' },
-  })
-  const [activeFilterKey, setActiveFilterKey] = useState<string>('reset')
-  const [activeOrderingKey, setActiveOrderingKey] = useState<string>('scoreDESC')
+  const [filters, setFilters] = useState(currentFilters)
+  const [ordering, setOrdering] = useState(currentOrdering)
+  const [activeFilters, setActiveFilters] = useState(Object.keys(currentFilters))
+  const [activeOrdering, setActiveOrdering] = useState(
+    Object.keys(orderingMapping).filter(
+      (key) => JSON.stringify(orderingMapping[key]) === JSON.stringify(currentOrdering)
+    ) || ['scoreDESC']
+  )
   const {
     data,
     error: graphQLRequestError,
-    refetch,
     loading,
     fetchMore,
   } = useQuery(GET_PROJECT_HEALTH_METRICS_LIST, {
@@ -138,33 +189,6 @@ const MetricsPage: FC = () => {
     },
   ]
 
-  const orderingMapping = {
-    scoreDESC: {
-      scoreOrdering: { score: 'DESC' },
-    },
-    scoreASC: {
-      scoreOrdering: { score: 'ASC' },
-    },
-    starsCountDESC: {
-      starsCountOrdering: { starsCount: 'DESC' },
-    },
-    starsCountASC: {
-      starsCountOrdering: { starsCount: 'ASC' },
-    },
-    forksCountDESC: {
-      forksCountOrdering: { forksCount: 'DESC' },
-    },
-    forksCountASC: {
-      forksCountOrdering: { forksCount: 'ASC' },
-    },
-    contributorsCountDESC: {
-      contributorsCountOrdering: { contributorsCount: 'DESC' },
-    },
-    contributorsCountASC: {
-      contributorsCountOrdering: { contributorsCount: 'ASC' },
-    },
-  }
-
   const getCurrentPage = () => {
     return Math.floor(pagination.offset / PAGINATION_LIMIT) + 1
   }
@@ -178,30 +202,28 @@ const MetricsPage: FC = () => {
             buttonDisplayName="Filter By"
             icon={faFilter}
             sections={filteringSections}
-            selectionMode="single"
-            selectedKeys={[activeFilterKey]}
-            onAction={async (key: string) => {
+            selectionMode="multiple"
+            selectedKeys={activeFilters}
+            onAction={(key: string) => {
               // Because how apollo caches pagination, we need to reset the pagination.
               const newPagination = { offset: 0, limit: PAGINATION_LIMIT }
               setPagination(newPagination)
-              setFilters(filtersMapping[key])
-              setActiveFilterKey(key)
-              await refetch({
-                filters: filtersMapping[key],
-                pagination: newPagination,
-                ordering: Object.values(ordering),
-              })
-              const paramsMapping = {
-                healthy: '?health=healthy',
-                needsAttention: '?health=needsAttention',
-                unhealthy: '?health=unhealthy',
-                reset: '',
-                incubator: '?level=incubator',
-                lab: '?level=lab',
-                production: '?level=production',
-                flagship: '?level=flagship',
+              let newFilters = { ...currentFilters }
+              const newParams = new URLSearchParams(searchParams.toString())
+              if (key in healthFiltersMapping) {
+                newParams.set('health', key)
+                newFilters = { ...newFilters, ...healthFiltersMapping[key] }
+              } else if (key in levelFiltersMapping) {
+                newParams.set('level', key)
+                newFilters = { ...newFilters, ...levelFiltersMapping[key] }
+              } else {
+                newParams.delete('health')
+                newParams.delete('level')
+                newFilters = {}
               }
-              router.push(`/projects/dashboard/metrics${paramsMapping[key] || ''}`)
+              setFilters(newFilters)
+              setActiveFilters(Array.from(newParams.values()))
+              router.replace(`/projects/dashboard/metrics?${newParams.toString()}`)
             }}
           />
 
@@ -210,18 +232,18 @@ const MetricsPage: FC = () => {
             icon={faSort}
             sections={orderingSections}
             selectionMode="single"
-            selectedKeys={[activeOrderingKey]}
+            selectedKeys={activeOrdering}
             onAction={async (key: string) => {
               // Reset pagination to the first page when changing ordering
               const newPagination = { offset: 0, limit: PAGINATION_LIMIT }
               setPagination(newPagination)
-              setOrdering(orderingMapping[key])
-              setActiveOrderingKey(key)
-              await refetch({
-                filters,
-                pagination: newPagination,
-                ordering: Object.values(orderingMapping[key]),
-              })
+              const newParams = new URLSearchParams(searchParams.toString())
+              if (key in orderingMapping) {
+                newParams.set('order', key)
+                setOrdering(orderingMapping[key])
+                setActiveOrdering([key])
+              }
+              router.replace(`/projects/dashboard/metrics?${newParams.toString()}`)
             }}
           />
         </div>
@@ -258,9 +280,9 @@ const MetricsPage: FC = () => {
             setPagination(newPagination)
             await fetchMore({
               variables: {
-                filters,
+                currentFilters,
                 pagination: newPagination,
-                ordering: Object.values(ordering),
+                ordering: Object.values(currentOrdering),
               },
               updateQuery: (prev, { fetchMoreResult }) => {
                 if (!fetchMoreResult) return prev
