@@ -10,7 +10,11 @@ class Command(BaseCommand):
 
     def handle(self, *_args, **options) -> None:
         """Purge data from specified OWASP Nest applications."""
-        nest_apps = ("github", "owasp")
+        nest_apps = (
+            "github",
+            "owasp",
+            "slack",
+        )
 
         with connection.cursor() as cursor:
             for nest_app in nest_apps:

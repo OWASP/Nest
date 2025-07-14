@@ -38,9 +38,9 @@ dump-data:
 	@CMD="python manage.py dumpdata \
 		github \
 		owasp \
-		slack.conversation \
-		slack.member \
-		slack.workspace \
+		slack.Conversation \
+		slack.Member \
+		slack.Workspace \
 		--indent=4 \
 		--natural-foreign \
 		--natural-primary -o data/nest.json" $(MAKE) exec-backend-command

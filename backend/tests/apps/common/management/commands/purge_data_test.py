@@ -9,10 +9,11 @@ from apps.common.management.commands.purge_data import Command
     ("nest_apps", "mock_models"),
     [
         (
-            ["github", "owasp"],
+            ["github", "owasp", "slack"],
             {
-                "github": ["Repo", "Issue"],
-                "owasp": ["Vulnerability", "Project"],
+                "github": ["Issue", "Repository"],
+                "owasp": ["Chapter", "Project"],
+                "slack": ["Conversation", "Member", "Workspace"],
             },
         )
     ],

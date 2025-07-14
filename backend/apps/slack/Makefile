@@ -1,10 +1,10 @@
 slack-export-data:
 	@echo "Exporting Slack data"
 	@CMD="python manage.py dumpdata \
-		slack.conversation \
-		slack.member \
-		slack.message \
-		slack.workspace \
+		slack.Conversation \
+		slack.Member \
+		slack.Message \
+		slack.Workspace \
 		--indent=4 \
 		--natural-foreign \
 		--natural-primary -o data/slack-data.json" $(MAKE) exec-backend-command
