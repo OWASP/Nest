@@ -253,7 +253,7 @@ const MetricsPage: FC = () => {
         <div className="truncate font-semibold">Stars</div>
         <div className="truncate font-semibold">Forks</div>
         <div className="truncate font-semibold">Contributors</div>
-        <div className="truncate text-center font-semibold">Created At</div>
+        <div className="truncate text-center font-semibold">Health Checked At</div>
         <div className="truncate text-center font-semibold">Score</div>
       </div>
       {loading ? (

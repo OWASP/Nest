@@ -29,7 +29,13 @@ const MetricsCard: FC<{ metric: HealthMetricsProps }> = ({ metric }) => {
           <p className="text-md">{metric.contributorsCount}</p>
         </div>
         <div className="truncate">
-          <p className="text-md text-center">{new Date(metric.createdAt).toLocaleDateString()}</p>
+          <p className="text-md text-center">
+            {new Date(metric.createdAt).toLocaleString('default', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            })}
+          </p>
         </div>
         <div
           className={clsx(
