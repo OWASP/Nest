@@ -87,6 +87,7 @@ export default function Page() {
         description: 'Name must be less than 100 characters',
         color: 'danger',
       })
+      return
     }
 
     if (newKeyName.match(/[^a-zA-Z0-9\s-]/)) {
