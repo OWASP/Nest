@@ -85,17 +85,19 @@ const MetricsPage: FC = () => {
   const healthFilter = searchParams.get('health')
   const levelFilter = searchParams.get('level')
   const orderingParam = searchParams.get('order')
-
+  const currentFilterKeys = []
   if (healthFilter) {
     currentFilters = {
       ...healthFiltersMapping[healthFilter],
     }
+    currentFilterKeys.push(healthFilter)
   }
   if (levelFilter) {
     currentFilters = {
       ...currentFilters,
       ...levelFiltersMapping[levelFilter],
     }
+    currentFilterKeys.push(levelFilter)
   }
   if (orderingParam) {
     currentOrdering = orderingMapping[orderingParam] || currentOrdering
@@ -106,7 +108,7 @@ const MetricsPage: FC = () => {
   const [pagination, setPagination] = useState({ offset: 0, limit: PAGINATION_LIMIT })
   const [filters, setFilters] = useState(currentFilters)
   const [ordering, setOrdering] = useState(currentOrdering)
-  const [activeFilters, setActiveFilters] = useState(Object.keys(currentFilters))
+  const [activeFilters, setActiveFilters] = useState(currentFilterKeys)
   const [activeOrdering, setActiveOrdering] = useState(
     Object.keys(orderingMapping).filter(
       (key) => JSON.stringify(orderingMapping[key]) === JSON.stringify(currentOrdering)
@@ -141,27 +143,6 @@ const MetricsPage: FC = () => {
       items: [
         { label: 'High to Low', key: 'scoreDESC' },
         { label: 'Low to High', key: 'scoreASC' },
-      ],
-    },
-    {
-      title: 'Stars',
-      items: [
-        { label: 'High to Low', key: 'starsCountDESC' },
-        { label: 'Low to High', key: 'starsCountASC' },
-      ],
-    },
-    {
-      title: 'Forks',
-      items: [
-        { label: 'High to Low', key: 'forksCountDESC' },
-        { label: 'Low to High', key: 'forksCountASC' },
-      ],
-    },
-    {
-      title: 'Contributors',
-      items: [
-        { label: 'High to Low', key: 'contributorsCountDESC' },
-        { label: 'Low to High', key: 'contributorsCountASC' },
       ],
     },
   ]
@@ -233,7 +214,7 @@ const MetricsPage: FC = () => {
             sections={orderingSections}
             selectionMode="single"
             selectedKeys={activeOrdering}
-            onAction={async (key: string) => {
+            onAction={(key: string) => {
               // Reset pagination to the first page when changing ordering
               const newPagination = { offset: 0, limit: PAGINATION_LIMIT }
               setPagination(newPagination)
@@ -259,45 +240,47 @@ const MetricsPage: FC = () => {
       {loading ? (
         <LoadingSpinner />
       ) : (
-        <div className="grid grid-cols-1 gap-2">
-          {metrics.length === 0 ? (
-            <div className="py-8 text-center text-gray-500">
-              No metrics found. Try adjusting your filters.
-            </div>
-          ) : (
-            metrics.map((metric) => <MetricsCard key={metric.id} metric={metric} />)
-          )}
-        </div>
+        <>
+          <div className="grid grid-cols-1 gap-2">
+            {metrics.length === 0 ? (
+              <div className="py-8 text-center text-gray-500">
+                No metrics found. Try adjusting your filters.
+              </div>
+            ) : (
+              metrics.map((metric) => <MetricsCard key={metric.id} metric={metric} />)
+            )}
+          </div>
+          <div className="mt-4 flex items-center justify-center">
+            <Pagination
+              initialPage={getCurrentPage()}
+              page={getCurrentPage()}
+              total={Math.ceil(metricsLength / PAGINATION_LIMIT)}
+              onChange={async (page) => {
+                const newOffset = (page - 1) * PAGINATION_LIMIT
+                const newPagination = { offset: newOffset, limit: PAGINATION_LIMIT }
+                setPagination(newPagination)
+                await fetchMore({
+                  variables: {
+                    currentFilters,
+                    pagination: newPagination,
+                    ordering: Object.values(currentOrdering),
+                  },
+                  updateQuery: (prev, { fetchMoreResult }) => {
+                    if (!fetchMoreResult) return prev
+                    return {
+                      ...prev,
+                      projectHealthMetrics: fetchMoreResult.projectHealthMetrics,
+                    }
+                  },
+                })
+              }}
+              showControls
+              color="warning"
+              className="mt-4"
+            />
+          </div>
+        </>
       )}
-      <div className="mt-4 flex items-center justify-center">
-        <Pagination
-          initialPage={getCurrentPage()}
-          page={getCurrentPage()}
-          total={Math.ceil(metricsLength / PAGINATION_LIMIT)}
-          onChange={async (page) => {
-            const newOffset = (page - 1) * PAGINATION_LIMIT
-            const newPagination = { offset: newOffset, limit: PAGINATION_LIMIT }
-            setPagination(newPagination)
-            await fetchMore({
-              variables: {
-                currentFilters,
-                pagination: newPagination,
-                ordering: Object.values(currentOrdering),
-              },
-              updateQuery: (prev, { fetchMoreResult }) => {
-                if (!fetchMoreResult) return prev
-                return {
-                  ...prev,
-                  projectHealthMetrics: fetchMoreResult.projectHealthMetrics,
-                }
-              },
-            })
-          }}
-          showControls
-          color="warning"
-          className="mt-4"
-        />
-      </div>
     </>
   )
 }
