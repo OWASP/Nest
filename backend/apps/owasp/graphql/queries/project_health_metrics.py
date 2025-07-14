@@ -50,11 +50,18 @@ class ProjectHealthMetricsQuery:
         return ProjectHealthMetrics.get_stats()
 
     @strawberry.field
-    def project_health_metrics_distinct_length(self) -> int:
+    def project_health_metrics_distinct_length(
+        self,
+        filters: ProjectHealthMetricsFilter | None = None,
+    ) -> int:
         """Get the distinct length of project health metrics.
 
         Returns:
             int: The count of distinct project health metrics.
 
         """
-        return ProjectHealthMetrics.get_latest_health_metrics().count()
+        queryset = ProjectHealthMetrics.get_latest_health_metrics()
+
+        if filters:
+            queryset = strawberry_django.filters.apply(filters, queryset)
+        return queryset.count()
