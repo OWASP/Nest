@@ -5,7 +5,7 @@ import clsx from 'clsx'
 import debounce from 'lodash/debounce'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { SEARCH_PROJECTS } from 'server/queries/projectQueries'
 
 interface ModuleFormProps {
@@ -251,53 +251,94 @@ type ProjectSelectorProps = {
   onProjectChange: (id: string | null, name: string) => void
 }
 
-const ProjectSelector = ({ value, defaultName, onProjectChange }: ProjectSelectorProps) => {
+export const ProjectSelector = ({ value, defaultName, onProjectChange }: ProjectSelectorProps) => {
   const client = useApolloClient()
   const [searchText, setSearchText] = useState(defaultName || '')
+  const [rawResults, setRawResults] = useState<{ id: string; name: string }[]>([])
   const [suggestions, setSuggestions] = useState<{ id: string; name: string }[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const suggestionClicked = useRef(false)
+  const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchSuggestions = useCallback(
     debounce(async (query: string) => {
-      if (!query) return setSuggestions([])
+      if (!query.trim()) {
+        setRawResults([])
+        return
+      }
+
       try {
         const { data } = await client.query({
           query: SEARCH_PROJECTS,
           variables: { query },
         })
-        setSuggestions(data.searchProjects.slice(0, 5))
+
+        setRawResults(data.searchProjects || [])
         setShowSuggestions(true)
       } catch (err) {
+        setRawResults([])
+        setShowSuggestions(false)
         throw new Error('Error fetching suggestions:', err)
       }
     }, 300),
     [client]
   )
 
+  // Trigger search suggestions on user input
   useEffect(() => {
     fetchSuggestions(searchText)
-    return () => fetchSuggestions.cancel()
+    return () => {
+      fetchSuggestions.cancel()
+    }
   }, [searchText, fetchSuggestions])
 
+  // Filter out selected project from results
+  useEffect(() => {
+    const filtered = rawResults.filter((proj) => proj.id !== value)
+    setSuggestions(filtered.slice(0, 5))
+  }, [rawResults, value])
+
   const handleSelect = (id: string, name: string) => {
-    setError(null)
+    suggestionClicked.current = true
     setSearchText(name)
-    setSuggestions([])
     setShowSuggestions(false)
+    setError(null)
     onProjectChange(id, name)
   }
 
   const handleBlur = () => {
-    const timeoutId = setTimeout(() => {
+    blurTimeoutRef.current = setTimeout(() => {
       setShowSuggestions(false)
-      if (searchText && !value) {
+
+      if (!suggestionClicked.current && searchText.trim() && !value) {
         setError('Project not found. Please select a valid project from the list.')
       }
-    }, 200)
-    return () => clearTimeout(timeoutId)
+
+      suggestionClicked.current = false
+    }, 150)
   }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value
+    setSearchText(input)
+    setError(null)
+
+    if (value && input !== defaultName) {
+      onProjectChange(null, input)
+    }
+  }
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (blurTimeoutRef.current) {
+        clearTimeout(blurTimeoutRef.current)
+      }
+    }
+  }, [])
 
   return (
     <div className="relative">
@@ -310,25 +351,20 @@ const ProjectSelector = ({ value, defaultName, onProjectChange }: ProjectSelecto
         placeholder="Start typing project name..."
         value={searchText}
         required
-        onChange={(e) => {
-          const newText = e.target.value
-          setSearchText(newText)
-          setError(null)
-          if (value) {
-            onProjectChange(null, newText)
-          }
-        }}
+        onChange={handleInputChange}
         onBlur={handleBlur}
         className={clsx(
           'w-96 rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:bg-gray-800 dark:text-gray-200'
         )}
       />
+
       {showSuggestions && suggestions.length > 0 && (
         <div className="absolute z-10 mt-1 w-full rounded-md border border-gray-300 bg-white shadow-lg dark:bg-gray-700">
           {suggestions.map((project) => (
             <button
               key={project.id}
               type="button"
+              onMouseDown={() => (suggestionClicked.current = true)}
               onClick={() => handleSelect(project.id, project.name)}
               className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600"
             >
@@ -337,6 +373,7 @@ const ProjectSelector = ({ value, defaultName, onProjectChange }: ProjectSelecto
           ))}
         </div>
       )}
+
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
     </div>
   )

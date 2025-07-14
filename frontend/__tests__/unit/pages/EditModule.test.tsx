@@ -106,17 +106,10 @@ describe('EditModulePage', () => {
       target: { value: 'Awesome Project' },
     })
 
-    // Trigger debounce and select suggestion
     await act(async () => {
       jest.runAllTimers()
     })
 
-    const suggestionButton = await screen.findByRole('button', {
-      name: /Awesome Project/i,
-    })
-    fireEvent.click(suggestionButton)
-
-    // Submit the form
     fireEvent.click(screen.getByRole('button', { name: /Update Module/i }))
 
     await waitFor(() => {
