@@ -31,7 +31,15 @@ test.describe('Projects Health Dashboard Metrics', () => {
     await expect(page.getByText(firstMetric.starsCount.toString())).toBeVisible()
     await expect(page.getByText(firstMetric.forksCount.toString())).toBeVisible()
     await expect(page.getByText(firstMetric.contributorsCount.toString())).toBeVisible()
-    await expect(page.getByText(new Date(firstMetric.createdAt).toLocaleDateString())).toBeVisible()
+    await expect(
+      page.getByText(
+        new Date(firstMetric.createdAt).toLocaleString('default', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        })
+      )
+    ).toBeVisible()
     await expect(page.getByText(firstMetric.score.toString())).toBeVisible()
   })
 })

@@ -24,6 +24,7 @@ jest.mock('next/navigation', () => ({
   })),
   useRouter: jest.fn(() => ({
     push: jest.fn(),
+    replace: jest.fn(),
   })),
 }))
 
@@ -73,7 +74,7 @@ describe('MetricsPage', () => {
     expect(sortButton).toBeInTheDocument()
   })
   test('renders metrics table headers', async () => {
-    const headers = ['Project Name', 'Stars', 'Forks', 'Contributors', 'Created At', 'Score']
+    const headers = ['Project Name', 'Stars', 'Forks', 'Contributors', 'Health Checked At', 'Score']
     render(<MetricsPage />)
     headers.forEach((header) => {
       expect(screen.getByText(header)).toBeInTheDocument()
@@ -87,7 +88,15 @@ describe('MetricsPage', () => {
       expect(screen.getByText(metric.starsCount.toString())).toBeInTheDocument()
       expect(screen.getByText(metric.forksCount.toString())).toBeInTheDocument()
       expect(screen.getByText(metric.contributorsCount.toString())).toBeInTheDocument()
-      expect(screen.getByText(new Date(metric.createdAt).toLocaleDateString())).toBeInTheDocument()
+      expect(
+        screen.getByText(
+          new Date(metric.createdAt).toLocaleString('default', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })
+        )
+      ).toBeInTheDocument()
       expect(screen.getByText(metric.score.toString())).toBeInTheDocument()
     })
   })
