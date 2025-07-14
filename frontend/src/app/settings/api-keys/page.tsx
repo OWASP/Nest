@@ -81,6 +81,23 @@ export default function Page() {
       addToast({ title: 'Error', description: 'Please provide a name', color: 'danger' })
       return
     }
+    if (newKeyName.length > 100) {
+      addToast({
+        title: 'Error',
+        description: 'Name must be less than 100 characters',
+        color: 'danger',
+      })
+    }
+
+    if (newKeyName.match(/[^a-zA-Z0-9\s-]/)) {
+      addToast({
+        title: 'Error',
+        description: 'Name can only contain letters, numbers, spaces, and hyphens',
+        color: 'danger',
+      })
+      return
+    }
+
     if (!newKeyExpiry) {
       addToast({ title: 'Error', description: 'Please select an expiration date', color: 'danger' })
       return
@@ -94,8 +111,22 @@ export default function Page() {
 
   const handleCopyKey = () => {
     if (newlyCreatedKey) {
-      navigator.clipboard.writeText(newlyCreatedKey)
-      addToast({ title: 'Copied', description: 'API key copied to clipboard', color: 'success' })
+      navigator.clipboard
+        .writeText(newlyCreatedKey)
+        .then(() =>
+          addToast({
+            title: 'Copied',
+            description: 'API key copied to clipboard',
+            color: 'success',
+          })
+        )
+        .catch(() => {
+          addToast({
+            title: 'Copy failed',
+            description: 'Unable to copy to clipboard',
+            color: 'danger',
+          })
+        })
     }
   }
 
@@ -114,8 +145,12 @@ export default function Page() {
 
   const handleRevokeKey = async () => {
     if (keyToRevoke) {
-      await revokeApiKey({ variables: { uuid: keyToRevoke.uuid } })
-      setKeyToRevoke(null)
+      try {
+        await revokeApiKey({ variables: { uuid: keyToRevoke.uuid } })
+        setKeyToRevoke(null)
+      } catch {
+        setKeyToRevoke(null)
+      }
     }
   }
 
@@ -302,6 +337,9 @@ export default function Page() {
                     onChange={(e) => setNewKeyName(e.target.value)}
                     placeholder="e.g., Development, Production, CI/CD"
                   />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Use letters, numbers, spaces, and hyphens only. Avoid special characters.
+                  </p>
                 </div>
                 <div>
                   <label htmlFor="expiration-date" className="mb-2 block text-sm font-medium">
