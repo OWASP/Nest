@@ -56,6 +56,9 @@ class ProjectHealthMetricsQuery:
     ) -> int:
         """Get the distinct length of project health metrics.
 
+        Args:
+            filters (ProjectHealthMetricsFilter | None): Filters to apply on the metrics.
+
         Returns:
             int: The count of distinct project health metrics.
 
