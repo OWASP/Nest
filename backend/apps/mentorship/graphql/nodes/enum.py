@@ -4,21 +4,24 @@ import enum
 
 import strawberry
 
+from apps.mentorship.models.common.experience_level import ExperienceLevel
+from apps.mentorship.models.program import Program
+
 
 @strawberry.enum
 class ExperienceLevelEnum(enum.Enum):
     """experience level enum."""
 
-    BEGINNER = "beginner"
-    INTERMEDIATE = "intermediate"
-    ADVANCED = "advanced"
-    EXPERT = "expert"
+    BEGINNER = ExperienceLevel.ExperienceLevelChoices.BEGINNER
+    INTERMEDIATE = ExperienceLevel.ExperienceLevelChoices.INTERMEDIATE
+    ADVANCED = ExperienceLevel.ExperienceLevelChoices.ADVANCED
+    EXPERT = ExperienceLevel.ExperienceLevelChoices.EXPERT
 
 
 @strawberry.enum
 class ProgramStatusEnum(enum.Enum):
     """program status enum."""
 
-    DRAFT = "draft"
-    PUBLISHED = "published"
-    COMPLETED = "completed"
+    DRAFT = Program.ProgramStatus.DRAFT
+    PUBLISHED = Program.ProgramStatus.PUBLISHED
+    COMPLETED = Program.ProgramStatus.COMPLETED
