@@ -81,8 +81,14 @@ export default function Page() {
       addToast({ title: 'Error', description: 'Please provide a name', color: 'danger' })
       return
     }
-    const variables: { name: string; expiresAt?: Date } = { name: newKeyName.trim() }
-    if (newKeyExpiry) variables.expiresAt = new Date(newKeyExpiry)
+    if (!newKeyExpiry) {
+      addToast({ title: 'Error', description: 'Please select an expiration date', color: 'danger' })
+      return
+    }
+    const variables: { name: string; expiresAt: Date } = {
+      name: newKeyName.trim(),
+      expiresAt: new Date(newKeyExpiry),
+    }
     createApiKey({ variables })
   }
 
@@ -346,7 +352,7 @@ export default function Page() {
                 <Button
                   color="primary"
                   onPress={handleCreateKey}
-                  isDisabled={createLoading || !newKeyName.trim() || !newKeyExpiry}
+                  isDisabled={createLoading || !newKeyName.trim()}
                 >
                   {createLoading && <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />}
                   Create API Key
