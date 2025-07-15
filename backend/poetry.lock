@@ -137,14 +137,14 @@ frozenlist = ">=1.1.0"
 
 [[package]]
 name = "algoliasearch"
-version = "4.22.1"
+version = "4.23.0"
 description = "A fully-featured and blazing-fast Python API client to interact with Algolia."
 optional = false
 python-versions = ">=3.8.1"
 groups = ["main"]
 files = [
-    {file = "algoliasearch-4.22.1-py3-none-any.whl", hash = "sha256:383db71f33b9a9499f527b77748e010a89d4c910771001ca082d4e54f7ae7db6"},
-    {file = "algoliasearch-4.22.1.tar.gz", hash = "sha256:78b225052247e49b3ea791e4e00aa372bc8fa09169a347397b444055c0fe6c34"},
+    {file = "algoliasearch-4.23.0-py3-none-any.whl", hash = "sha256:b0b8857a8e99cd39501df26a6a9f741103df0f5c67499062ac8a32a269d4f6a6"},
+    {file = "algoliasearch-4.23.0.tar.gz", hash = "sha256:b5ccd0a01104b6289c651e4aa3c9008ea1464080d237922f0e402a31048873a9"},
 ]
 
 [package.dependencies]
@@ -3261,14 +3261,14 @@ crt = ["botocore[crt] (>=1.37.4,<2.0a.0)"]
 
 [[package]]
 name = "sentry-sdk"
-version = "2.32.0"
+version = "2.33.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = ">=3.6"
 groups = ["main"]
 files = [
-    {file = "sentry_sdk-2.32.0-py2.py3-none-any.whl", hash = "sha256:6cf51521b099562d7ce3606da928c473643abe99b00ce4cb5626ea735f4ec345"},
-    {file = "sentry_sdk-2.32.0.tar.gz", hash = "sha256:9016c75d9316b0f6921ac14c8cd4fb938f26002430ac5be9945ab280f78bec6b"},
+    {file = "sentry_sdk-2.33.0-py2.py3-none-any.whl", hash = "sha256:a762d3f19a1c240e16c98796f2a5023f6e58872997d5ae2147ac3ed378b23ec2"},
+    {file = "sentry_sdk-2.33.0.tar.gz", hash = "sha256:cdceed05e186846fdf80ceea261fe0a11ebc93aab2f228ed73d076a07804152e"},
 ]
 
 [package.dependencies]
