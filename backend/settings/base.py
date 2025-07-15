@@ -193,3 +193,6 @@ class Base(Configuration):
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
     SLACK_SIGNING_SECRET = values.SecretValue()
+
+    # 24 hours cache timeout by default
+    SITEMAP_CACHE_TIMEOUT = int(os.environ.get("DJANGO_SITEMAP_CACHE_TIMEOUT", 86400))
