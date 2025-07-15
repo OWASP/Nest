@@ -45,4 +45,7 @@ class User(AbstractUser):
     @property
     def active_api_keys(self) -> QuerySet[ApiKey]:
         """Return active API keys for the user."""
-        return self.api_keys.filter(is_revoked=False, expires_at__gt=timezone.now())
+        return self.api_keys.filter(
+            expires_at__gte=timezone.now(),
+            is_revoked=False,
+        )

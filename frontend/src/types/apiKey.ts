@@ -1,16 +1,16 @@
 export type CreateApiKeyResult = {
-  ok: boolean
   apiKey: ApiKey
-  rawKey: string
   code?: string
   message?: string
+  ok: boolean
+  rawKey: string
 }
 
 export type ApiKey = {
-  name: string
-  isRevoked: boolean
   createdAt: string
   expiresAt: string
+  isRevoked: boolean
+  name: string
   uuid: string
 }
 

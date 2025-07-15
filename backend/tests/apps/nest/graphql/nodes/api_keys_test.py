@@ -15,8 +15,8 @@ class TestApiKeyNode:
 
         expected_fields = {
             "created_at",
-            "is_revoked",
             "expires_at",
+            "is_revoked",
             "name",
             "uuid",
         }

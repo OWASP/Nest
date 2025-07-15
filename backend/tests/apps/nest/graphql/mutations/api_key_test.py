@@ -14,7 +14,7 @@ from apps.nest.graphql.mutations.api_key import (
 from apps.nest.models.api_key import MAX_ACTIVE_KEYS, ApiKey
 
 
-def fake_info() -> MagicMock:
+def mock_info() -> MagicMock:
     """Return a mocked Info object."""
     info = MagicMock()
     info.context = MagicMock()
@@ -36,7 +36,7 @@ class TestApiKeyMutations:
     @patch("apps.nest.graphql.mutations.api_key.ApiKey.create")
     def test_create_api_key_success(self, mock_api_key_create, api_key_mutations):
         """Test the successful creation of an API key."""
-        info = fake_info()
+        info = mock_info()
         user = info.context.request.user
         name = "My New App Key"
         expires_at = timezone.now() + timedelta(days=30)
@@ -50,7 +50,7 @@ class TestApiKeyMutations:
         mock_api_key_create.assert_called_once_with(user=user, name=name, expires_at=expires_at)
 
         assert isinstance(result, CreateApiKeyResult)
-        assert result.ok is True
+        assert result.ok
         assert result.code == "SUCCESS"
         assert result.message == "API key created successfully."
         assert result.api_key == mock_instance
@@ -59,7 +59,7 @@ class TestApiKeyMutations:
     @patch("apps.nest.graphql.mutations.api_key.ApiKey.create", return_value=None)
     def test_create_api_key_limit_reached(self, mock_api_key_create, api_key_mutations):
         """Test creating an API key when the user has reached their active key limit."""
-        info = fake_info()
+        info = mock_info()
         user = info.context.request.user
         name = "This key should not be created"
         expires_at = timezone.now() + timedelta(days=30)
@@ -69,7 +69,7 @@ class TestApiKeyMutations:
         mock_api_key_create.assert_called_once_with(user=user, name=name, expires_at=expires_at)
 
         assert isinstance(result, CreateApiKeyResult)
-        assert result.ok is False
+        assert not result.ok
         assert result.code == "LIMIT_REACHED"
         assert result.message == f"You can have at most {MAX_ACTIVE_KEYS} active API keys."
         assert result.api_key is None
@@ -81,7 +81,7 @@ class TestApiKeyMutations:
         self, mock_logger, mock_api_key_create, api_key_mutations
     ):
         """Test the mutation's behavior when an IntegrityError is raised."""
-        info = fake_info()
+        info = mock_info()
         name = "A key that causes a DB error"
         expires_at = timezone.now() + timedelta(days=30)
 
@@ -100,7 +100,7 @@ class TestApiKeyMutations:
     @patch("apps.nest.graphql.mutations.api_key.ApiKey.objects.get")
     def test_revoke_api_key_success(self, mock_objects_get, api_key_mutations):
         """Test the successful revocation of an existing API key."""
-        info = fake_info()
+        info = mock_info()
         user = info.context.request.user
         uuid_to_revoke = uuid4()
 
@@ -112,10 +112,10 @@ class TestApiKeyMutations:
         mock_objects_get.assert_called_once_with(uuid=uuid_to_revoke, user=user)
 
         assert mock_api_key.is_revoked is True
-        mock_api_key.save.assert_called_once_with(update_fields=["is_revoked", "updated_at"])
+        mock_api_key.save.assert_called_once_with(update_fields=("is_revoked", "updated_at"))
 
         assert isinstance(result, RevokeApiKeyResult)
-        assert result.ok is True
+        assert result.ok
         assert result.code == "SUCCESS"
         assert result.message == "API key revoked successfully."
 
@@ -125,7 +125,7 @@ class TestApiKeyMutations:
     @patch("apps.nest.graphql.mutations.api_key.logger")
     def test_revoke_api_key_not_found(self, mock_logger, mock_objects_get, api_key_mutations):
         """Test revoking a key that does not exist or belong to the user."""
-        info = fake_info()
+        info = mock_info()
         user = info.context.request.user
         non_existent_public_id = uuid4()
 
@@ -136,6 +136,6 @@ class TestApiKeyMutations:
         mock_logger.warning.assert_called_once_with("API Key does not exist")
 
         assert isinstance(result, RevokeApiKeyResult)
-        assert result.ok is False
+        assert not result.ok
         assert result.code == "NOT_FOUND"
         assert result.message == "API key not found."

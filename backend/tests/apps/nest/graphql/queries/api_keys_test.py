@@ -5,7 +5,7 @@ import pytest
 from apps.nest.graphql.queries.api_key import ApiKeyQueries
 
 
-def fake_info():
+def mock_info():
     """Return fake information with a mocked user object."""
     info = MagicMock()
     info.context = MagicMock()
@@ -26,7 +26,7 @@ class TestApiKeyQueries:
 
     def test_active_api_key_count(self, api_key_queries):
         """Tests the active_api_key_count resolver using the user property."""
-        info = fake_info()
+        info = mock_info()
         user = info.context.request.user
 
         user.active_api_keys.count.return_value = 3
@@ -38,7 +38,7 @@ class TestApiKeyQueries:
 
     def test_api_keys_resolver(self, api_key_queries):
         """Tests the api_keys resolver with its default behavior."""
-        info = fake_info()
+        info = mock_info()
         qs = MagicMock(name="qs")
         info.context.request.user.active_api_keys.order_by.return_value = qs
         result = api_key_queries.api_keys(info)

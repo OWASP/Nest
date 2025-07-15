@@ -12,6 +12,7 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class ApiKeyAdmin(admin.ModelAdmin):
+    autocomplete_fields = ("user",)
     list_display = (
         "name",
         "user",
@@ -21,11 +22,7 @@ class ApiKeyAdmin(admin.ModelAdmin):
         "created_at",
         "last_used_at",
     )
-    list_filter = (
-        "expires_at",
-        "created_at",
-        "last_used_at",
-    )
+    list_filter = ("is_revoked",)
     ordering = ("-created_at",)
     search_fields = (
         "name",
@@ -35,5 +32,4 @@ class ApiKeyAdmin(admin.ModelAdmin):
 
 
 admin.site.register(ApiKey, ApiKeyAdmin)
-
 admin.site.register(User, UserAdmin)

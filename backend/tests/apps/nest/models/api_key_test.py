@@ -79,17 +79,17 @@ class TestApiKeyModel:
     def test_is_valid_active_key(self):
         """Test that a non-revoked, non-expired key is valid."""
         key = ApiKey(is_revoked=False, expires_at=timezone.now() + timedelta(days=1))
-        assert key.is_valid is True
+        assert key.is_valid
 
     def test_is_valid_expired_key(self):
         """Test that an expired key is not valid."""
         key = ApiKey(is_revoked=False, expires_at=timezone.now() - timedelta(days=1))
-        assert key.is_valid is False
+        assert not key.is_valid
 
     def test_is_valid_revoked_key(self):
         """Test that a revoked key is not valid."""
         key = ApiKey(is_revoked=True, expires_at=timezone.now() + timedelta(days=1))
-        assert key.is_valid is False
+        assert not key.is_valid
 
     def test_str_representation_active(self):
         """Test the string representation of an active key."""
