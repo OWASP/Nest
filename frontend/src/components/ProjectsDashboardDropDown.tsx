@@ -18,13 +18,25 @@ const ProjectsDashboardDropDown: FC<{
   icon: IconProp
   buttonDisplayName: string
   sections: DropDownSectionProps[]
-}> = ({ onAction, selectedKeys, selectionMode, icon, buttonDisplayName, sections }) => {
+  isOrdering?: boolean
+}> = ({ onAction, selectedKeys, selectionMode, icon, buttonDisplayName, sections, isOrdering }) => {
+  let displayKeys = selectedKeys || []
+  if (isOrdering && selectedKeys && selectedKeys.length > 0) {
+    displayKeys = selectedKeys.map((key) =>
+      key.replace(/ASC/, ' ascending').replace(/DESC/, ' descending')
+    )
+  }
   return (
     <Dropdown>
       <DropdownTrigger>
-        <Button variant="solid" color="success" className="text-white">
+        <Button variant="solid">
           <FontAwesomeIcon icon={icon} />
-          {buttonDisplayName}
+          <div className="flex flex-col items-center">
+            <span className="text-md">{buttonDisplayName}</span>
+            {selectedKeys && selectedKeys.length > 0 && (
+              <span className="text-xs text-gray-500">{displayKeys.join(', ')}</span>
+            )}
+          </div>
         </Button>
       </DropdownTrigger>
       <DropdownMenu onAction={onAction} selectedKeys={selectedKeys} selectionMode={selectionMode}>

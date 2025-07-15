@@ -203,7 +203,14 @@ const MetricsPage: FC = () => {
                 newFilters = {}
               }
               setFilters(newFilters)
-              setActiveFilters(Array.from(newParams.values()))
+              setActiveFilters(
+                Array.from(
+                  newParams
+                    .entries()
+                    .filter(([key]) => key != 'order')
+                    .map(([, value]) => value)
+                )
+              )
               router.replace(`/projects/dashboard/metrics?${newParams.toString()}`)
             }}
           />
@@ -214,6 +221,7 @@ const MetricsPage: FC = () => {
             sections={orderingSections}
             selectionMode="single"
             selectedKeys={activeOrdering}
+            isOrdering
             onAction={(key: string) => {
               // Reset pagination to the first page when changing ordering
               const newPagination = { offset: 0, limit: PAGINATION_LIMIT }
