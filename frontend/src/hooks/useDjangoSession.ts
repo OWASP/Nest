@@ -1,5 +1,6 @@
 import { useMutation } from '@apollo/client'
-import { useSession } from 'next-auth/react'
+import { addToast } from '@heroui/toast'
+import { useSession, signOut } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import { SYNC_DJANGO_SESSION_MUTATION } from 'server/queries/authQueries'
 import { ExtendedSession } from 'types/auth'
@@ -24,34 +25,60 @@ export const useDjangoSession = () => {
   const [isSyncing, setIsSyncing] = useState(false)
 
   useEffect(() => {
-    // If the session is unauthenticated, remove the sync status flag
-    // so next login re‑runs sync
     if (status === 'unauthenticated') {
       sessionStorage.removeItem(SYNC_STATUS_KEY)
       return
     }
 
     const shouldSync =
-      status === 'authenticated' && //logged in via jwt
-      (session as ExtendedSession)?.accessToken && // we have GH Token
-      !sessionStorage.getItem(SYNC_STATUS_KEY) //not yet synced
+      status === 'authenticated' &&
+      (session as ExtendedSession)?.accessToken &&
+      !sessionStorage.getItem(SYNC_STATUS_KEY)
 
     if (shouldSync) {
       setIsSyncing(true)
 
-      // sends  Github token to Django.
-      // On Success, Django writes session cookie, browser stores it
-
+      // The backend response contains a backend session cookie if successful.
+      // The cookie name is set in SESSION_COOKIE_NAME of backend/settings/base.py.
       syncSession({
         variables: {
           accessToken: (session as ExtendedSession).accessToken,
         },
       })
-        .then(() => {
-          sessionStorage.setItem(SYNC_STATUS_KEY, 'true')
+        .then((response) => {
+          const githubAuth = response?.data?.githubAuth
+          if (githubAuth?.ok) {
+            sessionStorage.setItem(SYNC_STATUS_KEY, 'true')
+            addToast({
+              color: 'success',
+              description: githubAuth?.message,
+              shouldShowTimeoutProgress: true,
+              timeout: 3000,
+              title: 'Authentication Successful',
+              variant: 'solid',
+            })
+          } else {
+            signOut() // Invalidate Next.js session if not ok
+            addToast({
+              color: 'danger',
+              description: githubAuth?.message,
+              shouldShowTimeoutProgress: true,
+              timeout: 4000,
+              title: 'Authentication Failed',
+              variant: 'solid',
+            })
+            return
+          }
         })
         .catch(() => {
-          throw new Error('Failed to sync Django session')
+          addToast({
+            color: 'danger',
+            description: 'Failed to sign in with GitHub',
+            shouldShowTimeoutProgress: true,
+            timeout: 4000,
+            title: 'Authentication Failed',
+            variant: 'solid',
+          })
         })
         .finally(() => {
           setIsSyncing(false)

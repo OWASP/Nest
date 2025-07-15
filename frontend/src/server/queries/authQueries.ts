@@ -13,9 +13,8 @@ export const LOGOUT_DJANGO_MUTATION = gql`
 export const SYNC_DJANGO_SESSION_MUTATION = gql`
   mutation SyncDjangoSession($accessToken: String!) {
     githubAuth(accessToken: $accessToken) {
-      authUser {
-        username
-      }
+      message
+      ok
     }
   }
 `
