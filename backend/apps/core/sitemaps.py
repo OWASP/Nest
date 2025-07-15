@@ -45,14 +45,16 @@ class StaticSitemap(Sitemap):
 
     def lastmod(self, item):
         """Return the last modification date for a static route item."""
-        if item["path"] in ["/projects", "/contribute"]:
-            lastmod = Project.objects.aggregate(latest=Max("created_at"))["latest"]
-        elif item["path"] == "/chapters":
-            lastmod = Chapter.objects.aggregate(latest=Max("created_at"))["latest"]
-        elif item["path"] == "/committees":
-            lastmod = Committee.objects.aggregate(latest=Max("created_at"))["latest"]
-        elif item["path"] == "/members":
-            lastmod = User.objects.aggregate(latest=Max("created_at"))["latest"]
+        path_to_model = {
+            "/projects": Project,
+            "/contribute": Project,
+            "/chapters": Chapter,
+            "/committees": Committee,
+            "/members": User,
+        }
+        model = path_to_model.get(item["path"])
+        if model:
+            lastmod = model.objects.aggregate(latest=Max("updated_at"))["latest"]
         else:
             lastmod = None
         return lastmod or datetime.now(UTC)
