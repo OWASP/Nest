@@ -15,6 +15,9 @@ clean-backend-docker:
 	@docker image rm -f nest-local-backend >/dev/null 2>&1 || true
 	@docker volume rm -f nest-local_backend-venv >/dev/null 2>&1 || true
 
+create-superuser:
+	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
+
 exec-backend-command:
 	@docker exec -i nest-backend $(CMD)
 
@@ -93,9 +96,6 @@ save-backup:
 	@echo "Saving Nest backup"
 	@CMD="python manage.py dumpdata --natural-primary --natural-foreign --indent=2" $(MAKE) exec-backend-command > backend/data/backup.json
 	@gzip backend/data/backup.json
-
-setup:
-	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
 
 shell-backend:
 	@CMD="/bin/sh" $(MAKE) exec-backend-command-it
