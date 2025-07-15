@@ -8,4 +8,4 @@
     {% if url.priority %}<priority>{{ url.priority }}</priority>{% endif %}
   </url>
 {% endfor %}
-</urlset> 
+</urlset>
