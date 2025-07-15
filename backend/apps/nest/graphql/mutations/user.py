@@ -4,13 +4,25 @@ import logging
 
 import requests
 import strawberry
+from django.contrib.auth import login, logout
 from github import Github
+from strawberry.types import Info
 
 from apps.github.models import User as GithubUser
 from apps.nest.graphql.nodes.user import AuthUserNode
+from apps.nest.graphql.permissions import IsAuthenticated
 from apps.nest.models import User
 
 logger = logging.getLogger(__name__)
+
+
+@strawberry.type
+class LogoutResult:
+    """Payload for logout mutation."""
+
+    ok: bool
+    code: str | None = None
+    message: str | None = None
 
 
 @strawberry.type
@@ -25,7 +37,7 @@ class UserMutations:
     """GraphQL mutations related to user."""
 
     @strawberry.mutation
-    def github_auth(self, access_token: str) -> GitHubAuthResult:
+    def github_auth(self, info: Info, access_token: str) -> GitHubAuthResult:
         """Authenticate via GitHub OAuth2."""
         try:
             github = Github(access_token)
@@ -49,8 +61,26 @@ class UserMutations:
                 username=gh_user.login,
             )
 
+            # Log the user in and attach it to a session.
+            # https://docs.djangoproject.com/en/5.2/topics/auth/default/#django.contrib.auth.login
+            # https://docs.djangoproject.com/en/5.2/topics/http/sessions/
+            login(info.context.request, auth_user)
+
             return GitHubAuthResult(auth_user=auth_user)
 
         except requests.exceptions.RequestException as e:
             logger.warning("GitHub authentication failed: %s", e)
             return GitHubAuthResult(auth_user=None)
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    def logout_user(self, info: Info) -> LogoutResult:
+        """Logout the current user."""
+        # Log the user out and clear the session.
+        # https://docs.djangoproject.com/en/5.2/topics/auth/default/#django.contrib.auth.logout
+        logout(info.context.request)
+
+        return LogoutResult(
+            ok=True,
+            code="SUCCESS",
+            message="User logged out successfully.",
+        )
