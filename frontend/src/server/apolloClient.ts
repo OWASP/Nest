@@ -5,26 +5,21 @@ import { fetchCsrfTokenServer } from 'server/fetchCsrfTokenServer'
 
 async function createApolloClient() {
   const authLink = setContext(async (_, { headers }) => {
-    const { csrfToken, sessionId } = await getRequiredCookies()
-
-    const cookieParts = []
-    if (csrfToken) cookieParts.push(`csrftoken=${csrfToken}`)
-    if (sessionId) cookieParts.push(`sessionid=${sessionId}`)
-
+    let csrfToken = null
+    const cookieValue = await getCsrfTokenOnServer()
+    csrfToken = cookieValue
     return {
       headers: {
         ...headers,
         'X-CSRFToken': csrfToken ?? '',
-        Cookie: cookieParts.join('; '),
+        Cookie: csrfToken ? `csrftoken=${csrfToken}` : '',
       },
     }
   })
-
   const httpLink = createHttpLink({
     credentials: 'same-origin',
     uri: process.env.NEXT_SERVER_GRAPHQL_URL,
   })
-
   return new ApolloClient({
     cache: new InMemoryCache().restore(globalThis.__APOLLO_STATE__ ?? {}),
     link: authLink.concat(httpLink),
@@ -32,21 +27,17 @@ async function createApolloClient() {
   })
 }
 
+// This is a no-op Apollo client for end-to-end tests.
 const noopApolloClient = {
   mutate: async () => ({ data: null }),
   query: async () => ({ data: null }),
 }
-
 export const apolloClient =
   process.env.NEXT_SERVER_DISABLE_SSR === 'true' ? noopApolloClient : await createApolloClient()
 
-export const getRequiredCookies = async () => {
+export const getCsrfTokenOnServer = async () => {
   const cookieStore = await cookies()
-
   const csrfCookie = cookieStore.get('csrftoken')
-  const sessionCookie = cookieStore.get('sessionid')
-  const csrfToken = csrfCookie?.value ?? (await fetchCsrfTokenServer())
-  const sessionId = sessionCookie?.value
 
-  return { csrfToken, sessionId }
+  return csrfCookie ? csrfCookie.value : await fetchCsrfTokenServer()
 }

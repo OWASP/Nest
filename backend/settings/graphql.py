@@ -33,11 +33,11 @@ class Query(
     GithubQuery,
     MentorshipQuery,
     ModuleQuery,
-    ProgramQuery,
     NestQuery,
     OwaspQuery,
+    ProgramQuery,
 ):
     """Schema queries."""
 
 
-schema = strawberry.Schema(query=Query, mutation=Mutation)
+schema = strawberry.Schema(mutation=Mutation, query=Query)
