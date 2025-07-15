@@ -269,9 +269,9 @@ const MetricsPage: FC = () => {
                 setPagination(newPagination)
                 await fetchMore({
                   variables: {
-                    currentFilters,
+                    filters,
                     pagination: newPagination,
-                    ordering: Object.values(currentOrdering),
+                    ordering: Object.values(ordering),
                   },
                   updateQuery: (prev, { fetchMoreResult }) => {
                     if (!fetchMoreResult) return prev
