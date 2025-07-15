@@ -4,7 +4,7 @@ import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useLogout } from 'hooks/useLogout'
 import Image from 'next/image'
-import { useSession, signIn, signOut } from 'next-auth/react'
+import { useSession, signIn } from 'next-auth/react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { userAuthStatus } from 'utils/constants'
 
@@ -55,7 +55,6 @@ export default function UserMenu({
 
   const handleLogout = () => {
     logout()
-    signOut({ callbackUrl: '/' })
     setIsOpen(false)
   }
 

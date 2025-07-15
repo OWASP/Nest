@@ -8,13 +8,23 @@ from apps.mentorship.graphql.mutations import (
     ModuleMutation,
     ProgramMutation,
 )
-from apps.mentorship.graphql.queries import MentorshipQuery, ModuleQuery, ProgramQuery
-from apps.nest.graphql.mutations import UserMutations
+from apps.mentorship.graphql.queries import (
+    MentorshipQuery,
+    ModuleQuery,
+    ProgramQuery,
+)
+from apps.nest.graphql.mutations import NestMutations
+from apps.nest.graphql.queries import NestQuery
 from apps.owasp.graphql.queries import OwaspQuery
 
 
 @strawberry.type
-class Mutation(MentorshipMutations, ModuleMutation, ProgramMutation, UserMutations):
+class Mutation(
+    MentorshipMutations,
+    ModuleMutation,
+    ProgramMutation,
+    NestMutations,
+):
     """Schema mutations."""
 
 
@@ -24,9 +34,10 @@ class Query(
     MentorshipQuery,
     ModuleQuery,
     ProgramQuery,
+    NestQuery,
     OwaspQuery,
 ):
     """Schema queries."""
 
 
-schema = strawberry.Schema(mutation=Mutation, query=Query)
+schema = strawberry.Schema(query=Query, mutation=Mutation)

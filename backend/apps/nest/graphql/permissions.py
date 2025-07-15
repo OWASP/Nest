@@ -1,8 +1,8 @@
-"""Permission module for GraphQL resolvers."""
+"""GraphQL permissions classes for authentication."""
 
 from typing import Any
 
-from django.core.exceptions import PermissionDenied
+from graphql import GraphQLError
 from strawberry.permission import BasePermission
 from strawberry.types import Info
 
@@ -13,24 +13,9 @@ class IsAuthenticated(BasePermission):
     message = "You must be logged in to perform this action."
 
     def has_permission(self, source, info: Info, **kwargs) -> bool:
-        """Check if the user is authenticated.
-
-        Args:
-            source: The root object of the GraphQL resolver.
-            info (Info): The GraphQL resolver info, containing context like request.
-            **kwargs: Additional arguments passed to the resolver.
-
-        Returns:
-            bool: True if the user is authenticated, otherwise False.
-
-        """
+        """Check if the user is authenticated."""
         return info.context.request.user.is_authenticated
 
-    def on_unauthorized(self) -> Any | None:
-        """Handle unauthorized access when permission is denied.
-
-        Raises:
-            PermissionDenied: If the user is not authenticated.
-
-        """
-        raise PermissionDenied(self.message)
+    def on_unauthorized(self) -> Any:
+        """Handle unauthorized access."""
+        return GraphQLError(self.message, extensions={"code": "UNAUTHORIZED"})
