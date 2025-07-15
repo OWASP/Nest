@@ -83,10 +83,11 @@ purge-data:
 	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command
 
 recreate-schema:
+	@echo "Recreating Nest schema"
 	@CMD="psql -U nest_user_dev -d nest_db_dev -c \
 		'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nest_user_dev'" \
 	  	$(MAKE) exec-db-command-it 2>/dev/null
-	$(MAKE) migrate
+	@$(MAKE) migrate
 
 restore-backup:
 	@echo "Restoring Nest backup"
