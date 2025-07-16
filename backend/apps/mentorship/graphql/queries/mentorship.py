@@ -5,7 +5,6 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from apps.mentorship.models.mentee import Mentee
 from apps.mentorship.models.mentor import Mentor
-from apps.mentorship.utils.user import get_user_entities_by_github_username
 from apps.nest.graphql.permissions import IsAuthenticated
 
 
@@ -23,15 +22,12 @@ class MentorshipQuery:
     @strawberry.field(permission_classes=[IsAuthenticated])
     def current_user_roles(self, info: strawberry.Info) -> UserRolesResult:
         """Get the mentorship roles for the currently authenticated user."""
-        username = str(info.context.request.user)
+        user = info.context.request.user
 
-        user_entities = get_user_entities_by_github_username(username)
-
-        if not user_entities:
-            msg = "Logic error: Authenticated user not found in the database."
+        if not hasattr(user, "github_user") or user.github_user is None:
+            msg = "Authenticated user does not have an associated GitHub profile."
             raise ObjectDoesNotExist(msg)
 
-        github_user, user = user_entities
         roles = []
 
         if Mentee.objects.filter(nest_user=user).exists():

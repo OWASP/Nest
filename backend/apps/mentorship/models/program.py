@@ -6,6 +6,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 from apps.common.models import TimestampedModel
+from apps.common.utils import slugify
 from apps.mentorship.models.common import (
     ExperienceLevel,
     MatchingAttributes,
@@ -77,3 +78,9 @@ class Program(MatchingAttributes, StartEndRange, TimestampedModel):
 
         """
         return self.name
+
+    def save(self, *args, **kwargs) -> None:
+        """Save prompt."""
+        self.key = slugify(self.name)
+
+        super().save(*args, **kwargs)

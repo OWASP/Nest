@@ -5,6 +5,7 @@ from __future__ import annotations
 from django.db import models
 
 from apps.common.models import TimestampedModel
+from apps.common.utils import slugify
 from apps.mentorship.models.common import (
     ExperienceLevel,
     MatchingAttributes,
@@ -71,4 +72,5 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
             self.started_at = self.started_at or self.program.started_at
             self.ended_at = self.ended_at or self.program.ended_at
 
+        self.key = slugify(self.name)
         super().save(*args, **kwargs)

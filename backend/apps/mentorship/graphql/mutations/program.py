@@ -6,15 +6,14 @@ import strawberry
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import transaction
 
-from apps.common.utils import slugify
-from apps.github.models import User as GithubUser
+from apps.mentorship.graphql.mutations.module import resolve_mentors_from_logins
 from apps.mentorship.graphql.nodes.program import (
     CreateProgramInput,
     ProgramNode,
     UpdateProgramInput,
+    UpdateProgramStatusInput,
 )
 from apps.mentorship.models import Mentor, Program
-from apps.mentorship.utils.user import get_user_entities_by_github_username
 from apps.nest.graphql.permissions import IsAuthenticated
 
 logger = logging.getLogger(__name__)
@@ -28,14 +27,12 @@ class ProgramMutation:
     @transaction.atomic
     def create_program(self, info: strawberry.Info, input_data: CreateProgramInput) -> ProgramNode:
         """Create a new mentorship program."""
-        username = str(info.context.request.user)
-        user_entities = get_user_entities_by_github_username(username)
+        user = info.context.request.user
 
-        if not user_entities:
-            msg = "Logic error: Authenticated user not found in the database."
+        if not hasattr(user, "github_user") or user.github_user is None:
+            msg = "Authenticated user does not have an associated GitHub profile."
             raise ObjectDoesNotExist(msg)
 
-        github_user, user = user_entities
         mentor, created = Mentor.objects.get_or_create(
             nest_user=user, defaults={"github_user": user.github_user}
         )
@@ -54,7 +51,6 @@ class ProgramMutation:
 
         program = Program.objects.create(
             name=input_data.name,
-            key=slugify(input_data.name),
             description=input_data.description,
             experience_levels=[lvl.value for lvl in input_data.experience_levels],
             mentees_limit=input_data.mentees_limit,
@@ -79,14 +75,11 @@ class ProgramMutation:
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     def update_program(self, info: strawberry.Info, input_data: UpdateProgramInput) -> ProgramNode:
         """Update an existing mentorship program. Only admins can update."""
-        username = str(info.context.request.user)
-        user_entities = get_user_entities_by_github_username(username)
+        user = info.context.request.user
 
-        if not user_entities:
-            msg = "Logic error: Authenticated user not found in the database."
+        if not hasattr(user, "github_user") or user.github_user is None:
+            msg = "Authenticated user does not have an associated GitHub profile."
             raise ObjectDoesNotExist(msg)
-
-        github_user, user = user_entities
 
         try:
             program = Program.objects.get(key=input_data.key)
@@ -138,11 +131,6 @@ class ProgramMutation:
             if value is not None:
                 setattr(program, field, value)
 
-        if input_data.name is not None:
-            new_key = slugify(input_data.name)
-            if new_key != program.key:
-                program.key = new_key
-
         if input_data.experience_levels is not None:
             program.experience_levels = [lvl.value for lvl in input_data.experience_levels]
 
@@ -152,17 +140,41 @@ class ProgramMutation:
         program.save()
 
         if input_data.admin_logins is not None:
-            resolved_mentors = []
-            for login in input_data.admin_logins:
-                try:
-                    github_user = GithubUser.objects.get(login__iexact=login.lower())
-                    mentor, _ = Mentor.objects.get_or_create(github_user=github_user)
-                    resolved_mentors.append(mentor)
-                except GithubUser.DoesNotExist as err:
-                    msg = f"GitHub user '{login}' not found."
-                    logger.warning(msg, exc_info=True)
-                    raise ObjectDoesNotExist(msg) from err
+            admins_to_set = resolve_mentors_from_logins(input_data.admin_logins)
+            program.admins.set(admins_to_set)
 
-            program.admins.set(resolved_mentors)
+        return program
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    def update_program_status(
+        self, info: strawberry.Info, input_data: UpdateProgramStatusInput
+    ) -> ProgramNode:
+        """Update only the status of a program."""
+        user = info.context.request.user
+
+        if not hasattr(user, "github_user") or user.github_user is None:
+            msg = "Authenticated user has no GitHub profile."
+            raise ObjectDoesNotExist(msg)
+
+        try:
+            program = Program.objects.get(key=input_data.key)
+        except Program.DoesNotExist as e:
+            msg = f"Program with key '{input_data.key}' not found."
+            raise ObjectDoesNotExist(msg) from e
+
+        try:
+            mentor = Mentor.objects.get(nest_user=user)
+        except Mentor.DoesNotExist as e:
+            msg = "You must be a mentor to update a program."
+            raise PermissionDenied(msg) from e
+
+        if mentor not in program.admins.all():
+            msg = "Only program admins can update the status."
+            raise PermissionDenied(msg)
+
+        program.status = input_data.status.value
+        program.save()
+
+        logger.info("Updated status of program '%s' to '%s'", program.key, program.status)
 
         return program

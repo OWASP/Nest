@@ -47,11 +47,11 @@ class CreateProgramInput:
     """Input Node for creating a mentorship program."""
 
     name: str
-    description: str = ""
+    description: str
     domains: list[str] = strawberry.field(default_factory=list)
     ended_at: datetime
     experience_levels: list[ExperienceLevelEnum] = strawberry.field(default_factory=list)
-    mentees_limit: int | None = None
+    mentees_limit: int
     started_at: datetime
     status: ProgramStatusEnum
     tags: list[str] = strawberry.field(default_factory=list)
@@ -63,12 +63,21 @@ class UpdateProgramInput:
 
     key: str
     name: str
-    description: str | None = None
+    description: str
     admin_logins: list[str] | None = None
     domains: list[str] | None = None
-    ended_at: datetime | None = None
+    ended_at: datetime
     experience_levels: list[ExperienceLevelEnum] | None = None
-    mentees_limit: int | None = None
-    started_at: datetime | None = None
-    status: ProgramStatusEnum | None = None
+    mentees_limit: int
+    started_at: datetime
+    status: ProgramStatusEnum
     tags: list[str] | None = None
+
+
+@strawberry.input
+class UpdateProgramStatusInput:
+    """Input for updating program status."""
+
+    key: str
+    name: str
+    status: ProgramStatusEnum

@@ -5,9 +5,8 @@ import logging
 import strawberry
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import transaction
-from django.utils.timezone import is_naive, make_aware
+from django.utils import timezone
 
-from apps.common.utils import slugify
 from apps.github.models import User as GithubUser
 from apps.mentorship.graphql.nodes.module import (
     CreateModuleInput,
@@ -15,14 +14,13 @@ from apps.mentorship.graphql.nodes.module import (
     UpdateModuleInput,
 )
 from apps.mentorship.models import Mentor, Module, Program
-from apps.mentorship.utils.user import get_user_entities_by_github_username
 from apps.nest.graphql.permissions import IsAuthenticated
 from apps.owasp.models import Project
 
 logger = logging.getLogger(__name__)
 
 
-def _resolve_mentors_from_logins(logins: list[str]) -> set[Mentor]:
+def resolve_mentors_from_logins(logins: list[str]) -> set[Mentor]:
     """Resolve a list of GitHub logins to a set of Mentor objects."""
     mentors = set()
     for login in logins:
@@ -43,10 +41,10 @@ def _validate_module_dates(started_at, ended_at, program_started_at, program_end
         msg = "Both start and end dates are required."
         raise ValidationError(message=msg)
 
-    if is_naive(started_at):
-        started_at = make_aware(started_at)
-    if is_naive(ended_at):
-        ended_at = make_aware(ended_at)
+    if timezone.is_naive(started_at):
+        started_at = timezone.make_aware(started_at)
+    if timezone.is_naive(ended_at):
+        ended_at = timezone.make_aware(ended_at)
 
     if ended_at <= started_at:
         msg = "End date must be after start date."
@@ -54,7 +52,7 @@ def _validate_module_dates(started_at, ended_at, program_started_at, program_end
     if started_at < program_started_at:
         msg = "Module start date cannot be before program start date."
         raise ValidationError(message=msg)
-    if program_ended_at and ended_at > program_ended_at:
+    if ended_at > program_ended_at:
         msg = "Module end date cannot be after program end date."
         raise ValidationError(message=msg)
 
@@ -69,14 +67,11 @@ class ModuleMutation:
     @transaction.atomic
     def create_module(self, info: strawberry.Info, input_data: CreateModuleInput) -> ModuleNode:
         """Create a new mentorship module. User must be an admin of the program."""
-        username = str(info.context.request.user)
-        user_entities = get_user_entities_by_github_username(username)
+        user = info.context.request.user
 
-        if not user_entities:
-            msg = "Logic error: Authenticated user not found in the database."
+        if not hasattr(user, "github_user") or user.github_user is None:
+            msg = "Authenticated user does not have an associated GitHub profile."
             raise ObjectDoesNotExist(msg)
-
-        github_user, user = user_entities
 
         try:
             program = Program.objects.get(key=input_data.program_key)
@@ -102,8 +97,7 @@ class ModuleMutation:
 
         module = Module.objects.create(
             name=input_data.name,
-            key=slugify(input_data.name),
-            description=input_data.description or "",
+            description=input_data.description,
             experience_level=input_data.experience_level.value,
             started_at=started_at,
             ended_at=ended_at,
@@ -113,7 +107,7 @@ class ModuleMutation:
             project=project,
         )
 
-        mentors_to_set = _resolve_mentors_from_logins(input_data.mentor_logins or [])
+        mentors_to_set = resolve_mentors_from_logins(input_data.mentor_logins or [])
         mentors_to_set.add(creator_as_mentor)
         module.mentors.set(list(mentors_to_set))
 
@@ -123,65 +117,68 @@ class ModuleMutation:
     @transaction.atomic
     def update_module(self, info: strawberry.Info, input_data: UpdateModuleInput) -> ModuleNode:
         """Update an existing mentorship module. User must be an admin of the program."""
-        username = str(info.context.request.user)
-        user_entities = get_user_entities_by_github_username(username)
+        user = info.context.request.user
 
-        if not user_entities:
-            msg = "Logic error: Authenticated user not found in the database."
+        if not hasattr(user, "github_user") or user.github_user is None:
+            msg = "Authenticated user does not have an associated GitHub profile."
             raise ObjectDoesNotExist(msg)
-
-        github_user, user = user_entities
 
         try:
             module = Module.objects.select_related("program").get(key=input_data.key)
-            creator_as_mentor = Mentor.objects.get(nest_user=user)
         except Module.DoesNotExist as e:
             msg = "Module not found."
             raise ObjectDoesNotExist(msg) from e
-        except Mentor.DoesNotExist as e:
-            msg = "Only mentors can edit modules."
-            raise PermissionDenied(msg) from e
 
-        if creator_as_mentor not in module.program.admins.all():
+        try:
+            creator_as_mentor = Mentor.objects.get(nest_user=user)
+        except Mentor.DoesNotExist as err:
+            msg = "Only mentors can edit modules."
+            logger.warning(
+                "User '%s' is not a mentor and cannot edit modules.",
+                user.email,
+                exc_info=True,
+            )
+            raise PermissionDenied(msg) from err
+
+        if not module.program.admins.filter(id=creator_as_mentor.id).exists():
             msg = "You must be an admin of the module's program to edit it."
+            logger.warning(
+                "Permission denied for user '%s' to update module '%s'.",
+                user.email,
+                module.key,
+            )
             raise PermissionDenied(msg)
 
-        module.name = input_data.name
-        module.key = slugify(input_data.name)
-
-        if input_data.description is not None:
-            module.description = input_data.description
-        if input_data.experience_level is not None:
-            module.experience_level = input_data.experience_level.value
-        if input_data.started_at is not None:
-            module.started_at = input_data.started_at
-        if input_data.ended_at is not None:
-            module.ended_at = input_data.ended_at
-        if input_data.domains is not None:
-            module.domains = input_data.domains
-        if input_data.tags is not None:
-            module.tags = input_data.tags
-
         started_at, ended_at = _validate_module_dates(
-            module.started_at,
-            module.ended_at,
+            input_data.started_at,
+            input_data.ended_at,
             module.program.started_at,
             module.program.ended_at,
         )
 
-        module.started_at = started_at
-        module.ended_at = ended_at
+        field_mapping = {
+            "name": input_data.name,
+            "description": input_data.description,
+            "experience_level": input_data.experience_level.value,
+            "started_at": started_at,
+            "ended_at": ended_at,
+            "domains": input_data.domains,
+            "tags": input_data.tags,
+        }
 
-        if input_data.project_id is not None:
-            try:
-                module.project = Project.objects.get(id=input_data.project_id)
-            except Project.DoesNotExist as e:
-                msg = f"Project with id '{input_data.project_id}' not found."
-                raise ObjectDoesNotExist(msg) from e
+        for field, value in field_mapping.items():
+            setattr(module, field, value)
+
+        try:
+            module.project = Project.objects.get(id=input_data.project_id)
+        except Project.DoesNotExist as err:
+            msg = f"Project with id '{input_data.project_id}' not found."
+            logger.warning(msg, exc_info=True)
+            raise ObjectDoesNotExist(msg) from err
 
         if input_data.mentor_logins is not None:
-            mentors_to_set = _resolve_mentors_from_logins(input_data.mentor_logins)
-            module.mentors.set(list(mentors_to_set))
+            mentors_to_set = resolve_mentors_from_logins(input_data.mentor_logins)
+            module.mentors.set(mentors_to_set)
 
         module.save()
 

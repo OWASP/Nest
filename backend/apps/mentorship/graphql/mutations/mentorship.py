@@ -6,7 +6,6 @@ from django.db import transaction
 from django.db.models import Q
 
 from apps.mentorship.models import Mentee, Mentor
-from apps.mentorship.utils.user import get_user_entities_by_github_username
 from apps.nest.graphql.nodes.user import AuthUserNode
 from apps.nest.graphql.permissions import IsAuthenticated
 from apps.owasp.models.project import Project
@@ -29,19 +28,15 @@ class MentorshipMutations:
     @transaction.atomic
     def apply_as_mentee(self, info: strawberry.Info) -> ApplyAsRoleResult:
         """Register the authenticated user as a mentee."""
-        username = str(info.context.request.user)
+        user = info.context.request.user
 
-        user_entities = get_user_entities_by_github_username(username)
-
-        if not user_entities:
-            msg = "Logic error: Authenticated user not found in the database."
+        if not hasattr(user, "github_user") or user.github_user is None:
+            msg = "Authenticated user does not have an associated GitHub profile."
             raise ObjectDoesNotExist(msg)
-
-        github_user, user = user_entities
 
         Mentee.objects.get_or_create(
             nest_user=user,
-            defaults={"github_user": github_user},
+            defaults={"github_user": user.github_user},
         )
 
         return ApplyAsRoleResult(
@@ -52,14 +47,14 @@ class MentorshipMutations:
     @transaction.atomic
     def apply_as_mentor(self, info: strawberry.Info) -> ApplyAsRoleResult:
         """Check for project leadership and register the user as a mentor."""
-        username = str(info.context.request.user)
-        user_entities = get_user_entities_by_github_username(username)
+        user = info.context.request.user
 
-        if not user_entities:
-            msg = "Logic error: Authenticated user not found in the database."
+        if not hasattr(user, "github_user") or user.github_user is None:
+            msg = "Authenticated user does not have an associated GitHub profile."
             raise ObjectDoesNotExist(msg)
 
-        github_user, user = user_entities
+        github_user = user.github_user
+
         is_leader = Project.objects.filter(
             Q(leaders_raw__icontains=github_user.login)
             | Q(leaders_raw__icontains=github_user.name or "")

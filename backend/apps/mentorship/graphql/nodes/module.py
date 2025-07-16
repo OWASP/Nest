@@ -41,15 +41,15 @@ class CreateModuleInput:
     """Input for creating a mentorship module."""
 
     name: str
-    description: str | None = None
+    description: str
     domains: list[str] = strawberry.field(default_factory=list)
-    ended_at: datetime | None = None
+    ended_at: datetime
     experience_level: ExperienceLevelEnum
     mentor_logins: list[str] | None = None
     program_key: str
-    project_name: str | None = None
+    project_name: str
     project_id: strawberry.ID
-    started_at: datetime | None = None
+    started_at: datetime
     tags: list[str] = strawberry.field(default_factory=list)
 
 
@@ -59,12 +59,12 @@ class UpdateModuleInput:
 
     key: str
     name: str
-    description: str | None = None
+    description: str
     domains: list[str] = strawberry.field(default_factory=list)
-    ended_at: datetime | None = None
-    experience_level: ExperienceLevelEnum | None = None
+    ended_at: datetime
+    experience_level: ExperienceLevelEnum
     mentor_logins: list[str] | None = None
-    project_id: strawberry.ID | None = None
-    project_name: str | None = None
-    started_at: datetime | None = None
+    project_id: strawberry.ID
+    project_name: str
+    started_at: datetime
     tags: list[str] = strawberry.field(default_factory=list)

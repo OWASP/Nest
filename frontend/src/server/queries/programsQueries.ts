@@ -131,8 +131,8 @@ export const GET_PROGRAM_ADMIN_DETAILS = gql`
 `
 
 export const UPDATE_PROGRAM_STATUS_MUTATION = gql`
-  mutation UpdateProgram($inputData: UpdateProgramInput!) {
-    updateProgram(inputData: $inputData) {
+  mutation updateProgramStatus($inputData: UpdateProgramStatusInput!) {
+    updateProgramStatus(inputData: $inputData) {
       key
       status
     }
