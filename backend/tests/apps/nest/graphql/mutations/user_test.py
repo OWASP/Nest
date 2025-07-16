@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from github.AuthenticatedUser import AuthenticatedUser
-from github.GithubException import GithubException
+from github.GithubException import BadCredentialsException
 
 from apps.github.models.user import User as GitHubUser
 from apps.nest.graphql.mutations.user import GitHubAuthResult, UserMutations
@@ -134,11 +134,11 @@ class TestUserMutations:
             assert "Failed to retrieve GitHub user" in result.message
 
     def test_github_auth_github_exception(self, user_mutations):
-        """Test GitHub auth handles GithubException."""
+        """Test GitHub auth handles BadCredentialsException."""
         with patch("apps.nest.graphql.mutations.user.Github") as mock_github_class:
             info = mock_info()
             mock_github = MagicMock()
-            mock_github.get_user.side_effect = GithubException(401, "Unauthorized", None)
+            mock_github.get_user.side_effect = BadCredentialsException(401, "Unauthorized", None)
             mock_github_class.return_value = mock_github
 
             result = user_mutations.github_auth(info, "token")
