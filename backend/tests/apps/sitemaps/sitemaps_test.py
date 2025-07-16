@@ -191,4 +191,3 @@ class TestCachedSitemapView(unittest.TestCase):
             response = view(request)
             assert response.status_code == 200
             assert response.content == b"ok"
-            

@@ -1,9 +1,8 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
-from django.urls import reverse, resolve
-from django.test import RequestFactory
 from apps.sitemaps import urls as sm_urls
+
 
 class TestSitemapUrls(unittest.TestCase):
     @patch("apps.sitemaps.urls.cached_sitemap_view")
@@ -12,6 +11,7 @@ class TestSitemapUrls(unittest.TestCase):
         mock_cached_sitemap_view.return_value = dummy_view
         import importlib
         import sys
+
         if "apps.sitemaps.urls" in sys.modules:
             importlib.reload(sm_urls)
         expected_names = [
@@ -25,4 +25,3 @@ class TestSitemapUrls(unittest.TestCase):
         found_names = [p.name for p in sm_urls.urlpatterns]
         for name in expected_names:
             assert name in found_names
-            
