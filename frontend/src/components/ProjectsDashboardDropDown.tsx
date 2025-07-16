@@ -1,4 +1,5 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
+import { faArrowDownWideShort, faArrowUpWideShort } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Dropdown,
@@ -14,27 +15,35 @@ import { DropDownSectionProps } from 'types/DropDownSectionProps'
 const ProjectsDashboardDropDown: FC<{
   onAction: (key: string) => void
   selectedKeys?: string[]
+  selectedLabels?: string[]
   selectionMode: 'single' | 'multiple'
-  icon: IconProp
+  icon?: IconProp
+  isOrdering?: boolean
   buttonDisplayName: string
   sections: DropDownSectionProps[]
-  isOrdering?: boolean
-}> = ({ onAction, selectedKeys, selectionMode, icon, buttonDisplayName, sections, isOrdering }) => {
-  let displayKeys = selectedKeys || []
-  if (isOrdering && selectedKeys && selectedKeys.length > 0) {
-    displayKeys = selectedKeys.map((key) =>
-      key.replace(/ASC/, ' ascending').replace(/DESC/, ' descending')
-    )
+}> = ({
+  onAction,
+  selectedKeys,
+  selectionMode,
+  icon,
+  isOrdering,
+  buttonDisplayName,
+  sections,
+  selectedLabels,
+}) => {
+  const orderingIconsMapping = {
+    desc: faArrowDownWideShort,
+    asc: faArrowUpWideShort,
   }
   return (
     <Dropdown>
       <DropdownTrigger>
         <Button variant="solid">
-          <FontAwesomeIcon icon={icon} />
+          <FontAwesomeIcon icon={isOrdering ? orderingIconsMapping[selectedKeys[0]] : icon} />
           <div className="flex flex-col items-center">
             <span className="text-md">{buttonDisplayName}</span>
-            {selectedKeys && selectedKeys.length > 0 && (
-              <span className="text-xs text-gray-500">{displayKeys.join(', ')}</span>
+            {selectedLabels && selectedLabels.length > 0 && (
+              <span className="text-xs text-gray-500">{selectedLabels.join(', ')}</span>
             )}
           </div>
         </Button>

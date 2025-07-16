@@ -11,6 +11,3 @@ class ProjectHealthMetricsOrder:
     """Ordering for Project Health Metrics."""
 
     score: auto
-    forks_count: auto
-    stars_count: auto
-    contributors_count: auto

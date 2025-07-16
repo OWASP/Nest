@@ -22,7 +22,7 @@ test.describe('Projects Health Dashboard Metrics', () => {
   test('renders page headers', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Project Health Metrics' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Filter By' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Sort By' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Score' })).toBeVisible()
   })
 
   test('renders health metrics data', async ({ page }) => {

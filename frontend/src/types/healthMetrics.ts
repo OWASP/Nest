@@ -51,18 +51,3 @@ export type HealthMetricsFilter = {
   }
   level?: string
 }
-
-export type HealthMetricsOrdering = {
-  scoreOrdering?: {
-    score: 'ASC' | 'DESC'
-  }
-  starsCountOrdering?: {
-    starsCount: 'ASC' | 'DESC'
-  }
-  forksCountOrdering?: {
-    forksCount: 'ASC' | 'DESC'
-  }
-  contributorsCountOrdering?: {
-    contributorsCount: 'ASC' | 'DESC'
-  }
-}

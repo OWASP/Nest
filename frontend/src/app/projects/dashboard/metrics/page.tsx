@@ -1,14 +1,15 @@
 'use client'
 
 import { useQuery } from '@apollo/client'
-import { faFilter, faSort } from '@fortawesome/free-solid-svg-icons'
+import { faFilter } from '@fortawesome/free-solid-svg-icons'
 import { Pagination } from '@heroui/react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
 import { GET_PROJECT_HEALTH_METRICS_LIST } from 'server/queries/projectsHealthDashboardQueries'
 import { DropDownSectionProps } from 'types/DropDownSectionProps'
-import { HealthMetricsProps, HealthMetricsOrdering } from 'types/healthMetrics'
+import { HealthMetricsProps } from 'types/healthMetrics'
+import { getKeysLabels } from 'utils/getKeysLabels'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetricsCard from 'components/MetricsCard'
 import ProjectsDashboardDropDown from 'components/ProjectsDashboardDropDown'
@@ -51,36 +52,9 @@ const MetricsPage: FC = () => {
     },
   }
 
-  const orderingMapping = {
-    scoreDESC: {
-      scoreOrdering: { score: 'DESC' },
-    },
-    scoreASC: {
-      scoreOrdering: { score: 'ASC' },
-    },
-    starsCountDESC: {
-      starsCountOrdering: { starsCount: 'DESC' },
-    },
-    starsCountASC: {
-      starsCountOrdering: { starsCount: 'ASC' },
-    },
-    forksCountDESC: {
-      forksCountOrdering: { forksCount: 'DESC' },
-    },
-    forksCountASC: {
-      forksCountOrdering: { forksCount: 'ASC' },
-    },
-    contributorsCountDESC: {
-      contributorsCountOrdering: { contributorsCount: 'DESC' },
-    },
-    contributorsCountASC: {
-      contributorsCountOrdering: { contributorsCount: 'ASC' },
-    },
-  }
-
   let currentFilters = {}
-  let currentOrdering: HealthMetricsOrdering = {
-    scoreOrdering: { score: 'DESC' },
+  let currentOrdering = {
+    score: 'DESC',
   }
   const healthFilter = searchParams.get('health')
   const levelFilter = searchParams.get('level')
@@ -100,20 +74,22 @@ const MetricsPage: FC = () => {
     currentFilterKeys.push(levelFilter)
   }
   if (orderingParam) {
-    currentOrdering = orderingMapping[orderingParam] || currentOrdering
+    currentOrdering = {
+      score: orderingParam.toUpperCase(),
+    }
   }
 
   const [metrics, setMetrics] = useState<HealthMetricsProps[]>([])
   const [metricsLength, setMetricsLength] = useState<number>(0)
   const [pagination, setPagination] = useState({ offset: 0, limit: PAGINATION_LIMIT })
   const [filters, setFilters] = useState(currentFilters)
-  const [ordering, setOrdering] = useState(currentOrdering)
-  const [activeFilters, setActiveFilters] = useState(currentFilterKeys)
-  const [activeOrdering, setActiveOrdering] = useState(
-    Object.keys(orderingMapping).filter(
-      (key) => JSON.stringify(orderingMapping[key]) === JSON.stringify(currentOrdering)
-    ) || ['scoreDESC']
+  const [ordering, setOrdering] = useState(
+    currentOrdering || {
+      score: 'DESC',
+    }
   )
+  const [activeFilters, setActiveFilters] = useState(currentFilterKeys)
+  const [activeOrdering, setActiveOrdering] = useState(orderingParam ? [orderingParam] : ['desc'])
   const {
     data,
     error: graphQLRequestError,
@@ -123,7 +99,7 @@ const MetricsPage: FC = () => {
     variables: {
       filters,
       pagination: { offset: 0, limit: PAGINATION_LIMIT },
-      ordering: Object.values(ordering),
+      ordering,
     },
   })
 
@@ -139,10 +115,10 @@ const MetricsPage: FC = () => {
 
   const orderingSections: DropDownSectionProps[] = [
     {
-      title: 'Score',
+      title: '',
       items: [
-        { label: 'High to Low', key: 'scoreDESC' },
-        { label: 'Low to High', key: 'scoreASC' },
+        { label: 'Descending', key: 'desc' },
+        { label: 'Ascending', key: 'asc' },
       ],
     },
   ]
@@ -159,9 +135,9 @@ const MetricsPage: FC = () => {
     {
       title: 'Project Health',
       items: [
-        { label: 'Healthy Projects', key: 'healthy' },
-        { label: 'Projects Needing Attention', key: 'needsAttention' },
-        { label: 'Unhealthy Projects', key: 'unhealthy' },
+        { label: 'Healthy', key: 'healthy' },
+        { label: 'Need Attention', key: 'needsAttention' },
+        { label: 'Unhealthy', key: 'unhealthy' },
       ],
     },
     {
@@ -185,10 +161,10 @@ const MetricsPage: FC = () => {
             sections={filteringSections}
             selectionMode="multiple"
             selectedKeys={activeFilters}
+            selectedLabels={getKeysLabels(filteringSections, activeFilters)}
             onAction={(key: string) => {
               // Because how apollo caches pagination, we need to reset the pagination.
-              const newPagination = { offset: 0, limit: PAGINATION_LIMIT }
-              setPagination(newPagination)
+              setPagination({ offset: 0, limit: PAGINATION_LIMIT })
               let newFilters = { ...currentFilters }
               const newParams = new URLSearchParams(searchParams.toString())
               if (key in healthFiltersMapping) {
@@ -216,22 +192,21 @@ const MetricsPage: FC = () => {
           />
 
           <ProjectsDashboardDropDown
-            buttonDisplayName="Sort By"
-            icon={faSort}
+            buttonDisplayName="Score"
+            isOrdering
             sections={orderingSections}
             selectionMode="single"
             selectedKeys={activeOrdering}
-            isOrdering
+            selectedLabels={getKeysLabels(orderingSections, activeOrdering)}
             onAction={(key: string) => {
               // Reset pagination to the first page when changing ordering
-              const newPagination = { offset: 0, limit: PAGINATION_LIMIT }
-              setPagination(newPagination)
+              setPagination({ offset: 0, limit: PAGINATION_LIMIT })
               const newParams = new URLSearchParams(searchParams.toString())
-              if (key in orderingMapping) {
-                newParams.set('order', key)
-                setOrdering(orderingMapping[key])
-                setActiveOrdering([key])
-              }
+              newParams.set('order', key)
+              setOrdering({
+                score: key.toUpperCase(),
+              })
+              setActiveOrdering([key])
               router.replace(`/projects/dashboard/metrics?${newParams.toString()}`)
             }}
           />

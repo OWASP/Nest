@@ -117,14 +117,13 @@ describe('MetricsPage', () => {
       'Lab',
       'Production',
       'Flagship',
-      'Healthy Projects',
-      'Projects Needing Attention',
-      'Unhealthy Projects',
+      'Healthy',
+      'Need Attention',
+      'Unhealthy',
       'Reset All Filters',
     ]
     const filterSectionsLabels = ['Project Level', 'Project Health', 'Reset Filters']
-    const sortOptions = ['High to Low', 'Low to High']
-    const sortSectionsLabels = ['Score']
+    const sortOptions = ['Ascending', 'Descending']
 
     await waitFor(() => {
       filterSectionsLabels.forEach((label) => {
@@ -135,9 +134,6 @@ describe('MetricsPage', () => {
         const button = screen.getByRole('button', { name: option })
         fireEvent.click(button)
         expect(button).toBeInTheDocument()
-      })
-      sortSectionsLabels.forEach((label) => {
-        expect(screen.getAllByText(label).length).toBeGreaterThan(0)
       })
       sortOptions.forEach((option) => {
         expect(screen.getAllByText(option).length).toBeGreaterThan(0)
