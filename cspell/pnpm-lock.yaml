@@ -410,8 +410,8 @@ packages:
     resolution: {integrity: sha512-uo0Z9JJeWzv8BG+tRcapBKNJ0dro9cLyczGzulS6EfeyAdeC9sbojtW6XwvYxJkEne9En+J2XEl4zyglVeIwFg==}
     engines: {node: '>=8'}
 
-  picomatch@4.0.2:
-    resolution: {integrity: sha512-M7BAV6Rlcy5u+m6oPhAPFgJTzAioX/6B0DxyvDlo9l8+T3nLKbrczg2WLUyzd45L8RqfUMyGPzekbMvX2Ldkwg==}
+  picomatch@4.0.3:
+    resolution: {integrity: sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==}
     engines: {node: '>=12'}
 
   repeat-string@1.6.1:
@@ -718,7 +718,7 @@ snapshots:
   cspell-glob@8.19.4:
     dependencies:
       '@cspell/url': 8.19.4
-      picomatch: 4.0.2
+      picomatch: 4.0.3
 
   cspell-grammar@8.19.4:
     dependencies:
@@ -791,9 +791,9 @@ snapshots:
 
   fast-json-stable-stringify@2.1.0: {}
 
-  fdir@6.4.6(picomatch@4.0.2):
+  fdir@6.4.6(picomatch@4.0.3):
     optionalDependencies:
-      picomatch: 4.0.2
+      picomatch: 4.0.3
 
   file-entry-cache@9.1.0:
     dependencies:
@@ -837,7 +837,7 @@ snapshots:
     dependencies:
       callsites: 3.1.0
 
-  picomatch@4.0.2: {}
+  picomatch@4.0.3: {}
 
   repeat-string@1.6.1: {}
 
@@ -849,8 +849,8 @@ snapshots:
 
   tinyglobby@0.2.14:
     dependencies:
-      fdir: 6.4.6(picomatch@4.0.2)
-      picomatch: 4.0.2
+      fdir: 6.4.6(picomatch@4.0.3)
+      picomatch: 4.0.3
 
   vscode-languageserver-textdocument@1.0.12: {}
 

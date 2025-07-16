@@ -3,8 +3,10 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from github.AuthenticatedUser import AuthenticatedUser
+from github.GithubException import BadCredentialsException
 
-from apps.github.models import User as GitHubUser
+from apps.github.models.user import User as GitHubUser
 from apps.nest.graphql.mutations.user import GitHubAuthResult, UserMutations
 
 
@@ -19,16 +21,15 @@ def mock_info() -> MagicMock:
 class TestGitHubAuthResult:
     """Test cases for GitHubAuthResult."""
 
-    def test_github_auth_result_with_user(self):
-        """Test GitHubAuthResult with valid user."""
-        mock_user = MagicMock()
-        result = GitHubAuthResult(auth_user=mock_user)
-        assert result.auth_user == mock_user
+    def test_github_auth_result_ok_true(self):
+        result = GitHubAuthResult(ok=True, message="Success")
+        assert result.ok
+        assert result.message == "Success"
 
-    def test_github_auth_result_without_user(self):
-        """Test GitHubAuthResult with None user."""
-        result = GitHubAuthResult(auth_user=None)
-        assert result.auth_user is None
+    def test_github_auth_result_ok_false(self):
+        result = GitHubAuthResult(ok=False, message="Failed")
+        assert not result.ok
+        assert result.message == "Failed"
 
 
 class TestUserMutations:
@@ -48,7 +49,7 @@ class TestUserMutations:
         mock_user.email = "testuser@example.com"
         return mock_user
 
-    def test_github_auth_new_user_success(self, user_mutations, mock_github_user):
+    def test_github_auth_new_user_success(self, user_mutations):
         """Test successful GitHub authentication for new user."""
         with (
             patch("apps.nest.graphql.mutations.user.Github") as mock_github_class,
@@ -58,40 +59,59 @@ class TestUserMutations:
         ):
             info = mock_info()
             mock_github = MagicMock()
+            mock_github_user = MagicMock(spec=AuthenticatedUser)
+            mock_github_user.login = "test_user"
+            mock_github_user.get_emails.return_value = [
+                MagicMock(email="user@example.com", primary=True, verified=True)
+            ]
             mock_github.get_user.return_value = mock_github_user
             mock_github_class.return_value = mock_github
 
-            # Mock email fetching from GitHub
-            mock_primary_email = MagicMock()
-            mock_primary_email.email = "user@example.com"
-            mock_primary_email.primary = True
-            mock_primary_email.verified = True
-            mock_github_user.get_emails.return_value = [mock_primary_email]
-
-            # GitHubUser.update_data returns mocked GitHubUser model
             mock_github_user_model = MagicMock(spec=GitHubUser)
             mock_update_data.return_value = mock_github_user_model
-
-            # Simulate get_or_create returning a new user
-            mock_created_user = MagicMock()
-            mock_user_objects.get_or_create.return_value = (mock_created_user, True)
+            mock_user_objects.get_or_create.return_value = (MagicMock(), True)
 
             result = user_mutations.github_auth(info, "valid_token")
-
-            mock_update_data.assert_called_once_with(mock_github_user, email="user@example.com")
-            mock_user_objects.get_or_create.assert_called_once_with(
-                defaults={
-                    "email": "user@example.com",
-                    "github_user": mock_github_user_model,
-                },
-                username=mock_github_user.login,
-            )
-            info = mock_info()
-
             assert isinstance(result, GitHubAuthResult)
-            assert result.auth_user == mock_created_user
+            assert result.ok
+            assert result.message == "Successfully authenticated with GitHub."
 
-    def test_github_auth_update_data_returns_none(self, user_mutations, mock_github_user):
+    def test_github_auth_no_primary_email(self, user_mutations):
+        """Test GitHub auth fails if no primary verified email."""
+        with (
+            patch("apps.nest.graphql.mutations.user.Github") as mock_github_class,
+            patch("apps.nest.graphql.mutations.user.login"),
+        ):
+            info = mock_info()
+            mock_github = MagicMock()
+            mock_github_user = MagicMock(spec=AuthenticatedUser)
+            mock_github_user.login = "testuser"
+            mock_github_user.get_emails.return_value = []
+            mock_github.get_user.return_value = mock_github_user
+            mock_github_class.return_value = mock_github
+
+            result = user_mutations.github_auth(info, "token")
+            assert not result.ok
+            assert "Verified primary email" in result.message
+
+    def test_github_auth_not_authenticated_user(self, user_mutations):
+        """Test GitHub auth fails if user is not AuthenticatedUser."""
+        with (
+            patch("apps.nest.graphql.mutations.user.Github") as mock_github_class,
+            patch("apps.nest.graphql.mutations.user.login"),
+        ):
+            info = mock_info()
+            mock_github = MagicMock()
+            mock_github_user = MagicMock()  # Not AuthenticatedUser
+            mock_github_user.login = "testuser"
+            mock_github.get_user.return_value = mock_github_user
+            mock_github_class.return_value = mock_github
+
+            result = user_mutations.github_auth(info, "token")
+            assert not result.ok
+            assert "Authenticated user required" in result.message
+
+    def test_github_auth_update_data_returns_none(self, user_mutations):
         """Test GitHub auth fails when update_data returns None."""
         with (
             patch("apps.nest.graphql.mutations.user.Github") as mock_github_class,
@@ -100,10 +120,27 @@ class TestUserMutations:
         ):
             info = mock_info()
             mock_github = MagicMock()
+            mock_github_user = MagicMock(spec=AuthenticatedUser)
+            mock_github_user.login = "testuser"
+            mock_github_user.get_emails.return_value = [
+                MagicMock(email="user@example.com", primary=True, verified=True)
+            ]
             mock_github.get_user.return_value = mock_github_user
             mock_github_class.return_value = mock_github
-
             mock_update_data.return_value = None
 
             result = user_mutations.github_auth(info, "token")
-            assert result.auth_user is None
+            assert not result.ok
+            assert "Failed to retrieve GitHub user" in result.message
+
+    def test_github_auth_github_exception(self, user_mutations):
+        """Test GitHub auth handles BadCredentialsException."""
+        with patch("apps.nest.graphql.mutations.user.Github") as mock_github_class:
+            info = mock_info()
+            mock_github = MagicMock()
+            mock_github.get_user.side_effect = BadCredentialsException(401, "Unauthorized", None)
+            mock_github_class.return_value = mock_github
+
+            result = user_mutations.github_auth(info, "token")
+            assert not result.ok
+            assert "authentication request failed" in result.message.lower()
