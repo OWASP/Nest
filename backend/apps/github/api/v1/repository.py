@@ -3,11 +3,13 @@
 from datetime import datetime
 
 from django.http import HttpRequest
+from django.views.decorators.cache import cache_page
 from ninja import FilterSchema, Query, Router, Schema
+from ninja.decorators import decorate_view
 from ninja.errors import HttpError
 from ninja.pagination import PageNumberPagination, paginate
 
-from apps.common.constants import PAGE_SIZE
+from apps.common.constants import CACHE_TIME, PAGE_SIZE
 from apps.github.models.repository import Repository
 
 router = Router()
@@ -29,6 +31,7 @@ class RepositorySchema(Schema):
 
 
 @router.get("/", response={200: list[RepositorySchema], 404: dict})
+@decorate_view(cache_page(CACHE_TIME))
 @paginate(PageNumberPagination, page_size=PAGE_SIZE)
 def list_repository(
     request: HttpRequest, filters: RepositoryFilterSchema = Query(...)

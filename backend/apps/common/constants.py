@@ -7,3 +7,4 @@ OWASP_NEWS_URL = "https://owasp.org/news"
 OWASP_WEBSITE_URL = "https://owasp.org"
 TAB = "\t"
 PAGE_SIZE = 100
+CACHE_TIME = 300
