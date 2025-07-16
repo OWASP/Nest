@@ -6,3 +6,4 @@ OWASP_NEST_URL = "https://nest.owasp.org"
 OWASP_NEWS_URL = "https://owasp.org/news"
 OWASP_WEBSITE_URL = "https://owasp.org"
 TAB = "\t"
+PAGE_SIZE = 100
