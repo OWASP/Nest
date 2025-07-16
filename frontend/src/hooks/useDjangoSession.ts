@@ -55,7 +55,7 @@ export const useDjangoSession = () => {
               shouldShowTimeoutProgress: true,
               timeout: 3000,
               title: 'Authentication Successful',
-              variant: 'solid',
+              variant: 'bordered',
             })
           } else {
             signOut() // Invalidate Next.js session if not ok
