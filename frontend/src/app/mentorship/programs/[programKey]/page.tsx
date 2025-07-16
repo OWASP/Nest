@@ -58,7 +58,6 @@ const ProgramDetailsPage = () => {
       return
     }
 
-
     await updateProgram({
       variables: {
         inputData: {
