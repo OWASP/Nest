@@ -10,7 +10,6 @@ from github.GithubException import GithubException
 from strawberry.types import Info
 
 from apps.github.models import User as GithubUser
-from apps.nest.graphql.permissions import IsAuthenticated
 from apps.nest.models import User
 
 logger = logging.getLogger(__name__)
@@ -94,15 +93,20 @@ class UserMutations:
                 ok=False,
             )
 
-    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @strawberry.mutation
     def logout_user(self, info: Info) -> LogoutResult:
         """Logout the current user."""
+        if not info.context.request.user.is_authenticated:
+            return LogoutResult(
+                message="User is not logged in.",
+                ok=False,
+            )
+
         # Log the user out and clear the session.
         # https://docs.djangoproject.com/en/5.2/topics/auth/default/#django.contrib.auth.logout
         logout(info.context.request)
 
         return LogoutResult(
-            code="SUCCESS",
             message="User logged out successfully.",
             ok=True,
         )
