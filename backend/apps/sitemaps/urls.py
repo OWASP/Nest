@@ -1,7 +1,6 @@
-"""URL configuration for sitemap endpoints in the core app."""
+"""URL configuration for sitemap endpoints in the sitemaps app."""
 
 from django.urls import path
-
 from .sitemaps import (
     ChapterSitemap,
     CommitteeSitemap,
@@ -50,4 +49,4 @@ urlpatterns = [
         cached_sitemap_view(sitemaps={"users": UserSitemap}),
         name="sitemap-users",
     ),
-]
+] 

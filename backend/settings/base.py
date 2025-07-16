@@ -56,6 +56,7 @@ class Base(Configuration):
         "apps.nest",
         "apps.owasp",
         "apps.slack",
+        "apps.sitemaps",
     )
 
     INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -199,7 +200,3 @@ class Base(Configuration):
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
     SLACK_SIGNING_SECRET = values.SecretValue()
-
-    SITEMAP_CACHE_TIMEOUT = values.IntegerValue(
-        environ_name="DJANGO_SITEMAP_CACHE_TIMEOUT", default=86400
-    )
