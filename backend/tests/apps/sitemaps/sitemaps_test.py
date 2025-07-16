@@ -44,11 +44,11 @@ class TestStaticSitemap(unittest.TestCase):
 
 class TestGetStaticPriority(unittest.TestCase):
     def test_priority_for_known_path(self):
-        assert sm.get_static_priority("/projects") == 0.9
-        assert sm.get_static_priority("/chapters") == 0.8
+        self.assertAlmostEqual(sm.get_static_priority("/projects"), 0.9, places=7)
+        self.assertAlmostEqual(sm.get_static_priority("/chapters"), 0.8, places=7)
 
     def test_priority_for_unknown_path(self):
-        assert sm.get_static_priority("/unknown") == 0.7
+        self.assertAlmostEqual(sm.get_static_priority("/unknown"), 0.7, places=7)
 
 
 class TestProjectSitemap(unittest.TestCase):
