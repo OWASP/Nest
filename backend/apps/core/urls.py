@@ -12,24 +12,18 @@ from .sitemaps import (
 )
 
 sitemaps = {
-    "static": StaticSitemap,
-    "projects": ProjectSitemap,
     "chapters": ChapterSitemap,
     "committees": CommitteeSitemap,
+    "projects": ProjectSitemap,
+    "static": StaticSitemap,
     "users": UserSitemap,
 }
 
 urlpatterns = [
-    path("sitemap.xml", cached_sitemap_view(sitemaps=sitemaps), name="sitemap-index"),
     path(
-        "sitemap/static.xml",
-        cached_sitemap_view(sitemaps={"static": StaticSitemap}),
-        name="sitemap-static",
-    ),
-    path(
-        "sitemap/projects.xml",
-        cached_sitemap_view(sitemaps={"projects": ProjectSitemap}),
-        name="sitemap-projects",
+        "sitemap.xml",
+        cached_sitemap_view(sitemaps=sitemaps),
+        name="sitemap-index",
     ),
     path(
         "sitemap/chapters.xml",
@@ -40,6 +34,16 @@ urlpatterns = [
         "sitemap/committees.xml",
         cached_sitemap_view(sitemaps={"committees": CommitteeSitemap}),
         name="sitemap-committees",
+    ),
+    path(
+        "sitemap/projects.xml",
+        cached_sitemap_view(sitemaps={"projects": ProjectSitemap}),
+        name="sitemap-projects",
+    ),
+    path(
+        "sitemap/static.xml",
+        cached_sitemap_view(sitemaps={"static": StaticSitemap}),
+        name="sitemap-static",
     ),
     path(
         "sitemap/users.xml",

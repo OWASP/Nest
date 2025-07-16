@@ -2,7 +2,6 @@
 
 from datetime import UTC, datetime
 
-from django.conf import settings
 from django.contrib.sitemaps import Sitemap
 from django.contrib.sitemaps.views import sitemap
 from django.db.models import Max
@@ -14,14 +13,13 @@ from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
 from apps.owasp.models.project import Project
 
-# Static routes
-STATIC_ROUTES = [
+STATIC_ROUTES = (
     {"path": "/chapters", "changefreq": "weekly", "priority": 0.8},
     {"path": "/committees", "changefreq": "monthly", "priority": 0.8},
-    {"path": "/projects", "changefreq": "weekly", "priority": 0.9},
     {"path": "/contribute", "changefreq": "daily", "priority": 0.6},
     {"path": "/members", "changefreq": "daily", "priority": 0.7},
-]
+    {"path": "/projects", "changefreq": "weekly", "priority": 0.9},
+)
 
 
 class StaticSitemap(Sitemap):
@@ -46,18 +44,18 @@ class StaticSitemap(Sitemap):
     def lastmod(self, item):
         """Return the last modification date for a static route item."""
         path_to_model = {
-            "/projects": Project,
-            "/contribute": Project,
             "/chapters": Chapter,
             "/committees": Committee,
+            "/contribute": Project,
             "/members": User,
+            "/projects": Project,
         }
-        model = path_to_model.get(item["path"])
-        if model:
-            lastmod = model.objects.aggregate(latest=Max("updated_at"))["latest"]
-        else:
-            lastmod = None
-        return lastmod or datetime.now(UTC)
+
+        return (
+            model.objects.aggregate(latest=Max("updated_at"))["latest"]
+            if (model := path_to_model.get(item["path"]))
+            else datetime.now(UTC)
+        )
 
 
 def get_static_priority(path):
@@ -73,7 +71,7 @@ class ProjectSitemap(Sitemap):
 
     def items(self):
         """Return list of indexable projects for sitemap generation."""
-        return [p for p in Project.objects.all() if getattr(p, "is_indexable", True)]
+        return [p for p in Project.objects.filter(is_active=True) if p.is_indexable]
 
     def location(self, obj):
         """Return the URL path for a project object."""
@@ -97,9 +95,7 @@ class ChapterSitemap(Sitemap):
 
     def items(self):
         """Return list of active and indexable chapters for sitemap generation."""
-        return [
-            c for c in Chapter.objects.filter(is_active=True) if getattr(c, "is_indexable", True)
-        ]
+        return [c for c in Chapter.objects.filter(is_active=True) if c.is_indexable]
 
     def location(self, obj):
         """Return the URL path for a chapter object."""
@@ -123,9 +119,7 @@ class CommitteeSitemap(Sitemap):
 
     def items(self):
         """Return list of active and indexable committees for sitemap generation."""
-        return [
-            c for c in Committee.objects.filter(is_active=True) if getattr(c, "is_indexable", True)
-        ]
+        return [c for c in Committee.objects.filter(is_active=True) if c.is_indexable]
 
     def location(self, obj):
         """Return the URL path for a committee object."""
@@ -149,7 +143,7 @@ class UserSitemap(Sitemap):
 
     def items(self):
         """Return list of indexable users for sitemap generation."""
-        return [u for u in User.objects.all() if getattr(u, "is_indexable", True)]
+        return [u for u in User.objects.filter(is_bot=False) if u.is_indexable]
 
     def location(self, obj):
         """Return the URL path for a user object."""
@@ -172,7 +166,7 @@ class UserSitemap(Sitemap):
 def cached_sitemap_view(sitemaps, **kwargs):
     """Cache sitemap view for performance optimization."""
 
-    @cache_page(settings.SITEMAP_CACHE_TIMEOUT)
+    @cache_page(86400)  # Cache for 24 hours.
     def _view(request: HttpRequest):
         return sitemap(request, sitemaps=sitemaps, **kwargs)
 
