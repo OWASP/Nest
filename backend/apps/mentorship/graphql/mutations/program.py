@@ -73,6 +73,7 @@ class ProgramMutation:
         return program
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
     def update_program(self, info: strawberry.Info, input_data: UpdateProgramInput) -> ProgramNode:
         """Update an existing mentorship program. Only admins can update."""
         user = info.context.request.user
@@ -146,6 +147,7 @@ class ProgramMutation:
         return program
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
     def update_program_status(
         self, info: strawberry.Info, input_data: UpdateProgramStatusInput
     ) -> ProgramNode:
