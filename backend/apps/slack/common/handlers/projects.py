@@ -118,7 +118,7 @@ def get_blocks(
         blocks.append(
             markdown(
                 f"⚠️ *Extended search over {Project.active_projects_count()} OWASP projects "
-                f"is available at <{get_absolute_url('projects')}"
+                f"is available at <{get_absolute_url('/projects')}"
                 f"?q={search_query}|{settings.SITE_NAME}>*{NL}"
                 f"{FEEDBACK_CHANNEL_MESSAGE}"
             )

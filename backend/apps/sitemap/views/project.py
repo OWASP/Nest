@@ -1,11 +1,10 @@
 """Project sitemap."""
 
-from django.contrib.sitemaps import Sitemap
-
 from apps.owasp.models.project import Project
+from apps.sitemap.views.base import BaseSitemap
 
 
-class ProjectSitemap(Sitemap):
+class ProjectSitemap(BaseSitemap):
     """Project sitemap."""
 
     prefix = "/projects"

@@ -55,7 +55,7 @@ def get_absolute_url(path: str) -> str:
         str: The absolute URL.
 
     """
-    return f"{settings.SITE_URL}/{path}"
+    return f"{settings.SITE_URL}/{path.lstrip('/')}"
 
 
 def get_nest_user_agent() -> str:
