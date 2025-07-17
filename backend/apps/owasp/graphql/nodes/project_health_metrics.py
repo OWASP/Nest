@@ -21,6 +21,8 @@ from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
         "recent_releases_count",
         "score",
         "stars_count",
+        "total_issues_count",
+        "total_releases_count",
         "unanswered_issues_count",
         "unassigned_issues_count",
     ],
