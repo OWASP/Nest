@@ -1,5 +1,5 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faArrowDownWideShort, faArrowUpWideShort } from '@fortawesome/free-solid-svg-icons'
+import { faArrowDownWideShort, faArrowUpShortWide } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Dropdown,
@@ -33,7 +33,7 @@ const ProjectsDashboardDropDown: FC<{
 }) => {
   const orderingIconsMapping = {
     desc: faArrowDownWideShort,
-    asc: faArrowUpWideShort,
+    asc: faArrowUpShortWide,
   }
   return (
     <Dropdown>

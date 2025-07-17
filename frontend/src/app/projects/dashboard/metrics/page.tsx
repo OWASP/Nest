@@ -214,9 +214,9 @@ const MetricsPage: FC = () => {
       </div>
       <div className="grid grid-cols-[4fr_1fr_1fr_1fr_1.5fr_1fr] p-4">
         <div className="truncate font-semibold">Project Name</div>
-        <div className="truncate font-semibold">Stars</div>
-        <div className="truncate font-semibold">Forks</div>
-        <div className="truncate font-semibold">Contributors</div>
+        <div className="truncate text-center font-semibold">Stars</div>
+        <div className="truncate text-center font-semibold">Forks</div>
+        <div className="truncate text-center font-semibold">Contributors</div>
         <div className="truncate text-center font-semibold">Health Checked At</div>
         <div className="truncate text-center font-semibold">Score</div>
       </div>

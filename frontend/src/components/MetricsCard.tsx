@@ -19,17 +19,17 @@ const MetricsCard: FC<{ metric: HealthMetricsProps }> = ({ metric }) => {
             {metric.projectName === '' ? 'No name' : metric.projectName}
           </p>
         </div>
-        <div className="truncate">
+        <div className="truncate text-center">
           <p className="text-md">{metric.starsCount}</p>
         </div>
-        <div className="truncate">
+        <div className="truncate text-center">
           <p className="text-md">{metric.forksCount}</p>
         </div>
-        <div className="truncate">
+        <div className="truncate text-center">
           <p className="text-md">{metric.contributorsCount}</p>
         </div>
-        <div className="truncate">
-          <p className="text-md text-center">
+        <div className="truncate text-center">
+          <p className="text-md">
             {new Date(metric.createdAt).toLocaleString('default', {
               month: 'short',
               day: 'numeric',
