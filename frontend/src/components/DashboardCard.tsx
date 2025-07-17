@@ -7,16 +7,17 @@ import SecondaryCard from 'components/SecondaryCard'
 const DashboardCard: React.FC<{
   readonly title: string
   readonly icon: IconProp
-  readonly stats: string
-}> = ({ title, icon, stats }) => {
+  readonly stats?: string
+  readonly className?: string
+}> = ({ title, icon, stats, className }) => {
   return (
     <SecondaryCard
       title={<AnchorTitle title={title} />}
-      className="overflow-hidden transition-colors duration-300 hover:bg-blue-100 dark:hover:bg-blue-950"
+      className={`overflow-hidden transition-colors duration-300 hover:bg-blue-100 dark:hover:bg-blue-950 ${className}`}
     >
       <span className="flex items-center gap-2 text-2xl font-light">
         <FontAwesomeIcon icon={icon} />
-        <p>{stats}</p>
+        {stats && <p>{stats}</p>}
       </span>
     </SecondaryCard>
   )

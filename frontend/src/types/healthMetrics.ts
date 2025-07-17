@@ -37,6 +37,7 @@ export type HealthMetricsProps = {
   openPullRequestsCount: number
   owaspPageLastUpdateDays: number
   projectName: string
+  recentReleasesCount: number
   score: number
   starsCount: number
   totalIssuesCount: number
