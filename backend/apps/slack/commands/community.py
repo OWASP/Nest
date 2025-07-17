@@ -24,5 +24,5 @@ class Community(CommandBase):
         return {
             **super().get_template_context(command),
             "name": "OWASP community",
-            "url": get_absolute_url("members"),
+            "url": get_absolute_url("/members"),
         }

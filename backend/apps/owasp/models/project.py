@@ -175,7 +175,7 @@ class Project(
     @property
     def nest_url(self) -> str:
         """Get Nest URL for project."""
-        return get_absolute_url(f"projects/{self.nest_key}")
+        return get_absolute_url(f"/projects/{self.nest_key}")
 
     @property
     def open_issues(self):
@@ -306,7 +306,7 @@ class Project(
 
     def get_absolute_url(self):
         """Get absolute URL for project."""
-        return self.nest_url
+        return f"/projects/{self.nest_key}"
 
     def save(self, *args, **kwargs) -> None:
         """Save the project instance."""

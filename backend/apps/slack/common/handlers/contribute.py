@@ -83,7 +83,7 @@ def get_blocks(
         blocks.append(
             markdown(
                 f"⚠️ *Extended search over {Issue.open_issues_count()} open issues "
-                f"is available at <{get_absolute_url('contribute')}"
+                f"is available at <{get_absolute_url('/contribute')}"
                 f"?q={search_query}|{settings.SITE_NAME}>*{NL}"
                 f"{FEEDBACK_CHANNEL_MESSAGE}"
             ),

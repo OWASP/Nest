@@ -3,7 +3,8 @@ from unittest.mock import MagicMock, patch
 
 from django.utils import timezone
 
-from apps.sitemap.views import ChapterSitemap
+from apps.sitemap.views.base import BaseSitemap
+from apps.sitemap.views.chapter import ChapterSitemap
 
 
 class TestChapterSitemap:
@@ -42,3 +43,6 @@ class TestChapterSitemap:
         obj = MagicMock(updated_at=None, created_at=dt)
 
         assert sitemap.lastmod(obj) == dt
+
+    def test_inherits_from_base(self):
+        assert issubclass(ChapterSitemap, BaseSitemap)

@@ -42,7 +42,7 @@ services:
     healthcheck:
       interval: 5s
       retries: 5
-      test: [CMD, pg_isready, -U, nest_user_production, -d, nest_db_production]
+      test: [CMD, pg_isready, -U, nest-user-production, -d, production-nest-db]
       timeout: 5s
     restart: unless-stopped
     volumes:

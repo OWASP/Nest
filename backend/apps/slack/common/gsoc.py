@@ -17,7 +17,7 @@ MARCH = 3
 
 now = timezone.now()
 gsoc_year = now.year if now.month >= MARCH else now.year - 1
-projects_url = get_absolute_url("projects")
+projects_url = get_absolute_url("/projects")
 
 GSOC_GENERAL_INFORMATION_BLOCKS = (
     markdown(
