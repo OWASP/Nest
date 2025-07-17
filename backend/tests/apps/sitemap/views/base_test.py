@@ -13,13 +13,6 @@ def sitemap():
 
 
 class TestBaseSitemap:
-    def test_get_static_priority_for_known_path(self, sitemap):
-        assert math.isclose(sitemap.get_static_priority("/projects"), 0.9)
-        assert math.isclose(sitemap.get_static_priority("/chapters"), 0.8)
-
-    def test_get_static_priority_for_unknown_path(self, sitemap):
-        assert math.isclose(sitemap.get_static_priority("/unknown"), 0.7)
-
     def test_changefreq(self, sitemap):
         obj = MagicMock()
 
@@ -46,3 +39,13 @@ class TestBaseSitemap:
         obj = MagicMock()
 
         assert math.isclose(sitemap.priority(obj), 0.7)
+
+    def test_get_protocol(self, sitemap):
+        assert sitemap.get_protocol() == "https"
+
+    def test_get_static_priority_for_known_path(self, sitemap):
+        assert math.isclose(sitemap.get_static_priority("/projects"), 0.9)
+        assert math.isclose(sitemap.get_static_priority("/chapters"), 0.8)
+
+    def test_get_static_priority_for_unknown_path(self, sitemap):
+        assert math.isclose(sitemap.get_static_priority("/unknown"), 0.7)

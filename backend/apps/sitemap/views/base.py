@@ -8,6 +8,7 @@ class BaseSitemap(Sitemap):
 
     change_frequency = "weekly"
     prefix = ""
+    protocol = "https"
 
     STATIC_ROUTES = (
         {"path": "/chapters", "changefreq": "weekly", "priority": 0.8},
