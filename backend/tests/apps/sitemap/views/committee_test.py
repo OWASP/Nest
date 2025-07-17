@@ -1,3 +1,4 @@
+import math
 from unittest.mock import MagicMock, patch
 
 from django.utils import timezone
@@ -27,7 +28,7 @@ class TestCommitteeSitemap:
     def test_priority(self):
         sitemap = CommitteeSitemap()
 
-        assert sitemap.priority(MagicMock()) == 0.8
+        assert math.isclose(sitemap.priority(MagicMock()), 0.8)
 
     def test_lastmod(self):
         dt = timezone.now()

@@ -1,3 +1,4 @@
+import math
 from unittest.mock import MagicMock
 
 import pytest
@@ -13,11 +14,11 @@ def sitemap():
 
 class TestBaseSitemap:
     def test_get_static_priority_for_known_path(self, sitemap):
-        assert sitemap.get_static_priority("/projects") == 0.9
-        assert sitemap.get_static_priority("/chapters") == 0.8
+        assert math.isclose(sitemap.get_static_priority("/projects"), 0.9)
+        assert math.isclose(sitemap.get_static_priority("/chapters"), 0.8)
 
     def test_get_static_priority_for_unknown_path(self, sitemap):
-        assert sitemap.get_static_priority("/unknown") == 0.7
+        assert math.isclose(sitemap.get_static_priority("/unknown"), 0.7)
 
     def test_changefreq(self, sitemap):
         obj = MagicMock()
@@ -44,4 +45,4 @@ class TestBaseSitemap:
     def test_priority(self, sitemap):
         obj = MagicMock()
 
-        assert sitemap.priority(obj) == 0.7
+        assert math.isclose(sitemap.priority(obj), 0.7)
