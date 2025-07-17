@@ -4,7 +4,8 @@ from unittest.mock import patch
 import pytest
 from django.utils import timezone
 
-from apps.sitemap.views import StaticSitemap
+from apps.sitemap.views.base import BaseSitemap
+from apps.sitemap.views.static import StaticSitemap
 
 
 @pytest.fixture
@@ -13,6 +14,9 @@ def sitemap():
 
 
 class TestStaticSitemap:
+    def test_inherits_from_base(self):
+        assert issubclass(StaticSitemap, BaseSitemap)
+
     @patch("apps.sitemap.views.static.Chapter.objects.aggregate")
     @patch("apps.sitemap.views.static.Committee.objects.aggregate")
     @patch("apps.sitemap.views.static.Project.objects.aggregate")

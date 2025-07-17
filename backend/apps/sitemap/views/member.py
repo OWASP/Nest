@@ -1,11 +1,10 @@
 """Member sitemap."""
 
-from django.contrib.sitemaps import Sitemap
-
 from apps.github.models.user import User
+from apps.sitemap.views.base import BaseSitemap
 
 
-class MemberSitemap(Sitemap):
+class MemberSitemap(BaseSitemap):
     """Member sitemap."""
 
     prefix = "/members"

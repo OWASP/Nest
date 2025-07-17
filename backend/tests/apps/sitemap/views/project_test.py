@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
 
-from apps.sitemap.views import ProjectSitemap
+from apps.sitemap.views.base import BaseSitemap
+from apps.sitemap.views.project import ProjectSitemap
 
 
 class TestProjectSitemap:
@@ -13,8 +14,9 @@ class TestProjectSitemap:
         assert list(sitemap.items()) == [mock_obj]
 
     def test_location(self):
-        obj = MagicMock()
-        obj.get_absolute_url.return_value = "/projects/foo"
         sitemap = ProjectSitemap()
 
-        assert sitemap.location(obj) == "/projects/foo"
+        assert sitemap.location(MagicMock(nest_key="bar")) == "/projects/bar"
+
+    def test_inherits_from_base(self):
+        assert issubclass(ProjectSitemap, BaseSitemap)

@@ -57,7 +57,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     @property
     def nest_url(self) -> str:
         """Get Nest URL for user."""
-        return get_absolute_url(f"members/{self.nest_key}")
+        return get_absolute_url(f"/members/{self.nest_key}")
 
     @property
     def releases(self):
@@ -94,7 +94,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
     def get_absolute_url(self):
         """Get absolute URL for the user."""
-        return self.nest_url
+        return f"/members/{self.nest_key}"
 
     @staticmethod
     def bulk_save(users, fields=None) -> None:

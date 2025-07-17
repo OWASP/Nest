@@ -49,7 +49,7 @@ class Gsoc(CommandBase):
                     "mode": "general",
                     "nest_bot_name": NEST_BOT_NAME,
                     "previous_year": gsoc_year,
-                    "projects_url": get_absolute_url("projects"),
+                    "projects_url": get_absolute_url("/projects"),
                 }
             )
         elif command_text.isnumeric():
