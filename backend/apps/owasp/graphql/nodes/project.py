@@ -48,9 +48,14 @@ class ProjectNode(GenericEntityNode):
     @strawberry.field
     def health_metrics_latest(self) -> ProjectHealthMetricsNode | None:
         """Resolve latest project health metrics."""
-        return ProjectHealthMetrics.get_latest_health_metrics().filter(
-            project=self,
-        ).first()
+        return (
+            ProjectHealthMetrics.get_latest_health_metrics()
+            .filter(
+                project=self,
+            )
+            .first()
+        )
+
     @strawberry.field
     def issues_count(self) -> int:
         """Resolve issues count."""

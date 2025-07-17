@@ -38,6 +38,11 @@ class ProjectHealthMetricsNode:
         return self.age_days
 
     @strawberry.field
+    def age_days_requirement(self) -> int:
+        """Resolve project age requirement in days."""
+        return self.age_days_requirement
+
+    @strawberry.field
     def created_at(self) -> datetime:
         """Resolve metrics creation date."""
         return self.nest_created_at
