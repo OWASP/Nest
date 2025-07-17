@@ -6,7 +6,6 @@ from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
 from ninja import FilterSchema, Query, Router, Schema
 from ninja.decorators import decorate_view
-from ninja.errors import HttpError
 from ninja.pagination import PageNumberPagination, paginate
 
 from apps.common.constants import CACHE_TIME, PAGE_SIZE
@@ -31,14 +30,21 @@ class ProjectSchema(Schema):
     updated_at: datetime
 
 
-@router.get("/", response={200: list[ProjectSchema], 404: dict})
+VALID_PROJECT_ORDERING_FIELDS = ["created_at", "updated_at"]
+
+
+@router.get("/", response={200: list[ProjectSchema]})
 @decorate_view(cache_page(CACHE_TIME))
 @paginate(PageNumberPagination, page_size=PAGE_SIZE)
 def list_projects(
-    request: HttpRequest, filters: ProjectFilterSchema = Query(...)
-) -> list[ProjectSchema] | dict:
+    request: HttpRequest,
+    filters: ProjectFilterSchema = Query(...),
+    ordering: str | None = Query(None),
+) -> list[ProjectSchema]:
     """Get all projects."""
     projects = filters.filter(Project.objects.all())
-    if not projects.exists():
-        raise HttpError(404, "Projects not found")
+
+    if ordering and ordering in VALID_PROJECT_ORDERING_FIELDS:
+        projects = projects.order_by(ordering)
+
     return projects

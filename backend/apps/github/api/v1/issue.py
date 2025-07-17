@@ -6,7 +6,6 @@ from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
 from ninja import FilterSchema, Query, Router, Schema
 from ninja.decorators import decorate_view
-from ninja.errors import HttpError
 from ninja.pagination import PageNumberPagination, paginate
 
 from apps.common.constants import CACHE_TIME, PAGE_SIZE
@@ -32,15 +31,21 @@ class IssueSchema(Schema):
     url: str
 
 
-@router.get("/", response={200: list[IssueSchema], 404: dict})
+VALID_ISSUE_ORDERING_FIELDS = ["created_at", "updated_at"]
+
+
+@router.get("/", response={200: list[IssueSchema]})
 @decorate_view(cache_page(CACHE_TIME))
 @paginate(PageNumberPagination, page_size=PAGE_SIZE)
 def list_issues(
-    request: HttpRequest, filters: IssueFilterSchema = Query(...)
-) -> list[IssueSchema] | dict:
+    request: HttpRequest,
+    filters: IssueFilterSchema = Query(...),
+    ordering: str | None = Query(None),
+) -> list[IssueSchema]:
     """Get all issues."""
     issues = filters.filter(Issue.objects.all())
 
-    if not issues.exists():
-        raise HttpError(404, "Issues not found")
+    if ordering and ordering in VALID_ISSUE_ORDERING_FIELDS:
+        issues = issues.order_by(ordering)
+
     return issues

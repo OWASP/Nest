@@ -20,7 +20,6 @@ class UserFilterSchema(FilterSchema):
 
     company: str | None = None
     location: str | None = None
-    name: str | None = None
 
 
 class UserSchema(Schema):
@@ -43,16 +42,23 @@ class UserSchema(Schema):
     url: str
 
 
-@router.get("/", response={200: list[UserSchema], 404: dict})
+VALID_USER_ORDERING_FIELDS = ["created_at", "updated_at"]
+
+
+@router.get("/", response={200: list[UserSchema]})
 @decorate_view(cache_page(CACHE_TIME))
 @paginate(PageNumberPagination, page_size=PAGE_SIZE)
 def list_users(
-    request: HttpRequest, filters: UserFilterSchema = Query(...)
-) -> list[UserSchema] | dict:
+    request: HttpRequest,
+    filters: UserFilterSchema = Query(...),
+    ordering: str | None = Query(None),
+) -> list[UserSchema]:
     """Get all users."""
     users = filters.filter(User.objects.all())
-    if not users.exists():
-        raise HttpError(404, "Users not found")
+
+    if ordering and ordering in VALID_USER_ORDERING_FIELDS:
+        users = users.order_by(ordering)
+
     return users
 
 

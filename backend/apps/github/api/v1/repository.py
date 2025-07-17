@@ -4,21 +4,14 @@ from datetime import datetime
 
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
-from ninja import FilterSchema, Query, Router, Schema
+from ninja import Query, Router, Schema
 from ninja.decorators import decorate_view
-from ninja.errors import HttpError
 from ninja.pagination import PageNumberPagination, paginate
 
 from apps.common.constants import CACHE_TIME, PAGE_SIZE
 from apps.github.models.repository import Repository
 
 router = Router()
-
-
-class RepositoryFilterSchema(FilterSchema):
-    """Filter schema for Repository."""
-
-    name: str | None = None
 
 
 class RepositorySchema(Schema):
@@ -30,14 +23,19 @@ class RepositorySchema(Schema):
     updated_at: datetime
 
 
-@router.get("/", response={200: list[RepositorySchema], 404: dict})
+VALID_REPOSITORY_ORDERING_FIELDS = ["created_at", "updated_at"]
+
+
+@router.get("/", response={200: list[RepositorySchema]})
 @decorate_view(cache_page(CACHE_TIME))
 @paginate(PageNumberPagination, page_size=PAGE_SIZE)
 def list_repository(
-    request: HttpRequest, filters: RepositoryFilterSchema = Query(...)
-) -> list[RepositorySchema] | dict:
+    request: HttpRequest,
+    ordering: str | None = Query(None),
+) -> list[RepositorySchema]:
     """Get all repositories."""
-    repositories = filters.filter(Repository.objects.all())
-    if not repositories.exists():
-        raise HttpError(404, "Repositories not found")
+    repositories = Repository.objects.all()
+
+    if ordering and ordering in VALID_REPOSITORY_ORDERING_FIELDS:
+        repositories = repositories.order_by(ordering)
     return repositories
