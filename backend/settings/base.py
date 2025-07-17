@@ -55,6 +55,7 @@ class Base(Configuration):
         "apps.mentorship",
         "apps.nest",
         "apps.owasp",
+        "apps.sitemap",
         "apps.slack",
     )
 

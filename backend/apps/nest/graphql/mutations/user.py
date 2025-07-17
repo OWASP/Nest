@@ -6,7 +6,7 @@ import strawberry
 from django.contrib.auth import login, logout
 from github import Github
 from github.AuthenticatedUser import AuthenticatedUser
-from github.GithubException import GithubException
+from github.GithubException import BadCredentialsException
 from strawberry.types import Info
 
 from apps.github.models import User as GithubUser
@@ -86,8 +86,7 @@ class UserMutations:
                 message="Successfully authenticated with GitHub.",
                 ok=True,
             )
-        except GithubException:
-            logger.exception("GitHub authentication failed.")
+        except BadCredentialsException:
             return GitHubAuthResult(
                 message="GitHub authentication request failed.",
                 ok=False,
