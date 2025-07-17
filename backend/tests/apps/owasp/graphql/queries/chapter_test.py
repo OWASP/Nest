@@ -62,6 +62,8 @@ class TestChapterResolution:
             result = ChapterQuery().recent_chapters(limit=2)
 
             assert result == mock_chapters
-            mock_filter.assert_called_once_with(is_active=True)
+            mock_filter.assert_called_once_with(
+                is_active=True, latitude__isnull=False, longitude__isnull=False
+            )
             mock_qs.order_by.assert_called_once_with("-created_at")
             mock_qs.order_by.return_value.__getitem__.assert_called_once_with(slice(None, 2))
