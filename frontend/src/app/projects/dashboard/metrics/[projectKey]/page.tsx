@@ -12,7 +12,7 @@ import {
   faCodeFork,
   faDollar,
   faCodePullRequest,
-  faChartDiagram,
+  faChartArea,
   faExclamationCircle,
   faTag,
   faRocket,
@@ -120,17 +120,24 @@ const ProjectHealthMetricsDetails: FC = () => {
           </div>
           <BarChart
             title="Days Metrics"
-            icon={faChartDiagram}
-            labels={['Last Commit Days', 'Last Release Days', 'OWASP Page Last Update Days']}
+            icon={faChartArea}
+            labels={[
+              'Age Days',
+              'Last Commit Days',
+              'Last Release Days',
+              'OWASP Page Last Update Days',
+            ]}
             days={[
+              metrics.ageDays,
               metrics.lastCommitDays,
               metrics.lastReleaseDays,
               metrics.owaspPageLastUpdateDays,
             ]}
             requirements={[
+              metrics.ageDaysRequirement,
               metrics.lastCommitDaysRequirement,
               metrics.lastReleaseDaysRequirement,
-              0, // Assuming OWASP page does not have a requirement
+              metrics.owaspPageLastUpdateDaysRequirement,
             ]}
           />
         </>

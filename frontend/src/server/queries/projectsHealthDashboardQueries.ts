@@ -22,6 +22,8 @@ export const GET_PROJECT_HEALTH_METRICS_DETAILS = gql`
   query Project($projectKey: String!) {
     project(key: $projectKey) {
       healthMetricsLatest {
+        ageDays
+        ageDaysRequirement
         createdAt
         contributorsCount
         forksCount
@@ -34,6 +36,7 @@ export const GET_PROJECT_HEALTH_METRICS_DETAILS = gql`
         openIssuesCount
         openPullRequestsCount
         owaspPageLastUpdateDays
+        owaspPageLastUpdateDaysRequirement
         projectName
         recentReleasesCount
         score
