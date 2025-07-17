@@ -55,8 +55,8 @@ class Base(Configuration):
         "apps.mentorship",
         "apps.nest",
         "apps.owasp",
+        "apps.sitemap",
         "apps.slack",
-        "apps.sitemaps",
     )
 
     INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

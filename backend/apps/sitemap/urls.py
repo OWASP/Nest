@@ -2,52 +2,46 @@
 
 from django.urls import path
 
-from .sitemaps import (
+from .views import (
     ChapterSitemap,
     CommitteeSitemap,
+    MemberSitemap,
     ProjectSitemap,
     StaticSitemap,
-    UserSitemap,
     cached_sitemap_view,
 )
 
 sitemaps = {
     "chapters": ChapterSitemap,
     "committees": CommitteeSitemap,
+    "members": MemberSitemap,
     "projects": ProjectSitemap,
     "static": StaticSitemap,
-    "users": UserSitemap,
 }
 
 urlpatterns = [
     path(
         "sitemap.xml",
         cached_sitemap_view(sitemaps=sitemaps),
-        name="sitemap-index",
     ),
     path(
         "sitemap/chapters.xml",
         cached_sitemap_view(sitemaps={"chapters": ChapterSitemap}),
-        name="sitemap-chapters",
     ),
     path(
         "sitemap/committees.xml",
         cached_sitemap_view(sitemaps={"committees": CommitteeSitemap}),
-        name="sitemap-committees",
+    ),
+    path(
+        "sitemap/members.xml",
+        cached_sitemap_view(sitemaps={"members": MemberSitemap}),
     ),
     path(
         "sitemap/projects.xml",
         cached_sitemap_view(sitemaps={"projects": ProjectSitemap}),
-        name="sitemap-projects",
     ),
     path(
         "sitemap/static.xml",
         cached_sitemap_view(sitemaps={"static": StaticSitemap}),
-        name="sitemap-static",
-    ),
-    path(
-        "sitemap/users.xml",
-        cached_sitemap_view(sitemaps={"users": UserSitemap}),
-        name="sitemap-users",
     ),
 ]

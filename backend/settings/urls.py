@@ -25,7 +25,7 @@ urlpatterns = [
     path("api/v1/", api_v1.urls),
     path("a/", admin.site.urls),
     path("status/", get_status),
-    path("", include("apps.sitemaps.urls")),
+    path("", include("apps.sitemap.urls")),
 ]
 
 if SlackConfig.app:
