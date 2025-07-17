@@ -304,6 +304,10 @@ class Project(
         self.created_at = repository.created_at
         self.updated_at = repository.updated_at
 
+    def get_absolute_url(self):
+        """Get absolute URL for project."""
+        return self.nest_url
+
     def save(self, *args, **kwargs) -> None:
         """Save the project instance."""
         if self.is_active and not self.summary and (prompt := Prompt.get_owasp_project_summary()):

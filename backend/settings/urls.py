@@ -7,7 +7,7 @@ The `urlpatterns` list routes URLs to views. For more information please see:
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 from django.views.decorators.csrf import csrf_protect
 from strawberry.django.views import GraphQLView
 
@@ -25,6 +25,7 @@ urlpatterns = [
     path("api/v1/", api_v1.urls),
     path("a/", admin.site.urls),
     path("status/", get_status),
+    path("", include("apps.sitemap.urls")),
 ]
 
 if SlackConfig.app:
