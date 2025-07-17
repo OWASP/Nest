@@ -126,6 +126,11 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         )
 
     @property
+    def owasp_page_last_update_days_requirement(self) -> int:
+        """Get the OWASP page last update requirement for the project."""
+        return self.project_requirements.owasp_page_last_update_days
+
+    @property
     def project_requirements(self) -> ProjectHealthRequirements:
         """Get the project health requirements for the project's level."""
         return ProjectHealthRequirements.objects.get(level=self.project.level)
