@@ -5,7 +5,7 @@ from datetime import datetime
 from django.conf import settings
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
-from ninja import FilterSchema, Query, Router, Schema
+from ninja import FilterSchema, Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 
@@ -39,8 +39,8 @@ VALID_ISSUE_ORDERING_FIELDS = {"created_at", "updated_at"}
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_issues(
     request: HttpRequest,
-    filters: IssueFilterSchema = Query(...),
-    ordering: str | None = Query(None),
+    filters: IssueFilterSchema = settings.FILTERS,
+    ordering: str | None = settings.ORDERING,
 ) -> list[IssueSchema]:
     """Get all issues."""
     issues = filters.filter(Issue.objects.all())

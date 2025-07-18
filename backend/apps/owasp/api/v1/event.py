@@ -5,7 +5,7 @@ from datetime import datetime
 from django.conf import settings
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
-from ninja import Query, Router, Schema
+from ninja import Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 
@@ -32,7 +32,7 @@ VALID_EVENT_ORDERING_FIELDS = {"start_date", "end_date"}
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_events(
     request: HttpRequest,
-    ordering: str | None = Query(None),
+    ordering: str | None = settings.ORDERING,
 ) -> list[EventSchema]:
     """Get all events."""
     events = Event.objects.all()

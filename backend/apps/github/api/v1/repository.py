@@ -5,7 +5,7 @@ from datetime import datetime
 from django.conf import settings
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
-from ninja import Query, Router, Schema
+from ninja import Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 
@@ -31,7 +31,7 @@ VALID_REPOSITORY_ORDERING_FIELDS = {"created_at", "updated_at"}
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_repository(
     request: HttpRequest,
-    ordering: str | None = Query(None),
+    ordering: str | None = settings.ORDERING,
 ) -> list[RepositorySchema]:
     """Get all repositories."""
     repositories = Repository.objects.all()

@@ -5,7 +5,7 @@ from datetime import datetime
 from django.conf import settings
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
-from ninja import FilterSchema, Query, Router, Schema
+from ninja import FilterSchema, Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 
@@ -38,8 +38,8 @@ VALID_RELEASE_ORDERING_FIELDS = {"created_at", "published_at"}
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_release(
     request: HttpRequest,
-    filters: ReleaseFilterSchema = Query(...),
-    ordering: str | None = Query(None),
+    filters: ReleaseFilterSchema = settings.FILTERS,
+    ordering: str | None = settings.ORDERING,
 ) -> list[ReleaseSchema]:
     """Get all releases."""
     releases = filters.filter(Release.objects.all())

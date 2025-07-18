@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 
 from configurations import Configuration, values
+from ninja import Query
 
 
 class Base(Configuration):
@@ -123,6 +124,8 @@ class Base(Configuration):
 
     API_PAGE_SIZE = 100
     API_CACHE_TIME = 300
+    FILTERS = Query(...)
+    ORDERING = Query(None)
 
     REDIS_HOST = values.SecretValue(environ_name="REDIS_HOST")
     REDIS_PASSWORD = values.SecretValue(environ_name="REDIS_PASSWORD")
