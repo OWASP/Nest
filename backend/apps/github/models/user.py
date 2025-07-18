@@ -5,6 +5,7 @@ from __future__ import annotations
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
+from apps.common.utils import get_absolute_url
 from apps.github.constants import (
     GITHUB_ACTIONS_USER_LOGIN,
     GITHUB_GHOST_USER_LOGIN,
@@ -20,6 +21,10 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
     class Meta:
         db_table = "github_users"
+        indexes = [
+            models.Index(fields=["-created_at"], name="github_user_created_at_desc"),
+            models.Index(fields=["-updated_at"], name="github_user_updated_at_desc"),
+        ]
         verbose_name_plural = "Users"
 
     bio = models.TextField(verbose_name="Bio", max_length=1000, default="")
@@ -54,6 +59,11 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         return self.created_issues.all()
 
     @property
+    def nest_url(self) -> str:
+        """Get Nest URL for user."""
+        return get_absolute_url(f"/members/{self.nest_key}")
+
+    @property
     def releases(self):
         """Get releases created by the user.
 
@@ -85,6 +95,10 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
                 setattr(self, model_field, value)
 
         self.is_bot = gh_user.type == "Bot"
+
+    def get_absolute_url(self):
+        """Get absolute URL for the user."""
+        return f"/members/{self.nest_key}"
 
     @staticmethod
     def bulk_save(users, fields=None) -> None:
