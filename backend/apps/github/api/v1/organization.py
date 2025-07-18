@@ -36,8 +36,8 @@ VALID_ORGANIZATION_ORDERING_FIELDS = {"created_at", "updated_at"}
 
 
 @router.get("/", response={200: list[OrganizationSchema]})
-@decorate_view(cache_page(settings.CACHE_TIME))
-@paginate(PageNumberPagination, page_size=settings.PAGE_SIZE)
+@decorate_view(cache_page(settings.API_CACHE_TIME))
+@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_organization(
     request: HttpRequest,
     filters: OrganizationFilterSchema = Query(...),
