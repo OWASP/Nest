@@ -2,13 +2,13 @@
 
 from datetime import datetime
 
+from django.conf import settings
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
 from ninja import FilterSchema, Query, Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 
-from apps.common.constants import CACHE_TIME, PAGE_SIZE
 from apps.github.models.release import Release
 
 router = Router()
@@ -30,12 +30,12 @@ class ReleaseSchema(Schema):
     tag_name: str
 
 
-VALID_RELEASE_ORDERING_FIELDS = ["created_at", "published_at"]
+VALID_RELEASE_ORDERING_FIELDS = {"created_at", "published_at"}
 
 
 @router.get("/", response={200: list[ReleaseSchema]})
-@decorate_view(cache_page(CACHE_TIME))
-@paginate(PageNumberPagination, page_size=PAGE_SIZE)
+@decorate_view(cache_page(settings.CACHE_TIME))
+@paginate(PageNumberPagination, page_size=settings.PAGE_SIZE)
 def list_release(
     request: HttpRequest,
     filters: ReleaseFilterSchema = Query(...),

@@ -121,6 +121,9 @@ class Base(Configuration):
         "INDEX_PREFIX": ENVIRONMENT.lower(),
     }
 
+    PAGE_SIZE = 100
+    CACHE_TIME = 300
+
     REDIS_HOST = values.SecretValue(environ_name="REDIS_HOST")
     REDIS_PASSWORD = values.SecretValue(environ_name="REDIS_PASSWORD")
     CACHES = {

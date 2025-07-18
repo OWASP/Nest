@@ -2,13 +2,13 @@
 
 from datetime import datetime
 
+from django.conf import settings
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
 from ninja import Query, Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 
-from apps.common.constants import CACHE_TIME, PAGE_SIZE
 from apps.owasp.models.event import Event
 
 router = Router()
@@ -24,12 +24,12 @@ class EventSchema(Schema):
     url: str
 
 
-VALID_EVENT_ORDERING_FIELDS = ["start_date", "end_date"]
+VALID_EVENT_ORDERING_FIELDS = {"start_date", "end_date"}
 
 
 @router.get("/", response={200: list[EventSchema]})
-@decorate_view(cache_page(CACHE_TIME))
-@paginate(PageNumberPagination, page_size=PAGE_SIZE)
+@decorate_view(cache_page(settings.CACHE_TIME))
+@paginate(PageNumberPagination, page_size=settings.PAGE_SIZE)
 def list_events(
     request: HttpRequest,
     ordering: str | None = Query(None),
