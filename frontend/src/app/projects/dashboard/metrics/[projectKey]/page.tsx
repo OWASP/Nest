@@ -62,10 +62,12 @@ const ProjectHealthMetricsDetails: FC = () => {
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <GeneralCompliantComponent
+              title="Funding Requirements Compliant"
               icon={faDollar}
               compliant={metrics.isFundingRequirementsCompliant}
             />
             <GeneralCompliantComponent
+              title="Leader Requirements Compliant"
               icon={faHandshake}
               compliant={metrics.isLeaderRequirementsCompliant}
             />
