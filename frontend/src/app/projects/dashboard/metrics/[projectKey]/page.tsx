@@ -144,6 +144,7 @@ const ProjectHealthMetricsDetails: FC = () => {
               metrics.lastPullRequestDaysRequirement,
               metrics.owaspPageLastUpdateDaysRequirement,
             ]}
+            reverseColors={[true, false, false, false, false]}
           />
         </>
       )}
