@@ -32,6 +32,7 @@ class Chapter(
         db_table = "owasp_chapters"
         indexes = [
             models.Index(fields=["-created_at"], name="chapter_created_at_desc_idx"),
+            models.Index(fields=["-updated_at"], name="chapter_updated_at_desc_idx"),
         ]
         verbose_name_plural = "Chapters"
 

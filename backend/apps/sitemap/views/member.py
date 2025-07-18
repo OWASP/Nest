@@ -7,6 +7,7 @@ from apps.sitemap.views.base import BaseSitemap
 class MemberSitemap(BaseSitemap):
     """Member sitemap."""
 
+    change_frequency = "daily"
     prefix = "/members"
 
     def items(self):

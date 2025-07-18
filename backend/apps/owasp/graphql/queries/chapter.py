@@ -21,10 +21,4 @@ class ChapterQuery:
     @strawberry.field
     def recent_chapters(self, limit: int = 8) -> list[ChapterNode]:
         """Resolve recent chapters."""
-        return Chapter.objects.filter(
-            is_active=True,
-            latitude__isnull=False,
-            longitude__isnull=False,
-        ).order_by(
-            "-created_at",
-        )[:limit]
+        return Chapter.active_chapters.order_by("-created_at")[:limit]
