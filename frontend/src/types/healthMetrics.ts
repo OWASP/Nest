@@ -33,6 +33,8 @@ export type HealthMetricsProps = {
   isLeaderRequirementsCompliant: boolean
   lastCommitDays: number
   lastCommitDaysRequirement: number
+  lastPullRequestDays: number
+  lastPullRequestDaysRequirement: number
   lastReleaseDays: number
   lastReleaseDaysRequirement: number
   openIssuesCount: number

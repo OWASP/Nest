@@ -112,6 +112,11 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         )
 
     @property
+    def last_pull_request_days_requirement(self) -> int:
+        """Get the last pull request requirement for the project."""
+        return self.project_requirements.last_pull_request_days
+
+    @property
     def last_release_days(self) -> int:
         """Calculate days since last release."""
         return (timezone.now() - self.last_released_at).days if self.last_released_at else 0

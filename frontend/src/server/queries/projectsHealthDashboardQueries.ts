@@ -31,6 +31,8 @@ export const GET_PROJECT_HEALTH_METRICS_DETAILS = gql`
         isLeaderRequirementsCompliant
         lastCommitDays
         lastCommitDaysRequirement
+        lastPullRequestDays
+        lastPullRequestDaysRequirement
         lastReleaseDays
         lastReleaseDaysRequirement
         openIssuesCount

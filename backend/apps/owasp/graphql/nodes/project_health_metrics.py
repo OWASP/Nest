@@ -63,6 +63,11 @@ class ProjectHealthMetricsNode:
         return self.last_pull_request_days
 
     @strawberry.field
+    def last_pull_request_days_requirement(self) -> int:
+        """Resolve last pull request age requirement in days."""
+        return self.last_pull_request_days_requirement
+
+    @strawberry.field
     def last_release_days(self) -> int:
         """Resolve last release age in days."""
         return self.last_release_days

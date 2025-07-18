@@ -122,21 +122,24 @@ const ProjectHealthMetricsDetails: FC = () => {
             title="Days Metrics"
             icon={faChartArea}
             labels={[
-              'Age Days',
-              'Last Commit Days',
-              'Last Release Days',
-              'OWASP Page Last Update Days',
+              'Project Age',
+              'Days Since Last Commit',
+              'Days Since Last Release',
+              'Days Since Last Pull Request',
+              'Days Since OWASP Page Last Update',
             ]}
             days={[
               metrics.ageDays,
               metrics.lastCommitDays,
               metrics.lastReleaseDays,
+              metrics.lastPullRequestDays,
               metrics.owaspPageLastUpdateDays,
             ]}
             requirements={[
               metrics.ageDaysRequirement,
               metrics.lastCommitDaysRequirement,
               metrics.lastReleaseDaysRequirement,
+              metrics.lastPullRequestDaysRequirement,
               metrics.owaspPageLastUpdateDaysRequirement,
             ]}
           />
