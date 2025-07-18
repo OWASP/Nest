@@ -18,7 +18,7 @@ export const config = {
     '/mentorship/programs',
     '/mentorship/programs/create',
     '/mentorship/programs/:programId',
-    '/mentorship/programs/:programId/createModule',
+    '/mentorship/programs/:programId/modules/create',
     '/mentorship/programs/:programId/edit',
     '/mentorship/programs/:programId/modules/:moduleId',
     '/mentorship/programs/:programId/modules/:moduleId/edit',

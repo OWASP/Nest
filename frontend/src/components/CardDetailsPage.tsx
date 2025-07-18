@@ -98,7 +98,7 @@ const DetailsCard = ({
                   <ActionButton
                     children=" Add Module"
                     onClick={() => {
-                      router.push(`${window.location.pathname}/createModule`)
+                      router.push(`${window.location.pathname}/modules/create`)
                     }}
                   />
                   {isDraft && (

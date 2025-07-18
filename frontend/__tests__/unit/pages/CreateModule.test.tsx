@@ -3,7 +3,7 @@ import { screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
-import CreateModulePage from 'app/mentorship/programs/[programKey]/createModule/page'
+import CreateModulePage from 'app/mentorship/programs/[programKey]/modules/create/page'
 
 jest.mock('next-auth/react', () => ({
   ...jest.requireActual('next-auth/react'),

@@ -60,7 +60,7 @@ describe('ProgramsSearchPage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(useSession as jest.Mock).mockReturnValue({
-      data: { user: { login: 'mockuser' } },
+      data: { user: { login: 'mock_user' } },
       status: 'authenticated',
     })
     ;(useUserRoles as jest.Mock).mockReturnValue({

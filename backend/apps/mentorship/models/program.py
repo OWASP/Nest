@@ -80,7 +80,7 @@ class Program(MatchingAttributes, StartEndRange, TimestampedModel):
         return self.name
 
     def save(self, *args, **kwargs) -> None:
-        """Save prompt."""
+        """Save program."""
         self.key = slugify(self.name)
 
         super().save(*args, **kwargs)

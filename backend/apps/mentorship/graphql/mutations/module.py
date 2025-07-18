@@ -68,10 +68,7 @@ class ModuleMutation:
     def create_module(self, info: strawberry.Info, input_data: CreateModuleInput) -> ModuleNode:
         """Create a new mentorship module. User must be an admin of the program."""
         user = info.context.request.user
-
-        if not hasattr(user, "github_user") or user.github_user is None:
-            msg = "Authenticated user does not have an associated GitHub profile."
-            raise ObjectDoesNotExist(msg)
+        IsAuthenticated.require_github_user(user)
 
         try:
             program = Program.objects.get(key=input_data.program_key)
@@ -118,10 +115,7 @@ class ModuleMutation:
     def update_module(self, info: strawberry.Info, input_data: UpdateModuleInput) -> ModuleNode:
         """Update an existing mentorship module. User must be an admin of the program."""
         user = info.context.request.user
-
-        if not hasattr(user, "github_user") or user.github_user is None:
-            msg = "Authenticated user does not have an associated GitHub profile."
-            raise ObjectDoesNotExist(msg)
+        IsAuthenticated.require_github_user(user)
 
         try:
             module = Module.objects.select_related("program").get(key=input_data.key)

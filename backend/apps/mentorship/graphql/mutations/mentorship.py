@@ -1,7 +1,6 @@
 """Mentorship role GraphQL mutations."""
 
 import strawberry
-from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import Q
 
@@ -29,10 +28,7 @@ class MentorshipMutations:
     def apply_as_mentee(self, info: strawberry.Info) -> ApplyAsRoleResult:
         """Register the authenticated user as a mentee."""
         user = info.context.request.user
-
-        if not hasattr(user, "github_user") or user.github_user is None:
-            msg = "Authenticated user does not have an associated GitHub profile."
-            raise ObjectDoesNotExist(msg)
+        IsAuthenticated.require_github_user(user)
 
         Mentee.objects.get_or_create(
             nest_user=user,
@@ -48,10 +44,7 @@ class MentorshipMutations:
     def apply_as_mentor(self, info: strawberry.Info) -> ApplyAsRoleResult:
         """Check for project leadership and register the user as a mentor."""
         user = info.context.request.user
-
-        if not hasattr(user, "github_user") or user.github_user is None:
-            msg = "Authenticated user does not have an associated GitHub profile."
-            raise ObjectDoesNotExist(msg)
+        IsAuthenticated.require_github_user(user)
 
         github_user = user.github_user
 

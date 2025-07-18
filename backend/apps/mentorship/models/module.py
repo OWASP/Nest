@@ -32,7 +32,7 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         blank=True,
         default="",
     )
-    key = models.CharField(verbose_name="Key", max_length=200, unique=True)
+    key = models.CharField(verbose_name="Key", max_length=200)
 
     # FKs.
     program = models.ForeignKey(

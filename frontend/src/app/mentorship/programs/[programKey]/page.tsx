@@ -6,10 +6,8 @@ import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import {
-  GET_PROGRAM_AND_MODULES,
-  UPDATE_PROGRAM_STATUS_MUTATION,
-} from 'server/queries/programsQueries'
+import { UPDATE_PROGRAM_STATUS_MUTATION } from 'server/mutations/programsMutations'
+import { GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
 import type { ExtendedSession } from 'types/auth'
 import type { Module, Program } from 'types/mentorship'
 import { ProgramStatusEnum } from 'types/mentorship'

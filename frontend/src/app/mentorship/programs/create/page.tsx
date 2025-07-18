@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 
-import { CREATE_PROGRAM } from 'server/queries/programsQueries'
+import { CREATE_PROGRAM } from 'server/mutations/programsMutations'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/ProgramForm'

@@ -10,8 +10,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToast } from '@heroui/toast'
 import { useUserRoles } from 'hooks/useUserRoles'
 import { useSession } from 'next-auth/react'
+import { APPLY_AS_MENTEE, APPLY_AS_MENTOR } from 'server/mutations/mentorshipMutations'
 import { GET_USER_ROLES } from 'server/queries/authQueries'
-import { APPLY_AS_MENTEE, APPLY_AS_MENTOR } from 'server/queries/mentorshipQueries'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const RoleApplicationPage = () => {

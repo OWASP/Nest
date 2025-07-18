@@ -210,7 +210,7 @@ const ModuleForm = ({
                       name="mentorLogins"
                       value={formData.mentorLogins}
                       onChange={handleInputChange}
-                      placeholder="johndoe, janedoe"
+                      placeholder="johndoe, jane_doe"
                       className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
                     />
                   </div>

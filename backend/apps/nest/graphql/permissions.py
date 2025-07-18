@@ -19,3 +19,13 @@ class IsAuthenticated(BasePermission):
     def on_unauthorized(self) -> Any:
         """Handle unauthorized access."""
         return GraphQLError(self.message, extensions={"code": "UNAUTHORIZED"})
+
+    @staticmethod
+    def require_github_user(user):
+        """Raise an error if the user has no GitHub profile."""
+        if not hasattr(user, "github_user") or user.github_user is None:
+            raise GraphQLError(
+                message="Authenticated user does not have a linked GitHub profile.",
+                extensions={"code": "GITHUB_PROFILE_MISSING"},
+            )
+        return user.github_user
