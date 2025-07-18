@@ -21,6 +21,10 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
     class Meta:
         db_table = "github_users"
+        indexes = [
+            models.Index(fields=["-created_at"], name="github_user_created_at_desc"),
+            models.Index(fields=["-updated_at"], name="github_user_updated_at_desc"),
+        ]
         verbose_name_plural = "Users"
 
     bio = models.TextField(verbose_name="Bio", max_length=1000, default="")
@@ -57,7 +61,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     @property
     def nest_url(self) -> str:
         """Get Nest URL for user."""
-        return get_absolute_url(f"members/{self.nest_key}")
+        return get_absolute_url(f"/members/{self.nest_key}")
 
     @property
     def releases(self):
@@ -94,7 +98,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
     def get_absolute_url(self):
         """Get absolute URL for the user."""
-        return self.nest_url
+        return f"/members/{self.nest_key}"
 
     @staticmethod
     def bulk_save(users, fields=None) -> None:

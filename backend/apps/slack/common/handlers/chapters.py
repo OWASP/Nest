@@ -100,7 +100,7 @@ def get_blocks(
         blocks.append(
             markdown(
                 f"⚠️ *Extended search over {Chapter.active_chapters_count()} OWASP chapters "
-                f"is available at <{get_absolute_url('chapters')}"
+                f"is available at <{get_absolute_url('/chapters')}"
                 f"?q={search_query}|{settings.SITE_NAME}>*{NL}"
                 f"{FEEDBACK_CHANNEL_MESSAGE}"
             )

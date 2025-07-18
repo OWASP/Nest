@@ -1,9 +1,18 @@
 from unittest.mock import MagicMock, patch
 
-from apps.sitemap.views import MemberSitemap
+from apps.sitemap.views.base import BaseSitemap
+from apps.sitemap.views.member import MemberSitemap
 
 
 class TestMemberSitemap:
+    def test_changefreq(self):
+        sitemap = MemberSitemap()
+
+        assert sitemap.changefreq(MagicMock()) == "daily"
+
+    def test_inherits_from_base(self):
+        assert issubclass(MemberSitemap, BaseSitemap)
+
     @patch("apps.sitemap.views.member.User")
     def test_items(self, mock_user):
         mock_obj = MagicMock(is_indexable=True)
@@ -12,9 +21,11 @@ class TestMemberSitemap:
 
         assert list(sitemap.items()) == [mock_obj]
 
+    def test_limit(self):
+        sitemap = MemberSitemap()
+        assert sitemap.limit == 50000
+
     def test_location(self):
-        obj = MagicMock()
-        obj.get_absolute_url.return_value = "/members/qux"
         sitemap = MemberSitemap()
 
-        assert sitemap.location(obj) == "/members/qux"
+        assert sitemap.location(MagicMock(nest_key="bar")) == "/members/bar"

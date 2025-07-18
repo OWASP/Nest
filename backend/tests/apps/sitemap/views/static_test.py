@@ -4,7 +4,8 @@ from unittest.mock import patch
 import pytest
 from django.utils import timezone
 
-from apps.sitemap.views import StaticSitemap
+from apps.sitemap.views.base import BaseSitemap
+from apps.sitemap.views.static import StaticSitemap
 
 
 @pytest.fixture
@@ -13,6 +14,16 @@ def sitemap():
 
 
 class TestStaticSitemap:
+    def test_changefreq(self, sitemap):
+        for item in sitemap.STATIC_ROUTES:
+            assert sitemap.changefreq(item) == item["changefreq"]
+
+    def test_inherits_from_base(self):
+        assert issubclass(StaticSitemap, BaseSitemap)
+
+    def test_items(self, sitemap):
+        assert sitemap.items() == sitemap.STATIC_ROUTES
+
     @patch("apps.sitemap.views.static.Chapter.objects.aggregate")
     @patch("apps.sitemap.views.static.Committee.objects.aggregate")
     @patch("apps.sitemap.views.static.Project.objects.aggregate")
@@ -27,16 +38,12 @@ class TestStaticSitemap:
             result = sitemap.lastmod(item)
             assert result is not None
 
-    def test_items(self, sitemap):
-        assert sitemap.items() == sitemap.STATIC_ROUTES
+    def test_limit(self, sitemap):
+        assert sitemap.limit == 50000
 
     def test_location(self, sitemap):
         for item in sitemap.STATIC_ROUTES:
             assert sitemap.location(item) == item["path"]
-
-    def test_changefreq(self, sitemap):
-        for item in sitemap.STATIC_ROUTES:
-            assert sitemap.changefreq(item) == item["changefreq"]
 
     def test_priority(self, sitemap):
         for item in sitemap.STATIC_ROUTES:
