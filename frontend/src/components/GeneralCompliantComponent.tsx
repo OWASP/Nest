@@ -17,10 +17,13 @@ const GeneralCompliantComponent: FC<{
 
   return (
     <SecondaryCard
-      className={clsx('pointer-events-auto items-center justify-center text-center font-light', {
-        [greenClass]: compliant,
-        [redClass]: !compliant,
-      })}
+      className={clsx(
+        'pointer-events-auto items-center justify-center text-center font-light transition-colors duration-200',
+        {
+          [greenClass]: compliant,
+          [redClass]: !compliant,
+        }
+      )}
     >
       <Tooltip content={title} placement="top">
         <FontAwesomeIcon icon={icon} className="text-4xl" />

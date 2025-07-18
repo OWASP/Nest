@@ -2,22 +2,21 @@
 
 import { useQuery } from '@apollo/client'
 import {
-  faStar,
-  faFolderOpen,
-  faQuestionCircle,
-  faHandshake,
-} from '@fortawesome/free-regular-svg-icons'
-import {
   faPeopleGroup,
   faCodeFork,
   faDollar,
   faCodePullRequest,
   faChartArea,
   faExclamationCircle,
+  faQuestionCircle,
+  faFolderOpen,
+  faHandshake,
   faTag,
   faRocket,
+  faStar,
   faTags,
 } from '@fortawesome/free-solid-svg-icons'
+import millify from 'millify'
 import { useParams } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
@@ -28,7 +27,6 @@ import DashboardCard from 'components/DashboardCard'
 import GeneralCompliantComponent from 'components/GeneralCompliantComponent'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
-
 const ProjectHealthMetricsDetails: FC = () => {
   const { projectKey } = useParams()
   const [metrics, setMetrics] = useState<HealthMetricsProps>()
@@ -73,51 +71,51 @@ const ProjectHealthMetricsDetails: FC = () => {
             />
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <DashboardCard title="Stars" icon={faStar} stats={metrics.starsCount.toString()} />
-            <DashboardCard title="Forks" icon={faCodeFork} stats={metrics.forksCount.toString()} />
+            <DashboardCard title="Stars" icon={faStar} stats={millify(metrics.starsCount)} />
+            <DashboardCard title="Forks" icon={faCodeFork} stats={millify(metrics.forksCount)} />
             <DashboardCard
               title="Contributors"
               icon={faPeopleGroup}
-              stats={metrics.contributorsCount.toString()}
+              stats={millify(metrics.contributorsCount)}
             />
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
             <DashboardCard
               title="Open Issues"
               icon={faExclamationCircle}
-              stats={metrics.openIssuesCount.toString()}
+              stats={millify(metrics.openIssuesCount)}
             />
             <DashboardCard
               title="Total Issues"
               icon={faFolderOpen}
-              stats={metrics.totalIssuesCount.toString()}
+              stats={millify(metrics.totalIssuesCount)}
             />
             <DashboardCard
               title="Unassigned Issues"
               icon={faTag}
-              stats={metrics.unassignedIssuesCount.toString()}
+              stats={millify(metrics.unassignedIssuesCount)}
             />
             <DashboardCard
               title="Unanswered Issues"
               icon={faQuestionCircle}
-              stats={metrics.unansweredIssuesCount.toString()}
+              stats={millify(metrics.unansweredIssuesCount)}
             />
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <DashboardCard
               title="Open Pull Requests"
               icon={faCodePullRequest}
-              stats={metrics.openPullRequestsCount.toString()}
+              stats={millify(metrics.openPullRequestsCount)}
             />
             <DashboardCard
               title="Recent Releases"
               icon={faRocket}
-              stats={metrics.recentReleasesCount.toString()}
+              stats={millify(metrics.recentReleasesCount)}
             />
             <DashboardCard
               title="Total Releases"
               icon={faTags}
-              stats={metrics.totalReleasesCount.toString()}
+              stats={millify(metrics.totalReleasesCount)}
             />
           </div>
           <BarChart
