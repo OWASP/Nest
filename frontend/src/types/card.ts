@@ -11,6 +11,7 @@ import type { Milestone } from 'types/milestone'
 import type { RepositoryCardProps } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
+import type { User } from 'types/user'
 
 export type CardProps = {
   button: Button
@@ -53,6 +54,7 @@ export interface DetailsCardProps {
   stats?: Stats[]
   summary?: string
   title?: string
+  leaders?: User[]
   topContributors?: Contributor[]
   topics?: string[]
   type: string
