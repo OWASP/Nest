@@ -46,7 +46,7 @@ class EventBase:
         """Get the Jinja template file for direct message.
 
         Returns:
-            Template: The Jinja template object.
+            Template | None: The Jinja template object or None.
 
         """
         return (
@@ -60,7 +60,7 @@ class EventBase:
         """Get the Jinja template file path for direct message.
 
         Returns:
-            Path: The Jinja template path.
+            Path | None: The Jinja template path or None.
 
         """
         return Path(f"events/{convert_to_snake_case(self.__class__.__name__)}.jinja")
@@ -70,7 +70,7 @@ class EventBase:
         """Get the Jinja template file for ephemeral message.
 
         Returns:
-            Template: The Jinja template object.
+            Template | None: The Jinja template object or None.
 
         """
         return (
@@ -84,7 +84,7 @@ class EventBase:
         """Get the Jinja template file path for ephemeral message.
 
         Returns:
-            str: The Jinja template path or None.
+            Path | None: The Jinja template path or None.
 
         """
         return None

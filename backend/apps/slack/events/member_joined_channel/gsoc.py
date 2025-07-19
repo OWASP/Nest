@@ -11,8 +11,6 @@ from apps.slack.events.event import EventBase
 
 logger: logging.Logger = logging.getLogger(__name__)
 
-MARCH = 3
-
 
 class Gsoc(EventBase):
     """Slack GSoC channel join event handler."""

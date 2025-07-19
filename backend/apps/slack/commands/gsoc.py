@@ -5,6 +5,7 @@ from django.utils import timezone
 from apps.common.utils import get_absolute_url
 from apps.slack.commands.command import CommandBase
 from apps.slack.common.constants import COMMAND_START
+from apps.slack.common.gsoc import MARCH
 from apps.slack.constants import (
     OWASP_CONTRIBUTE_CHANNEL_ID,
     OWASP_GSOC_CHANNEL_ID,
@@ -15,8 +16,6 @@ SUPPORTED_YEAR_START = 2012
 SUPPORTED_YEAR_END = 2025
 SUPPORTED_YEARS = set(range(SUPPORTED_YEAR_START, SUPPORTED_YEAR_END + 1))
 SUPPORTED_ANNOUNCEMENT_YEARS = SUPPORTED_YEARS - {2012, 2013, 2014, 2015, 2016, 2018}
-
-MARCH = 3
 
 
 class Gsoc(CommandBase):
