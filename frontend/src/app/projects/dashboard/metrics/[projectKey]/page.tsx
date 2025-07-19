@@ -70,8 +70,8 @@ const ProjectHealthMetricsDetails: FC = () => {
               color="primary"
               onPress={async () => {
                 await fetchMetricsPDF(
-                  `owasp/projects-health-metrics/${projectKey}/pdf`,
-                  `${metricsLatest.projectName}-health-metrics.pdf`
+                  `owasp/project-health-metrics/${projectKey}/pdf`,
+                  `${projectKey}-health-metrics.pdf`
                 )
               }}
             >
