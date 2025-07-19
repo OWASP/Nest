@@ -92,7 +92,7 @@ const ProjectDetailsPage = () => {
     <DetailsCard
       details={projectDetails}
       entityKey={project.key}
-      healthMetricsData={project.healthMetrics}
+      healthMetricsData={project.healthMetricsList}
       isActive={project.isActive}
       languages={project.languages}
       pullRequests={project.recentPullRequests}

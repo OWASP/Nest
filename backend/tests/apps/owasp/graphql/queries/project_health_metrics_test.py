@@ -84,6 +84,8 @@ class TestProjectHealthMetricsQuery:
                 is_funding_requirements_compliant=True,
                 is_leader_requirements_compliant=True,
                 recent_releases_count=3,
+                total_issues_count=15,
+                total_releases_count=5,
             )
         ]
         query = ProjectHealthMetricsQuery(project_health_metrics=metrics)

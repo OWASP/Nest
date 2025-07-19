@@ -44,8 +44,13 @@ class TestProjectNode:
             (f for f in ProjectNode.__strawberry_definition__.fields if f.name == name), None
         )
 
-    def test_resolve_health_metrics(self):
-        field = self._get_field_by_name("health_metrics")
+    def test_resolve_health_metrics_latest(self):
+        field = self._get_field_by_name("health_metrics_latest")
+        assert field is not None
+        assert field.type.of_type is ProjectHealthMetricsNode
+
+    def test_resolve_health_metrics_list(self):
+        field = self._get_field_by_name("health_metrics_list")
         assert field is not None
         assert field.type.of_type is ProjectHealthMetricsNode
 

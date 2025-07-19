@@ -19,7 +19,7 @@ export type Project = {
   contributorsCount: number
   description: string
   forksCount: number
-  healthMetrics?: HealthMetricsProps[]
+  healthMetricsList?: HealthMetricsProps[]
   isActive: boolean
   issuesCount: number
   key: string

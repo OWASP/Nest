@@ -2,7 +2,7 @@ export const mockProjectDetailsData = {
   project: {
     contributorsCount: 1200,
     forksCount: 10,
-    healthMetrics: [
+    healthMetricsList: [
       {
         openIssuesCount: 5,
         unassignedIssuesCount: 2,
