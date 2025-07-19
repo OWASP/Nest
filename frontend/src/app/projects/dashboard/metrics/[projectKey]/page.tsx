@@ -12,9 +12,11 @@ import {
   faStar,
   faTags,
 } from '@fortawesome/free-solid-svg-icons'
+import { Button } from '@heroui/button'
 import { useParams } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
+import { fetchMetricsPDF } from 'server/fetchMetricsPDF'
 import { GET_PROJECT_HEALTH_METRICS_DETAILS } from 'server/queries/projectsHealthDashboardQueries'
 import { HealthMetricsProps } from 'types/healthMetrics'
 import BarChart from 'components/BarChart'
@@ -63,6 +65,18 @@ const ProjectHealthMetricsDetails: FC = () => {
         <>
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">{metricsLatest.projectName}</h1>
+            <Button
+              variant="solid"
+              color="primary"
+              onPress={async () => {
+                await fetchMetricsPDF(
+                  `owasp/projects-health-metrics/${projectKey}/pdf`,
+                  `${metricsLatest.projectName}-health-metrics.pdf`
+                )
+              }}
+            >
+              Download PDF
+            </Button>
             <div className="flex items-center gap-2">
               <MetricsScoreCircle score={metricsLatest.score} />
               <GeneralCompliantComponent
