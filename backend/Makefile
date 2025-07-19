@@ -6,6 +6,8 @@ include backend/apps/slack/Makefile
 clean-backend-dependencies:
 	@rm -rf backend/.cache
 	@rm -rf backend/.local
+	@rm -rf backend/.pytest_cache
+	@rm -rf backend/.ruff_cache
 	@rm -rf backend/.venv
 
 clean-backend-docker:
