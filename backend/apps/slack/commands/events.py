@@ -6,6 +6,7 @@ from apps.slack.commands.command import CommandBase
 
 def get_events_data():
     """Get events data for the template."""
+    # Local import to avoid AppRegistryNotReady exception.
     from apps.owasp.models.event import Event
 
     return [

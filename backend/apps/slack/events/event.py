@@ -83,6 +83,9 @@ class EventBase:
     def ephemeral_message_template_path(self) -> Path | None:
         """Get the Jinja template file path for ephemeral message.
 
+        Ephemeral messages are optional so it returns None by default
+        but can be overridden in subclasses.
+
         Returns:
             Path | None: The Jinja template path or None.
 
