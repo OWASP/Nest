@@ -12,9 +12,11 @@ import {
   faChartColumn,
   faHeart,
 } from '@fortawesome/free-solid-svg-icons'
+import { Button } from '@heroui/button'
 import millify from 'millify'
 import { useState, useEffect, FC } from 'react'
 import { handleAppError } from 'app/global-error'
+import { fetchMetricsOverviewPDF } from 'server/fetchMetricsOverivewPDF'
 import { GET_PROJECT_HEALTH_STATS } from 'server/queries/projectsHealthDashboardQueries'
 import type { ProjectHealthStats } from 'types/projectHealthStats'
 import DashboardCard from 'components/DashboardCard'
@@ -22,7 +24,6 @@ import DonutBarChart from 'components/DonutBarChart'
 import LineChart from 'components/LineChart'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProjectTypeDashboardCard from 'components/ProjectTypeDashboardCard'
-
 const ProjectsDashboardPage: FC = () => {
   const [stats, setStats] = useState<ProjectHealthStats>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -95,7 +96,16 @@ const ProjectsDashboardPage: FC = () => {
   ]
   return (
     <>
-      <h1 className="font-semibold">Project Health Dashboard Overview</h1>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="font-semibold">Project Health Dashboard Overview</h1>
+        <Button
+          variant="solid"
+          color="primary"
+          onPress={async () => await fetchMetricsOverviewPDF()}
+        >
+          Download PDF
+        </Button>
+      </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
         {projectsCardsItems.map((item) => (
           <ProjectTypeDashboardCard
