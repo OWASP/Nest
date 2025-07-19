@@ -6,7 +6,12 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.mentorship.models.common import ExperienceLevel, MatchingAttributes, StartEndRange
+from apps.common.utils import slugify
+from apps.mentorship.models.common import (
+    ExperienceLevel,
+    MatchingAttributes,
+    StartEndRange,
+)
 
 
 class Program(MatchingAttributes, StartEndRange, TimestampedModel):
@@ -49,6 +54,7 @@ class Program(MatchingAttributes, StartEndRange, TimestampedModel):
         unique=True,
         verbose_name="Name",
     )
+    key = models.CharField(verbose_name="Key", max_length=200, unique=True)
 
     status = models.CharField(
         verbose_name="Status",
@@ -72,3 +78,9 @@ class Program(MatchingAttributes, StartEndRange, TimestampedModel):
 
         """
         return self.name
+
+    def save(self, *args, **kwargs) -> None:
+        """Save program."""
+        self.key = slugify(self.name)
+
+        super().save(*args, **kwargs)

@@ -18,3 +18,10 @@ export const SYNC_DJANGO_SESSION_MUTATION = gql`
     }
   }
 `
+export const GET_USER_ROLES = gql`
+  query GetUserRoles {
+    currentUserRoles {
+      roles
+    }
+  }
+`

@@ -16,12 +16,10 @@ async function createApolloClient() {
       },
     }
   })
-
   const httpLink = createHttpLink({
     credentials: 'same-origin',
     uri: process.env.NEXT_SERVER_GRAPHQL_URL,
   })
-
   return new ApolloClient({
     cache: new InMemoryCache().restore(globalThis.__APOLLO_STATE__ ?? {}),
     link: authLink.concat(httpLink),

@@ -13,6 +13,13 @@ export const headerLinks: Link[] = [
     ],
   },
   {
+    text: 'Mentorship',
+    submenu: [
+      { text: 'Enrollment', href: '/mentorship' },
+      { text: 'Programs', href: '/mentorship/programs' },
+    ],
+  },
+  {
     text: 'Projects',
     href: '/projects',
   },
