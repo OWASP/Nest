@@ -22,6 +22,7 @@ venv/
 *.key
 *.log
 *.pem
+*.pdf
 backend/.venv
 backend/data/backup*
 backend/staticfiles
