@@ -15,6 +15,9 @@ clean-backend-docker:
 	@docker image rm -f nest-local-backend >/dev/null 2>&1 || true
 	@docker volume rm -f nest-local_backend-venv >/dev/null 2>&1 || true
 
+create-superuser:
+	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
+
 exec-backend-command:
 	@docker exec -i nest-backend $(CMD)
 
@@ -38,9 +41,9 @@ dump-data:
 	@CMD="python manage.py dumpdata \
 		github \
 		owasp \
-		slack.conversation \
-		slack.member \
-		slack.workspace \
+		slack.Conversation \
+		slack.Member \
+		slack.Workspace \
 		--indent=4 \
 		--natural-foreign \
 		--natural-primary -o data/nest.json" $(MAKE) exec-backend-command
@@ -80,10 +83,11 @@ purge-data:
 	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command
 
 recreate-schema:
+	@echo "Recreating Nest schema"
 	@CMD="psql -U nest_user_dev -d nest_db_dev -c \
 		'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nest_user_dev'" \
 	  	$(MAKE) exec-db-command-it 2>/dev/null
-	$(MAKE) migrate
+	@$(MAKE) migrate
 
 restore-backup:
 	@echo "Restoring Nest backup"
@@ -93,9 +97,6 @@ save-backup:
 	@echo "Saving Nest backup"
 	@CMD="python manage.py dumpdata --natural-primary --natural-foreign --indent=2" $(MAKE) exec-backend-command > backend/data/backup.json
 	@gzip backend/data/backup.json
-
-setup:
-	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
 
 shell-backend:
 	@CMD="/bin/sh" $(MAKE) exec-backend-command-it

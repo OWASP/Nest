@@ -94,7 +94,7 @@ def get_blocks(
         blocks.append(
             markdown(
                 f"⚠️ *Extended search over {Committee.active_committees_count()} OWASP committees "
-                f"is available at <{get_absolute_url('committees')}"
+                f"is available at <{get_absolute_url('/committees')}"
                 f"?q={search_query}|{settings.SITE_NAME}>*{NL}"
                 f"{FEEDBACK_CHANNEL_MESSAGE}"
             )

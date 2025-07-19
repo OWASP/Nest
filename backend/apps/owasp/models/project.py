@@ -38,6 +38,7 @@ class Project(
         db_table = "owasp_projects"
         indexes = [
             models.Index(fields=["-created_at"], name="project_created_at_desc_idx"),
+            models.Index(fields=["-updated_at"], name="project_updated_at_desc_idx"),
         ]
         verbose_name_plural = "Projects"
 
@@ -175,7 +176,7 @@ class Project(
     @property
     def nest_url(self) -> str:
         """Get Nest URL for project."""
-        return get_absolute_url(f"projects/{self.nest_key}")
+        return get_absolute_url(f"/projects/{self.nest_key}")
 
     @property
     def open_issues(self):
@@ -303,6 +304,10 @@ class Project(
 
         self.created_at = repository.created_at
         self.updated_at = repository.updated_at
+
+    def get_absolute_url(self):
+        """Get absolute URL for project."""
+        return f"/projects/{self.nest_key}"
 
     def save(self, *args, **kwargs) -> None:
         """Save the project instance."""

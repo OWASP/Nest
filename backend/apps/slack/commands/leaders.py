@@ -46,7 +46,7 @@ class Leaders(CommandBase):
                 "idx_key": chapter["idx_key"],
                 "idx_leaders": chapter["idx_leaders"],
                 "idx_name": chapter["idx_name"],
-                "url": get_absolute_url(f"chapters/{chapter['idx_key']}"),
+                "url": get_absolute_url(f"/chapters/{chapter['idx_key']}"),
             }
             for chapter in chapters
         ]
@@ -55,7 +55,7 @@ class Leaders(CommandBase):
                 "idx_key": project["idx_key"],
                 "idx_leaders": project["idx_leaders"],
                 "idx_name": project["idx_name"],
-                "url": get_absolute_url(f"projects/{project['idx_key']}"),
+                "url": get_absolute_url(f"/projects/{project['idx_key']}"),
             }
             for project in projects
         ]

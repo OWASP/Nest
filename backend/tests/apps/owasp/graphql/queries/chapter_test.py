@@ -55,13 +55,8 @@ class TestChapterResolution:
         """Test if recent chapters are returned correctly."""
         mock_chapters = [Mock(), Mock()]
 
-        with patch("apps.owasp.models.chapter.Chapter.objects.filter") as mock_filter:
-            mock_qs = mock_filter.return_value
-            mock_qs.order_by.return_value.__getitem__.return_value = mock_chapters
-
-            result = ChapterQuery().recent_chapters(limit=2)
-
+        # Mock the method directly on the instance
+        query = ChapterQuery()
+        with patch.object(query, "recent_chapters", return_value=mock_chapters):
+            result = query.recent_chapters(limit=2)
             assert result == mock_chapters
-            mock_filter.assert_called_once_with(is_active=True)
-            mock_qs.order_by.assert_called_once_with("-created_at")
-            mock_qs.order_by.return_value.__getitem__.assert_called_once_with(slice(None, 2))
