@@ -24,7 +24,9 @@ export type ApexBarChartDataSeries = {
 }
 
 export type HealthMetricsProps = {
+  id: string
   createdAt: string
+  contributorsCount: number
   forksCount: number
   lastCommitDays: number
   lastCommitDaysRequirement: number
@@ -32,8 +34,20 @@ export type HealthMetricsProps = {
   lastReleaseDaysRequirement: number
   openIssuesCount: number
   openPullRequestsCount: number
+  projectName: string
+  projectKey: string
   score: number
   starsCount: number
   unassignedIssuesCount: number
   unansweredIssuesCount: number
+}
+
+export type HealthMetricsFilter = {
+  score?: {
+    gt?: number
+    gte?: number
+    lt?: number
+    lte?: number
+  }
+  level?: string
 }
