@@ -9,12 +9,14 @@ export const fetchMetricsPDF = async (path: string, fileName: string): Promise<v
     },
   })
   if (!response.ok) {
-    throw new Error(`Failed to fetch PDF: ${response.statusText}`)
+    handleAppError(new Error(`Failed to fetch PDF: ${response.status} ${response.statusText}`))
+    return
   }
   try {
     const blob = await response.blob()
     if (!blob) {
-      throw new Error('No PDF data received')
+      handleAppError(new Error('No data received from the server'))
+      return
     }
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
@@ -23,6 +25,7 @@ export const fetchMetricsPDF = async (path: string, fileName: string): Promise<v
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
   } catch (error) {
     handleAppError(error)
   }
