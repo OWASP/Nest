@@ -9,6 +9,7 @@ from .committee import CommitteeSitemap
 from .member import MemberSitemap
 from .project import ProjectSitemap
 from .static import StaticSitemap
+from .repository import RepositorySitemap
 
 
 def cached_sitemap_view(sitemaps, **kwargs):

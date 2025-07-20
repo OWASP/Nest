@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 from django.db.models import Max
 
 from apps.github.models.user import User
+from apps.github.models.repository import Repository
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
 from apps.owasp.models.project import Project
@@ -34,6 +35,7 @@ class StaticSitemap(BaseSitemap):
             "/contribute": Project,
             "/members": User,
             "/projects": Project,
+            "/repositories": Repository,
         }
 
         return (
