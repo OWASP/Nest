@@ -63,19 +63,19 @@ const ProjectHealthMetricsDetails: FC = () => {
         <>
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">{metricsLatest.projectName}</h1>
-            <MetricsScoreCircle score={metricsLatest.score} />
-          </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <GeneralCompliantComponent
-              title="Funding Requirements Compliant"
-              icon={faDollar}
-              compliant={metricsLatest.isFundingRequirementsCompliant}
-            />
-            <GeneralCompliantComponent
-              title="Leader Requirements Compliant"
-              icon={faHandshake}
-              compliant={metricsLatest.isLeaderRequirementsCompliant}
-            />
+            <div className="flex items-center gap-2">
+              <GeneralCompliantComponent
+                title="Funding Requirements Compliant"
+                icon={faDollar}
+                compliant={metricsLatest.isFundingRequirementsCompliant}
+              />
+              <MetricsScoreCircle score={metricsLatest.score} />
+              <GeneralCompliantComponent
+                title="Leader Requirements Compliant"
+                icon={faHandshake}
+                compliant={metricsLatest.isLeaderRequirementsCompliant}
+              />
+            </div>
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <LineChart
