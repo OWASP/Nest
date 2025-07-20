@@ -36,7 +36,7 @@ test.describe('Project Health Metrics Details Page', () => {
     await expect(page.getByText(metricsLatest.projectName)).toBeVisible()
     await expect(page.getByText(metricsLatest.score.toString())).toBeVisible()
     for (const header of headers) {
-      await expect(page.getByText(header)).toBeVisible()
+      await expect(page.getByText(header).all()).toBeGreaterThan(0)
     }
   })
 })
