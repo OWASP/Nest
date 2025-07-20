@@ -15,8 +15,8 @@ importers:
         specifier: ^2.0.9
         version: 2.0.9
       '@cspell/dict-en_us':
-        specifier: ^4.4.15
-        version: 4.4.15
+        specifier: ^4.4.16
+        version: 4.4.16
       '@cspell/dict-fullstack':
         specifier: ^3.2.7
         version: 3.2.7
@@ -27,14 +27,14 @@ importers:
         specifier: ^1.0.12
         version: 1.0.12
       '@cspell/dict-people-names':
-        specifier: ^1.1.12
-        version: 1.1.12
+        specifier: ^1.1.13
+        version: 1.1.13
       '@cspell/dict-software-terms':
         specifier: ^4.2.5
         version: 4.2.5
       '@cspell/dict-win32':
-        specifier: ^2.0.8
-        version: 2.0.8
+        specifier: ^2.0.9
+        version: 2.0.9
       cspell:
         specifier: ^8.19.4
         version: 8.19.4
@@ -116,8 +116,8 @@ packages:
   '@cspell/dict-en-gb@1.1.33':
     resolution: {integrity: sha512-tKSSUf9BJEV+GJQAYGw5e+ouhEe2ZXE620S7BLKe3ZmpnjlNG9JqlnaBhkIMxKnNFkLY2BP/EARzw31AZnOv4g==}
 
-  '@cspell/dict-en_us@4.4.15':
-    resolution: {integrity: sha512-mhWaLui5aq0pgM4oIqAJNbOW/wQG3epe4nu22eqYTLQN+ztdzyn7aFpE+9yTtZTNvldK0xtN7jgk2mtHZ9w+1A==}
+  '@cspell/dict-en_us@4.4.16':
+    resolution: {integrity: sha512-/R47sUbUmba2dG/0LZyE6P6gX/DRF1sCcYNQNWyPk/KeidQRNZG+FH9U0KRvX42/2ZzMge6ebXH3WAJ52w0Vqw==}
 
   '@cspell/dict-filetypes@3.0.13':
     resolution: {integrity: sha512-g6rnytIpQlMNKGJT1JKzWkC+b3xCliDKpQ3ANFSq++MnR4GaLiifaC4JkVON11Oh/UTplYOR1nY3BR4X30bswA==}
@@ -196,8 +196,8 @@ packages:
   '@cspell/dict-npm@5.2.12':
     resolution: {integrity: sha512-f5xcEl6+JZCFvDCOKJJuKv1ZMOzq9sBg/7y/iuqkBOgjeGDdB+PSrOJWk2jqu3PzXjjX39KJkt7mRUzv8Mrh1g==}
 
-  '@cspell/dict-people-names@1.1.12':
-    resolution: {integrity: sha512-SywnY5wZUhXKQZo6Q4odmOfnDF2PCrKnXam3xSTjp3AJ9EFWjCkHNLUnY627SkPyrDkzk3bnVia2MPGntHrg0A==}
+  '@cspell/dict-people-names@1.1.13':
+    resolution: {integrity: sha512-22BmGcNjDzYDsja99gDK1Az/BjkX8Xmk+n4MKUDm17kaMxykm7aSSN5+PMj9a+oMnEXSvXmfGPrMBJbS3AOsJQ==}
 
   '@cspell/dict-php@4.0.15':
     resolution: {integrity: sha512-iepGB2gtToMWSTvybesn4/lUp4LwXcEm0s8vasJLP76WWVkq1zYjmeS+WAIzNgsuURyZ/9mGqhS0CWMuo74ODw==}
@@ -250,8 +250,8 @@ packages:
   '@cspell/dict-vue@3.0.5':
     resolution: {integrity: sha512-Mqutb8jbM+kIcywuPQCCaK5qQHTdaByoEO2J9LKFy3sqAdiBogNkrplqUK0HyyRFgCfbJUgjz3N85iCMcWH0JA==}
 
-  '@cspell/dict-win32@2.0.8':
-    resolution: {integrity: sha512-mrXPYu6vfXpZvp3abi40eXWl09gkoxTqfITJaNLOn4GIxqy7cYGRRrxcVMgUNRmksJ2vlDyQKuyHEbOVhFYT5w==}
+  '@cspell/dict-win32@2.0.9':
+    resolution: {integrity: sha512-Jr7CR+6VghZ3PAz4zMM65wmAKZ0HpTaWk9r5VPv7Oo9AfLU1n0aZaK3LNSFudn4FZ9CGG+/5V3gAbMxlJy7r/Q==}
 
   '@cspell/dynamic-import@8.19.4':
     resolution: {integrity: sha512-0LLghC64+SiwQS20Sa0VfFUBPVia1rNyo0bYeIDoB34AA3qwguDBVJJkthkpmaP1R2JeR/VmxmJowuARc4ZUxA==}
@@ -471,7 +471,7 @@ snapshots:
       '@cspell/dict-elixir': 4.0.8
       '@cspell/dict-en-common-misspellings': 2.1.3
       '@cspell/dict-en-gb': 1.1.33
-      '@cspell/dict-en_us': 4.4.15
+      '@cspell/dict-en_us': 4.4.16
       '@cspell/dict-filetypes': 3.0.13
       '@cspell/dict-flutter': 1.1.1
       '@cspell/dict-fonts': 4.0.5
@@ -563,7 +563,7 @@ snapshots:
 
   '@cspell/dict-en-gb@1.1.33': {}
 
-  '@cspell/dict-en_us@4.4.15': {}
+  '@cspell/dict-en_us@4.4.16': {}
 
   '@cspell/dict-filetypes@3.0.13': {}
 
@@ -618,7 +618,7 @@ snapshots:
 
   '@cspell/dict-npm@5.2.12': {}
 
-  '@cspell/dict-people-names@1.1.12': {}
+  '@cspell/dict-people-names@1.1.13': {}
 
   '@cspell/dict-php@4.0.15': {}
 
@@ -656,7 +656,7 @@ snapshots:
 
   '@cspell/dict-vue@3.0.5': {}
 
-  '@cspell/dict-win32@2.0.8': {}
+  '@cspell/dict-win32@2.0.9': {}
 
   '@cspell/dynamic-import@8.19.4':
     dependencies:
