@@ -8,28 +8,24 @@ import {
   faCodePullRequest,
   faChartArea,
   faExclamationCircle,
-  faQuestionCircle,
-  faFolderOpen,
   faHandshake,
-  faTag,
-  faRocket,
   faStar,
   faTags,
 } from '@fortawesome/free-solid-svg-icons'
-import millify from 'millify'
 import { useParams } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
 import { GET_PROJECT_HEALTH_METRICS_DETAILS } from 'server/queries/projectsHealthDashboardQueries'
 import { HealthMetricsProps } from 'types/healthMetrics'
 import BarChart from 'components/BarChart'
-import DashboardCard from 'components/DashboardCard'
 import GeneralCompliantComponent from 'components/GeneralCompliantComponent'
+import LineChart from 'components/LineChart'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 const ProjectHealthMetricsDetails: FC = () => {
   const { projectKey } = useParams()
-  const [metrics, setMetrics] = useState<HealthMetricsProps>()
+  const [metricsList, setMetricsList] = useState<HealthMetricsProps[]>()
+  const [metricsLatest, setMetricsLatest] = useState<HealthMetricsProps>()
   const {
     loading,
     error: graphqlError,
@@ -43,79 +39,136 @@ const ProjectHealthMetricsDetails: FC = () => {
       handleAppError(graphqlError)
     }
     if (data?.project?.healthMetricsLatest) {
-      setMetrics(data.project.healthMetricsLatest)
+      setMetricsLatest(data.project.healthMetricsLatest)
+    }
+    if (data?.project?.healthMetricsList) {
+      setMetricsList(data.project.healthMetricsList)
     }
   }, [graphqlError, data])
+
   if (loading) {
     return <LoadingSpinner />
   }
 
+  const labels =
+    metricsList?.map((m) =>
+      new Date(m.createdAt).toLocaleString('default', {
+        month: 'short',
+        day: 'numeric',
+      })
+    ) || []
   return (
     <div className="flex flex-col gap-4">
-      {metrics && (
+      {metricsList && metricsLatest && (
         <>
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">{metrics.projectName}</h1>
-            <MetricsScoreCircle score={metrics.score} />
+            <h1 className="text-2xl font-bold">{metricsLatest.projectName}</h1>
+            <MetricsScoreCircle score={metricsLatest.score} />
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <GeneralCompliantComponent
               title="Funding Requirements Compliant"
               icon={faDollar}
-              compliant={metrics.isFundingRequirementsCompliant}
+              compliant={metricsLatest.isFundingRequirementsCompliant}
             />
             <GeneralCompliantComponent
               title="Leader Requirements Compliant"
               icon={faHandshake}
-              compliant={metrics.isLeaderRequirementsCompliant}
+              compliant={metricsLatest.isLeaderRequirementsCompliant}
             />
           </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <DashboardCard title="Stars" icon={faStar} stats={millify(metrics.starsCount)} />
-            <DashboardCard title="Forks" icon={faCodeFork} stats={millify(metrics.forksCount)} />
-            <DashboardCard
-              title="Contributors"
-              icon={faPeopleGroup}
-              stats={millify(metrics.contributorsCount)}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <LineChart
+              title="Stars"
+              icon={faStar}
+              series={[
+                {
+                  name: 'Stars',
+                  data: metricsList.map((m) => m.starsCount),
+                },
+              ]}
+              labels={labels}
+              round
+            />
+            <LineChart
+              title="Forks"
+              icon={faCodeFork}
+              series={[
+                {
+                  name: 'Forks',
+                  data: metricsList.map((m) => m.forksCount),
+                },
+              ]}
+              labels={labels}
+              round
             />
           </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            <DashboardCard
-              title="Open Issues"
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <LineChart
+              title="Issues"
               icon={faExclamationCircle}
-              stats={millify(metrics.openIssuesCount)}
+              series={[
+                {
+                  name: 'Open Issues',
+                  data: metricsList.map((m) => m.openIssuesCount),
+                },
+                {
+                  name: 'Unassigned Issues',
+                  data: metricsList.map((m) => m.unassignedIssuesCount),
+                },
+                {
+                  name: 'Unanswered Issues',
+                  data: metricsList.map((m) => m.unansweredIssuesCount),
+                },
+                {
+                  name: 'Total Issues',
+                  data: metricsList.map((m) => m.totalIssuesCount),
+                },
+              ]}
+              labels={labels}
+              round
             />
-            <DashboardCard
-              title="Total Issues"
-              icon={faFolderOpen}
-              stats={millify(metrics.totalIssuesCount)}
-            />
-            <DashboardCard
-              title="Unassigned Issues"
-              icon={faTag}
-              stats={millify(metrics.unassignedIssuesCount)}
-            />
-            <DashboardCard
-              title="Unanswered Issues"
-              icon={faQuestionCircle}
-              stats={millify(metrics.unansweredIssuesCount)}
-            />
-          </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <DashboardCard
+            <LineChart
               title="Open Pull Requests"
               icon={faCodePullRequest}
-              stats={millify(metrics.openPullRequestsCount)}
+              series={[
+                {
+                  name: 'Open Pull Requests',
+                  data: metricsList.map((m) => m.openPullRequestsCount),
+                },
+              ]}
+              labels={labels}
+              round
             />
-            <DashboardCard
-              title="Recent Releases"
-              icon={faRocket}
-              stats={millify(metrics.recentReleasesCount)}
-            />
-            <DashboardCard
-              title="Total Releases"
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <LineChart
+              title="Releases"
               icon={faTags}
-              stats={millify(metrics.totalReleasesCount)}
+              series={[
+                {
+                  name: 'Recent Releases',
+                  data: metricsList.map((m) => m.recentReleasesCount),
+                },
+                {
+                  name: 'Total Releases',
+                  data: metricsList.map((m) => m.totalReleasesCount),
+                },
+              ]}
+              labels={labels}
+              round
+            />
+            <LineChart
+              title="Contributors"
+              icon={faPeopleGroup}
+              series={[
+                {
+                  name: 'Contributors',
+                  data: metricsList.map((m) => m.contributorsCount),
+                },
+              ]}
+              labels={labels}
+              round
             />
           </div>
           <BarChart
@@ -129,18 +182,18 @@ const ProjectHealthMetricsDetails: FC = () => {
               'Days Since OWASP Page Last Update',
             ]}
             days={[
-              metrics.ageDays,
-              metrics.lastCommitDays,
-              metrics.lastReleaseDays,
-              metrics.lastPullRequestDays,
-              metrics.owaspPageLastUpdateDays,
+              metricsLatest.ageDays,
+              metricsLatest.lastCommitDays,
+              metricsLatest.lastReleaseDays,
+              metricsLatest.lastPullRequestDays,
+              metricsLatest.owaspPageLastUpdateDays,
             ]}
             requirements={[
-              metrics.ageDaysRequirement,
-              metrics.lastCommitDaysRequirement,
-              metrics.lastReleaseDaysRequirement,
-              metrics.lastPullRequestDaysRequirement,
-              metrics.owaspPageLastUpdateDaysRequirement,
+              metricsLatest.ageDaysRequirement,
+              metricsLatest.lastCommitDaysRequirement,
+              metricsLatest.lastReleaseDaysRequirement,
+              metricsLatest.lastPullRequestDaysRequirement,
+              metricsLatest.owaspPageLastUpdateDaysRequirement,
             ]}
             reverseColors={[true, false, false, false, false]}
           />

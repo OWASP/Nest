@@ -24,9 +24,6 @@ export const GET_PROJECT_HEALTH_METRICS_DETAILS = gql`
       healthMetricsLatest {
         ageDays
         ageDaysRequirement
-        createdAt
-        contributorsCount
-        forksCount
         isFundingRequirementsCompliant
         isLeaderRequirementsCompliant
         lastCommitDays
@@ -35,13 +32,18 @@ export const GET_PROJECT_HEALTH_METRICS_DETAILS = gql`
         lastPullRequestDaysRequirement
         lastReleaseDays
         lastReleaseDaysRequirement
-        openIssuesCount
-        openPullRequestsCount
         owaspPageLastUpdateDays
         owaspPageLastUpdateDaysRequirement
         projectName
-        recentReleasesCount
         score
+      }
+      healthMetricsList(limit: 30) {
+        contributorsCount
+        createdAt
+        forksCount
+        openIssuesCount
+        openPullRequestsCount
+        recentReleasesCount
         starsCount
         totalIssuesCount
         totalReleasesCount
