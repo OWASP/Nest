@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
-from apps.common.constants import NL, OWASP_NEWS_URL
+from apps.common.constants import OWASP_NEWS_URL
 from apps.slack.commands.news import News
 
 
@@ -58,20 +58,18 @@ class TestNewsCommand:
                 )
                 blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
                 if mock_get_news_data.return_value:
+                    # Check that the header is present
                     assert "*:newspaper: Latest OWASP news:*" in blocks[0]["text"]["text"]
-                    news_blocks = blocks[1:-2]
-                    for item, block in zip(
-                        mock_get_news_data.return_value, news_blocks, strict=False
-                    ):
-                        expected = f"  • *<{item['url']}|{item['title']}>* by {item['author']}"
-                        assert block["text"]["text"] == expected
-                    assert blocks[-2]["type"] == "divider"
-                    footer = blocks[-1]["text"]["text"]
-                    expected_footer = (
-                        f"Please visit <{OWASP_NEWS_URL}|OWASP news> page for more "
-                        f"information.{NL}"
-                    )
-                    assert footer == expected_footer
+                    # Check that news items are present
+                    news_text = blocks[0]["text"]["text"]
+                    for item in mock_get_news_data.return_value:
+                        assert item["title"] in news_text
+                        assert item["author"] in news_text
+                        assert item["url"] in news_text
+                    # Check that the footer is present in the same block
+                    assert "Please visit" in news_text
+                    assert OWASP_NEWS_URL in news_text
+                    assert "OWASP news" in news_text
                 else:
                     expected_warning = (
                         ":warning: *Failed to fetch OWASP news. Please try again later.*"
@@ -90,8 +88,11 @@ class TestNewsCommand:
         mock_client.conversations_open.assert_called_once_with(users=mock_command["user_id"])
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
 
-        assert len(blocks) == 1
+        assert len(blocks) == 2
         assert (
             blocks[0]["text"]["text"]
             == ":warning: *Failed to fetch OWASP news. Please try again later.*"
         )
+        assert blocks[1]["type"] == "section"
+        assert blocks[1]["text"]["type"] == "mrkdwn"
+        assert "💬 You can share feedback" in blocks[1]["text"]["text"]

@@ -5,7 +5,7 @@ from django.conf import settings
 
 from apps.slack.blocks import markdown
 from apps.slack.commands.gsoc import Gsoc
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
+from apps.slack.constants import FEEDBACK_SHARING_INVITE
 
 
 class TestGsocCommand:
@@ -63,7 +63,7 @@ class TestGsocCommand:
 
                 if command_text == "":
                     assert "Getting Started with OWASP GSoC" in block_texts[0]
-                    assert FEEDBACK_CHANNEL_MESSAGE in block_texts[1]
+                    assert any(FEEDBACK_SHARING_INVITE in text for text in block_texts)
                 else:
                     assert any(expected_message in text for text in block_texts)
 
