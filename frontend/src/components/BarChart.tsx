@@ -81,7 +81,7 @@ const BarChart: React.FC<{
           colors: [
             function ({ value, dataPointIndex, _ }) {
               const requirement = requirements[dataPointIndex]
-              if (reverseColors && reverseColors[dataPointIndex]) {
+              if (reverseColors?.[dataPointIndex]) {
                 if (value < requirement * 0.75) {
                   return orangeColor
                 } else if (value < requirement) {
