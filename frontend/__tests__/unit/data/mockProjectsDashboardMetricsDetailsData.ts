@@ -14,7 +14,7 @@ export const mockProjectsDashboardMetricsDetailsData = {
       owaspPageLastUpdateDays: 52,
       owaspPageLastUpdateDaysRequirement: 53,
       projectName: 'Test',
-      score: 76,
+      score: 41,
     },
     healthMetricsList: [
       {
