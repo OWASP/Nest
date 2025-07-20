@@ -59,7 +59,7 @@ const ProjectHealthMetricsDetails: FC = () => {
     ) || []
   return (
     <div className="flex flex-col gap-4">
-      {metricsList && metricsLatest && (
+      {metricsList && metricsLatest ? (
         <>
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">{metricsLatest.projectName}</h1>
@@ -198,6 +198,8 @@ const ProjectHealthMetricsDetails: FC = () => {
             reverseColors={[true, false, false, false, false]}
           />
         </>
+      ) : (
+        <div className="text-center text-gray-500">No metrics data available for this project.</div>
       )}
     </div>
   )

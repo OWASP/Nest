@@ -25,6 +25,10 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: () => <span data-testid="mock-icon"></span>,
 }))
 
+const mockError = {
+  error: new Error('GraphQL error'),
+}
+
 describe('ProjectHealthMetricsDetails', () => {
   beforeEach(() => {
     ;(useQuery as jest.Mock).mockReturnValue({
@@ -48,6 +52,19 @@ describe('ProjectHealthMetricsDetails', () => {
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
       expect(loadingSpinner.length).toBeGreaterThan(0)
+    })
+  })
+
+  test('renders error state', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: null,
+      loading: false,
+      error: mockError,
+    })
+    render(<ProjectHealthMetricsDetails />)
+    const errorMessage = screen.getByText('No metrics data available for this project.')
+    await waitFor(() => {
+      expect(errorMessage).toBeInTheDocument()
     })
   })
 
