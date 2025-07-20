@@ -7,6 +7,7 @@ class BaseSitemap(Sitemap):
     """Base sitemap class."""
 
     change_frequency = "weekly"
+    limit = 50000
     prefix = ""
     protocol = "https"
 

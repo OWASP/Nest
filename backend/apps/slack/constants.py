@@ -41,7 +41,7 @@ VIEW_CONTRIBUTE_ACTION_NEXT = "view_contribute_action_next"
 VIEW_CONTRIBUTE_ACTION_PREV = "view_contribute_action_prev"
 
 
-FEEDBACK_CHANNEL_MESSAGE = (
+FEEDBACK_SHARING_INVITE = (
     f"💬 You can share feedback on your {NEST_BOT_NAME} experience "
     f"in the <{OWASP_PROJECT_NEST_CHANNEL_ID}|project-nest> channel.{NL}"
 )

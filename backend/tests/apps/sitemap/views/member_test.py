@@ -5,6 +5,14 @@ from apps.sitemap.views.member import MemberSitemap
 
 
 class TestMemberSitemap:
+    def test_changefreq(self):
+        sitemap = MemberSitemap()
+
+        assert sitemap.changefreq(MagicMock()) == "daily"
+
+    def test_inherits_from_base(self):
+        assert issubclass(MemberSitemap, BaseSitemap)
+
     @patch("apps.sitemap.views.member.User")
     def test_items(self, mock_user):
         mock_obj = MagicMock(is_indexable=True)
@@ -13,10 +21,11 @@ class TestMemberSitemap:
 
         assert list(sitemap.items()) == [mock_obj]
 
+    def test_limit(self):
+        sitemap = MemberSitemap()
+        assert sitemap.limit == 50000
+
     def test_location(self):
         sitemap = MemberSitemap()
 
         assert sitemap.location(MagicMock(nest_key="bar")) == "/members/bar"
-
-    def test_inherits_from_base(self):
-        assert issubclass(MemberSitemap, BaseSitemap)

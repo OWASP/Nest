@@ -7,8 +7,16 @@ from apps.sitemap.views.base import BaseSitemap
 class ProjectSitemap(BaseSitemap):
     """Project sitemap."""
 
+    change_frequency = "weekly"
     prefix = "/projects"
 
     def items(self):
         """Return list of projects for sitemap generation."""
-        return [p for p in Project.objects.filter(is_active=True) if p.is_indexable]
+        return [
+            p
+            for p in Project.active_projects.order_by(
+                "-updated_at",
+                "-created_at",
+            )
+            if p.is_indexable
+        ]

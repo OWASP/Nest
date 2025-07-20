@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from typing import Any
 
+DIVIDER = "{{ DIVIDER }}"
+SECTION_BREAK = "{{ SECTION_BREAK }}"
+
 
 def divider() -> dict[str, str]:
     """Return a divider block.

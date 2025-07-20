@@ -21,6 +21,10 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
     class Meta:
         db_table = "github_users"
+        indexes = [
+            models.Index(fields=["-created_at"], name="github_user_created_at_desc"),
+            models.Index(fields=["-updated_at"], name="github_user_updated_at_desc"),
+        ]
         verbose_name_plural = "Users"
 
     bio = models.TextField(verbose_name="Bio", max_length=1000, default="")

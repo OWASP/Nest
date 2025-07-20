@@ -3,7 +3,7 @@ from unittest.mock import ANY, MagicMock, patch
 import pytest
 from django.conf import settings
 
-from apps.common.constants import OWASP_WEBSITE_URL
+from apps.common.constants import OWASP_URL
 from apps.slack.commands.staff import Staff
 
 FAILED_STAFF_DATA_ERROR_MESSAGE = "Failed to get OWASP Foundation staff data."
@@ -81,7 +81,12 @@ class TestStaffHandler:
                 assert f"*{idx}. {staff['name']}, {staff['title']}*" in staff_block
                 assert f"_{staff['location']}_" in staff_block
                 assert staff["description"] in staff_block
-            assert OWASP_WEBSITE_URL in blocks[-1]["text"]["text"]
+            # Check that the footer is in the second to last block
+            footer_block = blocks[-2]["text"]["text"]
+            assert OWASP_URL in footer_block
+            # Check that the feedback message is in the last block
+            feedback_block = blocks[-1]["text"]["text"]
+            assert "💬 You can share feedback" in feedback_block
         else:
             mock_slack_client.conversations_open.assert_called_once_with(
                 users=mock_slack_command["user_id"]
