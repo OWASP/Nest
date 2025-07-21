@@ -128,7 +128,6 @@ ignore = [
     "COM812",   # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
     "D407",     # https://docs.astral.sh/ruff/rules/missing-dashed-underline-after-section/
     "DJ012",    # https://docs.astral.sh/ruff/rules/django-unordered-body-content-in-model/
-    "ERA001",   # https://docs.astral.sh/ruff/rules/commented-out-code/
     "FBT002",   # https://docs.astral.sh/ruff/rules/boolean-default-value-positional-argument/
     "FIX002",   # https://docs.astral.sh/ruff/rules/line-contains-todo/
     "PD",       # https://docs.astral.sh/ruff/rules/#pandas-vet-pd
