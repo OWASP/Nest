@@ -14,19 +14,22 @@ const GeneralCompliantComponent: FC<{
 }> = ({ icon, compliant, title }) => {
   return (
     <Tooltip content={title} placement="top">
-      <div className="pointer-events-auto relative inline-block transition-all duration-300 ease-in-out hover:scale-105">
+      <div className="group pointer-events-auto relative inline-block transition-all duration-300 ease-in-out hover:scale-105">
         <FontAwesomeIcon
           icon={faCertificate}
-          className={clsx('h-20 w-20', {
-            'text-green-400': compliant,
-            'text-red-400': !compliant,
-          })}
+          className={clsx(
+            'h-14 w-14 drop-shadow-md filter transition-all group-hover:drop-shadow-lg',
+            {
+              'text-green-400/80': compliant,
+              'text-red-400/80': !compliant,
+            }
+          )}
         />
         <FontAwesomeIcon
           icon={icon}
-          className={clsx('absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2', {
-            'text-green-900': compliant,
-            'text-red-900': !compliant,
+          className={clsx('absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2', {
+            'text-green-900/90': compliant,
+            'text-red-900/90': !compliant,
           })}
         />
       </div>
