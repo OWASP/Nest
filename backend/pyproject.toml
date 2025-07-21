@@ -122,25 +122,25 @@ target-version = "py313"
 [tool.ruff.lint]
 extend-select = ["I"]
 ignore = [
-    "ANN",  # TODO(arkid15r): remove when all annotations are added.
-    "ARG002",
-    "C901",
-    "COM812",
-    "D407",
-    "DJ012",
-    "ERA001",
-    "FBT002",
-    "FIX002",
-    "PD",
-    "PERF203",
-    "PLC0414",
-    "PLC0415",  # TODO(arkid15r): remove when all imports are at the top level.
-    "PLR0912",
-    "PLR0913",
-    "PLR0915",
-    "RUF012",
-    "SLF001",
-    "TD003",
+    "ANN",      # ANN: Missing type annotations.
+    "ARG002",   # ARG002: Unused method argument.
+    "C901",     # C901: Cyclomatic complexity too high.
+    "COM812",   # COM812: Missing trailing comma.
+    "D407",     # D407: Incorrect docstring section header.
+    "DJ012",    # DJ012: Django - using old staticfiles tag.
+    "ERA001",   # ERA001: Commented-out code detected.
+    "FBT002",   # FBT002: Boolean positional argument in function definition.
+    "FIX002",   # FIX002: Unresolved FIXME comment.
+    "PD",       # PD: Pandas - best practices violations.
+    "PERF203",  # PERF203: Performance - inefficient use of len() in loop.
+    "PLC0414",  # PLC0414: Pylint - useless import alias.
+    "PLC0415",  # PLC0415: Pylint - import not at top-level.
+    "PLR0912",  # PLR0912: Pylint - too many branches.
+    "PLR0913",  # PLR0913: Pylint - too many arguments.
+    "PLR0915",  # PLR0915: Pylint - too many statements.
+    "RUF012",   # RUF012: Ruff - mutable class attribute as default.
+    "SLF001",   # SLF001: Private member access.
+    "TD003",    # TD003: TODO comment missing issue link.
 ]
 select = ["ALL"]
 
