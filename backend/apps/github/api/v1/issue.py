@@ -2,14 +2,22 @@
 
 from datetime import datetime
 
+from django.conf import settings
 from django.http import HttpRequest
-from ninja import Router, Schema
-from ninja.errors import HttpError
+from django.views.decorators.cache import cache_page
+from ninja import FilterSchema, Query, Router, Schema
+from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 
 from apps.github.models.issue import Issue
 
 router = Router()
+
+
+class IssueFilterSchema(FilterSchema):
+    """Filter schema for Issue."""
+
+    state: str | None = None
 
 
 class IssueSchema(Schema):
@@ -23,11 +31,21 @@ class IssueSchema(Schema):
     url: str
 
 
-@router.get("/", response={200: list[IssueSchema], 404: dict})
-@paginate(PageNumberPagination, page_size=100)
-def list_issues(request: HttpRequest) -> list[IssueSchema] | dict:
+VALID_ISSUE_ORDERING_FIELDS = {"created_at", "updated_at"}
+
+
+@router.get("/", response={200: list[IssueSchema]})
+@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
+@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
+def list_issues(
+    request: HttpRequest,
+    filters: IssueFilterSchema = Query(...),
+    ordering: str | None = Query(None),
+) -> list[IssueSchema]:
     """Get all issues."""
-    issues = Issue.objects.all()
-    if not issues.exists():
-        raise HttpError(404, "Issues not found")
+    issues = filters.filter(Issue.objects.all())
+
+    if ordering and ordering in VALID_ISSUE_ORDERING_FIELDS:
+        issues = issues.order_by(ordering)
+
     return issues

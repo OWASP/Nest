@@ -2,14 +2,24 @@
 
 from datetime import datetime
 
+from django.conf import settings
 from django.http import HttpRequest
-from ninja import Router, Schema
+from django.views.decorators.cache import cache_page
+from ninja import FilterSchema, Query, Router, Schema
+from ninja.decorators import decorate_view
 from ninja.errors import HttpError
 from ninja.pagination import PageNumberPagination, paginate
 
 from apps.github.models.user import User
 
 router = Router()
+
+
+class UserFilterSchema(FilterSchema):
+    """Filter schema for User."""
+
+    company: str | None = None
+    location: str | None = None
 
 
 class UserSchema(Schema):
@@ -32,13 +42,23 @@ class UserSchema(Schema):
     url: str
 
 
-@router.get("/", response={200: list[UserSchema], 404: dict})
-@paginate(PageNumberPagination, page_size=100)
-def list_users(request: HttpRequest) -> list[UserSchema]:
+VALID_USER_ORDERING_FIELDS = {"created_at", "updated_at"}
+
+
+@router.get("/", response={200: list[UserSchema]})
+@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
+@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
+def list_users(
+    request: HttpRequest,
+    filters: UserFilterSchema = Query(...),
+    ordering: str | None = Query(None),
+) -> list[UserSchema]:
     """Get all users."""
-    users = User.objects.all()
-    if not users.exists():
-        raise HttpError(404, "Users not found")
+    users = filters.filter(User.objects.all())
+
+    if ordering and ordering in VALID_USER_ORDERING_FIELDS:
+        users = users.order_by(ordering)
+
     return users
 
 
