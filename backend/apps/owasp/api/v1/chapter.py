@@ -2,14 +2,23 @@
 
 from datetime import datetime
 
+from django.conf import settings
 from django.http import HttpRequest
-from ninja import Router, Schema
-from ninja.errors import HttpError
+from django.views.decorators.cache import cache_page
+from ninja import FilterSchema, Query, Router, Schema
+from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 
 from apps.owasp.models.chapter import Chapter
 
 router = Router()
+
+
+class ChapterFilterSchema(FilterSchema):
+    """Filter schema for Chapter."""
+
+    country: str | None = None
+    region: str | None = None
 
 
 class ChapterSchema(Schema):
@@ -22,11 +31,21 @@ class ChapterSchema(Schema):
     updated_at: datetime
 
 
-@router.get("/", response={200: list[ChapterSchema], 404: dict})
-@paginate(PageNumberPagination, page_size=100)
-def list_chapters(request: HttpRequest) -> list[ChapterSchema]:
+VALID_CHAPTER_ORDERING_FIELDS = {"created_at", "updated_at"}
+
+
+@router.get("/", response={200: list[ChapterSchema]})
+@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
+@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
+def list_chapters(
+    request: HttpRequest,
+    filters: ChapterFilterSchema = Query(...),
+    ordering: str | None = Query(None),
+) -> list[ChapterSchema]:
     """Get all chapters."""
-    chapters = Chapter.objects.all()
-    if not chapters.exists():
-        raise HttpError(404, "Chapters not found")
+    chapters = filters.filter(Chapter.objects.all())
+
+    if ordering and ordering in VALID_CHAPTER_ORDERING_FIELDS:
+        chapters = chapters.order_by(ordering)
+
     return chapters

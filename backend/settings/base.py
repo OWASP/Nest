@@ -121,6 +121,9 @@ class Base(Configuration):
         "INDEX_PREFIX": ENVIRONMENT.lower(),
     }
 
+    API_PAGE_SIZE = 100
+    API_CACHE_TIME_SECONDS = 86400  # 24 hours.
+
     REDIS_HOST = values.SecretValue(environ_name="REDIS_HOST")
     REDIS_PASSWORD = values.SecretValue(environ_name="REDIS_PASSWORD")
     CACHES = {

@@ -2,14 +2,22 @@
 
 from datetime import datetime
 
+from django.conf import settings
 from django.http import HttpRequest
-from ninja import Router, Schema
-from ninja.errors import HttpError
+from django.views.decorators.cache import cache_page
+from ninja import FilterSchema, Query, Router, Schema
+from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 
 from apps.github.models.release import Release
 
 router = Router()
+
+
+class ReleaseFilterSchema(FilterSchema):
+    """Filter schema for Release."""
+
+    tag_name: str | None = None
 
 
 class ReleaseSchema(Schema):
@@ -22,11 +30,19 @@ class ReleaseSchema(Schema):
     tag_name: str
 
 
-@router.get("/", response={200: list[ReleaseSchema], 404: dict})
-@paginate(PageNumberPagination, page_size=100)
-def list_release(request: HttpRequest) -> list[ReleaseSchema]:
+VALID_RELEASE_ORDERING_FIELDS = {"created_at", "published_at"}
+
+
+@router.get("/", response={200: list[ReleaseSchema]})
+@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
+@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
+def list_release(
+    request: HttpRequest,
+    filters: ReleaseFilterSchema = Query(...),
+    ordering: str | None = Query(None),
+) -> list[ReleaseSchema]:
     """Get all releases."""
-    releases = Release.objects.all()
-    if not releases.exists():
-        raise HttpError(404, "Releases not found")
+    releases = filters.filter(Release.objects.all())
+    if ordering and ordering in VALID_RELEASE_ORDERING_FIELDS:
+        releases = releases.order_by(ordering)
     return releases
