@@ -39,7 +39,7 @@ class TestContactHandler:
             mock_client.conversations_open.assert_called_once_with(users="U123456")
             blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
             block_text = blocks[0]["text"]["text"]
-            expected_text = f"Please visit <https://owasp.org/contact/|OWASP contact> page{NL}"
+            expected_text = f"Please visit <https://owasp.org/contact/|OWASP contact> page{NL}{NL}"
             assert block_text == expected_text
             assert mock_client.chat_postMessage.call_args[1]["channel"] == "C123456"
 
@@ -51,7 +51,10 @@ class TestContactHandler:
         ack.assert_called_once()
 
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
-        assert len(blocks) == 1
+        assert len(blocks) == 2
         assert blocks[0]["type"] == "section"
         assert blocks[0]["text"]["type"] == "mrkdwn"
         assert "https://owasp.org/contact/" in blocks[0]["text"]["text"]
+        assert blocks[1]["type"] == "section"
+        assert blocks[1]["text"]["type"] == "mrkdwn"
+        assert "💬 You can share feedback" in blocks[1]["text"]["text"]

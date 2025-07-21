@@ -3,13 +3,11 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
-from apps.slack.common.gsoc import OWASP_NEST_MILESTONES
 from apps.slack.constants import (
     NEST_BOT_NAME,
     OWASP_CONTRIBUTE_CHANNEL_ID,
 )
 from apps.slack.events.member_joined_channel.contribute import Contribute
-from apps.slack.utils import get_text
 
 
 class TestContributeEventHandler:
@@ -68,13 +66,13 @@ class TestContributeEventHandler:
             mock_slack_client.conversations_open.assert_not_called()
             mock_slack_client.chat_postMessage.assert_not_called()
         else:
-            mock_slack_client.chat_postEphemeral.assert_called_once_with(
-                blocks=OWASP_NEST_MILESTONES,
-                channel=mock_slack_event["channel"],
-                user=mock_slack_event["user"],
-                text=get_text(OWASP_NEST_MILESTONES),
-            )
+            # Check that ephemeral message was sent
+            mock_slack_client.chat_postEphemeral.assert_called_once()
+            ephemeral_call_args = mock_slack_client.chat_postEphemeral.call_args
+            assert ephemeral_call_args[1]["channel"] == mock_slack_event["channel"]
+            assert ephemeral_call_args[1]["user"] == mock_slack_event["user"]
 
+            # Check that direct message was sent
             mock_slack_client.conversations_open.assert_called_once_with(users="U123456")
 
             _, kwargs = mock_slack_client.chat_postMessage.call_args
@@ -89,8 +87,9 @@ class TestContributeEventHandler:
             for message in expected_messages:
                 assert message in combined_text
 
-            mock_active_projects_count.assert_called_once()
-            mock_open_issues_count.assert_called_once()
+            # The mocks are called twice - once for direct message, once for ephemeral message
+            assert mock_active_projects_count.call_count == 2
+            assert mock_open_issues_count.call_count == 2
 
     @pytest.mark.parametrize(
         ("channel_id", "expected_result"),
