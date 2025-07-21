@@ -122,25 +122,25 @@ target-version = "py313"
 [tool.ruff.lint]
 extend-select = ["I"]
 ignore = [
-    "ANN",  # TODO(arkid15r): remove when all annotations are added.
-    "ARG002",
-    "C901",
-    "COM812",
-    "D407",
-    "DJ012",
-    "ERA001",
-    "FBT002",
-    "FIX002",
-    "PD",
-    "PERF203",
-    "PLC0414",
-    "PLC0415",  # TODO(arkid15r): remove when all imports are at the top level.
-    "PLR0912",
-    "PLR0913",
-    "PLR0915",
-    "RUF012",
-    "SLF001",
-    "TD003",
+    "ANN",      # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann/
+    "ARG002",   # https://docs.astral.sh/ruff/rules/unused-method-argument/
+    "C901",     # https://docs.astral.sh/ruff/rules/complex-structure/
+    "COM812",   # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
+    "D407",     # https://docs.astral.sh/ruff/rules/missing-dashed-underline-after-section/
+    "DJ012",    # https://docs.astral.sh/ruff/rules/django-unordered-body-content-in-model/
+    "ERA001",   # https://docs.astral.sh/ruff/rules/commented-out-code/
+    "FBT002",   # https://docs.astral.sh/ruff/rules/boolean-default-value-positional-argument/
+    "FIX002",   # https://docs.astral.sh/ruff/rules/line-contains-todo/
+    "PD",       # https://docs.astral.sh/ruff/rules/#pandas-vet-pd
+    "PERF203",  # https://docs.astral.sh/ruff/rules/try-except-in-loop/
+    "PLC0414",  # https://docs.astral.sh/ruff/rules/useless-import-alias/
+    "PLC0415",  # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+    "PLR0912",  # https://docs.astral.sh/ruff/rules/too-many-branches/
+    "PLR0913",  # https://docs.astral.sh/ruff/rules/too-many-arguments/
+    "PLR0915",  # https://docs.astral.sh/ruff/rules/too-many-statements/
+    "RUF012",   # https://docs.astral.sh/ruff/rules/mutable-class-default/
+    "SLF001",   # https://docs.astral.sh/ruff/rules/private-member-access/
+    "TD003",    # https://docs.astral.sh/ruff/rules/missing-todo-link/
 ]
 select = ["ALL"]
 
