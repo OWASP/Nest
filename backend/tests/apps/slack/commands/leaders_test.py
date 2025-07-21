@@ -45,8 +45,8 @@ class TestLeadersHandler:
             (True, True, "Projects"),
         ],
     )
-    @patch("apps.owasp.api.search.chapter.get_chapters")
-    @patch("apps.owasp.api.search.project.get_projects")
+    @patch("apps.owasp.index.search.chapter.get_chapters")
+    @patch("apps.owasp.index.search.project.get_projects")
     def test_handler_responses(
         self,
         mock_get_projects,
@@ -86,8 +86,8 @@ class TestLeadersHandler:
         ],
     )
     @patch("apps.slack.utils.escape")
-    @patch("apps.owasp.api.search.chapter.get_chapters")
-    @patch("apps.owasp.api.search.project.get_projects")
+    @patch("apps.owasp.index.search.chapter.get_chapters")
+    @patch("apps.owasp.index.search.project.get_projects")
     def test_handler_special_characters(
         self,
         mock_get_projects,
@@ -119,8 +119,8 @@ class TestLeadersHandler:
             ([], ""),
         ],
     )
-    @patch("apps.owasp.api.search.chapter.get_chapters")
-    @patch("apps.owasp.api.search.project.get_projects")
+    @patch("apps.owasp.index.search.chapter.get_chapters")
+    @patch("apps.owasp.index.search.project.get_projects")
     def test_handler_leader_formatting(
         self,
         mock_get_projects,

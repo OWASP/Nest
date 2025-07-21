@@ -33,7 +33,7 @@ def get_blocks(
 
     """
     from apps.github.models.issue import Issue
-    from apps.owasp.api.search.issue import get_issues
+    from apps.owasp.index.search.issue import get_issues
 
     presentation = presentation or EntityPresentation()
     search_query_escaped = escape(search_query)

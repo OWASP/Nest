@@ -36,7 +36,7 @@ class TestCommitteesHandler:
 
     @pytest.fixture(autouse=True)
     def mock_get_committees(self):
-        with patch("apps.owasp.api.search.committee.get_committees") as mock:
+        with patch("apps.owasp.index.search.committee.get_committees") as mock:
             mock.return_value = {"hits": [], "nbPages": 1}
             yield mock
 
