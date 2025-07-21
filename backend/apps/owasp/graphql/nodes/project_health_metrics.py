@@ -21,6 +21,8 @@ from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
         "recent_releases_count",
         "score",
         "stars_count",
+        "total_issues_count",
+        "total_releases_count",
         "unanswered_issues_count",
         "unassigned_issues_count",
     ],
@@ -33,6 +35,11 @@ class ProjectHealthMetricsNode(strawberry.relay.Node):
     def age_days(self) -> int:
         """Resolve project age in days."""
         return self.age_days
+
+    @strawberry.field
+    def age_days_requirement(self) -> int:
+        """Resolve project age requirement in days."""
+        return self.age_days_requirement
 
     @strawberry.field
     def created_at(self) -> datetime:
@@ -53,6 +60,11 @@ class ProjectHealthMetricsNode(strawberry.relay.Node):
     def last_pull_request_days(self) -> int:
         """Resolve last pull request age in days."""
         return self.last_pull_request_days
+
+    @strawberry.field
+    def last_pull_request_days_requirement(self) -> int:
+        """Resolve last pull request age requirement in days."""
+        return self.last_pull_request_days_requirement
 
     @strawberry.field
     def last_release_days(self) -> int:
@@ -78,3 +90,8 @@ class ProjectHealthMetricsNode(strawberry.relay.Node):
     def owasp_page_last_update_days(self) -> int:
         """Resolve OWASP page last update age in days."""
         return self.owasp_page_last_update_days
+
+    @strawberry.field
+    def owasp_page_last_update_days_requirement(self) -> int:
+        """Resolve OWASP page last update age requirement in days."""
+        return self.owasp_page_last_update_days_requirement
