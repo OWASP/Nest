@@ -1,4 +1,12 @@
 Important OWASP policies:
-{% for title, url in policies %}  • <{{ url }}|{{ title|safe }}>{{ NL }}{% endfor %}
-{{ SECTION_BREAK }}{{ DIVIDER }}{{ SECTION_BREAK }}
+{% for title, url in POLICIES %}  • <{{ url }}|{{ title|safe }}>{{ NL }}{% endfor %}
+
+{{ SECTION_BREAK }}
+{{ DIVIDER }}
+{{ SECTION_BREAK }}
+
 Please visit <https://owasp.org/www-policy/|OWASP policies> page for more information
+
+{{ SECTION_BREAK }}
+
+{{ FEEDBACK_SHARING_INVITE | safe }}

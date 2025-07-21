@@ -112,7 +112,12 @@ class TestSponsorsHandler:
 
             footer_block = blocks[current_block]["text"]["text"]
             assert (
-                "* Please visit the <https://owasp.org/supporters|OWASP supporters>"
+                "* Please visit the <https://owasp.org/supporters/|OWASP Supporters>"
                 in footer_block
             )
             assert "for more information about the sponsors" in footer_block
+            current_block += 1
+
+            # Check that the feedback message is in the next block
+            feedback_block = blocks[current_block]["text"]["text"]
+            assert "💬 You can share feedback" in feedback_block

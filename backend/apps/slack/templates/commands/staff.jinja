@@ -1,14 +1,16 @@
-{% if items %}
+{% if ITEMS %}
 OWASP Foundation Staff:{{ NL }}
 {{ SECTION_BREAK }}
-{% for item in items %}
+{% for item in ITEMS %}
 *{{ loop.index }}. {{ item.name }}, {{ item.title }}*
 _{{ item.location }}_
 {{ item.description | default('', true) }}{{ NL }}
 {{ SECTION_BREAK }}
 {%- endfor -%}
 {{ SECTION_BREAK }}{{ DIVIDER }}{{ SECTION_BREAK }}
-Please visit <{{ website_url }}/corporate/|OWASP staff> page for more information.{{ NL }}
+Please visit <{{ STAFF_PAGE_URL }}|{{ STAFF_PAGE_NAME }}> page for more information.{{ NL }}
+{{ SECTION_BREAK }}
+{{ FEEDBACK_SHARING_INVITE | safe }}
 {%- else -%}
 Failed to get OWASP Foundation staff data.
 {%- endif -%}

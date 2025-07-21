@@ -3,34 +3,28 @@
 import logging
 from pathlib import Path
 
-from django.utils import timezone
-
 from apps.common.utils import convert_to_snake_case
-from apps.slack.constants import OWASP_GSOC_CHANNEL_ID
+from apps.slack.constants import OWASP_PROJECT_NEST_CHANNEL_ID
 from apps.slack.events.event import EventBase
 
 logger: logging.Logger = logging.getLogger(__name__)
 
 
-class Gsoc(EventBase):
-    """Slack GSoC channel join event handler."""
+class ProjectNest(EventBase):
+    """Slack project-nest channel join event handler."""
 
     event_type = "member_joined_channel"
-    matchers = [lambda event: event["channel"] == OWASP_GSOC_CHANNEL_ID.lstrip("#")]
+    matchers = [lambda event: event["channel"] == OWASP_PROJECT_NEST_CHANNEL_ID.lstrip("#")]
 
     @property
-    def direct_message_template_path(self) -> Path:
+    def direct_message_template_path(self) -> Path | None:
         """Get direct message template path.
 
         Returns:
             Path: The template file path.
 
         """
-        return Path(
-            f"events/{self.event_type}/"
-            f"{convert_to_snake_case(self.__class__.__name__)}/"
-            "direct_message.jinja"
-        )
+        return None
 
     @property
     def ephemeral_message_template_path(self) -> Path:
@@ -58,7 +52,6 @@ class Gsoc(EventBase):
         """
         return {
             **super().get_context(event),
-            "GSOC_CHANNEL_ID": OWASP_GSOC_CHANNEL_ID,
-            "GSOC_CHANNEL_NAME": "gsoc",
-            "PREVIOUS_YEAR": timezone.now().year - 1,
+            "PROJECT_NEST_CHANNEL_ID": OWASP_PROJECT_NEST_CHANNEL_ID,
+            "PROJECT_NEST_CHANNEL_NAME": "project-nest",
         }
