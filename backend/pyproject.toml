@@ -113,7 +113,7 @@ module = ["apps.*.migrations.*"]
 
 [[tool.mypy.overrides]]
 disable_error_code = ["return-value", "attr-defined", "misc"]
-module = ["apps.*.graphql.queries.*", "apps.*.graphql.nodes.*"]
+module = ["apps.*.api.internal.queries.*", "apps.*.api.internal.nodes.*"]
 
 [tool.ruff]
 line-length = 99
@@ -146,7 +146,7 @@ select = ["ALL"]
 [tool.ruff.lint.per-file-ignores]
 "**/__init__.py" = ["D104", "F401"]
 "**/admin.py" = ["D100", "D101", "D104"]
-"**/api/*.py" = ["ARG001", "B008", "D106"]
+"**/rest/v1/*.py" = ["ARG001", "B008", "D106"]
 "**/apps.py" = ["D100", "D101", "D104"]
 "**/graphql/**/nodes.py" = ["D106"]
 "**/graphql/nodes/*.py" = ["D106"]

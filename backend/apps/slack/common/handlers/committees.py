@@ -32,7 +32,7 @@ def get_blocks(
         list: A list of Slack blocks representing the committees.
 
     """
-    from apps.owasp.api.search.committee import get_committees
+    from apps.owasp.index.search.committee import get_committees
     from apps.owasp.models.committee import Committee
 
     presentation = presentation or EntityPresentation()

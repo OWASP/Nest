@@ -32,7 +32,7 @@ def get_blocks(
         list: A list of Slack blocks representing the projects.
 
     """
-    from apps.owasp.api.search.project import get_projects
+    from apps.owasp.index.search.project import get_projects
     from apps.owasp.models.project import Project
 
     presentation = presentation or EntityPresentation()
