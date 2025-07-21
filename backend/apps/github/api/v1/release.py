@@ -34,7 +34,7 @@ VALID_RELEASE_ORDERING_FIELDS = {"created_at", "published_at"}
 
 
 @router.get("/", response={200: list[ReleaseSchema]})
-@decorate_view(cache_page(settings.API_CACHE_TIME))
+@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_release(
     request: HttpRequest,

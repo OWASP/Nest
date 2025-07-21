@@ -30,7 +30,7 @@ VALID_LABEL_ORDERING_FIELDS = {"created_at", "updated_at"}
 
 
 @router.get("/", response={200: list[LabelSchema]})
-@decorate_view(cache_page(settings.API_CACHE_TIME))
+@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_label(
     request: HttpRequest,

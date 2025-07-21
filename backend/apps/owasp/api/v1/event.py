@@ -28,7 +28,7 @@ VALID_EVENT_ORDERING_FIELDS = {"start_date", "end_date"}
 
 
 @router.get("/", response={200: list[EventSchema]})
-@decorate_view(cache_page(settings.API_CACHE_TIME))
+@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_events(
     request: HttpRequest,
