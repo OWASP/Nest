@@ -2,8 +2,8 @@ from unittest.mock import patch
 
 from django.core.management import call_command
 
-import settings.base
-from apps.owasp.graphql.nodes.project_health_stats import ProjectHealthStatsNode
+from django.conf import settings
+from apps.owasp.api.internal.nodes.project_health_stats import ProjectHealthStatsNode
 
 
 class TestOwaspGenerateProjectHealthMetricsOverviewPdf:
@@ -61,4 +61,4 @@ class TestOwaspGenerateProjectHealthMetricsOverviewPdf:
         mock_table.return_value.drawOn.assert_called_once_with(canvas, 100, 570)
         canvas.showPage.assert_called_once()
         canvas.save.assert_called_once()
-        mock_path.assert_called_once_with(settings.base.Base.BASE_DIR)
+        mock_path.assert_called_once_with(settings.BASE_DIR)
