@@ -2,8 +2,8 @@
 
 from django.core.management.base import BaseCommand
 
-from apps.github.index.issue import IssueIndex
-from apps.owasp.index.project import ProjectIndex
+from apps.github.index import IssueIndex
+from apps.owasp.index import ProjectIndex
 
 
 class Command(BaseCommand):

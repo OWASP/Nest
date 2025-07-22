@@ -35,13 +35,10 @@ class Label(BulkSaveModel, NodeModel, TimestampedModel):
             gh_label (github.Label.Label): The GitHub label object.
 
         """
-        # TODO(arkid15r): uncomment after PyGithub supports all fields.
         field_mapping = {
             "color": "color",
             "description": "description",
-            # "is_default": "default",
             "name": "name",
-            # "sequence_id": "id",
         }
 
         # Direct fields.

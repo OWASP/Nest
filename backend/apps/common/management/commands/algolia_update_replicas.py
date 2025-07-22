@@ -2,7 +2,7 @@
 
 from django.core.management.base import BaseCommand
 
-from apps.owasp.index.project import ProjectIndex
+from apps.owasp.index import ProjectIndex
 
 
 class Command(BaseCommand):

@@ -6,7 +6,7 @@ from django.db.models.functions import ExtractMonth, TruncDate
 from django.utils import timezone
 
 from apps.common.models import BulkSaveModel, TimestampedModel
-from apps.owasp.graphql.nodes.project_health_stats import ProjectHealthStatsNode
+from apps.owasp.api.internal.nodes.project_health_stats import ProjectHealthStatsNode
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
 HEALTH_SCORE_THRESHOLD_HEALTHY = 75

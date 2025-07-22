@@ -11,11 +11,11 @@ from django.urls import include, path
 from django.views.decorators.csrf import csrf_protect
 from strawberry.django.views import GraphQLView
 
-from apps.core.api.algolia import algolia_search
-from apps.core.api.csrf import get_csrf_token
-from apps.core.api.status import get_status
+from apps.core.api.internal.algolia import algolia_search
+from apps.core.api.internal.csrf import get_csrf_token
+from apps.core.api.internal.status import get_status
 from apps.slack.apps import SlackConfig
-from settings.api_v1 import api as api_v1
+from settings.api.v1 import api as api_v1
 from settings.graphql import schema
 
 urlpatterns = [

@@ -17,8 +17,8 @@ class Leaders(CommandBase):
             dict: The template context.
 
         """
-        from apps.owasp.api.search.chapter import get_chapters
-        from apps.owasp.api.search.project import get_projects
+        from apps.owasp.index.search.chapter import get_chapters
+        from apps.owasp.index.search.project import get_projects
 
         search_query = command["text"].strip()
 

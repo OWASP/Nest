@@ -32,7 +32,7 @@ def get_blocks(
         list: A list of Slack blocks representing the chapters.
 
     """
-    from apps.owasp.api.search.chapter import get_chapters
+    from apps.owasp.index.search.chapter import get_chapters
     from apps.owasp.models.chapter import Chapter
 
     presentation = presentation or EntityPresentation()

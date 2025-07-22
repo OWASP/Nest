@@ -2,10 +2,10 @@
 
 import strawberry
 
-from apps.github.graphql.queries import GithubQuery
-from apps.nest.graphql.mutations import NestMutations
-from apps.nest.graphql.queries import NestQuery
-from apps.owasp.graphql.queries import OwaspQuery
+from apps.github.api.internal.queries import GithubQuery
+from apps.nest.api.internal.mutations import NestMutations
+from apps.nest.api.internal.queries import NestQuery
+from apps.owasp.api.internal.queries import OwaspQuery
 
 
 @strawberry.type
