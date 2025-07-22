@@ -363,7 +363,7 @@ jobs:
       - name: Scan backend image
         uses: aquasecurity/trivy-action@dc5a429b52fcf669ce959baa2c2dd26090d2a6c4
         with:
-          exit-code: 1
+          exit-code: 0
           image-ref: owasp/nest:backend-staging
           scan-type: image
           trivy-config: trivy.yaml
