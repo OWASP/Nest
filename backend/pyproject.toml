@@ -169,9 +169,6 @@ select = ["ALL"]
     "D104", # https://docs.astral.sh/ruff/rules/undocumented-public-package/
     "E501"  # https://docs.astral.sh/ruff/rules/line-too-long/
 ]
-"**/models.py" = [
-    "D106" # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
-]
 "**/models/*.py" = [
     "D106" # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
 ]
