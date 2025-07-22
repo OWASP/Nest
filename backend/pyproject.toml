@@ -149,7 +149,6 @@ select = ["ALL"]
     "F401"  # https://docs.astral.sh/ruff/rules/unused-import/
 ]
 "**/admin.py" = [
-    "D100", # https://docs.astral.sh/ruff/rules/undocumented-public-module/
     "D104"  # https://docs.astral.sh/ruff/rules/undocumented-public-package/
 ]
 "**/apps.py" = [
