@@ -25,6 +25,7 @@ export type Project = {
   key: string
   languages: string[]
   leaders: string[]
+  leadersLogins: string[]
   level: string
   name: string
   openIssuesCount?: number

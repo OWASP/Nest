@@ -10,6 +10,7 @@ export const GET_PROJECT_DATA = gql`
       key
       languages
       leaders
+      leadersLogins
       level
       name
       healthMetrics(limit: 30) {

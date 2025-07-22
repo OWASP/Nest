@@ -53,6 +53,7 @@ export interface DetailsCardProps {
   stats?: Stats[]
   summary?: string
   title?: string
+  leadersLogins?: string[]
   topContributors?: Contributor[]
   topics?: string[]
   type: string
