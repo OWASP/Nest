@@ -1,6 +1,6 @@
 """Tests for OWASP Project Health Metrics Ordering."""
 
-from apps.owasp.graphql.ordering.project_health_metrics import ProjectHealthMetricsOrder
+from apps.owasp.api.internal.ordering.project_health_metrics import ProjectHealthMetricsOrder
 
 
 class TestProjectHealthMetricsOrder:
