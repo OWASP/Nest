@@ -7,11 +7,15 @@ from apps.nest.models.user import User
 
 
 class UserAdmin(admin.ModelAdmin):
+    """Admin for User model."""
+
     ordering = ("username",)
     search_fields = ("email", "username")
 
 
 class ApiKeyAdmin(admin.ModelAdmin):
+    """Admin for ApiKey model."""
+
     autocomplete_fields = ("user",)
     list_display = (
         "name",

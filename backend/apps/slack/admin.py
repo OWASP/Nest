@@ -10,6 +10,8 @@ from apps.slack.models.workspace import Workspace
 
 
 class ConversationAdmin(admin.ModelAdmin):
+    """Admin for Conversation model."""
+
     list_display = (
         "name",
         "slack_channel_id",
@@ -75,6 +77,8 @@ class ConversationAdmin(admin.ModelAdmin):
 
 
 class EventAdmin(admin.ModelAdmin):
+    """Admin for Event model."""
+
     list_display = (
         "nest_created_at",
         "trigger",
@@ -91,6 +95,8 @@ class EventAdmin(admin.ModelAdmin):
 
 
 class MemberAdmin(admin.ModelAdmin):
+    """Admin for Member model."""
+
     actions = ("approve_suggested_users",)
     autocomplete_fields = ("user",)
     filter_horizontal = ("suggested_users",)
@@ -137,6 +143,8 @@ class MemberAdmin(admin.ModelAdmin):
 
 
 class MessageAdmin(admin.ModelAdmin):
+    """Admin for Message model."""
+
     autocomplete_fields = (
         "author",
         "conversation",
@@ -159,6 +167,8 @@ class MessageAdmin(admin.ModelAdmin):
 
 
 class WorkspaceAdmin(admin.ModelAdmin):
+    """Admin for Workspace model."""
+
     search_fields = (
         "name",
         "slack_workspace_id",

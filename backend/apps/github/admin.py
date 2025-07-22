@@ -15,6 +15,8 @@ from apps.github.models.user import User
 
 
 class IssueAdmin(admin.ModelAdmin):
+    """Admin for Issue model."""
+
     autocomplete_fields = (
         "repository",
         "author",
@@ -48,10 +50,14 @@ class IssueAdmin(admin.ModelAdmin):
 
 
 class LabelAdmin(admin.ModelAdmin):
+    """Admin for Label model."""
+
     search_fields = ("name", "description")
 
 
 class MilestoneAdmin(admin.ModelAdmin):
+    """Admin for Milestone model."""
+
     autocomplete_fields = (
         "author",
         "labels",
@@ -64,6 +70,8 @@ class MilestoneAdmin(admin.ModelAdmin):
 
 
 class OrganizationAdmin(admin.ModelAdmin):
+    """Admin for Organization model."""
+
     list_display = (
         "title",
         "created_at",
@@ -78,6 +86,8 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 
 class PullRequestAdmin(admin.ModelAdmin):
+    """Admin for PullRequest model."""
+
     autocomplete_fields = (
         "assignees",
         "author",
@@ -118,6 +128,8 @@ class PullRequestAdmin(admin.ModelAdmin):
 
 
 class ReleaseAdmin(admin.ModelAdmin):
+    """Admin for Release model."""
+
     autocomplete_fields = (
         "author",
         "repository",
@@ -129,6 +141,8 @@ class ReleaseAdmin(admin.ModelAdmin):
 
 
 class RepositoryAdmin(admin.ModelAdmin):
+    """Admin for Repository model."""
+
     autocomplete_fields = (
         "organization",
         "owner",
@@ -187,6 +201,8 @@ class RepositoryAdmin(admin.ModelAdmin):
 
 
 class RepositoryContributorAdmin(admin.ModelAdmin):
+    """Admin for RepositoryContributor model."""
+
     autocomplete_fields = (
         "repository",
         "user",
@@ -195,6 +211,8 @@ class RepositoryContributorAdmin(admin.ModelAdmin):
 
 
 class UserAdmin(admin.ModelAdmin):
+    """Admin for User model."""
+
     list_display = (
         "title",
         "created_at",
