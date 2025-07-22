@@ -6,7 +6,7 @@ export const fetchMetricsOverviewPDF = async (): Promise<void> => {
     const response = await fetch(`${API_URL}owasp/project-health-metrics/overview-pdf`, {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/pdf',
+        accept: 'application/pdf',
       },
       credentials: 'include',
     })

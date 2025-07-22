@@ -11,8 +11,10 @@ import {
   faCodeBranch,
   faChartColumn,
   faHeart,
+  faFileArrowDown,
 } from '@fortawesome/free-solid-svg-icons'
-import { Button } from '@heroui/button'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Tooltip } from '@heroui/tooltip'
 import millify from 'millify'
 import { useState, useEffect, FC } from 'react'
 import { handleAppError } from 'app/global-error'
@@ -96,15 +98,22 @@ const ProjectsDashboardPage: FC = () => {
   ]
   return (
     <>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-start">
         <h1 className="font-semibold">Project Health Dashboard Overview</h1>
-        <Button
-          variant="solid"
-          color="primary"
-          onPress={async () => await fetchMetricsOverviewPDF()}
+        <Tooltip
+          content="Download PDF"
+          className="ml-2"
+          placement="top"
+          delay={100}
+          closeDelay={100}
+          showArrow
         >
-          Download PDF
-        </Button>
+          <FontAwesomeIcon
+            icon={faFileArrowDown}
+            className="ml-2 h-7 w-7 cursor-pointer text-gray-500 transition-colors duration-200 hover:text-gray-700"
+            onClick={async () => await fetchMetricsOverviewPDF()}
+          />
+        </Tooltip>
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
         {projectsCardsItems.map((item) => (
