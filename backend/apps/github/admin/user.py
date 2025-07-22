@@ -1,9 +1,9 @@
 """GitHub app User model admin."""
 
 from django.contrib import admin
-from django.utils.safestring import mark_safe
 
 from apps.github.models.user import User
+
 
 class UserAdmin(admin.ModelAdmin):
     """Admin for User model."""
@@ -17,5 +17,6 @@ class UserAdmin(admin.ModelAdmin):
         "login",
         "name",
     )
-    
+
+
 admin.site.register(User, UserAdmin)

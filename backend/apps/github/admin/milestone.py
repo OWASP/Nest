@@ -1,9 +1,9 @@
 """GitHub app Milestone model admin."""
 
 from django.contrib import admin
-from django.utils.safestring import mark_safe
 
 from apps.github.models.milestone import Milestone
+
 
 class MilestoneAdmin(admin.ModelAdmin):
     """Admin for Milestone model."""
@@ -17,5 +17,6 @@ class MilestoneAdmin(admin.ModelAdmin):
         "body",
         "title",
     )
-    
+
+
 admin.site.register(Milestone, MilestoneAdmin)

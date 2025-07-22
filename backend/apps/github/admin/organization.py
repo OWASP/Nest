@@ -1,9 +1,9 @@
 """GitHub app Organization model admin."""
 
 from django.contrib import admin
-from django.utils.safestring import mark_safe
 
 from apps.github.models.organization import Organization
+
 
 class OrganizationAdmin(admin.ModelAdmin):
     """Admin for Organization model."""
@@ -19,5 +19,6 @@ class OrganizationAdmin(admin.ModelAdmin):
         "login",
         "name",
     )
-    
+
+
 admin.site.register(Organization, OrganizationAdmin)

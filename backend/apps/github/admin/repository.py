@@ -5,6 +5,7 @@ from django.utils.safestring import mark_safe
 
 from apps.github.models.repository import Repository
 
+
 class RepositoryAdmin(admin.ModelAdmin):
     """Admin for Repository model."""
 
@@ -63,5 +64,6 @@ class RepositoryAdmin(admin.ModelAdmin):
 
     custom_field_title.short_description = "Name"
     custom_field_github_url.short_description = "GitHub 🔗"
-    
+
+
 admin.site.register(Repository, RepositoryAdmin)

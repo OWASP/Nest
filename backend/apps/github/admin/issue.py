@@ -5,6 +5,7 @@ from django.utils.safestring import mark_safe
 
 from apps.github.models.issue import Issue
 
+
 class IssueAdmin(admin.ModelAdmin):
     """Admin for Issue model."""
 
@@ -38,5 +39,6 @@ class IssueAdmin(admin.ModelAdmin):
         return mark_safe(f"<a href='{obj.url}' target='_blank'>↗️</a>")  # noqa: S308
 
     custom_field_github_url.short_description = "GitHub 🔗"
-    
+
+
 admin.site.register(Issue, IssueAdmin)

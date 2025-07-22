@@ -5,6 +5,7 @@ from django.utils.safestring import mark_safe
 
 from apps.github.models.pull_request import PullRequest
 
+
 class PullRequestAdmin(admin.ModelAdmin):
     """Admin for PullRequest model."""
 
@@ -45,5 +46,6 @@ class PullRequestAdmin(admin.ModelAdmin):
         return mark_safe(f"<a href='{obj.url}' target='_blank'>↗️</a>")  # noqa: S308
 
     custom_field_github_url.short_description = "GitHub 🔗"
-    
+
+
 admin.site.register(PullRequest, PullRequestAdmin)
