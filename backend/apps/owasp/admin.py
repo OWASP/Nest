@@ -12,6 +12,7 @@ from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 from apps.owasp.models.snapshot import Snapshot
 from apps.owasp.models.sponsor import Sponsor
+from apps.owasp.models import Badge
 
 
 class GenericEntityAdminMixin:
@@ -250,6 +251,12 @@ class SponsorAdmin(admin.ModelAdmin):
     )
 
 
+class BadgeAdmin(admin.ModelAdmin):
+    list_display = ("name", "description", "weight", "css_class", "nest_created_at", "nest_updated_at")
+    search_fields = ("name", "description", "css_class")
+    list_filter = ("weight",)
+    ordering = ("weight", "name")
+
 admin.site.register(Chapter, ChapterAdmin)
 admin.site.register(Committee, CommitteeAdmin)
 admin.site.register(Event, EventAdmin)
@@ -259,3 +266,4 @@ admin.site.register(ProjectHealthMetrics, ProjectHealthMetricsAdmin)
 admin.site.register(ProjectHealthRequirements)
 admin.site.register(Snapshot, SnapshotAdmin)
 admin.site.register(Sponsor, SponsorAdmin)
+admin.site.register(Badge, BadgeAdmin)
