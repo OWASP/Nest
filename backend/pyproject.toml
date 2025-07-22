@@ -174,7 +174,6 @@ select = ["ALL"]
 "**/rest/v1/*.py" = [
     "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
     "B008",   # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
-    "D106"    # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
 ]
 "**/tests/**/*.py" = [
     "D100",    # https://docs.astral.sh/ruff/rules/undocumented-public-module/
