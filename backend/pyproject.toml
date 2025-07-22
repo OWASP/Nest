@@ -153,7 +153,6 @@ select = ["ALL"]
     "D104"  # https://docs.astral.sh/ruff/rules/undocumented-public-package/
 ]
 "**/apps.py" = [
-    "D101", # https://docs.astral.sh/ruff/rules/undocumented-public-class/
     "D104"  # https://docs.astral.sh/ruff/rules/undocumented-public-package/
 ]
 "**/management/commands/*.py" = [
