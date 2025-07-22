@@ -114,7 +114,7 @@ module = ["apps.*.migrations.*"]
 
 [[tool.mypy.overrides]]
 disable_error_code = ["return-value", "attr-defined", "misc"]
-module = ["apps.*.graphql.queries.*", "apps.*.graphql.nodes.*"]
+module = ["apps.*.api.internal.queries.*", "apps.*.api.internal.nodes.*"]
 
 [tool.ruff]
 line-length = 99
@@ -123,32 +123,31 @@ target-version = "py313"
 [tool.ruff.lint]
 extend-select = ["I"]
 ignore = [
-    "ANN",  # TODO(arkid15r): remove when all annotations are added.
-    "ARG002",
-    "C901",
-    "COM812",
-    "D407",
-    "DJ012",
-    "ERA001",
-    "FBT002",
-    "FIX002",
-    "PD",
-    "PERF203",
-    "PLC0414",
-    "PLC0415",  # TODO(arkid15r): remove when all imports are at the top level.
-    "PLR0912",
-    "PLR0913",
-    "PLR0915",
-    "RUF012",
-    "SLF001",
-    "TD003",
+    "ANN",      # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann/
+    "ARG002",   # https://docs.astral.sh/ruff/rules/unused-method-argument/
+    "C901",     # https://docs.astral.sh/ruff/rules/complex-structure/
+    "COM812",   # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
+    "D407",     # https://docs.astral.sh/ruff/rules/missing-dashed-underline-after-section/
+    "DJ012",    # https://docs.astral.sh/ruff/rules/django-unordered-body-content-in-model/
+    "FBT002",   # https://docs.astral.sh/ruff/rules/boolean-default-value-positional-argument/
+    "FIX002",   # https://docs.astral.sh/ruff/rules/line-contains-todo/
+    "PD",       # https://docs.astral.sh/ruff/rules/#pandas-vet-pd
+    "PERF203",  # https://docs.astral.sh/ruff/rules/try-except-in-loop/
+    "PLC0414",  # https://docs.astral.sh/ruff/rules/useless-import-alias/
+    "PLC0415",  # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+    "PLR0912",  # https://docs.astral.sh/ruff/rules/too-many-branches/
+    "PLR0913",  # https://docs.astral.sh/ruff/rules/too-many-arguments/
+    "PLR0915",  # https://docs.astral.sh/ruff/rules/too-many-statements/
+    "RUF012",   # https://docs.astral.sh/ruff/rules/mutable-class-default/
+    "SLF001",   # https://docs.astral.sh/ruff/rules/private-member-access/
+    "TD003",    # https://docs.astral.sh/ruff/rules/missing-todo-link/
 ]
 select = ["ALL"]
 
 [tool.ruff.lint.per-file-ignores]
 "**/__init__.py" = ["D104", "F401"]
 "**/admin.py" = ["D100", "D101", "D104"]
-"**/api/*.py" = ["ARG001", "D106"]
+"**/rest/v1/*.py" = ["ARG001", "B008", "D106"]
 "**/apps.py" = ["D100", "D101", "D104"]
 "**/graphql/**/nodes.py" = ["D106"]
 "**/graphql/nodes/*.py" = ["D106"]

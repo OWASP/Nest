@@ -23,6 +23,12 @@ class Base(Configuration):
     DEBUG = False
     RELEASE_VERSION = values.Value(environ_name="RELEASE_VERSION")
     SENTRY_DSN = values.SecretValue(environ_name="SENTRY_DSN")
+
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_NAME = "nest.session-id"
+    SESSION_COOKIE_SAMESITE = "Lax"
+    SESSION_COOKIE_SECURE = True
+
     SITE_NAME = "localhost"
     SITE_URL = "http://localhost:8000"
 
@@ -49,6 +55,7 @@ class Base(Configuration):
         "apps.mentorship",
         "apps.nest",
         "apps.owasp",
+        "apps.sitemap",
         "apps.slack",
     )
 
@@ -113,6 +120,9 @@ class Base(Configuration):
         "APPLICATION_ID": ALGOLIA_APPLICATION_ID,
         "INDEX_PREFIX": ENVIRONMENT.lower(),
     }
+
+    API_PAGE_SIZE = 100
+    API_CACHE_TIME_SECONDS = 86400  # 24 hours.
 
     REDIS_HOST = values.SecretValue(environ_name="REDIS_HOST")
     REDIS_PASSWORD = values.SecretValue(environ_name="REDIS_PASSWORD")
