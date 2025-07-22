@@ -50,9 +50,7 @@ class CreateProgramInput:
     description: str
     domains: list[str] = strawberry.field(default_factory=list)
     ended_at: datetime
-    experience_levels: list[ExperienceLevelEnum] = strawberry.field(
-        default_factory=list
-    )
+    experience_levels: list[ExperienceLevelEnum] = strawberry.field(default_factory=list)
     mentees_limit: int
     started_at: datetime
     status: ProgramStatusEnum

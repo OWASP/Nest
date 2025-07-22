@@ -35,9 +35,7 @@ def resolve_mentors_from_logins(logins: list[str]) -> set[Mentor]:
     return mentors
 
 
-def _validate_module_dates(
-    started_at, ended_at, program_started_at, program_ended_at
-) -> tuple:
+def _validate_module_dates(started_at, ended_at, program_started_at, program_ended_at) -> tuple:
     """Validate and normalize module start/end dates against program constraints."""
     if started_at is None or ended_at is None:
         msg = "Both start and end dates are required."
@@ -67,9 +65,7 @@ class ModuleMutation:
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
-    def create_module(
-        self, info: strawberry.Info, input_data: CreateModuleInput
-    ) -> ModuleNode:
+    def create_module(self, info: strawberry.Info, input_data: CreateModuleInput) -> ModuleNode:
         """Create a new mentorship module. User must be an admin of the program."""
         user = info.context.request.user
         IsAuthenticated.require_github_user(user)
@@ -116,9 +112,7 @@ class ModuleMutation:
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
-    def update_module(
-        self, info: strawberry.Info, input_data: UpdateModuleInput
-    ) -> ModuleNode:
+    def update_module(self, info: strawberry.Info, input_data: UpdateModuleInput) -> ModuleNode:
         """Update an existing mentorship module. User must be an admin of the program."""
         user = info.context.request.user
         IsAuthenticated.require_github_user(user)

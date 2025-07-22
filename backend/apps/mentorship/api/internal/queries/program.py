@@ -29,9 +29,7 @@ class ProgramQuery:
 
         if mentor_username:
             mentor_username = mentor_username.strip().lower()
-            queryset = queryset.filter(
-                admins__github_user__login__iexact=mentor_username
-            )
+            queryset = queryset.filter(admins__github_user__login__iexact=mentor_username)
 
         if search:
             queryset = queryset.filter(name__icontains=search)
@@ -52,9 +50,7 @@ class ProgramQuery:
     def program(self, program_key: str) -> ProgramNode:
         """Get a program by Key."""
         try:
-            program = Program.objects.prefetch_related("admins__github_user").get(
-                key=program_key
-            )
+            program = Program.objects.prefetch_related("admins__github_user").get(key=program_key)
         except Program.DoesNotExist as err:
             msg = f"Program with key '{program_key}' not found."
             logger.warning(msg, exc_info=True)

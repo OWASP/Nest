@@ -25,9 +25,7 @@ class ProgramMutation:
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
-    def create_program(
-        self, info: strawberry.Info, input_data: CreateProgramInput
-    ) -> ProgramNode:
+    def create_program(self, info: strawberry.Info, input_data: CreateProgramInput) -> ProgramNode:
         """Create a new mentorship program."""
         user = info.context.request.user
         IsAuthenticated.require_github_user(user)
@@ -73,9 +71,7 @@ class ProgramMutation:
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
-    def update_program(
-        self, info: strawberry.Info, input_data: UpdateProgramInput
-    ) -> ProgramNode:
+    def update_program(self, info: strawberry.Info, input_data: UpdateProgramInput) -> ProgramNode:
         """Update an existing mentorship program. Only admins can update."""
         user = info.context.request.user
         IsAuthenticated.require_github_user(user)
@@ -113,9 +109,7 @@ class ProgramMutation:
             and input_data.ended_at <= input_data.started_at
         ):
             msg = "End date must be after start date."
-            logger.warning(
-                "Validation error updating program '%s': %s", program.key, msg
-            )
+            logger.warning("Validation error updating program '%s': %s", program.key, msg)
             raise ValidationError(msg)
 
         field_mapping = {
@@ -133,9 +127,7 @@ class ProgramMutation:
                 setattr(program, field, value)
 
         if input_data.experience_levels is not None:
-            program.experience_levels = [
-                lvl.value for lvl in input_data.experience_levels
-            ]
+            program.experience_levels = [lvl.value for lvl in input_data.experience_levels]
 
         if input_data.status is not None:
             program.status = input_data.status.value
@@ -176,8 +168,6 @@ class ProgramMutation:
         program.status = input_data.status.value
         program.save()
 
-        logger.info(
-            "Updated status of program '%s' to '%s'", program.key, program.status
-        )
+        logger.info("Updated status of program '%s' to '%s'", program.key, program.status)
 
         return program
