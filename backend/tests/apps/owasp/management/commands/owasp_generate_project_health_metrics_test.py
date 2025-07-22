@@ -1,9 +1,8 @@
 from unittest.mock import MagicMock, patch
 
+from django.conf import settings
 from django.core.management import call_command
 from reportlab.lib.pagesizes import letter
-
-import settings.base
 
 
 class TestOwaspGenerateProjectHealthMetricsPdf:
@@ -88,5 +87,5 @@ class TestOwaspGenerateProjectHealthMetricsPdf:
         mock_table.return_value.drawOn.assert_called_once_with(canvas, 50, 280)
         canvas.showPage.assert_called_once()
         canvas.save.assert_called_once()
-        mock_path.assert_called_once_with(settings.base.Base.BASE_DIR)
+        mock_path.assert_called_once_with(settings.BASE_DIR)
         mock_bytes_io.return_value.close.assert_called_once()
