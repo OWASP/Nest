@@ -30,13 +30,9 @@ class RAGTool:
         try:
             self.retriever = Retriever(embedding_model=embedding_model)
             self.generator = Generator(chat_model=chat_model)
-            logger.info(
-                "RAG Service initialized with embedding model: %s, chat model: %s",
-                embedding_model,
-                chat_model,
-            )
         except Exception:
-            logger.exception("Failed to initialize RAG Service")
+            logger.exception("Failed to initialize RAG tool")
+            raise
 
     def query(
         self,
@@ -56,8 +52,6 @@ class RAGTool:
         Returns:
             dict[str, Any]: A dictionary containing:
                 - answer (str): The generated answer
-                - sources (list): Source information used for the answer
-                - metadata (dict): Additional metadata about the query processing
 
         """
         logger.info("Retrieving context for query")

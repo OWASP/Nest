@@ -3,6 +3,7 @@
 from django.core.management.base import BaseCommand
 
 from apps.ai.agent.tools.RAG.rag_tool import RAGTool
+from apps.ai.common.constants import DEFAULT_LIMIT, DEFAULT_SIMILARITY_THRESHOLD
 
 
 class Command(BaseCommand):
@@ -13,15 +14,18 @@ class Command(BaseCommand):
             "--query",
             type=str,
             default="What is OWASP Foundation?",
-            help="Query to test the RAGService",
+            help="Query to test the RAG tool",
         )
         parser.add_argument(
-            "--limit", type=int, default=3, help="Maximum number of results to retrieve"
+            "--limit",
+            type=int,
+            default=DEFAULT_LIMIT,
+            help="Maximum number of results to retrieve",
         )
         parser.add_argument(
             "--threshold",
             type=float,
-            default=0.5,
+            default=DEFAULT_SIMILARITY_THRESHOLD,
             help="Similarity threshold (0.0 to 1.0)",
         )
         parser.add_argument(
@@ -44,10 +48,14 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        rag_tool = RAGTool(
-            embedding_model=options["embedding_model"],
-            chat_model=options["chat_model"],
-        )
+        try:
+            rag_tool = RAGTool(
+                embedding_model=options["embedding_model"],
+                chat_model=options["chat_model"],
+            )
+        except ValueError:
+            self.stderr.write(self.style.ERROR("Initialization error"))
+            return
 
         query = options["query"]
         limit = options["limit"]
@@ -61,5 +69,4 @@ class Command(BaseCommand):
             similarity_threshold=threshold,
             content_types=content_types,
         )
-
         self.stdout.write(f"\nAnswer: {result['answer']}")

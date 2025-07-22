@@ -102,16 +102,22 @@ Context: {formatted_context}
 Answer:
 """
 
-        response = self.openai_client.chat.completions.create(
-            model=self.chat_model,
-            messages=[
-                {"role": "system", "content": self.SYSTEM_PROMPT},
-                {"role": "user", "content": user_prompt},
-            ],
-            temperature=self.TEMPERATURE,
-            max_tokens=self.MAX_TOKENS,
-        )
-        final_answer = response.choices[0].message.content.strip()
+        try:
+            response = self.openai_client.chat.completions.create(
+                model=self.chat_model,
+                messages=[
+                    {"role": "system", "content": self.SYSTEM_PROMPT},
+                    {"role": "user", "content": user_prompt},
+                ],
+                temperature=self.TEMPERATURE,
+                max_tokens=self.MAX_TOKENS,
+            )
+            final_answer = response.choices[0].message.content.strip()
+        except openai.OpenAIError:
+            logger.exception("OpenAI API error")
+            return {
+                "answer": "I'm sorry, I'm currently unable to process your request.",
+            }
 
         return {
             "answer": final_answer,

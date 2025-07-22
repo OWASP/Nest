@@ -24,7 +24,7 @@ class Retriever:
         """Initialize the Retriever.
 
         Args:
-            embedding_model (str, optional): The OpenAI embedding model to use".
+            embedding_model (str, optional): The OpenAI embedding model to use"
 
         Raises:
             ValueError: If the OpenAI API key is not set.
@@ -156,13 +156,23 @@ class Retriever:
         elif clean_content_type == "message":
             context.update(
                 {
-                    "channel": getattr(content_object.conversation, "slack_channel_id", None),
-                    "thread_ts": getattr(content_object.parent_message, "ts", None),
+                    "channel": (
+                        getattr(content_object.conversation, "slack_channel_id", None)
+                        if hasattr(content_object, "conversation") and content_object.conversation
+                        else None
+                    ),
+                    "thread_ts": (
+                        getattr(content_object.parent_message, "ts", None)
+                        if hasattr(content_object, "parent_message")
+                        and content_object.parent_message
+                        else None
+                    ),
                     "ts": getattr(content_object, "ts", None),
-                    "user": getattr(content_object.author, "name", None),
-                    "text": getattr(content_object, "text", None),
-                    "attachments": getattr(content_object.raw_data, "attachments", []),
-                    "url": getattr(content_object, "url", None),
+                    "user": (
+                        getattr(content_object.author, "name", None)
+                        if hasattr(content_object, "author") and content_object.author
+                        else None
+                    ),
                 }
             )
 
