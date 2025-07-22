@@ -30,7 +30,12 @@ class CommitteeSchema(Schema):
 VALID_COMMITTEE_ORDERING_FIELDS = {"created_at", "updated_at"}
 
 
-@router.get("/", response={200: list[CommitteeSchema]})
+@router.get(
+    "/",
+    summary="Get all committees",
+    tags=["Committees"],
+    response={200: list[CommitteeSchema]},
+)
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_committees(
@@ -38,7 +43,16 @@ def list_committees(
     filters: CommitteeFilterSchema = Query(...),
     ordering: str | None = Query(None),
 ) -> list[CommitteeSchema]:
-    """Get all committees."""
+    """
+    Retrieves a paginated list of committees, optionally filtered and ordered by specified fields.
+    
+    Parameters:
+        filters (CommitteeFilterSchema): Criteria to filter the list of committees.
+        ordering (str, optional): Field name to order the results by. Must be one of the valid ordering fields.
+    
+    Returns:
+        list[CommitteeSchema]: A list of committees matching the filter and ordering criteria.
+    """
     committees = filters.filter(Committee.objects.all())
 
     if ordering and ordering in VALID_COMMITTEE_ORDERING_FIELDS:

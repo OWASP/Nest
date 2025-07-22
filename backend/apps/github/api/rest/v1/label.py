@@ -29,7 +29,12 @@ class LabelSchema(Schema):
 VALID_LABEL_ORDERING_FIELDS = {"created_at", "updated_at"}
 
 
-@router.get("/", response={200: list[LabelSchema]})
+@router.get(
+    "/",
+    summary="Get all labels",
+    tags=["Labels"],
+    response={200: list[LabelSchema]},
+)
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_label(
@@ -37,7 +42,16 @@ def list_label(
     filters: LabelFilterSchema = Query(...),
     ordering: str | None = Query(None),
 ) -> list[LabelSchema]:
-    """Get all labels."""
+    """
+    Retrieves a paginated list of labels, optionally filtered by color and ordered by creation or update time.
+    
+    Parameters:
+        filters (LabelFilterSchema): Optional filters to apply, such as label color.
+        ordering (str, optional): Field to order results by; must be 'created_at' or 'updated_at'.
+    
+    Returns:
+        list[LabelSchema]: A list of labels matching the filter and ordering criteria.
+    """
     labels = filters.filter(Label.objects.all())
 
     if ordering and ordering in VALID_LABEL_ORDERING_FIELDS:

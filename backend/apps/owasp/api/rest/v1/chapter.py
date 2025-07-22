@@ -34,7 +34,12 @@ class ChapterSchema(Schema):
 VALID_CHAPTER_ORDERING_FIELDS = {"created_at", "updated_at"}
 
 
-@router.get("/", response={200: list[ChapterSchema]})
+@router.get(
+    "/",
+    summary="Get all chapters",
+    tags=["Chapters"],
+    response={200: list[ChapterSchema]},
+)
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_chapters(
@@ -42,7 +47,16 @@ def list_chapters(
     filters: ChapterFilterSchema = Query(...),
     ordering: str | None = Query(None),
 ) -> list[ChapterSchema]:
-    """Get all chapters."""
+    """
+    Retrieves a paginated list of chapters, optionally filtered by country and region and ordered by creation or update time.
+    
+    Parameters:
+        filters (ChapterFilterSchema): Optional filters for country and region.
+        ordering (str, optional): Field to order results by; must be 'created_at' or 'updated_at' if provided.
+    
+    Returns:
+        list[ChapterSchema]: A list of chapters matching the specified filters and ordering.
+    """
     chapters = filters.filter(Chapter.objects.all())
 
     if ordering and ordering in VALID_CHAPTER_ORDERING_FIELDS:

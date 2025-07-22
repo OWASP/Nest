@@ -45,7 +45,12 @@ class UserSchema(Schema):
 VALID_USER_ORDERING_FIELDS = {"created_at", "updated_at"}
 
 
-@router.get("/", response={200: list[UserSchema]})
+@router.get(
+    "/",
+    summary="Get all users",
+    tags=["Users"],
+    response={200: list[UserSchema]},
+)
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_users(
@@ -53,7 +58,16 @@ def list_users(
     filters: UserFilterSchema = Query(...),
     ordering: str | None = Query(None),
 ) -> list[UserSchema]:
-    """Get all users."""
+    """
+    Retrieve a paginated list of users, optionally filtered by company and location, and ordered by creation or update date.
+    
+    Parameters:
+        filters (UserFilterSchema): Optional filters for company and location.
+        ordering (str, optional): Field to order results by; must be "created_at" or "updated_at".
+    
+    Returns:
+        list[UserSchema]: A list of users matching the specified filters and ordering.
+    """
     users = filters.filter(User.objects.all())
 
     if ordering and ordering in VALID_USER_ORDERING_FIELDS:
@@ -62,9 +76,25 @@ def list_users(
     return users
 
 
-@router.get("/{login}", response={200: UserSchema, 404: dict})
+@router.get(
+    "/{login}",
+    summary="Get user by login",
+    tags=["Users"],
+    response={200: UserSchema, 404: dict},
+)
 def get_user(request: HttpRequest, login: str) -> UserSchema:
-    """Get user by login."""
+    """
+    Retrieve a user's details by their login identifier.
+    
+    Parameters:
+    	login (str): The unique login name of the user to retrieve.
+    
+    Returns:
+    	UserSchema: The user's data if found.
+    
+    Raises:
+    	HttpError: If no user with the specified login exists, raises a 404 error.
+    """
     user = User.objects.filter(login=login).first()
     if not user:
         raise HttpError(404, "User not found")

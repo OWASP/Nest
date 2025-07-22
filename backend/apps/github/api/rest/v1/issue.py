@@ -34,7 +34,12 @@ class IssueSchema(Schema):
 VALID_ISSUE_ORDERING_FIELDS = {"created_at", "updated_at"}
 
 
-@router.get("/", response={200: list[IssueSchema]})
+@router.get(
+    "/",
+    summary="Get all issues",
+    tags=["Issues"],
+    response={200: list[IssueSchema]},
+)
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_issues(
@@ -42,7 +47,16 @@ def list_issues(
     filters: IssueFilterSchema = Query(...),
     ordering: str | None = Query(None),
 ) -> list[IssueSchema]:
-    """Get all issues."""
+    """
+    Retrieves a paginated list of GitHub issues, optionally filtered by state and ordered by creation or update time.
+    
+    Parameters:
+        filters (IssueFilterSchema): Optional filters to apply to the issues, such as state.
+        ordering (str, optional): Field to order the issues by, either "created_at" or "updated_at".
+    
+    Returns:
+        list[IssueSchema]: A paginated list of issues matching the provided filters and ordering.
+    """
     issues = filters.filter(Issue.objects.all())
 
     if ordering and ordering in VALID_ISSUE_ORDERING_FIELDS:

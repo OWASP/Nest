@@ -33,7 +33,12 @@ class ProjectSchema(Schema):
 VALID_PROJECT_ORDERING_FIELDS = {"created_at", "updated_at"}
 
 
-@router.get("/", response={200: list[ProjectSchema]})
+@router.get(
+    "/",
+    summary="Get all projects",
+    tags=["Projects"],
+    response={200: list[ProjectSchema]},
+)
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_projects(
@@ -41,7 +46,16 @@ def list_projects(
     filters: ProjectFilterSchema = Query(...),
     ordering: str | None = Query(None),
 ) -> list[ProjectSchema]:
-    """Get all projects."""
+    """
+    Retrieves a paginated list of projects, optionally filtered by level and ordered by creation or update time.
+    
+    Parameters:
+        filters (ProjectFilterSchema): Optional filters to apply to the project list.
+        ordering (str, optional): Field to order the results by; must be either "created_at" or "updated_at".
+    
+    Returns:
+        list[ProjectSchema]: A list of projects matching the specified filters and ordering.
+    """
     projects = filters.filter(Project.objects.all())
 
     if ordering and ordering in VALID_PROJECT_ORDERING_FIELDS:

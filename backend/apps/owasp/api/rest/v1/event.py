@@ -27,14 +27,27 @@ class EventSchema(Schema):
 VALID_EVENT_ORDERING_FIELDS = {"start_date", "end_date"}
 
 
-@router.get("/", response={200: list[EventSchema]})
+@router.get(
+    "/",
+    summary="Get all events",
+    tags=["Events"],
+    response={200: list[EventSchema]},
+)
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_events(
     request: HttpRequest,
     ordering: str | None = Query(None),
 ) -> list[EventSchema]:
-    """Get all events."""
+    """
+    Retrieves a paginated list of all events, optionally ordered by start or end date.
+    
+    Parameters:
+        ordering (str, optional): Field to order events by. Must be "start_date" or "end_date" to take effect.
+    
+    Returns:
+        list[EventSchema]: A list of serialized event objects.
+    """
     events = Event.objects.all()
 
     if ordering and ordering in VALID_EVENT_ORDERING_FIELDS:
