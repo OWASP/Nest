@@ -32,7 +32,7 @@ def get_blocks(
         list: A list of Slack blocks representing the users.
 
     """
-    from apps.github.api.search.user import get_users
+    from apps.github.index.search.user import get_users
 
     presentation = presentation or EntityPresentation()
     search_query_escaped = escape(search_query)

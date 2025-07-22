@@ -18,3 +18,38 @@ export const GET_PROJECT_HEALTH_STATS = gql`
     }
   }
 `
+export const GET_PROJECT_HEALTH_METRICS_DETAILS = gql`
+  query Project($projectKey: String!) {
+    project(key: $projectKey) {
+      healthMetricsLatest {
+        ageDays
+        ageDaysRequirement
+        isFundingRequirementsCompliant
+        isLeaderRequirementsCompliant
+        lastCommitDays
+        lastCommitDaysRequirement
+        lastPullRequestDays
+        lastPullRequestDaysRequirement
+        lastReleaseDays
+        lastReleaseDaysRequirement
+        owaspPageLastUpdateDays
+        owaspPageLastUpdateDaysRequirement
+        projectName
+        score
+      }
+      healthMetricsList(limit: 30) {
+        contributorsCount
+        createdAt
+        forksCount
+        openIssuesCount
+        openPullRequestsCount
+        recentReleasesCount
+        starsCount
+        totalIssuesCount
+        totalReleasesCount
+        unassignedIssuesCount
+        unansweredIssuesCount
+      }
+    }
+  }
+`

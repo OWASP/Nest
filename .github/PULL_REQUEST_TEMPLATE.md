@@ -10,5 +10,5 @@ Add the PR description here.
 
 ## Checklist
 
-- [ ] I've read and followed the [contributing guidelines](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md)
+- [ ] I've read and followed the [contributing guidelines](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md).
 - [ ] I've run `make check-test` locally; all checks and tests passed.
