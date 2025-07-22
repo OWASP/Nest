@@ -150,22 +150,12 @@ select = ["ALL"]
 ]
 "**/admin.py" = [
     "D100", # https://docs.astral.sh/ruff/rules/undocumented-public-module/
-    "D101", # https://docs.astral.sh/ruff/rules/undocumented-public-class/
     "D104"  # https://docs.astral.sh/ruff/rules/undocumented-public-package/
 ]
 "**/apps.py" = [
     "D100", # https://docs.astral.sh/ruff/rules/undocumented-public-module/
     "D101", # https://docs.astral.sh/ruff/rules/undocumented-public-class/
     "D104"  # https://docs.astral.sh/ruff/rules/undocumented-public-package/
-]
-"**/graphql/**/nodes.py" = [
-    "D106" # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
-]
-"**/graphql/nodes/*.py" = [
-    "D106" # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
-]
-"**/graphql/queries/*.py" = [
-    "N805" # https://docs.astral.sh/ruff/rules/invalid-first-argument-name-for-method/
 ]
 "**/management/commands/*.py" = [
     "D101", # https://docs.astral.sh/ruff/rules/undocumented-public-class/
@@ -177,9 +167,6 @@ select = ["ALL"]
     "D101", # https://docs.astral.sh/ruff/rules/undocumented-public-class/
     "D104", # https://docs.astral.sh/ruff/rules/undocumented-public-package/
     "E501"  # https://docs.astral.sh/ruff/rules/line-too-long/
-]
-"**/models.py" = [
-    "D106" # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
 ]
 "**/models/*.py" = [
     "D106" # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/

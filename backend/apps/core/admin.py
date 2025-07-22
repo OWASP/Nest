@@ -6,6 +6,8 @@ from apps.core.models.prompt import Prompt
 
 
 class PromptAdmin(admin.ModelAdmin):
+    """Admin for Prompt model."""
+
     search_fields = ("name",)
 
 

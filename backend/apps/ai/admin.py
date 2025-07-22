@@ -6,6 +6,8 @@ from apps.ai.models.chunk import Chunk
 
 
 class ChunkAdmin(admin.ModelAdmin):
+    """Admin for Chunk model."""
+
     list_display = (
         "id",
         "text",
