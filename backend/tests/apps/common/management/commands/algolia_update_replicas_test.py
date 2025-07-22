@@ -15,7 +15,7 @@ class TestUpdateReplicasCommand:
     def _setup(self):
         """Set up test environment."""
         self.stdout = StringIO()
-        with patch("apps.owasp.index.project.ProjectIndex.configure_replicas") as replica_patch:
+        with patch("apps.owasp.index.ProjectIndex.configure_replicas") as replica_patch:
             self.mock_replica_update = replica_patch
             yield
 

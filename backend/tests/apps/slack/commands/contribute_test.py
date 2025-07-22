@@ -29,7 +29,7 @@ class TestContributeHandler:
 
     @pytest.fixture(autouse=True)
     def mock_get_contributions(self):
-        with patch("apps.owasp.api.search.issue.get_issues") as mock:
+        with patch("apps.owasp.index.search.issue.get_issues") as mock:
             mock.return_value = {"hits": [], "nbPages": 1}
             yield mock
 

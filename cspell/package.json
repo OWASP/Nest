@@ -1,6 +1,6 @@
 {
   "devDependencies": {
-    "@cspell/dict-aws": "^4.0.12",
+    "@cspell/dict-aws": "^4.0.13",
     "@cspell/dict-data-science": "^2.0.9",
     "@cspell/dict-en_us": "^4.4.16",
     "@cspell/dict-fullstack": "^3.2.7",

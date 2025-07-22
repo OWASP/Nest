@@ -46,7 +46,7 @@ def get_gsoc_projects(year: int) -> list:
         list: A list of GSoC projects with their attributes.
 
     """
-    from apps.owasp.api.search.project import get_projects
+    from apps.owasp.index.search.project import get_projects
 
     return get_projects(
         attributes=["idx_name", "idx_url"],

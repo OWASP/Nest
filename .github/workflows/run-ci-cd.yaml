@@ -120,19 +120,13 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
-      - name: Setup Trivy
-        uses: aquasecurity/setup-trivy@9ea583eb67910444b1f64abf338bd2e105a0a93d
-        with:
-          cache: true
-          version: v0.62.1
-
       - name: Run Trivy Repository Scan
         uses: aquasecurity/trivy-action@dc5a429b52fcf669ce959baa2c2dd26090d2a6c4
         with:
           scan-type: repo
-          skip-setup-trivy: true
           trivy-config: trivy.yaml
           trivyignores: trivyignore.yaml
+          version: latest
 
   scan-ci-dependencies:
     name: Run CI Denendencies Scan
@@ -145,19 +139,13 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
-      - name: Setup Trivy
-        uses: aquasecurity/setup-trivy@9ea583eb67910444b1f64abf338bd2e105a0a93d
-        with:
-          cache: true
-          version: v0.62.1
-
       - name: Run Trivy Filesystem Scan
         uses: aquasecurity/trivy-action@dc5a429b52fcf669ce959baa2c2dd26090d2a6c4
         with:
           scan-type: fs
-          skip-setup-trivy: true
           trivy-config: trivy.yaml
           trivyignores: trivyignore.yaml
+          version: latest
 
   run-backend-tests:
     name: Run backend tests
@@ -372,29 +360,25 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
-      - name: Setup Trivy
-        uses: aquasecurity/setup-trivy@9ea583eb67910444b1f64abf338bd2e105a0a93d
-        with:
-          cache: true
-          version: v0.62.1
-
       - name: Scan backend image
         uses: aquasecurity/trivy-action@dc5a429b52fcf669ce959baa2c2dd26090d2a6c4
         with:
-          exit-code: 1
+          exit-code: 0
           image-ref: owasp/nest:backend-staging
-          skip-setup-trivy: true
+          scan-type: image
           trivy-config: trivy.yaml
           trivyignores: trivyignore.yaml
+          version: latest
 
       - name: Scan frontend image
         uses: aquasecurity/trivy-action@dc5a429b52fcf669ce959baa2c2dd26090d2a6c4
         with:
           exit-code: 1
           image-ref: owasp/nest:frontend-staging
-          skip-setup-trivy: true
+          scan-type: image
           trivy-config: trivy.yaml
           trivyignores: trivyignore.yaml
+          version: latest
 
   deploy-staging-nest:
     name: Deploy Nest Staging

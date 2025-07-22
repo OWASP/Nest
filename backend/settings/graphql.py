@@ -2,20 +2,20 @@
 
 import strawberry
 
-from apps.github.graphql.queries import GithubQuery
-from apps.mentorship.graphql.mutations import (
+from apps.github.api.internal.queries import GithubQuery
+from apps.mentorship.api.internal.mutations import (
     MentorshipMutations,
     ModuleMutation,
     ProgramMutation,
 )
-from apps.mentorship.graphql.queries import (
+from apps.mentorship.api.internal.queries import (
     MentorshipQuery,
     ModuleQuery,
     ProgramQuery,
 )
-from apps.nest.graphql.mutations import NestMutations
-from apps.nest.graphql.queries import NestQuery
-from apps.owasp.graphql.queries import OwaspQuery
+from apps.nest.api.internal.mutations import NestMutations
+from apps.nest.api.internal.queries import NestQuery
+from apps.owasp.api.internal.queries import OwaspQuery
 
 
 @strawberry.type
