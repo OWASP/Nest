@@ -16,10 +16,9 @@ class Status(models.Model):
         IN_PROGRESS = "IN_PROGRESS", "In Progress"
         IN_REVIEW = "IN_REVIEW", "In Review"
         COMPLETED = "COMPLETED", "Completed"
-        EXPERT = "expert", "Expert"
 
     status = models.CharField(
-        max_length=12,
+        max_length=20,
         choices=StatusChoices.choices,
         default=StatusChoices.TODO,
         verbose_name="Task status",

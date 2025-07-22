@@ -59,5 +59,9 @@ class Task(Status, TimestampedModel):
 
     def __str__(self) -> str:
         """Return a human-readable representation of the task."""
-        assignee_name = self.assignee.github_user.login if self.assignee else "Unassigned"
+        assignee_name = (
+            self.assignee.github_user.login
+            if self.assignee and self.assignee.github_user
+            else f"Mentee {self.assignee.id if self.assignee else 'Unassigned'}"
+        )
         return f"Task for '{self.issue.title}' assigned to {assignee_name}"
