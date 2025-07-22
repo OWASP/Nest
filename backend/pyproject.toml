@@ -148,9 +148,6 @@ select = ["ALL"]
     "D104", # https://docs.astral.sh/ruff/rules/undocumented-public-package/
     "F401"  # https://docs.astral.sh/ruff/rules/unused-import/
 ]
-"**/apps.py" = [
-    "D104"  # https://docs.astral.sh/ruff/rules/undocumented-public-package/
-]
 "**/management/commands/*.py" = [
     "D101", # https://docs.astral.sh/ruff/rules/undocumented-public-class/
     "D102", # https://docs.astral.sh/ruff/rules/undocumented-public-method/
