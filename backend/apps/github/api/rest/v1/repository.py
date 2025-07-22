@@ -26,7 +26,12 @@ class RepositorySchema(Schema):
 VALID_REPOSITORY_ORDERING_FIELDS = {"created_at", "updated_at"}
 
 
-@router.get("/", response={200: list[RepositorySchema]})
+@router.get(
+    "/",
+    summary="Get all repositories",
+    tags=["Repositories"],
+    response={200: list[RepositorySchema]},
+)
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_repository(

@@ -30,7 +30,12 @@ class CommitteeSchema(Schema):
 VALID_COMMITTEE_ORDERING_FIELDS = {"created_at", "updated_at"}
 
 
-@router.get("/", response={200: list[CommitteeSchema]})
+@router.get(
+    "/",
+    summary="Get all committees",
+    tags=["Committees"],
+    response={200: list[CommitteeSchema]},
+)
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_committees(

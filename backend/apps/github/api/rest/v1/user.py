@@ -45,7 +45,12 @@ class UserSchema(Schema):
 VALID_USER_ORDERING_FIELDS = {"created_at", "updated_at"}
 
 
-@router.get("/", response={200: list[UserSchema]})
+@router.get(
+    "/",
+    summary="Get all users",
+    tags=["Users"],
+    response={200: list[UserSchema]},
+)
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_users(
@@ -62,7 +67,12 @@ def list_users(
     return users
 
 
-@router.get("/{login}", response={200: UserSchema, 404: dict})
+@router.get(
+    "/{login}",
+    summary="Get user by login",
+    tags=["Users"],
+    response={200: UserSchema, 404: dict},
+)
 def get_user(request: HttpRequest, login: str) -> UserSchema:
     """Get user by login."""
     user = User.objects.filter(login=login).first()

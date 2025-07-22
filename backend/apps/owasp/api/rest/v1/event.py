@@ -27,7 +27,12 @@ class EventSchema(Schema):
 VALID_EVENT_ORDERING_FIELDS = {"start_date", "end_date"}
 
 
-@router.get("/", response={200: list[EventSchema]})
+@router.get(
+    "/",
+    summary="Get all events",
+    tags=["Events"],
+    response={200: list[EventSchema]},
+)
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_events(

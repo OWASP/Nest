@@ -34,7 +34,12 @@ class ChapterSchema(Schema):
 VALID_CHAPTER_ORDERING_FIELDS = {"created_at", "updated_at"}
 
 
-@router.get("/", response={200: list[ChapterSchema]})
+@router.get(
+    "/",
+    summary="Get all chapters",
+    tags=["Chapters"],
+    response={200: list[ChapterSchema]},
+)
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_chapters(
