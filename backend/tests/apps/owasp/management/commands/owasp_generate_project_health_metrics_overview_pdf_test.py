@@ -1,8 +1,8 @@
 from unittest.mock import patch
 
+from django.conf import settings
 from django.core.management import call_command
 
-from django.conf import settings
 from apps.owasp.api.internal.nodes.project_health_stats import ProjectHealthStatsNode
 
 
