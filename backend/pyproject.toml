@@ -148,15 +148,6 @@ select = ["ALL"]
     "D104", # https://docs.astral.sh/ruff/rules/undocumented-public-package/
     "F401"  # https://docs.astral.sh/ruff/rules/unused-import/
 ]
-"**/admin.py" = [
-    "D100", # https://docs.astral.sh/ruff/rules/undocumented-public-module/
-    "D104"  # https://docs.astral.sh/ruff/rules/undocumented-public-package/
-]
-"**/apps.py" = [
-    "D100", # https://docs.astral.sh/ruff/rules/undocumented-public-module/
-    "D101", # https://docs.astral.sh/ruff/rules/undocumented-public-class/
-    "D104"  # https://docs.astral.sh/ruff/rules/undocumented-public-package/
-]
 "**/management/commands/*.py" = [
     "D101", # https://docs.astral.sh/ruff/rules/undocumented-public-class/
     "D102", # https://docs.astral.sh/ruff/rules/undocumented-public-method/
@@ -174,7 +165,6 @@ select = ["ALL"]
 "**/rest/v1/*.py" = [
     "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
     "B008",   # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
-    "D106"    # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
 ]
 "**/tests/**/*.py" = [
     "D100",    # https://docs.astral.sh/ruff/rules/undocumented-public-module/
