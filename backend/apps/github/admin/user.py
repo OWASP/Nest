@@ -1,0 +1,21 @@
+"""GitHub app User model admin."""
+
+from django.contrib import admin
+from django.utils.safestring import mark_safe
+
+from apps.github.models.user import User
+
+class UserAdmin(admin.ModelAdmin):
+    """Admin for User model."""
+
+    list_display = (
+        "title",
+        "created_at",
+        "updated_at",
+    )
+    search_fields = (
+        "login",
+        "name",
+    )
+    
+admin.site.register(User, UserAdmin)
