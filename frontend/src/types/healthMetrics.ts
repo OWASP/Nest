@@ -54,11 +54,11 @@ export type HealthMetricsProps = {
 }
 
 export type HealthMetricsFilter = {
+  level?: string
   score?: {
     gt?: number
     gte?: number
     lt?: number
     lte?: number
   }
-  level?: string
 }

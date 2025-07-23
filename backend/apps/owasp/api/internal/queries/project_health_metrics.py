@@ -67,4 +67,5 @@ class ProjectHealthMetricsQuery:
 
         if filters:
             queryset = strawberry_django.filters.apply(filters, queryset)
+
         return queryset.count()
