@@ -10,7 +10,7 @@ class RepositoryAdmin(admin.ModelAdmin):
     """Admin for Repository model."""
 
     autocomplete_fields = (
-        "organization",
+        # "organization",
         "owner",
     )
     list_display = (
