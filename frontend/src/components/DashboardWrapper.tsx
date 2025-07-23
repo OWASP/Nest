@@ -1,12 +1,17 @@
 'use client'
 
+import { useQuery } from '@apollo/client'
 import { notFound } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { FC, ReactNode, useEffect } from 'react'
+import { FC, ReactNode, useEffect, useState } from 'react'
+import { handleAppError } from 'app/global-error'
+import { GET_USER_IS_OWASP_STAFF } from 'server/queries/userQueries'
+import type { User } from 'types/user'
 import { userAuthStatus } from 'utils/constants'
 
 const DashboardWrapper: FC<{ children: ReactNode }> = ({ children }) => {
-  const { status } = useSession()
+  const { status, data: session } = useSession()
+  const [user, setUser] = useState<User>()
 
   useEffect(() => {
     if (status === userAuthStatus.LOADING) {
@@ -15,8 +20,34 @@ const DashboardWrapper: FC<{ children: ReactNode }> = ({ children }) => {
     if (status === userAuthStatus.UNAUTHENTICATED) {
       notFound()
     }
-  }, [status])
+  }, [status, session])
 
+  const {
+    data,
+    error: graphQLError,
+    loading,
+  } = useQuery(GET_USER_IS_OWASP_STAFF, {
+    variables: {
+      login: session?.user?.login,
+    },
+    skip: !session?.user?.login,
+  })
+  useEffect(() => {
+    if (graphQLError) {
+      handleAppError(graphQLError)
+    }
+    if (data) {
+      setUser(data.user)
+    }
+  }, [data, graphQLError])
+
+  if (loading || status === userAuthStatus.LOADING) {
+    return
+  }
+
+  if (user && !user.isOwaspStaff) {
+    notFound()
+  }
   return <>{children}</>
 }
 

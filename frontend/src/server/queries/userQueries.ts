@@ -85,3 +85,10 @@ export const GET_USER_METADATA = gql`
     }
   }
 `
+export const GET_USER_IS_OWASP_STAFF = gql`
+  query GetUser($login: String!) {
+    user(login: $login) {
+      isOwaspStaff
+    }
+  }
+`
