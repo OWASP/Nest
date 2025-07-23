@@ -137,14 +137,14 @@ frozenlist = ">=1.1.0"
 
 [[package]]
 name = "algoliasearch"
-version = "4.23.0"
+version = "4.23.1"
 description = "A fully-featured and blazing-fast Python API client to interact with Algolia."
 optional = false
 python-versions = ">=3.8.1"
 groups = ["main"]
 files = [
-    {file = "algoliasearch-4.23.0-py3-none-any.whl", hash = "sha256:b0b8857a8e99cd39501df26a6a9f741103df0f5c67499062ac8a32a269d4f6a6"},
-    {file = "algoliasearch-4.23.0.tar.gz", hash = "sha256:b5ccd0a01104b6289c651e4aa3c9008ea1464080d237922f0e402a31048873a9"},
+    {file = "algoliasearch-4.23.1-py3-none-any.whl", hash = "sha256:7fa77269d278c729cb5c76a040f207d5cbf36db1cf9fe600d9767fff8a102cf2"},
+    {file = "algoliasearch-4.23.1.tar.gz", hash = "sha256:0679e84ed88a0c97f58c1936abf6027bd489c61d8227ab62f468fff4f3568d81"},
 ]
 
 [package.dependencies]
@@ -252,18 +252,18 @@ tests-mypy = ["mypy (>=1.11.1) ; platform_python_implementation == \"CPython\" a
 
 [[package]]
 name = "boto3"
-version = "1.39.10"
+version = "1.39.11"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "boto3-1.39.10-py3-none-any.whl", hash = "sha256:5b2aa5b7d075491c7c6cb539255a44f0ebd70ffc540e32dfd56eb8a361390e5e"},
-    {file = "boto3-1.39.10.tar.gz", hash = "sha256:62a1623c8c9495625c88778869b75b692a7ef226fcbb96ea58365b9f043a2ae2"},
+    {file = "boto3-1.39.11-py3-none-any.whl", hash = "sha256:af8f1dad35eceff7658fab43b39b0f55892b6e3dd12308733521cc24dd2c9a02"},
+    {file = "boto3-1.39.11.tar.gz", hash = "sha256:3027edf20642fe1d5f9dc50a420d0fe2733073ed6a9f0f047b60fe08c3682132"},
 ]
 
 [package.dependencies]
-botocore = ">=1.39.10,<1.40.0"
+botocore = ">=1.39.11,<1.40.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.13.0,<0.14.0"
 
@@ -272,14 +272,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.39.10"
+version = "1.39.11"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "botocore-1.39.10-py3-none-any.whl", hash = "sha256:d279f252a37bfa7d8a628404ea745c0163ed6260e037d813ce0aef2996ffea28"},
-    {file = "botocore-1.39.10.tar.gz", hash = "sha256:7fe00007304fe4627d7dd7b8605c6666a560651e91100f47391ae40a310dc092"},
+    {file = "botocore-1.39.11-py3-none-any.whl", hash = "sha256:1545352931a8a186f3e977b1e1a4542d7d434796e274c3c62efd0210b5ea76dc"},
+    {file = "botocore-1.39.11.tar.gz", hash = "sha256:953b12909d6799350e346ab038e55b6efe622c616f80aef74d7a6683ffdd972c"},
 ]
 
 [package.dependencies]
@@ -1592,14 +1592,14 @@ tenacity = ">=8.1.0,<8.4.0 || >8.4.0,<10"
 
 [[package]]
 name = "langchain-core"
-version = "0.3.70"
+version = "0.3.71"
 description = "Building applications with LLMs through composability"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "langchain_core-0.3.70-py3-none-any.whl", hash = "sha256:56f1ce0ab410508e25b3b4b3b87a8ffae38bf16294e5f605ac63a8aff5bc13a4"},
-    {file = "langchain_core-0.3.70.tar.gz", hash = "sha256:58551e5411ff9f92c7c8f4379e07e762ca66800e821cd904e19881fe41f691ee"},
+    {file = "langchain_core-0.3.71-py3-none-any.whl", hash = "sha256:cce6f3faae57d23bc4f2b41246b9dcf06b8dcdf52caaf6afd62b0849df20ba23"},
+    {file = "langchain_core-0.3.71.tar.gz", hash = "sha256:03ce06ba86bd1fa202b7b704d81554306f9cf5a3044b80d9a8ea7d93eab08623"},
 ]
 
 [package.dependencies]
@@ -2116,14 +2116,14 @@ files = [
 
 [[package]]
 name = "openai"
-version = "1.97.0"
+version = "1.97.1"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "openai-1.97.0-py3-none-any.whl", hash = "sha256:a1c24d96f4609f3f7f51c9e1c2606d97cc6e334833438659cfd687e9c972c610"},
-    {file = "openai-1.97.0.tar.gz", hash = "sha256:0be349569ccaa4fb54f97bb808423fd29ccaeb1246ee1be762e0c81a47bae0aa"},
+    {file = "openai-1.97.1-py3-none-any.whl", hash = "sha256:4e96bbdf672ec3d44968c9ea39d2c375891db1acc1794668d8149d5fa6000606"},
+    {file = "openai-1.97.1.tar.gz", hash = "sha256:a744b27ae624e3d4135225da9b1c89c107a2a7e5bc4c93e5b7b5214772ce7a4e"},
 ]
 
 [package.dependencies]
