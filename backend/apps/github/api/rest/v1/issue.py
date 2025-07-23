@@ -13,7 +13,7 @@ from ninja.pagination import PageNumberPagination, paginate
 from apps.github.models.generic_issue_model import GenericIssueModel
 from apps.github.models.issue import Issue
 
-router = Router()
+router = Router(tags=["Issues"])
 
 
 class IssueFilterSchema(FilterSchema):
@@ -42,7 +42,7 @@ class IssueSchema(Schema):
     operation_id="list_issues",
     response={200: list[IssueSchema]},
     summary="List issues",
-    tags=["Issues"],
+    tags=["GitHub"],
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)

@@ -30,7 +30,7 @@ class EventSchema(Schema):
     description="Retrieve a paginated list of OWASP events.",
     operation_id="list_events",
     summary="List events",
-    tags=["Events"],
+    tags=["OWASP"],
     response={200: list[EventSchema]},
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))

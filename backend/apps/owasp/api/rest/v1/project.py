@@ -41,7 +41,7 @@ class ProjectSchema(Schema):
     operation_id="list_projects",
     response={200: list[ProjectSchema]},
     summary="List projects",
-    tags=["Projects"],
+    tags=["OWASP"],
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
