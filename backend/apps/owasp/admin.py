@@ -16,6 +16,8 @@ from apps.owasp.models.sponsor import Sponsor
 
 
 class GenericEntityAdminMixin:
+    """Mixin for generic entity admin."""
+
     def get_queryset(self, request):
         """Get queryset."""
         return super().get_queryset(request).prefetch_related("repositories")
@@ -70,6 +72,8 @@ class LeaderAdminMixin:
 
 
 class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
+    """Admin for Chapter model."""
+
     autocomplete_fields = ("owasp_repository",)
     filter_horizontal = LeaderAdminMixin.filter_horizontal
     list_display = (
@@ -90,6 +94,8 @@ class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
 
 
 class CommitteeAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
+    """Admin for Committee model."""
+
     autocomplete_fields = (
         "leaders",
         "owasp_repository",
@@ -99,6 +105,8 @@ class CommitteeAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin
 
 
 class EventAdmin(admin.ModelAdmin):
+    """Admin for Event model."""
+
     list_display = (
         "name",
         "suggested_location",
@@ -124,6 +132,8 @@ class PostAdmin(admin.ModelAdmin):
 
 
 class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
+    """Admin for Project model."""
+
     autocomplete_fields = (
         "organizations",
         "owasp_repository",
@@ -168,6 +178,8 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
 
 
 class ProjectHealthMetricsAdmin(admin.ModelAdmin):
+    """Admin for ProjectHealthMetrics model."""
+
     autocomplete_fields = ("project",)
     list_filter = (
         "project__level",
@@ -192,6 +204,8 @@ class ProjectHealthMetricsAdmin(admin.ModelAdmin):
 
 
 class SnapshotAdmin(admin.ModelAdmin):
+    """Admin for Snapshot model."""
+
     autocomplete_fields = (
         "new_chapters",
         "new_issues",
@@ -222,7 +236,7 @@ class SnapshotAdmin(admin.ModelAdmin):
 
 
 class SponsorAdmin(admin.ModelAdmin):
-    """Admin configuration for Sponsor model."""
+    """Admin for Sponsor model."""
 
     list_display = (
         "name",
