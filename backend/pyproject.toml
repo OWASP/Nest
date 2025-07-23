@@ -105,7 +105,7 @@ plugins = ["strawberry.ext.mypy_plugin"]
 
 [[tool.mypy.overrides]]
 disable_error_code = ["attr-defined"]
-module = ["apps.*.models.mixins.*", "apps.*.admin", "schema.tests.*"]
+module = ["apps.*.models.mixins.*", "apps.*.admin.*", "schema.tests.*"]
 
 [[tool.mypy.overrides]]
 disable_error_code = ["var-annotated"]
@@ -148,25 +148,6 @@ select = ["ALL"]
     "D104", # https://docs.astral.sh/ruff/rules/undocumented-public-package/
     "F401"  # https://docs.astral.sh/ruff/rules/unused-import/
 ]
-"**/admin.py" = [
-    "D100", # https://docs.astral.sh/ruff/rules/undocumented-public-module/
-    "D101", # https://docs.astral.sh/ruff/rules/undocumented-public-class/
-    "D104"  # https://docs.astral.sh/ruff/rules/undocumented-public-package/
-]
-"**/apps.py" = [
-    "D100", # https://docs.astral.sh/ruff/rules/undocumented-public-module/
-    "D101", # https://docs.astral.sh/ruff/rules/undocumented-public-class/
-    "D104"  # https://docs.astral.sh/ruff/rules/undocumented-public-package/
-]
-"**/graphql/**/nodes.py" = [
-    "D106" # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
-]
-"**/graphql/nodes/*.py" = [
-    "D106" # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
-]
-"**/graphql/queries/*.py" = [
-    "N805" # https://docs.astral.sh/ruff/rules/invalid-first-argument-name-for-method/
-]
 "**/management/commands/*.py" = [
     "D101", # https://docs.astral.sh/ruff/rules/undocumented-public-class/
     "D102", # https://docs.astral.sh/ruff/rules/undocumented-public-method/
@@ -178,16 +159,12 @@ select = ["ALL"]
     "D104", # https://docs.astral.sh/ruff/rules/undocumented-public-package/
     "E501"  # https://docs.astral.sh/ruff/rules/line-too-long/
 ]
-"**/models.py" = [
-    "D106" # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
-]
 "**/models/*.py" = [
     "D106" # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
 ]
 "**/rest/v1/*.py" = [
     "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
     "B008",   # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
-    "D106"    # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
 ]
 "**/tests/**/*.py" = [
     "D100",    # https://docs.astral.sh/ruff/rules/undocumented-public-module/

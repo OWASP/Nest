@@ -1,17 +1,13 @@
-"""Nest app admin."""
+"""Nest app APIKey model admin."""
 
 from django.contrib import admin
 
 from apps.nest.models.api_key import ApiKey
-from apps.nest.models.user import User
-
-
-class UserAdmin(admin.ModelAdmin):
-    ordering = ("username",)
-    search_fields = ("email", "username")
 
 
 class ApiKeyAdmin(admin.ModelAdmin):
+    """Admin for ApiKey model."""
+
     autocomplete_fields = ("user",)
     list_display = (
         "name",
@@ -32,4 +28,3 @@ class ApiKeyAdmin(admin.ModelAdmin):
 
 
 admin.site.register(ApiKey, ApiKeyAdmin)
-admin.site.register(User, UserAdmin)
