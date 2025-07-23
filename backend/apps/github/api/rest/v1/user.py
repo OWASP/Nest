@@ -1,11 +1,12 @@
 """User API."""
 
 from datetime import datetime
+from typing import Literal
 
 from django.conf import settings
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
-from ninja import FilterSchema, Query, Router, Schema
+from ninja import Field, FilterSchema, Query, Router, Schema
 from ninja.decorators import decorate_view
 from ninja.errors import HttpError
 from ninja.pagination import PageNumberPagination, paginate
@@ -18,8 +19,11 @@ router = Router()
 class UserFilterSchema(FilterSchema):
     """Filter schema for User."""
 
-    company: str | None = None
-    location: str | None = None
+    company: str | None = Field(
+        None,
+        description="Company of the user",
+    )
+    location: str | None = Field(None, description="Location of the user", example="India")
 
 
 class UserSchema(Schema):
@@ -42,27 +46,41 @@ class UserSchema(Schema):
     url: str
 
 
-VALID_USER_ORDERING_FIELDS = {"created_at", "updated_at"}
-
-
-@router.get("/", response={200: list[UserSchema]})
+@router.get(
+    "/",
+    description="Retrieve a paginated list of GitHub users.",
+    operation_id="list_users",
+    response={200: list[UserSchema]},
+    summary="List users",
+    tags=["GitHub"],
+)
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_users(
     request: HttpRequest,
     filters: UserFilterSchema = Query(...),
-    ordering: str | None = Query(None),
+    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
+        None,
+        description="Ordering field",
+    ),
 ) -> list[UserSchema]:
     """Get all users."""
     users = filters.filter(User.objects.all())
 
-    if ordering and ordering in VALID_USER_ORDERING_FIELDS:
+    if ordering:
         users = users.order_by(ordering)
 
     return users
 
 
-@router.get("/{login}", response={200: UserSchema, 404: dict})
+@router.get(
+    "/{login}",
+    description="Retrieve a GitHub user by login.",
+    operation_id="get_user",
+    response={200: UserSchema, 404: dict},
+    summary="Get user by login",
+    tags=["GitHub"],
+)
 def get_user(request: HttpRequest, login: str) -> UserSchema:
     """Get user by login."""
     user = User.objects.filter(login=login).first()

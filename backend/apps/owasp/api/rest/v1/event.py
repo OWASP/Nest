@@ -1,6 +1,7 @@
 """Event API."""
 
 from datetime import datetime
+from typing import Literal
 
 from django.conf import settings
 from django.http import HttpRequest
@@ -24,20 +25,27 @@ class EventSchema(Schema):
     url: str
 
 
-VALID_EVENT_ORDERING_FIELDS = {"start_date", "end_date"}
-
-
-@router.get("/", response={200: list[EventSchema]})
+@router.get(
+    "/",
+    description="Retrieve a paginated list of OWASP events.",
+    operation_id="list_events",
+    summary="List events",
+    tags=["OWASP"],
+    response={200: list[EventSchema]},
+)
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_events(
     request: HttpRequest,
-    ordering: str | None = Query(None),
+    ordering: Literal["start_date", "-start_date", "end_date", "-end_date"] | None = Query(
+        None,
+        description="Ordering field",
+    ),
 ) -> list[EventSchema]:
     """Get all events."""
     events = Event.objects.all()
 
-    if ordering and ordering in VALID_EVENT_ORDERING_FIELDS:
+    if ordering:
         events = events.order_by(ordering)
 
     return events
