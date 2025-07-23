@@ -8,6 +8,7 @@ from apps.mentorship.models.mentor import Mentor
 from apps.mentorship.models.module import Module
 from apps.mentorship.models.program import Program
 from apps.mentorship.models.task import Task
+from apps.mentorship.models.tasl_level import TaskLevel
 
 
 class MenteeAdmin(admin.ModelAdmin):
@@ -108,9 +109,26 @@ class TaskAdmin(admin.ModelAdmin):
     list_filter = ("status", "module", "assignee")
 
 
+class TaskLevelAdmin(admin.ModelAdmin):
+    """Admin view for TaskLevel model."""
+
+    list_display = (
+        "description",
+        "github_labels",
+        "module",
+        "name",
+    )
+
+    search_fields = (
+        "name",
+        "module__name",
+    )
+
+
 admin.site.register(MenteeProgram, MenteeProgramAdmin)
 admin.site.register(Mentee, MenteeAdmin)
 admin.site.register(Mentor, MentorAdmin)
 admin.site.register(Module, ModuleAdmin)
 admin.site.register(Program, ProgramAdmin)
 admin.site.register(Task, TaskAdmin)
+admin.site.register(TaskLevel, TaskLevelAdmin)
