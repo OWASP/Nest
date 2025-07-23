@@ -22,6 +22,10 @@ owasp-generate-project-health-metrics-overview-pdf:
 	@echo "Generating OWASP project health metrics overview PDF"
 	@CMD="python manage.py owasp_generate_project_health_metrics_overview_pdf" $(MAKE) exec-backend-command
 
+owasp-generate-project-health-metrics-pdf:
+	@echo "Generating OWASP project health metrics PDF for project: $(project_key)"
+	@CMD="python manage.py owasp_generate_project_health_metrics_pdf --project-key=$(project_key)" $(MAKE) exec-backend-command
+
 owasp-process-snapshots:
 	@echo "Processing OWASP snapshots"
 	@CMD="python manage.py owasp_process_snapshots" $(MAKE) exec-backend-command
