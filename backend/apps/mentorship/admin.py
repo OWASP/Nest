@@ -7,6 +7,7 @@ from apps.mentorship.models.mentee_program import MenteeProgram
 from apps.mentorship.models.mentor import Mentor
 from apps.mentorship.models.module import Module
 from apps.mentorship.models.program import Program
+from apps.mentorship.models.task import Task
 
 
 class MenteeAdmin(admin.ModelAdmin):
@@ -86,8 +87,30 @@ class ProgramAdmin(admin.ModelAdmin):
     filter_horizontal = ("admins",)
 
 
+class TaskAdmin(admin.ModelAdmin):
+    """Admin view for Task model."""
+
+    list_display = (
+        "issue",
+        "assignee",
+        "module",
+        "status",
+        "assigned_at",
+        "deadline_at",
+    )
+
+    search_fields = (
+        "issue__title",
+        "assignee__github_user__login",
+        "module__name",
+    )
+
+    list_filter = ("status", "module")
+
+
 admin.site.register(MenteeProgram, MenteeProgramAdmin)
 admin.site.register(Mentee, MenteeAdmin)
 admin.site.register(Mentor, MentorAdmin)
 admin.site.register(Module, ModuleAdmin)
 admin.site.register(Program, ProgramAdmin)
+admin.site.register(Task, TaskAdmin)
