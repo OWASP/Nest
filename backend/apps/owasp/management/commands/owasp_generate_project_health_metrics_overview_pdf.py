@@ -29,14 +29,17 @@ class Command(BaseCommand):
             ["Metric", "Value"],
             ["Healthy Projects", f"{metrics_stats.projects_count_healthy}"],
             ["Unhealthy Projects", f"{metrics_stats.projects_count_unhealthy}"],
-            ["Projects Needing Attention", f"{metrics_stats.projects_count_need_attention}"],
+            ["Need Attention Projects", f"{metrics_stats.projects_count_need_attention}"],
             ["Average Score", f"{metrics_stats.average_score:.2f}"],
             ["Total Contributors", f"{metrics_stats.total_contributors:,}"],
             ["Total Forks", f"{metrics_stats.total_forks:,}"],
             ["Total Stars", f"{metrics_stats.total_stars:,}"],
-            ["Healthy Projects Percentage", f"%{metrics_stats.projects_percentage_healthy:.2f}"],
             [
-                "Projects Needing Attention Percentage",
+                "Healthy Projects Percentage",
+                f"%{metrics_stats.projects_percentage_healthy:.2f}",
+            ],
+            [
+                "Need Attention Projects Percentage",
                 f"%{metrics_stats.projects_percentage_need_attention:.2f}",
             ],
             [

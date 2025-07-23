@@ -21,8 +21,8 @@ venv/
 *.code-workspace
 *.key
 *.log
-*.pem
 *.pdf
+*.pem
 backend/.venv
 backend/data/backup*
 backend/staticfiles
