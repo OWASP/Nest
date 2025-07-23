@@ -19,7 +19,10 @@ router = Router()
 class ProjectFilterSchema(FilterSchema):
     """Filter schema for Project."""
 
-    level: ProjectLevel | None = Field(None, description="Level of the project")
+    level: ProjectLevel | None = Field(
+        None,
+        description="Level of the project",
+    )
 
 
 class ProjectSchema(Schema):
@@ -44,9 +47,13 @@ class ProjectSchema(Schema):
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_projects(
     request: HttpRequest,
-    filters: ProjectFilterSchema = Query(..., description="Filter criteria for projects"),
+    filters: ProjectFilterSchema = Query(
+        ...,
+        description="Filter criteria for projects",
+    ),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
-        None, description="Ordering field"
+        None,
+        description="Ordering field",
     ),
 ) -> list[ProjectSchema]:
     """Get all projects."""

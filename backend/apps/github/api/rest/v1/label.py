@@ -17,7 +17,11 @@ router = Router()
 class LabelFilterSchema(FilterSchema):
     """Filter schema for Label."""
 
-    color: str | None = Field(None, description="Color of the label", example="d93f0b")
+    color: str | None = Field(
+        None,
+        description="Color of the label",
+        example="d93f0b",
+    )
 
 
 class LabelSchema(Schema):
@@ -42,7 +46,10 @@ def list_label(
     request: HttpRequest,
     filters: LabelFilterSchema = Query(..., description="Filter criteria for labels"),
     ordering: Literal["nest_created_at", "-nest_created_at", "nest_updated_at", "-nest_updated_at"]
-    | None = Query(None, description="Ordering field"),
+    | None = Query(
+        None,
+        description="Ordering field",
+    ),
 ) -> list[LabelSchema]:
     """Get all labels."""
     labels = filters.filter(Label.objects.all())

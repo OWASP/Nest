@@ -37,7 +37,8 @@ class CommitteeSchema(Schema):
 def list_committees(
     request: HttpRequest,
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
-        None, description="Ordering field"
+        None,
+        description="Ordering field",
     ),
 ) -> list[CommitteeSchema]:
     """Get all committees."""

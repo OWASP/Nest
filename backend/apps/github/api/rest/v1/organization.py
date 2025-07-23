@@ -19,7 +19,9 @@ class OrganizationFilterSchema(FilterSchema):
     """Filter schema for Organization."""
 
     location: str | None = Field(
-        None, description="Location of the organization", example="United States of America"
+        None,
+        description="Location of the organization",
+        example="United States of America",
     )
 
 
@@ -47,10 +49,12 @@ class OrganizationSchema(Schema):
 def list_organization(
     request: HttpRequest,
     filters: OrganizationFilterSchema = Query(
-        ..., description="Filter criteria for organizations"
+        ...,
+        description="Filter criteria for organizations",
     ),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
-        None, description="Ordering field"
+        None,
+        description="Ordering field",
     ),
 ) -> list[OrganizationSchema]:
     """Get all organizations."""

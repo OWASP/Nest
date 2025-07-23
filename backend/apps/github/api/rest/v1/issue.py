@@ -19,7 +19,10 @@ router = Router()
 class IssueFilterSchema(FilterSchema):
     """Filter schema for Issue."""
 
-    state: GenericIssueModel.State | None = Field(None, description="State of the issue")
+    state: GenericIssueModel.State | None = Field(
+        None,
+        description="State of the issue",
+    )
 
 
 class IssueSchema(Schema):
@@ -45,9 +48,13 @@ class IssueSchema(Schema):
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_issues(
     request: HttpRequest,
-    filters: IssueFilterSchema = Query(..., description="Filter criteria for issues"),
+    filters: IssueFilterSchema = Query(
+        ...,
+        description="Filter criteria for issues",
+    ),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
-        None, description="Ordering field"
+        None,
+        description="Ordering field",
     ),
 ) -> list[IssueSchema]:
     """Get all issues."""

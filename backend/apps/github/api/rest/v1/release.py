@@ -43,9 +43,13 @@ class ReleaseSchema(Schema):
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_release(
     request: HttpRequest,
-    filters: ReleaseFilterSchema = Query(..., description="Filter criteria for releases"),
+    filters: ReleaseFilterSchema = Query(
+        ...,
+        description="Filter criteria for releases",
+    ),
     ordering: Literal["created_at", "-created_at", "published_at", "-published_at"] | None = Query(
-        None, description="Ordering field"
+        None,
+        description="Ordering field",
     ),
 ) -> list[ReleaseSchema]:
     """Get all releases."""

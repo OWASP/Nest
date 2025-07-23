@@ -58,9 +58,13 @@ class UserSchema(Schema):
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_users(
     request: HttpRequest,
-    filters: UserFilterSchema = Query(..., description="Filter criteria for users"),
+    filters: UserFilterSchema = Query(
+        ...,
+        description="Filter criteria for users",
+    ),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
-        None, description="Ordering field"
+        None,
+        description="Ordering field",
     ),
 ) -> list[UserSchema]:
     """Get all users."""

@@ -37,7 +37,8 @@ class RepositorySchema(Schema):
 def list_repository(
     request: HttpRequest,
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
-        None, description="Ordering field"
+        None,
+        description="Ordering field",
     ),
 ) -> list[RepositorySchema]:
     """Get all repositories."""

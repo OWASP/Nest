@@ -44,9 +44,13 @@ class ChapterSchema(Schema):
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_chapters(
     request: HttpRequest,
-    filters: ChapterFilterSchema = Query(..., description="Filter criteria for chapters"),
+    filters: ChapterFilterSchema = Query(
+        ...,
+        description="Filter criteria for chapters",
+    ),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
-        None, description="Ordering field"
+        None,
+        description="Ordering field",
     ),
 ) -> list[ChapterSchema]:
     """Get all chapters."""

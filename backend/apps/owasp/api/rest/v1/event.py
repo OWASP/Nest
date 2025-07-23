@@ -38,7 +38,8 @@ class EventSchema(Schema):
 def list_events(
     request: HttpRequest,
     ordering: Literal["start_date", "-start_date", "end_date", "-end_date"] | None = Query(
-        None, description="Ordering field"
+        None,
+        description="Ordering field",
     ),
 ) -> list[EventSchema]:
     """Get all events."""
