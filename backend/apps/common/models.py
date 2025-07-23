@@ -9,6 +9,8 @@ class BulkSaveModel(models.Model):
     """Base model for bulk save action."""
 
     class Meta:
+        """Meta options for BulkSaveModel."""
+
         abstract = True
 
     @staticmethod
@@ -34,6 +36,8 @@ class TimestampedModel(models.Model):
     """Base model with auto created_at and updated_at fields."""
 
     class Meta:
+        """Meta options for TimestampedModel."""
+
         abstract = True
 
     nest_created_at = models.DateTimeField(auto_now_add=True)

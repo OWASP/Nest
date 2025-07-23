@@ -47,14 +47,14 @@ pygithub = "^2.5.0"
 python = "^3.13"
 python-dateutil = "^2.9.0.post0"
 pyyaml = "^6.0.2"
+reportlab = "^4.4.2"
 requests = "^2.32.3"
 sentry-sdk = { extras = ["django"], version = "^2.20.0" }
 slack-bolt = "^1.22.0"
 slack-sdk = "^3.35.0"
 strawberry-graphql = {extras = ["django"], version = "^0.270.1"}
-thefuzz = "^0.22.1"
 strawberry-graphql-django = "^0.59.1"
-reportlab = "^4.4.2"
+thefuzz = "^0.22.1"
 
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.36.4"
@@ -106,7 +106,7 @@ plugins = ["strawberry.ext.mypy_plugin"]
 
 [[tool.mypy.overrides]]
 disable_error_code = ["attr-defined"]
-module = ["apps.*.models.mixins.*", "apps.*.admin", "schema.tests.*"]
+module = ["apps.*.models.mixins.*", "apps.*.admin.*", "schema.tests.*"]
 
 [[tool.mypy.overrides]]
 disable_error_code = ["var-annotated"]
@@ -145,18 +145,37 @@ ignore = [
 select = ["ALL"]
 
 [tool.ruff.lint.per-file-ignores]
-"**/__init__.py" = ["D104", "F401"]
-"**/admin.py" = ["D100", "D101", "D104"]
-"**/rest/v1/*.py" = ["ARG001", "B008", "D106"]
-"**/apps.py" = ["D100", "D101", "D104"]
-"**/graphql/**/nodes.py" = ["D106"]
-"**/graphql/nodes/*.py" = ["D106"]
-"**/graphql/queries/*.py" = ["N805"]
-"**/management/commands/*.py" = ["D101", "D102", "T201"]
-"**/migrations/*.py" = ["D100", "D101", "D104", "E501"]
-"**/models.py" = ["D106"]
-"**/models/*.py" = ["D106"]
-"**/tests/**/*.py" = ["D100", "D101", "D102", "D103", "D107", "PLR2004", "S101"]
+"**/__init__.py" = [
+    "D104", # https://docs.astral.sh/ruff/rules/undocumented-public-package/
+    "F401"  # https://docs.astral.sh/ruff/rules/unused-import/
+]
+"**/management/commands/*.py" = [
+    "D101", # https://docs.astral.sh/ruff/rules/undocumented-public-class/
+    "D102", # https://docs.astral.sh/ruff/rules/undocumented-public-method/
+    "T201"  # https://docs.astral.sh/ruff/rules/print/
+]
+"**/migrations/*.py" = [
+    "D100", # https://docs.astral.sh/ruff/rules/undocumented-public-module/
+    "D101", # https://docs.astral.sh/ruff/rules/undocumented-public-class/
+    "D104", # https://docs.astral.sh/ruff/rules/undocumented-public-package/
+    "E501"  # https://docs.astral.sh/ruff/rules/line-too-long/
+]
+"**/models/*.py" = [
+    "D106" # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
+]
+"**/rest/v1/*.py" = [
+    "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
+    "B008",   # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
+]
+"**/tests/**/*.py" = [
+    "D100",    # https://docs.astral.sh/ruff/rules/undocumented-public-module/
+    "D101",    # https://docs.astral.sh/ruff/rules/undocumented-public-class/
+    "D102",    # https://docs.astral.sh/ruff/rules/undocumented-public-method/
+    "D103",    # https://docs.astral.sh/ruff/rules/undocumented-public-function/
+    "D107",    # https://docs.astral.sh/ruff/rules/undocumented-public-init/
+    "PLR2004", # https://docs.astral.sh/ruff/rules/magic-value-comparison/
+    "S101"     # https://docs.astral.sh/ruff/rules/assert/
+]
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
