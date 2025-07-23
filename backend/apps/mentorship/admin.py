@@ -105,7 +105,7 @@ class TaskAdmin(admin.ModelAdmin):
         "module__name",
     )
 
-    list_filter = ("status", "module", "assignee")
+    list_filter = ("status", "module")
 
 
 admin.site.register(MenteeProgram, MenteeProgramAdmin)
