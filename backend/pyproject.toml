@@ -130,7 +130,6 @@ ignore = [
     "D407",     # https://docs.astral.sh/ruff/rules/missing-dashed-underline-after-section/
     "DJ012",    # https://docs.astral.sh/ruff/rules/django-unordered-body-content-in-model/
     "FIX002",   # https://docs.astral.sh/ruff/rules/line-contains-todo/
-    "PD",       # https://docs.astral.sh/ruff/rules/#pandas-vet-pd
     "PERF203",  # https://docs.astral.sh/ruff/rules/try-except-in-loop/
     "PLC0414",  # https://docs.astral.sh/ruff/rules/useless-import-alias/
     "PLC0415",  # https://docs.astral.sh/ruff/rules/import-outside-top-level/
