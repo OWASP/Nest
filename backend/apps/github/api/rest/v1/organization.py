@@ -6,7 +6,7 @@ from typing import Literal
 from django.conf import settings
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
-from ninja import FilterSchema, Query, Router, Schema
+from ninja import Field, FilterSchema, Query, Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 
@@ -18,8 +18,9 @@ router = Router()
 class OrganizationFilterSchema(FilterSchema):
     """Filter schema for Organization."""
 
-    company: str | None = None
-    location: str | None = None
+    location: str | None = Field(
+        None, description="Location of the organization", example="United States of America"
+    )
 
 
 class OrganizationSchema(Schema):

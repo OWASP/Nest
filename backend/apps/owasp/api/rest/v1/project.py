@@ -6,10 +6,11 @@ from typing import Literal
 from django.conf import settings
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
-from ninja import FilterSchema, Query, Router, Schema
+from ninja import Field, FilterSchema, Query, Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 
+from apps.owasp.models.enums.project import ProjectLevel
 from apps.owasp.models.project import Project
 
 router = Router()
@@ -18,7 +19,7 @@ router = Router()
 class ProjectFilterSchema(FilterSchema):
     """Filter schema for Project."""
 
-    level: str | None = None
+    level: ProjectLevel | None = Field(None, description="Level of the project")
 
 
 class ProjectSchema(Schema):
@@ -26,7 +27,7 @@ class ProjectSchema(Schema):
 
     created_at: datetime
     description: str
-    level: str
+    level: ProjectLevel
     name: str
     updated_at: datetime
 
@@ -43,7 +44,7 @@ class ProjectSchema(Schema):
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_projects(
     request: HttpRequest,
-    filters: ProjectFilterSchema = Query(..., summary="Filter criteria for projects"),
+    filters: ProjectFilterSchema = Query(..., description="Filter criteria for projects"),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None, description="Ordering field"
     ),

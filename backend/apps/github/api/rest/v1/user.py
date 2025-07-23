@@ -6,7 +6,7 @@ from typing import Literal
 from django.conf import settings
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
-from ninja import FilterSchema, Query, Router, Schema
+from ninja import Field, FilterSchema, Query, Router, Schema
 from ninja.decorators import decorate_view
 from ninja.errors import HttpError
 from ninja.pagination import PageNumberPagination, paginate
@@ -19,8 +19,11 @@ router = Router()
 class UserFilterSchema(FilterSchema):
     """Filter schema for User."""
 
-    company: str | None = None
-    location: str | None = None
+    company: str | None = Field(
+        None,
+        description="Company of the user",
+    )
+    location: str | None = Field(None, description="Location of the user", example="India")
 
 
 class UserSchema(Schema):

@@ -5,7 +5,7 @@ from typing import Literal
 from django.conf import settings
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
-from ninja import FilterSchema, Query, Router, Schema
+from ninja import Field, FilterSchema, Query, Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 
@@ -17,7 +17,7 @@ router = Router()
 class LabelFilterSchema(FilterSchema):
     """Filter schema for Label."""
 
-    color: str | None = None
+    color: str | None = Field(None, description="Color of the label", example="d93f0b")
 
 
 class LabelSchema(Schema):

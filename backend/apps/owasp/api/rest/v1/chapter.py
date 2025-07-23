@@ -6,7 +6,7 @@ from typing import Literal
 from django.conf import settings
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
-from ninja import FilterSchema, Query, Router, Schema
+from ninja import Field, FilterSchema, Query, Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 
@@ -18,8 +18,8 @@ router = Router()
 class ChapterFilterSchema(FilterSchema):
     """Filter schema for Chapter."""
 
-    country: str | None = None
-    region: str | None = None
+    country: str | None = Field(None, description="Country of the chapter", example="India")
+    region: str | None = Field(None, description="Region of the chapter", example="Asia")
 
 
 class ChapterSchema(Schema):

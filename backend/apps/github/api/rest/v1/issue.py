@@ -6,7 +6,7 @@ from typing import Literal
 from django.conf import settings
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
-from ninja import FilterSchema, Query, Router, Schema
+from ninja import Field, FilterSchema, Query, Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 
@@ -19,7 +19,7 @@ router = Router()
 class IssueFilterSchema(FilterSchema):
     """Filter schema for Issue."""
 
-    state: GenericIssueModel.State | None = None
+    state: GenericIssueModel.State | None = Field(None, description="State of the issue")
 
 
 class IssueSchema(Schema):

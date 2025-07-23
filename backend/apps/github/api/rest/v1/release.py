@@ -6,7 +6,7 @@ from typing import Literal
 from django.conf import settings
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
-from ninja import FilterSchema, Query, Router, Schema
+from ninja import Field, FilterSchema, Query, Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 
@@ -18,7 +18,7 @@ router = Router()
 class ReleaseFilterSchema(FilterSchema):
     """Filter schema for Release."""
 
-    tag_name: str | None = None
+    tag_name: str | None = Field(None, description="Tag name of the release", example="v1.0.0")
 
 
 class ReleaseSchema(Schema):
