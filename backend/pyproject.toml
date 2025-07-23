@@ -47,13 +47,14 @@ pygithub = "^2.5.0"
 python = "^3.13"
 python-dateutil = "^2.9.0.post0"
 pyyaml = "^6.0.2"
+reportlab = "^4.4.2"
 requests = "^2.32.3"
 sentry-sdk = { extras = ["django"], version = "^2.20.0" }
 slack-bolt = "^1.22.0"
 slack-sdk = "^3.35.0"
 strawberry-graphql = {extras = ["django"], version = "^0.270.1"}
-thefuzz = "^0.22.1"
 strawberry-graphql-django = "^0.59.1"
+thefuzz = "^0.22.1"
 
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.36.4"
