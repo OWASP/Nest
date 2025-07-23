@@ -74,9 +74,9 @@ class TestOwaspGenerateProjectHealthMetricsPdf:
             ["Contributors", metrics.contributors_count],
             ["Unassigned Issues", metrics.unassigned_issues_count],
             ["Unanswered Issues", metrics.unanswered_issues_count],
-            ["Has funding issues", "No"],
+            ["Has funding policy issues", "No"],
             [
-                "Has leadership issues",
+                "Has leadership policy issues",
                 "No",
             ],
         ]

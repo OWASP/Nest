@@ -64,9 +64,12 @@ class Command(BaseCommand):
             ["Contributors", metrics.contributors_count],
             ["Unassigned Issues", metrics.unassigned_issues_count],
             ["Unanswered Issues", metrics.unanswered_issues_count],
-            ["Has funding issues", "No" if metrics.is_funding_requirements_compliant else "Yes"],
             [
-                "Has leadership issues",
+                "Has funding policy issues",
+                "No" if metrics.is_funding_requirements_compliant else "Yes",
+            ],
+            [
+                "Has leadership policy issues",
                 "No" if metrics.is_leader_requirements_compliant else "Yes",
             ],
         ]
