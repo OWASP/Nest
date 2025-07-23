@@ -27,9 +27,8 @@ from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
         "unassigned_issues_count",
     ],
     filters=ProjectHealthMetricsFilter,
-    pagination=True,
 )
-class ProjectHealthMetricsNode:
+class ProjectHealthMetricsNode(strawberry.relay.Node):
     """Project health metrics node."""
 
     @strawberry.field
@@ -76,6 +75,11 @@ class ProjectHealthMetricsNode:
     def last_release_days_requirement(self) -> int:
         """Resolve last release age requirement in days."""
         return self.last_release_days_requirement
+
+    @strawberry.field
+    def project_key(self) -> str:
+        """Resolve project key."""
+        return self.project.nest_key
 
     @strawberry.field
     def project_name(self) -> str:
