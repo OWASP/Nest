@@ -1,6 +1,7 @@
 """Release API."""
 
 from datetime import datetime
+from typing import Literal
 
 from django.conf import settings
 from django.http import HttpRequest
@@ -30,11 +31,10 @@ class ReleaseSchema(Schema):
     tag_name: str
 
 
-VALID_RELEASE_ORDERING_FIELDS = {"created_at", "published_at"}
-
-
 @router.get(
     "/",
+    description="Retrieve a paginated list of GitHub releases.",
+    operation_id="list_releases",
     summary="Get all releases",
     tags=["Releases"],
     response={200: list[ReleaseSchema]},
@@ -43,11 +43,13 @@ VALID_RELEASE_ORDERING_FIELDS = {"created_at", "published_at"}
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_release(
     request: HttpRequest,
-    filters: ReleaseFilterSchema = Query(...),
-    ordering: str | None = Query(None),
+    filters: ReleaseFilterSchema = Query(..., description="Filter criteria for releases"),
+    ordering: Literal["created_at", "-created_at", "published_at", "-published_at"] | None = Query(
+        None, description="Ordering field"
+    ),
 ) -> list[ReleaseSchema]:
     """Get all releases."""
     releases = filters.filter(Release.objects.all())
-    if ordering and ordering in VALID_RELEASE_ORDERING_FIELDS:
+    if ordering:
         releases = releases.order_by(ordering)
     return releases

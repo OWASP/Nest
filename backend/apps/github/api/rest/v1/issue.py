@@ -1,6 +1,7 @@
 """Issue API."""
 
 from datetime import datetime
+from typing import Literal
 
 from django.conf import settings
 from django.http import HttpRequest
@@ -9,6 +10,7 @@ from ninja import FilterSchema, Query, Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 
+from apps.github.models.generic_issue_model import GenericIssueModel
 from apps.github.models.issue import Issue
 
 router = Router()
@@ -17,7 +19,7 @@ router = Router()
 class IssueFilterSchema(FilterSchema):
     """Filter schema for Issue."""
 
-    state: str | None = None
+    state: GenericIssueModel.State | None = None
 
 
 class IssueSchema(Schema):
@@ -26,31 +28,32 @@ class IssueSchema(Schema):
     body: str
     created_at: datetime
     title: str
-    state: str
+    state: GenericIssueModel.State
     updated_at: datetime
     url: str
 
 
-VALID_ISSUE_ORDERING_FIELDS = {"created_at", "updated_at"}
-
-
 @router.get(
     "/",
+    description="Retrieve a paginated list of GitHub issues.",
+    operation_id="list_issues",
+    response={200: list[IssueSchema]},
     summary="Get all issues",
     tags=["Issues"],
-    response={200: list[IssueSchema]},
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_issues(
     request: HttpRequest,
-    filters: IssueFilterSchema = Query(...),
-    ordering: str | None = Query(None),
+    filters: IssueFilterSchema = Query(..., description="Filter criteria for issues"),
+    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
+        None, description="Ordering field"
+    ),
 ) -> list[IssueSchema]:
     """Get all issues."""
     issues = filters.filter(Issue.objects.all())
 
-    if ordering and ordering in VALID_ISSUE_ORDERING_FIELDS:
+    if ordering:
         issues = issues.order_by(ordering)
 
     return issues

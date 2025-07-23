@@ -1,6 +1,7 @@
 """Project API."""
 
 from datetime import datetime
+from typing import Literal
 
 from django.conf import settings
 from django.http import HttpRequest
@@ -30,26 +31,27 @@ class ProjectSchema(Schema):
     updated_at: datetime
 
 
-VALID_PROJECT_ORDERING_FIELDS = {"created_at", "updated_at"}
-
-
 @router.get(
     "/",
+    description="Retrieve a paginated list of OWASP projects.",
+    operation_id="list_projects",
+    response={200: list[ProjectSchema]},
     summary="Get all projects",
     tags=["Projects"],
-    response={200: list[ProjectSchema]},
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_projects(
     request: HttpRequest,
-    filters: ProjectFilterSchema = Query(...),
-    ordering: str | None = Query(None),
+    filters: ProjectFilterSchema = Query(..., summary="Filter criteria for projects"),
+    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
+        None, description="Ordering field"
+    ),
 ) -> list[ProjectSchema]:
     """Get all projects."""
     projects = filters.filter(Project.objects.all())
 
-    if ordering and ordering in VALID_PROJECT_ORDERING_FIELDS:
+    if ordering:
         projects = projects.order_by(ordering)
 
     return projects

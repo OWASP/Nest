@@ -1,5 +1,7 @@
 """Label API."""
 
+from typing import Literal
+
 from django.conf import settings
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
@@ -26,26 +28,26 @@ class LabelSchema(Schema):
     name: str
 
 
-VALID_LABEL_ORDERING_FIELDS = {"created_at", "updated_at"}
-
-
 @router.get(
     "/",
+    description="Retrieve a paginated list of GitHub labels.",
+    operation_id="list_labels",
+    response={200: list[LabelSchema]},
     summary="Get all labels",
     tags=["Labels"],
-    response={200: list[LabelSchema]},
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_label(
     request: HttpRequest,
-    filters: LabelFilterSchema = Query(...),
-    ordering: str | None = Query(None),
+    filters: LabelFilterSchema = Query(..., description="Filter criteria for labels"),
+    ordering: Literal["nest_created_at", "-nest_created_at", "nest_updated_at", "-nest_updated_at"]
+    | None = Query(None, description="Ordering field"),
 ) -> list[LabelSchema]:
     """Get all labels."""
     labels = filters.filter(Label.objects.all())
 
-    if ordering and ordering in VALID_LABEL_ORDERING_FIELDS:
+    if ordering:
         labels = labels.order_by(ordering)
 
     return labels

@@ -1,6 +1,7 @@
 """User API."""
 
 from datetime import datetime
+from typing import Literal
 
 from django.conf import settings
 from django.http import HttpRequest
@@ -42,26 +43,27 @@ class UserSchema(Schema):
     url: str
 
 
-VALID_USER_ORDERING_FIELDS = {"created_at", "updated_at"}
-
-
 @router.get(
     "/",
+    description="Retrieve a paginated list of GitHub users.",
+    operation_id="list_users",
+    response={200: list[UserSchema]},
     summary="Get all users",
     tags=["Users"],
-    response={200: list[UserSchema]},
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_users(
     request: HttpRequest,
-    filters: UserFilterSchema = Query(...),
-    ordering: str | None = Query(None),
+    filters: UserFilterSchema = Query(..., description="Filter criteria for users"),
+    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
+        None, description="Ordering field"
+    ),
 ) -> list[UserSchema]:
     """Get all users."""
     users = filters.filter(User.objects.all())
 
-    if ordering and ordering in VALID_USER_ORDERING_FIELDS:
+    if ordering:
         users = users.order_by(ordering)
 
     return users
@@ -69,9 +71,11 @@ def list_users(
 
 @router.get(
     "/{login}",
+    description="Retrieve a GitHub user by login.",
+    operation_id="get_user",
+    response={200: UserSchema, 404: dict},
     summary="Get user by login",
     tags=["Users"],
-    response={200: UserSchema, 404: dict},
 )
 def get_user(request: HttpRequest, login: str) -> UserSchema:
     """Get user by login."""
