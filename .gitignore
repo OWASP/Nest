@@ -10,7 +10,6 @@ __pycache__
 .local
 .mypy_cache
 .npm/
-*.pdf
 .pnpm-store/
 .psql_history
 .pytest_cache
