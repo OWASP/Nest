@@ -29,10 +29,13 @@ const getMockHealthMetric = (): HealthMetricsProps[] => [
     recentReleasesCount: 0,
     score: 0,
     totalIssuesCount: 0,
-    totalReleasesCount: 0
+    totalReleasesCount: 0,
   },
 ]
 
+// Using `any` intentionally for testing incomplete health metric data.
+// The structure may not match the full HealthMetric type, hence typing it strictly would be misleading.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getMockIncompleteHealthMetric = (): any[] => [
   {
     createdAt: '2025-07-23T00:00:00Z',
@@ -42,16 +45,19 @@ const getMockIncompleteHealthMetric = (): any[] => [
     openPullRequestsCount: 0,
     starsCount: 10,
     forksCount: 3,
-  }
+  },
 ]
 
-jest.mock('components/BarChart', () => (props: ({ title: string })) => (
-  <div data-testid="BarChart" data-props={JSON.stringify(props)}>{props.title}</div>
+jest.mock('components/BarChart', () => (props: { title: string }) => (
+  <div data-testid="BarChart" data-props={JSON.stringify(props)}>
+    {props.title}
+  </div>
 ))
-jest.mock('components/LineChart', () => (props: ({ title: string })) => (
-  <div data-testid="LineChart" data-props={JSON.stringify(props)}>{props.title}</div>
+jest.mock('components/LineChart', () => (props: { title: string }) => (
+  <div data-testid="LineChart" data-props={JSON.stringify(props)}>
+    {props.title}
+  </div>
 ))
-
 
 describe('HealthMetrics', () => {
   describe('with valid data', () => {
@@ -87,7 +93,7 @@ describe('HealthMetrics', () => {
       render(<HealthMetrics data={getMockHealthMetric()} />)
       const issuesTrend = screen.getByText('Issues Trend')
       const props = JSON.parse(issuesTrend.getAttribute('data-props') || '{}')
-      const seriesNames = props.series.map((s: ({ name: string })) => s.name)
+      const seriesNames = props.series.map((s: { name: string }) => s.name)
       expect(seriesNames).toEqual(['Open Issues', 'Unassigned Issues', 'Unanswered Issues'])
     })
 
