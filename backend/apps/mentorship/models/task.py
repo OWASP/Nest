@@ -5,10 +5,9 @@ from __future__ import annotations
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.mentorship.models.common import Status
 
 
-class Task(Status, TimestampedModel):
+class Task(TimestampedModel):
     """Connects a Module, a GitHub Issue, and a Mentee to track work."""
 
     class Meta:
@@ -16,6 +15,14 @@ class Task(Status, TimestampedModel):
         verbose_name_plural = "Tasks"
         unique_together = ("issue", "assignee")
         ordering = ["deadline_at"]
+
+    class StatusChoices(models.TextChoices):
+        """Status choices."""
+
+        TODO = "TODO", "To Do"
+        IN_PROGRESS = "IN_PROGRESS", "In Progress"
+        IN_REVIEW = "IN_REVIEW", "In Review"
+        COMPLETED = "COMPLETED", "Completed"
 
     # FKs.
     assignee = models.ForeignKey(
@@ -63,6 +70,13 @@ class Task(Status, TimestampedModel):
         default=dict,
         blank=True,
         help_text="Optional data",
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=StatusChoices.choices,
+        default=StatusChoices.TODO,
+        verbose_name="Task status",
     )
 
     def __str__(self) -> str:

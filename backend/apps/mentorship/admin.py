@@ -114,7 +114,7 @@ class TaskLevelAdmin(admin.ModelAdmin):
 
     list_display = (
         "description",
-        "github_labels",
+        "labels",
         "module",
         "name",
     )

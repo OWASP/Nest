@@ -19,10 +19,10 @@ class TaskLevel(models.Model):
         default="",
     )
 
-    github_labels = models.JSONField(
+    labels = models.JSONField(
         default=list,
         blank=True,
-        verbose_name="GitHub Labels",
+        verbose_name="Labels",
     )
 
     name = models.CharField(
