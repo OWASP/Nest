@@ -3,6 +3,10 @@
 from django.contrib import admin, messages
 from django.utils.safestring import mark_safe
 
+from apps.github.models.issue import Issue
+from apps.github.models.organization import Organization
+from apps.github.models.release import Release
+from apps.owasp.models.badge import Badge
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
 from apps.owasp.models.event import Event
@@ -12,6 +16,27 @@ from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 from apps.owasp.models.snapshot import Snapshot
 from apps.owasp.models.sponsor import Sponsor
+
+
+@admin.register(Organization)
+class OrganizationAdmin(admin.ModelAdmin):
+    """Admin configuration for Organization model."""
+
+    search_fields = ["name", "login"]  # Replace with real field names from your model
+
+
+@admin.register(Issue)
+class IssueAdmin(admin.ModelAdmin):
+    """Admin configuration for Issue model."""
+
+    search_fields = ["title", "number", "key"]  # Use the actual fields your Issue model supports
+
+
+@admin.register(Release)
+class ReleaseAdmin(admin.ModelAdmin):
+    """Admin configuration for Release model."""
+
+    search_fields = ["tag_name", "name", "key"]  # Adjust these as per your model fields
 
 
 class GenericEntityAdminMixin:
@@ -264,6 +289,22 @@ class SponsorAdmin(admin.ModelAdmin):
     )
 
 
+class BadgeAdmin(admin.ModelAdmin):
+    """Admin for Badge model."""
+
+    list_display = (
+        "name",
+        "description",
+        "weight",
+        "css_class",
+        "nest_created_at",
+        "nest_updated_at",
+    )
+    search_fields = ("name", "description", "css_class")
+    list_filter = ("weight",)
+    ordering = ("weight", "name")
+
+
 admin.site.register(Chapter, ChapterAdmin)
 admin.site.register(Committee, CommitteeAdmin)
 admin.site.register(Event, EventAdmin)
@@ -273,3 +314,4 @@ admin.site.register(ProjectHealthMetrics, ProjectHealthMetricsAdmin)
 admin.site.register(ProjectHealthRequirements)
 admin.site.register(Snapshot, SnapshotAdmin)
 admin.site.register(Sponsor, SponsorAdmin)
+admin.site.register(Badge, BadgeAdmin)
