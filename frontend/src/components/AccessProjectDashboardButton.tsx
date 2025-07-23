@@ -9,11 +9,11 @@ import { handleAppError } from 'app/global-error'
 import { GET_USER_IS_OWASP_STAFF } from 'server/queries/userQueries'
 import type { User } from 'types/user'
 import { userAuthStatus } from 'utils/constants'
+import LoadingSpinner from 'components/LoadingSpinner'
 
 const AccessProjectDashboardButton: FC = () => {
-  const { data: session, status } = useSession()
   const [user, setUser] = useState<User>()
-
+  const { data: session, status } = useSession()
   const {
     data,
     error: graphQLError,
@@ -35,10 +35,13 @@ const AccessProjectDashboardButton: FC = () => {
   }, [data, graphQLError])
 
   if (loading || status === userAuthStatus.LOADING) {
-    return
+    return <LoadingSpinner />
+  }
+  if (user && !user.isOwaspStaff) {
+    return <></>
   }
 
-  if (user && !user.isOwaspStaff) {
+  if (!user) {
     return <></>
   }
 
