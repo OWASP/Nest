@@ -8,7 +8,7 @@ from apps.mentorship.models.mentor import Mentor
 from apps.mentorship.models.module import Module
 from apps.mentorship.models.program import Program
 from apps.mentorship.models.task import Task
-from apps.mentorship.models.tasl_level import TaskLevel
+from apps.mentorship.models.task_level import TaskLevel
 
 
 class MenteeAdmin(admin.ModelAdmin):
