@@ -3,6 +3,7 @@
 from django.contrib import admin, messages
 from django.utils.safestring import mark_safe
 
+from apps.owasp.models import Badge
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
 from apps.owasp.models.event import Event
@@ -264,6 +265,22 @@ class SponsorAdmin(admin.ModelAdmin):
     )
 
 
+class BadgeAdmin(admin.ModelAdmin):
+    """Admin for Badge model."""
+
+    list_display = (
+        "name",
+        "description",
+        "weight",
+        "css_class",
+        "nest_created_at",
+        "nest_updated_at",
+    )
+    search_fields = ("name", "description", "css_class")
+    list_filter = ("weight",)
+    ordering = ("weight", "name")
+
+
 admin.site.register(Chapter, ChapterAdmin)
 admin.site.register(Committee, CommitteeAdmin)
 admin.site.register(Event, EventAdmin)
@@ -273,3 +290,4 @@ admin.site.register(ProjectHealthMetrics, ProjectHealthMetricsAdmin)
 admin.site.register(ProjectHealthRequirements)
 admin.site.register(Snapshot, SnapshotAdmin)
 admin.site.register(Sponsor, SponsorAdmin)
+admin.site.register(Badge, BadgeAdmin)
