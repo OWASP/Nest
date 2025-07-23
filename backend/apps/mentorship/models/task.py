@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from django.db import models
-from django.utils import timezone
 
 from apps.common.models import TimestampedModel
 from apps.mentorship.models.common import Status
@@ -20,7 +19,7 @@ class Task(Status, TimestampedModel):
 
     # FKs.
     assignee = models.ForeignKey(
-        "mentorship.Mentee",
+        "github.User",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -43,7 +42,7 @@ class Task(Status, TimestampedModel):
     )
 
     assigned_at = models.DateTimeField(
-        default=timezone.now,
+        auto_now_add=True,
         help_text="Timestamp when the task was assigned to the mentee.",
     )
 
@@ -59,9 +58,8 @@ class Task(Status, TimestampedModel):
 
     def __str__(self) -> str:
         """Return a human-readable representation of the task."""
-        assignee_name = (
-            self.assignee.github_user.login
-            if self.assignee and self.assignee.github_user
-            else f"Mentee {self.assignee.id if self.assignee else 'Unassigned'}"
+        return (
+            f"Task for '{self.issue.title}' assigned to {self.assignee.login}"
+            if self.assignee
+            else f"Task: {self.issue.title} (Unassigned)"
         )
-        return f"Task for '{self.issue.title}' assigned to {assignee_name}"
