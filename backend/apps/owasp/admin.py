@@ -266,6 +266,8 @@ class SponsorAdmin(admin.ModelAdmin):
 
 
 class BadgeAdmin(admin.ModelAdmin):
+    """Admin for Badge model."""
+
     list_display = (
         "name",
         "description",

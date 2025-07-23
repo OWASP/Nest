@@ -1,12 +1,11 @@
 """Badge model for user achievements and roles in OWASP Nest."""
 
 from django.db import models
-from safedelete.models import SafeDeleteModel
 
 from apps.common.models import TimestampedModel
 
 
-class Badge(TimestampedModel, SafeDeleteModel):
+class Badge(TimestampedModel):
     """Represents a user badge for roles or achievements."""
 
     name = models.CharField(max_length=255, unique=True, help_text="Name of the badge.")
