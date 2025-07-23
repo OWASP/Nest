@@ -35,7 +35,7 @@ class ReleaseSchema(Schema):
     "/",
     description="Retrieve a paginated list of GitHub releases.",
     operation_id="list_releases",
-    summary="Get all releases",
+    summary="List releases",
     tags=["Releases"],
     response={200: list[ReleaseSchema]},
 )
@@ -43,10 +43,7 @@ class ReleaseSchema(Schema):
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_release(
     request: HttpRequest,
-    filters: ReleaseFilterSchema = Query(
-        ...,
-        description="Filter criteria for releases",
-    ),
+    filters: ReleaseFilterSchema = Query(...),
     ordering: Literal["created_at", "-created_at", "published_at", "-published_at"] | None = Query(
         None,
         description="Ordering field",

@@ -37,14 +37,14 @@ class LabelSchema(Schema):
     description="Retrieve a paginated list of GitHub labels.",
     operation_id="list_labels",
     response={200: list[LabelSchema]},
-    summary="Get all labels",
+    summary="List labels",
     tags=["Labels"],
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_label(
     request: HttpRequest,
-    filters: LabelFilterSchema = Query(..., description="Filter criteria for labels"),
+    filters: LabelFilterSchema = Query(...),
     ordering: Literal["nest_created_at", "-nest_created_at", "nest_updated_at", "-nest_updated_at"]
     | None = Query(
         None,

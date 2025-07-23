@@ -37,17 +37,14 @@ class ChapterSchema(Schema):
     description="Retrieve a paginated list of OWASP chapters.",
     operation_id="list_chapters",
     response={200: list[ChapterSchema]},
-    summary="Get all chapters",
+    summary="List chapters",
     tags=["Chapters"],
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_chapters(
     request: HttpRequest,
-    filters: ChapterFilterSchema = Query(
-        ...,
-        description="Filter criteria for chapters",
-    ),
+    filters: ChapterFilterSchema = Query(...),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None,
         description="Ordering field",

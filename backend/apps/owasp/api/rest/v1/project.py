@@ -40,17 +40,14 @@ class ProjectSchema(Schema):
     description="Retrieve a paginated list of OWASP projects.",
     operation_id="list_projects",
     response={200: list[ProjectSchema]},
-    summary="Get all projects",
+    summary="List projects",
     tags=["Projects"],
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_projects(
     request: HttpRequest,
-    filters: ProjectFilterSchema = Query(
-        ...,
-        description="Filter criteria for projects",
-    ),
+    filters: ProjectFilterSchema = Query(...),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None,
         description="Ordering field",

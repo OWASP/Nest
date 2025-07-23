@@ -29,7 +29,7 @@ class EventSchema(Schema):
     "/",
     description="Retrieve a paginated list of OWASP events.",
     operation_id="list_events",
-    summary="Get all events",
+    summary="List events",
     tags=["Events"],
     response={200: list[EventSchema]},
 )

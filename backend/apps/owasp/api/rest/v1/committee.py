@@ -29,7 +29,7 @@ class CommitteeSchema(Schema):
     description="Retrieve a paginated list of OWASP committees.",
     operation_id="list_committees",
     response={200: list[CommitteeSchema]},
-    summary="Get all committees",
+    summary="List committees",
     tags=["Committees"],
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))

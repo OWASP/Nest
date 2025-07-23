@@ -41,17 +41,14 @@ class IssueSchema(Schema):
     description="Retrieve a paginated list of GitHub issues.",
     operation_id="list_issues",
     response={200: list[IssueSchema]},
-    summary="Get all issues",
+    summary="List issues",
     tags=["Issues"],
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_issues(
     request: HttpRequest,
-    filters: IssueFilterSchema = Query(
-        ...,
-        description="Filter criteria for issues",
-    ),
+    filters: IssueFilterSchema = Query(...),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None,
         description="Ordering field",

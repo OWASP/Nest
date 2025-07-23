@@ -28,7 +28,7 @@ class RepositorySchema(Schema):
     "/",
     description="Retrieve a paginated list of GitHub repositories.",
     operation_id="list_repositories",
-    summary="Get all repositories",
+    summary="List repositories",
     tags=["Repositories"],
     response={200: list[RepositorySchema]},
 )

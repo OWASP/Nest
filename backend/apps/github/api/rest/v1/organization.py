@@ -41,17 +41,14 @@ class OrganizationSchema(Schema):
     description="Retrieve a paginated list of GitHub organizations.",
     operation_id="list_organizations",
     response={200: list[OrganizationSchema]},
-    summary="Get all organizations",
+    summary="List organizations",
     tags=["Organizations"],
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_organization(
     request: HttpRequest,
-    filters: OrganizationFilterSchema = Query(
-        ...,
-        description="Filter criteria for organizations",
-    ),
+    filters: OrganizationFilterSchema = Query(...),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None,
         description="Ordering field",

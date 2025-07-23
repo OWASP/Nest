@@ -51,17 +51,14 @@ class UserSchema(Schema):
     description="Retrieve a paginated list of GitHub users.",
     operation_id="list_users",
     response={200: list[UserSchema]},
-    summary="Get all users",
+    summary="List users",
     tags=["Users"],
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_users(
     request: HttpRequest,
-    filters: UserFilterSchema = Query(
-        ...,
-        description="Filter criteria for users",
-    ),
+    filters: UserFilterSchema = Query(...),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None,
         description="Ordering field",
