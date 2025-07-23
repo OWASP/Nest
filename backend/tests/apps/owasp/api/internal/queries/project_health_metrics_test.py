@@ -64,12 +64,15 @@ class TestProjectHealthMetricsQuery:
         )
         mock_get_stats.return_value = expected_stats
 
-        query = ProjectHealthMetricsQuery(project_health_metrics=[])
+        query = ProjectHealthMetricsQuery()
         result = query.project_health_stats()
         mock_get_stats.assert_called_once()
         assert result == expected_stats
 
-    def test_resolve_project_health_metrics(self):
+    @patch(
+        "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_latest_health_metrics"
+    )
+    def test_resolve_project_health_metrics(self, mock_get_latest_metrics):
         """Test resolving project health metrics."""
         metrics = [
             ProjectHealthMetricsNode(
@@ -88,10 +91,22 @@ class TestProjectHealthMetricsQuery:
                 total_releases_count=5,
             )
         ]
-        query = ProjectHealthMetricsQuery(project_health_metrics=metrics)
-        result = query.project_health_metrics
+        mock_get_latest_metrics.return_value = metrics
+        query = ProjectHealthMetricsQuery()
+        result = query.project_health_metrics(filters=None, pagination=None, ordering=None)
         assert isinstance(result, list)
         assert isinstance(result[0], ProjectHealthMetricsNode)
         assert len(result) == 1
         assert result[0].stars_count == 1000
         assert result[0].forks_count == 200
+
+    @patch(
+        "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_latest_health_metrics"
+    )
+    def test_project_health_metrics_distinct_length(self, mock_get_latest_metrics):
+        """Test the distinct length of project health metrics."""
+        mock_get_latest_metrics.return_value.count.return_value = 42
+        query = ProjectHealthMetricsQuery()
+        result = query.project_health_metrics_distinct_length()
+        assert result == 42
+        mock_get_latest_metrics.return_value.count.assert_called_once()

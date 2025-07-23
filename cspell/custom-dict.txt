@@ -69,6 +69,7 @@ jumpstart
 kasya
 libexpat
 linkify
+lte
 lxml
 mamicidal
 markdownit
