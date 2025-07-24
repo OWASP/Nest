@@ -30,6 +30,8 @@ const getMockHealthMetric = (): HealthMetricsProps[] => [
     score: 85,
     totalIssuesCount: 100,
     totalReleasesCount: 15,
+    id: '123',
+    projectKey: 'owasp',
   },
 ]
 
@@ -45,6 +47,8 @@ const getMockIncompleteHealthMetric = (): any[] => [
     openPullRequestsCount: 0,
     starsCount: 10,
     forksCount: 3,
+    id: '123',
+    projectKey: 'owasp',
   },
 ]
 
