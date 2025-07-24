@@ -1,25 +1,23 @@
 'use client'
 
 import { useQuery } from '@apollo/client'
+import { useDjangoSession } from 'hooks/useDjangoSession'
 import { notFound } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { FC, ReactNode, useEffect, useState } from 'react'
 import { handleAppError } from 'app/global-error'
 import { GET_USER_IS_OWASP_STAFF } from 'server/queries/userQueries'
 import type { User } from 'types/user'
-import { userAuthStatus } from 'utils/constants'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const DashboardWrapper: FC<{ children: ReactNode }> = ({ children }) => {
-  const { status, data: session } = useSession()
+  const { isSyncing, session } = useDjangoSession()
   const [user, setUser] = useState<User>()
 
   useEffect(() => {
-    if (status === userAuthStatus.UNAUTHENTICATED) {
-      notFound()
+    if (isSyncing) {
+      return
     }
-  }, [status, session])
-
+  }, [isSyncing])
   const {
     data,
     error: graphQLError,
@@ -39,7 +37,7 @@ const DashboardWrapper: FC<{ children: ReactNode }> = ({ children }) => {
     }
   }, [data, graphQLError])
 
-  if (loading || status === userAuthStatus.LOADING) {
+  if (loading || isSyncing) {
     return <LoadingSpinner />
   }
 

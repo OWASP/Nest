@@ -7,7 +7,7 @@ import { ExtendedSession } from 'types/auth'
 
 const SYNC_STATUS_KEY = 'django_session_synced'
 
-export const useDjangoSession = () => {
+export const useDjangoSession: () => { isSyncing: boolean; session: ExtendedSession } = () => {
   const { data: session, status } = useSession()
   const [syncSession, { loading }] = useMutation(SYNC_DJANGO_SESSION_MUTATION)
   const [isSyncing, setIsSyncing] = useState(false)
@@ -65,5 +65,5 @@ export const useDjangoSession = () => {
     }
   }, [status, session, syncSession])
 
-  return { isSyncing: loading || isSyncing }
+  return { isSyncing: loading || isSyncing, session: session as ExtendedSession }
 }
