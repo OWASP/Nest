@@ -13,6 +13,7 @@ export type Chapter = {
   relatedUrls: string[]
   suggestedLocation: string
   summary: string
+  leadersLogins?: string[]
   topContributors: Contributor[]
   updatedAt: number
   url: string
