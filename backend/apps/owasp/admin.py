@@ -264,6 +264,27 @@ class SponsorAdmin(admin.ModelAdmin):
     )
 
 
+class BadgeAdmin(admin.ModelAdmin):
+    """Admin for Badge model."""
+
+    list_display = (
+        "name",
+        "description",
+        "weight",
+        "css_class",
+        "nest_created_at",
+        "nest_updated_at",
+    )
+    search_fields = ("name", "description", "css_class")
+    list_filter = ("weight",)
+    ordering = ("weight", "name")
+    fieldsets = (
+        ("Basic Information", {"fields": ("name", "description", "weight")}),
+        ("Display Settings", {"fields": ("css_class",)}),
+        ("Timestamps", {"fields": ("nest_created_at", "nest_updated_at")}),
+    )
+
+
 admin.site.register(Chapter, ChapterAdmin)
 admin.site.register(Committee, CommitteeAdmin)
 admin.site.register(Event, EventAdmin)
