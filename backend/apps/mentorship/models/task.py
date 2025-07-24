@@ -16,13 +16,35 @@ class Task(TimestampedModel):
         unique_together = ("issue", "assignee")
         ordering = ["deadline_at"]
 
-    class StatusChoices(models.TextChoices):
+    class Status(models.TextChoices):
         """Status choices."""
 
         TODO = "TODO", "To Do"
         IN_PROGRESS = "IN_PROGRESS", "In Progress"
         IN_REVIEW = "IN_REVIEW", "In Review"
         COMPLETED = "COMPLETED", "Completed"
+
+    assigned_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text="Timestamp when the task was assigned to the mentee.",
+    )
+
+    deadline_at = models.DateTimeField(
+        null=True, blank=True, help_text="Optional deadline for the task."
+    )
+
+    metadata = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Optional data",
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.TODO,
+        verbose_name="Task status",
+    )
 
     # FKs.
     assignee = models.ForeignKey(
@@ -57,32 +79,10 @@ class Task(TimestampedModel):
         help_text="The module this task is part of.",
     )
 
-    assigned_at = models.DateTimeField(
-        auto_now_add=True,
-        help_text="Timestamp when the task was assigned to the mentee.",
-    )
-
-    deadline_at = models.DateTimeField(
-        null=True, blank=True, help_text="Optional deadline for the task."
-    )
-
-    metadata = models.JSONField(
-        default=dict,
-        blank=True,
-        help_text="Optional data",
-    )
-
-    status = models.CharField(
-        max_length=20,
-        choices=StatusChoices.choices,
-        default=StatusChoices.TODO,
-        verbose_name="Task status",
-    )
-
     def __str__(self) -> str:
         """Return a human-readable representation of the task."""
         return (
-            f"Task for '{self.issue.title}' assigned to {self.assignee.login}"
+            f"Task: '{self.issue.title}' assigned to {self.assignee.login}"
             if self.assignee
             else f"Task: {self.issue.title} (Unassigned)"
         )
