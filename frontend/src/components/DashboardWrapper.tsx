@@ -41,6 +41,10 @@ const DashboardWrapper: FC<{ children: ReactNode }> = ({ children }) => {
     return <LoadingSpinner />
   }
 
+  if (!session?.user?.login) {
+    notFound()
+  }
+
   if (!user) {
     return <LoadingSpinner />
   }
