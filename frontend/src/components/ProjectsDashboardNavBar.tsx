@@ -40,7 +40,11 @@ const ProjectsDashboardNavBar: React.FC = () => {
       <NavbarContent className="flex h-full justify-center md:flex-col md:items-start">
         {NAVIGATION_ITEMS.map(({ href, label, icon }) => (
           <NavbarItem key={href} isActive={isActive(href)}>
-            <Link href={href} aria-current={isActive(href) ? 'page' : undefined}>
+            <Link
+              href={href}
+              aria-current={isActive(href) ? 'page' : undefined}
+              className="text-blue-500 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500"
+            >
               <div className="flex w-full items-center gap-2 rounded p-2 transition-colors duration-200 hover:bg-gray-200 dark:hover:bg-gray-800">
                 <FontAwesomeIcon icon={icon} className="text-xl" aria-hidden="true" />
                 <span className="text-sm font-semibold">{label}</span>

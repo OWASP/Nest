@@ -1,11 +1,12 @@
 """Release API."""
 
 from datetime import datetime
+from typing import Literal
 
 from django.conf import settings
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
-from ninja import FilterSchema, Query, Router, Schema
+from ninja import Field, FilterSchema, Query, Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 
@@ -17,7 +18,7 @@ router = Router()
 class ReleaseFilterSchema(FilterSchema):
     """Filter schema for Release."""
 
-    tag_name: str | None = None
+    tag_name: str | None = Field(None, description="Tag name of the release", example="v1.0.0")
 
 
 class ReleaseSchema(Schema):
@@ -30,19 +31,26 @@ class ReleaseSchema(Schema):
     tag_name: str
 
 
-VALID_RELEASE_ORDERING_FIELDS = {"created_at", "published_at"}
-
-
-@router.get("/", response={200: list[ReleaseSchema]})
+@router.get(
+    "/",
+    description="Retrieve a paginated list of GitHub releases.",
+    operation_id="list_releases",
+    summary="List releases",
+    tags=["GitHub"],
+    response={200: list[ReleaseSchema]},
+)
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
 def list_release(
     request: HttpRequest,
     filters: ReleaseFilterSchema = Query(...),
-    ordering: str | None = Query(None),
+    ordering: Literal["created_at", "-created_at", "published_at", "-published_at"] | None = Query(
+        None,
+        description="Ordering field",
+    ),
 ) -> list[ReleaseSchema]:
     """Get all releases."""
     releases = filters.filter(Release.objects.all())
-    if ordering and ordering in VALID_RELEASE_ORDERING_FIELDS:
+    if ordering:
         releases = releases.order_by(ordering)
     return releases
