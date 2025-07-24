@@ -12,14 +12,14 @@ const ProjectsHealthDashboardLayout: React.FC<{ readonly children: React.ReactNo
     notFound()
   }
   return (
-    <DashboardWrapper>
-      <FontLoaderWrapper>
+    <FontLoaderWrapper>
+      <DashboardWrapper>
         <div className="flex flex-col md:flex-row">
           <ProjectsDashboardNavBar />
           <main className="flex-1 p-4">{children}</main>
         </div>
-      </FontLoaderWrapper>
-    </DashboardWrapper>
+      </DashboardWrapper>
+    </FontLoaderWrapper>
   )
 }
 
