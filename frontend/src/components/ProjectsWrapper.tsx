@@ -50,7 +50,7 @@ const ProjectsWrapper: FC<{ children: ReactNode }> = ({ children }) => {
     return <>{children}</>
   }
 
-  if (segment == 'dashboard' || segment == 'metrics') {
+  if (segment) {
     return <>{children}</>
   }
 
