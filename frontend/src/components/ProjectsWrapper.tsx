@@ -57,7 +57,9 @@ const ProjectsWrapper: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <div className="flex flex-col items-center justify-center">
       <Link href="/projects/dashboard">
-        <Button color="secondary">Go To Dashboard</Button>
+        <Button color="secondary" className="shadow-md hover:bg-gray-200 dark:hover:bg-gray-700">
+          Go To Dashboard
+        </Button>
       </Link>
       {children}
     </div>
