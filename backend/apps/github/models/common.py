@@ -32,6 +32,11 @@ class GenericUserModel(models.Model):
     updated_at = models.DateTimeField(verbose_name="Updated at")
 
     @property
+    def nest_key(self):
+        """Nest key."""
+        return self.login
+
+    @property
     def title(self) -> str:
         """Entity title."""
         return (

@@ -37,13 +37,11 @@ export const mockSnapshotDetailsData = {
         topContributors: [
           {
             avatarUrl: 'https://avatars.githubusercontent.com/u/2201626?v=4',
-            contributionsCount: 170,
             login: 'arkid15r',
             name: 'Arkadii Yakovets',
           },
           {
             avatarUrl: 'https://avatars.githubusercontent.com/u/97700473?v=4',
-            contributionsCount: 5,
             login: 'test-user',
             name: 'test user',
           },
@@ -62,13 +60,11 @@ export const mockSnapshotDetailsData = {
         topContributors: [
           {
             avatarUrl: 'https://avatars.githubusercontent.com/u/95969896?v=4',
-            contributionsCount: 14,
             login: 'acs-web-tech',
             name: 'P.ARUN',
           },
           {
             avatarUrl: 'https://avatars.githubusercontent.com/u/56408064?v=4',
-            contributionsCount: 1,
             login: 'test-user-1',
             name: '',
           },

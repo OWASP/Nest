@@ -11,6 +11,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 from dateutil import parser
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 
 from apps.common.constants import NL
@@ -70,10 +71,16 @@ class Event(BulkSaveModel, TimestampedModel):
             QuerySet: A queryset of upcoming Event instances ordered by start date.
 
         """
-        return Event.objects.filter(
-            start_date__gt=timezone.now(),
-        ).order_by(
-            "start_date",
+        return (
+            Event.objects.filter(
+                start_date__gt=timezone.now(),
+            )
+            .exclude(
+                Q(name__exact="") | Q(url__exact=""),
+            )
+            .order_by(
+                "start_date",
+            )
         )
 
     @staticmethod

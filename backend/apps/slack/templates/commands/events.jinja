@@ -1,6 +1,6 @@
 *Upcoming OWASP Events:*{{ SECTION_BREAK }}{{ DIVIDER }}{{ SECTION_BREAK }}
-{%- for event in upcoming_events %}
-*{% if loop.index %}{{ loop.index }}. {% endif %}{% if event.url %}<{{ event.url }}|{{ event.name }}>{% else %}{{ event.name }}{% endif %}*
+{%- for event in EVENTS %}
+*<{{ event.url }}|{{ event.name }}>*
 _{%- if event.start_date and event.end_date -%}
     {%- if event.start_date == event.end_date -%}
  {{ event.start_date.strftime('%b %-d, %Y') }}
@@ -12,5 +12,8 @@ _{%- if event.start_date and event.end_date -%}
 {%- endif %} | {{ event.location }}_
 {%- if event.description %}{{ NL }}{{ event.description }}{% endif %}{{ NL }}{%- if not loop.last %}{{ SECTION_BREAK }}{% endif %}
 {%- endfor %}
+
 {{ SECTION_BREAK }}{{ DIVIDER }}{{ SECTION_BREAK }}
-🔍 For more information about upcoming events, please visit <{{ website_url }}/events/|OWASP Events>{{ NL }}
+🔍 For more information about upcoming events, please visit <{{ EVENTS_PAGE_URL }}|{{ EVENTS_PAGE_NAME }}>.{{ NL }}
+{{ SECTION_BREAK }}
+{{ FEEDBACK_SHARING_INVITE | safe }}

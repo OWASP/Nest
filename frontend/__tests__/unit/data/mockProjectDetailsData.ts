@@ -2,7 +2,7 @@ export const mockProjectDetailsData = {
   project: {
     contributorsCount: 1200,
     forksCount: 10,
-    healthMetrics: [
+    healthMetricsList: [
       {
         openIssuesCount: 5,
         unassignedIssuesCount: 2,
@@ -122,7 +122,6 @@ export const mockProjectDetailsData = {
   },
   topContributors: Array.from({ length: 15 }, (_, i) => ({
     avatarUrl: `https://avatars.githubusercontent.com/avatar${i + 1}.jpg`,
-    contributionsCount: 30 - i,
     login: `contributor${i + 1}`,
     name: `Contributor ${i + 1}`,
   })),

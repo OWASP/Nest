@@ -25,7 +25,6 @@ export const GET_ORGANIZATION_DATA = gql`
     }
     topContributors(organization: $login) {
       avatarUrl
-      contributionsCount
       login
       name
     }

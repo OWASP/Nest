@@ -42,8 +42,8 @@ test.describe('About Page', () => {
   })
 
   test('displays contributor information when data is loaded', async ({ page }) => {
-    await expect(page.getByText('Contributor 1')).toBeVisible()
-    await expect(page.getByText('Contributor 2')).toBeVisible()
+    await expect(page.getByText('Contributor 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('Contributor 2', { exact: true })).toBeVisible()
   })
 
   test('displays leaders data when data is loaded', async ({ page }) => {

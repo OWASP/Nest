@@ -304,9 +304,9 @@ export default function Home() {
           />
         </div>
         <TopContributorsList
-          icon={faUsers}
           contributors={data?.topContributors}
-          maxInitialDisplay={9}
+          icon={faUsers}
+          maxInitialDisplay={12}
         />
         <div className="grid-cols-2 gap-4 lg:grid">
           <RecentIssues data={data?.recentIssues} />

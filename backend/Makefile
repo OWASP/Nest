@@ -6,6 +6,8 @@ include backend/apps/slack/Makefile
 clean-backend-dependencies:
 	@rm -rf backend/.cache
 	@rm -rf backend/.local
+	@rm -rf backend/.pytest_cache
+	@rm -rf backend/.ruff_cache
 	@rm -rf backend/.venv
 
 clean-backend-docker:
@@ -14,6 +16,9 @@ clean-backend-docker:
 	@docker container rm -f nest-db >/dev/null 2>&1 || true
 	@docker image rm -f nest-local-backend >/dev/null 2>&1 || true
 	@docker volume rm -f nest-local_backend-venv >/dev/null 2>&1 || true
+
+create-superuser:
+	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
 
 exec-backend-command:
 	@docker exec -i nest-backend $(CMD)
@@ -35,8 +40,17 @@ django-shell:
 
 dump-data:
 	@echo "Dumping Nest data"
-	@CMD="python manage.py dumpdata github owasp --indent=2" $(MAKE) exec-backend-command > backend/data/nest.json
-	@gzip backend/data/nest.json
+	@CMD="python manage.py dumpdata \
+		github \
+		owasp \
+		slack.Conversation \
+		slack.Member \
+		slack.Workspace \
+		--indent=4 \
+		--natural-foreign \
+		--natural-primary -o data/nest.json" $(MAKE) exec-backend-command
+	@CMD="sed -E -i 's/\"email\": *\"([^\"]|\\\")*\"/\"email\": \"\"/g' data/nest.json" $(MAKE) exec-backend-command
+	@CMD="gzip -f data/nest.json" $(MAKE) exec-backend-command
 
 enrich-data: \
 	github-enrich-issues \
@@ -71,10 +85,11 @@ purge-data:
 	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command
 
 recreate-schema:
+	@echo "Recreating Nest schema"
 	@CMD="psql -U nest_user_dev -d nest_db_dev -c \
 		'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nest_user_dev'" \
 	  	$(MAKE) exec-db-command-it 2>/dev/null
-	$(MAKE) migrate
+	@$(MAKE) migrate
 
 restore-backup:
 	@echo "Restoring Nest backup"
@@ -84,9 +99,6 @@ save-backup:
 	@echo "Saving Nest backup"
 	@CMD="python manage.py dumpdata --natural-primary --natural-foreign --indent=2" $(MAKE) exec-backend-command > backend/data/backup.json
 	@gzip backend/data/backup.json
-
-setup:
-	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
 
 shell-backend:
 	@CMD="/bin/sh" $(MAKE) exec-backend-command-it

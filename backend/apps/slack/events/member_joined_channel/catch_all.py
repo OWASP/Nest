@@ -3,7 +3,11 @@
 from slack_sdk import WebClient
 
 from apps.slack.apps import SlackConfig
-from apps.slack.constants import OWASP_CONTRIBUTE_CHANNEL_ID, OWASP_GSOC_CHANNEL_ID
+from apps.slack.constants import (
+    OWASP_CONTRIBUTE_CHANNEL_ID,
+    OWASP_GSOC_CHANNEL_ID,
+    OWASP_PROJECT_NEST_CHANNEL_ID,
+)
 
 
 def catch_all_handler(event: dict, client: WebClient, ack) -> None:  # noqa: ARG001
@@ -26,6 +30,7 @@ if SlackConfig.app:
             not in {
                 OWASP_CONTRIBUTE_CHANNEL_ID,
                 OWASP_GSOC_CHANNEL_ID,
+                OWASP_PROJECT_NEST_CHANNEL_ID,
             }
         ],
     )(catch_all_handler)

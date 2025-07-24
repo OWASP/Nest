@@ -15,13 +15,13 @@ class TestUserModel:
         assert isinstance(github_user_field, models.OneToOneField)
 
         assert github_user_field.remote_field.model == GithubUser
-        assert github_user_field.null is True
-        assert github_user_field.blank is True
+        assert github_user_field.null
+        assert github_user_field.blank
 
         username_field = User._meta.get_field("username")
         assert isinstance(username_field, models.CharField)
         assert username_field.max_length > 0
-        assert username_field.unique is True  # Comes from AbstractUser
+        assert username_field.unique  # Comes from AbstractUser
 
     def test_meta_options(self):
         """Test Meta class options like db_table and ordering."""

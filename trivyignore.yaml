@@ -6,3 +6,4 @@ vulnerabilities:
   - id: CVE-2025-24928  # libxml2 buffer overflow
   - id: CVE-2025-27113  # libxml2 null dereference
   - id: CVE-2025-31115  # xz heap use-after-free
+  - id: CVE-2025-6965   # sqlite integer truncation

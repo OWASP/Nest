@@ -106,9 +106,14 @@ class TestGithubUpdateExternalRepositories:
         )
 
         self.mock_unregister_indexes = mock.Mock()
+        self.mock_register_indexes = mock.Mock()
         monkeypatch.setattr(
-            "apps.github.management.commands.github_update_related_organizations.unregister_indexes",
+            "apps.core.utils.index.DisableIndexing.unregister_indexes",
             self.mock_unregister_indexes,
+        )
+        monkeypatch.setattr(
+            "apps.core.utils.index.DisableIndexing.register_indexes",
+            self.mock_register_indexes,
         )
 
         self.mock_related_orgs = mock.MagicMock()
@@ -154,7 +159,9 @@ class TestGithubUpdateExternalRepositories:
         with mock.patch("builtins.print"):
             self.command.handle(organization=None)
 
-        assert self.mock_unregister_indexes.called
+        self.mock_unregister_indexes.assert_called_once()
+        self.mock_register_indexes.assert_called_once()
+
         assert self.mock_gh.get_organization.call_count == scenario.num_orgs
         for org in orgs:
             self.mock_gh.get_organization.assert_any_call(org.login)
@@ -171,8 +178,10 @@ class TestGithubUpdateExternalRepositories:
         with mock.patch("builtins.print"):
             self.command.handle(organization="TestOrg")
 
+        self.mock_unregister_indexes.assert_called_once()
+        self.mock_register_indexes.assert_called_once()
+
         self.mock_related_orgs.filter.assert_called_with(login__iexact="TestOrg")
-        assert self.mock_unregister_indexes.called
         assert self.mock_gh.get_organization.call_count == 1
         self.mock_gh.get_organization.assert_called_with("TestOrg")
         assert self.mock_sync_repository.call_count == 2
@@ -184,6 +193,9 @@ class TestGithubUpdateExternalRepositories:
         with mock.patch("builtins.print"):
             self.command.handle(organization=None)
 
+        self.mock_unregister_indexes.assert_called_once()
+        self.mock_register_indexes.assert_called_once()
+
         mock_logger.error.assert_called_once_with("No OWASP related organizations found")
         assert not self.mock_gh.get_organization.called
         assert not self.mock_sync_repository.called
@@ -194,6 +206,9 @@ class TestGithubUpdateExternalRepositories:
 
         with mock.patch("builtins.print"):
             self.command.handle(organization=None)
+
+        self.mock_unregister_indexes.assert_called_once()
+        self.mock_register_indexes.assert_called_once()
 
         mock_logger.warning.assert_called_once_with(
             "Invalid GitHub token. Please create or update .env file with a valid token."
@@ -207,6 +222,9 @@ class TestGithubUpdateExternalRepositories:
 
         with mock.patch("builtins.print"):
             self.command.handle(organization=None)
+
+        self.mock_unregister_indexes.assert_called_once()
+        self.mock_register_indexes.assert_called_once()
 
         mock_logger.error.assert_called_once_with(
             "Couldn't identify related project for external organization %s. "
@@ -228,6 +246,9 @@ class TestGithubUpdateExternalRepositories:
 
         with mock.patch("builtins.print"):
             self.command.handle(organization=None)
+
+        self.mock_unregister_indexes.assert_called_once()
+        self.mock_register_indexes.assert_called_once()
 
         mock_logger.exception.assert_called_once_with(
             "Error syncing repository %s", "https://github.com/TestOrg/repo-0"

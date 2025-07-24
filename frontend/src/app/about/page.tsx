@@ -114,9 +114,9 @@ const About = () => {
 
         {topContributors && (
           <TopContributorsList
-            icon={faUsers}
             contributors={topContributors}
-            maxInitialDisplay={9}
+            icon={faUsers}
+            maxInitialDisplay={12}
           />
         )}
 

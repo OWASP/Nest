@@ -17,7 +17,8 @@ const BarChart: React.FC<{
   labels: string[]
   days: number[]
   requirements: number[]
-}> = ({ title, days, icon, requirements, labels }) => {
+  reverseColors?: boolean[]
+}> = ({ title, days, icon, requirements, labels, reverseColors }) => {
   const { theme } = useTheme()
   let themeColor = '#1E1E2C'
   let redColor = '#FF7875'
@@ -80,6 +81,14 @@ const BarChart: React.FC<{
           colors: [
             function ({ value, dataPointIndex, _ }) {
               const requirement = requirements[dataPointIndex]
+              if (reverseColors?.[dataPointIndex]) {
+                if (value < requirement * 0.75) {
+                  return orangeColor
+                } else if (value < requirement) {
+                  return redColor
+                }
+                return greenColor
+              }
               if (value > requirement) {
                 return redColor
               } else if (value > requirement * 0.75) {

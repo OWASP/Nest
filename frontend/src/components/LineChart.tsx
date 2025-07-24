@@ -15,7 +15,8 @@ const LineChart: React.FC<{
   series: ApexLineChartSeries[]
   labels?: string[]
   icon?: IconProp
-}> = ({ title, series, labels, icon }) => {
+  round?: boolean
+}> = ({ title, series, labels, icon, round }) => {
   const { theme } = useTheme()
   const color = theme === 'dark' ? '#ECECEC' : '#1E1E2C'
 
@@ -40,7 +41,10 @@ const LineChart: React.FC<{
           yaxis: {
             labels: {
               formatter: (value: number) => {
-                return value >= 1000 ? `${(value / 1000).toFixed(1)}K` : `${value.toFixed(0)}`
+                if (value >= 1000) {
+                  return `${(value / 1000).toFixed(1)}K`
+                }
+                return `${value.toFixed(round ? 0 : 2)}`
               },
             },
           },

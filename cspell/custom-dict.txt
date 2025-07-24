@@ -2,6 +2,7 @@ Agsoc
 Aichi
 Aissue
 Aupdated
+BOTTOMPADDING
 CCSP
 CISSP
 Cañón
@@ -28,6 +29,7 @@ Twitterbot
 WSL
 Whistleblower
 Wörld
+Xmark
 a2eeef
 ahmedxgouda
 algoliasearch
@@ -67,6 +69,7 @@ jumpstart
 kasya
 libexpat
 linkify
+lte
 lxml
 mamicidal
 markdownit
@@ -86,6 +89,7 @@ nosniff
 openstreetmap
 owasppcitoolkit
 owtf
+pdfgen
 pentest
 pentesting
 pgvector
