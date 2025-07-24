@@ -26,6 +26,7 @@ export type ApexBarChartDataSeries = {
 export type HealthMetricsProps = {
   ageDays: number
   ageDaysRequirement: number
+  id: string
   createdAt: string
   contributorsCount: number
   forksCount: number
@@ -42,6 +43,7 @@ export type HealthMetricsProps = {
   owaspPageLastUpdateDays: number
   owaspPageLastUpdateDaysRequirement: number
   projectName: string
+  projectKey: string
   recentReleasesCount: number
   score: number
   starsCount: number
@@ -49,4 +51,14 @@ export type HealthMetricsProps = {
   totalReleasesCount: number
   unassignedIssuesCount: number
   unansweredIssuesCount: number
+}
+
+export type HealthMetricsFilter = {
+  level?: string
+  score?: {
+    gt?: number
+    gte?: number
+    lt?: number
+    lte?: number
+  }
 }

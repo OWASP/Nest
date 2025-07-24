@@ -5,7 +5,11 @@ from __future__ import annotations
 from django.db import models
 
 from apps.common.models import TimestampedModel
-from apps.mentorship.models.common import ExperienceLevel, MatchingAttributes, StartEndRange
+from apps.mentorship.models.common import (
+    ExperienceLevel,
+    MatchingAttributes,
+    StartEndRange,
+)
 
 
 class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedModel):
@@ -40,6 +44,12 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         "owasp.Project",
         on_delete=models.CASCADE,
         verbose_name="Project",
+    )
+
+    labels = models.JSONField(
+        blank=True,
+        default=list,
+        verbose_name="Labels",
     )
 
     # M2Ms.
