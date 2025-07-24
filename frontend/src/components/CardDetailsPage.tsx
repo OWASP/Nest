@@ -7,6 +7,7 @@ import {
   faTags,
   faUsers,
   faRectangleList,
+  faArrowUpRightFromSquare,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
@@ -200,8 +201,9 @@ const DetailsCard = ({
             )}
           </div>
         )}
-        {leadersLogins && (
+        {leadersLogins && leadersLogins.length > 0 && (
           <LeadersListBlock
+            icon={faArrowUpRightFromSquare}
             label="Leaders"
             leaders={leadersLogins.reduce((acc, login) => {
               acc[login] = ''
