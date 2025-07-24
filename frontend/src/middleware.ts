@@ -12,6 +12,15 @@ export default async function authenticationMiddleware(request: NextRequest) {
 }
 
 export const config = {
-  // required authentication for all defined routes under matcher
-  matcher: [],
+  //protected route
+  matcher: [
+    '/mentorship',
+    '/mentorship/programs',
+    '/mentorship/programs/create',
+    '/mentorship/programs/:programId',
+    '/mentorship/programs/:programId/modules/create',
+    '/mentorship/programs/:programId/edit',
+    '/mentorship/programs/:programId/modules/:moduleId',
+    '/mentorship/programs/:programId/modules/:moduleId/edit',
+  ],
 }

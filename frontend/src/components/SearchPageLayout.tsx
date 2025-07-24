@@ -12,7 +12,7 @@ interface SearchPageLayoutProps {
 
   onPageChange: (page: number) => void
   searchPlaceholder: string
-  empty: string
+  empty?: string
   indexName: string
   loadingImageUrl?: string
   children?: React.ReactNode

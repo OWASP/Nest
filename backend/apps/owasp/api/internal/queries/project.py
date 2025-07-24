@@ -38,3 +38,13 @@ class ProjectQuery:
 
         """
         return Project.objects.filter(is_active=True).order_by("-created_at")[:limit]
+
+    @strawberry.field
+    def search_projects(self, query: str) -> list[ProjectNode]:
+        """Search active projects by name (case-insensitive, partial match)."""
+        if not query.strip():
+            return []
+
+        return Project.objects.filter(is_active=True, name__icontains=query.strip()).order_by(
+            "name"
+        )[:3]

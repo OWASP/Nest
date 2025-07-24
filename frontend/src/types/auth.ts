@@ -8,3 +8,9 @@ export type ExtendedSession = {
     login?: string
   }
 }
+
+export type UserRolesData = {
+  currentUserRoles: {
+    roles: string[]
+  }
+}

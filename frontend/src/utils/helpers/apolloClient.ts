@@ -3,7 +3,6 @@ import { setContext } from '@apollo/client/link/context'
 import { AppError, handleAppError } from 'app/global-error'
 import { GRAPHQL_URL } from 'utils/credentials'
 import { getCsrfToken } from 'utils/utility'
-
 const createApolloClient = () => {
   if (!GRAPHQL_URL) {
     const error = new AppError(500, 'Missing GraphQL URL')

@@ -1,6 +1,6 @@
 import NextAuth, { type AuthOptions } from 'next-auth'
 import GitHubProvider from 'next-auth/providers/github'
-import { ExtendedProfile, ExtendedSession } from 'types/auth'
+import type { ExtendedProfile, ExtendedSession } from 'types/auth'
 import {
   GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET,

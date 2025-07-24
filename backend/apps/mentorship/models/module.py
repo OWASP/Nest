@@ -5,6 +5,7 @@ from __future__ import annotations
 from django.db import models
 
 from apps.common.models import TimestampedModel
+from apps.common.utils import slugify
 from apps.mentorship.models.common import (
     ExperienceLevel,
     MatchingAttributes,
@@ -31,6 +32,7 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         blank=True,
         default="",
     )
+    key = models.CharField(verbose_name="Key", max_length=200)
 
     # FKs.
     program = models.ForeignKey(
@@ -73,8 +75,8 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
     def save(self, *args, **kwargs):
         """Save module."""
         if self.program:
-            # Set default dates from program if not provided.
             self.started_at = self.started_at or self.program.started_at
             self.ended_at = self.ended_at or self.program.ended_at
 
+        self.key = slugify(self.name)
         super().save(*args, **kwargs)
