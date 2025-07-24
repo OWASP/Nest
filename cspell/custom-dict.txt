@@ -2,6 +2,7 @@ Agsoc
 Aichi
 Aissue
 Aupdated
+BOTTOMPADDING
 CCSP
 CISSP
 Cañón
@@ -69,6 +70,7 @@ jumpstart
 kasya
 libexpat
 linkify
+lte
 lxml
 mamicidal
 markdownit
@@ -89,6 +91,7 @@ nosniff
 openstreetmap
 owasppcitoolkit
 owtf
+pdfgen
 pentest
 pentesting
 pgvector

@@ -48,6 +48,12 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         verbose_name="Project",
     )
 
+    labels = models.JSONField(
+        blank=True,
+        default=list,
+        verbose_name="Labels",
+    )
+
     # M2Ms.
     mentors = models.ManyToManyField(
         "mentorship.Mentor",
