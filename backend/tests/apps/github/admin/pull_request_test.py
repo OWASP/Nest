@@ -15,7 +15,7 @@ def pull_request_admin_instance():
 class TestPullRequestAdmin:
     """Test suite for the PullRequestAdmin class."""
 
-    def test_custom_field_github_url_unit(self, pull_request_admin_instance):
+    def test_custom_field_github_url(self, pull_request_admin_instance):
         """Test that custom_field_github_url generates the correct HTML link."""
         mock_pull_request = MagicMock()
         mock_pull_request.url = "https://github.com/mock-org/mock-repo/pull/42"

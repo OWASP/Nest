@@ -15,7 +15,7 @@ def issue_admin_instance():
 class TestIssueAdmin:
     """Test suite for the IssueAdmin class."""
 
-    def test_custom_field_github_url_unit(self, issue_admin_instance):
+    def test_custom_field_github_url(self, issue_admin_instance):
         """Test that custom_field_github_url generates the correct HTML link."""
         mock_issue = MagicMock()
         mock_issue.url = "https://github.com/mock-org/mock-repo/issues/1"
