@@ -12,7 +12,8 @@
     "lint:check": "eslint . --config eslint.config.mjs --max-warnings=0",
     "start": "next start",
     "test:e2e": "npx playwright test",
-    "test:unit": "tsc --noEmit && NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest"
+    "test:unit": "tsc --noEmit && NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest",
+    "test": "jest"
   },
   "dependencies": {
     "@apollo/client": "^3.13.8",
@@ -33,7 +34,6 @@
     "@next/eslint-plugin-next": "^15.4.3",
     "@next/third-parties": "^15.4.3",
     "@sentry/nextjs": "^9.41.0",
-    "@testing-library/user-event": "^14.6.1",
     "@types/leaflet.markercluster": "^1.5.5",
     "@types/lodash": "^4.17.20",
     "apexcharts": "^5.3.1",
@@ -72,6 +72,7 @@
     "@tailwindcss/postcss": "^4.1.11",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^29.5.14",
     "@types/leaflet": "^1.9.20",
     "@types/leaflet.markercluster": "^1.5.5",
@@ -124,5 +125,11 @@
     "singleQuote": true,
     "tabWidth": 2,
     "trailingComma": "es5"
-  }
+  },
+  "description": "",
+  "main": "postcss.config.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
 }
