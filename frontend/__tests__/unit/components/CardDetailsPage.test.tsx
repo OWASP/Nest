@@ -432,7 +432,7 @@ describe('DetailsCard Component', () => {
     expect(container).toHaveClass('dark:bg-[#212529]')
     expect(container).toHaveClass('dark:text-gray-300')
   })
-})
+
   it('handles clicking on the metrics score circle link', () => {
     const props = {
       ...minimalProps,
@@ -510,6 +510,7 @@ describe('DetailsCard Component', () => {
     expect(gridContainer).toHaveClass('gap-6')
     expect(gridContainer).toHaveClass('md:grid-cols-7')
   })
+
   it('handles invalid inputs gracefully', () => {
     // Test with invalid data types
     const props = {
@@ -543,3 +544,4 @@ describe('DetailsCard Component', () => {
     // Long description should be contained in the document
     expect(screen.getByText(longText)).toBeInTheDocument()
   })
+})
