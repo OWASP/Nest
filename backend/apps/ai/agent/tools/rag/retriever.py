@@ -27,7 +27,7 @@ class Retriever:
         """Initialize the Retriever.
 
         Args:
-            embedding_model (str, optional): The OpenAI embedding model to use"
+            embedding_model (str, optional): The OpenAI embedding model to use.
 
         Raises:
             ValueError: If the OpenAI API key is not set.
@@ -57,7 +57,7 @@ class Retriever:
                 model=self.embedding_model,
             )
             return response.data[0].embedding
-        except openai.error.OpenAIError:
+        except openai.OpenAIError:
             logger.exception("OpenAI API error")
             raise
         except Exception:

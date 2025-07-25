@@ -1,7 +1,6 @@
 """A tool for orchestrating the components of RAG process."""
 
 import logging
-from typing import Any
 
 from apps.ai.common.constants import DEFAULT_CHUNKS_RETRIEVAL_LIMIT, DEFAULT_SIMILARITY_THRESHOLD
 
@@ -22,7 +21,7 @@ class RagTool:
         """Initialize the RAG tool.
 
         Args:
-            embedding_model (str, optional): The model to use for embeddings".
+            embedding_model (str, optional): The model to use for embeddings.
             chat_model (str, optional): The model to use for chat generation.
 
         Raises:
@@ -42,7 +41,7 @@ class RagTool:
         limit: int = DEFAULT_CHUNKS_RETRIEVAL_LIMIT,
         similarity_threshold: float = DEFAULT_SIMILARITY_THRESHOLD,
         content_types: list[str] | None = None,
-    ) -> dict[str, Any]:
+    ) -> str:
         """Process a user query using the complete RAG pipeline.
 
         Args:

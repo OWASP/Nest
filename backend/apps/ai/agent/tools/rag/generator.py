@@ -73,7 +73,7 @@ it is out of scope for OWASP, you MUST state: "please ask question related to OW
 
         return "\n\n---\n\n".join(formatted_context)
 
-    def generate_answer(self, query: str, context_chunks: list[dict[str, Any]]) -> dict[str, Any]:
+    def generate_answer(self, query: str, context_chunks: list[dict[str, Any]]) -> str:
         """Generate an answer to the user's query using provided context chunks.
 
         Args:
@@ -81,7 +81,7 @@ it is out of scope for OWASP, you MUST state: "please ask question related to OW
           context_chunks: A list of context chunks retrieved by the retriever.
 
         Returns:
-          A dictionary containing the generated answer.
+          The generated answer as a string.
 
         """
         formatted_context = self.prepare_context(context_chunks)
