@@ -100,14 +100,15 @@ class Command(BaseCommand):
         prose_parts = []
         metadata_parts = []
 
-        if chapter.description:
-            prose_parts.append(f"Description: {chapter.description}")
+        # Prose content
+        for field, label in [("description", "Description"), ("summary", "Summary")]:
+            value = getattr(chapter, field, None)
+            if value:
+                prose_parts.append(f"{label}: {value}")
 
-        if chapter.summary:
-            prose_parts.append(f"Summary: {chapter.summary}")
-
-        if hasattr(chapter, "owasp_repository") and chapter.owasp_repository:
-            repo = chapter.owasp_repository
+        # Repository content
+        repo = getattr(chapter, "owasp_repository", None)
+        if repo:
             if repo.description:
                 prose_parts.append(f"Repository Description: {repo.description}")
             if repo.topics:
@@ -116,34 +117,34 @@ class Command(BaseCommand):
         if chapter.name:
             metadata_parts.append(f"Chapter Name: {chapter.name}")
 
-        location_parts = []
-        if chapter.country:
-            location_parts.append(f"Country: {chapter.country}")
-        if chapter.region:
-            location_parts.append(f"Region: {chapter.region}")
-        if chapter.postal_code:
-            location_parts.append(f"Postal Code: {chapter.postal_code}")
-        if chapter.suggested_location:
-            location_parts.append(f"Location: {chapter.suggested_location}")
-
+        # Location information - combine into single operation
+        location_parts = [
+            f"{label}: {value}"
+            for value, label in [
+                (chapter.country, "Country"),
+                (chapter.region, "Region"),
+                (chapter.postal_code, "Postal Code"),
+                (chapter.suggested_location, "Location"),
+            ]
+            if value
+        ]
         if location_parts:
             metadata_parts.append(f"Location Information: {', '.join(location_parts)}")
 
-        if chapter.currency:
-            metadata_parts.append(f"Currency: {chapter.currency}")
+        # Simple and list-based metadata fields
+        for field, label in [
+            ("currency", "Currency"),
+            ("meetup_group", "Meetup Group"),
+            ("tags", "Tags"),
+            ("topics", "Topics"),
+            ("leaders_raw", "Chapter Leaders"),
+        ]:
+            value = getattr(chapter, field, None)
+            if value:
+                display_value = ", ".join(value) if isinstance(value, list) else value
+                metadata_parts.append(f"{label}: {display_value}")
 
-        if chapter.meetup_group:
-            metadata_parts.append(f"Meetup Group: {chapter.meetup_group}")
-
-        if chapter.tags:
-            metadata_parts.append(f"Tags: {', '.join(chapter.tags)}")
-
-        if chapter.topics:
-            metadata_parts.append(f"Topics: {', '.join(chapter.topics)}")
-
-        if chapter.leaders_raw:
-            metadata_parts.append(f"Chapter Leaders: {', '.join(chapter.leaders_raw)}")
-
+        # Related URLs with validation
         if chapter.related_urls:
             valid_urls = [
                 url

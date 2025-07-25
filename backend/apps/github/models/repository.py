@@ -210,6 +210,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
             user (User, optional): The user instance.
 
         """
+        # Direct field mapping
         field_mapping = {
             "created_at": "created_at",
             "default_branch": "default_branch",
@@ -234,74 +235,75 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
             "updated_at": "updated_at",
             "watchers_count": "watchers_count",
         }
-
-        # Direct fields.
         for model_field, gh_field in field_mapping.items():
             value = getattr(gh_repository, gh_field)
             if value is not None:
                 setattr(self, model_field, value)
 
-        # Key and OWASP repository flags.
+        # Repository metadata
         self.key = self.name.lower()
         self.is_owasp_repository = (
             organization is not None and organization.login.lower() == OWASP_LOGIN
         )
         self.is_owasp_site_repository = check_owasp_site_repository(self.key)
 
-        # Commits.
-        if commits is not None:
-            try:
-                self.commits_count = commits.totalCount
-            except GithubException as e:
-                if e.data["status"] == "409" and "Git Repository is empty" in e.data["message"]:
-                    self.is_empty = True
+        # Process optional data sources
+        optional_data = [
+            (commits, self._process_commits_data),
+            (contributors, self._process_contributors_data),
+            (languages, self._process_languages_data),
+        ]
+        for data, processor in optional_data:
+            if data is not None:
+                processor(data)
 
-        # Contributors.
-        if contributors is not None:
-            self.contributors_count = contributors.totalCount
-
-        # Languages.
-        if languages is not None:
-            total_size = sum(languages.values())
-            self.languages = {
-                language: round(size * 100.0 / total_size, 1)
-                for language, size in languages.items()
-            }
-
-        # License.
+        # License
         self.license = gh_repository.license.spdx_id if gh_repository.license else ""
 
-        # Fetch project metadata from funding.yml file.
+        # Funding metadata
+        self._process_funding_data(gh_repository)
+
+        # Foreign keys
+        self.organization = organization
+        self.owner = user
+
+    def _process_commits_data(self, commits):
+        """Process commits data."""
+        try:
+            self.commits_count = commits.totalCount
+        except GithubException as e:
+            if e.data["status"] == "409" and "Git Repository is empty" in e.data["message"]:
+                self.is_empty = True
+
+    def _process_contributors_data(self, contributors):
+        """Process contributors data."""
+        self.contributors_count = contributors.totalCount
+
+    def _process_languages_data(self, languages):
+        """Process languages data."""
+        total_size = sum(languages.values())
+        self.languages = {
+            language: round(size * 100.0 / total_size, 1) for language, size in languages.items()
+        }
+
+    def _process_funding_data(self, gh_repository):
+        """Process funding.yml data."""
         try:
             funding_yml = gh_repository.get_contents(".github/FUNDING.yml")
             yaml_content = b64decode(funding_yml.content).decode()
             self.funding_yml = yaml.safe_load(yaml_content)
             self.has_funding_yml = True
 
-            # Set funding policy compliance flag.
-            is_funding_policy_compliant = True
-            for platform, targets in self.funding_yml.items():
-                for target in targets if isinstance(targets, list) else [targets]:
-                    if not target:
-                        continue
-                    is_funding_policy_compliant = check_funding_policy_compliance(
-                        platform,
-                        target,
-                    )
-
-                    if not is_funding_policy_compliant:
-                        break
-
-                if not is_funding_policy_compliant:
-                    break
-            self.is_funding_policy_compliant = is_funding_policy_compliant
+            # Check funding policy compliance
+            self.is_funding_policy_compliant = all(
+                check_funding_policy_compliance(platform, target)
+                for platform, targets in self.funding_yml.items()
+                for target in (targets if isinstance(targets, list) else [targets])
+                if target
+            )
         except (AttributeError, GithubException):
             self.has_funding_yml = False
             self.is_funding_policy_compliant = True
-
-        # FKs.
-        self.organization = organization
-        self.owner = user
 
     @staticmethod
     def update_data(
