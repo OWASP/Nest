@@ -12,16 +12,22 @@ def pull_request_admin_instance():
     return PullRequestAdmin(model=PullRequest, admin_site=AdminSite())
 
 
-def test_custom_field_github_url_unit(pull_request_admin_instance):
-    mock_pull_request = MagicMock()
-    mock_pull_request.url = "https://github.com/mock-org/mock-repo/pull/42"
+class TestPullRequestAdmin:
+    """Test suite for the PullRequestAdmin class."""
 
-    result = pull_request_admin_instance.custom_field_github_url(mock_pull_request)
+    def test_custom_field_github_url_unit(self, pull_request_admin_instance):
+        """Test that custom_field_github_url generates the correct HTML link."""
+        mock_pull_request = MagicMock()
+        mock_pull_request.url = "https://github.com/mock-org/mock-repo/pull/42"
 
-    expected_html = "<a href='https://github.com/mock-org/mock-repo/pull/42' target='_blank'>↗️</a>"
+        result = pull_request_admin_instance.custom_field_github_url(mock_pull_request)
 
-    assert result == expected_html
+        expected_html = (
+            "<a href='https://github.com/mock-org/mock-repo/pull/42' target='_blank'>↗️</a>"
+        )
 
+        assert result == expected_html
 
-def test_list_display_contains_custom_field(pull_request_admin_instance):
-    assert "custom_field_github_url" in pull_request_admin_instance.list_display
+    def test_list_display_contains_custom_field(self, pull_request_admin_instance):
+        """Test that the list_display includes custom fields."""
+        assert "custom_field_github_url" in pull_request_admin_instance.list_display

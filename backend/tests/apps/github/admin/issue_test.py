@@ -12,18 +12,22 @@ def issue_admin_instance():
     return IssueAdmin(model=Issue, admin_site=AdminSite())
 
 
-def test_custom_field_github_url_unit(issue_admin_instance):
-    mock_issue = MagicMock()
-    mock_issue.url = "https://github.com/mock-org/mock-repo/issues/1"
+class TestIssueAdmin:
+    """Test suite for the IssueAdmin class."""
 
-    result = issue_admin_instance.custom_field_github_url(mock_issue)
+    def test_custom_field_github_url_unit(self, issue_admin_instance):
+        """Test that custom_field_github_url generates the correct HTML link."""
+        mock_issue = MagicMock()
+        mock_issue.url = "https://github.com/mock-org/mock-repo/issues/1"
 
-    expected_html = (
-        "<a href='https://github.com/mock-org/mock-repo/issues/1' target='_blank'>↗️</a>"
-    )
+        result = issue_admin_instance.custom_field_github_url(mock_issue)
 
-    assert result == expected_html
+        expected_html = (
+            "<a href='https://github.com/mock-org/mock-repo/issues/1' target='_blank'>↗️</a>"
+        )
 
+        assert result == expected_html
 
-def test_list_display_contains_custom_field(issue_admin_instance):
-    assert "custom_field_github_url" in issue_admin_instance.list_display
+    def test_list_display_contains_custom_field(self, issue_admin_instance):
+        """Test that the list_display includes custom fields."""
+        assert "custom_field_github_url" in issue_admin_instance.list_display
