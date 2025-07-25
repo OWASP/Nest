@@ -20,6 +20,7 @@ export const mockProjectDetailsData = {
     key: 'example-project',
     languages: ['Python', 'GraphQL', 'JavaScript'],
     leaders: ['alice', 'bob'],
+    leadersLogins: ['alice', 'bob'],
     level: 'Lab',
     name: 'Test Project',
     recentIssues: [

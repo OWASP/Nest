@@ -55,4 +55,8 @@ test.describe('Chapter Details Page', () => {
     await page.getByRole('button', { name: 'Show less' }).click()
     await expect(page.getByRole('button', { name: 'Show more' })).toBeVisible()
   })
+
+  test('should have a leaders list block', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Leaders' })).toBeVisible()
+  })
 })

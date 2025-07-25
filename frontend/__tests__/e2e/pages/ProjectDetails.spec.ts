@@ -123,4 +123,8 @@ test.describe('Project Details Page', () => {
     await expect(page.getByText('Forks Trend')).toBeVisible()
     await expect(page.getByText('Days Since Last Commit and Release')).toBeVisible()
   })
+
+  test('should have a leaders list block', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Leaders' })).toBeVisible()
+  })
 })
