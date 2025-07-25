@@ -2,24 +2,27 @@
 
 from django.core.management.base import BaseCommand
 
-from apps.ai.agent.tools.RAG.rag_tool import RAGTool
-from apps.ai.common.constants import DEFAULT_LIMIT, DEFAULT_SIMILARITY_THRESHOLD
+from apps.ai.agent.tools.rag.rag_tool import RagTool
+from apps.ai.common.constants import (
+    DEFAULT_CHUNKS_RETRIEVAL_LIMIT,
+    DEFAULT_SIMILARITY_THRESHOLD,
+)
 
 
 class Command(BaseCommand):
-    help = "Test the RAGTool functionality with a sample query"
+    help = "Test the RagTool functionality with a sample query"
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--query",
             type=str,
             default="What is OWASP Foundation?",
-            help="Query to test the RAG tool",
+            help="Query to test the Rag tool",
         )
         parser.add_argument(
             "--limit",
             type=int,
-            default=DEFAULT_LIMIT,
+            default=DEFAULT_CHUNKS_RETRIEVAL_LIMIT,
             help="Maximum number of results to retrieve",
         )
         parser.add_argument(
@@ -49,7 +52,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         try:
-            rag_tool = RAGTool(
+            rag_tool = RagTool(
                 embedding_model=options["embedding_model"],
                 chat_model=options["chat_model"],
             )
@@ -57,16 +60,11 @@ class Command(BaseCommand):
             self.stderr.write(self.style.ERROR("Initialization error"))
             return
 
-        query = options["query"]
-        limit = options["limit"]
-        threshold = options["threshold"]
-        content_types = options["content_types"]
-
         self.stdout.write("\nProcessing query...")
         result = rag_tool.query(
-            question=query,
-            limit=limit,
-            similarity_threshold=threshold,
-            content_types=content_types,
+            question=options["query"],
+            limit=options["limit"],
+            similarity_threshold=options["threshold"],
+            content_types=options["content_types"],
         )
-        self.stdout.write(f"\nAnswer: {result['answer']}")
+        self.stdout.write(f"\nAnswer: {result}")

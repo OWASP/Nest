@@ -50,7 +50,7 @@ it is out of scope for OWASP, you MUST state: "please ask question related to OW
         self.openai_client = openai.OpenAI(api_key=openai_api_key)
         logger.info("Generator initialized with chat model: %s", self.chat_model)
 
-    def format_context_for_prompt(self, context_chunks: list[dict[str, Any]]) -> str:
+    def prepare_context(self, context_chunks: list[dict[str, Any]]) -> str:
         """Format the list of retrieved context chunks into a single string for the LLM.
 
         Args:
@@ -73,7 +73,7 @@ it is out of scope for OWASP, you MUST state: "please ask question related to OW
 
         return "\n\n---\n\n".join(formatted_context)
 
-    def generate(self, query: str, context_chunks: list[dict[str, Any]]) -> dict[str, Any]:
+    def generate_answer(self, query: str, context_chunks: list[dict[str, Any]]) -> dict[str, Any]:
         """Generate an answer to the user's query using provided context chunks.
 
         Args:
@@ -84,7 +84,7 @@ it is out of scope for OWASP, you MUST state: "please ask question related to OW
           A dictionary containing the generated answer.
 
         """
-        formatted_context = self.format_context_for_prompt(context_chunks)
+        formatted_context = self.prepare_context(context_chunks)
 
         user_prompt = f"""
 - You are an assistant for question-answering tasks related to OWASP.
@@ -112,13 +112,9 @@ Answer:
                 temperature=self.TEMPERATURE,
                 max_tokens=self.MAX_TOKENS,
             )
-            final_answer = response.choices[0].message.content.strip()
+            answer = response.choices[0].message.content.strip()
         except openai.OpenAIError:
             logger.exception("OpenAI API error")
-            return {
-                "answer": "I'm sorry, I'm currently unable to process your request.",
-            }
+            answer = "I'm sorry, I'm currently unable to process your request."
 
-        return {
-            "answer": final_answer,
-        }
+        return answer

@@ -9,7 +9,10 @@ import openai
 from django.db.models import Q
 from pgvector.django.functions import CosineDistance
 
-from apps.ai.common.constants import DEFAULT_LIMIT, DEFAULT_SIMILARITY_THRESHOLD
+from apps.ai.common.constants import (
+    DEFAULT_CHUNKS_RETRIEVAL_LIMIT,
+    DEFAULT_SIMILARITY_THRESHOLD,
+)
 from apps.ai.models.chunk import Chunk
 
 logger = logging.getLogger(__name__)
@@ -63,8 +66,8 @@ class Retriever:
 
     def get_source_name(self, content_object) -> str:
         """Get the name/identifier for the content object."""
-        for attr in ["name", "title", "login", "key", "summary"]:
-            if hasattr(content_object, attr) and getattr(content_object, attr):
+        for attr in ("name", "title", "login", "key", "summary"):
+            if getattr(content_object, attr, None):
                 return str(getattr(content_object, attr))
 
         return str(content_object)
@@ -181,7 +184,7 @@ class Retriever:
     def retrieve(
         self,
         query: str,
-        limit: int = DEFAULT_LIMIT,
+        limit: int = DEFAULT_CHUNKS_RETRIEVAL_LIMIT,
         similarity_threshold: float = DEFAULT_SIMILARITY_THRESHOLD,
         content_types: list[str] | None = None,
     ) -> list[dict[str, Any]]:
@@ -199,17 +202,16 @@ class Retriever:
         """
         query_embedding = self.get_query_embedding(query)
 
-        final_content_types = content_types
-        if not final_content_types:
-            final_content_types = self.extract_content_types_from_query(query)
+        if not content_types:
+            content_types = self.extract_content_types_from_query(query)
 
         queryset = Chunk.objects.annotate(
             similarity=1 - CosineDistance("embedding", query_embedding)
         ).filter(similarity__gte=similarity_threshold)
 
-        if final_content_types:
+        if content_types:
             content_type_query = Q()
-            for name in final_content_types:
+            for name in content_types:
                 lower_name = name.lower()
                 if "." in lower_name:
                     app_label, model = lower_name.split(".", 1)

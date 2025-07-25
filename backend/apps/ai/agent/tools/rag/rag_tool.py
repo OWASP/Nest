@@ -3,7 +3,7 @@
 import logging
 from typing import Any
 
-from apps.ai.common.constants import DEFAULT_LIMIT, DEFAULT_SIMILARITY_THRESHOLD
+from apps.ai.common.constants import DEFAULT_CHUNKS_RETRIEVAL_LIMIT, DEFAULT_SIMILARITY_THRESHOLD
 
 from .generator import Generator
 from .retriever import Retriever
@@ -11,11 +11,13 @@ from .retriever import Retriever
 logger = logging.getLogger(__name__)
 
 
-class RAGTool:
+class RagTool:
     """Main RAG tool that orchestrates the retrieval and generation process."""
 
     def __init__(
-        self, embedding_model: str = "text-embedding-3-small", chat_model: str = "gpt-4o"
+        self,
+        embedding_model: str = "text-embedding-3-small",
+        chat_model: str = "gpt-4o",
     ):
         """Initialize the RAG tool.
 
@@ -37,7 +39,7 @@ class RAGTool:
     def query(
         self,
         question: str,
-        limit: int = DEFAULT_LIMIT,
+        limit: int = DEFAULT_CHUNKS_RETRIEVAL_LIMIT,
         similarity_threshold: float = DEFAULT_SIMILARITY_THRESHOLD,
         content_types: list[str] | None = None,
     ) -> dict[str, Any]:
@@ -62,14 +64,10 @@ class RAGTool:
             content_types=content_types,
         )
 
-        generation_result = self.generator.generate(
+        generation_result = self.generator.generate_answer(
             query=question, context_chunks=retrieved_chunks
         )
 
-        result = {
-            "answer": generation_result["answer"],
-        }
-
         logger.info("Successfully processed RAG query")
 
-        return result
+        return generation_result
