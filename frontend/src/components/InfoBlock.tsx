@@ -1,8 +1,8 @@
 import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Tooltip } from '@heroui/tooltip'
 import millify from 'millify'
 import { pluralize } from 'utils/pluralize'
-import { Tooltip } from '@heroui/tooltip'
 
 const InfoBlock = ({
   className = '',
