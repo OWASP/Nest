@@ -1,10 +1,19 @@
 import { render, screen } from '@testing-library/react'
+import React from 'react'
 import '@testing-library/jest-dom'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 
 // Mock the Tooltip component from @heroui/tooltip
 jest.mock('@heroui/tooltip', () => ({
-  Tooltip: ({ children, content, placement }: any) => (
+  Tooltip: ({
+    children,
+    content,
+    placement,
+  }: {
+    children: React.ReactNode
+    content: string
+    placement: string
+  }) => (
     <div data-testid="tooltip-wrapper" data-content={content} data-placement={placement}>
       {children}
     </div>
@@ -95,15 +104,15 @@ describe('MetricsScoreCircle', () => {
   // Test 6: DOM structure and classNames
   it('has correct DOM structure and classes', () => {
     const { container } = render(<MetricsScoreCircle score={75} />)
-    
+
     // Check for main structural elements
     const tooltipWrapper = screen.getByTestId('tooltip-wrapper')
     expect(tooltipWrapper).toBeInTheDocument()
-    
+
     // Check for elements with expected classes
     const circularElement = container.querySelector('[class*="rounded-full"]')
     expect(circularElement).toBeInTheDocument()
-    
+
     const flexElement = container.querySelector('[class*="flex"]')
     expect(flexElement).toBeInTheDocument()
   })
@@ -151,11 +160,11 @@ describe('MetricsScoreCircle', () => {
   // Test 8: Accessibility
   it('has proper accessibility structure', () => {
     render(<MetricsScoreCircle score={75} />)
-    
+
     // Check that the tooltip provides accessible description
     const tooltipWrapper = screen.getByTestId('tooltip-wrapper')
     expect(tooltipWrapper).toBeInTheDocument()
-    
+
     // Verify text content is accessible
     expect(screen.getByText('75')).toBeInTheDocument()
     expect(screen.getByText('Health')).toBeInTheDocument()
@@ -165,7 +174,7 @@ describe('MetricsScoreCircle', () => {
   // Test 9: Event handling - hover effects (visual testing through classes)
   it('has hover effect classes applied', () => {
     const { container } = render(<MetricsScoreCircle score={75} />)
-    
+
     // Check for hover-related classes
     const hoverElement = container.querySelector('[class*="hover:"]')
     expect(hoverElement).toBeInTheDocument()
@@ -174,35 +183,39 @@ describe('MetricsScoreCircle', () => {
   // Test 10: Component integration test
   it('integrates all features correctly for a low score', () => {
     const { container } = render(<MetricsScoreCircle score={15} />)
-    
+
     // Should have red styling
     expect(container.querySelector('[class*="bg-red"]')).toBeInTheDocument()
-    
+
     // Should have pulse animation
     expect(container.querySelector('[class*="animate-pulse"]')).toBeInTheDocument()
-    
+
     // Should display correct score
     expect(screen.getByText('15')).toBeInTheDocument()
-    
+
     // Should have tooltip
-    expect(screen.getByTestId('tooltip-wrapper')).toHaveAttribute('data-content', 'Current Project Health Score')
+    expect(screen.getByTestId('tooltip-wrapper')).toHaveAttribute(
+      'data-content',
+      'Current Project Health Score'
+    )
   })
 
   it('integrates all features correctly for a high score', () => {
     const { container } = render(<MetricsScoreCircle score={90} />)
-    
+
     // Should have green styling
     expect(container.querySelector('[class*="bg-green"]')).toBeInTheDocument()
-    
+
     // Should NOT have pulse animation
     expect(container.querySelector('[class*="animate-pulse"]')).not.toBeInTheDocument()
-    
+
     // Should display correct score
     expect(screen.getByText('90')).toBeInTheDocument()
-    
+
     // Should have tooltip
-    expect(screen.getByTestId('tooltip-wrapper')).toHaveAttribute('data-content', 'Current Project Health Score')
+    expect(screen.getByTestId('tooltip-wrapper')).toHaveAttribute(
+      'data-content',
+      'Current Project Health Score'
+    )
   })
 })
-
-
