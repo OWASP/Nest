@@ -1,8 +1,7 @@
 {
   "name": "nest-owasp",
   "version": "1.0.0",
-  "description": "<div align=\"center\">",
-  "main": "index.js",
+  "description": "OWASP Nest - A comprehensive platform for managing OWASP projects, chapters, and community resources",
   "directories": {
     "doc": "docs"
   },
@@ -11,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ParthGupta1304/Nest-owasp.git"
+    "url": "git+https://github.com/OWASP/Nest.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/ParthGupta1304/Nest-owasp/issues"
+    "url": "https://github.com/OWASP/Nest/issues"
   },
-  "homepage": "https://github.com/ParthGupta1304/Nest-owasp#readme"
+  "homepage": "https://github.com/OWASP/Nest#readme"
 }
