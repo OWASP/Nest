@@ -33,7 +33,7 @@ const InfoBlock = ({
         <div className="text-sm md:text-base">
           {label && <div className="text-sm font-medium">{label}</div>}
           <Tooltip
-            content={`${value.toLocaleString()} ${name}`}
+            content={value ? `${value.toLocaleString()} ${name}` : `No ${name}`}
             delay={100}
             closeDelay={100}
             showArrow

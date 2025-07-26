@@ -27,7 +27,7 @@ const InfoItem = ({
         {name}
       </span>
       <Tooltip
-        content={`${value.toLocaleString()} ${name}`}
+        content={value ? `${value.toLocaleString()} ${name}` : `0 ${name}`}
         delay={100}
         closeDelay={100}
         showArrow
