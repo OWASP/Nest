@@ -1,16 +1,16 @@
-import { render, screen } from '@testing-library/react'
-import InfoItem from 'components/InfoItem'
 import { faUser } from '@fortawesome/free-solid-svg-icons'
+import { render, screen } from '@testing-library/react'
 import millify from 'millify'
+import { pluralize } from 'utils/pluralize'
+import InfoItem from 'components/InfoItem'
 
-// ✅ Mocks
 jest.mock('millify', () => jest.fn())
 jest.mock('utils/pluralize', () => ({
   pluralize: jest.fn(),
 }))
-import { pluralize } from 'utils/pluralize'
-const mockPluralize = pluralize as jest.Mock
+
 const mockMillify = millify as jest.Mock
+const mockPluralize = pluralize as jest.Mock
 
 describe('InfoItem', () => {
   beforeEach(() => {
@@ -32,14 +32,7 @@ describe('InfoItem', () => {
     mockMillify.mockReturnValue('2k')
     mockPluralize.mockReturnValue('2 contributors')
 
-    render(
-      <InfoItem
-        icon={faUser}
-        unit="contributor"
-        value={2000}
-        pluralizedName="contributors"
-      />
-    )
+    render(<InfoItem icon={faUser} unit="contributor" value={2000} pluralizedName="contributors" />)
 
     expect(mockPluralize).toHaveBeenCalledWith(2000, 'contributor', 'contributors')
     expect(screen.getByText('2 contributors')).toBeInTheDocument()
