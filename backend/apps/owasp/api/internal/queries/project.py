@@ -1,11 +1,11 @@
 """OWASP project GraphQL queries."""
 
-from apps.nest.api.internal.permissions import IsAuthenticated
 import strawberry
+from django.db.models import Q
 
+from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.api.internal.nodes.project import ProjectNode
 from apps.owasp.models.project import Project
-from django.db.models import Q
 
 
 @strawberry.type
@@ -47,9 +47,9 @@ class ProjectQuery:
         if not query.strip():
             return []
 
-        return Project.objects.filter(
-            is_active=True, name__icontains=query.strip()
-        ).order_by("name")[:3]
+        return Project.objects.filter(is_active=True, name__icontains=query.strip()).order_by(
+            "name"
+        )[:3]
 
     @strawberry.field(permission_classes=[IsAuthenticated])
     def is_project_leader(self, info: strawberry.Info) -> bool:
