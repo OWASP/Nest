@@ -84,7 +84,7 @@ class Milestone(GenericIssueModel):
         BulkSaveModel.bulk_save(Milestone, milestones, fields=fields)
 
     @staticmethod
-    def update_data(gh_milestone, author=None, repository=None, save=True):
+    def update_data(gh_milestone, *, author=None, repository=None, save=True):
         """Update Milestone data.
 
         Args:

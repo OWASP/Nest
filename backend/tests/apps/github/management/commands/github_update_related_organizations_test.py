@@ -123,7 +123,7 @@ class TestGithubUpdateExternalRepositories:
 
         self.command = command
 
-    def _setup_organizations_mock(self, orgs, exists=True):
+    def _setup_organizations_mock(self, orgs, *, exists=True):
         self.mock_related_orgs.exists.return_value = exists
         self.mock_related_orgs.count.return_value = len(orgs)
         self.mock_related_orgs.__iter__.return_value = orgs
