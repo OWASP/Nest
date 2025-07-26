@@ -17,3 +17,7 @@ ai-create-project-chunks:
 ai-create-slack-message-chunks:
 	@echo "Creating Slack message chunks"
 	@CMD="python manage.py ai_create_slack_message_chunks" $(MAKE) exec-backend-command
+
+ai-run-rag-tool:
+	@echo "Running RAG tool"
+	@CMD="python manage.py ai_run_rag_tool" $(MAKE) exec-backend-command
