@@ -5,3 +5,5 @@ from .mentor import Mentor
 from .mentor_module import MentorModule
 from .module import Module
 from .program import Program
+from .task import Task
+from .task_level import TaskLevel
