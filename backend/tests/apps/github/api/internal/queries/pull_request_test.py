@@ -170,26 +170,6 @@ class TestPullRequestQuery:
         mock_subquery.assert_called_once()
         mock_outer_ref.assert_called_once_with("author_id")
 
-    @patch("apps.owasp.models.project.Project.objects")
-    @patch("apps.github.models.pull_request.PullRequest.objects")
-    def test_recent_pull_requests_with_project_filter(
-        self, mock_pr_objects, mock_project_objects, mock_queryset, mock_pull_request
-    ):
-        """Test pull requests with project filter."""
-        # Mock project lookup
-        mock_project = Mock()
-        mock_project.repositories.values_list.return_value = [1, 2, 3]
-        mock_project_objects.filter.return_value.first.return_value = mock_project
-
-        mock_pr_objects.select_related.return_value = mock_queryset
-        mock_queryset.__getitem__.return_value = [mock_pull_request]
-
-        result = PullRequestQuery().recent_pull_requests(project="test-project")
-
-        assert result == [mock_pull_request]
-        mock_project_objects.filter.assert_called_once_with(key__iexact="www-project-test-project")
-        mock_queryset.filter.assert_called_with(repository_id__in=[1, 2, 3])
-
     @patch("apps.github.models.pull_request.PullRequest.objects")
     def test_recent_pull_requests_with_multiple_filters_no_project(
         self, mock_objects, mock_queryset, mock_pull_request

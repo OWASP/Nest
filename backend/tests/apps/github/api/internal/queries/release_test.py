@@ -166,6 +166,11 @@ class TestReleaseQuery:
         mock_subquery.assert_called_once()
         mock_outer_ref.assert_called_once_with("author_id")
         # Verify organization filter was applied
+        filter_calls = mock_queryset.filter.call_args_list
+        organization_filter_found = any(
+            "repository__organization__login" in str(call) for call in filter_calls
+        )
+        assert organization_filter_found, "Organization filter should be applied"
 
     @patch("apps.github.api.internal.queries.release.OuterRef")
     @patch("apps.github.api.internal.queries.release.Subquery")

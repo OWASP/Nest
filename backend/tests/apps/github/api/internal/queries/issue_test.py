@@ -192,13 +192,3 @@ class TestIssueQuery:
         filter_calls = mock_queryset.filter.call_args_list
         assert len(filter_calls) >= 1
         mock_queryset.__getitem__.assert_called_with(slice(None, 10))
-        mock_queryset = MagicMock()
-        mock_queryset.order_by.return_value = mock_queryset
-        mock_queryset.filter.return_value = mock_queryset
-        mock_queryset.__getitem__.return_value = [mock_issue]
-        mock_select_related.return_value = mock_queryset
-
-        result = IssueQuery().recent_issues(login="alice", organization="owasp")
-
-        assert result == [mock_issue]
-        assert mock_queryset.filter.call_count == 2

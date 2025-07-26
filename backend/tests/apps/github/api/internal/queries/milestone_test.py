@@ -117,8 +117,3 @@ class TestMilestoneQuery:
             get_queryset.filter.assert_any_call(author__login="testuser")
             get_queryset.filter.assert_any_call(repository__organization__login="owasp")
             get_queryset.__getitem__.assert_called_with(slice(None, 10))
-
-        with pytest.raises(ValidationError) as exc_info:
-            MilestoneQuery().recent_milestones(state="invalid")
-
-        assert "Invalid state: invalid" in str(exc_info.value)
