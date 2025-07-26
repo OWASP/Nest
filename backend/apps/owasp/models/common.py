@@ -185,6 +185,7 @@ class RepositoryBasedEntityModel(models.Model):
                 "Unable to parse entity metadata",
                 extra={"repository": getattr(self.owasp_repository, "name", None)},
             )
+            return {}
 
     def get_related_url(self, url, exclude_domains=(), include_domains=()) -> str | None:
         """Get OWASP entity related URL."""
