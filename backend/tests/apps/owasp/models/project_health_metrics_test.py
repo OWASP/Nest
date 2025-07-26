@@ -121,15 +121,13 @@ class TestProjectHealthMetricsModel:
         assert getattr(metrics, field_name) == expected_days
 
     @patch("apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_stats")
-    @patch("reportlab.pdfgen.canvas.Canvas")
-    @patch("reportlab.platypus.Table")
-    @patch("reportlab.platypus.TableStyle")
-    @patch("reportlab.platypus.tables.Table.setStyle")
-    @patch("io.BytesIO")
+    @patch("apps.owasp.models.project_health_metrics.Canvas")
+    @patch("apps.owasp.models.project_health_metrics.Table")
+    @patch("apps.owasp.models.project_health_metrics.TableStyle")
+    @patch("apps.owasp.models.project_health_metrics.BytesIO")
     def test_generate_overview_pdf(
         self,
         mock_bytes_io,
-        mock_set_style,
         mock_table_style,
         mock_table,
         mock_canvas,
