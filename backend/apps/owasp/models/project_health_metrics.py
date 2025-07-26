@@ -199,9 +199,10 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
             ],
         ]
 
-        table = Table(table_data, colWidths="*")
-        table.setStyle(
-            TableStyle(
+        table = Table(
+            table_data,
+            colWidths="*",
+            style=TableStyle(
                 [
                     ("BACKGROUND", (0, 0), (-1, 0), "lightgrey"),
                     ("TEXTCOLOR", (0, 0), (-1, 0), "black"),
@@ -210,7 +211,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
                     ("BOTTOMPADDING", (0, 0), (-1, 0), 5),
                     ("BACKGROUND", (0, 1), (-1, -1), "white"),
                 ]
-            )
+            ),
         )
         table.wrapOn(canvas, 400, 600)
         table.drawOn(canvas, 100, 570)

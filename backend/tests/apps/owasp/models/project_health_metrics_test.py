@@ -122,11 +122,18 @@ class TestProjectHealthMetricsModel:
 
     @patch("apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_stats")
     @patch("reportlab.pdfgen.canvas.Canvas")
-    @patch("reportlab.platypus.tables.Table")
-    @patch("reportlab.platypus.tables.TableStyle")
+    @patch("reportlab.platypus.Table")
+    @patch("reportlab.platypus.TableStyle")
+    @patch("reportlab.platypus.tables.Table.setStyle")
     @patch("io.BytesIO")
     def test_generate_overview_pdf(
-        self, mock_bytes_io, mock_table_style, mock_table, mock_canvas, mock_get_stats
+        self,
+        mock_bytes_io,
+        mock_set_style,
+        mock_table_style,
+        mock_table,
+        mock_canvas,
+        mock_get_stats,
     ):
         """Test that the command executes without errors."""
         metrics_stats = ProjectHealthStatsNode(
@@ -167,7 +174,9 @@ class TestProjectHealthMetricsModel:
         mock_bytes_io.assert_called_once()
         mock_canvas.assert_called_once_with(mock_bytes_io.return_value)
         canvas = mock_canvas.return_value
-        mock_table.assert_called_once_with(table_data, colWidths="*")
+        mock_table.assert_called_once_with(
+            table_data, colWidths="*", style=mock_table_style.return_value
+        )
         mock_table_style.assert_called_once()
         mock_table.return_value.wrapOn.assert_called_once_with(canvas, 400, 600)
         mock_table.return_value.drawOn.assert_called_once_with(canvas, 100, 570)
