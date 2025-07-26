@@ -192,7 +192,9 @@ class TestProjectHealthMetricsModel:
                 "No",
             ],
         ]
-        mock_table.assert_called_once_with(table_data, colWidths="*")
+        mock_table.assert_called_once_with(
+            table_data, colWidths="*", style=mock_table_style.return_value
+        )
         mock_table_style.assert_called_once()
 
         mock_table.return_value.wrapOn.assert_called_once_with(canvas, 500, 300)
