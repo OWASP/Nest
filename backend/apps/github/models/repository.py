@@ -295,15 +295,20 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
             self.has_funding_yml = True
 
             # Check funding policy compliance
-            self.is_funding_policy_compliant = all(
-                check_funding_policy_compliance(platform, target)
-                for platform, targets in self.funding_yml.items()
-                for target in (targets if isinstance(targets, list) else [targets])
-                if target
-            )
+            self.is_funding_policy_compliant = self._check_all_funding_compliance()
         except (AttributeError, GithubException):
             self.has_funding_yml = False
             self.is_funding_policy_compliant = True
+
+    def _check_all_funding_compliance(self) -> bool:
+        """Check if all funding targets are policy compliant."""
+        for platform, targets in self.funding_yml.items():
+            # Normalize to list for consistent processing
+            target_list = targets if isinstance(targets, list) else [targets]
+            for target in target_list:
+                if target and not check_funding_policy_compliance(platform, target):
+                    return False
+        return True
 
     @staticmethod
     def update_data(
