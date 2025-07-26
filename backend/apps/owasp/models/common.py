@@ -179,12 +179,13 @@ class RepositoryBasedEntityModel(models.Model):
                 get_repository_file_content(self.index_md_url),
                 re.DOTALL,
             )
-            return yaml.safe_load(yaml_content.group(1)) or {} if yaml_content else {}
+            return yaml.safe_load(content) if (content := yaml_content.group(1)) else {}
         except (AttributeError, yaml.scanner.ScannerError):
             logger.exception(
                 "Unable to parse entity metadata",
                 extra={"repository": getattr(self.owasp_repository, "name", None)},
             )
+            return {}
 
     def get_related_url(self, url, exclude_domains=(), include_domains=()) -> str | None:
         """Get OWASP entity related URL."""
