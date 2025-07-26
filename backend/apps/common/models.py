@@ -1,5 +1,7 @@
 """Common app models."""
 
+# ruff: noqa: SLF001 https://docs.astral.sh/ruff/rules/private-member-access/
+
 from django.db import models
 
 BATCH_SIZE = 1000
