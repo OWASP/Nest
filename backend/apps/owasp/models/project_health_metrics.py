@@ -7,7 +7,7 @@ from django.db import models
 from django.db.models.functions import ExtractMonth, TruncDate
 from django.utils import timezone
 from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
+from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Table, TableStyle
 
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -182,7 +182,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
             return None
 
         buffer = BytesIO()
-        pdf = canvas.Canvas(buffer, pagesize=letter)
+        pdf = Canvas(buffer, pagesize=letter)
         pdf.setTitle(f"Health Metrics Report for {metrics.project.name}")
         pdf.setFont("Helvetica", 12)
         pdf.drawCentredString(300, 700, f"Health Metrics Report for {metrics.project.name}")

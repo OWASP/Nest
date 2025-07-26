@@ -127,7 +127,7 @@ class TestProjectHealthMetricsModel:
     @patch("apps.owasp.models.project_health_metrics.Table")
     @patch("apps.owasp.models.project_health_metrics.TableStyle")
     @patch("apps.owasp.models.project_health_metrics.BytesIO")
-    def generate_detailed_pdf(
+    def test_generate_detailed_pdf(
         self,
         mock_bytes_io,
         mock_table_style,
@@ -192,7 +192,9 @@ class TestProjectHealthMetricsModel:
                 "No",
             ],
         ]
-        mock_table.assert_called_once_with(table_data, colWidths="*")
+        mock_table.assert_called_once_with(
+            table_data, colWidths="*", style=mock_table_style.return_value
+        )
         mock_table_style.assert_called_once()
 
         mock_table.return_value.wrapOn.assert_called_once_with(canvas, 500, 300)
