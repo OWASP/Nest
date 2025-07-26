@@ -1,5 +1,6 @@
 import { IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Tooltip } from '@heroui/tooltip'
 import millify from 'millify'
 import { pluralize } from 'utils/pluralize'
 
@@ -25,7 +26,15 @@ const InfoItem = ({
         <FontAwesomeIcon icon={icon} className="mr-2 h-4 w-4" />
         {name}
       </span>
-      <span className="font-medium">{formattedValue}</span>
+      <Tooltip
+        content={value ? `${value.toLocaleString()} ${name}` : `0 ${name}`}
+        delay={100}
+        closeDelay={100}
+        showArrow
+        placement="top"
+      >
+        <span className="font-medium">{formattedValue}</span>
+      </Tooltip>
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Tooltip } from '@heroui/tooltip'
 import millify from 'millify'
 import { pluralize } from 'utils/pluralize'
 
@@ -31,7 +32,15 @@ const InfoBlock = ({
       <div>
         <div className="text-sm md:text-base">
           {label && <div className="text-sm font-medium">{label}</div>}
-          {formattedValue}
+          <Tooltip
+            content={value ? `${value.toLocaleString()} ${name}` : `No ${name}`}
+            delay={100}
+            closeDelay={100}
+            showArrow
+            placement="top"
+          >
+            {formattedValue}
+          </Tooltip>
         </div>
       </div>
     </div>
