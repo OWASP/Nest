@@ -1,10 +1,11 @@
-import { faCalendarDays } from '@fortawesome/free-regular-svg-icons'
+import { faCalendar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
 import Link from 'next/link'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import type { CardProps } from 'types/card'
 import { ICONS } from 'utils/data'
+import { formatDateRange } from 'utils/dateFormatter'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import ActionButton from 'components/ActionButton'
 import ContributorAvatar from 'components/ContributorAvatar'
@@ -79,9 +80,8 @@ const Card = ({
         {/* Timeline Section (Optional) */}
         {timeline?.start && timeline?.end && (
           <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            <FontAwesomeIcon icon={faCalendarDays} className="mr-1 inline-block h-4 w-4" />
-            {new Date(timeline.start).toLocaleDateString()} &rarr;{' '}
-            {new Date(timeline.end).toLocaleDateString()}
+            <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+            <span>{formatDateRange(timeline.start, timeline.end)}</span>
           </div>
         )}
       </div>

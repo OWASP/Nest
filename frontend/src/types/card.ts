@@ -24,8 +24,8 @@ export type CardProps = {
   summary: string
   title: string
   timeline?: {
-    start: string | Date
-    end: string | Date
+    start: string
+    end: string
   }
   tooltipLabel?: string
   topContributors?: Contributor[]
@@ -47,8 +47,6 @@ export interface DetailsCardProps {
   healthMetricsData?: HealthMetricsProps[]
   heatmap?: JSX.Element
   isActive?: boolean
-  isDraft?: boolean
-  setPublish?: () => void
   languages?: string[]
   mentors?: Contributor[]
   admins?: Contributor[]

@@ -10,14 +10,10 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
-import type { ExtendedSession } from 'types/auth'
 import type { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/credentials'
 import { getSocialIcon } from 'utils/urlIconMappings'
-import ActionButton from 'components/ActionButton'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import HealthMetrics from 'components/HealthMetrics'
@@ -38,8 +34,6 @@ import TopContributorsList from 'components/TopContributorsList'
 const DetailsCard = ({
   description,
   details,
-  isDraft,
-  setPublish,
   tags,
   domains,
   modules,
@@ -67,52 +61,12 @@ const DetailsCard = ({
   type,
   userSummary,
 }: DetailsCardProps) => {
-  const { data } = useSession()
-  const router = useRouter()
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <div className="mt-4 flex flex-row items-center">
           <div className="flex w-full items-center justify-between">
             <h1 className="text-4xl font-bold">{title}</h1>
-            {type === 'program' &&
-              admins?.some(
-                (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
-              ) && (
-                <div className="flex gap-2">
-                  <ActionButton
-                    onClick={() => {
-                      router.push(`${window.location.pathname}/edit`)
-                    }}
-                    children="Edit Program"
-                  />
-
-                  <ActionButton
-                    children=" Add Module"
-                    onClick={() => {
-                      router.push(`${window.location.pathname}/modules/create`)
-                    }}
-                  />
-                  {isDraft && (
-                    <ActionButton children="Publish" onClick={() => setPublish && setPublish()} />
-                  )}
-                </div>
-              )}
-
-            {type === 'module' &&
-              admins?.some(
-                (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
-              ) && (
-                <button
-                  type="button"
-                  className="flex items-center justify-center gap-2 text-nowrap rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-[#0D6EFD] text-blue-600 transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
-                  onClick={() => {
-                    router.push(`${window.location.pathname}/edit`)
-                  }}
-                >
-                  Edit Module
-                </button>
-              )}
             {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
               <Link href="#issues-trend">
                 <MetricsScoreCircle score={healthMetricsData[0].score} />
@@ -234,13 +188,19 @@ const DetailsCard = ({
             className={`mb-8 grid grid-cols-1 gap-6 ${(tags?.length || 0) === 0 || (domains?.length || 0) === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
           >
             {tags?.length > 0 && (
-              <ToggleableList items={tags} icon={faTags} label={<AnchorTitle title="Tags" />} />
+              <ToggleableList
+                items={tags}
+                icon={faTags}
+                label={<AnchorTitle title="Tags" />}
+                isDisabled={true}
+              />
             )}
             {domains?.length > 0 && (
               <ToggleableList
                 items={domains}
                 icon={faChartPie}
                 label={<AnchorTitle title="Domains" />}
+                isDisabled={true}
               />
             )}
           </div>

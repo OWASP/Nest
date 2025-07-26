@@ -1,9 +1,11 @@
 """OWASP project GraphQL queries."""
 
+from apps.nest.api.internal.permissions import IsAuthenticated
 import strawberry
 
 from apps.owasp.api.internal.nodes.project import ProjectNode
 from apps.owasp.models.project import Project
+from django.db.models import Q
 
 
 @strawberry.type
@@ -45,6 +47,20 @@ class ProjectQuery:
         if not query.strip():
             return []
 
-        return Project.objects.filter(is_active=True, name__icontains=query.strip()).order_by(
-            "name"
-        )[:3]
+        return Project.objects.filter(
+            is_active=True, name__icontains=query.strip()
+        ).order_by("name")[:3]
+
+    @strawberry.field(permission_classes=[IsAuthenticated])
+    def is_project_leader(self, info: strawberry.Info) -> bool:
+        """Check if current user is a project leader based on GitHub login or name."""
+        user = info.context.request.user
+
+        IsAuthenticated.require_github_user(user)
+
+        github_user = user.github_user
+
+        return Project.objects.filter(
+            Q(leaders_raw__icontains=github_user.login)
+            | Q(leaders_raw__icontains=(github_user.name or ""))
+        ).exists()
