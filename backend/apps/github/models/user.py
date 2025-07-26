@@ -35,6 +35,12 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
     is_bot = models.BooleanField(verbose_name="Is bot", default=False)
 
+    is_owasp_staff = models.BooleanField(
+        default=False,
+        verbose_name="OWASP Staff",
+        help_text="Indicates if the user is an OWASP staff member.",
+    )
+
     contributions_count = models.PositiveIntegerField(
         verbose_name="Contributions count", default=0
     )

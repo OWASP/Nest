@@ -16,6 +16,7 @@ export type User<T = number> = {
   email?: string
   followersCount: number
   followingCount: number
+  isOwaspStaff?: boolean
   issues?: Issue[]
   issuesCount?: number
   key: string
