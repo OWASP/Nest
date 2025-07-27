@@ -140,6 +140,18 @@ def get_params_for_index(index_name: str) -> dict:
             ]
             params["aroundLatLngViaIP"] = True
 
+        case "programs":
+            params["attributesToRetrieve"] = [
+                "idx_name",
+                "idx_key",
+                "idx_status",
+                "idx_description",
+                "idx_experience_levels",
+                "idx_admins",
+                "idx_started_at",
+                "idx_ended_at",
+            ]
+
         case "projects":
             params["attributesToRetrieve"] = [
                 "idx_contributors_count",

@@ -105,7 +105,7 @@ export default function UserMenu({
         >
           {isProjectLeader && (
             <a
-              href="/mentorship"
+              href="/my/mentorship"
               className="block w-full px-4 py-2 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white"
             >
               My Mentorship

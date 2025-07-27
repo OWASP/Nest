@@ -18,6 +18,20 @@ export const GET_PROGRAM_DATA = gql`
   }
 `
 
+export const GET_MY_PROGRAMS = gql`
+  query GetMyPrograms($username: String!, $search: String) {
+    myPrograms(username: $username, search: $search) {
+      id
+      key
+      name
+      description
+      startedAt
+      endedAt
+      userRole
+    }
+  }
+`
+
 export const GET_PROGRAM_DETAILS = gql`
   query GetProgramDetails($programKey: String!) {
     program(programKey: $programKey) {

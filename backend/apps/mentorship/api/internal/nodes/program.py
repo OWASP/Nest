@@ -25,21 +25,13 @@ class ProgramNode:
     mentees_limit: int | None = None
     started_at: datetime
     status: ProgramStatusEnum
+    user_role: str | None = None
     tags: list[str] | None = None
 
     @strawberry.field
     def admins(self) -> list[MentorNode] | None:
         """Get the list of program administrators."""
         return self.admins.all()
-
-
-@strawberry.type
-class PaginatedPrograms:
-    """A paginated list of mentorship programs."""
-
-    current_page: int
-    programs: list[ProgramNode]
-    total_pages: int
 
 
 @strawberry.input

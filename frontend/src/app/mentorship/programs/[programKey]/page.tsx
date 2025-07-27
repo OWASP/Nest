@@ -56,6 +56,14 @@ const ProgramDetailsPage = () => {
       return
     }
 
+    addToast({
+      title: 'Program Published',
+      description: 'The program is now live and the page will refresh.',
+      variant: 'solid',
+      color: 'success',
+      timeout: 3000,
+    })
+
     await updateProgram({
       variables: {
         inputData: {
@@ -65,13 +73,6 @@ const ProgramDetailsPage = () => {
         },
       },
       refetchQueries: [{ query: GET_PROGRAM_AND_MODULES, variables: { programKey } }],
-    })
-    addToast({
-      title: 'Program Published',
-      description: 'The program is now live and the page will refresh.',
-      variant: 'solid',
-      color: 'success',
-      timeout: 3000,
     })
   }
 

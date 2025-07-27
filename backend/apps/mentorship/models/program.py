@@ -12,9 +12,10 @@ from apps.mentorship.models.common import (
     MatchingAttributes,
     StartEndRange,
 )
+from apps.mentorship.models.mixins.program import ProgramIndexMixin
 
 
-class Program(MatchingAttributes, StartEndRange, TimestampedModel):
+class Program(MatchingAttributes, ProgramIndexMixin, StartEndRange, TimestampedModel):
     """Program model representing an overarching mentorship initiative."""
 
     class Meta:

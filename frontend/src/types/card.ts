@@ -48,6 +48,8 @@ export interface DetailsCardProps {
   heatmap?: JSX.Element
   isActive?: boolean
   languages?: string[]
+  isDraft?: boolean
+  setPublish?: () => void
   mentors?: Contributor[]
   admins?: Contributor[]
   projectName?: string

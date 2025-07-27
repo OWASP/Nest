@@ -25,6 +25,7 @@ export type Program = {
   endedAt: string
   domains: string[]
   tags: string[]
+  userRole?: string
   admins: Contributor[]
   modules: Module[]
 }
