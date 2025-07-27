@@ -21,10 +21,9 @@ const InfoBlock = ({
   unit?: string
   value: number
 }) => {
-  const name = pluralizedName
-    ? pluralize(value, unit || '', pluralizedName)
-    : pluralize(value, unit || '')
+  const name = pluralizedName ? pluralize(value, unit, pluralizedName) : pluralize(value, unit)
   const formattedValue = value ? `${millify(value, { precision })} ${name}` : `No ${name}`
+  const tooltipValue = value ? `${value.toLocaleString()} ${name}` : `No ${name}`
 
   return (
     <div className={`flex ${className}`}>
@@ -32,13 +31,7 @@ const InfoBlock = ({
       <div>
         <div className="text-sm md:text-base">
           {label && <div className="text-sm font-medium">{label}</div>}
-          <Tooltip
-            content={value ? `${value.toLocaleString()} ${name}` : `No ${name}`}
-            delay={100}
-            closeDelay={100}
-            showArrow
-            placement="top"
-          >
+          <Tooltip content={tooltipValue} delay={100} closeDelay={100} showArrow placement="top">
             {formattedValue}
           </Tooltip>
         </div>

@@ -19,6 +19,7 @@ const InfoItem = ({
 }) => {
   const name = pluralizedName ? pluralize(value, unit, pluralizedName) : pluralize(value, unit)
   const formattedValue = millify(value, { precision })
+  const tooltipValue = value ? `${value.toLocaleString()} ${name}` : `No ${name}`
 
   return (
     <div className="flex items-center justify-between">
@@ -26,13 +27,7 @@ const InfoItem = ({
         <FontAwesomeIcon icon={icon} className="mr-2 h-4 w-4" />
         {name}
       </span>
-      <Tooltip
-        content={value ? `${value.toLocaleString()} ${name}` : `0 ${name}`}
-        delay={100}
-        closeDelay={100}
-        showArrow
-        placement="top"
-      >
+      <Tooltip content={tooltipValue} delay={100} closeDelay={100} showArrow placement="top">
         <span className="font-medium">{formattedValue}</span>
       </Tooltip>
     </div>
