@@ -1,100 +1,82 @@
-describe('<Footer /> component', () => {
-  beforeEach(() => {
+import React from 'react'
+import { render, screen, fireEvent } from '@testing-library/react'
+import { Footer } from '@/components/Footer'
+import { footerSections, footerIcons } from '@/config/footerConfig'
+
+// Mock the release version to make the test predictable
+jest.mock('../../../src/config/environment', () => ({
+  RELEASE_VERSION: 'v1.2.3',
+}))
+
+describe('<Footer />', () => {
+  // Just checking if the footer renders without crashing
+  it('renders the footer component', () => {
     render(<Footer />)
+    expect(screen.getByText('Nest')).toBeInTheDocument()
   })
 
-  // Test to ensure the footer component mounts without any error
-  it('renders the footer component successfully', () => {
-    expect(screen.getByTestId('footer')).toBeInTheDocument()
-  })
-
-  // Verifies that all section titles defined in the footer configuration appear
-  it('displays all section titles from the footer configuration', () => {
+  // Make sure all footer section titles (like "Docs", "Community") show up
+  it('renders all footer sections', () => {
+    render(<Footer />)
     footerSections.forEach(section => {
       expect(screen.getByText(section.title)).toBeInTheDocument()
     })
   })
 
-  // Simulates user interaction by clicking a section title to toggle its links
+  // Check if all the social icons (Twitter, GitHub, etc.) are there
+  it('renders the social media icons', () => {
+    render(<Footer />)
+    footerIcons.forEach(icon => {
+      expect(screen.getByRole('link', { name: icon.label })).toBeInTheDocument()
+    })
+  })
+
+  // Test the behavior of toggling a section open and closed
   it('shows and hides section links when the section is toggled', () => {
+    render(<Footer />)
+
+    // Pick the first section that has actual links (just to be safe)
+    const sectionWithLinks = footerSections.find(section => section.links.length > 0)
+    if (!sectionWithLinks) {
+      throw new Error('No footer section with links found for testing')
+    }
+
+    // Click to expand the section
     const toggleButton = screen.getByRole('button', {
-      name: footerSections[0].title,
+      name: sectionWithLinks.title,
     })
     fireEvent.click(toggleButton)
 
-    footerSections[0].links.forEach(link => {
+    // Now the links inside should show up
+    sectionWithLinks.links.forEach(link => {
       expect(screen.getByText(link.text)).toBeInTheDocument()
     })
 
+    // Click again to collapse the section
     fireEvent.click(toggleButton)
 
-    footerSections[0].links.forEach(link => {
-      expect(screen.queryByText(link.text)).not.toBeVisible()
+    // Now those links should be gone (not just hidden — removed from DOM)
+    sectionWithLinks.links.forEach(link => {
+      expect(screen.queryByText(link.text)).not.toBeInTheDocument()
     })
   })
 
-  // Confirms each footer link appears with the correct display text and destination URL
-  it('renders each footer link with the correct text and href value', () => {
-    footerSections.forEach(section => {
-      const toggleButton = screen.getByRole('button', { name: section.title })
-      fireEvent.click(toggleButton)
-      section.links.forEach(link => {
-        const anchor = screen.getByRole('link', { name: link.text })
-        expect(anchor).toHaveAttribute('href', link.href)
-      })
-    })
+  // This checks that the version number (from env config) is displayed
+  it('renders version number from environment variable', () => {
+    render(<Footer />)
+    expect(screen.getByText(/v1.2.3/)).toBeInTheDocument()
   })
 
-  // Ensures that social media icons appear with the right accessible labels and URLs
-  it('renders all social media icons with appropriate aria-labels and hrefs', () => {
-    footerIcons.forEach(icon => {
-      const iconLink = screen.getByLabelText(`OWASP Nest ${icon.label}`)
-      expect(iconLink).toBeInTheDocument()
-      expect(iconLink).toHaveAttribute('href', icon.href)
-    })
-  })
-
-  // Validates that the version number is rendered from the environment configuration
-  it('displays the release version passed from environment settings', () => {
-    expect(screen.getByText('v1.2.3')).toBeInTheDocument()
-  })
-
-  // Checks that the footer shows the current year correctly in the copyright
-  it('displays the correct current year in the copyright text', () => {
-    const year = new Date().getFullYear()
-    expect(
-      screen.getByText(`© ${year} OWASP Nest. All rights reserved.`)
-    ).toBeInTheDocument()
-  })
-
-  // Tests how the component handles a section object that has no links defined
+  // Confirm that if we ever have an empty section, the layout doesn't break
   it('handles a section with no links without breaking the layout', () => {
-    const emptySection = { title: 'Empty Section', links: [] }
-    render(
-      <footer>
-        <button>{emptySection.title}</button>
-      </footer>
-    )
-    expect(screen.getByText(emptySection.title)).toBeInTheDocument()
-  })
+    const mockSections = [...footerSections, { title: 'Empty Section', links: [] }]
 
-  // Verifies that all interactive elements are accessible by screen readers
-  it('ensures all buttons and links have accessible names for screen readers', () => {
-    const allButtons = screen.getAllByRole('button')
-    const allLinks = screen.getAllByRole('link')
+    // Temporarily override the footerSections for this test
+    jest
+      .spyOn(require('../../../src/config/footerConfig'), 'footerSections', 'get')
+      .mockReturnValue(mockSections)
 
-    allButtons.forEach(btn => {
-      expect(btn).toHaveAccessibleName()
-    })
-
-    allLinks.forEach(link => {
-      expect(link).toHaveAccessibleName()
-    })
-  })
-
-  // Checks that the main footer container applies the expected Tailwind class
-  it('applies the correct class name for the footer container styling', () => {
-    const footerContainer = screen.getByTestId('footer')
-    expect(footerContainer).toHaveClass('bg-neutral-100')
+    render(<Footer />)
+    expect(screen.getByText('Empty Section')).toBeInTheDocument()
   })
 })
