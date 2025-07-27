@@ -33,17 +33,29 @@ describe('MetricsCard', () => {
     const score = screen.getByText('90')
     expect(score).toHaveClass('text-green-900')
   })
-
+  
   it('uses orange styling for 50 <= score < 75', () => {
     render(<MetricsCard metric={{ ...baseMetric, score: 60 }} />)
     const score = screen.getByText('60')
     expect(score).toHaveClass('text-orange-900')
   })
-
+  
   it('uses red styling for score < 50', () => {
     render(<MetricsCard metric={{ ...baseMetric, score: 30 }} />)
     const score = screen.getByText('30')
     expect(score).toHaveClass('text-red-900')
+  })
+  
+  it('uses green styling for score exactly at 75 boundary', () => {
+    render(<MetricsCard metric={{ ...baseMetric, score: 75 }} />)
+    const score = screen.getByText('75')
+    expect(score).toHaveClass('text-green-900')
+  })
+
+  it('uses orange styling for score exactly at 50 boundary', () => {
+    render(<MetricsCard metric={{ ...baseMetric, score: 50 }} />)
+    const score = screen.getByText('50')
+    expect(score).toHaveClass('text-orange-900')
   })
 
   it('renders correct link based on projectKey', () => {
