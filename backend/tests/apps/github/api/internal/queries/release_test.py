@@ -217,5 +217,4 @@ class TestReleaseQuery:
             "author", "repository", "repository__organization"
         )
         # Verify login filter was applied
-        filter_calls = mock_queryset.filter.call_args_list
-        assert len(filter_calls) >= 1
+        assert len(mock_queryset.filter.call_args_list) >= 1

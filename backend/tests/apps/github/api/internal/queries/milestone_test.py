@@ -113,7 +113,7 @@ class TestMilestoneQuery:
                 distinct=False, limit=10, login="testuser", organization="owasp", state="closed"
             )
 
-            assert isinstance(result, list)
-            get_queryset.filter.assert_any_call(author__login="testuser")
-            get_queryset.filter.assert_any_call(repository__organization__login="owasp")
-            get_queryset.__getitem__.assert_called_with(slice(None, 10))
+        assert isinstance(result, list)
+        get_queryset.filter.assert_any_call(author__login="testuser")
+        get_queryset.filter.assert_any_call(repository__organization__login="owasp")
+        get_queryset.__getitem__.assert_called_with(slice(None, 10))

@@ -130,7 +130,6 @@ class TestIssueQuery:
         assert result == [mock_issue]
         mock_subquery.assert_called_once()
         mock_outer_ref.assert_called_once_with("author_id")
-        # Verify organization filter was applied
 
     @patch("apps.github.api.internal.queries.issue.OuterRef")
     @patch("apps.github.api.internal.queries.issue.Subquery")
@@ -172,9 +171,7 @@ class TestIssueQuery:
         result = IssueQuery().recent_issues(organization="owasp")
 
         assert result == [mock_issue]
-        # Verify organization filter was applied
-        filter_calls = mock_queryset.filter.call_args_list
-        assert len(filter_calls) >= 1
+        assert len(mock_queryset.filter.call_args_list) >= 1
 
     @patch("apps.github.models.issue.Issue.objects.select_related")
     def test_recent_issues_multiple_filters(self, mock_select_related, mock_issue):
@@ -189,6 +186,5 @@ class TestIssueQuery:
 
         assert result == [mock_issue]
         # Verify organization filter was applied
-        filter_calls = mock_queryset.filter.call_args_list
-        assert len(filter_calls) >= 1
+        assert len(mock_queryset.filter.call_args_list) >= 1
         mock_queryset.__getitem__.assert_called_with(slice(None, 10))
