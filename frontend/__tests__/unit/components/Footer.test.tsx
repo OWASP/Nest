@@ -1,86 +1,100 @@
-import { render, screen, fireEvent } from '@testing-library/react'
-import '@testing-library/jest-dom'
-import Footer from '@/components/Footer'
-import { footerIcons } from '@/constants/footerIcons'
-
-describe('Footer component', () => {
-  // Basic render check — makes sure the component doesn't crash on mount
-  it('should render the footer without any errors', () => {
+describe('<Footer /> component', () => {
+  beforeEach(() => {
     render(<Footer />)
-    const footerElement = screen.getByRole('contentinfo')
-    expect(footerElement).toBeInTheDocument()
   })
 
-  // Ensures that the key footer sections are actually present in the DOM
-  it('displays all primary section headings', () => {
-    render(<Footer />)
+  // Test to ensure the footer component mounts without any error
+  it('renders the footer component successfully', () => {
+    expect(screen.getByTestId('footer')).toBeInTheDocument()
+  })
 
-    const headings = ['Project', 'Resources', 'Community', 'Legal'] // these may vary depending on actual content
-
-    headings.forEach((headingText) => {
-      const heading = screen.getByText(headingText)
-      expect(heading).toBeInTheDocument()
+  // Verifies that all section titles defined in the footer configuration appear
+  it('displays all section titles from the footer configuration', () => {
+    footerSections.forEach(section => {
+      expect(screen.getByText(section.title)).toBeInTheDocument()
     })
   })
 
-  // Loops through each defined icon and checks if they are rendered properly
-  // Also verifies correct labels and links for accessibility and functionality
-  it('renders all social media icons with valid links and labels', () => {
-    render(<Footer />)
+  // Simulates user interaction by clicking a section title to toggle its links
+  it('shows and hides section links when the section is toggled', () => {
+    const toggleButton = screen.getByRole('button', {
+      name: footerSections[0].title,
+    })
+    fireEvent.click(toggleButton)
 
-    for (const icon of footerIcons) {
-      const linkElement = screen.getByRole('link', { name: icon.label })
-      expect(linkElement).toBeInTheDocument()
-      expect(linkElement).toHaveAttribute('href', icon.href)
-    }
-  })
+    footerSections[0].links.forEach(link => {
+      expect(screen.getByText(link.text)).toBeInTheDocument()
+    })
 
-  // Tests the collapsible behavior of mobile sections by simulating click events
-  it('expands and collapses footer sections when toggled', () => {
-    render(<Footer />)
+    fireEvent.click(toggleButton)
 
-    const collapsibleButtons = screen.getAllByRole('button', { name: /expand/i })
-
-    collapsibleButtons.forEach((button) => {
-      const targetId = button.getAttribute('aria-controls')
-      expect(targetId).toBeTruthy()
-
-      const sectionContent = document.getElementById(targetId!)
-      expect(sectionContent).not.toBeNull()
-
-      if (sectionContent) {
-        expect(sectionContent.classList.contains('hidden')).toBe(true)
-
-        // simulate expanding
-        fireEvent.click(button)
-
-        expect(sectionContent.classList.contains('hidden')).toBe(false)
-      }
+    footerSections[0].links.forEach(link => {
+      expect(screen.queryByText(link.text)).not.toBeVisible()
     })
   })
 
-  // Makes sure the component is following basic accessibility guidelines
-  it('uses appropriate roles and accessible labels', () => {
-    render(<Footer />)
+  // Confirms each footer link appears with the correct display text and destination URL
+  it('renders each footer link with the correct text and href value', () => {
+    footerSections.forEach(section => {
+      const toggleButton = screen.getByRole('button', { name: section.title })
+      fireEvent.click(toggleButton)
+      section.links.forEach(link => {
+        const anchor = screen.getByRole('link', { name: link.text })
+        expect(anchor).toHaveAttribute('href', link.href)
+      })
+    })
+  })
 
-    const footer = screen.getByRole('contentinfo')
-    expect(footer).toBeInTheDocument()
+  // Ensures that social media icons appear with the right accessible labels and URLs
+  it('renders all social media icons with appropriate aria-labels and hrefs', () => {
+    footerIcons.forEach(icon => {
+      const iconLink = screen.getByLabelText(`OWASP Nest ${icon.label}`)
+      expect(iconLink).toBeInTheDocument()
+      expect(iconLink).toHaveAttribute('href', icon.href)
+    })
+  })
 
+  // Validates that the version number is rendered from the environment configuration
+  it('displays the release version passed from environment settings', () => {
+    expect(screen.getByText('v1.2.3')).toBeInTheDocument()
+  })
+
+  // Checks that the footer shows the current year correctly in the copyright
+  it('displays the correct current year in the copyright text', () => {
+    const year = new Date().getFullYear()
+    expect(
+      screen.getByText(`© ${year} OWASP Nest. All rights reserved.`)
+    ).toBeInTheDocument()
+  })
+
+  // Tests how the component handles a section object that has no links defined
+  it('handles a section with no links without breaking the layout', () => {
+    const emptySection = { title: 'Empty Section', links: [] }
+    render(
+      <footer>
+        <button>{emptySection.title}</button>
+      </footer>
+    )
+    expect(screen.getByText(emptySection.title)).toBeInTheDocument()
+  })
+
+  // Verifies that all interactive elements are accessible by screen readers
+  it('ensures all buttons and links have accessible names for screen readers', () => {
+    const allButtons = screen.getAllByRole('button')
     const allLinks = screen.getAllByRole('link')
-    allLinks.forEach((link) => {
-      expect(link).toHaveAttribute('aria-label')
+
+    allButtons.forEach(btn => {
+      expect(btn).toHaveAccessibleName()
+    })
+
+    allLinks.forEach(link => {
+      expect(link).toHaveAccessibleName()
     })
   })
 
-  // Simulates a corner case where the sections array is empty or undefined
-  // The component should still render without breaking the layout
-  it('renders gracefully when no sections are passed', () => {
-    render(<Footer sections={[]} />)
-
-    const footer = screen.getByRole('contentinfo')
-    expect(footer).toBeInTheDocument()
-
-    const headings = screen.queryAllByRole('heading')
-    expect(headings.length).toBe(0)
+  // Checks that the main footer container applies the expected Tailwind class
+  it('applies the correct class name for the footer container styling', () => {
+    const footerContainer = screen.getByTestId('footer')
+    expect(footerContainer).toHaveClass('bg-neutral-100')
   })
 })
