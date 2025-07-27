@@ -246,14 +246,7 @@ describe('<NavButton />', () => {
   describe('Default Values and Fallbacks', () => {
     it('should render without crashing when optional color props are not provided', () => {
       expect(() => {
-        render(
-          <NavButton
-            href="/test"
-            defaultIcon={faHome}
-            hoverIcon={faUser}
-            text="Test"
-          />
-        )
+        render(<NavButton href="/test" defaultIcon={faHome} hoverIcon={faUser} text="Test" />)
       }).not.toThrow()
     })
 
@@ -265,14 +258,7 @@ describe('<NavButton />', () => {
     })
 
     it('should render without custom className', () => {
-      render(
-        <NavButton
-          href="/test"
-          defaultIcon={faHome}
-          hoverIcon={faUser}
-          text="Test"
-        />
-      )
+      render(<NavButton href="/test" defaultIcon={faHome} hoverIcon={faUser} text="Test" />)
       const link = screen.getByRole('link')
       expect(link).toBeInTheDocument()
       expect(link).toHaveClass('group') // Should still have default classes
