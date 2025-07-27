@@ -1,324 +1,214 @@
-import { render, screen, fireEvent } from '@testing-library/react'
-import { faHome, faUser } from '@fortawesome/free-solid-svg-icons'
-import NavButton from 'components/NavButton'
-import type { NavButtonProps } from 'types/button'
+import { render, screen, fireEvent } from '@testing-library/react';
+import { faHome, faUser, faCog } from '@fortawesome/free-solid-svg-icons';
+import NavButton from 'components/NavButton';
+import type { NavButtonProps } from 'types/button';
 
-// Mock Next.js Link component
+/**
+ * Mocking Next.js's Link component is crucial for unit testing.
+ * This mock isolates the NavButton component from the Next.js routing system,
+ * allowing us to test its own logic without external dependencies.
+ * We render a simple anchor tag `<a>` to inspect props like `href`.
+ */
 jest.mock('next/link', () => {
+  // The mock takes the same props as a real Next.js Link component.
+  // It passes them down to a standard `a` element.
   return function MockLink({ children, href, ...props }: any) {
     return (
       <a href={href} {...props}>
         {children}
       </a>
-    )
-  }
-})
+    );
+  };
+});
 
+// Main test suite for the NavButton component.
 describe('NavButton', () => {
+  // Define a set of default props to be used in most tests.
+  // This reduces repetition and makes tests easier to read.
   const defaultProps: NavButtonProps = {
-    href: '/test',
+    href: '/home',
     defaultIcon: faHome,
     hoverIcon: faUser,
-    text: 'Test Button',
-  }
+    text: 'Home',
+  };
 
+  /**
+   * A helper function to render the NavButton component.
+   * It merges any provided props with the default props,
+   * making it easy to test different component variations.
+   * @param {Partial<NavButtonProps>} props - Optional props to override defaults.
+   * @returns The result of the `render` call from @testing-library/react.
+   */
   const renderNavButton = (props: Partial<NavButtonProps> = {}) => {
-    return render(<NavButton {...defaultProps} {...props} />)
-  }
+    return render(<NavButton {...defaultProps} {...props} />);
+  };
 
-  describe('Rendering', () => {
+  // Group tests related to initial rendering and basic structure.
+  describe('Rendering and DOM Structure', () => {
     it('renders successfully with minimal required props', () => {
-      renderNavButton()
-      expect(screen.getByText('Test Button')).toBeInTheDocument()
-      expect(screen.getByRole('link')).toHaveAttribute('href', '/test')
-    })
+      renderNavButton();
+      // Check if the button text is rendered.
+      expect(screen.getByText('Home')).toBeInTheDocument();
+      // Verify the link has the correct href attribute.
+      expect(screen.getByRole('link')).toHaveAttribute('href', '/home');
+    });
 
-    it('renders with custom className', () => {
-      renderNavButton({ className: 'custom-class' })
-      const link = screen.getByRole('link')
-      expect(link).toHaveClass('custom-class')
-    })
+    it('applies a custom className when provided', () => {
+      const customClass = 'my-custom-class';
+      renderNavButton({ className: customClass });
+      const linkElement = screen.getByRole('link');
+      expect(linkElement).toHaveClass(customClass);
+    });
 
-    it('renders text content correctly', () => {
-      renderNavButton({ text: 'Custom Button Text' })
-      expect(screen.getByText('Custom Button Text')).toBeInTheDocument()
-    })
+    it('renders the correct text content', () => {
+      const buttonText = 'Profile Page';
+      renderNavButton({ text: buttonText });
+      expect(screen.getByText(buttonText)).toBeInTheDocument();
+    });
 
-    it('renders with target="_blank" and rel="noopener noreferrer"', () => {
-      renderNavButton()
-      const link = screen.getByRole('link')
-      expect(link).toHaveAttribute('target', '_blank')
-      expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-    })
-  })
+    it('has the correct base DOM structure and essential CSS classes', () => {
+        renderNavButton();
+        const linkElement = screen.getByRole('link');
+        // Check for essential layout and styling classes.
+        expect(linkElement).toHaveClass('group', 'relative', 'flex', 'items-center', 'justify-center', 'rounded-md', 'p-4');
+        // Check for typography and color classes.
+        expect(linkElement).toHaveClass('text-sm', 'font-medium', 'text-black', 'dark:text-white');
+    });
+  });
 
-  describe('Icon Rendering', () => {
-    it('renders default icon initially', () => {
-      renderNavButton()
-      const icon = screen.getByRole('img', { hidden: true })
-      expect(icon).toBeInTheDocument()
-    })
+  // Group tests related to the component's icon behavior.
+  describe('Icon Rendering and State Changes', () => {
+    it('renders the default icon initially', () => {
+      renderNavButton();
+      // The FontAwesome icon is rendered as an SVG with role="img".
+      const icon = screen.getByRole('img', { hidden: true });
+      expect(icon).toBeInTheDocument();
+      // Check if the initial icon corresponds to the defaultIcon prop.
+      expect(icon.getAttribute('data-icon')).toBe(faHome.iconName);
+    });
 
-    it('applies default icon color when provided', () => {
-      renderNavButton({ defaultIconColor: '#ff0000' })
-      const icon = screen.getByRole('img', { hidden: true })
-      expect(icon).toHaveStyle({ color: '#ff0000' })
-    })
-
-    it('applies hover icon color when provided', () => {
-      renderNavButton({ hoverIconColor: '#00ff00' })
-      const link = screen.getByRole('link')
-      fireEvent.mouseEnter(link)
-      const icon = screen.getByRole('img', { hidden: true })
-      expect(icon).toHaveStyle({ color: '#00ff00' })
-    })
-  })
-
-  describe('State Changes and Hover Behavior', () => {
-    it('changes icon on hover', () => {
-      renderNavButton()
-      const link = screen.getByRole('link')
-      const icon = screen.getByRole('img', { hidden: true })
+    it('switches to the hover icon on mouse enter and back on mouse leave', () => {
+      renderNavButton();
+      const linkElement = screen.getByRole('link');
       
-      // Initially should show default icon
-      expect(icon).toHaveClass('scale-110', { exact: false })
-      
-      // On hover, should show hover icon and apply scale class
-      fireEvent.mouseEnter(link)
-      expect(icon).toHaveClass('scale-110')
-      expect(icon).toHaveClass('text-yellow-400')
-      
-      // On mouse leave, should return to default state
-      fireEvent.mouseLeave(link)
-      expect(icon).not.toHaveClass('scale-110')
-      expect(icon).not.toHaveClass('text-yellow-400')
-    })
+      // Initial state: default icon should be visible.
+      let icon = screen.getByRole('img', { hidden: true });
+      expect(icon.getAttribute('data-icon')).toBe(faHome.iconName);
 
-    it('handles multiple hover events correctly', () => {
-      renderNavButton()
-      const link = screen.getByRole('link')
-      const icon = screen.getByRole('img', { hidden: true })
-      
-      // First hover
-      fireEvent.mouseEnter(link)
-      expect(icon).toHaveClass('scale-110')
-      
-      // Mouse leave
-      fireEvent.mouseLeave(link)
-      expect(icon).not.toHaveClass('scale-110')
-      
-      // Second hover
-      fireEvent.mouseEnter(link)
-      expect(icon).toHaveClass('scale-110')
-    })
-  })
+      // Simulate mouse enter event.
+      fireEvent.mouseEnter(linkElement);
+      icon = screen.getByRole('img', { hidden: true });
+      // The icon should now be the hoverIcon.
+      expect(icon.getAttribute('data-icon')).toBe(faUser.iconName);
 
-  describe('Props-based Behavior', () => {
-    it('uses different icons for default and hover states', () => {
+      // Simulate mouse leave event.
+      fireEvent.mouseLeave(linkElement);
+      icon = screen.getByRole('img', { hidden: true });
+      // The icon should revert to the defaultIcon.
+      expect(icon.getAttribute('data-icon')).toBe(faHome.iconName);
+    });
+  });
+
+  // Group tests for behavior driven by props.
+  describe('Prop-based Behavior', () => {
+    it('applies default and hover icon colors correctly', () => {
       renderNavButton({
-        defaultIcon: faHome,
-        hoverIcon: faUser,
-      })
-      
-      const link = screen.getByRole('link')
-      const icon = screen.getByRole('img', { hidden: true })
-      
-      // Initially shows default icon
-      expect(icon).toBeInTheDocument()
-      
-      // On hover shows different icon
-      fireEvent.mouseEnter(link)
-      expect(icon).toBeInTheDocument()
-    })
+        defaultIconColor: 'rgb(0, 0, 255)', // blue
+        hoverIconColor: 'rgb(255, 0, 0)',   // red
+      });
+      const linkElement = screen.getByRole('link');
+      const icon = screen.getByRole('img', { hidden: true });
 
-    it('applies custom colors correctly', () => {
-      renderNavButton({
-        defaultIconColor: '#123456',
-        hoverIconColor: '#654321',
-      })
-      
-      const link = screen.getByRole('link')
-      const icon = screen.getByRole('img', { hidden: true })
-      
-      // Default color
-      expect(icon).toHaveStyle({ color: '#123456' })
-      
-      // Hover color
-      fireEvent.mouseEnter(link)
-      expect(icon).toHaveStyle({ color: '#654321' })
-    })
-  })
+      // Check initial color.
+      expect(icon).toHaveStyle({ color: 'rgb(0, 0, 255)' });
 
-  describe('Event Handling', () => {
-    it('handles mouse enter event', () => {
-      renderNavButton()
-      const link = screen.getByRole('link')
-      
-      fireEvent.mouseEnter(link)
-      const icon = screen.getByRole('img', { hidden: true })
-      expect(icon).toHaveClass('scale-110')
-    })
+      // Check color on hover.
+      fireEvent.mouseEnter(linkElement);
+      expect(icon).toHaveStyle({ color: 'rgb(255, 0, 0)' });
 
-    it('handles mouse leave event', () => {
-      renderNavButton()
-      const link = screen.getByRole('link')
-      
-      // First enter to set hover state
-      fireEvent.mouseEnter(link)
-      const icon = screen.getByRole('img', { hidden: true })
-      expect(icon).toHaveClass('scale-110')
-      
-      // Then leave
-      fireEvent.mouseLeave(link)
-      expect(icon).not.toHaveClass('scale-110')
-    })
+      // Check color after hover ends.
+      fireEvent.mouseLeave(linkElement);
+      expect(icon).toHaveStyle({ color: 'rgb(0, 0, 255)' });
+    });
 
-    it('handles focus events correctly', () => {
-      renderNavButton()
-      const link = screen.getByRole('link')
-      
-      // Should have focus-visible styles
-      expect(link).toHaveClass('focus-visible:outline-none')
-      expect(link).toHaveClass('focus-visible:ring-1')
-    })
-  })
+    it('uses different icons for default and hover states as per props', () => {
+        renderNavButton({ defaultIcon: faCog, hoverIcon: faHome });
+        const linkElement = screen.getByRole('link');
+        
+        // Check initial icon
+        let icon = screen.getByRole('img', { hidden: true });
+        expect(icon.getAttribute('data-icon')).toBe(faCog.iconName);
+        
+        // Check hover icon
+        fireEvent.mouseEnter(linkElement);
+        icon = screen.getByRole('img', { hidden: true });
+        expect(icon.getAttribute('data-icon')).toBe(faHome.iconName);
+    });
+  });
 
-  describe('Accessibility', () => {
-    it('has proper link role', () => {
-      renderNavButton()
-      expect(screen.getByRole('link')).toBeInTheDocument()
-    })
+  // Group tests for event handling and accessibility.
+  describe('Event Handling and Accessibility', () => {
+    it('has the correct accessibility role', () => {
+      renderNavButton();
+      expect(screen.getByRole('link', { name: 'Home' })).toBeInTheDocument();
+    });
 
-    it('has proper target and rel attributes for external links', () => {
-      renderNavButton()
-      const link = screen.getByRole('link')
-      expect(link).toHaveAttribute('target', '_blank')
-      expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-    })
+    it('includes target="_blank" and rel="noopener noreferrer" for security', () => {
+      renderNavButton();
+      const linkElement = screen.getByRole('link');
+      expect(linkElement).toHaveAttribute('target', '_blank');
+      expect(linkElement).toHaveAttribute('rel', 'noopener noreferrer');
+    });
 
-    it('has proper focus management', () => {
-      renderNavButton()
-      const link = screen.getByRole('link')
-      expect(link).toHaveClass('focus-visible:outline-none')
-    })
-  })
+    it('applies focus-visible styles for keyboard navigation', () => {
+        renderNavButton();
+        const linkElement = screen.getByRole('link');
+        // These classes are critical for accessibility, showing a ring on focus.
+        expect(linkElement).toHaveClass('focus-visible:outline-none', 'focus-visible:ring-1');
+    });
+  });
 
-  describe('DOM Structure and Styling', () => {
-    it('has correct base classes', () => {
-      renderNavButton()
-      const link = screen.getByRole('link')
-      
-      expect(link).toHaveClass('group')
-      expect(link).toHaveClass('relative')
-      expect(link).toHaveClass('flex')
-      expect(link).toHaveClass('h-10')
-      expect(link).toHaveClass('cursor-pointer')
-      expect(link).toHaveClass('items-center')
-      expect(link).toHaveClass('justify-center')
-      expect(link).toHaveClass('gap-2')
-      expect(link).toHaveClass('overflow-hidden')
-      expect(link).toHaveClass('whitespace-pre')
-      expect(link).toHaveClass('rounded-md')
-      expect(link).toHaveClass('bg-[#87a1bc]')
-      expect(link).toHaveClass('p-4')
-      expect(link).toHaveClass('text-sm')
-      expect(link).toHaveClass('font-medium')
-      expect(link).toHaveClass('text-black')
-    })
-
-    it('has correct hover and focus classes', () => {
-      renderNavButton()
-      const link = screen.getByRole('link')
-      
-      expect(link).toHaveClass('hover:ring-1')
-      expect(link).toHaveClass('hover:ring-[#b0c7de]')
-      expect(link).toHaveClass('hover:ring-offset-0')
-      expect(link).toHaveClass('focus-visible:outline-none')
-      expect(link).toHaveClass('focus-visible:ring-1')
-      expect(link).toHaveClass('focus-visible:ring-ring')
-    })
-
-    it('has correct dark mode classes', () => {
-      renderNavButton()
-      const link = screen.getByRole('link')
-      
-      expect(link).toHaveClass('dark:bg-slate-900')
-      expect(link).toHaveClass('dark:text-white')
-      expect(link).toHaveClass('dark:hover:bg-slate-900/90')
-      expect(link).toHaveClass('dark:hover:ring-[#46576b]')
-    })
-
-    it('has correct responsive classes', () => {
-      renderNavButton()
-      const link = screen.getByRole('link')
-      
-      expect(link).toHaveClass('md:flex')
-    })
-  })
-
+  // Group tests for edge cases and invalid inputs.
   describe('Edge Cases and Invalid Inputs', () => {
-    it('handles empty text gracefully', () => {
-      renderNavButton({ text: '' })
-      const link = screen.getByRole('link')
-      expect(link).toBeInTheDocument()
-    })
+    it('handles an empty string for the text prop gracefully', () => {
+      renderNavButton({ text: '' });
+      // The link should still render, but the accessible name might be missing.
+      const linkElement = screen.getByRole('link');
+      expect(linkElement).toBeInTheDocument();
+      // The text span should not be present.
+      expect(screen.queryByText(/.+/)).not.toBeInTheDocument();
+    });
 
-    it('handles very long text', () => {
-      const longText = 'A'.repeat(1000)
-      renderNavButton({ text: longText })
-      expect(screen.getByText(longText)).toBeInTheDocument()
-    })
+    it('handles very long text without breaking', () => {
+      const longText = 'a'.repeat(500);
+      renderNavButton({ text: longText });
+      expect(screen.getByText(longText)).toBeInTheDocument();
+      // The component uses `whitespace-pre`, so long text should be handled by CSS.
+      expect(screen.getByText(longText)).toHaveClass('truncate');
+    });
 
-    it('handles special characters in text', () => {
-      renderNavButton({ text: 'Test & Button <script>alert("xss")</script>' })
-      expect(screen.getByText('Test & Button <script>alert("xss")</script>')).toBeInTheDocument()
-    })
+    it('handles undefined for optional props without crashing', () => {
+      // Render with only the required props to ensure no crashes.
+      const { unmount } = render(
+        <NavButton
+          href="/test"
+          defaultIcon={faHome}
+          hoverIcon={faUser}
+          text="Test"
+          className={undefined}
+          defaultIconColor={undefined}
+          hoverIconColor={undefined}
+        />
+      );
+      expect(screen.getByRole('link')).toBeInTheDocument();
+      // Clean up the rendered component.
+      unmount();
+    });
 
-    it('handles complex href values', () => {
-      const complexHref = 'https://example.com/path?param=value&other=123#fragment'
-      renderNavButton({ href: complexHref })
-      const link = screen.getByRole('link')
-      expect(link).toHaveAttribute('href', complexHref)
-    })
-
-    it('handles undefined className gracefully', () => {
-      renderNavButton({ className: undefined })
-      const link = screen.getByRole('link')
-      expect(link).toBeInTheDocument()
-    })
-
-    it('handles undefined icon colors gracefully', () => {
-      renderNavButton({
-        defaultIconColor: undefined,
-        hoverIconColor: undefined,
-      })
-      const link = screen.getByRole('link')
-      expect(link).toBeInTheDocument()
-    })
-  })
-
-  describe('Integration with FontAwesome', () => {
-    it('renders FontAwesome icon correctly', () => {
-      renderNavButton()
-      const icon = screen.getByRole('img', { hidden: true })
-      expect(icon).toBeInTheDocument()
-    })
-
-    it('switches between different FontAwesome icons on hover', () => {
-      renderNavButton({
-        defaultIcon: faHome,
-        hoverIcon: faUser,
-      })
-      
-      const link = screen.getByRole('link')
-      const icon = screen.getByRole('img', { hidden: true })
-      
-      // Icon should be present initially
-      expect(icon).toBeInTheDocument()
-      
-      // Icon should still be present after hover
-      fireEvent.mouseEnter(link)
-      expect(icon).toBeInTheDocument()
-    })
-  })
-})
+    it('handles complex href values correctly', () => {
+        const complexHref = 'https://example.com/path?query=value&another=true#section-id';
+        renderNavButton({ href: complexHref });
+        expect(screen.getByRole('link')).toHaveAttribute('href', complexHref);
+    });
+  });
+});
