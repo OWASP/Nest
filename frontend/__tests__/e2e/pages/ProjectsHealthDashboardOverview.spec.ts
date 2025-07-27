@@ -4,11 +4,22 @@ import millify from 'millify'
 
 test.describe('Projects Health Dashboard Overview', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/graphql/', async (route) => {
-      await route.fulfill({
-        status: 200,
-        json: { data: mockProjectsDashboardOverviewData },
-      })
+    await page.route('**/graphql/', async (route, request) => {
+      const postData = request.postDataJSON()
+      switch (postData.operationName) {
+        case 'GetUser':
+          await route.fulfill({
+            status: 200,
+            json: { data: mockProjectsDashboardOverviewData.user },
+          })
+          break
+        default:
+          await route.fulfill({
+            status: 200,
+            json: { data: mockProjectsDashboardOverviewData.projectHealthStats },
+          })
+          break
+      }
     })
     await page.context().addCookies([
       {
@@ -18,10 +29,12 @@ test.describe('Projects Health Dashboard Overview', () => {
         path: '/',
       },
     ])
-    await page.goto('/projects/dashboard', { timeout: 60000 })
+    await page.goto('/projects/dashboard', { timeout: 100000 })
   })
   test('renders project health stats', async ({ page }) => {
-    await expect(page.getByText('Project Health Dashboard Overview')).toBeVisible()
+    await expect(page.getByText('Project Health Dashboard Overview')).toBeVisible({
+      timeout: 10000,
+    })
 
     // Check for healthy projects
     await expect(

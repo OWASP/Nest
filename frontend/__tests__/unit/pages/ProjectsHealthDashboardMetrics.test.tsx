@@ -34,6 +34,29 @@ jest.mock('components/ProjectsDashboardDropDown', () => ({
   ),
 }))
 
+jest.mock('hooks/useDjangoSession', () => ({
+  useDjangoSession: () => ({
+    isSyncing: false,
+    session: {
+      user: {
+        login: 'testuser',
+      },
+    },
+  }),
+}))
+
+jest.mock('next-auth/react', () => ({
+  useSession: () => ({
+    data: {
+      session: {
+        user: {
+          login: 'testuser',
+        },
+      },
+    },
+  }),
+}))
+
 jest.mock('@heroui/react', () => ({
   ...jest.requireActual('@heroui/react'),
   Pagination: ({ page, onChange }) => (

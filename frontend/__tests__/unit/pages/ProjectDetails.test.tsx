@@ -27,6 +27,18 @@ jest.mock('react-apexcharts', () => {
   }
 })
 
+jest.mock('next-auth/react', () => ({
+  useSession: () => ({
+    data: {
+      session: {
+        user: {
+          login: 'testuser',
+        },
+      },
+    },
+  }),
+}))
+
 const mockRouter = {
   push: jest.fn(),
 }
