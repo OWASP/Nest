@@ -15,3 +15,4 @@ export const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET
 export const NEXTAUTH_URL = process.env.NEXTAUTH_URL
 export const RELEASE_VERSION = process.env.NEXT_PUBLIC_RELEASE_VERSION
 export const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN
+export const SENTRY_AUTH_TOKEN = process.env.NEXT_SENTRY_AUTH_TOKEN
