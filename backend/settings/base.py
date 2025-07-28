@@ -45,6 +45,7 @@ class Base(Configuration):
         "algoliasearch_django",
         "corsheaders",
         "storages",
+        "ninja",
     )
 
     LOCAL_APPS = (

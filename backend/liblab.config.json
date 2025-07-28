@@ -1,0 +1,12 @@
+{
+  "sdkName": "OwaspNestSDK",
+  "specFilePath": "openapi.json",
+  "languages": ["python"],
+  "python": {
+    "publishing": {
+      "pypi": {
+        "packageName": "owasp-nest-sdk"
+      }
+    }
+  }
+}
