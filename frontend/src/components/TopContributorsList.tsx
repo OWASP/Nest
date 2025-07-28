@@ -1,4 +1,4 @@
-import type { IconProp } from "@fortawesome/fontawesome-svg-core"
+import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -7,7 +7,7 @@ import { capitalize } from 'utils/capitalize'
 import { getMemberUrl } from 'utils/urlFormatter'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
-import ToggleButton from "components/ToggleButton"
+import ShowMoreButton from 'components/ShowMoreButton'
 
 const TopContributorsList = ({
   contributors,
@@ -46,7 +46,7 @@ const TopContributorsList = ({
           <div key={index} className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
             <div className="flex w-full items-center gap-2">
               <Image
-                 alt={item?.name || ''}
+                alt={item?.name || ''}
                 className="rounded-full"
                 height={24}
                 src={`${item?.avatarUrl}&s=60`}
@@ -65,7 +65,7 @@ const TopContributorsList = ({
         ))}
       </div>
       {contributors.length > maxInitialDisplay && (
-        <ToggleButton
+        <ShowMoreButton
           isExpanded={showAllContributors}
           onToggle={toggleContributors}
           showMoreText="Show more"

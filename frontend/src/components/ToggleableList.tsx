@@ -1,9 +1,9 @@
-import type { IconDefinition } from "@fortawesome/fontawesome-svg-core"
+import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useRouter } from "next/navigation"
-import type React from "react"
-import { useState } from "react"
-import ToggleButton from "components/ToggleButton"
+import { useRouter } from 'next/navigation'
+import type React from 'react'
+import { useState } from 'react'
+import ShowMoreButton from 'components/ShowMoreButton'
 
 const ToggleableList = ({
   items,
@@ -45,7 +45,12 @@ const ToggleableList = ({
         ))}
       </div>
       {items.length > limit && (
-        <ToggleButton isExpanded={showAll} onToggle={toggleShowAll} showMoreText="Show more" showLessText="Show less" />
+        <ShowMoreButton
+          isExpanded={showAll}
+          onToggle={toggleShowAll}
+          showMoreText="Show more"
+          showLessText="Show less"
+        />
       )}
     </div>
   )
