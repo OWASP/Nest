@@ -59,12 +59,12 @@ def sync_repository(
 
     # Process repository content if not archived
     if not repository.is_archived:
-        _sync_repository_milestones(gh_repository, repository)
-        _sync_repository_issues(gh_repository, repository)
-        _sync_repository_pull_requests(gh_repository, repository)
+        repository.sync_milestones(gh_repository)
+        repository.sync_issues(gh_repository)
+        repository.sync_pull_requests(gh_repository)
 
-    _sync_repository_releases(gh_repository, repository, is_owasp_site_repository)
-    _sync_repository_contributors(gh_repository, repository)
+    repository.sync_releases(gh_repository, is_owasp_site_repository)
+    repository.sync_contributors(gh_repository)
 
     return organization, repository
 

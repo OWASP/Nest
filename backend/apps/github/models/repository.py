@@ -2,21 +2,32 @@
 
 from __future__ import annotations
 
+import logging
 from base64 import b64decode
+from datetime import timedelta as td
 
 import yaml
 from django.db import models
-from github.GithubException import GithubException
+from django.utils import timezone
+from github.GithubException import GithubException, UnknownObjectException
 
 from apps.common.models import TimestampedModel
 from apps.github.constants import OWASP_LOGIN
 from apps.github.models.common import NodeModel
+from apps.github.models.issue import Issue
+from apps.github.models.label import Label
 from apps.github.models.milestone import Milestone
 from apps.github.models.mixins import RepositoryIndexMixin
+from apps.github.models.pull_request import PullRequest
+from apps.github.models.release import Release
+from apps.github.models.repository_contributor import RepositoryContributor
+from apps.github.models.user import User
 from apps.github.utils import (
     check_funding_policy_compliance,
     check_owasp_site_repository,
 )
+
+logger = logging.getLogger(__name__)
 
 IGNORED_LANGUAGES = {"css", "html"}
 LANGUAGE_PERCENTAGE_THRESHOLD = 1
@@ -303,11 +314,8 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     def _check_all_funding_compliance(self) -> bool:
         """Check if all funding targets are policy compliant."""
         for platform, targets in self.funding_yml.items():
-            # Normalize to list for consistent processing
-            target_list = targets if isinstance(targets, list) else [targets]
-            for target in target_list:
-                if target and not check_funding_policy_compliance(platform, target):
-                    return False
+            if not check_funding_policy_compliance(platform, targets):
+                return False
         return True
 
     @staticmethod
@@ -354,3 +362,134 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
             repository.save()
 
         return repository
+
+    def sync_milestones(self, gh_repository):
+        """Sync milestones from GitHub repository."""
+        until = (
+            self.latest_updated_milestone.updated_at
+            if self.latest_updated_milestone
+            else timezone.now() - td(days=30)
+        )
+        for gh_milestone in gh_repository.get_milestones(
+            direction="desc", sort="updated", state="all"
+        ):
+            if gh_milestone.updated_at < until:
+                break
+            milestone = Milestone.update_data(
+                gh_milestone,
+                author=User.update_data(gh_milestone.creator),
+                repository=self,
+            )
+            milestone.labels.clear()
+            for gh_milestone_label in gh_milestone.get_labels():
+                try:
+                    milestone.labels.add(Label.update_data(gh_milestone_label))
+                except UnknownObjectException:
+                    logger.exception("Couldn't get GitHub milestone label %s", milestone.url)
+
+    def sync_issues(self, gh_repository):
+        """Sync issues from GitHub repository."""
+        project_track_issues = self.project.track_issues if self.project else True
+        if not (self.track_issues and project_track_issues):
+            logger.info("Skipping issues sync for %s", self.name)
+            return
+        until = (
+            self.latest_updated_issue.updated_at
+            if self.latest_updated_issue
+            else timezone.now() - td(days=30)
+        )
+        for gh_issue in gh_repository.get_issues(direction="desc", sort="updated", state="all"):
+            if gh_issue.pull_request:
+                continue
+            if gh_issue.updated_at < until:
+                break
+            milestone = (
+                Milestone.update_data(
+                    gh_issue.milestone,
+                    author=User.update_data(gh_issue.milestone.creator),
+                    repository=self,
+                )
+                if gh_issue.milestone
+                else None
+            )
+            issue = Issue.update_data(
+                gh_issue,
+                author=User.update_data(gh_issue.user),
+                milestone=milestone,
+                repository=self,
+            )
+            self._update_assignees_and_labels(issue, gh_issue.assignees, gh_issue.labels, "issue")
+
+    def sync_pull_requests(self, gh_repository):
+        """Sync pull requests from GitHub repository."""
+        until = (
+            self.latest_updated_pull_request.updated_at
+            if self.latest_updated_pull_request
+            else timezone.now() - td(days=30)
+        )
+        for gh_pull_request in gh_repository.get_pulls(
+            direction="desc", sort="updated", state="all"
+        ):
+            if gh_pull_request.updated_at < until:
+                break
+            milestone = (
+                Milestone.update_data(
+                    gh_pull_request.milestone,
+                    author=User.update_data(gh_pull_request.milestone.creator),
+                    repository=self,
+                )
+                if gh_pull_request.milestone
+                else None
+            )
+            pull_request = PullRequest.update_data(
+                gh_pull_request,
+                author=User.update_data(gh_pull_request.user),
+                milestone=milestone,
+                repository=self,
+            )
+            self._update_assignees_and_labels(
+                pull_request, gh_pull_request.assignees, gh_pull_request.labels, "pull request"
+            )
+
+    def _update_assignees_and_labels(self, item, gh_assignees, gh_labels, item_type):
+        item.assignees.clear()
+        for gh_assignee in gh_assignees:
+            assignee = User.update_data(gh_assignee)
+            if assignee:
+                item.assignees.add(assignee)
+        item.labels.clear()
+        for gh_label in gh_labels:
+            try:
+                item.labels.add(Label.update_data(gh_label))
+            except UnknownObjectException:
+                logger.exception("Couldn't get GitHub %s label %s", item_type, item.url)
+
+    def sync_releases(self, gh_repository, is_owasp_site_repository):
+        """Sync releases from GitHub repository."""
+        releases = []
+        if not is_owasp_site_repository:
+            existing_release_node_ids = set(
+                Release.objects.filter(repository=self).values_list("node_id", flat=True)
+                if self.id
+                else ()
+            )
+            for gh_release in gh_repository.get_releases():
+                release_node_id = Release.get_node_id(gh_release)
+                if release_node_id in existing_release_node_ids:
+                    break
+                releases.append(
+                    Release.update_data(
+                        gh_release, author=User.update_data(gh_release.author), repository=self
+                    )
+                )
+        Release.bulk_save(releases)
+
+    def sync_contributors(self, gh_repository):
+        """Sync contributors from GitHub repository."""
+        RepositoryContributor.bulk_save(
+            [
+                RepositoryContributor.update_data(gh_contributor, repository=self, user=user)
+                for gh_contributor in gh_repository.get_contributors()
+                if (user := User.update_data(gh_contributor))
+            ]
+        )
