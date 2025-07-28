@@ -2,6 +2,7 @@
   "name": "nest-owasp",
   "version": "1.0.0",
   "description": "OWASP Nest - A comprehensive platform for managing OWASP projects, chapters, and community resources",
+  "main": "index.js",
   "directories": {
     "doc": "docs"
   },
