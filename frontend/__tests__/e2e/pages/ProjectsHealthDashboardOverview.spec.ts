@@ -4,19 +4,42 @@ import millify from 'millify'
 
 test.describe('Projects Health Dashboard Overview', () => {
   test.beforeEach(async ({ page }) => {
+    await page.route('**/auth/login/**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        json: {
+          data: {
+            session: {
+              user: {
+                login: 'testuser',
+                accessToken: 'test-access-token',
+              },
+            },
+          },
+        },
+      })
+    })
     await page.route('**/graphql/', async (route, request) => {
       const postData = request.postDataJSON()
       switch (postData.operationName) {
         case 'GetUser':
           await route.fulfill({
             status: 200,
-            json: { data: mockProjectsDashboardOverviewData.user },
+            json: { data: { user: mockProjectsDashboardOverviewData.user } },
+          })
+          break
+        case 'SyncDjangoSession':
+          await route.fulfill({
+            status: 200,
+            json: { data: { githubAuth: mockProjectsDashboardOverviewData.githubAuth } },
           })
           break
         default:
           await route.fulfill({
             status: 200,
-            json: { data: mockProjectsDashboardOverviewData.projectHealthStats },
+            json: {
+              data: { projectHealthStats: mockProjectsDashboardOverviewData.projectHealthStats },
+            },
           })
           break
       }
@@ -30,6 +53,9 @@ test.describe('Projects Health Dashboard Overview', () => {
       },
     ])
     await page.goto('/projects/dashboard', { timeout: 100000 })
+  })
+  test('shows 404 page if not authenticated', async ({ page }) => {
+    await expect(page.getByText('404', { exact: true })).toBeVisible()
   })
   test('renders project health stats', async ({ page }) => {
     await expect(page.getByText('Project Health Dashboard Overview')).toBeVisible({

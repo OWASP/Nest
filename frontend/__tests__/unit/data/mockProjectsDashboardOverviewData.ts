@@ -16,4 +16,8 @@ export const mockProjectsDashboardOverviewData = {
   user: {
     isOwaspStaff: true,
   },
+  githubAuth: {
+    message: 'GitHub authentication is enabled',
+    ok: true,
+  },
 }
