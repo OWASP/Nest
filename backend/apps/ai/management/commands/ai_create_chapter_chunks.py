@@ -101,7 +101,11 @@ class Command(BaseCommand):
         metadata_parts = []
 
         # Prose content
-        for field, label in [("description", "Description"), ("summary", "Summary")]:
+        prose_fields = (
+            ("description", "Description"),
+            ("summary", "Summary"),
+        )
+        for field, label in prose_fields:
             value = getattr(chapter, field, None)
             if value:
                 prose_parts.append(f"{label}: {value}")
