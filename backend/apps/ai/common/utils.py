@@ -9,6 +9,7 @@ from apps.ai.common.constants import (
     MIN_REQUEST_INTERVAL_SECONDS,
 )
 from apps.ai.models.chunk import Chunk
+from apps.ai.models.context import Context
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -43,6 +44,12 @@ def create_chunks_and_embeddings(
             model="text-embedding-3-small",
         )
 
+        context = Context(
+            generated_text="\n".join(all_chunk_texts),
+            content_object=content_object,
+        )
+        context.save()
+
         return [
             chunk
             for text, embedding in zip(
@@ -53,7 +60,7 @@ def create_chunks_and_embeddings(
             if (
                 chunk := Chunk.update_data(
                     text=text,
-                    content_object=content_object,
+                    context=context,
                     embedding=embedding,
                     save=False,
                 )

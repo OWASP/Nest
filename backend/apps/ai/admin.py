@@ -3,6 +3,21 @@
 from django.contrib import admin
 
 from apps.ai.models.chunk import Chunk
+from apps.ai.models.context import Context
+
+
+class ContextAdmin(admin.ModelAdmin):
+    """Admin for Context model."""
+
+    list_display = (
+        "id",
+        "generated_text",
+        "content_type",
+        "object_id",
+        "source",
+    )
+    search_fields = ("generated_text", "source")
+    list_filter = ("content_type", "source")
 
 
 class ChunkAdmin(admin.ModelAdmin):
@@ -11,9 +26,11 @@ class ChunkAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "text",
-        "content_type",
+        "context",
     )
-    search_fields = ("text", "object_id")
+    search_fields = ("text",)
+    list_filter = ("context__content_type",)
 
 
+admin.site.register(Context, ContextAdmin)
 admin.site.register(Chunk, ChunkAdmin)
