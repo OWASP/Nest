@@ -11,20 +11,17 @@ import {
   faCodeBranch,
   faChartColumn,
   faHeart,
-  faFileArrowDown,
 } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Tooltip } from '@heroui/tooltip'
 import millify from 'millify'
 import { useState, useEffect, FC } from 'react'
 import { handleAppError } from 'app/global-error'
-import { fetchMetricsOverviewPDF } from 'server/fetchMetricsOverviewPDF'
 import { GET_PROJECT_HEALTH_STATS } from 'server/queries/projectsHealthDashboardQueries'
 import type { ProjectHealthStats } from 'types/projectHealthStats'
 import DashboardCard from 'components/DashboardCard'
 import DonutBarChart from 'components/DonutBarChart'
 import LineChart from 'components/LineChart'
 import LoadingSpinner from 'components/LoadingSpinner'
+import MetricsPDFButton from 'components/MetricsPDFButton'
 import ProjectTypeDashboardCard from 'components/ProjectTypeDashboardCard'
 
 const ProjectsDashboardPage: FC = () => {
@@ -101,20 +98,10 @@ const ProjectsDashboardPage: FC = () => {
     <>
       <div className="mb-4 flex items-center justify-start">
         <h1 className="font-semibold">Project Health Dashboard Overview</h1>
-        <Tooltip
-          content="Download as PDF"
-          className="ml-2"
-          placement="top"
-          delay={100}
-          closeDelay={100}
-          showArrow
-        >
-          <FontAwesomeIcon
-            icon={faFileArrowDown}
-            className="ml-2 h-7 w-7 cursor-pointer text-gray-500 transition-colors duration-200 hover:text-gray-700"
-            onClick={async () => await fetchMetricsOverviewPDF()}
-          />
-        </Tooltip>
+        <MetricsPDFButton
+          path="overview/pdf"
+          fileName="owasp-project-health-metrics-overview.pdf"
+        />
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
         {projectsCardsItems.map((item) => (

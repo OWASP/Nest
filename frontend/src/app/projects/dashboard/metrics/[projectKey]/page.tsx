@@ -12,17 +12,16 @@ import {
   faStar,
   faTags,
 } from '@fortawesome/free-solid-svg-icons'
-import { Button } from '@heroui/button'
 import { useParams } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
-import { fetchMetricsPDF } from 'server/fetchMetricsPDF'
 import { GET_PROJECT_HEALTH_METRICS_DETAILS } from 'server/queries/projectsHealthDashboardQueries'
 import { HealthMetricsProps } from 'types/healthMetrics'
 import BarChart from 'components/BarChart'
 import GeneralCompliantComponent from 'components/GeneralCompliantComponent'
 import LineChart from 'components/LineChart'
 import LoadingSpinner from 'components/LoadingSpinner'
+import MetricsPDFButton from 'components/MetricsPDFButton'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 const ProjectHealthMetricsDetails: FC = () => {
   const { projectKey } = useParams()
@@ -64,19 +63,13 @@ const ProjectHealthMetricsDetails: FC = () => {
       {metricsList && metricsLatest ? (
         <>
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">{metricsLatest.projectName}</h1>
-            <Button
-              variant="solid"
-              color="primary"
-              onPress={async () => {
-                await fetchMetricsPDF(
-                  `owasp/project-health-metrics/${projectKey}/pdf`,
-                  `${projectKey}-health-metrics.pdf`
-                )
-              }}
-            >
-              Download PDF
-            </Button>
+            <div className="flex justify-start">
+              <h1 className="text-2xl font-bold">{metricsLatest.projectName}</h1>
+              <MetricsPDFButton
+                path={`${projectKey}/pdf`}
+                fileName={`${projectKey}-health-metrics.pdf`}
+              />
+            </div>
             <div className="flex items-center gap-2">
               <MetricsScoreCircle score={metricsLatest.score} />
               <GeneralCompliantComponent

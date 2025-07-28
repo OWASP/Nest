@@ -187,24 +187,39 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         pdf.drawCentredString(300, 680, f"Health Score: {metrics.score:.2f}")
         table_data = [
             ["Metric", "Value"],
-            ["Project Age (days)", metrics.age_days],
-            ["Last Commit (days)", metrics.last_commit_days],
-            ["Last Commit Requirement (days)", metrics.last_commit_days_requirement],
-            ["Last Pull Request (days)", metrics.last_pull_request_days],
-            ["Last Release (days)", metrics.last_release_days],
-            ["Last Release Requirement (days)", metrics.last_release_days_requirement],
-            ["OWASP Page Last Update (days)", metrics.owasp_page_last_update_days],
-            ["Open Issues", metrics.open_issues_count],
-            ["Total Issues", metrics.total_issues_count],
-            ["Open Pull Requests", metrics.open_pull_requests_count],
-            ["Total Pull Requests", metrics.total_pull_requests_count],
-            ["Recent Releases", metrics.recent_releases_count],
-            ["Total Releases", metrics.total_releases_count],
+            ["Project Age", f"{metrics.age_days}/{metrics.age_days_requirement} days"],
+            [
+                "Last Commit",
+                f"{metrics.last_commit_days}/{metrics.last_commit_days_requirement} days",
+            ],
+            [
+                "Last Pull Request",
+                f"{metrics.last_pull_request_days}/{metrics.last_pull_request_days_requirement} days",
+            ],
+            [
+                "Last Release",
+                f"{metrics.last_release_days}/{metrics.last_release_days_requirement} days",
+            ],
+            [
+                "OWASP Page Last Update",
+                f"{metrics.owasp_page_last_update_days}/{metrics.owasp_page_last_update_days_requirement} days",
+            ],
+            ["Open/Total Issues", f"{metrics.open_issues_count}/{metrics.total_issues_count}"],
+            [
+                "Open/Total Pull Requests",
+                f"{metrics.open_pull_requests_count}/{metrics.total_pull_requests_count}",
+            ],
+            [
+                "Recent/Total Releases",
+                f"{metrics.recent_releases_count}/{metrics.total_releases_count}",
+            ],
             ["Forks", metrics.forks_count],
             ["Stars", metrics.stars_count],
+            [
+                "Unassigned/Unanswered Issues",
+                f"{metrics.unassigned_issues_count}/{metrics.unanswered_issues_count}",
+            ],
             ["Contributors", metrics.contributors_count],
-            ["Unassigned Issues", metrics.unassigned_issues_count],
-            ["Unanswered Issues", metrics.unanswered_issues_count],
             [
                 "Has funding policy issues",
                 "No" if metrics.is_funding_requirements_compliant else "Yes",
