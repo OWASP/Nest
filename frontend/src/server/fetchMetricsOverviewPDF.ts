@@ -1,14 +1,13 @@
 import { AppError } from 'app/global-error'
-import { API_URL } from 'utils/credentials'
+import { VIEWS_URL } from 'utils/credentials'
 
 export const fetchMetricsOverviewPDF = async (): Promise<void> => {
   try {
-    const response = await fetch(`${API_URL}owasp/project-health-metrics/overview-pdf`, {
+    const response = await fetch(`${VIEWS_URL}owasp/project-health-metrics/overview/pdf`, {
       method: 'GET',
       headers: {
         accept: 'application/pdf',
       },
-      credentials: 'include',
     })
 
     if (!response.ok) {

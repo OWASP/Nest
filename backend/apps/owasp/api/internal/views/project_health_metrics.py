@@ -1,15 +1,11 @@
-"""API endpoint for OWASP project health metrics."""
+"""Views for OWASP project health metrics."""
 
 from django.http import FileResponse
-from ninja import Router
 
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
-router = Router()
 
-
-@router.get("/overview-pdf")
-def generate_overview_pdf(request):
+def generate_overview_pdf(_request):
     """Generate a PDF overview of OWASP project health metrics."""
     pdf = ProjectHealthMetrics.generate_overview_pdf()
     return FileResponse(
