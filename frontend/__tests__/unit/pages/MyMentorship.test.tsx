@@ -1,0 +1,113 @@
+import { screen, waitFor, fireEvent } from '@testing-library/react'
+import { render } from 'wrappers/testUtil'
+import MyMentorshipPage from 'app/my/mentorship/page'
+import { useRouter as useRouterMock } from 'next/navigation'
+import { useProjectLeader } from 'hooks/useProjectLeader'
+import { useQuery } from '@apollo/client'
+
+// Mocks
+jest.mock('next-auth/react')
+jest.mock('hooks/useProjectLeader')
+jest.mock('@apollo/client', () => {
+    const actual = jest.requireActual('@apollo/client')
+    return {
+        ...actual,
+        useQuery: jest.fn(),
+    }
+})
+jest.mock('next/navigation', () => {
+    const actual = jest.requireActual('next/navigation')
+    return {
+        ...actual,
+        useRouter: jest.fn(),
+        useSearchParams: () => new URLSearchParams(''),
+    }
+})
+
+const mockPush = jest.fn()
+
+beforeEach(() => {
+    jest.clearAllMocks()
+        ; (useRouterMock as jest.Mock).mockReturnValue({ push: mockPush })
+})
+
+const mockProgramData = {
+    myPrograms: {
+        programs: [
+            {
+                id: '1',
+                key: 'program-1',
+                name: 'Test Program',
+                description: 'Test Description',
+                status: 'draft',
+                startedAt: '2025-07-28',
+                endedAt: '2025-08-10',
+                experienceLevels: ['beginner'],
+                menteesLimit: 10,
+                admins: [],
+            },
+        ],
+        totalPages: 1,
+    },
+}
+
+describe('MyMentorshipPage', () => {
+    it('shows loading while checking access', () => {
+        ; (useProjectLeader as jest.Mock).mockReturnValue({ isLeader: false, loading: true })
+            ; (useQuery as jest.Mock).mockReturnValue({ data: undefined, loading: false, error: undefined })
+
+        render(<MyMentorshipPage />)
+        expect(screen.getByText(/Checking access/i)).toBeInTheDocument()
+    })
+
+    it('shows access denied if user is not project leader', async () => {
+        ; (useProjectLeader as jest.Mock).mockReturnValue({ isLeader: false, loading: false })
+            ; (useQuery as jest.Mock).mockReturnValue({ data: undefined, loading: false, error: undefined })
+
+        render(<MyMentorshipPage />)
+        expect(await screen.findByText(/Access Denied/i)).toBeInTheDocument()
+    })
+
+    it('renders mentorship programs if user is leader', async () => {
+        ; (useProjectLeader as jest.Mock).mockReturnValue({ isLeader: true, loading: false })
+            ; (useQuery as jest.Mock).mockReturnValue({
+                data: mockProgramData,
+                loading: false,
+                error: undefined,
+            })
+
+        render(<MyMentorshipPage />)
+        expect(await screen.findByText('My Mentorship')).toBeInTheDocument()
+        expect(await screen.findByText('Test Program')).toBeInTheDocument()
+    })
+
+    it('shows empty state when no programs found', async () => {
+        ; (useProjectLeader as jest.Mock).mockReturnValue({ isLeader: true, loading: false })
+            ; (useQuery as jest.Mock).mockReturnValue({
+                data: { myPrograms: { programs: [], totalPages: 1 } },
+                loading: false,
+                error: undefined,
+            })
+
+        render(<MyMentorshipPage />)
+        expect(await screen.findByText(/Program not found/i)).toBeInTheDocument()
+    })
+
+    it('navigates to create page on clicking create button', async () => {
+        ; (useProjectLeader as jest.Mock).mockReturnValue({ isLeader: true, loading: false })
+            ; (useQuery as jest.Mock).mockReturnValue({
+                data: mockProgramData,
+                loading: false,
+                error: undefined,
+            })
+
+        render(<MyMentorshipPage />)
+
+        const btn = await screen.findByRole('button', { name: /create program/i })
+        fireEvent.click(btn)
+
+        await waitFor(() => {
+            expect(mockPush).toHaveBeenCalledWith('/mentorship/programs/create')
+        })
+    })
+})

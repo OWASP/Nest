@@ -15,8 +15,9 @@ import ProgramForm from 'components/ProgramForm'
 const CreateProgramPage = () => {
   const router = useRouter()
   const { data: session, status } = useSession()
-
   const { isLeader: isProjectLeader, loading: leaderLoading } = useProjectLeader()
+
+  const [redirected, setRedirected] = useState(false)
 
   const [createProgram, { loading }] = useMutation(CREATE_PROGRAM)
 
@@ -43,6 +44,7 @@ const CreateProgramPage = () => {
         shouldShowTimeoutProgress: true,
       })
       router.push('/mentorship/programs')
+      setRedirected(true)
     }
   }, [session, status, leaderLoading, router, isProjectLeader])
 
@@ -84,7 +86,7 @@ const CreateProgramPage = () => {
     }
   }
 
-  if (status === 'loading' || !session) {
+  if (status === 'loading' || leaderLoading || !session || redirected) {
     return <LoadingSpinner />
   }
 
