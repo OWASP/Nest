@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation } from '@apollo/client'
 import { addToast } from '@heroui/toast'
-import { useParams, useSearchParams } from 'next/navigation'
+import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
@@ -19,28 +19,37 @@ import LoadingSpinner from 'components/LoadingSpinner'
 const ProgramDetailsPage = () => {
   const { programKey } = useParams() as { programKey: string }
   const searchParams = useSearchParams()
+  const router = useRouter()
   const shouldRefresh = searchParams.get('refresh') === 'true'
 
   const { data: session } = useSession()
-  const [isLoading, setIsLoading] = useState(true)
-  const [program, setProgram] = useState<Program | null>(null)
-  const [modules, setModules] = useState<Module[]>([])
-
-  const { data, error, refetch } = useQuery(GET_PROGRAM_AND_MODULES, {
-    variables: { programKey },
-    skip: !programKey,
-    notifyOnNetworkStatusChange: true,
-  })
+  const username = (session as ExtendedSession)?.user?.login
 
   const [updateProgram] = useMutation(UPDATE_PROGRAM_STATUS_MUTATION, {
     onError: handleAppError,
   })
 
-  const username = (session as ExtendedSession)?.user?.login
+  const {
+    data,
+    refetch,
+    loading: isQueryLoading,
+  } = useQuery(GET_PROGRAM_AND_MODULES, {
+    variables: { programKey },
+    skip: !programKey,
+    notifyOnNetworkStatusChange: true,
+  })
+
+  const [program, setProgram] = useState<Program | null>(null)
+  const [modules, setModules] = useState<Module[]>([])
+  const [isRefetching, setIsRefetching] = useState(false)
+
+  const isLoading = isQueryLoading || isRefetching
+
   const isAdmin = useMemo(
     () => !!program?.admins?.some((admin) => admin.login === username),
     [program, username]
   )
+
   const canPublish = useMemo(
     () => isAdmin && program?.status?.toLowerCase() === ProgramStatusEnum.DRAFT,
     [isAdmin, program]
@@ -68,6 +77,7 @@ const ProgramDetailsPage = () => {
       },
       refetchQueries: [{ query: GET_PROGRAM_AND_MODULES, variables: { programKey } }],
     })
+
     addToast({
       title: 'Program Published',
       description: 'The program is now live and the page will refresh.',
@@ -78,25 +88,29 @@ const ProgramDetailsPage = () => {
   }
 
   useEffect(() => {
-    const doRefetch = async () => {
+    const processResult = async () => {
       if (shouldRefresh) {
-        await refetch()
+        setIsRefetching(true)
+        try {
+          await refetch()
+        } finally {
+          setIsRefetching(false)
+
+          const params = new URLSearchParams(searchParams.toString())
+          params.delete('refresh')
+          const cleaned = params.toString()
+          router.replace(cleaned ? `?${cleaned}` : window.location.pathname, { scroll: false })
+        }
       }
 
       if (data?.program) {
         setProgram(data.program)
         setModules(data.modulesByProgram || [])
-      } else if (error) {
-        handleAppError(error)
-      }
-
-      if (data || error) {
-        setIsLoading(false)
       }
     }
 
-    doRefetch()
-  }, [shouldRefresh, data, error, refetch])
+    processResult()
+  }, [shouldRefresh, data, refetch, router, searchParams])
 
   if (isLoading) return <LoadingSpinner />
 

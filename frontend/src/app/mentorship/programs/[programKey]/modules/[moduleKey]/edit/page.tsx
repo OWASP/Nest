@@ -90,6 +90,7 @@ const EditModulePage = () => {
     try {
       const input = {
         key: moduleKey,
+        programKey: programKey,
         name: formData.name,
         description: formData.description,
         experienceLevel: formData.experienceLevel,
@@ -111,7 +112,7 @@ const EditModulePage = () => {
         variant: 'solid',
         timeout: 3000,
       })
-      router.push(`/mentorship/programs/${programKey}`)
+      router.push(`/mentorship/programs/${programKey}?refresh=true`)
     } catch (err) {
       handleAppError(err)
     }

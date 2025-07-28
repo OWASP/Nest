@@ -55,13 +55,12 @@ const MyMentorshipPage: React.FC = () => {
     loading: loadingPrograms,
     error,
   } = useQuery(GET_MY_PROGRAMS, {
-    variables: { username, search: debouncedQuery, page, limit: 24 },
-    skip: !username,
+    variables: { search: debouncedQuery, page, limit: 24 },
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
   })
 
-  const { isLeader: isProjectLeader, loading: leaderLoading } = useProjectLeader(username)
+  const { isLeader: isProjectLeader, loading: leaderLoading } = useProjectLeader()
 
   useEffect(() => {
     if (programData?.myPrograms) {

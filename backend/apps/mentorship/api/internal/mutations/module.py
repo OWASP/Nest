@@ -124,7 +124,9 @@ class ModuleMutation:
         IsAuthenticated.require_github_user(user)
 
         try:
-            module = Module.objects.select_related("program").get(key=input_data.key)
+            module = Module.objects.select_related("program").get(
+                key=input_data.key, program__key=input_data.program_key
+            )
         except Module.DoesNotExist as e:
             msg = "Module not found."
             raise ObjectDoesNotExist(msg) from e

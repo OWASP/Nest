@@ -25,8 +25,8 @@ export const GET_MODULES_BY_PROGRAM = gql`
 `
 
 export const GET_MODULE_BY_ID = gql`
-  query GetModule($moduleKey: String!) {
-    getModule(moduleKey: $moduleKey) {
+  query GetModule($moduleKey: String!, $programKey: String!) {
+    getModule(moduleKey: $moduleKey, programKey: $programKey) {
       id
       key
       name
@@ -55,8 +55,9 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
         avatarUrl
       }
     }
-    getModule(moduleKey: $moduleKey) {
+    getModule(moduleKey: $moduleKey, programKey: $programKey) {
       id
+      key
       name
       description
       tags

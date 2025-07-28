@@ -19,6 +19,12 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
     class Meta:
         db_table = "mentorship_modules"
         verbose_name_plural = "Modules"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["program", "key"],
+                name="unique_module_key_in_program",
+            )
+        ]
 
     description = models.TextField(
         verbose_name="Description",

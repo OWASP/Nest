@@ -2,10 +2,8 @@ import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import { IS_PROJECT_LEADER_QUERY } from 'server/queries/mentorshipQueries'
 
-export const useProjectLeader = (username?: string) => {
+export const useProjectLeader = () => {
   const { data, loading, error } = useQuery(IS_PROJECT_LEADER_QUERY, {
-    variables: { username },
-    skip: !username,
     fetchPolicy: 'network-only',
     onError: () => {
       addToast({

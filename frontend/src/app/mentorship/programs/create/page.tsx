@@ -8,7 +8,6 @@ import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 
 import { CREATE_PROGRAM } from 'server/mutations/programsMutations'
-import { ExtendedSession } from 'types/auth'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/ProgramForm'
@@ -16,9 +15,8 @@ import ProgramForm from 'components/ProgramForm'
 const CreateProgramPage = () => {
   const router = useRouter()
   const { data: session, status } = useSession()
-  const username = (session as ExtendedSession)?.user?.login
 
-  const { isLeader: isProjectLeader, loading: leaderLoading } = useProjectLeader(username)
+  const { isLeader: isProjectLeader, loading: leaderLoading } = useProjectLeader()
 
   const [createProgram, { loading }] = useMutation(CREATE_PROGRAM)
 

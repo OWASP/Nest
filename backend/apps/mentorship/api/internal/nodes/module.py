@@ -58,6 +58,7 @@ class UpdateModuleInput:
     """Input for updating a mentorship module."""
 
     key: str
+    program_key: str
     name: str
     description: str
     domains: list[str] = strawberry.field(default_factory=list)

@@ -36,15 +36,15 @@ class ModuleQuery:
         )
 
     @strawberry.field
-    def get_module(self, module_key: str) -> ModuleNode:
-        """Get a single module by its key. Raises an error if not found."""
+    def get_module(self, module_key: str, program_key: str) -> ModuleNode:
+        """Get a single module by its key within a specific program."""
         try:
             return (
                 Module.objects.select_related("program", "project")
                 .prefetch_related("mentors__github_user")
-                .get(key=module_key)
+                .get(key=module_key, program__key=program_key)
             )
         except Module.DoesNotExist as err:
-            msg = f"Module with key '{module_key}' not found."
+            msg = f"Module with key '{module_key}' under program '{program_key}' not found."
             logger.warning(msg, exc_info=True)
             raise ObjectDoesNotExist(msg) from err
