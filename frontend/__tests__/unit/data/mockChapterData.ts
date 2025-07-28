@@ -1,5 +1,5 @@
 export const mockChapterData = {
-  active_chapters_count: 0,
+  activeChaptersCount: 0,
   chapters: [
     {
       createdAt: 1568320077,
@@ -13,7 +13,6 @@ export const mockChapterData = {
       topContributors: [
         {
           avatarUrl: 'https://avatars.githubusercontent.com/u/58754211?v=4',
-          contributionsCount: 286,
           login: 'Isanori-Sakanashi',
           name: 'Isanori Sakanashi',
         },

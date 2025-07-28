@@ -22,6 +22,8 @@ OWASP_PROJECT_THREAT_DRAGON_CHANNEL_ID = "#CURE8PQ68"
 OWASP_SPONSORSHIP_CHANNEL_ID = "#C08EGFDD9L2"
 OWASP_THREAT_MODELING_CHANNEL_ID = "#C1CS3C6AF"
 
+OWASP_WORKSPACE_ID = "T04T40NHX"
+
 VIEW_PROJECTS_ACTION = "view_projects_action"
 VIEW_PROJECTS_ACTION_NEXT = "view_projects_action_next"
 VIEW_PROJECTS_ACTION_PREV = "view_projects_action_prev"
@@ -39,7 +41,7 @@ VIEW_CONTRIBUTE_ACTION_NEXT = "view_contribute_action_next"
 VIEW_CONTRIBUTE_ACTION_PREV = "view_contribute_action_prev"
 
 
-FEEDBACK_CHANNEL_MESSAGE = (
+FEEDBACK_SHARING_INVITE = (
     f"💬 You can share feedback on your {NEST_BOT_NAME} experience "
     f"in the <{OWASP_PROJECT_NEST_CHANNEL_ID}|project-nest> channel.{NL}"
 )

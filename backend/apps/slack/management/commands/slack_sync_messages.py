@@ -4,6 +4,7 @@ import logging
 import time
 
 from django.core.management.base import BaseCommand
+from django.template.defaultfilters import pluralize
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
@@ -73,8 +74,8 @@ class Command(BaseCommand):
                     client=client,
                     conversation=conversation,
                     delay=delay,
-                    max_retries=max_retries,
                     include_replies=True,
+                    max_retries=max_retries,
                 )
 
         self.stdout.write(self.style.SUCCESS("\nFinished processing all workspaces"))
@@ -132,9 +133,11 @@ class Command(BaseCommand):
                     channel=conversation.slack_channel_id,
                     cursor=cursor,
                     limit=batch_size,
-                    oldest=latest_message.created_at.timestamp()
-                    if (latest_message := conversation.latest_message)
-                    else None,
+                    oldest=(
+                        latest_message.ts
+                        if (latest_message := conversation.latest_message)
+                        else "0"
+                    ),
                 )
                 self._handle_slack_response(response, "conversations_history")
 
@@ -177,14 +180,14 @@ class Command(BaseCommand):
                 break
 
             Message.bulk_save(messages.copy())
-            if include_replies:
+            if include_replies and messages:
+                print("Fetching message replies...")
                 for message in messages:
                     if not message.has_replies:
                         continue
 
                     self._fetch_replies(
                         client=client,
-                        conversation=conversation,
                         message=message,
                         delay=delay,
                         max_retries=max_retries,
@@ -193,7 +196,6 @@ class Command(BaseCommand):
     def _fetch_replies(
         self,
         client: WebClient,
-        conversation: Conversation,
         message: Message,
         delay: float,
         max_retries: int,
@@ -207,29 +209,29 @@ class Command(BaseCommand):
                 retry_count = 0
                 try:
                     params = {
-                        "channel": conversation.slack_channel_id,
+                        "channel": message.conversation.slack_channel_id,
                         "cursor": cursor,
                         "inclusive": False,
                         "limit": 1000,
-                        "oldest": latest_reply.created_at.timestamp()
-                        if (latest_reply := message.latest_reply)
-                        else 0,
+                        "oldest": (
+                            latest_reply.ts if (latest_reply := message.latest_reply) else "0"
+                        ),
                         "ts": message.slack_message_id,
                     }
                     response = client.conversations_replies(**params)
                     self._handle_slack_response(response, "conversations_replies")
 
-                    messages_in_response = response.get("messages", [])
-                    if not messages_in_response:
+                    messages = response.get("messages", [])
+                    if not messages:
                         break
 
-                    replies = [
+                    replies += [
                         reply
-                        for reply_data in messages_in_response
+                        for reply_data in messages
                         if (
                             reply := self._create_message(
                                 client=client,
-                                conversation=conversation,
+                                conversation=message.conversation,
                                 delay=delay,
                                 max_retries=max_retries,
                                 message_data=reply_data,
@@ -265,11 +267,16 @@ class Command(BaseCommand):
         except SlackApiError as e:
             self.stdout.write(
                 self.style.ERROR(
-                    f"Failed to fetch thread replies for message: {e.response['error']}"
+                    f"Failed to fetch thread replies for message {message.url}:"
+                    f" {e.response['error']}"
                 )
             )
 
-        Message.bulk_save(replies)
+        if replies_count := len(replies):
+            print(
+                f"Saving {replies_count} repl{pluralize(replies_count, 'y,ies')} for {message.url}"
+            )
+            Message.bulk_save(replies)
 
     def _create_message(
         self,

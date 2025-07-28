@@ -15,6 +15,8 @@ from apps.owasp.models.sponsor import Sponsor
 
 
 class GenericEntityAdminMixin:
+    """Mixin for generic entity admin."""
+
     def get_queryset(self, request):
         """Get queryset."""
         return super().get_queryset(request).prefetch_related("repositories")
@@ -49,7 +51,10 @@ class LeaderAdminMixin:
     """Admin mixin for entities that can have leaders."""
 
     actions = ("approve_suggested_leaders",)
-    filter_horizontal = ("suggested_leaders",)
+    filter_horizontal = (
+        "leaders",
+        "suggested_leaders",
+    )
 
     def approve_suggested_leaders(self, request, queryset):
         """Approve suggested leaders for selected entities."""
@@ -66,10 +71,10 @@ class LeaderAdminMixin:
 
 
 class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
-    autocomplete_fields = (
-        "leaders",
-        "owasp_repository",
-    )
+    """Admin for Chapter model."""
+
+    autocomplete_fields = ("owasp_repository",)
+    filter_horizontal = LeaderAdminMixin.filter_horizontal
     list_display = (
         "name",
         "created_at",
@@ -88,14 +93,19 @@ class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
 
 
 class CommitteeAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
+    """Admin for Committee model."""
+
     autocomplete_fields = (
         "leaders",
         "owasp_repository",
     )
+    filter_horizontal = LeaderAdminMixin.filter_horizontal
     search_fields = ("name",)
 
 
 class EventAdmin(admin.ModelAdmin):
+    """Admin for Event model."""
+
     list_display = (
         "name",
         "suggested_location",
@@ -121,13 +131,15 @@ class PostAdmin(admin.ModelAdmin):
 
 
 class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
+    """Admin for Project model."""
+
     autocomplete_fields = (
-        "leaders",
         "organizations",
         "owasp_repository",
         "owners",
         "repositories",
     )
+    filter_horizontal = LeaderAdminMixin.filter_horizontal
     list_display = (
         "custom_field_name",
         "created_at",
@@ -165,6 +177,8 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
 
 
 class ProjectHealthMetricsAdmin(admin.ModelAdmin):
+    """Admin for ProjectHealthMetrics model."""
+
     autocomplete_fields = ("project",)
     list_filter = (
         "project__level",
@@ -189,6 +203,8 @@ class ProjectHealthMetricsAdmin(admin.ModelAdmin):
 
 
 class SnapshotAdmin(admin.ModelAdmin):
+    """Admin for Snapshot model."""
+
     autocomplete_fields = (
         "new_chapters",
         "new_issues",
@@ -219,7 +235,7 @@ class SnapshotAdmin(admin.ModelAdmin):
 
 
 class SponsorAdmin(admin.ModelAdmin):
-    """Admin configuration for Sponsor model."""
+    """Admin for Sponsor model."""
 
     list_display = (
         "name",

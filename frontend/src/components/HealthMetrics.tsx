@@ -4,11 +4,10 @@ import {
   faCodeFork,
   faCodePullRequest,
   faStar,
-  faTag,
 } from '@fortawesome/free-solid-svg-icons'
 import React from 'react'
 import type { HealthMetricsProps } from 'types/healthMetrics'
-import GradientRadialChart from 'components/GradientRadialChart'
+import BarChart from 'components/BarChart'
 import LineChart from 'components/LineChart'
 
 const HealthMetrics: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
@@ -25,6 +24,7 @@ const HealthMetrics: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <LineChart
           title="Issues Trend"
+          round={true}
           series={[
             {
               name: 'Open Issues',
@@ -44,6 +44,7 @@ const HealthMetrics: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
         />
         <LineChart
           title="Pull Requests Trend"
+          round={true}
           series={[
             {
               name: 'Open Pull Requests',
@@ -57,6 +58,7 @@ const HealthMetrics: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <LineChart
           title="Stars Trend"
+          round={true}
           series={[
             {
               name: 'Stars',
@@ -68,6 +70,7 @@ const HealthMetrics: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
         />
         <LineChart
           title="Forks Trend"
+          round={true}
           series={[
             {
               name: 'Forks',
@@ -78,20 +81,17 @@ const HealthMetrics: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
           icon={faCodeFork}
         />
       </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <GradientRadialChart
-          title="Days Since Last Commit"
-          icon={faCodeCommit}
-          days={data[length - 1]?.lastCommitDays ?? 0}
-          requirement={data[length - 1]?.lastCommitDaysRequirement ?? 0}
-        />
-        <GradientRadialChart
-          title="Days Since Last Release"
-          icon={faTag}
-          days={data[length - 1]?.lastReleaseDays ?? 0}
-          requirement={data[length - 1]?.lastReleaseDaysRequirement ?? 0}
-        />
-      </div>
+
+      <BarChart
+        title="Days Since Last Commit and Release"
+        icon={faCodeCommit}
+        labels={['Days Since Last Commit', 'Days Since Last Release']}
+        days={[data[length - 1]?.lastCommitDays ?? 0, data[length - 1]?.lastReleaseDays ?? 0]}
+        requirements={[
+          data[length - 1]?.lastCommitDaysRequirement ?? 0,
+          data[length - 1]?.lastReleaseDaysRequirement ?? 0,
+        ]}
+      />
     </>
   )
 }

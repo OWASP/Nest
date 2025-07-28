@@ -11,7 +11,7 @@ from apps.slack.constants import (
 )
 
 project_issues_url = get_absolute_url("/contribute")
-projects_url = get_absolute_url("projects")
+projects_url = get_absolute_url("/projects")
 
 CONTRIBUTE_GENERAL_INFORMATION_BLOCKS = (
     markdown(

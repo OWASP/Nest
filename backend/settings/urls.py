@@ -7,14 +7,15 @@ The `urlpatterns` list routes URLs to views. For more information please see:
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 from django.views.decorators.csrf import csrf_protect
 from strawberry.django.views import GraphQLView
 
-from apps.core.api.algolia import algolia_search
-from apps.core.api.csrf import get_csrf_token
+from apps.core.api.internal.algolia import algolia_search
+from apps.core.api.internal.csrf import get_csrf_token
+from apps.core.api.internal.status import get_status
 from apps.slack.apps import SlackConfig
-from settings.api_v1 import api as api_v1
+from settings.api.v1 import api as api_v1
 from settings.graphql import schema
 
 urlpatterns = [
@@ -23,6 +24,8 @@ urlpatterns = [
     path("graphql/", csrf_protect(GraphQLView.as_view(schema=schema, graphiql=settings.DEBUG))),
     path("api/v1/", api_v1.urls),
     path("a/", admin.site.urls),
+    path("status/", get_status),
+    path("", include("apps.sitemap.urls")),
 ]
 
 if SlackConfig.app:

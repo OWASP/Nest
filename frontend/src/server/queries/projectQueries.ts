@@ -12,7 +12,7 @@ export const GET_PROJECT_DATA = gql`
       leaders
       level
       name
-      healthMetrics(limit: 30) {
+      healthMetricsList(limit: 30) {
         createdAt
         forksCount
         lastCommitDays
@@ -101,7 +101,6 @@ export const GET_PROJECT_DATA = gql`
     }
     topContributors(project: $key) {
       avatarUrl
-      contributionsCount
       login
       name
     }
@@ -132,7 +131,6 @@ export const GET_TOP_CONTRIBUTORS = gql`
   query GetTopContributors($excludedUsernames: [String!], $key: String!) {
     topContributors(excludedUsernames: $excludedUsernames, project: $key) {
       avatarUrl
-      contributionsCount
       login
       name
     }

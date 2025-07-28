@@ -37,14 +37,14 @@ extras = ["regex"]
 
 [[package]]
 name = "certifi"
-version = "2025.6.15"
+version = "2025.7.14"
 description = "Python package for providing Mozilla's CA Bundle."
 optional = false
 python-versions = ">=3.7"
 groups = ["main"]
 files = [
-    {file = "certifi-2025.6.15-py3-none-any.whl", hash = "sha256:2e0c7ce7cb5d8f8634ca55d2ba7e6ec2689a2fd6537d8dec1296a477a4910057"},
-    {file = "certifi-2025.6.15.tar.gz", hash = "sha256:d747aa5a8b9bbbb1bb8c22bb13e22bd1f18e9796defa16bab421f7f7a317323b"},
+    {file = "certifi-2025.7.14-py3-none-any.whl", hash = "sha256:6b31f564a415d79ee77df69d757bb49a5bb53bd9f756cbbe24394ffd6fc1f4b2"},
+    {file = "certifi-2025.7.14.tar.gz", hash = "sha256:8ea99dbdfaaf2ba2f9bac77b9249ef62ec5218e7c2b2e903378ed5fccf765995"},
 ]
 
 [[package]]
@@ -316,14 +316,14 @@ testing = ["coverage", "pyyaml"]
 
 [[package]]
 name = "markdown2"
-version = "2.5.3"
+version = "2.5.4"
 description = "A fast and complete Python implementation of Markdown"
 optional = false
 python-versions = "<4,>=3.9"
 groups = ["main"]
 files = [
-    {file = "markdown2-2.5.3-py3-none-any.whl", hash = "sha256:a8ebb7e84b8519c37bf7382b3db600f1798a22c245bfd754a1f87ca8d7ea63b3"},
-    {file = "markdown2-2.5.3.tar.gz", hash = "sha256:4d502953a4633408b0ab3ec503c5d6984d1b14307e32b325ec7d16ea57524895"},
+    {file = "markdown2-2.5.4-py3-none-any.whl", hash = "sha256:3c4b2934e677be7fec0e6f2de4410e116681f4ad50ec8e5ba7557be506d3f439"},
+    {file = "markdown2-2.5.4.tar.gz", hash = "sha256:a09873f0b3c23dbfae589b0080587df52ad75bb09a5fa6559147554736676889"},
 ]
 
 [package.extras]
@@ -502,14 +502,14 @@ pyyaml = ">=5.1"
 
 [[package]]
 name = "mkdocs-material"
-version = "9.6.14"
+version = "9.6.16"
 description = "Documentation that simply works"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "mkdocs_material-9.6.14-py3-none-any.whl", hash = "sha256:3b9cee6d3688551bf7a8e8f41afda97a3c39a12f0325436d76c86706114b721b"},
-    {file = "mkdocs_material-9.6.14.tar.gz", hash = "sha256:39d795e90dce6b531387c255bd07e866e027828b7346d3eba5ac3de265053754"},
+    {file = "mkdocs_material-9.6.16-py3-none-any.whl", hash = "sha256:8d1a1282b892fe1fdf77bfeb08c485ba3909dd743c9ba69a19a40f637c6ec18c"},
+    {file = "mkdocs_material-9.6.16.tar.gz", hash = "sha256:d07011df4a5c02ee0877496d9f1bfc986cfb93d964799b032dd99fe34c0e9d19"},
 ]
 
 [package.dependencies]
@@ -562,14 +562,14 @@ mkdocs = ">=1.4.1"
 
 [[package]]
 name = "mkdocstrings"
-version = "0.29.1"
+version = "0.30.0"
 description = "Automatic documentation from sources, for MkDocs."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "mkdocstrings-0.29.1-py3-none-any.whl", hash = "sha256:37a9736134934eea89cbd055a513d40a020d87dfcae9e3052c2a6b8cd4af09b6"},
-    {file = "mkdocstrings-0.29.1.tar.gz", hash = "sha256:8722f8f8c5cd75da56671e0a0c1bbed1df9946c0cef74794d6141b34011abd42"},
+    {file = "mkdocstrings-0.30.0-py3-none-any.whl", hash = "sha256:ae9e4a0d8c1789697ac776f2e034e2ddd71054ae1cf2c2bb1433ccfd07c226f2"},
+    {file = "mkdocstrings-0.30.0.tar.gz", hash = "sha256:5d8019b9c31ddacd780b6784ffcdd6f21c408f34c0bd1103b5351d609d5b4444"},
 ]
 
 [package.dependencies]
@@ -829,14 +829,14 @@ files = [
 
 [[package]]
 name = "typing-extensions"
-version = "4.14.0"
+version = "4.14.1"
 description = "Backported and Experimental Type Hints for Python 3.9+"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "typing_extensions-4.14.0-py3-none-any.whl", hash = "sha256:a1514509136dd0b477638fc68d6a91497af5076466ad0fa6c338e44e359944af"},
-    {file = "typing_extensions-4.14.0.tar.gz", hash = "sha256:8676b788e32f02ab42d9e7c61324048ae4c6d844a399eebace3d4979d75ceef4"},
+    {file = "typing_extensions-4.14.1-py3-none-any.whl", hash = "sha256:d1e1e3b58374dc93031d6eda2420a48ea44a36c2b4766a4fdeb3710755731d76"},
+    {file = "typing_extensions-4.14.1.tar.gz", hash = "sha256:38b39f4aeeab64884ce9f74c94263ef78f3c22467c8724005483154c26648d36"},
 ]
 
 [[package]]
@@ -919,4 +919,4 @@ watchmedo = ["PyYAML (>=3.10)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "0bd0001709e1ebf947fb6da98fc6b135f3a788bee7655c66e08fd687f0bc73f3"
+content-hash = "8342bcc2242b0c5e497dc60491aa65664f3dcb10e443df9ec60124c61a9489c3"

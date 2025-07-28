@@ -1,17 +1,13 @@
 """A command to create chunks of Slack messages."""
 
 import os
-import time
-from datetime import UTC, datetime, timedelta
 
 import openai
 from django.core.management.base import BaseCommand
 
+from apps.ai.common.utils import create_chunks_and_embeddings
 from apps.ai.models.chunk import Chunk
 from apps.slack.models.message import Message
-
-MIN_REQUEST_INTERVAL_SECONDS = 1.2
-DEFAULT_LAST_REQUEST_OFFSET_SECONDS = 2
 
 
 class Command(BaseCommand):
@@ -35,13 +31,13 @@ class Command(BaseCommand):
                 [
                     chunk
                     for message in Message.objects.all()[offset : offset + batch_size]
-                    for chunk in self.create_chunks(message)
+                    for chunk in self.handle_chunks(message)
                 ]
             )
 
         self.stdout.write(f"Completed processing all {total_messages} messages")
 
-    def create_chunks(self, message: Message) -> list[Chunk]:
+    def handle_chunks(self, message: Message) -> list[Chunk]:
         """Create chunks from a message."""
         if message.subtype in {"channel_join", "channel_leave"}:
             return []
@@ -53,40 +49,8 @@ class Command(BaseCommand):
             )
             return []
 
-        try:
-            time_since_last_request = datetime.now(UTC) - getattr(
-                self,
-                "last_request_time",
-                datetime.now(UTC) - timedelta(seconds=DEFAULT_LAST_REQUEST_OFFSET_SECONDS),
-            )
-
-            if time_since_last_request < timedelta(seconds=MIN_REQUEST_INTERVAL_SECONDS):
-                time.sleep(MIN_REQUEST_INTERVAL_SECONDS - time_since_last_request.total_seconds())
-
-            response = self.openai_client.embeddings.create(
-                input=chunk_text,
-                model="text-embedding-3-small",
-            )
-            self.last_request_time = datetime.now(UTC)
-
-            return [
-                chunk
-                for text, embedding in zip(
-                    chunk_text,
-                    [d.embedding for d in response.data],  # Embedding data from OpenAI response.
-                    strict=True,
-                )
-                if (
-                    chunk := Chunk.update_data(
-                        embedding=embedding,
-                        message=message,
-                        save=False,
-                        text=text,
-                    )
-                )
-            ]
-        except openai.OpenAIError as e:
-            self.stdout.write(
-                self.style.ERROR(f"OpenAI API error for message {message.slack_message_id}: {e}")
-            )
-            return []
+        return create_chunks_and_embeddings(
+            all_chunk_texts=chunk_text,
+            content_object=message,
+            openai_client=self.openai_client,
+        )

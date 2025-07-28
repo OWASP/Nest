@@ -1,5 +1,7 @@
 """A command to purge OWASP Nest data."""
 
+# ruff: noqa: SLF001 https://docs.astral.sh/ruff/rules/private-member-access/
+
 from django.apps import apps
 from django.core.management.base import BaseCommand
 from django.db import connection
@@ -10,7 +12,11 @@ class Command(BaseCommand):
 
     def handle(self, *_args, **options) -> None:
         """Purge data from specified OWASP Nest applications."""
-        nest_apps = ("github", "owasp")
+        nest_apps = (
+            "github",
+            "owasp",
+            "slack",
+        )
 
         with connection.cursor() as cursor:
             for nest_app in nest_apps:

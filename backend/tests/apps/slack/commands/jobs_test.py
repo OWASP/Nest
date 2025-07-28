@@ -5,7 +5,7 @@ from django.conf import settings
 
 from apps.common.constants import NL
 from apps.slack.commands.jobs import Jobs
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE, OWASP_JOBS_CHANNEL_ID
+from apps.slack.constants import FEEDBACK_SHARING_INVITE, OWASP_JOBS_CHANNEL_ID
 
 EXPECTED_BLOCK_COUNT_JOBS = 3
 
@@ -48,7 +48,7 @@ class TestJobsHandler:
             expected_block1_text = (
                 f"Please join <{OWASP_JOBS_CHANNEL_ID}> channel{NL}"
                 "This Slack channel shares community-driven job opportunities, networking, "
-                "and career advice in cybersecurity and related fields."
+                f"and career advice in cybersecurity and related fields.{NL}{NL}"
             )
             assert block1_text == expected_block1_text
 
@@ -56,4 +56,4 @@ class TestJobsHandler:
             assert "⚠️ *Disclaimer:" in block2_text
 
             block3_text = blocks[2]["text"]["text"]
-            assert FEEDBACK_CHANNEL_MESSAGE.strip() in block3_text
+            assert FEEDBACK_SHARING_INVITE.strip() in block3_text

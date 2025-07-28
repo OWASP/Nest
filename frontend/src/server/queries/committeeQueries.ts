@@ -18,7 +18,6 @@ export const GET_COMMITTEE_DATA = gql`
     }
     topContributors(committee: $key) {
       avatarUrl
-      contributionsCount
       login
       name
     }

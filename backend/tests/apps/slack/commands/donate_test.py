@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 from django.conf import settings
 
-from apps.common.constants import OWASP_WEBSITE_URL
+from apps.common.constants import NL, OWASP_URL
 from apps.slack.commands.donate import Donate
 
 EXPECTED_BLOCK_COUNT_DONATE = 3
@@ -42,15 +42,13 @@ class TestDonateHandler:
 
             description_text = blocks[0]["text"]["text"]
             assert "The OWASP Foundation" in description_text
-            assert (
-                f"https://{OWASP_WEBSITE_URL}/www-policy/operational/donations" in description_text
-            )
+            assert f"{OWASP_URL}/www-policy/operational/donations" in description_text
 
             assert blocks[1]["type"] == "divider"
 
             donate_link_text = blocks[2]["text"]["text"]
             expected_link_text = (
-                f"Please Visit <{OWASP_WEBSITE_URL}/donate/| OWASP Foundation> page to donate."
+                f"{NL}Please Visit <{OWASP_URL}/donate/|OWASP Foundation> page to donate."
             )
             assert donate_link_text == expected_link_text
 
@@ -68,11 +66,11 @@ class TestDonateHandler:
 
         assert blocks[0]["type"] == "section"
         assert blocks[0]["text"]["type"] == "mrkdwn"
-        assert "501(c)(3) nonprofit organization" in blocks[0]["text"]["text"]
+        assert "501(c)(3) non-profit organization" in blocks[0]["text"]["text"]
         assert "OWASP Donations Policy" in blocks[0]["text"]["text"]
 
         assert blocks[1]["type"] == "divider"
 
         assert blocks[2]["type"] == "section"
         assert blocks[2]["text"]["type"] == "mrkdwn"
-        assert f"{OWASP_WEBSITE_URL}/donate/" in blocks[2]["text"]["text"]
+        assert f"{OWASP_URL}/donate/" in blocks[2]["text"]["text"]

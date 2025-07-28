@@ -7,11 +7,7 @@ from apps.slack.commands.command import CommandBase
 class Community(CommandBase):
     """Slack bot /community command."""
 
-    def get_template_file_name(self):
-        """Get the template file name."""
-        return "commands/navigate.jinja"
-
-    def get_template_context(self, command: dict):
+    def get_context(self, command: dict):
         """Get the template context.
 
         Args:
@@ -22,7 +18,7 @@ class Community(CommandBase):
 
         """
         return {
-            **super().get_template_context(command),
-            "name": "OWASP community",
-            "url": get_absolute_url("members"),
+            **super().get_context(command),
+            "COMMUNITY_PAGE_NAME": "OWASP community",
+            "COMMUNITY_PAGE_URL": get_absolute_url("/members"),
         }

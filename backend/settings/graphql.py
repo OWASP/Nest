@@ -2,17 +2,19 @@
 
 import strawberry
 
-from apps.github.graphql.queries import GithubQuery
-from apps.nest.graphql.mutations.user import UserMutations
-from apps.owasp.graphql.queries import OwaspQuery
+from apps.github.api.internal.queries import GithubQuery
+from apps.nest.api.internal.mutations import NestMutations
+from apps.nest.api.internal.queries import NestQuery
+from apps.owasp.api.internal.queries import OwaspQuery
 
 
-class Mutation(UserMutations):
+@strawberry.type
+class Mutation(NestMutations):
     """Schema mutations."""
 
 
 @strawberry.type
-class Query(GithubQuery, OwaspQuery):
+class Query(GithubQuery, NestQuery, OwaspQuery):
     """Schema queries."""
 
 

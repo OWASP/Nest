@@ -2,7 +2,7 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import dynamic from 'next/dynamic'
 import { useTheme } from 'next-themes'
 import React from 'react'
-import type { ApexChartLabelSeries } from 'types/healthMetrics'
+import type { ApexLineChartSeries } from 'types/healthMetrics'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
 // Importing Chart dynamically to avoid SSR issues with ApexCharts
@@ -12,12 +12,13 @@ const Chart = dynamic(() => import('react-apexcharts'), {
 
 const LineChart: React.FC<{
   title: string
-  series: ApexChartLabelSeries[]
+  series: ApexLineChartSeries[]
   labels?: string[]
   icon?: IconProp
-}> = ({ title, series, labels, icon }) => {
+  round?: boolean
+}> = ({ title, series, labels, icon, round }) => {
   const { theme } = useTheme()
-  const color = theme === 'dark' ? '#ececec' : '#1E1E2C'
+  const color = theme === 'dark' ? '#ECECEC' : '#1E1E2C'
 
   return (
     <SecondaryCard title={<AnchorTitle title={title} />} icon={icon}>
@@ -40,7 +41,10 @@ const LineChart: React.FC<{
           yaxis: {
             labels: {
               formatter: (value: number) => {
-                return value >= 1000 ? `${(value / 1000).toFixed(1)}K` : `${value.toFixed(0)}`
+                if (value >= 1000) {
+                  return `${(value / 1000).toFixed(1)}K`
+                }
+                return `${value.toFixed(round ? 0 : 2)}`
               },
             },
           },

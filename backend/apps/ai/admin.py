@@ -6,15 +6,14 @@ from apps.ai.models.chunk import Chunk
 
 
 class ChunkAdmin(admin.ModelAdmin):
+    """Admin for Chunk model."""
+
     list_display = (
         "id",
-        "message",
         "text",
+        "content_type",
     )
-    search_fields = (
-        "message__slack_message_id",
-        "text",
-    )
+    search_fields = ("text", "object_id")
 
 
 admin.site.register(Chunk, ChunkAdmin)

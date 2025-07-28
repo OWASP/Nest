@@ -84,6 +84,20 @@ class Message(TimestampedModel):
         """Get the text of the message."""
         return self.raw_data.get("text", "")
 
+    @property
+    def ts(self) -> str:
+        """Get the message timestamp."""
+        return self.raw_data["ts"]
+
+    @property
+    def url(self):
+        """Return message URL."""
+        return (
+            f"https://{self.conversation.workspace.name.lower()}.slack.com/archives/"
+            f"{self.conversation.slack_channel_id}/"
+            f"p{self.slack_message_id.replace('.', '')}"
+        )
+
     def from_slack(
         self,
         message_data: dict,

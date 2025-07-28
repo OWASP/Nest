@@ -19,8 +19,12 @@ __pycache__
 .vscode
 venv/
 *.code-workspace
+*.key
 *.log
+*.pdf
+*.pem
 backend/.venv
+backend/data/backup*
 backend/staticfiles
 cspell/node_modules
 frontend/blob-report/

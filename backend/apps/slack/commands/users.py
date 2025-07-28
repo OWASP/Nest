@@ -8,7 +8,7 @@ from apps.slack.common.presentation import EntityPresentation
 class Users(CommandBase):
     """Slack bot /users command."""
 
-    def get_render_blocks(self, command: dict):
+    def render_blocks(self, command: dict):
         """Get the rendered blocks."""
         return get_blocks(
             search_query=command["text"].strip(),

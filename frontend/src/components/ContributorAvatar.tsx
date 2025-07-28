@@ -10,12 +10,7 @@ type ContributorProps = {
 }
 
 const isAlgoliaContributor = (contributor: Contributor): contributor is Contributor => {
-  return (
-    typeof contributor === 'object' &&
-    contributor !== null &&
-    'avatar_url' in contributor &&
-    'contributions_count' in contributor
-  )
+  return typeof contributor === 'object' && contributor !== null && 'avatarUrl' in contributor
 }
 
 const ContributorAvatar = memo(({ contributor, uniqueKey }: ContributorProps) => {
@@ -35,10 +30,14 @@ const ContributorAvatar = memo(({ contributor, uniqueKey }: ContributorProps) =>
       ? ` in ${(contributor as Contributor).projectName}`
       : ''
 
+  const tooltipContent = contributionsCount
+    ? `${contributionsCount} contributions${repositoryInfo} by ${displayName}`
+    : `${displayName}${repositoryInfo}`
+
   return (
     <Tooltip
       id={`avatar-tooltip-${login}-${uniqueKey}`}
-      content={`${contributionsCount} contributions${repositoryInfo} by ${displayName}`}
+      content={tooltipContent}
       delay={100}
       closeDelay={100}
       showArrow

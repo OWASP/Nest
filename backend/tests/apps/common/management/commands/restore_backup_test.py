@@ -9,8 +9,8 @@ from apps.common.management.commands.restore_backup import Command
 
 
 class TestRestoreBackupCommand:
-    @patch("apps.common.management.commands.restore_backup.unregister_indexes")
-    @patch("apps.common.management.commands.restore_backup.register_indexes")
+    @patch("apps.core.utils.index.DisableIndexing.unregister_indexes")
+    @patch("apps.core.utils.index.DisableIndexing.register_indexes")
     @patch("apps.common.management.commands.restore_backup.call_command")
     @patch("apps.common.management.commands.restore_backup.transaction.atomic")
     def test_handle_success(
@@ -38,8 +38,8 @@ class TestRestoreBackupCommand:
         mock_atomic.return_value.__enter__.assert_called_once()
         mock_atomic.return_value.__exit__.assert_called_once()
 
-    @patch("apps.common.management.commands.restore_backup.unregister_indexes")
-    @patch("apps.common.management.commands.restore_backup.register_indexes")
+    @patch("apps.core.utils.index.DisableIndexing.unregister_indexes")
+    @patch("apps.core.utils.index.DisableIndexing.register_indexes")
     @patch("apps.common.management.commands.restore_backup.call_command")
     @patch("apps.common.management.commands.restore_backup.transaction.atomic")
     def test_handle_with_exception_during_loaddata(
@@ -61,14 +61,13 @@ class TestRestoreBackupCommand:
             command.handle()
 
         mock_unregister.assert_called_once()
+        mock_register.assert_called_once()
 
         mock_atomic.return_value.__enter__.assert_called_once()
         mock_atomic.return_value.__exit__.assert_called_once()
 
-        mock_register.assert_called_once()
-
-    @patch("apps.common.management.commands.restore_backup.unregister_indexes")
-    @patch("apps.common.management.commands.restore_backup.register_indexes")
+    @patch("apps.core.utils.index.DisableIndexing.unregister_indexes")
+    @patch("apps.core.utils.index.DisableIndexing.register_indexes")
     @patch("apps.common.management.commands.restore_backup.call_command")
     @patch("apps.common.management.commands.restore_backup.transaction.atomic")
     def test_handle_with_exception_during_unregister_indexing(
@@ -78,9 +77,8 @@ class TestRestoreBackupCommand:
         mock_register,
         mock_unregister,
     ):
-        """Test behavior when unregister_indexes fails."""
-        mock_unregister.side_effect = Exception("Unregister indexing failed")
-        mock_register.return_value = None
+        """Test behavior when call_command fails."""
+        mock_call_command.side_effect = Exception("Call command failed")
 
         command = Command()
         with suppress(Exception):
@@ -88,12 +86,12 @@ class TestRestoreBackupCommand:
 
         mock_unregister.assert_called_once()
 
-        mock_atomic.assert_not_called()
-        mock_call_command.assert_not_called()
-        mock_register.assert_not_called()
+        mock_atomic.assert_called_once()
+        mock_call_command.assert_called_once_with("loaddata", "data/backup.json.gz", "-v", "3")
+        mock_register.assert_called_once()
 
-    @patch("apps.common.management.commands.restore_backup.unregister_indexes")
-    @patch("apps.common.management.commands.restore_backup.register_indexes")
+    @patch("apps.core.utils.index.DisableIndexing.unregister_indexes")
+    @patch("apps.core.utils.index.DisableIndexing.register_indexes")
     @patch("apps.common.management.commands.restore_backup.call_command")
     @patch("apps.common.management.commands.restore_backup.transaction.atomic")
     def test_handle_with_exception_during_register_indexing(
@@ -106,9 +104,7 @@ class TestRestoreBackupCommand:
         """Test behavior when register_indexes fails."""
         mock_atomic.return_value.__enter__ = MagicMock()
         mock_atomic.return_value.__exit__ = MagicMock()
-        mock_unregister.return_value = None
-        mock_register.side_effect = Exception("Register indexing failed")
-        mock_call_command.return_value = None
+        mock_call_command.side_effect = Exception("Register indexing failed")
 
         command = Command()
         with suppress(Exception):
