@@ -17,7 +17,6 @@ import type { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/credentials'
 import { getSocialIcon } from 'utils/urlIconMappings'
-import ActionButton from 'components/ActionButton'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import HealthMetrics from 'components/HealthMetrics'
@@ -26,6 +25,7 @@ import LeadersList from 'components/LeadersList'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import Milestones from 'components/Milestones'
 import ModuleCard from 'components/ModuleCard'
+import ProgramActions from 'components/ProgramActions'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
@@ -78,19 +78,7 @@ const DetailsCard = ({
             {type === 'program' &&
               admins?.some(
                 (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
-              ) && (
-                <div className="flex gap-2">
-                  <ActionButton
-                    children=" Add Module"
-                    onClick={() => {
-                      router.push(`${window.location.pathname}/modules/create`)
-                    }}
-                  />
-                  {isDraft && (
-                    <ActionButton children="Publish" onClick={() => setPublish && setPublish()} />
-                  )}
-                </div>
-              )}
+              ) && <ProgramActions isDraft={isDraft} setPublish={setPublish} />}
 
             {type === 'module' &&
               admins?.some(

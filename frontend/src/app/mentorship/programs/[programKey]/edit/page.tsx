@@ -33,7 +33,6 @@ const EditProgramPage = () => {
     menteesLimit: 5,
     startedAt: '',
     endedAt: '',
-    experienceLevels: [] as string[],
     tags: '',
     domains: '',
     adminLogins: '',
@@ -76,7 +75,6 @@ const EditProgramPage = () => {
         menteesLimit: program.menteesLimit ?? 5,
         startedAt: formatDateForInput(program.startedAt),
         endedAt: formatDateForInput(program.endedAt),
-        experienceLevels: program.experienceLevels || [],
         tags: (program.tags || []).join(', '),
         domains: (program.domains || []).join(', '),
         adminLogins: (program.admins || [])
@@ -98,7 +96,6 @@ const EditProgramPage = () => {
         menteesLimit: Number(formData.menteesLimit),
         startedAt: formData.startedAt,
         endedAt: formData.endedAt,
-        experienceLevels: formData.experienceLevels,
         tags: parseCommaSeparated(formData.tags),
         domains: parseCommaSeparated(formData.domains),
         adminLogins: parseCommaSeparated(formData.adminLogins),
@@ -115,7 +112,7 @@ const EditProgramPage = () => {
         timeout: 3000,
       })
 
-      router.push(`/mentorship/programs`)
+      router.push(`/mentorship/programs/${programKey}?refresh=true`)
     } catch (err) {
       addToast({
         title: 'Update Failed',
@@ -148,6 +145,7 @@ const EditProgramPage = () => {
       title="Edit Program"
       submitText="Save Changes"
       isEdit={true}
+      type="edit"
     />
   )
 }

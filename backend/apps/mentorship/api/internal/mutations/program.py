@@ -7,6 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, Validat
 from django.db import transaction
 
 from apps.mentorship.api.internal.mutations.module import resolve_mentors_from_logins
+from apps.mentorship.api.internal.nodes.enum import ProgramStatusEnum
 from apps.mentorship.api.internal.nodes.program import (
     CreateProgramInput,
     ProgramNode,
@@ -49,13 +50,12 @@ class ProgramMutation:
         program = Program.objects.create(
             name=input_data.name,
             description=input_data.description,
-            experience_levels=[lvl.value for lvl in input_data.experience_levels],
             mentees_limit=input_data.mentees_limit,
             started_at=input_data.started_at,
             ended_at=input_data.ended_at,
             domains=input_data.domains,
             tags=input_data.tags,
-            status=input_data.status.value,
+            status=ProgramStatusEnum.DRAFT.value,
         )
 
         program.admins.set([mentor])
@@ -125,9 +125,6 @@ class ProgramMutation:
         for field, value in field_mapping.items():
             if value is not None:
                 setattr(program, field, value)
-
-        if input_data.experience_levels is not None:
-            program.experience_levels = [lvl.value for lvl in input_data.experience_levels]
 
         if input_data.status is not None:
             program.status = input_data.status.value

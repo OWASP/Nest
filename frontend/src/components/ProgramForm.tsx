@@ -9,11 +9,10 @@ interface ProgramFormProps {
     menteesLimit: number
     startedAt: string
     endedAt: string
-    experienceLevels: string[]
     tags: string
     domains: string
     adminLogins?: string
-    status: string
+    status?: string
   }
   setFormData: React.Dispatch<
     React.SetStateAction<{
@@ -22,11 +21,10 @@ interface ProgramFormProps {
       menteesLimit: number
       startedAt: string
       endedAt: string
-      experienceLevels: string[]
       tags: string
       domains: string
       adminLogins?: string
-      status: string
+      status?: string
     }>
   >
   onSubmit: (e: React.FormEvent) => void
@@ -34,14 +32,8 @@ interface ProgramFormProps {
   title: string
   submitText?: string
   isEdit?: boolean
+  type?: 'create' | 'edit'
 }
-
-const EXPERIENCE_LEVELS = [
-  { key: 'BEGINNER', label: 'Beginner' },
-  { key: 'INTERMEDIATE', label: 'Intermediate' },
-  { key: 'ADVANCED', label: 'Advanced' },
-  { key: 'EXPERT', label: 'Expert' },
-]
 
 const STATUS_OPTIONS = [
   { key: 'DRAFT', label: 'Draft' },
@@ -56,6 +48,7 @@ const ProgramForm = ({
   loading,
   title,
   isEdit,
+  type,
   submitText = 'Save',
 }: ProgramFormProps) => {
   const handleInputChange = (
@@ -63,15 +56,6 @@ const ProgramForm = ({
   ) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleExperienceLevelChange = (level: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      experienceLevels: prev.experienceLevels.includes(level)
-        ? prev.experienceLevels.filter((l) => l !== level)
-        : [...prev.experienceLevels, level],
-    }))
   }
 
   return (
@@ -171,46 +155,29 @@ const ProgramForm = ({
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div>
-                  <label htmlFor="program-status" className="mb-2 block text-sm font-medium">
-                    Program Status
-                  </label>
-                  <select
-                    id="program-status"
-                    name="status"
-                    value={formData.status}
-                    onChange={handleInputChange}
-                    disabled={!isEdit}
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-200 disabled:opacity-60 dark:bg-gray-800 dark:text-gray-200 dark:disabled:bg-gray-700"
-                  >
-                    {STATUS_OPTIONS.map((opt) => (
-                      <option key={opt.key} value={opt.key}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <fieldset>
-                    <legend className="mb-3 block text-sm font-medium">Experience Levels</legend>
-                    <div className="grid grid-cols-2 gap-3">
-                      {EXPERIENCE_LEVELS.map((level) => (
-                        <label key={level.key} className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            checked={formData.experienceLevels.includes(level.key)}
-                            onChange={() => handleExperienceLevelChange(level.key)}
-                            className="h-4 w-4"
-                          />
-                          <span>{level.label}</span>
-                        </label>
+              {type === 'edit' && (
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label htmlFor="program-status" className="mb-2 block text-sm font-medium">
+                      Program Status
+                    </label>
+                    <select
+                      id="program-status"
+                      name="status"
+                      value={formData.status}
+                      onChange={handleInputChange}
+                      disabled={!isEdit}
+                      className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-200 disabled:opacity-60 dark:bg-gray-800 dark:text-gray-200 dark:disabled:bg-gray-700"
+                    >
+                      {STATUS_OPTIONS.map((opt) => (
+                        <option key={opt.key} value={opt.key}>
+                          {opt.label}
+                        </option>
                       ))}
-                    </div>
-                  </fieldset>
+                    </select>
+                  </div>
                 </div>
-              </div>
+              )}
             </section>
 
             {/* Additional Details */}

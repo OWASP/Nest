@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation } from '@apollo/client'
 import { addToast } from '@heroui/toast'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
@@ -18,20 +18,22 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProgramDetailsPage = () => {
   const { programKey } = useParams() as { programKey: string }
+  const searchParams = useSearchParams()
+  const shouldRefresh = searchParams.get('refresh') === 'true'
+
   const { data: session } = useSession()
   const [isLoading, setIsLoading] = useState(true)
   const [program, setProgram] = useState<Program | null>(null)
   const [modules, setModules] = useState<Module[]>([])
 
-  const { data, error } = useQuery(GET_PROGRAM_AND_MODULES, {
+  const { data, error, refetch } = useQuery(GET_PROGRAM_AND_MODULES, {
     variables: { programKey },
     skip: !programKey,
+    notifyOnNetworkStatusChange: true,
   })
 
   const [updateProgram] = useMutation(UPDATE_PROGRAM_STATUS_MUTATION, {
-    onError: (error) => {
-      handleAppError(error)
-    },
+    onError: handleAppError,
   })
 
   const username = (session as ExtendedSession)?.user?.login
@@ -56,14 +58,6 @@ const ProgramDetailsPage = () => {
       return
     }
 
-    addToast({
-      title: 'Program Published',
-      description: 'The program is now live and the page will refresh.',
-      variant: 'solid',
-      color: 'success',
-      timeout: 3000,
-    })
-
     await updateProgram({
       variables: {
         inputData: {
@@ -74,20 +68,35 @@ const ProgramDetailsPage = () => {
       },
       refetchQueries: [{ query: GET_PROGRAM_AND_MODULES, variables: { programKey } }],
     })
+    addToast({
+      title: 'Program Published',
+      description: 'The program is now live and the page will refresh.',
+      variant: 'solid',
+      color: 'success',
+      timeout: 3000,
+    })
   }
 
   useEffect(() => {
-    if (data?.program) {
-      setProgram(data.program)
-      setModules(data.modulesByProgram || [])
-    } else if (error) {
-      handleAppError(error)
+    const doRefetch = async () => {
+      if (shouldRefresh) {
+        await refetch()
+      }
+
+      if (data?.program) {
+        setProgram(data.program)
+        setModules(data.modulesByProgram || [])
+      } else if (error) {
+        handleAppError(error)
+      }
+
+      if (data || error) {
+        setIsLoading(false)
+      }
     }
 
-    if (data || error) {
-      setIsLoading(false)
-    }
-  }, [data, error])
+    doRefetch()
+  }, [shouldRefresh, data, error, refetch])
 
   if (isLoading) return <LoadingSpinner />
 

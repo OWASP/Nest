@@ -37,15 +37,15 @@ describe('CreateModulePage', () => {
 
   beforeEach(() => {
     jest.useFakeTimers()
-    ;(useRouter as jest.Mock).mockReturnValue({ push: mockPush, replace: mockReplace })
-    ;(useParams as jest.Mock).mockReturnValue({ programKey: 'test-program' })
-    ;(useApolloClient as jest.Mock).mockReturnValue({
-      query: jest.fn().mockResolvedValue({
-        data: {
-          searchProjects: [{ id: '123', name: 'Awesome Project' }],
-        },
-      }),
-    })
+      ; (useRouter as jest.Mock).mockReturnValue({ push: mockPush, replace: mockReplace })
+      ; (useParams as jest.Mock).mockReturnValue({ programKey: 'test-program' })
+      ; (useApolloClient as jest.Mock).mockReturnValue({
+        query: jest.fn().mockResolvedValue({
+          data: {
+            searchProjects: [{ id: '123', name: 'Awesome Project' }],
+          },
+        }),
+      })
   })
 
   afterEach(() => {
@@ -55,22 +55,22 @@ describe('CreateModulePage', () => {
   })
 
   it('submits the form and navigates to programs page', async () => {
-    ;(useSession as jest.Mock).mockReturnValue({
+    ; (useSession as jest.Mock).mockReturnValue({
       data: { user: { login: 'admin-user' } },
       status: 'authenticated',
     })
-    ;(useQuery as jest.Mock).mockReturnValue({
-      data: {
-        program: {
-          admins: [{ login: 'admin-user' }],
+      ; (useQuery as jest.Mock).mockReturnValue({
+        data: {
+          program: {
+            admins: [{ login: 'admin-user' }],
+          },
         },
-      },
-      loading: false,
-    })
-    ;(useMutation as jest.Mock).mockReturnValue([
-      mockCreateModule.mockResolvedValue({}),
-      { loading: false },
-    ])
+        loading: false,
+      })
+      ; (useMutation as jest.Mock).mockReturnValue([
+        mockCreateModule.mockResolvedValue({}),
+        { loading: false },
+      ])
 
     render(<CreateModulePage />)
 
@@ -115,7 +115,7 @@ describe('CreateModulePage', () => {
 
     await waitFor(() => {
       expect(mockCreateModule).toHaveBeenCalled()
-      expect(mockPush).toHaveBeenCalledWith('/mentorship/programs/test-program')
+      expect(mockPush).toHaveBeenCalledWith('/mentorship/programs/test-program?refresh=true')
     })
   })
 })

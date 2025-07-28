@@ -20,6 +20,7 @@ export type CardProps = {
   level?: Level
   projectLink?: string
   projectName?: string
+  modules?: string[]
   social?: { title: string; icon: string; url: string }[]
   summary: string
   title: string

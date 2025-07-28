@@ -49,9 +49,11 @@ def _validate_module_dates(started_at, ended_at, program_started_at, program_end
     if ended_at <= started_at:
         msg = "End date must be after start date."
         raise ValidationError(message=msg)
+
     if started_at < program_started_at:
         msg = "Module start date cannot be before program start date."
         raise ValidationError(message=msg)
+
     if ended_at > program_ended_at:
         msg = "Module end date cannot be after program end date."
         raise ValidationError(message=msg)
@@ -104,6 +106,10 @@ class ModuleMutation:
             project=project,
         )
 
+        if module.experience_level not in program.experience_levels:
+            program.experience_levels.append(module.experience_level)
+            program.save(update_fields=["experience_levels"])
+
         mentors_to_set = resolve_mentors_from_logins(input_data.mentor_logins or [])
         mentors_to_set.add(creator_as_mentor)
         module.mentors.set(list(mentors_to_set))
@@ -150,6 +156,8 @@ class ModuleMutation:
             module.program.ended_at,
         )
 
+        old_experience_level = module.experience_level
+
         field_mapping = {
             "name": input_data.name,
             "description": input_data.description,
@@ -175,5 +183,22 @@ class ModuleMutation:
             module.mentors.set(mentors_to_set)
 
         module.save()
+
+        if module.experience_level not in module.program.experience_levels:
+            module.program.experience_levels.append(module.experience_level)
+
+        # Remove old experience level if no other module is using it
+        if (
+            old_experience_level != module.experience_level
+            and old_experience_level in module.program.experience_levels
+            and not Module.objects.filter(
+                program=module.program, experience_level=old_experience_level
+            )
+            .exclude(id=module.id)
+            .exists()
+        ):
+            module.program.experience_levels.remove(old_experience_level)
+
+        module.program.save(update_fields=["experience_levels"])
 
         return module

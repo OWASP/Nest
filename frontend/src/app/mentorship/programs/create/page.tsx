@@ -2,12 +2,13 @@
 
 import { useMutation } from '@apollo/client'
 import { addToast } from '@heroui/toast'
-import { useUserRoles } from 'hooks/useUserRoles'
+import { useIsProjectLeader } from 'hooks/useProjectLeader'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 
 import { CREATE_PROGRAM } from 'server/mutations/programsMutations'
+import { ExtendedSession } from 'types/auth'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/ProgramForm'
@@ -15,7 +16,10 @@ import ProgramForm from 'components/ProgramForm'
 const CreateProgramPage = () => {
   const router = useRouter()
   const { data: session, status } = useSession()
-  const { roles, isLoadingRoles } = useUserRoles()
+  const username = (session as ExtendedSession)?.user?.login
+
+  const { isLeader: isProjectLeader, loading: leaderLoading } = useIsProjectLeader(username)
+
   const [createProgram, { loading }] = useMutation(CREATE_PROGRAM)
 
   const [formData, setFormData] = useState({
@@ -24,20 +28,17 @@ const CreateProgramPage = () => {
     menteesLimit: 5,
     startedAt: '',
     endedAt: '',
-    experienceLevels: [] as string[],
     tags: '',
     domains: '',
-    status: 'DRAFT',
   })
 
   useEffect(() => {
-    if (status === 'loading' || isLoadingRoles) return
+    if (status === 'loading' || leaderLoading) return
 
-    const isMentor = roles.includes('mentor')
-    if (!session || !isMentor) {
+    if (!session || !isProjectLeader) {
       addToast({
         title: 'Access Denied',
-        description: 'You must be a mentor to create a program.',
+        description: 'You must be project leader to create a program.',
         color: 'danger',
         variant: 'solid',
         timeout: 3000,
@@ -45,7 +46,7 @@ const CreateProgramPage = () => {
       })
       router.push('/mentorship/programs')
     }
-  }, [session, status, roles, isLoadingRoles, router])
+  }, [session, status, leaderLoading, router, isProjectLeader])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -57,10 +58,8 @@ const CreateProgramPage = () => {
         menteesLimit: Number(formData.menteesLimit),
         startedAt: formData.startedAt,
         endedAt: formData.endedAt,
-        experienceLevels: formData.experienceLevels,
         tags: parseCommaSeparated(formData.tags),
         domains: parseCommaSeparated(formData.domains),
-        status: formData.status,
       }
 
       await createProgram({ variables: { input } })
@@ -74,7 +73,7 @@ const CreateProgramPage = () => {
         variant: 'solid',
       })
 
-      router.push('/mentorship/programs')
+      router.push('/my/mentorship')
     } catch (err) {
       addToast({
         description: err?.message || 'Unable to complete the requested operation.',
@@ -87,7 +86,7 @@ const CreateProgramPage = () => {
     }
   }
 
-  if (status === 'loading' || isLoadingRoles || !session) {
+  if (status === 'loading' || !session) {
     return <LoadingSpinner />
   }
 

@@ -103,7 +103,7 @@ const CreateModulePage = () => {
         timeout: 3000,
       })
 
-      router.push(`/mentorship/programs/${programKey}`)
+      router.push(`/mentorship/programs/${programKey}?refresh=true`)
     } catch (err) {
       addToast({
         title: 'Creation Failed',

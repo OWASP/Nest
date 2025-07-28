@@ -82,23 +82,30 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
         {/* Desktop Header Links */}
         <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium md:block">
           <div className="flex justify-start pl-6">
-            {headerLinks.map((link, i) => {
-              return link.submenu ? (
-                <NavDropdown link={link} pathname={pathname} key={i} />
-              ) : (
-                <Link
-                  key={link.text}
-                  href={link.href || '/'}
-                  className={cn(
-                    'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
-                    pathname === link.href && 'font-bold text-blue-800 dark:text-white'
-                  )}
-                  aria-current="page"
-                >
-                  {link.text}
-                </Link>
-              )
-            })}
+            {headerLinks
+              .filter((link) => {
+                if (link.requiresGitHubAuth) {
+                  return isGitHubAuthEnabled
+                }
+                return true
+              })
+              .map((link, i) => {
+                return link.submenu ? (
+                  <NavDropdown link={link} pathname={pathname} key={i} />
+                ) : (
+                  <Link
+                    key={link.text}
+                    href={link.href || '/'}
+                    className={cn(
+                      'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                      pathname === link.href && 'font-bold text-blue-800 dark:text-white'
+                    )}
+                    aria-current="page"
+                  >
+                    {link.text}
+                  </Link>
+                )
+              })}
           </div>
         </div>
         <div className="flex items-center justify-normal space-x-4">

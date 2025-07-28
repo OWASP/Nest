@@ -19,15 +19,19 @@ export const GET_PROGRAM_DATA = gql`
 `
 
 export const GET_MY_PROGRAMS = gql`
-  query GetMyPrograms($username: String!, $search: String) {
-    myPrograms(username: $username, search: $search) {
-      id
-      key
-      name
-      description
-      startedAt
-      endedAt
-      userRole
+  query GetMyPrograms($username: String!, $search: String, $page: Int, $limit: Int) {
+    myPrograms(username: $username, search: $search, page: $page, limit: $limit) {
+      currentPage
+      totalPages
+      programs {
+        id
+        key
+        name
+        description
+        startedAt
+        endedAt
+        userRole
+      }
     }
   }
 `

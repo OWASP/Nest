@@ -34,6 +34,15 @@ class ProgramNode:
         return self.admins.all()
 
 
+@strawberry.type
+class PaginatedPrograms:
+    """A paginated list of mentorship programs."""
+
+    current_page: int
+    programs: list[ProgramNode]
+    total_pages: int
+
+
 @strawberry.input
 class CreateProgramInput:
     """Input Node for creating a mentorship program."""
@@ -42,10 +51,8 @@ class CreateProgramInput:
     description: str
     domains: list[str] = strawberry.field(default_factory=list)
     ended_at: datetime
-    experience_levels: list[ExperienceLevelEnum] = strawberry.field(default_factory=list)
     mentees_limit: int
     started_at: datetime
-    status: ProgramStatusEnum
     tags: list[str] = strawberry.field(default_factory=list)
 
 
@@ -59,7 +66,6 @@ class UpdateProgramInput:
     admin_logins: list[str] | None = None
     domains: list[str] | None = None
     ended_at: datetime
-    experience_levels: list[ExperienceLevelEnum] | None = None
     mentees_limit: int
     started_at: datetime
     status: ProgramStatusEnum

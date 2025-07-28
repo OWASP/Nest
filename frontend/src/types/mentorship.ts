@@ -30,6 +30,19 @@ export type Program = {
   modules: Module[]
 }
 
+export type ProgramList = {
+  objectId: string
+  name: string
+  description: string
+  experienceLevels: string[]
+  status: string
+  key: string
+  admins: { name: string; login: string }[]
+  startedAt: string
+  endedAt: string
+  modules: string[]
+}
+
 export type Module = {
   id: string
   key: string

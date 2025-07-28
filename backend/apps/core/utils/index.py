@@ -142,14 +142,15 @@ def get_params_for_index(index_name: str) -> dict:
 
         case "programs":
             params["attributesToRetrieve"] = [
-                "idx_name",
-                "idx_key",
-                "idx_status",
-                "idx_description",
-                "idx_experience_levels",
                 "idx_admins",
-                "idx_started_at",
+                "idx_description",
                 "idx_ended_at",
+                "idx_experience_levels",
+                "idx_key",
+                "idx_modules",
+                "idx_name",
+                "idx_started_at",
+                "idx_status",
             ]
 
         case "projects":

@@ -3,20 +3,9 @@
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import { ProgramList } from 'types/mentorship'
 import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'
-
-export interface AlgoliaProgram {
-  objectID: string
-  name: string
-  description: string
-  experienceLevels: string[]
-  status: string
-  key: string
-  admins: { name: string; login: string }[]
-  startedAt: string
-  endedAt: string
-}
 
 const ProgramsPage = () => {
   const {
@@ -27,7 +16,7 @@ const ProgramsPage = () => {
     searchQuery,
     handleSearch,
     handlePageChange,
-  } = useSearchPage<AlgoliaProgram>({
+  } = useSearchPage<ProgramList>({
     indexName: 'programs',
     pageTitle: 'OWASP Programs',
     hitsPerPage: 24,
@@ -35,7 +24,7 @@ const ProgramsPage = () => {
 
   const router = useRouter()
 
-  const renderProgramCard = (program: AlgoliaProgram) => {
+  const renderProgramCard = (program: ProgramList) => {
     const handleButtonClick = () => {
       router.push(`/mentorship/programs/${program.key}`)
     }
@@ -48,7 +37,7 @@ const ProgramsPage = () => {
 
     return (
       <Card
-        key={program.objectID}
+        key={program.key}
         title={program.name}
         summary={program.description}
         button={submitButton}
@@ -56,6 +45,7 @@ const ProgramsPage = () => {
           start: program.startedAt,
           end: program.endedAt,
         }}
+        modules={program.modules}
         url={`/mentorship/programs/${program.key}`}
       />
     )
