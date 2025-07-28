@@ -1,86 +1,90 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { useTheme } from 'next-themes';
-import React from 'react'; 
-import ModeToggle from '@/components/ModeToggle';
+import { render, screen, fireEvent } from '@testing-library/react'
+import { useTheme } from 'next-themes'
+import React from 'react'
+import ModeToggle from 'components/ModeToggle'
 
 jest.mock('next-themes', () => ({
-    useTheme: jest.fn(),
-}));
+  useTheme: jest.fn(),
+}))
 
 jest.mock('@heroui/button', () => ({
-    Button: ({ children, onPress, 'aria-label': ariaLabel }: React.PropsWithChildren<{ onPress?: () => void; 'aria-label'?: string }>) => (
-        <button onClick={onPress} aria-label={ariaLabel}>{children}</button>
-    ),
-}));
+  Button: ({
+    children,
+    onPress,
+    'aria-label': ariaLabel,
+  }: React.PropsWithChildren<{ onPress?: () => void; 'aria-label'?: string }>) => (
+    <button onClick={onPress} aria-label={ariaLabel}>
+      {children}
+    </button>
+  ),
+}))
 
 jest.mock('@heroui/tooltip', () => ({
-    Tooltip: ({children}: React.PropsWithChildren) => <>{children}</>,
-}));
+  Tooltip: ({ children }: React.PropsWithChildren) => <>{children}</>,
+}))
 
-const useThemeMock = useTheme as jest.Mock;
+const useThemeMock = useTheme as jest.Mock
 
 describe('ModeToggle Component', () => {
+  test('should render correctly in light mode and show moon icon', () => {
+    useThemeMock.mockReturnValue({
+      theme: 'light',
+      setTheme: jest.fn(),
+    })
 
-    test('should render correctly in light mode and show moon icon', () => {
-        useThemeMock.mockReturnValue({
-            theme: 'light',
-            setTheme: jest.fn(),
-        })
+    render(<ModeToggle />)
 
-        render(<ModeToggle/>);
+    const button = screen.getByRole('button', { name: /enable dark mode/i })
+    expect(button).toBeInTheDocument()
 
-        const button = screen.getByRole('button', {name: /enable dark mode/i});
-        expect(button).toBeInTheDocument();
+    const icon = document.querySelector('[data-icon="moon"]')
+    expect(icon).toBeInTheDocument()
+  })
 
-        const icon = document.querySelector('[data-icon="moon"]');
-        expect(icon).toBeInTheDocument();
-    });
+  test('should render correctly in dark mode and show sun icon', () => {
+    useThemeMock.mockReturnValue({
+      theme: 'dark',
+      setTheme: jest.fn(),
+    })
 
+    render(<ModeToggle />)
 
-    test('should render correctly in dark mode and show sun icon', () => {
-        useThemeMock.mockReturnValue({
-            theme:'dark',
-            setTheme: jest.fn(),
-        })
+    const button = screen.getByRole('button', { name: /enable light mode/i })
+    expect(button).toBeInTheDocument()
 
-        render(<ModeToggle/>);
+    const icon = document.querySelector('[data-icon="sun"]')
+    expect(icon).toBeInTheDocument()
+  })
 
-        const button = screen.getByRole('button' ,{ name: /enable light mode/i});
-        expect(button).toBeInTheDocument();
+  test('should call setTheme to switch from light to dark when clicked', () => {
+    const setThemeMock = jest.fn()
 
-        const icon = document.querySelector('[data-icon="sun"]');
-        expect(icon).toBeInTheDocument();
-    });
+    useThemeMock.mockReturnValue({
+      theme: 'light',
+      setTheme: setThemeMock,
+    })
 
-    test('should call setTheme to switch from light to dark when clicked', () => {
-        const setThemeMock = jest.fn();
+    render(<ModeToggle />)
+    const button = screen.getByRole('button')
 
-        useThemeMock.mockReturnValue({
-            theme:'light',
-            setTheme:setThemeMock,
-        });
+    fireEvent.click(button)
 
-        render(<ModeToggle/>);
-        const button = screen.getByRole('button');
+    expect(setThemeMock).toHaveBeenCalledWith('dark')
+  })
 
-        fireEvent.click(button);
+  test('should call setTheme to switch from dark to light when clicked', () => {
+    const setThemeMock = jest.fn()
 
-        expect(setThemeMock).toHaveBeenCalledWith('dark');
-    });
+    useThemeMock.mockReturnValue({
+      theme: 'dark',
+      setTheme: setThemeMock,
+    })
 
-    test('should call setTheme to switch from dark to light when clicked', () => {
-        const setThemeMock = jest.fn();
+    render(<ModeToggle />)
+    const button = screen.getByRole('button')
 
-        useThemeMock.mockReturnValue({
-            theme:'dark',
-            setTheme:setThemeMock,
-        });
+    fireEvent.click(button)
 
-        render(<ModeToggle/>);
-        const button = screen.getByRole('button');
-
-        fireEvent.click(button);
-
-        expect(setThemeMock).toHaveBeenCalledWith('light');
-    });
-});
+    expect(setThemeMock).toHaveBeenCalledWith('light')
+  })
+})
