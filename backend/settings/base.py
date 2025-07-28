@@ -12,10 +12,10 @@ class Base(Configuration):
     BASE_DIR = Path(__file__).resolve().parent.parent
 
     ENVIRONMENT = os.environ.get("DJANGO_CONFIGURATION", "Local")
-    if ENVIRONMENT == "Local":
+    if ENVIRONMENT == "Test":
         from dotenv import load_dotenv
 
-        load_dotenv(BASE_DIR / ".env")
+        load_dotenv(BASE_DIR / ".env.example")
 
     ALLOWED_HOSTS = values.ListValue()
     AUTH_USER_MODEL = "nest.User"

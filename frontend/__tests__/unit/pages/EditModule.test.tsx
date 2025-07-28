@@ -34,18 +34,18 @@ describe('EditModulePage', () => {
 
   beforeEach(() => {
     jest.useFakeTimers()
-      ; (useRouter as jest.Mock).mockReturnValue({ push: mockPush, replace: mockReplace })
-      ; (useParams as jest.Mock).mockReturnValue({
-        programKey: 'test-program',
-        moduleKey: 'test-module',
-      })
-      ; (useApolloClient as jest.Mock).mockReturnValue({
-        query: jest.fn().mockResolvedValue({
-          data: {
-            searchProjects: [{ id: '123', name: 'Awesome Project' }],
-          },
-        }),
-      })
+    ;(useRouter as jest.Mock).mockReturnValue({ push: mockPush, replace: mockReplace })
+    ;(useParams as jest.Mock).mockReturnValue({
+      programKey: 'test-program',
+      moduleKey: 'test-module',
+    })
+    ;(useApolloClient as jest.Mock).mockReturnValue({
+      query: jest.fn().mockResolvedValue({
+        data: {
+          searchProjects: [{ id: '123', name: 'Awesome Project' }],
+        },
+      }),
+    })
   })
 
   afterEach(() => {
@@ -55,34 +55,34 @@ describe('EditModulePage', () => {
   })
 
   it('renders and submits form for editing module', async () => {
-    ; (useSession as jest.Mock).mockReturnValue({
+    ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { login: 'admin-user' } },
       status: 'authenticated',
     })
-      ; (useQuery as jest.Mock).mockReturnValue({
-        loading: false,
-        data: {
-          program: {
-            admins: [{ login: 'admin-user' }],
-          },
-          getModule: {
-            name: 'Existing Module',
-            description: 'Old description',
-            experienceLevel: 'INTERMEDIATE',
-            startedAt: '2025-07-01',
-            endedAt: '2025-07-31',
-            domains: ['AI'],
-            tags: ['graphql'],
-            projectName: 'Awesome Project',
-            projectId: '123',
-            mentors: [{ login: 'mentor1' }],
-          },
+    ;(useQuery as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        program: {
+          admins: [{ login: 'admin-user' }],
         },
-      })
-      ; (useMutation as jest.Mock).mockReturnValue([
-        mockUpdateModule.mockResolvedValue({}),
-        { loading: false },
-      ])
+        getModule: {
+          name: 'Existing Module',
+          description: 'Old description',
+          experienceLevel: 'INTERMEDIATE',
+          startedAt: '2025-07-01',
+          endedAt: '2025-07-31',
+          domains: ['AI'],
+          tags: ['graphql'],
+          projectName: 'Awesome Project',
+          projectId: '123',
+          mentors: [{ login: 'mentor1' }],
+        },
+      },
+    })
+    ;(useMutation as jest.Mock).mockReturnValue([
+      mockUpdateModule.mockResolvedValue({}),
+      { loading: false },
+    ])
 
     render(<EditModulePage />)
 
@@ -119,11 +119,11 @@ describe('EditModulePage', () => {
   })
 
   it('shows loading spinner initially', () => {
-    ; (useSession as jest.Mock).mockReturnValue({
+    ;(useSession as jest.Mock).mockReturnValue({
       data: null,
       status: 'loading',
     })
-      ; (useQuery as jest.Mock).mockReturnValue({ loading: true })
+    ;(useQuery as jest.Mock).mockReturnValue({ loading: true })
 
     render(<EditModulePage />)
 
