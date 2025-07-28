@@ -22,5 +22,6 @@ export const config = {
     '/mentorship/programs/:programId/edit',
     '/mentorship/programs/:programId/modules/:moduleId',
     '/mentorship/programs/:programId/modules/:moduleId/edit',
+    '/my/mentorship',
   ],
 }

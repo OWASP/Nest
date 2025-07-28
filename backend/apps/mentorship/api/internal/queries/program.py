@@ -9,6 +9,7 @@ from django.db.models import Q
 from apps.mentorship.api.internal.nodes.program import PaginatedPrograms, ProgramNode
 from apps.mentorship.models import Program
 from apps.mentorship.models.mentor import Mentor
+from apps.nest.api.internal.permissions import IsAuthenticated
 
 PAGE_SIZE = 25
 logger = logging.getLogger(__name__)
@@ -30,22 +31,22 @@ class ProgramQuery:
 
         return program
 
-    @strawberry.field
+    @strawberry.field(permission_classes=[IsAuthenticated])
     def my_programs(
         self,
         info: strawberry.Info,
-        username: str,
         search: str = "",
         page: int = 1,
         limit: int = 24,
     ) -> PaginatedPrograms:
-        """Get paginated programs where user is admin or mentor."""
+        """Get paginated programs where the current user is admin or mentor."""
+        user = info.context.request.user
+        IsAuthenticated.require_github_user(user)
+
         try:
-            mentor = Mentor.objects.select_related("github_user").get(
-                github_user__login__iexact=username.strip().lower()
-            )
+            mentor = Mentor.objects.select_related("github_user").get(github_user=user.github_user)
         except Mentor.DoesNotExist:
-            logger.warning("Mentor with username '%s' not found.", username)
+            logger.warning("Mentor for user '%s' not found.", user.username)
             return PaginatedPrograms(programs=[], total_pages=0, current_page=page)
 
         queryset = (

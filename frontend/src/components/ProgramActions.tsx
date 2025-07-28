@@ -63,6 +63,8 @@ const ProgramActions: React.FC<ProgramActionsProps> = ({ isDraft, setPublish }) 
             {options.map((option) => (
               <button
                 key={option.key}
+                type="button"
+                role="menuitem"
                 onClick={() => handleAction(option.key)}
                 className="w-full border-b border-gray-100 px-3 py-2 text-left text-sm text-gray-700 transition-colors last:border-b-0 hover:bg-[#D1DBE6] dark:border-gray-600 dark:text-gray-300 dark:hover:bg-[#454545]"
               >

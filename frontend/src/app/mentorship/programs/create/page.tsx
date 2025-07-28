@@ -2,7 +2,7 @@
 
 import { useMutation } from '@apollo/client'
 import { addToast } from '@heroui/toast'
-import { useIsProjectLeader } from 'hooks/useProjectLeader'
+import { useProjectLeader } from 'hooks/useProjectLeader'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
@@ -18,7 +18,7 @@ const CreateProgramPage = () => {
   const { data: session, status } = useSession()
   const username = (session as ExtendedSession)?.user?.login
 
-  const { isLeader: isProjectLeader, loading: leaderLoading } = useIsProjectLeader(username)
+  const { isLeader: isProjectLeader, loading: leaderLoading } = useProjectLeader(username)
 
   const [createProgram, { loading }] = useMutation(CREATE_PROGRAM)
 

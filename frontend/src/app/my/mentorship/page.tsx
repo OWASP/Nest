@@ -4,7 +4,7 @@ import { useQuery } from '@apollo/client'
 import { faPlus, faGraduationCap } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToast } from '@heroui/toast'
-import { useIsProjectLeader } from 'hooks/useProjectLeader'
+import { useProjectLeader } from 'hooks/useProjectLeader'
 import { debounce } from 'lodash'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
@@ -61,7 +61,7 @@ const MyMentorshipPage: React.FC = () => {
     errorPolicy: 'all',
   })
 
-  const { isLeader: isProjectLeader, loading: leaderLoading } = useIsProjectLeader(username)
+  const { isLeader: isProjectLeader, loading: leaderLoading } = useProjectLeader(username)
 
   useEffect(() => {
     if (programData?.myPrograms) {

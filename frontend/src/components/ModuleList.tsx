@@ -34,6 +34,7 @@ const ModuleList: React.FC<ModuleListProps> = ({ modules }) => {
         {modules.length > 5 && (
           <Button
             disableAnimation
+            aria-label={showAll ? 'Show fewer modules' : 'Show more modules'}
             onPress={() => setShowAll((prev) => !prev)}
             className="mt-4 flex items-center bg-transparent text-blue-400 hover:underline"
           >
