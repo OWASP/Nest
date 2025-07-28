@@ -4,27 +4,30 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mentorship', '0002_module_labels_task'),
-        ('owasp', '0044_chapter_chapter_updated_at_desc_idx_and_more'),
+        ("mentorship", "0002_module_labels_task"),
+        ("owasp", "0044_chapter_chapter_updated_at_desc_idx_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='module',
-            name='key',
-            field=models.CharField(default='default-key', max_length=200, verbose_name='Key'),
+            model_name="module",
+            name="key",
+            field=models.CharField(default="default-key", max_length=200, verbose_name="Key"),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='program',
-            name='key',
-            field=models.CharField(default='temp-key', max_length=200, unique=True, verbose_name='Key'),
+            model_name="program",
+            name="key",
+            field=models.CharField(
+                default="temp-key", max_length=200, unique=True, verbose_name="Key"
+            ),
             preserve_default=False,
         ),
         migrations.AddConstraint(
-            model_name='module',
-            constraint=models.UniqueConstraint(fields=('program', 'key'), name='unique_module_key_in_program'),
+            model_name="module",
+            constraint=models.UniqueConstraint(
+                fields=("program", "key"), name="unique_module_key_in_program"
+            ),
         ),
     ]
