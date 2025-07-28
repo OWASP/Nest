@@ -1,6 +1,6 @@
 import {within, render, fireEvent, screen, cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import Pagination from 'components/Pagination'  
+import Pagination from 'components/Pagination'
 
 afterEach(cleanup);
 
@@ -84,9 +84,10 @@ it('disables Next on last page', () => {
   expect(screen.getByRole('button', { name: String(n) })).toBeInTheDocument()
 })
 
-    // Should show an ellipsis span (no button) at two positions
-    const ellipses = screen.getAllByText((_, el) => el?.tagName === 'SPAN' && !el.textContent?.trim())
-    expect(ellipses.length).toBeGreaterThanOrEqual(2);
+       // Should show exactly two “More pages” indicators
+    const ellipses = screen.getAllByLabelText('More pages')
+    expect(ellipses).toHaveLength(2);
+
 
     // Should show pages around currentPage: 9, 10, 11
     [9, 10, 11].forEach((n) =>
