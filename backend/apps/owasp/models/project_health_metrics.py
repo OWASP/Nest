@@ -194,7 +194,10 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
             ],
             [
                 "Last Pull Request",
-                f"{metrics.last_pull_request_days}/{metrics.last_pull_request_days_requirement} days",
+                (
+                    f"{metrics.last_pull_request_days}",
+                    f"/{metrics.last_pull_request_days_requirement} days",
+                ),
             ],
             [
                 "Last Release",
@@ -202,7 +205,10 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
             ],
             [
                 "OWASP Page Last Update",
-                f"{metrics.owasp_page_last_update_days}/{metrics.owasp_page_last_update_days_requirement} days",
+                (
+                    f"{metrics.owasp_page_last_update_days}",
+                    f"/{metrics.owasp_page_last_update_days_requirement} days",
+                ),
             ],
             ["Open/Total Issues", f"{metrics.open_issues_count}/{metrics.total_issues_count}"],
             [
