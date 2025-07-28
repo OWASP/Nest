@@ -33,8 +33,18 @@ def check_owasp_site_repository(key: str) -> bool:
     )
 
 
-def check_funding_policy_compliance(platform: str, target: str) -> bool:
-    """Check OWASP funding policy compliance.
+def check_funding_policy_compliance(platform, targets):
+    """Check if all funding targets for a platform are policy compliant."""
+    if not isinstance(targets, (list, tuple, set)):
+        targets = [targets]
+    for target in targets:
+        if target and not _check_single_funding_policy_compliance(platform, target):
+            return False
+    return True
+
+
+def _check_single_funding_policy_compliance(platform, target):
+    """Check OWASP funding policy compliance for a single target.
 
     Args:
         platform (str): The funding platform (e.g., 'github', 'custom').
