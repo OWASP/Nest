@@ -26,10 +26,6 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '**.tile.openstreetmap.org',
       },
-      {
-        protocol: 'https',
-        hostname: 'example.com',
-      },
     ],
   },
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/productionBrowserSourceMaps
