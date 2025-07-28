@@ -25,6 +25,7 @@
       "@e2e/*": ["__tests__/e2e/*"],
       "@unit/*": ["__tests__/unit/*"],
       "*": ["./src/*"],
+      "@/*": ["src/*"],
       "app/*": ["src/app/*"],
       "components/*": ["src/components/*"],
       "hooks/*": ["src/hooks/*"],
