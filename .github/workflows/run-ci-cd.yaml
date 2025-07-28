@@ -444,6 +444,7 @@ jobs:
 
           # Frontend
           touch .env.frontend
+          echo "NEXT_SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env.frontend
           echo "NEXT_SERVER_CSRF_URL=${{ secrets.NEXT_SERVER_CSRF_URL }}" >> .env.frontend
           echo "NEXT_SERVER_GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" >> .env.frontend
           echo "NEXT_SERVER_GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" >> .env.frontend
@@ -675,6 +676,7 @@ jobs:
 
           # Frontend
           touch .env.frontend
+          echo "NEXT_SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env.frontend
           echo "NEXT_SERVER_CSRF_URL=${{ secrets.NEXT_SERVER_CSRF_URL }}" >> .env.frontend
           echo "NEXT_SERVER_GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" >> .env.frontend
           echo "NEXT_SERVER_GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" >> .env.frontend
