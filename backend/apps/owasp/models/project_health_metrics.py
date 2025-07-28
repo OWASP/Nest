@@ -6,11 +6,11 @@ from django.db.models.functions import ExtractMonth, TruncDate
 from django.utils import timezone
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen.canvas import Canvas
-from reportlab.platypus import Table, TableStyle
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.owasp.api.internal.nodes.project_health_stats import ProjectHealthStatsNode
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
+from apps.owasp.utils import create_table
 
 HEALTH_SCORE_THRESHOLD_HEALTHY = 75
 HEALTH_SCORE_THRESHOLD_NEED_ATTENTION = 50
@@ -194,9 +194,12 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
             ],
             [
                 "Last Pull Request",
-                (
-                    f"{metrics.last_pull_request_days}",
-                    f"/{metrics.last_pull_request_days_requirement} days",
+                # To bypass ruff long line error
+                "/".join(
+                    [
+                        str(metrics.last_pull_request_days),
+                        f"{metrics.last_pull_request_days_requirement} days",
+                    ]
                 ),
             ],
             [
@@ -205,9 +208,12 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
             ],
             [
                 "OWASP Page Last Update",
-                (
-                    f"{metrics.owasp_page_last_update_days}",
-                    f"/{metrics.owasp_page_last_update_days_requirement} days",
+                # To bypass ruff long line error
+                "/".join(
+                    [
+                        str(metrics.owasp_page_last_update_days),
+                        f"{metrics.owasp_page_last_update_days_requirement} days",
+                    ]
                 ),
             ],
             ["Open/Total Issues", f"{metrics.open_issues_count}/{metrics.total_issues_count}"],
@@ -235,22 +241,9 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
                 "No" if metrics.is_leader_requirements_compliant else "Yes",
             ],
         ]
-        table = Table(
-            table_data,
-            colWidths="*",
-            style=TableStyle(
-                [
-                    ("BACKGROUND", (0, 0), (-1, 0), "lightgrey"),
-                    ("TEXTCOLOR", (0, 0), (-1, 0), "black"),
-                    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                    ("BOTTOMPADDING", (0, 0), (-1, 0), 5),
-                    ("BACKGROUND", (0, 1), (-1, -1), "white"),
-                ]
-            ),
-        )
-        table.wrapOn(pdf, 500, 300)
-        table.drawOn(pdf, 50, 280)
+        table = create_table(table_data)
+        table.wrapOn(pdf, 500, 250)
+        table.drawOn(pdf, 50, 220)
         pdf.drawCentredString(
             300, 100, f"Report Generated on: {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}"
         )

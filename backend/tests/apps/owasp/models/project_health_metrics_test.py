@@ -124,8 +124,8 @@ class TestProjectHealthMetricsModel:
         "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_latest_health_metrics",
     )
     @patch("apps.owasp.models.project_health_metrics.Canvas")
-    @patch("apps.owasp.models.project_health_metrics.Table")
-    @patch("apps.owasp.models.project_health_metrics.TableStyle")
+    @patch("apps.owasp.utils.Table")
+    @patch("apps.owasp.utils.TableStyle")
     @patch("apps.owasp.models.project_health_metrics.BytesIO")
     def test_generate_detailed_pdf(
         self,
@@ -175,9 +175,12 @@ class TestProjectHealthMetricsModel:
             ],
             [
                 "Last Pull Request",
-                (
-                    f"{metrics.last_pull_request_days}",
-                    f"/{metrics.last_pull_request_days_requirement} days",
+                # To bypass ruff long line error
+                "/".join(
+                    [
+                        str(metrics.last_pull_request_days),
+                        f"{metrics.last_pull_request_days_requirement} days",
+                    ]
                 ),
             ],
             [
@@ -186,9 +189,12 @@ class TestProjectHealthMetricsModel:
             ],
             [
                 "OWASP Page Last Update",
-                (
-                    f"{metrics.owasp_page_last_update_days}",
-                    f"/{metrics.owasp_page_last_update_days_requirement} days",
+                # To bypass ruff long line error
+                "/".join(
+                    [
+                        str(metrics.owasp_page_last_update_days),
+                        f"{metrics.owasp_page_last_update_days_requirement} days",
+                    ]
                 ),
             ],
             ["Open/Total Issues", f"{metrics.open_issues_count}/{metrics.total_issues_count}"],
@@ -221,15 +227,15 @@ class TestProjectHealthMetricsModel:
         )
         mock_table_style.assert_called_once()
 
-        mock_table.return_value.wrapOn.assert_called_once_with(canvas, 500, 300)
-        mock_table.return_value.drawOn.assert_called_once_with(canvas, 50, 280)
+        mock_table.return_value.wrapOn.assert_called_once_with(canvas, 500, 250)
+        mock_table.return_value.drawOn.assert_called_once_with(canvas, 50, 220)
         canvas.showPage.assert_called_once()
         canvas.save.assert_called_once()
 
     @patch("apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_stats")
     @patch("apps.owasp.models.project_health_metrics.Canvas")
-    @patch("apps.owasp.models.project_health_metrics.Table")
-    @patch("apps.owasp.models.project_health_metrics.TableStyle")
+    @patch("apps.owasp.utils.Table")
+    @patch("apps.owasp.utils.TableStyle")
     @patch("apps.owasp.models.project_health_metrics.BytesIO")
     def test_generate_overview_pdf(
         self,
@@ -282,7 +288,7 @@ class TestProjectHealthMetricsModel:
             table_data, colWidths="*", style=mock_table_style.return_value
         )
         mock_table_style.assert_called_once()
-        mock_table.return_value.wrapOn.assert_called_once_with(canvas, 400, 600)
-        mock_table.return_value.drawOn.assert_called_once_with(canvas, 100, 570)
+        mock_table.return_value.wrapOn.assert_called_once_with(canvas, 400, 500)
+        mock_table.return_value.drawOn.assert_called_once_with(canvas, 100, 470)
         canvas.showPage.assert_called_once()
         canvas.save.assert_called_once()
