@@ -4,7 +4,6 @@ from apps.owasp.api.rest.v1.chapter import router as chapter_router
 from apps.owasp.api.rest.v1.committee import router as committee_router
 from apps.owasp.api.rest.v1.event import router as event_router
 from apps.owasp.api.rest.v1.project import router as project_router
-from apps.owasp.api.rest.v1.project_health_metrics import router as project_health_metrics_router
 from apps.owasp.api.rest.v1.urls import router as main_router
 
 
@@ -16,7 +15,6 @@ class TestRouterRegistration:
         "/committees": committee_router,
         "/events": event_router,
         "/projects": project_router,
-        "/project-health-metrics": project_health_metrics_router,
     }
 
     def test_all_routers_are_registered(self):
