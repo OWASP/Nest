@@ -38,35 +38,30 @@ class RagTool:
     def query(
         self,
         question: str,
+        content_types: list[str] | None = None,
         limit: int = DEFAULT_CHUNKS_RETRIEVAL_LIMIT,
         similarity_threshold: float = DEFAULT_SIMILARITY_THRESHOLD,
-        content_types: list[str] | None = None,
     ) -> str:
         """Process a user query using the complete RAG pipeline.
 
         Args:
             question (str): The user's question.
+            content_types (Optional[list[str]]): Content types to filter by.
             limit (int): Maximum number of context chunks to retrieve.
             similarity_threshold (float): Minimum similarity score for retrieval.
-            content_types (Optional[list[str]]): Content types to filter by.
 
         Returns:
-            dict[str, Any]: A dictionary containing:
-                - answer (str): The generated answer
+            The generated answer as a string.
 
         """
         logger.info("Retrieving context for query")
-        retrieved_chunks = self.retriever.retrieve(
+
+        return self.generator.generate_answer(
+            context_chunks=self.retriever.retrieve(
+                content_types=content_types,
+                limit=limit,
+                query=question,
+                similarity_threshold=similarity_threshold,
+            ),
             query=question,
-            limit=limit,
-            similarity_threshold=similarity_threshold,
-            content_types=content_types,
         )
-
-        generation_result = self.generator.generate_answer(
-            query=question, context_chunks=retrieved_chunks
-        )
-
-        logger.info("Successfully processed RAG query")
-
-        return generation_result
