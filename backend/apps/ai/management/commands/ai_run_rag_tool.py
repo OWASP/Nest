@@ -53,8 +53,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             rag_tool = RagTool(
-                embedding_model=options["embedding_model"],
                 chat_model=options["chat_model"],
+                embedding_model=options["embedding_model"],
             )
         except ValueError:
             self.stderr.write(self.style.ERROR("Initialization error"))
@@ -62,9 +62,9 @@ class Command(BaseCommand):
 
         self.stdout.write("\nProcessing query...")
         result = rag_tool.query(
-            question=options["query"],
-            limit=options["limit"],
-            similarity_threshold=options["threshold"],
             content_types=options["content_types"],
+            limit=options["limit"],
+            question=options["query"],
+            similarity_threshold=options["threshold"],
         )
         self.stdout.write(f"\nAnswer: {result}")

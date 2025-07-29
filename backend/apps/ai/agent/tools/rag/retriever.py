@@ -223,29 +223,29 @@ class Retriever:
             queryset = queryset.filter(content_type_query)
 
         chunks = (
-            queryset.select_related("context__content_type")
-            .prefetch_related("context__content_object")
+            queryset.select_related("content_type")
+            .prefetch_related("content_object")
             .order_by("-similarity")[:limit]
         )
 
         results = []
         for chunk in chunks:
-            if not chunk.context or not chunk.context.content_object:
+            if not chunk.content_object:
                 logger.warning("Content object is None for chunk %s. Skipping.", chunk.id)
                 continue
 
-            source_name = self.get_source_name(chunk.context.content_object)
+            source_name = self.get_source_name(chunk.content_object)
             additional_context = self.get_additional_context(
-                chunk.context.content_object, chunk.context.content_type.model
+                chunk.content_object, chunk.content_type.model
             )
 
             results.append(
                 {
                     "text": chunk.text,
                     "similarity": float(chunk.similarity),
-                    "source_type": chunk.context.content_type.model,
+                    "source_type": chunk.content_type.model,
                     "source_name": source_name,
-                    "source_id": chunk.context.object_id,
+                    "source_id": chunk.object_id,
                     "additional_context": additional_context,
                 }
             )
