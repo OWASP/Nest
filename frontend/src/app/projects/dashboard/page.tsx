@@ -26,6 +26,7 @@ import DonutBarChart from 'components/DonutBarChart'
 import LineChart from 'components/LineChart'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProjectTypeDashboardCard from 'components/ProjectTypeDashboardCard'
+
 const ProjectsDashboardPage: FC = () => {
   const [stats, setStats] = useState<ProjectHealthStats>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -101,7 +102,7 @@ const ProjectsDashboardPage: FC = () => {
       <div className="mb-4 flex items-center justify-start">
         <h1 className="font-semibold">Project Health Dashboard Overview</h1>
         <Tooltip
-          content="Download PDF"
+          content="Download as PDF"
           className="ml-2"
           placement="top"
           delay={100}

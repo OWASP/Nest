@@ -20,12 +20,12 @@ from settings.api.v1 import api as api_v1
 from settings.graphql import schema
 
 urlpatterns = [
-    path("owasp/", include(owasp_urls)),
     path("csrf/", get_csrf_token),
     path("idx/", csrf_protect(algolia_search)),
     path("graphql/", csrf_protect(GraphQLView.as_view(schema=schema, graphiql=settings.DEBUG))),
     path("api/v1/", api_v1.urls),
     path("a/", admin.site.urls),
+    path("owasp/", include(owasp_urls)),
     path("status/", get_status),
     path("", include("apps.sitemap.urls")),
 ]
