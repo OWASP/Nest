@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 class Retriever:
     """A class for retrieving relevant text chunks for a RAG."""
 
-    SUPPORTED_CONTENT_TYPES = ["event", "project", "chapter", "committee", "message"]
+    SUPPORTED_CONTENT_TYPES = ("event", "project", "chapter", "committee", "message")
 
     def __init__(self, embedding_model: str = "text-embedding-3-small"):
         """Initialize the Retriever.
@@ -36,7 +36,6 @@ class Retriever:
         if not (openai_api_key := os.getenv("DJANGO_OPEN_AI_SECRET_KEY")):
             error_msg = "DJANGO_OPEN_AI_SECRET_KEY environment variable not set"
             raise ValueError(error_msg)
-
         self.openai_client = openai.OpenAI(api_key=openai_api_key)
         self.embedding_model = embedding_model
         logger.info("Retriever initialized with embedding model: %s", self.embedding_model)
@@ -69,7 +68,6 @@ class Retriever:
         for attr in ("name", "title", "login", "key", "summary"):
             if getattr(content_object, attr, None):
                 return str(getattr(content_object, attr))
-
         return str(content_object)
 
     def get_additional_context(self, content_object, content_type: str) -> dict[str, Any]:
@@ -85,7 +83,6 @@ class Retriever:
         """
         context = {}
         clean_content_type = content_type.split(".")[-1] if "." in content_type else content_type
-
         if clean_content_type == "chapter":
             context.update(
                 {
@@ -178,7 +175,6 @@ class Retriever:
                     ),
                 }
             )
-
         return {k: v for k, v in context.items() if v is not None}
 
     def retrieve(
@@ -201,14 +197,11 @@ class Retriever:
 
         """
         query_embedding = self.get_query_embedding(query)
-
         if not content_types:
             content_types = self.extract_content_types_from_query(query)
-
         queryset = Chunk.objects.annotate(
             similarity=1 - CosineDistance("embedding", query_embedding)
         ).filter(similarity__gte=similarity_threshold)
-
         if content_types:
             content_type_query = Q()
             for name in content_types:
@@ -216,36 +209,37 @@ class Retriever:
                 if "." in lower_name:
                     app_label, model = lower_name.split(".", 1)
                     content_type_query |= Q(
-                        content_type__app_label=app_label, content_type__model=model
+                        context__content_type__app_label=app_label,
+                        context__content_type__model=model,
                     )
                 else:
-                    content_type_query |= Q(content_type__model=lower_name)
+                    content_type_query |= Q(context__content_type__model=lower_name)
             queryset = queryset.filter(content_type_query)
 
         chunks = (
-            queryset.select_related("content_type")
-            .prefetch_related("content_object")
+            queryset.select_related("context__content_type")
+            .prefetch_related("context__content_object")
             .order_by("-similarity")[:limit]
         )
 
         results = []
         for chunk in chunks:
-            if not chunk.content_object:
+            if not chunk.context or not chunk.context.content_object:
                 logger.warning("Content object is None for chunk %s. Skipping.", chunk.id)
                 continue
 
-            source_name = self.get_source_name(chunk.content_object)
+            source_name = self.get_source_name(chunk.context.content_object)
             additional_context = self.get_additional_context(
-                chunk.content_object, chunk.content_type.model
+                chunk.context.content_object, chunk.context.content_type.model
             )
 
             results.append(
                 {
                     "text": chunk.text,
                     "similarity": float(chunk.similarity),
-                    "source_type": chunk.content_type.model,
+                    "source_type": chunk.context.content_type.model,
                     "source_name": source_name,
-                    "source_id": chunk.object_id,
+                    "source_id": chunk.context.object_id,
                     "additional_context": additional_context,
                 }
             )
@@ -262,7 +256,6 @@ class Retriever:
             A list of detected content type names.
 
         """
-        detected_types = []
         query_words = set(re.findall(r"\b\w+\b", query.lower()))
 
         detected_types = [
