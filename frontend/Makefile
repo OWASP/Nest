@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 check-frontend: \
 	format-frontend-code \
 	lint-frontend-code
@@ -20,10 +22,16 @@ exec-frontend-command-it:
 	@docker exec -it nest-frontend $(CMD)
 
 format-frontend-code:
-	cd frontend && pnpm run format
+	@cd frontend && pnpm run format:check >/dev/null 2>&1 \
+	&& (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
+	|| (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[37;41mFailed\033[0m\n")
+	@cd frontend && pnpm run format >/dev/null 2>&1
 
 lint-frontend-code:
-	cd frontend && pnpm run lint
+	@cd frontend && pnpm run lint:check >/dev/null 2>&1 \
+	&& (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
+	|| (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[37;41mFailed\033[0m\n")
+	@cd frontend && pnpm run lint >/dev/null 2>&1
 
 shell-frontend:
 	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it
