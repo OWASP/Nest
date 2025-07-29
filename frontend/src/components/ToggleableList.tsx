@@ -44,14 +44,8 @@ const ToggleableList = ({
           </button>
         ))}
       </div>
-      {items.length > limit && (
-        <ShowMoreButton
-          isExpanded={showAll}
-          onToggle={toggleShowAll}
-          showMoreText="Show more"
-          showLessText="Show less"
-        />
-      )}
+      {items.length > limit && 
+      <ShowMoreButton onToggle={toggleShowAll} />}
     </div>
   )
 }

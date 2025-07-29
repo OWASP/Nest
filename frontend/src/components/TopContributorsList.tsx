@@ -64,14 +64,7 @@ const TopContributorsList = ({
           </div>
         ))}
       </div>
-      {contributors.length > maxInitialDisplay && (
-        <ShowMoreButton
-          isExpanded={showAllContributors}
-          onToggle={toggleContributors}
-          showMoreText="Show more"
-          showLessText="Show less"
-        />
-      )}
+      {contributors.length > maxInitialDisplay && <ShowMoreButton onToggle={toggleContributors} />}
     </SecondaryCard>
   )
 }
