@@ -176,7 +176,7 @@ jobs:
 
       - name: Run backend tests
         run: |
-          docker run -e DJANGO_CONFIGURATION=Test owasp/nest:test-backend-latest pytest
+          docker run -e DJANGO_SETTINGS_MODULE=settings.test --env-file backend/.env.example owasp/nest:test-backend-latest pytest
 
   run-frontend-unit-tests:
     name: Run frontend unit tests

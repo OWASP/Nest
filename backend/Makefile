@@ -117,7 +117,6 @@ test-backend:
 		-f backend/docker/Dockerfile.test backend \
 		-t nest-test-backend
 	@docker run \
-		-e DJANGO_CONFIGURATION=Test \
 		-e DJANGO_SETTINGS_MODULE=settings.test \
 		--env-file backend/.env.example \
 		--rm nest-test-backend pytest
