@@ -2,15 +2,13 @@ from django.contrib import admin
 
 from apps.owasp.models.post import Post
 
+from .mixins import StandardOWASPAdminMixin
 
-class PostAdmin(admin.ModelAdmin):
+
+class PostAdmin(admin.ModelAdmin, StandardOWASPAdminMixin):
     """Admin configuration for Post model."""
 
-    list_display = (
-        "author_name",
-        "published_at",
-        "title",
-    )
+    list_display = ("author_name", "published_at", "title")
     search_fields = (
         "author_image_url",
         "author_name",

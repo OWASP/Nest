@@ -18,12 +18,7 @@ class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
         "custom_field_owasp_url",
         "custom_field_github_urls",
     )
-    list_filter = (
-        "is_active",
-        "is_leaders_policy_compliant",
-        "country",
-        "region",
-    )
+    list_filter = ("is_active", "is_leaders_policy_compliant", "country", "region")
     search_fields = ("name", "key")
 
 
