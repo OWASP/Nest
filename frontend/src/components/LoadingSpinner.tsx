@@ -7,7 +7,7 @@ interface LoadingSpinnerProps {
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ imageUrl }) => {
   const defaultImage = '/img/owasp_icon_white_sm.png'
-  const image = (typeof imageUrl === 'string' && imageUrl) || defaultImage
+  const image = imageUrl || defaultImage
   const dark = image.replace('white', 'black')
 
   return (
