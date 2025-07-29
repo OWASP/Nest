@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen } from 'wrappers/testUtil'
-import LeadersList from 'components/LeadersList'
 import type { LeadersListProps } from 'types/leaders'
+import LeadersList from 'components/LeadersList'
 
 // Mock Next.js Link component
 jest.mock('next/link', () => {
@@ -69,13 +69,13 @@ describe('LeadersList Component', () => {
     })
 
     it('renders "Unknown" when leaders prop is null', () => {
-      render(<LeadersList leaders={null as any} />)
+      render(<LeadersList leaders={null} />)
       expect(screen.getByText('Unknown')).toBeInTheDocument()
       expect(screen.queryByTestId('truncated-text')).not.toBeInTheDocument()
     })
 
     it('renders "Unknown" when leaders prop is undefined', () => {
-      render(<LeadersList leaders={undefined as any} />)
+      render(<LeadersList leaders={undefined} />)
       expect(screen.getByText('Unknown')).toBeInTheDocument()
       expect(screen.queryByTestId('truncated-text')).not.toBeInTheDocument()
     })
@@ -160,7 +160,7 @@ describe('LeadersList Component', () => {
     it('generates correct href for each leader', () => {
       render(<LeadersList {...defaultProps} />)
       const links = screen.getAllByTestId('leader-link')
-      
+
       expect(links[0]).toHaveAttribute('href', '/members?q=John%20Doe')
       expect(links[1]).toHaveAttribute('href', '/members?q=Jane%20Smith')
       expect(links[2]).toHaveAttribute('href', '/members?q=Bob%20Johnson')
@@ -169,7 +169,7 @@ describe('LeadersList Component', () => {
     it('properly encodes special characters in URLs', () => {
       render(<LeadersList leaders="John O'Connor, test@example.com" />)
       const links = screen.getAllByTestId('leader-link')
-      
+
       expect(links[0]).toHaveAttribute('href', "/members?q=John%20O'Connor")
       expect(links[1]).toHaveAttribute('href', '/members?q=test%40example.com')
     })
@@ -179,7 +179,7 @@ describe('LeadersList Component', () => {
     it('provides proper aria-label for each leader link', () => {
       render(<LeadersList {...defaultProps} />)
       const links = screen.getAllByTestId('leader-link')
-      
+
       expect(links[0]).toHaveAttribute('aria-label', 'View profile of John Doe')
       expect(links[1]).toHaveAttribute('aria-label', 'View profile of Jane Smith')
       expect(links[2]).toHaveAttribute('aria-label', 'View profile of Bob Johnson')
@@ -188,7 +188,7 @@ describe('LeadersList Component', () => {
     it('provides title attribute for each leader link', () => {
       render(<LeadersList {...defaultProps} />)
       const links = screen.getAllByTestId('leader-link')
-      
+
       expect(links[0]).toHaveAttribute('title', 'John Doe')
       expect(links[1]).toHaveAttribute('title', 'Jane Smith')
       expect(links[2]).toHaveAttribute('title', 'Bob Johnson')
@@ -197,7 +197,7 @@ describe('LeadersList Component', () => {
     it('ensures links are focusable and have proper attributes', () => {
       render(<LeadersList leaders="John Doe" />)
       const link = screen.getByTestId('leader-link')
-      
+
       expect(link).toHaveAttribute('href')
       expect(link).toHaveAttribute('aria-label')
       expect(link).toHaveAttribute('title')
@@ -250,12 +250,12 @@ describe('LeadersList Component', () => {
     })
 
     it('handles undefined gracefully', () => {
-      render(<LeadersList leaders={undefined as any} />)
+      render(<LeadersList leaders={undefined} />)
       expect(screen.getByText('Unknown')).toBeInTheDocument()
     })
 
     it('handles null gracefully', () => {
-      render(<LeadersList leaders={null as any} />)
+      render(<LeadersList leaders={null} />)
       expect(screen.getByText('Unknown')).toBeInTheDocument()
     })
   })
@@ -265,10 +265,10 @@ describe('LeadersList Component', () => {
       render(<LeadersList {...defaultProps} />)
       const truncatedText = screen.getByTestId('truncated-text')
       expect(truncatedText).toBeInTheDocument()
-      
+
       // Check that leader links are inside TruncatedText
       const links = screen.getAllByTestId('leader-link')
-      links.forEach(link => {
+      links.forEach((link) => {
         expect(truncatedText).toContainElement(link)
       })
     })
