@@ -23,6 +23,7 @@ import LineChart from 'components/LineChart'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetricsPDFButton from 'components/MetricsPDFButton'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
+
 const ProjectHealthMetricsDetails: FC = () => {
   const { projectKey } = useParams()
   const [metricsList, setMetricsList] = useState<HealthMetricsProps[]>()

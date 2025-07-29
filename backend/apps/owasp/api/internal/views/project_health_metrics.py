@@ -24,9 +24,11 @@ def generate_project_health_metrics_pdf(_request, project_key: str):
     if not re.match(r"^[a-zA-Z0-9_-]+$", project_key):
         return HttpResponseBadRequest("Invalid project key")
 
-    pdf = ProjectHealthMetrics.generate_latest_metrics_pdf(project_key)
-    if not pdf:
-        return HttpResponseNotFound("No health metrics found for project")
-    return FileResponse(
-        pdf, as_attachment=True, filename=f"{project_key}_health_metrics_report.pdf"
-    )
+    if pdf := ProjectHealthMetrics.generate_latest_metrics_pdf(project_key):
+        return FileResponse(
+            pdf,
+            as_attachment=True,
+            filename=f"{project_key}_health_metrics_report.pdf",
+        )
+
+    return HttpResponseNotFound("No health metrics found for this project")
