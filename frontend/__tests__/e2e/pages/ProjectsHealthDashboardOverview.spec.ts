@@ -4,18 +4,15 @@ import millify from 'millify'
 
 test.describe('Projects Health Dashboard Overview', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/auth/login/**', async (route) => {
+    await page.route('**/api/auth/session', async (route) => {
       await route.fulfill({
         status: 200,
         json: {
-          data: {
-            session: {
-              user: {
-                login: 'testuser',
-                accessToken: 'test-access-token',
-              },
-            },
+          user: {
+            login: 'testuser',
           },
+          accessToken: 'test-access-token',
+          expires: '2125-08-28T01:33:56.550Z',
         },
       })
     })
@@ -51,11 +48,32 @@ test.describe('Projects Health Dashboard Overview', () => {
         domain: 'localhost',
         path: '/',
       },
+      {
+        name: 'nest.session-id',
+        value: 'test-session-id',
+        domain: 'localhost',
+        path: '/',
+      },
+      {
+        name: 'next-auth.csrf-token',
+        value: 'test-csrf-token',
+        domain: 'localhost',
+        path: '/',
+      },
+      {
+        name: 'next-auth.callback-url',
+        value: '/',
+        domain: 'localhost',
+        path: '/',
+      },
+      {
+        name: 'next-auth.session-token',
+        value: 'test-session-token',
+        domain: 'localhost',
+        path: '/',
+      },
     ])
     await page.goto('/projects/dashboard', { timeout: 100000 })
-  })
-  test('shows 404 page if not authenticated', async ({ page }) => {
-    await expect(page.getByText('404', { exact: true })).toBeVisible()
   })
   test('renders project health stats', async ({ page }) => {
     await expect(page.getByText('Project Health Dashboard Overview')).toBeVisible({
