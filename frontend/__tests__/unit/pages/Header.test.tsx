@@ -160,18 +160,26 @@ const renderWithSession = (component: React.ReactElement) => {
 
 // Helper function to find mobile menu element
 const findMobileMenu = () => {
-  return document.querySelector('[class*="fixed"][class*="inset-y-0"][class*="left-0"]')
+  return screen.queryByRole('navigation', { name: /mobile menu/i }) ||
+         screen.queryByTestId('mobile-menu') ||
+         document.querySelector('[class*="fixed"][class*="inset-y-0"][class*="left-0"]')
 }
 
 // Helper function to check if mobile menu is open
 const isMobileMenuOpen = () => {
   const menu = findMobileMenu()
+  if (menu && menu.getAttribute('aria-expanded') === 'true') {
+    return true
+  }
   return menu && menu.className.includes('translate-x-0')
 }
 
 // Helper function to check if mobile menu is closed
 const isMobileMenuClosed = () => {
   const menu = findMobileMenu()
+  if (menu && menu.getAttribute('aria-expanded') === 'false') {
+    return true
+  }
   return menu && menu.className.includes('-translate-x-full')
 }
 
