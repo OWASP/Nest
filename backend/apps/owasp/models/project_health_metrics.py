@@ -4,13 +4,10 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models.functions import ExtractMonth, TruncDate
 from django.utils import timezone
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen.canvas import Canvas
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.owasp.api.internal.nodes.project_health_stats import ProjectHealthStatsNode
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
-from apps.owasp.utils import create_table
 
 HEALTH_SCORE_THRESHOLD_HEALTHY = 75
 HEALTH_SCORE_THRESHOLD_NEED_ATTENTION = 50
@@ -158,99 +155,6 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
 
         """
         BulkSaveModel.bulk_save(ProjectHealthMetrics, metrics, fields=fields)
-
-    @staticmethod
-    def generate_latest_metrics_pdf(project_key: str) -> BytesIO | None:
-        """Generate a PDF report of the latest health metrics for a project.
-
-        Args:
-            project_key (str): The key of the OWASP project.
-
-        Returns:
-            BytesIO: A buffer containing the generated PDF report.
-
-        """
-        metrics = (
-            ProjectHealthMetrics.get_latest_health_metrics()
-            .filter(project__key=f"www-project-{project_key}")
-            .first()
-        )
-
-        if not metrics:
-            return None
-
-        buffer = BytesIO()
-        pdf = Canvas(buffer, pagesize=letter)
-        pdf.setTitle(f"Health Metrics Report for {metrics.project.name}")
-        pdf.setFont("Helvetica", 12)
-        pdf.drawCentredString(300, 700, f"Health Metrics Report for {metrics.project.name}")
-        pdf.drawCentredString(300, 680, f"Health Score: {metrics.score:.2f}")
-        table_data = [
-            ["Metric", "Value"],
-            ["Project Age", f"{metrics.age_days}/{metrics.age_days_requirement} days"],
-            [
-                "Last Commit",
-                f"{metrics.last_commit_days}/{metrics.last_commit_days_requirement} days",
-            ],
-            [
-                "Last Pull Request",
-                # To bypass ruff long line error
-                "/".join(
-                    [
-                        str(metrics.last_pull_request_days),
-                        f"{metrics.last_pull_request_days_requirement} days",
-                    ]
-                ),
-            ],
-            [
-                "Last Release",
-                f"{metrics.last_release_days}/{metrics.last_release_days_requirement} days",
-            ],
-            [
-                "OWASP Page Last Update",
-                # To bypass ruff long line error
-                "/".join(
-                    [
-                        str(metrics.owasp_page_last_update_days),
-                        f"{metrics.owasp_page_last_update_days_requirement} days",
-                    ]
-                ),
-            ],
-            ["Open/Total Issues", f"{metrics.open_issues_count}/{metrics.total_issues_count}"],
-            [
-                "Open/Total Pull Requests",
-                f"{metrics.open_pull_requests_count}/{metrics.total_pull_requests_count}",
-            ],
-            [
-                "Recent/Total Releases",
-                f"{metrics.recent_releases_count}/{metrics.total_releases_count}",
-            ],
-            ["Forks", metrics.forks_count],
-            ["Stars", metrics.stars_count],
-            [
-                "Unassigned/Unanswered Issues",
-                f"{metrics.unassigned_issues_count}/{metrics.unanswered_issues_count}",
-            ],
-            ["Contributors", metrics.contributors_count],
-            [
-                "Has funding policy issues",
-                "No" if metrics.is_funding_requirements_compliant else "Yes",
-            ],
-            [
-                "Has leadership policy issues",
-                "No" if metrics.is_leader_requirements_compliant else "Yes",
-            ],
-        ]
-        table = create_table(table_data)
-        table.wrapOn(pdf, 500, 250)
-        table.drawOn(pdf, 50, 220)
-        pdf.drawCentredString(
-            300, 100, f"Report Generated on: {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}"
-        )
-        pdf.showPage()
-        pdf.save()
-        buffer.seek(0)
-        return buffer
 
     @staticmethod
     def get_latest_health_metrics() -> models.QuerySet["ProjectHealthMetrics"]:

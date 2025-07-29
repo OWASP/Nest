@@ -12,7 +12,7 @@ const MetricsPDFButton: FC<{
 }> = ({ path, fileName }) => {
   return (
     <Tooltip
-      content="Download PDF"
+      content="Download as PDF"
       className="ml-2"
       placement="top"
       delay={100}

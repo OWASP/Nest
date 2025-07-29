@@ -5,7 +5,7 @@ import re
 from django.http import FileResponse, HttpResponseBadRequest, HttpResponseNotFound
 from django.views.decorators.http import require_GET
 
-from apps.owasp.utils.pdf import generate_metrics_overview_pdf
+from apps.owasp.utils.pdf import generate_latest_metrics_pdf, generate_metrics_overview_pdf
 
 
 @require_GET
@@ -24,7 +24,7 @@ def generate_project_health_metrics_pdf(_request, project_key: str):
     if not re.match(r"^[a-zA-Z0-9_-]+$", project_key):
         return HttpResponseBadRequest("Invalid project key")
 
-    if pdf := ProjectHealthMetrics.generate_latest_metrics_pdf(project_key):
+    if pdf := generate_latest_metrics_pdf(project_key):
         return FileResponse(
             pdf,
             as_attachment=True,
