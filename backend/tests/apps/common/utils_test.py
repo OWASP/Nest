@@ -113,7 +113,7 @@ class TestUtils:
         request = MagicMock()
         request.META = {}
 
-        mocker.patch.object(settings, "ENVIRONMENT", "Local")
+        mocker.patch.object(settings, "IS_LOCAL_ENVIRONMENT", value=True)
         mocker.patch.dict(
             settings._wrapped.__dict__,
             {"PUBLIC_IP_ADDRESS": "10.0.0.100"},  # NOSONAR
