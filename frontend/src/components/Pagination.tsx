@@ -72,8 +72,8 @@ const Pagination: React.FC<PaginationProps> = ({
           <React.Fragment key={index}>
             {number === '...' ? (
               <span className="flex h-10 w-10 items-center justify-center text-gray-600 dark:text-gray-400"
-              data-testid="ellipsis"
               role="presentation"
+              aria-label="More pages"
               >
                 <FontAwesomeIcon icon={faEllipsisH} className="h-5 w-5"></FontAwesomeIcon>
               </span>
