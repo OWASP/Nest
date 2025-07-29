@@ -1,14 +1,18 @@
 """Slack app admin."""
 
 from django.contrib import admin, messages
+from django.http import HttpRequest
 
-from apps.slack.models.conversation import Conversation
-from apps.slack.models.event import Event
-from apps.slack.models.member import Member
-from apps.slack.models.message import Message
-from apps.slack.models.workspace import Workspace
+from apps.slack.models import (
+    Conversation,
+    Event,
+    Member,
+    Message,
+    Workspace,
+)
 
 
+@admin.register(Conversation)
 class ConversationAdmin(admin.ModelAdmin):
     """Admin for Conversation model."""
 
@@ -39,51 +43,26 @@ class ConversationAdmin(admin.ModelAdmin):
         "slack_creator_id",
     )
     fieldsets = (
-        (
-            "Conversation Information",
-            {
-                "fields": (
-                    "slack_channel_id",
-                    "name",
-                    "created_at",
-                    "slack_creator_id",
-                )
-            },
-        ),
-        (
-            "Properties",
-            {
-                "fields": (
-                    "is_private",
-                    "is_archived",
-                    "is_general",
-                )
-            },
-        ),
-        (
-            "Content",
-            {
-                "fields": (
-                    "topic",
-                    "purpose",
-                )
-            },
-        ),
-        (
-            "Additional attributes",
-            {"fields": ("sync_messages",)},
-        ),
+        ("Conversation Information", {
+            "fields": ("slack_channel_id", "name", "created_at", "slack_creator_id")
+        }),
+        ("Properties", {
+            "fields": ("is_private", "is_archived", "is_general")
+        }),
+        ("Content", {
+            "fields": ("topic", "purpose")
+        }),
+        ("Additional Attributes", {
+            "fields": ("sync_messages",)
+        }),
     )
 
 
+@admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     """Admin for Event model."""
 
-    list_display = (
-        "nest_created_at",
-        "trigger",
-        "user_id",
-    )
+    list_display = ("nest_created_at", "trigger", "user_id")
     list_filter = ("trigger",)
     search_fields = (
         "channel_id",
@@ -94,16 +73,14 @@ class EventAdmin(admin.ModelAdmin):
     )
 
 
+@admin.register(Member)
 class MemberAdmin(admin.ModelAdmin):
     """Admin for Member model."""
 
     actions = ("approve_suggested_users",)
     autocomplete_fields = ("user",)
     filter_horizontal = ("suggested_users",)
-    list_filter = (
-        "is_bot",
-        "workspace",
-    )
+    list_filter = ("is_bot", "workspace")
     search_fields = (
         "slack_user_id",
         "username",
@@ -112,24 +89,26 @@ class MemberAdmin(admin.ModelAdmin):
         "user__login",
     )
 
-    def approve_suggested_users(self, request, queryset):
+    @admin.action(description="Approve the suggested user (if only one exists)")
+    def approve_suggested_users(self, request: HttpRequest, queryset):
         """Approve all suggested users for selected members, enforcing one-to-one constraints."""
         for entity in queryset:
             suggestions = entity.suggested_users.all()
+            count = suggestions.count()
 
-            if suggestions.count() == 1:
-                entity.user = suggestions.first()  # only one suggested user
+            if count == 1:
+                entity.user = suggestions.first()
                 entity.save()
                 self.message_user(
                     request,
-                    f" assigned user for {entity}.",
+                    f"Assigned user for {entity}.",
                     messages.SUCCESS,
                 )
-            elif suggestions.count() > 1:
+            elif count > 1:
                 self.message_user(
                     request,
                     f"Error: Multiple suggested users found for {entity}. "
-                    f"Only one user can be assigned due to the one-to-one constraint.",
+                    "Only one user can be assigned due to the one-to-one constraint.",
                     messages.ERROR,
                 )
             else:
@@ -139,9 +118,8 @@ class MemberAdmin(admin.ModelAdmin):
                     messages.WARNING,
                 )
 
-    approve_suggested_users.short_description = "Approve the suggested user (if only one exists)"
 
-
+@admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
     """Admin for Message model."""
 
@@ -156,16 +134,14 @@ class MessageAdmin(admin.ModelAdmin):
         "author",
         "conversation",
     )
-    list_filter = (
-        "has_replies",
-        "conversation",
-    )
+    list_filter = ("has_replies", "conversation")
     search_fields = (
         "slack_message_id",
         "raw_data__text",
     )
 
 
+@admin.register(Workspace)
 class WorkspaceAdmin(admin.ModelAdmin):
     """Admin for Workspace model."""
 
@@ -173,10 +149,3 @@ class WorkspaceAdmin(admin.ModelAdmin):
         "name",
         "slack_workspace_id",
     )
-
-
-admin.site.register(Conversation, ConversationAdmin)
-admin.site.register(Event, EventAdmin)
-admin.site.register(Member, MemberAdmin)
-admin.site.register(Message, MessageAdmin)
-admin.site.register(Workspace, WorkspaceAdmin)
