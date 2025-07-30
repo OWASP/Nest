@@ -12,15 +12,17 @@ class Base(Configuration):
     BASE_DIR = Path(__file__).resolve().parent.parent
 
     ENVIRONMENT = os.environ.get("DJANGO_CONFIGURATION", "Local")
-    if ENVIRONMENT == "Test":
-        from dotenv import load_dotenv
-
-        load_dotenv(BASE_DIR / ".env.example")
 
     ALLOWED_HOSTS = values.ListValue()
     AUTH_USER_MODEL = "nest.User"
     CORS_ALLOW_CREDENTIALS = True
     DEBUG = False
+
+    IS_LOCAL_ENVIRONMENT = False
+    IS_PRODUCTION_ENVIRONMENT = False
+    IS_STAGING_ENVIRONMENT = False
+    IS_TEST_ENVIRONMENT = False
+
     RELEASE_VERSION = values.Value(environ_name="RELEASE_VERSION")
     SENTRY_DSN = values.SecretValue(environ_name="SENTRY_DSN")
 
@@ -44,6 +46,7 @@ class Base(Configuration):
     THIRD_PARTY_APPS = (
         "algoliasearch_django",
         "corsheaders",
+        "ninja",
         "storages",
     )
 
