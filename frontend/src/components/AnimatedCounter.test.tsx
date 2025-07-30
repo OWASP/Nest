@@ -1,4 +1,4 @@
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, waitFor } from '@testing-library/react'
 import AnimatedCounter from 'components/AnimatedCounter'
 
 jest.useFakeTimers()
@@ -77,5 +77,16 @@ describe('AnimatedCounter', () => {
     render(<AnimatedCounter {...defaultProps} />)
     const counter = screen.getByLabelText('Animated count')
     expect(counter.tagName.toLowerCase()).toBe('span')
+  })
+
+  it('renders the counter with correct value after animation', async () => {
+    render(<AnimatedCounter end={42} duration={0.1} />)
+
+    const counterElement = screen.getByLabelText(/animated count/i)
+    expect(counterElement).toBeInTheDocument()
+
+    await waitFor(() => {
+      expect(counterElement.textContent).toBe('42')
+    }, { timeout: 500 })
   })
 })
