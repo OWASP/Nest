@@ -10,7 +10,12 @@ from .mixins import GenericEntityAdminMixin, LeaderAdminMixin
 class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
     """Admin for Project model."""
 
-    autocomplete_fields = ("organizations", "owasp_repository", "owners", "repositories")
+    autocomplete_fields = (
+        "organizations",
+        "owasp_repository",
+        "owners",
+        "repositories",
+    )
     filter_horizontal = LeaderAdminMixin.filter_horizontal
     list_display = (
         "custom_field_name",

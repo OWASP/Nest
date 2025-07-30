@@ -4,14 +4,17 @@ from django.contrib import admin
 
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
-from .mixins import StandardOWASPAdminMixin
+from .mixins import StandardOwaspAdminMixin
 
 
-class ProjectHealthMetricsAdmin(admin.ModelAdmin, StandardOWASPAdminMixin):
+class ProjectHealthMetricsAdmin(admin.ModelAdmin, StandardOwaspAdminMixin):
     """Admin for ProjectHealthMetrics model."""
 
     autocomplete_fields = ("project",)
-    list_filter = ("project__level", "nest_created_at")
+    list_filter = (
+        "project__level",
+        "nest_created_at",
+    )
     list_display = (
         "project",
         "nest_created_at",

@@ -4,25 +4,34 @@ from django.contrib import messages
 from django.utils.safestring import mark_safe
 
 
-class BaseOWASPAdminMixin:
+class BaseOwaspAdminMixin:
     """Base mixin for OWASP admin classes providing common patterns."""
 
     # Common configuration patterns
-    common_list_display_fields = ("created_at", "updated_at")
-    common_search_fields = ("name", "key")
-    common_list_filters = ("is_active",)
+    list_display_field_names = (
+        "created_at",
+        "updated_at",
+    )
+    list_filter_field_names = ("is_active",)
+    search_field_names = (
+        "name",
+        "key",
+    )
 
     def get_base_list_display(self, *additional_fields):
         """Get base list display with additional fields."""
-        base = ["name"] if hasattr(self.model, "name") else []
-        return tuple(base + list(additional_fields) + list(self.common_list_display_fields))
+        return tuple(
+            ("name",) if hasattr(self.model, "name") else (),
+            *additional_fields,
+            *self.list_display_field_names,
+        )
 
     def get_base_search_fields(self, *additional_fields):
         """Get base search fields with additional fields."""
-        return tuple(list(self.common_search_fields) + list(additional_fields))
+        return self.search_field_names + additional_fields
 
 
-class GenericEntityAdminMixin(BaseOWASPAdminMixin):
+class GenericEntityAdminMixin(BaseOwaspAdminMixin):
     """Mixin for generic entity admin with common entity functionality."""
 
     def get_queryset(self, request):
@@ -36,13 +45,17 @@ class GenericEntityAdminMixin(BaseOWASPAdminMixin):
                 return ""
             return self._format_github_link(obj.owasp_repository)
 
-        urls = [self._format_github_link(repository) for repository in obj.repositories.all()]
-        return mark_safe(" ".join(urls))  # noqa: S308
+        return mark_safe(  # noqa: S308
+            " ".join(
+                [self._format_github_link(repository) for repository in obj.repositories.all()]
+            )
+        )
 
     def custom_field_owasp_url(self, obj):
         """Entity OWASP URL with uniform formatting."""
         if not hasattr(obj, "key") or not obj.key:
             return ""
+
         return mark_safe(  # noqa: S308
             f"<a href='https://owasp.org/{obj.key}' target='_blank'>↗️</a>"
         )
@@ -55,7 +68,8 @@ class GenericEntityAdminMixin(BaseOWASPAdminMixin):
             return ""
         if not hasattr(repository, "key") or not repository.key:
             return ""
-        return (
+
+        return mark_safe(  # noqa: S308
             f"<a href='https://github.com/{repository.owner.login}/"
             f"{repository.key}' target='_blank'>↗️</a>"
         )
@@ -64,19 +78,21 @@ class GenericEntityAdminMixin(BaseOWASPAdminMixin):
     custom_field_owasp_url.short_description = "OWASP 🔗"
 
 
-class LeaderAdminMixin(BaseOWASPAdminMixin):
+class LeaderAdminMixin(BaseOwaspAdminMixin):
     """Admin mixin for entities that can have leaders."""
 
     actions = ("approve_suggested_leaders",)
-    filter_horizontal = ("leaders", "suggested_leaders")
+    filter_horizontal = (
+        "leaders",
+        "suggested_leaders",
+    )
 
     def approve_suggested_leaders(self, request, queryset):
         """Approve suggested leaders for selected entities."""
         total_approved = 0
         for entity in queryset:
             suggestions = entity.suggested_leaders.all()
-            count = suggestions.count()
-            if count > 0:
+            if count := suggestions.count():
                 entity.leaders.add(*suggestions)
                 total_approved += count
                 entity_name = entity.name if hasattr(entity, "name") else str(entity)
@@ -86,7 +102,7 @@ class LeaderAdminMixin(BaseOWASPAdminMixin):
                     messages.SUCCESS,
                 )
 
-        if total_approved > 0:
+        if total_approved:
             self.message_user(
                 request,
                 f"Total approved suggestions: {total_approved}",
@@ -96,7 +112,7 @@ class LeaderAdminMixin(BaseOWASPAdminMixin):
     approve_suggested_leaders.short_description = "Approve suggested leaders"
 
 
-class StandardOWASPAdminMixin(BaseOWASPAdminMixin):
+class StandardOwaspAdminMixin(BaseOwaspAdminMixin):
     """Standard mixin for simple OWASP admin classes."""
 
     def get_common_config(
@@ -112,8 +128,6 @@ class StandardOWASPAdminMixin(BaseOWASPAdminMixin):
             config["search_fields"] = self.get_base_search_fields(*extra_search_fields)
 
         if extra_list_filters:
-            config["list_filter"] = tuple(
-                list(self.common_list_filters) + list(extra_list_filters)
-            )
+            config["list_filter"] = self.list_filter_field_names + extra_list_filters
 
         return config

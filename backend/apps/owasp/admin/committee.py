@@ -10,7 +10,10 @@ from .mixins import GenericEntityAdminMixin, LeaderAdminMixin
 class CommitteeAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
     """Admin for Committee model."""
 
-    autocomplete_fields = ("leaders", "owasp_repository")
+    autocomplete_fields = (
+        "leaders",
+        "owasp_repository",
+    )
     filter_horizontal = LeaderAdminMixin.filter_horizontal
     search_fields = ("name",)
 
