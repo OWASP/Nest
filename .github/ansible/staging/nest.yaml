@@ -46,6 +46,7 @@
           - .env.frontend
 
       - name: Clean up secrets
+        delegate_to: localhost
         file:
           path: '{{ github_workspace }}/{{ item }}'
           state: absent
@@ -54,6 +55,7 @@
           - .env.cache
           - .env.db
           - .env.frontend
+        run_once: true
 
       - name: Copy crontab
         copy:
