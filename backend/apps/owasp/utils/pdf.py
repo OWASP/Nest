@@ -16,7 +16,7 @@ def create_table(data, col_widths="*"):
         data,
         colWidths=col_widths,
         style=TableStyle(
-            [
+            (
                 ("BACKGROUND", (0, 0), (-1, 0), "#f2f2f2"),
                 ("TEXTCOLOR", (0, 0), (-1, 0), "#000000"),
                 ("ALIGN", (0, 0), (-1, -1), "CENTER"),
@@ -24,7 +24,7 @@ def create_table(data, col_widths="*"):
                 ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
                 ("BACKGROUND", (0, 1), (-1, -1), "#ffffff"),
                 ("GRID", (0, 0), (-1, -1), 1, "#dddddd"),
-            ]
+            )
         ),
     )
 
@@ -73,8 +73,8 @@ def generate_metrics_overview_pdf() -> BytesIO:
     )
 
     table = create_table(table_data)
-    table.wrapOn(canvas, 400, 600)
-    table.drawOn(canvas, 100, 570)
+    table.wrapOn(canvas, 400, 500)
+    table.drawOn(canvas, 100, 470)
     canvas.drawCentredString(
         300, 100, f"Generated on: {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}"
     )
@@ -112,13 +112,13 @@ def generate_latest_metrics_pdf(project_key: str) -> BytesIO | None:
         300, 680, f"Health Score: {metrics.score:.2f}" if metrics.score is not None else "N/A"
     )
     table_data = (
-        ["Metric", "Value"],
-        ["Project Age", f"{metrics.age_days}/{metrics.age_days_requirement} days"],
-        [
+        ("Metric", "Value"),
+        ("Project Age", f"{metrics.age_days}/{metrics.age_days_requirement} days"),
+        (
             "Last Commit",
             f"{metrics.last_commit_days}/{metrics.last_commit_days_requirement} days",
-        ],
-        [
+        ),
+        (
             "Last Pull Request",
             # To bypass ruff long line error
             "/".join(
@@ -127,12 +127,12 @@ def generate_latest_metrics_pdf(project_key: str) -> BytesIO | None:
                     f"{metrics.last_pull_request_days_requirement} days",
                 ]
             ),
-        ],
-        [
+        ),
+        (
             "Last Release",
             f"{metrics.last_release_days}/{metrics.last_release_days_requirement} days",
-        ],
-        [
+        ),
+        (
             "OWASP Page Last Update",
             # To bypass ruff long line error
             "/".join(
@@ -141,31 +141,31 @@ def generate_latest_metrics_pdf(project_key: str) -> BytesIO | None:
                     f"{metrics.owasp_page_last_update_days_requirement} days",
                 ]
             ),
-        ],
-        ["Open/Total Issues", f"{metrics.open_issues_count}/{metrics.total_issues_count}"],
-        [
+        ),
+        ("Open/Total Issues", f"{metrics.open_issues_count}/{metrics.total_issues_count}"),
+        (
             "Open/Total Pull Requests",
             f"{metrics.open_pull_requests_count}/{metrics.total_pull_requests_count}",
-        ],
-        [
+        ),
+        (
             "Recent/Total Releases",
             f"{metrics.recent_releases_count}/{metrics.total_releases_count}",
-        ],
-        ["Forks", metrics.forks_count],
-        ["Stars", metrics.stars_count],
-        [
+        ),
+        ("Forks", metrics.forks_count),
+        ("Stars", metrics.stars_count),
+        (
             "Unassigned/Unanswered Issues",
             f"{metrics.unassigned_issues_count}/{metrics.unanswered_issues_count}",
-        ],
-        ["Contributors", metrics.contributors_count],
-        [
+        ),
+        ("Contributors", metrics.contributors_count),
+        (
             "Has funding policy issues",
             "No" if metrics.is_funding_requirements_compliant else "Yes",
-        ],
-        [
+        ),
+        (
             "Has leadership policy issues",
             "No" if metrics.is_leader_requirements_compliant else "Yes",
-        ],
+        ),
     )
     table = create_table(table_data)
     table.wrapOn(pdf, 500, 250)

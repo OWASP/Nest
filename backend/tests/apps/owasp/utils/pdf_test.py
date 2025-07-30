@@ -73,8 +73,8 @@ class TestGenerateMetricsPDF:
             table_data, colWidths="*", style=mock_table_style.return_value
         )
         mock_table_style.assert_called_once()
-        mock_table.return_value.wrapOn.assert_called_once_with(canvas, 400, 600)
-        mock_table.return_value.drawOn.assert_called_once_with(canvas, 100, 570)
+        mock_table.return_value.wrapOn.assert_called_once_with(canvas, 400, 500)
+        mock_table.return_value.drawOn.assert_called_once_with(canvas, 100, 470)
         canvas.showPage.assert_called_once()
         canvas.save.assert_called_once()
 
@@ -125,13 +125,13 @@ class TestGenerateMetricsPDF:
         mock_canvas.assert_called_once_with(mock_bytes_io.return_value, pagesize=letter)
         canvas = mock_canvas.return_value
         table_data = (
-            ["Metric", "Value"],
-            ["Project Age", f"{metrics.age_days}/{metrics.age_days_requirement} days"],
-            [
+            ("Metric", "Value"),
+            ("Project Age", f"{metrics.age_days}/{metrics.age_days_requirement} days"),
+            (
                 "Last Commit",
                 f"{metrics.last_commit_days}/{metrics.last_commit_days_requirement} days",
-            ],
-            [
+            ),
+            (
                 "Last Pull Request",
                 # To bypass ruff long line error
                 "/".join(
@@ -140,12 +140,12 @@ class TestGenerateMetricsPDF:
                         f"{metrics.last_pull_request_days_requirement} days",
                     ]
                 ),
-            ],
-            [
+            ),
+            (
                 "Last Release",
                 f"{metrics.last_release_days}/{metrics.last_release_days_requirement} days",
-            ],
-            [
+            ),
+            (
                 "OWASP Page Last Update",
                 # To bypass ruff long line error
                 "/".join(
@@ -154,31 +154,31 @@ class TestGenerateMetricsPDF:
                         f"{metrics.owasp_page_last_update_days_requirement} days",
                     ]
                 ),
-            ],
-            ["Open/Total Issues", f"{metrics.open_issues_count}/{metrics.total_issues_count}"],
-            [
+            ),
+            ("Open/Total Issues", f"{metrics.open_issues_count}/{metrics.total_issues_count}"),
+            (
                 "Open/Total Pull Requests",
                 f"{metrics.open_pull_requests_count}/{metrics.total_pull_requests_count}",
-            ],
-            [
+            ),
+            (
                 "Recent/Total Releases",
                 f"{metrics.recent_releases_count}/{metrics.total_releases_count}",
-            ],
-            ["Forks", metrics.forks_count],
-            ["Stars", metrics.stars_count],
-            [
+            ),
+            ("Forks", metrics.forks_count),
+            ("Stars", metrics.stars_count),
+            (
                 "Unassigned/Unanswered Issues",
                 f"{metrics.unassigned_issues_count}/{metrics.unanswered_issues_count}",
-            ],
-            ["Contributors", metrics.contributors_count],
-            [
+            ),
+            ("Contributors", metrics.contributors_count),
+            (
                 "Has funding policy issues",
                 "No" if metrics.is_funding_requirements_compliant else "Yes",
-            ],
-            [
+            ),
+            (
                 "Has leadership policy issues",
                 "No" if metrics.is_leader_requirements_compliant else "Yes",
-            ],
+            ),
         )
         mock_table.assert_called_once_with(
             table_data, colWidths="*", style=mock_table_style.return_value
