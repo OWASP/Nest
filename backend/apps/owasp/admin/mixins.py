@@ -1,13 +1,14 @@
 """OWASP admin mixins for common functionality."""
 
 from django.contrib import messages
+from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
 
 class BaseOwaspAdminMixin:
     """Base mixin for OWASP admin classes providing common patterns."""
 
-    # Common configuration patterns
+    # Common configuration patterns.
     list_display_field_names = (
         "created_at",
         "updated_at",
@@ -57,7 +58,7 @@ class GenericEntityAdminMixin(BaseOwaspAdminMixin):
             return ""
 
         return mark_safe(  # noqa: S308
-            f"<a href='https://owasp.org/{obj.key}' target='_blank'>↗️</a>"
+            f"<a href='https://owasp.org/{escape(obj.key)}' target='_blank'>↗️</a>"
         )
 
     def _format_github_link(self, repository):
@@ -70,8 +71,8 @@ class GenericEntityAdminMixin(BaseOwaspAdminMixin):
             return ""
 
         return mark_safe(  # noqa: S308
-            f"<a href='https://github.com/{repository.owner.login}/"
-            f"{repository.key}' target='_blank'>↗️</a>"
+            f"<a href='https://github.com/{escape(repository.owner.login)}/"
+            f"{escape(repository.key)}' target='_blank'>↗️</a>"
         )
 
     custom_field_github_urls.short_description = "GitHub 🔗"
