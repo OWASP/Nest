@@ -39,10 +39,10 @@ class TestUtils:
 
         assert mock_update_data.call_count == 2
         mock_update_data.assert_any_call(
-            text="first chunk",
             content_object=mock_content_object,
             embedding=[0.1, 0.2],
             save=False,
+            text="first chunk",
         )
 
         assert result == ["mock_chunk_instance", "mock_chunk_instance"]
