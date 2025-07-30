@@ -78,7 +78,7 @@ def get_user_ip_address(request) -> str:
         str: The user's IP address.
 
     """
-    if settings.ENVIRONMENT == "Local":
+    if settings.IS_LOCAL_ENVIRONMENT:
         return settings.PUBLIC_IP_ADDRESS
 
     x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
