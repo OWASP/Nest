@@ -11,12 +11,12 @@ class ContextAdmin(admin.ModelAdmin):
 
     list_display = (
         "id",
-        "generated_text",
+        "content",
         "content_type",
         "object_id",
         "source",
     )
-    search_fields = ("generated_text", "source")
+    search_fields = ("content", "source")
     list_filter = ("content_type", "source")
 
 

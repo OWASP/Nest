@@ -45,7 +45,7 @@ def create_chunks_and_embeddings(
         )
 
         context = Context(
-            generated_text="\n".join(all_chunk_texts),
+            content="\n".join(all_chunk_texts),
             content_object=content_object,
         )
         context.save()

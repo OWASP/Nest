@@ -18,7 +18,7 @@ class Chunk(TimestampedModel):
         unique_together = ("context", "text")
 
     context = models.ForeignKey(
-        Context, on_delete=models.CASCADE, related_name="chunks", null=True, blank=True
+        Context, on_delete=models.CASCADE, related_name="chunks", default=""
     )
     embedding = VectorField(verbose_name="Embedding", dimensions=1536)
     text = models.TextField(verbose_name="Text")

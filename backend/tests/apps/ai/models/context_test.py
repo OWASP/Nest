@@ -19,7 +19,7 @@ class TestContextModel:
     def test_str_method_without_content_type(self):
         context = Context()
         context.id = 1
-        context.generated_text = "Sample text without content type"
+        context.content = "Sample text without content type"
         context.content_type = None
         context.content_object = None
 
@@ -32,7 +32,7 @@ class TestContextModel:
 
         context = Context()
         context.id = 1
-        context.generated_text = long_text
+        context.content = long_text
         context.content_type = None
         context.content_object = None
 
@@ -46,7 +46,7 @@ class TestContextModel:
 
         context = Context()
         context.id = 1
-        context.generated_text = text_50_chars
+        context.content = text_50_chars
         context.content_type = None
         context.content_object = None
 
@@ -58,7 +58,7 @@ class TestContextModel:
     def test_str_method_with_empty_text(self):
         context = Context()
         context.id = 1
-        context.generated_text = ""
+        context.content = ""
         context.content_type = None
         context.content_object = None
 
@@ -70,8 +70,8 @@ class TestContextModel:
         assert Context._meta.db_table == "ai_contexts"
         assert Context._meta.verbose_name == "Context"
 
-    def test_generated_text_field_properties(self):
-        field = Context._meta.get_field("generated_text")
+    def test_content_field_properties(self):
+        field = Context._meta.get_field("content")
         assert field.verbose_name == "Generated Text"
         assert field.__class__.__name__ == "TextField"
 
@@ -104,10 +104,10 @@ class TestContextModel:
     def test_context_creation_with_save(self, mock_init, mock_save):
         mock_init.return_value = None
 
-        generated_text = "Test generated text"
+        content = "Test generated text"
         source = "test_source"
 
-        context = Context(generated_text=generated_text, source=source)
+        context = Context(content=content, source=source)
         context.save()
 
         mock_save.assert_called_once()
@@ -122,12 +122,12 @@ class TestContextModel:
         mock_context = create_model_mock(Context)
         mock_create.return_value = mock_context
 
-        generated_text = "Test text"
+        content = "Test text"
         source = "test_source"
 
-        result = Context.objects.create(generated_text=generated_text, source=source)
+        result = Context.objects.create(content=content, source=source)
 
-        mock_create.assert_called_once_with(generated_text=generated_text, source=source)
+        mock_create.assert_called_once_with(content=content, source=source)
         assert result == mock_context
 
     @patch("apps.ai.models.context.Context.objects.filter")
@@ -153,7 +153,7 @@ class TestContextModel:
     @patch("apps.ai.models.context.Context.full_clean")
     def test_context_validation(self, mock_full_clean):
         context = Context()
-        context.generated_text = "Valid text"
+        context.content = "Valid text"
         context.source = "A" * 100
 
         context.full_clean()
@@ -167,7 +167,7 @@ class TestContextModel:
         mock_full_clean.side_effect = ValidationError("Source too long")
 
         context = Context()
-        context.generated_text = "Valid text"
+        context.content = "Valid text"
         context.source = "A" * 101
 
         with pytest.raises(ValidationError) as exc_info:

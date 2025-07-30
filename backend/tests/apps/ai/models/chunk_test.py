@@ -133,5 +133,3 @@ class TestChunkModel:
         from apps.ai.models.context import Context
 
         assert context_field.related_model == Context
-        assert context_field.null is True
-        assert context_field.blank is True
