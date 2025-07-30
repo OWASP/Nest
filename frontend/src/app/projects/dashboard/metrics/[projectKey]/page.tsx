@@ -68,7 +68,7 @@ const ProjectHealthMetricsDetails: FC = () => {
               <h1 className="text-2xl font-bold">{metricsLatest.projectName}</h1>
               <MetricsPDFButton
                 path={`${projectKey}/pdf`}
-                fileName={`${projectKey}-health-metrics.pdf`}
+                fileName={`${projectKey}-health-metrics`}
               />
             </div>
             <div className="flex items-center gap-2">

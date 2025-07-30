@@ -7,6 +7,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Table, TableStyle
 
+from apps.owasp.api.internal.nodes.project_health_stats import ProjectHealthStatsNode
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 
@@ -29,15 +30,16 @@ def create_table(data, col_widths="*"):
     )
 
 
-def generate_metrics_overview_pdf() -> BytesIO:
+def generate_metrics_overview_pdf(metrics_stats: ProjectHealthStatsNode) -> BytesIO:
     """Generate a PDF overview of project health metrics.
+
+    Args:
+        metrics_stats: The project health stats node.
 
     Returns:
         BytesIO: PDF content as bytes.
 
     """
-    metrics_stats = ProjectHealthMetrics.get_stats()
-
     buffer = BytesIO()
     canvas = Canvas(buffer)
     canvas.setFont("Helvetica", 12)
@@ -84,22 +86,16 @@ def generate_metrics_overview_pdf() -> BytesIO:
     return buffer
 
 
-def generate_latest_metrics_pdf(project_key: str) -> BytesIO | None:
+def generate_latest_metrics_pdf(metrics: ProjectHealthMetrics) -> BytesIO | None:
     """Generate a PDF report of the latest health metrics for a project.
 
     Args:
-        project_key (str): The key of the OWASP project.
+        metrics (ProjectHealthMetrics): The project health metrics.
 
     Returns:
         BytesIO: A buffer containing the generated PDF report.
 
     """
-    metrics = (
-        ProjectHealthMetrics.get_latest_health_metrics()
-        .filter(project__key=f"www-project-{project_key}")
-        .first()
-    )
-
     if not metrics:
         return None
 
@@ -176,4 +172,5 @@ def generate_latest_metrics_pdf(project_key: str) -> BytesIO | None:
     pdf.showPage()
     pdf.save()
     buffer.seek(0)
+
     return buffer

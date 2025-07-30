@@ -65,7 +65,7 @@ class TestGenerateMetricsPDF:
             ),
         )
         mock_get_stats.return_value = metrics_stats
-        generate_metrics_overview_pdf()
+        generate_metrics_overview_pdf(metrics_stats)
         mock_bytes_io.assert_called_once()
         mock_canvas.assert_called_once_with(mock_bytes_io.return_value)
         canvas = mock_canvas.return_value
@@ -95,6 +95,7 @@ class TestGenerateMetricsPDF:
     ):
         metrics = MagicMock(
             age_days=30,
+            age_days_requirement=365,
             contributors_count=20,
             forks_count=15,
             is_funding_requirements_compliant=True,
@@ -102,11 +103,13 @@ class TestGenerateMetricsPDF:
             last_commit_days=5,
             last_commit_days_requirement=7,
             last_pull_request_days=2,
+            last_pull_request_days_requirement=30,
             last_release_days=10,
             last_release_days_requirement=14,
             open_issues_count=10,
             open_pull_requests_count=3,
             owasp_page_last_update_days=20,
+            owasp_page_last_update_days_requirement=90,
             project=MagicMock(name="Test Project", key="www-project-test"),
             recent_releases_count=1,
             score=85.0,
@@ -117,10 +120,7 @@ class TestGenerateMetricsPDF:
             unanswered_issues_count=2,
             unassigned_issues_count=5,
         )
-        mock_get_latest_health_metrics.return_value.filter.return_value.first.return_value = (
-            metrics
-        )
-        generate_latest_metrics_pdf("test")
+        generate_latest_metrics_pdf(metrics)
         mock_bytes_io.assert_called_once()
         mock_canvas.assert_called_once_with(mock_bytes_io.return_value, pagesize=letter)
         canvas = mock_canvas.return_value

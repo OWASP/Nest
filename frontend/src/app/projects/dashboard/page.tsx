@@ -98,10 +98,7 @@ const ProjectsDashboardPage: FC = () => {
     <>
       <div className="mb-4 flex items-center justify-start">
         <h1 className="font-semibold">Project Health Dashboard Overview</h1>
-        <MetricsPDFButton
-          path="overview/pdf"
-          fileName="owasp-project-health-metrics-overview.pdf"
-        />
+        <MetricsPDFButton path="overview/pdf" fileName="owasp-project-health-metrics-overview" />
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
         {projectsCardsItems.map((item) => (

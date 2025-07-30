@@ -1,5 +1,6 @@
 import { handleAppError } from 'app/global-error'
 import { API_URL } from 'utils/credentials'
+
 export const fetchMetricsPDF = async (path: string, fileName: string): Promise<void> => {
   const response = await fetch(`${API_URL}owasp/project-health-metrics/${path}`, {
     method: 'GET',
@@ -20,7 +21,7 @@ export const fetchMetricsPDF = async (path: string, fileName: string): Promise<v
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.setAttribute('download', `${fileName}_${new Date().toISOString().split('T')[0]}.pdf`)
+    link.setAttribute('download', `${fileName}-${new Date().toISOString().split('T')[0]}.pdf`)
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
