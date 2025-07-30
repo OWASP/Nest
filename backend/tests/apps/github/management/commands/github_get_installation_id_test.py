@@ -47,7 +47,7 @@ class TestGitHubGetInstallationId(SimpleTestCase):
             command.handle(app_id=123456)
 
         # Verify the mocks were called correctly
-        args, kwargs = mock_app_auth.call_args
+        _, kwargs = mock_app_auth.call_args
         assert kwargs["app_id"] == 123456
         assert isinstance(kwargs["private_key"], str)
         mock_github_integration.assert_called_once_with(auth=mock_auth_instance)

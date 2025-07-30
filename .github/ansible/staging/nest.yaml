@@ -34,29 +34,26 @@
           state: directory
           mode: '0755'
 
-      - name: Copy .env.backend
+      - name: Copy secrets
         copy:
-          src: '{{ github_workspace }}/.env.backend'
+          src: '{{ github_workspace }}/{{ item }}'
           dest: ~/
           mode: '0400'
+        loop:
+          - .env.backend
+          - .env.cache
+          - .env.db
+          - .env.frontend
 
-      - name: Copy .env.cache
-        copy:
-          src: '{{ github_workspace }}/.env.cache'
-          dest: ~/
-          mode: '0400'
-
-      - name: Copy .env.db
-        copy:
-          src: '{{ github_workspace }}/.env.db'
-          dest: ~/
-          mode: '0400'
-
-      - name: Copy .env.frontend
-        copy:
-          src: '{{ github_workspace }}/.env.frontend'
-          dest: ~/
-          mode: '0400'
+      - name: Clean up secrets
+        file:
+          path: '{{ github_workspace }}/{{ item }}'
+          state: absent
+        loop:
+          - .env.backend
+          - .env.cache
+          - .env.db
+          - .env.frontend
 
       - name: Copy crontab
         copy:
