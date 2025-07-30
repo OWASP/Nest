@@ -155,7 +155,7 @@ describe('Rendering', () => {
     )
   })
 
-  describe('Search Input Behavious', () => {
+  describe('Search input behavior', () => {
     it('updates search query on input change', async () => {
       const user = userEvent.setup()
 
