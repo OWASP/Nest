@@ -15,7 +15,7 @@
     "test:unit": "tsc --noEmit && NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest"
   },
   "dependencies": {
-    "@apollo/client": "^3.13.8",
+    "@apollo/client": "^3.13.9",
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-brands-svg-icons": "^6.7.2",
     "@fortawesome/free-regular-svg-icons": "^6.7.2",
