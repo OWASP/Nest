@@ -18,6 +18,7 @@ class Local(Base):
     CSRF_TRUSTED_ORIGINS = ALLOWED_ORIGINS
 
     DEBUG = True
+    IS_LOCAL_ENVIRONMENT = True
     LOGGING = {}
     PUBLIC_IP_ADDRESS = values.Value()
     SLACK_COMMANDS_ENABLED = True
