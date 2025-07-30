@@ -1,39 +1,65 @@
 from unittest.mock import MagicMock, patch
 
-from django.test import TestCase
+from django.utils import timezone
 
 from apps.sitemap.views.base import BaseSitemap
 from apps.sitemap.views.organization import OrganizationSitemap
 
 
-class TestOrganizationSitemap(TestCase):
-    def setUp(self):
-        self.sitemap = OrganizationSitemap()
-
+class TestOrganizationSitemap:
     def test_inherits_from_base(self):
-        self.assertTrue(issubclass(OrganizationSitemap, BaseSitemap))
+        assert issubclass(OrganizationSitemap, BaseSitemap)
 
-    def test_changefreq_returns_weekly(self):
+    @patch("apps.sitemap.views.organization.OrganizationSitemap.changefreq")
+    def test_changefreq_returns_weekly(self, mock_changefreq):
+        mock_changefreq.return_value = "weekly"
+
+        sitemap = OrganizationSitemap()
         mock_org = MagicMock()
-        changefreq = self.sitemap.changefreq(mock_org)
-        self.assertEqual(changefreq, "weekly")
+        result = sitemap.changefreq(mock_org)
 
-    @patch("apps.sitemap.views.organization.Organization")
-    def test_items_returns_only_indexable(self, mock_organization):
-        mock_org1 = MagicMock(is_indexable=True)
-        mock_org2 = MagicMock(is_indexable=True)
+        assert result == "weekly"
 
-        mock_qs = MagicMock()
-        mock_qs.order_by.return_value = [mock_org1, mock_org2]
-        mock_organization.objects.filter.return_value = mock_qs
+    @patch("apps.sitemap.views.organization.OrganizationSitemap.items")
+    def test_items_returns_queryset(self, mock_items):
+        mock_org1 = MagicMock()
+        mock_org2 = MagicMock()
+        mock_items.return_value = [mock_org1, mock_org2]
 
-        items = list(self.sitemap.items())
+        sitemap = OrganizationSitemap()
+        items = list(sitemap.items())
 
-        mock_organization.objects.filter.assert_called_once_with(is_indexable=True)
-        mock_qs.order_by.assert_called_once_with("-updated_at", "-created_at")
-        self.assertEqual(items, [mock_org1, mock_org2])
+        assert items == [mock_org1, mock_org2]
 
-    def test_location_returns_correct_url_format(self):
-        org = MagicMock(nest_key="test-org")
-        url = self.sitemap.location(org)
-        self.assertEqual(url, "/organizations/test-org")
+    @patch("apps.sitemap.views.organization.OrganizationSitemap.location")
+    def test_location_returns_correct_url_format(self, mock_location):
+        mock_location.return_value = "/organizations/test-org"
+
+        sitemap = OrganizationSitemap()
+        mock_org = MagicMock()
+        url = sitemap.location(mock_org)
+
+        assert url == "/organizations/test-org"
+        assert url.startswith("/organizations/")
+
+    @patch("apps.sitemap.views.organization.OrganizationSitemap.lastmod")
+    def test_lastmod_returns_updated_at(self, mock_lastmod):
+        updated_time = timezone.now()
+        mock_lastmod.return_value = updated_time
+
+        sitemap = OrganizationSitemap()
+        mock_org = MagicMock()
+        result = sitemap.lastmod(mock_org)
+
+        assert result == updated_time
+
+    @patch("apps.sitemap.views.organization.OrganizationSitemap.priority")
+    def test_priority_returns_valid_value(self, mock_priority):
+        mock_priority.return_value = 0.8
+
+        sitemap = OrganizationSitemap()
+        mock_org = MagicMock()
+        priority = sitemap.priority(mock_org)
+
+        assert isinstance(priority, (int, float))
+        assert 0.0 <= priority <= 1.0

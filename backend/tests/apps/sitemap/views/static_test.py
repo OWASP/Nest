@@ -28,12 +28,16 @@ class TestStaticSitemap:
     @patch("apps.sitemap.views.static.Committee.objects.aggregate")
     @patch("apps.sitemap.views.static.Project.objects.aggregate")
     @patch("apps.sitemap.views.static.User.objects.aggregate")
-    def test_lastmod(self, mock_user, mock_project, mock_committee, mock_chapter, sitemap):
+    @patch("apps.sitemap.views.static.Organization.objects.aggregate")
+    def test_lastmod(
+        self, mock_user, mock_project, mock_committee, mock_chapter, mock_organization, sitemap
+    ):
         dt = timezone.now()
         mock_chapter.return_value = {"latest": dt}
         mock_committee.return_value = {"latest": dt}
         mock_project.return_value = {"latest": dt}
         mock_user.return_value = {"latest": dt}
+        mock_organization.return_value = {"latest": dt}
         for item in sitemap.STATIC_ROUTES:
             result = sitemap.lastmod(item)
             assert result is not None
