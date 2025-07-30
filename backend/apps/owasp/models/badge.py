@@ -5,6 +5,7 @@ from django.db import models
 
 from apps.common.models import TimestampedModel
 
+
 class Badge(TimestampedModel):
     """Represents a user badge for roles or achievements."""
 

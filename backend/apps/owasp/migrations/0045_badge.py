@@ -5,25 +5,49 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('owasp', '0044_chapter_chapter_updated_at_desc_idx_and_more'),
+        ("owasp", "0044_chapter_chapter_updated_at_desc_idx_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Badge',
+            name="Badge",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nest_created_at', models.DateTimeField(auto_now_add=True)),
-                ('nest_updated_at', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(help_text='Name of the badge.', max_length=255, unique=True)),
-                ('description', models.CharField(blank=True, help_text='A short description of the badge.', max_length=255)),
-                ('weight', models.PositiveSmallIntegerField(default=0, help_text='A weight to sort badges by.', validators=[django.core.validators.MinValueValidator(0)])),
-                ('css_class', models.CharField(help_text='The font-awesome css class for the badge.', max_length=255)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("nest_created_at", models.DateTimeField(auto_now_add=True)),
+                ("nest_updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "name",
+                    models.CharField(help_text="Name of the badge.", max_length=255, unique=True),
+                ),
+                (
+                    "description",
+                    models.CharField(
+                        blank=True, help_text="A short description of the badge.", max_length=255
+                    ),
+                ),
+                (
+                    "weight",
+                    models.PositiveSmallIntegerField(
+                        default=0,
+                        help_text="A weight to sort badges by.",
+                        validators=[django.core.validators.MinValueValidator(0)],
+                    ),
+                ),
+                (
+                    "css_class",
+                    models.CharField(
+                        help_text="The font-awesome css class for the badge.", max_length=255
+                    ),
+                ),
             ],
             options={
-                'ordering': ['weight', 'name'],
+                "ordering": ["weight", "name"],
             },
         ),
     ]
