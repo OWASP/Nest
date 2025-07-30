@@ -1,6 +1,6 @@
 """Sitemap views for Organization objects."""
 
-from apps.organization.models import Organization
+from apps.organization.models.organization import Organization
 from apps.sitemap.views.base import BaseSitemap
 
 
