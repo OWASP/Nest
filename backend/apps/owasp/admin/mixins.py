@@ -1,3 +1,5 @@
+"""OWASP admin mixins for common functionality."""
+
 from django.contrib import messages
 from django.utils.safestring import mark_safe
 
@@ -30,6 +32,8 @@ class GenericEntityAdminMixin(BaseOWASPAdminMixin):
     def custom_field_github_urls(self, obj):
         """Entity GitHub URLs with uniform formatting."""
         if not hasattr(obj, "repositories"):
+            if not hasattr(obj, "owasp_repository") or not obj.owasp_repository:
+                return ""
             return self._format_github_link(obj.owasp_repository)
 
         urls = [self._format_github_link(repository) for repository in obj.repositories.all()]
@@ -37,12 +41,18 @@ class GenericEntityAdminMixin(BaseOWASPAdminMixin):
 
     def custom_field_owasp_url(self, obj):
         """Entity OWASP URL with uniform formatting."""
+        if not hasattr(obj, "key") or not obj.key:
+            return ""
         return mark_safe(  # noqa: S308
             f"<a href='https://owasp.org/{obj.key}' target='_blank'>↗️</a>"
         )
 
     def _format_github_link(self, repository):
         """Format a single GitHub repository link."""
+        if not repository or not hasattr(repository, "owner") or not repository.owner:
+            return ""
+        if not hasattr(repository, "key") or not repository.key:
+            return ""
         return (
             f"<a href='https://github.com/{repository.owner.login}/"
             f"{repository.key}' target='_blank'>↗️</a>"

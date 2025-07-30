@@ -1,3 +1,5 @@
+"""Project health metrics admin configuration."""
+
 from django.contrib import admin
 
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics

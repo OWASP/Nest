@@ -1,3 +1,5 @@
+"""Sponsor admin configuration."""
+
 from django.contrib import admin
 
 from apps.owasp.models.sponsor import Sponsor

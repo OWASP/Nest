@@ -1,3 +1,5 @@
+"""Post admin configuration."""
+
 from django.contrib import admin
 
 from apps.owasp.models.post import Post

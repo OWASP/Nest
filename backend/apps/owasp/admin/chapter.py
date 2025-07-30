@@ -1,3 +1,5 @@
+"""Chapter admin configuration."""
+
 from django.contrib import admin
 
 from apps.owasp.models.chapter import Chapter

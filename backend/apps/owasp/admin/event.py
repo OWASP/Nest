@@ -1,3 +1,5 @@
+"""Event admin configuration."""
+
 from django.contrib import admin
 
 from apps.owasp.models.event import Event
