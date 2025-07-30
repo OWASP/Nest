@@ -51,6 +51,8 @@ class GenericEntityAdminMixin(BaseOWASPAdminMixin):
         """Format a single GitHub repository link."""
         if not repository or not hasattr(repository, "owner") or not repository.owner:
             return ""
+        if not hasattr(repository.owner, "login") or not repository.owner.login:
+            return ""
         if not hasattr(repository, "key") or not repository.key:
             return ""
         return (
@@ -77,9 +79,10 @@ class LeaderAdminMixin(BaseOWASPAdminMixin):
             if count > 0:
                 entity.leaders.add(*suggestions)
                 total_approved += count
+                entity_name = entity.name if hasattr(entity, "name") else str(entity)
                 self.message_user(
                     request,
-                    f"Approved {count} leader suggestions for {entity.name}",
+                    f"Approved {count} leader suggestions for {entity_name}",
                     messages.SUCCESS,
                 )
 
