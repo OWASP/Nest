@@ -31,5 +31,13 @@ export default function AnimatedCounter({ end, duration, className }: AnimatedCo
     requestAnimationFrame(animate)
   }, [end, duration])
 
-  return <span className={className}>{millify(count)}</span>
+  return (
+  <span
+    className={className}
+    role="status"
+    aria-label="animated counter"
+  >
+    {millify(count)}
+  </span>
+)
 }
