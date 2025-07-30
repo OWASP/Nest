@@ -52,6 +52,12 @@
           dest: ~/
           mode: '0400'
 
+      - name: Copy GitHub App private key
+        copy:
+          src: '{{ github_workspace }}/.github.pem'
+          dest: ~/.github.pem
+          mode: '0400'
+
       - name: Copy crontab
         copy:
           src: '{{ github_workspace }}/cron/production'

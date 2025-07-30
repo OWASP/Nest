@@ -127,6 +127,9 @@ class Base(Configuration):
     API_PAGE_SIZE = 100
     API_CACHE_TIME_SECONDS = 86400  # 24 hours.
 
+    GITHUB_APP_ID = values.SecretValue()
+    GITHUB_APP_INSTALLATION_ID = values.SecretValue()
+
     REDIS_HOST = values.SecretValue(environ_name="REDIS_HOST")
     REDIS_PASSWORD = values.SecretValue(environ_name="REDIS_PASSWORD")
     CACHES = {
