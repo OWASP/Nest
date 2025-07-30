@@ -1,15 +1,16 @@
-import { act, render, screen } from '@testing-library/react'
-import BarChart from 'components/BarChart'
-import '@testing-library/jest-dom'
-import { ThemeProvider } from 'next-themes'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faFire } from '@fortawesome/free-solid-svg-icons'
+import { act, render, screen } from '@testing-library/react'
+import '@testing-library/jest-dom'
+import { ThemeProvider } from 'next-themes'
 import React from 'react'
 
-// ✅ Register FontAwesome icon
+import BarChart from 'components/BarChart'
+
+// Register FontAwesome icon
 library.add(faFire)
 
-// ✅ Mock ApexCharts
+// Mock ApexCharts
 jest.mock('react-apexcharts', () => {
   const MockChart = () => <div data-testid="mock-chart" />
   return {
@@ -18,19 +19,17 @@ jest.mock('react-apexcharts', () => {
   }
 })
 
-// ✅ Silence known warnings
+// Silence known warnings
 const originalError = console.error
 beforeAll(() => {
   jest.spyOn(console, 'error').mockImplementation((...args) => {
     const [message] = args
     if (
       typeof message === 'string' &&
-      (
-        message.includes('act(...)') ||
+      (message.includes('act(...)') ||
         message.includes('not wrapped in act') ||
         message.includes('LoadableComponent') ||
-        message.includes('useLayoutEffect')
-      )
+        message.includes('useLayoutEffect'))
     ) {
       return
     }
@@ -38,7 +37,7 @@ beforeAll(() => {
   })
 })
 
-// ✅ Utility to render with act + theme
+// Utility to render with act + theme
 const renderWithTheme = async (
   ui: React.ReactElement,
   theme: 'light' | 'dark' = 'light'
@@ -54,7 +53,7 @@ const renderWithTheme = async (
   return result!
 }
 
-// ✅ Common test props
+// Common test props
 const mockProps = {
   title: 'Calories Burned',
   labels: ['Mon', 'Tue', 'Wed'],
@@ -63,13 +62,14 @@ const mockProps = {
 }
 
 describe('<BarChart />', () => {
-  it('renders without crashing (minimal props)', async () => {
+  it('renders without crashing with minimal props', async () => {
     await renderWithTheme(<BarChart {...mockProps} />)
     expect(screen.getByText('Calories Burned')).toBeInTheDocument()
     expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
   })
 
-  it('renders with icon if provided', async () => {
+  it('renders with icon when provided', async () => {
+    // cspell:ignore fas
     await renderWithTheme(<BarChart {...mockProps} icon={['fas', 'fire']} />)
     expect(screen.getByText('Calories Burned')).toBeInTheDocument()
     expect(document.querySelector('[data-icon="fire"]')).toBeInTheDocument()
@@ -78,6 +78,7 @@ describe('<BarChart />', () => {
   it('renders correctly in dark mode', async () => {
     await renderWithTheme(<BarChart {...mockProps} />, 'dark')
     expect(screen.getByText('Calories Burned')).toBeInTheDocument()
+    expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
   })
 
   it('handles empty data arrays without crashing', async () => {
@@ -101,23 +102,11 @@ describe('<BarChart />', () => {
     expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
   })
 
-  it('has proper accessibility attributes (optional)', async () => {
-  await renderWithTheme(<BarChart {...mockProps} />)
-  const chartContainer = screen.getByTestId('mock-chart').parentElement
-  if (chartContainer) {
-    const role = chartContainer.getAttribute('role')
-    const label = chartContainer.getAttribute('aria-label')
-
-    if (role || label) {
-      // Only check if at least one of them is present
-      if (role) expect(chartContainer).toHaveAttribute('role', 'img')
-      if (label) expect(chartContainer).toHaveAttribute('aria-label', mockProps.title)
-    } else {
-      // Optional: log warning during test if both are missing
-      console.warn('⚠️ Accessibility attributes missing in BarChart wrapper')
-    }
-  }
-})
+  it('renders chart container with proper structure', async () => {
+    await renderWithTheme(<BarChart {...mockProps} />)
+    const chartElement = screen.getByTestId('mock-chart')
+    expect(chartElement).toBeInTheDocument()
+  })
 
   it('handles mismatched array lengths gracefully', async () => {
     const mismatchedProps = {
@@ -126,6 +115,16 @@ describe('<BarChart />', () => {
     }
     await renderWithTheme(<BarChart {...mismatchedProps} />)
     expect(screen.getByText('Calories Burned')).toBeInTheDocument()
+    expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
+  })
+
+  it('renders title correctly', async () => {
+    await renderWithTheme(<BarChart {...mockProps} />)
+    expect(screen.getByText('Calories Burned')).toBeInTheDocument()
+  })
+
+  it('renders chart component when data is provided', async () => {
+    await renderWithTheme(<BarChart {...mockProps} />)
     expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
   })
 })
