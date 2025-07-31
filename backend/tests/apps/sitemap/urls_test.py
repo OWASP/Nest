@@ -25,6 +25,7 @@ class TestSitemapUrls(unittest.TestCase):
             "sitemap/members.xml",
             "sitemap/organizations.xml",
             "sitemap/projects.xml",
+            "sitemap/repositories.xml",
             "sitemap/static.xml",
         )
         found_paths = {p.pattern._route for p in sitemap_urls.urlpatterns}
