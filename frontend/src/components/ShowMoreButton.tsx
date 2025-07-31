@@ -21,7 +21,7 @@ const ShowMoreButton = ({
         type="button"
         disableAnimation
         onPress={handleToggle}
-        className="flex items-center bg-transparent text-blue-400"
+        className="px-0 flex items-center bg-transparent text-blue-400"
       >
         {isExpanded ? (
           <>
