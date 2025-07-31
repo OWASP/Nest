@@ -10,6 +10,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
+import { useCallback } from "react"
 import type { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/credentials'
@@ -29,6 +30,10 @@ import SecondaryCard from 'components/SecondaryCard'
 import SponsorCard from 'components/SponsorCard'
 import ToggleableList from 'components/ToggleableList'
 import TopContributorsList from 'components/TopContributorsList'
+// Email validation regex
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+// Helper to sanitize URLs
+const sanitizeForUrl = (str: string) => encodeURIComponent(str.trim())
 
 const DetailsCard = ({
   description,
@@ -56,7 +61,7 @@ const DetailsCard = ({
   userSummary,
 }: DetailsCardProps) => {
   // Helper function to render detail values with appropriate links
-  const renderDetailValue = (detail: { label: string; value: string }) => {
+  const renderDetailValue = useCallback((detail: { label: string; value: string }) => {
     const { label, value } = detail
 
     // Don't render links for empty/placeholder values
@@ -66,10 +71,13 @@ const DetailsCard = ({
 
     switch (label) {
       case "Email":
-        // Render email as mailto link
+        // Render email as mailto link if valid
+        if (!EMAIL_REGEX.test(value)) {
+          return value // Return as plain text for invalid emails
+        }
         return (
           <a
-            href={`mailto:${value}`}
+            href={`mailto:${sanitizeForUrl(value)}`}
             className="text-blue-400 hover:text-blue-600 hover:underline transition-colors"
             aria-label={`Send email to ${value}`}
           >
@@ -80,7 +88,7 @@ const DetailsCard = ({
       case "Company":
         // Render company as GitHub link if it starts with @
         if (value.startsWith("@")) {
-          const companyName = value.slice(1) // Remove @ prefix
+          const companyName = sanitizeForUrl(value.slice(1)) // Remove @ prefix and sanitize
           return (
             <a
               href={`https://github.com/${companyName}`}
@@ -100,7 +108,7 @@ const DetailsCard = ({
         // Return other fields as plain text
         return value
     }
-  }
+  }, [])
 
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
@@ -117,7 +125,7 @@ const DetailsCard = ({
           {!isActive && (
             <span className="ml-4 justify-center rounded bg-red-200 px-2 py-1 text-sm text-red-800">
               Inactive
-            </span>
+              </span>
           )}
         </div>
         <p className="mb-6 text-xl">{description}</p>
@@ -150,7 +158,7 @@ const DetailsCard = ({
             {details?.map((detail) =>
               detail?.label === 'Leaders' ? (
                 <div key={detail.label} className="flex flex-row gap-1 pb-1">
-                    <strong>{detail.label}:</strong>{' '}
+                  <strong>{detail.label}:</strong>{' '}
                   <LeadersList leaders={detail?.value != null ? String(detail.value) : 'Unknown'} />
                 </div>
               ) : (
@@ -225,7 +233,7 @@ const DetailsCard = ({
             maxInitialDisplay={12}
           />
         )}
-          {(type === 'project' ||
+        {(type === 'project' ||
           type === 'repository' ||
           type === 'user' ||
           type === 'organization') && (
@@ -254,8 +262,8 @@ const DetailsCard = ({
             <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />
           </div>
         )}
-         {(type === 'project' || type === 'user' || type === 'organization') &&
-         repositories.length > 0 && (
+        {(type === 'project' || type === 'user' || type === 'organization') &&
+        repositories.length > 0 && (
           <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
             <RepositoriesCard repositories={repositories} />
           </SecondaryCard>
@@ -263,7 +271,7 @@ const DetailsCard = ({
         {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
           <HealthMetrics data={healthMetricsData} />
         )}
-         {entityKey && ['chapter', 'project', 'repository'].includes(type) && (
+        {entityKey && ['chapter', 'project', 'repository'].includes(type) && (
           <SponsorCard
             target={entityKey}
             title={projectName || title}
