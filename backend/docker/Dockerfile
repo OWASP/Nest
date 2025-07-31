@@ -1,7 +1,10 @@
-FROM python:3.13.5-alpine AS builder
-
 ARG OWASP_GID=1000
 ARG OWASP_UID=1000
+
+FROM python:3.13.5-alpine AS builder
+
+ARG OWASP_GID
+ARG OWASP_UID
 
 ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
@@ -15,6 +18,7 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
 RUN mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
     ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
+RUN echo "Building with UID=${OWASP_UID}, GID=${OWASP_GID}"
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     apk update && apk upgrade && \
     addgroup -S -g ${OWASP_GID} owasp && \
@@ -41,6 +45,10 @@ COPY templates templates
 
 FROM python:3.13.5-alpine
 
+ARG OWASP_GID
+ARG OWASP_UID
+
+RUN echo "Building with UID=${OWASP_UID}, GID=${OWASP_GID}"
 RUN apk update && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp
