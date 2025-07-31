@@ -13,7 +13,8 @@ export default function AnimatedCounter({
   end,
   duration,
   className,
-  onEnd, // ✅ include this
+  onEnd,
+  'aria-label': ariaLabel,
 }: AnimatedCounterProps) {
   const [count, setCount] = useState(0)
   const countRef = useRef(count)
@@ -33,18 +34,18 @@ export default function AnimatedCounter({
       if (progress < 1) {
         requestAnimationFrame(animate)
       } else {
-        if (onEnd) onEnd() // ✅ only call at the end
+        if (onEnd) onEnd()
       }
     }
 
     requestAnimationFrame(animate)
-  }, [end, duration, onEnd]) // include onEnd in deps
+  }, [end, duration, onEnd])
 
   return (
     <span
       className={className}
       role="status"
-      aria-label="animated counter"
+      aria-label={ariaLabel || 'animated counter'}
     >
       {millify(count)}
     </span>
