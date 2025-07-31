@@ -155,7 +155,7 @@ class ConversationAdminMixin(SlackChannelRelatedAdminMixin):
         "slack_creator_id",
     )
 
-    def get_fieldsets(self, request, obj=None):
+    def get_fieldsets(self, _request, _obj=None):
         """Get standard fieldsets for conversation."""
         return (
             (

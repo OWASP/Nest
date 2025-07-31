@@ -5,7 +5,7 @@ from django.db import models
 
 from apps.slack.models.conversation import Conversation
 
-from .mixins import ConversationAdminMixin
+from .mixins import ConversationAdminMixin, SlackChannelRelatedAdminMixin
 
 
 class ConversationAdmin(ConversationAdminMixin, admin.ModelAdmin):
@@ -23,7 +23,13 @@ class ConversationAdmin(ConversationAdminMixin, admin.ModelAdmin):
     list_select_related = ("workspace",)
     ordering = ("-created_at",)
     readonly_fields = ("slack_channel_id", "created_at", "slack_creator_id")
-    search_fields = ConversationAdminMixin.base_slack_search_fields
+    search_fields = (
+        *SlackChannelRelatedAdminMixin.base_slack_search_fields,
+        "name",
+        "topic",
+        "purpose",
+        "slack_creator_id",
+    )
 
     def get_queryset(self, request):
         """Optimize queryset to reduce N+1 queries for member count."""
