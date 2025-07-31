@@ -1,7 +1,6 @@
 import os
 from unittest import mock
 
-import github
 import pytest
 
 from apps.owasp.management.commands.owasp_scrape_projects import (
@@ -38,7 +37,7 @@ class TestOwaspScrapeProjects:
     )
     @mock.patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"})
     @mock.patch.object(Project, "bulk_save", autospec=True)
-    @mock.patch.object(github, "Github", autospec=True)
+    @mock.patch("apps.owasp.management.commands.owasp_scrape_projects.get_github_client")
     def test_handle(self, mock_github, mock_bulk_save, command, mock_project, offset, projects):
         mock_scraper = mock.Mock(spec=OwaspScraper)
         mock_scraper.get_urls.return_value = [

@@ -12,4 +12,5 @@ class Test(Base):
             "LOCATION": "test-cache",
         },
     }
-    DEBUG = False
+
+    IS_TEST_ENVIRONMENT = True

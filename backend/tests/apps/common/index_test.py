@@ -49,7 +49,7 @@ class TestIndexRegistry:
     )
     def test_is_indexable(self, is_local, index_name, excluded_index_names, expected):
         with (
-            patch("apps.common.index.IS_LOCAL_BUILD", is_local),
+            patch("apps.common.index.settings.IS_LOCAL_ENVIRONMENT", is_local),
             override_settings(ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES=excluded_index_names),
         ):
             IndexRegistry.get_instance().load_excluded_local_index_names()
@@ -140,7 +140,7 @@ class TestIndexBase:
         index_name = "index_name"
 
         with (
-            patch("apps.common.index.IS_LOCAL_BUILD", is_local),
+            patch("apps.common.index.settings.IS_LOCAL_ENVIRONMENT", is_local),
             patch("apps.common.index.is_indexable") as mock_is_indexable,
         ):
 
