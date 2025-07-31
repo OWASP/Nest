@@ -25,7 +25,7 @@ class RepositorySitemap(BaseSitemap):
         ).order_by(
             "-updated_at",
             "-created_at",
-        )[:1000]  # Limit to 1,000 repositories
+        )
 
     def location(self, obj: Repository) -> str:
         """Return the URL path for a repository.
