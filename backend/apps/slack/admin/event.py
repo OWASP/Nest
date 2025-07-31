@@ -4,23 +4,16 @@ from django.contrib import admin
 
 from apps.slack.models.event import Event
 
-from .mixins import SlackChannelRelatedAdminMixin, SlackEntityAdminMixin
+from .mixins import EventAdminMixin
 
 
-class EventAdmin(admin.ModelAdmin, SlackEntityAdminMixin, SlackChannelRelatedAdminMixin):
+class EventAdmin(EventAdminMixin, admin.ModelAdmin):
     """Admin for Event model."""
 
-    list_display = (
-        "nest_created_at",
-        "trigger",
-        "user_id",
-    )
+    list_display = ("nest_created_at", "trigger", "user_id")
     list_filter = ("trigger",)
-    search_fields = SlackChannelRelatedAdminMixin.base_slack_search_fields + (
-        "text",
-        "user_id",
-        "user_name",
-    )
+    ordering = ("-nest_created_at",)
+    search_fields = ("channel_id", "channel_name", "text", "user_id", "user_name")
 
 
 admin.site.register(Event, EventAdmin)

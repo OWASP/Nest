@@ -7,10 +7,12 @@ from apps.slack.models.workspace import Workspace
 from .mixins import SlackWorkspaceRelatedAdminMixin
 
 
-class WorkspaceAdmin(admin.ModelAdmin, SlackWorkspaceRelatedAdminMixin):
+class WorkspaceAdmin(SlackWorkspaceRelatedAdminMixin, admin.ModelAdmin):
     """Admin for Workspace model."""
 
-    search_fields = SlackWorkspaceRelatedAdminMixin.base_slack_search_fields
+    list_display = ("name", "slack_workspace_id", "created_at")
+    ordering = ("-created_at",)
+    search_fields = ("name", "slack_workspace_id")
 
 
 admin.site.register(Workspace, WorkspaceAdmin)
