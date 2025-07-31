@@ -15,6 +15,7 @@ __pycache__
 .venv
 .vscode
 *.log
+*.pem
 backend/data
 backend/staticfiles
 build
