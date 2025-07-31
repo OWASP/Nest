@@ -23,14 +23,7 @@ class ConversationAdmin(ConversationAdminMixin, admin.ModelAdmin):
     list_select_related = ("workspace",)
     ordering = ("-created_at",)
     readonly_fields = ("slack_channel_id", "created_at", "slack_creator_id")
-    search_fields = (
-        "slack_channel_id",
-        "channel_name",
-        "name",
-        "topic",
-        "purpose",
-        "slack_creator_id",
-    )
+    search_fields = ConversationAdminMixin.base_slack_search_fields
 
     def get_queryset(self, request):
         """Optimize queryset to reduce N+1 queries for member count."""
