@@ -1,13 +1,9 @@
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
-import { useState } from "react"
+import { useState } from 'react'
 
-const ShowMoreButton = ({
-  onToggle,
-}: {
-  onToggle: () => void
-}) => {
+const ShowMoreButton = ({ onToggle }: { onToggle: () => void }) => {
   const [isExpanded, setIsExpanded] = useState(false)
 
   const handleToggle = () => {
@@ -21,7 +17,7 @@ const ShowMoreButton = ({
         type="button"
         disableAnimation
         onPress={handleToggle}
-        className="flex items-center bg-transparent text-blue-400"
+        className="flex items-center bg-transparent px-0 text-blue-400"
       >
         {isExpanded ? (
           <>

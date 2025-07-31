@@ -44,8 +44,7 @@ const ToggleableList = ({
           </button>
         ))}
       </div>
-      {items.length > limit && 
-      <ShowMoreButton onToggle={toggleShowAll} />}
+      {items.length > limit && <ShowMoreButton onToggle={toggleShowAll} />}
     </div>
   )
 }
