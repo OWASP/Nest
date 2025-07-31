@@ -2,12 +2,16 @@
 
 from functools import wraps
 
+from django.contrib.auth import get_user
 from django.http import HttpResponseForbidden
 
 
-def has_owasp_staff_permission(user):
+def has_owasp_staff_permission(request):
     """Check if user is an OWASP staff member."""
-    return (
+    # Returns Anonymous user even if authenticated
+    # Strawberry returns the authenticated user
+    user = get_user(request)
+    return bool(
         user
         and hasattr(user, "github_user")
         and user.github_user
@@ -28,7 +32,7 @@ def owasp_staff_required(view_func):
 
     @wraps(view_func)
     def _wrapper(request, *args, **kwargs):
-        if not has_owasp_staff_permission(request.user):
+        if not has_owasp_staff_permission(request):
             return HttpResponseForbidden(
                 "You must be an OWASP staff member to access this resource."
             )
