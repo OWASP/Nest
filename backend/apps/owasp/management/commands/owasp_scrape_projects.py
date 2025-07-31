@@ -1,14 +1,13 @@
 """A command to update OWASP projects from owasp.org data."""
 
 import logging
-import os
 import time
 
-import github
 from django.core.management.base import BaseCommand
 from github.GithubException import UnknownObjectException
 
-from apps.github.constants import GITHUB_ITEMS_PER_PAGE, GITHUB_USER_RE
+from apps.github.auth import get_github_client
+from apps.github.constants import GITHUB_USER_RE
 from apps.github.utils import normalize_url
 from apps.owasp.models.project import Project
 from apps.owasp.scraper import OwaspScraper
@@ -37,7 +36,7 @@ class Command(BaseCommand):
                 offset (int): The starting index for processing.
 
         """
-        gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
+        gh = get_github_client()
 
         active_projects = Project.active_projects.order_by("-created_at")
         active_projects_count = active_projects.count()

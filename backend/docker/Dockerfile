@@ -1,9 +1,15 @@
+ARG OWASP_GID=1000
+ARG OWASP_UID=1000
+
 FROM python:3.13.5-alpine AS builder
+
+ARG OWASP_GID
+ARG OWASP_UID
 
 ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
-    OWASP_GID=1000 \
-    OWASP_UID=1000 \
+    OWASP_GID=${OWASP_GID} \
+    OWASP_UID=${OWASP_UID} \
     PIP_CACHE_DIR="/home/owasp/.cache/pip" \
     POETRY_CACHE_DIR="/home/owasp/.cache/pypoetry" \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
@@ -38,9 +44,12 @@ COPY templates templates
 
 FROM python:3.13.5-alpine
 
+ARG OWASP_GID
+ARG OWASP_UID
+
 RUN apk update && \
-    addgroup -S owasp && \
-    adduser -S -h /home/owasp -G owasp owasp
+    addgroup -S -g ${OWASP_GID} owasp && \
+    adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp
 
 ENV FORCE_COLOR=1 \
     PATH="/home/owasp/.venv/bin:$PATH" \
