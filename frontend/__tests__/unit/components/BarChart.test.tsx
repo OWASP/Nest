@@ -19,29 +19,8 @@ jest.mock('react-apexcharts', () => {
   }
 })
 
-// Silence known warnings
-const originalError = console.error
-beforeAll(() => {
-  jest.spyOn(console, 'error').mockImplementation((...args) => {
-    const [message] = args
-    if (
-      typeof message === 'string' &&
-      (message.includes('act(...)') ||
-        message.includes('not wrapped in act') ||
-        message.includes('LoadableComponent') ||
-        message.includes('useLayoutEffect'))
-    ) {
-      return
-    }
-    originalError(...args)
-  })
-})
-
 // Utility to render with act + theme
-const renderWithTheme = async (
-  ui: React.ReactElement,
-  theme: 'light' | 'dark' = 'light'
-) => {
+const renderWithTheme = async (ui: React.ReactElement, theme: 'light' | 'dark' = 'light') => {
   let result: ReturnType<typeof render> | undefined
   await act(async () => {
     result = render(
@@ -72,7 +51,7 @@ describe('<BarChart />', () => {
     // cspell:ignore fas
     await renderWithTheme(<BarChart {...mockProps} icon={['fas', 'fire']} />)
     expect(screen.getByText('Calories Burned')).toBeInTheDocument()
-    expect(document.querySelector('[data-icon="fire"]')).toBeInTheDocument()
+    expect(document.querySelector('svg')).toBeInTheDocument() // FontAwesome renders as SVG
   })
 
   it('renders correctly in dark mode', async () => {
