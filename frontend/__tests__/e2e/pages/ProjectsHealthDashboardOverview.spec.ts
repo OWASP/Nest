@@ -1,84 +1,20 @@
+import { mockDashboardCookies } from '@e2e/helpers/mockDashboardCookies'
 import { test, expect } from '@playwright/test'
 import { mockProjectsDashboardOverviewData } from '@unit/data/mockProjectsDashboardOverviewData'
 import millify from 'millify'
 
 test.describe('Projects Health Dashboard Overview', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.route('**/api/auth/session', async (route) => {
-      await route.fulfill({
-        status: 200,
-        json: {
-          user: {
-            login: 'testuser',
-          },
-          accessToken: 'test-access-token',
-          expires: '2125-08-28T01:33:56.550Z',
-        },
-      })
-    })
-    await page.route('**/graphql/', async (route, request) => {
-      const postData = request.postDataJSON()
-      switch (postData.operationName) {
-        case 'GetUser':
-          await route.fulfill({
-            status: 200,
-            json: { data: { user: mockProjectsDashboardOverviewData.user } },
-          })
-          break
-        case 'SyncDjangoSession':
-          await route.fulfill({
-            status: 200,
-            json: { data: { githubAuth: mockProjectsDashboardOverviewData.githubAuth } },
-          })
-          break
-        default:
-          await route.fulfill({
-            status: 200,
-            json: {
-              data: { projectHealthStats: mockProjectsDashboardOverviewData.projectHealthStats },
-            },
-          })
-          break
-      }
-    })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-      {
-        name: 'nest.session-id',
-        value: 'test-session-id',
-        domain: 'localhost',
-        path: '/',
-      },
-      {
-        name: 'next-auth.csrf-token',
-        value: 'test-csrf-token',
-        domain: 'localhost',
-        path: '/',
-      },
-      {
-        name: 'next-auth.callback-url',
-        value: '/',
-        domain: 'localhost',
-        path: '/',
-      },
-      {
-        name: 'next-auth.session-token',
-        value: 'test-session-token',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('/projects/dashboard', { timeout: 100000 })
+  test('renders 404 when user is not OWASP staff', async ({ page }) => {
+    await mockDashboardCookies(page, mockProjectsDashboardOverviewData, false)
+    await page.goto('/projects/dashboard')
+    await expect(page.getByText('404')).toBeVisible()
+    await expect(page.getByText('This page could not be found.')).toBeVisible()
   })
+
   test('renders project health stats', async ({ page }) => {
-    await expect(page.getByText('Project Health Dashboard Overview')).toBeVisible({
-      timeout: 10000,
-    })
+    await mockDashboardCookies(page, mockProjectsDashboardOverviewData, true)
+    await page.goto('/projects/dashboard', { timeout: 6000 })
+    await expect(page.getByText('Project Health Dashboard Overview')).toBeVisible()
 
     // Check for healthy projects
     await expect(
