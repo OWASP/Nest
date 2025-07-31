@@ -286,6 +286,9 @@ jobs:
       - name: Build backend image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
+          build-args: |
+            OWASP_GID=1001
+            OWASP_UID=1001
           cache-from: |
             type=gha
             type=registry,ref=owasp/nest:backend-staging-cache
@@ -429,7 +432,6 @@ jobs:
           echo "DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}" >> .env.backend
           echo "DJANGO_SLACK_BOT_TOKEN=${{ secrets.DJANGO_SLACK_BOT_TOKEN }}" >> .env.backend
           echo "DJANGO_SLACK_SIGNING_SECRET=${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}" >> .env.backend
-          echo "GITHUB_TOKEN=${{ secrets.NEST_GITHUB_TOKEN }}" >> .env.backend
           echo "SLACK_BOT_TOKEN_T04T40NHX=${{ secrets.SLACK_BOT_TOKEN_T04T40NHX }}" >> .env.backend
 
           # Cache
@@ -516,6 +518,9 @@ jobs:
       - name: Build backend image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
+          build-args: |
+            OWASP_GID=1002
+            OWASP_UID=1002
           cache-from: |
             type=gha
             type=registry,ref=owasp/nest:backend-staging-cache
@@ -652,6 +657,8 @@ jobs:
           echo "DJANGO_DB_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> .env.backend
           echo "DJANGO_DB_PORT=${{ secrets.DJANGO_DB_PORT }}" >> .env.backend
           echo "DJANGO_DB_USER=${{ secrets.DJANGO_DB_USER }}" >> .env.backend
+          echo "DJANGO_GITHUB_APP_ID=${{ secrets.DJANGO_GITHUB_APP_ID }}" >> .env.backend
+          echo "DJANGO_GITHUB_APP_INSTALLATION_ID=${{ secrets.DJANGO_GITHUB_APP_INSTALLATION_ID }}" >> .env.backend
           echo "DJANGO_OPEN_AI_SECRET_KEY=${{ secrets.DJANGO_OPEN_AI_SECRET_KEY }}" >> .env.backend
           echo "DJANGO_REDIS_HOST=${{ secrets.DJANGO_REDIS_HOST }}" >> .env.backend
           echo "DJANGO_REDIS_PASSWORD=${{ secrets.DJANGO_REDIS_PASSWORD }}" >> .env.backend
@@ -661,7 +668,6 @@ jobs:
           echo "DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}" >> .env.backend
           echo "DJANGO_SLACK_BOT_TOKEN=${{ secrets.DJANGO_SLACK_BOT_TOKEN }}" >> .env.backend
           echo "DJANGO_SLACK_SIGNING_SECRET=${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}" >> .env.backend
-          echo "GITHUB_TOKEN=${{ secrets.NEST_GITHUB_TOKEN }}" >> .env.backend
           echo "SLACK_BOT_TOKEN_T04T40NHX=${{ secrets.SLACK_BOT_TOKEN_T04T40NHX }}" >> .env.backend
 
           # Cache
@@ -683,6 +689,10 @@ jobs:
           echo "NEXT_SERVER_GRAPHQL_URL=${{ secrets.NEXT_SERVER_GRAPHQL_URL }}" >> .env.frontend
           echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> .env.frontend
           echo "NEXTAUTH_URL=${{ secrets.VITE_API_URL }}" >> .env.frontend
+
+          # GitHub App private key
+          echo "${{ secrets.NEST_GITHUB_APP_PRIVATE_KEY }}" > .github.pem
+          chmod 600 .github.pem
 
       - name: Run Nest deploy
         working-directory: .github/ansible
