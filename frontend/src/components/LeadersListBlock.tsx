@@ -65,7 +65,7 @@ const LeaderData = ({
         label: 'View Profile',
         onclick: () => handleButtonClick(user),
       }}
-      className="h-64 w-40 bg-inherit"
+      className="w-42 h-64 bg-inherit"
       company={user.company}
       description={leaders[user.login]}
       location={user.location}
