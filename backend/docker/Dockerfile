@@ -1,7 +1,10 @@
-FROM python:3.13.5-alpine AS builder
-
 ARG OWASP_GID=1000
 ARG OWASP_UID=1000
+
+FROM python:3.13.5-alpine AS builder
+
+ARG OWASP_GID
+ARG OWASP_UID
 
 ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
@@ -40,6 +43,9 @@ COPY static static
 COPY templates templates
 
 FROM python:3.13.5-alpine
+
+ARG OWASP_GID
+ARG OWASP_UID
 
 RUN apk update && \
     addgroup -S -g ${OWASP_GID} owasp && \
