@@ -22,10 +22,10 @@ class TestSitemapUrls(unittest.TestCase):
             "sitemap.xml",
             "sitemap/chapters.xml",
             "sitemap/committees.xml",
-            "sitemap/projects.xml",
-            "sitemap/static.xml",
             "sitemap/members.xml",
             "sitemap/organizations.xml",
+            "sitemap/projects.xml",
+            "sitemap/static.xml",
         )
         found_paths = {p.pattern._route for p in sitemap_urls.urlpatterns}
         for path in expected_paths:

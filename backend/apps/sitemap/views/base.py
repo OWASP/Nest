@@ -16,8 +16,8 @@ class BaseSitemap(Sitemap):
         {"path": "/committees", "changefreq": "monthly", "priority": 0.8},
         {"path": "/contribute", "changefreq": "daily", "priority": 0.6},
         {"path": "/members", "changefreq": "daily", "priority": 0.7},
+        {"path": "/organizations", "changefreq": "monthly", "priority": 0.8},
         {"path": "/projects", "changefreq": "weekly", "priority": 0.9},
-        {"path": "/organizations", "changefreq": "weekly", "priority": 0.8},
     )
 
     def get_static_priority(self, path):

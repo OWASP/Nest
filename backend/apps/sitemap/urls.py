@@ -16,9 +16,9 @@ sitemaps = {
     "chapters": ChapterSitemap,
     "committees": CommitteeSitemap,
     "members": MemberSitemap,
+    "organizations": OrganizationSitemap,
     "projects": ProjectSitemap,
     "static": StaticSitemap,
-    "organizations": OrganizationSitemap,
 }
 
 urlpatterns = [
@@ -39,12 +39,12 @@ urlpatterns = [
         cached_sitemap_view(sitemaps={"members": MemberSitemap}),
     ),
     path(
-        "sitemap/projects.xml",
-        cached_sitemap_view(sitemaps={"projects": ProjectSitemap}),
-    ),
-    path(
         "sitemap/organizations.xml",
         cached_sitemap_view(sitemaps={"organizations": OrganizationSitemap}),
+    ),
+    path(
+        "sitemap/projects.xml",
+        cached_sitemap_view(sitemaps={"projects": ProjectSitemap}),
     ),
     path(
         "sitemap/static.xml",

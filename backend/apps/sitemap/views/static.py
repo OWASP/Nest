@@ -34,8 +34,8 @@ class StaticSitemap(BaseSitemap):
             "/committees": Committee,
             "/contribute": Project,
             "/members": User,
-            "/projects": Project,
             "/organizations": Organization,
+            "/projects": Project,
         }
 
         return (
