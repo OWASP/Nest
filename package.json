@@ -1,0 +1,5 @@
+{
+	"devDependencies": {
+		"which": "^5.0.0"
+	}
+}

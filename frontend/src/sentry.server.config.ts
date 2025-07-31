@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/nextjs'
 import { SENTRY_DSN, ENVIRONMENT, RELEASE_VERSION } from 'utils/credentials'
 
+
 Sentry.init({
   dsn: SENTRY_DSN || '',
   enabled: !!SENTRY_DSN,
