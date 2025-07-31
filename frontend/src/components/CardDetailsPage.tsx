@@ -55,6 +55,53 @@ const DetailsCard = ({
   type,
   userSummary,
 }: DetailsCardProps) => {
+  // Helper function to render detail values with appropriate links
+  const renderDetailValue = (detail: { label: string; value: string }) => {
+    const { label, value } = detail
+
+    // Don't render links for empty/placeholder values
+    if (!value || value === "N/A" || value === "Not available" || value === "Unknown") {
+      return value
+    }
+
+    switch (label) {
+      case "Email":
+        // Render email as mailto link
+        return (
+          <a
+            href={`mailto:${value}`}
+            className="text-blue-400 hover:text-blue-600 hover:underline transition-colors"
+            aria-label={`Send email to ${value}`}
+          >
+            {value}
+          </a>
+        )
+
+      case "Company":
+        // Render company as GitHub link if it starts with @
+        if (value.startsWith("@")) {
+          const companyName = value.slice(1) // Remove @ prefix
+          return (
+            <a
+              href={`https://github.com/${companyName}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-600 hover:underline transition-colors"
+              aria-label={`Visit ${value} on GitHub`}
+            >
+              {value}
+            </a>
+          )
+        }
+        // Return as plain text if no @ prefix
+        return value
+
+      default:
+        // Return other fields as plain text
+        return value
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
@@ -103,14 +150,14 @@ const DetailsCard = ({
             {details?.map((detail) =>
               detail?.label === 'Leaders' ? (
                 <div key={detail.label} className="flex flex-row gap-1 pb-1">
-                  <strong>{detail.label}:</strong>{' '}
+                    <strong>{detail.label}:</strong>{' '}
                   <LeadersList leaders={detail?.value != null ? String(detail.value) : 'Unknown'} />
                 </div>
               ) : (
                 <div key={detail.label} className="pb-1">
-                  <strong>{detail.label}:</strong> {detail?.value || 'Unknown'}
+                  <strong>{detail.label}:</strong> {renderDetailValue(detail)}
                 </div>
-              )
+              ),
             )}
             {socialLinks && (type === 'chapter' || type === 'committee') && (
               <SocialLinks urls={socialLinks || []} />
@@ -139,7 +186,7 @@ const DetailsCard = ({
               ))}
             </SecondaryCard>
           )}
-          {type === 'chapter' && geolocationData && (
+            {type === 'chapter' && geolocationData && (
             <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
               <ChapterMapWrapper
                 geoLocData={geolocationData}
@@ -178,7 +225,7 @@ const DetailsCard = ({
             maxInitialDisplay={12}
           />
         )}
-        {(type === 'project' ||
+          {(type === 'project' ||
           type === 'repository' ||
           type === 'user' ||
           type === 'organization') && (
@@ -207,16 +254,16 @@ const DetailsCard = ({
             <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />
           </div>
         )}
-        {(type === 'project' || type === 'user' || type === 'organization') &&
-          repositories.length > 0 && (
-            <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
-              <RepositoriesCard repositories={repositories} />
-            </SecondaryCard>
-          )}
+         {(type === 'project' || type === 'user' || type === 'organization') &&
+         repositories.length > 0 && (
+          <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
+            <RepositoriesCard repositories={repositories} />
+          </SecondaryCard>
+        )}
         {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
           <HealthMetrics data={healthMetricsData} />
         )}
-        {entityKey && ['chapter', 'project', 'repository'].includes(type) && (
+         {entityKey && ['chapter', 'project', 'repository'].includes(type) && (
           <SponsorCard
             target={entityKey}
             title={projectName || title}
