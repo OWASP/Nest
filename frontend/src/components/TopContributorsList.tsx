@@ -1,7 +1,4 @@
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Button } from '@heroui/button'
+import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -10,6 +7,7 @@ import { capitalize } from 'utils/capitalize'
 import { getMemberUrl } from 'utils/urlFormatter'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
+import ShowMoreButton from 'components/ShowMoreButton'
 
 const TopContributorsList = ({
   contributors,
@@ -66,23 +64,7 @@ const TopContributorsList = ({
           </div>
         ))}
       </div>
-      {contributors.length > maxInitialDisplay && (
-        <Button
-          disableAnimation
-          onPress={toggleContributors}
-          className="mt-4 flex items-center bg-transparent text-blue-400 hover:underline"
-        >
-          {showAllContributors ? (
-            <>
-              Show less <FontAwesomeIcon icon={faChevronUp} className="ml-1" />
-            </>
-          ) : (
-            <>
-              Show more <FontAwesomeIcon icon={faChevronDown} className="ml-1" />
-            </>
-          )}
-        </Button>
-      )}
+      {contributors.length > maxInitialDisplay && <ShowMoreButton onToggle={toggleContributors} />}
     </SecondaryCard>
   )
 }
