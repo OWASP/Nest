@@ -1,17 +1,19 @@
-import {within, render, fireEvent, screen, cleanup } from '@testing-library/react'
+import { within, render, fireEvent, screen, cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import Pagination from 'components/Pagination'
 
-afterEach(cleanup);
+afterEach(cleanup)
 
 describe('<Pagination />', () => {
   const onPageChange = jest.fn()
 
-  const renderComponent = (overrides: {
-    currentPage?: number
-    totalPages?: number
-    isLoaded?: boolean
-  } = {}) => {
+  const renderComponent = (
+    overrides: {
+      currentPage?: number
+      totalPages?: number
+      isLoaded?: boolean
+    } = {}
+  ) => {
     const props = {
       currentPage: overrides.currentPage ?? 1,
       totalPages: overrides.totalPages ?? 5,
@@ -51,17 +53,17 @@ describe('<Pagination />', () => {
     }
   })
 
-it('disables Prev on first page', () => {
-  const { container } = renderComponent({ currentPage: 1, totalPages: 3 })
-  const prevBtn = within(container).getByRole('button', { name: 'Prev' })
-  expect(prevBtn).toBeDisabled()
-})
+  it('disables Prev on first page', () => {
+    const { container } = renderComponent({ currentPage: 1, totalPages: 3 })
+    const prevBtn = within(container).getByRole('button', { name: 'Prev' })
+    expect(prevBtn).toBeDisabled()
+  })
 
-it('disables Next on last page', () => {
-  const { container } = renderComponent({ currentPage: 3, totalPages: 3 })
-  const nextBtn = within(container).getByRole('button', { name: 'Next' })
-  expect(nextBtn).toBeDisabled()
-})
+  it('disables Next on last page', () => {
+    const { container } = renderComponent({ currentPage: 3, totalPages: 3 })
+    const nextBtn = within(container).getByRole('button', { name: 'Next' })
+    expect(nextBtn).toBeDisabled()
+  })
 
   it('calls onPageChange with correct page number on button clicks', () => {
     renderComponent({ currentPage: 2, totalPages: 5 })
@@ -77,20 +79,19 @@ it('disables Next on last page', () => {
   })
 
   it('renders ellipses and correct pages for large totalPages', () => {
-    renderComponent({ currentPage: 10, totalPages: 20 });
+    renderComponent({ currentPage: 10, totalPages: 20 })
 
     // Should show first 3 pages
- [1, 2, 3].forEach((n) => {
-  expect(screen.getByRole('button', { name: String(n) })).toBeInTheDocument()
-})
+    ;[1, 2, 3].forEach((n) => {
+      expect(screen.getByRole('button', { name: String(n) })).toBeInTheDocument()
+    })
 
-       // Should show exactly two “More pages” indicators
+    // Should show exactly two “More pages” indicators
     const ellipses = screen.getAllByLabelText('More pages')
-    expect(ellipses).toHaveLength(2);
-
+    expect(ellipses).toHaveLength(2)
 
     // Should show pages around currentPage: 9, 10, 11
-    [9, 10, 11].forEach((n) =>
+    ;[9, 10, 11].forEach((n) =>
       expect(screen.getByRole('button', { name: String(n) })).toBeInTheDocument()
     )
 
@@ -119,9 +120,9 @@ it('disables Next on last page', () => {
 
   // Edge-case: currentPage near the start of a large set
   it('shows correct pages when currentPage = 4 of 10', () => {
-    renderComponent({ currentPage: 4, totalPages: 10 });
+    renderComponent({ currentPage: 4, totalPages: 10 })
     // Should show 1,2,3,4,5 then ellipsis and 10
-    [1, 2, 3, 4, 5].forEach(n =>
+    ;[1, 2, 3, 4, 5].forEach((n) =>
       expect(screen.getByRole('button', { name: String(n) })).toBeInTheDocument()
     )
     expect(screen.getByRole('button', { name: '10' })).toBeInTheDocument()
