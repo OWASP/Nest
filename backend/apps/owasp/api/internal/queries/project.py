@@ -56,8 +56,6 @@ class ProjectQuery:
         """Check if current user is a project leader based on GitHub login or name."""
         user = info.context.request.user
 
-        IsAuthenticated.require_github_user(user)
-
         github_user = user.github_user
 
         return Project.objects.filter(

@@ -9,6 +9,7 @@ import { ErrorDisplay } from 'app/global-error'
 import { CREATE_MODULE } from 'server/mutations/moduleMutations'
 import { GET_PROGRAM_ADMIN_DETAILS } from 'server/queries/programsQueries'
 import type { ExtendedSession } from 'types/auth'
+import { EXPERIENCE_LEVELS } from 'types/mentorship'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
@@ -33,7 +34,7 @@ const CreateModulePage = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    experienceLevel: 'BEGINNER',
+    experienceLevel: EXPERIENCE_LEVELS.BEGINNER,
     startedAt: '',
     endedAt: '',
     domains: '',

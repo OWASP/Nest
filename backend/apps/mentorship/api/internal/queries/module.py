@@ -16,7 +16,7 @@ class ModuleQuery:
     """Module queries."""
 
     @strawberry.field
-    def modules_by_program(self, program_key: str) -> list[ModuleNode]:
+    def get_program_modules(self, program_key: str) -> list[ModuleNode]:
         """Get all modules by program Key. Returns an empty list if program is not found."""
         return (
             Module.objects.filter(program__key=program_key)

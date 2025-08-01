@@ -28,7 +28,6 @@ class MentorshipMutations:
     def apply_as_mentee(self, info: strawberry.Info) -> ApplyAsRoleResult:
         """Register the authenticated user as a mentee."""
         user = info.context.request.user
-        IsAuthenticated.require_github_user(user)
 
         Mentee.objects.get_or_create(
             nest_user=user,
@@ -44,7 +43,6 @@ class MentorshipMutations:
     def apply_as_mentor(self, info: strawberry.Info) -> ApplyAsRoleResult:
         """Check for project leadership and register the user as a mentor."""
         user = info.context.request.user
-        IsAuthenticated.require_github_user(user)
 
         github_user = user.github_user
 

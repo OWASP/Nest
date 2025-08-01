@@ -22,7 +22,6 @@ class MentorshipQuery:
     def current_user_roles(self, info: strawberry.Info) -> UserRolesResult:
         """Get the mentorship roles for the currently authenticated user."""
         user = info.context.request.user
-        IsAuthenticated.require_github_user(user)
 
         roles = []
 

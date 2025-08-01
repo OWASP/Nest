@@ -2,7 +2,7 @@ import { gql } from '@apollo/client'
 
 export const GET_MODULES_BY_PROGRAM = gql`
   query ModulesByProgram($programKey: String!) {
-    modulesByProgram(programKey: $programKey) {
+    getProgramModules(programKey: $programKey) {
       id
       key
       name

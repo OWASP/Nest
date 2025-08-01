@@ -29,7 +29,6 @@ class ProgramMutation:
     def create_program(self, info: strawberry.Info, input_data: CreateProgramInput) -> ProgramNode:
         """Create a new mentorship program."""
         user = info.context.request.user
-        IsAuthenticated.require_github_user(user)
 
         mentor, created = Mentor.objects.get_or_create(
             nest_user=user, defaults={"github_user": user.github_user}
@@ -74,7 +73,6 @@ class ProgramMutation:
     def update_program(self, info: strawberry.Info, input_data: UpdateProgramInput) -> ProgramNode:
         """Update an existing mentorship program. Only admins can update."""
         user = info.context.request.user
-        IsAuthenticated.require_github_user(user)
 
         try:
             program = Program.objects.get(key=input_data.key)
@@ -144,7 +142,6 @@ class ProgramMutation:
     ) -> ProgramNode:
         """Update only the status of a program."""
         user = info.context.request.user
-        IsAuthenticated.require_github_user(user)
 
         try:
             program = Program.objects.get(key=input_data.key)

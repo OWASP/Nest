@@ -41,7 +41,6 @@ class ProgramQuery:
     ) -> PaginatedPrograms:
         """Get paginated programs where the current user is admin or mentor."""
         user = info.context.request.user
-        IsAuthenticated.require_github_user(user)
 
         try:
             mentor = Mentor.objects.select_related("github_user").get(github_user=user.github_user)

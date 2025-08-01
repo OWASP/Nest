@@ -12,6 +12,12 @@ export enum ProgramStatusEnum {
   COMPLETED = 'completed',
 }
 
+export const EXPERIENCE_LEVELS = {
+  BEGINNER: 'BEGINNER',
+  INTERMEDIATE: 'INTERMEDIATE',
+  ADVANCED: 'ADVANCED',
+}
+
 // Main Program type
 export type Program = {
   id: string

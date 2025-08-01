@@ -9,7 +9,7 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UPDATE_MODULE } from 'server/mutations/moduleMutations'
 import { GET_PROGRAM_ADMINS_AND_MODULES } from 'server/queries/moduleQueries'
 import type { ExtendedSession } from 'types/auth'
-import type { ModuleFormData } from 'types/mentorship'
+import { EXPERIENCE_LEVELS, type ModuleFormData } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -71,7 +71,7 @@ const EditModulePage = () => {
       setFormData({
         name: m.name || '',
         description: m.description || '',
-        experienceLevel: m.experienceLevel || 'BEGINNER',
+        experienceLevel: m.experienceLevel || EXPERIENCE_LEVELS.BEGINNER,
         startedAt: formatDateForInput(m.startedAt),
         endedAt: formatDateForInput(m.endedAt),
         domains: (m.domains || []).join(', '),

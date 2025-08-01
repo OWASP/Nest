@@ -65,7 +65,7 @@ hsl
 igoat
 inlinehilite
 isanori
-jane_doe
+jane-doe
 jumpstart
 kasya
 libexpat
@@ -82,7 +82,6 @@ mentee
 mentees
 mern
 millify
-mock_user
 mpim
 navlink
 nestbot
