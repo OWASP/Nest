@@ -10,18 +10,15 @@ class RepositorySitemap(BaseSitemap):
     """Repository sitemap."""
 
     change_frequency = "weekly"
-    prefix = "/organizations"
+    prefix = "/repositories"
 
     def items(self) -> QuerySet[Repository]:
-        """Return list of repositories for sitemap generation.
-        
-        Returns:
-            QuerySet[Repository]: Filtered and ordered repository queryset,
-                limited to prevent performance issues with large datasets.
-        """
+        """Return list of repositories for sitemap generation."""
         return Repository.objects.filter(
             is_archived=False,
-            owner__isnull=False,
+            is_empty=False,
+            is_template=False,
+            organization__isnull=False,
         ).order_by(
             "-updated_at",
             "-created_at",
@@ -29,18 +26,12 @@ class RepositorySitemap(BaseSitemap):
 
     def location(self, obj: Repository) -> str:
         """Return the URL path for a repository.
-        
+
         Args:
             obj: Repository instance to generate URL for.
-            
+
         Returns:
             str: The URL path for the repository.
-            
-        Raises:
-            ValueError: If repository has no owner.
+
         """
-        if not obj.owner:
-            raise ValueError(f"Repository '{obj.name}' has no owner")
-        
-        return f"{self.prefix}/{obj.owner.login}/repositories/{obj.key}"
-        
+        return f"/organizations/{obj.organization.nest_key}{self.prefix}/{obj.key}".lower()

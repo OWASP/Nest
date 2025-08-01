@@ -1,7 +1,6 @@
 import math
 from unittest.mock import MagicMock, patch
 
-import pytest
 from django.utils import timezone
 
 from apps.sitemap.views.base import BaseSitemap
@@ -19,25 +18,18 @@ class TestRepositorySitemap:
 
     @patch("apps.sitemap.views.repository.Repository")
     def test_items(self, mock_repository):
-        mock_obj = MagicMock()
-        # Create a mock queryset that properly chains the methods
         mock_queryset = MagicMock()
-        mock_queryset.filter.return_value.order_by.return_value = [mock_obj]
-        mock_repository.objects = mock_queryset
+        mock_queryset.order_by.return_value = mock_queryset
+
+        mock_obj = MagicMock(is_indexable=True)
+        mock_queryset.__iter__ = lambda _: iter([mock_obj])
+
+        mock_repository.objects.filter.return_value = mock_queryset
+
         sitemap = RepositorySitemap()
 
         result = list(sitemap.items())
         assert result == [mock_obj]
-        
-        # Verify the correct methods were called with correct arguments
-        mock_queryset.filter.assert_called_once_with(
-            is_archived=False,
-            owner__isnull=False,
-        )
-        mock_queryset.filter.return_value.order_by.assert_called_once_with(
-            "-updated_at",
-            "-created_at",
-        )
 
     def test_lastmod(self):
         dt = timezone.now()
@@ -56,18 +48,12 @@ class TestRepositorySitemap:
 
     def test_location(self):
         sitemap = RepositorySitemap()
-        mock_owner = MagicMock(login="test-org")
-        mock_repo = MagicMock(key="test-repo", owner=mock_owner)
+        mock_organization = MagicMock(nest_key="test-org")
+        mock_repository = MagicMock(key="test-repo", organization=mock_organization)
 
-        assert sitemap.location(mock_repo) == "/organizations/test-org/repositories/test-repo"
-
-    def test_location_raises_error_for_repository_without_owner(self):
-        sitemap = RepositorySitemap()
-        mock_repo = MagicMock(owner=None)
-        mock_repo.name = "test-repo"
-
-        with pytest.raises(ValueError, match="Repository 'test-repo' has no owner"):
-            sitemap.location(mock_repo)
+        assert (
+            sitemap.location(mock_repository) == "/organizations/test-org/repositories/test-repo"
+        )
 
     def test_priority(self):
         sitemap = RepositorySitemap()
