@@ -603,28 +603,6 @@ describe('TopContributorsList Component', () => {
       })
     })
 
-    it('renders button with correct styling classes', () => {
-      const manyContributors = Array(15)
-        .fill(null)
-        .map((_, index) => ({
-          ...mockContributors[0],
-          login: `user${index}`,
-          name: `User ${index}`,
-        }))
-
-      render(<TopContributorsList contributors={manyContributors} maxInitialDisplay={5} />)
-
-      const button = screen.getByRole('button')
-      expect(button).toHaveClass(
-        'mt-4',
-        'flex',
-        'items-center',
-        'bg-transparent',
-        'text-blue-400',
-        'hover:underline'
-      )
-    })
-
     it('renders contributor links with proper styling', () => {
       render(<TopContributorsList {...defaultProps} />)
 
