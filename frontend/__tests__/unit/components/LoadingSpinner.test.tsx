@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react'
-import LoadingSpinner from '../../../src/components/LoadingSpinner'
+import LoadingSpinner from 'components/LoadingSpinner'
 
-// Mock next/image to avoid SSR-related issues during test runs
-jest.mock('next/image', () => (props: any) => {
-  // Replace <Image /> with a basic <img />
-  return <img {...props} />
-})
+jest.mock('next/image', () => ({
+  __esModule: true,
+  // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+  default: (props) => <img {...props} />,
+}))
 
 describe('<LoadingSpinner />', () => {
   it('renders without crashing', () => {
