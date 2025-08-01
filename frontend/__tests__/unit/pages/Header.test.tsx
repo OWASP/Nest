@@ -1,8 +1,9 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import { usePathname } from 'next/navigation'
 import { SessionProvider } from 'next-auth/react'
 import Header from 'components/Header'
 import '@testing-library/jest-dom'
+import React from 'react' // Import React
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
@@ -11,6 +12,7 @@ jest.mock('next/navigation', () => ({
 
 // Mock next/image
 jest.mock('next/image', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return function MockImage({ src, alt, className, width, height, priority, ...props }: any) {
     return (
       <img
@@ -28,6 +30,7 @@ jest.mock('next/image', () => {
 
 // Mock next/link
 jest.mock('next/link', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return function MockLink({ href, children, onClick, className, ...props }: any) {
     return (
       <a href={href} onClick={onClick} className={className} {...props}>
@@ -39,12 +42,13 @@ jest.mock('next/link', () => {
 
 // Mock FontAwesome components with proper icon mapping
 jest.mock('@fortawesome/react-fontawesome', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   FontAwesomeIcon: ({ icon, className }: any) => {
     // Map icon names to test IDs based on the actual icons used
     const iconMap: { [key: string]: string } = {
-      'bars': 'icon-bars',
-      'xmark': 'icon-xmark', // Updated from 'times' to 'xmark' based on error output
-      'times': 'icon-times'
+      bars: 'icon-bars',
+      xmark: 'icon-xmark',
+      times: 'icon-times',
     }
     const testId = iconMap[icon.iconName] || `icon-${icon.iconName}`
     return <span className={className} data-testid={testId} />
@@ -53,8 +57,9 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
 
 // Mock HeroUI Button
 jest.mock('@heroui/button', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Button: ({ children, onPress, className, ...props }: any) => (
-    <button onClick={onPress} className={className} {...props}>
+    <button type="button" onClick={onPress} className={className} {...props}>
       {children}
     </button>
   ),
@@ -68,6 +73,7 @@ jest.mock('components/ModeToggle', () => {
 })
 
 jest.mock('components/NavButton', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return function MockNavButton({ href, text, className }: any) {
     return (
       <a href={href} className={className} data-testid="nav-button">
@@ -78,11 +84,12 @@ jest.mock('components/NavButton', () => {
 })
 
 jest.mock('components/NavDropDown', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return function MockNavDropdown({ link, pathname }: any) {
     return (
       <div data-testid="nav-dropdown">
         {link.text}
-        {link.submenu?.map((sub: any, i: number) => (
+        {link.submenu?.map((sub: { href: string; text: string }, i: number) => (
           <a key={i} href={sub.href} className={pathname === sub.href ? 'active' : ''}>
             {sub.text}
           </a>
@@ -95,7 +102,7 @@ jest.mock('components/NavDropDown', () => {
 jest.mock('components/UserMenu', () => {
   return function MockUserMenu({ isGitHubAuthEnabled }: { isGitHubAuthEnabled: boolean }) {
     return (
-      <div data-testid="user-menu" data-github-auth={isGitHubAuthEnabled}>
+      <div data-testid="user-menu" data-github-auth={isGitHubAuthEnabled.toString()}>
         User Menu
       </div>
     )
@@ -130,11 +137,13 @@ jest.mock('utils/constants', () => ({
 
 // Mock utility function
 jest.mock('utils/utility', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   cn: (...classes: any[]) => classes.filter(Boolean).join(' '),
 }))
 
 // Mock next-auth
 jest.mock('next-auth/react', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   SessionProvider: ({ children }: any) => children,
   useSession: () => ({
     data: null,
@@ -160,9 +169,11 @@ const renderWithSession = (component: React.ReactElement) => {
 
 // Helper function to find mobile menu element
 const findMobileMenu = () => {
-  return screen.queryByRole('navigation', { name: /mobile menu/i }) ||
-         screen.queryByTestId('mobile-menu') ||
-         document.querySelector('[class*="fixed"][class*="inset-y-0"][class*="left-0"]')
+  return (
+    screen.queryByRole('navigation', { name: /mobile menu/i }) ||
+    screen.queryByTestId('mobile-menu') ||
+    document.querySelector('[class*="fixed"][class*="inset-y-0"][class*="left-0"]')
+  )
 }
 
 // Helper function to check if mobile menu is open
@@ -171,7 +182,7 @@ const isMobileMenuOpen = () => {
   if (menu && menu.getAttribute('aria-expanded') === 'true') {
     return true
   }
-  return menu && menu.className.includes('translate-x-0')
+  return menu?.className.includes('translate-x-0') || false
 }
 
 // Helper function to check if mobile menu is closed
@@ -180,7 +191,7 @@ const isMobileMenuClosed = () => {
   if (menu && menu.getAttribute('aria-expanded') === 'false') {
     return true
   }
-  return menu && menu.className.includes('-translate-x-full')
+  return menu?.className.includes('-translate-x-full') || false
 }
 
 describe('Header Component', () => {
@@ -192,11 +203,11 @@ describe('Header Component', () => {
       configurable: true,
       value: 1024,
     })
-    
+
     // Mock window methods
     window.addEventListener = jest.fn()
     window.removeEventListener = jest.fn()
-    
+
     // Clear all mocks
     jest.clearAllMocks()
   })
@@ -207,32 +218,32 @@ describe('Header Component', () => {
 
   describe('Basic Rendering', () => {
     it('renders successfully with GitHub auth enabled', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       expect(screen.getByRole('banner')).toBeInTheDocument()
-      
+
       // Use getAllByRole for multiple elements
       const logoImages = screen.getAllByRole('img', { name: /owasp logo/i })
       expect(logoImages.length).toBe(4) // 2 in desktop header + 2 in mobile menu
-      
+
       const brandTexts = screen.getAllByText('Nest')
       expect(brandTexts.length).toBe(2) // One in desktop header, one in mobile menu
-      
+
       const userMenu = screen.getByTestId('user-menu')
       expect(userMenu).toHaveAttribute('data-github-auth', 'true')
     })
 
     it('renders successfully with GitHub auth disabled', () => {
       renderWithSession(<Header isGitHubAuthEnabled={false} />)
-      
+
       expect(screen.getByRole('banner')).toBeInTheDocument()
-      
+
       const logoImages = screen.getAllByRole('img', { name: /owasp logo/i })
       expect(logoImages.length).toBe(4)
-      
+
       const brandTexts = screen.getAllByText('Nest')
       expect(brandTexts.length).toBe(2)
-      
+
       const userMenu = screen.getByTestId('user-menu')
       expect(userMenu).toHaveAttribute('data-github-auth', 'false')
     })
@@ -240,12 +251,12 @@ describe('Header Component', () => {
 
   describe('Logo and Branding', () => {
     it('renders logo with correct attributes', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       const logoImages = screen.getAllByRole('img', { name: /owasp logo/i })
       expect(logoImages.length).toBe(4) // 2 in desktop header + 2 in mobile menu
-      
-      logoImages.forEach(logo => {
+
+      logoImages.forEach((logo) => {
         expect(logo).toHaveAttribute('width', '64')
         expect(logo).toHaveAttribute('height', '64')
         expect(logo).toHaveAttribute('src')
@@ -253,8 +264,8 @@ describe('Header Component', () => {
     })
 
     it('renders Nest text branding', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       const brandTexts = screen.getAllByText('Nest')
       expect(brandTexts.length).toBe(2) // One in desktop header, one in mobile menu
       expect(brandTexts[0]).toBeInTheDocument()
@@ -262,14 +273,16 @@ describe('Header Component', () => {
     })
 
     it('logo link navigates to home page', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       // Find all links that go to home page with logo images
-      const homeLinks = screen.getAllByRole('link').filter(link => 
-        link.getAttribute('href') === '/' && link.querySelector('img[alt="OWASP Logo"]')
-      )
+      const homeLinks = screen
+        .getAllByRole('link')
+        .filter(
+          (link) => link.getAttribute('href') === '/' && link.querySelector('img[alt="OWASP Logo"]')
+        )
       expect(homeLinks.length).toBe(2) // Desktop and mobile
-      homeLinks.forEach(link => {
+      homeLinks.forEach((link) => {
         expect(link).toHaveAttribute('href', '/')
       })
     })
@@ -277,27 +290,26 @@ describe('Header Component', () => {
 
   describe('Navigation Links', () => {
     it('renders all header links on desktop', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       // Use getAllByRole for navigation links since they appear in both desktop and mobile
       const homeLinks = screen.getAllByRole('link', { name: 'Home' })
       const aboutLinks = screen.getAllByRole('link', { name: 'About' })
       const contactLinks = screen.getAllByRole('link', { name: 'Contact' })
-      
+
       expect(homeLinks.length).toBeGreaterThanOrEqual(1)
       expect(aboutLinks.length).toBeGreaterThanOrEqual(1)
       expect(contactLinks.length).toBeGreaterThanOrEqual(1)
     })
 
-
     it('applies active styling to current page link', () => {
       mockUsePathname.mockReturnValue('/about')
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       // Find the About links with aria-current attribute
       const aboutLinks = screen.getAllByRole('link', { name: 'About' })
-      const activeAboutLinks = aboutLinks.filter(link => 
-        link.getAttribute('aria-current') === 'page'
+      const activeAboutLinks = aboutLinks.filter(
+        (link) => link.getAttribute('aria-current') === 'page'
       )
       expect(activeAboutLinks.length).toBeGreaterThan(0)
     })
@@ -305,91 +317,93 @@ describe('Header Component', () => {
 
   describe('Mobile Menu Functionality', () => {
     it('renders mobile menu toggle button', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
       expect(toggleButton).toBeInTheDocument()
     })
 
     it('opens mobile menu when toggle button is clicked', async () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
-      
+
       await act(async () => {
         fireEvent.click(toggleButton)
       })
-      
+
       expect(isMobileMenuOpen()).toBe(true)
     })
 
     it('closes mobile menu when toggle button is clicked again', async () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
-      
+
       // Open menu
       await act(async () => {
         fireEvent.click(toggleButton)
       })
-      
+
       // Close menu
       await act(async () => {
         fireEvent.click(toggleButton)
       })
-      
+
       expect(isMobileMenuClosed()).toBe(true)
     })
 
     it('shows hamburger icon when menu is closed', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       // Use queryByTestId to check if element exists without throwing
       const barsIcon = screen.queryByTestId('icon-bars')
       const xmarkIcon = screen.queryByTestId('icon-xmark')
-      
+
       // Either bars or xmark should be present (depending on initial state)
       expect(barsIcon || xmarkIcon).toBeInTheDocument()
     })
 
     it('shows close icon when menu is open', async () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
-      
+
       await act(async () => {
         fireEvent.click(toggleButton)
       })
-      
+
       // Check for close icon - use xmark instead of times based on error output
       const closeIcon = screen.queryByTestId('icon-xmark') || screen.queryByTestId('icon-times')
       expect(closeIcon).toBeInTheDocument()
     })
 
     it('closes mobile menu when logo is clicked', async () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
-      
+
       // Open menu first
       await act(async () => {
         fireEvent.click(toggleButton)
       })
-      
+
       expect(isMobileMenuOpen()).toBe(true)
-      
+
       // Find and click the logo link in mobile menu
       const logoLinks = screen.getAllByRole('link')
-      const mobileLogoLink = logoLinks.find(link => 
-        link.getAttribute('href') === '/' && 
-        link.querySelector('img[alt="OWASP Logo"]')
+      const mobileLogoLink = logoLinks.find(
+        (link) => link.getAttribute('href') === '/' && link.querySelector('img[alt="OWASP Logo"]')
       )
-      
+
+      // Assert that mobileLogoLink is not null before clicking
+      expect(mobileLogoLink).not.toBeNull()
+
       if (mobileLogoLink) {
         await act(async () => {
           fireEvent.click(mobileLogoLink)
         })
-        
+
         expect(isMobileMenuClosed()).toBe(true)
       }
     })
@@ -397,7 +411,7 @@ describe('Header Component', () => {
 
   describe('Mobile Menu Content', () => {
     beforeEach(async () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
+      renderWithSession(<Header isGitHubAuthEnabled />)
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
       await act(async () => {
         fireEvent.click(toggleButton)
@@ -408,7 +422,7 @@ describe('Header Component', () => {
       const allHomeLinks = screen.getAllByText('Home')
       const allAboutLinks = screen.getAllByText('About')
       const allContactLinks = screen.getAllByText('Contact')
-      
+
       expect(allHomeLinks.length).toBeGreaterThan(1) // Desktop + Mobile
       expect(allAboutLinks.length).toBeGreaterThan(1)
       expect(allContactLinks.length).toBeGreaterThan(1)
@@ -417,11 +431,11 @@ describe('Header Component', () => {
     it('renders NavButtons with correct text in mobile menu', () => {
       const navButtons = screen.getAllByTestId('nav-button')
       expect(navButtons.length).toBeGreaterThanOrEqual(2)
-      
+
       // Check for the specific button texts from the actual component
-      const starButton = navButtons.find(btn => btn.textContent?.includes('Star'))
-      const sponsorButton = navButtons.find(btn => btn.textContent?.includes('Sponsor'))
-      
+      const starButton = navButtons.find((btn) => btn.textContent?.includes('Star'))
+      const sponsorButton = navButtons.find((btn) => btn.textContent?.includes('Sponsor'))
+
       expect(starButton).toBeInTheDocument()
       expect(sponsorButton).toBeInTheDocument()
     })
@@ -434,77 +448,77 @@ describe('Header Component', () => {
 
   describe('Component Integration', () => {
     it('renders UserMenu component', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       expect(screen.getByTestId('user-menu')).toBeInTheDocument()
     })
 
     it('renders ModeToggle component', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       expect(screen.getByTestId('mode-toggle')).toBeInTheDocument()
     })
 
     it('renders NavButton components with correct props', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       const navButtons = screen.getAllByTestId('nav-button')
       expect(navButtons.length).toBeGreaterThanOrEqual(2)
     })
 
     it('renders NavDropdown for submenu items', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       expect(screen.getByTestId('nav-dropdown')).toBeInTheDocument()
     })
   })
 
   describe('Event Handling and Lifecycle', () => {
     it('sets up resize event listener on mount', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       expect(window.addEventListener).toHaveBeenCalledWith('resize', expect.any(Function))
     })
 
     it('sets up click event listener on mount', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       expect(window.addEventListener).toHaveBeenCalledWith('click', expect.any(Function))
     })
 
     // Simplified resize test - just check that the functionality works
     it('handles window resize events', async () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       // Open mobile menu first
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
       await act(async () => {
         fireEvent.click(toggleButton)
       })
-      
+
       // Simulate resize event
       await act(async () => {
         window.dispatchEvent(new Event('resize'))
       })
-      
+
       // Test passes if no errors are thrown
-      expect(true).toBe(true)
+      expect(true).toBe(true)  
     })
 
     it('handles outside click correctly', async () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       // Open mobile menu
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
       await act(async () => {
         fireEvent.click(toggleButton)
       })
-      
+
       // Click outside
       await act(async () => {
         document.body.click()
       })
-      
+
       // Verify the event listener is set up
       expect(window.addEventListener).toHaveBeenCalledWith('click', expect.any(Function))
     })
@@ -512,33 +526,33 @@ describe('Header Component', () => {
 
   describe('Accessibility', () => {
     it('has proper banner role', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       expect(screen.getByRole('banner')).toBeInTheDocument()
     })
 
     it('has screen reader text for mobile menu button', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       const screenReaderText = screen.getByText('Open main menu')
       expect(screenReaderText).toBeInTheDocument()
     })
 
     it('has proper alt text for logo images', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       const logoImages = screen.getAllByRole('img', { name: /owasp logo/i })
       expect(logoImages.length).toBeGreaterThan(0)
     })
 
     it('has proper aria-current attribute on active links', () => {
       mockUsePathname.mockReturnValue('/')
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       // Find the Home links that should be active
       const homeLinks = screen.getAllByRole('link', { name: 'Home' })
-      const activeHomeLinks = homeLinks.filter(link => 
-        link.getAttribute('aria-current') === 'page'
+      const activeHomeLinks = homeLinks.filter(
+        (link) => link.getAttribute('aria-current') === 'page'
       )
       expect(activeHomeLinks.length).toBeGreaterThan(0)
     })
@@ -546,8 +560,8 @@ describe('Header Component', () => {
 
   describe('Styling and CSS Classes', () => {
     it('applies correct header structure', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       const header = screen.getByRole('banner')
       expect(header).toBeInTheDocument()
       // Focus on semantic structure rather than specific classes
@@ -555,33 +569,33 @@ describe('Header Component', () => {
     })
 
     it('mobile menu starts closed', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       expect(isMobileMenuClosed()).toBe(true)
     })
 
     it('mobile menu opens when toggled', async () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
       await act(async () => {
         fireEvent.click(toggleButton)
       })
-      
+
       expect(isMobileMenuOpen()).toBe(true)
     })
   })
 
   describe('Prop-based Behavior', () => {
     it('passes isGitHubAuthEnabled prop to UserMenu correctly when true', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       expect(screen.getByTestId('user-menu')).toHaveAttribute('data-github-auth', 'true')
     })
 
     it('passes isGitHubAuthEnabled prop to UserMenu correctly when false', () => {
       renderWithSession(<Header isGitHubAuthEnabled={false} />)
-      
+
       expect(screen.getByTestId('user-menu')).toHaveAttribute('data-github-auth', 'false')
     })
   })
@@ -589,30 +603,30 @@ describe('Header Component', () => {
   describe('Edge Cases and Error Handling', () => {
     it('handles undefined pathname gracefully', () => {
       mockUsePathname.mockReturnValue('')
-      
+
       expect(() => {
-        renderWithSession(<Header isGitHubAuthEnabled={true} />)
+        renderWithSession(<Header isGitHubAuthEnabled />)
       }).not.toThrow()
     })
 
     it('handles missing headerLinks gracefully', () => {
       expect(() => {
-        renderWithSession(<Header isGitHubAuthEnabled={true} />)
+        renderWithSession(<Header isGitHubAuthEnabled />)
       }).not.toThrow()
     })
 
     it('handles multiple rapid toggle clicks', async () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
-      
+
       // Rapid clicks
       await act(async () => {
         fireEvent.click(toggleButton)
         fireEvent.click(toggleButton)
         fireEvent.click(toggleButton)
       })
-      
+
       // Should still work correctly
       expect(toggleButton).toBeInTheDocument()
     })
@@ -620,25 +634,25 @@ describe('Header Component', () => {
 
   describe('State Management', () => {
     it('initializes with mobile menu closed', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       expect(isMobileMenuClosed()).toBe(true)
     })
 
     it('toggles mobile menu state correctly', async () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
-      
+
       // Initially closed
       expect(isMobileMenuClosed()).toBe(true)
-      
+
       // Open
       await act(async () => {
         fireEvent.click(toggleButton)
       })
       expect(isMobileMenuOpen()).toBe(true)
-      
+
       // Close
       await act(async () => {
         fireEvent.click(toggleButton)
@@ -649,8 +663,8 @@ describe('Header Component', () => {
 
   describe('Content Rendering', () => {
     it('renders all expected text content', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       // Use getAllByText since elements appear multiple times
       expect(screen.getAllByText('Nest').length).toBeGreaterThan(0)
       expect(screen.getAllByText('Home').length).toBeGreaterThan(0)
@@ -660,8 +674,8 @@ describe('Header Component', () => {
     })
 
     it('renders navigation buttons with correct text', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       const navButtons = screen.getAllByTestId('nav-button')
       expect(navButtons.length).toBeGreaterThan(0)
     })
@@ -669,20 +683,26 @@ describe('Header Component', () => {
 
   describe('Responsive Behavior', () => {
     it('has proper responsive navigation structure', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       // Check for desktop navigation (should exist but may be hidden on mobile)
       const navigation = screen.getByRole('banner')
       expect(navigation).toBeInTheDocument()
-      
+
       // Check for mobile menu toggle
       const mobileToggle = screen.getByRole('button', { name: /open main menu/i })
       expect(mobileToggle).toBeInTheDocument()
     })
 
     it('shows mobile menu button for mobile screens', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      // Set window width to simulate mobile
+      Object.defineProperty(window, 'innerWidth', {
+        writable: true,
+        configurable: true,
+        value: 400,
+      })
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       const mobileToggle = screen.getByRole('button', { name: /open main menu/i })
       expect(mobileToggle).toBeInTheDocument()
     })
@@ -690,8 +710,8 @@ describe('Header Component', () => {
 
   describe('Integration with Next.js', () => {
     it('renders Next.js Image component correctly', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       const logoImages = screen.getAllByRole('img', { name: /owasp logo/i })
       const firstLogo = logoImages[0]
       expect(firstLogo).toHaveAttribute('src')
@@ -701,8 +721,8 @@ describe('Header Component', () => {
     })
 
     it('renders Next.js Link components correctly', () => {
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       const homeLinks = screen.getAllByRole('link', { name: 'Home' })
       const firstHomeLink = homeLinks[0]
       expect(firstHomeLink).toHaveAttribute('href', '/')
@@ -710,11 +730,11 @@ describe('Header Component', () => {
 
     it('integrates with Next.js routing via usePathname', () => {
       mockUsePathname.mockReturnValue('/about')
-      renderWithSession(<Header isGitHubAuthEnabled={true} />)
-      
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
       const aboutLinks = screen.getAllByRole('link', { name: 'About' })
-      const activeAboutLinks = aboutLinks.filter(link => 
-        link.getAttribute('aria-current') === 'page'
+      const activeAboutLinks = aboutLinks.filter(
+        (link) => link.getAttribute('aria-current') === 'page'
       )
       expect(activeAboutLinks.length).toBeGreaterThan(0)
     })
