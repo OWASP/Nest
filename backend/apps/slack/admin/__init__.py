@@ -1,4 +1,4 @@
-"""Slack admin module initialization."""
+"""Slack app admin."""
 
 from .conversation import ConversationAdmin
 from .event import EventAdmin
