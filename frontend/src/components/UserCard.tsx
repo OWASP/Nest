@@ -14,6 +14,7 @@ const UserCard = ({
   email,
   followersCount,
   location,
+  login,
   name,
   repositoriesCount,
 }: UserCardProps) => {
@@ -41,7 +42,7 @@ const UserCard = ({
             {name}
           </h3>
           <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
-            {company || location || email}
+            {company || location || email || login}
           </p>
           {description && (
             <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
