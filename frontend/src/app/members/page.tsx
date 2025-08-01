@@ -43,6 +43,7 @@ const UsersPage = () => {
         email={user.email || ''}
         followersCount={user.followersCount}
         location={user.location || ''}
+        login={user.login}
         name={user.name || `@${user.login}`}
         repositoriesCount={user.publicRepositoriesCount}
       />
