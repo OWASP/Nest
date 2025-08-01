@@ -2,14 +2,22 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import SortBy from 'components/SortBy'
 
+jest.mock('framer-motion', () => {
+  const actual = jest.requireActual('framer-motion');
+  return {
+    ...actual,
+    LazyMotion: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+});
+
 describe('<SortBy />', () => {
   const defaultProps = {
-    options: [
-      { label: 'Name', value: 'name' },
-      { label: 'Date', value: 'date' },
+    sortOptions: [
+      { label: 'Name', key: 'name' },
+      { label: 'Date', key: 'date' },
     ],
-    selected: 'name',
-    onChange: jest.fn(),
+    selectedSortOption: 'name',
+    onSortChange: jest.fn(),
     selectedOrder: 'asc',
     onOrderChange: jest.fn(),
   }
@@ -20,7 +28,7 @@ describe('<SortBy />', () => {
 
   it('renders successfully with minimal required props', () => {
     render(<SortBy {...defaultProps} />)
-    expect(screen.getByText('Sort by')).toBeInTheDocument()
+    expect(screen.getByText('Sort By :')).toBeInTheDocument()
     expect(screen.getByRole('combobox')).toBeInTheDocument()
   })
 
@@ -32,10 +40,10 @@ describe('<SortBy />', () => {
     expect(screen.getByText('Date')).toBeInTheDocument()
   })
 
-  it('calls onChange when a different option is selected', () => {
+  it('calls onSortChange when a different option is selected', () => {
     render(<SortBy {...defaultProps} />)
     fireEvent.change(screen.getByRole('combobox'), { target: { value: 'date' } })
-    expect(defaultProps.onChange).toHaveBeenCalledWith('date')
+    expect(defaultProps.onSortChange).toHaveBeenCalledWith('date')
   })
 
   it('renders ascending icon and tooltip when selectedOrder is "asc"', () => {
@@ -57,12 +65,14 @@ describe('<SortBy />', () => {
   })
 
   it('handles missing optional props gracefully', () => {
-    // Remove onOrderChange and selectedOrder
+    // Provide all required props, use dummy values if not testing them
     const { container } = render(
       <SortBy
-        options={defaultProps.options}
-        selected="name"
-        onChange={defaultProps.onChange}
+        sortOptions={defaultProps.sortOptions}
+        selectedSortOption="name"
+        onSortChange={defaultProps.onSortChange}
+        selectedOrder="asc"
+        onOrderChange={jest.fn()}
       />
     )
     expect(container).toBeInTheDocument()
@@ -70,29 +80,31 @@ describe('<SortBy />', () => {
 
   it('renders correct classNames and structure', () => {
     render(<SortBy {...defaultProps} />)
-    const wrapper = screen.getByText('Sort by').closest('div')
+    const wrapper = screen.getByText('Sort By :').closest('div')
     expect(wrapper).toHaveClass('flex', 'items-center')
   })
 
   it('has accessible labels and roles', () => {
     render(<SortBy {...defaultProps} />)
-    expect(screen.getByRole('combobox')).toHaveAccessibleName('Sort by')
+    expect(screen.getByRole('combobox')).toHaveAccessibleName('Sort By :')
     expect(screen.getByRole('button')).toHaveAttribute('aria-label')
   })
 
-  it('handles empty options array', () => {
+  it('handles empty sortOptions array', () => {
     render(
       <SortBy
-        options={[]}
-        selected=""
-        onChange={jest.fn()}
+        sortOptions={[]}
+        selectedSortOption=""
+        onSortChange={jest.fn()}
+        selectedOrder="asc"
+        onOrderChange={jest.fn()}
       />
     )
-    expect(screen.getByRole('combobox').children.length).toBe(0)
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
   })
 
-  it('handles invalid selected value', () => {
-    render(<SortBy {...defaultProps} selected="invalid" />)
+  it('handles invalid selectedSortOption value', () => {
+    render(<SortBy {...defaultProps} selectedSortOption="invalid" />)
     expect(screen.getByRole('combobox')).toHaveValue('invalid')
   })
 })
