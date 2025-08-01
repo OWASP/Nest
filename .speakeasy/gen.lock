@@ -1,0 +1,255 @@
+lockVersion: 2.0.0
+id: 7dbcdb03-6498-4b3b-924d-e18c8e215c55
+management:
+  docChecksum: 09a524483e1103e04354b113fdbf3608
+  docVersion: 1.0.0
+  speakeasyVersion: 1.594.0
+  generationVersion: 2.670.1
+  releaseVersion: 0.0.1
+  configChecksum: ceb0ff8d29fb412a2eee73cb11d4c8bc
+features:
+  python:
+    additionalDependencies: 1.0.0
+    constsAndDefaults: 1.0.5
+    core: 5.19.5
+    defaultEnabledRetries: 0.2.0
+    devContainers: 3.0.0
+    enumUnions: 0.1.0
+    envVarSecurityUsage: 0.3.2
+    flattening: 3.1.1
+    globalSecurity: 3.0.3
+    globalSecurityCallbacks: 1.0.0
+    globalSecurityFlattening: 1.0.0
+    globalServerURLs: 3.1.1
+    methodArguments: 1.0.2
+    nullables: 1.0.1
+    responseFormat: 1.0.1
+    retries: 3.0.2
+    sdkHooks: 1.1.0
+generatedFiles:
+  - .devcontainer/README.md
+  - .devcontainer/devcontainer.json
+  - .devcontainer/setup.sh
+  - .gitattributes
+  - .vscode/settings.json
+  - USAGE.md
+  - docs/models/chapterschema.md
+  - docs/models/committeeschema.md
+  - docs/models/eventschema.md
+  - docs/models/getuserrequest.md
+  - docs/models/issueschema.md
+  - docs/models/labelschema.md
+  - docs/models/listchaptersordering.md
+  - docs/models/listchaptersrequest.md
+  - docs/models/listcommitteesordering.md
+  - docs/models/listcommitteesrequest.md
+  - docs/models/listeventsordering.md
+  - docs/models/listeventsrequest.md
+  - docs/models/listissuesordering.md
+  - docs/models/listissuesrequest.md
+  - docs/models/listlabelsordering.md
+  - docs/models/listlabelsrequest.md
+  - docs/models/listorganizationsordering.md
+  - docs/models/listorganizationsrequest.md
+  - docs/models/listprojectsordering.md
+  - docs/models/listprojectsrequest.md
+  - docs/models/listreleasesordering.md
+  - docs/models/listreleasesrequest.md
+  - docs/models/listrepositoriesordering.md
+  - docs/models/listrepositoriesrequest.md
+  - docs/models/listusersordering.md
+  - docs/models/listusersrequest.md
+  - docs/models/organizationschema.md
+  - docs/models/pagedchapterschema.md
+  - docs/models/pagedcommitteeschema.md
+  - docs/models/pagedeventschema.md
+  - docs/models/pagedissueschema.md
+  - docs/models/pagedlabelschema.md
+  - docs/models/pagedorganizationschema.md
+  - docs/models/pagedprojectschema.md
+  - docs/models/pagedreleaseschema.md
+  - docs/models/pagedrepositoryschema.md
+  - docs/models/pageduserschema.md
+  - docs/models/projectlevel.md
+  - docs/models/projectschema.md
+  - docs/models/releaseschema.md
+  - docs/models/repositoryschema.md
+  - docs/models/security.md
+  - docs/models/state.md
+  - docs/models/userschema.md
+  - docs/models/utils/retryconfig.md
+  - docs/sdks/github/README.md
+  - docs/sdks/nestapi/README.md
+  - docs/sdks/owasp/README.md
+  - poetry.toml
+  - py.typed
+  - pylintrc
+  - pyproject.toml
+  - scripts/publish.sh
+  - src/nest_api/__init__.py
+  - src/nest_api/_hooks/__init__.py
+  - src/nest_api/_hooks/sdkhooks.py
+  - src/nest_api/_hooks/types.py
+  - src/nest_api/_version.py
+  - src/nest_api/basesdk.py
+  - src/nest_api/errors/__init__.py
+  - src/nest_api/errors/apierror.py
+  - src/nest_api/errors/nestapierror.py
+  - src/nest_api/errors/no_response_error.py
+  - src/nest_api/errors/responsevalidationerror.py
+  - src/nest_api/github.py
+  - src/nest_api/httpclient.py
+  - src/nest_api/models/__init__.py
+  - src/nest_api/models/chapterschema.py
+  - src/nest_api/models/committeeschema.py
+  - src/nest_api/models/eventschema.py
+  - src/nest_api/models/get_userop.py
+  - src/nest_api/models/issueschema.py
+  - src/nest_api/models/labelschema.py
+  - src/nest_api/models/list_chaptersop.py
+  - src/nest_api/models/list_committeesop.py
+  - src/nest_api/models/list_eventsop.py
+  - src/nest_api/models/list_issuesop.py
+  - src/nest_api/models/list_labelsop.py
+  - src/nest_api/models/list_organizationsop.py
+  - src/nest_api/models/list_projectsop.py
+  - src/nest_api/models/list_releasesop.py
+  - src/nest_api/models/list_repositoriesop.py
+  - src/nest_api/models/list_usersop.py
+  - src/nest_api/models/organizationschema.py
+  - src/nest_api/models/pagedchapterschema.py
+  - src/nest_api/models/pagedcommitteeschema.py
+  - src/nest_api/models/pagedeventschema.py
+  - src/nest_api/models/pagedissueschema.py
+  - src/nest_api/models/pagedlabelschema.py
+  - src/nest_api/models/pagedorganizationschema.py
+  - src/nest_api/models/pagedprojectschema.py
+  - src/nest_api/models/pagedreleaseschema.py
+  - src/nest_api/models/pagedrepositoryschema.py
+  - src/nest_api/models/pageduserschema.py
+  - src/nest_api/models/projectlevel.py
+  - src/nest_api/models/projectschema.py
+  - src/nest_api/models/releaseschema.py
+  - src/nest_api/models/repositoryschema.py
+  - src/nest_api/models/security.py
+  - src/nest_api/models/state.py
+  - src/nest_api/models/userschema.py
+  - src/nest_api/owasp.py
+  - src/nest_api/py.typed
+  - src/nest_api/sdk.py
+  - src/nest_api/sdkconfiguration.py
+  - src/nest_api/types/__init__.py
+  - src/nest_api/types/basemodel.py
+  - src/nest_api/utils/__init__.py
+  - src/nest_api/utils/annotations.py
+  - src/nest_api/utils/datetimes.py
+  - src/nest_api/utils/enums.py
+  - src/nest_api/utils/eventstreaming.py
+  - src/nest_api/utils/forms.py
+  - src/nest_api/utils/headers.py
+  - src/nest_api/utils/logger.py
+  - src/nest_api/utils/metadata.py
+  - src/nest_api/utils/queryparams.py
+  - src/nest_api/utils/requestbodies.py
+  - src/nest_api/utils/retries.py
+  - src/nest_api/utils/security.py
+  - src/nest_api/utils/serializers.py
+  - src/nest_api/utils/unmarshal_json_response.py
+  - src/nest_api/utils/url.py
+  - src/nest_api/utils/values.py
+examples:
+  list_issues:
+    speakeasy-default-list-issues:
+      parameters:
+        query:
+          page: 1
+      responses:
+        "200":
+          application/json: {"items": [{"body": "<value>", "created_at": "2025-07-18T12:46:15.645Z", "title": "<value>", "state": "closed", "updated_at": "2023-02-19T06:46:47.973Z", "url": "https://victorious-glider.info"}], "count": 209946}
+  list_labels:
+    speakeasy-default-list-labels:
+      parameters:
+        query:
+          color: "d93f0b"
+          page: 1
+      responses:
+        "200":
+          application/json: {"items": [], "count": 860276}
+  list_organizations:
+    speakeasy-default-list-organizations:
+      parameters:
+        query:
+          location: "United States of America"
+          page: 1
+      responses:
+        "200":
+          application/json: {"items": [{"company": "Grady LLC", "created_at": "2025-12-31T23:31:01.740Z", "location": "<value>", "login": "Rosina11", "name": "<value>", "updated_at": "2024-09-05T17:30:42.265Z"}], "count": 150206}
+  list_releases:
+    speakeasy-default-list-releases:
+      parameters:
+        query:
+          tag_name: "v1.0.0"
+          page: 1
+      responses:
+        "200":
+          application/json: {"items": [], "count": 732904}
+  list_repositories:
+    speakeasy-default-list-repositories:
+      parameters:
+        query:
+          page: 1
+      responses:
+        "200":
+          application/json: {"items": [], "count": 331323}
+  list_users:
+    speakeasy-default-list-users:
+      parameters:
+        query:
+          location: "India"
+          page: 1
+      responses:
+        "200":
+          application/json: {"items": [{"avatar_url": "https://anguished-bakeware.name/", "bio": "<value>", "company": "Fritsch Group", "created_at": "2024-06-03T21:01:44.588Z", "email": "Elouise.McCullough@hotmail.com", "followers_count": 282009, "following_count": 160322, "location": "<value>", "login": "Ophelia.Stroman27", "name": "<value>", "public_repositories_count": 380109, "title": "<value>", "twitter_username": "<value>", "updated_at": "2025-06-26T06:28:35.999Z", "url": "https://svelte-puritan.name/"}], "count": 506301}
+  get_user:
+    speakeasy-default-get-user:
+      parameters:
+        path:
+          login: "Enos13"
+      responses:
+        "200":
+          application/json: {"avatar_url": "https://bulky-embossing.com/", "bio": "<value>", "company": "Jacobs, Bogisich and Lynch", "created_at": "2025-01-22T05:16:45.510Z", "email": "Abraham_Pacocha@yahoo.com", "followers_count": 685134, "following_count": 653740, "location": "<value>", "login": "Jessika_Keebler17", "name": "<value>", "public_repositories_count": 821696, "title": "<value>", "twitter_username": "<value>", "updated_at": "2023-05-16T02:39:59.458Z", "url": "https://international-adrenalin.biz/"}
+  list_chapters:
+    speakeasy-default-list-chapters:
+      parameters:
+        query:
+          country: "India"
+          region: "Asia"
+          page: 1
+      responses:
+        "200":
+          application/json: {"items": [{"country": "Slovenia", "created_at": "2025-04-17T12:05:02.463Z", "name": "<value>", "region": "<value>", "updated_at": "2023-05-06T16:21:25.155Z"}], "count": 769051}
+  list_committees:
+    speakeasy-default-list-committees:
+      parameters:
+        query:
+          page: 1
+      responses:
+        "200":
+          application/json: {"items": [{"name": "<value>", "description": "boo per while sunbathe likewise yeast quizzically expansion eek", "created_at": "2025-03-16T20:29:18.773Z", "updated_at": "2023-06-13T22:21:50.847Z"}], "count": 288373}
+  list_events:
+    speakeasy-default-list-events:
+      parameters:
+        query:
+          page: 1
+      responses:
+        "200":
+          application/json: {"items": [], "count": 957493}
+  list_projects:
+    speakeasy-default-list-projects:
+      parameters:
+        query:
+          page: 1
+      responses:
+        "200":
+          application/json: {"items": [], "count": 820243}
+examplesVersion: 1.0.2
