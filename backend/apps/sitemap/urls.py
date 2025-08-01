@@ -24,6 +24,7 @@ sitemaps = {
 }
 
 urlpatterns = [
+    path('snapshots/', SnapshotsSitemapView.as_view(), name='snapshots-sitemap'),
     path(
         "sitemap.xml",
         cached_sitemap_view(sitemaps=sitemaps),
