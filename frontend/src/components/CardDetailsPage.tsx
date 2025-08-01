@@ -31,7 +31,7 @@ import SponsorCard from 'components/SponsorCard'
 import ToggleableList from 'components/ToggleableList'
 import TopContributorsList from 'components/TopContributorsList'
 // Email validation regex
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i
 // Helper to sanitize URLs
 const sanitizeForUrl = (str: string) => encodeURIComponent(str.trim())
 
