@@ -12,7 +12,13 @@ library.add(faFire)
 
 // Mock ApexCharts
 jest.mock('react-apexcharts', () => {
-  const MockChart = () => <div data-testid="mock-chart" />
+  const MockChart = ({ options, series }: any) => (
+    <div
+      data-testid="mock-chart"
+      data-options={JSON.stringify(options)}
+      data-series={JSON.stringify(series)}
+    />
+  )
   return {
     __esModule: true,
     default: MockChart,
@@ -47,11 +53,41 @@ describe('<BarChart />', () => {
     expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
   })
 
-  it('renders with icon when provided', async () => {
+  it('renders with custom icon when provided', async () => {
     // cspell:ignore fas
     await renderWithTheme(<BarChart {...mockProps} icon={['fas', 'fire']} />)
     expect(screen.getByText('Calories Burned')).toBeInTheDocument()
-    expect(document.querySelector('svg')).toBeInTheDocument() // FontAwesome renders as SVG
+
+    // Check for custom FontAwesome fire icon
+    const fireIconElement = document.querySelector('svg[data-icon="fire"]')
+    expect(fireIconElement).toBeInTheDocument()
+
+    // Component renders both default and custom icons
+    const defaultIconElement = document.querySelector('svg[data-icon="link"]')
+    expect(defaultIconElement).toBeInTheDocument()
+
+    // Should have multiple icons when custom icon is provided
+    const allIcons = document.querySelectorAll('svg[data-icon]')
+    expect(allIcons.length).toBeGreaterThan(1)
+  })
+
+  it('renders with default icon when icon prop not provided', async () => {
+    await renderWithTheme(<BarChart {...mockProps} />)
+    expect(screen.getByText('Calories Burned')).toBeInTheDocument()
+
+    // Should render default link icon when no icon prop is provided
+    const defaultIconElement = document.querySelector('svg[data-icon="link"]')
+    expect(defaultIconElement).toBeInTheDocument()
+
+    // Should only have the default icon
+    const allIcons = document.querySelectorAll('svg[data-icon]')
+    expect(allIcons.length).toBe(1)
+  })
+
+  it('renders correctly in light mode', async () => {
+    await renderWithTheme(<BarChart {...mockProps} />, 'light')
+    expect(screen.getByText('Calories Burned')).toBeInTheDocument()
+    expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
   })
 
   it('renders correctly in dark mode', async () => {
@@ -72,38 +108,99 @@ describe('<BarChart />', () => {
     expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
   })
 
-  it('handles reverseColors logic correctly', async () => {
-    const customProps = {
-      ...mockProps,
-      reverseColors: [true, false, true],
+  it('handles single data point correctly', async () => {
+    const singleDataProps = {
+      title: 'Single Day',
+      labels: ['Mon'],
+      days: [200],
+      requirements: [180],
     }
-    await renderWithTheme(<BarChart {...customProps} />)
+    await renderWithTheme(<BarChart {...singleDataProps} />)
+    expect(screen.getByText('Single Day')).toBeInTheDocument()
     expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
   })
 
-  it('renders chart container with proper structure', async () => {
+  it('handles reverseColors when provided', async () => {
+    const reverseColorsProps = {
+      ...mockProps,
+      reverseColors: [true, false, true],
+    }
+    await renderWithTheme(<BarChart {...reverseColorsProps} />)
+    expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
+  })
+
+  it('handles reverseColors when not provided', async () => {
     await renderWithTheme(<BarChart {...mockProps} />)
-    const chartElement = screen.getByTestId('mock-chart')
-    expect(chartElement).toBeInTheDocument()
+    expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
   })
 
   it('handles mismatched array lengths gracefully', async () => {
     const mismatchedProps = {
       ...mockProps,
       days: [200, 150], // Only 2 entries instead of 3
+      requirements: [180], // Only 1 entry
     }
     await renderWithTheme(<BarChart {...mismatchedProps} />)
     expect(screen.getByText('Calories Burned')).toBeInTheDocument()
     expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
   })
 
-  it('renders title correctly', async () => {
+  it('passes correct data to chart component', async () => {
     await renderWithTheme(<BarChart {...mockProps} />)
-    expect(screen.getByText('Calories Burned')).toBeInTheDocument()
+    const chartElement = screen.getByTestId('mock-chart')
+
+    // Verify that chart receives the data
+    expect(chartElement).toHaveAttribute('data-series')
+    expect(chartElement).toHaveAttribute('data-options')
   })
 
-  it('renders chart component when data is provided', async () => {
-    await renderWithTheme(<BarChart {...mockProps} />)
+  it('renders with different title', async () => {
+    const customTitleProps = {
+      ...mockProps,
+      title: 'Custom Chart Title',
+    }
+    await renderWithTheme(<BarChart {...customTitleProps} />)
+    expect(screen.getByText('Custom Chart Title')).toBeInTheDocument()
+    expect(screen.queryByText('Calories Burned')).not.toBeInTheDocument()
+  })
+
+  it('handles zero values in data arrays', async () => {
+    const zeroDataProps = {
+      ...mockProps,
+      days: [0, 150, 0],
+      requirements: [0, 170, 0],
+    }
+    await renderWithTheme(<BarChart {...zeroDataProps} />)
+    expect(screen.getByText('Calories Burned')).toBeInTheDocument()
     expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
+  })
+
+  it('handles negative values in data arrays', async () => {
+    const negativeDataProps = {
+      ...mockProps,
+      days: [-50, 150, -30],
+      requirements: [-40, 170, -20],
+    }
+    await renderWithTheme(<BarChart {...negativeDataProps} />)
+    expect(screen.getByText('Calories Burned')).toBeInTheDocument()
+    expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
+  })
+
+  it('handles large numbers in data arrays', async () => {
+    const largeDataProps = {
+      ...mockProps,
+      days: [20000, 15000, 10000],
+      requirements: [18000, 17000, 9000],
+    }
+    await renderWithTheme(<BarChart {...largeDataProps} />)
+    expect(screen.getByText('Calories Burned')).toBeInTheDocument()
+    expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
+  })
+
+  it('renders chart container with proper accessibility', async () => {
+    await renderWithTheme(<BarChart {...mockProps} />)
+    const chartElement = screen.getByTestId('mock-chart')
+    expect(chartElement).toBeInTheDocument()
+    expect(chartElement).toBeVisible()
   })
 })
