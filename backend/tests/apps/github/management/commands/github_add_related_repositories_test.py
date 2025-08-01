@@ -3,7 +3,6 @@ from unittest import mock
 import pytest
 
 from apps.github.management.commands.github_add_related_repositories import (
-    GITHUB_ITEMS_PER_PAGE,
     Command,
     Project,
 )
@@ -32,21 +31,20 @@ def mock_project():
         (1, 8),
     ],
 )
-@mock.patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"})
-@mock.patch("apps.github.management.commands.github_add_related_repositories.github.Github")
+@mock.patch("apps.github.management.commands.github_add_related_repositories.get_github_client")
 @mock.patch("apps.github.management.commands.github_add_related_repositories.sync_repository")
 @mock.patch("apps.github.management.commands.github_add_related_repositories.get_repository_path")
 def test_handle(
     mock_get_repository_path,
     mock_sync_repository,
-    mock_github,
+    mock_get_github_client,
     command,
     mock_project,
     offset,
     projects,
 ):
     mock_gh_client = mock.Mock()
-    mock_github.return_value = mock_gh_client
+    mock_get_github_client.return_value = mock_gh_client
 
     mock_get_repository_path.return_value = "OWASP/test-repo"
 
@@ -76,7 +74,7 @@ def test_handle(
     ):
         command.handle(offset=offset)
 
-        mock_github.assert_called_once_with("test-token", per_page=GITHUB_ITEMS_PER_PAGE)
+        mock_get_github_client.assert_called_once()
 
         mock_get_repository_path.assert_called_with("https://github.com/OWASP/test-repo")
         mock_gh_client.get_repo.assert_called_with("OWASP/test-repo")
