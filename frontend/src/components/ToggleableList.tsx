@@ -1,9 +1,9 @@
-import { IconDefinition } from '@fortawesome/fontawesome-svg-core'
-import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
+import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Button } from '@heroui/button'
 import { useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import type React from 'react'
+import { useState } from 'react'
+import ShowMoreButton from 'components/ShowMoreButton'
 
 const ToggleableList = ({
   items,
@@ -46,23 +46,7 @@ const ToggleableList = ({
           </button>
         ))}
       </div>
-      {items.length > limit && (
-        <Button
-          disableAnimation
-          onPress={toggleShowAll}
-          className="mt-4 flex items-center bg-transparent text-blue-400 hover:underline"
-        >
-          {showAll ? (
-            <>
-              Show less <FontAwesomeIcon icon={faChevronUp} className="ml-1" />
-            </>
-          ) : (
-            <>
-              Show more <FontAwesomeIcon icon={faChevronDown} className="ml-1" />
-            </>
-          )}
-        </Button>
-      )}
+      {items.length > limit && <ShowMoreButton onToggle={toggleShowAll} />}
     </div>
   )
 }

@@ -1,15 +1,12 @@
 """A command to update OWASP related organizations."""
 
 import logging
-import os
 
-import github
 from django.core.management.base import BaseCommand
-from github.GithubException import BadCredentialsException
 
 from apps.core.utils import index
+from apps.github.auth import get_github_client
 from apps.github.common import sync_repository
-from apps.github.constants import GITHUB_ITEMS_PER_PAGE
 from apps.github.models.organization import Organization
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -43,13 +40,7 @@ class Command(BaseCommand):
 
         """
         with index.disable_indexing():
-            try:
-                gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
-            except BadCredentialsException:
-                logger.warning(
-                    "Invalid GitHub token. Please create or update .env file with a valid token."
-                )
-                return
+            gh = get_github_client()
 
             organizations = Organization.related_organizations.all()
             if organization := options["organization"]:

@@ -39,9 +39,9 @@ Before contributing, ensure you have the following installed:
 
 #### `NEXT_PUBLIC_API_URL`
 
-- **Description**: The base URL for the application's REST API.
-- **Example Value**: `https://nest.owasp.org/api/`
-- **Usage**: Used by frontend components to make REST API calls.
+- **Description**: The base URL for the application's internal API.
+- **Example Value**: `https://nest.owasp.org/`
+- **Usage**: Used by frontend components to make API calls.
 
 #### `NEXT_PUBLIC_CSRF_URL`
 

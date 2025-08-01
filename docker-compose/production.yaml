@@ -15,6 +15,7 @@ services:
       - nest-db-network
     volumes:
       - ./backend/data:/home/owasp/data
+      - ~/.github.pem:/home/owasp/.github.pem:ro
 
   production-nest-cache:
     container_name: production-nest-cache
