@@ -1,14 +1,15 @@
 import { render, screen, fireEvent } from '@testing-library/react'
+import React from 'react'
 import '@testing-library/jest-dom'
 import SortBy from 'components/SortBy'
 
 jest.mock('framer-motion', () => {
-  const actual = jest.requireActual('framer-motion');
+  const actual = jest.requireActual('framer-motion')
   return {
     ...actual,
     LazyMotion: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  };
-});
+  }
+})
 
 describe('<SortBy />', () => {
   const defaultProps = {
