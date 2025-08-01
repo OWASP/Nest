@@ -7,7 +7,9 @@ from django.views.decorators.cache import cache_page
 from .chapter import ChapterSitemap
 from .committee import CommitteeSitemap
 from .member import MemberSitemap
+from .organization import OrganizationSitemap
 from .project import ProjectSitemap
+from .repository import RepositorySitemap
 from .static import StaticSitemap
 
 
