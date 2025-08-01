@@ -1,5 +1,6 @@
 """Sitemap view base class."""
 
+from django.conf import settings
 from django.contrib.sitemaps import Sitemap
 
 
@@ -9,7 +10,7 @@ class BaseSitemap(Sitemap):
     change_frequency = "weekly"
     limit = 50000
     prefix = ""
-    protocol = "https"
+    protocol = "http" if settings.IS_LOCAL_ENVIRONMENT else "https"
 
     STATIC_ROUTES = (
         {"path": "/chapters", "changefreq": "weekly", "priority": 0.8},
@@ -18,6 +19,7 @@ class BaseSitemap(Sitemap):
         {"path": "/members", "changefreq": "daily", "priority": 0.7},
         {"path": "/organizations", "changefreq": "monthly", "priority": 0.8},
         {"path": "/projects", "changefreq": "weekly", "priority": 0.9},
+        {"path": "/repositories", "changefreq": "weekly", "priority": 0.7},
     )
 
     def get_static_priority(self, path):
@@ -42,7 +44,7 @@ class BaseSitemap(Sitemap):
 
     def location(self, obj):
         """Return the URL path for an object."""
-        return f"{self.prefix}/{obj.nest_key}"
+        return f"{self.prefix}/{obj.nest_key}".lower()
 
     def priority(self, obj):
         """Return the priority score for an object."""
