@@ -46,13 +46,10 @@ describe('ProjectsDashboardNavbar', () => {
   })
 
   it('should not apply active state to any link when on an unrelated path', () => {
-    
     ;(nextNavigation.usePathname as jest.Mock).mockReturnValue('/some/other/unrelated/path')
 
-    
     const { getByRole } = render(<ProjectsDashboardNavBar />)
 
-    
     expect(getByRole('link', { name: /overview/i })).not.toHaveAttribute('aria-current', 'page')
     expect(getByRole('link', { name: /metrics/i })).not.toHaveAttribute('aria-current', 'page')
   })
