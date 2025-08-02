@@ -205,18 +205,19 @@ describe('<SearchPageLayout />', () => {
     expect(screen.getByText('Edge case content')).toBeInTheDocument()
   })
   it('renders safely when onSearch and onPageChange are undefined', () => {
-    render(
-      <SearchPageLayout
-        isLoaded={true}
-        totalPages={0}
-        currentPage={1}
-        searchQuery=""
-        // onSearch and onPageChange are intentionally omitted
-        searchPlaceholder="Search..."
-        empty="No results"
-        indexName="test"
-      />
-    )
+  render(
+    // @ts-expect-error Testing with missing handlers intentionally
+    <SearchPageLayout
+      isLoaded={true}
+      totalPages={0}
+      currentPage={1}
+      searchQuery=""
+      // onSearch and onPageChange are intentionally omitted
+      searchPlaceholder="Search..."
+      empty="No results"
+      indexName="test"
+    />
+  )
 
     expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument()
     expect(screen.getByText('No results')).toBeInTheDocument()
@@ -247,19 +248,19 @@ describe('<SearchPageLayout />', () => {
   it('renders safely when currentPage is NaN', () => {
     const handlePageChange = jest.fn()
 
-    render(
-      <SearchPageLayout
-        isLoaded={true}
-        totalPages={3}
-        currentPage={NaN}
-        onSearch={() => {}}
-        onPageChange={handlePageChange}
-        searchQuery=""
-        searchPlaceholder="Search..."
-        empty="No results"
-        indexName="test"
-      />
-    )
+  render(
+    <SearchPageLayout
+      isLoaded={true}
+      totalPages={3}
+      currentPage={NaN}
+      onSearch={() => {}}
+      onPageChange={handlePageChange}
+      searchQuery=""
+      searchPlaceholder="Search..."
+      empty="No results"
+      indexName="test"
+    />
+  )
 
     // Should default to rendering page 1
     expect(screen.getByText('1')).toBeInTheDocument()
@@ -318,18 +319,22 @@ describe('<SearchPageLayout />', () => {
     expect(screen.getByText('Test Content')).toBeInTheDocument()
   })
 
-  it('renders safely when totalPages is negative', () => {
-    render(
-      <SearchPageLayout
-        isLoaded={true}
-        totalPages={-5}
-        currentPage={1}
-        onSearch={() => {}}
-        onPageChange={() => {}}
-      >
-        Test Content
-      </SearchPageLayout>
-    )
+it('renders safely when totalPages is negative', () => {
+  render(
+    <SearchPageLayout
+      isLoaded={true}
+      totalPages={-5}
+      currentPage={1}
+      onSearch={() => {}}
+      onPageChange={() => {}}
+      searchQuery=""
+      searchPlaceholder="Search..."
+      empty="No results"
+      indexName="test"
+    >
+      Test Content
+    </SearchPageLayout>
+  )
 
     // Expect the main content to still render
     expect(screen.getByText('Test Content')).toBeInTheDocument()
@@ -339,18 +344,22 @@ describe('<SearchPageLayout />', () => {
     expect(screen.queryByText('Next')).not.toBeInTheDocument()
   })
 
-  it('renders safely when totalPages is NaN', () => {
-    render(
-      <SearchPageLayout
-        isLoaded={true}
-        totalPages={NaN}
-        currentPage={1}
-        onSearch={() => {}}
-        onPageChange={() => {}}
-      >
-        Test Content
-      </SearchPageLayout>
-    )
+it('renders safely when totalPages is NaN', () => {
+  render(
+    <SearchPageLayout
+      isLoaded={true}
+      totalPages={NaN}
+      currentPage={1}
+      onSearch={() => {}}
+      onPageChange={() => {}}
+      searchQuery=""
+      searchPlaceholder="Search..."
+      empty="No results"
+      indexName="test"
+    >
+      Test Content
+    </SearchPageLayout>
+  )
 
     // Should render content safely
     expect(screen.getByText('Test Content')).toBeInTheDocument()
@@ -360,19 +369,23 @@ describe('<SearchPageLayout />', () => {
     expect(screen.queryByText('Next')).not.toBeInTheDocument()
   })
 
-  it('renders root layout with expected structure and classNames', () => {
-    const { container } = render(
-      <SearchPageLayout
-        isLoaded={true}
-        totalPages={1}
-        currentPage={1}
-        onSearch={() => {}}
-        onPageChange={() => {}}
-        sortChildren={<div>Sort Options</div>}
-      >
-        <div>Child Content</div>
-      </SearchPageLayout>
-    )
+it('renders root layout with expected structure and classNames', () => {
+  const { container } = render(
+    <SearchPageLayout
+      isLoaded={true}
+      totalPages={1}
+      currentPage={1}
+      onSearch={() => {}}
+      onPageChange={() => {}}
+      searchQuery=""
+      searchPlaceholder="Search..."
+      empty="No results"
+      indexName="test"
+      sortChildren={<div>Sort Options</div>}
+    >
+      <div>Child Content</div>
+    </SearchPageLayout>
+  )
 
     // Check the outermost layout container has expected classNames
     const rootDiv = container.querySelector('div.flex.min-h-screen')
@@ -383,18 +396,22 @@ describe('<SearchPageLayout />', () => {
     expect(screen.getByText('Sort Options')).toBeInTheDocument()
   })
 
-  it('renders top-level layout structure and nested content', () => {
-    render(
-      <SearchPageLayout
-        isLoaded={true}
-        totalPages={1}
-        currentPage={1}
-        onSearch={() => {}}
-        onPageChange={() => {}}
-      >
-        <div>Test child content</div>
-      </SearchPageLayout>
-    )
+it('renders top-level layout structure and nested content', () => {
+  render(
+    <SearchPageLayout
+      isLoaded={true}
+      totalPages={1}
+      currentPage={1}
+      onSearch={() => {}}
+      onPageChange={() => {}}
+      searchQuery=""
+      searchPlaceholder="Search..."
+      empty="No results"
+      indexName="test"
+    >
+      <div>Test child content</div>
+    </SearchPageLayout>
+  )
 
     // Assert a text element (child) appears inside the layout
     expect(screen.getByText('Test child content')).toBeInTheDocument()
