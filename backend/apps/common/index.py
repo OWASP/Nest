@@ -29,7 +29,6 @@ EXCLUDED_LOCAL_INDEX_NAMES = (
     "projects_updated_at_asc",
     "projects_updated_at_desc",
 )
-IS_LOCAL_BUILD = settings.ENVIRONMENT == "Local"
 LOCAL_INDEX_LIMIT = 1000
 
 
@@ -60,7 +59,11 @@ class IndexRegistry:
             bool: True if the index is enabled, False otherwise.
 
         """
-        return name.lower() not in self.excluded_local_index_names if IS_LOCAL_BUILD else True
+        return (
+            name.lower() not in self.excluded_local_index_names
+            if settings.IS_LOCAL_ENVIRONMENT
+            else True
+        )
 
     def load_excluded_local_index_names(self) -> IndexRegistry:
         """Load excluded local index names from settings.
@@ -285,4 +288,4 @@ class IndexBase(AlgoliaIndex):
         """
         qs = self.get_entities()
 
-        return qs[:LOCAL_INDEX_LIMIT] if IS_LOCAL_BUILD else qs
+        return qs[:LOCAL_INDEX_LIMIT] if settings.IS_LOCAL_ENVIRONMENT else qs

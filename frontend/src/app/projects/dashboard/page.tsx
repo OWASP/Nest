@@ -21,6 +21,7 @@ import DashboardCard from 'components/DashboardCard'
 import DonutBarChart from 'components/DonutBarChart'
 import LineChart from 'components/LineChart'
 import LoadingSpinner from 'components/LoadingSpinner'
+import MetricsPDFButton from 'components/MetricsPDFButton'
 import ProjectTypeDashboardCard from 'components/ProjectTypeDashboardCard'
 
 const ProjectsDashboardPage: FC = () => {
@@ -95,7 +96,10 @@ const ProjectsDashboardPage: FC = () => {
   ]
   return (
     <>
-      <h1 className="font-semibold">Project Health Dashboard Overview</h1>
+      <div className="mb-4 flex items-center justify-start">
+        <h1 className="font-semibold">Project Health Dashboard Overview</h1>
+        <MetricsPDFButton path="overview/pdf" fileName="owasp-project-health-metrics-overview" />
+      </div>
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
         {projectsCardsItems.map((item) => (
           <ProjectTypeDashboardCard
