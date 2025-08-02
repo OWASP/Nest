@@ -55,7 +55,7 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                         href={item?.author?.login ? `/members/${item?.author?.login}` : '#'}
                       >
                         <Image
-                          alt={item?.author?.name ?? 'author'}
+                          alt={item?.author?.name ?? ''}
                           className="mr-2 h-6 w-6 rounded-full"
                           height={24}
                           src={item?.author?.avatarUrl ?? ''}
@@ -68,7 +68,6 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                     <Link
                       className="text-blue-400 hover:underline"
                       href={
-                        item.url ??
                         `https://github.com/${item.organizationName}/${item.repositoryName}/releases/tag/${item.tagName}`
                       }
                       target="_blank"
