@@ -1,12 +1,28 @@
 import NextAuth, { type AuthOptions } from 'next-auth'
 import GitHubProvider from 'next-auth/providers/github'
-import type { ExtendedProfile, ExtendedSession } from 'types/auth'
+import { apolloClient } from 'server/apolloClient'
+import { IS_PROJECT_LEADER_QUERY } from 'server/queries/mentorshipQueries'
+import { ExtendedProfile, ExtendedSession } from 'types/auth'
 import {
   GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET,
   IS_GITHUB_AUTH_ENABLED,
   NEXTAUTH_SECRET,
 } from 'utils/credentials'
+
+async function checkIfProjectLeader(login: string): Promise<boolean> {
+  try {
+    const client = await apolloClient
+    const { data } = await client.query({
+      query: IS_PROJECT_LEADER_QUERY,
+      variables: { login },
+      fetchPolicy: 'no-cache',
+    })
+    return data?.isProjectLeader ?? false
+  } catch (err) {
+    throw new Error('Failed to fetch project leader status Error', err)
+  }
+}
 
 const providers = []
 
@@ -42,16 +58,24 @@ const authOptions: AuthOptions = {
       if (account?.access_token) {
         token.accessToken = account.access_token
       }
+
       if ((profile as ExtendedProfile)?.login) {
-        token.login = (profile as ExtendedProfile)?.login
+        const login = (profile as ExtendedProfile).login
+        token.login = login
+
+        const isLeader = await checkIfProjectLeader(login)
+        token.isLeader = isLeader
       }
+
       return token
     },
 
     async session({ session, token }) {
       ;(session as ExtendedSession).accessToken = token.accessToken as string
+
       if (session.user) {
         ;(session as ExtendedSession).user.login = token.login as string
+        ;(session as ExtendedSession).user.isLeader = token.isLeader as boolean
       }
       return session
     },

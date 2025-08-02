@@ -3,7 +3,7 @@
 import strawberry
 from django.db.models import Q
 
-from apps.nest.api.internal.permissions import IsAuthenticated
+from apps.github.models.user import User as GithubUser
 from apps.owasp.api.internal.nodes.project import ProjectNode
 from apps.owasp.models.project import Project
 
@@ -51,12 +51,13 @@ class ProjectQuery:
             "name"
         )[:3]
 
-    @strawberry.field(permission_classes=[IsAuthenticated])
-    def is_project_leader(self, info: strawberry.Info) -> bool:
-        """Check if current user is a project leader based on GitHub login or name."""
-        user = info.context.request.user
-
-        github_user = user.github_user
+    @strawberry.field
+    def is_project_leader(self, info: strawberry.Info, login: str) -> bool:
+        """Check if a GitHub login or name is listed as a project leader."""
+        try:
+            github_user = GithubUser.objects.get(login=login)
+        except GithubUser.DoesNotExist:
+            return False
 
         return Project.objects.filter(
             Q(leaders_raw__icontains=github_user.login)

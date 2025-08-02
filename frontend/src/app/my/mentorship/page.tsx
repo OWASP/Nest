@@ -4,7 +4,6 @@ import { useQuery } from '@apollo/client'
 import { faPlus, faGraduationCap } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToast } from '@heroui/toast'
-import { useProjectLeader } from 'hooks/useProjectLeader'
 import { debounce } from 'lodash'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
@@ -59,8 +58,7 @@ const MyMentorshipPage: React.FC = () => {
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
   })
-
-  const { isLeader: isProjectLeader, loading: leaderLoading } = useProjectLeader()
+  const isProjectLeader = (session as ExtendedSession)?.user.isLeader
 
   useEffect(() => {
     if (programData?.myPrograms) {
@@ -85,7 +83,7 @@ const MyMentorshipPage: React.FC = () => {
   const handleView = (key: string) => router.push(`/mentorship/programs/${key}`)
   const handleEdit = (key: string) => router.push(`/mentorship/programs/${key}/edit`)
 
-  if (leaderLoading || !username) {
+  if (!username) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center">
         <p className="text-gray-600 dark:text-white">Checking access...</p>

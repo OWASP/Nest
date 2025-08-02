@@ -78,7 +78,7 @@ export const GET_PROGRAM_AND_MODULES = gql`
         avatarUrl
       }
     }
-    modulesByProgram(programKey: $programKey) {
+    getProgramModules(programKey: $programKey) {
       id
       key
       name

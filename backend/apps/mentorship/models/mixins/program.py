@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from apps.mentorship.models.program import Program
-
 
 class ProgramIndexMixin:
     """Program index mixin for mentorship programs."""
@@ -11,7 +9,7 @@ class ProgramIndexMixin:
     @property
     def is_indexable(self) -> bool:
         """Only index published programs."""
-        return self.status == Program.ProgramStatus.PUBLISHED
+        return self.status == self.__class__.ProgramStatus.PUBLISHED
 
     @property
     def idx_name(self) -> str:

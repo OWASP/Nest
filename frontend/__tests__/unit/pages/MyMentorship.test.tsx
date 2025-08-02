@@ -1,13 +1,10 @@
 import { useQuery } from '@apollo/client'
 import { screen, waitFor, fireEvent } from '@testing-library/react'
-import { useProjectLeader } from 'hooks/useProjectLeader'
 import { useRouter as useRouterMock } from 'next/navigation'
+import { useSession as mockUseSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import MyMentorshipPage from 'app/my/mentorship/page'
 
-// Mocks
-jest.mock('next-auth/react')
-jest.mock('hooks/useProjectLeader')
 jest.mock('@apollo/client', () => {
   const actual = jest.requireActual('@apollo/client')
   return {
@@ -15,6 +12,7 @@ jest.mock('@apollo/client', () => {
     useQuery: jest.fn(),
   }
 })
+
 jest.mock('next/navigation', () => {
   const actual = jest.requireActual('next/navigation')
   return {
@@ -24,6 +22,15 @@ jest.mock('next/navigation', () => {
   }
 })
 
+jest.mock('next-auth/react', () => {
+  const actual = jest.requireActual('next-auth/react')
+  return {
+    ...actual,
+    useSession: jest.fn(),
+  }
+})
+
+const mockUseQuery = useQuery as jest.Mock
 const mockPush = jest.fn()
 
 beforeEach(() => {
@@ -53,24 +60,51 @@ const mockProgramData = {
 
 describe('MyMentorshipPage', () => {
   it('shows loading while checking access', () => {
-    ;(useProjectLeader as jest.Mock).mockReturnValue({ isLeader: false, loading: true })
-    ;(useQuery as jest.Mock).mockReturnValue({ data: undefined, loading: false, error: undefined })
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: null,
+      status: 'loading',
+    })
+    mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
 
     render(<MyMentorshipPage />)
     expect(screen.getByText(/Checking access/i)).toBeInTheDocument()
   })
 
   it('shows access denied if user is not project leader', async () => {
-    ;(useProjectLeader as jest.Mock).mockReturnValue({ isLeader: false, loading: false })
-    ;(useQuery as jest.Mock).mockReturnValue({ data: undefined, loading: false, error: undefined })
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          name: 'Non Leader',
+          email: 'nonleader@example.com',
+          login: 'nonleader',
+          isLeader: false,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+
+    mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
 
     render(<MyMentorshipPage />)
     expect(await screen.findByText(/Access Denied/i)).toBeInTheDocument()
   })
 
   it('renders mentorship programs if user is leader', async () => {
-    ;(useProjectLeader as jest.Mock).mockReturnValue({ isLeader: true, loading: false })
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          name: 'Leader',
+          email: 'leader@example.com',
+          login: 'leaderuser',
+          isLeader: true,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+
+    mockUseQuery.mockReturnValue({
       data: mockProgramData,
       loading: false,
       error: undefined,
@@ -82,8 +116,20 @@ describe('MyMentorshipPage', () => {
   })
 
   it('shows empty state when no programs found', async () => {
-    ;(useProjectLeader as jest.Mock).mockReturnValue({ isLeader: true, loading: false })
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          name: 'Leader',
+          email: 'leader@example.com',
+          login: 'leaderuser',
+          isLeader: true,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+
+    mockUseQuery.mockReturnValue({
       data: { myPrograms: { programs: [], totalPages: 1 } },
       loading: false,
       error: undefined,
@@ -94,8 +140,20 @@ describe('MyMentorshipPage', () => {
   })
 
   it('navigates to create page on clicking create button', async () => {
-    ;(useProjectLeader as jest.Mock).mockReturnValue({ isLeader: true, loading: false })
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          name: 'Leader',
+          email: 'leader@example.com',
+          login: 'leaderuser',
+          isLeader: true,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+
+    mockUseQuery.mockReturnValue({
       data: mockProgramData,
       loading: false,
       error: undefined,

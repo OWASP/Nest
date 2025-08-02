@@ -11,10 +11,11 @@ jest.mock('next-auth/react', () => {
     ...jest.requireActual('next-auth/react'),
     useSession: () => ({
       data: {
-        user: { name: 'Test User', email: 'test@example.com', login: 'testuser' },
+        user: { name: 'Test User', email: 'test@example.com', login: 'testuser', isLeader: true },
         expires: '2099-01-01T00:00:00.000Z',
       },
       status: 'authenticated',
+      loading: false,
     }),
   }
 })

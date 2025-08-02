@@ -1,13 +1,12 @@
 'use client'
 
-import { useLazyQuery } from '@apollo/client'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useLogout } from 'hooks/useLogout'
 import Image from 'next/image'
 import { signIn, useSession } from 'next-auth/react'
 import { useEffect, useId, useRef, useState } from 'react'
-import { IS_PROJECT_LEADER_QUERY } from 'server/queries/mentorshipQueries'
+import { ExtendedSession } from 'types/auth'
 
 export default function UserMenu({
   isGitHubAuthEnabled,
@@ -17,19 +16,9 @@ export default function UserMenu({
   const { data: session, status } = useSession()
   const { logout, isLoggingOut } = useLogout()
   const [isOpen, setIsOpen] = useState(false)
-  const [isProjectLeader, setIsProjectLeader] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const dropdownId = useId()
-
-  const [fetchIsProjectLeader] = useLazyQuery(IS_PROJECT_LEADER_QUERY, {
-    fetchPolicy: 'network-only',
-    onCompleted: (data) => {
-      setIsProjectLeader(data?.isProjectLeader ?? false)
-    },
-    onError: () => {
-      setIsProjectLeader(false)
-    },
-  })
+  const isProjectLeader = (session as ExtendedSession)?.user.isLeader
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -40,15 +29,6 @@ export default function UserMenu({
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
-
-  const handleToggleDropdown = () => {
-    const nextState = !isOpen
-    setIsOpen(nextState)
-
-    if (nextState && status === 'authenticated') {
-      fetchIsProjectLeader()
-    }
-  }
 
   if (!isGitHubAuthEnabled) return null
 
@@ -80,7 +60,7 @@ export default function UserMenu({
   return (
     <div ref={dropdownRef} className="relative flex items-center justify-center">
       <button
-        onClick={handleToggleDropdown}
+        onClick={() => setIsOpen((prev) => !prev)}
         aria-expanded={isOpen}
         aria-haspopup="true"
         aria-controls={dropdownId}

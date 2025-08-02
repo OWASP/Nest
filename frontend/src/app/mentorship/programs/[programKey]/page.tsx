@@ -105,7 +105,7 @@ const ProgramDetailsPage = () => {
 
       if (data?.program) {
         setProgram(data.program)
-        setModules(data.modulesByProgram || [])
+        setModules(data.getProgramModules || [])
       }
     }
 

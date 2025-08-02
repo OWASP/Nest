@@ -2,12 +2,12 @@
 
 import { useMutation } from '@apollo/client'
 import { addToast } from '@heroui/toast'
-import { useProjectLeader } from 'hooks/useProjectLeader'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 
 import { CREATE_PROGRAM } from 'server/mutations/programsMutations'
+import { ExtendedSession } from 'types/auth'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/ProgramForm'
@@ -15,7 +15,7 @@ import ProgramForm from 'components/ProgramForm'
 const CreateProgramPage = () => {
   const router = useRouter()
   const { data: session, status } = useSession()
-  const { isLeader: isProjectLeader, loading: leaderLoading } = useProjectLeader()
+  const isProjectLeader = (session as ExtendedSession)?.user.isLeader
 
   const [redirected, setRedirected] = useState(false)
 
@@ -32,7 +32,7 @@ const CreateProgramPage = () => {
   })
 
   useEffect(() => {
-    if (status === 'loading' || leaderLoading) return
+    if (status === 'loading') return
 
     if (!session || !isProjectLeader) {
       addToast({
@@ -46,7 +46,7 @@ const CreateProgramPage = () => {
       router.push('/mentorship/programs')
       setRedirected(true)
     }
-  }, [session, status, leaderLoading, router, isProjectLeader])
+  }, [session, status, router, isProjectLeader])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -86,7 +86,7 @@ const CreateProgramPage = () => {
     }
   }
 
-  if (status === 'loading' || leaderLoading || !session || redirected) {
+  if (status === 'loading' || !session || redirected) {
     return <LoadingSpinner />
   }
 

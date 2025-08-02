@@ -33,7 +33,7 @@ describe('ProgramDetailsPage', () => {
       tags: ['web', 'security'],
       domains: ['OWASP'],
     },
-    modulesByProgram: [],
+    getProgramModules: [],
   }
 
   beforeEach(() => {

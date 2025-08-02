@@ -1,8 +1,8 @@
 import { useMutation } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { useProjectLeader } from 'hooks/useProjectLeader'
-import { useRouter } from 'next/navigation'
+import { useRouter as mockUseRouter } from 'next/navigation'
+import { useSession as mockUseSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import CreateProgramPage from 'app/mentorship/programs/create/page'
 
@@ -11,10 +11,18 @@ jest.mock('@apollo/client', () => ({
   useMutation: jest.fn(),
 }))
 
-jest.mock('hooks/useProjectLeader')
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
 }))
+
+jest.mock('next-auth/react', () => {
+  const actual = jest.requireActual('next-auth/react')
+  return {
+    ...actual,
+    useSession: jest.fn(),
+  }
+})
+
 jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))
@@ -24,16 +32,25 @@ const mockCreateProgram = jest.fn()
 
 describe('CreateProgramPage (no MockedProvider)', () => {
   beforeEach(() => {
-    ;(useRouter as jest.Mock).mockReturnValue({ push: mockRouterPush })
+    jest.clearAllMocks()
+    ;(mockUseRouter as jest.Mock).mockReturnValue({ push: mockRouterPush })
     ;(useMutation as jest.Mock).mockReturnValue([mockCreateProgram, { loading: false }])
   })
 
-  afterEach(() => {
-    jest.clearAllMocks()
-  })
-
   test('redirects with toast if not a project leader', async () => {
-    ;(useProjectLeader as jest.Mock).mockReturnValue({ isLeader: false, loading: false })
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          name: 'Test User',
+          email: 'test@example.com',
+          login: 'testuser',
+          isLeader: false,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+      loading: false,
+    })
 
     render(<CreateProgramPage />)
 
@@ -44,14 +61,39 @@ describe('CreateProgramPage (no MockedProvider)', () => {
   })
 
   test('renders form when session and leader are valid', async () => {
-    ;(useProjectLeader as jest.Mock).mockReturnValue({ isLeader: true, loading: false })
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          name: 'Test User',
+          email: 'test@example.com',
+          login: 'testuser',
+          isLeader: true,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+      loading: false,
+    })
 
     render(<CreateProgramPage />)
+
     expect(await screen.findByLabelText('Program Name *')).toBeInTheDocument()
   })
 
   test('submits form and redirects on success', async () => {
-    ;(useProjectLeader as jest.Mock).mockReturnValue({ isLeader: true, loading: false })
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          name: 'Test User',
+          email: 'test@example.com',
+          login: 'testuser',
+          isLeader: true,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+      loading: false,
+    })
 
     mockCreateProgram.mockResolvedValue({
       data: { createProgram: { key: 'program_1' } },
