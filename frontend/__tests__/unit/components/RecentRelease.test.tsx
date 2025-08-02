@@ -69,7 +69,7 @@ const mockReleases: Release[] = [
   {
     name: 'v1.0 The First Release',
     url: 'https://example.com/release/v1',
-    publishedAt: now,
+    publishedAt: 1722420000000, // 2024-07-31T10:00:00Z as timestamp
     repositoryName: 'our-awesome-project',
     organizationName: 'our-org',
     tagName: 'v1.0',
