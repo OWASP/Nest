@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 from apps.ai.common.utils import create_chunks_and_embeddings
 
@@ -9,9 +9,12 @@ class MockEmbeddingData:
 
 
 class TestUtils:
+    @patch("apps.ai.common.utils.Context")
     @patch("apps.ai.common.utils.Chunk.update_data")
     @patch("apps.ai.common.utils.time.sleep")
-    def test_create_chunks_and_embeddings_success(self, mock_sleep, mock_update_data):
+    def test_create_chunks_and_embeddings_success(
+        self, mock_sleep, mock_update_data, mock_context
+    ):
         """Tests the successful path where the OpenAI API returns embeddings."""
         mock_openai_client = MagicMock()
         mock_api_response = MagicMock()
@@ -37,12 +40,21 @@ class TestUtils:
             model="text-embedding-3-small",
         )
 
-        assert mock_update_data.call_count == 2
-        mock_update_data.assert_any_call(
-            content_object=mock_content_object,
-            embedding=[0.1, 0.2],
-            save=False,
-            text="first chunk",
+        mock_update_data.assert_has_calls(
+            [
+                call(
+                    text="first chunk",
+                    context=mock_context(),
+                    embedding=[0.1, 0.2],
+                    save=False,
+                ),
+                call(
+                    text="second chunk",
+                    context=mock_context(),
+                    embedding=[0.3, 0.4],
+                    save=False,
+                ),
+            ]
         )
 
         assert result == ["mock_chunk_instance", "mock_chunk_instance"]
