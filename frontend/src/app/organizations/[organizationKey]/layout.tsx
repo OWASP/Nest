@@ -2,8 +2,7 @@ import { Metadata } from 'next'
 import Script from 'next/script'
 import React from 'react'
 import { apolloClient } from 'server/apolloClient'
-import { GET_ORGANIZATION_DATA } from 'server/queries/organizationQueries'
-import { GET_ORGANIZATION_METADATA } from 'server/queries/organizationQueries'
+import { GET_ORGANIZATION_METADATA, GET_ORGANIZATION_DATA } from 'server/queries/organizationQueries'
 import { generateSeoMetadata } from 'utils/metaconfig'
 
 export async function generateMetadata({
