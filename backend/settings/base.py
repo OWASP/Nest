@@ -48,6 +48,7 @@ class Base(Configuration):
         "corsheaders",
         "ninja",
         "storages",
+        "ninja",
     )
 
     LOCAL_APPS = (

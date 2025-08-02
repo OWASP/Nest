@@ -1,0 +1,116 @@
+name: Generate and Publish Python SDK
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/apps/**/rest/v1/*.py"
+      - "liblab.config.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-publish-sdk:
+    name: Build and Publish Python SDK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check Out Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up Build Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Set Up Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Poetry
+        run: curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Add Poetry to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install Liblab CLI
+        run: npm install -g liblab
+
+      - name: Install Python Dependencies
+        working-directory: ./backend
+        run: poetry install
+
+      - name: Generate OpenAPI Specification
+        working-directory: ./backend
+        env:
+          DJANGO_SETTINGS_MODULE: settings.test
+          DJANGO_CONFIGURATION: Test
+        run: |
+          poetry run python manage.py export_openapi_schema --api settings.api.v1.api --output openapi.json
+
+      - name: Calculate API Specification Hash
+        id: spec_diff
+        run: |
+          SPEC_HASH=$(shasum -a 256 backend/openapi.json | awk '{print $1}')
+          echo "spec_hash=$SPEC_HASH" >> $GITHUB_OUTPUT
+
+      - name: Check for Existing SDK Version in Cache
+        id: cache_check
+        uses: actions/cache@v4
+        with:
+          path: .cache
+          key: sdk-published-${{ steps.spec_diff.outputs.spec_hash }}
+
+      - name: Generate SDK Source Code
+        if: steps.cache_check.outputs.cache-hit != 'true'
+        env:
+          LIBLAB_TOKEN: ${{ secrets.LIBLAB_TOKEN }}
+        run: |
+          if [ -z "$LIBLAB_TOKEN" ]; then
+            echo "LIBLAB_TOKEN is not set. Skipping SDK generation."
+            exit 0
+          fi
+          liblab build --liblab-config liblab.config.json --yes
+
+      - name: Build Python Distribution Package
+        if: steps.cache_check.outputs.cache-hit != 'true'
+        working-directory: ./output/python
+        env:
+          LIBLAB_TOKEN: ${{ secrets.LIBLAB_TOKEN }}
+        run: |
+          if [ -z "$LIBLAB_TOKEN" ]; then
+            echo "LIBLAB_TOKEN is not set. Skipping build."
+            exit 0
+          fi
+          pip install build
+          python -m build
+
+      - name: Publish Python SDK to PyPI
+        if: steps.cache_check.outputs.cache-hit != 'true'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          packages-dir: ./output/python/dist/
+
+      - name: Report Publishing Status
+        if: always()
+        run: |
+          if [ "${{ steps.cache_check.outputs.cache-hit }}" == "true" ]; then
+            echo "API specification has not changed. No new SDK was published."
+          else
+            if [ -z "${{ secrets.PYPI_API_TOKEN }}" ]; then
+              echo "API specification changed, but publishing was skipped because PyPI secrets are not configured."
+              echo "This is expected for forked repositories."
+            else
+              echo "New API specification detected. SDK has been generated and published to PyPI."
+            fi
+          fi
