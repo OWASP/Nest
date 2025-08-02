@@ -5,6 +5,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { ReactNode } from 'react'
+import { footerSections, footerIcons } from 'utils/constants'
 import Footer from 'components/Footer'
 
 // Define proper types for mock props
@@ -44,7 +45,7 @@ jest.mock('next/link', () => {
 jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: ({ icon, className }: MockFontAwesomeIconProps) => (
     <span data-testid="font-awesome-icon" className={className}>
-      {String(icon)}
+      {typeof icon === 'object' && icon !== null ? JSON.stringify(icon) : String(icon)}
     </span>
   ),
 }))
@@ -100,36 +101,9 @@ jest.mock('utils/credentials', () => ({
 }))
 
 describe('Footer', () => {
-  const mockFooterSections = [
-    {
-      title: 'OWASP Nest',
-      links: [
-        { text: 'About', href: '/about' },
-        { text: 'Contribute', href: 'https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md' },
-      ],
-    },
-    {
-      title: 'Resources',
-      links: [
-        { text: 'Chapters', href: '/chapters/' },
-        { text: 'Projects', href: '/projects/' },
-        { text: 'Plain Text', isSpan: true },
-      ],
-    },
-  ]
-
-  const mockFooterIcons = [
-    {
-      icon: 'faGithub',
-      href: 'https://github.com/owasp/nest',
-      label: 'GitHub',
-    },
-    {
-      icon: 'faSlack',
-      href: 'https://owasp.slack.com/archives/project-nest',
-      label: 'Slack',
-    },
-  ]
+  // Use the imported mocked constants
+  const mockFooterSections = footerSections
+  const mockFooterIcons = footerIcons
 
   const renderFooter = () => {
     return render(<Footer />)
@@ -164,9 +138,18 @@ describe('Footer', () => {
     test('renders all section links correctly', () => {
       renderFooter()
 
-      const regularLinks = mockFooterSections.flatMap((section) =>
-        section.links.filter((link) => !link.isSpan)
-      )
+      const regularLinks = []
+      const spanElements = []
+
+      for (const section of mockFooterSections) {
+        for (const link of section.links) {
+          if (link.isSpan) {
+            spanElements.push(link)
+          } else {
+            regularLinks.push(link)
+          }
+        }
+      }
       regularLinks.forEach((link) => {
         const linkElement = screen.getByRole('link', { name: link.text })
         expect(linkElement).toBeInTheDocument()
@@ -174,9 +157,6 @@ describe('Footer', () => {
         expect(linkElement).toHaveAttribute('target', '_blank')
       })
 
-      const spanElements = mockFooterSections.flatMap((section) =>
-        section.links.filter((link) => link.isSpan)
-      )
       spanElements.forEach((link) => {
         expect(screen.getByText(link.text)).toBeInTheDocument()
       })
