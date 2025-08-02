@@ -30,11 +30,37 @@ jest.mock('@heroui/toast', () => ({
 const mockRouterPush = jest.fn()
 const mockCreateProgram = jest.fn()
 
-describe('CreateProgramPage (no MockedProvider)', () => {
+describe('CreateProgramPage (comprehensive tests)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(mockUseRouter as jest.Mock).mockReturnValue({ push: mockRouterPush })
     ;(useMutation as jest.Mock).mockReturnValue([mockCreateProgram, { loading: false }])
+  })
+
+  test('redirects if unauthenticated', async () => {
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: null,
+      status: 'unauthenticated',
+      loading: false,
+    })
+
+    render(<CreateProgramPage />)
+
+    await waitFor(() => {
+      expect(mockRouterPush).toHaveBeenCalledWith('/mentorship/programs')
+    })
+  })
+
+  test('shows nothing when session is loading', () => {
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: null,
+      status: 'loading',
+      loading: true,
+    })
+
+    render(<CreateProgramPage />)
+
+    expect(screen.queryByLabelText('Program Name *')).not.toBeInTheDocument()
   })
 
   test('redirects with toast if not a project leader', async () => {
@@ -60,7 +86,7 @@ describe('CreateProgramPage (no MockedProvider)', () => {
     })
   })
 
-  test('renders form when session and leader are valid', async () => {
+  test('renders form when user is project leader', async () => {
     ;(mockUseSession as jest.Mock).mockReturnValue({
       data: {
         user: {
@@ -138,6 +164,47 @@ describe('CreateProgramPage (no MockedProvider)', () => {
       })
 
       expect(mockRouterPush).toHaveBeenCalledWith('/my/mentorship')
+    })
+  })
+
+  test('shows error toast if createProgram mutation fails', async () => {
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          name: 'Test User',
+          email: 'test@example.com',
+          login: 'testuser',
+          isLeader: true,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+      loading: false,
+    })
+
+    mockCreateProgram.mockRejectedValue(new Error('Server error'))
+
+    render(<CreateProgramPage />)
+
+    fireEvent.change(screen.getByLabelText('Program Name *'), {
+      target: { value: 'Test Program' },
+    })
+    fireEvent.change(screen.getByLabelText('Description *'), {
+      target: { value: 'A description' },
+    })
+    fireEvent.change(screen.getByLabelText('Start Date *'), {
+      target: { value: '2025-01-01' },
+    })
+    fireEvent.change(screen.getByLabelText('End Date *'), {
+      target: { value: '2025-12-31' },
+    })
+
+    fireEvent.submit(screen.getByText('Save').closest('form')!)
+
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'GraphQL Request Failed' })
+      )
     })
   })
 })
