@@ -34,7 +34,7 @@ class TestPurgeDataCommand:
                     _meta=MagicMock(
                         db_table=f"{app_name.lower()}_{model.lower()}",
                         model_name=f"{model}s",
-                    )
+                    ),
                 )
                 for model in mock_models[app_name]
             ]
