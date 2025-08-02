@@ -20,6 +20,18 @@ jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 
+jest.mock('next-auth/react', () => ({
+  useSession: () => ({
+    data: {
+      session: {
+        user: {
+          login: 'testuser',
+        },
+      },
+    },
+  }),
+}))
+
 jest.mock('components/Pagination', () =>
   jest.fn(({ currentPage, onPageChange }) => (
     <div>

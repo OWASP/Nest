@@ -17,6 +17,7 @@ from apps.github.models.user import User
         "followers_count",
         "following_count",
         "id",
+        "is_owasp_staff",
         "location",
         "login",
         "name",
