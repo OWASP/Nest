@@ -82,8 +82,8 @@ class TestProcessLeaders:
     def mock_users(self):
         """Return a dictionary of mock users."""
         return {
-            1: {"id": 1, "login": "john_doe", "name": "John Doe"},
-            2: {"id": 2, "login": "jane_doe", "name": "Jane Doe"},
+            1: {"id": 1, "login": "john-doe", "name": "John Doe"},
+            2: {"id": 2, "login": "jane-doe", "name": "Jane Doe"},
             3: {"id": 3, "login": "peter_jones", "name": "Peter Jones"},
             4: {"id": 4, "login": "testuser", "name": "Test User"},
         }
@@ -110,8 +110,8 @@ class TestProcessLeaders:
     @patch("apps.github.management.commands.github_match_users.fuzz")
     def test_fuzzy_match(self, mock_fuzz, command, mock_users):
         """Test fuzzy matching."""
-        mock_fuzz.token_sort_ratio.side_effect = (
-            lambda left, right: 90 if "peter" in right.lower() or "peter" in left.lower() else 10
+        mock_fuzz.token_sort_ratio.side_effect = lambda left, right: (
+            90 if "peter" in right.lower() or "peter" in left.lower() else 10
         )
 
         leaders_raw = ["pete_jones"]
@@ -202,7 +202,13 @@ class TestHandleMethod:
         return command
 
     def test_invalid_model_name(
-        self, mock_member, mock_project, mock_committee, mock_chapter, mock_user, command
+        self,
+        mock_member,
+        mock_project,
+        mock_committee,
+        mock_chapter,
+        mock_user,
+        command,
     ):
         """Test handle with an invalid model name."""
         command.handle(model_name="invalid", threshold=75)
@@ -269,7 +275,13 @@ class TestHandleMethod:
         command.stdout.write.assert_any_call("Exact match found for leader_one: leader_one")
 
     def test_handle_with_no_users(
-        self, mock_member, mock_project, mock_committee, mock_chapter, mock_user, command
+        self,
+        mock_member,
+        mock_project,
+        mock_committee,
+        mock_chapter,
+        mock_user,
+        command,
     ):
         """Test handle when there are no users in the database."""
         mock_user.objects.values.return_value = []
@@ -290,7 +302,13 @@ class TestHandleMethod:
         mock_chapter_instance.suggested_leaders.set.assert_called_once_with(set())
 
     def test_handle_with_no_leaders_in_instance(
-        self, mock_member, mock_project, mock_committee, mock_chapter, mock_user, command
+        self,
+        mock_member,
+        mock_project,
+        mock_committee,
+        mock_chapter,
+        mock_user,
+        command,
     ):
         """Test handle when an instance has no leaders."""
         mock_user.objects.values.return_value = [
