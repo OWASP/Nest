@@ -1,4 +1,3 @@
-// tests/unit/components/MetricsCard.test.tsx
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import MetricsCard from 'components/MetricsCard'
@@ -62,9 +61,9 @@ describe('MetricsCard component', () => {
   it('applies correct styling class depending on score thresholds', () => {
     const cases: Array<[number, string]> = [
       [90, 'text-green-900'],
-      [75, 'text-green-900'], // boundary green
+      [75, 'text-green-900'], 
       [60, 'text-orange-900'],
-      [50, 'text-orange-900'], // boundary orange
+      [50, 'text-orange-900'], 
       [30, 'text-red-900'],
     ]
 
