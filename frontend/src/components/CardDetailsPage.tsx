@@ -10,6 +10,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
+import { useCallback } from "react"
 import type { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/credentials'
@@ -29,6 +30,10 @@ import SecondaryCard from 'components/SecondaryCard'
 import SponsorCard from 'components/SponsorCard'
 import ToggleableList from 'components/ToggleableList'
 import TopContributorsList from 'components/TopContributorsList'
+// Email validation regex
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i
+// Helper to sanitize URLs
+const sanitizeForUrl = (str: string) => encodeURIComponent(str.trim())
 
 const DetailsCard = ({
   description,
@@ -55,6 +60,56 @@ const DetailsCard = ({
   type,
   userSummary,
 }: DetailsCardProps) => {
+  // Helper function to render detail values with appropriate links
+  const renderDetailValue = useCallback((detail: { label: string; value: string }) => {
+    const { label, value } = detail
+
+    // Don't render links for empty/placeholder values
+    if (!value || value === "N/A" || value === "Not available" || value === "Unknown") {
+      return value
+    }
+
+    switch (label) {
+      case "Email":
+        // Render email as mailto link if valid
+        if (!EMAIL_REGEX.test(value)) {
+          return value // Return as plain text for invalid emails
+        }
+        return (
+          <a
+            href={`mailto:${sanitizeForUrl(value)}`}
+            className="text-blue-400 hover:text-blue-600 hover:underline transition-colors"
+            aria-label={`Send email to ${value}`}
+          >
+            {value}
+          </a>
+        )
+
+      case "Company":
+        // Render company as GitHub link if it starts with @
+        if (value.startsWith("@")) {
+          const companyName = sanitizeForUrl(value.slice(1)) // Remove @ prefix and sanitize
+          return (
+            <a
+              href={`https://github.com/${companyName}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-600 hover:underline transition-colors"
+              aria-label={`Visit ${value} on GitHub`}
+            >
+              {value}
+            </a>
+          )
+        }
+        // Return as plain text if no @ prefix
+        return value
+
+      default:
+        // Return other fields as plain text
+        return value
+    }
+  }, [])
+
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
@@ -70,7 +125,7 @@ const DetailsCard = ({
           {!isActive && (
             <span className="ml-4 justify-center rounded bg-red-200 px-2 py-1 text-sm text-red-800">
               Inactive
-            </span>
+              </span>
           )}
         </div>
         <p className="mb-6 text-xl">{description}</p>
@@ -108,9 +163,9 @@ const DetailsCard = ({
                 </div>
               ) : (
                 <div key={detail.label} className="pb-1">
-                  <strong>{detail.label}:</strong> {detail?.value || 'Unknown'}
+                  <strong>{detail.label}:</strong> {renderDetailValue(detail)}
                 </div>
-              )
+              ),
             )}
             {socialLinks && (type === 'chapter' || type === 'committee') && (
               <SocialLinks urls={socialLinks || []} />
@@ -139,7 +194,7 @@ const DetailsCard = ({
               ))}
             </SecondaryCard>
           )}
-          {type === 'chapter' && geolocationData && (
+            {type === 'chapter' && geolocationData && (
             <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
               <ChapterMapWrapper
                 geoLocData={geolocationData}
@@ -208,11 +263,11 @@ const DetailsCard = ({
           </div>
         )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
-          repositories.length > 0 && (
-            <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
-              <RepositoriesCard repositories={repositories} />
-            </SecondaryCard>
-          )}
+        repositories.length > 0 && (
+          <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
+            <RepositoriesCard repositories={repositories} />
+          </SecondaryCard>
+        )}
         {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
           <HealthMetrics data={healthMetricsData} />
         )}
