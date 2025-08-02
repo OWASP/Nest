@@ -74,9 +74,9 @@ describe('MyMentorshipPage', () => {
     ;(mockUseSession as jest.Mock).mockReturnValue({
       data: {
         user: {
-          name: 'Non Leader',
-          email: 'nonleader@example.com',
-          login: 'nonleader',
+          name: 'user 1',
+          email: 'user@example.com',
+          login: 'user1',
           isLeader: false,
         },
         expires: '2099-01-01T00:00:00.000Z',
@@ -94,9 +94,9 @@ describe('MyMentorshipPage', () => {
     ;(mockUseSession as jest.Mock).mockReturnValue({
       data: {
         user: {
-          name: 'Leader',
+          name: 'User',
           email: 'leader@example.com',
-          login: 'leaderuser',
+          login: 'user',
           isLeader: true,
         },
         expires: '2099-01-01T00:00:00.000Z',
@@ -119,9 +119,9 @@ describe('MyMentorshipPage', () => {
     ;(mockUseSession as jest.Mock).mockReturnValue({
       data: {
         user: {
-          name: 'Leader',
-          email: 'leader@example.com',
-          login: 'leaderuser',
+          name: 'User',
+          email: 'user@example.com',
+          login: 'user',
           isLeader: true,
         },
         expires: '2099-01-01T00:00:00.000Z',
@@ -143,9 +143,9 @@ describe('MyMentorshipPage', () => {
     ;(mockUseSession as jest.Mock).mockReturnValue({
       data: {
         user: {
-          name: 'Leader',
-          email: 'leader@example.com',
-          login: 'leaderuser',
+          name: 'User',
+          email: 'user@example.com',
+          login: 'User',
           isLeader: true,
         },
         expires: '2099-01-01T00:00:00.000Z',
