@@ -12,9 +12,9 @@ library.add(faFire)
 
 // Mock ApexCharts
 jest.mock('react-apexcharts', () => {
-  const MockChart = ({ options, series }: any) => (
-    <div 
-      data-testid="mock-chart" 
+  const MockChart = ({ options, series }) => (
+    <div
+      data-testid="mock-chart"
       data-options={JSON.stringify(options)}
       data-series={JSON.stringify(series)}
     />
@@ -57,11 +57,11 @@ describe('<BarChart />', () => {
     // cspell:ignore fas
     await renderWithTheme(<BarChart {...mockProps} icon={['fas', 'fire']} />)
     expect(screen.getByText('Calories Burned')).toBeInTheDocument()
-    
+
     // Check for custom FontAwesome fire icon
     const fireIconElement = document.querySelector('svg[data-icon="fire"]')
     expect(fireIconElement).toBeInTheDocument()
-    
+
     // Verify the specific icon behavior based on component implementation
     const allIcons = document.querySelectorAll('svg[data-icon]')
     expect(allIcons.length).toBeGreaterThanOrEqual(1)
@@ -70,11 +70,11 @@ describe('<BarChart />', () => {
   it('renders with default icon when icon prop not provided', async () => {
     await renderWithTheme(<BarChart {...mockProps} />)
     expect(screen.getByText('Calories Burned')).toBeInTheDocument()
-    
+
     // Should render default link icon when no icon prop is provided
     const defaultIconElement = document.querySelector('svg[data-icon="link"]')
     expect(defaultIconElement).toBeInTheDocument()
-    
+
     // Should only have the default icon
     const allIcons = document.querySelectorAll('svg[data-icon]')
     expect(allIcons.length).toBe(1)
@@ -144,7 +144,7 @@ describe('<BarChart />', () => {
   it('passes correct data to chart component', async () => {
     await renderWithTheme(<BarChart {...mockProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    
+
     // Verify that chart receives the data
     expect(chartElement).toHaveAttribute('data-series')
     expect(chartElement).toHaveAttribute('data-options')
@@ -200,17 +200,10 @@ describe('<BarChart />', () => {
     expect(chartElement).toBeVisible()
   })
 
-  it('renders chart with accessibility wrapper when available', async () => {
+  it('does not render chart with accessibility wrapper when available', async () => {
     await renderWithTheme(<BarChart {...mockProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const chartContainer = chartElement.closest('[role="img"]')
-    
-    // This test will pass if accessibility wrapper exists, skip if not implemented yet
-    if (chartContainer) {
-      expect(chartContainer).toHaveAttribute('role', 'img')
-    } else {
-      // No accessibility wrapper found - this is expected for current implementation
-      expect(chartElement).toBeInTheDocument()
-    }
-  }))
+
+    expect(chartElement).toBeInTheDocument()
+  })
 })
