@@ -27,7 +27,7 @@ class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
 
     sequence_id = models.PositiveBigIntegerField(verbose_name="Release ID", default=0)
     created_at = models.DateTimeField(verbose_name="Created at")
-    published_at = models.DateTimeField(verbose_name="Published at")
+    published_at = models.DateTimeField(verbose_name="Published at", blank=True, null=True)
 
     # FKs.
     author = models.ForeignKey(
