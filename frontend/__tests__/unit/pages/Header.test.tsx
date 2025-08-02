@@ -1,9 +1,9 @@
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { usePathname } from 'next/navigation'
 import { SessionProvider } from 'next-auth/react'
+import React from 'react'
 import Header from 'components/Header'
 import '@testing-library/jest-dom'
-import React from 'react' // Import React
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
@@ -11,22 +11,10 @@ jest.mock('next/navigation', () => ({
 }))
 
 // Mock next/image
-jest.mock('next/image', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return function MockImage({ src, alt, className, width, height, priority, ...props }: any) {
-    return (
-      <img
-        src={src}
-        alt={alt}
-        className={className}
-        width={width}
-        height={height}
-        data-priority={priority}
-        {...props}
-      />
-    )
-  }
-})
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: (props) => <div data-testid="mock-image" {...props} role="img" />,
+}))
 
 // Mock next/link
 jest.mock('next/link', () => {
@@ -398,14 +386,10 @@ describe('Header Component', () => {
 
       // Assert that mobileLogoLink is not null before clicking
       expect(mobileLogoLink).not.toBeNull()
-
-      if (mobileLogoLink) {
-        await act(async () => {
-          fireEvent.click(mobileLogoLink)
-        })
-
-        expect(isMobileMenuClosed()).toBe(true)
-      }
+      await act(async () => {
+        fireEvent.click(mobileLogoLink)
+      })
+      expect(isMobileMenuClosed()).toBe(true)
     })
   })
 
@@ -502,7 +486,7 @@ describe('Header Component', () => {
       })
 
       // Test passes if no errors are thrown
-      expect(true).toBe(true)  
+      expect(true).toBe(true)
     })
 
     it('handles outside click correctly', async () => {
