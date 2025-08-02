@@ -1,6 +1,8 @@
 import { Metadata } from 'next'
+import Script from 'next/script'
 import React from 'react'
 import { apolloClient } from 'server/apolloClient'
+import { GET_ORGANIZATION_DATA } from 'server/queries/organizationQueries'
 import { GET_ORGANIZATION_METADATA } from 'server/queries/organizationQueries'
 import { generateSeoMetadata } from 'utils/metaconfig'
 
@@ -28,6 +30,94 @@ export async function generateMetadata({
     : null
 }
 
-export default function OrganizationDetailsLayout({ children }: { children: React.ReactNode }) {
-  return children
+async function generateOrganizationStructuredData(organizationKey: string) {
+  try {
+    const { data } = await apolloClient.query({
+      query: GET_ORGANIZATION_DATA,
+      variables: {
+        login: organizationKey,
+      },
+    })
+
+    const organization = data?.organization
+    if (!organization) return null
+
+    const structuredData = {
+      '@context': 'https://schema.org' as const,
+      '@type': 'Organization' as const,
+      name: organization.name || organization.login,
+      description: organization.description,
+      url: organization.url,
+      logo: organization.avatarUrl
+        ? {
+            '@type': 'ImageObject' as const,
+            url: organization.avatarUrl,
+          }
+        : undefined,
+      foundingDate: organization.createdAt,
+      location: organization.location
+        ? {
+            '@type': 'Place' as const,
+            name: organization.location,
+          }
+        : undefined,
+      contactPoint: organization.email
+        ? {
+            '@type': 'ContactPoint' as const,
+            email: organization.email,
+            contactType: 'general inquiry',
+          }
+        : undefined,
+      sameAs: [organization.url, `https://github.com/${organization.login}`].filter(Boolean),
+      memberOf: {
+        '@type': 'Organization' as const,
+        name: 'OWASP Foundation',
+        url: 'https://owasp.org',
+      },
+      keywords: [
+        organization.name,
+        organization.login,
+        'cybersecurity',
+        'application security',
+        'open source',
+      ]
+        .filter(Boolean)
+        .join(', '),
+    }
+
+    // Remove undefined properties
+    Object.keys(structuredData).forEach(
+      (key) => structuredData[key] === undefined && delete structuredData[key]
+    )
+
+    return structuredData
+  } catch {
+    return null
+  }
+}
+
+export default async function OrganizationDetailsLayout({
+  children,
+  params,
+}: Readonly<{
+  children: Readonly<React.ReactNode>
+  params: Promise<{ organizationKey: string }>
+}>) {
+  const { organizationKey } = await params
+  const structuredData = await generateOrganizationStructuredData(organizationKey)
+
+  return (
+    <>
+      {structuredData && (
+        <Script
+          id="organization-structured-data"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData, null, 2),
+          }}
+        />
+      )}
+      {children}
+    </>
+  )
 }
