@@ -51,7 +51,7 @@ const About = () => {
   const { data: topContributorsResponse, error: topContributorsRequestError } = useQuery(
     GET_TOP_CONTRIBUTORS,
     {
-      variables: { excludedUsernames: Object.keys(leaders), key: projectKey },
+      variables: { excludedUsernames: Object.keys(leaders), key: projectKey, limit: 24 },
     }
   )
 

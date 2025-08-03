@@ -47,7 +47,7 @@ class TestRepositoryContributorQuery:
         assert result[1].project_key is None
 
         mock_get_top_contributors.assert_called_once_with(
-            limit=20,
+            limit=24,
             chapter=None,
             committee=None,
             excluded_usernames=None,
