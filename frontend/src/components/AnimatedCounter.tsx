@@ -2,12 +2,20 @@ import millify from 'millify'
 import { useEffect, useRef, useState } from 'react'
 
 interface AnimatedCounterProps {
-  className?: string
-  duration: number
   end: number
+  duration: number
+  className?: string
+  'aria-label'?: string
+  onEnd?: () => void
 }
 
-export default function AnimatedCounter({ end, duration, className }: AnimatedCounterProps) {
+export default function AnimatedCounter({
+  end,
+  duration,
+  className,
+  onEnd,
+  'aria-label': ariaLabel,
+}: AnimatedCounterProps) {
   const [count, setCount] = useState(0)
   const countRef = useRef(count)
   const startTime = useRef(Date.now())
@@ -25,19 +33,21 @@ export default function AnimatedCounter({ end, duration, className }: AnimatedCo
 
       if (progress < 1) {
         requestAnimationFrame(animate)
+      } else {
+        if (onEnd) onEnd()
       }
     }
 
     requestAnimationFrame(animate)
-  }, [end, duration])
+  }, [end, duration, onEnd])
 
   return (
-  <span
-    className={className}
-    role="status"
-    aria-label="animated counter"
-  >
-    {millify(count)}
-  </span>
-)
+    <span
+      className={className}
+      role="status"
+      aria-label={ariaLabel || 'animated counter'}
+    >
+      {millify(count)}
+    </span>
+  )
 }
