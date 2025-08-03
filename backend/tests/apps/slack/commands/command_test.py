@@ -76,12 +76,16 @@ class TestCommandBase:
         mock_logger = mocker.patch("apps.slack.commands.command.logger")
         ack = MagicMock()
         mock_client = MagicMock()
-        mock_client.chat_postMessage.side_effect = [Exception("API Error"), "Success"]
+        mock_client.chat_postMessage.side_effect = [Exception("API Error"), {"ok": True}]
         mocker.patch.object(command_instance, "render_blocks", return_value=[{"type": "section"}])
         command_instance.handler(ack=ack, command=mock_command_payload, client=mock_client)
         ack.assert_called_once()
         mock_logger.exception.assert_called_once()
+        # Verify retry occurred and eventually succeeded
         assert mock_client.chat_postMessage.call_count == 2
+        mock_logger.exception.assert_called_with(
+            "Failed to handle command '%s'", command_instance.command_name
+        )
 
     def test_handler_when_commands_disabled(
         self, settings, command_instance, mock_command_payload

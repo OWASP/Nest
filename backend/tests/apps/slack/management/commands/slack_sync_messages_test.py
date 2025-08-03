@@ -64,12 +64,12 @@ class TestPopulateSlackMessages:
         mock_workspace = mocker.patch(f"{self.target_module}.Workspace")
         mock_webclient = mocker.patch(f"{self.target_module}.WebClient")
 
-        mock_workspace = MagicMock()
-        mock_workspace.bot_token = None
+        mock_workspace_instance = MagicMock()
+        mock_workspace_instance.bot_token = None
 
         mock_queryset = MagicMock()
         mock_queryset.exists.return_value = True
-        mock_queryset.__iter__.return_value = [mock_workspace]
+        mock_queryset.__iter__.return_value = [mock_workspace_instance]
         mock_workspace.objects.all.return_value = mock_queryset
 
         call_command("slack_sync_messages")
