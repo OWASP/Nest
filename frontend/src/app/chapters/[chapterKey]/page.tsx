@@ -72,7 +72,7 @@ export default function ChapterDetailsPage() {
         title={chapter.name}
         topContributors={topContributors}
         type="chapter"
-    />
+      />
     </PageLayout>
   )
 }

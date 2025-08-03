@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { assertContributorToggle, assertRepoDetails } from '@testUtils/sharedAssertions'
+import { assertRepoDetails } from '@testUtils/sharedAssertions'
 import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
 import { render } from 'wrappers/testUtil'
 import ProjectDetailsPage from 'app/projects/[projectKey]/page'

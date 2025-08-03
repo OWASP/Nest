@@ -2,8 +2,8 @@
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import PageLayout from 'components/PageLayout'
 import type { User } from 'types/user'
+import PageLayout from 'components/PageLayout'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/UserCard'
 

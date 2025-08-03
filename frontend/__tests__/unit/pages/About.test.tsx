@@ -1,7 +1,6 @@
 import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { assertContributorToggle } from '@testUtils/sharedAssertions'
 import { mockAboutData } from '@unit/data/mockAboutData'
 import { useRouter } from 'next/navigation'
 import { act } from 'react'

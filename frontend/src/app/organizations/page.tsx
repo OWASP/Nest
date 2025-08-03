@@ -2,8 +2,8 @@
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import PageLayout from 'components/PageLayout'
 import type { Organization } from 'types/organization'
+import PageLayout from 'components/PageLayout'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/UserCard'
 
@@ -35,7 +35,7 @@ const OrganizationPage = () => {
       onclick: handleButtonClick,
     }
 
-  return (
+    return (
       <UserCard
         avatar={organization.avatarUrl}
         button={submitButton}
