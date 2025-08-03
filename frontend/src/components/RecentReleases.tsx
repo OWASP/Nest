@@ -41,10 +41,10 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
             <div key={index} className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
               <div className="flex w-full flex-col justify-between">
                 <div className="flex w-full items-center">
-                  {showAvatar && (
+                  {showAvatar && item?.author && (
                     <Tooltip
                       closeDelay={100}
-                      content={item?.author?.name || item?.author?.login}
+                      content={item?.author?.name ?? item?.author?.login}
                       id={`avatar-tooltip-${index}`}
                       delay={100}
                       placement="bottom"
@@ -52,13 +52,13 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                     >
                       <Link
                         className="flex-shrink-0 text-blue-400 hover:underline"
-                        href={`/members/${item?.author?.login}`}
+                        href={item?.author?.login ? `/members/${item?.author?.login}` : '#'}
                       >
                         <Image
-                          alt={item?.author?.name || 'author'}
+                          alt={item?.author?.name ?? ''}
                           className="mr-2 h-6 w-6 rounded-full"
                           height={24}
-                          src={item?.author?.avatarUrl || ''}
+                          src={item?.author?.avatarUrl ?? ''}
                           width={24}
                         />
                       </Link>
@@ -67,11 +67,11 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                   <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
                     <Link
                       className="text-blue-400 hover:underline"
-                      href={item?.url || '/'}
+                      href={`https://github.com/${item.organizationName}/${item.repositoryName}/releases/tag/${item.tagName}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <TruncatedText text={item?.name} />
+                      <TruncatedText text={item?.name || item?.tagName} />
                     </Link>
                   </h3>
                 </div>
@@ -86,7 +86,7 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                       className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
                       onClick={() =>
                         router.push(
-                          `/organizations/${item?.organizationName}/repositories/${item.repositoryName || ''}`
+                          `/organizations/${item?.organizationName}/repositories/${item.repositoryName ?? ''}`
                         )
                       }
                     >
