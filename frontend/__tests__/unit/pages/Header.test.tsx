@@ -13,7 +13,11 @@ jest.mock('next/navigation', () => ({
 // Mock next/image
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: (props) => <div data-testid="mock-image" {...props} role="img" />,
+  default: ({ src, alt, ...props }) => {
+    const { width, height, className } = props
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={src} alt={alt} width={width} height={height} className={className} />
+  },
 }))
 
 // Mock next/link
