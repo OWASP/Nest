@@ -33,6 +33,9 @@ export async function generateMetadata({
 }
 
 async function generateOrganizationStructuredData(organizationKey: string) {
+  // https://developers.google.com/search/docs/appearance/structured-data/organization
+  // https://schema.org/Organization
+
   try {
     const { data } = await apolloClient.query({
       query: GET_ORGANIZATION_DATA,
@@ -70,7 +73,7 @@ async function generateOrganizationStructuredData(organizationKey: string) {
             contactType: 'general inquiry',
           }
         : undefined,
-      sameAs: [organization.url, `https://github.com/${organization.login}`].filter(Boolean),
+      sameAs: [organization.url],
       memberOf: {
         '@type': 'Organization' as const,
         name: 'OWASP Foundation',
