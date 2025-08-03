@@ -49,7 +49,7 @@ async function generateOrganizationStructuredData(organizationKey: string) {
       '@type': 'Organization' as const,
       name: organization.name || organization.login,
       description: organization.description,
-      url: organization.url,
+      url: `https://nest.owasp.org/organizations/${organizationKey}`,
       logo: organization.avatarUrl
         ? {
             '@type': 'ImageObject' as const,
@@ -74,7 +74,7 @@ async function generateOrganizationStructuredData(organizationKey: string) {
       memberOf: {
         '@type': 'Organization' as const,
         name: 'OWASP Foundation',
-        url: 'https://owasp.org',
+        url: 'https://nest.owasp.org',
       },
       keywords: [
         organization.name,
@@ -82,6 +82,7 @@ async function generateOrganizationStructuredData(organizationKey: string) {
         'cybersecurity',
         'application security',
         'open source',
+        'OWASP',
       ]
         .filter(Boolean)
         .join(', '),
