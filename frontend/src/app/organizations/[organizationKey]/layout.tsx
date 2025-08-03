@@ -33,8 +33,7 @@ export async function generateMetadata({
 }
 
 async function generateOrganizationStructuredData(organizationKey: string) {
-  // https://developers.google.com/search/docs/appearance/structured-data/organization
-  // https://schema.org/Organization
+  // https://developers.google.com/search/docs/appearance/structured-data/organization#structured-data-type-definitions
 
   try {
     const { data } = await apolloClient.query({
@@ -77,7 +76,7 @@ async function generateOrganizationStructuredData(organizationKey: string) {
       memberOf: {
         '@type': 'Organization' as const,
         name: 'OWASP Foundation',
-        url: 'https://nest.owasp.org',
+        url: 'https://owasp.org',
       },
       keywords: [
         organization.name,
