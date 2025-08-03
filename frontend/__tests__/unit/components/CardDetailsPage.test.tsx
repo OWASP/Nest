@@ -42,7 +42,7 @@ jest.mock('next/image', () => ({
     <img
       src={src}
       alt={alt}
-      style={fill ? { objectFit: objectFit as React.CSSProperties['objectFit'] } : undefined}
+      style={fill && { objectFit: objectFit as React.CSSProperties['objectFit'] }}
       {...props}
     />
   ),
@@ -328,7 +328,7 @@ describe('CardDetailsPage', () => {
     validData: T,
     overrides: Record<string, unknown>
   ): T => {
-    return { ...validData, ...overrides } as T
+    return Object.assign({}, validData, overrides)
   }
 
   const createMalformedArray = <T extends Record<string, unknown>>(
@@ -347,6 +347,8 @@ describe('CardDetailsPage', () => {
     negativeNumber: -10,
     invalidUrl: 'not-a-url',
   })
+
+  const invalidValues = createInvalidValues()
 
   const mockHealthMetricsData = [
     {
@@ -674,14 +676,11 @@ describe('CardDetailsPage', () => {
       expect(detailsCard).toHaveClass('md:col-span-5')
     })
 
-    it('renders statistics section for supported entity types', () => {
-      const supportedTypes = ['project', 'repository', 'committee', 'user', 'organization']
+    const supportedTypes = ['project', 'repository', 'committee', 'user', 'organization']
 
-      supportedTypes.forEach((type) => {
-        cleanup()
-        render(<CardDetailsPage {...defaultProps} type={type} />)
-        expect(screen.getByText('Statistics')).toBeInTheDocument()
-      })
+    test.each(supportedTypes)('renders statistics section for %s type', (entityType) => {
+      render(<CardDetailsPage {...defaultProps} type={entityType} />)
+      expect(screen.getByText('Statistics')).toBeInTheDocument()
     })
 
     it('renders languages and topics for project and repository types', () => {
@@ -789,7 +788,6 @@ describe('CardDetailsPage', () => {
     })
 
     it('handles missing detail values with fallback', () => {
-      const invalidValues = createInvalidValues()
       const detailsWithMissingValues = [
         { label: 'Missing Value', value: invalidValues.emptyString },
         { label: 'Null Value', value: invalidValues.nullValue },
@@ -817,8 +815,8 @@ describe('CardDetailsPage', () => {
 
   describe('Default Values and Fallbacks', () => {
     it('uses default isActive value when not provided', () => {
-      const propsWithoutIsActive = { ...defaultProps }
-      delete propsWithoutIsActive.isActive
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { isActive, ...propsWithoutIsActive } = defaultProps
 
       render(<CardDetailsPage {...propsWithoutIsActive} />)
 
@@ -826,8 +824,8 @@ describe('CardDetailsPage', () => {
     })
 
     it('uses default showAvatar value when not provided', () => {
-      const propsWithoutShowAvatar = { ...defaultProps }
-      delete propsWithoutShowAvatar.showAvatar
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { showAvatar, ...propsWithoutShowAvatar } = defaultProps
 
       render(<CardDetailsPage {...propsWithoutShowAvatar} />)
 
@@ -914,38 +912,30 @@ describe('CardDetailsPage', () => {
       expect(screen.getByTestId('recent-releases')).toBeInTheDocument()
     })
 
-    it('renders all expected sections for different entity types', () => {
-      const entityTypes = ['project', 'repository', 'user', 'organization', 'committee', 'chapter']
+    const entityTypes = ['project', 'repository', 'user', 'organization', 'committee', 'chapter']
 
-      entityTypes.forEach((entityType) => {
-        cleanup()
-        render(
-          <CardDetailsPage
-            {...defaultProps}
-            type={entityType}
-            geolocationData={entityType === 'chapter' ? mockChapterGeoData : undefined}
-            socialLinks={
-              ['chapter', 'committee'].includes(entityType)
-                ? ['https://github.com/test']
-                : undefined
-            }
-          />
-        )
+    test.each(entityTypes)('renders all expected sections for %s type', (entityType) => {
+      render(
+        <CardDetailsPage
+          {...defaultProps}
+          type={entityType}
+          geolocationData={entityType === 'chapter' ? mockChapterGeoData : undefined}
+          socialLinks={
+            ['chapter', 'committee'].includes(entityType) ? ['https://github.com/test'] : undefined
+          }
+        />
+      )
 
-        expect(
-          screen.getByText(`${entityType.charAt(0).toUpperCase() + entityType.slice(1)} Details`)
-        ).toBeInTheDocument()
-      })
+      expect(
+        screen.getByText(`${entityType.charAt(0).toUpperCase() + entityType.slice(1)} Details`)
+      ).toBeInTheDocument()
     })
 
-    it('renders statistics section for supported entity types', () => {
-      const supportedTypes = ['project', 'repository', 'committee', 'user', 'organization']
+    const supportedTypes = ['project', 'repository', 'committee', 'user', 'organization']
 
-      supportedTypes.forEach((entityType) => {
-        cleanup()
-        render(<CardDetailsPage {...defaultProps} type={entityType} />)
-        expect(screen.getByText('Statistics')).toBeInTheDocument()
-      })
+    test.each(supportedTypes)('renders statistics section for supported %s type', (entityType) => {
+      render(<CardDetailsPage {...defaultProps} type={entityType} />)
+      expect(screen.getByText('Statistics')).toBeInTheDocument()
     })
 
     it('renders chapter map for chapter type only', () => {
@@ -1086,7 +1076,6 @@ describe('CardDetailsPage', () => {
 
   describe('Data Validation and Error Handling', () => {
     it('handles malformed health metrics data gracefully', () => {
-      const invalidValues = createInvalidValues()
       const malformedHealthData = [
         createMalformedData(mockHealthMetricsData[0], { score: invalidValues.nullValue }),
       ]
@@ -1100,7 +1089,6 @@ describe('CardDetailsPage', () => {
     })
 
     it('handles invalid health metrics score gracefully', () => {
-      const invalidValues = createInvalidValues()
       const invalidHealthData = createMalformedArray(mockHealthMetricsData, [
         { score: invalidValues.negativeNumber },
         { score: invalidValues.undefinedValue },
@@ -1146,7 +1134,6 @@ describe('CardDetailsPage', () => {
     })
 
     it('handles contributors with missing required fields', () => {
-      const invalidValues = createInvalidValues()
       const incompleteContributors = createMalformedArray(mockContributors, [
         {
           avatarUrl: invalidValues.emptyString,
@@ -1191,7 +1178,6 @@ describe('CardDetailsPage', () => {
     })
 
     it('handles malformed repository data', () => {
-      const invalidValues = createInvalidValues()
       const malformedRepositories = createMalformedArray(mockRepositories, [
         {
           name: invalidValues.nullValue,
@@ -1209,7 +1195,6 @@ describe('CardDetailsPage', () => {
     })
 
     it('handles empty string values in details', () => {
-      const invalidValues = createInvalidValues()
       const detailsWithEmptyStrings = [
         { label: invalidValues.emptyString, value: 'Some Value' },
         { label: 'Some Label', value: invalidValues.emptyString },
@@ -1306,7 +1291,6 @@ describe('CardDetailsPage', () => {
     })
 
     it('handles zero and negative values in stats', () => {
-      const invalidValues = createInvalidValues()
       const statsWithZeroValues = [
         { icon: faCode, value: 0, unit: 'Star' },
         { icon: faTags, value: invalidValues.negativeNumber, unit: 'Issue' },
@@ -1321,7 +1305,6 @@ describe('CardDetailsPage', () => {
     })
 
     it('handles mixed valid and invalid data in arrays', () => {
-      const invalidValues = createInvalidValues()
       const mixedValidInvalidData = {
         ...defaultProps,
         recentIssues: [
