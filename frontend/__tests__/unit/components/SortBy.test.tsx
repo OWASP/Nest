@@ -74,7 +74,7 @@ describe('<SortBy />', () => {
     await act(async () => {
       // Get the second button (the sort order button)
       const buttons = screen.getAllByRole('button')
-      fireEvent.click(buttons[1]) // The sort order button is the second button
+      fireEvent.click(buttons[1])
     })
     expect(defaultProps.onOrderChange).toHaveBeenCalledWith('desc')
   })
