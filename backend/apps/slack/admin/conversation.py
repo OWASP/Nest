@@ -8,32 +8,6 @@ from apps.slack.models.conversation import Conversation
 class ConversationAdmin(admin.ModelAdmin):
     """Admin for Conversation model."""
 
-    list_display = (
-        "name",
-        "slack_channel_id",
-        "created_at",
-        "total_members_count",
-    )
-    search_fields = (
-        "name",
-        "topic",
-        "purpose",
-        "slack_channel_id",
-        "slack_creator_id",
-    )
-    list_filter = (
-        "sync_messages",
-        "is_archived",
-        "is_channel",
-        "is_general",
-        "is_im",
-        "is_private",
-    )
-    readonly_fields = (
-        "slack_channel_id",
-        "created_at",
-        "slack_creator_id",
-    )
     fieldsets = (
         (
             "Conversation Information",
@@ -69,6 +43,32 @@ class ConversationAdmin(admin.ModelAdmin):
             "Additional attributes",
             {"fields": ("sync_messages",)},
         ),
+    )
+    list_display = (
+        "name",
+        "slack_channel_id",
+        "created_at",
+        "total_members_count",
+    )
+    list_filter = (
+        "sync_messages",
+        "is_archived",
+        "is_channel",
+        "is_general",
+        "is_im",
+        "is_private",
+    )
+    readonly_fields = (
+        "slack_channel_id",
+        "created_at",
+        "slack_creator_id",
+    )
+    search_fields = (
+        "name",
+        "topic",
+        "purpose",
+        "slack_channel_id",
+        "slack_creator_id",
     )
 
 
