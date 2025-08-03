@@ -1,8 +1,21 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import AnimatedCounter from './AnimatedCounter';
 import '@testing-library/jest-dom';
-import { act} from 'react-dom/test-utils';
+import { act } from '@testing-library/react';
+describe('AnimatedCounter', () => {
+  it('renders the counter with the correct value after animation', async () => {
+    render(<AnimatedCounter end={42} duration={0.1} />);
+
+    const counterElement = screen.getByRole('status', { name: /animated counter/i });
+    expect(counterElement).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(counterElement.textContent).toBe('42');
+    }, { timeout: 500 });
+  });
+});
+
 
 describe('AnimatedCounter', () => {
   beforeEach(() => {
@@ -55,16 +68,7 @@ describe('AnimatedCounter', () => {
     expect(counter).toHaveAttribute('aria-label');
   });
 });
+function waitFor(arg0: () => void, arg1: { timeout: number; }) {
+  throw new Error('Function not implemented.');
+}
 
-describe('AnimatedCounter', () => {
-  it('renders the counter with the correct value after animation', async () => {
-    render(<AnimatedCounter end={42} duration={0.1} />);
-
-    const counterElement = screen.getByRole('status', { name: /animated counter/i });
-    expect(counterElement).toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(counterElement.textContent).toBe('42');
-    }, { timeout: 500 });
-  });
-});
