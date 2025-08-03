@@ -27,6 +27,10 @@ export const GET_REPOSITORY_DATA = gql`
       organization {
         login
       }
+      project {
+        key
+        name
+      }
       releases {
         author {
           avatarUrl
@@ -62,7 +66,6 @@ export const GET_REPOSITORY_DATA = gql`
     }
     topContributors(organization: $organizationKey, repository: $repositoryKey) {
       avatarUrl
-      contributionsCount
       login
       name
     }

@@ -2,8 +2,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
 import Link from 'next/link'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import { CardProps } from 'types/card'
-import { Icons } from 'utils/data'
+import type { CardProps } from 'types/card'
+import { ICONS } from 'utils/data'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import ActionButton from 'components/ActionButton'
 import ContributorAvatar from 'components/ContributorAvatar'
@@ -60,9 +60,9 @@ const Card = ({
         </div>
 
         {/* Icons associated with the project */}
-        {icons && Object.keys(Icons).some((key) => icons[key]) && (
+        {icons && Object.keys(ICONS).some((key) => icons[key]) && (
           <div className="mt-3 flex flex-wrap">
-            {Object.keys(Icons).map((key, index) =>
+            {Object.keys(ICONS).map((key, index) =>
               icons[key] ? (
                 <DisplayIcon
                   key={`${key}-${index}`}

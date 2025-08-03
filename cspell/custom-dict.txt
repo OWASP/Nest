@@ -2,6 +2,7 @@ Agsoc
 Aichi
 Aissue
 Aupdated
+BOTTOMPADDING
 CCSP
 CISSP
 Cañón
@@ -12,6 +13,7 @@ GTM
 Héllo
 Kateryna
 NETTACKER
+NOSONAR
 Nadu
 Nominatim
 PLR
@@ -21,14 +23,18 @@ SEO
 SLF
 Sivagangai
 Sonarqube
+T04T40NHX
 Truncator
 Twitterbot
 WSL
 Whistleblower
 Wörld
+Xmark
 a2eeef
+ahmedxgouda
 algoliasearch
 ansa
+apexcharts
 apk
 arithmatex
 arkid15r
@@ -43,6 +49,7 @@ csrfguard
 csrfprotector
 csrftoken
 cva
+demojize
 dismissable
 dsn
 env
@@ -62,6 +69,7 @@ jumpstart
 kasya
 libexpat
 linkify
+lte
 lxml
 mamicidal
 markdownit
@@ -69,6 +77,8 @@ markercluster
 mastg
 mcr
 mdfile
+mentee
+mentees
 mern
 millify
 mpim
@@ -79,6 +89,7 @@ nosniff
 openstreetmap
 owasppcitoolkit
 owtf
+pdfgen
 pentest
 pentesting
 pgvector

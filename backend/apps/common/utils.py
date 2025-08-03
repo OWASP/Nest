@@ -12,6 +12,26 @@ from django.utils.text import slugify as django_slugify
 from humanize import intword, naturaltime
 
 
+def convert_to_camel_case(text: str) -> str:
+    """Convert a string to camelCase.
+
+    Args:
+        text (str): The input string.
+
+    Returns:
+        str: The converted string in camelCase.
+
+    """
+    parts = text.split("_")
+    offset = 1 if text.startswith("_") else 0
+    head = parts[offset : offset + 1] or [text]
+
+    segments = [f"_{head[0]}" if offset else head[0]]
+    segments.extend(word.capitalize() for word in parts[offset + 1 :])
+
+    return "".join(segments)
+
+
 def convert_to_snake_case(text: str) -> str:
     """Convert a string to snake_case.
 
@@ -35,7 +55,7 @@ def get_absolute_url(path: str) -> str:
         str: The absolute URL.
 
     """
-    return f"{settings.SITE_URL}/{path}"
+    return f"{settings.SITE_URL}/{path.lstrip('/')}"
 
 
 def get_nest_user_agent() -> str:
@@ -58,7 +78,7 @@ def get_user_ip_address(request) -> str:
         str: The user's IP address.
 
     """
-    if settings.ENVIRONMENT == "Local":
+    if settings.IS_LOCAL_ENVIRONMENT:
         return settings.PUBLIC_IP_ADDRESS
 
     x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")

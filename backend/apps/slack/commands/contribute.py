@@ -9,7 +9,7 @@ from apps.slack.common.presentation import EntityPresentation
 class Contribute(CommandBase):
     """Slack bot /contribute command."""
 
-    def get_render_blocks(self, command):
+    def render_blocks(self, command):
         """Get the rendered blocks.
 
         Args:
@@ -21,7 +21,7 @@ class Contribute(CommandBase):
         """
         command_text = command["text"].strip()
         if command_text in COMMAND_HELP:
-            return super().get_render_blocks(command)
+            return super().render_blocks(command)
 
         return get_blocks(
             search_query="" if command_text in COMMAND_START else command_text,
@@ -35,17 +35,3 @@ class Contribute(CommandBase):
                 summary_truncation=300,
             ),
         )
-
-    def get_template_context(self, command: dict):
-        """Get the template context.
-
-        Args:
-            command (dict): The Slack command payload.
-
-        Returns:
-            dict: The template context.
-
-        """
-        return {
-            **super().get_template_context(command),
-        }

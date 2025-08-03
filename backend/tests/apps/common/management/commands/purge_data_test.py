@@ -9,10 +9,11 @@ from apps.common.management.commands.purge_data import Command
     ("nest_apps", "mock_models"),
     [
         (
-            ["github", "owasp"],
+            ["github", "owasp", "slack"],
             {
-                "github": ["Repo", "Issue"],
-                "owasp": ["Vulnerability", "Project"],
+                "github": ["Issue", "Repository"],
+                "owasp": ["Chapter", "Project"],
+                "slack": ["Conversation", "Member", "Workspace"],
             },
         )
     ],
@@ -29,10 +30,11 @@ class TestPurgeDataCommand:
             mock_app_config = MagicMock()
             mock_app_config.get_models.return_value = [
                 MagicMock(
+                    __name__=model,
                     _meta=MagicMock(
                         db_table=f"{app_name.lower()}_{model.lower()}",
-                        verbose_name_plural=f"{model}s",
-                    )
+                        model_name=f"{model}s",
+                    ),
                 )
                 for model in mock_models[app_name]
             ]
@@ -47,4 +49,4 @@ class TestPurgeDataCommand:
             for model_name in mock_models[app_name]:
                 table_name = f"{app_name.lower()}_{model_name.lower()}"
                 cursor_instance.execute.assert_any_call(f"TRUNCATE TABLE {table_name} CASCADE")
-                mock_print.assert_any_call(f"Purged GitHub {model_name}s")
+                mock_print.assert_any_call(f"Purged {app_name}.{model_name}")

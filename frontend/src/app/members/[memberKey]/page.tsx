@@ -12,13 +12,12 @@ import { useParams } from 'next/navigation'
 import React, { useState, useEffect, useRef } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GET_USER_DATA } from 'server/queries/userQueries'
-import type {
-  ProjectIssuesType,
-  ProjectMilestonesType,
-  ProjectReleaseType,
-  RepositoryCardProps,
-} from 'types/project'
-import type { ItemCardPullRequests, UserDetailsProps } from 'types/user'
+import type { Issue } from 'types/issue'
+import type { Milestone } from 'types/milestone'
+import type { RepositoryCardProps } from 'types/project'
+import type { PullRequest } from 'types/pullRequest'
+import type { Release } from 'types/release'
+import type { UserDetails } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
 import DetailsCard from 'components/CardDetailsPage'
@@ -27,12 +26,12 @@ import PageLayout from 'components/PageLayout'
 
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams()
-  const [user, setUser] = useState<UserDetailsProps | null>()
-  const [issues, setIssues] = useState<ProjectIssuesType[]>([])
+  const [user, setUser] = useState<UserDetails | null>()
+  const [issues, setIssues] = useState<Issue[]>([])
   const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
-  const [milestones, setMilestones] = useState<ProjectMilestonesType[]>([])
-  const [pullRequests, setPullRequests] = useState<ItemCardPullRequests[]>([])
-  const [releases, setReleases] = useState<ProjectReleaseType[]>([])
+  const [milestones, setMilestones] = useState<Milestone[]>([])
+  const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
+  const [releases, setReleases] = useState<Release[]>([])
   const [data, setData] = useState<HeatmapData>({} as HeatmapData)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [username, setUsername] = useState('')

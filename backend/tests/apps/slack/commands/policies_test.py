@@ -6,7 +6,7 @@ from django.conf import settings
 from apps.common.constants import NL
 from apps.slack.commands.policies import Policies
 
-EXPECTED_BLOCK_COUNT = 3
+EXPECTED_BLOCK_COUNT = 4
 
 
 class TestPoliciesHandler:
@@ -44,6 +44,7 @@ class TestPoliciesHandler:
                     "Conflict Resolution Policy",
                     "https://owasp.org/www-policy/operational/conflict-resolution",
                 ),
+                ("Copyright Policy", "https://owasp.org/www-policy/operational/copyright"),
                 (
                     "Conflict of Interest Policy",
                     "https://owasp.org/www-policy/operational/conflict-of-interest",
@@ -58,8 +59,9 @@ class TestPoliciesHandler:
                 ("Grant Policy", "https://owasp.org/www-policy/operational/grants"),
                 ("Membership Policy", "https://owasp.org/www-policy/operational/membership"),
                 ("Project Policy", "https://owasp.org/www-policy/operational/projects"),
+                ("Privacy Policy", "https://owasp.org/www-policy/operational/privacy"),
                 (
-                    "Whistleblower & Anti-Retaliation Policy",
+                    "Whistleblower Policy",
                     "https://owasp.org/www-policy/operational/whistleblower",
                 ),
             ]
@@ -72,3 +74,6 @@ class TestPoliciesHandler:
                 "for more information"
             )
             assert blocks[2]["text"]["text"].strip() == expected_footer
+            assert blocks[3]["type"] == "section"
+            assert blocks[3]["text"]["type"] == "mrkdwn"
+            assert "💬 You can share feedback" in blocks[3]["text"]["text"]

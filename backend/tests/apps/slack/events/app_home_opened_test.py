@@ -1,8 +1,15 @@
 from unittest.mock import Mock, patch
 
 import pytest
+from django.conf import settings
 
 from apps.common.constants import TAB
+from apps.slack.blocks import DIVIDER, SECTION_BREAK
+from apps.slack.constants import (
+    FEEDBACK_SHARING_INVITE,
+    NEST_BOT_NAME,
+    NL,
+)
 from apps.slack.events.app_home_opened import AppHomeOpened
 
 
@@ -29,7 +36,7 @@ class TestAppHomeOpened:
             ]
 
             handler = AppHomeOpened()
-            handler.get_render_blocks = Mock(
+            handler.render_blocks = Mock(
                 return_value=[
                     {
                         "type": "section",
@@ -61,7 +68,16 @@ class TestAppHomeOpened:
             )
 
             expected_context = {
-                "user_id": "U12345",
+                "DIVIDER": DIVIDER,
+                "FEEDBACK_SHARING_INVITE": FEEDBACK_SHARING_INVITE,
+                "NEST_BOT_NAME": NEST_BOT_NAME,
+                "NL": NL,
+                "SECTION_BREAK": SECTION_BREAK,
+                "OWASP_NEST_NAME": "OWASP Nest",
+                "OWASP_NEST_URL": settings.SITE_URL,
                 "TAB": TAB,
+                "USER_ID": "U12345",
             }
-            handler.get_render_blocks.assert_called_once_with(expected_context)
+            handler.render_blocks.assert_called_once_with(
+                handler.direct_message_template, expected_context
+            )

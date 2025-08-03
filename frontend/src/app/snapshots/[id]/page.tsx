@@ -7,12 +7,12 @@ import React, { useState, useEffect } from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GET_SNAPSHOT_DETAILS } from 'server/queries/snapshotQueries'
-import { ChapterTypeGraphQL } from 'types/chapter'
-import { ProjectTypeGraphql } from 'types/project'
-import { SnapshotDetailsProps } from 'types/snapshot'
+import type { Chapter } from 'types/chapter'
+import type { Project } from 'types/project'
+import type { SnapshotDetails } from 'types/snapshot'
 import { level } from 'utils/data'
 import { formatDate } from 'utils/dateFormatter'
-import { getFilteredIconsGraphql, handleSocialUrls } from 'utils/utility'
+import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import Card from 'components/Card'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -20,7 +20,7 @@ import PageLayout from 'components/PageLayout'
 
 const SnapshotDetailsPage: React.FC = () => {
   const { id: snapshotKey } = useParams()
-  const [snapshot, setSnapshot] = useState<SnapshotDetailsProps | null>(null)
+  const [snapshot, setSnapshot] = useState<SnapshotDetails | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const router = useRouter()
 
@@ -39,15 +39,15 @@ const SnapshotDetailsPage: React.FC = () => {
     }
   }, [graphQLData, graphQLRequestError, snapshotKey])
 
-  const renderProjectCard = (project: ProjectTypeGraphql) => {
+  const renderProjectCard = (project: Project) => {
     const params: string[] = ['forksCount', 'starsCount', 'contributorsCount']
-    const filteredIcons = getFilteredIconsGraphql(project, params)
+    const filteredIcons = getFilteredIcons(project, params)
 
     const handleButtonClick = () => {
       router.push(`/projects/${project.key}`)
     }
 
-    const SubmitButton = {
+    const submitButton = {
       label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
       onclick: handleButtonClick,
@@ -55,7 +55,7 @@ const SnapshotDetailsPage: React.FC = () => {
 
     return (
       <Card
-        button={SubmitButton}
+        button={submitButton}
         icons={filteredIcons}
         key={project.key}
         level={level[`${project.level.toLowerCase() as keyof typeof level}`]}
@@ -67,16 +67,16 @@ const SnapshotDetailsPage: React.FC = () => {
     )
   }
 
-  const renderChapterCard = (chapter: ChapterTypeGraphQL) => {
+  const renderChapterCard = (chapter: Chapter) => {
     const params: string[] = ['updatedAt']
-    const filteredIcons = getFilteredIconsGraphql(chapter, params)
+    const filteredIcons = getFilteredIcons(chapter, params)
     const formattedUrls = handleSocialUrls(chapter.relatedUrls)
 
     const handleButtonClick = () => {
       router.push(`/chapters/${chapter.key}`)
     }
 
-    const SubmitButton = {
+    const submitButton = {
       label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
       onclick: handleButtonClick,
@@ -84,13 +84,13 @@ const SnapshotDetailsPage: React.FC = () => {
 
     return (
       <Card
+        button={submitButton}
+        icons={filteredIcons}
         key={chapter.key}
+        social={formattedUrls}
+        summary={chapter.summary}
         title={chapter.name}
         url={`/chapters/${chapter.key}`}
-        summary={chapter.summary}
-        icons={filteredIcons}
-        button={SubmitButton}
-        social={formattedUrls}
       />
     )
   }

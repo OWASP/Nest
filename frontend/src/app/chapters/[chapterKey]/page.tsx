@@ -5,8 +5,8 @@ import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GET_CHAPTER_DATA } from 'server/queries/chapterQueries'
-import { ChapterTypeGraphQL } from 'types/chapter'
-import { TopContributorsTypeGraphql } from 'types/contributor'
+import type { Chapter } from 'types/chapter'
+import type { Contributor } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -14,8 +14,8 @@ import PageLayout from 'components/PageLayout'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams()
-  const [chapter, setChapter] = useState<ChapterTypeGraphQL>({} as ChapterTypeGraphQL)
-  const [topContributors, setTopContributors] = useState<TopContributorsTypeGraphql[]>([])
+  const [chapter, setChapter] = useState<Chapter>({} as Chapter)
+  const [topContributors, setTopContributors] = useState<Contributor[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const { data, error: graphQLRequestError } = useQuery(GET_CHAPTER_DATA, {
@@ -64,14 +64,15 @@ export default function ChapterDetailsPage() {
     <PageLayout breadcrumbItems={{ title: chapter.name }}>
       <DetailsCard
         details={details}
-        geolocationData={chapter}
-        is_active={chapter.isActive}
+        entityKey={chapter.key}
+        geolocationData={[chapter]}
+        isActive={chapter.isActive}
         socialLinks={chapter.relatedUrls}
         summary={chapter.summary}
         title={chapter.name}
         topContributors={topContributors}
         type="chapter"
-      />
+    />
     </PageLayout>
   )
 }

@@ -9,52 +9,71 @@ import {
   faRectangleList,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { DetailsCardProps } from 'types/card'
+import Link from 'next/link'
+import type { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
+import { IS_PROJECT_HEALTH_ENABLED } from 'utils/credentials'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
+import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
 import LeadersList from 'components/LeadersList'
+import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import Milestones from 'components/Milestones'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
 import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
+import SponsorCard from 'components/SponsorCard'
 import ToggleableList from 'components/ToggleableList'
-import TopContributors from 'components/TopContributors'
+import TopContributorsList from 'components/TopContributorsList'
 
 const DetailsCard = ({
-  title,
-  is_active = true,
-  summary,
   description,
-  heatmap,
-  stats,
   details,
-  socialLinks,
-  type,
-  topContributors,
-  languages,
-  pullRequests,
-  topics,
-  recentIssues,
-  recentReleases,
-  recentMilestones,
-  showAvatar = true,
-  userSummary,
+  entityKey,
   geolocationData = null,
+  healthMetricsData,
+  heatmap,
+  isActive = true,
+  languages,
+  projectName,
+  pullRequests,
+  recentIssues,
+  recentMilestones,
+  recentReleases,
   repositories = [],
+  showAvatar = true,
+  socialLinks,
+  stats,
+  summary,
+  title,
+  topContributors,
+  topics,
+  type,
+  userSummary,
 }: DetailsCardProps) => {
   return (
     <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
-        <h1 className="mb-6 mt-4 text-4xl font-bold">{title}</h1>
+        <div className="mt-4 flex flex-row items-center">
+          <div className="flex w-full items-center justify-between">
+            <h1 className="text-4xl font-bold">{title}</h1>
+            {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
+              <Link href="#issues-trend">
+                <MetricsScoreCircle score={healthMetricsData[0].score} />
+              </Link>
+            )}
+          </div>
+          {!isActive && (
+            <span className="ml-4 justify-center rounded bg-red-200 px-2 py-1 text-sm text-red-800">
+              Inactive
+            </span>
+          )}
+        </div>
         <p className="mb-6 text-xl">{description}</p>
-        {!is_active && (
-          <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
-        )}
         {summary && (
           <SecondaryCard icon={faCircleInfo} title={<AnchorTitle title="Summary" />}>
             <p>{summary}</p>
@@ -123,7 +142,7 @@ const DetailsCard = ({
           {type === 'chapter' && geolocationData && (
             <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
               <ChapterMapWrapper
-                geoLocData={geolocationData ? [geolocationData] : []}
+                geoLocData={geolocationData}
                 showLocal={true}
                 style={{
                   borderRadius: '0.5rem',
@@ -153,11 +172,10 @@ const DetailsCard = ({
           </div>
         )}
         {topContributors && (
-          <TopContributors
-            icon={faUsers}
+          <TopContributorsList
             contributors={topContributors}
-            maxInitialDisplay={9}
-            type="contributor"
+            icon={faUsers}
+            maxInitialDisplay={12}
           />
         )}
         {(type === 'project' ||
@@ -191,14 +209,20 @@ const DetailsCard = ({
         )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
-            <SecondaryCard
-              icon={faFolderOpen}
-              title={<AnchorTitle title="Repositories" />}
-              className="mt-6"
-            >
+            <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
               <RepositoriesCard repositories={repositories} />
             </SecondaryCard>
           )}
+        {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
+          <HealthMetrics data={healthMetricsData} />
+        )}
+        {entityKey && ['chapter', 'project', 'repository'].includes(type) && (
+          <SponsorCard
+            target={entityKey}
+            title={projectName || title}
+            type={type === 'chapter' ? 'chapter' : 'project'}
+          />
+        )}
       </div>
     </div>
   )

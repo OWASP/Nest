@@ -470,4 +470,14 @@ describe('UserDetailsPage', () => {
       expect(screen.getAllByText('N/A').length).toBe(3)
     })
   })
+  test('does not render sponsor block', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockUserDetailsData,
+      error: null,
+    })
+    render(<UserDetailsPage />)
+    await waitFor(() => {
+      expect(screen.queryByText(`Want to become a sponsor?`)).toBeNull()
+    })
+  })
 })

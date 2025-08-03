@@ -2,15 +2,14 @@ import { faCalendar, faCodePullRequest, faFolderOpen } from '@fortawesome/free-s
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter } from 'next/navigation'
 import React from 'react'
-import { PullRequestsType } from 'types/home'
-import { ItemCardPullRequests } from 'types/user'
+import type { PullRequest } from 'types/pullRequest'
 import { formatDate } from 'utils/dateFormatter'
 import AnchorTitle from 'components/AnchorTitle'
 import ItemCardList from 'components/ItemCardList'
 import { TruncatedText } from 'components/TruncatedText'
 
 interface RecentPullRequestsProps {
-  data: ItemCardPullRequests[] | PullRequestsType[]
+  data: PullRequest[]
   showAvatar?: boolean
 }
 

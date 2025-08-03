@@ -35,7 +35,7 @@ class TestProjectHandler:
     @pytest.fixture(autouse=True)
     def setup_mocks(self):
         with (
-            patch("apps.owasp.api.search.project.get_projects") as mock_get_projects,
+            patch("apps.owasp.index.search.project.get_projects") as mock_get_projects,
             patch("apps.owasp.models.project.Project") as mock_project_model,
         ):
             mock_project_model.active_projects_count.return_value = 42

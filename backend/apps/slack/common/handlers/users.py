@@ -10,7 +10,7 @@ from apps.common.utils import get_absolute_url
 from apps.slack.blocks import get_pagination_buttons, markdown
 from apps.slack.common.constants import TRUNCATION_INDICATOR
 from apps.slack.common.presentation import EntityPresentation
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
+from apps.slack.constants import FEEDBACK_SHARING_INVITE
 from apps.slack.utils import escape
 
 
@@ -32,7 +32,7 @@ def get_blocks(
         list: A list of Slack blocks representing the users.
 
     """
-    from apps.github.api.search.user import get_users
+    from apps.github.index.search.user import get_users
 
     presentation = presentation or EntityPresentation()
     search_query_escaped = escape(search_query)
@@ -117,7 +117,7 @@ def get_blocks(
             markdown(
                 f"⚠️ *Extended search over OWASP community users is available at "
                 f"<{get_absolute_url('/members')}?q={search_query}|{settings.SITE_NAME}>*{NL}"
-                f"{FEEDBACK_CHANNEL_MESSAGE}"
+                f"{FEEDBACK_SHARING_INVITE}"
             )
         )
 

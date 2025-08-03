@@ -33,7 +33,7 @@ class TestChapterHandler:
     @pytest.fixture(autouse=True)
     def setup_mocks(self):
         with (
-            patch("apps.owasp.api.search.chapter.get_chapters") as mock_get_chapters,
+            patch("apps.owasp.index.search.chapter.get_chapters") as mock_get_chapters,
             patch("apps.owasp.models.chapter.Chapter") as mock_chapter_model,
         ):
             mock_chapter_model.active_chapters_count.return_value = 42

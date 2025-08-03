@@ -2,7 +2,7 @@
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import { CommitteeTypeAlgolia } from 'types/committee'
+import type { Committee } from 'types/committee'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import Card from 'components/Card'
 import PageLayout from 'components/PageLayout'
@@ -17,20 +17,20 @@ const CommitteesPage = () => {
     searchQuery,
     handleSearch,
     handlePageChange,
-  } = useSearchPage<CommitteeTypeAlgolia>({
+  } = useSearchPage<Committee>({
     indexName: 'committees',
     pageTitle: 'OWASP Committees',
   })
   const router = useRouter()
-  const renderCommitteeCard = (committee: CommitteeTypeAlgolia) => {
-    const params: string[] = ['updated_at']
+  const renderCommitteeCard = (committee: Committee) => {
+    const params: string[] = ['updatedAt']
     const filteredIcons = getFilteredIcons(committee, params)
-    const formattedUrls = handleSocialUrls(committee.related_urls)
+    const formattedUrls = handleSocialUrls(committee.relatedUrls)
     const handleButtonClick = () => {
       router.push(`/committees/${committee.key}`)
     }
 
-    const SubmitButton = {
+    const submitButton = {
       label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
       onclick: handleButtonClick,
@@ -43,8 +43,8 @@ const CommitteesPage = () => {
         url={`/committees/${committee.key}`}
         summary={committee.summary}
         icons={filteredIcons}
-        topContributors={committee.top_contributors}
-        button={SubmitButton}
+        topContributors={committee.topContributors}
+        button={submitButton}
         social={formattedUrls}
         tooltipLabel={`Learn more about ${committee.name}`}
       />

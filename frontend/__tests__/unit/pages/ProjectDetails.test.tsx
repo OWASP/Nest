@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
-import { act, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { assertContributorToggle, assertRepoDetails } from '@testUtils/sharedAssertions'
 import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
 import { render } from 'wrappers/testUtil'
@@ -18,6 +18,15 @@ jest.mock('@heroui/toast', () => ({
 jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: () => <span data-testid="mock-icon" />,
 }))
+
+jest.mock('react-apexcharts', () => {
+  return {
+    __esModule: true,
+    default: () => {
+      return <div data-testid="mock-apexcharts">Mock ApexChart</div>
+    },
+  }
+})
 
 const mockRouter = {
   push: jest.fn(),
@@ -97,10 +106,28 @@ describe('ProjectDetailsPage', () => {
     })
   })
 
-  // eslint-disable-next-line jest/expect-expect
   test('toggles contributors list when show more/less is clicked', async () => {
     render(<ProjectDetailsPage />)
-    await assertContributorToggle('Contributor 9', ['Contributor 7', 'Contributor 8'])
+    await waitFor(() => {
+      expect(screen.getByText('Contributor 12')).toBeInTheDocument()
+      expect(screen.queryByText('Contributor 13')).not.toBeInTheDocument()
+    })
+
+    const showMoreButton = screen.getByRole('button', { name: /Show more/i })
+    fireEvent.click(showMoreButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Contributor 13')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 14')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 15')).toBeInTheDocument()
+    })
+
+    const showLessButton = screen.getByRole('button', { name: /Show less/i })
+    fireEvent.click(showLessButton)
+
+    await waitFor(() => {
+      expect(screen.queryByText('Contributor 13')).not.toBeInTheDocument()
+    })
   })
 
   test('navigates to user page when contributor is clicked', async () => {
@@ -123,6 +150,21 @@ describe('ProjectDetailsPage', () => {
         expect(screen.getByText(issue.title)).toBeInTheDocument()
         expect(screen.getByText(issue.repositoryName)).toBeInTheDocument()
       })
+    })
+  })
+
+  test('Displays health metrics section', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockProjectDetailsData,
+      error: null,
+    })
+    render(<ProjectDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Issues Trend')).toBeInTheDocument()
+      expect(screen.getByText('Pull Requests Trend')).toBeInTheDocument()
+      expect(screen.getByText('Stars Trend')).toBeInTheDocument()
+      expect(screen.getByText('Forks Trend')).toBeInTheDocument()
+      expect(screen.getByText('Days Since Last Commit and Release')).toBeInTheDocument()
     })
   })
 
@@ -233,6 +275,19 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText(`1.2K Contributors`)).toBeInTheDocument()
       expect(screen.getByText(`3 Repositories`)).toBeInTheDocument()
       expect(screen.getByText(`10 Issues`)).toBeInTheDocument()
+    })
+  })
+  test('renders project sponsor block correctly', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockProjectDetailsData,
+      error: null,
+    })
+
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText(`Want to become a sponsor?`)).toBeInTheDocument()
+      expect(screen.getByText(`Sponsor ${mockProjectDetailsData.project.name}`)).toBeInTheDocument()
     })
   })
 })

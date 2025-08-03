@@ -1,10 +1,10 @@
 import { Tooltip } from '@heroui/tooltip'
 import { millify } from 'millify'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import { IconType } from 'types/icon'
-import { IconKeys, Icons } from 'utils/data'
+import type { Icon } from 'types/icon'
+import { IconKeys, ICONS } from 'utils/data'
 
-export default function DisplayIcon({ item, icons }: { item: string; icons: IconType }) {
+export default function DisplayIcon({ item, icons }: { item: string; icons: Icon }) {
   // className for the container
   const containerClassName = [
     'flex flex-row-reverse items-center justify-center gap-1 px-4 pb-1 -ml-2',
@@ -35,7 +35,7 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
 
   return icons[item] ? (
     <Tooltip
-      content={`${Icons[item as keyof typeof Icons]?.label}`}
+      content={`${ICONS[item as keyof typeof ICONS]?.label}`}
       delay={150}
       closeDelay={100}
       showArrow
@@ -51,7 +51,7 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
         <span>
           <FontAwesomeIconWrapper
             className={iconClassName}
-            icon={Icons[item as IconKeys]?.icon} // Display corresponding icon
+            icon={ICONS[item as IconKeys]?.icon} // Display corresponding icon
           />
         </span>
       </div>

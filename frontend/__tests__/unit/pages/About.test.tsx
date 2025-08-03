@@ -40,7 +40,7 @@ jest.mock('utils/aboutData', () => ({
     {
       section: 'Backend',
       tools: {
-        Python: {
+        python: {
           icon: '/images/icons/python.svg',
           url: 'https://www.python.org/',
         },
@@ -58,11 +58,11 @@ jest.mock('utils/aboutData', () => ({
     {
       section: 'Tests',
       tools: {
-        Jest: {
+        jest: {
           icon: '/images/icons/jest.svg',
           url: 'https://jestjs.io/',
         },
-        Pytest: {
+        pytest: {
           icon: '/images/icons/pytest.svg',
           url: 'https://docs.pytest.org/',
         },
@@ -71,11 +71,11 @@ jest.mock('utils/aboutData', () => ({
     {
       section: 'Tools',
       tools: {
-        Ansible: {
+        ansible: {
           icon: '/images/icons/ansible.svg',
           url: 'https://www.ansible.com/',
         },
-        GitHub: {
+        gitHub: {
           icon: '/images/icons/github.svg',
           url: 'https://www.github.com/',
         },
@@ -204,16 +204,36 @@ describe('About Component', () => {
       expect(screen.getByText('Top Contributors')).toBeInTheDocument()
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
       expect(screen.getByText('Contributor 6')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
+      expect(screen.getByText('Contributor 10')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 12')).toBeInTheDocument()
+      expect(screen.queryByText('Contributor 13')).not.toBeInTheDocument()
     })
   })
 
-  // eslint-disable-next-line jest/expect-expect
   test('toggles contributors list when show more/less is clicked', async () => {
     await act(async () => {
       render(<About />)
     })
-    await assertContributorToggle('Contributor 6', ['Contributor 7', 'Contributor 8'])
+    await waitFor(() => {
+      expect(screen.getByText('Contributor 12')).toBeInTheDocument()
+      expect(screen.queryByText('Contributor 13')).not.toBeInTheDocument()
+    })
+
+    const showMoreButton = screen.getByRole('button', { name: /Show more/i })
+    fireEvent.click(showMoreButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Contributor 13')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 14')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 15')).toBeInTheDocument()
+    })
+
+    const showLessButton = screen.getByRole('button', { name: /Show less/i })
+    fireEvent.click(showLessButton)
+
+    await waitFor(() => {
+      expect(screen.queryByText('Contributor 13')).not.toBeInTheDocument()
+    })
   })
 
   test('renders technologies section correctly', async () => {

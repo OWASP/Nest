@@ -42,12 +42,10 @@ test.describe('Chapter Details Page', () => {
 
   test('should have top contributors', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Contributor 1' })).toBeVisible()
-    await expect(page.getByText('Contributor 1')).toBeVisible()
-    await expect(page.getByText('29 Contributions')).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Contributor 2' })).toBeVisible()
-    await expect(page.getByText('Contributor 2')).toBeVisible()
-    await expect(page.getByText('28 Contributions')).toBeVisible()
+    await expect(page.getByRole('img', { name: 'Contributor 1', exact: true })).toBeVisible()
+    await expect(page.getByText('Contributor 1', { exact: true })).toBeVisible()
+    await expect(page.getByRole('img', { name: 'Contributor 2', exact: true })).toBeVisible()
+    await expect(page.getByText('Contributor 2', { exact: true })).toBeVisible()
   })
 
   test('toggle top contributors', async ({ page }) => {

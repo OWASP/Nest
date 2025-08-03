@@ -49,7 +49,6 @@ describe('CommitteeDetailsPage Component', () => {
     })
   })
 
-  // eslint-disable-next-line jest/expect-expect
   test('renders committee data correctly', async () => {
     render(<CommitteeDetailsPage />)
     await assertHeadingsAndTexts({
@@ -89,10 +88,8 @@ describe('CommitteeDetailsPage Component', () => {
       topContributors: [
         {
           avatarUrl: 'https://example.com/avatar1.jpg',
-          contributionsCount: 30,
           login: 'Contributor 1',
           name: '',
-          __typename: 'UserNode',
         },
       ],
     }
@@ -125,6 +122,17 @@ describe('CommitteeDetailsPage Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Committee not found')).toBeInTheDocument()
+    })
+  })
+
+  test('does not render sponsor block', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockCommitteeDetailsData,
+      error: null,
+    })
+    render(<CommitteeDetailsPage />)
+    await waitFor(() => {
+      expect(screen.queryByText(`Want to become a sponsor?`)).toBeNull()
     })
   })
 })

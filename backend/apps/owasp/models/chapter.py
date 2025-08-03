@@ -10,7 +10,7 @@ from apps.common.geocoding import get_location_coordinates
 from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.open_ai import OpenAi
-from apps.common.utils import join_values
+from apps.common.utils import get_absolute_url, join_values
 from apps.core.models.prompt import Prompt
 from apps.owasp.models.common import RepositoryBasedEntityModel
 from apps.owasp.models.managers.chapter import ActiveChapterManager
@@ -32,6 +32,7 @@ class Chapter(
         db_table = "owasp_chapters"
         indexes = [
             models.Index(fields=["-created_at"], name="chapter_created_at_desc_idx"),
+            models.Index(fields=["-updated_at"], name="chapter_updated_at_desc_idx"),
         ]
         verbose_name_plural = "Chapters"
 
@@ -70,6 +71,11 @@ class Chapter(
     def nest_key(self):
         """Get Nest key."""
         return self.key.replace("www-chapter-", "")
+
+    @property
+    def nest_url(self) -> str:
+        """Get Nest URL for chapter."""
+        return get_absolute_url(f"chapters/{self.nest_key}")
 
     @staticmethod
     @lru_cache

@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
-import { act, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { assertContributorToggle, assertRepoDetails } from '@testUtils/sharedAssertions'
 import { mockRepositoryData } from '@unit/data/mockRepositoryData'
 import { render } from 'wrappers/testUtil'
@@ -60,7 +60,6 @@ describe('RepositoryDetailsPage', () => {
     })
   })
 
-  // eslint-disable-next-line jest/expect-expect
   test('renders repository details when data is available', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: mockRepositoryData,
@@ -100,10 +99,28 @@ describe('RepositoryDetailsPage', () => {
     })
   })
 
-  // eslint-disable-next-line jest/expect-expect
   test('toggles contributors list when show more/less is clicked', async () => {
     render(<RepositoryDetailsPage />)
-    await assertContributorToggle('Contributor 9', ['Contributor 7', 'Contributor 8'])
+    await waitFor(() => {
+      expect(screen.getByText('Contributor 12')).toBeInTheDocument()
+      expect(screen.queryByText('Contributor 13')).not.toBeInTheDocument()
+    })
+
+    const showMoreButton = screen.getByRole('button', { name: /Show more/i })
+    fireEvent.click(showMoreButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Contributor 13')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 14')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 15')).toBeInTheDocument()
+    })
+
+    const showLessButton = screen.getByRole('button', { name: /Show less/i })
+    fireEvent.click(showLessButton)
+
+    await waitFor(() => {
+      expect(screen.queryByText('Contributor 13')).not.toBeInTheDocument()
+    })
   })
 
   test('navigates to user page when contributor is clicked', async () => {
@@ -202,6 +219,17 @@ describe('RepositoryDetailsPage', () => {
       expect(screen.getByText('No Forks')).toBeInTheDocument()
       expect(screen.getByText('No Issues')).toBeInTheDocument()
       expect(screen.getByText('No Stars')).toBeInTheDocument()
+    })
+  })
+
+  test('renders repository sponsor block correctly', async () => {
+    render(<RepositoryDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText(`Want to become a sponsor?`)).toBeInTheDocument()
+      expect(
+        screen.getByText(`Sponsor ${mockRepositoryData.repository.project.name}`)
+      ).toBeInTheDocument()
     })
   })
 })

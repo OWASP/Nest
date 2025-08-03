@@ -63,7 +63,6 @@ describe('SnapshotDetailsPage', () => {
     })
   })
 
-  // eslint-disable-next-line jest/expect-expect
   test('renders snapshot details when data is available', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: mockSnapshotDetailsData,

@@ -32,6 +32,11 @@ class GenericUserModel(models.Model):
     updated_at = models.DateTimeField(verbose_name="Updated at")
 
     @property
+    def nest_key(self):
+        """Nest key."""
+        return self.login
+
+    @property
     def title(self) -> str:
         """Entity title."""
         return (
@@ -49,16 +54,16 @@ class GenericUserModel(models.Model):
             "avatar_url": "avatar_url",
             "collaborators_count": "collaborators",
             "company": "company",
+            "created_at": "created_at",
             "email": "email",
             "followers_count": "followers",
             "following_count": "following",
             "location": "location",
             "login": "login",
             "name": "name",
-            "created_at": "created_at",
-            "updated_at": "updated_at",
             "public_gists_count": "public_gists",
             "public_repositories_count": "public_repos",
+            "updated_at": "updated_at",
         }
 
         # Direct fields.

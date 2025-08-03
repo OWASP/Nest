@@ -10,7 +10,7 @@ from apps.common.utils import get_absolute_url, natural_date
 from apps.slack.blocks import get_pagination_buttons, markdown
 from apps.slack.common.constants import TRUNCATION_INDICATOR
 from apps.slack.common.presentation import EntityPresentation
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
+from apps.slack.constants import FEEDBACK_SHARING_INVITE
 from apps.slack.utils import escape
 
 
@@ -32,7 +32,7 @@ def get_blocks(
         list: A list of Slack blocks representing the projects.
 
     """
-    from apps.owasp.api.search.project import get_projects
+    from apps.owasp.index.search.project import get_projects
     from apps.owasp.models.project import Project
 
     presentation = presentation or EntityPresentation()
@@ -118,9 +118,9 @@ def get_blocks(
         blocks.append(
             markdown(
                 f"⚠️ *Extended search over {Project.active_projects_count()} OWASP projects "
-                f"is available at <{get_absolute_url('projects')}"
+                f"is available at <{get_absolute_url('/projects')}"
                 f"?q={search_query}|{settings.SITE_NAME}>*{NL}"
-                f"{FEEDBACK_CHANNEL_MESSAGE}"
+                f"{FEEDBACK_SHARING_INVITE}"
             )
         )
 

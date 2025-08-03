@@ -25,12 +25,10 @@ export const GET_MAIN_PAGE_DATA = gql`
       name
       suggestedLocation
     }
-    topContributors(limit: 18) {
+    topContributors(limit: 40) {
       avatarUrl
       login
       name
-      projectKey
-      projectName
     }
     recentIssues(limit: 5, distinct: $distinct) {
       author {

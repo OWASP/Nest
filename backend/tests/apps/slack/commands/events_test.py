@@ -8,7 +8,7 @@ from apps.slack.commands.events import Events
 
 
 class MockEvent:
-    def __init__(self, name, start_date, end_date, suggested_location, url, description):
+    def __init__(self, name, start_date, end_date, location, url, description):
         self.name = name
         self.start_date = (
             datetime.strptime(start_date, "%Y-%m-%d").replace(tzinfo=UTC).date()
@@ -20,7 +20,7 @@ class MockEvent:
             if end_date
             else None
         )
-        self.suggested_location = suggested_location
+        self.location = location
         self.url = url
         self.description = description
 
@@ -31,7 +31,7 @@ mock_events = sorted(
             name="OWASP Snow 2025",
             start_date="2025-03-14",
             end_date="2025-03-14",
-            suggested_location="Denver, CO",
+            location="Denver, CO",
             url="https://example.com/snow",
             description="Regional conference",
         ),
@@ -39,12 +39,12 @@ mock_events = sorted(
             name="OWASP Global AppSec EU 2025",
             start_date="2025-05-26",
             end_date="2025-05-30",
-            suggested_location="Amsterdam, Netherlands",
+            location="Amsterdam, Netherlands",
             url="https://example.com/eu",
             description="Premier conference",
         ),
     ],
-    key=lambda x: x.start_date,
+    key=lambda x: x.start_date or datetime.max.replace(tzinfo=UTC).date(),
 )
 
 
@@ -98,17 +98,18 @@ class TestEventsHandler:
 
         sent_blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
         assert sent_blocks[0]["type"] == "section"
-        assert sent_blocks[0]["text"]["text"] == expected_header
-        assert sent_blocks[1]["type"] == "divider"
+        # Check that the header is in the first block
+        assert expected_header in sent_blocks[0]["text"]["text"]
 
         if has_events_data:
             event1 = mock_events[0]
             event1_text_found = False
+            # Check all blocks for event 1
             for block in sent_blocks:
                 if block.get("type") == "section" and "text" in block and "text" in block["text"]:
                     block_text = block["text"]["text"]
                     if (
-                        f"*1. <{event1.url}|{event1.name}>*" in block_text
+                        f"*<{event1.url}|{event1.name}>*" in block_text
                         and "Mar 14, 2025" in block_text
                         and "Denver, CO" in block_text
                         and event1.description in block_text
@@ -119,11 +120,12 @@ class TestEventsHandler:
 
             event2 = mock_events[1]
             event2_text_found = False
+            # Check all blocks for event 2
             for block in sent_blocks:
                 if block.get("type") == "section" and "text" in block and "text" in block["text"]:
                     block_text = block["text"]["text"]
                     if (
-                        f"*2. <{event2.url}|{event2.name}>*" in block_text
+                        f"*<{event2.url}|{event2.name}>*" in block_text
                         and "May 26 — 30, 2025" in block_text
                         and "Amsterdam, Netherlands" in block_text
                         and event2.description in block_text
@@ -132,6 +134,12 @@ class TestEventsHandler:
                         break
             assert event2_text_found, "Block containing Event 2 details not found or incorrect"
 
-            footer_block = sent_blocks[-1]
-            assert footer_block["type"] == "section"
-            assert "🔍 For more information about upcoming events" in footer_block["text"]["text"]
+            # Check that the footer is in one of the blocks
+            footer_found = False
+            for block in sent_blocks:
+                if block.get("type") == "section" and "text" in block and "text" in block["text"]:
+                    block_text = block["text"]["text"]
+                    if "🔍 For more information about upcoming events" in block_text:
+                        footer_found = True
+                        break
+            assert footer_found, "Footer not found in any block"

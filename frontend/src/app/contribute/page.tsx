@@ -4,7 +4,7 @@ import { useSearchPage } from 'hooks/useSearchPage'
 import React, { useState } from 'react'
 
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import { IssueType } from 'types/issue'
+import type { Issue } from 'types/issue'
 import { getFilteredIcons } from 'utils/utility'
 
 import Card from 'components/Card'
@@ -21,15 +21,15 @@ const ContributePage = () => {
     searchQuery,
     handleSearch,
     handlePageChange,
-  } = useSearchPage<IssueType>({
+  } = useSearchPage<Issue>({
     indexName: 'issues',
     pageTitle: 'OWASP Issues',
   })
 
   const [modalOpenIndex, setModalOpenIndex] = useState<number | null>(null)
 
-  const renderContributeCard = (issue: IssueType, index: number) => {
-    const params: string[] = ['created_at', 'comments_count']
+  const renderContributeCard = (issue: Issue, index: number) => {
+    const params: string[] = ['createdAt', 'commentsCount']
     const filteredIcons = getFilteredIcons(issue, params)
 
     const SubmitButton = {
@@ -50,8 +50,8 @@ const ContributePage = () => {
           key={issue.objectID}
           title={issue.title}
           url={issue.url}
-          projectName={issue.project_name}
-          projectLink={issue.project_url}
+          projectName={issue.projectName}
+          projectLink={issue.projectUrl}
           summary={issue.summary}
           icons={filteredIcons}
           button={SubmitButton}

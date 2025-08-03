@@ -1,6 +1,6 @@
 import { faGithub, faSlack, faBluesky, faLinkedin } from '@fortawesome/free-brands-svg-icons'
-import { Link } from 'types/link'
-import { Section } from 'types/section'
+import type { Link } from 'types/link'
+import type { Section } from 'types/section'
 
 export const headerLinks: Link[] = [
   {
@@ -117,3 +117,9 @@ export const themeToggleTooltip = {
 }
 
 export const desktopViewMinWidth = 768
+
+export const userAuthStatus = {
+  AUTHENTICATED: 'authenticated',
+  LOADING: 'loading',
+  UNAUTHENTICATED: 'unauthenticated',
+}

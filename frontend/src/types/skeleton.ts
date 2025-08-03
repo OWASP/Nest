@@ -1,16 +1,16 @@
-export interface CardSkeletonProps {
-  showLevel?: boolean
-  showIcons?: boolean
-  showProjectName?: boolean
-  showSummary?: boolean
-  showLink?: boolean
-  showContributors?: boolean
-  showSocial?: boolean
-  showActionButton?: boolean
+export type CardSkeletonProps = {
   numIcons?: number
+  showActionButton?: boolean
+  showContributors?: boolean
+  showIcons?: boolean
+  showLevel?: boolean
+  showLink?: boolean
+  showProjectName?: boolean
+  showSocial?: boolean
+  showSummary?: boolean
 }
 
-export interface UserCardSkeletonProps {
+export type UserCardSkeletonProps = {
   showAvatar?: boolean
   showName?: boolean
   showViewProfile?: boolean
