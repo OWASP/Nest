@@ -1,9 +1,7 @@
-import React from 'react'
 import { render, screen } from '@testing-library/react'
+import type { HealthMetricsProps } from 'types/healthMetrics'
 import MetricsCard from 'components/MetricsCard'
 import '@testing-library/jest-dom'
-
-import type { HealthMetricsProps } from 'types/healthMetrics'
 
 const makeMetric = (overrides: Partial<HealthMetricsProps> = {}): HealthMetricsProps => ({
   projectKey: 'test-project',
@@ -61,16 +59,16 @@ describe('MetricsCard component', () => {
   it('applies correct styling class depending on score thresholds', () => {
     const cases: Array<[number, string]> = [
       [90, 'text-green-900'],
-      [75, 'text-green-900'], 
+      [75, 'text-green-900'],
       [60, 'text-orange-900'],
-      [50, 'text-orange-900'], 
+      [50, 'text-orange-900'],
       [30, 'text-red-900'],
     ]
 
     cases.forEach(([score, expectedClass]) => {
       const metric = makeMetric({ score })
       render(<MetricsCard metric={metric} />)
-      const scoreEl = screen.getByText(score.toString())
+      const scoreEl = screen.getByText(score.toString()).closest('div')
       expect(scoreEl).toHaveClass(expectedClass)
     })
   })
