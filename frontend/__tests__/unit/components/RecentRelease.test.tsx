@@ -64,11 +64,12 @@ jest.mock('next/image', () => ({
   },
 }))
 
+const now = Date.now()
 const mockReleases: Release[] = [
   {
     name: 'v1.0 The First Release',
     url: 'https://example.com/release/v1',
-    publishedAt: 1733040000000, // 2025-07-31T10:00:00Z as timestamp
+    publishedAt: now,
     repositoryName: 'our-awesome-project',
     organizationName: 'our-org',
     tagName: 'v1.0',
@@ -89,7 +90,7 @@ const mockReleases: Release[] = [
   {
     name: 'v2.0 The Second Release',
     url: 'https://example.com/release/v2',
-    publishedAt: 1732953600000, // 2025-07-30T12:00:00Z as timestamp
+    publishedAt: now,
     repositoryName: 'another-cool-project',
     organizationName: 'our-org',
     tagName: 'v2.0',
