@@ -41,10 +41,6 @@ export function generateProfilePageStructuredData(
     }
   }
 
-  if (user.avatarUrl) {
-    structuredData.mainEntity.image = user.avatarUrl
-  }
-
   if (user.location) {
     structuredData.mainEntity.address = {
       '@type': 'PostalAddress',
