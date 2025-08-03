@@ -1,7 +1,8 @@
 import React from 'react'
+import { ProfilePageStructuredData } from 'types/profilePageStructuredData'
 
 interface StructuredDataScriptProps {
-  data: Record<string, unknown>
+  data: ProfilePageStructuredData
 }
 
 // dangerouslySetInnerHTML injects the JSON data as a script tag.
