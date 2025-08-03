@@ -69,14 +69,15 @@ jest.mock('utils/credentials', () => ({
 }))
 
 jest.mock('utils/urlIconMappings', () => ({
-  getSocialIcon: (url: string) => ({
-    iconName:
-      url && typeof url === 'string' && url.includes('github')
-        ? 'github'
-        : url && typeof url === 'string' && url.includes('twitter')
-          ? 'twitter'
-          : 'link',
-  }),
+  getSocialIcon: (url: string) => {
+    if (url?.includes('github')) {
+      return { iconName: 'github' }
+    }
+    if (url?.includes('twitter')) {
+      return { iconName: 'twitter' }
+    }
+    return { iconName: 'link' }
+  },
 }))
 
 jest.mock('components/AnchorTitle', () => ({
@@ -323,6 +324,30 @@ jest.mock('components/TopContributorsList', () => ({
 }))
 
 describe('CardDetailsPage', () => {
+  const createMalformedData = <T extends Record<string, unknown>>(
+    validData: T,
+    overrides: Record<string, unknown>
+  ): T => {
+    return { ...validData, ...overrides } as T
+  }
+
+  const createMalformedArray = <T extends Record<string, unknown>>(
+    validArray: T[],
+    malformedItems: Record<string, unknown>[]
+  ): T[] => {
+    return malformedItems.map((item, index) =>
+      createMalformedData(validArray[index] || validArray[0], item)
+    )
+  }
+
+  const createInvalidValues = () => ({
+    nullValue: null,
+    undefinedValue: undefined,
+    emptyString: '',
+    negativeNumber: -10,
+    invalidUrl: 'not-a-url',
+  })
+
   const mockHealthMetricsData = [
     {
       ageDays: 365,
@@ -476,7 +501,7 @@ describe('CardDetailsPage', () => {
       author: mockUser,
       isPreRelease: false,
       name: 'v1.0.0',
-      publishedAt: Date.now() - 604800000, 
+      publishedAt: Date.now() - 604800000,
       repositoryName: 'test-repo',
       tagName: 'v1.0.0',
       url: 'https://github.com/test/repo/releases/tag/v1.0.0',
@@ -485,7 +510,7 @@ describe('CardDetailsPage', () => {
 
   const mockChapterGeoData = [
     {
-      createdAt: Date.now() - 31536000000, 
+      createdAt: Date.now() - 31536000000,
       isActive: true,
       key: 'test-chapter',
       leaders: ['John Doe', 'Jane Smith'],
@@ -522,12 +547,9 @@ describe('CardDetailsPage', () => {
     socialLinks: [],
   }
 
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
-
   afterEach(() => {
     cleanup()
+    jest.clearAllMocks()
   })
 
   describe('Essential Rendering Tests', () => {
@@ -767,10 +789,11 @@ describe('CardDetailsPage', () => {
     })
 
     it('handles missing detail values with fallback', () => {
+      const invalidValues = createInvalidValues()
       const detailsWithMissingValues = [
-        { label: 'Missing Value', value: '' },
-        { label: 'Null Value', value: null as string },
-        { label: 'Undefined Value', value: undefined as string },
+        { label: 'Missing Value', value: invalidValues.emptyString },
+        { label: 'Null Value', value: invalidValues.nullValue },
+        { label: 'Undefined Value', value: invalidValues.undefinedValue },
       ]
 
       render(<CardDetailsPage {...defaultProps} details={detailsWithMissingValues} />)
@@ -1063,11 +1086,9 @@ describe('CardDetailsPage', () => {
 
   describe('Data Validation and Error Handling', () => {
     it('handles malformed health metrics data gracefully', () => {
+      const invalidValues = createInvalidValues()
       const malformedHealthData = [
-        {
-          ...mockHealthMetricsData[0],
-          score: null as number,
-        },
+        createMalformedData(mockHealthMetricsData[0], { score: invalidValues.nullValue }),
       ]
 
       render(
@@ -1079,16 +1100,11 @@ describe('CardDetailsPage', () => {
     })
 
     it('handles invalid health metrics score gracefully', () => {
-      const invalidHealthData = [
-        {
-          ...mockHealthMetricsData[0],
-          score: -10,
-        },
-        {
-          ...mockHealthMetricsData[0],
-          score: undefined as unknown as number,
-        },
-      ]
+      const invalidValues = createInvalidValues()
+      const invalidHealthData = createMalformedArray(mockHealthMetricsData, [
+        { score: invalidValues.negativeNumber },
+        { score: invalidValues.undefinedValue },
+      ])
 
       render(
         <CardDetailsPage {...defaultProps} type="project" healthMetricsData={invalidHealthData} />
@@ -1130,20 +1146,21 @@ describe('CardDetailsPage', () => {
     })
 
     it('handles contributors with missing required fields', () => {
-      const incompleteContributors = [
+      const invalidValues = createInvalidValues()
+      const incompleteContributors = createMalformedArray(mockContributors, [
         {
-          avatarUrl: '',
-          login: '',
-          name: '',
+          avatarUrl: invalidValues.emptyString,
+          login: invalidValues.emptyString,
+          name: invalidValues.emptyString,
           projectKey: 'project1',
         },
         {
           avatarUrl: 'https://example.com/avatar.jpg',
           login: 'user2',
-          name: null as unknown as string,
+          name: invalidValues.nullValue,
           projectKey: 'project1',
         },
-      ]
+      ])
 
       expect(() =>
         render(<CardDetailsPage {...defaultProps} topContributors={incompleteContributors} />)
@@ -1174,18 +1191,17 @@ describe('CardDetailsPage', () => {
     })
 
     it('handles malformed repository data', () => {
-      const malformedRepositories = [
+      const invalidValues = createInvalidValues()
+      const malformedRepositories = createMalformedArray(mockRepositories, [
         {
-          ...mockRepositories[0],
-          name: null as unknown as string,
-          contributorsCount: -1,
+          name: invalidValues.nullValue,
+          contributorsCount: invalidValues.negativeNumber,
         },
         {
-          ...mockRepositories[1],
-          url: '',
-          starsCount: undefined as unknown as number,
+          url: invalidValues.emptyString,
+          starsCount: invalidValues.undefinedValue,
         },
-      ]
+      ])
 
       expect(() =>
         render(<CardDetailsPage {...defaultProps} repositories={malformedRepositories} />)
@@ -1193,10 +1209,11 @@ describe('CardDetailsPage', () => {
     })
 
     it('handles empty string values in details', () => {
+      const invalidValues = createInvalidValues()
       const detailsWithEmptyStrings = [
-        { label: '', value: 'Some Value' },
-        { label: 'Some Label', value: '' },
-        { label: null as unknown as string, value: null as unknown as string },
+        { label: invalidValues.emptyString, value: 'Some Value' },
+        { label: 'Some Label', value: invalidValues.emptyString },
+        { label: invalidValues.nullValue, value: invalidValues.nullValue },
       ]
 
       expect(() =>
@@ -1289,10 +1306,11 @@ describe('CardDetailsPage', () => {
     })
 
     it('handles zero and negative values in stats', () => {
+      const invalidValues = createInvalidValues()
       const statsWithZeroValues = [
         { icon: faCode, value: 0, unit: 'Star' },
-        { icon: faTags, value: -5, unit: 'Issue' },
-        { icon: faCode, value: null as unknown as number, unit: 'Fork' },
+        { icon: faTags, value: invalidValues.negativeNumber, unit: 'Issue' },
+        { icon: faCode, value: invalidValues.nullValue, unit: 'Fork' },
       ]
 
       expect(() =>
@@ -1303,15 +1321,16 @@ describe('CardDetailsPage', () => {
     })
 
     it('handles mixed valid and invalid data in arrays', () => {
+      const invalidValues = createInvalidValues()
       const mixedValidInvalidData = {
         ...defaultProps,
         recentIssues: [
           mockRecentIssues[0], // Valid
-          { ...mockRecentIssues[0], title: null },
-          { ...mockRecentIssues[0], author: null },
+          createMalformedData(mockRecentIssues[0], { title: invalidValues.nullValue }),
+          createMalformedData(mockRecentIssues[0], { author: invalidValues.nullValue }),
         ],
-        languages: ['JavaScript', '', null, 'TypeScript'],
-        topics: ['web', undefined, 'frontend', ''],
+        languages: ['JavaScript', invalidValues.emptyString, invalidValues.nullValue, 'TypeScript'],
+        topics: ['web', invalidValues.undefinedValue, 'frontend', invalidValues.emptyString],
       }
 
       expect(() => render(<CardDetailsPage {...mixedValidInvalidData} />)).not.toThrow()
