@@ -134,7 +134,10 @@ describe('RecentReleases Component', () => {
     expect(repoNameElement).toBeInTheDocument()
     expect(authorLink).toBeInTheDocument()
 
-    expect(releaseLink).toHaveAttribute('href', 'https://example.com/release/v1')
+    expect(releaseLink).toHaveAttribute(
+      'href',
+      'https://github.com/our-org/our-awesome-project/releases/tag/v1.0'
+    )
     expect(releaseLink).toHaveAttribute('target', '_blank')
     expect(authorLink).toHaveAttribute('href', '/members/testuser')
   })
@@ -208,7 +211,7 @@ describe('RecentReleases Component', () => {
     // Should still render the release name
     expect(screen.getByText('v1.0 The First Release')).toBeInTheDocument()
     // Should handle missing author gracefully
-    expect(screen.getByAltText('author')).toBeInTheDocument()
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
   })
 
   it('should handle releases with missing repository information', () => {
@@ -244,7 +247,10 @@ describe('RecentReleases Component', () => {
     })
 
     const releaseLink = screen.getByRole('link', { name: /v1.0 The First Release/i })
-    expect(releaseLink).toHaveAttribute('href', '/')
+    expect(releaseLink).toHaveAttribute(
+      'href',
+      'https://github.com/our-org/our-awesome-project/releases/tag/v1.0'
+    )
   })
 
   it('should render with default props when not provided', () => {
