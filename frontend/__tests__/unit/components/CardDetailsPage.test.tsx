@@ -328,7 +328,7 @@ describe('CardDetailsPage', () => {
     validData: T,
     overrides: Record<string, unknown>
   ): T => {
-    return Object.assign({}, validData, overrides)
+    return { ...validData, ...overrides }
   }
 
   const createMalformedArray = <T extends Record<string, unknown>>(
