@@ -3,22 +3,21 @@
 This package provides JSON schemas for OWASP projects.
 """
 
+import importlib.resources
 import json
-from pathlib import Path
 
 __version__ = "0.1.0"
 __author__ = "Arkadii Yakovets <arkadii.yakovets@owasp.org>"
 __license__ = "MIT"
-
-PACKAGE_DIR = Path(__file__).parent
 
 
 # Load all JSON schemas
 def _load_schemas():
     """Load all JSON schema files from the package directory."""
     schemas = {}
-    for schema_name in ("chapter", "committee", "project"):
-        with (PACKAGE_DIR / f"{schema_name}.json").open(encoding="utf-8") as f:
+    for schema_name in ("chapter", "committee", "project", "common"):
+        schema_path = importlib.resources.files(__package__).joinpath(f"{schema_name}.json")
+        with schema_path.open(encoding="utf-8") as f:
             schemas[schema_name] = json.load(f)
 
     return schemas
@@ -71,6 +70,7 @@ def get_all_schemas() -> dict[str, dict]:
 chapter_schema = get_schema("chapter")
 committee_schema = get_schema("committee")
 project_schema = get_schema("project")
+common_schema = get_schema("common")
 
 __all__ = [
     "__author__",
@@ -78,6 +78,7 @@ __all__ = [
     "__version__",
     "chapter_schema",
     "committee_schema",
+    "common_schema",
     "get_all_schemas",
     "get_schema",
     "list_schemas",
