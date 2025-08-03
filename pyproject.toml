@@ -18,10 +18,6 @@ classifiers = [
 ]
 packages = [{ include = "owasp_schema", from = "src" }]
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
 [tool.poetry.dependencies]
 jsonschema = "^4.23.0"
 pytest = "^8.3.4"
@@ -51,3 +47,7 @@ select = ["ALL"]
 [tool.ruff.lint.per-file-ignores]
 "**/__init__.py" = ["D104"]
 "**/*.py" = ["S101"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

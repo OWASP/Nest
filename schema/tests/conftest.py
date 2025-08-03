@@ -6,11 +6,11 @@ from pathlib import Path
 import pytest
 import yaml
 
-from utils.schema_validators import validate_data
+from owasp_schema.utils.schema_validators import validate_data
 
 tests_dir = Path(__file__).resolve().parent
 tests_data_dir = tests_dir / "data"
-schema_dir = tests_dir.parent
+schema_dir = tests_dir.parent / "owasp_schema"
 
 
 # Fixtures.
