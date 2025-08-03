@@ -1,0 +1,19 @@
+import React from 'react'
+
+interface StructuredDataScriptProps {
+  data: Record<string, unknown>
+}
+
+// dangerouslySetInnerHTML injects the JSON data as a script tag.
+const StructuredDataScript: React.FC<StructuredDataScriptProps> = ({ data }) => {
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify(data, null, 2), // include everything with 2 spaces indentation
+      }}
+    />
+  )
+}
+
+export default StructuredDataScript
