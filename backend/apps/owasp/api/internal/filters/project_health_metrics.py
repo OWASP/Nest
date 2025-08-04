@@ -20,8 +20,3 @@ class ProjectHealthMetricsFilter:
     def level(self, value: str, prefix: str):
         """Filter by project level."""
         return Q(project__level=ProjectLevel(value)) if value else Q()
-
-    @strawberry_django.filter_field
-    def is_active(self, *, value: bool, prefix: str):
-        """Filter by active projects."""
-        return Q(project__is_active=value) if value else Q()
