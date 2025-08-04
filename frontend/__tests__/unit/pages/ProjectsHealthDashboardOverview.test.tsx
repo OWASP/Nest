@@ -20,23 +20,6 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
 jest.mock('hooks/useDjangoSession', () => ({
   useDjangoSession: () => ({
     isSyncing: false,
-    session: {
-      user: {
-        login: 'testuser',
-      },
-    },
-  }),
-}))
-
-jest.mock('next-auth/react', () => ({
-  useSession: () => ({
-    data: {
-      session: {
-        user: {
-          login: 'testuser',
-        },
-      },
-    },
   }),
 }))
 

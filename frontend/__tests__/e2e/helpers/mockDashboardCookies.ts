@@ -14,16 +14,18 @@ export const mockDashboardCookies = async (page, mockDashboardData, isOwaspStaff
   await page.route('**/graphql/', async (route, request) => {
     const postData = request.postDataJSON()
     switch (postData.operationName) {
-      case 'GetUser':
-        await route.fulfill({
-          status: 200,
-          json: { data: { user: { login: 'testuser', isOwaspStaff: isOwaspStaff } } },
-        })
-        break
       case 'SyncDjangoSession':
         await route.fulfill({
           status: 200,
-          json: { data: { githubAuth: { message: 'test message', ok: true } } },
+          json: {
+            data: {
+              githubAuth: {
+                message: 'test message',
+                ok: true,
+                user: { isOwaspStaff: isOwaspStaff },
+              },
+            },
+          },
         })
         break
       default:

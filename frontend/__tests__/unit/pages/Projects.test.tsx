@@ -20,15 +20,9 @@ jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 
-jest.mock('next-auth/react', () => ({
-  useSession: () => ({
-    data: {
-      session: {
-        user: {
-          login: 'testuser',
-        },
-      },
-    },
+jest.mock('hooks/useDjangoSession', () => ({
+  useDjangoSession: () => ({
+    isSyncing: false,
   }),
 }))
 
