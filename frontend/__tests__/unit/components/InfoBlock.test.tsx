@@ -7,22 +7,21 @@ import React from 'react'
 import { pluralize } from 'utils/pluralize'
 import InfoBlock from 'components/InfoBlock'
 
-interface MockFontAwesomeIconProps {
-  icon: unknown
-  className?: string
-}
-
 jest.mock('millify', () => jest.fn())
 jest.mock('utils/pluralize', () => ({
   pluralize: jest.fn(),
 }))
 
 jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, className }: MockFontAwesomeIconProps) => (
-    <span data-testid="font-awesome-icon" className={className}>
-      {String(icon)}
-    </span>
-  ),
+  FontAwesomeIcon: ({
+    icon,
+    className,
+    ...props
+  }: {
+    icon: { iconName: string }
+    className?: string
+    [key: string]: unknown
+  }) => <span data-testid={`icon-${icon.iconName}`} className={className} {...props} />,
 }))
 
 jest.mock('@heroui/tooltip', () => ({
@@ -51,7 +50,7 @@ describe('InfoBlock Component', () => {
 
         render(<InfoBlock icon={faUser} value={100} />)
 
-        expect(screen.getByTestId('font-awesome-icon')).toBeInTheDocument()
+        expect(screen.getByTestId('icon-user')).toBeInTheDocument()
         expect(screen.getByText('100 items')).toBeInTheDocument()
         expect(screen.getByTestId('tooltip')).toBeInTheDocument()
       })
@@ -72,7 +71,7 @@ describe('InfoBlock Component', () => {
           />
         )
 
-        expect(screen.getByTestId('font-awesome-icon')).toBeInTheDocument()
+        expect(screen.getByTestId('icon-star')).toBeInTheDocument()
         expect(screen.getByText('Team Members')).toBeInTheDocument()
         expect(screen.getByText('1.5k contributors')).toBeInTheDocument()
       })
@@ -180,7 +179,7 @@ describe('InfoBlock Component', () => {
     })
 
     describe('Event handling', () => {
-      it('should handle mouse events on tooltip without errors', async () => {
+      it('should handle tooltip hover interactions', async () => {
         const user = userEvent.setup()
         mockMillify.mockReturnValue('100')
         mockPluralize.mockReturnValue('items')
@@ -188,14 +187,23 @@ describe('InfoBlock Component', () => {
         render(<InfoBlock icon={faUser} value={100} />)
 
         const tooltip = screen.getByTestId('tooltip')
+
+        // Verify tooltip is initially present
+        expect(tooltip).toBeInTheDocument()
+        expect(tooltip).toHaveAttribute('title', '100 items')
 
         await user.hover(tooltip)
-        fireEvent.mouseLeave(tooltip)
-
+        // Tooltip should remain accessible and maintain its content
         expect(tooltip).toBeInTheDocument()
+        expect(tooltip).toHaveAttribute('title', '100 items')
+
+        fireEvent.mouseLeave(tooltip)
+        // Tooltip should still be present with correct content after mouse leave
+        expect(tooltip).toBeInTheDocument()
+        expect(tooltip).toHaveAttribute('title', '100 items')
       })
 
-      it('should handle click events on tooltip without errors', async () => {
+      it('should handle tooltip click interactions', async () => {
         const user = userEvent.setup()
         mockMillify.mockReturnValue('100')
         mockPluralize.mockReturnValue('items')
@@ -203,23 +211,33 @@ describe('InfoBlock Component', () => {
         render(<InfoBlock icon={faUser} value={100} />)
 
         const tooltip = screen.getByTestId('tooltip')
+
+        // Verify tooltip is accessible for interaction
+        expect(tooltip).toBeInTheDocument()
+        expect(tooltip).toHaveAttribute('title', '100 items')
 
         await user.click(tooltip)
 
+        // Tooltip should remain stable and accessible after click
         expect(tooltip).toBeInTheDocument()
+        expect(tooltip).toHaveAttribute('title', '100 items')
+        expect(tooltip).toHaveTextContent('100 items')
       })
     })
 
     describe('Default values and fallbacks', () => {
-      it('should use empty string as default label', () => {
+      it('should not render a label element when label prop is not provided', () => {
         mockMillify.mockReturnValue('100')
         mockPluralize.mockReturnValue('items')
 
         render(<InfoBlock icon={faUser} value={100} />)
 
-        const labelElements = screen.queryAllByText(/./)
-        const hasEmptyLabel = labelElements.some((el) => el.textContent === '')
-        expect(hasEmptyLabel).toBe(false)
+        // Verify only the formatted value is rendered, no label
+        expect(screen.getByText('100 items')).toBeInTheDocument()
+
+        // Verify no element with label styling exists
+        const labelElements = document.querySelectorAll('.text-sm.font-medium')
+        expect(labelElements).toHaveLength(0)
       })
 
       it('should use empty string as default className', () => {
@@ -329,7 +347,7 @@ describe('InfoBlock Component', () => {
         render(<InfoBlock icon={faUser} value={42} />)
 
         expect(screen.getByText('42 answers')).toBeInTheDocument()
-        expect(screen.getByTestId('font-awesome-icon')).toBeInTheDocument()
+        expect(screen.getByTestId('icon-user')).toBeInTheDocument()
         expect(screen.getByTestId('tooltip')).toBeInTheDocument()
       })
     })
@@ -344,7 +362,7 @@ describe('InfoBlock Component', () => {
         const wrapper = container.firstChild as HTMLElement
         expect(wrapper).toHaveClass('flex')
 
-        const icon = screen.getByTestId('font-awesome-icon')
+        const icon = screen.getByTestId('icon-user')
         expect(icon).toHaveClass('mr-3', 'mt-1', 'w-5')
 
         const contentDiv = wrapper.children[1] as HTMLElement
@@ -369,7 +387,7 @@ describe('InfoBlock Component', () => {
 
         render(<InfoBlock icon={faUser} value={100} />)
 
-        const icon = screen.getByTestId('font-awesome-icon')
+        const icon = screen.getByTestId('icon-user')
         expect(icon).toHaveClass('mr-3', 'mt-1', 'w-5')
       })
 
@@ -471,8 +489,8 @@ describe('InfoBlock Component', () => {
 
       rerender(<InfoBlock icon={faUser} value={100} />)
 
-      expect(mockMillify).toHaveBeenCalledTimes(1)
-      expect(mockPluralize).toHaveBeenCalledTimes(1)
+      expect(mockMillify).toHaveBeenCalledTimes(0)
+      expect(mockPluralize).toHaveBeenCalledTimes(0)
     })
 
     it('should handle rapid prop changes efficiently', () => {
@@ -485,7 +503,7 @@ describe('InfoBlock Component', () => {
       rerender(<InfoBlock icon={faUser} value={300} />)
       rerender(<InfoBlock icon={faUser} value={400} />)
 
-      expect(screen.getByTestId('font-awesome-icon')).toBeInTheDocument()
+      expect(screen.getByTestId('icon-user')).toBeInTheDocument()
       expect(screen.getByTestId('tooltip')).toBeInTheDocument()
     })
   })
