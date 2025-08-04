@@ -49,22 +49,6 @@ async function generateOrganizationStructuredData(organizationKey: string) {
     const structuredData = {
       '@context': 'https://schema.org' as const,
       '@type': 'Organization' as const,
-      name: organization.name || organization.login,
-      description: organization.description,
-      url: `https://nest.owasp.org/organizations/${organizationKey}`,
-      logo: organization.avatarUrl
-        ? {
-            '@type': 'ImageObject' as const,
-            url: organization.avatarUrl,
-          }
-        : undefined,
-      foundingDate: organization.createdAt,
-      location: organization.location
-        ? {
-            '@type': 'Place' as const,
-            name: organization.location,
-          }
-        : undefined,
       contactPoint: organization.email
         ? {
             '@type': 'ContactPoint' as const,
@@ -72,12 +56,9 @@ async function generateOrganizationStructuredData(organizationKey: string) {
             contactType: 'general inquiry',
           }
         : undefined,
-      sameAs: [organization.url],
-      memberOf: {
-        '@type': 'Organization' as const,
-        name: 'OWASP Foundation',
-        url: 'https://owasp.org',
-      },
+      description: organization.description,
+      email: organization.email,
+      foundingDate: organization.createdAt,
       keywords: [
         organization.name,
         organization.login,
@@ -85,9 +66,27 @@ async function generateOrganizationStructuredData(organizationKey: string) {
         'application security',
         'open source',
         'OWASP',
-      ]
-        .filter(Boolean)
-        .join(', '),
+      ].filter(Boolean),
+      location: organization.location
+        ? {
+            '@type': 'Place' as const,
+            name: organization.location,
+          }
+        : undefined,
+      logo: organization.avatarUrl
+        ? {
+            '@type': 'ImageObject' as const,
+            url: organization.avatarUrl,
+          }
+        : undefined,
+      memberOf: {
+        '@type': 'Organization' as const,
+        name: 'OWASP Foundation',
+        url: 'https://owasp.org',
+      },
+      name: organization.name || organization.login,
+      sameAs: [organization.url].filter(Boolean),
+      url: `https://nest.owasp.org/organizations/${organizationKey}`,
     }
 
     // Remove undefined properties
