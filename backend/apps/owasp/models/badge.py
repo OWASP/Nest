@@ -26,7 +26,7 @@ class Badge(BulkSaveModel, ProjectIndexMixin, RepositoryBasedEntityModel, Timest
         max_length=255, help_text="The font-awesome css class for the badge."
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return the badge name as its string representation."""
         return self.name
 
