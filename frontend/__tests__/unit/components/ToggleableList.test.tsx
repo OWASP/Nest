@@ -26,9 +26,12 @@ jest.mock('components/ShowMoreButton', () => ({
 jest.mock('@fortawesome/react-fontawesome', () => ({
   __esModule: true,
   FontAwesomeIcon: ({ icon, className }: { icon: IconDefinition; className: string }) => (
-    <span role="img" data-testid="font-awesome-icon" className={className}>
-      {icon.iconName}
-    </span>
+    <img 
+    alt={`${icon.iconName} icon`} 
+    data-testid="font-awesome-icon" 
+    className={className}
+    src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB2aWV3Qm94PSIwIDAgMSAxIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg=="
+  />
   ),
 }))
 
