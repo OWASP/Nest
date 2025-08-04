@@ -8,6 +8,7 @@ from apps.owasp.models.badge import Badge
 class BadgeAdmin(admin.ModelAdmin):
     """Admin for Badge model."""
 
+    readonly_fields = ("nest_created_at", "nest_updated_at")
     list_display = (
         "name",
         "description",
