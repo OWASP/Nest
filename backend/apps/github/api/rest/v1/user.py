@@ -46,6 +46,12 @@ class UserSchema(Schema):
     url: str
 
 
+class UserErrorResponse(Schema):
+    """Error response schema for User."""
+
+    detail: str
+
+
 @router.get(
     "/",
     description="Retrieve a paginated list of GitHub users.",
@@ -77,7 +83,7 @@ def list_users(
     "/{login}",
     description="Retrieve a GitHub user by login.",
     operation_id="get_user",
-    response={200: UserSchema, 404: dict},
+    response={200: UserSchema, 404: UserErrorResponse},
     summary="Get user by login",
     tags=["GitHub"],
 )

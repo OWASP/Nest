@@ -13,6 +13,10 @@ api_settings = {
     "docs": Swagger(settings={"persistAuthorization": True}),
     "title": "OWASP Nest",
     "version": "1.0.0",
+    "servers": [
+        {"url": "https://nest.owasp.org", "description": "Production"},
+        {"url": "http://nest.owasp.dev", "description": "Staging"},
+    ],
 }
 if not settings.IS_LOCAL_ENVIRONMENT:
     api_settings.update(
