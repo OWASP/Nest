@@ -52,8 +52,8 @@ async function generateOrganizationStructuredData(organizationKey: string) {
       contactPoint: organization.email
         ? {
             '@type': 'ContactPoint' as const,
-            email: organization.email,
             contactType: 'general inquiry',
+            email: organization.email,
           }
         : undefined,
       description: organization.description,
@@ -62,8 +62,8 @@ async function generateOrganizationStructuredData(organizationKey: string) {
       keywords: [
         organization.name,
         organization.login,
-        'cybersecurity',
         'application security',
+        'cybersecurity',
         'open source',
         'OWASP',
       ].filter(Boolean),
