@@ -1,3 +1,5 @@
+"""Admin configuration for the Badge model in the OWASP app."""
+
 from django.contrib import admin
 
 from apps.owasp.models.badge import Badge
