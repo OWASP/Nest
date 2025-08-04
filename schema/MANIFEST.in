@@ -1,0 +1,17 @@
+include *.json
+include *.py
+include *.md
+include *.cfg
+include README.md
+include LICENSE
+include src/owasp_schema/*.json
+recursive-exclude tests *
+recursive-exclude docker *
+recursive-exclude utils *
+recursive-exclude .venv *
+recursive-exclude dist *
+recursive-exclude build *
+recursive-exclude __pycache__ *
+recursive-exclude .pytest_cache *
+recursive-exclude .ruff_cache *
+exclude *.lock
