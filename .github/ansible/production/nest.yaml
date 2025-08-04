@@ -28,29 +28,30 @@
         shell:
           cmd: sed -i 's/\bnest-frontend\b/production-nest-frontend/' ~/frontend/Makefile
 
-      - name: Copy .env.backend
+      - name: Copy secrets
         copy:
-          src: '{{ github_workspace }}/.env.backend'
+          src: '{{ github_workspace }}/{{ item }}'
           dest: ~/
           mode: '0400'
+        loop:
+          - .env.backend
+          - .env.cache
+          - .env.db
+          - .env.frontend
+          - .github.pem
 
-      - name: Copy .env.cache
-        copy:
-          src: '{{ github_workspace }}/.env.cache'
-          dest: ~/
-          mode: '0400'
-
-      - name: Copy .env.db
-        copy:
-          src: '{{ github_workspace }}/.env.db'
-          dest: ~/
-          mode: '0400'
-
-      - name: Copy .env.frontend
-        copy:
-          src: '{{ github_workspace }}/.env.frontend'
-          dest: ~/
-          mode: '0400'
+      - name: Clean up secrets
+        delegate_to: localhost
+        file:
+          path: '{{ github_workspace }}/{{ item }}'
+          state: absent
+        loop:
+          - .env.backend
+          - .env.cache
+          - .env.db
+          - .env.frontend
+          - .github.pem
+        run_once: true
 
       - name: Copy crontab
         copy:

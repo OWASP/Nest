@@ -26,11 +26,9 @@ venv/
 backend/.venv
 backend/data/backup*
 backend/staticfiles
-cspell/node_modules
 frontend/blob-report/
 frontend/coverage
 frontend/dist
-frontend/node_modules
 frontend/npm-debug.log*
 frontend/playwright-report/
 frontend/playwright/.cache/
@@ -39,4 +37,5 @@ frontend/test-results/
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
 logs
+node_modules/
 TODO
