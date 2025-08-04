@@ -7,13 +7,17 @@ import InfoItem from 'components/InfoItem'
 import ShowMoreButton from 'components/ShowMoreButton'
 import { TruncatedText } from 'components/TruncatedText'
 
-const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => {
+const RepositoriesCard: React.FC<RepositoriesCardProps> = ({
+  maxInitialDisplay = 4,
+  repositories,
+}) => {
   const [showAllRepositories, setShowAllRepositories] = useState(false)
 
   const toggleRepositories = () => setShowAllRepositories(!showAllRepositories)
 
-  const displayedRepositories = showAllRepositories ? repositories : repositories.slice(0, 4)
-
+  const displayedRepositories = showAllRepositories
+    ? repositories
+    : repositories.slice(0, maxInitialDisplay)
   return (
     <div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -21,7 +25,7 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
           return <RepositoryItem key={index} details={repository} />
         })}
       </div>
-      {repositories.length > 4 && <ShowMoreButton onToggle={toggleRepositories} />}
+      {repositories.length > maxInitialDisplay && <ShowMoreButton onToggle={toggleRepositories} />}
     </div>
   )
 }
