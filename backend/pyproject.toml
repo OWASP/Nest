@@ -106,7 +106,7 @@ plugins = ["strawberry.ext.mypy_plugin"]
 
 [[tool.mypy.overrides]]
 disable_error_code = ["attr-defined"]
-module = ["apps.*.models.mixins.*", "apps.*.admin.*", "schema.tests.*"]
+module = ["apps.*.models.mixins.*", "apps.*.admin.*"]
 
 [[tool.mypy.overrides]]
 disable_error_code = ["var-annotated"]
