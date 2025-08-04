@@ -68,6 +68,7 @@ export interface UserCardProps {
   email?: string
   followersCount?: number
   location?: string
+  login?: string
   name?: string
   repositoriesCount?: number
 }

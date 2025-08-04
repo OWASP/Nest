@@ -1,15 +1,12 @@
 """A command to update OWASP entities from GitHub data."""
 
 import logging
-import os
 
-import github
 from django.core.management.base import BaseCommand
-from github.GithubException import BadCredentialsException
 
 from apps.core.utils import index
+from apps.github.auth import get_github_client
 from apps.github.common import sync_repository
-from apps.github.constants import GITHUB_ITEMS_PER_PAGE
 from apps.github.models.repository import Repository
 from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 from apps.owasp.models.chapter import Chapter
@@ -48,14 +45,8 @@ class Command(BaseCommand):
 
         """
         with index.disable_indexing():
-            try:
-                gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
-                gh_owasp_organization = gh.get_organization(OWASP_ORGANIZATION_NAME)
-            except BadCredentialsException:
-                logger.warning(
-                    "Invalid GitHub token. Please create and update .env file with a valid token."
-                )
-                return
+            gh = get_github_client()
+            gh_owasp_organization = gh.get_organization(OWASP_ORGANIZATION_NAME)
 
             owasp_organization = None
             owasp_user = None

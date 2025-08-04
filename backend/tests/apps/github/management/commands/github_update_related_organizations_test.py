@@ -2,7 +2,6 @@ from typing import NamedTuple
 from unittest import mock
 
 import pytest
-from github.GithubException import BadCredentialsException
 
 from apps.github.management.commands.github_update_related_organizations import (
     Command,
@@ -24,11 +23,11 @@ def mock_logger():
 
 
 @pytest.fixture
-def mock_github_class():
+def mock_get_github_client():
     with mock.patch(
-        "apps.github.management.commands.github_update_related_organizations.github.Github"
-    ) as mock_github:
-        yield mock_github
+        "apps.github.management.commands.github_update_related_organizations.get_github_client"
+    ) as mock_get_client:
+        yield mock_get_client
 
 
 def create_mock_organization(login="TestOrg", num_related_projects=1):
@@ -95,7 +94,7 @@ class TestGithubUpdateExternalRepositories:
         self.mock_gh = mock.Mock()
         gh_factory = mock.Mock(return_value=self.mock_gh)
         monkeypatch.setattr(
-            "apps.github.management.commands.github_update_related_organizations.github.Github",
+            "apps.github.management.commands.github_update_related_organizations.get_github_client",
             gh_factory,
         )
 
@@ -123,7 +122,7 @@ class TestGithubUpdateExternalRepositories:
 
         self.command = command
 
-    def _setup_organizations_mock(self, orgs, exists=True):
+    def _setup_organizations_mock(self, orgs, *, exists=True):
         self.mock_related_orgs.exists.return_value = exists
         self.mock_related_orgs.count.return_value = len(orgs)
         self.mock_related_orgs.__iter__.return_value = orgs
@@ -198,21 +197,6 @@ class TestGithubUpdateExternalRepositories:
 
         mock_logger.error.assert_called_once_with("No OWASP related organizations found")
         assert not self.mock_gh.get_organization.called
-        assert not self.mock_sync_repository.called
-
-    def test_handle_invalid_token(self, mock_github_class, mock_logger):
-        """Test command execution with invalid GitHub token."""
-        mock_github_class.side_effect = BadCredentialsException(401, "Invalid token")
-
-        with mock.patch("builtins.print"):
-            self.command.handle(organization=None)
-
-        self.mock_unregister_indexes.assert_called_once()
-        self.mock_register_indexes.assert_called_once()
-
-        mock_logger.warning.assert_called_once_with(
-            "Invalid GitHub token. Please create or update .env file with a valid token."
-        )
         assert not self.mock_sync_repository.called
 
     def test_handle_invalid_related_projects(self, mock_logger):

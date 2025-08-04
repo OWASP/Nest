@@ -25,7 +25,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       name
       suggestedLocation
     }
-    topContributors(limit: 20) {
+    topContributors(limit: 40) {
       avatarUrl
       login
       name
