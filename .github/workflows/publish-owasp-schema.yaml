@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 concurrency:
   cancel-in-progress: true
@@ -104,7 +105,7 @@ jobs:
             type=registry,ref=owasp/nest:test-schema-cache
           cache-to: |
             type=gha,compression=zstd
-          context: schema
+          context: .
           file: schema/docker/Dockerfile.test
           load: true
           platforms: linux/amd64
@@ -113,3 +114,75 @@ jobs:
       - name: Run schema tests
         run: |
           docker run --rm owasp/nest:test-schema-latest pytest
+
+  publish-schema-package:
+    name: Publish to PyPI
+    needs:
+      - run-schema-tests
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13'
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Install dependencies
+        run: |
+          cd schema
+          poetry install
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Bump version
+        run: |
+          cd schema
+          poetry run bump2version patch --commit --tag --allow-dirty
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push changes
+        run: |
+          git push
+          git push --tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build with new version
+        run: |
+          cd schema
+          poetry build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            Automated release for OWASP Schema package.
+
+            Changes in this release:
+            - Updated schema files
+            - Automated build and publish
+
+            Package: https://pypi.org/project/owasp-schema/
+          draft: false
+          prerelease: false
