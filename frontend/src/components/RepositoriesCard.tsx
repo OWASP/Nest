@@ -1,21 +1,16 @@
-import {
-  faCodeFork,
-  faStar,
-  faUsers,
-  faExclamationCircle,
-  faChevronDown,
-  faChevronUp,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCodeFork, faStar, faUsers, faExclamationCircle } from '@fortawesome/free-solid-svg-icons'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState } from 'react'
 import type { RepositoriesCardProps, RepositoryCardProps } from 'types/project'
 import InfoItem from 'components/InfoItem'
+import ShowMoreButton from 'components/ShowMoreButton'
 import { TruncatedText } from 'components/TruncatedText'
 
 const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => {
   const [showAllRepositories, setShowAllRepositories] = useState(false)
+
+  const toggleRepositories = () => setShowAllRepositories(!showAllRepositories)
 
   const displayedRepositories = showAllRepositories ? repositories : repositories.slice(0, 4)
 
@@ -26,24 +21,7 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
           return <RepositoryItem key={index} details={repository} />
         })}
       </div>
-      {repositories.length > 4 && (
-        <div className="mt-6 flex items-center justify-center text-center">
-          <button
-            onClick={() => setShowAllRepositories(!showAllRepositories)}
-            className="mt-4 flex items-center justify-center text-blue-400 hover:underline"
-          >
-            {showAllRepositories ? (
-              <>
-                Show less <FontAwesomeIcon icon={faChevronUp} className="ml-1" />
-              </>
-            ) : (
-              <>
-                Show more <FontAwesomeIcon icon={faChevronDown} className="ml-1" />
-              </>
-            )}
-          </button>
-        </div>
-      )}
+      {repositories.length > 4 && <ShowMoreButton onToggle={toggleRepositories} />}
     </div>
   )
 }
