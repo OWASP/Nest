@@ -1,6 +1,6 @@
 """OWASP Project Health Metrics Ordering."""
 
-from strawberry import auto
+import strawberry
 from strawberry_django import order_type
 
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
@@ -10,4 +10,9 @@ from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 class ProjectHealthMetricsOrder:
     """Ordering for Project Health Metrics."""
 
-    score: auto
+    score: strawberry.auto
+    # We need to order by another field in case of equal scores
+    # to ensure unique metrics in pagination.
+    # because SQL returns random order if no order is specified.
+    # We didn't do this ordering in the model since we order already in the query.
+    project__name: strawberry.auto

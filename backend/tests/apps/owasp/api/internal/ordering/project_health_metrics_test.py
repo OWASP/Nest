@@ -15,12 +15,11 @@ class TestProjectHealthMetricsOrder:
         order_fields = {
             field.name for field in ProjectHealthMetricsOrder.__strawberry_definition__.fields
         }
-        expected_fields = {"score"}
+        expected_fields = {"score", "project__name"}
         assert expected_fields == order_fields
 
     def test_order_by(self):
         """Test ordering by score."""
-        order_instance = ProjectHealthMetricsOrder(
-            score="DESC",
-        )
+        order_instance = ProjectHealthMetricsOrder(score="DESC", project__name="ASC")
         assert order_instance.score == "DESC"
+        assert order_instance.project__name == "ASC"
