@@ -15,7 +15,7 @@ api_settings = {
     "version": "1.0.0",
     "servers": [
         {"url": "https://nest.owasp.org", "description": "Production"},
-        {"url": "http://nest.owasp.dev", "description": "Staging"},
+        {"url": "https://nest.owasp.dev", "description": "Staging"},
     ],
 }
 if not settings.IS_LOCAL_ENVIRONMENT:
