@@ -255,19 +255,17 @@ describe('RecentReleases Component', () => {
   })
 
   it('should render with default props when not provided', () => {
+    let container : HTMLElement
     act(() => {
       render(<RecentReleases data={mockReleases} />)
+      const result = render(<RecentReleases data={mockReleases} />)
+      container = result.container
     })
 
     // Should show avatars by default
     expect(screen.getByRole('link', { name: /Test User/i })).toBeInTheDocument()
 
-    // Should use multi-column layout by default
-    let container: HTMLElement
-    act(() => {
-      const result = render(<RecentReleases data={mockReleases} />)
-      container = result.container
-    })
+
     const gridContainer = container.querySelector('.grid')
     expect(gridContainer).toHaveClass('md:grid-cols-2', 'lg:grid-cols-3')
   })
