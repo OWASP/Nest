@@ -12,6 +12,9 @@ class TaskLevel(models.Model):
         db_table = "mentorship_task_levels"
         verbose_name_plural = "Task Levels"
         ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint(fields=["module", "name"], name="unique_module_tasklevel_name")
+        ]
 
     description = models.TextField(
         verbose_name="Description",
@@ -28,6 +31,7 @@ class TaskLevel(models.Model):
     name = models.CharField(
         max_length=200,
         verbose_name="Name",
+        default="",
     )
 
     # FKs.
