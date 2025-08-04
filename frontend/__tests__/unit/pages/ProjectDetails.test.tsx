@@ -68,11 +68,17 @@ describe('ProjectDetailsPage', () => {
     })
   })
 
-  // eslint-disable-next-line jest/expect-expect
   test('renders project details when data is available', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: mockProjectDetailsData,
       error: null,
+    })
+
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Project')).toBeInTheDocument()
+      expect(screen.getByText('https://github.com/example-project')).toBeInTheDocument()
     })
   })
 

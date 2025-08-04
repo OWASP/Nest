@@ -32,11 +32,7 @@ const config: Config = {
   globals: {},
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   testEnvironment: 'jest-environment-jsdom',
-  testPathIgnorePatterns: [
-    '<rootDir>/__tests__/unit/data/',
-    '<rootDir>/__tests__/e2e/',
-    '<rootDir>/__tests__/testUtils/',
-  ],
+  testPathIgnorePatterns: ['<rootDir>/__tests__/unit/data/', '<rootDir>/__tests__/e2e/'],
   transform: {
     '^.+\\.tsx?$': '@swc/jest',
   },

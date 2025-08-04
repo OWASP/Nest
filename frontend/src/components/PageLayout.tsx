@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import { usePathname } from 'next/navigation'
 import React from 'react'
+import { capitalize } from 'utils/capitalize'
 import BreadCrumbs, { BreadCrumbItem } from 'components/BreadCrumbs'
 
 export interface crumbItem {
@@ -27,7 +28,7 @@ function generateBreadcrumbs(pathname: string, excludeLast = false): BreadCrumbI
   return _.map(segments, (segment, index) => {
     const path = '/' + _.join(_.slice(segments, 0, index + 1), '/')
     return {
-      title: _.capitalize(segment),
+      title: capitalize(segment),
       path,
     }
   })
