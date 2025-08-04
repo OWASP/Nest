@@ -341,9 +341,9 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
 
 #### NestBot Development
 
-❗ **Never install your development Slack application in the OWASP Slack workspace.**
-❗ **Doing so will interfere with OWASP Nest functionality and trigger unnecessary notifications to Slack admins.**
-❗ **Always use a different workspace (create your own if needed).**
+- **❗Never install your development Slack application in the OWASP Slack workspace.**
+- **❗Doing so will interfere with OWASP Nest functionality and trigger unnecessary notifications to Slack admins.**
+- **❗Always use a different workspace (create your own if needed).**
 
 To setup NestBot development environment, follow these steps:
 
@@ -374,8 +374,19 @@ To setup NestBot development environment, follow these steps:
      ngrok start NestBot
      ```
 
-1. **Update environment Variables with your NestBot Configuration**:
+2. **Set up Slack application**:
+   - Create a slack workspace if you don't have one already (Don't use OWASP workspace).
+   - Open the workspace from your browser and get its id.
+      - Example link: `https://app.slack.com/client/T0123456789/...`, the id is: T0123456789.
+   - Open the admin page of the django project: `localhost:8000/a` (create a superuser with `make setup`), and add a new workspace with the id and the name of your workspace.
+   - Go to the [Slack API website](https://api.slack.com/apps), and create a new app.
+   - Open the app from the dashboard, and select `App Manifest` from `Features`.
+   - Copy the content from [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) to the `App Manifest` from `Features`, and replace all `nest.owasp.org` with your ngrok domain (keep the slack endpoints like the original, just put your ngrok link).
+   - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
 
+3. **Update environment variables with your NestBot Configuration**:
+
+   - Open the app dashboard.
    - Update `backend/.env` with your Slack application tokens:
 
      - Bot User OAuth Token from `Settings -- Install App -- OAuth Tokens` section
@@ -383,12 +394,14 @@ To setup NestBot development environment, follow these steps:
 
      ```plaintext
      DJANGO_SLACK_BOT_TOKEN=<your-slack-bot-token>
+     DJANGO_SLACK_BOT_TOKEN_<your-workspace-id>=<your-slack-bot-token>
      DJANGO_SLACK_SIGNING_SECRET=<your-slack-signing-secret>
+
      ```
 
-1. **Set up Slack application**:
-   - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). You'll need to replace slash commands endpoint with your ngrok static domain path.
-   - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
+4. **Sync the slack data**:
+   - Make sure that the app is running.
+   - Run `make slack-sync-data`.
 
 #### OWASP Schema Development
 
