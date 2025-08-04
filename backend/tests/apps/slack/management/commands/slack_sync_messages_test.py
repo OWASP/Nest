@@ -12,8 +12,9 @@ class TestPopulateSlackMessages:
 
     def test_handle_command_flow(self, mocker):
         """Tests the entire command flow by mocking the ORM and Slack client."""
-        mock_member = mocker.patch(f"{self.target_module}.Member")  # noqa: F841
-        mock_message = mocker.patch(f"{self.target_module}.Message")  # noqa: F841
+        mocker.patch(f"{self.target_module}.Member")
+        mocker.patch(f"{self.target_module}.Message")
+
         mock_workspace = mocker.patch(f"{self.target_module}.Workspace")
         mock_conversation = mocker.patch(f"{self.target_module}.Conversation")
         mock_webclient = mocker.patch(f"{self.target_module}.WebClient")
