@@ -144,6 +144,49 @@ describe('ToggleableList', () => {
     render(<ToggleableList items={mockItems} label="test-label" limit={0} />)
     // Should show ShowMoreButton since limit is exceeded
     expect(screen.getByTestId('show-more-button')).toBeInTheDocument()
-    expect(screen.queryByText('item')).not.toBeInTheDocument()
+    mockItems.forEach(item => {
+      expect(screen.queryByText(item)).not.toBeInTheDocument()
+    })
+  })
+
+  it('properly encodes special character in item names', () => {
+    const itemsWithSpecialChars = ['C++', 'C#', 'Node.js & Express']
+    render(<ToggleableList items={itemsWithSpecialChars} label="Special Items" />)
+    const specialButton = screen.getByText('C++')
+    fireEvent.click(specialButton)
+
+    expect(mockPush).toHaveBeenCalledWith('/projects?q=C%2B%2B')
+  })
+
+  it('applies correct CSS classes to main container', () => {
+    const { container } = render(<ToggleableList items={mockItems} label="Styled List" />)
+    const mainDiv = container.firstChild
+    expect(mainDiv).toHaveClass('rounded-lg', 'bg-gray-100', 'p-6', 'shadow-md', 'dark:bg-gray-800')
+  })
+
+  it('applies correct CSS classes to header', () => {
+    render(<ToggleableList items={mockItems} label="Styled header" />)
+    const header = screen.getByRole('heading', { level: 2 })
+    expect(header).toHaveClass('mb-4', 'text-2xl', 'font-semibold')
+  })
+
+  it('applies correct CSS to button items', () => {
+    const randomItems = ['React', 'Vue', 'Angular']
+    render(<ToggleableList items={randomItems} label="Styled Buttons" />)
+    const button = screen.getByText('React')
+    expect(button).toHaveClass('rounded-lg',
+      'border',
+      'border-gray-400',
+      'px-3',
+      'py-1',
+      'text-sm',
+      'transition-all',
+      'duration-200',
+      'ease-in-out',
+      'hover:scale-105',
+      'hover:bg-gray-200',
+      'hover:underline',
+      'dark:border-gray-300',
+      'dark:hover:bg-gray-700')
   })
 })
