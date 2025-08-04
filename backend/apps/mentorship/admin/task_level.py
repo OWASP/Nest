@@ -1,6 +1,7 @@
-"""Mentorship app Program model admin."""
+"""Mentorship app TaskLevel model admin."""
 
 from django.contrib import admin
+
 from apps.mentorship.models.task_level import TaskLevel
 
 
