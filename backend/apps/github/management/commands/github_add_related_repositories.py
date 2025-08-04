@@ -1,14 +1,12 @@
 """A command to update OWASP entities related repositories data."""
 
 import logging
-import os
 
-import github
 from django.core.management.base import BaseCommand
 from github.GithubException import UnknownObjectException
 
+from apps.github.auth import get_github_client
 from apps.github.common import sync_repository
-from apps.github.constants import GITHUB_ITEMS_PER_PAGE
 from apps.github.utils import get_repository_path
 from apps.owasp.models.project import Project
 
@@ -39,7 +37,7 @@ class Command(BaseCommand):
         """
         active_projects = Project.active_projects.order_by("-created_at")
         active_projects_count = active_projects.count()
-        gh = github.Github(os.getenv("GITHUB_TOKEN"), per_page=GITHUB_ITEMS_PER_PAGE)
+        gh = get_github_client()
 
         offset = options["offset"]
         projects = []
