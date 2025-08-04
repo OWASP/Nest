@@ -52,7 +52,9 @@ const MetricsPage: FC = () => {
     },
   }
 
-  let currentFilters = {}
+  let currentFilters = {
+    isActive: true,
+  }
   let currentOrdering = {
     score: 'DESC',
   }
@@ -62,6 +64,7 @@ const MetricsPage: FC = () => {
   const currentFilterKeys = []
   if (healthFilter) {
     currentFilters = {
+      ...currentFilters,
       ...healthFiltersMapping[healthFilter],
     }
     currentFilterKeys.push(healthFilter)
@@ -181,7 +184,7 @@ const MetricsPage: FC = () => {
               } else {
                 newParams.delete('health')
                 newParams.delete('level')
-                newFilters = {}
+                newFilters = { isActive: true }
               }
               setFilters(newFilters)
               setActiveFilters(

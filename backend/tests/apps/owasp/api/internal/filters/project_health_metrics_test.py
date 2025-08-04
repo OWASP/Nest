@@ -16,11 +16,12 @@ class TestProjectHealthMetricsFilter:
         filter_fields = {
             field.name for field in ProjectHealthMetricsFilter.__strawberry_definition__.fields
         }
-        expected_fields = {"score", "level"}
+        expected_fields = {"score", "level", "is_active"}
         assert expected_fields.issubset(filter_fields)
 
     def test_filtering(self):
         """Test filtering by project level and score."""
-        filter_instance = ProjectHealthMetricsFilter(level="flagship", score=50)
+        filter_instance = ProjectHealthMetricsFilter(level="flagship", score=50, is_active=True)
         assert filter_instance.level == ProjectLevel.FLAGSHIP
         assert filter_instance.score == 50
+        assert filter_instance.is_active is True
