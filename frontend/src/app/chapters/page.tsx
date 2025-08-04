@@ -102,7 +102,7 @@ const ChaptersPage = () => {
             }}
           />
         )}
-        {chapters && chapters.filter((chapter) => chapter.is_active).map(renderChapterCard)}
+        {chapters && chapters.filter((chapter) => chapter.isActive).map(renderChapterCard)}
       </SearchPageLayout>
     </PageLayout>
   )

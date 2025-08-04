@@ -24,6 +24,7 @@ import type { Contributor } from 'types/contributor'
 import type { Project } from 'types/project'
 import type { User } from 'types/user'
 import { aboutText, technologies } from 'utils/aboutData'
+import { capitalize } from 'utils/capitalize'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -153,7 +154,7 @@ const About = () => {
                             target="_blank"
                             rel="noopener noreferrer"
                           >
-                            {name}
+                            {capitalize(name)}
                           </Link>
                         </li>
                       ))}

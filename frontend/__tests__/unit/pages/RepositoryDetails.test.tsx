@@ -1,7 +1,6 @@
 import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
-import { assertRepoDetails } from '@testUtils/sharedAssertions'
 import { mockRepositoryData } from '@unit/data/mockRepositoryData'
 import { render } from 'wrappers/testUtil'
 import RepositoryDetailsPage from 'app/organizations/[organizationKey]/repositories/[repositoryKey]/page'
@@ -68,14 +67,14 @@ describe('RepositoryDetailsPage', () => {
 
     render(<RepositoryDetailsPage />)
 
-    await assertRepoDetails({
-      heading: 'Test Repo',
-      license: 'MIT',
-      stars: '50K Stars',
-      forks: '3K Forks',
-      commits: '10 Commits',
-      contributors: '5 Contributors',
-      issues: '2 Issues',
+    await waitFor(() => {
+      expect(screen.getAllByText('Test Repo')).toHaveLength(2) // Title and breadcrumb
+      expect(screen.getByText('MIT')).toBeInTheDocument()
+      expect(screen.getByText('10 Commits')).toBeInTheDocument()
+      expect(screen.getByText('5 Contributors')).toBeInTheDocument()
+      expect(screen.getByText('3K Forks')).toBeInTheDocument()
+      expect(screen.getByText('2 Issues')).toBeInTheDocument()
+      expect(screen.getByText('50K Stars')).toBeInTheDocument()
     })
   })
 
@@ -230,6 +229,83 @@ describe('RepositoryDetailsPage', () => {
       expect(
         screen.getByText(`Sponsor ${mockRepositoryData.repository.project.name}`)
       ).toBeInTheDocument()
+    })
+  })
+
+  test('renders breadcrumbs correctly with organization name', async () => {
+    render(<RepositoryDetailsPage />)
+
+    await waitFor(() => {
+      // Check that breadcrumbs are rendered with organization name
+      expect(screen.getByText('Home')).toBeInTheDocument()
+      expect(screen.getByText('Organizations')).toBeInTheDocument()
+      expect(screen.getByText('Repositories')).toBeInTheDocument()
+      const breadcrumbOrgName = screen.getByText(mockRepositoryData.repository.organization.name, {
+        selector: 'a',
+      })
+      expect(breadcrumbOrgName).toBeInTheDocument()
+
+      const breadcrumbRepoName = screen.getByText(mockRepositoryData.repository.name, {
+        selector: 'span',
+      })
+      expect(breadcrumbRepoName).toBeInTheDocument()
+    })
+
+    // Check breadcrumb links
+    const homeLink = screen.getByText('Home').closest('a')
+    const organizationsLink = screen.getByText('Organizations').closest('a')
+    const organizationNameLink = screen.getByText(mockRepositoryData.repository.organization.name, {
+      selector: 'a',
+    })
+    const repositoriesLink = screen.getByText('Repositories').closest('a')
+
+    expect(homeLink).toHaveAttribute('href', '/')
+    expect(organizationsLink).toHaveAttribute('href', '/organizations')
+    expect(organizationNameLink).toHaveAttribute(
+      'href',
+      `/organizations/${mockRepositoryData.repository.organization.login}`
+    )
+    expect(repositoriesLink).toHaveAttribute(
+      'href',
+      `/organizations/${mockRepositoryData.repository.organization.login}#repositories`
+    )
+  })
+
+  test('renders breadcrumbs with fallback to organization login when name is not available', async () => {
+    const repositoryDataWithoutOrgName = {
+      ...mockRepositoryData,
+      repository: {
+        ...mockRepositoryData.repository,
+        organization: {
+          ...mockRepositoryData.repository.organization,
+          name: null,
+        },
+      },
+    }
+
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: repositoryDataWithoutOrgName,
+      error: null,
+    })
+
+    render(<RepositoryDetailsPage />)
+
+    await waitFor(() => {
+      // Check that breadcrumbs fall back to organization login
+      expect(screen.getByText('Home')).toBeInTheDocument()
+      expect(screen.getByText('Organizations')).toBeInTheDocument()
+      expect(screen.getByText('Repositories')).toBeInTheDocument()
+
+      const breadcrumbOrgLogin = screen.getByText(
+        mockRepositoryData.repository.organization.login,
+        { selector: 'a' }
+      )
+      expect(breadcrumbOrgLogin).toBeInTheDocument()
+
+      const breadcrumbRepoName = screen.getByText(mockRepositoryData.repository.name, {
+        selector: 'span',
+      })
+      expect(breadcrumbRepoName).toBeInTheDocument()
     })
   })
 })

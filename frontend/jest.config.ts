@@ -42,7 +42,6 @@ const config: Config = {
   },
   moduleNameMapper: {
     '^@unit/(.*)$': '<rootDir>/__tests__/unit/$1',
-    '^@testUtils/(.*)$': '<rootDir>/__tests__/testUtils/$1',
     '^@/(.*)$': '<rootDir>/src/$1',
     '\\.(scss|sass|css)$': 'identity-obj-proxy',
   },

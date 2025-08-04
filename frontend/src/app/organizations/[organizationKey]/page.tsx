@@ -113,8 +113,20 @@ const OrganizationDetailsPage = () => {
     },
   ]
 
+  // Create custom breadcrumbs with organization name
+  const customBreadcrumbs = [
+    {
+      title: 'Organizations',
+      path: '/organizations',
+    },
+    {
+      title: organization.name,
+      path: `/organizations/${organization.login}`,
+    },
+  ]
+
   return (
-    <PageLayout breadcrumbItems={{ title: organization.name }}>
+    <PageLayout customBreadcrumbs={customBreadcrumbs}>
       <DetailsCard
         details={organizationDetails}
         recentIssues={issues}

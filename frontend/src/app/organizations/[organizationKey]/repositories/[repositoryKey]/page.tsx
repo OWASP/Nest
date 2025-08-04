@@ -106,8 +106,29 @@ const RepositoryDetailsPage = () => {
       unit: 'Commit',
     },
   ]
+
+  // Create custom breadcrumbs with organization name
+  const customBreadcrumbs = [
+    {
+      title: 'Organizations',
+      path: '/organizations',
+    },
+    {
+      title: repository.organization?.name || repository.organization?.login || 'Organization',
+      path: `/organizations/${repository.organization?.login || organizationKey}`,
+    },
+    {
+      title: 'Repositories',
+      path: `/organizations/${repository.organization?.login || organizationKey}#repositories`,
+    },
+    {
+      title: repository.name,
+      path: `/organizations/${repository.organization?.login || organizationKey}/repositories/${repositoryKey}`,
+    },
+  ]
+
   return (
-    <PageLayout breadcrumbItems={{ title: repository.name }}>
+    <PageLayout customBreadcrumbs={customBreadcrumbs}>
       <DetailsCard
         details={repositoryDetails}
         entityKey={repository.project?.key}

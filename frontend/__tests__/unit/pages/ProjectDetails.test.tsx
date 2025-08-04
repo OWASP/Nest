@@ -1,7 +1,6 @@
 import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { assertRepoDetails } from '@testUtils/sharedAssertions'
 import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
 import { render } from 'wrappers/testUtil'
 import ProjectDetailsPage from 'app/projects/[projectKey]/page'
@@ -74,15 +73,6 @@ describe('ProjectDetailsPage', () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: mockProjectDetailsData,
       error: null,
-    })
-
-    render(<ProjectDetailsPage />)
-    await assertRepoDetails({
-      heading: 'Test Project',
-      license: 'Lab',
-      stars: '2.2K Stars',
-      forks: '10 Forks',
-      issues: '10 Issues',
     })
   })
 

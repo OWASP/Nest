@@ -211,4 +211,29 @@ describe('OrganizationDetailsPage', () => {
       expect(screen.queryByText(`Want to become a sponsor?`)).toBeNull()
     })
   })
+
+  test('renders breadcrumbs correctly', async () => {
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockOrganizationDetailsData,
+      error: null,
+    })
+
+    render(<OrganizationDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Home')).toBeInTheDocument()
+      expect(screen.getByText('Organizations')).toBeInTheDocument()
+
+      const breadcrumbOrgName = screen.getByText(mockOrganizationDetailsData.organization.name, {
+        selector: 'span',
+      })
+      expect(breadcrumbOrgName).toBeInTheDocument()
+    })
+
+    const homeLink = screen.getByText('Home').closest('a')
+    const organizationsLink = screen.getByText('Organizations').closest('a')
+
+    expect(homeLink).toHaveAttribute('href', '/')
+    expect(organizationsLink).toHaveAttribute('href', '/organizations')
+  })
 })

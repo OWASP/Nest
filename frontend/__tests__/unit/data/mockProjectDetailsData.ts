@@ -57,6 +57,7 @@ export const mockProjectDetailsData = {
         openIssuesCount: 6,
         organization: {
           login: 'OWASP',
+          name: 'OWASP Foundation',
         },
         starsCount: 95,
         subscribersCount: 15,
@@ -70,6 +71,7 @@ export const mockProjectDetailsData = {
         openIssuesCount: 3,
         organization: {
           login: 'OWASP',
+          name: 'OWASP Foundation',
         },
         starsCount: 60,
         subscribersCount: 10,

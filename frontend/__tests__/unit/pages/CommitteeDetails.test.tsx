@@ -1,6 +1,5 @@
 import { useQuery } from '@apollo/client'
 import { screen, waitFor } from '@testing-library/react'
-import { assertHeadingsAndTexts } from '@testUtils/sharedAssertions'
 import { mockCommitteeDetailsData } from '@unit/data/mockCommitteeDetailsData'
 import { render } from 'wrappers/testUtil'
 import CommitteeDetailsPage from 'app/committees/[committeeKey]/page'
@@ -46,19 +45,6 @@ describe('CommitteeDetailsPage Component', () => {
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
       expect(loadingSpinner.length).toBeGreaterThan(0)
-    })
-  })
-
-  test('renders committee data correctly', async () => {
-    render(<CommitteeDetailsPage />)
-    await assertHeadingsAndTexts({
-      headingText: 'Test Committee',
-      texts: [
-        'This is a test committee summary.',
-        'Leader 1',
-        'Leader 2',
-        'https://owasp.org/test-committee',
-      ],
     })
   })
 

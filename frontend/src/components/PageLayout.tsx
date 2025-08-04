@@ -7,8 +7,14 @@ export interface crumbItem {
   title: string
 }
 
+export interface customBreadcrumbItem {
+  title: string
+  path: string
+}
+
 export interface PageLayoutProps {
   breadcrumbItems?: crumbItem
+  customBreadcrumbs?: customBreadcrumbItem[]
   children: React.ReactNode
 }
 
@@ -27,13 +33,24 @@ function generateBreadcrumbs(pathname: string, excludeLast = false): BreadCrumbI
   })
 }
 
-export default function PageLayout({ breadcrumbItems, children }: PageLayoutProps) {
+export default function PageLayout({
+  breadcrumbItems,
+  customBreadcrumbs,
+  children,
+}: PageLayoutProps) {
   const pathname = usePathname()
-  const isBreadCrumbItemsEmpty = _.isEmpty(breadcrumbItems)
-  const autoBreadcrumbs = generateBreadcrumbs(pathname, !isBreadCrumbItemsEmpty)
-  const allBreadcrumbs = isBreadCrumbItemsEmpty
-    ? autoBreadcrumbs
-    : [...autoBreadcrumbs, { title: _.get(breadcrumbItems, 'title', ''), path: pathname }]
+
+  let allBreadcrumbs: BreadCrumbItem[]
+
+  if (customBreadcrumbs && customBreadcrumbs.length > 0) {
+    allBreadcrumbs = customBreadcrumbs
+  } else {
+    const isBreadCrumbItemsEmpty = _.isEmpty(breadcrumbItems)
+    const autoBreadcrumbs = generateBreadcrumbs(pathname, !isBreadCrumbItemsEmpty)
+    allBreadcrumbs = isBreadCrumbItemsEmpty
+      ? autoBreadcrumbs
+      : [...autoBreadcrumbs, { title: _.get(breadcrumbItems, 'title', ''), path: pathname }]
+  }
 
   return (
     <>
