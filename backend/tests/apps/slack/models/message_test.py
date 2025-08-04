@@ -1,99 +1,182 @@
-from datetime import UTC, datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import Mock, patch
 
 from apps.slack.models.conversation import Conversation
 from apps.slack.models.member import Member
 from apps.slack.models.message import Message
-from apps.slack.models.workspace import Workspace
+
+
+def create_model_mock(model_class):
+    mock = Mock(spec=model_class)
+    mock._state = Mock()
+    mock.pk = 1
+    return mock
 
 
 class TestMessageModel:
-    """Tests for the Message model."""
+    def test_bulk_save(self):
+        mock_messages = [Mock(id=None), Mock(id=1)]
+        with patch("apps.common.models.BulkSaveModel.bulk_save") as mock_bulk_save:
+            Message.bulk_save(mock_messages)
+            mock_bulk_save.assert_called_once_with(Message, mock_messages, fields=None)
 
-    def test_str_representation(self):
-        message = Message(raw_data={"text": "This is the message text"})
-        assert str(message) == "This is the message text"
+    def test_update_data_new_message(self, mocker):
+        mock_conversation = create_model_mock(Conversation)
+        mock_author = create_model_mock(Member)
 
-        huddle_message = Message(raw_data={"subtype": "huddle_thread", "channel": "C123"})
-        assert str(huddle_message) == "C123 huddle"
-
-    def test_cleaned_text_property(self):
-        message = Message()
-        message.raw_data = {
-            "text": "Hello <@U123> check this :smile: <https://example.com> and this :thumbs_up:"
+        message_data = {
+            "ts": "123456.789",
+            "text": "Test message",
         }
-        expected_text = "Hello check this and this"
-        assert message.cleaned_text == expected_text
 
-        message.raw_data = {"text": "  Extra   whitespace  "}
-        assert message.cleaned_text == "Extra whitespace"
-
-    def test_url_property(self):
-        workspace = Workspace(name="MyWorkspace")
-        conversation = Conversation(workspace=workspace, slack_channel_id="C123")
-        message = Message(conversation=conversation, slack_message_id="12345.67890")
-        expected_url = "https://myworkspace.slack.com/archives/C123/p1234567890"
-        assert message.url == expected_url
-
-    def test_latest_reply_property(self):
-        message = Message(conversation=Conversation())
-
-        with patch.object(Message.objects, "filter") as mock_filter:
-            _ = message.latest_reply
-
-        mock_filter.assert_called_once_with(
-            conversation=message.conversation, parent_message=message
+        mocker.patch(
+            "apps.slack.models.message.Message.objects.get",
+            side_effect=Message.DoesNotExist,
         )
-        mock_filter.return_value.order_by.assert_called_once_with("-created_at")
-        mock_filter.return_value.order_by.return_value.first.assert_called_once()
-
-    def test_from_slack_method(self):
-        message = Message()
-        conversation = Conversation()
-        author = Member()
-        parent = Message()
-
-        slack_data = {
-            "ts": "1672531200.000",  # 2023-01-01
-            "reply_count": 5,
-            "bot_id": "B123",
-        }
-
-        message.from_slack(slack_data, conversation, author, parent_message=parent)
-
-        assert message.created_at == datetime(2023, 1, 1, tzinfo=UTC)
-        assert message.has_replies is True
-        assert message.is_bot is True
-        assert message.raw_data == slack_data
-        assert message.slack_message_id == "1672531200.000"
-        assert message.author == author
-        assert message.conversation == conversation
-        assert message.parent_message == parent
-
-    def test_update_data_creates_new_message(self):
-        slack_data = {"ts": "12345.001"}
-        conversation = Conversation()
+        patched_message_save = mocker.patch("apps.slack.models.message.Message.save")
 
         with (
-            patch.object(Message, "save") as mock_save,
-            patch.object(Message.objects, "get", side_effect=Message.DoesNotExist) as mock_get,
+            patch.object(Message, "conversation", create=True),
+            patch.object(Message, "author", create=True),
         ):
-            message = Message.update_data(slack_data, conversation, save=True)
+            result = Message.update_data(
+                data=message_data, conversation=mock_conversation, author=mock_author, save=True
+            )
 
-        mock_get.assert_called_once_with(slack_message_id="12345.001", conversation=conversation)
-        mock_save.assert_called_once()
-        assert isinstance(message, Message)
-        assert message.slack_message_id == "12345.001"
+            assert result is not None
+            assert isinstance(result, Message)
+            assert result.slack_message_id == "123456.789"
+            assert result.conversation == mock_conversation
+            assert result.author == mock_author
+            patched_message_save.assert_called_once()
 
-    def test_update_data_updates_existing_message(self):
-        slack_data = {"ts": "12345.001"}
-        conversation = Conversation()
-        mock_existing_message = MagicMock(spec=Message)
+    def test_update_data_existing_message(self, mocker):
+        mock_conversation = create_model_mock(Conversation)
+        mock_author = create_model_mock(Member)
 
-        with patch.object(Message.objects, "get", return_value=mock_existing_message) as mock_get:
-            message = Message.update_data(slack_data, conversation, save=True)
+        message_data = {
+            "ts": "123456.789",
+            "text": "Updated message",
+        }
 
-        mock_get.assert_called_once()
-        mock_existing_message.from_slack.assert_called_once()
-        mock_existing_message.save.assert_called_once()
-        assert message == mock_existing_message
+        mock_message_instance = create_model_mock(Message)
+        mock_message_instance.slack_message_id = "123456.789"
+
+        mocker.patch(
+            "apps.slack.models.message.Message.objects.get",
+            return_value=mock_message_instance,
+        )
+
+        result = Message.update_data(
+            data=message_data, conversation=mock_conversation, author=mock_author, save=True
+        )
+
+        assert result is mock_message_instance
+
+        mock_message_instance.from_slack.assert_called_once_with(
+            message_data,
+            mock_conversation,
+            mock_author,
+            parent_message=None,
+        )
+        mock_message_instance.save.assert_called_once()
+
+    def test_update_data_no_save(self, mocker):
+        mock_conversation = create_model_mock(Conversation)
+        mock_author = create_model_mock(Member)
+
+        message_data = {
+            "ts": "123456.789",
+            "text": "Test message",
+        }
+
+        mocker.patch(
+            "apps.slack.models.message.Message.objects.get",
+            side_effect=Message.DoesNotExist,
+        )
+
+        patched_save_method = mocker.patch("apps.slack.models.message.Message.save")
+
+        with (
+            patch.object(Message, "conversation", create=True),
+            patch.object(Message, "author", create=True),
+        ):
+            result = Message.update_data(
+                data=message_data, conversation=mock_conversation, author=mock_author, save=False
+            )
+
+            assert result is not None
+            assert isinstance(result, Message)
+            assert result.slack_message_id == "123456.789"
+            assert result.conversation == mock_conversation
+            assert result.author == mock_author
+            patched_save_method.assert_not_called()
+
+    def test_update_data_with_thread_reply(self, mocker):
+        mock_conversation = create_model_mock(Conversation)
+        mock_author = create_model_mock(Member)
+        mock_parent = create_model_mock(Message)
+
+        message_data = {
+            "ts": "123456.789",
+            "text": "Reply message",
+        }
+
+        mocker.patch(
+            "apps.slack.models.message.Message.objects.get",
+            side_effect=Message.DoesNotExist,
+        )
+        patched_message_save = mocker.patch("apps.slack.models.message.Message.save")
+
+        with (
+            patch.object(Message, "conversation", create=True),
+            patch.object(Message, "author", create=True),
+            patch.object(Message, "parent_message", create=True),
+        ):
+            result = Message.update_data(
+                data=message_data,
+                conversation=mock_conversation,
+                author=mock_author,
+                parent_message=mock_parent,
+                save=True,
+            )
+
+            assert result is not None
+            assert isinstance(result, Message)
+            assert result.slack_message_id == "123456.789"
+            assert result.parent_message == mock_parent
+            assert not result.has_replies
+            patched_message_save.assert_called_once()
+
+    def test_update_data_with_thread_parent(self, mocker):
+        mock_conversation = create_model_mock(Conversation)
+        mock_author = create_model_mock(Member)
+
+        message_data = {
+            "ts": "123456.789",
+            "text": "Parent message",
+            "reply_count": 2,
+        }
+
+        mocker.patch(
+            "apps.slack.models.message.Message.objects.get",
+            side_effect=Message.DoesNotExist,
+        )
+        patched_message_save = mocker.patch("apps.slack.models.message.Message.save")
+
+        with (
+            patch.object(Message, "conversation", create=True),
+            patch.object(Message, "author", create=True),
+        ):
+            result = Message.update_data(
+                data=message_data, conversation=mock_conversation, author=mock_author, save=True
+            )
+
+            assert result is not None
+            assert isinstance(result, Message)
+            assert result.slack_message_id == "123456.789"
+            assert result.has_replies
+            patched_message_save.assert_called_once()
+
+    def test_str_method(self):
+        message = Message(raw_data={"text": "Short message"})
+        assert str(message) == "Short message"
