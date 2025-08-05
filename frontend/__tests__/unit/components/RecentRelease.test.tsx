@@ -319,14 +319,15 @@ describe('RecentReleases Component', () => {
       render(<RecentReleases data={releasesWithMissingOrg} />)
     })
 
-    const repoNameElement = screen.getByText(/our-awesome-project/i)
+    const repoButton = screen.getByRole('button')
+    expect(repoButton).toBeDisabled()
+
     act(() => {
-      fireEvent.click(repoNameElement)
+      fireEvent.click(repoButton)
     })
 
-    expect(mockRouterPush).toHaveBeenCalledWith(
-      '/organizations/undefined/repositories/our-awesome-project'
-    )
+    // Should not navigate when organization name is missing
+    expect(mockRouterPush).not.toHaveBeenCalled()
   })
 
   it('should handle repository click with missing repository name', () => {
@@ -342,11 +343,14 @@ describe('RecentReleases Component', () => {
     })
 
     const repoButton = screen.getByRole('button')
+    expect(repoButton).toBeDisabled()
+
     act(() => {
       fireEvent.click(repoButton)
     })
 
-    expect(mockRouterPush).toHaveBeenCalledWith('/organizations/our-org/repositories/')
+    // Should not navigate when repository name is missing
+    expect(mockRouterPush).not.toHaveBeenCalled()
   })
 
   it('should render with proper CSS classes for styling', () => {
