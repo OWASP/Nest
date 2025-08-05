@@ -478,21 +478,6 @@ describe('InfoBlock Component', () => {
   })
 
   describe('Performance considerations', () => {
-    it('should not re-render unnecessarily with same props', () => {
-      mockMillify.mockReturnValue('100')
-      mockPluralize.mockReturnValue('items')
-
-      const { rerender } = render(<InfoBlock icon={faUser} value={100} />)
-
-      mockMillify.mockClear()
-      mockPluralize.mockClear()
-
-      rerender(<InfoBlock icon={faUser} value={100} />)
-
-      expect(mockMillify).toHaveBeenCalledTimes(0)
-      expect(mockPluralize).toHaveBeenCalledTimes(0)
-    })
-
     it('should handle rapid prop changes efficiently', () => {
       mockMillify.mockReturnValue('100')
       mockPluralize.mockReturnValue('items')

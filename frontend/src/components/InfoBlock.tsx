@@ -2,7 +2,6 @@ import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
 import millify from 'millify'
-import { memo } from 'react'
 import { pluralize } from 'utils/pluralize'
 
 const InfoBlock = ({
@@ -41,4 +40,4 @@ const InfoBlock = ({
   )
 }
 
-export default memo(InfoBlock)
+export default InfoBlock
