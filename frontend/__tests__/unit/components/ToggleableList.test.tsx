@@ -1,18 +1,19 @@
-import { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { faUser } from '@fortawesome/free-solid-svg-icons'
 import { render, screen, fireEvent } from '@testing-library/react'
 import ToggleableList from 'components/ToggleableList'
 
+interface MockFontAwesomeIconProps {
+  icon: unknown
+  className?: string
+}
 
-// Mock next/router
-const mockPush = jest.fn();
+const mockPush = jest.fn()
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockPush,
   }),
 }))
 
-// Mock ShowMoreButton as default export
 jest.mock('components/ShowMoreButton', () => ({
   __esModule: true,
   default: ({ onToggle }: { onToggle: () => void }) => (
@@ -22,16 +23,11 @@ jest.mock('components/ShowMoreButton', () => ({
   ),
 }))
 
-// Mock FontAwesomeIcon with role and className
 jest.mock('@fortawesome/react-fontawesome', () => ({
-  __esModule: true,
-  FontAwesomeIcon: ({ icon, className }: { icon: IconDefinition; className: string }) => (
-    <img 
-    alt={`${icon.iconName} icon`} 
-    data-testid="font-awesome-icon" 
-    className={className}
-    src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB2aWV3Qm94PSIwIDAgMSAxIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg=="
-  />
+  FontAwesomeIcon: ({ icon, className }: MockFontAwesomeIconProps) => (
+    <span data-testid="font-awesome-icon" className={className}>
+      {String(icon)}
+    </span>
   ),
 }))
 
@@ -46,12 +42,12 @@ describe('ToggleableList', () => {
     render(<ToggleableList items={mockItems} label="test-label" />)
 
     // First 10 items should be visible
-    mockItems.slice(0, 10).forEach(item => {
+    mockItems.slice(0, 10).forEach((item) => {
       expect(screen.getByText(item)).toBeInTheDocument()
     })
 
     // Remaining items should be hidden
-    mockItems.slice(10).forEach(item => {
+    mockItems.slice(10).forEach((item) => {
       expect(screen.queryByText(item)).not.toBeInTheDocument()
     })
   })
@@ -147,7 +143,7 @@ describe('ToggleableList', () => {
     render(<ToggleableList items={mockItems} label="test-label" limit={0} />)
     // Should show ShowMoreButton since limit is exceeded
     expect(screen.getByTestId('show-more-button')).toBeInTheDocument()
-    mockItems.forEach(item => {
+    mockItems.forEach((item) => {
       expect(screen.queryByText(item)).not.toBeInTheDocument()
     })
   })
@@ -177,7 +173,8 @@ describe('ToggleableList', () => {
     const randomItems = ['React', 'Vue', 'Angular']
     render(<ToggleableList items={randomItems} label="Styled Buttons" />)
     const button = screen.getByText('React')
-    expect(button).toHaveClass('rounded-lg',
+    expect(button).toHaveClass(
+      'rounded-lg',
       'border',
       'border-gray-400',
       'px-3',
@@ -190,6 +187,7 @@ describe('ToggleableList', () => {
       'hover:bg-gray-200',
       'hover:underline',
       'dark:border-gray-300',
-      'dark:hover:bg-gray-700')
+      'dark:hover:bg-gray-700'
+    )
   })
 })
