@@ -30,9 +30,7 @@ import SecondaryCard from 'components/SecondaryCard'
 import SponsorCard from 'components/SponsorCard'
 import ToggleableList from 'components/ToggleableList'
 import TopContributorsList from 'components/TopContributorsList'
-// Email validation regex
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i
-// Helper to sanitize URLs
 const sanitizeForUrl = (str: string) => encodeURIComponent(str.trim())
 
 const DetailsCard = ({
@@ -60,20 +58,16 @@ const DetailsCard = ({
   type,
   userSummary,
 }: DetailsCardProps) => {
-  // Helper function to render detail values with appropriate links
   const renderDetailValue = useCallback((detail: { label: string; value: string }) => {
     const { label, value } = detail
-
-    // Don't render links for empty/placeholder values
     if (!value || value === "N/A" || value === "Not available" || value === "Unknown") {
       return value
     }
 
     switch (label) {
       case "Email":
-        // Render email as mailto link if valid
         if (!EMAIL_REGEX.test(value)) {
-          return value // Return as plain text for invalid emails
+          return value
         }
         return (
           <a
@@ -86,9 +80,8 @@ const DetailsCard = ({
         )
 
       case "Company":
-        // Render company as GitHub link if it starts with @
         if (value.startsWith("@")) {
-          const companyName = sanitizeForUrl(value.slice(1)) // Remove @ prefix and sanitize
+          const companyName = sanitizeForUrl(value.slice(1))
           return (
             <a
               href={`https://github.com/${companyName}`}
@@ -101,11 +94,9 @@ const DetailsCard = ({
             </a>
           )
         }
-        // Return as plain text if no @ prefix
         return value
 
       default:
-        // Return other fields as plain text
         return value
     }
   }, [])
