@@ -216,11 +216,7 @@ class Retriever:
                     content_type_query |= Q(context__content_type__model=lower_name)
             queryset = queryset.filter(content_type_query)
 
-        chunks = (
-            queryset.select_related("context__content_type")
-            .prefetch_related("context__content_object")
-            .order_by("-similarity")[:limit]
-        )
+        chunks = queryset.select_related("context__content_type").order_by("-similarity")[:limit]
 
         results = []
         for chunk in chunks:

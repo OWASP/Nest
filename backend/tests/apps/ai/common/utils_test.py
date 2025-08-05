@@ -1,4 +1,7 @@
+from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock, call, patch
+
+import openai
 
 from apps.ai.common.utils import create_chunks_and_embeddings
 
@@ -12,10 +15,17 @@ class TestUtils:
     @patch("apps.ai.common.utils.Context")
     @patch("apps.ai.common.utils.Chunk.update_data")
     @patch("apps.ai.common.utils.time.sleep")
+    @patch("apps.ai.common.utils.datetime")
     def test_create_chunks_and_embeddings_success(
-        self, mock_sleep, mock_update_data, mock_context
+        self, mock_datetime, mock_sleep, mock_update_data, mock_context
     ):
         """Tests the successful path where the OpenAI API returns embeddings."""
+        base_time = datetime.now(UTC)
+        mock_datetime.now.return_value = base_time
+        mock_datetime.UTC = UTC
+
+        mock_datetime.timedelta = timedelta
+
         mock_openai_client = MagicMock()
         mock_api_response = MagicMock()
         mock_api_response.data = [
@@ -44,15 +54,15 @@ class TestUtils:
             [
                 call(
                     text="first chunk",
-                    context=mock_context(),
+                    context=mock_content_object,
                     embedding=[0.1, 0.2],
-                    save=False,
+                    save=True,
                 ),
                 call(
                     text="second chunk",
-                    context=mock_context(),
+                    context=mock_content_object,
                     embedding=[0.3, 0.4],
-                    save=False,
+                    save=True,
                 ),
             ]
         )
@@ -65,14 +75,47 @@ class TestUtils:
     def test_create_chunks_and_embeddings_api_error(self, mock_logger):
         """Tests the failure path where the OpenAI API raises an exception."""
         mock_openai_client = MagicMock()
-        mock_openai_client.embeddings.create.side_effect = Exception("API connection failed")
+
+        mock_openai_client.embeddings.create.side_effect = openai.OpenAIError(
+            "API connection failed"
+        )
 
         result = create_chunks_and_embeddings(
-            all_chunk_texts=["some text"],
-            content_object=MagicMock(),
+            chunk_texts=["some text"],
+            context=MagicMock(),
             openai_client=mock_openai_client,
         )
 
-        mock_logger.exception.assert_called_once_with("OpenAI API error")
+        mock_logger.exception.assert_called_once_with("Failed to create chunks and embeddings")
 
         assert result == []
+
+    @patch("apps.ai.common.utils.Context")
+    @patch("apps.ai.common.utils.Chunk.update_data")
+    @patch("apps.ai.common.utils.time.sleep")
+    @patch("apps.ai.common.utils.datetime")
+    def test_create_chunks_and_embeddings_no_sleep_with_current_settings(
+        self, mock_datetime, mock_sleep, mock_update_data, mock_context
+    ):
+        """Tests that sleep is not called with current offset settings."""
+        base_time = datetime.now(UTC)
+        mock_datetime.now.return_value = base_time
+        mock_datetime.UTC = UTC
+        mock_datetime.timedelta = timedelta
+
+        mock_openai_client = MagicMock()
+        mock_api_response = MagicMock()
+        mock_api_response.data = [MockEmbeddingData([0.1, 0.2])]
+        mock_openai_client.embeddings.create.return_value = mock_api_response
+
+        mock_update_data.return_value = "mock_chunk_instance"
+
+        result = create_chunks_and_embeddings(
+            ["test chunk"],
+            MagicMock(),
+            mock_openai_client,
+        )
+
+        mock_sleep.assert_not_called()
+
+        assert result == ["mock_chunk_instance"]

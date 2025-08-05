@@ -3,11 +3,13 @@
 import os
 
 import openai
+from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
 from apps.ai.common.constants import DELIMITER
-from apps.ai.common.utils import create_chunks_and_embeddings
+from apps.ai.common.utils import create_chunks_and_embeddings, create_context
 from apps.ai.models.chunk import Chunk
+from apps.ai.models.context import Context
 from apps.owasp.models.project import Project
 
 
@@ -25,15 +27,30 @@ class Command(BaseCommand):
             default=50,
             help="Number of projects to process in each batch",
         )
+        parser.add_argument(
+            "--context",
+            action="store_true",
+            help="Create only context (skip chunks and embeddings)",
+        )
+        parser.add_argument(
+            "--chunks",
+            action="store_true",
+            help="Create only chunks+embeddings (requires existing context)",
+        )
 
     def handle(self, *args, **options):
-        if not (openai_api_key := os.getenv("DJANGO_OPEN_AI_SECRET_KEY")):
+        if not options["context"] and not options["chunks"]:
+            self.stdout.write(self.style.ERROR("Must specify either --context or --chunks"))
+            return
+
+        if options["chunks"] and not (openai_api_key := os.getenv("DJANGO_OPEN_AI_SECRET_KEY")):
             self.stdout.write(
                 self.style.ERROR("DJANGO_OPEN_AI_SECRET_KEY environment variable not set")
             )
             return
 
-        self.openai_client = openai.OpenAI(api_key=openai_api_key)
+        if options["chunks"]:
+            self.openai_client = openai.OpenAI(api_key=openai_api_key)
 
         if options["project_key"]:
             queryset = Project.objects.filter(key=options["project_key"])
@@ -49,42 +66,88 @@ class Command(BaseCommand):
         self.stdout.write(f"Found {total_projects} projects to process")
 
         batch_size = options["batch_size"]
+        processed_count = 0
+
         for offset in range(0, total_projects, batch_size):
             batch_projects = queryset[offset : offset + batch_size]
 
-            batch_chunks = []
-            for project in batch_projects:
-                chunks = self.create_chunks(project)
-                batch_chunks.extend(chunks)
+            if options["context"]:
+                processed_count += self.process_context_batch(batch_projects)
+            elif options["chunks"]:
+                processed_count += self.process_chunks_batch(batch_projects)
 
-            if batch_chunks:
-                chunks_count = len(batch_chunks)
-                Chunk.bulk_save(batch_chunks)
-                self.stdout.write(f"Saved {chunks_count} chunks")
-
-        self.stdout.write(f"Completed processing all {total_projects} projects")
-
-    def create_chunks(self, project: Project) -> list[Chunk]:
-        prose_content, metadata_content = self.extract_project_content(project)
-
-        all_chunk_texts = []
-
-        if metadata_content.strip():
-            all_chunk_texts.append(metadata_content)
-
-        if prose_content.strip():
-            prose_chunks = Chunk.split_text(prose_content)
-            all_chunk_texts.extend(prose_chunks)
-
-        if not all_chunk_texts:
-            self.stdout.write(f"No content to chunk for project {project.key}")
-            return []
-
-        return create_chunks_and_embeddings(
-            all_chunk_texts=all_chunk_texts,
-            content_object=project,
-            openai_client=self.openai_client,
+        self.stdout.write(
+            self.style.SUCCESS(f"Completed processing {processed_count}/{total_projects} projects")
         )
+
+    def process_context_batch(self, projects: list[Project]) -> int:
+        """Process a batch of projects to create contexts."""
+        processed = 0
+
+        for project in projects:
+            prose_content, metadata_content = self.extract_project_content(project)
+            full_content = (
+                f"{metadata_content}\n\n{prose_content}" if metadata_content else prose_content
+            )
+
+            if not full_content.strip():
+                self.stdout.write(f"No content for project {project.key}")
+                continue
+
+            if create_context(
+                content=full_content, content_object=project, source="owasp_project"
+            ):
+                processed += 1
+                self.stdout.write(f"Created context for {project.key}")
+            else:
+                self.stdout.write(self.style.ERROR(f"Failed to create context for {project.key}"))
+        return processed
+
+    def process_chunks_batch(self, projects: list[Project]) -> int:
+        """Process a batch of projects to create chunks."""
+        processed = 0
+        batch_chunks = []
+
+        project_content_type = ContentType.objects.get_for_model(Project)
+
+        for project in projects:
+            context = Context.objects.filter(
+                content_type=project_content_type, object_id=project.id
+            ).first()
+
+            if not context:
+                self.stdout.write(
+                    self.style.WARNING(f"No context found for project {project.key}")
+                )
+                continue
+
+            prose_content, metadata_content = self.extract_project_content(project)
+            all_chunk_texts = []
+
+            if metadata_content.strip():
+                all_chunk_texts.append(metadata_content)
+
+            if prose_content.strip():
+                prose_chunks = Chunk.split_text(prose_content)
+                all_chunk_texts.extend(prose_chunks)
+
+            if not all_chunk_texts:
+                self.stdout.write(f"No content to chunk for project {project.key}")
+                continue
+
+            if chunks := create_chunks_and_embeddings(
+                chunk_texts=all_chunk_texts,
+                context=context,
+                openai_client=self.openai_client,
+                save=False,
+            ):
+                batch_chunks.extend(chunks)
+                processed += 1
+                self.stdout.write(f"Created {len(chunks)} chunks for {project.key}")
+
+        if batch_chunks:
+            Chunk.bulk_save(batch_chunks)
+        return processed
 
     def extract_project_content(self, project: Project) -> tuple[str, str]:
         prose_parts = []
