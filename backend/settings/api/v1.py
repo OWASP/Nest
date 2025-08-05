@@ -9,24 +9,48 @@ from apps.github.api.rest.v1.urls import router as github_router
 from apps.owasp.api.rest.v1.urls import router as owasp_router
 
 api_settings = {
+    "auth": ApiKeyAuth(),
     "description": "Open Worldwide Application Security Project API",
     "docs": Swagger(settings={"persistAuthorization": True}),
-    "servers": [
-        {"url": "https://nest.owasp.org", "description": "Production"},
-        {"url": "https://nest.owasp.dev", "description": "Staging"},
-    ],
+    "throttle": [AuthRateThrottle("10/s")],
     "title": "OWASP Nest",
     "version": "1.0.0",
 }
-if not settings.IS_LOCAL_ENVIRONMENT:
-    api_settings.update(
-        {
-            "auth": ApiKeyAuth(),
-            "throttle": [AuthRateThrottle("10/s")],
-        }
-    )
 
-api = NinjaAPI(**api_settings)
 
-api.add_router("github", github_router)
+api_settings_customization = {}
+if settings.IS_LOCAL_ENVIRONMENT:
+    api_settings_customization = {
+        "auth": None,
+        "servers": [
+            {
+                "description": "Local",
+                "url": "http://localhost:8000",
+            }
+        ],
+        "throttle": [],
+    }
+elif settings.IS_STAGING_ENVIRONMENT:
+    api_settings_customization = {
+        "servers": [
+            {
+                "description": "Staging",
+                "url": "https://nest.owasp.dev",
+            }
+        ],
+    }
+elif settings.IS_PRODUCTION_ENVIRONMENT:
+    api_settings_customization = {
+        "servers": [
+            {
+                "description": "Production",
+                "url": "https://nest.owasp.org",
+            }
+        ],
+    }
+
+
+api = NinjaAPI(**{**api_settings, **api_settings_customization})
+
 api.add_router("owasp", owasp_router)
+api.add_router("github", github_router)

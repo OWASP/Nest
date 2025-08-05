@@ -1,6 +1,7 @@
 """User API."""
 
 from datetime import datetime
+from http import HTTPStatus
 from typing import Literal
 
 from django.conf import settings
@@ -56,7 +57,7 @@ class UserErrorResponse(Schema):
     "/",
     description="Retrieve a paginated list of GitHub users.",
     operation_id="list_users",
-    response={200: list[UserSchema]},
+    response={HTTPStatus.OK: list[UserSchema]},
     summary="List users",
     tags=["GitHub"],
 )
@@ -83,13 +84,16 @@ def list_users(
     "/{login}",
     description="Retrieve a GitHub user by login.",
     operation_id="get_user",
-    response={200: UserSchema, 404: UserErrorResponse},
+    response={
+        HTTPStatus.NOT_FOUND: UserErrorResponse,
+        HTTPStatus.OK: UserSchema,
+    },
     summary="Get user by login",
     tags=["GitHub"],
 )
-def get_user(request: HttpRequest, login: str) -> UserSchema:
+def get_user(request: HttpRequest, login: str) -> UserSchema | UserErrorResponse:
     """Get user by login."""
-    user = User.objects.filter(login=login).first()
-    if not user:
-        return Response({"message": "User not found"}, status=404)
-    return user
+    if user := User.objects.filter(login=login).first():
+        return user
+
+    return Response({"message": "User not found"}, status=HTTPStatus.NOT_FOUND)
