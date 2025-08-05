@@ -31,43 +31,32 @@ export function generateProfilePageStructuredData(
         name: 'OWASP',
         url: 'https://owasp.org',
       },
-    },
-  }
-
-  if (user.company) {
-    structuredData.mainEntity.worksFor = {
-      '@type': 'Organization',
-      name: user.company,
-    }
-  }
-
-  if (user.location) {
-    structuredData.mainEntity.address = {
-      '@type': 'PostalAddress',
-      addressLocality: user.location,
-    }
-  }
-
-  structuredData.mainEntity.knowsAbout = [
-    'Application Security',
-    'OWASP',
-    'Cybersecurity',
-    'Software Security',
-  ]
-
-  structuredData.mainEntity.hasOccupation = {
-    '@type': 'Occupation',
-    name: 'OWASP Community Member',
-  }
-
-  if (user.followersCount > 0) {
-    structuredData.interactionStatistic = [
-      {
-        '@type': 'InteractionCounter',
-        interactionType: 'https://schema.org/FollowAction',
-        userInteractionCount: user.followersCount,
+      hasOccupation: {
+        '@type': 'Occupation',
+        name: 'OWASP Community Member',
       },
-    ]
+      ...(user.company && {
+        worksFor: {
+          '@type': 'Organization',
+          name: user.company,
+        },
+      }),
+      ...(user.location && {
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: user.location,
+        },
+      }),
+    },
+    ...(user.followersCount > 0 && {
+      interactionStatistic: [
+        {
+          '@type': 'InteractionCounter',
+          interactionType: 'https://schema.org/FollowAction',
+          userInteractionCount: user.followersCount,
+        },
+      ],
+    }),
   }
 
   return structuredData
