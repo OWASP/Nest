@@ -39,6 +39,7 @@ langchain-community = "^0.3.26"
 lxml = "^5.3.0"
 markdown = "^3.7"
 openai = "^1.60.1"
+owasp-schema = "^0.1.6"
 pgvector = "^0.4.1"
 psycopg2-binary = "^2.9.9"
 pydantic = "^2.11.1"
@@ -55,7 +56,6 @@ slack-sdk = "^3.35.0"
 strawberry-graphql = { extras = ["django"], version = "^0.270.1" }
 strawberry-graphql-django = "^0.59.1"
 thefuzz = "^0.22.1"
-owasp-schema = "^0.1.6"
 
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.36.4"
