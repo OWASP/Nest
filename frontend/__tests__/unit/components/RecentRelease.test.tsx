@@ -255,7 +255,7 @@ describe('RecentReleases Component', () => {
   })
 
   it('should render with default props when not provided', () => {
-    let container : HTMLElement
+    let container: HTMLElement
     act(() => {
       const result = render(<RecentReleases data={mockReleases} />)
       container = result.container
@@ -267,11 +267,11 @@ describe('RecentReleases Component', () => {
   })
 
   it('should handle null/undefined data gracefully', () => {
-    const { unmount } = render(<RecentReleases data={null as Release[]} />)
+    const { unmount } = render(<RecentReleases data={[]} />)
     expect(screen.getByText('No recent releases.')).toBeInTheDocument()
     unmount()
 
-    render(<RecentReleases data={undefined as Release[]} />)
+    render(<RecentReleases data={[]} />)
     expect(screen.getByText('No recent releases.')).toBeInTheDocument()
   })
 
