@@ -3,13 +3,13 @@
 from strawberry.permission import BasePermission
 
 
-class IsOWASPStaff(BasePermission):
-    """Permission class to check if the user is an OWASP staff member."""
+class HasDashboardAccess(BasePermission):
+    """Permission class to check if the user has dashboard access."""
 
-    message = "You must be an OWASP staff member to access this resource."
+    message = "You must have dashboard access to access this resource."
 
     def has_permission(self, source, info, **kwargs) -> bool:
-        """Check if the user is an OWASP staff member."""
+        """Check if the user has dashboard access."""
         user = info.context.request.user
         return (
             user

@@ -6,11 +6,10 @@ import { useSelectedLayoutSegment } from 'next/navigation'
 import { FC, ReactNode } from 'react'
 import LoadingSpinner from 'components/LoadingSpinner'
 
-const IS_OWASP_STAFF_KEY = 'is_owasp_staff'
-
 const ProjectsWrapper: FC<{ children: ReactNode }> = ({ children }) => {
   const segment = useSelectedLayoutSegment()
-  const { isSyncing } = useDjangoSession()
+  const { isSyncing, session } = useDjangoSession()
+  const isOwaspStaff = session?.user?.isOwaspStaff
   if (isSyncing) {
     return <LoadingSpinner />
   }
@@ -18,7 +17,6 @@ const ProjectsWrapper: FC<{ children: ReactNode }> = ({ children }) => {
     return <>{children}</>
   }
 
-  const isOwaspStaff = sessionStorage.getItem(IS_OWASP_STAFF_KEY) === 'true'
   if (!isOwaspStaff) {
     return <>{children}</>
   }

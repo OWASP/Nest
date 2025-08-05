@@ -6,17 +6,15 @@ import { SYNC_DJANGO_SESSION_MUTATION } from 'server/queries/authQueries'
 import { ExtendedSession } from 'types/auth'
 
 const SYNC_STATUS_KEY = 'django_session_synced'
-const IS_OWASP_STAFF_KEY = 'is_owasp_staff'
 
-export const useDjangoSession: () => { isSyncing: boolean } = () => {
-  const { data: session, status } = useSession()
+export const useDjangoSession: () => { isSyncing: boolean; session?: ExtendedSession } = () => {
+  const { data: session, status, update } = useSession()
   const [syncSession, { loading }] = useMutation(SYNC_DJANGO_SESSION_MUTATION)
   const [isSyncing, setIsSyncing] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       sessionStorage.removeItem(SYNC_STATUS_KEY)
-      sessionStorage.removeItem(IS_OWASP_STAFF_KEY)
       return
     }
 
@@ -39,7 +37,12 @@ export const useDjangoSession: () => { isSyncing: boolean } = () => {
           const githubAuth = response?.data?.githubAuth
           if (githubAuth?.ok) {
             sessionStorage.setItem(SYNC_STATUS_KEY, 'true')
-            sessionStorage.setItem(IS_OWASP_STAFF_KEY, String(githubAuth.user?.isOwaspStaff))
+            update({
+              user: {
+                ...session.user,
+                isOwaspStaff: githubAuth.user?.isOwaspStaff,
+              },
+            }).then(() => {})
           } else {
             signOut() // Invalidate Next.js session if not ok.
             addToast({
@@ -66,7 +69,10 @@ export const useDjangoSession: () => { isSyncing: boolean } = () => {
           setIsSyncing(false)
         })
     }
-  }, [status, session, syncSession])
+  }, [status, session, syncSession, update])
 
-  return { isSyncing: loading || isSyncing }
+  return {
+    isSyncing: loading || isSyncing || status === 'loading',
+    session: session as ExtendedSession,
+  }
 }

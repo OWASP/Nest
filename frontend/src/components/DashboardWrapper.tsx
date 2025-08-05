@@ -5,15 +5,14 @@ import { notFound } from 'next/navigation'
 import { FC, ReactNode } from 'react'
 import LoadingSpinner from 'components/LoadingSpinner'
 
-const IS_OWASP_STAFF_KEY = 'is_owasp_staff'
 const DashboardWrapper: FC<{ children: ReactNode }> = ({ children }) => {
-  const { isSyncing } = useDjangoSession()
+  const { isSyncing, session } = useDjangoSession()
 
   if (isSyncing) {
     return <LoadingSpinner />
   }
 
-  const isOwaspStaff = sessionStorage.getItem(IS_OWASP_STAFF_KEY) === 'true'
+  const isOwaspStaff = session?.user?.isOwaspStaff
   if (!isOwaspStaff) {
     notFound()
   }
