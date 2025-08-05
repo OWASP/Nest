@@ -1,179 +1,542 @@
-import { fireEvent, screen } from '@testing-library/react'
-import { useRouter } from 'next/navigation'
-import React from 'react'
-import { render } from 'wrappers/testUtil'
-import type { Organization } from 'types/organization'
-import type { RepositoryCardProps } from 'types/project'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import * as nextNavigation from 'next/navigation'
 import RepositoriesCard from 'components/RepositoriesCard'
+import type { RepositoryCardProps } from 'types/project'
 
+// Mock next/navigation
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
 }))
 
-jest.mock('components/ShowMoreButton', () => {
-  return function MockShowMoreButton({ onToggle }: { onToggle: () => void }) {
-    const [isExpanded, setIsExpanded] = React.useState(false)
+// Mock FontAwesome icons
+jest.mock('@fortawesome/react-fontawesome', () => ({
+  FontAwesomeIcon: ({ icon, className }: { icon: any; className?: string }) => (
+    <span data-testid={`icon-${icon.iconName}`} className={className} />
+  ),
+}))
 
-    const handleToggle = () => {
-      setIsExpanded(!isExpanded)
-      onToggle()
-    }
-
+// Mock InfoItem component
+jest.mock('components/InfoItem', () => {
+  return function MockInfoItem({ 
+    icon, 
+    pluralizedName, 
+    unit, 
+    value 
+  }: { 
+    icon: any; 
+    pluralizedName: string; 
+    unit: string; 
+    value: number 
+  }) {
     return (
-      <button type="button" onClick={handleToggle} data-testid="show-more-button">
-        {isExpanded ? 'Show less' : 'Show more'}
-      </button>
+      <div data-testid={`info-item-${pluralizedName.toLowerCase()}`}>
+        <span data-testid={`icon-${icon.iconName}`} />
+        <span>{pluralizedName}: {value}</span>
+      </div>
     )
   }
 })
 
+// Mock TruncatedText component
 jest.mock('components/TruncatedText', () => ({
-  TruncatedText: ({ text }: { text: string }) => <span>{text}</span>,
+  TruncatedText: ({ text }: { text?: string }) => (
+    <span data-testid="truncated-text">{text}</span>
+  ),
 }))
 
-jest.mock('components/InfoItem', () => {
-  return function MockInfoItem({ unit, value }: { unit: string; value: number }) {
-    return <div data-testid={`info-item-${unit}`}>{value}</div>
-  }
-})
-
-const mockPush = jest.fn()
-const mockUseRouter = useRouter as jest.Mock
-
 describe('RepositoriesCard', () => {
+  const mockPush = jest.fn()
+  
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseRouter.mockReturnValue({
+    ;(nextNavigation.useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
     })
   })
 
-  const createMockRepository = (index: number): RepositoryCardProps => ({
-    contributorsCount: 10 + index,
-    forksCount: 5 + index,
-    key: `repo-${index}`,
-    name: `Repository ${index}`,
-    openIssuesCount: 3 + index,
+  // Test data
+  const mockRepository: RepositoryCardProps = {
+    key: 'test-repo',
+    name: 'Test Repository',
+    starsCount: 100,
+    forksCount: 50,
+    contributorsCount: 25,
+    openIssuesCount: 10,
+    subscribersCount: 5,
+    url: 'https://github.com/test/repo',
     organization: {
-      login: `org-${index}`,
-      name: `Organization ${index}`,
-      key: `org-${index}`,
-      url: `https://github.com/org-${index}`,
-      avatarUrl: `https://github.com/org-${index}.png`,
-      description: `Organization ${index} description`,
-      objectID: `org-${index}`,
-      collaboratorsCount: 10,
-      followersCount: 50,
-      publicRepositoriesCount: 20,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    } as Organization,
-    starsCount: 100 + index,
-    subscribersCount: 20 + index,
-    url: `https://github.com/org-${index}/repo-${index}`,
+      login: 'test-org',
+      key: 'test-key',
+      url: 'https://api.github.com/orgs/test-org',
+      avatarUrl: 'https://avatars.githubusercontent.com/u/1?v=4',
+      description: 'Test organization',
+      name: 'Test Organization',
+      company: 'Test Company',
+      location: 'Test Location',
+      email: 'test@test-org.com',
+      createdAt: new Date('2020-01-01T00:00:00Z').getTime(),
+      updatedAt: new Date('2020-01-01T00:00:00Z').getTime(),
+      collaboratorsCount: 0,
+      followersCount: 0,
+      objectID: '',
+      publicRepositoriesCount: 0
+    },
+  }
+
+  const createMockRepositories = (count: number): RepositoryCardProps[] => {
+    return Array.from({ length: count }, (_, index) => ({
+      ...mockRepository,
+      key: `repo-${index}`,
+      name: `Repository ${index + 1}`,
+    }))
+  }
+
+  describe('Renders successfully with minimal required props', () => {
+    it('renders without crashing with empty repositories array', () => {
+      render(<RepositoriesCard repositories={[]} />)
+      expect(screen.getByRole('generic')).toBeInTheDocument()
+    })
+
+    it('renders with single repository', () => {
+      render(<RepositoriesCard repositories={[mockRepository]} />)
+      expect(screen.getByText('Test Repository')).toBeInTheDocument()
+    })
+
+    it('renders with multiple repositories', () => {
+      const repositories = createMockRepositories(3)
+      render(<RepositoriesCard repositories={repositories} />)
+      
+      expect(screen.getByText('Repository 1')).toBeInTheDocument()
+      expect(screen.getByText('Repository 2')).toBeInTheDocument()
+      expect(screen.getByText('Repository 3')).toBeInTheDocument()
+    })
   })
 
-  it('renders without crashing with empty repositories', () => {
-    render(<RepositoriesCard repositories={[]} />)
-    expect(screen.queryByTestId('show-more-button')).not.toBeInTheDocument()
+  describe('Conditional rendering logic', () => {
+    it('shows only first 4 repositories by default', () => {
+      const repositories = createMockRepositories(6)
+      render(<RepositoriesCard repositories={repositories} />)
+      
+      expect(screen.getByText('Repository 1')).toBeInTheDocument()
+      expect(screen.getByText('Repository 2')).toBeInTheDocument()
+      expect(screen.getByText('Repository 3')).toBeInTheDocument()
+      expect(screen.getByText('Repository 4')).toBeInTheDocument()
+      expect(screen.queryByText('Repository 5')).not.toBeInTheDocument()
+      expect(screen.queryByText('Repository 6')).not.toBeInTheDocument()
+    })
+
+    it('shows "Show more" button when more than 4 repositories', () => {
+      const repositories = createMockRepositories(5)
+      render(<RepositoriesCard repositories={repositories} />)
+      
+      expect(screen.getByRole('button', { name: /show more/i })).toBeInTheDocument()
+    })
+
+    it('does not show "Show more" button when 4 or fewer repositories', () => {
+      const repositories = createMockRepositories(4)
+      render(<RepositoriesCard repositories={repositories} />)
+      
+      expect(screen.queryByRole('button', { name: /show more/i })).not.toBeInTheDocument()
+    })
+
+    it('shows all repositories when "Show more" is clicked', () => {
+      const repositories = createMockRepositories(6)
+      render(<RepositoriesCard repositories={repositories} />)
+      
+      const showMoreButton = screen.getByRole('button', { name: /show more/i })
+      fireEvent.click(showMoreButton)
+      
+      expect(screen.getByText('Repository 5')).toBeInTheDocument()
+      expect(screen.getByText('Repository 6')).toBeInTheDocument()
+    })
+
+    it('shows "Show less" button when all repositories are displayed', () => {
+      const repositories = createMockRepositories(6)
+      render(<RepositoriesCard repositories={repositories} />)
+      
+      const showMoreButton = screen.getByRole('button', { name: /show more/i })
+      fireEvent.click(showMoreButton)
+      
+      expect(screen.getByRole('button', { name: /show less/i })).toBeInTheDocument()
+    })
+
+    it('hides repositories when "Show less" is clicked', () => {
+      const repositories = createMockRepositories(6)
+      render(<RepositoriesCard repositories={repositories} />)
+      
+      const showMoreButton = screen.getByRole('button', { name: /show more/i })
+      fireEvent.click(showMoreButton)
+      
+      const showLessButton = screen.getByRole('button', { name: /show less/i })
+      fireEvent.click(showLessButton)
+      
+      expect(screen.queryByText('Repository 5')).not.toBeInTheDocument()
+      expect(screen.queryByText('Repository 6')).not.toBeInTheDocument()
+    })
   })
 
-  it('shows first 4 repositories initially when there are more than 4', () => {
-    const repositories = Array.from({ length: 6 }, (_, i) => createMockRepository(i))
+  describe('Prop-based behavior', () => {
+    it('renders repository information correctly', () => {
+      render(<RepositoriesCard repositories={[mockRepository]} />)
+      
+      expect(screen.getByTestId('info-item-stars')).toBeInTheDocument()
+      expect(screen.getByTestId('info-item-forks')).toBeInTheDocument()
+      expect(screen.getByTestId('info-item-contributors')).toBeInTheDocument()
+      expect(screen.getByTestId('info-item-issues')).toBeInTheDocument()
+    })
 
-    render(<RepositoriesCard repositories={repositories} />)
+    it('handles repositories with missing optional props', () => {
+      const repositoryWithoutKey = {
+        ...mockRepository,
+        key: undefined,
+      }
+      render(<RepositoriesCard repositories={[repositoryWithoutKey]} />)
+      
+      expect(screen.getByText('Test Repository')).toBeInTheDocument()
+    })
 
-    expect(screen.getByText('Repository 0')).toBeInTheDocument()
-    expect(screen.getByText('Repository 3')).toBeInTheDocument()
-    expect(screen.queryByText('Repository 4')).not.toBeInTheDocument()
-    expect(screen.queryByText('Repository 5')).not.toBeInTheDocument()
+    it('handles repositories with zero values', () => {
+      const repositoryWithZeros = {
+        ...mockRepository,
+        starsCount: 0,
+        forksCount: 0,
+        contributorsCount: 0,
+        openIssuesCount: 0,
+      }
+      render(<RepositoriesCard repositories={[repositoryWithZeros]} />)
+      
+      expect(screen.getByTestId('info-item-stars')).toBeInTheDocument()
+      expect(screen.getByTestId('info-item-forks')).toBeInTheDocument()
+      expect(screen.getByTestId('info-item-contributors')).toBeInTheDocument()
+      expect(screen.getByTestId('info-item-issues')).toBeInTheDocument()
+    })
   })
 
-  it('shows all repositories when there are 4 or fewer', () => {
-    const repositories = Array.from({ length: 3 }, (_, i) => createMockRepository(i))
+  describe('Event handling', () => {
+    it('navigates to repository page when repository is clicked', () => {
+      render(<RepositoriesCard repositories={[mockRepository]} />)
+      
+      const repositoryButton = screen.getByRole('button', { name: /test repository/i })
+      fireEvent.click(repositoryButton)
+      
+      expect(mockPush).toHaveBeenCalledWith('/organizations/test-org/repositories/test-repo')
+    })
 
-    render(<RepositoriesCard repositories={repositories} />)
+    it('handles click on "Show more" button', () => {
+      const repositories = createMockRepositories(5)
+      render(<RepositoriesCard repositories={repositories} />)
+      
+      const showMoreButton = screen.getByRole('button', { name: /show more/i })
+      fireEvent.click(showMoreButton)
+      
+      expect(screen.getByText('Repository 5')).toBeInTheDocument()
+    })
 
-    expect(screen.getByText('Repository 0')).toBeInTheDocument()
-    expect(screen.getByText('Repository 1')).toBeInTheDocument()
-    expect(screen.getByText('Repository 2')).toBeInTheDocument()
+    it('handles click on "Show less" button', () => {
+      const repositories = createMockRepositories(5)
+      render(<RepositoriesCard repositories={repositories} />)
+      
+      const showMoreButton = screen.getByRole('button', { name: /show more/i })
+      fireEvent.click(showMoreButton)
+      
+      const showLessButton = screen.getByRole('button', { name: /show less/i })
+      fireEvent.click(showLessButton)
+      
+      expect(screen.queryByText('Repository 5')).not.toBeInTheDocument()
+    })
   })
 
-  it('displays ShowMoreButton when there are more than 4 repositories', () => {
-    const repositories = Array.from({ length: 6 }, (_, i) => createMockRepository(i))
+  describe('State changes and internal logic', () => {
+    it('toggles showAllRepositories state correctly', () => {
+      const repositories = createMockRepositories(5)
+      render(<RepositoriesCard repositories={repositories} />)
+      
+      // Initially shows first 4
+      expect(screen.queryByText('Repository 5')).not.toBeInTheDocument()
+      
+      // Click show more
+      const showMoreButton = screen.getByRole('button', { name: /show more/i })
+      fireEvent.click(showMoreButton)
+      expect(screen.getByText('Repository 5')).toBeInTheDocument()
+      
+      // Click show less
+      const showLessButton = screen.getByRole('button', { name: /show less/i })
+      fireEvent.click(showLessButton)
+      expect(screen.queryByText('Repository 5')).not.toBeInTheDocument()
+    })
 
-    render(<RepositoriesCard repositories={repositories} />)
-
-    expect(screen.getByTestId('show-more-button')).toBeInTheDocument()
+    it('maintains state correctly when toggling multiple times', () => {
+      const repositories = createMockRepositories(5)
+      render(<RepositoriesCard repositories={repositories} />)
+      
+      const showMoreButton = screen.getByRole('button', { name: /show more/i })
+      
+      // Toggle multiple times
+      fireEvent.click(showMoreButton)
+      fireEvent.click(showMoreButton)
+      fireEvent.click(showMoreButton)
+      
+      // Should still show all repositories
+      expect(screen.getByText('Repository 5')).toBeInTheDocument()
+    })
   })
 
-  it('does not display ShowMoreButton when there are 4 or fewer repositories', () => {
-    const repositories = Array.from({ length: 4 }, (_, i) => createMockRepository(i))
+  describe('Default values and fallbacks', () => {
+    it('handles undefined repositories prop', () => {
+      render(<RepositoriesCard repositories={undefined} />)
+      expect(screen.getByRole('generic')).toBeInTheDocument()
+    })
 
-    render(<RepositoriesCard repositories={repositories} />)
+    it('handles empty repositories array', () => {
+      render(<RepositoriesCard repositories={[]} />)
+      expect(screen.getByRole('generic')).toBeInTheDocument()
+    })
 
-    expect(screen.queryByTestId('show-more-button')).not.toBeInTheDocument()
+    it('handles repository with missing name', () => {
+      const repositoryWithoutName = {
+        ...mockRepository,
+        name: '',
+      }
+      render(<RepositoriesCard repositories={[repositoryWithoutName]} />)
+      
+      const truncatedText = screen.getByTestId('truncated-text')
+      expect(truncatedText).toHaveTextContent('')
+    })
   })
 
-  it('toggles between showing 4 and all repositories when clicked', () => {
-    const repositories = Array.from({ length: 6 }, (_, i) => createMockRepository(i))
+  describe('Text and content rendering', () => {
+    it('displays repository name correctly', () => {
+      render(<RepositoriesCard repositories={[mockRepository]} />)
+      expect(screen.getByTestId('truncated-text')).toHaveTextContent('Test Repository')
+    })
 
-    render(<RepositoriesCard repositories={repositories} />)
-
-    // Initially shows first 4
-    expect(screen.getByText('Repository 0')).toBeInTheDocument()
-    expect(screen.queryByText('Repository 4')).not.toBeInTheDocument()
-
-    // Click show more
-    fireEvent.click(screen.getByTestId('show-more-button'))
-
-    // Now shows all repositories
-    expect(screen.getByText('Repository 4')).toBeInTheDocument()
-    expect(screen.getByText('Repository 5')).toBeInTheDocument()
-
-    // Click show less
-    fireEvent.click(screen.getByTestId('show-more-button'))
-
-    // Back to showing first 4
-    expect(screen.queryByText('Repository 4')).not.toBeInTheDocument()
-    expect(screen.queryByText('Repository 5')).not.toBeInTheDocument()
+    it('displays correct button text for show more/less', () => {
+      const repositories = createMockRepositories(5)
+      render(<RepositoriesCard repositories={repositories} />)
+      
+      expect(screen.getByRole('button', { name: /show more/i })).toBeInTheDocument()
+      
+      const showMoreButton = screen.getByRole('button', { name: /show more/i })
+      fireEvent.click(showMoreButton)
+      
+      expect(screen.getByRole('button', { name: /show less/i })).toBeInTheDocument()
+    })
   })
 
-  it('renders repository items with correct information', () => {
-    const repositories = [createMockRepository(0)]
+  describe('Edge cases and invalid inputs', () => {
+    it('handles very large number of repositories', () => {
+      const repositories = createMockRepositories(100)
+      render(<RepositoriesCard repositories={repositories} />)
+      
+      // Should show first 4 by default
+      expect(screen.getByText('Repository 1')).toBeInTheDocument()
+      expect(screen.getByText('Repository 4')).toBeInTheDocument()
+      expect(screen.queryByText('Repository 5')).not.toBeInTheDocument()
+      
+      // Should show all when expanded
+      const showMoreButton = screen.getByRole('button', { name: /show more/i })
+      fireEvent.click(showMoreButton)
+      
+      expect(screen.getByText('Repository 100')).toBeInTheDocument()
+    })
 
-    render(<RepositoriesCard repositories={repositories} />)
+    it('handles repositories with very long names', () => {
+      const repositoryWithLongName = {
+        ...mockRepository,
+        name: 'This is a very long repository name that should be truncated when displayed in the UI',
+      }
+      render(<RepositoriesCard repositories={[repositoryWithLongName]} />)
+      
+      expect(screen.getByTestId('truncated-text')).toHaveTextContent(repositoryWithLongName.name)
+    })
 
-    expect(screen.getByText('Repository 0')).toBeInTheDocument()
-    expect(screen.getByTestId('info-item-Star')).toBeInTheDocument()
-    expect(screen.getByTestId('info-item-Fork')).toBeInTheDocument()
-    expect(screen.getByTestId('info-item-Contributor')).toBeInTheDocument()
-    expect(screen.getByTestId('info-item-Issue')).toBeInTheDocument()
+    it('handles repositories with special characters in names', () => {
+      const repositoryWithSpecialChars = {
+        ...mockRepository,
+        name: 'repo-with-special-chars-!@#$%^&*()',
+      }
+      render(<RepositoriesCard repositories={[repositoryWithSpecialChars]} />)
+      
+      expect(screen.getByTestId('truncated-text')).toHaveTextContent(repositoryWithSpecialChars.name)
+    })
+
+    it('handles repositories with very large numbers', () => {
+      const repositoryWithLargeNumbers = {
+        ...mockRepository,
+        starsCount: 999999999,
+        forksCount: 888888888,
+        contributorsCount: 777777777,
+        openIssuesCount: 666666666,
+      }
+      render(<RepositoriesCard repositories={[repositoryWithLargeNumbers]} />)
+      
+      expect(screen.getByTestId('info-item-stars')).toBeInTheDocument()
+      expect(screen.getByTestId('info-item-forks')).toBeInTheDocument()
+      expect(screen.getByTestId('info-item-contributors')).toBeInTheDocument()
+      expect(screen.getByTestId('info-item-issues')).toBeInTheDocument()
+    })
   })
 
-  it('navigates to correct URL when repository item is clicked', () => {
-    const repositories = [createMockRepository(0)]
+  describe('Accessibility roles and labels', () => {
+    it('has proper button roles for interactive elements', () => {
+      const repositories = createMockRepositories(5)
+      render(<RepositoriesCard repositories={repositories} />)
+      
+      // Repository buttons
+      expect(screen.getByRole('button', { name: /repository 1/i })).toBeInTheDocument()
+      
+      // Show more/less button
+      expect(screen.getByRole('button', { name: /show more/i })).toBeInTheDocument()
+    })
 
-    render(<RepositoriesCard repositories={repositories} />)
+    it('has accessible button labels', () => {
+      const repositories = createMockRepositories(5)
+      render(<RepositoriesCard repositories={repositories} />)
+      
+      const showMoreButton = screen.getByRole('button', { name: /show more/i })
+      expect(showMoreButton).toHaveAccessibleName(/show more/i)
+      
+      fireEvent.click(showMoreButton)
+      
+      const showLessButton = screen.getByRole('button', { name: /show less/i })
+      expect(showLessButton).toHaveAccessibleName(/show less/i)
+    })
 
-    const repositoryButton = screen.getByText('Repository 0')
-    fireEvent.click(repositoryButton)
-
-    expect(mockPush).toHaveBeenCalledWith('/organizations/org-0/repositories/repo-0')
+    it('has proper semantic structure', () => {
+      render(<RepositoriesCard repositories={[mockRepository]} />)
+      
+      // Main container
+      expect(screen.getByRole('generic')).toBeInTheDocument()
+      
+      // Repository button
+      expect(screen.getByRole('button', { name: /test repository/i })).toBeInTheDocument()
+    })
   })
 
-  it('handles repositories without organization data gracefully', () => {
-    const repository: RepositoryCardProps = {
-      contributorsCount: 10,
-      forksCount: 5,
-      key: 'repo-test',
-      name: 'Test Repository',
-      openIssuesCount: 3,
-      starsCount: 100,
-      subscribersCount: 20,
-      url: 'https://github.com/test/repo',
-    }
+  describe('DOM structure, classNames, and styles', () => {
+    it('has correct CSS classes for grid layout', () => {
+      render(<RepositoriesCard repositories={[mockRepository]} />)
+      
+      const gridContainer = screen.getByRole('generic').querySelector('.grid')
+      expect(gridContainer).toHaveClass('grid-cols-1', 'gap-4', 'sm:grid-cols-2', 'md:grid-cols-3', 'lg:grid-cols-4')
+    })
 
-    expect(() => render(<RepositoriesCard repositories={[repository]} />)).not.toThrow()
+    it('has correct CSS classes for repository cards', () => {
+      render(<RepositoriesCard repositories={[mockRepository]} />)
+      
+      const repositoryCard = screen.getByRole('button', { name: /test repository/i }).closest('div')
+      expect(repositoryCard).toHaveClass(
+        'h-46',
+        'flex',
+        'w-full',
+        'flex-col',
+        'gap-3',
+        'rounded-lg',
+        'border',
+        'p-4',
+        'shadow-sm',
+        'ease-in-out',
+        'hover:shadow-md',
+        'dark:border-gray-700',
+        'dark:bg-gray-800'
+      )
+    })
+
+    it('has correct CSS classes for show more/less button', () => {
+      const repositories = createMockRepositories(5)
+      render(<RepositoriesCard repositories={repositories} />)
+      
+      const showMoreButton = screen.getByRole('button', { name: /show more/i })
+      expect(showMoreButton).toHaveClass(
+        'mt-4',
+        'flex',
+        'items-center',
+        'justify-center',
+        'text-blue-400',
+        'hover:underline'
+      )
+    })
+
+    it('has correct container structure', () => {
+      render(<RepositoriesCard repositories={[mockRepository]} />)
+      
+      const mainContainer = screen.getByRole('generic')
+      expect(mainContainer).toBeInTheDocument()
+      
+      const gridContainer = mainContainer.querySelector('.grid')
+      expect(gridContainer).toBeInTheDocument()
+    })
+
+    it('has correct button container structure', () => {
+      const repositories = createMockRepositories(5)
+      render(<RepositoriesCard repositories={repositories} />)
+      
+      const buttonContainer = screen.getByRole('button', { name: /show more/i }).closest('.mt-6')
+      expect(buttonContainer).toHaveClass('mt-6', 'flex', 'items-center', 'justify-center', 'text-center')
+    })
   })
-})
+
+  describe('Integration with child components', () => {
+    it('renders InfoItem components with correct props', () => {
+      render(<RepositoriesCard repositories={[mockRepository]} />)
+      
+      expect(screen.getByTestId('info-item-stars')).toBeInTheDocument()
+      expect(screen.getByTestId('info-item-forks')).toBeInTheDocument()
+      expect(screen.getByTestId('info-item-contributors')).toBeInTheDocument()
+      expect(screen.getByTestId('info-item-issues')).toBeInTheDocument()
+    })
+
+    it('renders TruncatedText component with repository name', () => {
+      render(<RepositoriesCard repositories={[mockRepository]} />)
+      
+      const truncatedText = screen.getByTestId('truncated-text')
+      expect(truncatedText).toHaveTextContent('Test Repository')
+    })
+
+    it('renders FontAwesome icons correctly', () => {
+      render(<RepositoriesCard repositories={[mockRepository]} />)
+      
+      // Check for chevron icons in show more/less button
+      const repositories = createMockRepositories(5)
+      render(<RepositoriesCard repositories={repositories} />)
+      
+      const showMoreButton = screen.getByRole('button', { name: /show more/i })
+      expect(showMoreButton.querySelector('[data-testid="icon-chevron-down"]')).toBeInTheDocument()
+      
+      fireEvent.click(showMoreButton)
+      
+      const showLessButton = screen.getByRole('button', { name: /show less/i })
+      expect(showLessButton.querySelector('[data-testid="icon-chevron-up"]')).toBeInTheDocument()
+    })
+  })
+
+  describe('Error handling and robustness', () => {
+    it('handles navigation errors gracefully', () => {
+      mockPush.mockImplementation(() => {
+        throw new Error('Navigation error')
+      })
+      
+      render(<RepositoriesCard repositories={[mockRepository]} />)
+      
+      const repositoryButton = screen.getByRole('button', { name: /test repository/i })
+      
+      // Should not crash when navigation fails
+      expect(() => fireEvent.click(repositoryButton)).not.toThrow()
+    })
+
+    it('handles missing organization data', () => {
+      const repositoryWithoutOrg = {
+        ...mockRepository,
+        organization: undefined,
+      }
+      
+      render(<RepositoriesCard repositories={[repositoryWithoutOrg]} />)
+      
+      const repositoryButton = screen.getByRole('button', { name: /test repository/i })
+      fireEvent.click(repositoryButton)
+      
+      // Should handle missing organization gracefully
+      expect(mockPush).toHaveBeenCalledWith('/organizations/undefined/repositories/test-repo')
+    })
+  })
+}) 

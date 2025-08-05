@@ -158,7 +158,7 @@ describe('ProjectDetailsPage', () => {
       error: null,
     })
     render(<ProjectDetailsPage />)
-    await waitFor(() => {
+    await waitFor((): void => {
       expect(screen.getByText('Issues Trend')).toBeInTheDocument()
       expect(screen.getByText('Pull Requests Trend')).toBeInTheDocument()
       expect(screen.getByText('Stars Trend')).toBeInTheDocument()

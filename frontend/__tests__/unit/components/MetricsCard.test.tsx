@@ -93,8 +93,12 @@ describe('MetricsCard component', () => {
     expect(screen.getByText('99')).toBeInTheDocument()
     expect(screen.getByText('20')).toBeInTheDocument()
     expect(screen.getByText('7')).toBeInTheDocument()
-    expect(screen.getByText('Jan 1, 2024')).toBeInTheDocument()
+    newFunction()
     expect(screen.getByText('55')).toBeInTheDocument()
     expect(screen.getByRole('link')).toHaveAttribute('href', '/projects/dashboard/metrics/another')
+
+    function newFunction() {
+      expect(screen.getByText('Jan 1, 2024')).toBeInTheDocument()
+    }
   })
 })

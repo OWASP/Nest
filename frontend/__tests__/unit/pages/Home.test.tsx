@@ -270,15 +270,7 @@ describe('Home', () => {
     ]
     const stats = mockGraphQLData.statsOverview
 
-    await waitFor(() => {
-      headers.forEach((header) => expect(screen.getByText(header)).toBeInTheDocument())
-      // Wait for 2 seconds
-      setTimeout(() => {
-        Object.values(stats).forEach((value) =>
-          expect(screen.getByText(`${millify(value)}+`)).toBeInTheDocument()
-        )
-      }, 2000)
-    })
+    await newFunction({ headers, stats })
   })
 
   test('renders event details including date range and location', async () => {
@@ -349,3 +341,30 @@ describe('Home', () => {
     })
   })
 })
+async function newFunction({
+  headers,
+  stats,
+}: {
+  headers: string[]
+  stats: {
+    activeChaptersStats: number
+    activeProjectsStats: number
+    countriesStats: number
+    contributorsStats: number
+    slackWorkspaceStats: number
+  }
+}): Promise<void> {
+  // Wait for headers
+  for (const header of headers) {
+    await waitFor(() => {
+      expect(screen.getByText(header)).toBeInTheDocument()
+    })
+  }
+
+  // Wait for stats (millified + "+")
+  for (const value of Object.values(stats)) {
+    await waitFor(function () {
+      expect(screen.getByText(`${millify(value)}+`)).toBeInTheDocument()
+    })
+  }
+}
