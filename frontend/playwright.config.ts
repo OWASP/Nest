@@ -27,8 +27,7 @@ export default defineConfig({
     trace: 'off',
   },
   webServer: {
-    command:
-      'pnpm run build && NEXT_SERVER_DISABLE_SSR=true && NEXT_SERVER_GITHUB_CLIENT_ID="mock_id" && NEXT_SERVER_GITHUB_CLIENT_SECRET="mock_secret" pnpm run start',
+    command: 'pnpm run build && NEXT_SERVER_DISABLE_SSR=true pnpm run start',
     timeout: 120_000,
     url: 'http://localhost:3000',
   },

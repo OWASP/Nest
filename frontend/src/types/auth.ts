@@ -5,7 +5,7 @@ export type ExtendedProfile = {
 export type ExtendedSession = {
   accessToken?: string
   user?: {
-    login?: string
     isOwaspStaff?: boolean
+    login?: string
   }
 }
