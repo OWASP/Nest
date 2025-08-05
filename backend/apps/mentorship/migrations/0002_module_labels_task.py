@@ -9,7 +9,6 @@ class Migration(migrations.Migration):
         ("github", "0032_user_github_user_created_at_desc_and_more"),
         ("mentorship", "0001_initial"),
     ]
-
     operations = [
         migrations.AddField(
             model_name="module",
@@ -22,7 +21,10 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.BigAutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
                     ),
                 ),
                 ("nest_created_at", models.DateTimeField(auto_now_add=True)),
@@ -37,7 +39,9 @@ class Migration(migrations.Migration):
                 (
                     "deadline_at",
                     models.DateTimeField(
-                        blank=True, help_text="Optional deadline for the task.", null=True
+                        blank=True,
+                        help_text="Optional deadline for the task.",
+                        null=True,
                     ),
                 ),
                 (
