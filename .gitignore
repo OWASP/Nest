@@ -38,5 +38,6 @@ frontend/yarn-debug.log*
 frontend/yarn-error.log*
 logs
 node_modules/
-schema/.venv
+schema/.venv/
+schema/dist/
 TODO
