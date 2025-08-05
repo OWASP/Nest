@@ -1,41 +1,39 @@
 """OWASP Schema tests configuration."""
 
-import json
 from pathlib import Path
 
 import pytest
 import yaml
 
-from utils.schema_validators import validate_data
+from owasp_schema import chapter_schema as chapter_schema_module
+from owasp_schema import committee_schema as committee_schema_module
+from owasp_schema import common_schema as common_schema_module
+from owasp_schema import project_schema as project_schema_module
+from owasp_schema.utils.schema_validators import validate_data
 
 tests_dir = Path(__file__).resolve().parent
 tests_data_dir = tests_dir / "data"
-schema_dir = tests_dir.parent
 
 
 # Fixtures.
 @pytest.fixture
 def chapter_schema():
-    with Path(schema_dir / "chapter.json").open() as file:
-        yield json.load(file)
+    return chapter_schema_module
 
 
 @pytest.fixture
 def common_schema():
-    with Path(schema_dir / "common.json").open() as file:
-        yield json.load(file)
+    return common_schema_module
 
 
 @pytest.fixture
 def project_schema():
-    with Path(schema_dir / "project.json").open() as file:
-        yield json.load(file)
+    return project_schema_module
 
 
 @pytest.fixture
 def committee_schema():
-    with Path(schema_dir / "committee.json").open() as file:
-        yield json.load(file)
+    return committee_schema_module
 
 
 # Base functions.
