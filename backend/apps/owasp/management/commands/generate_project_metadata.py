@@ -1,4 +1,4 @@
-"""A commnad to generate project metadata from project_key."""
+"""A command to generate project metadata from project_key."""
 
 from pathlib import Path
 
