@@ -8,8 +8,6 @@ from django.http import HttpResponseForbidden
 
 def has_dashboard_permission(request):
     """Check if user has dashboard access."""
-    # Returns Anonymous user even if authenticated
-    # Strawberry returns the authenticated user
     user = get_user(request)
     return (
         user
