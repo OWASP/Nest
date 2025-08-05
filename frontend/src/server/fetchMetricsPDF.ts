@@ -7,6 +7,7 @@ export const fetchMetricsPDF = async (path: string, fileName: string): Promise<v
     headers: {
       accept: 'application/pdf',
     },
+    credentials: 'include',
   })
   if (!response.ok) {
     handleAppError(new Error(`Failed to fetch PDF: ${response.status} ${response.statusText}`))
