@@ -24,9 +24,10 @@ class Command(BaseCommand):
         project_key = options["project_key"]
         self.stdout.write(f"Attempting to process project: {project_key}")
 
-        project = Project.objects.get(key=project_key)
-        if not project:
-            self.stderr.write(self.style.ERROR("Project not found."))
+        try:
+            project = Project.objects.get(key=project_key)
+        except Project.DoesNotExist:
+            self.stderr.write(self.style.ERROR(f"Project with key '{project_key}' not found."))
             return
 
         metadata_dict = self.map_data_to_schema(project)
