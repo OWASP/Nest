@@ -63,6 +63,15 @@ class Task(TimestampedModel):
         help_text="The GitHub issue this task corresponds to.",
     )
 
+    level = models.ForeignKey(
+        "mentorship.TaskLevel",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="tasks",
+        help_text="The difficulty level of this task.",
+    )
+
     module = models.ForeignKey(
         "mentorship.Module",
         on_delete=models.CASCADE,
