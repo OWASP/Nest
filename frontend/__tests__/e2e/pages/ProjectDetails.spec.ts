@@ -1,22 +1,10 @@
+import { mockDashboardCookies } from '@e2e/helpers/mockDashboardCookies'
 import { test, expect } from '@playwright/test'
 import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
 
 test.describe('Project Details Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/graphql/', async (route) => {
-      await route.fulfill({
-        status: 200,
-        json: { data: mockProjectDetailsData },
-      })
-    })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
+    await mockDashboardCookies(page, mockProjectDetailsData, false)
     await page.goto('/projects/test-project', { timeout: 60000 })
   })
 
