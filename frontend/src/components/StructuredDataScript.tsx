@@ -9,6 +9,7 @@ interface StructuredDataScriptProps {
 const StructuredDataScript: React.FC<StructuredDataScriptProps> = ({ data }) => {
   return (
     <script
+      id="profile-structured-data"
       type="application/ld+json"
       dangerouslySetInnerHTML={{
         __html: JSON.stringify(data, null, 2), // include everything with 2 spaces indentation
