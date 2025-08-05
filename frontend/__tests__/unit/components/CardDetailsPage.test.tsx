@@ -240,7 +240,16 @@ jest.mock('components/RecentReleases', () => ({
 
 jest.mock('components/RepositoriesCard', () => ({
   __esModule: true,
-  default: ({ repositories, ...props }: { repositories: unknown[]; [key: string]: unknown }) => (
+  default: ({
+    repositories,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    maxInitialDisplay,
+    ...props
+  }: {
+    repositories: unknown[]
+    maxInitialDisplay?: number
+    [key: string]: unknown
+  }) => (
     <div data-testid="repositories-card" {...props}>
       Repositories ({repositories.length} items)
     </div>
@@ -310,10 +319,15 @@ jest.mock('components/TopContributorsList', () => ({
   default: ({
     contributors,
     maxInitialDisplay,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    icon,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    label,
     ...props
   }: {
     contributors: unknown[]
-    _icon: unknown
+    icon?: unknown
+    label?: string
     maxInitialDisplay: number
     [key: string]: unknown
   }) => (
