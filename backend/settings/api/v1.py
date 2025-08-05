@@ -11,11 +11,11 @@ from apps.owasp.api.rest.v1.urls import router as owasp_router
 api_settings = {
     "description": "Open Worldwide Application Security Project API",
     "docs": Swagger(settings={"persistAuthorization": True}),
-    "title": "OWASP Nest",
     "servers": [
         {"url": "https://nest.owasp.org", "description": "Production"},
         {"url": "https://nest.owasp.dev", "description": "Staging"},
     ],
+    "title": "OWASP Nest",
     "version": "1.0.0",
 }
 if not settings.IS_LOCAL_ENVIRONMENT:
