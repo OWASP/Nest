@@ -8,8 +8,8 @@ from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
 from ninja import Field, FilterSchema, Query, Router, Schema
 from ninja.decorators import decorate_view
-from ninja.errors import HttpError
 from ninja.pagination import PageNumberPagination, paginate
+from ninja.responses import Response
 
 from apps.github.models.user import User
 
@@ -49,7 +49,7 @@ class UserSchema(Schema):
 class UserErrorResponse(Schema):
     """Error response schema for User."""
 
-    detail: str
+    message: str
 
 
 @router.get(
@@ -91,5 +91,5 @@ def get_user(request: HttpRequest, login: str) -> UserSchema:
     """Get user by login."""
     user = User.objects.filter(login=login).first()
     if not user:
-        raise HttpError(404, "User not found")
+        return Response({"message": "User not found"}, status=404)
     return user

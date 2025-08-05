@@ -12,11 +12,11 @@ api_settings = {
     "description": "Open Worldwide Application Security Project API",
     "docs": Swagger(settings={"persistAuthorization": True}),
     "title": "OWASP Nest",
-    "version": "1.0.0",
     "servers": [
         {"url": "https://nest.owasp.org", "description": "Production"},
         {"url": "https://nest.owasp.dev", "description": "Staging"},
     ],
+    "version": "1.0.0",
 }
 if not settings.IS_LOCAL_ENVIRONMENT:
     api_settings.update(
