@@ -18,7 +18,7 @@ export default function UserMenu({
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const dropdownId = useId()
-  const isProjectLeader = (session as ExtendedSession)?.user.isLeader
+  const isProjectLeader = (session as ExtendedSession)?.user?.isLeader
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
