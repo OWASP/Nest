@@ -255,10 +255,10 @@ const DetailsCard = ({
         )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
         repositories.length > 0 && (
-          <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
-            <RepositoriesCard repositories={repositories} />
-          </SecondaryCard>
-        )}
+            <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
+              <RepositoriesCard maxInitialDisplay={4} repositories={repositories} />
+            </SecondaryCard>
+          )}
         {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
           <HealthMetrics data={healthMetricsData} />
         )}
