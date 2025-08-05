@@ -6,3 +6,4 @@ from .mentor import MentorAdmin
 from .module import ModuleAdmin
 from .program import ProgramAdmin
 from .task import TaskAdmin
+from .task_level import TaskLevelAdmin
