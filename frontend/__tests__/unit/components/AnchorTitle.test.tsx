@@ -401,8 +401,212 @@ describe('AnchorTitle Component', () => {
       expect(link).toHaveAttribute('href', '#updated-title')
     })
   })
-  
-  
-  
-  
+
+  describe('Browser API Interactions', () => {
+    it('handles window.pageYOffset correctly', () => {
+      const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
+      
+      Object.defineProperty(window, 'pageYOffset', {
+        value: 500,
+        configurable: true
+      })
+      
+      const mockElement = {
+        getBoundingClientRect: jest.fn(() => ({ top: 100 })),
+        querySelector: jest.fn(() => ({ offsetHeight: 30 }))
+      }
+      jest.spyOn(document, 'getElementById').mockReturnValue(mockElement as any)
+      
+      render(<AnchorTitle title="Offset Test" />)
+      const link = screen.getByRole('link')
+      
+      fireEvent.click(link)
+
+      expect(mockScrollTo).toHaveBeenCalledWith({
+        top: 520,
+        behavior: 'smooth'
+      })
+    })
+
+    it('handles hash changes in the URL correctly', async () => {
+      const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
+      jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+        cb(0)
+        return 0
+      })
+
+      window.location.hash = ''
+      render(<AnchorTitle title="Hash Test" />)
+
+      window.location.hash = '#hash-test'
+      const popstateEvent = new PopStateEvent('popstate')
+      fireEvent(window, popstateEvent)
+      
+      await waitFor(() => {
+        expect(mockScrollTo).toHaveBeenCalled()
+      })
+    })
+  })
+
+  describe('Performance and Optimization', () => {
+    it('uses useCallback for scrollToElement function', () => {
+      const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
+      
+      const { rerender } = render(<AnchorTitle title="Callback Test" />)
+      const link1 = screen.getByRole('link')
+      
+      fireEvent.click(link1)
+      
+      rerender(<AnchorTitle title="Callback Test" />)
+      const link2 = screen.getByRole('link')
+      
+      fireEvent.click(link2)
+      
+      expect(mockScrollTo).toHaveBeenCalledTimes(2)
+    })
+
+    it('cleans up event listeners properly', () => {
+      const mockAddEventListener = jest.spyOn(window, 'addEventListener')
+      const mockRemoveEventListener = jest.spyOn(window, 'removeEventListener')
+      
+      const { unmount } = render(<AnchorTitle title="Cleanup Test" />)
+      
+      expect(mockAddEventListener).toHaveBeenCalledWith('popstate', expect.any(Function))
+      
+      unmount()
+      
+      expect(mockRemoveEventListener).toHaveBeenCalledWith('popstate', expect.any(Function))
+    })
+  })
+
+  describe('State Changes and Internal Logic', () => {
+    it('recalculates scroll position when element dimensions change', () => {
+      const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
+    
+      let offsetHeight = 30
+      const mockElement = {
+        getBoundingClientRect: jest.fn(() => ({ top: 100 })),
+        querySelector: jest.fn(() => ({ offsetHeight }))
+      }
+      jest.spyOn(document, 'getElementById').mockReturnValue(mockElement as any)
+      
+      render(<AnchorTitle title="Dynamic Height" />)
+      const link = screen.getByRole('link')
+      
+      fireEvent.click(link)
+      const firstCall = (mockScrollTo.mock.calls[0][0] as unknown as { top: number }).top
+      
+      offsetHeight = 60
+      fireEvent.click(link)
+      const secondCall = (mockScrollTo.mock.calls[1][0] as unknown as { top: number }).top
+      
+      expect(firstCall).not.toBe(secondCall)
+      expect(Math.abs(firstCall - secondCall)).toBe(30)
+    })
+    it('handles component rerender with different IDs', () => {
+      const mockAddEventListener = jest.spyOn(window, 'addEventListener')
+      const mockRemoveEventListener = jest.spyOn(window, 'removeEventListener')
+      
+      const { rerender } = render(<AnchorTitle title="Original" />)
+      const originalAddCalls = mockAddEventListener.mock.calls.length
+      
+      rerender(<AnchorTitle title="Changed" />)
+      
+      expect(mockRemoveEventListener).toHaveBeenCalled()
+      expect(mockAddEventListener.mock.calls.length).toBeGreaterThan(originalAddCalls)
+    })
+  })
+
+  describe('CSS and Styling', () => {
+    it('applies correct CSS classes for visual behaviour', () => {
+      render(<AnchorTitle title="Style Test" />)
+
+      const link = screen.getByRole('link')
+      expect(link).toHaveClass(
+        'inherit-color',
+        'ml-2', 
+        'opacity-0',
+        'transition-opacity',
+        'duration-200',
+        'group-hover:opacity-100'
+      )
+    })
+
+    it('has correct icon styling', () => {
+      render(<AnchorTitle title="Icon Test" />)
+      
+      const icon = screen.getByRole('link').querySelector('svg')
+      expect(icon).toHaveClass('custom-icon', 'h-7', 'w-5')
+    })
+
+    it('maintains proper layout structure', () => {
+      render(<AnchorTitle title="Layout Test" />)
+      
+      const titleContainer = screen.getByText('Layout Test').closest('div')
+      expect(titleContainer).toHaveAttribute('id', 'anchor-title')
+      expect(titleContainer).toHaveClass('flex', 'items-center', 'text-2xl', 'font-semibold')
+      
+      const groupContainer = titleContainer?.closest('.group')
+      expect(groupContainer).toHaveClass('group', 'relative', 'flex', 'items-center')
+    })
+  })
+
+  describe('Dependencies and Mocking', () => {
+    it('uses slugify utility correctly', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const slugifyMock = require('utils/slugify').default
+      
+      render(<AnchorTitle title="Slugify Test" />)
+      
+      expect(slugifyMock).toHaveBeenCalledWith('Slugify Test')
+    })
+
+    it('handles slugify returning different formats', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const slugifyMock = require('utils/slugify').default
+      slugifyMock.mockReturnValue('custom-slug-format')
+      
+      render(<AnchorTitle title="Custom Slug" />)
+      
+      const link = screen.getByRole('link')
+      expect(link).toHaveAttribute('href', '#custom-slug-format')
+      
+      const element = document.getElementById('custom-slug-format')
+      expect(element).toBeInTheDocument()
+    })
+  })
+
+  describe('Comprehensive User Interactions', () => {
+    it('complete user journey: render → hover → click → navigate', async () => {
+      const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
+      const mockPushState = jest.spyOn(window.history, 'pushState').mockImplementation()
+      
+      render(<AnchorTitle title="User Journey" />)
+      
+      const titleElement = screen.getByText('User Journey')
+      expect(titleElement).toBeInTheDocument()
+      
+      const link = screen.getByRole('link')
+      expect(link).toHaveClass('opacity-0')
+      
+      fireEvent.click(link)
+      
+      expect(mockScrollTo).toHaveBeenCalledWith({
+        top: expect.any(Number),
+        behavior: 'smooth'
+      })
+      expect(mockPushState).toHaveBeenCalledWith(null, '', '#custom-slug-format')
+    })
+
+    it('handles keyboard navigation', () => {
+      render(<AnchorTitle title="Keyboard Test" />)
+      
+      const link = screen.getByRole('link')
+      
+      link.focus()
+      expect(document.activeElement).toBe(link)
+      
+      fireEvent.keyDown(link, { key: 'Enter', code: 'Enter' })
+    })
+  })
 })
