@@ -44,7 +44,7 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                   {showAvatar && item?.author && (
                     <Tooltip
                       closeDelay={100}
-                      content={item?.author?.name ?? item?.author?.login}
+                      content={item.author.name || item.author.login}
                       id={`avatar-tooltip-${index}`}
                       delay={100}
                       placement="bottom"
@@ -52,13 +52,13 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                     >
                       <Link
                         className="flex-shrink-0 text-blue-400 hover:underline"
-                        href={item?.author?.login ? `/members/${item?.author?.login}` : '#'}
+                        href={item.author.login ? `/members/${item.author.login}` : '#'}
                       >
                         <Image
-                          alt={item?.author?.name ?? ''}
+                          alt={item.author.name || item.author.login}
                           className="mr-2 h-6 w-6 rounded-full"
                           height={24}
-                          src={item?.author?.avatarUrl ?? ''}
+                          src={item.author.avatarUrl}
                           width={24}
                         />
                       </Link>
@@ -71,7 +71,7 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <TruncatedText text={item?.name || item?.tagName} />
+                      <TruncatedText text={item.name || item.tagName} />
                     </Link>
                   </h3>
                 </div>
@@ -86,8 +86,8 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
                       className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
                       disabled={!item.organizationName || !item.repositoryName}
                       onClick={() => {
-                        const org = item.organizationName ?? ''
-                        const repo = item.repositoryName ?? ''
+                        const org = item.organizationName || ''
+                        const repo = item.repositoryName || ''
                         if (!org || !repo) return
                         router.push(`/organizations/${org}/repositories/${repo}`)
                       }}

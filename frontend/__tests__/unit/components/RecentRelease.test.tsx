@@ -68,8 +68,7 @@ const now = Date.now()
 const mockReleases: Release[] = [
   {
     name: 'v1.0 The First Release',
-    url: 'https://example.com/release/v1',
-    publishedAt: 1722420000000, // 2024-07-31T10:00:00Z as timestamp
+    publishedAt: now,
     repositoryName: 'our-awesome-project',
     organizationName: 'our-org',
     tagName: 'v1.0',
@@ -89,7 +88,6 @@ const mockReleases: Release[] = [
   },
   {
     name: 'v2.0 The Second Release',
-    url: 'https://example.com/release/v2',
     publishedAt: now,
     repositoryName: 'another-cool-project',
     organizationName: 'our-org',
@@ -193,14 +191,13 @@ describe('RecentReleases Component', () => {
 
   // New test cases for comprehensive coverage
 
-  it('should handle releases with missing author information', () => {
+  it('should handle releases with missing author name', () => {
     const releasesWithMissingAuthor = [
       {
         ...mockReleases[0],
         author: {
           ...mockReleases[0].author,
-          name: undefined,
-          login: undefined,
+          name: '',
         },
       },
     ]
@@ -212,7 +209,7 @@ describe('RecentReleases Component', () => {
     // Should still render the release name
     expect(screen.getByText('v1.0 The First Release')).toBeInTheDocument()
     // Should handle missing author gracefully
-    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+    expect(screen.getByAltText('testuser')).toBeInTheDocument()
   })
 
   it('should handle releases with missing repository information', () => {
@@ -330,7 +327,7 @@ describe('RecentReleases Component', () => {
     expect(mockRouterPush).not.toHaveBeenCalled()
   })
 
-  it('should handle repository click with missing repository name', () => {
+  it('should disable repository button if repository name is missing', () => {
     const releasesWithMissingRepoName = [
       {
         ...mockReleases[0],
