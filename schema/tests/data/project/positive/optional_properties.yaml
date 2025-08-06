@@ -1,4 +1,4 @@
-audience: breaker
+audience: [breaker]
 blog: https://blog.projec.com
 community:
   - platform: slack

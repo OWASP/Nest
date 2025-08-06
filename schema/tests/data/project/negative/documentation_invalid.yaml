@@ -1,4 +1,4 @@
-audience: builder
+audience: [builder]
 documentation:
   - xyz-abc
 name: OWASP Incubator Code Project

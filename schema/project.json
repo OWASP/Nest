@@ -6,17 +6,21 @@
   "properties": {
     "audience": {
       "description": "The intended audience for the project.",
-      "enum": [
-        "breaker",
-        "builder",
-        "defender"
-      ],
-      "enumDescriptions": [
-        "Security testers and ethical hackers.",
-        "Developers and engineers.",
-        "Security professionals and defenders."
-      ],
-      "type": "string"
+      "items": {
+        "enum": [
+          "breaker",
+          "builder",
+          "defender"
+        ],
+        "enumDescriptions": [
+          "Security testers and ethical hackers.",
+          "Developers and engineers.",
+          "Security professionals and defenders."
+        ],
+        "type": "string",
+        "uniqueItems": true
+      },
+      "type": "array"
     },
     "blog": {
       "description": "Project's blog.",
@@ -206,15 +210,7 @@
       "type": "string"
     }
   },
-  "required": [
-    "audience",
-    "leaders",
-    "level",
-    "name",
-    "pitch",
-    "tags",
-    "type"
-  ],
+  "required": ["audience", "leaders", "level", "name", "pitch", "tags", "type"],
   "title": "OWASP Project",
   "type": "object"
 }
