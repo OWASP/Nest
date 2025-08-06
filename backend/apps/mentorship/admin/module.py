@@ -12,7 +12,9 @@ class ModuleAdmin(admin.ModelAdmin):
         "name",
         "program",
         "project",
+        "linked_issue_labels",
     )
+    filter_horizontal = ("linked_issues",)
 
     search_fields = (
         "name",

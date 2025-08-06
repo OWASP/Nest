@@ -60,6 +60,9 @@ enrich-data: \
 	owasp-enrich-events \
 	owasp-enrich-projects
 
+filter-issues:
+	@CMD="python manage.py link_issues_by_label" $(MAKE) exec-backend-command
+
 generate-sitemap:
 	@CMD="python manage.py generate_sitemap" $(MAKE) exec-backend-command
 

@@ -64,6 +64,13 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         verbose_name="Labels",
     )
 
+    linked_issue_labels = models.JSONField(
+        blank=True,
+        default=list,
+        verbose_name="Linked Issue Labels",
+        help_text="List of GitHub issue labels used to associate issues with this module.",
+    )
+
     # M2Ms.
     mentors = models.ManyToManyField(
         "mentorship.Mentor",
@@ -71,6 +78,14 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         related_name="modules",
         through="mentorship.MentorModule",
         blank=True,
+    )
+
+    linked_issues = models.ManyToManyField(
+        "github.Issue",
+        verbose_name="Linked Issues",
+        related_name="mentorship_modules",
+        blank=True,
+        help_text="Issues linked to this module via label matching.",
     )
 
     def __str__(self) -> str:
