@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from datetime import timedelta as td
 
 from django.utils import timezone
@@ -127,6 +128,8 @@ def sync_repository(
                         author=User.update_data(gh_issue.milestone.creator),
                         repository=repository,
                     )
+
+                # Create issue (moved outside milestone block)
                 issue = Issue.update_data(
                     gh_issue,
                     author=author,
@@ -147,8 +150,48 @@ def sync_repository(
                         issue.labels.add(Label.update_data(gh_issue_label))
                     except UnknownObjectException:
                         logger.exception("Couldn't get GitHub issue label %s", issue.url)
-        else:
-            logger.info("Skipping issues sync for %s", repository.name)
+
+                    # Interested users from comments
+                    pattern = re.compile(
+                        r"("
+                        r"(assign.*me)|"
+                        r"(i\s*(?:'d|would)?.*like.*work.*on)|"
+                        r"(can\s+i.*work.*on)|"
+                        r"(i.*(?:'ll|will)?.*take)|"
+                        r"(i.*want.*work.*on)|"
+                        r"(i.*am.*interested)|"
+                        r"(can\s+i.*be.*assigned)|"
+                        r"(please.*assign.*me)|"
+                        r"(i.*can.*(?:help|work|fix|handle))|"
+                        r"(let\s+me.*(?:work|take|handle))|"
+                        r"(i.*(?:'ll|will).*(?:fix|handle|work))|"
+                        r"(assign.*to.*me)|"
+                        r"(i.*volunteer)|"
+                        r"(count.*me.*in)|"
+                        r"(i.*(?:'m|am).*up.*for)|"
+                        r"(i.*could.*work)|"
+                        r"(happy.*work)|"
+                        r"(i.*(?:'d|would).*love.*work)"
+                        r")",
+                        re.IGNORECASE | re.DOTALL,
+                    )
+
+                comments = gh_issue.get_comments()
+                interested_users_added = False
+
+                for comment in comments:
+                    body = (comment.body or "").lower()
+
+                    if pattern.search(body):
+                        user_obj = User.update_data(comment.user)
+                        if user_obj and not issue.interested_users.filter(pk=user_obj.pk).exists():
+                            issue.interested_users.add(user_obj)
+                            interested_users_added = True
+
+                if interested_users_added:
+                    issue.save()
+                else:
+                    logger.info("Skipping interested users sync for %s", issue.title)
 
         # GitHub repository pull requests.
         kwargs = {
