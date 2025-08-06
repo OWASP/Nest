@@ -27,6 +27,7 @@ export type User<T = number> = {
   releases?: Release[]
   releasesCount?: number
   topRepositories?: RepositoryCardProps[]
+  updatedAt?: T
   url: string
 }
 
