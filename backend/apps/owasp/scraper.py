@@ -50,6 +50,21 @@ class OwaspScraper:
         except etree.ParserError:
             return
 
+    def get_audience(self) -> list[str]:
+        """Return scraped audience."""
+        if self.page_tree is None:
+            return []
+
+        audience_elements = self.page_tree.xpath(
+            "//h4[@id='audience']/following-sibling::ul[1]/li"
+        )
+        audience = []
+        for element in audience_elements:
+            text = element.text_content().strip()
+            if text:
+                audience.append(text)
+        return audience
+
     def get_urls(self, domain=None):
         """Return scraped URLs."""
         return set(

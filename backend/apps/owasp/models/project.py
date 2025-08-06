@@ -42,6 +42,7 @@ class Project(
         ]
         verbose_name_plural = "Projects"
 
+    audience = models.JSONField(verbose_name="Audience", default=list, blank=True)
     level = models.CharField(
         verbose_name="Level",
         max_length=20,
