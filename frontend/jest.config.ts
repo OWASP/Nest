@@ -7,7 +7,6 @@ const config: Config = {
     '!src/**/*.d.ts',
     '!src/app/api/**',
     '!src/app/**/layout.tsx',
-    '!src/components/**',
     '!src/hooks/**',
     '!src/instrumentation.ts',
     '!src/instrumentation-client.ts',
@@ -23,10 +22,10 @@ const config: Config = {
   coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
   coverageThreshold: {
     global: {
-      branches: 75,
-      functions: 75,
-      lines: 75,
-      statements: 75,
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
     },
   },
   globals: {},
