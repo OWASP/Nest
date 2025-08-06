@@ -1,14 +1,19 @@
-import React from "react";
-import { screen, render, fireEvent, waitFor } from "@testing-library/react";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faLink } from "@fortawesome/free-solid-svg-icons";
-import AnchorTitle from "components/AnchorTitle";
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faLink } from '@fortawesome/free-solid-svg-icons'
+import { screen, render, fireEvent, waitFor } from '@testing-library/react'
+import AnchorTitle from 'components/AnchorTitle'
 
 library.add(faLink)
 
 jest.mock('utils/slugify', () => ({
   __esModule: true,
-  default: jest.fn((str: string) => str.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, ''))
+  default: jest.fn((str: string) =>
+    str
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+  ),
 }))
 
 describe('AnchorTitle Component', () => {
@@ -48,7 +53,14 @@ describe('AnchorTitle Component', () => {
       const link = screen.getByRole('link')
       const icon = link.querySelector('svg')
       expect(icon).toBeInTheDocument()
-      expect(link).toHaveClass('inherit-color', 'ml-2', 'opacity-0', 'transition-opacity', 'duration-200', 'group-hover:opacity-100')
+      expect(link).toHaveClass(
+        'inherit-color',
+        'ml-2',
+        'opacity-0',
+        'transition-opacity',
+        'duration-200',
+        'group-hover:opacity-100'
+      )
     })
   })
 
@@ -69,10 +81,10 @@ describe('AnchorTitle Component', () => {
         'Simple Title',
         'Test with Numbers 123',
         'Title-with-hyphens',
-        'Title_with_underscores'
+        'Title_with_underscores',
       ]
 
-      titles.forEach(title => {
+      titles.forEach((title) => {
         const { unmount } = render(<AnchorTitle title={title} />)
         const link = screen.getByRole('link')
         expect(link.getAttribute('href')).toMatch(/^#[a-z0-9-]+$/)
@@ -81,8 +93,6 @@ describe('AnchorTitle Component', () => {
     })
 
     it('applies className prop when provided', () => {
-      const customClass = 'custom-class'
-
       render(<AnchorTitle title="Test" />)
       const container = screen.getByText('Test').closest('div')
       expect(container).toHaveClass('flex', 'items-center', 'text-2xl', 'font-semibold')
@@ -93,16 +103,20 @@ describe('AnchorTitle Component', () => {
     let mockScrollTo: jest.SpyInstance
     let mockPushState: jest.SpyInstance
     let mockGetBoundingClientRect: jest.SpyInstance
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let mockGetElementById: jest.SpyInstance
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let mockRequestAnimationFrame: jest.SpyInstance
 
     beforeEach(() => {
       mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
       mockPushState = jest.spyOn(window.history, 'pushState').mockImplementation()
-      mockRequestAnimationFrame = jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
-        cb(0)
-        return 0
-      })
+      mockRequestAnimationFrame = jest
+        .spyOn(window, 'requestAnimationFrame')
+        .mockImplementation((cb) => {
+          cb(0)
+          return 0
+        })
 
       mockGetBoundingClientRect = jest.fn(() => ({
         top: 100,
@@ -113,16 +127,18 @@ describe('AnchorTitle Component', () => {
         right: 200,
         x: 0,
         y: 100,
-        toJSON: () => {}
+        toJSON: () => {},
       }))
 
       const mockElement = {
         getBoundingClientRect: mockGetBoundingClientRect,
         querySelector: jest.fn(() => ({
-          offsetHeight: 30
-        }))
+          offsetHeight: 30,
+        })),
       }
-      mockGetElementById = jest.spyOn(document, 'getElementById').mockReturnValue(mockElement as any)
+      mockGetElementById = jest
+        .spyOn(document, 'getElementById')
+        .mockReturnValue(mockElement as never)
     })
 
     it('prevents default behaviour on link click', () => {
@@ -144,8 +160,8 @@ describe('AnchorTitle Component', () => {
       fireEvent.click(link)
 
       expect(mockScrollTo).toHaveBeenCalledWith({
-        "behavior": "smooth",
-        "top": 20,
+        behavior: 'smooth',
+        top: 20,
       })
     })
 
@@ -166,22 +182,25 @@ describe('AnchorTitle Component', () => {
 
       expect(mockScrollTo).toHaveBeenCalledWith({
         top: 20,
-        behavior: 'smooth'
+        behavior: 'smooth',
       })
     })
   })
 
   describe('useEffect Behaviour', () => {
     let mockScrollTo: jest.SpyInstance
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let mockGetElementById: jest.SpyInstance
     let mockRequestAnimationFrame: jest.SpyInstance
 
     beforeEach(() => {
       mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
-      mockRequestAnimationFrame = jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
-        cb(0)
-        return 0
-      })
+      mockRequestAnimationFrame = jest
+        .spyOn(window, 'requestAnimationFrame')
+        .mockImplementation((cb) => {
+          cb(0)
+          return 0
+        })
 
       const mockElement = {
         getBoundingClientRect: jest.fn(() => ({
@@ -193,13 +212,15 @@ describe('AnchorTitle Component', () => {
           right: 200,
           x: 0,
           y: 100,
-          toJSON: () => {}
+          toJSON: () => {},
         })),
         querySelector: jest.fn(() => ({
-          offsetHeight: 30
-        }))
+          offsetHeight: 30,
+        })),
       }
-      mockGetElementById = jest.spyOn(document, 'getElementById').mockReturnValue(mockElement as any)
+      mockGetElementById = jest
+        .spyOn(document, 'getElementById')
+        .mockReturnValue(mockElement as never)
     })
 
     it('scrolls to element on mount when hash matches', async () => {
@@ -211,7 +232,7 @@ describe('AnchorTitle Component', () => {
         expect(mockRequestAnimationFrame).toHaveBeenCalled()
         expect(mockScrollTo).toHaveBeenCalledWith({
           top: 20,
-          behavior: 'smooth'
+          behavior: 'smooth',
         })
       })
     })
@@ -225,7 +246,7 @@ describe('AnchorTitle Component', () => {
         expect(mockRequestAnimationFrame).toHaveBeenCalled()
         expect(mockScrollTo).toHaveBeenCalledWith({
           top: 20,
-          behavior: 'smooth'
+          behavior: 'smooth',
         })
       })
     })
@@ -239,12 +260,12 @@ describe('AnchorTitle Component', () => {
     })
     it('handles popstate events correctly', async () => {
       render(<AnchorTitle title="Popstate Test" />)
-      
+
       window.location.hash = '#popstate-test'
-      
+
       const popstateEvent = new PopStateEvent('popstate')
       fireEvent(window, popstateEvent)
-      
+
       await waitFor(() => {
         expect(mockRequestAnimationFrame).toHaveBeenCalled()
         expect(mockScrollTo).toHaveBeenCalled()
@@ -258,16 +279,16 @@ describe('AnchorTitle Component', () => {
       unmount()
 
       expect(mockRemoveEventListener).toHaveBeenCalledWith('popstate', expect.any(Function))
-    }) 
+    })
   })
-  
+
   describe('Edge Cases and Error Handling', () => {
     it('handles empty title gracefully', () => {
       render(<AnchorTitle title="" />)
-      
+
       const container = document.querySelector('div[id=""]')
       expect(container).toBeInTheDocument()
-      
+
       const link = screen.getByRole('link')
       expect(link).toHaveAttribute('href', '#')
     })
@@ -282,9 +303,10 @@ describe('AnchorTitle Component', () => {
     })
 
     it('handles very long titles', () => {
-      const longTitle = 'This is a very long title that might cause issues with ID generation and should be handled gracefully by the component'
+      const longTitle =
+        'This is a very long title that might cause issues with ID generation and should be handled gracefully by the component'
       render(<AnchorTitle title={longTitle} />)
-      
+
       expect(screen.getByText(longTitle)).toBeInTheDocument()
       const link = screen.getByRole('link')
       expect(link.getAttribute('href')).toBeDefined()
@@ -305,12 +327,19 @@ describe('AnchorTitle Component', () => {
     it('handles missing anchor-title element in scroll calculation', () => {
       const mockElement = {
         getBoundingClientRect: jest.fn(() => ({
-          top: 100, height: 50, width: 200, bottom: 150,
-          left: 0, right: 200, x: 0, y: 100, toJSON: () => {}
+          top: 100,
+          height: 50,
+          width: 200,
+          bottom: 150,
+          left: 0,
+          right: 200,
+          x: 0,
+          y: 100,
+          toJSON: () => {},
         })),
-        querySelector: jest.fn(() => null) 
+        querySelector: jest.fn(() => null),
       }
-      jest.spyOn(document, 'getElementById').mockReturnValue(mockElement as any)
+      jest.spyOn(document, 'getElementById').mockReturnValue(mockElement as never)
       jest.spyOn(window, 'scrollTo').mockImplementation()
 
       render(<AnchorTitle title="No Anchor" />)
@@ -331,7 +360,7 @@ describe('AnchorTitle Component', () => {
 
     it('provides proper heading structure', () => {
       render(<AnchorTitle title="Heading Test" />)
-      
+
       const titleElement = screen.getByText('Heading Test')
       expect(titleElement).toHaveAttribute('id', 'anchor-title')
       expect(titleElement).toHaveClass('text-2xl', 'font-semibold')
@@ -340,17 +369,17 @@ describe('AnchorTitle Component', () => {
     it('maintains focus management on interaction', () => {
       const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
       const mockPushState = jest.spyOn(window.history, 'pushState').mockImplementation()
-      
+
       render(<AnchorTitle title="Focus Test" />)
-      
+
       const link = screen.getByRole('link')
       link.focus()
       expect(document.activeElement).toBe(link)
-      
+
       fireEvent.click(link)
-      
+
       expect(document.activeElement).toBeDefined()
-      
+
       mockScrollTo.mockRestore()
       mockPushState.mockRestore()
     })
@@ -392,11 +421,11 @@ describe('AnchorTitle Component', () => {
     it('updates correctly when title prop changes', () => {
       const { rerender } = render(<AnchorTitle title="Original Title" />)
       expect(screen.getByText('Original Title')).toBeInTheDocument()
-      
+
       rerender(<AnchorTitle title="Updated Title" />)
       expect(screen.getByText('Updated Title')).toBeInTheDocument()
       expect(screen.queryByText('Original Title')).not.toBeInTheDocument()
-      
+
       const link = screen.getByRole('link')
       expect(link).toHaveAttribute('href', '#updated-title')
     })
@@ -405,26 +434,26 @@ describe('AnchorTitle Component', () => {
   describe('Browser API Interactions', () => {
     it('handles window.pageYOffset correctly', () => {
       const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
-      
+
       Object.defineProperty(window, 'pageYOffset', {
         value: 500,
-        configurable: true
+        configurable: true,
       })
-      
+
       const mockElement = {
         getBoundingClientRect: jest.fn(() => ({ top: 100 })),
-        querySelector: jest.fn(() => ({ offsetHeight: 30 }))
+        querySelector: jest.fn(() => ({ offsetHeight: 30 })),
       }
-      jest.spyOn(document, 'getElementById').mockReturnValue(mockElement as any)
-      
+      jest.spyOn(document, 'getElementById').mockReturnValue(mockElement as never)
+
       render(<AnchorTitle title="Offset Test" />)
       const link = screen.getByRole('link')
-      
+
       fireEvent.click(link)
 
       expect(mockScrollTo).toHaveBeenCalledWith({
         top: 520,
-        behavior: 'smooth'
+        behavior: 'smooth',
       })
     })
 
@@ -441,7 +470,7 @@ describe('AnchorTitle Component', () => {
       window.location.hash = '#hash-test'
       const popstateEvent = new PopStateEvent('popstate')
       fireEvent(window, popstateEvent)
-      
+
       await waitFor(() => {
         expect(mockScrollTo).toHaveBeenCalled()
       })
@@ -451,30 +480,30 @@ describe('AnchorTitle Component', () => {
   describe('Performance and Optimization', () => {
     it('uses useCallback for scrollToElement function', () => {
       const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
-      
+
       const { rerender } = render(<AnchorTitle title="Callback Test" />)
       const link1 = screen.getByRole('link')
-      
+
       fireEvent.click(link1)
-      
+
       rerender(<AnchorTitle title="Callback Test" />)
       const link2 = screen.getByRole('link')
-      
+
       fireEvent.click(link2)
-      
+
       expect(mockScrollTo).toHaveBeenCalledTimes(2)
     })
 
     it('cleans up event listeners properly', () => {
       const mockAddEventListener = jest.spyOn(window, 'addEventListener')
       const mockRemoveEventListener = jest.spyOn(window, 'removeEventListener')
-      
+
       const { unmount } = render(<AnchorTitle title="Cleanup Test" />)
-      
+
       expect(mockAddEventListener).toHaveBeenCalledWith('popstate', expect.any(Function))
-      
+
       unmount()
-      
+
       expect(mockRemoveEventListener).toHaveBeenCalledWith('popstate', expect.any(Function))
     })
   })
@@ -482,36 +511,36 @@ describe('AnchorTitle Component', () => {
   describe('State Changes and Internal Logic', () => {
     it('recalculates scroll position when element dimensions change', () => {
       const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
-    
+
       let offsetHeight = 30
       const mockElement = {
         getBoundingClientRect: jest.fn(() => ({ top: 100 })),
-        querySelector: jest.fn(() => ({ offsetHeight }))
+        querySelector: jest.fn(() => ({ offsetHeight })),
       }
-      jest.spyOn(document, 'getElementById').mockReturnValue(mockElement as any)
-      
+      jest.spyOn(document, 'getElementById').mockReturnValue(mockElement as never)
+
       render(<AnchorTitle title="Dynamic Height" />)
       const link = screen.getByRole('link')
-      
+
       fireEvent.click(link)
       const firstCall = (mockScrollTo.mock.calls[0][0] as unknown as { top: number }).top
-      
+
       offsetHeight = 60
       fireEvent.click(link)
       const secondCall = (mockScrollTo.mock.calls[1][0] as unknown as { top: number }).top
-      
+
       expect(firstCall).not.toBe(secondCall)
       expect(Math.abs(firstCall - secondCall)).toBe(30)
     })
     it('handles component rerender with different IDs', () => {
       const mockAddEventListener = jest.spyOn(window, 'addEventListener')
       const mockRemoveEventListener = jest.spyOn(window, 'removeEventListener')
-      
+
       const { rerender } = render(<AnchorTitle title="Original" />)
       const originalAddCalls = mockAddEventListener.mock.calls.length
-      
+
       rerender(<AnchorTitle title="Changed" />)
-      
+
       expect(mockRemoveEventListener).toHaveBeenCalled()
       expect(mockAddEventListener.mock.calls.length).toBeGreaterThan(originalAddCalls)
     })
@@ -524,7 +553,7 @@ describe('AnchorTitle Component', () => {
       const link = screen.getByRole('link')
       expect(link).toHaveClass(
         'inherit-color',
-        'ml-2', 
+        'ml-2',
         'opacity-0',
         'transition-opacity',
         'duration-200',
@@ -534,18 +563,18 @@ describe('AnchorTitle Component', () => {
 
     it('has correct icon styling', () => {
       render(<AnchorTitle title="Icon Test" />)
-      
+
       const icon = screen.getByRole('link').querySelector('svg')
       expect(icon).toHaveClass('custom-icon', 'h-7', 'w-5')
     })
 
     it('maintains proper layout structure', () => {
       render(<AnchorTitle title="Layout Test" />)
-      
+
       const titleContainer = screen.getByText('Layout Test').closest('div')
       expect(titleContainer).toHaveAttribute('id', 'anchor-title')
       expect(titleContainer).toHaveClass('flex', 'items-center', 'text-2xl', 'font-semibold')
-      
+
       const groupContainer = titleContainer?.closest('.group')
       expect(groupContainer).toHaveClass('group', 'relative', 'flex', 'items-center')
     })
@@ -555,9 +584,9 @@ describe('AnchorTitle Component', () => {
     it('uses slugify utility correctly', () => {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const slugifyMock = require('utils/slugify').default
-      
+
       render(<AnchorTitle title="Slugify Test" />)
-      
+
       expect(slugifyMock).toHaveBeenCalledWith('Slugify Test')
     })
 
@@ -565,12 +594,12 @@ describe('AnchorTitle Component', () => {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const slugifyMock = require('utils/slugify').default
       slugifyMock.mockReturnValue('custom-slug-format')
-      
+
       render(<AnchorTitle title="Custom Slug" />)
-      
+
       const link = screen.getByRole('link')
       expect(link).toHaveAttribute('href', '#custom-slug-format')
-      
+
       const element = document.getElementById('custom-slug-format')
       expect(element).toBeInTheDocument()
     })
@@ -580,32 +609,32 @@ describe('AnchorTitle Component', () => {
     it('complete user journey: render → hover → click → navigate', async () => {
       const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
       const mockPushState = jest.spyOn(window.history, 'pushState').mockImplementation()
-      
+
       render(<AnchorTitle title="User Journey" />)
-      
+
       const titleElement = screen.getByText('User Journey')
       expect(titleElement).toBeInTheDocument()
-      
+
       const link = screen.getByRole('link')
       expect(link).toHaveClass('opacity-0')
-      
+
       fireEvent.click(link)
-      
+
       expect(mockScrollTo).toHaveBeenCalledWith({
         top: expect.any(Number),
-        behavior: 'smooth'
+        behavior: 'smooth',
       })
       expect(mockPushState).toHaveBeenCalledWith(null, '', '#custom-slug-format')
     })
 
     it('handles keyboard navigation', () => {
       render(<AnchorTitle title="Keyboard Test" />)
-      
+
       const link = screen.getByRole('link')
-      
+
       link.focus()
       expect(document.activeElement).toBe(link)
-      
+
       fireEvent.keyDown(link, { key: 'Enter', code: 'Enter' })
     })
   })
