@@ -1,35 +1,31 @@
 export interface ProfilePageStructuredData {
   '@context': string
   '@type': string
+  dateCreated?: string
+  dateModified?: string
   mainEntity: {
     '@type': string
-    name: string
+    address?: string
     description?: string
+    identifier?: string
     image?: string
-    url?: string
-    sameAs?: string[]
-    worksFor?: {
+    interactionStatistic?: Array<{
       '@type': string
-      name: string
-    }
-    address?: {
-      '@type': string
-      addressLocality: string
-    }
+      interactionType: string
+      userInteractionCount: number
+    }>
     knowsAbout?: string[]
-    hasOccupation?: {
-      '@type': string
-      name: string
-    }
     memberOf?: {
       '@type': string
       name: string
       url: string
     }
+    name: string
+    sameAs?: string[]
+    url?: string
+    worksFor?: {
+      '@type': string
+      name: string
+    }
   }
-  interactionStatistic?: Array<{
-    '@type': string
-    interactionType: string
-    userInteractionCount: number
-  }>
 }

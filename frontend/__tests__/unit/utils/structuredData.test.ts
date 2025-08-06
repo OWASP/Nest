@@ -12,10 +12,11 @@ describe('generateProfilePageStructuredData', () => {
     followersCount: 500,
     followingCount: 200,
     key: 'testuser',
-    location: 'San Francisco, CA',
+    location: 'San Francisco, CA, USA',
     login: 'testuser',
     name: 'Test User',
     publicRepositoriesCount: 25,
+    updatedAt: '2021-02-03T00:00:00Z',
     url: 'https://github.com/testuser',
   }
 
@@ -25,38 +26,34 @@ describe('generateProfilePageStructuredData', () => {
     expect(result).toEqual({
       '@context': 'https://schema.org',
       '@type': 'ProfilePage',
+      dateCreated: '1970-01-01T00:33:40.000Z',
+      dateModified: '1970-01-01T00:33:41.000Z',
       mainEntity: {
         '@type': 'Person',
-        name: 'Test User',
+        address: 'San Francisco, CA, USA',
         description: 'Security researcher and OWASP contributor',
+        identifier: 'testuser',
         image: 'https://example.com/avatar.jpg',
-        url: 'https://nest.owasp.org/members/testuser',
-        sameAs: ['https://github.com/testuser'],
+        interactionStatistic: [
+          {
+            '@type': 'InteractionCounter',
+            interactionType: 'https://schema.org/FollowAction',
+            userInteractionCount: 500,
+          },
+        ],
         memberOf: {
           '@type': 'Organization',
-          name: 'OWASP',
-          url: 'https://owasp.org',
+          name: 'OWASP Community',
+          url: 'https://nest.owasp.org/members',
         },
-        hasOccupation: {
-          '@type': 'Occupation',
-          name: 'OWASP Community Member',
-        },
+        name: 'Test User',
+        sameAs: ['https://github.com/testuser'],
+        url: 'https://nest.owasp.org/members/testuser',
         worksFor: {
           '@type': 'Organization',
           name: 'Security Corp',
         },
-        address: {
-          '@type': 'PostalAddress',
-          addressLocality: 'San Francisco, CA',
-        },
       },
-      interactionStatistic: [
-        {
-          '@type': 'InteractionCounter',
-          interactionType: 'https://schema.org/FollowAction',
-          userInteractionCount: 500,
-        },
-      ],
     })
   })
 
@@ -70,6 +67,7 @@ describe('generateProfilePageStructuredData', () => {
       key: 'basicuser',
       login: 'basicuser',
       publicRepositoriesCount: 0,
+      updatedAt: '2021-02-03T00:00:00Z',
       url: 'https://github.com/basicuser',
     }
 
@@ -79,11 +77,10 @@ describe('generateProfilePageStructuredData', () => {
     expect(result.mainEntity.description).toBeUndefined()
     expect(result.mainEntity.worksFor).toBeUndefined()
     expect(result.mainEntity.address).toBeUndefined()
-    expect(result.interactionStatistic).toBeUndefined()
+    expect(result.mainEntity.interactionStatistic).toBeUndefined()
 
     // These should always be present
     expect(result.mainEntity.memberOf).toBeDefined()
-    expect(result.mainEntity.hasOccupation).toBeDefined()
   })
 
   it('should include interaction statistics only when followers count > 0', () => {
@@ -93,10 +90,10 @@ describe('generateProfilePageStructuredData', () => {
     const resultWithFollowers = generateProfilePageStructuredData(userWithFollowers)
     const resultWithoutFollowers = generateProfilePageStructuredData(userWithoutFollowers)
 
-    expect(resultWithFollowers.interactionStatistic).toBeDefined()
-    expect(resultWithFollowers.interactionStatistic?.[0].userInteractionCount).toBe(100)
+    expect(resultWithFollowers.mainEntity.interactionStatistic).toBeDefined()
+    expect(resultWithFollowers.mainEntity.interactionStatistic?.[0].userInteractionCount).toBe(100)
 
-    expect(resultWithoutFollowers.interactionStatistic).toBeUndefined()
+    expect(resultWithoutFollowers.mainEntity.interactionStatistic).toBeUndefined()
   })
 
   it('should use custom base URL when provided', () => {
@@ -130,10 +127,7 @@ describe('generateProfilePageStructuredData', () => {
 
     const result = generateProfilePageStructuredData(userWithLocationOnly)
 
-    expect(result.mainEntity.address).toEqual({
-      '@type': 'PostalAddress',
-      addressLocality: 'New York, NY',
-    })
+    expect(result.mainEntity.address).toEqual('New York, NY')
     expect(result.mainEntity.worksFor).toBeUndefined()
   })
 

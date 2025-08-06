@@ -14,50 +14,42 @@ export function generateProfilePageStructuredData(
   user: UserDetails,
   baseUrl = 'https://nest.owasp.org'
 ): ProfilePageStructuredData {
-  const profileUrl = `${baseUrl}/members/${user.login}`
-
-  const structuredData: ProfilePageStructuredData = {
+  return {
     '@context': 'https://schema.org',
     '@type': 'ProfilePage',
+    dateCreated: new Date(parseInt(user.createdAt) * 1000).toISOString(),
+    dateModified: new Date(parseInt(user.updatedAt) * 1000).toISOString(),
     mainEntity: {
       '@type': 'Person',
-      name: user.name || user.login,
+      ...(user.location && {
+        address: user.location,
+      }),
       description: user.bio,
+      identifier: user.login,
       image: user.avatarUrl,
-      url: profileUrl,
-      sameAs: [user.url], // GitHub profile URL
+      ...(user.followersCount > 0 && {
+        interactionStatistic: [
+          {
+            '@type': 'InteractionCounter',
+            interactionType: 'https://schema.org/FollowAction',
+            userInteractionCount: user.followersCount,
+          },
+        ],
+      }),
       memberOf: {
         '@type': 'Organization',
-        name: 'OWASP',
-        url: 'https://owasp.org',
+        name: 'OWASP Community',
+        url: 'https://nest.owasp.org/members',
       },
-      hasOccupation: {
-        '@type': 'Occupation',
-        name: 'OWASP Community Member',
-      },
+      name: user.name || user.login,
+      sameAs: [user.url],
+      url: `${baseUrl}/members/${user.login}`,
       ...(user.company && {
         worksFor: {
           '@type': 'Organization',
           name: user.company,
         },
       }),
-      ...(user.location && {
-        address: {
-          '@type': 'PostalAddress',
-          addressLocality: user.location,
-        },
-      }),
     },
-    ...(user.followersCount > 0 && {
-      interactionStatistic: [
-        {
-          '@type': 'InteractionCounter',
-          interactionType: 'https://schema.org/FollowAction',
-          userInteractionCount: user.followersCount,
-        },
-      ],
-    }),
   }
-
-  return structuredData
 }

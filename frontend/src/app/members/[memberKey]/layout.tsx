@@ -40,31 +40,21 @@ export default async function UserDetailsLayout({
 }) {
   const { memberKey } = await params
 
-  try {
-    const { data } = await apolloClient.query({
-      query: GET_USER_DATA,
-      variables: {
-        key: memberKey,
-      },
-    })
+  const { data } = await apolloClient.query({
+    query: GET_USER_DATA,
+    variables: {
+      key: memberKey,
+    },
+  })
 
-    const user = data?.user
-
-    if (!user) {
-      return children
-    }
-
-    if (user && user.login) {
-      const structuredData = generateProfilePageStructuredData(user)
-
-      return (
-        <>
-          <StructuredDataScript data={structuredData} />
-          {children}
-        </>
-      )
-    }
-  } catch {
+  if (!data?.user?.login) {
     return children
   }
+
+  return (
+    <>
+      <StructuredDataScript data={generateProfilePageStructuredData(data.user)} />
+      {children}
+    </>
+  )
 }

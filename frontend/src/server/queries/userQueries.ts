@@ -72,6 +72,7 @@ export const GET_USER_DATA = gql`
       name
       publicRepositoriesCount
       releasesCount
+      updatedAt
       url
     }
   }
