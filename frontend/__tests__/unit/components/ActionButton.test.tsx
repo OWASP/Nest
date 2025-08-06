@@ -118,9 +118,9 @@ describe('ActionButton', () => {
   })
 
   it(`changes background and text color on hover`, () => {
-    render(<ActionButton>Test Button</ActionButton>);
+    render(<ActionButton>Test Button</ActionButton>)
     const button = screen.getByRole('button')
-    expect(button).toHaveClass('dark:hover:bg-blue-600') 
-    expect(button).toHaveClass('dark:text-white') 
+    expect(button).toHaveClass('hover:bg-[#1D7BD7]')
+    expect(button).toHaveClass('dark:hover:text-white')
   })
 })
