@@ -1,7 +1,6 @@
 import { render, screen, act } from '@testing-library/react'
-import AnimatedCounter from 'components/AnimatedCounter'
 import '@testing-library/jest-dom'
-import React from 'react'
+import AnimatedCounter from 'components/AnimatedCounter'
 
 jest.useFakeTimers()
 
@@ -65,7 +64,7 @@ describe('AnimatedCounter', () => {
 
     it('updates count during animation', () => {
       render(<AnimatedCounter end={50} duration={2} />)
-      
+
       // Advance time by 1 second (halfway through animation)
       act(() => {
         jest.advanceTimersByTime(1000)
@@ -79,7 +78,7 @@ describe('AnimatedCounter', () => {
 
     it('stops at exact end value', () => {
       render(<AnimatedCounter end={75} duration={1} />)
-      
+
       act(() => {
         jest.advanceTimersByTime(1000)
       })
@@ -113,11 +112,11 @@ describe('AnimatedCounter', () => {
   describe('Text and content rendering', () => {
     it('displays formatted numbers using millify', () => {
       render(<AnimatedCounter end={1200} duration={1} />)
-      
+
       act(() => {
         jest.advanceTimersByTime(1000)
       })
-      
+
       expect(screen.getByText('1.2K')).toBeInTheDocument()
     })
 
@@ -176,13 +175,13 @@ describe('AnimatedCounter', () => {
     it('calls requestAnimationFrame during animation', () => {
       const requestAnimationFrameSpy = jest.spyOn(window, 'requestAnimationFrame')
       render(<AnimatedCounter end={100} duration={1} />)
-      
+
       expect(requestAnimationFrameSpy).toHaveBeenCalled()
     })
 
     it('renders final value correctly', () => {
       render(<AnimatedCounter end={100} duration={0.1} />)
-      
+
       act(() => {
         jest.advanceTimersByTime(100)
       })
@@ -192,7 +191,7 @@ describe('AnimatedCounter', () => {
 
     it('updates count correctly', () => {
       render(<AnimatedCounter end={10} duration={1} />)
-      
+
       act(() => {
         jest.advanceTimersByTime(1000)
       })
@@ -204,7 +203,7 @@ describe('AnimatedCounter', () => {
   describe('Component lifecycle', () => {
     it('re-initializes animation when props change', () => {
       const { rerender } = render(<AnimatedCounter end={50} duration={1} />)
-      
+
       // Wait for first animation to complete
       act(() => {
         jest.advanceTimersByTime(1000)
@@ -214,23 +213,23 @@ describe('AnimatedCounter', () => {
 
       // Change props
       rerender(<AnimatedCounter end={100} duration={2} />)
-      
+
       // Should show the new end value after animation completes
       act(() => {
         jest.advanceTimersByTime(2000)
       })
-      
+
       expect(screen.getByText('100')).toBeInTheDocument()
     })
 
     it('handles rapid prop changes gracefully', () => {
       const { rerender } = render(<AnimatedCounter end={10} duration={1} />)
-      
+
       // Rapidly change props
       rerender(<AnimatedCounter end={20} duration={1} />)
       rerender(<AnimatedCounter end={30} duration={1} />)
       rerender(<AnimatedCounter end={40} duration={1} />)
-      
+
       // Should not crash and should render
       expect(screen.getByText('0')).toBeInTheDocument()
     })
@@ -256,7 +255,7 @@ describe('AnimatedCounter', () => {
   describe('Event handling and user interactions', () => {
     it('responds to prop changes correctly', () => {
       const { rerender } = render(<AnimatedCounter end={100} duration={1} />)
-      
+
       act(() => {
         jest.advanceTimersByTime(1000)
       })
@@ -265,12 +264,12 @@ describe('AnimatedCounter', () => {
 
       // Change end value
       rerender(<AnimatedCounter end={200} duration={1} />)
-      
+
       // Should show the new end value after animation completes
       act(() => {
         jest.advanceTimersByTime(1000)
       })
-      
+
       expect(screen.getByText('200')).toBeInTheDocument()
     })
   })
@@ -282,9 +281,9 @@ describe('AnimatedCounter', () => {
         renderSpy()
         return <AnimatedCounter end={100} duration={1} />
       }
-      
+
       render(<TestWrapper />)
-      
+
       act(() => {
         jest.advanceTimersByTime(1000)
       })
