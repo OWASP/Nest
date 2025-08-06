@@ -45,6 +45,7 @@ export type Project = {
 }
 
 export type RepositoriesCardProps = {
+  maxInitialDisplay?: number
   repositories?: RepositoryCardProps[]
 }
 
