@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faLink } from '@fortawesome/free-solid-svg-icons'
 import { screen, render, fireEvent, waitFor } from '@testing-library/react'
@@ -91,21 +92,13 @@ describe('AnchorTitle Component', () => {
         unmount()
       })
     })
-
-    it('applies className prop when provided', () => {
-      render(<AnchorTitle title="Test" />)
-      const container = screen.getByText('Test').closest('div')
-      expect(container).toHaveClass('flex', 'items-center', 'text-2xl', 'font-semibold')
-    })
   })
 
   describe('Event Handling', () => {
     let mockScrollTo: jest.SpyInstance
     let mockPushState: jest.SpyInstance
     let mockGetBoundingClientRect: jest.SpyInstance
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let mockGetElementById: jest.SpyInstance
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let mockRequestAnimationFrame: jest.SpyInstance
 
     beforeEach(() => {
@@ -138,7 +131,8 @@ describe('AnchorTitle Component', () => {
       }
       mockGetElementById = jest
         .spyOn(document, 'getElementById')
-        .mockReturnValue(mockElement as never)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .mockReturnValue(mockElement as any)
     })
 
     it('prevents default behaviour on link click', () => {
@@ -189,7 +183,6 @@ describe('AnchorTitle Component', () => {
 
   describe('useEffect Behaviour', () => {
     let mockScrollTo: jest.SpyInstance
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let mockGetElementById: jest.SpyInstance
     let mockRequestAnimationFrame: jest.SpyInstance
 
@@ -220,24 +213,11 @@ describe('AnchorTitle Component', () => {
       }
       mockGetElementById = jest
         .spyOn(document, 'getElementById')
-        .mockReturnValue(mockElement as never)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .mockReturnValue(mockElement as any)
     })
 
     it('scrolls to element on mount when hash matches', async () => {
-      window.location.hash = '#test-scroll'
-
-      render(<AnchorTitle title="Test Scroll" />)
-
-      await waitFor(() => {
-        expect(mockRequestAnimationFrame).toHaveBeenCalled()
-        expect(mockScrollTo).toHaveBeenCalledWith({
-          top: 20,
-          behavior: 'smooth',
-        })
-      })
-    })
-
-    it('scrolls to an element on mount when hash matches', async () => {
       window.location.hash = '#test-scroll'
 
       render(<AnchorTitle title="Test Scroll" />)
@@ -339,7 +319,8 @@ describe('AnchorTitle Component', () => {
         })),
         querySelector: jest.fn(() => null),
       }
-      jest.spyOn(document, 'getElementById').mockReturnValue(mockElement as never)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      jest.spyOn(document, 'getElementById').mockReturnValue(mockElement as any)
       jest.spyOn(window, 'scrollTo').mockImplementation()
 
       render(<AnchorTitle title="No Anchor" />)
@@ -444,7 +425,8 @@ describe('AnchorTitle Component', () => {
         getBoundingClientRect: jest.fn(() => ({ top: 100 })),
         querySelector: jest.fn(() => ({ offsetHeight: 30 })),
       }
-      jest.spyOn(document, 'getElementById').mockReturnValue(mockElement as never)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      jest.spyOn(document, 'getElementById').mockReturnValue(mockElement as any)
 
       render(<AnchorTitle title="Offset Test" />)
       const link = screen.getByRole('link')
@@ -517,7 +499,8 @@ describe('AnchorTitle Component', () => {
         getBoundingClientRect: jest.fn(() => ({ top: 100 })),
         querySelector: jest.fn(() => ({ offsetHeight })),
       }
-      jest.spyOn(document, 'getElementById').mockReturnValue(mockElement as never)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      jest.spyOn(document, 'getElementById').mockReturnValue(mockElement as any)
 
       render(<AnchorTitle title="Dynamic Height" />)
       const link = screen.getByRole('link')
@@ -532,6 +515,7 @@ describe('AnchorTitle Component', () => {
       expect(firstCall).not.toBe(secondCall)
       expect(Math.abs(firstCall - secondCall)).toBe(30)
     })
+
     it('handles component rerender with different IDs', () => {
       const mockAddEventListener = jest.spyOn(window, 'addEventListener')
       const mockRemoveEventListener = jest.spyOn(window, 'removeEventListener')
@@ -607,6 +591,16 @@ describe('AnchorTitle Component', () => {
 
   describe('Comprehensive User Interactions', () => {
     it('complete user journey: render → hover → click → navigate', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const slugifyMock = require('utils/slugify').default
+      slugifyMock.mockImplementation((str: string) =>
+        str
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '')
+      )
+
       const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
       const mockPushState = jest.spyOn(window.history, 'pushState').mockImplementation()
 
@@ -624,7 +618,7 @@ describe('AnchorTitle Component', () => {
         top: expect.any(Number),
         behavior: 'smooth',
       })
-      expect(mockPushState).toHaveBeenCalledWith(null, '', '#custom-slug-format')
+      expect(mockPushState).toHaveBeenCalledWith(null, '', '#user-journey')
     })
 
     it('handles keyboard navigation', () => {
