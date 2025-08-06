@@ -113,26 +113,27 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
     @classmethod
     def get_top_contributors(
         cls,
-        limit=15,
+        *,
         chapter=None,
         committee=None,
         excluded_usernames: list[str] | None = None,
+        has_full_name=False,
+        limit=15,
         organization=None,
         project=None,
         repository=None,
-        has_full_name=None,
     ):
         """Get top contributors across repositories, organization, or project.
 
         Args:
-            limit (int, optional): Maximum number of contributors to return.
             chapter (str, optional): Chapter key to filter by.
             committee (str, optional): Committee key to filter by.
             excluded_usernames (list[str], optional): Usernames to exclude from the results.
+            has_full_name (bool, optional): Filter contributors with likely full names.
+            limit (int, optional): Maximum number of contributors to return.
             organization (str, optional): Organization login to filter by.
             project (str, optional): Project key to filter by.
             repository (str, optional): Repository key to filter by.
-            has_full_name (bool, optional): Filter contributors with likely full names.
 
         Returns:
             list: List of dictionaries containing contributor information.
@@ -148,8 +149,8 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
             queryset = queryset.exclude(user__login__in=excluded_usernames)
 
         if has_full_name:
-            # Match any two words with at least 2 chars each, separated by whitespace
-            queryset = queryset.filter(user__name__regex=r"\S{2,}\s+\S{2,}")
+            # Match any 2+ words 2+ characther long separated by a whitespace.
+            queryset = queryset.filter(user__name__regex=r"\S{2,}\s\S{2,}")
 
         if project:
             queryset = queryset.filter(repository__project__key__iexact=f"www-project-{project}")

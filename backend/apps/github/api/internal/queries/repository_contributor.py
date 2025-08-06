@@ -13,41 +13,41 @@ class RepositoryContributorQuery:
     @strawberry.field
     def top_contributors(
         self,
-        limit: int = 24,
+        *,
         chapter: str | None = None,
         committee: str | None = None,
         excluded_usernames: list[str] | None = None,
+        has_full_name: bool = False,
+        limit: int = 24,
         organization: str | None = None,
         project: str | None = None,
         repository: str | None = None,
-        *,
-        has_full_name: bool | None = None,
     ) -> list[RepositoryContributorNode]:
         """Resolve top contributors.
 
         Args:
-            limit (int): Maximum number of contributors to return.
             chapter (str, optional): Chapter key to filter by.
             committee (str, optional): Committee key to filter by.
-            organization (str, optional): Organization login to filter by.
             excluded_usernames (list[str], optional): Usernames to exclude from the results.
+            has_full_name (bool, optional): Filter contributors with likely full names.
+            limit (int, optional): Maximum number of contributors to return.
+            organization (str, optional): Organization login to filter by.
             project (str, optional): Project key to filter by.
             repository (str, optional): Repository name to filter by.
-            has_full_name (bool, optional): Filter contributors with likely full names.
 
         Returns:
             list: List of top contributors with their details.
 
         """
         top_contributors = RepositoryContributor.get_top_contributors(
-            limit=limit,
             chapter=chapter,
             committee=committee,
             excluded_usernames=excluded_usernames,
+            has_full_name=has_full_name,
+            limit=limit,
             organization=organization,
             project=project,
             repository=repository,
-            has_full_name=has_full_name,
         )
 
         return [
