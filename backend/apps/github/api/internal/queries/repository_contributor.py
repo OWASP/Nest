@@ -13,7 +13,7 @@ class RepositoryContributorQuery:
     @strawberry.field
     def top_contributors(
         self,
-        limit: int = 20,
+        limit: int = 24,
         chapter: str | None = None,
         committee: str | None = None,
         excluded_usernames: list[str] | None = None,
