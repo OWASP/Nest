@@ -210,7 +210,15 @@
       "type": "string"
     }
   },
-  "required": ["audience", "leaders", "level", "name", "pitch", "tags", "type"],
+  "required": [
+    "audience",
+    "leaders",
+    "level",
+    "name",
+    "pitch",
+    "tags",
+    "type"
+  ],
   "title": "OWASP Project",
   "type": "object"
 }
