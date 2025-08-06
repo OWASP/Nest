@@ -149,7 +149,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
 
         if has_full_name:
             # Match any two words with at least 2 chars each, separated by whitespace
-            queryset = queryset.filter(user__name__regex=r".{2,}\s+.{2,}")
+            queryset = queryset.filter(user__name__regex=r"\S{2,}\s+\S{2,}")
 
         if project:
             queryset = queryset.filter(repository__project__key__iexact=f"www-project-{project}")
