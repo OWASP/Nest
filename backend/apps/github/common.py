@@ -151,47 +151,38 @@ def sync_repository(
                     except UnknownObjectException:
                         logger.exception("Couldn't get GitHub issue label %s", issue.url)
 
-                    # Interested users from comments
-                    pattern = re.compile(
-                        r"("
-                        r"(assign.*me)|"
-                        r"(i\s*(?:'d|would)?.*like.*work.*on)|"
-                        r"(can\s+i.*work.*on)|"
-                        r"(i.*(?:'ll|will)?.*take)|"
-                        r"(i.*want.*work.*on)|"
-                        r"(i.*am.*interested)|"
-                        r"(can\s+i.*be.*assigned)|"
-                        r"(please.*assign.*me)|"
-                        r"(i.*can.*(?:help|work|fix|handle))|"
-                        r"(let\s+me.*(?:work|take|handle))|"
-                        r"(i.*(?:'ll|will).*(?:fix|handle|work))|"
-                        r"(assign.*to.*me)|"
-                        r"(i.*volunteer)|"
-                        r"(count.*me.*in)|"
-                        r"(i.*(?:'m|am).*up.*for)|"
-                        r"(i.*could.*work)|"
-                        r"(happy.*work)|"
-                        r"(i.*(?:'d|would).*love.*work)"
-                        r")",
-                        re.IGNORECASE | re.DOTALL,
-                    )
-
-                comments = gh_issue.get_comments()
-                interested_users_added = False
-
-                for comment in comments:
-                    body = (comment.body or "").lower()
-
-                    if pattern.search(body):
-                        user_obj = User.update_data(comment.user)
-                        if user_obj and not issue.interested_users.filter(pk=user_obj.pk).exists():
-                            issue.interested_users.add(user_obj)
-                            interested_users_added = True
-
-                if interested_users_added:
-                    issue.save()
-                else:
-                    logger.info("Skipping interested users sync for %s", issue.title)
+                try:
+                    comments = gh_issue.get_comments()
+                    issue.interested_users.clear()
+                    for comment in comments:
+                        body = (comment.body or "").lower()
+                        # patterns
+                        interest_patterns = [
+                            r"assign.*me",
+                            r"i(?:'d| would)? like to work on",
+                            r"can i work on",
+                            r"i(?:'ll| will)? take",
+                            r"i want to work on",
+                            r"i am interested",
+                            r"can i be assigned",
+                            r"please assign.*me",
+                            r"i can (?:help|work|fix|handle)",
+                            r"let me (?:work|take|handle)",
+                            r"i(?:'ll| will).*(?:fix|handle|work)",
+                            r"assign.*to.*me",
+                            r"i volunteer",
+                            r"count me in",
+                            r"i(?:'m| am) up for",
+                            r"i could work",
+                            r"happy.*work",
+                            r"i(?:'d| would) love to work",
+                        ]
+                        if any(re.search(pattern, body) for pattern in interest_patterns):
+                            user_obj = User.update_data(comment.user)
+                            if user_obj:
+                                issue.interested_users.add(user_obj)
+                except UnknownObjectException as e:
+                    logger.warning("Failed to process comments for issue %s: %s", issue.title, e)
 
         # GitHub repository pull requests.
         kwargs = {
