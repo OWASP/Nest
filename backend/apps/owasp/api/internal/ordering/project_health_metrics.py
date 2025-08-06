@@ -11,8 +11,9 @@ class ProjectHealthMetricsOrder:
     """Ordering for Project Health Metrics."""
 
     score: strawberry.auto
+
     # We need to order by another field in case of equal scores
     # to ensure unique metrics in pagination.
-    # because SQL returns random order if no order is specified.
-    # We didn't do this ordering in the model since we order already in the query.
+    # The ORM returns random ordered query set if no order is specified.
+    # We don't do ordering in the model since we order already in the query.
     project__name: strawberry.auto
