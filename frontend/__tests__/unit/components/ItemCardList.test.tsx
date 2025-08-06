@@ -178,7 +178,6 @@ const mockRelease: Release = {
   publishedAt: 1640995200000,
   repositoryName: 'test-repo',
   tagName: 'v1.0.0',
-  url: 'https://github.com/test-org/test-repo/releases/tag/v1.0.0',
 }
 
 describe('ItemCardList Component', () => {
