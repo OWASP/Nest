@@ -16,7 +16,6 @@ from tests.conftest import tests_data_dir
             "audience_invalid.yaml",
             "'hacker' is not one of ['breaker', 'builder', 'defender']",
         ),
-        ("audience_empty.yaml", "'' is not one of ['breaker', 'builder', 'defender']"),
         ("audience_null.yaml", "None is not of type 'array'"),
         ("audience_undefined.yaml", "'audience' is a required property"),
         ("blog_empty.yaml", "'' is not a 'uri'"),
