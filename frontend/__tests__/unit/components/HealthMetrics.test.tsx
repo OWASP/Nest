@@ -1,5 +1,6 @@
 import { faCodeCommit } from '@fortawesome/free-solid-svg-icons'
-import { render, screen } from '@testing-library/react'
+
+import { render, screen } from 'wrappers/testUtil'
 import { HealthMetricsProps } from 'types/healthMetrics'
 import HealthMetrics from 'components/HealthMetrics'
 

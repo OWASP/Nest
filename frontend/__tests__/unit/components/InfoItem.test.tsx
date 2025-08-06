@@ -1,7 +1,8 @@
 import { faUser } from '@fortawesome/free-solid-svg-icons'
-import { render, screen } from '@testing-library/react'
+
 import millify from 'millify'
 import React from 'react'
+import { render, screen } from 'wrappers/testUtil'
 import { pluralize } from 'utils/pluralize'
 import InfoItem from 'components/InfoItem'
 

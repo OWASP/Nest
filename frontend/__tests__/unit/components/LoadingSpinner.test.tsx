@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen } from 'wrappers/testUtil'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 jest.mock('next/image', () => ({

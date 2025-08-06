@@ -1,9 +1,10 @@
 import { faUser, faStar, faCode } from '@fortawesome/free-solid-svg-icons'
-import { render, screen, fireEvent } from '@testing-library/react'
+
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import millify from 'millify'
 import React from 'react'
+import { render, screen, fireEvent } from 'wrappers/testUtil'
 import { pluralize } from 'utils/pluralize'
 import InfoBlock from 'components/InfoBlock'
 

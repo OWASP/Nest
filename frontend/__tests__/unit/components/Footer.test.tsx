@@ -1,12 +1,14 @@
+import { ReactNode } from 'react'
+import { render, screen, fireEvent } from 'wrappers/testUtil'
+import '@testing-library/jest-dom'
+import { footerSections, footerIcons } from 'utils/constants'
+import Footer from 'components/Footer'
+
 /**
  * @file Complete unit tests for the Footer component.
  * @see {@link AutoScrollToTop.test.tsx} for structural reference.
  */
-import { render, screen, fireEvent } from '@testing-library/react'
-import '@testing-library/jest-dom'
-import { ReactNode } from 'react'
-import { footerSections, footerIcons } from 'utils/constants'
-import Footer from 'components/Footer'
+
 
 // Define proper types for mock props
 interface MockLinkProps {

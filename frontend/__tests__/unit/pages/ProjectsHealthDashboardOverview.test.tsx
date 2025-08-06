@@ -1,8 +1,10 @@
 import { useQuery } from '@apollo/client'
-import { render, screen, waitFor } from '@testing-library/react'
+
 import { mockProjectsDashboardOverviewData } from '@unit/data/mockProjectsDashboardOverviewData'
 import millify from 'millify'
+import { render, screen, waitFor } from 'wrappers/testUtil'
 import ProjectsDashboardPage from 'app/projects/dashboard/page'
+
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),

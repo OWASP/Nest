@@ -1,4 +1,4 @@
-import { render, fireEvent, waitFor } from '@testing-library/react'
+import { render, fireEvent, waitFor } from 'wrappers/testUtil'
 import ScrollToTop from 'components/ScrollToTop'
 
 describe('ScrollToTop component test', () => {

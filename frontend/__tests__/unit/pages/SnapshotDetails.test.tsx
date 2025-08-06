@@ -1,9 +1,11 @@
 import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+
 import { mockSnapshotDetailsData } from '@unit/data/mockSnapshotData'
 import { render } from 'wrappers/testUtil'
+import { fireEvent, screen, waitFor } from 'wrappers/testUtil'
 import SnapshotDetailsPage from 'app/snapshots/[id]/page'
+
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),

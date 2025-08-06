@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { useQuery, useMutation } from '@apollo/client'
-import { screen, waitFor, fireEvent, within } from '@testing-library/react'
+
 import { mockApiKeys, mockCreateApiKeyResult } from '@unit/data/mockApiKeysData'
 import { format, addDays } from 'date-fns'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
+import { screen, waitFor, fireEvent, within } from 'wrappers/testUtil'
 import ApiKeysPage from 'app/settings/api-keys/page'
 import { CREATE_API_KEY, REVOKE_API_KEY } from 'server/queries/apiKeyQueries'
 

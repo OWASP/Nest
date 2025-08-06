@@ -1,12 +1,14 @@
 import { addToast } from '@heroui/toast'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+
 import { useRouter } from 'next/navigation'
 import type { Session } from 'next-auth'
 import { useSession, signIn } from 'next-auth/react'
+import { render, screen, fireEvent, waitFor } from 'wrappers/testUtil'
 import { userAuthStatus } from 'utils/constants'
 import LoginPageContent from 'components/LoginPageContent'
 
 // Define types for mock props
+
 interface MockFontAwesomeIconProps {
   icon: {
     iconName?: string

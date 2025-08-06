@@ -1,8 +1,7 @@
 import { addToast } from '@heroui/toast'
 import * as Sentry from '@sentry/nextjs'
-import { screen, fireEvent } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
-import { render } from 'wrappers/testUtil'
+import { render, screen, fireEvent } from 'wrappers/testUtil'
 import GlobalError, {
   AppError,
   ERROR_CONFIGS,

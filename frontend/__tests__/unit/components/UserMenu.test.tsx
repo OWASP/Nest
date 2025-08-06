@@ -1,11 +1,12 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { useLogout } from 'hooks/useLogout'
 import type { Session } from 'next-auth'
 import { useSession, signIn } from 'next-auth/react'
+import { render, screen, fireEvent, waitFor } from 'wrappers/testUtil'
 import { userAuthStatus } from 'utils/constants'
 import UserMenu from 'components/UserMenu'
 
 // Mock next-auth
+
 jest.mock('next-auth/react', () => ({
   useSession: jest.fn(),
   signIn: jest.fn(),

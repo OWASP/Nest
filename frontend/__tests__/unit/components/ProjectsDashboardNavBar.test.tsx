@@ -1,5 +1,5 @@
-import { render } from '@testing-library/react'
 import * as nextNavigation from 'next/navigation'
+import { render } from 'wrappers/testUtil'
 import ProjectsDashboardNavBar from 'components/ProjectsDashboardNavBar'
 import '@testing-library/jest-dom'
 

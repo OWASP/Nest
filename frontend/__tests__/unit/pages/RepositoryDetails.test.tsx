@@ -1,9 +1,11 @@
 import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
-import { act, fireEvent, screen, waitFor } from '@testing-library/react'
+
 import { mockRepositoryData } from '@unit/data/mockRepositoryData'
 import { render } from 'wrappers/testUtil'
+import { act, fireEvent, screen, waitFor } from 'wrappers/testUtil'
 import RepositoryDetailsPage from 'app/organizations/[organizationKey]/repositories/[repositoryKey]/page'
+
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),

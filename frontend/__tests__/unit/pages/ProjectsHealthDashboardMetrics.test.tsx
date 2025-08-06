@@ -1,7 +1,9 @@
 import { useQuery } from '@apollo/client'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+
 import { mockHealthMetricsData } from '@unit/data/mockProjectsHealthMetricsData'
+import { render, screen, waitFor, fireEvent } from 'wrappers/testUtil'
 import MetricsPage from 'app/projects/dashboard/metrics/page'
+
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),

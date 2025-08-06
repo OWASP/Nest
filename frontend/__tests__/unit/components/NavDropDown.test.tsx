@@ -1,10 +1,11 @@
-import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
+import { render, screen, waitFor } from 'wrappers/testUtil'
 import type { Link as LinkType } from 'types/link'
 import NavDropdown from 'components/NavDropDown'
 
 // Mock Next.js Link component
+
 jest.mock('next/link', () => {
   return ({ href, children, ...props }) => {
     return (

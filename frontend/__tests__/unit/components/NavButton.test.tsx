@@ -1,13 +1,15 @@
+import { faHome, faUser } from '@fortawesome/free-solid-svg-icons'
+import type { ComponentPropsWithoutRef } from 'react'
+import { render, screen, fireEvent } from 'wrappers/testUtil'
+import type { NavButtonProps } from 'types/button'
+import '@testing-library/jest-dom'
+import NavButton from 'components/NavButton'
+
 /**
  * @file Complete unit tests for the NavButton component.
  * @see {@link AutoScrollToTop.test.tsx} for structural reference.
  */
-import { faHome, faUser } from '@fortawesome/free-solid-svg-icons'
-import { render, screen, fireEvent } from '@testing-library/react'
-import '@testing-library/jest-dom'
-import type { ComponentPropsWithoutRef } from 'react'
-import type { NavButtonProps } from 'types/button'
-import NavButton from 'components/NavButton'
+
 
 // The NavButton component uses next/link internally. We mock it to isolate
 // the NavButton's behavior and prevent actual navigation during tests.

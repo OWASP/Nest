@@ -1,9 +1,10 @@
-import { render, screen } from '@testing-library/react'
 import React from 'react'
 import '@testing-library/jest-dom'
+import { render, screen } from 'wrappers/testUtil'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 
 // Mock the Tooltip component from @heroui/tooltip
+
 jest.mock('@heroui/tooltip', () => ({
   Tooltip: ({
     children,

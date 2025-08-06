@@ -1,9 +1,10 @@
-import { screen, render, fireEvent } from '@testing-library/react'
 import { ReactNode } from 'react'
+import { screen, render, fireEvent } from 'wrappers/testUtil'
 import type { CardProps } from 'types/card'
 import Card from 'components/Card'
 
 // Define proper types for mock props
+
 interface MockLinkProps {
   children: ReactNode
   href: string

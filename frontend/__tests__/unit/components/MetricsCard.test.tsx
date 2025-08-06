@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen } from 'wrappers/testUtil'
 import type { HealthMetricsProps } from 'types/healthMetrics'
 import MetricsCard from 'components/MetricsCard'
 import '@testing-library/jest-dom'

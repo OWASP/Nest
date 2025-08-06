@@ -1,7 +1,7 @@
-import { waitFor, screen, fireEvent } from '@testing-library/react'
 import mockProjectData from '@unit/data/mockProjectData'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
+import { waitFor, screen, fireEvent } from 'wrappers/testUtil'
 import ProjectsPage from 'app/projects/page'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 

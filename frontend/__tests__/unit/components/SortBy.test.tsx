@@ -1,5 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react'
 import { act } from 'react'
+import { render, screen, fireEvent } from 'wrappers/testUtil'
 import SortBy from 'components/SortBy'
 
 describe('<SortBy />', () => {

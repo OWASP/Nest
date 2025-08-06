@@ -1,8 +1,10 @@
 import { useQuery } from '@apollo/client'
-import { screen, waitFor } from '@testing-library/react'
+
 import { mockCommitteeDetailsData } from '@unit/data/mockCommitteeDetailsData'
 import { render } from 'wrappers/testUtil'
+import { screen, waitFor } from 'wrappers/testUtil'
 import CommitteeDetailsPage from 'app/committees/[committeeKey]/page'
+
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),

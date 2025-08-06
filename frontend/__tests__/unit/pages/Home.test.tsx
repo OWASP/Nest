@@ -1,10 +1,11 @@
 import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+
 import { mockAlgoliaData, mockGraphQLData } from '@unit/data/mockHomeData'
 import millify from 'millify'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
+import { fireEvent, screen, waitFor } from 'wrappers/testUtil'
 import Home from 'app/page'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 
@@ -258,6 +259,7 @@ describe('Home', () => {
     })
   })
 
+  // eslint-disable-next-line jest/expect-expect
   test('renders stats correctly', async () => {
     render(<Home />)
 
@@ -270,7 +272,7 @@ describe('Home', () => {
     ]
     const stats = mockGraphQLData.statsOverview
 
-    await newFunction({ headers, stats })
+    await newFunction({ headers, stats }) // Assertions are in newFunction
   })
 
   test('renders event details including date range and location', async () => {

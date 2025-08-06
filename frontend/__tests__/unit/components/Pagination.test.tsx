@@ -1,5 +1,5 @@
-import { within, render, fireEvent, screen, cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom'
+import { within, render, fireEvent, screen, cleanup } from 'wrappers/testUtil'
 import Pagination from 'components/Pagination'
 
 afterEach(cleanup)

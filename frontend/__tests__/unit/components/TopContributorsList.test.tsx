@@ -1,7 +1,8 @@
 import { faUsers } from '@fortawesome/free-solid-svg-icons'
-import { fireEvent, screen } from '@testing-library/react'
+
 import React from 'react'
 import { render } from 'wrappers/testUtil'
+import { fireEvent, screen } from 'wrappers/testUtil'
 import type { Contributor } from 'types/contributor'
 import TopContributorsList from 'components/TopContributorsList'
 

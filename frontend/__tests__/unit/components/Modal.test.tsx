@@ -1,8 +1,9 @@
 import { faCheck } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+
 import { render } from 'wrappers/testUtil'
 import '@testing-library/jest-dom'
+import { fireEvent, screen, waitFor } from 'wrappers/testUtil'
 import DialogComp from 'components/Modal'
 
 jest.mock('@/components/MarkdownWrapper', () => {

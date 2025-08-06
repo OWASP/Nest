@@ -1,8 +1,10 @@
 import { useQuery } from '@apollo/client'
-import { screen, waitFor } from '@testing-library/react'
+
 import { mockChapterDetailsData } from '@unit/data/mockChapterDetailsData'
 import { render } from 'wrappers/testUtil'
+import { screen, waitFor } from 'wrappers/testUtil'
 import ChapterDetailsPage from 'app/chapters/[chapterKey]/page'
+
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),

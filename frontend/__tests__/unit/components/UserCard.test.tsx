@@ -1,5 +1,5 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import React from 'react'
+import { render, screen, fireEvent, cleanup } from 'wrappers/testUtil'
 import type { UserCardProps } from 'types/card'
 import UserCard from 'components/UserCard'
 

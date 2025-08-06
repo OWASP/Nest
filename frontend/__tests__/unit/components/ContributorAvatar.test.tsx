@@ -1,5 +1,5 @@
-import { screen, render, cleanup } from '@testing-library/react'
 import React from 'react'
+import { screen, render, cleanup } from 'wrappers/testUtil'
 import { Contributor } from 'types/contributor'
 import ContributorAvatar from 'components/ContributorAvatar'
 

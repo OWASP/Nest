@@ -31,7 +31,6 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
-
   jest.spyOn(global.console, 'warn').mockImplementation((message) => {
     if (
       typeof message === 'string' &&

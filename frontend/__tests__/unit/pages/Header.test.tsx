@@ -1,11 +1,12 @@
-import { render, screen, fireEvent, act } from '@testing-library/react'
 import { usePathname } from 'next/navigation'
 import { SessionProvider } from 'next-auth/react'
 import React from 'react'
+import { render, screen, fireEvent, act } from 'wrappers/testUtil'
 import Header from 'components/Header'
 import '@testing-library/jest-dom'
 
 // Mock next/navigation
+
 jest.mock('next/navigation', () => ({
   usePathname: jest.fn(),
 }))

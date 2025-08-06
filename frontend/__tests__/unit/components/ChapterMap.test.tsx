@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { render } from 'wrappers/testUtil'
 import { Chapter } from 'types/chapter'
 import ChapterMap from 'components/ChapterMap'
 

@@ -1,7 +1,9 @@
 import { useQuery } from '@apollo/client'
-import { render, screen, waitFor } from '@testing-library/react'
+
 import { mockProjectsDashboardMetricsDetailsData } from '@unit/data/mockProjectsDashboardMetricsDetailsData'
+import { render, screen, waitFor } from 'wrappers/testUtil'
 import ProjectHealthMetricsDetails from 'app/projects/dashboard/metrics/[projectKey]/page'
+
 
 jest.mock('react-apexcharts', () => {
   return {

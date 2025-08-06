@@ -1,7 +1,8 @@
 import { faCode, faTags } from '@fortawesome/free-solid-svg-icons'
-import { render, screen, cleanup } from '@testing-library/react'
+
 import React from 'react'
 import '@testing-library/jest-dom'
+import { render, screen, cleanup } from 'wrappers/testUtil'
 import type { DetailsCardProps } from 'types/card'
 import CardDetailsPage from 'components/CardDetailsPage'
 

@@ -1,7 +1,8 @@
 import { sendGAEvent } from '@next/third-parties/google'
-import { screen, render, waitFor } from '@testing-library/react'
+
 import userEvent from '@testing-library/user-event'
 import { useRouter } from 'next/navigation'
+import { screen, render, waitFor } from 'wrappers/testUtil'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { Chapter } from 'types/chapter'
 import { Event } from 'types/event'

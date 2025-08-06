@@ -1,6 +1,6 @@
-import { screen } from '@testing-library/react'
 import { render } from 'wrappers/testUtil'
 import '@testing-library/jest-dom'
+import { screen } from 'wrappers/testUtil'
 import SponsorCard from 'components/SponsorCard'
 
 describe('Sponsor Card tests', () => {

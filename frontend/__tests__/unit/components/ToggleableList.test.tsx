@@ -1,5 +1,6 @@
 import { faUser } from '@fortawesome/free-solid-svg-icons'
-import { render, screen, fireEvent } from '@testing-library/react'
+
+import { render, screen, fireEvent } from 'wrappers/testUtil'
 import ToggleableList from 'components/ToggleableList'
 
 interface MockFontAwesomeIconProps {

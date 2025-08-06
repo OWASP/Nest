@@ -1,5 +1,5 @@
-import { render } from '@testing-library/react'
 import * as nextNavigation from 'next/navigation'
+import { render } from 'wrappers/testUtil'
 import AutoScrollToTop from 'components/AutoScrollToTop'
 
 jest.mock('next/navigation', () => ({

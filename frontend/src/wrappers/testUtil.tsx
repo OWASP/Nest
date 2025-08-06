@@ -1,6 +1,6 @@
 import { HeroUIProvider } from '@heroui/system'
-import { render as rtlRender, screen, fireEvent, waitFor, cleanup } from '@testing-library/react'
-import { within } from '@testing-library/dom'
+import { screen, fireEvent, waitFor, within } from '@testing-library/dom'
+import { render as rtlRender, cleanup } from '@testing-library/react'
 import React from 'react'
 
 function render(ui: React.ReactElement, options = {}) {
