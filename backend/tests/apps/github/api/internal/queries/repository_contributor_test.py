@@ -54,6 +54,7 @@ class TestRepositoryContributorQuery:
             organization=None,
             project=None,
             repository=None,
+            has_full_name=None,
         )
 
     @patch("apps.github.models.repository_contributor.RepositoryContributor.get_top_contributors")
@@ -74,6 +75,7 @@ class TestRepositoryContributorQuery:
             organization=None,
             project=None,
             repository=None,
+            has_full_name=None,
         )
 
     @patch("apps.github.models.repository_contributor.RepositoryContributor.get_top_contributors")
@@ -89,6 +91,7 @@ class TestRepositoryContributorQuery:
             organization="owasp",
             project="test-project",
             repository="test-repo",
+            has_full_name=None,
         )
 
         assert len(result) == 2
@@ -101,6 +104,7 @@ class TestRepositoryContributorQuery:
             organization="owasp",
             project="test-project",
             repository="test-repo",
+            has_full_name=None,
         )
 
     @patch("apps.github.models.repository_contributor.RepositoryContributor.get_top_contributors")

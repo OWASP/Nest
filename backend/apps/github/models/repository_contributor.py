@@ -120,6 +120,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
         organization=None,
         project=None,
         repository=None,
+        has_full_name=None,
     ):
         """Get top contributors across repositories, organization, or project.
 
@@ -131,6 +132,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
             organization (str, optional): Organization login to filter by.
             project (str, optional): Project key to filter by.
             repository (str, optional): Repository key to filter by.
+            has_full_name (bool, optional): Filter contributors with likely full names.
 
         Returns:
             list: List of dictionaries containing contributor information.
@@ -144,6 +146,10 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
 
         if excluded_usernames:
             queryset = queryset.exclude(user__login__in=excluded_usernames)
+
+        if has_full_name:
+            # Match any two words with at least 2 chars each, separated by whitespace
+            queryset = queryset.filter(user__name__regex=r".{2,}\s+.{2,}")
 
         if project:
             queryset = queryset.filter(repository__project__key__iexact=f"www-project-{project}")

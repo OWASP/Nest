@@ -20,6 +20,8 @@ class RepositoryContributorQuery:
         organization: str | None = None,
         project: str | None = None,
         repository: str | None = None,
+        *,
+        has_full_name: bool | None = None,
     ) -> list[RepositoryContributorNode]:
         """Resolve top contributors.
 
@@ -31,6 +33,7 @@ class RepositoryContributorQuery:
             excluded_usernames (list[str], optional): Usernames to exclude from the results.
             project (str, optional): Project key to filter by.
             repository (str, optional): Repository name to filter by.
+            has_full_name (bool, optional): Filter contributors with likely full names.
 
         Returns:
             list: List of top contributors with their details.
@@ -44,6 +47,7 @@ class RepositoryContributorQuery:
             organization=organization,
             project=project,
             repository=repository,
+            has_full_name=has_full_name,
         )
 
         return [
