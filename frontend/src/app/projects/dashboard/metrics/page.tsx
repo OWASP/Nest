@@ -99,7 +99,12 @@ const MetricsPage: FC = () => {
     variables: {
       filters,
       pagination: { offset: 0, limit: PAGINATION_LIMIT },
-      ordering,
+      ordering: [
+        ordering,
+        {
+          ['project_Name']: 'ASC',
+        },
+      ],
     },
   })
 
@@ -246,7 +251,12 @@ const MetricsPage: FC = () => {
                   variables: {
                     filters,
                     pagination: newPagination,
-                    ordering,
+                    ordering: [
+                      ordering,
+                      {
+                        ['project_Name']: 'ASC',
+                      },
+                    ],
                   },
                   updateQuery: (prev, { fetchMoreResult }) => {
                     if (!fetchMoreResult) return prev
