@@ -34,7 +34,8 @@ class Command(BaseCommand):
                 continue
 
             for label in issue.labels.all():
-                key = (issue.repository_id, label.name)
+                normalized_label = (label.name or "").strip().casefold()
+                key = (issue.repository_id, normalized_label)
                 repo_label_to_issue_ids.setdefault(key, set()).add(issue.id)
 
         self.stdout.write(
