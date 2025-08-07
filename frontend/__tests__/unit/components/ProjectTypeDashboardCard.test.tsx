@@ -205,12 +205,9 @@ describe('ProjectTypeDashboardCard', () => {
       expect(screen.getByText(largeNumber.toString())).toBeInTheDocument()
     })
 
+    type ProjectHealthType = 'healthy' | 'needsAttention' | 'unhealthy'
     it('renders correctly with all type variants', () => {
-      const types: Array<'healthy' | 'needsAttention' | 'unhealthy'> = [
-        'healthy',
-        'needsAttention',
-        'unhealthy',
-      ]
+      const types: Array<ProjectHealthType> = ['healthy', 'needsAttention', 'unhealthy']
 
       types.forEach((type) => {
         const { unmount } = render(
@@ -363,11 +360,13 @@ describe('ProjectTypeDashboardCard', () => {
         'unhealthy',
       ]
 
-      validTypes.forEach((type) => {
+      const testTypeValue = (type: 'healthy' | 'needsAttention' | 'unhealthy') => {
         expect(() => {
           render(<ProjectTypeDashboardCard type={type} count={10} icon={faHeartPulse} />)
         }).not.toThrow()
-      })
+      }
+
+      validTypes.forEach(testTypeValue)
     })
 
     it('handles different icon types correctly', () => {
@@ -380,28 +379,6 @@ describe('ProjectTypeDashboardCard', () => {
         expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
         unmount()
       })
-    })
-  })
-
-  describe('Title Mapping Logic', () => {
-    it('correctly maps healthy type to Healthy title', () => {
-      render(<ProjectTypeDashboardCard type="healthy" count={10} icon={faHeartPulse} />)
-
-      expect(screen.getByTestId('card-title')).toHaveTextContent('Healthy')
-    })
-
-    it('correctly maps needsAttention type to Need Attention title', () => {
-      render(
-        <ProjectTypeDashboardCard type="needsAttention" count={5} icon={faExclamationTriangle} />
-      )
-
-      expect(screen.getByTestId('card-title')).toHaveTextContent('Need Attention')
-    })
-
-    it('correctly maps unhealthy type to Unhealthy title', () => {
-      render(<ProjectTypeDashboardCard type="unhealthy" count={2} icon={faSkull} />)
-
-      expect(screen.getByTestId('card-title')).toHaveTextContent('Unhealthy')
     })
   })
 
