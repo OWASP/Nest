@@ -86,6 +86,11 @@ export const GET_PROGRAM_AND_MODULES = gql`
       experienceLevel
       startedAt
       endedAt
+      mentors {
+        login
+        name
+        avatarUrl
+      }
     }
   }
 `

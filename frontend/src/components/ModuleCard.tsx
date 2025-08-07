@@ -12,10 +12,28 @@ import type { Module } from 'types/mentorship'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import { TextInfoItem } from 'components/InfoItem'
+import SingleModuleCard from 'components/SingleModuleCard'
 import { TruncatedText } from 'components/TruncatedText'
 
-const ModuleCard = ({ modules }: { modules: Module[] }) => {
+interface ModuleCardProps {
+  modules: Module[]
+  accessLevel?: string
+  admins?: { login: string }[]
+}
+
+const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
   const [showAllModule, setShowAllModule] = useState(false)
+
+  if (modules.length === 1) {
+    return (
+      <SingleModuleCard
+        module={modules[0]}
+        showEdit={!!accessLevel && accessLevel === 'admin'}
+        accessLevel={accessLevel}
+        admins={admins}
+      />
+    )
+  }
 
   const displayedModule = showAllModule ? modules : modules.slice(0, 4)
 
