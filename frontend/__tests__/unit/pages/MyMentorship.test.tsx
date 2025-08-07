@@ -165,7 +165,7 @@ describe('MyMentorshipPage', () => {
     fireEvent.click(btn)
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/mentorship/programs/create')
+      expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/create')
     })
   })
 })

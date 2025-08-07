@@ -47,7 +47,7 @@ describe('CreateProgramPage (comprehensive tests)', () => {
     render(<CreateProgramPage />)
 
     await waitFor(() => {
-      expect(mockRouterPush).toHaveBeenCalledWith('/mentorship/programs')
+      expect(mockRouterPush).toHaveBeenCalledWith('/')
     })
   })
 

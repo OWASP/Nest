@@ -3,7 +3,7 @@ import { screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
-import EditModulePage from 'app/mentorship/programs/[programKey]/modules/[moduleKey]/edit/page'
+import EditModulePage from 'app/my/mentorship/programs/[programKey]/modules/[moduleKey]/edit/page'
 
 // Mocks
 jest.mock('next-auth/react', () => ({
@@ -114,7 +114,7 @@ describe('EditModulePage', () => {
 
     await waitFor(() => {
       expect(mockUpdateModule).toHaveBeenCalled()
-      expect(mockPush).toHaveBeenCalledWith('/mentorship/programs/test-program?refresh=true')
+      expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program?refresh=true')
     })
   })
 
