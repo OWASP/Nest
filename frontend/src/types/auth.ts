@@ -7,5 +7,6 @@ export type ExtendedSession = {
   user?: {
     isOwaspStaff?: boolean
     login?: string
+    image?: string
   }
 }

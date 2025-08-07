@@ -2,19 +2,13 @@
 
 from functools import wraps
 
-from django.contrib.auth import get_user
 from django.http import HttpResponseForbidden
 
 
 def has_dashboard_permission(request):
     """Check if user has dashboard access."""
-    user = get_user(request)
-    return (
-        user
-        and hasattr(user, "github_user")
-        and user.github_user
-        and user.github_user.is_owasp_staff
-    )
+    user = request.user
+    return user and user.is_authenticated and user.is_owasp_staff
 
 
 def dashboard_access_required(view_func):
