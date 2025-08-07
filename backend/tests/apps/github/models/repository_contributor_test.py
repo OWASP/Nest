@@ -191,4 +191,4 @@ class TestRepositoryContributor(TestCase):
             # Should not call filter with regex
             filter_calls = mock_queryset.filter.call_args_list
             regex_calls = [call for call in filter_calls if "user__name__regex" in call.kwargs]
-            assert len(regex_calls) == 0, "Should not apply regex filter when has_full_name=False"
+            assert not regex_calls, "Should not apply regex filter when has_full_name=False"
