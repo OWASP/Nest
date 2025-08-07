@@ -31,7 +31,7 @@
     "@heroui/toast": "^2.0.14",
     "@heroui/tooltip": "^2.2.21",
     "@next/eslint-plugin-next": "^15.4.5",
-    "@next/third-parties": "^15.4.5",
+    "@next/third-parties": "^15.4.6",
     "@sentry/nextjs": "^10.1.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/leaflet.markercluster": "^1.5.5",
