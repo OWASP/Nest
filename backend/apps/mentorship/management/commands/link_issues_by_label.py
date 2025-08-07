@@ -34,24 +34,20 @@ class Command(BaseCommand):
 
         self.stdout.write("Processing modules...")
         # Filter out modules without linked_issue_labels upfront
-        modules = (
-            Module.objects.exclude(linked_issue_labels__isnull=True)
-            .exclude(linked_issue_labels=[])
-            .iterator()
-        )
+        modules = Module.objects.exclude(labels__isnull=True).exclude(labels=[])
 
         for module in modules:
-            linked_labels = module.linked_issue_labels
+            linked_labels = module.labels
 
             matched_issue_ids = set()
             for label in linked_labels:
                 matched_issue_ids.update(label_to_issue_ids.get(label, set()))
 
             if matched_issue_ids:
-                current_ids = set(module.linked_issues.values_list("id", flat=True))
+                current_ids = set(module.issues.values_list("id", flat=True))
                 if current_ids != matched_issue_ids:
                     with transaction.atomic():
-                        module.linked_issues.set(matched_issue_ids)
+                        module.issues.set(matched_issue_ids)
                     total_links += len(matched_issue_ids)
                     total_modules += 1
                     self.stdout.write(
