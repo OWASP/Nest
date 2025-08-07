@@ -61,11 +61,12 @@ class TestRepositoryContributor(TestCase):
         """Test has_full_name filter with valid full names that should be included."""
         valid_names = (
             "Alex Thompson",
-            "Edwin van der Sar,"
-            "Marc-André ter Stegen,"
-            "Mo S. Lo,"
-            "Mo Sa,"
-            "Ray W. Johnson"
+            "Edwin van der Sar",
+            "Marc-André ter Stegen",
+            "Mo S. Lo",
+            "Mö S. Lö",
+            "Mo Sa",
+            "Ray W. Johnson",
             "William Thomas Anderson Lee",
         )
 
@@ -104,9 +105,7 @@ class TestRepositoryContributor(TestCase):
 
                     result = RepositoryContributor.get_top_contributors(has_full_name=True)
 
-                    assert len(result) > 0, (
-                        f"Name '{name}' should be included but was filtered out"
-                    )
+                    assert result, f"Name '{name}' should be included but was filtered out"
                     assert any(c["name"] == name for c in result), (
                         f"Name '{name}' not found in results"
                     )
@@ -127,7 +126,7 @@ class TestRepositoryContributor(TestCase):
             "john",
             "NoName",
             "NONAME",
-            "SingleName",
+            "Single-Name",
             "somethingELSE",
             ". M. S.",
             "X Y Z",
@@ -164,7 +163,7 @@ class TestRepositoryContributor(TestCase):
                     result = RepositoryContributor.get_top_contributors(has_full_name=True)
 
                     # Should be excluded (empty results)
-                    assert len(result) == 0, f"Name '{name}' should be excluded but was included"
+                    assert not result, f"Name '{name}' should be excluded but was included"
 
     def test_has_full_name_filter_with_false_value(self):
         """Test that has_full_name=False does not apply the filter."""
@@ -201,4 +200,4 @@ class TestRepositoryContributor(TestCase):
             # Should not call filter with regex
             filter_calls = mock_queryset.filter.call_args_list
             regex_calls = [call for call in filter_calls if "user__name__regex" in call.kwargs]
-            assert len(regex_calls) == 0, "Should not apply regex filter when has_full_name=False"
+            assert not regex_calls, "Should not apply regex filter when has_full_name=False"

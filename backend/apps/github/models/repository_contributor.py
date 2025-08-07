@@ -9,8 +9,10 @@ from django.template.defaultfilters import pluralize
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.github.models.managers.repository_contributor import RepositoryContributorManager
 
-# Match any 2+ words 2+ characther long separated by a whitespace.
-CONTRIBUTOR_FULL_NAME_REGEX = r"\w{2,}\s\w{2,}"
+# Matches a full name starting with at least two Unicode letters (no digits or underscores),
+# followed by one or more space-separated parts that are either a single letter with a period or
+# another sequence of at least two letters.
+CONTRIBUTOR_FULL_NAME_REGEX = r"[^\W\d_]{2,}(\s+([^\W\d_]\.|[^\W\d_]{2,}))+"
 
 
 class RepositoryContributor(BulkSaveModel, TimestampedModel):
