@@ -288,9 +288,7 @@ class TestRepositoryContributor(TestCase):
 
             # Should not call filter with regex (no full name filtering)
             filter_calls = mock_queryset.filter.call_args_list
-            regex_calls = [
-                call for call in filter_calls if len(call) > 1 and "user__name__regex" in call[1]
-            ]
+            regex_calls = [call for call in filter_calls if "user__name__regex" in call.kwargs]
             assert len(regex_calls) == 0, (
                 "Should not apply regex filter when has_full_name is not specified"
             )
