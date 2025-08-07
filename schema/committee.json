@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/OWASP/Nest/main/schema/committee.json",
+  "$id": "https://raw.githubusercontent.com/OWASP/nest-schema/main/committee.json",
   "$defs": {
     "meeting_minutes": {
       "description": "Meeting minutes of the committee.",
