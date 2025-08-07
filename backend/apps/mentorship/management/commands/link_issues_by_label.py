@@ -61,7 +61,8 @@ class Command(BaseCommand):
             matched_issue_ids = set()
             for repo in project_repos:
                 for label_name in linked_label_names:
-                    key = (repo.id, label_name)
+                    normalized_label = (label_name or "").strip().casefold()
+                    key = (repo.id, normalized_label)
                     issues_for_label = repo_label_to_issue_ids.get(key, set())
                     matched_issue_ids.update(issues_for_label)
 
@@ -72,7 +73,7 @@ class Command(BaseCommand):
             total_links_created += num_linked
             total_modules_updated += 1
 
-            repo_names = ", ".join([r.path for r in project_repos])
+            repo_names = ", ".join([r.name for r in project_repos])
             self.stdout.write(
                 self.style.SUCCESS(
                     f"Updated module '{module.name}': set {num_linked} issues "
