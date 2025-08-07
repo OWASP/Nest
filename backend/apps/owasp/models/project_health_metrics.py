@@ -169,7 +169,8 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
                 ProjectHealthMetrics.objects.filter(project=models.OuterRef("project"))
                 .order_by("-nest_created_at")
                 .values("nest_created_at")[:1]
-            )
+            ),
+            project__is_active=True,
         )
 
     @staticmethod
