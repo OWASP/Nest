@@ -40,6 +40,7 @@ type Stats = {
   value: number
 }
 export interface DetailsCardProps {
+  accessLevel?: string
   description?: string
   details?: { label: string; value: string | JSX.Element }[]
   domains?: string[]
@@ -49,8 +50,9 @@ export interface DetailsCardProps {
   heatmap?: JSX.Element
   isActive?: boolean
   languages?: string[]
-  isDraft?: boolean
-  setPublish?: () => void
+  status?: string
+  setStatus?: (newStatus: 'DRAFT' | 'PUBLISHED' | 'COMPLETED') => void
+  canUpdateStatus?: boolean
   mentors?: Contributor[]
   admins?: Contributor[]
   projectName?: string

@@ -25,6 +25,10 @@ const ProgramDetailsPage = () => {
   const { data: session } = useSession()
   const username = (session as ExtendedSession)?.user?.login
 
+  const [program, setProgram] = useState<Program | null>(null)
+  const [modules, setModules] = useState<Module[]>([])
+  const [isRefetching, setIsRefetching] = useState(false)
+
   const [updateProgram] = useMutation(UPDATE_PROGRAM_STATUS_MUTATION, {
     onError: handleAppError,
   })
@@ -39,10 +43,6 @@ const ProgramDetailsPage = () => {
     notifyOnNetworkStatusChange: true,
   })
 
-  const [program, setProgram] = useState<Program | null>(null)
-  const [modules, setModules] = useState<Module[]>([])
-  const [isRefetching, setIsRefetching] = useState(false)
-
   const isLoading = isQueryLoading || isRefetching
 
   const isAdmin = useMemo(
@@ -50,16 +50,16 @@ const ProgramDetailsPage = () => {
     [program, username]
   )
 
-  const canPublish = useMemo(
-    () => isAdmin && program?.status?.toLowerCase() === ProgramStatusEnum.DRAFT,
-    [isAdmin, program]
-  )
+  const canUpdateStatus = useMemo(() => {
+    if (!isAdmin || !program?.status) return false
+    return true
+  }, [isAdmin, program])
 
-  const setPublish = async () => {
+  const updateStatus = async (newStatus: ProgramStatusEnum) => {
     if (!program || !isAdmin) {
       addToast({
         title: 'Permission Denied',
-        description: 'Only admins can publish this program.',
+        description: 'Only admins can update the program status.',
         variant: 'solid',
         color: 'danger',
         timeout: 3000,
@@ -67,24 +67,28 @@ const ProgramDetailsPage = () => {
       return
     }
 
-    await updateProgram({
-      variables: {
-        inputData: {
-          key: program.key,
-          name: program.name,
-          status: 'PUBLISHED',
+    try {
+      await updateProgram({
+        variables: {
+          inputData: {
+            key: program.key,
+            name: program.name,
+            status: newStatus,
+          },
         },
-      },
-      refetchQueries: [{ query: GET_PROGRAM_AND_MODULES, variables: { programKey } }],
-    })
+        refetchQueries: [{ query: GET_PROGRAM_AND_MODULES, variables: { programKey } }],
+      })
 
-    addToast({
-      title: 'Program Published',
-      description: 'The program is now live and the page will refresh.',
-      variant: 'solid',
-      color: 'success',
-      timeout: 3000,
-    })
+      addToast({
+        title: `Program status updated to ${titleCaseWord(newStatus)}`,
+        description: 'The status has been successfully updated.',
+        variant: 'solid',
+        color: 'success',
+        timeout: 3000,
+      })
+    } catch (err) {
+      handleAppError(err)
+    }
   }
 
   useEffect(() => {
@@ -95,7 +99,6 @@ const ProgramDetailsPage = () => {
           await refetch()
         } finally {
           setIsRefetching(false)
-
           const params = new URLSearchParams(searchParams.toString())
           params.delete('refresh')
           const cleaned = params.toString()
@@ -114,7 +117,7 @@ const ProgramDetailsPage = () => {
 
   if (isLoading) return <LoadingSpinner />
 
-  if (!program) {
+  if (!program && !isLoading) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -138,13 +141,16 @@ const ProgramDetailsPage = () => {
   return (
     <DetailsCard
       modules={modules}
-      isDraft={canPublish}
-      setPublish={setPublish}
+      status={program.status}
+      setStatus={updateStatus}
+      canUpdateStatus={canUpdateStatus}
       details={programDetails}
+      admins={program.admins}
       tags={program.tags}
       domains={program.domains}
       summary={program.description}
       title={program.name}
+      accessLevel="admin"
       type="program"
     />
   )

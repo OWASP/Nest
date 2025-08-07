@@ -14,7 +14,7 @@ export const headerLinks: Link[] = [
   },
   {
     text: 'Mentorship',
-    submenu: [{ text: 'Programs', href: '/mentorship/programs' }],
+    href: '/mentorship/programs',
     requiresGitHubAuth: true,
   },
   {

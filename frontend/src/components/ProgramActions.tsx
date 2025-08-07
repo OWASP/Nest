@@ -1,31 +1,45 @@
+'use client'
+
 import { useRouter } from 'next/navigation'
 import React, { useState, useRef, useEffect } from 'react'
 
 interface ProgramActionsProps {
-  isDraft: boolean
-  setPublish?: () => void
+  status: string
+  setStatus: (newStatus: 'DRAFT' | 'PUBLISHED' | 'COMPLETED') => void
 }
 
-const ProgramActions: React.FC<ProgramActionsProps> = ({ isDraft, setPublish }) => {
+const ProgramActions: React.FC<ProgramActionsProps> = ({ status, setStatus }) => {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const handleAction = (actionKey: string) => {
-    if (actionKey === 'create_module') {
-      router.push(`${window.location.pathname}/modules/create`)
-    } else if (actionKey === 'publish' && setPublish) {
-      setPublish()
+    switch (actionKey) {
+      case 'create_module':
+        router.push(`${window.location.pathname}/modules/create`)
+        break
+      case 'publish':
+        setStatus('PUBLISHED')
+        break
+      case 'draft':
+        setStatus('DRAFT')
+        break
+      case 'completed':
+        setStatus('COMPLETED')
+        break
     }
-    setIsOpen(false) // Close dropdown after action
+    setIsOpen(false)
   }
 
   const options = [
     { key: 'create_module', label: 'Add Module' },
-    ...(isDraft ? [{ key: 'publish', label: 'Publish Program' }] : []),
+    ...(status === 'DRAFT' ? [{ key: 'publish', label: 'Publish Program' }] : []),
+    ...(status === 'PUBLISHED' || status === 'COMPLETED'
+      ? [{ key: 'draft', label: 'Move to Draft' }]
+      : []),
+    ...(status === 'PUBLISHED' ? [{ key: 'completed', label: 'Mark as Completed' }] : []),
   ]
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -41,10 +55,9 @@ const ProgramActions: React.FC<ProgramActionsProps> = ({ isDraft, setPublish }) 
 
   return (
     <div className="flex items-center gap-2">
-      {/* Actions Dropdown */}
       <div className="relative" ref={dropdownRef}>
         <button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => setIsOpen((prev) => !prev)}
           className="w-full rounded-lg border-b border-gray-100 bg-[#D1DBE6] px-4 py-3 text-left text-sm text-gray-700 transition-colors last:border-b-0 dark:border-gray-600 dark:bg-[#454545] dark:text-gray-300"
         >
           Select Action

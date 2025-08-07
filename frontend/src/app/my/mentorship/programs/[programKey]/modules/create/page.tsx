@@ -72,7 +72,7 @@ const CreateModulePage = () => {
         variant: 'solid',
         timeout: 4000,
       })
-      setTimeout(() => router.replace('/mentorship/programs'), 1500)
+      setTimeout(() => router.replace('/my/mentorship'), 1500)
     }
   }, [sessionStatus, sessionData, queryLoading, programData, programKey, queryError, router])
 
@@ -104,7 +104,7 @@ const CreateModulePage = () => {
         timeout: 3000,
       })
 
-      router.push(`/mentorship/programs/${programKey}?refresh=true`)
+      router.push(`/my/mentorship/programs/${programKey}?refresh=true`)
     } catch (err) {
       addToast({
         title: 'Creation Failed',

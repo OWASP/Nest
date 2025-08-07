@@ -2,9 +2,8 @@
 
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import { ProgramList } from 'types/mentorship'
-import Card from 'components/Card'
+import { Program } from 'types/mentorship'
+import ProgramCard from 'components/ProgramCard'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 const ProgramsPage = () => {
@@ -16,7 +15,7 @@ const ProgramsPage = () => {
     searchQuery,
     handleSearch,
     handlePageChange,
-  } = useSearchPage<ProgramList>({
+  } = useSearchPage<Program>({
     indexName: 'programs',
     pageTitle: 'OWASP Programs',
     hitsPerPage: 24,
@@ -24,29 +23,17 @@ const ProgramsPage = () => {
 
   const router = useRouter()
 
-  const renderProgramCard = (program: ProgramList) => {
+  const renderProgramCard = (program: Program) => {
     const handleButtonClick = () => {
       router.push(`/mentorship/programs/${program.key}`)
     }
 
-    const submitButton = {
-      label: 'View Details',
-      icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
-      onclick: handleButtonClick,
-    }
-
     return (
-      <Card
+      <ProgramCard
         key={program.key}
-        title={program.name}
-        summary={program.description}
-        button={submitButton}
-        timeline={{
-          start: program.startedAt,
-          end: program.endedAt,
-        }}
-        modules={program.modules}
-        url={`/mentorship/programs/${program.key}`}
+        program={program}
+        accessLevel="user"
+        onView={handleButtonClick}
       />
     )
   }
@@ -63,7 +50,9 @@ const ProgramsPage = () => {
       searchQuery={searchQuery}
       totalPages={totalPages}
     >
-      {programs && programs.filter((p) => p.status === 'published').map(renderProgramCard)}
+      <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {programs && programs.filter((p) => p.status === 'published').map(renderProgramCard)}
+      </div>
     </SearchPageLayout>
   )
 }

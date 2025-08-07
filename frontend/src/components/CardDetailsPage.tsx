@@ -38,8 +38,10 @@ import TopContributorsList from 'components/TopContributorsList'
 const DetailsCard = ({
   description,
   details,
-  isDraft,
-  setPublish,
+  accessLevel,
+  status,
+  setStatus,
+  canUpdateStatus,
   tags,
   domains,
   modules,
@@ -75,12 +77,11 @@ const DetailsCard = ({
         <div className="mt-4 flex flex-row items-center">
           <div className="flex w-full items-center justify-between">
             <h1 className="text-4xl font-bold">{title}</h1>
-            {type === 'program' &&
-              admins?.some(
-                (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
-              ) && <ProgramActions isDraft={isDraft} setPublish={setPublish} />}
-
+            {type === 'program' && accessLevel === 'admin' && canUpdateStatus && (
+              <ProgramActions status={status} setStatus={setStatus} />
+            )}
             {type === 'module' &&
+              accessLevel === 'admin' &&
               admins?.some(
                 (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
               ) && (

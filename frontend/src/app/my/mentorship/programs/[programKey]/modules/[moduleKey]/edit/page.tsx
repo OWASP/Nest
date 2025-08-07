@@ -61,7 +61,7 @@ const EditModulePage = () => {
         variant: 'solid',
         timeout: 4000,
       })
-      setTimeout(() => router.replace(`/mentorship/programs/${programKey}`), 1500)
+      setTimeout(() => router.replace(`/my/mentorship/programs/${programKey}`), 1500)
     }
   }, [sessionStatus, sessionData, queryLoading, data, programKey, queryError, router])
 
@@ -112,7 +112,7 @@ const EditModulePage = () => {
         variant: 'solid',
         timeout: 3000,
       })
-      router.push(`/mentorship/programs/${programKey}?refresh=true`)
+      router.push(`/my/mentorship/programs/${programKey}?refresh=true`)
     } catch (err) {
       handleAppError(err)
     }

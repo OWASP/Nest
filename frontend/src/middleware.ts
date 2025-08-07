@@ -12,16 +12,6 @@ export default async function authenticationMiddleware(request: NextRequest) {
 }
 
 export const config = {
-  //protected route
-  matcher: [
-    '/mentorship',
-    '/mentorship/programs',
-    '/mentorship/programs/create',
-    '/mentorship/programs/:programId',
-    '/mentorship/programs/:programId/modules/create',
-    '/mentorship/programs/:programId/edit',
-    '/mentorship/programs/:programId/modules/:moduleId',
-    '/mentorship/programs/:programId/modules/:moduleId/edit',
-    '/my/mentorship',
-  ],
+  //protected routes
+  matcher: ['/my/mentorship/:path*'],
 }

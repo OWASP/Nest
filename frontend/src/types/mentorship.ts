@@ -25,15 +25,15 @@ export type Program = {
   name: string
   description: string
   status: ProgramStatusEnum
-  experienceLevels: ExperienceLevelEnum[]
-  menteesLimit: number
+  experienceLevels?: ExperienceLevelEnum[]
+  menteesLimit?: number
   startedAt: string
   endedAt: string
-  domains: string[]
-  tags: string[]
+  domains?: string[]
+  tags?: string[]
   userRole?: string
-  admins: Contributor[]
-  modules: Module[]
+  admins?: Contributor[]
+  modules?: Module[]
 }
 
 export type ProgramList = {

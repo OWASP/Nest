@@ -32,14 +32,7 @@ interface ProgramFormProps {
   title: string
   submitText?: string
   isEdit?: boolean
-  type?: 'create' | 'edit'
 }
-
-const STATUS_OPTIONS = [
-  { key: 'DRAFT', label: 'Draft' },
-  { key: 'PUBLISHED', label: 'Published' },
-  { key: 'COMPLETED', label: 'Completed' },
-]
 
 const ProgramForm = ({
   formData,
@@ -48,7 +41,6 @@ const ProgramForm = ({
   loading,
   title,
   isEdit,
-  type,
   submitText = 'Save',
 }: ProgramFormProps) => {
   const handleInputChange = (
@@ -155,29 +147,6 @@ const ProgramForm = ({
                   />
                 </div>
               </div>
-              {type === 'edit' && (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div>
-                    <label htmlFor="program-status" className="mb-2 block text-sm font-medium">
-                      Program Status
-                    </label>
-                    <select
-                      id="program-status"
-                      name="status"
-                      value={formData.status}
-                      onChange={handleInputChange}
-                      disabled={!isEdit}
-                      className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-200 disabled:opacity-60 dark:bg-gray-800 dark:text-gray-200 dark:disabled:bg-gray-700"
-                    >
-                      {STATUS_OPTIONS.map((opt) => (
-                        <option key={opt.key} value={opt.key}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              )}
             </section>
 
             {/* Additional Details */}

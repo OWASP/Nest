@@ -2,7 +2,7 @@ import { useQuery } from '@apollo/client'
 import { render, screen, waitFor } from '@testing-library/react'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import EditProgramPage from 'app/mentorship/programs/[programKey]/edit/page'
+import EditProgramPage from 'app/my/mentorship/programs/[programKey]/edit/page'
 
 jest.mock('next-auth/react', () => ({
   useSession: jest.fn(),

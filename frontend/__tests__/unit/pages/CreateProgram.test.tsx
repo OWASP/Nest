@@ -4,7 +4,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { useRouter as mockUseRouter } from 'next/navigation'
 import { useSession as mockUseSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
-import CreateProgramPage from 'app/mentorship/programs/create/page'
+import CreateProgramPage from 'app/my/mentorship/programs/create/page'
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),

@@ -11,6 +11,7 @@ import { GET_PROGRAM_DETAILS } from 'server/queries/programsQueries'
 import type { ExtendedSession } from 'types/auth'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
+import slugify from 'utils/slugify'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/ProgramForm'
 const EditProgramPage = () => {
@@ -63,7 +64,7 @@ const EditProgramPage = () => {
         variant: 'solid',
         timeout: 4000,
       })
-      setTimeout(() => router.replace('/mentorship/programs'), 1500)
+      setTimeout(() => router.replace('/my/mentorship/programs'), 1500)
     }
   }, [sessionStatus, session, data, queryLoading, router])
   useEffect(() => {
@@ -112,7 +113,7 @@ const EditProgramPage = () => {
         timeout: 3000,
       })
 
-      router.push(`/mentorship/programs/${programKey}?refresh=true`)
+      router.push(`/my/mentorship/programs/${slugify(formData.name)}?refresh=true`)
     } catch (err) {
       addToast({
         title: 'Update Failed',
@@ -145,7 +146,6 @@ const EditProgramPage = () => {
       title="Edit Program"
       submitText="Save Changes"
       isEdit={true}
-      type="edit"
     />
   )
 }

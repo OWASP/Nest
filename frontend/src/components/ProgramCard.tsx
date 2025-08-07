@@ -5,11 +5,14 @@ import type React from 'react'
 import { Program } from 'types/mentorship'
 import ActionButton from 'components/ActionButton'
 
-const ProgramCard: React.FC<{
+interface ProgramCardProps {
   program: Program
-  onEdit: (key: string) => void
+  onEdit?: (key: string) => void
   onView: (key: string) => void
-}> = ({ program, onEdit, onView }) => {
+  accessLevel: 'admin' | 'user'
+}
+
+const ProgramCard: React.FC<ProgramCardProps> = ({ program, onEdit, onView, accessLevel }) => {
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString('en-US', {
       month: 'short',
@@ -23,7 +26,6 @@ const ProgramCard: React.FC<{
     default: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
   }
 
-  const isMentor = program.userRole === 'mentor'
   const description =
     program.description?.length > 100
       ? `${program.description.slice(0, 100)}...`
@@ -37,11 +39,13 @@ const ProgramCard: React.FC<{
             <h3 className="line-clamp-2 text-base font-semibold text-gray-600 dark:text-white">
               {program.name}
             </h3>
-            <span
-              className={`rounded-full px-2 py-1 text-xs font-medium capitalize ${roleClass[program.userRole] ?? roleClass.default}`}
-            >
-              {program.userRole}
-            </span>
+            {accessLevel === 'admin' && (
+              <span
+                className={`rounded-full px-2 py-1 text-xs font-medium capitalize ${roleClass[program.userRole] ?? roleClass.default}`}
+              >
+                {program.userRole}
+              </span>
+            )}
           </div>
           <div className="mb-2 text-xs text-gray-600 dark:text-gray-400">
             {program.startedAt && program.endedAt
@@ -52,15 +56,23 @@ const ProgramCard: React.FC<{
           </div>
           <p className="mb-4 text-sm text-gray-700 dark:text-gray-300">{description}</p>
         </div>
+
         <div className="mt-auto flex gap-2">
-          <ActionButton onClick={() => onView(program.key)}>
-            <FontAwesomeIcon icon={faEye} className="mr-1" />
-            View
-          </ActionButton>
-          {!isMentor && (
-            <ActionButton onClick={() => onEdit(program.key)}>
-              <FontAwesomeIcon icon={faEdit} className="mr-1" />
-              Edit
+          {accessLevel === 'admin' ? (
+            <>
+              <ActionButton onClick={() => onView(program.key)}>
+                <FontAwesomeIcon icon={faEye} className="mr-1" />
+                Preview
+              </ActionButton>
+              <ActionButton onClick={() => onEdit(program.key)}>
+                <FontAwesomeIcon icon={faEdit} className="mr-1" />
+                Edit
+              </ActionButton>
+            </>
+          ) : (
+            <ActionButton onClick={() => onView(program.key)}>
+              <FontAwesomeIcon icon={faEye} className="mr-1" />
+              View Details
             </ActionButton>
           )}
         </div>

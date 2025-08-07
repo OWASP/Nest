@@ -14,6 +14,7 @@ import type { ExtendedSession } from 'types/auth'
 import type { Program } from 'types/mentorship'
 
 import ActionButton from 'components/ActionButton'
+import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramCard from 'components/ProgramCard'
 import SearchPageLayout from 'components/SearchPageLayout'
 
@@ -79,16 +80,12 @@ const MyMentorshipPage: React.FC = () => {
     }
   }, [error])
 
-  const handleCreate = () => router.push('/mentorship/programs/create')
-  const handleView = (key: string) => router.push(`/mentorship/programs/${key}`)
-  const handleEdit = (key: string) => router.push(`/mentorship/programs/${key}/edit`)
+  const handleCreate = () => router.push('/my/mentorship/programs/create')
+  const handleView = (key: string) => router.push(`/my/mentorship/programs/${key}`)
+  const handleEdit = (key: string) => router.push(`/my/mentorship/programs/${key}/edit`)
 
   if (!username) {
-    return (
-      <div className="flex min-h-[80vh] items-center justify-center">
-        <p className="text-gray-600 dark:text-white">Checking access...</p>
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   if (!isProjectLeader) {
@@ -139,7 +136,13 @@ const MyMentorshipPage: React.FC = () => {
             </div>
           ) : (
             programs.map((p) => (
-              <ProgramCard key={p.id} program={p} onEdit={handleEdit} onView={handleView} />
+              <ProgramCard
+                accessLevel="admin"
+                key={p.id}
+                program={p}
+                onEdit={handleEdit}
+                onView={handleView}
+              />
             ))
           )}
         </div>
