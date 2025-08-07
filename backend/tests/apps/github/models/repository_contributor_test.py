@@ -6,6 +6,12 @@ from apps.github.models.repository_contributor import RepositoryContributor
 
 
 class TestRepositoryContributor(TestCase):
+    FULL_NAME_REGEX_PATTERN = r"\S{2,}\s+\S{2,}"
+    REPOSITORY_CONTRIBUTOR_OBJECTS_PATH = (
+        "apps.github.models.repository_contributor.RepositoryContributor.objects"
+    )
+    MOCK_AVATAR_URL = "https://example.com/avatar.jpg"
+
     def test_from_github(self):
         default_contribution_value = 5
         repository_contributor = RepositoryContributor()
@@ -66,18 +72,14 @@ class TestRepositoryContributor(TestCase):
             "Alex Thompson",
         ]
 
-        regex_pattern = r"\S{2,}\s+\S{2,}"
-
         for name in valid_names:
             with self.subTest(name=name):
                 # Test regex matches
-                regex_match = re.search(regex_pattern, name) is not None
+                regex_match = re.search(self.FULL_NAME_REGEX_PATTERN, name) is not None
                 assert regex_match, f"Valid name '{name}' should match regex pattern"
 
                 # Test filter behavior
-                with patch(
-                    "apps.github.models.repository_contributor.RepositoryContributor.objects"
-                ) as mock_objects:
+                with patch(self.REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
                     mock_queryset = MagicMock()
                     qs = mock_objects.by_humans.return_value.to_community_repositories.return_value
                     qs.select_related.return_value = mock_queryset
@@ -96,7 +98,7 @@ class TestRepositoryContributor(TestCase):
                     mock_annotate.order_by.return_value = mock_order_by
                     mock_order_by.__getitem__.return_value = [
                         {
-                            "user__avatar_url": "https://example.com/avatar.jpg",
+                            "user__avatar_url": self.MOCK_AVATAR_URL,
                             "total_contributions": 10,
                             "user__login": "testuser",
                             "user__name": name,
@@ -129,18 +131,14 @@ class TestRepositoryContributor(TestCase):
             "AB",
         ]
 
-        regex_pattern = r"\S{2,}\s+\S{2,}"
-
         for name in invalid_names:
             with self.subTest(name=name):
                 # Test regex doesn't match
-                regex_match = re.search(regex_pattern, name) is not None
+                regex_match = re.search(self.FULL_NAME_REGEX_PATTERN, name) is not None
                 assert not regex_match, f"Invalid name '{name}' should not match regex pattern"
 
                 # Test filter behavior
-                with patch(
-                    "apps.github.models.repository_contributor.RepositoryContributor.objects"
-                ) as mock_objects:
+                with patch(self.REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
                     mock_queryset = MagicMock()
                     qs = mock_objects.by_humans.return_value.to_community_repositories.return_value
                     qs.select_related.return_value = mock_queryset
@@ -179,9 +177,7 @@ class TestRepositoryContributor(TestCase):
         for name in multi_word_names:
             with (
                 self.subTest(name=name),
-                patch(
-                    "apps.github.models.repository_contributor.RepositoryContributor.objects"
-                ) as mock_objects,
+                patch(self.REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects,
             ):
                 mock_queryset = MagicMock()
                 qs = mock_objects.by_humans.return_value.to_community_repositories.return_value
@@ -200,7 +196,7 @@ class TestRepositoryContributor(TestCase):
                 mock_annotate.order_by.return_value = mock_order_by
                 mock_order_by.__getitem__.return_value = [
                     {
-                        "user__avatar_url": "https://example.com/avatar.jpg",
+                        "user__avatar_url": self.MOCK_AVATAR_URL,
                         "total_contributions": 10,
                         "user__login": "testuser",
                         "user__name": name,
@@ -226,19 +222,15 @@ class TestRepositoryContributor(TestCase):
             "J K",
         ]
 
-        regex_pattern = r"\S{2,}\s+\S{2,}"
-
         for name in short_invalid_names:
             with self.subTest(name=name):
                 # Test the actual regex pattern
-                match = re.search(regex_pattern, name)
+                match = re.search(self.FULL_NAME_REGEX_PATTERN, name)
 
                 # These names should NOT match the regex
                 assert match is None, f"Name '{name}' should not match regex pattern but it did"
 
-                with patch(
-                    "apps.github.models.repository_contributor.RepositoryContributor.objects"
-                ) as mock_objects:
+                with patch(self.REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
                     mock_queryset = MagicMock()
                     qs = mock_objects.by_humans.return_value.to_community_repositories.return_value
                     qs.select_related.return_value = mock_queryset
@@ -266,9 +258,7 @@ class TestRepositoryContributor(TestCase):
 
     def test_has_full_name_filter_disabled_by_default(self):
         """Test that has_full_name filter is not applied when not specified."""
-        with patch(
-            "apps.github.models.repository_contributor.RepositoryContributor.objects"
-        ) as mock_objects:
+        with patch(self.REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
             mock_queryset = MagicMock()
             qs = mock_objects.by_humans.return_value.to_community_repositories.return_value
             qs.select_related.return_value = mock_queryset
@@ -286,7 +276,7 @@ class TestRepositoryContributor(TestCase):
             mock_annotate.order_by.return_value = mock_order_by
             mock_order_by.__getitem__.return_value = [
                 {
-                    "user__avatar_url": "https://example.com/avatar.jpg",
+                    "user__avatar_url": self.MOCK_AVATAR_URL,
                     "total_contributions": 10,
                     "user__login": "singlename",
                     "user__name": "singlename",
@@ -309,9 +299,7 @@ class TestRepositoryContributor(TestCase):
 
     def test_has_full_name_filter_with_false_value(self):
         """Test that has_full_name=False does not apply the filter."""
-        with patch(
-            "apps.github.models.repository_contributor.RepositoryContributor.objects"
-        ) as mock_objects:
+        with patch(self.REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
             mock_queryset = MagicMock()
             qs = mock_objects.by_humans.return_value.to_community_repositories.return_value
             qs.select_related.return_value = mock_queryset
@@ -335,7 +323,5 @@ class TestRepositoryContributor(TestCase):
 
             # Should not call filter with regex
             filter_calls = mock_queryset.filter.call_args_list
-            regex_calls = [
-                call for call in filter_calls if len(call) > 1 and "user__name__regex" in call[1]
-            ]
+            regex_calls = [call for call in filter_calls if "user__name__regex" in call.kwargs]
             assert len(regex_calls) == 0, "Should not apply regex filter when has_full_name=False"
