@@ -64,20 +64,20 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         verbose_name="Labels",
     )
     # M2Ms.
-    mentors = models.ManyToManyField(
-        "mentorship.Mentor",
-        verbose_name="Mentors",
-        related_name="modules",
-        through="mentorship.MentorModule",
-        blank=True,
-    )
-
     issues = models.ManyToManyField(
         "github.Issue",
         verbose_name="Linked Issues",
         related_name="mentorship_modules",
         blank=True,
         help_text="Issues linked to this module via label matching.",
+    )
+
+    mentors = models.ManyToManyField(
+        "mentorship.Mentor",
+        verbose_name="Mentors",
+        related_name="modules",
+        through="mentorship.MentorModule",
+        blank=True,
     )
 
     def __str__(self) -> str:

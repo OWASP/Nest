@@ -12,9 +12,8 @@ class ModuleAdmin(admin.ModelAdmin):
         "name",
         "program",
         "project",
-        "labels",
     )
-    filter_horizontal = ("issues",)
+    autocomplete_fields = ("issues",)
 
     search_fields = (
         "name",

@@ -10,7 +10,10 @@ from apps.mentorship.models.module import Module
 class Command(BaseCommand):
     """Efficiently link issues to mentorship modules based on matching labels."""
 
-    help = "Efficiently link issues to mentorship modules based on matching labels."
+    help = (
+        "Links issues to modules by matching labels from all repositories "
+        "associated with the module's project."
+    )
 
     def handle(self, *_args, **options) -> None:
         """Handle the command execution.
@@ -20,44 +23,66 @@ class Command(BaseCommand):
             **options: Arbitrary keyword arguments containing command options.
 
         """
-        self.stdout.write("Fetching all issues and labels...")
-        # load id
-        issues = Issue.objects.prefetch_related("labels").only("id")
+        # Build a Repository-Aware Map of Labels to Issues ---
+        self.stdout.write("Building a repository-aware map of labels to issues...")
+        repo_label_to_issue_ids: dict[tuple[int, str], set[int]] = {}
 
-        label_to_issue_ids: dict[str, set[int]] = {}
-        for issue in issues:
+        issues_query = Issue.objects.select_related("repository").prefetch_related("labels")
+
+        for issue in issues_query:
+            if not issue.repository_id:
+                continue
+
             for label in issue.labels.all():
-                label_to_issue_ids.setdefault(label.name, set()).add(issue.id)
+                key = (issue.repository_id, label.name)
+                repo_label_to_issue_ids.setdefault(key, set()).add(issue.id)
 
-        total_modules = 0
-        total_links = 0
+        self.stdout.write(
+            f"Map built. Found issues for {len(repo_label_to_issue_ids)} unique repo-label pairs."
+        )
 
-        self.stdout.write("Processing modules...")
-        # Filter out modules without linked_issue_labels upfront
-        modules = Module.objects.exclude(labels__isnull=True).exclude(labels=[])
+        total_modules_updated = 0
+        total_links_created = 0
 
-        for module in modules:
-            linked_labels = module.labels
+        # Process modules and link issues from multiple repositories
+        self.stdout.write("Processing modules and linking issues...")
+
+        modules_to_process = (
+            Module.objects.prefetch_related("project__repositories")
+            .exclude(project__repositories__isnull=True)
+            .exclude(labels__isnull=True)
+            .exclude(labels=[])
+        )
+
+        for module in modules_to_process:
+            project_repos = module.project.repositories.all()
+            linked_label_names = module.labels
 
             matched_issue_ids = set()
-            for label in linked_labels:
-                matched_issue_ids.update(label_to_issue_ids.get(label, set()))
+            for repo in project_repos:
+                for label_name in linked_label_names:
+                    key = (repo.id, label_name)
+                    issues_for_label = repo_label_to_issue_ids.get(key, set())
+                    matched_issue_ids.update(issues_for_label)
 
-            if matched_issue_ids:
-                current_ids = set(module.issues.values_list("id", flat=True))
-                if current_ids != matched_issue_ids:
-                    with transaction.atomic():
-                        module.issues.set(matched_issue_ids)
-                    total_links += len(matched_issue_ids)
-                    total_modules += 1
-                    self.stdout.write(
-                        self.style.SUCCESS(
-                            f"Linked {len(matched_issue_ids)} issues to module '{module.name}'"
-                        )
-                    )
+            with transaction.atomic():
+                module.issues.set(matched_issue_ids)
+
+            num_linked = len(matched_issue_ids)
+            total_links_created += num_linked
+            total_modules_updated += 1
+
+            repo_names = ", ".join([r.path for r in project_repos])
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Updated module '{module.name}': set {num_linked} issues "
+                    f"from repos: [{repo_names}]"
+                )
+            )
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Completed. {total_links} issues linked across {total_modules} modules."
+                f"Completed. {total_links_created} issue links set across "
+                f"{total_modules_updated} modules."
             )
         )
