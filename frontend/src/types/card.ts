@@ -51,7 +51,7 @@ export interface DetailsCardProps {
   isActive?: boolean
   languages?: string[]
   status?: string
-  setStatus?: (newStatus: 'DRAFT' | 'PUBLISHED' | 'COMPLETED') => void
+  setStatus?: (newStatus: string) => void
   canUpdateStatus?: boolean
   mentors?: Contributor[]
   admins?: Contributor[]

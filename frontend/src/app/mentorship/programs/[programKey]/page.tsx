@@ -1,16 +1,11 @@
 'use client'
 
-import { useQuery, useMutation } from '@apollo/client'
-import { addToast } from '@heroui/toast'
+import { useQuery } from '@apollo/client'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
-import { useEffect, useMemo, useState } from 'react'
-import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { UPDATE_PROGRAM_STATUS_MUTATION } from 'server/mutations/programsMutations'
+import { useEffect, useState } from 'react'
+import { ErrorDisplay } from 'app/global-error'
 import { GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
-import type { ExtendedSession } from 'types/auth'
 import type { Module, Program } from 'types/mentorship'
-import { ProgramStatusEnum } from 'types/mentorship'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
@@ -21,14 +16,6 @@ const ProgramDetailsPage = () => {
   const searchParams = useSearchParams()
   const router = useRouter()
   const shouldRefresh = searchParams.get('refresh') === 'true'
-
-  const { data: session } = useSession()
-  const username = (session as ExtendedSession)?.user?.login
-
-  const [updateProgram] = useMutation(UPDATE_PROGRAM_STATUS_MUTATION, {
-    onError: handleAppError,
-  })
-
   const {
     data,
     refetch,
@@ -44,48 +31,6 @@ const ProgramDetailsPage = () => {
   const [isRefetching, setIsRefetching] = useState(false)
 
   const isLoading = isQueryLoading || isRefetching
-
-  const isAdmin = useMemo(
-    () => !!program?.admins?.some((admin) => admin.login === username),
-    [program, username]
-  )
-
-  const canPublish = useMemo(
-    () => isAdmin && program?.status?.toLowerCase() === ProgramStatusEnum.DRAFT,
-    [isAdmin, program]
-  )
-
-  const setPublish = async () => {
-    if (!program || !isAdmin) {
-      addToast({
-        title: 'Permission Denied',
-        description: 'Only admins can publish this program.',
-        variant: 'solid',
-        color: 'danger',
-        timeout: 3000,
-      })
-      return
-    }
-
-    await updateProgram({
-      variables: {
-        inputData: {
-          key: program.key,
-          name: program.name,
-          status: 'PUBLISHED',
-        },
-      },
-      refetchQueries: [{ query: GET_PROGRAM_AND_MODULES, variables: { programKey } }],
-    })
-
-    addToast({
-      title: 'Program Published',
-      description: 'The program is now live and the page will refresh.',
-      variant: 'solid',
-      color: 'success',
-      timeout: 3000,
-    })
-  }
 
   useEffect(() => {
     const processResult = async () => {
@@ -114,7 +59,7 @@ const ProgramDetailsPage = () => {
 
   if (isLoading) return <LoadingSpinner />
 
-  if (!program) {
+  if (!program && !isLoading) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -138,8 +83,6 @@ const ProgramDetailsPage = () => {
   return (
     <DetailsCard
       modules={modules}
-      isDraft={canPublish}
-      setPublish={setPublish}
       details={programDetails}
       tags={program.tags}
       domains={program.domains}
