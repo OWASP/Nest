@@ -2,16 +2,18 @@ import re
 from unittest import TestCase
 from unittest.mock import MagicMock, Mock, patch
 
-from apps.github.models.repository_contributor import RepositoryContributor
+from apps.github.models.repository_contributor import (
+    CONTRIBUTOR_FULL_NAME_REGEX,
+    RepositoryContributor,
+)
+
+MOCK_AVATAR_URL = "https://example.com/avatar.jpg"
+REPOSITORY_CONTRIBUTOR_OBJECTS_PATH = (
+    "apps.github.models.repository_contributor.RepositoryContributor.objects"
+)
 
 
 class TestRepositoryContributor(TestCase):
-    FULL_NAME_REGEX_PATTERN = r"\S{2,}\s+\S{2,}"
-    REPOSITORY_CONTRIBUTOR_OBJECTS_PATH = (
-        "apps.github.models.repository_contributor.RepositoryContributor.objects"
-    )
-    MOCK_AVATAR_URL = "https://example.com/avatar.jpg"
-
     def test_from_github(self):
         default_contribution_value = 5
         repository_contributor = RepositoryContributor()
@@ -57,29 +59,24 @@ class TestRepositoryContributor(TestCase):
 
     def test_has_full_name_filter_valid_names(self):
         """Test has_full_name filter with valid full names that should be included."""
-        valid_names = [
-            "John Doe",
-            "Mary Jane Smith",
-            "Bob Johnson",
-            "Alice Wilson",
-            "David Brown",
-            "Sarah Miller",
-            "Mike Davis",
-            "Lisa Garcia",
-            "Tom Anderson",
-            "Amy Taylor",
-            "Chris Martinez",
+        valid_names = (
             "Alex Thompson",
-        ]
+            "Edwin van der Sar,"
+            "Marc-André ter Stegen,"
+            "Mo S. Lo,"
+            "Mo Sa,"
+            "Ray W. Johnson"
+            "William Thomas Anderson Lee",
+        )
 
         for name in valid_names:
             with self.subTest(name=name):
                 # Test regex matches
-                regex_match = re.search(self.FULL_NAME_REGEX_PATTERN, name) is not None
+                regex_match = re.search(CONTRIBUTOR_FULL_NAME_REGEX, name) is not None
                 assert regex_match, f"Valid name '{name}' should match regex pattern"
 
                 # Test filter behavior
-                with patch(self.REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
+                with patch(REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
                     mock_queryset = MagicMock()
                     qs = mock_objects.by_humans.return_value.to_community_repositories.return_value
                     qs.select_related.return_value = mock_queryset
@@ -98,8 +95,8 @@ class TestRepositoryContributor(TestCase):
                     mock_annotate.order_by.return_value = mock_order_by
                     mock_order_by.__getitem__.return_value = [
                         {
-                            "user__avatar_url": self.MOCK_AVATAR_URL,
                             "total_contributions": 10,
+                            "user__avatar_url": MOCK_AVATAR_URL,
                             "user__login": "testuser",
                             "user__name": name,
                         }
@@ -116,29 +113,35 @@ class TestRepositoryContributor(TestCase):
 
     def test_has_full_name_filter_invalid_names(self):
         """Test has_full_name filter with invalid names that should be excluded."""
-        invalid_names = [
-            "john",
-            "A B",
-            "X Y Z",
-            "",
+        invalid_names = (
             "   ",
-            "a",
-            "J",
-            "SingleName",
-            "x y",
-            "1 2",
+            "",
             "@ #",
+            "1 2",
+            "a b",
+            "A B",
+            "a",
             "AB",
-        ]
+            "J K",
+            "Jo. Key",
+            "john",
+            "NoName",
+            "NONAME",
+            "SingleName",
+            "somethingELSER. M. S.",
+            "X Y Z",
+            "x y",
+            "X Y",
+        )
 
         for name in invalid_names:
             with self.subTest(name=name):
                 # Test regex doesn't match
-                regex_match = re.search(self.FULL_NAME_REGEX_PATTERN, name) is not None
+                regex_match = re.search(CONTRIBUTOR_FULL_NAME_REGEX, name) is not None
                 assert not regex_match, f"Invalid name '{name}' should not match regex pattern"
 
                 # Test filter behavior
-                with patch(self.REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
+                with patch(REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
                     mock_queryset = MagicMock()
                     qs = mock_objects.by_humans.return_value.to_community_repositories.return_value
                     qs.select_related.return_value = mock_queryset
@@ -162,142 +165,9 @@ class TestRepositoryContributor(TestCase):
                     # Should be excluded (empty results)
                     assert len(result) == 0, f"Name '{name}' should be excluded but was included"
 
-    def test_has_full_name_filter_multi_word_names(self):
-        """Test has_full_name filter with multi-word names (3+ words)."""
-        multi_word_names = [
-            "John Michael Smith Johnson",
-            "Mary Jane Santos Silva",
-            "Robert James Wilson Brown",
-            "Emily Rose Davis Miller",
-            "William Thomas Anderson Lee",
-            "Jennifer Anne Thompson White",
-            "Michael David Johnson Garcia",
-        ]
-
-        for name in multi_word_names:
-            with (
-                self.subTest(name=name),
-                patch(self.REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects,
-            ):
-                mock_queryset = MagicMock()
-                qs = mock_objects.by_humans.return_value.to_community_repositories.return_value
-                qs.select_related.return_value = mock_queryset
-                # Mock filter chain
-                mock_queryset.exclude.return_value = mock_queryset
-                mock_queryset.filter.return_value = mock_queryset
-
-                # Mock aggregation chain
-                mock_values = MagicMock()
-                mock_annotate = MagicMock()
-                mock_order_by = MagicMock()
-
-                mock_queryset.values.return_value = mock_values
-                mock_values.annotate.return_value = mock_annotate
-                mock_annotate.order_by.return_value = mock_order_by
-                mock_order_by.__getitem__.return_value = [
-                    {
-                        "user__avatar_url": self.MOCK_AVATAR_URL,
-                        "total_contributions": 10,
-                        "user__login": "testuser",
-                        "user__name": name,
-                    }
-                ]
-
-                result = RepositoryContributor.get_top_contributors(has_full_name=True)
-
-                # All multi-word names should be included
-                assert len(result) > 0, f"Multi-word name '{name}' should be included"
-                assert any(c["name"] == name for c in result), (
-                    f"Multi-word name '{name}' not found in results"
-                )
-
-    def test_has_full_name_filter_short_invalid_names(self):
-        """Test has_full_name filter excludes names with parts shorter than 2 characters."""
-        short_invalid_names = [
-            "A B",
-            "X Y",
-            "1 2",
-            "@ #",
-            "a b",
-            "J K",
-        ]
-
-        for name in short_invalid_names:
-            with self.subTest(name=name):
-                # Test the actual regex pattern
-                match = re.search(self.FULL_NAME_REGEX_PATTERN, name)
-
-                # These names should NOT match the regex
-                assert match is None, f"Name '{name}' should not match regex pattern but it did"
-
-                with patch(self.REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
-                    mock_queryset = MagicMock()
-                    qs = mock_objects.by_humans.return_value.to_community_repositories.return_value
-                    qs.select_related.return_value = mock_queryset
-
-                    # Mock filter chain
-                    mock_queryset.exclude.return_value = mock_queryset
-                    mock_queryset.filter.return_value = mock_queryset
-
-                    # Mock aggregation chain
-                    mock_values = MagicMock()
-                    mock_annotate = MagicMock()
-                    mock_order_by = MagicMock()
-
-                    mock_queryset.values.return_value = mock_values
-                    mock_values.annotate.return_value = mock_annotate
-                    mock_annotate.order_by.return_value = mock_order_by
-                    mock_order_by.__getitem__.return_value = []  # No results for invalid names
-
-                    result = RepositoryContributor.get_top_contributors(has_full_name=True)
-
-                    # Should be excluded (empty results)
-                    assert len(result) == 0, (
-                        f"Invalid name '{name}' should be excluded but was included"
-                    )
-
-    def test_has_full_name_filter_disabled_by_default(self):
-        """Test that has_full_name filter is not applied when not specified."""
-        with patch(self.REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
-            mock_queryset = MagicMock()
-            qs = mock_objects.by_humans.return_value.to_community_repositories.return_value
-            qs.select_related.return_value = mock_queryset
-            # Mock filter chain
-            mock_queryset.exclude.return_value = mock_queryset
-            mock_queryset.filter.return_value = mock_queryset
-
-            # Mock aggregation chain
-            mock_values = MagicMock()
-            mock_annotate = MagicMock()
-            mock_order_by = MagicMock()
-
-            mock_queryset.values.return_value = mock_values
-            mock_values.annotate.return_value = mock_annotate
-            mock_annotate.order_by.return_value = mock_order_by
-            mock_order_by.__getitem__.return_value = [
-                {
-                    "user__avatar_url": self.MOCK_AVATAR_URL,
-                    "total_contributions": 10,
-                    "user__login": "singlename",
-                    "user__name": "singlename",
-                }
-            ]
-
-            # Call without has_full_name parameter
-            result = RepositoryContributor.get_top_contributors()
-
-            # Should not call filter with regex (no full name filtering)
-            filter_calls = mock_queryset.filter.call_args_list
-            regex_calls = [call for call in filter_calls if "user__name__regex" in call.kwargs]
-            assert len(regex_calls) == 0, (
-                "Should not apply regex filter when has_full_name is not specified"
-            )
-
-            assert len(result) > 0, "Should return results when no filtering is applied"
-
     def test_has_full_name_filter_with_false_value(self):
         """Test that has_full_name=False does not apply the filter."""
-        with patch(self.REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
+        with patch(REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
             mock_queryset = MagicMock()
             qs = mock_objects.by_humans.return_value.to_community_repositories.return_value
             qs.select_related.return_value = mock_queryset
@@ -315,6 +185,14 @@ class TestRepositoryContributor(TestCase):
             mock_values.annotate.return_value = mock_annotate
             mock_annotate.order_by.return_value = mock_order_by
             mock_order_by.__getitem__.return_value = []
+
+            # Call with has_full_name=False
+            RepositoryContributor.get_top_contributors()
+
+            # Should not call filter with regex
+            filter_calls = mock_queryset.filter.call_args_list
+            regex_calls = [call for call in filter_calls if "user__name__regex" in call.kwargs]
+            assert len(regex_calls) == 0, "Should not apply regex filter when has_full_name=False"
 
             # Call with has_full_name=False
             RepositoryContributor.get_top_contributors(has_full_name=False)

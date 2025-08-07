@@ -9,6 +9,9 @@ from django.template.defaultfilters import pluralize
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.github.models.managers.repository_contributor import RepositoryContributorManager
 
+# Match any 2+ words 2+ characther long separated by a whitespace.
+CONTRIBUTOR_FULL_NAME_REGEX = r"\w{2,}\s\w{2,}"
+
 
 class RepositoryContributor(BulkSaveModel, TimestampedModel):
     """Repository contributor model."""
@@ -149,8 +152,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
             queryset = queryset.exclude(user__login__in=excluded_usernames)
 
         if has_full_name:
-            # Match any 2+ words 2+ characther long separated by a whitespace.
-            queryset = queryset.filter(user__name__regex=r"\S{2,}\s\S{2,}")
+            queryset = queryset.filter(user__name__regex=CONTRIBUTOR_FULL_NAME_REGEX)
 
         if project:
             queryset = queryset.filter(repository__project__key__iexact=f"www-project-{project}")
