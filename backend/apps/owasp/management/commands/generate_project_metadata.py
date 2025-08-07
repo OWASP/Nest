@@ -9,6 +9,8 @@ from owasp_schema.utils.schema_validators import validate_data
 
 from apps.owasp.models.project import Project, ProjectLevel, ProjectType
 
+MIN_PROJECT_TAGS = 3
+
 
 class Command(BaseCommand):
     help = "Generates and validates project metadata for a given project key."
@@ -65,38 +67,23 @@ class Command(BaseCommand):
         }
 
         data = {
+            "audience": project.audience,
+            "leaders": [],
+            "level": level_mapping.get(project.level),
             "name": project.name,
             "pitch": project.description,
-            "level": level_mapping.get(project.level),
             "type": type_mapping.get(project.type),
-            "audience": "builder",  # Required field with a default value for the PoC.
-            "leaders": [],
-            "tags": project.tags,
         }
 
         for leader in project.leaders.all():
-            person = {"github": leader.login}
+            person = {}
+            if leader.login:
+                person["github"] = leader.login
             if leader.name:
                 person["name"] = leader.name
             if leader.email:
                 person["email"] = leader.email
             data["leaders"].append(person)
-
-        if project.owasp_url:
-            data["website"] = project.owasp_url
-
-        if project.repositories.exists():
-            data["repositories"] = []
-            for repo in project.repositories.all():
-                repo_data = {}
-                if repo.url:
-                    repo_data["url"] = repo.url
-                if repo.name:
-                    repo_data["name"] = repo.name
-                if repo.description:
-                    repo_data["description"] = repo.description
-                if repo_data:
-                    data["repositories"].append(repo_data)
 
         if project.licenses:
             valid_licenses = [
@@ -106,5 +93,24 @@ class Command(BaseCommand):
             ]
             if valid_licenses:
                 data["license"] = valid_licenses
+
+        if project.repositories.exists():
+            data["repositories"] = []
+            for repo in project.repositories.all():
+                repo_data = {}
+                if repo.description:
+                    repo_data["description"] = repo.description
+                if repo.name:
+                    repo_data["name"] = repo.name
+                if repo.url:
+                    repo_data["url"] = repo.url
+                if repo_data:
+                    data["repositories"].append(repo_data)
+
+        if project.tags and len(project.tags) >= MIN_PROJECT_TAGS:
+            data["tags"] = project.tags
+
+        if project.owasp_url:
+            data["website"] = project.owasp_url
 
         return data
