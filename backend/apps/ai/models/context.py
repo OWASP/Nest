@@ -32,3 +32,40 @@ class Context(TimestampedModel):
             f"{self.content_type.model if self.content_type else 'None'} {entity}: "
             f"{self.content[:50]}"
         )
+
+    @staticmethod
+    def update_data(
+        content: str,
+        content_object=None,
+        source: str = "",
+        *,
+        save: bool = True,
+    ) -> "Context | None":
+        """Update context data.
+
+        Args:
+          content (str): The content text of the context.
+          content_object: Optional related object (generic foreign key).
+          source (str): Source identifier for the context.
+          save (bool): Whether to save the context to the database.
+
+        Returns:
+          Context: The updated context instance or None if it already exists.
+
+        """
+        if content_object:
+            content_type = ContentType.objects.get_for_model(content_object)
+            object_id = content_object.pk
+            if Context.objects.filter(
+                content_type=content_type, object_id=object_id, content=content
+            ).exists():
+                return None
+        elif Context.objects.filter(content=content, content_object__isnull=True).exists():
+            return None
+
+        context = Context(content=content, content_object=content_object, source=source)
+
+        if save:
+            context.save()
+
+        return context
