@@ -10,5 +10,4 @@ export type Release = {
   repository?: RepositoryDetails
   repositoryName: string
   tagName: string
-  url: string
 }
