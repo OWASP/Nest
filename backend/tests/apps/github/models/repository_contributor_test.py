@@ -186,18 +186,9 @@ class TestRepositoryContributor(TestCase):
             mock_annotate.order_by.return_value = mock_order_by
             mock_order_by.__getitem__.return_value = []
 
-            # Call with has_full_name=False
-            RepositoryContributor.get_top_contributors()
-
-            # Should not call filter with regex
-            filter_calls = mock_queryset.filter.call_args_list
-            regex_calls = [call for call in filter_calls if "user__name__regex" in call.kwargs]
-            assert len(regex_calls) == 0, "Should not apply regex filter when has_full_name=False"
-
-            # Call with has_full_name=False
             RepositoryContributor.get_top_contributors(has_full_name=False)
 
             # Should not call filter with regex
             filter_calls = mock_queryset.filter.call_args_list
             regex_calls = [call for call in filter_calls if "user__name__regex" in call.kwargs]
-            assert not regex_calls, "Should not apply regex filter when has_full_name=False"
+            assert len(regex_calls) == 0, "Should not apply regex filter when has_full_name=False"
