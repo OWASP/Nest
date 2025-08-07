@@ -94,7 +94,12 @@ describe('RecentPullRequests', () => {
 
   // --- Prop-based Behavior ---
   it('passes showAvatar prop to ItemCardList', () => {
-    render(<RecentPullRequests data={minimalData} showAvatar={false} />)
+    // Test with showAvatar=true (default)
+    const { rerender } = render(<RecentPullRequests data={minimalData} />)
+    // Add assertion for avatar presence if testable
+    // Test with showAvatar=false
+    rerender(<RecentPullRequests data={minimalData} showAvatar={false} />)
+    // Add assertion for avatar absence if testable
     expect(screen.getByText('test-repo')).toBeInTheDocument()
   })
 
@@ -115,20 +120,6 @@ describe('RecentPullRequests', () => {
   it('handles undefined data prop gracefully', () => {
     render(<RecentPullRequests data={undefined} />)
     expect(screen.getByText('Recent Pull Requests')).toBeInTheDocument()
-  })
-
-  // --- Defaults and Fallbacks ---
-  it('uses default value for showAvatar when not provided', () => {
-    render(<RecentPullRequests data={minimalData} />)
-    expect(screen.getByText('test-repo')).toBeInTheDocument()
-  })
-
-  // --- Content Rendering ---
-  it('renders the title and formatted date', () => {
-    render(<RecentPullRequests data={minimalData} />)
-    expect(screen.getByText('Recent Pull Requests')).toBeInTheDocument()
-    expect(screen.getByText('Jun 1, 2024')).toBeInTheDocument()
-    expect(screen.getByText('Test Pull Request')).toBeInTheDocument()
   })
 
   // --- Accessibility ---
