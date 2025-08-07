@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/OWASP/Nest/main/schema/project.json",
+  "$id": "https://raw.githubusercontent.com/OWASP/nest-schema/main/project.json",
   "additionalProperties": false,
   "description": "OWASP project schema",
   "properties": {
