@@ -4,16 +4,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('github', '0033_alter_release_published_at'),
-        ('mentorship', '0003_tasklevel_task_level_and_more'),
+        ("github", "0033_alter_release_published_at"),
+        ("mentorship", "0003_tasklevel_task_level_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='module',
-            name='issues',
-            field=models.ManyToManyField(blank=True, help_text='Issues linked to this module via label matching.', related_name='mentorship_modules', to='github.issue', verbose_name='Linked Issues'),
+            model_name="module",
+            name="issues",
+            field=models.ManyToManyField(
+                blank=True,
+                help_text="Issues linked to this module via label matching.",
+                related_name="mentorship_modules",
+                to="github.issue",
+                verbose_name="Linked Issues",
+            ),
         ),
     ]
