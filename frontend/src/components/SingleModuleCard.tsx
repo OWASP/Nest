@@ -1,5 +1,6 @@
 import { faUsers, faEllipsisV } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useState, useRef, useEffect } from 'react'
@@ -71,7 +72,21 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex cursor-pointer items-center gap-2">
           <FontAwesomeIcon icon={faUsers} className="text-gray-500 dark:text-gray-300" />
-          <span className="text-2xl font-semibold">{module.name}</span>
+          <Link
+            href={`${window.location.pathname}/modules/${module.key}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1"
+          >
+            <h1
+              className="max-w-full break-words text-base font-semibold text-blue-400 hover:text-blue-600 sm:break-normal sm:text-lg lg:text-2xl"
+              style={{
+                transition: 'color 0.3s ease',
+              }}
+            >
+              {module.name}
+            </h1>
+          </Link>
         </div>
 
         <div className="relative" ref={dropdownRef}>
