@@ -4,9 +4,12 @@ export type ExtendedProfile = {
 
 export type ExtendedSession = {
   accessToken?: string
+  expires?: string
   user?: {
-    isOwaspStaff?: boolean
-    login?: string
+    email?: string
     image?: string
+    isOwaspStaff?: boolean
+    name?: string
+    login?: string
   }
 }

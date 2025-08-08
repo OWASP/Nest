@@ -1,5 +1,4 @@
 import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
-import { mockDashboardCookies } from '@e2e/helpers/mockDashboardCookies'
 import { test, expect } from '@playwright/test'
 import mockProjectData from '@unit/data/mockProjectData'
 
@@ -14,7 +13,6 @@ test.describe('Projects Page', () => {
         }),
       })
     })
-    await mockDashboardCookies(page, {}, false)
     await page.goto('/projects')
   })
 

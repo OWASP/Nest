@@ -86,7 +86,7 @@ export default function UserMenu({
       {isOpen && (
         <div
           id={dropdownId}
-          className="absolute right-0 top-full z-10 mt-2 w-48 overflow-hidden rounded-md bg-white shadow-lg dark:bg-slate-800"
+          className="absolute right-0 top-full z-20 mt-2 w-48 overflow-hidden rounded-md bg-white shadow-lg dark:bg-slate-800"
         >
           <div className="flex flex-col p-2">
             <UserMenuItem onClick={handleLogout} disabled={isLoggingOut}>

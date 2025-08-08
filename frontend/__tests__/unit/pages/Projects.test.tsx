@@ -20,12 +20,6 @@ jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 
-jest.mock('hooks/useDjangoSession', () => ({
-  useDjangoSession: () => ({
-    isSyncing: false,
-  }),
-}))
-
 jest.mock('components/Pagination', () =>
   jest.fn(({ currentPage, onPageChange }) => (
     <div>

@@ -27,12 +27,6 @@ jest.mock('react-apexcharts', () => {
   }
 })
 
-jest.mock('hooks/useDjangoSession', () => ({
-  useDjangoSession: () => ({
-    isSyncing: false,
-  }),
-}))
-
 const mockRouter = {
   push: jest.fn(),
 }
