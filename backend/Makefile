@@ -1,5 +1,6 @@
 include backend/apps/ai/Makefile
 include backend/apps/github/Makefile
+include backend/apps/nest/Makefile
 include backend/apps/owasp/Makefile
 include backend/apps/slack/Makefile
 
@@ -109,6 +110,7 @@ shell-db:
 sync-data: \
 	update-data \
 	enrich-data \
+	nest-update-user-badges \
 	index-data
 
 test-backend:
@@ -134,6 +136,7 @@ update-data: \
 	github-update-users \
 	owasp-aggregate-projects \
 	owasp-update-events \
+	owasp-sync-awards \
 	owasp-sync-posts \
 	owasp-update-sponsors \
 	slack-sync-data

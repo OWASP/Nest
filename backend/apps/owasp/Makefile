@@ -26,6 +26,10 @@ owasp-process-snapshots:
 	@echo "Processing OWASP snapshots"
 	@CMD="python manage.py owasp_process_snapshots" $(MAKE) exec-backend-command
 
+owasp-sync-awards:
+	@echo "Syncing OWASP awards data"
+	@CMD="python manage.py owasp_sync_awards" $(MAKE) exec-backend-command
+
 owasp-update-leaders:
 	@CMD="python manage.py owasp_update_leaders $(MATCH_MODEL)" $(MAKE) exec-backend-command
 
