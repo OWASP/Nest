@@ -24,7 +24,7 @@ jest.mock('components/ActionButton', () => ({ children, onClick }) => (
 jest.mock('@heroui/modal', () => {
   return {
     Modal: ({ isOpen, children }: { isOpen: boolean; children: React.ReactNode }) =>
-      isOpen ? <div role="dialog">{children}</div> : null,
+      isOpen ? <dialog open>{children}</dialog> : null,
     ModalContent: ({
       children,
       className,
@@ -85,7 +85,7 @@ describe('DialogComp', () => {
       label: 'Action',
       icon: <FontAwesomeIcon icon={faCheck} />,
       url: 'https://example.com',
-      onclick: mockOnClick,
+      onPress: mockOnClick,
     },
   }
 
@@ -142,7 +142,7 @@ describe('DialogComp', () => {
 
   it('calls onClose when close button is clicked', () => {
     render(<DialogComp {...defaultProps} />)
-    const closeButton = screen.getByText('Close')
+    const closeButton = screen.getByRole('button', { name: /close/i })
     fireEvent.click(closeButton)
     expect(mockOnClose).toHaveBeenCalledTimes(1)
   })
@@ -164,7 +164,7 @@ describe('DialogComp', () => {
         label: 'Minimal Action',
         icon: null,
         url: '',
-        onclick: mockOnClick,
+        onPress: mockOnClick,
       },
     }
 
