@@ -1,5 +1,4 @@
-import { render } from '@testing-library/react';
-import { screen } from '@testing-library/dom';
+import { render, screen } from '@testing-library/react';
 
 import '@testing-library/jest-dom';
 import { faCertificate } from '@fortawesome/free-solid-svg-icons';
@@ -24,16 +23,18 @@ describe('GeneralCompliantComponent', () => {
     expect(screen.getByText('Test Title')).toBeInTheDocument();
   });
 
-  it('applies correct color for compliant=true', () => {
-    const { container } = render(<GeneralCompliantComponent {...baseProps} compliant={true} />);
-    const icon = container.querySelector('.text-green-400/80');
-    expect(icon).toBeInTheDocument();
-  });
+ it('applies correct color for compliant=true', () => {
+  const { container } = render(<GeneralCompliantComponent {...baseProps} compliant={true} />);
+  const svg = container.querySelector('svg'); // Find the SVG icon
+  expect(svg).toBeInTheDocument();
+  expect(svg).toHaveClass('text-green-400/80'); // Check for the specific class
+});
 
   it('applies correct color for compliant=false', () => {
     const { container } = render(<GeneralCompliantComponent {...baseProps} compliant={false} />);
-    const icon = container.querySelector('.text-red-400/80');
-    expect(icon).toBeInTheDocument();
+    const svg = container.querySelector('svg'); // Find the SVG icon
+    expect(svg).toBeInTheDocument();
+    expect(svg).toHaveClass('text-red-400/80'); // Check for the specific class
   });
 
   it('renders the correct icon and title', () => {
@@ -53,13 +54,12 @@ describe('GeneralCompliantComponent', () => {
   });
 
   it('has accessible role and label', () => {
-    const { getByLabelText } = render(
-      <div aria-label="compliance-icon">
-        <GeneralCompliantComponent {...baseProps} />
-      </div>
-    );
-    expect(getByLabelText('compliance-icon')).toBeInTheDocument();
-  });
+  render(<GeneralCompliantComponent {...baseProps} />);
+  const iconElement = screen.getByText(baseProps.title); // Asserts the title text is visible
+  expect(iconElement).toBeInTheDocument();
+  // Or, if the icon has a specific role, you can check for that
+  // expect(screen.getByRole('img', { hidden: true })).toBeInTheDocument();
+});
 
   it('renders with custom icon', () => {
     const customIcon = faCertificate; // Replace with another icon if needed
