@@ -6,9 +6,19 @@ test.describe('Project Details Page', () => {
     await page.route('**/graphql/', async (route) => {
       await route.fulfill({
         status: 200,
-        body: JSON.stringify(mockProjectDetailsData),
+        json: {
+          data: mockProjectDetailsData,
+        },
       })
     })
+    await page.context().addCookies([
+      {
+        name: 'csrftoken',
+        value: 'abc123',
+        domain: 'localhost',
+        path: '/',
+      },
+    ])
     await page.goto('/projects/test-project', { timeout: 60000 })
   })
 
