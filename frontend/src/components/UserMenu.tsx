@@ -8,7 +8,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'
 import { useEffect, useId, useRef, useState } from 'react'
-import UserMenuItem from 'components/UserMenuItem'
 
 export default function UserMenu({
   isGitHubAuthEnabled,
@@ -62,6 +61,9 @@ export default function UserMenu({
     setIsOpen(false)
   }
 
+  const userMenuItemClasses =
+    'block w-full px-4 py-2 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white'
+
   return (
     <div ref={dropdownRef} className="relative flex items-center justify-center">
       <button
@@ -89,13 +91,17 @@ export default function UserMenu({
           className="absolute right-0 top-full z-20 mt-2 w-48 overflow-hidden rounded-md bg-white shadow-lg dark:bg-slate-800"
         >
           <div className="flex flex-col p-2">
-            <UserMenuItem onClick={handleLogout} disabled={isLoggingOut}>
+            <button onClick={handleLogout} disabled={isLoggingOut} className={userMenuItemClasses}>
               {isLoggingOut ? 'Signing out...' : 'Sign out'}
-            </UserMenuItem>
+            </button>
 
             {isOwaspStaff && (
-              <Link href="/projects/dashboard">
-                <UserMenuItem onClick={() => setIsOpen(false)}>Projects Health</UserMenuItem>
+              <Link
+                href="/projects/dashboard"
+                className={userMenuItemClasses}
+                onClick={() => setIsOpen(false)}
+              >
+                Projects Health
               </Link>
             )}
           </div>
