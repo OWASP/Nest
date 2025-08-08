@@ -1,4 +1,4 @@
-FROM python:3.13.5-alpine AS builder
+FROM python:3.13.6-alpine AS builder
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
@@ -35,7 +35,7 @@ COPY schema/src/owasp_schema owasp_schema
 COPY schema/*.json owasp_schema/
 COPY schema/tests tests
 
-FROM python:3.13.5-alpine
+FROM python:3.13.6-alpine
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
