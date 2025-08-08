@@ -1,3 +1,4 @@
+import { ProgramStatusEnum } from 'types/mentorship'
 export const mockPrograms = [
   {
     key: 'program_1',
@@ -9,3 +10,22 @@ export const mockPrograms = [
     modules: ['Module A', 'Module B'],
   },
 ]
+
+export const mockProgramDetailsData = {
+  program: {
+    key: 'test-program',
+    name: 'Test Program',
+    description: 'Sample summary',
+    status: ProgramStatusEnum.DRAFT,
+    startedAt: '2025-01-01',
+    endedAt: '2025-12-31',
+    menteesLimit: 20,
+    experienceLevels: ['beginner', 'intermediate'],
+    admins: [{ login: 'admin-user', avatarUrl: 'https://example.com/avatar.png' }],
+    tags: ['web', 'security'],
+    domains: ['OWASP'],
+  },
+  getProgramModules: [],
+}
+
+export default mockProgramDetailsData

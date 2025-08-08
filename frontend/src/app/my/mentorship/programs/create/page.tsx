@@ -43,7 +43,7 @@ const CreateProgramPage = () => {
         timeout: 3000,
         shouldShowTimeoutProgress: true,
       })
-      router.push('/my/mentorship')
+      router.push('/')
       setRedirected(true)
     }
   }, [session, status, router, isProjectLeader])

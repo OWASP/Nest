@@ -82,7 +82,7 @@ describe('CreateProgramPage (comprehensive tests)', () => {
 
     await waitFor(() => {
       expect(addToast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Access Denied' }))
-      expect(mockRouterPush).toHaveBeenCalledWith('/mentorship/programs')
+      expect(mockRouterPush).toHaveBeenCalledWith('/')
     })
   })
 

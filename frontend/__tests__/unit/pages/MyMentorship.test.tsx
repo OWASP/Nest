@@ -67,7 +67,7 @@ describe('MyMentorshipPage', () => {
     mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
 
     render(<MyMentorshipPage />)
-    expect(screen.getByText(/Checking access/i)).toBeInTheDocument()
+    expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
   })
 
   it('shows access denied if user is not project leader', async () => {
