@@ -260,7 +260,7 @@ def clear_algolia_cache_by_index(index_name: str = "") -> None:
         logger.info("Deleting %d cache keys for pattern: %s", len(keys_to_delete), pattern)
 
         for key in keys_to_delete:
-            logger.debug("Deleting key: %s", key)
+            logger.info("Deleting key: %s", key)
             cache.delete(key)
 
     except AttributeError as e:

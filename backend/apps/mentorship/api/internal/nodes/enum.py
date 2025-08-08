@@ -4,8 +4,8 @@ import enum
 
 import strawberry
 
+from apps.mentorship.models import Program
 from apps.mentorship.models.common.experience_level import ExperienceLevel
-from apps.mentorship.models.program import Program
 
 
 @strawberry.enum

@@ -1,7 +1,7 @@
 """OWASP app program index."""
 
 from apps.common.index import IndexBase, register
-from apps.mentorship.models.program import Program
+from apps.mentorship.models import Program
 
 
 @register(Program)
