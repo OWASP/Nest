@@ -7,6 +7,7 @@ from apps.owasp.api.internal.filters.project_health_metrics import ProjectHealth
 from apps.owasp.api.internal.nodes.project_health_metrics import ProjectHealthMetricsNode
 from apps.owasp.api.internal.nodes.project_health_stats import ProjectHealthStatsNode
 from apps.owasp.api.internal.ordering.project_health_metrics import ProjectHealthMetricsOrder
+from apps.owasp.api.internal.permissions.project_health_metrics import HasDashboardAccess
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 
@@ -19,6 +20,7 @@ class ProjectHealthMetricsQuery:
         description="List of project health metrics.",
         pagination=True,
         ordering=ProjectHealthMetricsOrder,
+        permission_classes=[HasDashboardAccess],
     )
     def project_health_metrics(
         self,
@@ -39,7 +41,9 @@ class ProjectHealthMetricsQuery:
         """
         return ProjectHealthMetrics.get_latest_health_metrics()
 
-    @strawberry.field
+    @strawberry.field(
+        permission_classes=[HasDashboardAccess],
+    )
     def project_health_stats(self) -> ProjectHealthStatsNode:
         """Resolve overall project health stats.
 
@@ -49,7 +53,9 @@ class ProjectHealthMetricsQuery:
         """
         return ProjectHealthMetrics.get_stats()
 
-    @strawberry.field
+    @strawberry.field(
+        permission_classes=[HasDashboardAccess],
+    )
     def project_health_metrics_distinct_length(
         self,
         filters: ProjectHealthMetricsFilter | None = None,
