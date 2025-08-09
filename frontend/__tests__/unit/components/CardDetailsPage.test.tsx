@@ -810,7 +810,7 @@ describe('CardDetailsPage', () => {
 
       render(<CardDetailsPage {...defaultProps} details={detailsWithMissingValues} />)
 
-      expect(screen.getAllByText('Unknown')).toHaveLength(3)
+      expect(screen.getAllByText('N/A')).toHaveLength(3)
     })
 
     it('handles empty languages and topics arrays', () => {

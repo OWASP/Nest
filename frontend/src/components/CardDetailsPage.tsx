@@ -10,7 +10,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
-import { useCallback } from "react"
+import { useCallback } from 'react'
+import type { JSX } from 'react'
 import type { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/credentials'
@@ -58,48 +59,62 @@ const DetailsCard = ({
   type,
   userSummary,
 }: DetailsCardProps) => {
-  const renderDetailValue = useCallback((detail: { label: string; value: string }) => {
-    const { label, value } = detail
-    if (!value || value === "N/A" || value === "Not available" || value === "Unknown") {
-      return value
-    }
+  const renderDetailValue = useCallback(
+    (detail: { label: string; value: string | JSX.Element }) => {
+      const { label, value } = detail
 
-    switch (label) {
-      case "Email":
-        if (!EMAIL_REGEX.test(value)) {
-          return value
-        }
-        return (
-          <a
-            href={`mailto:${sanitizeForUrl(value)}`}
-            className="text-blue-400 hover:text-blue-600 hover:underline transition-colors"
-            aria-label={`Send email to ${value}`}
-          >
-            {value}
-          </a>
-        )
+      if (
+        value == null ||
+        value === '' ||
+        value === 'N/A' ||
+        value === 'Not available' ||
+        value === 'Unknown'
+      ) {
+        return 'N/A'
+      }
 
-      case "Company":
-        if (value.startsWith("@")) {
-          const companyName = sanitizeForUrl(value.slice(1))
+      if (typeof value !== 'string') {
+        return value
+      }
+
+      switch (label) {
+        case 'Email':
+          if (!EMAIL_REGEX.test(value)) {
+            return value
+          }
           return (
             <a
-              href={`https://github.com/${companyName}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-400 hover:text-blue-600 hover:underline transition-colors"
-              aria-label={`Visit ${value} on GitHub`}
+              href={`mailto:${sanitizeForUrl(value)}`}
+              className="text-blue-400 hover:underline"
+              aria-label={`Send email to ${value}`}
             >
               {value}
             </a>
           )
-        }
-        return value
 
-      default:
-        return value
-    }
-  }, [])
+        case 'Company':
+          if (value.startsWith('@')) {
+            const companyName = sanitizeForUrl(value.slice(1))
+            return (
+              <a
+                href={`https://github.com/${companyName}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:underline"
+                aria-label={`Visit ${value} on GitHub`}
+              >
+                {value}
+              </a>
+            )
+          }
+          return value
+
+        default:
+          return value
+      }
+    },
+    []
+  )
 
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
@@ -116,7 +131,7 @@ const DetailsCard = ({
           {!isActive && (
             <span className="ml-4 justify-center rounded bg-red-200 px-2 py-1 text-sm text-red-800">
               Inactive
-              </span>
+            </span>
           )}
         </div>
         <p className="mb-6 text-xl">{description}</p>
@@ -156,7 +171,7 @@ const DetailsCard = ({
                 <div key={detail.label} className="pb-1">
                   <strong>{detail.label}:</strong> {renderDetailValue(detail)}
                 </div>
-              ),
+              )
             )}
             {socialLinks && (type === 'chapter' || type === 'committee') && (
               <SocialLinks urls={socialLinks || []} />
@@ -185,7 +200,7 @@ const DetailsCard = ({
               ))}
             </SecondaryCard>
           )}
-            {type === 'chapter' && geolocationData && (
+          {type === 'chapter' && geolocationData && (
             <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
               <ChapterMapWrapper
                 geoLocData={geolocationData}
@@ -254,7 +269,7 @@ const DetailsCard = ({
           </div>
         )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
-        repositories.length > 0 && (
+          repositories.length > 0 && (
             <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
               <RepositoriesCard maxInitialDisplay={4} repositories={repositories} />
             </SecondaryCard>
