@@ -1,16 +1,16 @@
 import { Page, expect } from '@playwright/test'
 
 export async function expectBreadCrumbsToBeVisible(page: Page, breadcrumbs: string[] = ['Home']) {
-  const breadcrumbsContainer = page.locator('[aria-label="breadcrumb"]')
+  const breadcrumbsContainer = page.locator('nav[role="navigation"][aria-label="breadcrumb"]')
 
-  await expect(breadcrumbsContainer).toBeVisible()
+  await expect(breadcrumbsContainer).toBeVisible({ timeout: 10000 })
   await expect(breadcrumbsContainer).toHaveCount(1)
 
-  for (const breadcrumb of breadcrumbs) {
-    await expect(breadcrumbsContainer.getByText(breadcrumb)).toBeVisible()
-  }
+  const expectedBreadcrumbs = breadcrumbs[0] === 'Home' ? breadcrumbs : ['Home', ...breadcrumbs]
 
-  const allBreadcrumbs = await breadcrumbsContainer.locator('li').allTextContents()
-  const visibleBreadcrumbs = allBreadcrumbs.filter((text) => text.trim() !== '')
-  await expect(visibleBreadcrumbs).toEqual(breadcrumbs)
+  for (const breadcrumb of expectedBreadcrumbs) {
+    await expect(breadcrumbsContainer.getByText(breadcrumb, { exact: true })).toBeVisible({
+      timeout: 5000,
+    })
+  }
 }

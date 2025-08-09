@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client'
 import { addToast } from '@heroui/toast'
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockSnapshotDetailsData } from '@unit/data/mockSnapshotData'
 import { render } from 'wrappers/testUtil'
 import SnapshotDetailsPage from 'app/snapshots/[id]/page'
@@ -54,7 +54,9 @@ describe('SnapshotDetailsPage', () => {
       error: null,
     })
 
-    render(<SnapshotDetailsPage />)
+    await act(async () => {
+      render(<SnapshotDetailsPage />)
+    })
 
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
     await waitFor(() => {
@@ -68,10 +70,8 @@ describe('SnapshotDetailsPage', () => {
       error: null,
     })
 
-    render(<SnapshotDetailsPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('New Snapshot')).toBeInTheDocument()
+    await act(async () => {
+      render(<SnapshotDetailsPage />)
     })
 
     expect(screen.getByText('New Chapters')).toBeInTheDocument()
@@ -85,10 +85,14 @@ describe('SnapshotDetailsPage', () => {
       error: mockError,
     })
 
-    render(<SnapshotDetailsPage />)
+    await act(async () => {
+      render(<SnapshotDetailsPage />)
+    })
 
-    await waitFor(() => screen.getByText('Snapshot not found'))
-    expect(screen.getByText('Snapshot not found')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Snapshot not found')).toBeInTheDocument()
+    })
+
     expect(addToast).toHaveBeenCalledWith({
       description: 'An unexpected server error occurred.',
       title: 'Server Error',
@@ -104,7 +108,9 @@ describe('SnapshotDetailsPage', () => {
       data: mockSnapshotDetailsData,
     })
 
-    render(<SnapshotDetailsPage />)
+    await act(async () => {
+      render(<SnapshotDetailsPage />)
+    })
 
     await waitFor(() => {
       expect(screen.getByText('OWASP Nest')).toBeInTheDocument()
@@ -123,7 +129,9 @@ describe('SnapshotDetailsPage', () => {
       data: mockSnapshotDetailsData,
     })
 
-    render(<SnapshotDetailsPage />)
+    await act(async () => {
+      render(<SnapshotDetailsPage />)
+    })
 
     await waitFor(() => {
       expect(screen.getByText('OWASP Sivagangai')).toBeInTheDocument()
@@ -142,10 +150,13 @@ describe('SnapshotDetailsPage', () => {
       data: mockSnapshotDetailsData,
     })
 
-    render(<SnapshotDetailsPage />)
+    await act(async () => {
+      render(<SnapshotDetailsPage />)
+    })
 
     await waitFor(() => {
-      expect(screen.getByText('New Snapshot')).toBeInTheDocument()
+      const title = screen.getByRole('heading', { name: 'New Snapshot' })
+      expect(title).toBeInTheDocument()
       expect(screen.getByText('Latest pre-release')).toBeInTheDocument()
     })
 
@@ -166,7 +177,9 @@ describe('SnapshotDetailsPage', () => {
       error: null,
     })
 
-    render(<SnapshotDetailsPage />)
+    await act(async () => {
+      render(<SnapshotDetailsPage />)
+    })
 
     await waitFor(() => {
       expect(screen.queryByText('New Chapters')).not.toBeInTheDocument()

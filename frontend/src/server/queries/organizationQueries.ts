@@ -75,6 +75,7 @@ export const GET_ORGANIZATION_DATA = gql`
       openIssuesCount
       organization {
         login
+        name
       }
       starsCount
       url
