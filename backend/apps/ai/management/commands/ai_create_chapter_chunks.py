@@ -3,11 +3,13 @@
 import os
 
 import openai
+from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
-from apps.ai.common.constants import DELIMITER
+from apps.ai.common.extractors import extract_chapter_content
 from apps.ai.common.utils import create_chunks_and_embeddings
 from apps.ai.models.chunk import Chunk
+from apps.ai.models.context import Context
 from apps.owasp.models.chapter import Chapter
 
 
@@ -16,7 +18,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--chapter",
+            "--chapter-key",
             type=str,
             help="Process only the chapter with this key",
         )
@@ -41,8 +43,8 @@ class Command(BaseCommand):
 
         self.openai_client = openai.OpenAI(api_key=openai_api_key)
 
-        if chapter := options["chapter"]:
-            queryset = Chapter.objects.filter(key=chapter)
+        if options["chapter_key"]:
+            queryset = Chapter.objects.filter(key=options["chapter_key"])
         elif options["all"]:
             queryset = Chapter.objects.all()
         else:
@@ -55,107 +57,58 @@ class Command(BaseCommand):
         self.stdout.write(f"Found {total_chapters} chapters to process")
 
         batch_size = options["batch_size"]
+        processed_count = 0
+
         for offset in range(0, total_chapters, batch_size):
             batch_chapters = queryset[offset : offset + batch_size]
+            processed_count += self.process_chunks_batch(batch_chapters)
 
-            batch_chunks = []
-            for chapter in batch_chapters:
-                batch_chunks.extend(self.handle_chunks(chapter))
-
-            if batch_chunks:
-                Chunk.bulk_save(batch_chunks)
-                self.stdout.write(f"Saved {len(batch_chunks)} chunks")
-
-        self.stdout.write(f"Completed processing all {total_chapters} chapters")
-
-    def handle_chunks(self, chapter: Chapter) -> list[Chunk]:
-        """Create chunks from a chapter's data."""
-        prose_content, metadata_content = self.extract_chapter_content(chapter)
-
-        all_chunk_texts = []
-
-        if metadata_content.strip():
-            all_chunk_texts.append(metadata_content)
-
-        if prose_content.strip():
-            all_chunk_texts.extend(Chunk.split_text(prose_content))
-
-        if not all_chunk_texts:
-            self.stdout.write(f"No content to chunk for chapter {chapter.key}")
-            return []
-
-        return create_chunks_and_embeddings(
-            all_chunk_texts=all_chunk_texts,
-            content_object=chapter,
-            openai_client=self.openai_client,
+        self.stdout.write(
+            self.style.SUCCESS(f"Completed processing {processed_count}/{total_chapters} chapters")
         )
 
-    def extract_chapter_content(self, chapter: Chapter) -> tuple[str, str]:
-        """Extract and separate prose content from metadata for a chapter.
+    def process_chunks_batch(self, chapters: list[Chapter]) -> int:
+        """Process a batch of chapters to create chunks."""
+        processed = 0
+        batch_chunks = []
 
-        Returns:
-          tuple[str, str]: (prose_content, metadata_content)
+        chapter_content_type = ContentType.objects.get_for_model(Chapter)
 
-        """
-        prose_parts = []
-        metadata_parts = []
+        for chapter in chapters:
+            context = Context.objects.filter(
+                content_type=chapter_content_type, object_id=chapter.id
+            ).first()
 
-        if chapter.description:
-            prose_parts.append(f"Description: {chapter.description}")
+            if not context:
+                self.stdout.write(
+                    self.style.WARNING(f"No context found for chapter {chapter.key}")
+                )
+                continue
 
-        if chapter.summary:
-            prose_parts.append(f"Summary: {chapter.summary}")
+            prose_content, metadata_content = extract_chapter_content(chapter)
+            all_chunk_texts = []
 
-        if hasattr(chapter, "owasp_repository") and chapter.owasp_repository:
-            repo = chapter.owasp_repository
-            if repo.description:
-                prose_parts.append(f"Repository Description: {repo.description}")
-            if repo.topics:
-                metadata_parts.append(f"Repository Topics: {', '.join(repo.topics)}")
+            if metadata_content.strip():
+                all_chunk_texts.append(metadata_content)
 
-        if chapter.name:
-            metadata_parts.append(f"Chapter Name: {chapter.name}")
+            if prose_content.strip():
+                prose_chunks = Chunk.split_text(prose_content)
+                all_chunk_texts.extend(prose_chunks)
 
-        location_parts = []
-        if chapter.country:
-            location_parts.append(f"Country: {chapter.country}")
-        if chapter.region:
-            location_parts.append(f"Region: {chapter.region}")
-        if chapter.postal_code:
-            location_parts.append(f"Postal Code: {chapter.postal_code}")
-        if chapter.suggested_location:
-            location_parts.append(f"Location: {chapter.suggested_location}")
+            if not all_chunk_texts:
+                self.stdout.write(f"No content to chunk for chapter {chapter.key}")
+                continue
 
-        if location_parts:
-            metadata_parts.append(f"Location Information: {', '.join(location_parts)}")
+            if chunks := create_chunks_and_embeddings(
+                chunk_texts=all_chunk_texts,
+                context=context,
+                openai_client=self.openai_client,
+                save=False,
+            ):
+                batch_chunks.extend(chunks)
+                processed += 1
+                self.stdout.write(f"Created {len(chunks)} chunks for {chapter.key}")
 
-        if chapter.currency:
-            metadata_parts.append(f"Currency: {chapter.currency}")
-
-        if chapter.meetup_group:
-            metadata_parts.append(f"Meetup Group: {chapter.meetup_group}")
-
-        if chapter.tags:
-            metadata_parts.append(f"Tags: {', '.join(chapter.tags)}")
-
-        if chapter.topics:
-            metadata_parts.append(f"Topics: {', '.join(chapter.topics)}")
-
-        if chapter.leaders_raw:
-            metadata_parts.append(f"Chapter Leaders: {', '.join(chapter.leaders_raw)}")
-
-        if chapter.related_urls:
-            valid_urls = [
-                url
-                for url in chapter.related_urls
-                if url and url not in (chapter.invalid_urls or [])
-            ]
-            if valid_urls:
-                metadata_parts.append(f"Related URLs: {', '.join(valid_urls)}")
-
-        metadata_parts.append(f"Active Chapter: {'Yes' if chapter.is_active else 'No'}")
-
-        return (
-            DELIMITER.join(filter(None, prose_parts)),
-            DELIMITER.join(filter(None, metadata_parts)),
-        )
+        if batch_chunks:
+            Chunk.bulk_save(batch_chunks)
+        return processed

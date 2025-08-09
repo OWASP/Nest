@@ -3,11 +3,13 @@
 import os
 
 import openai
+from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
-from apps.ai.common.constants import DELIMITER
+from apps.ai.common.extractors import extract_committee_content
 from apps.ai.common.utils import create_chunks_and_embeddings
 from apps.ai.models.chunk import Chunk
+from apps.ai.models.context import Context
 from apps.owasp.models.committee import Committee
 
 
@@ -16,7 +18,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--committee",
+            "--committee-key",
             type=str,
             help="Process only the committee with this key",
         )
@@ -41,8 +43,8 @@ class Command(BaseCommand):
 
         self.openai_client = openai.OpenAI(api_key=openai_api_key)
 
-        if committee := options["committee"]:
-            queryset = Committee.objects.filter(key=committee)
+        if options["committee_key"]:
+            queryset = Committee.objects.filter(key=options["committee_key"])
         elif options["all"]:
             queryset = Committee.objects.all()
         else:
@@ -55,83 +57,60 @@ class Command(BaseCommand):
         self.stdout.write(f"Found {total_committees} committees to process")
 
         batch_size = options["batch_size"]
+        processed_count = 0
+
         for offset in range(0, total_committees, batch_size):
             batch_committees = queryset[offset : offset + batch_size]
+            processed_count += self.process_chunks_batch(batch_committees)
 
-            batch_chunks = []
-            for committee in batch_committees:
-                batch_chunks.extend(self.handle_chunks(committee))
-
-            if batch_chunks:
-                Chunk.bulk_save(batch_chunks)
-                self.stdout.write(f"Saved {len(batch_chunks)} chunks")
-
-        self.stdout.write(f"Completed processing all {total_committees} committees")
-
-    def handle_chunks(self, committee: Committee) -> list[Chunk]:
-        """Create chunks from a committee's data."""
-        prose_content, metadata_content = self.extract_committee_content(committee)
-
-        all_chunk_texts = []
-
-        if metadata_content.strip():
-            all_chunk_texts.append(metadata_content)
-
-        if prose_content.strip():
-            all_chunk_texts.extend(Chunk.split_text(prose_content))
-
-        if not all_chunk_texts:
-            self.stdout.write(f"No content to chunk for committee {committee.key}")
-            return []
-
-        return create_chunks_and_embeddings(
-            all_chunk_texts=all_chunk_texts,
-            content_object=committee,
-            openai_client=self.openai_client,
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Completed processing {processed_count}/{total_committees} committees"
+            )
         )
 
-    def extract_committee_content(self, committee: Committee) -> tuple[str, str]:
-        """Extract structured content from committee data."""
-        prose_parts = []
-        metadata_parts = []
+    def process_chunks_batch(self, committees: list[Committee]) -> int:
+        """Process a batch of committees to create chunks."""
+        processed = 0
+        batch_chunks = []
 
-        if committee.description:
-            prose_parts.append(f"Description: {committee.description}")
+        committee_content_type = ContentType.objects.get_for_model(Committee)
 
-        if committee.summary:
-            prose_parts.append(f"Summary: {committee.summary}")
+        for committee in committees:
+            context = Context.objects.filter(
+                content_type=committee_content_type, object_id=committee.id
+            ).first()
 
-        if hasattr(committee, "owasp_repository") and committee.owasp_repository:
-            repo = committee.owasp_repository
-            if repo.description:
-                prose_parts.append(f"Repository Description: {repo.description}")
-            if repo.topics:
-                metadata_parts.append(f"Repository Topics: {', '.join(repo.topics)}")
+            if not context:
+                self.stdout.write(
+                    self.style.WARNING(f"No context found for committee {committee.key}")
+                )
+                continue
 
-        if committee.name:
-            metadata_parts.append(f"Committee Name: {committee.name}")
+            prose_content, metadata_content = extract_committee_content(committee)
+            all_chunk_texts = []
 
-        if committee.tags:
-            metadata_parts.append(f"Tags: {', '.join(committee.tags)}")
+            if metadata_content.strip():
+                all_chunk_texts.append(metadata_content)
 
-        if committee.topics:
-            metadata_parts.append(f"Topics: {', '.join(committee.topics)}")
+            if prose_content.strip():
+                prose_chunks = Chunk.split_text(prose_content)
+                all_chunk_texts.extend(prose_chunks)
 
-        if committee.leaders_raw:
-            metadata_parts.append(f"Committee Leaders: {', '.join(committee.leaders_raw)}")
+            if not all_chunk_texts:
+                self.stdout.write(f"No content to chunk for committee {committee.key}")
+                continue
 
-        if committee.related_urls:
-            valid_urls = [
-                url
-                for url in committee.related_urls
-                if url and url not in (committee.invalid_urls or [])
-            ]
-            if valid_urls:
-                metadata_parts.append(f"Related URLs: {', '.join(valid_urls)}")
+            if chunks := create_chunks_and_embeddings(
+                chunk_texts=all_chunk_texts,
+                context=context,
+                openai_client=self.openai_client,
+                save=False,
+            ):
+                batch_chunks.extend(chunks)
+                processed += 1
+                self.stdout.write(f"Created {len(chunks)} chunks for {committee.key}")
 
-        metadata_parts.append(f"Active Committee: {'Yes' if committee.is_active else 'No'}")
-
-        return (
-            DELIMITER.join(filter(None, prose_parts)),
-            DELIMITER.join(filter(None, metadata_parts)),
-        )
+        if batch_chunks:
+            Chunk.bulk_save(batch_chunks)
+        return processed

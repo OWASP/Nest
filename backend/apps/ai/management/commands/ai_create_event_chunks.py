@@ -3,11 +3,13 @@
 import os
 
 import openai
+from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
-from apps.ai.common.constants import DELIMITER
+from apps.ai.common.extractors import extract_event_content
 from apps.ai.common.utils import create_chunks_and_embeddings
 from apps.ai.models.chunk import Chunk
+from apps.ai.models.context import Context
 from apps.owasp.models.event import Event
 
 
@@ -16,7 +18,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--event",
+            "--event-key",
             type=str,
             help="Process only the event with this key",
         )
@@ -41,8 +43,8 @@ class Command(BaseCommand):
 
         self.openai_client = openai.OpenAI(api_key=openai_api_key)
 
-        if event := options["event"]:
-            queryset = Event.objects.filter(key=event)
+        if options["event_key"]:
+            queryset = Event.objects.filter(key=options["event_key"])
         elif options["all"]:
             queryset = Event.objects.all()
         else:
@@ -55,79 +57,56 @@ class Command(BaseCommand):
         self.stdout.write(f"Found {total_events} events to process")
 
         batch_size = options["batch_size"]
+        processed_count = 0
+
         for offset in range(0, total_events, batch_size):
             batch_events = queryset[offset : offset + batch_size]
+            processed_count += self.process_chunks_batch(batch_events)
 
-            batch_chunks = []
-            for event in batch_events:
-                batch_chunks.extend(self.handle_chunks(event))
-
-            if batch_chunks:
-                Chunk.bulk_save(batch_chunks)
-                self.stdout.write(f"Saved {len(batch_chunks)} chunks")
-
-        self.stdout.write(f"Completed processing all {total_events} events")
-
-    def handle_chunks(self, event: Event) -> list[Chunk]:
-        """Create chunks from an event's data."""
-        prose_content, metadata_content = self.extract_event_content(event)
-
-        all_chunk_texts = []
-
-        if metadata_content.strip():
-            all_chunk_texts.append(metadata_content)
-
-        if prose_content.strip():
-            all_chunk_texts.extend(Chunk.split_text(prose_content))
-
-        if not all_chunk_texts:
-            self.stdout.write(f"No content to chunk for event {event.key}")
-            return []
-
-        return create_chunks_and_embeddings(
-            all_chunk_texts,
-            content_object=event,
-            openai_client=self.openai_client,
+        self.stdout.write(
+            self.style.SUCCESS(f"Completed processing {processed_count}/{total_events} events")
         )
 
-    def extract_event_content(self, event: Event) -> tuple[str, str]:
-        """Extract and separate prose content from metadata for an event.
+    def process_chunks_batch(self, events: list[Event]) -> int:
+        """Process a batch of events to create chunks."""
+        processed = 0
+        batch_chunks = []
 
-        Returns:
-          tuple[str, str]: (prose_content, metadata_content)
+        event_content_type = ContentType.objects.get_for_model(Event)
 
-        """
-        prose_parts = []
-        metadata_parts = []
+        for event in events:
+            context = Context.objects.filter(
+                content_type=event_content_type, object_id=event.id
+            ).first()
 
-        if event.description:
-            prose_parts.append(f"Description: {event.description}")
+            if not context:
+                self.stdout.write(self.style.WARNING(f"No context found for event {event.key}"))
+                continue
 
-        if event.summary:
-            prose_parts.append(f"Summary: {event.summary}")
+            prose_content, metadata_content = extract_event_content(event)
+            all_chunk_texts = []
 
-        if event.name:
-            metadata_parts.append(f"Event Name: {event.name}")
+            if metadata_content.strip():
+                all_chunk_texts.append(metadata_content)
 
-        if event.category:
-            metadata_parts.append(f"Category: {event.get_category_display()}")
+            if prose_content.strip():
+                prose_chunks = Chunk.split_text(prose_content)
+                all_chunk_texts.extend(prose_chunks)
 
-        if event.start_date:
-            metadata_parts.append(f"Start Date: {event.start_date}")
+            if not all_chunk_texts:
+                self.stdout.write(f"No content to chunk for event {event.key}")
+                continue
 
-        if event.end_date:
-            metadata_parts.append(f"End Date: {event.end_date}")
+            if chunks := create_chunks_and_embeddings(
+                chunk_texts=all_chunk_texts,
+                context=context,
+                openai_client=self.openai_client,
+                save=False,
+            ):
+                batch_chunks.extend(chunks)
+                processed += 1
+                self.stdout.write(f"Created {len(chunks)} chunks for {event.key}")
 
-        if event.suggested_location:
-            metadata_parts.append(f"Location: {event.suggested_location}")
-
-        if event.latitude and event.longitude:
-            metadata_parts.append(f"Coordinates: {event.latitude}, {event.longitude}")
-
-        if event.url:
-            metadata_parts.append(f"Event URL: {event.url}")
-
-        return (
-            DELIMITER.join(filter(None, prose_parts)),
-            DELIMITER.join(filter(None, metadata_parts)),
-        )
+        if batch_chunks:
+            Chunk.bulk_save(batch_chunks)
+        return processed

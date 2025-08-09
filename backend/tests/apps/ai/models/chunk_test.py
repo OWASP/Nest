@@ -1,10 +1,9 @@
 from unittest.mock import Mock, patch
 
-from django.contrib.contenttypes.models import ContentType
-from django.db import models
+import pytest
 
 from apps.ai.models.chunk import Chunk
-from apps.slack.models.message import Message
+from apps.ai.models.context import Context
 
 
 def create_model_mock(model_class):
@@ -17,23 +16,16 @@ def create_model_mock(model_class):
 
 class TestChunkModel:
     def test_str_method(self):
-        mock_message = create_model_mock(Message)
-        mock_message.name = "Test Message"
-
-        mock_content_type = Mock(spec=ContentType)
-        mock_content_type.model = "message"
-
-        with (
-            patch.object(Chunk, "content_type", mock_content_type),
-            patch.object(Chunk, "content_object", mock_message),
-        ):
-            chunk = Chunk()
-            chunk.id = 1
-            chunk.text = "This is a test chunk with some content that should be displayed"
-
-            result = str(chunk)
-            assert "Chunk 1 for message Test Message:" in result
-            assert "This is a test chunk with some content that" in result
+        mock_context = Mock(spec=Context)
+        mock_context.__str__ = Mock(return_value="Context 1 for message Test Message: ...")
+        mock_context._state = Mock()
+        chunk = Chunk()
+        chunk.id = 1
+        chunk.text = "This is a test chunk with some content that should be displayed"
+        chunk.context = mock_context
+        result = str(chunk)
+        assert "Chunk 1 for Context 1 for message Test Message:" in result
+        assert "This is a test chunk with some content that" in result
 
     def test_bulk_save_with_chunks(self):
         mock_chunks = [Mock(), Mock(), Mock()]
@@ -60,118 +52,60 @@ class TestChunkModel:
         assert all(isinstance(chunk, str) for chunk in result)
 
     @patch("apps.ai.models.chunk.Chunk.save")
-    @patch("apps.ai.models.chunk.Chunk.__init__")
-    def test_update_data_new_chunk(self, mock_init, mock_save, mocker):
-        mock_init.return_value = None
-
-        mock_message = create_model_mock(Message)
+    def test_update_data_save_with_context(self, mock_save):
         text = "Test chunk content"
         embedding = [0.1, 0.2, 0.3]
 
-        mock_content_type = Mock(spec=ContentType)
-        mock_get_for_model = mocker.patch(
-            "django.contrib.contenttypes.models.ContentType.objects.get_for_model",
-            return_value=mock_content_type,
-        )
+        with patch("apps.ai.models.chunk.Chunk") as mock_chunk:
+            chunk_instance = Mock()
+            chunk_instance.context_id = 123
+            mock_chunk.return_value = chunk_instance
 
-        mock_filter = mocker.patch(
-            "apps.ai.models.chunk.Chunk.objects.filter",
-            return_value=Mock(exists=Mock(return_value=False)),
-        )
+            result = Chunk.update_data(text=text, embedding=embedding, save=True)
 
-        result = Chunk.update_data(
-            text=text, content_object=mock_message, embedding=embedding, save=True
-        )
+            mock_chunk.assert_called_once_with(text=text, embedding=embedding)
+            chunk_instance.save.assert_called_once()
+            assert result is chunk_instance
 
-        mock_get_for_model.assert_called_once_with(mock_message)
-        mock_filter.assert_called_once_with(
-            content_type=mock_content_type, object_id=mock_message.id, text=text
-        )
-        mock_init.assert_called_once_with(
-            content_type=mock_content_type,
-            object_id=mock_message.id,
-            text=text,
-            embedding=embedding,
-        )
-        mock_save.assert_called_once()
-
-        assert result is not None
-        assert isinstance(result, Chunk)
-
-    def test_update_data_existing_chunk(self, mocker):
-        mock_message = create_model_mock(Message)
-        text = "Existing chunk content"
-        embedding = [0.1, 0.2, 0.3]
-
-        mock_content_type = Mock(spec=ContentType)
-        mock_get_for_model = mocker.patch(
-            "django.contrib.contenttypes.models.ContentType.objects.get_for_model",
-            return_value=mock_content_type,
-        )
-
-        mock_filter = mocker.patch(
-            "apps.ai.models.chunk.Chunk.objects.filter",
-            return_value=Mock(exists=Mock(return_value=True)),
-        )
-
-        result = Chunk.update_data(
-            text=text, content_object=mock_message, embedding=embedding, save=True
-        )
-
-        mock_get_for_model.assert_called_once_with(mock_message)
-        mock_filter.assert_called_once_with(
-            content_type=mock_content_type, object_id=mock_message.id, text=text
-        )
-        assert result is None
-
-    @patch("apps.ai.models.chunk.Chunk.save")
-    @patch("apps.ai.models.chunk.Chunk.__init__")
-    def test_update_data_no_save(self, mock_init, mock_save, mocker):
-        mock_init.return_value = None
-
-        mock_message = create_model_mock(Message)
+    def test_update_data_save_without_context_raises(self):
         text = "Test chunk content"
         embedding = [0.1, 0.2, 0.3]
 
-        mock_content_type = Mock(spec=ContentType)
-        mock_get_for_model = mocker.patch(
-            "django.contrib.contenttypes.models.ContentType.objects.get_for_model",
-            return_value=mock_content_type,
-        )
+        with patch("apps.ai.models.chunk.Chunk") as mock_chunk:
+            chunk_instance = Mock()
+            chunk_instance.context_id = None
+            mock_chunk.return_value = chunk_instance
 
-        mock_filter = mocker.patch(
-            "apps.ai.models.chunk.Chunk.objects.filter",
-            return_value=Mock(exists=Mock(return_value=False)),
-        )
+            with pytest.raises(
+                ValueError, match="Chunk must have a context assigned before saving."
+            ):
+                Chunk.update_data(text=text, embedding=embedding, save=True)
 
-        result = Chunk.update_data(
-            text=text, content_object=mock_message, embedding=embedding, save=False
-        )
+            mock_chunk.assert_called_once_with(text=text, embedding=embedding)
+            chunk_instance.save.assert_not_called()
 
-        mock_get_for_model.assert_called_once_with(mock_message)
-        mock_filter.assert_called_once_with(
-            content_type=mock_content_type, object_id=mock_message.id, text=text
-        )
-        mock_init.assert_called_once_with(
-            content_type=mock_content_type,
-            object_id=mock_message.id,
-            text=text,
-            embedding=embedding,
-        )
-        mock_save.assert_not_called()
+    def test_update_data_no_save(self):
+        text = "Test chunk content"
+        embedding = [0.1, 0.2, 0.3]
 
-        assert result is not None
-        assert isinstance(result, Chunk)
+        with patch("apps.ai.models.chunk.Chunk") as mock_chunk:
+            chunk_instance = Mock()
+            chunk_instance.context_id = None
+            mock_chunk.return_value = chunk_instance
+
+            result = Chunk.update_data(text=text, embedding=embedding, save=False)
+
+            mock_chunk.assert_called_once_with(text=text, embedding=embedding)
+            chunk_instance.save.assert_not_called()
+            assert result is chunk_instance
 
     def test_meta_class_attributes(self):
         assert Chunk._meta.db_table == "ai_chunks"
         assert Chunk._meta.verbose_name == "Chunk"
-        assert ("content_type", "object_id", "text") in Chunk._meta.unique_together
+        assert ("context", "text") in Chunk._meta.unique_together
 
-    def test_generic_foreign_key_relationship(self):
-        content_type_field = Chunk._meta.get_field("content_type")
-        object_id_field = Chunk._meta.get_field("object_id")
+    def test_context_relationship(self):
+        context_field = Chunk._meta.get_field("context")
+        from apps.ai.models.context import Context
 
-        assert isinstance(content_type_field, models.ForeignKey)
-        assert content_type_field.remote_field.model == ContentType
-        assert isinstance(object_id_field, models.PositiveIntegerField)
+        assert context_field.related_model == Context
