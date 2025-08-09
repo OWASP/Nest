@@ -15,6 +15,9 @@ export const SYNC_DJANGO_SESSION_MUTATION = gql`
     githubAuth(accessToken: $accessToken) {
       message
       ok
+      user {
+        isOwaspStaff
+      }
     }
   }
 `

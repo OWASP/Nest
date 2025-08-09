@@ -7,8 +7,8 @@ import { ExtendedSession } from 'types/auth'
 
 const SYNC_STATUS_KEY = 'django_session_synced'
 
-export const useDjangoSession = () => {
-  const { data: session, status } = useSession()
+export const useDjangoSession: () => { isSyncing: boolean; session?: ExtendedSession } = () => {
+  const { data: session, status, update } = useSession()
   const [syncSession, { loading }] = useMutation(SYNC_DJANGO_SESSION_MUTATION)
   const [isSyncing, setIsSyncing] = useState(false)
 
@@ -37,6 +37,12 @@ export const useDjangoSession = () => {
           const githubAuth = response?.data?.githubAuth
           if (githubAuth?.ok) {
             sessionStorage.setItem(SYNC_STATUS_KEY, 'true')
+            update({
+              user: {
+                ...session.user,
+                isOwaspStaff: githubAuth.user?.isOwaspStaff,
+              },
+            }).then(() => {})
           } else {
             signOut() // Invalidate Next.js session if not ok.
             addToast({
@@ -63,7 +69,10 @@ export const useDjangoSession = () => {
           setIsSyncing(false)
         })
     }
-  }, [status, session, syncSession])
+  }, [status, session, syncSession, update])
 
-  return { isSyncing: loading || isSyncing }
+  return {
+    isSyncing: loading || isSyncing || status === 'loading',
+    session: session as ExtendedSession,
+  }
 }
