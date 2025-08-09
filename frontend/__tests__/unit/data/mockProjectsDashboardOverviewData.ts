@@ -13,4 +13,11 @@ export const mockProjectsDashboardOverviewData = {
     totalForks: 48428,
     totalStars: 123456,
   },
+  user: {
+    isOwaspStaff: true,
+  },
+  githubAuth: {
+    message: 'GitHub authentication is enabled',
+    ok: true,
+  },
 }

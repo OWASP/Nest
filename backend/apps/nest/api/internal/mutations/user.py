@@ -10,6 +10,7 @@ from github.GithubException import BadCredentialsException
 from strawberry.types import Info
 
 from apps.github.models import User as GithubUser
+from apps.nest.api.internal.nodes.user import AuthUserNode
 from apps.nest.models import User
 
 logger = logging.getLogger(__name__)
@@ -30,6 +31,7 @@ class GitHubAuthResult:
 
     message: str
     ok: bool
+    user: AuthUserNode | None = None
 
 
 @strawberry.type
@@ -85,6 +87,7 @@ class UserMutations:
             return GitHubAuthResult(
                 message="Successfully authenticated with GitHub.",
                 ok=True,
+                user=nest_user,
             )
         except BadCredentialsException:
             return GitHubAuthResult(

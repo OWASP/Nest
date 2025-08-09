@@ -1,26 +1,19 @@
+import { mockDashboardCookies } from '@e2e/helpers/mockDashboardCookies'
 import { test, expect } from '@playwright/test'
 import { mockProjectsDashboardOverviewData } from '@unit/data/mockProjectsDashboardOverviewData'
 import millify from 'millify'
 
 test.describe('Projects Health Dashboard Overview', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.route('**/graphql/', async (route) => {
-      await route.fulfill({
-        status: 200,
-        json: { data: mockProjectsDashboardOverviewData },
-      })
-    })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('/projects/dashboard', { timeout: 60000 })
+  test('renders 404 when user is not OWASP staff', async ({ page }) => {
+    await mockDashboardCookies(page, mockProjectsDashboardOverviewData, false)
+    await page.goto('/projects/dashboard')
+    await expect(page.getByText('404')).toBeVisible()
+    await expect(page.getByText('This page could not be found.')).toBeVisible()
   })
+
   test('renders project health stats', async ({ page }) => {
+    await mockDashboardCookies(page, mockProjectsDashboardOverviewData, true)
+    await page.goto('/projects/dashboard')
     await expect(page.getByText('Project Health Dashboard Overview')).toBeVisible()
 
     // Check for healthy projects
