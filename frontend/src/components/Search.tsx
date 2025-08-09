@@ -82,6 +82,7 @@ const SearchBar: React.FC<SearchProps> = ({
             {searchQuery && (
               <button
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                data-testid="clear-search-button"
                 onClick={handleClearSearch}
               >
                 <FontAwesomeIcon icon={faTimes} />
@@ -89,7 +90,7 @@ const SearchBar: React.FC<SearchProps> = ({
             )}
           </>
         ) : (
-          <Skeleton className="h-12 rounded-lg" />
+          <Skeleton data-testid="loading-skeleton" className="h-12 rounded-lg" />
         )}
       </div>
     </div>
