@@ -1,6 +1,7 @@
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faLink } from '@fortawesome/free-solid-svg-icons'
 import { screen, render, fireEvent, waitFor } from '@testing-library/react'
+import slugifyMock from 'utils/slugify'
 import AnchorTitle from 'components/AnchorTitle'
 
 library.add(faLink)
@@ -11,10 +12,62 @@ jest.mock('utils/slugify', () => ({
     str
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '')
+      .replace(/-{2,}/g, '-')
+      .replace(/^(-)+|(-)+$/g, '')
   ),
 }))
+
+// Helper functions to reduce nesting
+const createMockBoundingClientRect = () => ({
+  top: 100,
+  height: 50,
+  width: 200,
+  bottom: 150,
+  left: 0,
+  right: 200,
+  x: 0,
+  y: 100,
+  toJSON: () => {},
+})
+
+const createMockElement = (getBoundingClientRect: jest.SpyInstance | jest.Mock) => ({
+  getBoundingClientRect,
+  querySelector: jest.fn(() => ({
+    offsetHeight: 30,
+  })),
+})
+
+const setupMockAnimationFrame = (cb: (time: number) => void) => {
+  cb(0)
+  return 0
+}
+
+const createMockElementForUseEffect = () => ({
+  getBoundingClientRect: jest.fn(() => createMockBoundingClientRect()),
+  querySelector: jest.fn(() => ({
+    offsetHeight: 30,
+  })),
+})
+
+const setupAnimationFrameForUseEffect = (cb: (time: number) => void) => {
+  cb(0)
+  return 0
+}
+
+const createMockElementWithNullQuery = () => ({
+  getBoundingClientRect: jest.fn(() => createMockBoundingClientRect()),
+  querySelector: jest.fn(() => null),
+})
+
+const createMockElementForOffset = () => ({
+  getBoundingClientRect: jest.fn(() => ({ top: 100 })),
+  querySelector: jest.fn(() => ({ offsetHeight: 30 })),
+})
+
+const setupAnimationFrameForHash = (cb: (time: number) => void) => {
+  cb(0)
+  return 0
+}
 
 describe('AnchorTitle Component', () => {
   afterEach(() => {
@@ -84,10 +137,13 @@ describe('AnchorTitle Component', () => {
         'Title_with_underscores',
       ]
 
+      const titleRegex = /^#[a-z0-9-]+$/
+
       titles.forEach((title) => {
         const { unmount } = render(<AnchorTitle title={title} />)
         const link = screen.getByRole('link')
-        expect(link.getAttribute('href')).toMatch(/^#[a-z0-9-]+$/)
+        const href = link.getAttribute('href')
+        expect(href).toMatch(titleRegex)
         unmount()
       })
     })
@@ -100,45 +156,29 @@ describe('AnchorTitle Component', () => {
     let mockGetElementById: jest.SpyInstance
     let mockRequestAnimationFrame: jest.SpyInstance
 
-    beforeEach(() => {
+    const setupMocks = () => {
       mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
       mockPushState = jest.spyOn(window.history, 'pushState').mockImplementation()
       mockRequestAnimationFrame = jest
         .spyOn(window, 'requestAnimationFrame')
-        .mockImplementation((cb) => {
-          cb(0)
-          return 0
-        })
+        .mockImplementation(setupMockAnimationFrame)
 
-      mockGetBoundingClientRect = jest.fn(() => ({
-        top: 100,
-        height: 50,
-        width: 200,
-        bottom: 150,
-        left: 0,
-        right: 200,
-        x: 0,
-        y: 100,
-        toJSON: () => {},
-      }))
-
-      const mockElement = {
-        getBoundingClientRect: mockGetBoundingClientRect,
-        querySelector: jest.fn(() => ({
-          offsetHeight: 30,
-        })),
-      }
+      mockGetBoundingClientRect = jest.fn(createMockBoundingClientRect)
+      const mockElement = createMockElement(mockGetBoundingClientRect)
       mockGetElementById = jest
         .spyOn(document, 'getElementById')
         .mockReturnValue(mockElement as unknown as HTMLElement)
-    })
+    }
 
-    afterEach(() => {
+    const cleanupMocks = () => {
       mockScrollTo.mockRestore()
       mockPushState.mockRestore()
       mockRequestAnimationFrame.mockRestore()
       mockGetElementById.mockRestore()
-    })
+    }
+
+    beforeEach(setupMocks)
+    afterEach(cleanupMocks)
 
     it('prevents default behaviour on link click', () => {
       render(<AnchorTitle title="Click Test" />)
@@ -191,41 +231,26 @@ describe('AnchorTitle Component', () => {
     let mockGetElementById: jest.SpyInstance
     let mockRequestAnimationFrame: jest.SpyInstance
 
-    beforeEach(() => {
+    const setupUseEffectMocks = () => {
       mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
       mockRequestAnimationFrame = jest
         .spyOn(window, 'requestAnimationFrame')
-        .mockImplementation((cb) => {
-          cb(0)
-          return 0
-        })
+        .mockImplementation(setupAnimationFrameForUseEffect)
 
-      const mockElement = {
-        getBoundingClientRect: jest.fn(() => ({
-          top: 100,
-          height: 50,
-          width: 200,
-          bottom: 150,
-          left: 0,
-          right: 200,
-          x: 0,
-          y: 100,
-          toJSON: () => {},
-        })),
-        querySelector: jest.fn(() => ({
-          offsetHeight: 30,
-        })),
-      }
+      const mockElement = createMockElementForUseEffect()
       mockGetElementById = jest
         .spyOn(document, 'getElementById')
         .mockReturnValue(mockElement as unknown as HTMLElement)
-    })
+    }
 
-    afterEach(() => {
+    const cleanupUseEffectMocks = () => {
       mockScrollTo.mockRestore()
       mockRequestAnimationFrame.mockRestore()
       mockGetElementById.mockRestore()
-    })
+    }
+
+    beforeEach(setupUseEffectMocks)
+    afterEach(cleanupUseEffectMocks)
 
     it('scrolls to element on mount when hash matches', async () => {
       window.location.hash = '#test-scroll'
@@ -289,7 +314,9 @@ describe('AnchorTitle Component', () => {
 
       expect(screen.getByText(specialTitle)).toBeInTheDocument()
       const link = screen.getByRole('link')
-      expect(link.getAttribute('href')).toMatch(/^#[a-z0-9-]*$/)
+      const specialCharRegex = /^#[a-z0-9-]*$/
+      const href = link.getAttribute('href')
+      expect(href).toMatch(specialCharRegex)
     })
 
     it('handles very long titles', () => {
@@ -316,20 +343,7 @@ describe('AnchorTitle Component', () => {
     })
 
     it('handles missing anchor-title element in scroll calculation', () => {
-      const mockElement = {
-        getBoundingClientRect: jest.fn(() => ({
-          top: 100,
-          height: 50,
-          width: 200,
-          bottom: 150,
-          left: 0,
-          right: 200,
-          x: 0,
-          y: 100,
-          toJSON: () => {},
-        })),
-        querySelector: jest.fn(() => null),
-      }
+      const mockElement = createMockElementWithNullQuery()
       const mockGetElementById = jest
         .spyOn(document, 'getElementById')
         .mockReturnValue(mockElement as unknown as HTMLElement)
@@ -444,10 +458,7 @@ describe('AnchorTitle Component', () => {
         configurable: true,
       })
 
-      const mockElement = {
-        getBoundingClientRect: jest.fn(() => ({ top: 100 })),
-        querySelector: jest.fn(() => ({ offsetHeight: 30 })),
-      }
+      const mockElement = createMockElementForOffset()
       const mockGetElementById = jest
         .spyOn(document, 'getElementById')
         .mockReturnValue(mockElement as unknown as HTMLElement)
@@ -475,10 +486,7 @@ describe('AnchorTitle Component', () => {
       const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
       const mockRequestAnimationFrame = jest
         .spyOn(window, 'requestAnimationFrame')
-        .mockImplementation((cb) => {
-          cb(0)
-          return 0
-        })
+        .mockImplementation(setupAnimationFrameForHash)
 
       window.location.hash = ''
       render(<AnchorTitle title="Hash Test" />)
@@ -535,10 +543,10 @@ describe('AnchorTitle Component', () => {
     it('recalculates scroll position when element dimensions change', () => {
       const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
 
-      let offsetHeight = 30
+      const offsetHeights = { current: 30 }
       const mockElement = {
         getBoundingClientRect: jest.fn(() => ({ top: 100 })),
-        querySelector: jest.fn(() => ({ offsetHeight })),
+        querySelector: jest.fn(() => ({ offsetHeight: offsetHeights.current })),
       }
       const mockGetElementById = jest
         .spyOn(document, 'getElementById')
@@ -550,7 +558,7 @@ describe('AnchorTitle Component', () => {
       fireEvent.click(link)
       const firstCall = (mockScrollTo.mock.calls[0][0] as unknown as { top: number }).top
 
-      offsetHeight = 60
+      offsetHeights.current = 60
       fireEvent.click(link)
       const secondCall = (mockScrollTo.mock.calls[1][0] as unknown as { top: number }).top
 
@@ -614,19 +622,14 @@ describe('AnchorTitle Component', () => {
 
   describe('Dependencies and Mocking', () => {
     it('uses slugify utility correctly', () => {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const slugifyMock = require('utils/slugify').default
-
       render(<AnchorTitle title="Slugify Test" />)
-
       expect(slugifyMock).toHaveBeenCalledWith('Slugify Test')
     })
 
     it('handles slugify returning different formats', () => {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const slugifyMock = require('utils/slugify').default
-      const originalImplementation = slugifyMock.getMockImplementation()
-      slugifyMock.mockReturnValue('custom-slug-format')
+      const mockFn = slugifyMock as jest.MockedFunction<typeof slugifyMock>
+      const originalImplementation = mockFn.getMockImplementation()
+      mockFn.mockReturnValue('custom-slug-format')
 
       render(<AnchorTitle title="Custom Slug" />)
 
@@ -637,21 +640,21 @@ describe('AnchorTitle Component', () => {
       expect(element).toBeInTheDocument()
 
       if (originalImplementation) {
-        slugifyMock.mockImplementation(originalImplementation)
+        mockFn.mockImplementation(originalImplementation)
       }
     })
   })
 
   describe('Comprehensive User Interactions', () => {
-    it('complete user journey: render → hover → click → navigate', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const slugifyMock = require('utils/slugify').default
-      slugifyMock.mockImplementation((str: string) =>
+    it('complete user journey: render → hover → click → navigate', () => {
+      const mockFn = slugifyMock as jest.MockedFunction<typeof slugifyMock>
+
+      mockFn.mockImplementation((str: string) =>
         str
           .toLowerCase()
           .replace(/[^a-z0-9]/g, '-')
-          .replace(/-+/g, '-')
-          .replace(/^-|-$/g, '')
+          .replace(/-{2,}/g, '-')
+          .replace(/^(-)+|(-)+$/g, '')
       )
 
       const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
