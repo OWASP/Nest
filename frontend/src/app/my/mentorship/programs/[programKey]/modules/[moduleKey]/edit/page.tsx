@@ -40,13 +40,18 @@ const EditModulePage = () => {
       return
     }
 
-    if (queryError || !data?.program || !data?.getModule || sessionStatus === 'unauthenticated') {
+    if (
+      queryError ||
+      !data?.getProgram ||
+      !data?.getModule ||
+      sessionStatus === 'unauthenticated'
+    ) {
       setAccessStatus('denied')
       return
     }
 
     const currentUserLogin = (sessionData as ExtendedSession)?.user?.login
-    const isAdmin = data.program.admins?.some(
+    const isAdmin = data.getProgram.admins?.some(
       (admin: { login: string }) => admin.login === currentUserLogin
     )
 
@@ -139,7 +144,7 @@ const EditModulePage = () => {
       setFormData={setFormData}
       onSubmit={handleSubmit}
       loading={mutationLoading}
-      submitText="Update Module"
+      submitText="Save"
       isEdit
     />
   )

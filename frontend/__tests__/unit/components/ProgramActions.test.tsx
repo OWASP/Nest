@@ -43,7 +43,7 @@ describe('ProgramActions', () => {
 
   test('renders and toggles dropdown', () => {
     render(<ProgramActions status="DRAFT" setStatus={setStatus} />)
-    const button = screen.getByRole('button', { name: /select action/i })
+    const button = screen.getByTestId('program-actions-button')
     fireEvent.click(button)
     expect(screen.getByText('Add Module')).toBeInTheDocument()
     expect(screen.getByText('Publish Program')).toBeInTheDocument()
@@ -53,7 +53,8 @@ describe('ProgramActions', () => {
 
   test('handles Add Module action', () => {
     render(<ProgramActions status="DRAFT" setStatus={setStatus} />)
-    fireEvent.click(screen.getByRole('button', { name: /select action/i }))
+    const button = screen.getByTestId('program-actions-button')
+    fireEvent.click(button)
     fireEvent.click(screen.getByRole('menuitem', { name: /add module/i }))
     expect(mockPush).toHaveBeenCalled()
     expect(setStatus).not.toHaveBeenCalled()
@@ -61,7 +62,8 @@ describe('ProgramActions', () => {
 
   test('handles Publish action', () => {
     render(<ProgramActions status="DRAFT" setStatus={setStatus} />)
-    fireEvent.click(screen.getByRole('button', { name: /select action/i }))
+    const button = screen.getByTestId('program-actions-button')
+    fireEvent.click(button)
     fireEvent.click(screen.getByRole('menuitem', { name: /publish program/i }))
     expect(setStatus).toHaveBeenCalledWith('PUBLISHED')
     expect(mockPush).not.toHaveBeenCalled()
@@ -69,14 +71,16 @@ describe('ProgramActions', () => {
 
   test('handles Move to Draft action', () => {
     render(<ProgramActions status="PUBLISHED" setStatus={setStatus} />)
-    fireEvent.click(screen.getByRole('button', { name: /select action/i }))
+    const button = screen.getByTestId('program-actions-button')
+    fireEvent.click(button)
     fireEvent.click(screen.getByRole('menuitem', { name: /move to draft/i }))
     expect(setStatus).toHaveBeenCalledWith('DRAFT')
   })
 
   test('handles Mark as Completed action', () => {
     render(<ProgramActions status="PUBLISHED" setStatus={setStatus} />)
-    fireEvent.click(screen.getByRole('button', { name: /select action/i }))
+    const button = screen.getByTestId('program-actions-button')
+    fireEvent.click(button)
     fireEvent.click(screen.getByRole('menuitem', { name: /mark as completed/i }))
     expect(setStatus).toHaveBeenCalledWith('COMPLETED')
   })
@@ -88,7 +92,8 @@ describe('ProgramActions', () => {
         <button data-testid="outside">Outside</button>
       </div>
     )
-    fireEvent.click(screen.getByRole('button', { name: /select action/i }))
+    const button = screen.getByTestId('program-actions-button')
+    fireEvent.click(button)
     expect(screen.getByText('Add Module')).toBeInTheDocument()
     fireEvent.mouseDown(screen.getByTestId('outside'))
     expect(screen.queryByText('Add Module')).not.toBeInTheDocument()

@@ -12,7 +12,7 @@ export const mockPrograms = [
 ]
 
 export const mockProgramDetailsData = {
-  program: {
+  getProgram: {
     key: 'test-program',
     name: 'Test Program',
     description: 'Sample summary',

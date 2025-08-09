@@ -61,7 +61,7 @@ describe('CreateModulePage', () => {
     })
     ;(useQuery as jest.Mock).mockReturnValue({
       data: {
-        program: {
+        getProgram: {
           admins: [{ login: 'admin-user' }],
         },
       },

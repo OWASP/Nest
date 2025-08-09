@@ -48,8 +48,8 @@ const ProgramDetailsPage = () => {
         }
       }
 
-      if (data?.program) {
-        setProgram(data.program)
+      if (data?.getProgram) {
+        setProgram(data.getProgram)
         setModules(data.getProgramModules || [])
       }
     }

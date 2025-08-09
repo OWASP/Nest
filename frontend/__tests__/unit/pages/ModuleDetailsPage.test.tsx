@@ -70,7 +70,7 @@ describe('ModuleDetailsPage', () => {
       loading: false,
       data: {
         getModule: mockModuleData,
-        program: {
+        getProgram: {
           admins,
         },
       },

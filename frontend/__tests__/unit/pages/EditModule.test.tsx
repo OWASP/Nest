@@ -62,7 +62,7 @@ describe('EditModulePage', () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        program: {
+        getProgram: {
           admins: [{ login: 'admin-user' }],
         },
         getModule: {
@@ -110,7 +110,7 @@ describe('EditModulePage', () => {
       jest.runAllTimers()
     })
 
-    fireEvent.click(screen.getByRole('button', { name: /Update Module/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Save/i }))
 
     await waitFor(() => {
       expect(mockUpdateModule).toHaveBeenCalled()

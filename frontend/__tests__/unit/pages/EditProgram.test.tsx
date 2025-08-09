@@ -50,7 +50,7 @@ describe('EditProgramPage', () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        program: {
+        getProgram: {
           admins: [{ login: 'admin1' }],
         },
       },
@@ -71,7 +71,7 @@ describe('EditProgramPage', () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        program: {
+        getProgram: {
           name: 'Test',
           description: 'Test description',
           menteesLimit: 10,

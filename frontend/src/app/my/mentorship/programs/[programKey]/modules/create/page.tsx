@@ -51,13 +51,13 @@ const CreateModulePage = () => {
       return
     }
 
-    if (queryError || !programData?.program || sessionStatus === 'unauthenticated') {
+    if (queryError || !programData?.getProgram || sessionStatus === 'unauthenticated') {
       setAccessStatus('denied')
       return
     }
 
     const currentUserLogin = (sessionData as ExtendedSession)?.user?.login
-    const isAdmin = programData.program.admins?.some(
+    const isAdmin = programData.getProgram.admins?.some(
       (admin: { login: string }) => admin.login === currentUserLogin
     )
 

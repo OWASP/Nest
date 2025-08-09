@@ -28,7 +28,7 @@ const ModuleDetailsPage = () => {
   useEffect(() => {
     if (data?.getModule) {
       setModule(data.getModule)
-      setAdmins(data.program.admins)
+      setAdmins(data.getProgram.admins)
       setIsLoading(false)
     } else if (error) {
       handleAppError(error)

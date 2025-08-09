@@ -44,12 +44,12 @@ const EditProgramPage = () => {
     if (sessionStatus === 'loading' || queryLoading) {
       return
     }
-    if (!data?.program || sessionStatus === 'unauthenticated') {
+    if (!data?.getProgram || sessionStatus === 'unauthenticated') {
       setAccessStatus('denied')
       return
     }
 
-    const isAdmin = data.program.admins?.some(
+    const isAdmin = data.getProgram.admins?.some(
       (admin: { login: string }) => admin.login === (session as ExtendedSession)?.user?.login
     )
 
@@ -68,8 +68,8 @@ const EditProgramPage = () => {
     }
   }, [sessionStatus, session, data, queryLoading, router])
   useEffect(() => {
-    if (accessStatus === 'allowed' && data?.program) {
-      const { program } = data
+    if (accessStatus === 'allowed' && data?.getProgram) {
+      const { getProgram: program } = data
       setFormData({
         name: program.name || '',
         description: program.description || '',
@@ -144,7 +144,7 @@ const EditProgramPage = () => {
       onSubmit={handleSubmit}
       loading={mutationLoading}
       title="Edit Program"
-      submitText="Save Changes"
+      submitText="Save"
       isEdit={true}
     />
   )

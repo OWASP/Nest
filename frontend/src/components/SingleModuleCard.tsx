@@ -128,9 +128,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
 
       {/* Description */}
       <div>
-        <span className="text-lg font-medium text-gray-700 dark:text-gray-200">
-          {module.description}
-        </span>
+        <p className="text-lg font-medium text-gray-700 dark:text-gray-300">{module.description}</p>
       </div>
 
       {/* Details */}

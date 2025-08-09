@@ -38,7 +38,7 @@ export const GET_MY_PROGRAMS = gql`
 
 export const GET_PROGRAM_DETAILS = gql`
   query GetProgramDetails($programKey: String!) {
-    program(programKey: $programKey) {
+    getProgram(programKey: $programKey) {
       id
       key
       name
@@ -60,7 +60,7 @@ export const GET_PROGRAM_DETAILS = gql`
 `
 export const GET_PROGRAM_AND_MODULES = gql`
   query GetProgramAndModules($programKey: String!) {
-    program(programKey: $programKey) {
+    getProgram(programKey: $programKey) {
       id
       key
       name
@@ -97,7 +97,7 @@ export const GET_PROGRAM_AND_MODULES = gql`
 
 export const GET_PROGRAM_ADMIN_DETAILS = gql`
   query GetProgramDetails($programKey: String!) {
-    program(programKey: $programKey) {
+    getProgram(programKey: $programKey) {
       id
       key
       name
