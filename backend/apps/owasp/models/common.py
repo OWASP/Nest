@@ -179,7 +179,11 @@ class RepositoryBasedEntityModel(models.Model):
                 get_repository_file_content(self.index_md_url),
                 re.DOTALL,
             )
-            return yaml.safe_load(content) if (content := yaml_content.group(1)) else {}
+            return (
+                yaml.safe_load(content)
+                if yaml_content and (content := yaml_content.group(1))
+                else {}
+            )
         except (AttributeError, yaml.scanner.ScannerError):
             logger.exception(
                 "Unable to parse entity metadata",

@@ -40,7 +40,7 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
     def idx_health_score(self) -> float | None:
         """Return health score for indexing."""
         # TODO(arkid15r): Enable real health score in production when ready.
-        return 100 if settings.ENVIRONMENT == "Production" else self.health_score
+        return 100 if settings.IS_PRODUCTION_ENVIRONMENT else self.health_score
 
     @property
     def idx_is_active(self) -> bool:

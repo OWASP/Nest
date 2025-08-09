@@ -128,8 +128,18 @@ export const GET_PROJECT_METADATA = gql`
 `
 
 export const GET_TOP_CONTRIBUTORS = gql`
-  query GetTopContributors($excludedUsernames: [String!], $key: String!) {
-    topContributors(excludedUsernames: $excludedUsernames, project: $key) {
+  query GetTopContributors(
+    $excludedUsernames: [String!]
+    $hasFullName: Boolean = false
+    $key: String!
+    $limit: Int = 20
+  ) {
+    topContributors(
+      excludedUsernames: $excludedUsernames
+      hasFullName: $hasFullName
+      limit: $limit
+      project: $key
+    ) {
       avatarUrl
       login
       name

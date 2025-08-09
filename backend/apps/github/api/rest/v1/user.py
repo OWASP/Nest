@@ -1,6 +1,7 @@
 """User API."""
 
 from datetime import datetime
+from http import HTTPStatus
 from typing import Literal
 
 from django.conf import settings
@@ -8,8 +9,8 @@ from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
 from ninja import Field, FilterSchema, Query, Router, Schema
 from ninja.decorators import decorate_view
-from ninja.errors import HttpError
 from ninja.pagination import PageNumberPagination, paginate
+from ninja.responses import Response
 
 from apps.github.models.user import User
 
@@ -46,11 +47,17 @@ class UserSchema(Schema):
     url: str
 
 
+class UserErrorResponse(Schema):
+    """Error response schema for User."""
+
+    message: str
+
+
 @router.get(
     "/",
     description="Retrieve a paginated list of GitHub users.",
     operation_id="list_users",
-    response={200: list[UserSchema]},
+    response={HTTPStatus.OK: list[UserSchema]},
     summary="List users",
     tags=["GitHub"],
 )
@@ -77,13 +84,16 @@ def list_users(
     "/{login}",
     description="Retrieve a GitHub user by login.",
     operation_id="get_user",
-    response={200: UserSchema, 404: dict},
+    response={
+        HTTPStatus.NOT_FOUND: UserErrorResponse,
+        HTTPStatus.OK: UserSchema,
+    },
     summary="Get user by login",
     tags=["GitHub"],
 )
-def get_user(request: HttpRequest, login: str) -> UserSchema:
+def get_user(request: HttpRequest, login: str) -> UserSchema | UserErrorResponse:
     """Get user by login."""
-    user = User.objects.filter(login=login).first()
-    if not user:
-        raise HttpError(404, "User not found")
-    return user
+    if user := User.objects.filter(login=login).first():
+        return user
+
+    return Response({"message": "User not found"}, status=HTTPStatus.NOT_FOUND)
