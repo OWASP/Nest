@@ -47,10 +47,11 @@ class TestRepositoryContributorQuery:
         assert result[1].project_key is None
 
         mock_get_top_contributors.assert_called_once_with(
-            limit=24,
             chapter=None,
             committee=None,
             excluded_usernames=None,
+            has_full_name=False,
+            limit=24,
             organization=None,
             project=None,
             repository=None,
@@ -67,10 +68,11 @@ class TestRepositoryContributorQuery:
         assert result[0].login == "alice"
 
         mock_get_top_contributors.assert_called_once_with(
-            limit=1,
             chapter=None,
             committee=None,
             excluded_usernames=None,
+            has_full_name=False,
+            limit=1,
             organization=None,
             project=None,
             repository=None,
@@ -82,10 +84,11 @@ class TestRepositoryContributorQuery:
         mock_get_top_contributors.return_value = mock_contributor_data
 
         result = RepositoryContributorQuery().top_contributors(
-            limit=10,
             chapter="test-chapter",
             committee="test-committee",
             excluded_usernames=["excluded_user"],
+            has_full_name=False,
+            limit=10,
             organization="owasp",
             project="test-project",
             repository="test-repo",
@@ -94,10 +97,11 @@ class TestRepositoryContributorQuery:
         assert len(result) == 2
 
         mock_get_top_contributors.assert_called_once_with(
-            limit=10,
             chapter="test-chapter",
             committee="test-committee",
             excluded_usernames=["excluded_user"],
+            has_full_name=False,
+            limit=10,
             organization="owasp",
             project="test-project",
             repository="test-repo",
