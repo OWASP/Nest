@@ -76,7 +76,9 @@ class GoogleAuth(models.Model):
     @property
     def is_token_expired(self):
         """Check if the access token is expired."""
-        return self.expires_at is None or self.expires_at <= timezone.now()
+        return self.expires_at is None or self.expires_at <= timezone.now() + timezone.timedelta(
+            seconds=60
+        )
 
     @staticmethod
     def refresh_access_token(auth):

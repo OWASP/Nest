@@ -196,7 +196,7 @@ class TestGoogleAuthModel:
         mock_get_or_create.assert_called_once_with(user=self.member)
 
         mock_flow_instance.fetch_token.assert_called_once_with(
-            authorization_response="http://auth.url",
+            authorization_response="http://auth.url",  # NOSONAR
         )
         mock_save.assert_called_once()
 
