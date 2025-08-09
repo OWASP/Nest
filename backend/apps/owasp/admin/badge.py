@@ -8,7 +8,28 @@ from apps.owasp.models.badge import Badge
 class BadgeAdmin(admin.ModelAdmin):
     """Admin for Badge model."""
 
-    readonly_fields = ("nest_created_at", "nest_updated_at")
+    fieldsets = (
+        (
+            "Basic Information",
+            {
+                "fields": (
+                    "name",
+                    "description",
+                    "weight",
+                )
+            },
+        ),
+        ("Display Settings", {"fields": ("css_class",)}),
+        (
+            "Timestamps",
+            {
+                "fields": (
+                    "nest_created_at",
+                    "nest_updated_at",
+                )
+            },
+        ),
+    )
     list_display = (
         "name",
         "description",
@@ -17,13 +38,19 @@ class BadgeAdmin(admin.ModelAdmin):
         "nest_created_at",
         "nest_updated_at",
     )
-    search_fields = ("name", "description", "css_class")
     list_filter = ("weight",)
-    ordering = ("weight", "name")
-    fieldsets = (
-        ("Basic Information", {"fields": ("name", "description", "weight")}),
-        ("Display Settings", {"fields": ("css_class",)}),
-        ("Timestamps", {"fields": ("nest_created_at", "nest_updated_at")}),
+    ordering = (
+        "weight",
+        "name",
+    )
+    readonly_fields = (
+        "nest_created_at",
+        "nest_updated_at",
+    )
+    search_fields = (
+        "css_class",
+        "description",
+        "name",
     )
 
 
