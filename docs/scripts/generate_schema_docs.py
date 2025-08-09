@@ -1,19 +1,23 @@
-from pathlib import Path
+"""Generate schema documentation from JSON schema files."""
+
+# ruff: noqa: S603 https://docs.astral.sh/ruff/rules/subprocess-without-shell-equals-true/
+# ruff: noqa: S607 https://docs.astral.sh/ruff/rules/start-process-with-partial-path/
+
 import subprocess
+from pathlib import Path
 
 
 def generate_schema_docs():
-    INPUT_DIR = Path("./schema")
-    OUTPUT_DIR = Path("./docs/schema")
+    """Generate documentation from JSON schema files."""
+    input_dir = Path("./schema")
+    output_dir = Path("./docs/schema")
 
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    for schema_file in INPUT_DIR.iterdir():
+    for schema_file in input_dir.iterdir():
         if schema_file.suffix == ".json" and schema_file.name != "common.json":
             base_name = schema_file.stem
-            output_file = OUTPUT_DIR / f"{base_name}.md"
-
-            print(f"Processing {schema_file} -> {output_file}")
+            output_file = output_dir / f"{base_name}.md"
 
             # Generate the schema documentation
             subprocess.run(
