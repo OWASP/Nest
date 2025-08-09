@@ -116,4 +116,11 @@ describe('ActionButton', () => {
       fireEvent.click(screen.getByRole('link'))
     }).not.toThrow()
   })
+
+  it(`changes background and text color on hover`, () => {
+    render(<ActionButton>Test Button</ActionButton>)
+    const button = screen.getByRole('button')
+    expect(button).toHaveClass('hover:bg-[#1D7BD7]')
+    expect(button).toHaveClass('dark:hover:text-white')
+  })
 })
