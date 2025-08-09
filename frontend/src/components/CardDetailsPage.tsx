@@ -10,6 +10,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
+import { useCallback } from 'react'
+import type { JSX } from 'react'
 import type { DetailsCardProps } from 'types/card'
 import { capitalize } from 'utils/capitalize'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/credentials'
@@ -29,6 +31,8 @@ import SecondaryCard from 'components/SecondaryCard'
 import SponsorCard from 'components/SponsorCard'
 import ToggleableList from 'components/ToggleableList'
 import TopContributorsList from 'components/TopContributorsList'
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i
+const sanitizeForUrl = (str: string) => encodeURIComponent(str.trim())
 
 const DetailsCard = ({
   description,
@@ -55,6 +59,63 @@ const DetailsCard = ({
   type,
   userSummary,
 }: DetailsCardProps) => {
+  const renderDetailValue = useCallback(
+    (detail: { label: string; value: string | JSX.Element }) => {
+      const { label, value } = detail
+
+      if (
+        value == null ||
+        value === '' ||
+        value === 'N/A' ||
+        value === 'Not available' ||
+        value === 'Unknown'
+      ) {
+        return 'Unknown'
+      }
+
+      if (typeof value !== 'string') {
+        return value
+      }
+
+      switch (label) {
+        case 'Email':
+          if (!EMAIL_REGEX.test(value)) {
+            return value
+          }
+          return (
+            <a
+              href={`mailto:${sanitizeForUrl(value)}`}
+              className="text-blue-400 hover:underline"
+              aria-label={`Send email to ${value}`}
+            >
+              {value}
+            </a>
+          )
+
+        case 'Company':
+          if (value.startsWith('@')) {
+            const companyName = sanitizeForUrl(value.slice(1))
+            return (
+              <a
+                href={`https://github.com/${companyName}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:underline"
+                aria-label={`Visit ${value} on GitHub`}
+              >
+                {value}
+              </a>
+            )
+          }
+          return value
+
+        default:
+          return value
+      }
+    },
+    []
+  )
+
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
@@ -108,7 +169,7 @@ const DetailsCard = ({
                 </div>
               ) : (
                 <div key={detail.label} className="pb-1">
-                  <strong>{detail.label}:</strong> {detail?.value || 'Unknown'}
+                  <strong>{detail.label}:</strong> {renderDetailValue(detail)}
                 </div>
               )
             )}
