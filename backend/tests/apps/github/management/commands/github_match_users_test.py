@@ -32,7 +32,6 @@ class TestGithubMatchUsersCommand:
         """Test that the command adds the correct arguments."""
         parser = MagicMock()
         command.add_arguments(parser)
-
         assert parser.add_argument.call_count == 2
         parser.add_argument.assert_any_call(
             "model_name",
@@ -75,7 +74,6 @@ class TestProcessLeaders:
         """Return a command instance."""
         command = Command()
         command.stdout = MagicMock()
-
         return command
 
     @pytest.fixture
@@ -91,7 +89,6 @@ class TestProcessLeaders:
     def test_no_leaders(self, command):
         """Test with no leaders provided."""
         exact, fuzzy, unmatched = command.process_leaders([], 75, {})
-
         assert exact == []
         assert fuzzy == []
         assert unmatched == []
@@ -100,7 +97,6 @@ class TestProcessLeaders:
         """Test exact matching."""
         leaders_raw = ["john_doe", "Jane Doe"]
         exact, fuzzy, unmatched = command.process_leaders(leaders_raw, 75, mock_users)
-
         assert len(exact) == 2
         assert mock_users[1] in exact
         assert mock_users[2] in exact
@@ -110,13 +106,12 @@ class TestProcessLeaders:
     @patch("apps.github.management.commands.github_match_users.fuzz")
     def test_fuzzy_match(self, mock_fuzz, command, mock_users):
         """Test fuzzy matching."""
-        mock_fuzz.token_sort_ratio.side_effect = (
-            lambda left, right: 90 if "peter" in right.lower() or "peter" in left.lower() else 10
+        mock_fuzz.token_sort_ratio.side_effect = lambda left, right: (
+            90 if "peter" in right.lower() or "peter" in left.lower() else 10
         )
 
         leaders_raw = ["pete_jones"]
         exact, fuzzy, unmatched = command.process_leaders(leaders_raw, 80, mock_users)
-
         assert exact == []
         assert len(fuzzy) == 1
         assert mock_users[3] in fuzzy
@@ -126,7 +121,6 @@ class TestProcessLeaders:
         """Test unmatched leader."""
         leaders_raw = ["unknown_leader"]
         exact, fuzzy, unmatched = command.process_leaders(leaders_raw, 100, mock_users)
-
         assert exact == []
         assert fuzzy == []
         assert unmatched == ["unknown_leader"]
@@ -134,7 +128,6 @@ class TestProcessLeaders:
     def test_mixed_matches(self, command, mock_users):
         """Test a mix of exact, fuzzy, and unmatched leaders."""
         leaders_raw = ["john_doe", "pete_jones", "unknown_leader"]
-
         with patch("apps.github.management.commands.github_match_users.fuzz") as mock_fuzz:
 
             def ratio(s1, s2):
@@ -142,7 +135,6 @@ class TestProcessLeaders:
 
             mock_fuzz.token_sort_ratio.side_effect = ratio
             exact, fuzzy, unmatched = command.process_leaders(leaders_raw, 80, mock_users)
-
         assert len(exact) == 1
         assert mock_users[1] in exact
         assert len(fuzzy) == 1
@@ -153,7 +145,6 @@ class TestProcessLeaders:
         """Test with duplicate leaders in raw list."""
         leaders_raw = ["john_doe", "john_doe"]
         exact, fuzzy, unmatched = command.process_leaders(leaders_raw, 75, mock_users)
-
         assert len(exact) == 1
         assert mock_users[1] in exact
         assert fuzzy == []
@@ -163,7 +154,6 @@ class TestProcessLeaders:
         """Test with empty string and None in leaders raw list."""
         leaders_raw = ["", None, "john_doe"]
         exact, fuzzy, unmatched = command.process_leaders(leaders_raw, 75, mock_users)
-
         assert len(exact) == 1
         assert mock_users[1] in exact
         assert fuzzy == []
@@ -177,7 +167,6 @@ class TestProcessLeaders:
         }
         leaders_raw = ["JohnDoe"]
         exact, fuzzy, unmatched = command.process_leaders(leaders_raw, 75, users)
-
         assert len(exact) == 2
         assert users[1] in exact
         assert users[2] in exact
@@ -198,11 +187,16 @@ class TestHandleMethod:
         """Return a command instance with mocked stdout."""
         command = Command()
         command.stdout = MagicMock()
-
         return command
 
     def test_invalid_model_name(
-        self, mock_member, mock_project, mock_committee, mock_chapter, mock_user, command
+        self,
+        mock_member,
+        mock_project,
+        mock_committee,
+        mock_chapter,
+        mock_user,
+        command,
     ):
         """Test handle with an invalid model name."""
         command.handle(model_name="invalid", threshold=75)
@@ -241,56 +235,55 @@ class TestHandleMethod:
             "Member": mock_member,
         }
         model_class = mock_models[model_class_str]
-
         mock_user.objects.values.return_value = [
             {"id": 1, "login": "leader_one", "name": "Leader One"},
             {"id": 2, "login": "leader_two", "name": "Leader Two"},
         ]
-
         mock_instance = MagicMock()
         mock_instance.id = 1
-
         if model_name == "member":
             mock_instance.username = "leader_one"
             mock_instance.real_name = "Leader Two"
         else:
             mock_instance.leaders_raw = ["leader_one", "leader_two"]
-
         model_class.objects.prefetch_related.return_value = [mock_instance]
-
         command.handle(model_name=model_name, threshold=90)
-
         model_class.objects.prefetch_related.assert_called_once_with(relation_field)
-
         relation = getattr(mock_instance, relation_field)
         relation.set.assert_called_once_with({1, 2})
-
         command.stdout.write.assert_any_call(f"Processing {model_name} 1...")
         command.stdout.write.assert_any_call("Exact match found for leader_one: leader_one")
 
     def test_handle_with_no_users(
-        self, mock_member, mock_project, mock_committee, mock_chapter, mock_user, command
+        self,
+        mock_member,
+        mock_project,
+        mock_committee,
+        mock_chapter,
+        mock_user,
+        command,
     ):
         """Test handle when there are no users in the database."""
         mock_user.objects.values.return_value = []
         mock_chapter_instance = MagicMock(id=1, leaders_raw=["some_leader"])
         mock_chapter.objects.prefetch_related.return_value = [mock_chapter_instance]
-
         command.handle(model_name="chapter", threshold=75)
-
         command.stdout.write.assert_any_call("Processing chapter 1...")
-
         unmatched_call = [
             c for c in command.stdout.write.call_args_list if "Unmatched" in c.args[0]
         ]
-
         assert len(unmatched_call) == 1
         assert "['some_leader']" in unmatched_call[0].args[0]
-
         mock_chapter_instance.suggested_leaders.set.assert_called_once_with(set())
 
     def test_handle_with_no_leaders_in_instance(
-        self, mock_member, mock_project, mock_committee, mock_chapter, mock_user, command
+        self,
+        mock_member,
+        mock_project,
+        mock_committee,
+        mock_chapter,
+        mock_user,
+        command,
     ):
         """Test handle when an instance has no leaders."""
         mock_user.objects.values.return_value = [
@@ -298,15 +291,10 @@ class TestHandleMethod:
         ]
         mock_chapter_instance = MagicMock(id=1, leaders_raw=[])
         mock_chapter.objects.prefetch_related.return_value = [mock_chapter_instance]
-
         command.handle(model_name="chapter", threshold=75)
-
         command.stdout.write.assert_any_call("Processing chapter 1...")
-
         unmatched_call = [
             c for c in command.stdout.write.call_args_list if "Unmatched" in c.args[0]
         ]
-
         assert len(unmatched_call) == 0
-
         mock_chapter_instance.suggested_leaders.set.assert_called_once_with(set())

@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 
-from apps.mentorship.models.program import Program
+from apps.mentorship.models import Program
 
 
 class ProgramAdmin(admin.ModelAdmin):

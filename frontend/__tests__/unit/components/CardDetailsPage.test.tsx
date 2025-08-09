@@ -23,6 +23,14 @@ jest.mock('next/link', () => {
   return MockLink
 })
 
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+  }),
+}))
+
 jest.mock('next/image', () => ({
   __esModule: true,
   default: ({

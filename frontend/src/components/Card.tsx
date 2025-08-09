@@ -1,14 +1,17 @@
+import { faCalendar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
 import Link from 'next/link'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import type { CardProps } from 'types/card'
 import { ICONS } from 'utils/data'
+import { formatDateRange } from 'utils/dateFormatter'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import ActionButton from 'components/ActionButton'
 import ContributorAvatar from 'components/ContributorAvatar'
 import DisplayIcon from 'components/DisplayIcon'
 import Markdown from 'components/MarkdownWrapper'
+import ModuleList from 'components/ModuleList'
 
 const Card = ({
   title,
@@ -20,8 +23,10 @@ const Card = ({
   button,
   projectName,
   projectLink,
+  modules,
   social,
   tooltipLabel,
+  timeline,
 }: CardProps) => {
   return (
     <div className="mx-auto mb-2 mt-4 flex w-full max-w-[95%] flex-col items-start rounded-md border border-border bg-white p-4 dark:bg-[#212529] md:max-w-6xl">
@@ -73,6 +78,14 @@ const Card = ({
             )}
           </div>
         )}
+
+        {/* Timeline Section (Optional) */}
+        {timeline?.start && timeline?.end && (
+          <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+            <span>{formatDateRange(timeline.start, timeline.end)}</span>
+          </div>
+        )}
       </div>
 
       {/* Project name link (if provided) */}
@@ -90,7 +103,8 @@ const Card = ({
       {/* Project summary */}
       <Markdown content={summary} className="mt-2 w-full text-gray-600 dark:text-gray-300" />
 
-      {/* Bottom section with social links, contributors and action button */}
+      {/* Modules section (if available) */}
+      <ModuleList modules={modules} />
       <div className="mt-4 w-full">
         {/* Social icons section */}
         {social && social.length > 0 && (

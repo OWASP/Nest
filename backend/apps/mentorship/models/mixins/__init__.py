@@ -1,0 +1,1 @@
+"""Mentorship app models mixins."""

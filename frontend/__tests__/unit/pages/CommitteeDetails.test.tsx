@@ -1,4 +1,5 @@
 import { useQuery } from '@apollo/client'
+
 import { screen, waitFor } from '@testing-library/react'
 import { mockCommitteeDetailsData } from '@unit/data/mockCommitteeDetailsData'
 import { render } from 'wrappers/testUtil'

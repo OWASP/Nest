@@ -3,4 +3,5 @@ export type Link = {
   isSpan?: boolean
   submenu?: Link[]
   text: string
+  requiresGitHubAuth?: boolean
 }
