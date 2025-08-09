@@ -1,3 +1,4 @@
+import { faAlgolia } from '@fortawesome/free-brands-svg-icons'
 import {
   faSearch,
   faTimes,
@@ -284,6 +285,16 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                 </ul>
               </div>
             ))}
+            <a
+              aria-label="Search by Algolia (opens in a new tab)"
+              className="flex items-center justify-center gap-2 bg-white py-2 text-gray-500 hover:text-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+              href="https://www.algolia.com"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <FontAwesomeIcon icon={faAlgolia} className="h-3 w-3" aria-hidden="true" />
+              <span className="text-xs">Search by Algolia</span>
+            </a>
           </div>
         )}
       </div>
