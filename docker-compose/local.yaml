@@ -71,7 +71,6 @@ services:
     container_name: nest-docs
     command: >
       sh -c '
-        python docs/scripts/generate_schema_docs.py &&
         mkdocs serve -a 0.0.0.0:8001
       '
     build:
@@ -83,7 +82,6 @@ services:
       - 8001:8001
     volumes:
       - ../docs:/home/owasp/docs
-      - ../schema:/home/owasp/schema
       - docs-venv:/home/owasp/.venv
 
   frontend:

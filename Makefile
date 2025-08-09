@@ -2,7 +2,6 @@ include backend/Makefile
 include cspell/Makefile
 include docs/Makefile
 include frontend/Makefile
-include schema/Makefile
 
 MAKEFLAGS += --no-print-directory
 
@@ -15,8 +14,7 @@ clean: \
 
 clean-dependencies: \
 	clean-backend-dependencies \
-	clean-frontend-dependencies \
-	clean-schema-dependencies
+	clean-frontend-dependencies
 
 clean-docker: \
 	clean-backend-docker \
@@ -57,8 +55,7 @@ run:
 	docker compose -f docker-compose/local.yaml --project-name nest-local up --remove-orphans
 
 test: \
-	test-nest-app \
-	test-schema
+	test-nest-app
 
 test-nest-app: \
 	test-backend \
@@ -68,8 +65,7 @@ update: \
 	clean-dependencies \
 	update-docs-dependencies \
 	update-nest-app-dependencies \
-	update-pre-commit \
-	update-schema-dependencies
+	update-pre-commit
 
 update-nest-app-dependencies: \
 	update-backend-dependencies \

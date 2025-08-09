@@ -43,7 +43,6 @@ repos:
       - id: mypy
         additional_dependencies:
           - strawberry-graphql-django
-          - types-jsonschema
           - types-lxml
           - types-python-dateutil
           - types-PyYAML
@@ -77,7 +76,7 @@ repos:
       - id: name-tests-test
         args:
           - --pytest
-        exclude: (backend|schema)/tests/data
-        files: (backend|schema)/tests
+        exclude: backend/tests/data
+        files: backend/tests
       - id: trailing-whitespace
         exclude: pnpm-lock.yaml
