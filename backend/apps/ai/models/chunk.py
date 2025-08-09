@@ -44,29 +44,27 @@ class Chunk(TimestampedModel):
     @staticmethod
     def update_data(
         text: str,
-        context: Context,
         embedding,
         *,
         save: bool = True,
-    ) -> "Chunk | None":
+    ) -> "Chunk":
         """Update chunk data.
 
         Args:
           text (str): The text content of the chunk.
-          context (Context): The context this chunk belongs to.
           embedding (list): The embedding vector for the chunk.
           save (bool): Whether to save the chunk to the database.
 
         Returns:
-          Chunk: The updated chunk instance or None if it already exists.
+          Chunk: The created chunk instance (without context assigned).
 
         """
-        if Chunk.objects.filter(context=context, text=text).exists():
-            return None
-
-        chunk = Chunk(context=context, text=text, embedding=embedding)
+        chunk = Chunk(text=text, embedding=embedding)
 
         if save:
+            if chunk.context_id is None:
+                error_msg = "Chunk must have a context assigned before saving."
+                raise ValueError(error_msg)
             chunk.save()
 
         return chunk

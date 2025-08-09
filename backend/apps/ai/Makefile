@@ -1,14 +1,30 @@
+ai-create-chapter-context:
+	@echo "Creating chapter context"
+	@CMD="python manage.py ai_create_chapter_context" $(MAKE) exec-backend-command
+
 ai-create-chapter-chunks:
 	@echo "Creating chapter chunks"
 	@CMD="python manage.py ai_create_chapter_chunks" $(MAKE) exec-backend-command
+
+ai-create-committee-context:
+	@echo "Creating committee context"
+	@CMD="python manage.py ai_create_committee_context" $(MAKE) exec-backend-command
 
 ai-create-committee-chunks:
 	@echo "Creating committee chunks"
 	@CMD="python manage.py ai_create_committee_chunks" $(MAKE) exec-backend-command
 
+ai-create-event-context:
+	@echo "Creating event context"
+	@CMD="python manage.py ai_create_event_context" $(MAKE) exec-backend-command
+
 ai-create-event-chunks:
 	@echo "Creating event chunks"
 	@CMD="python manage.py ai_create_event_chunks" $(MAKE) exec-backend-command
+
+ai-create-project-context:
+	@echo "Creating project context"
+	@CMD="python manage.py ai_create_project_context" $(MAKE) exec-backend-command
 
 ai-create-project-chunks:
 	@echo "Creating project chunks"

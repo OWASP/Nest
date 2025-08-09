@@ -1,5 +1,7 @@
 from unittest.mock import Mock, patch
 
+import pytest
+
 from apps.ai.models.chunk import Chunk
 from apps.ai.models.context import Context
 
@@ -50,78 +52,52 @@ class TestChunkModel:
         assert all(isinstance(chunk, str) for chunk in result)
 
     @patch("apps.ai.models.chunk.Chunk.save")
-    @patch("apps.ai.models.chunk.Chunk.__init__")
-    def test_update_data_new_chunk(self, mock_init, mock_save, mocker):
-        mock_init.return_value = None
-
-        mock_context = Mock(spec=Context)
-        mock_context._state = Mock()
+    def test_update_data_save_with_context(self, mock_save):
         text = "Test chunk content"
         embedding = [0.1, 0.2, 0.3]
 
-        mock_filter = mocker.patch(
-            "apps.ai.models.chunk.Chunk.objects.filter",
-            return_value=Mock(exists=Mock(return_value=False)),
-        )
+        with patch("apps.ai.models.chunk.Chunk") as mock_chunk:
+            chunk_instance = Mock()
+            chunk_instance.context_id = 123
+            mock_chunk.return_value = chunk_instance
 
-        result = Chunk.update_data(text=text, context=mock_context, embedding=embedding, save=True)
+            result = Chunk.update_data(text=text, embedding=embedding, save=True)
 
-        mock_filter.assert_called_once_with(context=mock_context, text=text)
-        mock_init.assert_called_once_with(
-            context=mock_context,
-            text=text,
-            embedding=embedding,
-        )
-        mock_save.assert_called_once()
+            mock_chunk.assert_called_once_with(text=text, embedding=embedding)
+            chunk_instance.save.assert_called_once()
+            assert result is chunk_instance
 
-        assert result is not None
-        assert isinstance(result, Chunk)
-
-    def test_update_data_existing_chunk(self, mocker):
-        mock_context = Mock(spec=Context)
-        mock_context._state = Mock()
-        text = "Existing chunk content"
-        embedding = [0.1, 0.2, 0.3]
-
-        mock_filter = mocker.patch(
-            "apps.ai.models.chunk.Chunk.objects.filter",
-            return_value=Mock(exists=Mock(return_value=True)),
-        )
-
-        result = Chunk.update_data(text=text, context=mock_context, embedding=embedding, save=True)
-
-        mock_filter.assert_called_once_with(context=mock_context, text=text)
-        assert result is None
-
-    @patch("apps.ai.models.chunk.Chunk.save")
-    @patch("apps.ai.models.chunk.Chunk.__init__")
-    def test_update_data_no_save(self, mock_init, mock_save, mocker):
-        mock_init.return_value = None
-
-        mock_context = Mock(spec=Context)
-        mock_context._state = Mock()
+    def test_update_data_save_without_context_raises(self):
         text = "Test chunk content"
         embedding = [0.1, 0.2, 0.3]
 
-        mock_filter = mocker.patch(
-            "apps.ai.models.chunk.Chunk.objects.filter",
-            return_value=Mock(exists=Mock(return_value=False)),
-        )
+        with patch("apps.ai.models.chunk.Chunk") as mock_chunk:
+            chunk_instance = Mock()
+            chunk_instance.context_id = None
+            mock_chunk.return_value = chunk_instance
 
-        result = Chunk.update_data(
-            text=text, context=mock_context, embedding=embedding, save=False
-        )
+            with pytest.raises(
+                ValueError, match="Chunk must have a context assigned before saving."
+            ):
+                Chunk.update_data(text=text, embedding=embedding, save=True)
 
-        mock_filter.assert_called_once_with(context=mock_context, text=text)
-        mock_init.assert_called_once_with(
-            context=mock_context,
-            text=text,
-            embedding=embedding,
-        )
-        mock_save.assert_not_called()
+            mock_chunk.assert_called_once_with(text=text, embedding=embedding)
+            chunk_instance.save.assert_not_called()
 
-        assert result is not None
-        assert isinstance(result, Chunk)
+    def test_update_data_no_save(self):
+        text = "Test chunk content"
+        embedding = [0.1, 0.2, 0.3]
+
+        with patch("apps.ai.models.chunk.Chunk") as mock_chunk:
+            chunk_instance = Mock()
+            chunk_instance.context_id = None
+            mock_chunk.return_value = chunk_instance
+
+            result = Chunk.update_data(text=text, embedding=embedding, save=False)
+
+            mock_chunk.assert_called_once_with(text=text, embedding=embedding)
+            chunk_instance.save.assert_not_called()
+            assert result is chunk_instance
 
     def test_meta_class_attributes(self):
         assert Chunk._meta.db_table == "ai_chunks"

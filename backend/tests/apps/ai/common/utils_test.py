@@ -23,7 +23,6 @@ class TestUtils:
         base_time = datetime.now(UTC)
         mock_datetime.now.return_value = base_time
         mock_datetime.UTC = UTC
-
         mock_datetime.timedelta = timedelta
 
         mock_openai_client = MagicMock()
@@ -34,7 +33,10 @@ class TestUtils:
         ]
         mock_openai_client.embeddings.create.return_value = mock_api_response
 
-        mock_update_data.return_value = "mock_chunk_instance"
+        # Create mock chunk instances with .save method
+        mock_chunk1 = MagicMock()
+        mock_chunk2 = MagicMock()
+        mock_update_data.side_effect = [mock_chunk1, mock_chunk2]
 
         all_chunk_texts = ["first chunk", "second chunk"]
         mock_content_object = MagicMock()
@@ -52,22 +54,18 @@ class TestUtils:
 
         mock_update_data.assert_has_calls(
             [
-                call(
-                    text="first chunk",
-                    context=mock_content_object,
-                    embedding=[0.1, 0.2],
-                    save=True,
-                ),
-                call(
-                    text="second chunk",
-                    context=mock_content_object,
-                    embedding=[0.3, 0.4],
-                    save=True,
-                ),
+                call(text="first chunk", embedding=[0.1, 0.2], save=False),
+                call(text="second chunk", embedding=[0.3, 0.4], save=False),
             ]
         )
 
-        assert result == ["mock_chunk_instance", "mock_chunk_instance"]
+        assert mock_chunk1.context == mock_content_object
+        assert mock_chunk2.context == mock_content_object
+
+        mock_chunk1.save.assert_called_once()
+        mock_chunk2.save.assert_called_once()
+
+        assert result == [mock_chunk1, mock_chunk2]
 
         mock_sleep.assert_not_called()
 
@@ -108,7 +106,8 @@ class TestUtils:
         mock_api_response.data = [MockEmbeddingData([0.1, 0.2])]
         mock_openai_client.embeddings.create.return_value = mock_api_response
 
-        mock_update_data.return_value = "mock_chunk_instance"
+        mock_chunk = MagicMock()
+        mock_update_data.return_value = mock_chunk
 
         result = create_chunks_and_embeddings(
             ["test chunk"],
@@ -117,5 +116,5 @@ class TestUtils:
         )
 
         mock_sleep.assert_not_called()
-
-        assert result == ["mock_chunk_instance"]
+        mock_chunk.save.assert_called_once()
+        assert result == [mock_chunk]

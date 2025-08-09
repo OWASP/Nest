@@ -62,7 +62,14 @@ def create_chunks_and_embeddings(
     Returns:
         list[Chunk]: List of created Chunk instances (empty if failed)
 
+    Raises:
+        ValueError: If context is None or invalid
+
     """
+    if context is None:
+        error_msg = "Context is required for chunk creation.please create a context first."
+        raise ValueError(error_msg)
+
     try:
         last_request_time = datetime.now(UTC) - timedelta(
             seconds=DEFAULT_LAST_REQUEST_OFFSET_SECONDS
@@ -80,12 +87,17 @@ def create_chunks_and_embeddings(
 
         chunks = []
         for text, embedding in zip(chunk_texts, embeddings, strict=True):
-            chunk = Chunk.update_data(text=text, context=context, embedding=embedding, save=save)
-            if chunk:
-                chunks.append(chunk)
+            chunk = Chunk.update_data(text=text, embedding=embedding, save=False)
+            chunk.context = context
+            if save:
+                chunk.save()
+            chunks.append(chunk)
 
     except openai.OpenAIError:
         logger.exception("Failed to create chunks and embeddings")
         return []
+    except ValueError:
+        logger.exception("Context error")
+        raise
     else:
         return chunks
