@@ -286,13 +286,13 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
               </div>
             ))}
             <a
-              href="https://www.algolia.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 bg-white py-2 text-gray-500 hover:text-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
               aria-label="Search by Algolia (opens in a new tab)"
+              className="flex items-center justify-center gap-2 bg-white py-2 text-gray-500 hover:text-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+              href="https://www.algolia.com"
+              rel="noopener noreferrer"
+              target="_blank"
             >
-              <FontAwesomeIcon icon={faAlgolia} className="h-5 w-5" aria-hidden="true" />
+              <FontAwesomeIcon icon={faAlgolia} className="h-3 w-3" aria-hidden="true" />
               <span className="text-xs">Search by Algolia</span>
             </a>
           </div>
