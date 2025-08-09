@@ -9,7 +9,7 @@ export type ExtendedSession = {
     email?: string
     image?: string
     isOwaspStaff?: boolean
-    name?: string
     login?: string
+    name?: string
   }
 }

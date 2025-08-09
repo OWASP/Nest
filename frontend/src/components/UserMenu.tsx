@@ -91,19 +91,19 @@ export default function UserMenu({
           className="absolute right-0 top-full z-20 mt-2 w-48 overflow-hidden rounded-md bg-white shadow-lg dark:bg-slate-800"
         >
           <div className="flex flex-col p-2">
-            <button onClick={handleLogout} disabled={isLoggingOut} className={userMenuItemClasses}>
-              {isLoggingOut ? 'Signing out...' : 'Sign out'}
-            </button>
-
             {isOwaspStaff && (
               <Link
                 href="/projects/dashboard"
                 className={userMenuItemClasses}
                 onClick={() => setIsOpen(false)}
               >
-                Projects Health
+                Project Health Dashboard
               </Link>
             )}
+
+            <button onClick={handleLogout} disabled={isLoggingOut} className={userMenuItemClasses}>
+              {isLoggingOut ? 'Signing out...' : 'Sign out'}
+            </button>
           </div>
         </div>
       )}

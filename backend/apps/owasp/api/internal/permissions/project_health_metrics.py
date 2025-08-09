@@ -10,5 +10,8 @@ class HasDashboardAccess(BasePermission):
 
     def has_permission(self, source, info, **kwargs) -> bool:
         """Check if the user has dashboard access."""
-        user = info.context.request.user
-        return user and user.is_authenticated and user.github_user.is_owasp_staff
+        return (
+            (user := info.context.request.user)
+            and user.is_authenticated
+            and user.github_user.is_owasp_staff
+        )

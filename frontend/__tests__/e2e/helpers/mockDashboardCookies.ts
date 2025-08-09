@@ -3,12 +3,12 @@ export const mockDashboardCookies = async (page, mockDashboardData, isOwaspStaff
     await route.fulfill({
       status: 200,
       json: {
-        user: {
-          login: 'testuser',
-          isOwaspStaff: isOwaspStaff,
-        },
         accessToken: 'test-access-token',
         expires: '2125-08-28T01:33:56.550Z',
+        user: {
+          isOwaspStaff: isOwaspStaff,
+          login: 'testuser',
+        },
       },
     })
   })

@@ -85,7 +85,9 @@ class UserMutations:
             login(info.context.request, nest_user)
 
             return GitHubAuthResult(
-                message="Successfully authenticated with GitHub.", ok=True, user=nest_user
+                message="Successfully authenticated with GitHub.",
+                ok=True,
+                user=nest_user,
             )
         except BadCredentialsException:
             return GitHubAuthResult(
