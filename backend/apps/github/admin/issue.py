@@ -13,6 +13,7 @@ class IssueAdmin(admin.ModelAdmin):
         "repository",
         "author",
         "assignees",
+        "interested_users",
         "labels",
     )
     list_display = (
@@ -23,6 +24,7 @@ class IssueAdmin(admin.ModelAdmin):
     )
     list_filter = (
         "state",
+        "created_at",
         "is_locked",
     )
     search_fields = ("title",)

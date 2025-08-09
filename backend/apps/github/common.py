@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from datetime import timedelta as td
 
 from django.utils import timezone
@@ -127,6 +128,8 @@ def sync_repository(
                         author=User.update_data(gh_issue.milestone.creator),
                         repository=repository,
                     )
+
+                # Create issue (moved outside milestone block)
                 issue = Issue.update_data(
                     gh_issue,
                     author=author,
@@ -147,8 +150,39 @@ def sync_repository(
                         issue.labels.add(Label.update_data(gh_issue_label))
                     except UnknownObjectException:
                         logger.exception("Couldn't get GitHub issue label %s", issue.url)
-        else:
-            logger.info("Skipping issues sync for %s", repository.name)
+
+                try:
+                    comments = gh_issue.get_comments()
+                    issue.interested_users.clear()
+                    for comment in comments:
+                        body = (comment.body or "").lower()
+                        # patterns
+                        interest_patterns = [
+                            r"assign.*me",
+                            r"i(?:'d| would)? like to work on",
+                            r"can i work on",
+                            r"i(?:'ll| will)? take",
+                            r"i want to work on",
+                            r"i am interested",
+                            r"can i be assigned",
+                            r"please assign.*me",
+                            r"i can (?:help|work|fix|handle)",
+                            r"let me (?:work|take|handle)",
+                            r"i(?:'ll| will).*(?:fix|handle|work)",
+                            r"assign.*to.*me",
+                            r"i volunteer",
+                            r"count me in",
+                            r"i(?:'m| am) up for",
+                            r"i could work",
+                            r"happy.*work",
+                            r"i(?:'d| would) love to work",
+                        ]
+                        if any(re.search(pattern, body) for pattern in interest_patterns):
+                            user_obj = User.update_data(comment.user)
+                            if user_obj:
+                                issue.interested_users.add(user_obj)
+                except UnknownObjectException as e:
+                    logger.warning("Failed to process comments for issue %s: %s", issue.title, e)
 
         # GitHub repository pull requests.
         kwargs = {
