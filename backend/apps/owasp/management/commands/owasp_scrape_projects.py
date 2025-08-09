@@ -15,6 +15,9 @@ from apps.owasp.scraper import OwaspScraper
 logger: logging.Logger = logging.getLogger(__name__)
 
 
+ALLOWED_AUDIENCE = {"breaker", "builder", "defender"}
+
+
 class Command(BaseCommand):
     help = "Scrape owasp.org pages and update relevant projects."
 
@@ -50,6 +53,11 @@ class Command(BaseCommand):
             if scraper.page_tree is None:
                 project.deactivate()
                 continue
+
+            scraped_audience = scraper.get_audience()
+            project.audience = sorted(
+                {item.lower() for item in scraped_audience if item.lower() in ALLOWED_AUDIENCE}
+            )
 
             # Get GitHub URLs.
             scraped_urls = sorted(
