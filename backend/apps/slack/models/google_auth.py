@@ -1,17 +1,11 @@
 """Slack Google OAuth Authentication Model."""
 
-import os
-
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from google_auth_oauthlib.flow import Flow
 
-GOOGLE_AUTH_CLIENT_ID = settings.GOOGLE_AUTH_CLIENT_ID
-GOOGLE_AUTH_CLIENT_SECRET = settings.GOOGLE_AUTH_CLIENT_SECRET
-GOOGLE_AUTH_REDIRECT_URI = settings.GOOGLE_AUTH_REDIRECT_URI
-
-error_message = (
+AUTH_ERROR_MESSAGE = (
     "Google OAuth client ID, secret, and redirect URI must be set in environment variables."
 )
 
@@ -25,12 +19,11 @@ class GoogleAuth(models.Model):
         related_name="google_auth",
         verbose_name="Slack Member",
     )
-    access_token = models.CharField(
-        max_length=255,
+    access_token = models.TextField(
         verbose_name="Access Token",
+        blank=True,
     )
-    refresh_token = models.CharField(
-        max_length=255,
+    refresh_token = models.TextField(
         verbose_name="Refresh Token",
         blank=True,
     )
@@ -44,13 +37,13 @@ class GoogleAuth(models.Model):
     def get_flow():
         """Create a Google OAuth flow instance."""
         if not settings.IS_GOOGLE_AUTH_ENABLED:
-            raise ValueError(error_message)
+            raise ValueError(AUTH_ERROR_MESSAGE)
         return Flow.from_client_config(
             client_config={
                 "web": {
-                    "client_id": GOOGLE_AUTH_CLIENT_ID,
-                    "client_secret": GOOGLE_AUTH_CLIENT_SECRET,
-                    "redirect_uris": [GOOGLE_AUTH_REDIRECT_URI],
+                    "client_id": settings.GOOGLE_AUTH_CLIENT_ID,
+                    "client_secret": settings.GOOGLE_AUTH_CLIENT_SECRET,
+                    "redirect_uris": [settings.GOOGLE_AUTH_REDIRECT_URI],
                     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                     "token_uri": "https://oauth2.googleapis.com/token",
                 }
@@ -62,7 +55,7 @@ class GoogleAuth(models.Model):
     def authenticate(auth_url, user):
         """Authenticate a user and return a GoogleAuth instance."""
         if not settings.IS_GOOGLE_AUTH_ENABLED:
-            raise ValueError(error_message)
+            raise ValueError(AUTH_ERROR_MESSAGE)
         auth = GoogleAuth.objects.get_or_create(user=user)[0]
         if auth.access_token and not auth.is_token_expired:
             return auth
@@ -89,7 +82,7 @@ class GoogleAuth(models.Model):
     def refresh_access_token(auth):
         """Refresh the access token using the refresh token."""
         if not settings.IS_GOOGLE_AUTH_ENABLED:
-            raise ValueError(error_message)
+            raise ValueError(AUTH_ERROR_MESSAGE)
         refresh_error = "Google OAuth refresh token is not set or expired."
         if not auth.refresh_token:
             raise ValueError(refresh_error)
@@ -97,8 +90,8 @@ class GoogleAuth(models.Model):
         flow = GoogleAuth.get_flow()
         flow.fetch_token(
             refresh_token=auth.refresh_token,
-            client_id=os.getenv("GOOGLE_AUTH_CLIENT_ID"),
-            client_secret=os.getenv("GOOGLE_AUTH_CLIENT_SECRET"),
+            client_id=settings.GOOGLE_AUTH_CLIENT_ID,
+            client_secret=settings.GOOGLE_AUTH_CLIENT_SECRET,
         )
 
         credentials = flow.credentials

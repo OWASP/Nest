@@ -19,8 +19,8 @@ class TestGoogleAuthModel:
     def setUp(self):
         """Set up test data."""
         self.member = Member(slack_user_id="U123456789", username="testuser")
-        self.valid_token = "valid_access_token"
-        self.valid_refresh_token = "valid_refresh_token"
+        self.valid_token = "valid_access_token"  # noqa: S105
+        self.valid_refresh_token = "valid_refresh_token"  # noqa: S105
         self.expired_time = timezone.now() - timedelta(hours=1)
         self.future_time = timezone.now() + timedelta(hours=1)
 
@@ -80,13 +80,11 @@ class TestGoogleAuthModel:
         with pytest.raises(ValueError, match="Google OAuth client ID"):
             GoogleAuth.get_flow()
 
-    @patch.dict(
-        "os.environ",
-        {
-            "GOOGLE_AUTH_CLIENT_ID": "test_client_id",
-            "GOOGLE_AUTH_CLIENT_SECRET": "test_client_secret",
-            "GOOGLE_AUTH_REDIRECT_URI": "http://localhost:8000/callback",
-        },
+    @override_settings(
+        IS_GOOGLE_AUTH_ENABLED=True,
+        GOOGLE_AUTH_CLIENT_ID="test_client_id",
+        GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
+        GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
     )
     @override_settings(IS_GOOGLE_AUTH_ENABLED=True)
     @patch("apps.slack.models.google_auth.Flow.from_client_config")
@@ -103,15 +101,13 @@ class TestGoogleAuthModel:
     def test_authenticate_when_disabled(self):
         """Test authenticate raises error when Google auth is disabled."""
         with pytest.raises(ValueError, match="Google OAuth client ID"):
-            GoogleAuth.authenticate("http://auth.url", self.member)
+            GoogleAuth.authenticate("http://auth.url", self.member)  # NOSONAR
 
-    @patch.dict(
-        "os.environ",
-        {
-            "GOOGLE_AUTH_CLIENT_ID": "test_client_id",
-            "GOOGLE_AUTH_CLIENT_SECRET": "test_client_secret",
-            "GOOGLE_AUTH_REDIRECT_URI": "http://localhost:8000/callback",
-        },
+    @override_settings(
+        IS_GOOGLE_AUTH_ENABLED=True,
+        GOOGLE_AUTH_CLIENT_ID="test_client_id",
+        GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
+        GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
     )
     @patch("apps.slack.models.google_auth.GoogleAuth.save")
     @patch("apps.slack.models.google_auth.GoogleAuth.objects.get_or_create")
@@ -120,8 +116,17 @@ class TestGoogleAuthModel:
         """Test authenticate with existing valid token."""
         # Create existing auth with valid token
 
-        result = GoogleAuth.authenticate("http://auth.url", self.member)
         mock_get_flow.return_value = Mock(spec=Flow)
+        mock_get_or_create.return_value = (
+            GoogleAuth(
+                user=self.member,
+                access_token=self.valid_token,
+                refresh_token=self.valid_refresh_token,
+                expires_at=self.future_time,
+            ),
+            True,
+        )
+        result = GoogleAuth.authenticate("http://auth.url", self.member)  # NOSONAR
 
         assert result.access_token == self.valid_token
         assert result.refresh_token == self.valid_refresh_token
@@ -129,20 +134,15 @@ class TestGoogleAuthModel:
         mock_get_or_create.assert_called_once_with(user=self.member)
         mock_save.assert_not_called()
 
-    @patch.dict(
-        "os.environ",
-        {
-            "GOOGLE_AUTH_CLIENT_ID": "test_client_id",
-            "GOOGLE_AUTH_CLIENT_SECRET": "test_client_secret",
-            "GOOGLE_AUTH_REDIRECT_URI": "http://localhost:8000/callback",
-        },
+    @override_settings(
+        IS_GOOGLE_AUTH_ENABLED=True,
+        GOOGLE_AUTH_CLIENT_ID="test_client_id",
+        GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
+        GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
     )
     @patch("apps.slack.models.google_auth.GoogleAuth.refresh_access_token")
-    @patch("apps.slack.models.google_auth.GoogleAuth.save")
     @patch("apps.slack.models.google_auth.GoogleAuth.objects.get_or_create")
-    def test_authenticate_existing_expired_token(
-        self, mock_get_or_create, mock_save, mock_refresh
-    ):
+    def test_authenticate_existing_expired_token(self, mock_get_or_create, mock_refresh):
         """Test authenticate with existing expired token."""
         # Create existing auth with expired token
         existing_auth = GoogleAuth(
@@ -151,20 +151,18 @@ class TestGoogleAuthModel:
             refresh_token=self.valid_refresh_token,
             expires_at=self.expired_time,
         )
+        mock_get_or_create.return_value = (existing_auth, False)
 
-        result = GoogleAuth.authenticate("http://auth.url", self.member)
+        GoogleAuth.authenticate("http://auth.url", self.member)  # NOSONAR
 
         mock_refresh.assert_called_once_with(existing_auth)
         mock_get_or_create.assert_called_once_with(user=self.member)
-        mock_save.assert_called_once()
 
-    @patch.dict(
-        "os.environ",
-        {
-            "GOOGLE_AUTH_CLIENT_ID": "env_client_id",
-            "GOOGLE_AUTH_CLIENT_SECRET": "env_client_secret",
-            "GOOGLE_AUTH_REDIRECT_URI": "http://localhost:8000/callback",
-        },
+    @override_settings(
+        IS_GOOGLE_AUTH_ENABLED=True,
+        GOOGLE_AUTH_CLIENT_ID="test_client_id",
+        GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
+        GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
     )
     @patch("apps.slack.models.google_auth.GoogleAuth.get_flow")
     @patch("apps.slack.models.google_auth.GoogleAuth.save")
@@ -173,25 +171,32 @@ class TestGoogleAuthModel:
         """Test authenticate for first time (no existing token)."""
         # Mock flow and credentials
         mock_credentials = Mock()
-        mock_credentials.token = "new_access_token"  # NOQA
-        mock_credentials.refresh_token = "new_refresh_token"
+        mock_credentials.token = "new_access_token"  # noqa: S105 # NOSONAR
+        mock_credentials.refresh_token = "new_refresh_token"  # noqa: S105
         mock_credentials.expiry = self.future_time
 
         mock_flow_instance = Mock()
         mock_flow_instance.credentials = mock_credentials
         mock_get_flow.return_value = mock_flow_instance
+        mock_get_or_create.return_value = (
+            GoogleAuth(
+                user=self.member,
+                access_token="",
+                refresh_token="",
+                expires_at=None,
+            ),
+            True,
+        )
 
-        result = GoogleAuth.authenticate("http://auth.url", self.member)
+        result = GoogleAuth.authenticate("http://auth.url", self.member)  # NOSONAR
 
-        assert result.access_token == "new_access_token"
-        assert result.refresh_token == "new_refresh_token"
+        assert result.access_token == "new_access_token"  # noqa: S105
+        assert result.refresh_token == "new_refresh_token"  # noqa: S105
         assert result.expires_at == self.future_time
         mock_get_or_create.assert_called_once_with(user=self.member)
 
         mock_flow_instance.fetch_token.assert_called_once_with(
-            refresh_token=self.valid_refresh_token,
-            client_id="env_client_id",
-            client_secret="env_client_secret",
+            authorization_response="http://auth.url",
         )
         mock_save.assert_called_once()
 
@@ -205,13 +210,11 @@ class TestGoogleAuthModel:
         with pytest.raises(ValueError, match="Google OAuth client ID"):
             GoogleAuth.refresh_access_token(auth)
 
-    @patch.dict(
-        "os.environ",
-        {
-            "GOOGLE_AUTH_CLIENT_ID": "env_client_id",
-            "GOOGLE_AUTH_CLIENT_SECRET": "env_client_secret",
-            "GOOGLE_AUTH_REDIRECT_URI": "http://localhost:8000/callback",
-        },
+    @override_settings(
+        IS_GOOGLE_AUTH_ENABLED=True,
+        GOOGLE_AUTH_CLIENT_ID="test_client_id",
+        GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
+        GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
     )
     @patch("apps.slack.models.google_auth.GoogleAuth.get_flow")
     @patch("apps.slack.models.google_auth.GoogleAuth.save")
@@ -227,8 +230,8 @@ class TestGoogleAuthModel:
 
         # Mock flow and new credentials
         mock_credentials = Mock()
-        mock_credentials.token = "new_access_token"
-        mock_credentials.refresh_token = "new_refresh_token"
+        mock_credentials.token = "new_access_token"  # noqa: S105 # NOSONAR
+        mock_credentials.refresh_token = "new_refresh_token"  # noqa: S105
         mock_credentials.expiry = self.future_time
 
         mock_flow_instance = Mock()
@@ -237,14 +240,14 @@ class TestGoogleAuthModel:
 
         GoogleAuth.refresh_access_token(auth)
 
-        assert auth.access_token == "new_access_token"
-        assert auth.refresh_token == "new_refresh_token"
+        assert auth.access_token == "new_access_token"  # noqa: S105
+        assert auth.refresh_token == "new_refresh_token"  # noqa: S105
         assert auth.expires_at == self.future_time
 
         mock_flow_instance.fetch_token.assert_called_once_with(
             refresh_token=self.valid_refresh_token,
-            client_id="env_client_id",
-            client_secret="env_client_secret",
+            client_id="test_client_id",
+            client_secret="test_client_secret",  # noqa: S106
         )
         mock_save.assert_called_once()
 
@@ -289,7 +292,7 @@ class TestGoogleAuthIntegration:
         with override_settings(
             IS_GOOGLE_AUTH_ENABLED=True,
             GOOGLE_AUTH_CLIENT_ID="integration_client_id",
-            GOOGLE_AUTH_CLIENT_SECRET="integration_client_secret",
+            GOOGLE_AUTH_CLIENT_SECRET="integration_client_secret",  # noqa: S106
             GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
         ):
             # Test flow creation doesn't raise errors
@@ -301,8 +304,8 @@ class TestGoogleAuthIntegration:
             # Test authentication with valid token
             auth = GoogleAuth(
                 user=member,
-                access_token="integration_token",
-                refresh_token="integration_refresh",
+                access_token="integration_token",  # noqa: S106
+                refresh_token="integration_refresh",  # noqa: S106
                 expires_at=timezone.now() + timedelta(hours=1),
             )
 
