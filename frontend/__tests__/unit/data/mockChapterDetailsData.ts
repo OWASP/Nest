@@ -21,6 +21,7 @@ export const mockChapterDetailsData = {
     },
     establishedYear: 2020,
     key: 'test-chapter',
+    leadersLogins: ['leader1', 'leader2'],
   },
   topContributors: Array.from({ length: 15 }, (_, i) => ({
     avatarUrl: `https://avatars.githubusercontent.com/avatar${i + 1}.jpg`,

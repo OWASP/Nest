@@ -68,6 +68,7 @@ export default function ChapterDetailsPage() {
       socialLinks={chapter.relatedUrls}
       summary={chapter.summary}
       title={chapter.name}
+      leadersLogins={chapter.leadersLogins}
       topContributors={topContributors}
       type="chapter"
     />

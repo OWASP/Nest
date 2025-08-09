@@ -10,6 +10,11 @@ class GenericEntityNode:
     """Base node class for OWASP entities with common fields and resolvers."""
 
     @strawberry.field
+    def leaders_logins(self) -> list[str]:
+        """Resolve leaders logins."""
+        return [leader.login for leader in self.leaders.all()]
+
+    @strawberry.field
     def leaders(self) -> list[str]:
         """Resolve leaders."""
         return self.idx_leaders
