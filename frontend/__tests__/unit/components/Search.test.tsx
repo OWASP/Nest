@@ -1,22 +1,22 @@
 import { sendGTMEvent } from '@next/third-parties/google'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import SearchBar from 'components/Search'
 
 jest.mock('@next/third-parties/google', () => ({
   sendGTMEvent: jest.fn(),
 }))
 
-jest.mock('lodash', () => ({
-  debounce: <T extends (...args: unknown[]) => unknown>(fn: T, delay: number) => {
-    let timeoutId: ReturnType<typeof setTimeout>
-    const debounced = (...args: Parameters<T>) => {
-      clearTimeout(timeoutId)
-      timeoutId = setTimeout(() => fn(...args), delay)
+jest.mock('lodash/debounce', () => {
+  return (fn: (...args: unknown[]) => unknown, delay: number) => {
+    let tid: ReturnType<typeof setTimeout>
+    const debounced = (...a: unknown[]) => {
+      clearTimeout(tid)
+      tid = setTimeout(() => fn(...a), delay)
     }
-    debounced.cancel = () => clearTimeout(timeoutId)
+    debounced.cancel = () => clearTimeout(tid)
     return debounced
-  },
-}))
+  }
+})
 
 describe('SearchBar Component', () => {
   const mockOnSearch = jest.fn()
@@ -32,7 +32,7 @@ describe('SearchBar Component', () => {
   })
 
   afterEach(() => {
-    jest.runOnlyPendingTimers()
+    jest.clearAllTimers()
     jest.useRealTimers()
   })
 
@@ -182,10 +182,8 @@ describe('SearchBar Component', () => {
       fireEvent.change(input, { target: { value: 'new query' } })
 
       expect(input).toHaveValue('new query')
-      await waitFor(() => {
-        expect(mockOnSearch).toHaveBeenCalledWith('new query')
-      })
-
+      jest.advanceTimersByTime(750)
+      expect(mockOnSearch).toHaveBeenCalledWith('new query')
       expect(sendGTMEvent).toHaveBeenCalledWith({
         event: 'search',
         path: window.location.pathname,
@@ -195,10 +193,8 @@ describe('SearchBar Component', () => {
       fireEvent.change(input, { target: { value: 'change query' } })
 
       expect(input).toHaveValue('change query')
-
-      await waitFor(() => {
-        expect(mockOnSearch).toHaveBeenCalledWith('change query')
-      })
+      jest.advanceTimersByTime(750)
+      expect(mockOnSearch).toHaveBeenCalledWith('change query')
       expect(sendGTMEvent).toHaveBeenCalledWith({
         event: 'search',
         path: window.location.pathname,

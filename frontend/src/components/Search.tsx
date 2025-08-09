@@ -57,6 +57,7 @@ const SearchBar: React.FC<SearchProps> = ({
   }
 
   const handleClearSearch = () => {
+    debouncedSearch.cancel()
     setSearchQuery('')
     onSearch('')
     inputRef.current?.focus()
