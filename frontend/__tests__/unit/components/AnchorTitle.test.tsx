@@ -12,8 +12,8 @@ jest.mock('utils/slugify', () => ({
     str
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '-')
-      .replace(/-{2,}/g, '-')
-      .replace(/(^(-)+|(-)+$)/g, '')
+      .replace(/-{2,10}/g, '-')
+      .replace(/(^-{1,10}|-{1,10}$)/g, '')
   ),
 }))
 
@@ -653,8 +653,8 @@ describe('AnchorTitle Component', () => {
         str
           .toLowerCase()
           .replace(/[^a-z0-9]/g, '-')
-          .replace(/-{2,}/g, '-')
-          .replace(/(^(-)+|(-)+$)/g, '')
+          .replace(/-{2,10}/g, '-')
+          .replace(/(^-{1,10}|-{1,10}$)/g, '')
       )
 
       const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
