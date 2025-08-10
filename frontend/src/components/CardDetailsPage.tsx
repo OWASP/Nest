@@ -7,10 +7,12 @@ import {
   faTags,
   faUsers,
   faRectangleList,
+  faArrowUpRightFromSquare,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
 import type { DetailsCardProps } from 'types/card'
+import { LeadersListBlockProps } from 'types/leaders'
 import { capitalize } from 'utils/capitalize'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/credentials'
 import { getSocialIcon } from 'utils/urlIconMappings'
@@ -19,6 +21,7 @@ import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
 import LeadersList from 'components/LeadersList'
+import LeadersListBlock from 'components/LeadersListBlock'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import Milestones from 'components/Milestones'
 import RecentIssues from 'components/RecentIssues'
@@ -50,6 +53,7 @@ const DetailsCard = ({
   stats,
   summary,
   title,
+  leadersLogins,
   topContributors,
   topics,
   type,
@@ -170,6 +174,16 @@ const DetailsCard = ({
               <ToggleableList items={topics} icon={faTags} label={<AnchorTitle title="Topics" />} />
             )}
           </div>
+        )}
+        {leadersLogins && leadersLogins.length > 0 && (
+          <LeadersListBlock
+            icon={faArrowUpRightFromSquare}
+            label="Leaders"
+            leaders={leadersLogins.reduce((acc, login) => {
+              acc[login] = ''
+              return acc
+            }, {} as LeadersListBlockProps)}
+          />
         )}
         {topContributors && (
           <TopContributorsList
