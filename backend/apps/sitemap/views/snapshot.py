@@ -14,11 +14,8 @@ class SnapshotSitemap(BaseSitemap):
         """Return a queryset of indexable Snapshot objects."""
         return [
             s
-            for s in Snapshot.objects.filter(
-                status=Snapshot.Status.COMPLETED
-            ).order_by(
-                "-updated_at", 
-                "-created_at"
+            for s in Snapshot.objects.filter(status=Snapshot.Status.COMPLETED).order_by(
+                "-updated_at", "-created_at"
             )
             if s.is_indexable
         ]
