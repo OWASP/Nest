@@ -6,21 +6,29 @@ import type { User } from 'types/user'
 import Milestones from 'components/Milestones'
 
 jest.mock('next/navigation', () => ({
+  ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(),
 }))
 
 jest.mock('utils/dateFormatter', () => ({
+  __esModule: true,
   formatDate: jest.fn((date) => `Formatted: ${date}`),
+  default: jest.fn((date) => `Formatted: ${date}`),
 }))
 
 jest.mock('components/AnchorTitle', () => {
-  return function MockAnchorTitle({ title, className }: { title: string; className?: string }) {
+  const MockAnchorTitle = ({ title, className }: { title: string; className?: string }) => {
     return <h2 className={className}>{title}</h2>
+  }
+
+  return {
+    __esModule: true,
+    default: MockAnchorTitle,
   }
 })
 
 jest.mock('components/ItemCardList', () => {
-  return function MockItemCardList({
+  const MockItemCardList = ({
     title,
     data,
     showAvatar,
@@ -31,16 +39,16 @@ jest.mock('components/ItemCardList', () => {
     title: React.ReactNode
     data: Milestone[]
     showAvatar: boolean
-    icon: unknown
+    icon: { iconName?: string }
     showSingleColumn: boolean
     renderDetails: (item: Milestone) => React.ReactNode
-  }) {
+  }) => {
     return (
       <div data-testid="item-card-list">
         <div data-testid="title">{title}</div>
         <div data-testid="show-avatar">{showAvatar.toString()}</div>
         <div data-testid="show-single-column">{showSingleColumn.toString()}</div>
-        <div data-testid="icon">{(icon as unknown)?.iconName}</div>
+        <div data-testid="icon">{icon?.iconName}</div>
         {data.map((item, index) => (
           <div key={index} data-testid={`milestone-${index}`}>
             {renderDetails(item)}
@@ -49,10 +57,17 @@ jest.mock('components/ItemCardList', () => {
       </div>
     )
   }
+
+  return {
+    __esModule: true,
+    default: MockItemCardList,
+  }
 })
 
 jest.mock('components/TruncatedText', () => ({
+  __esModule: true,
   TruncatedText: ({ text }: { text: string }) => <span data-testid="truncated-text">{text}</span>,
+  default: ({ text }: { text: string }) => <span data-testid="truncated-text">{text}</span>,
 }))
 
 const mockPush = jest.fn()
