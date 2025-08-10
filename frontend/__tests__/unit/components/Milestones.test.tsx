@@ -51,17 +51,8 @@ jest.mock('components/ItemCardList', () => {
     showSingleColumn: boolean
     renderDetails: (item: Milestone) => React.ReactNode
   }) => {
-  
-    const getIconLabel = (iconProp: unknown): string => {
-      if (!iconProp) return 'no-icon'
-      if (typeof iconProp === 'string') return iconProp
-      if (typeof iconProp === 'object' && iconProp !== null) {
-        if ('iconName' in iconProp) return String((iconProp as { iconName: unknown }).iconName)
-        if ('props' in iconProp) return 'react-component'
-        return 'icon-object'
-      }
-      return 'icon-generic'
-    }
+    const getIconLabel = (iconProp: unknown): string =>
+      !iconProp ? 'no-icon' : typeof iconProp === 'string' ? iconProp : JSON.stringify(iconProp)
 
     return (
       <div data-testid="item-card-list">
@@ -94,12 +85,6 @@ jest.mock('components/TruncatedText', () => ({
 }))
 
 const mockPush = jest.fn()
-const mockReplace = jest.fn()
-const mockBack = jest.fn()
-const mockForward = jest.fn()
-const mockRefresh = jest.fn()
-const mockPrefetch = jest.fn()
-
 const mockUseRouter = useRouter as jest.Mock
 
 describe('Milestones', () => {
@@ -107,11 +92,6 @@ describe('Milestones', () => {
     jest.clearAllMocks()
     mockUseRouter.mockReturnValue({
       push: mockPush,
-      replace: mockReplace,
-      back: mockBack,
-      forward: mockForward,
-      refresh: mockRefresh,
-      prefetch: mockPrefetch,
     })
   })
 
@@ -199,19 +179,16 @@ describe('Milestones', () => {
     expect(screen.getByTestId('truncated-text')).toHaveTextContent('awesome-repo')
   })
 
-  it('handles milestone without repositoryName', () => {
+  it('handles missing repositoryName (empty string and undefined)', () => {
+    // Test empty string
     render(<Milestones data={[createMockMilestone({ repositoryName: '' })]} />)
-
     expect(screen.queryByTestId('truncated-text')).not.toBeInTheDocument()
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
-  })
 
-  it('handles milestone with undefined repositoryName', () => {
+    // Test undefined
     const milestone = createMockMilestone()
     delete (milestone as Partial<Milestone>).repositoryName
-
     render(<Milestones data={[milestone]} />)
-
     expect(screen.queryByTestId('truncated-text')).not.toBeInTheDocument()
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
