@@ -23,6 +23,7 @@ class TestUserNode:
             "followers_count",
             "following_count",
             "id",
+            "is_owasp_staff",
             "issues_count",
             "location",
             "login",

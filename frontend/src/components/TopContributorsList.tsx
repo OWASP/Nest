@@ -1,9 +1,9 @@
 import type { IconProp } from '@fortawesome/fontawesome-svg-core'
+import upperFirst from 'lodash/upperFirst'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import type { Contributor } from 'types/contributor'
-import { capitalize } from 'utils/capitalize'
 import { getMemberUrl } from 'utils/urlFormatter'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
@@ -58,7 +58,7 @@ const TopContributorsList = ({
                 href={getMemberUrl(item?.login)}
                 title={item?.name || item?.login}
               >
-                {capitalize(item.name) || capitalize(item.login)}
+                {upperFirst(item.name) || upperFirst(item.login)}
               </Link>
             </div>
           </div>
