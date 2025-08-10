@@ -7,6 +7,7 @@ import {
   faStar,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
+import { capitalize } from 'lodash'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
@@ -14,7 +15,6 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
 import type { Contributor } from 'types/contributor'
 import type { Project } from 'types/project'
-import { capitalize } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'

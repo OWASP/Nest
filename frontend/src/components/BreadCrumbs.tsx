@@ -3,9 +3,9 @@
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Breadcrumbs, BreadcrumbItem } from '@heroui/react'
+import { capitalize } from 'lodash'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { capitalize } from 'utils/capitalize'
 
 export default function BreadCrumbs() {
   const homeRoute = '/'

@@ -1,4 +1,4 @@
-import { capitalize } from 'utils/capitalize'
+import { capitalize } from 'lodash'
 
 describe('capitalize function', () => {
   beforeEach(() => {

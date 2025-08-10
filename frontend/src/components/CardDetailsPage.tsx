@@ -9,9 +9,9 @@ import {
   faRectangleList,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { capitalize } from 'lodash'
 import Link from 'next/link'
 import type { DetailsCardProps } from 'types/card'
-import { capitalize } from 'utils/capitalize'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/credentials'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
@@ -121,24 +121,24 @@ const DetailsCard = ({
             type === 'committee' ||
             type === 'user' ||
             type === 'organization') && (
-            <SecondaryCard
-              icon={faChartPie}
-              title={<AnchorTitle title="Statistics" />}
-              className="md:col-span-2"
-            >
-              {stats.map((stat, index) => (
-                <div key={index}>
-                  <InfoBlock
-                    className="pb-1"
-                    icon={stat.icon}
-                    pluralizedName={stat.pluralizedName}
-                    unit={stat.unit}
-                    value={stat.value}
-                  />
-                </div>
-              ))}
-            </SecondaryCard>
-          )}
+              <SecondaryCard
+                icon={faChartPie}
+                title={<AnchorTitle title="Statistics" />}
+                className="md:col-span-2"
+              >
+                {stats.map((stat, index) => (
+                  <div key={index}>
+                    <InfoBlock
+                      className="pb-1"
+                      icon={stat.icon}
+                      pluralizedName={stat.pluralizedName}
+                      unit={stat.unit}
+                      value={stat.value}
+                    />
+                  </div>
+                ))}
+              </SecondaryCard>
+            )}
           {type === 'chapter' && geolocationData && (
             <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
               <ChapterMapWrapper
@@ -182,31 +182,31 @@ const DetailsCard = ({
           type === 'repository' ||
           type === 'user' ||
           type === 'organization') && (
-          <div className="grid-cols-2 gap-4 lg:grid">
-            <RecentIssues data={recentIssues} showAvatar={showAvatar} />
-            {type === 'user' ||
-            type === 'organization' ||
-            type === 'repository' ||
-            type === 'project' ? (
-              <Milestones data={recentMilestones} showAvatar={showAvatar} />
-            ) : (
-              <RecentReleases
-                data={recentReleases}
-                showAvatar={showAvatar}
-                showSingleColumn={true}
-              />
-            )}
-          </div>
-        )}
+            <div className="grid-cols-2 gap-4 lg:grid">
+              <RecentIssues data={recentIssues} showAvatar={showAvatar} />
+              {type === 'user' ||
+                type === 'organization' ||
+                type === 'repository' ||
+                type === 'project' ? (
+                <Milestones data={recentMilestones} showAvatar={showAvatar} />
+              ) : (
+                <RecentReleases
+                  data={recentReleases}
+                  showAvatar={showAvatar}
+                  showSingleColumn={true}
+                />
+              )}
+            </div>
+          )}
         {(type === 'project' ||
           type === 'repository' ||
           type === 'organization' ||
           type === 'user') && (
-          <div className="grid-cols-2 gap-4 lg:grid">
-            <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />
-            <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />
-          </div>
-        )}
+            <div className="grid-cols-2 gap-4 lg:grid">
+              <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />
+              <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />
+            </div>
+          )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
             <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
