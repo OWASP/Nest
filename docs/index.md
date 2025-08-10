@@ -10,7 +10,7 @@ title: OWASP Nest
 
 ![Node 22](https://img.shields.io/badge/Node-22-blue.svg) ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg) ![Code Style](https://img.shields.io/badge/ESLint-9.17-blue) ![Prettier](https://img.shields.io/badge/Prettier-3.4.2-blue)
 
-![CI/CD](https://img.shields.io/github/actions/workflow/status/owasp/nest/ci-cd.yaml?branch=main&color=41BE41&style=flat&label=Build) ![GitHub License](https://img.shields.io/github/license/owasp/nest?style=flat&color=41BE4A&label=License) ![Contributors](https://img.shields.io/github/contributors/owasp/nest?style=flat&label=Contributors) ![Last Commit](https://img.shields.io/github/last-commit/owasp/nest/main?style=flat&label=Last%20commit)
+![CI/CD](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-ci-cd.yaml?branch=main&color=41BE41&style=flat&label=Build) ![GitHub License](https://img.shields.io/github/license/owasp/nest?style=flat&color=41BE4A&label=License) ![Contributors](https://img.shields.io/github/contributors/owasp/nest?style=flat&label=Contributors) ![Last Commit](https://img.shields.io/github/last-commit/owasp/nest/main?style=flat&label=Last%20commit)
 
 ## What is OWASP Nest?
 
