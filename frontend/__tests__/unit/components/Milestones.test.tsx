@@ -64,7 +64,14 @@ jest.mock('components/ItemCardList', () => {
         <div data-testid="show-single-column">{showSingleColumn.toString()}</div>
         <div data-testid="icon">{getIconLabel(icon)}</div>
         {data.map((item, index) => {
-          const uniqueKey = `milestone-${index}-${item.url || `${item.organizationName || 'org'}-${item.repositoryName || 'repo'}-${item.title || 'milestone'}`}`
+          // Avoid nested template literals by constructing fallback separately
+          const fallbackKey = [
+            item.organizationName || 'org',
+            item.repositoryName || 'repo',
+            item.title || 'milestone'
+          ].join('-')
+          
+          const uniqueKey = `milestone-${index}-${item.url || fallbackKey}`
 
           return (
             <div key={uniqueKey} data-testid={`milestone-${index}`}>
