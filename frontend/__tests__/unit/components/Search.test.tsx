@@ -53,8 +53,8 @@ describe('SearchBar Component', () => {
 
   describe('Conditional rendering logic', () => {
     it('shows skeleton when isLoaded is true', () => {
-      render(<SearchBar {...defaultProps} isLoaded={true} />)
-      const skeleton = screen.queryByTestId('loading-skeleton')
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const skeleton = container.querySelector('.h-12.rounded-lg:not(input)')
       const input = screen.queryByPlaceholderText('Search projects...')
       expect(input).not.toBeInTheDocument()
       expect(skeleton).toBeInTheDocument()
@@ -62,26 +62,26 @@ describe('SearchBar Component', () => {
     })
 
     it('shows input when isLoaded is false', () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
-      const skeleton = screen.queryByTestId('loading-skeleton')
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={false} />)
+      const skeleton = container.querySelector('.h-12.rounded-lg:not(input)')
       const input = screen.getByPlaceholderText('Search projects...')
       expect(skeleton).not.toBeInTheDocument()
       expect(input).toBeInTheDocument()
     })
 
     it('does not show clear button when searchQuery is empty', () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={false} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toHaveValue('')
-      const clearButton = screen.queryByTestId('clear-search-button')
+      const clearButton = container.querySelector('button.absolute.rounded-full[class*="right-2"]')
       expect(clearButton).not.toBeInTheDocument()
     })
 
     it('shows clear button when searchQuery is not empty', () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={false} />)
       const input = screen.getByPlaceholderText('Search projects...')
       fireEvent.change(input, { target: { value: 'test' } })
-      const clearButton = screen.queryByTestId('clear-search-button')
+      const clearButton = container.querySelector('button.absolute.rounded-full[class*="right-2"]')
       expect(clearButton).toBeInTheDocument()
     })
   })
@@ -124,11 +124,11 @@ describe('SearchBar Component', () => {
     })
 
     it('clears input when clear button is clicked', async () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={false} />)
       const input = screen.getByPlaceholderText('Search projects...')
       fireEvent.change(input, { target: { value: 'test' } })
       expect(input).toHaveValue('test')
-      const clearButton = screen.queryByTestId('clear-search-button')
+      const clearButton = container.querySelector('button.absolute.rounded-full[class*="right-2"]')
       fireEvent.click(clearButton)
       expect(input).toHaveValue('')
     })
@@ -291,14 +291,14 @@ describe('SearchBar Component', () => {
 
   describe('Accessibility roles and labels', () => {
     it('has the correct accessibility labels', () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={false} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toBeInTheDocument()
       expect(input).toHaveAttribute('type', 'text')
-      let clearButton = screen.queryByTestId('clear-search-button')
+      let clearButton = container.querySelector('button.absolute.rounded-full[class*="right-2"]')
       expect(clearButton).not.toBeInTheDocument()
       fireEvent.change(input, { target: { value: 'test' } })
-      clearButton = screen.queryByTestId('clear-search-button')
+      clearButton = container.querySelector('button.absolute.rounded-full[class*="right-2"]')
       expect(clearButton).toBeInTheDocument()
     })
 
@@ -320,16 +320,16 @@ describe('SearchBar Component', () => {
     })
 
     it('has the correct class names for skeleton', () => {
-      render(<SearchBar {...defaultProps} isLoaded={true} />)
-      const skeleton = screen.queryByTestId('loading-skeleton')
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const skeleton = container.querySelector('.h-12.rounded-lg:not(input)')
       expect(skeleton).toHaveClass('h-12 rounded-lg')
     })
 
     it('has the correct class names for clear button', () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={false} />)
       const input = screen.getByPlaceholderText('Search projects...')
       fireEvent.change(input, { target: { value: 'test' } })
-      const clearButton = screen.queryByTestId('clear-search-button')
+      const clearButton = container.querySelector('button.absolute.rounded-full[class*="right-2"]')
       expect(clearButton).toHaveClass(
         'absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300'
       )
