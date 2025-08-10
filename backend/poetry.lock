@@ -809,22 +809,22 @@ test = ["django-stubs", "mypy (==1.7.1)", "psycopg2-binary", "pytest", "pytest-a
 
 [[package]]
 name = "django-redis"
-version = "5.4.0"
+version = "6.0.0"
 description = "Full featured redis cache backend for Django."
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "django-redis-5.4.0.tar.gz", hash = "sha256:6a02abaa34b0fea8bf9b707d2c363ab6adc7409950b2db93602e6cb292818c42"},
-    {file = "django_redis-5.4.0-py3-none-any.whl", hash = "sha256:ebc88df7da810732e2af9987f7f426c96204bf89319df4c6da6ca9a2942edd5b"},
+    {file = "django_redis-6.0.0-py3-none-any.whl", hash = "sha256:20bf0063a8abee567eb5f77f375143c32810c8700c0674ced34737f8de4e36c0"},
+    {file = "django_redis-6.0.0.tar.gz", hash = "sha256:2d9cb12a20424a4c4dde082c6122f486628bae2d9c2bee4c0126a4de7fda00dd"},
 ]
 
 [package.dependencies]
-Django = ">=3.2"
-redis = ">=3,<4.0.0 || >4.0.0,<4.0.1 || >4.0.1"
+Django = ">=4.2"
+redis = ">=4.0.2"
 
 [package.extras]
-hiredis = ["redis[hiredis] (>=3,!=4.0.0,!=4.0.1)"]
+hiredis = ["redis[hiredis] (>=4.0.2)"]
 
 [[package]]
 name = "django-storages"
@@ -4104,4 +4104,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "4c8a1c9f2e3f249a286d6477a1c1c53d4f355bc7c0fbf3eafa9da531e8697454"
+content-hash = "1e07403cf90a68668b8773c327c49cac13b04ea64f5d6659830004f2d423b27c"
