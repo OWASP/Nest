@@ -9,6 +9,7 @@ from .views import (
     OrganizationSitemap,
     ProjectSitemap,
     RepositorySitemap,
+    SnapshotSitemap,
     StaticSitemap,
     cached_sitemap_view,
 )
@@ -18,6 +19,7 @@ sitemaps = {
     "committees": CommitteeSitemap,
     "members": MemberSitemap,
     "organizations": OrganizationSitemap,
+    "snapshots": SnapshotSitemap,
     "projects": ProjectSitemap,
     "repositories": RepositorySitemap,
     "static": StaticSitemap,
@@ -43,6 +45,10 @@ urlpatterns = [
     path(
         "sitemap/organizations.xml",
         cached_sitemap_view(sitemaps={"organizations": OrganizationSitemap}),
+    ),
+    path(
+        "sitemap/snapshots.xml",
+        cached_sitemap_view(sitemaps={"snapshots": SnapshotSitemap}),
     ),
     path(
         "sitemap/projects.xml",
