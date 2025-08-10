@@ -11,6 +11,8 @@ from lxml import etree, html
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
+from apps.owasp.models.enums.project import AudienceChoices
+
 logger: logging.Logger = logging.getLogger(__name__)
 
 MAX_RETRIES = 3
@@ -55,15 +57,22 @@ class OwaspScraper:
         if self.page_tree is None:
             return []
 
-        audience_elements = self.page_tree.xpath(
-            "//h4[@id='audience']/following-sibling::ul[1]/li"
-        )
-        audience = []
-        for element in audience_elements:
-            text = element.text_content().strip()
-            if text:
-                audience.append(text)
-        return audience
+        flexible_xpath = "//div[@class='sidebar'] | //*[@role='complementary']"
+        containers = self.page_tree.xpath(flexible_xpath)
+
+        found_keywords = set()
+
+        all_list_items = []
+        for container in containers:
+            all_list_items.extend(container.xpath(".//li"))
+
+        for item in all_list_items:
+            item_text = item.text_content()
+            for lower_kw, original_kw in AudienceChoices.choices:
+                if original_kw in item_text:
+                    found_keywords.add(lower_kw)
+
+        return sorted(found_keywords)
 
     def get_urls(self, domain=None):
         """Return scraped URLs."""

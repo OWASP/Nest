@@ -1,59 +1,18 @@
-"""A command to generate project metadata from project_key."""
+"""A command to generate project metadata YAML files."""
 
-from pathlib import Path
-
-import yaml
-from django.core.management.base import BaseCommand
-from owasp_schema import get_schema
-from owasp_schema.utils.schema_validators import validate_data
-
+from apps.owasp.management.commands.base_generate_metadata import BaseGenerateMetadataCommand
 from apps.owasp.models.project import Project, ProjectLevel, ProjectType
 
 MIN_PROJECT_TAGS = 3
 
 
-class Command(BaseCommand):
+class Command(BaseGenerateMetadataCommand):
     help = "Generates and validates project metadata for a given project key."
-
-    def add_arguments(self, parser):
-        parser.add_argument(
-            "project_key",
-            type=str,
-            help="The key of the project to generate the metadata file.",
-        )
-
-    def handle(self, *args, **options):
-        project_key = options["project_key"]
-        self.stdout.write(f"Attempting to process project: {project_key}")
-
-        try:
-            project = Project.objects.get(key=project_key)
-        except Project.DoesNotExist:
-            self.stderr.write(self.style.ERROR(f"Project with key '{project_key}' not found."))
-            return
-
-        metadata_dict = self.map_data_to_schema(project)
-
-        project_schema = get_schema("project")
-        error_message = validate_data(schema=project_schema, data=metadata_dict)
-
-        if error_message:
-            self.stderr.write(self.style.ERROR("Validation FAILED!"))
-            self.stderr.write(f"Reason: {error_message}")
-            return
-        self.stdout.write(self.style.SUCCESS("Validation successful!"))
-
-        self.stdout.write("Writing validated data to file...")
-        output_dir = Path("schema/data")
-        output_file_path = output_dir / "project.owasp.yaml"
-        output_dir.mkdir(parents=True, exist_ok=True)
-
-        with Path.open(output_file_path, "w") as f:
-            yaml.dump(metadata_dict, f, sort_keys=False, default_flow_style=False, indent=2)
-        self.stdout.write(self.style.SUCCESS(f"Successfully generated file: {output_file_path}"))
+    model = Project
+    schema_name = "project"
 
     def map_data_to_schema(self, project: Project) -> dict:
-        """Map the Project model data to a dictionary."""
+        """Map the Project model data to a dictionary that matches the schema."""
         level_mapping = {
             ProjectLevel.INCUBATOR: 2,
             ProjectLevel.LAB: 3,

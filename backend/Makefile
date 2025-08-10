@@ -59,10 +59,6 @@ enrich-data: \
 	owasp-enrich-events \
 	owasp-enrich-projects
 
-generate-project-metadata:
-	@echo "Generating metadata"
-	@CMD="python manage.py generate_project_metadata $(project_key)" $(MAKE) exec-backend-command
-
 generate-sitemap:
 	@CMD="python manage.py generate_sitemap" $(MAKE) exec-backend-command
 

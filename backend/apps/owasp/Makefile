@@ -1,3 +1,7 @@
+generate-project-metadata:
+	@echo "Generating metadata"
+	@CMD="python manage.py create_project_metadata_file $(entity_key)" $(MAKE) exec-backend-command
+
 owasp-aggregate-projects:
 	@echo "Aggregating OWASP projects"
 	@CMD="python manage.py owasp_aggregate_projects" $(MAKE) exec-backend-command
