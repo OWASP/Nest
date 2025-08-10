@@ -1,5 +1,5 @@
 import type { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { capitalize } from 'lodash'
+import capitalize from 'lodash/capitalize'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'

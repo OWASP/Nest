@@ -3,7 +3,7 @@
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Breadcrumbs, BreadcrumbItem } from '@heroui/react'
-import { capitalize } from 'lodash'
+import capitalize from 'lodash/capitalize'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 

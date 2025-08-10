@@ -7,7 +7,7 @@ import {
   faStar,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
-import { capitalize } from 'lodash'
+import capitalize from 'lodash/capitalize'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
