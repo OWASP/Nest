@@ -8,14 +8,12 @@ on:
       - main
     paths-ignore:
       - backend/data/nest.json.gz
-      - schema/*
   push:
     branches:
       - feature/**
       - main
     paths-ignore:
       - backend/data/nest.json.gz
-      - schema/*
   release:
     types:
       - published
