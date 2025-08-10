@@ -1,17 +1,18 @@
 """A command to generate project metadata YAML files."""
 
-from apps.owasp.management.commands.base_generate_metadata import BaseGenerateMetadataCommand
+from apps.owasp.management.commands.common.entity_metadata import (
+    EntityMetadataBase,
+)
 from apps.owasp.models.project import Project, ProjectLevel, ProjectType
 
 MIN_PROJECT_TAGS = 3
 
 
-class Command(BaseGenerateMetadataCommand):
+class Command(EntityMetadataBase):
     help = "Generates and validates project metadata for a given project key."
     model = Project
-    schema_name = "project"
 
-    def map_data_to_schema(self, project: Project) -> dict:
+    def get_metadata(self, project: Project) -> dict:
         """Map the Project model data to a dictionary that matches the schema."""
         level_mapping = {
             ProjectLevel.INCUBATOR: 2,
@@ -55,16 +56,17 @@ class Command(BaseGenerateMetadataCommand):
 
         if project.repositories.exists():
             data["repositories"] = []
-            for repo in project.repositories.all():
-                repo_data = {}
-                if repo.description:
-                    repo_data["description"] = repo.description
-                if repo.name:
-                    repo_data["name"] = repo.name
-                if repo.url:
-                    repo_data["url"] = repo.url
-                if repo_data:
-                    data["repositories"].append(repo_data)
+            for repository in project.repositories.all():
+                repository_data = {}
+                if repository.description:
+                    repository_data["description"] = repository.description
+                if repository.name:
+                    repository_data["name"] = repository.name
+                if repository.url:
+                    repository_data["url"] = repository.url
+
+                if repository_data:
+                    data["repositories"].append(repository_data)
 
         if project.tags and len(project.tags) >= MIN_PROJECT_TAGS:
             data["tags"] = project.tags

@@ -5,6 +5,14 @@ from django.db import models
 from django.db.models import TextChoices
 
 
+class AudienceChoices(models.TextChoices):
+    """Enum for OWASP project audience."""
+
+    BREAKER = "breaker", "Breaker"
+    BUILDER = "builder", "Builder"
+    DEFENDER = "defender", "Defender"
+
+
 class ProjectType(TextChoices):
     """Enum for OWASP project types."""
 
@@ -36,16 +44,8 @@ class ProjectLevel(TextChoices):
     FLAGSHIP = "flagship", "Flagship"
 
 
-class AudienceChoices(models.TextChoices):
-    """Enum for OWASP project audiences."""
-
-    BREAKER = "breaker", "Breaker"
-    BUILDER = "builder", "Builder"
-    DEFENDER = "defender", "Defender"
-
-
 def validate_audience(value):
-    """Ensure that the audience field contains a list of valid choices."""
+    """Audience validator."""
     if not isinstance(value, list):
         error_message = "Audience must be a list."
         raise ValidationError(error_message)

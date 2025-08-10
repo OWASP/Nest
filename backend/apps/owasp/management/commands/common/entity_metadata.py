@@ -13,11 +13,10 @@ from owasp_schema.utils.schema_validators import validate_data
 logger = logging.getLogger(__name__)
 
 
-class BaseGenerateMetadataCommand(BaseCommand, ABC):
-    """A base command to generate and validate metadata YAML files."""
+class EntityMetadataBase(BaseCommand, ABC):
+    """A base command to generate metadata files."""
 
     model: models.Model = None
-    schema_name: str = ""
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -28,11 +27,12 @@ class BaseGenerateMetadataCommand(BaseCommand, ABC):
 
     def handle(self, *args, **options):
         """Handle the command execution."""
-        if not all([self.model, self.schema_name]):
-            self.stderr.write(self.style.ERROR("Fields 'model', 'schema_name' must be set."))
+        if not self.model:
+            self.stderr.write(self.style.ERROR("OWASP entity model is not set."))
             return
 
         entity_key = options["entity_key"]
+        schema_name = self.model.__name__.lower()
 
         try:
             entity = self.model.objects.get(key=entity_key)
@@ -42,26 +42,22 @@ class BaseGenerateMetadataCommand(BaseCommand, ABC):
             )
             return
 
-        metadata_dict = self.map_data_to_schema(entity)
-
-        schema = get_schema(self.schema_name)
-        error_message = validate_data(schema=schema, data=metadata_dict)
-
-        if error_message:
+        metadata = self.get_metadata(entity)
+        if error_message := validate_data(schema=get_schema(schema_name), data=metadata):
             self.stderr.write(self.style.ERROR("Validation FAILED!"))
             self.stderr.write(f"Reason: {error_message}")
             return
-        self.stdout.write(self.style.SUCCESS("Validation successful!"))
 
-        output_dir = Path(f"data/schema/{self.schema_name}")
-        output_file_path = output_dir / f"{self.schema_name}.owasp.yaml"
+        output_dir = Path(f"data/schema/{schema_name}")
         output_dir.mkdir(parents=True, exist_ok=True)
 
+        output_file_path = output_dir / f"{entity_key}.owasp.yaml"
         with output_file_path.open("w") as f:
-            yaml.dump(metadata_dict, f, sort_keys=True, default_flow_style=False, indent=4)
+            yaml.dump(metadata, f, sort_keys=True, default_flow_style=False, indent=4)
 
         self.stdout.write(self.style.SUCCESS(f"Successfully generated file: {output_file_path}"))
 
     @abstractmethod
-    def map_data_to_schema(self, entity: models.Model) -> dict:
-        """Map the entity data to a dictionary that matches the schema."""
+    def get_metadata(self, entity: models.Model) -> dict:
+        """Get entity metadata."""
+        return {}

@@ -118,5 +118,5 @@ class TestOwaspScrapeProjects:
 
         mock_bulk_save.assert_called_once()
         saved_project = mock_bulk_save.call_args[0][0][0]
-        expected_audience = ["builder", "breaker", "defender"]
-        assert saved_project.audience == expected_audience
+
+        assert saved_project.audience == ["builder", "breaker", "defender"]
