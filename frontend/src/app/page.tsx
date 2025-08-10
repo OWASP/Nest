@@ -17,6 +17,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToast } from '@heroui/toast'
+import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
@@ -25,7 +26,7 @@ import type { AlgoliaResponse } from 'types/algolia'
 import type { Chapter } from 'types/chapter'
 import type { Event } from 'types/event'
 import type { MainPageData } from 'types/home'
-import { capitalize } from 'utils/capitalize'
+
 import { formatDate, formatDateRange } from 'utils/dateFormatter'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
@@ -268,7 +269,7 @@ export default function Home() {
                         icon={getProjectIcon(project.type) as IconProp}
                         className="mr-2 h-4 w-4"
                       />
-                      <TruncatedText text={capitalize(project.type)} />
+                      <TruncatedText text={upperFirst(project.type)} />
                     </div>
                   </div>
                   {project.leaders.length > 0 && (
