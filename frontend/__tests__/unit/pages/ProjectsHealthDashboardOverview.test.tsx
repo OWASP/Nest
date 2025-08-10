@@ -17,6 +17,12 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: () => <span data-testid="mock-icon" />,
 }))
 
+jest.mock('hooks/useDjangoSession', () => ({
+  useDjangoSession: () => ({
+    isSyncing: false,
+  }),
+}))
+
 jest.mock('react-apexcharts', () => {
   return {
     __esModule: true,
