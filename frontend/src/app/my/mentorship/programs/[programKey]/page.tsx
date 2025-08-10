@@ -117,7 +117,7 @@ const ProgramDetailsPage = () => {
 
   if (isLoading) return <LoadingSpinner />
 
-  if (!program && !isLoading) {
+  if (!program) {
     return (
       <ErrorDisplay
         statusCode={404}

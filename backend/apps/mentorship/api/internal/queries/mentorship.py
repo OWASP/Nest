@@ -20,9 +20,14 @@ class MentorshipQuery:
     @strawberry.field
     def is_mentor(self, login: str) -> bool:
         """Check if a GitHub login is a mentor."""
+        if not login or not login.strip():
+            return False
+
+        login = login.strip()
+
         try:
             github_user = GithubUser.objects.get(login=login)
         except GithubUser.DoesNotExist:
             return False
 
-        return Mentor.objects.filter(nest_user__github_user=github_user).exists()
+        return Mentor.objects.filter(github_user=github_user).exists()
