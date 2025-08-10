@@ -294,16 +294,16 @@ describe('SearchBar Component', () => {
 
       fireEvent.change(input, { target: { value: 'edge case' } })
       expect(mockOnSearch).not.toHaveBeenCalled()
-      
+
       const clearButton = container.querySelector('button.absolute.rounded-full[class*="right-2"]')
       fireEvent.click(clearButton)
-      
+
       jest.advanceTimersByTime(750)
-      
+
       expect(mockOnSearch).toHaveBeenCalledTimes(1)
-      expect(mockOnSearch).toHaveBeenCalledWith('') 
-      expect(mockOnSearch).not.toHaveBeenCalledWith('edge case') 
-      
+      expect(mockOnSearch).toHaveBeenCalledWith('')
+      expect(mockOnSearch).not.toHaveBeenCalledWith('edge case')
+
       expect(input).toHaveValue('')
       expect(input).toHaveFocus()
     })
