@@ -3,15 +3,18 @@ import { API_URL } from 'utils/credentials'
 
 export const fetchMetricsPDF = async (path: string, fileName: string): Promise<void> => {
   const response = await fetch(`${API_URL}owasp/project-health-metrics/${path}`, {
-    method: 'GET',
+    credentials: 'include',
     headers: {
       accept: 'application/pdf',
     },
+    method: 'GET',
   })
+
   if (!response.ok) {
     handleAppError(new Error(`Failed to fetch PDF: ${response.status} ${response.statusText}`))
     return
   }
+
   try {
     const blob = await response.blob()
     if (!blob) {

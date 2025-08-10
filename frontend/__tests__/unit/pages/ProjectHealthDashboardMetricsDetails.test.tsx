@@ -21,6 +21,12 @@ jest.mock('next/navigation', () => ({
   })),
 }))
 
+jest.mock('hooks/useDjangoSession', () => ({
+  useDjangoSession: () => ({
+    isSyncing: false,
+  }),
+}))
+
 jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: () => <span data-testid="mock-icon"></span>,
 }))
