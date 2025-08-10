@@ -68,9 +68,9 @@ jest.mock('components/ItemCardList', () => {
           const fallbackKey = [
             item.organizationName || 'org',
             item.repositoryName || 'repo',
-            item.title || 'milestone'
+            item.title || 'milestone',
           ].join('-')
-          
+
           const uniqueKey = `milestone-${index}-${item.url || fallbackKey}`
 
           return (
