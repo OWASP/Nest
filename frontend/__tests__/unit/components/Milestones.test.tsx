@@ -182,16 +182,19 @@ describe('Milestones', () => {
     expect(screen.getByTestId('truncated-text')).toHaveTextContent('awesome-repo')
   })
 
-  it('handles missing repositoryName (empty string and undefined)', () => {
-    // Test empty string
+  it('handles milestone without repositoryName', () => {
     render(<Milestones data={[createMockMilestone({ repositoryName: '' })]} />)
+
     expect(screen.queryByTestId('truncated-text')).not.toBeInTheDocument()
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
+  })
 
-    // Test undefined
+  it('handles milestone with undefined repositoryName', () => {
     const milestone = createMockMilestone()
     delete (milestone as Partial<Milestone>).repositoryName
+
     render(<Milestones data={[milestone]} />)
+
     expect(screen.queryByTestId('truncated-text')).not.toBeInTheDocument()
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
