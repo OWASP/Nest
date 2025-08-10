@@ -7,7 +7,7 @@ import {
   faStar,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
-import capitalize from 'lodash/capitalize'
+import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
@@ -55,9 +55,9 @@ const ProjectDetailsPage = () => {
     { label: 'Leaders', value: project.leaders.join(', ') },
     {
       label: 'Level',
-      value: capitalize(project.level),
+      value: upperFirst(project.level),
     },
-    { label: 'Type', value: capitalize(project.type) },
+    { label: 'Type', value: upperFirst(project.type) },
     {
       label: 'URL',
       value: (

@@ -1,5 +1,5 @@
 import type { IconProp } from '@fortawesome/fontawesome-svg-core'
-import capitalize from 'lodash/capitalize'
+import upperFirst from 'lodash/upperFirst'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -58,7 +58,7 @@ const TopContributorsList = ({
                 href={getMemberUrl(item?.login)}
                 title={item?.name || item?.login}
               >
-                {capitalize(item.name) || capitalize(item.login)}
+                {upperFirst(item.name) || upperFirst(item.login)}
               </Link>
             </div>
           </div>

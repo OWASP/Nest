@@ -17,7 +17,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToast } from '@heroui/toast'
-import capitalize from 'lodash/capitalize'
+import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
@@ -269,7 +269,7 @@ export default function Home() {
                         icon={getProjectIcon(project.type) as IconProp}
                         className="mr-2 h-4 w-4"
                       />
-                      <TruncatedText text={capitalize(project.type)} />
+                      <TruncatedText text={upperFirst(project.type)} />
                     </div>
                   </div>
                   {project.leaders.length > 0 && (

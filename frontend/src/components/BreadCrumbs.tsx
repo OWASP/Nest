@@ -3,7 +3,7 @@
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Breadcrumbs, BreadcrumbItem } from '@heroui/react'
-import capitalize from 'lodash/capitalize'
+import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -43,7 +43,7 @@ export default function BreadCrumbs() {
 
           {segments.map((segment, index) => {
             const href = homeRoute + segments.slice(0, index + 1).join(homeRoute)
-            const label = capitalize(segment).replace(/-/g, ' ')
+            const label = upperFirst(segment).replace(/-/g, ' ')
             const isLast = index === segments.length - 1
 
             return (

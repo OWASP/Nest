@@ -12,7 +12,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
-import capitalize from 'lodash/capitalize'
+import upperFirst from 'lodash/upperFirst'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -157,7 +157,7 @@ const About = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          {capitalize(name)}
+                          {upperFirst(name)}
                         </Link>
                       </li>
                     ))}
