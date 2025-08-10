@@ -1,78 +1,33 @@
 """A command to update context for OWASP project data."""
 
-from django.core.management.base import BaseCommand
+from django.db.models import Model, QuerySet
 
-from apps.ai.common.extractors import extract_project_content
-from apps.ai.common.utils import create_context
+from apps.ai.common.base import BaseContextCommand
+from apps.ai.common.extractors.project import extract_project_content
 from apps.owasp.models.project import Project
 
 
-class Command(BaseCommand):
-    help = "Update context for OWASP project data"
+class Command(BaseContextCommand):
+    @property
+    def model_class(self) -> type[Model]:
+        return Project
 
-    def add_arguments(self, parser):
-        parser.add_argument(
-            "--project-key",
-            type=str,
-            help="Process only the project with this key",
-        )
-        parser.add_argument(
-            "--all",
-            action="store_true",
-            help="Process all the projects",
-        )
-        parser.add_argument(
-            "--batch-size",
-            type=int,
-            default=50,
-            help="Number of projects to process in each batch",
-        )
+    @property
+    def entity_name(self) -> str:
+        return "project"
 
-    def handle(self, *args, **options):
-        if options["project_key"]:
-            queryset = Project.objects.filter(key=options["project_key"])
-        elif options["all"]:
-            queryset = Project.objects.all()
-        else:
-            queryset = Project.objects.filter(is_active=True)
-        queryset = queryset.order_by("id")
+    @property
+    def entity_name_plural(self) -> str:
+        return "projects"
 
-        if not (total_projects := queryset.count()):
-            self.stdout.write("No projects found to process")
-            return
+    @property
+    def key_field_name(self) -> str:
+        return "key"
 
-        self.stdout.write(f"Found {total_projects} projects to process")
+    def get_base_queryset(self) -> QuerySet:
+        """Return the base queryset with ordering."""
+        return super().get_base_queryset()
 
-        batch_size = options["batch_size"]
-        processed_count = 0
-
-        for offset in range(0, total_projects, batch_size):
-            batch_projects = queryset[offset : offset + batch_size]
-            processed_count += self.process_context_batch(batch_projects)
-
-        self.stdout.write(
-            self.style.SUCCESS(f"Completed processing {processed_count}/{total_projects} projects")
-        )
-
-    def process_context_batch(self, projects: list[Project]) -> int:
-        """Process a batch of projects to create contexts."""
-        processed = 0
-
-        for project in projects:
-            prose_content, metadata_content = extract_project_content(project)
-            full_content = (
-                f"{metadata_content}\n\n{prose_content}" if metadata_content else prose_content
-            )
-
-            if not full_content.strip():
-                self.stdout.write(f"No content for project {project.key}")
-                continue
-
-            if create_context(
-                content=full_content, content_object=project, source="owasp_project"
-            ):
-                processed += 1
-                self.stdout.write(f"Created context for {project.key}")
-            else:
-                self.stdout.write(self.style.ERROR(f"Failed to create context for {project.key}"))
-        return processed
+    def extract_content(self, entity: Project) -> tuple[str, str]:
+        """Extract content from the project."""
+        return extract_project_content(entity)

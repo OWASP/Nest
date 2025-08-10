@@ -46,7 +46,7 @@ class TestAiRunRagToolCommand:
         parser.add_argument.assert_any_call(
             "--threshold",
             type=float,
-            default=0.5,  # DEFAULT_SIMILARITY_THRESHOLD
+            default=0.4,  # DEFAULT_SIMILARITY_THRESHOLD
             help="Similarity threshold (0.0 to 1.0)",
         )
         parser.add_argument.assert_any_call(

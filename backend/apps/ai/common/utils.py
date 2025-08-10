@@ -5,7 +5,6 @@ import time
 from datetime import UTC, datetime, timedelta
 
 import openai
-from django.contrib.contenttypes.models import ContentType
 
 from apps.ai.common.constants import (
     DEFAULT_LAST_REQUEST_OFFSET_SECONDS,
@@ -29,17 +28,7 @@ def create_context(content: str, content_object=None, source: str = "") -> Conte
         Context: Created Context instance
 
     """
-    context = Context.update_data(content=content, content_object=content_object, source=source)
-    if context is None:
-        if content_object:
-            content_type = ContentType.objects.get_for_model(content_object)
-            context = Context.objects.get(
-                content_type=content_type, object_id=content_object.pk, content=content
-            )
-        else:
-            context = Context.objects.get(content=content, content_object__isnull=True)
-
-    return context
+    return Context.update_data(content=content, content_object=content_object, source=source)
 
 
 def create_chunks_and_embeddings(

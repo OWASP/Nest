@@ -1,6 +1,4 @@
-"""Tests for the ai_create_project_context Django management command."""
-
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from django.core.management.base import BaseCommand
@@ -26,91 +24,34 @@ def mock_project():
 class TestAiCreateProjectContextCommand:
     """Test suite for the ai_create_project_context command."""
 
-    def test_command_help_text(self, command):
-        """Test that the command has the correct help text."""
-        assert command.help == "Update context for OWASP project data"
-
     def test_command_inheritance(self, command):
         """Test that the command inherits from BaseCommand."""
         assert isinstance(command, BaseCommand)
 
-    def test_add_arguments(self, command):
-        """Test that the command adds the correct arguments."""
-        parser = MagicMock()
-        command.add_arguments(parser)
+    def test_model_class_property(self, command):
+        """Test the model_class property returns Project."""
+        from apps.owasp.models.project import Project
 
-        assert parser.add_argument.call_count == 3
-        parser.add_argument.assert_any_call(
-            "--project-key",
-            type=str,
-            help="Process only the project with this key",
-        )
-        parser.add_argument.assert_any_call(
-            "--all",
-            action="store_true",
-            help="Process all the projects",
-        )
-        parser.add_argument.assert_any_call(
-            "--batch-size",
-            type=int,
-            default=50,
-            help="Number of projects to process in each batch",
-        )
+        assert command.model_class == Project
 
-    @patch("apps.ai.management.commands.ai_create_project_context.Project.objects")
-    def test_handle_no_projects_found(self, mock_project_objects, command):
-        """Test command when no projects are found."""
-        command.stdout = MagicMock()
-        mock_queryset = MagicMock()
-        mock_queryset.count.return_value = 0
-        mock_project_objects.filter.return_value = mock_queryset
+    def test_entity_name_property(self, command):
+        """Test the entity_name property."""
+        assert command.entity_name == "project"
 
-        command.handle(project_key=None, all=False, batch_size=50)
+    def test_entity_name_plural_property(self, command):
+        """Test the entity_name_plural property."""
+        assert command.entity_name_plural == "projects"
 
-    @patch("apps.ai.management.commands.ai_create_project_context.Project.objects")
-    def test_handle_with_project_key(self, mock_project_objects, command, mock_project):
-        """Test command with specific project key."""
-        command.stdout = MagicMock()
-        command.style = MagicMock()
-        mock_queryset = MagicMock()
-        mock_queryset.count.return_value = 1
-        mock_queryset.__iter__ = lambda _self: iter([mock_project])
-        mock_queryset.__getitem__ = lambda _self, _key: [mock_project]
-        mock_project_objects.filter.return_value = mock_queryset
+    def test_key_field_name_property(self, command):
+        """Test the key_field_name property."""
+        assert command.key_field_name == "key"
 
-        with patch.object(command, "process_context_batch", return_value=1):
-            command.handle(project_key="test-project", all=False, batch_size=50)
-
-        mock_project_objects.filter.assert_called_with(key="test-project")
-
-    @patch("apps.ai.management.commands.ai_create_project_context.Project.objects")
-    def test_handle_with_all_flag(self, mock_project_objects, command, mock_project):
-        """Test command with --all flag."""
-        command.stdout = MagicMock()
-        command.style = MagicMock()
-        mock_queryset = MagicMock()
-        mock_queryset.count.return_value = 1
-        mock_queryset.__iter__ = lambda _self: iter([mock_project])
-        mock_queryset.__getitem__ = lambda _self, _key: [mock_project]
-        mock_project_objects.all.return_value = mock_queryset
-
-        with patch.object(command, "process_context_batch", return_value=1):
-            command.handle(project_key=None, all=True, batch_size=50)
-
-        mock_project_objects.all.assert_called_once()
-
-    @patch("apps.ai.management.commands.ai_create_project_context.Project.objects")
-    def test_handle_default_active_projects(self, mock_project_objects, command, mock_project):
-        """Test command defaults to active projects."""
-        command.stdout = MagicMock()
-        command.style = MagicMock()
-        mock_queryset = MagicMock()
-        mock_queryset.count.return_value = 1
-        mock_queryset.__iter__ = lambda _self: iter([mock_project])
-        mock_queryset.__getitem__ = lambda _self, _key: [mock_project]
-        mock_project_objects.filter.return_value = mock_queryset
-
-        with patch.object(command, "process_context_batch", return_value=1):
-            command.handle(project_key=None, all=False, batch_size=50)
-
-        mock_project_objects.filter.assert_called_with(is_active=True)
+    def test_extract_content(self, command, mock_project):
+        """Test content extraction from project."""
+        with patch(
+            "apps.ai.management.commands.ai_create_project_context.extract_project_content"
+        ) as mock_extract:
+            mock_extract.return_value = ("prose content", "metadata content")
+            content = command.extract_content(mock_project)
+            assert content == ("prose content", "metadata content")
+            mock_extract.assert_called_once_with(mock_project)

@@ -16,56 +16,6 @@ def create_model_mock(model_class):
 
 
 class TestContextModel:
-    def test_str_method_without_content_type(self):
-        context = Context()
-        context.id = 1
-        context.content = "Sample text without content type"
-        context.content_type = None
-        context.content_object = None
-
-        result = str(context)
-
-        assert result == "None None: Sample text without content type"
-
-    def test_str_method_with_text_truncation(self):
-        long_text = "A" * 100
-
-        context = Context()
-        context.id = 1
-        context.content = long_text
-        context.content_type = None
-        context.content_object = None
-
-        result = str(context)
-
-        assert result == f"None None: {long_text[:50]}"
-        assert len(result.split(": ", 1)[1]) == 50
-
-    def test_str_method_with_exactly_50_chars(self):
-        text_50_chars = "A" * 50
-
-        context = Context()
-        context.id = 1
-        context.content = text_50_chars
-        context.content_type = None
-        context.content_object = None
-
-        result = str(context)
-
-        assert result == f"None None: {text_50_chars}"
-        assert len(result.split(": ", 1)[1]) == 50
-
-    def test_str_method_with_empty_text(self):
-        context = Context()
-        context.id = 1
-        context.content = ""
-        context.content_type = None
-        context.content_object = None
-
-        result = str(context)
-
-        assert result == "None None: "
-
     def test_meta_class_attributes(self):
         assert Context._meta.db_table == "ai_contexts"
         assert Context._meta.verbose_name == "Context"
@@ -77,14 +27,13 @@ class TestContextModel:
 
     def test_content_type_field_properties(self):
         field = Context._meta.get_field("content_type")
-        assert field.null is True
-        assert field.blank is True
+        assert field.null is False
+        assert field.blank is False
         assert hasattr(field, "remote_field")
         assert field.remote_field.on_delete.__name__ == "CASCADE"
 
     def test_object_id_field_properties(self):
         field = Context._meta.get_field("object_id")
-        assert field.default == 0
         assert field.__class__.__name__ == "PositiveIntegerField"
 
     def test_source_field_properties(self):
@@ -92,12 +41,6 @@ class TestContextModel:
         assert field.max_length == 100
         assert field.blank is True
         assert field.default == ""
-
-    def test_content_object_generic_foreign_key(self):
-        field = Context._meta.get_field("content_object")
-        assert field.__class__.__name__ == "GenericForeignKey"
-        assert field.ct_field == "content_type"
-        assert field.fk_field == "object_id"
 
     @patch("apps.ai.models.context.Context.save")
     @patch("apps.ai.models.context.Context.__init__")
@@ -177,10 +120,7 @@ class TestContextModel:
     def test_context_default_values(self):
         context = Context()
 
-        assert context.object_id == 0
         assert context.source == ""
-        assert context.content_type is None
-        assert context.content_object is None
 
     @patch("apps.ai.models.context.Context.refresh_from_db")
     def test_context_refresh_from_db(self, mock_refresh):
@@ -195,3 +135,26 @@ class TestContextModel:
         context.delete()
 
         mock_delete.assert_called_once()
+
+    @patch("apps.ai.models.context.Context.objects.filter")
+    def test_update_data_existing_context(self, mock_filter):
+        mock_context = create_model_mock(Context)
+        mock_filter.return_value.first.return_value = mock_context
+
+        content = "Test"
+        mock_content_object = Mock()
+        mock_content_object.pk = 1
+
+        with patch(
+            "apps.ai.models.context.ContentType.objects.get_for_model"
+        ) as mock_get_for_model:
+            mock_content_type = Mock()
+            mock_get_for_model.return_value = mock_content_type
+
+            result = Context.update_data(content, mock_content_object, source="src", save=True)
+
+            mock_get_for_model.assert_called_once_with(mock_content_object)
+            mock_filter.assert_called_once_with(
+                content_type=mock_content_type, object_id=1, content=content
+            )
+            assert result == mock_context

@@ -30,6 +30,10 @@ ai-create-project-chunks:
 	@echo "Creating project chunks"
 	@CMD="python manage.py ai_create_project_chunks" $(MAKE) exec-backend-command
 
+ai-create-slack-message-context:
+	@echo "Creating Slack message context"
+	@CMD="python manage.py ai_create_slack_message_context" $(MAKE) exec-backend-command
+
 ai-create-slack-message-chunks:
 	@echo "Creating Slack message chunks"
 	@CMD="python manage.py ai_create_slack_message_chunks" $(MAKE) exec-backend-command

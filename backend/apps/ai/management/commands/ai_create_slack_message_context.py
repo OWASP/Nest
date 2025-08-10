@@ -1,12 +1,12 @@
-"""A command to create chunks of Slack messages."""
+"""A command to update context for Slack message data."""
 
 from django.db.models import Model, QuerySet
 
-from apps.ai.common.base import BaseChunkCommand
+from apps.ai.common.base import BaseContextCommand
 from apps.slack.models.message import Message
 
 
-class Command(BaseChunkCommand):
+class Command(BaseContextCommand):
     @property
     def model_class(self) -> type[Model]:
         return Message

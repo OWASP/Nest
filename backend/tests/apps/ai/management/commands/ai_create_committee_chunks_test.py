@@ -1,7 +1,4 @@
-"""Tests for the ai_create_committee_chunks Django management command."""
-
-import os
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from django.core.management.base import BaseCommand
@@ -11,144 +8,40 @@ from apps.ai.management.commands.ai_create_committee_chunks import Command
 
 @pytest.fixture
 def command():
-    """Return a command instance."""
     return Command()
 
 
 @pytest.fixture
 def mock_committee():
-    """Return a mock Committee instance."""
     committee = Mock()
     committee.id = 1
     committee.key = "test-committee"
     return committee
 
 
-@pytest.fixture
-def mock_context():
-    """Return a mock Context instance."""
-    context = Mock()
-    context.id = 1
-    return context
-
-
 class TestAiCreateCommitteeChunksCommand:
-    """Test suite for the ai_create_committee_chunks command."""
-
-    def test_command_help_text(self, command):
-        """Test that the command has the correct help text."""
-        assert command.help == "Create chunks for OWASP committee data"
-
     def test_command_inheritance(self, command):
-        """Test that the command inherits from BaseCommand."""
         assert isinstance(command, BaseCommand)
 
-    def test_add_arguments(self, command):
-        """Test that the command adds the correct arguments."""
-        parser = MagicMock()
-        command.add_arguments(parser)
+    def test_model_class_property(self, command):
+        from apps.owasp.models.committee import Committee
 
-        assert parser.add_argument.call_count == 3
-        parser.add_argument.assert_any_call(
-            "--committee-key",
-            type=str,
-            help="Process only the committee with this key",
-        )
-        parser.add_argument.assert_any_call(
-            "--all",
-            action="store_true",
-            help="Process all the committees",
-        )
-        parser.add_argument.assert_any_call(
-            "--batch-size",
-            type=int,
-            default=50,
-            help="Number of committees to process in each batch",
-        )
+        assert command.model_class == Committee
 
-    @patch.dict(os.environ, {}, clear=True)
-    def test_handle_missing_openai_key(self, command):
-        """Test command fails when OpenAI API key is not set."""
-        command.stdout = MagicMock()
-        command.style = MagicMock()
+    def test_entity_name_property(self, command):
+        assert command.entity_name == "committee"
 
-        command.handle()
+    def test_entity_name_plural_property(self, command):
+        assert command.entity_name_plural == "committees"
 
-        command.stdout.write.assert_called_once()
-        command.style.ERROR.assert_called_once_with(
-            "DJANGO_OPEN_AI_SECRET_KEY environment variable not set"
-        )
+    def test_key_field_name_property(self, command):
+        assert command.key_field_name == "key"
 
-    @patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"})
-    @patch("apps.ai.management.commands.ai_create_committee_chunks.openai.OpenAI")
-    @patch("apps.ai.management.commands.ai_create_committee_chunks.Committee.objects")
-    def test_handle_no_committees_found(self, mock_committee_objects, mock_openai, command):
-        """Test command when no committees are found."""
-        command.stdout = MagicMock()
-        mock_queryset = MagicMock()
-        mock_queryset.count.return_value = 0
-        mock_committee_objects.filter.return_value = mock_queryset
-
-        command.handle(committee_key=None, all=False, batch_size=50)
-
-        command.stdout.write.assert_called_with("No committees found to process")
-
-    @patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"})
-    @patch("apps.ai.management.commands.ai_create_committee_chunks.openai.OpenAI")
-    @patch("apps.ai.management.commands.ai_create_committee_chunks.Committee.objects")
-    def test_handle_with_committee_key(
-        self, mock_committee_objects, mock_openai, command, mock_committee
-    ):
-        """Test command with specific committee key."""
-        command.stdout = MagicMock()
-        command.style = MagicMock()
-        mock_queryset = MagicMock()
-        mock_queryset.count.return_value = 1
-        mock_queryset.__iter__ = lambda _self: iter([mock_committee])
-        mock_queryset.__getitem__ = lambda _self, _key: [mock_committee]
-        mock_committee_objects.filter.return_value = mock_queryset
-
-        with patch.object(command, "process_chunks_batch", return_value=1):
-            command.handle(committee_key="test-committee", all=False, batch_size=50)
-
-        mock_committee_objects.filter.assert_called_with(key="test-committee")
-
-    @patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"})
-    @patch("apps.ai.management.commands.ai_create_committee_chunks.openai.OpenAI")
-    @patch("apps.ai.management.commands.ai_create_committee_chunks.Committee.objects")
-    def test_handle_with_all_flag(
-        self, mock_committee_objects, mock_openai, command, mock_committee
-    ):
-        """Test command with --all flag."""
-        command.stdout = MagicMock()
-        command.style = MagicMock()
-        mock_queryset = MagicMock()
-        mock_queryset.count.return_value = 1
-        mock_queryset.__iter__ = lambda _self: iter([mock_committee])
-        mock_queryset.__getitem__ = lambda _self, _key: [mock_committee]
-        mock_committee_objects.all.return_value = mock_queryset
-
-        with patch.object(command, "process_chunks_batch", return_value=1):
-            command.handle(committee_key=None, all=True, batch_size=50)
-
-        mock_committee_objects.all.assert_called_once()
-
-    @patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"})
-    @patch("apps.ai.management.commands.ai_create_committee_chunks.openai.OpenAI")
-    @patch("apps.ai.management.commands.ai_create_committee_chunks.Committee.objects")
-    def test_handle_default_active_committees(
-        self, mock_committee_objects, mock_openai, command, mock_committee
-    ):
-        """Test command defaults to active committees."""
-        command.stdout = MagicMock()
-        command.style = MagicMock()
-        mock_queryset = MagicMock()
-        mock_queryset.count.return_value = 1
-        mock_queryset.__iter__ = lambda _self: iter([mock_committee])
-        mock_queryset.__getitem__ = lambda _self, _key: [mock_committee]
-        mock_committee_objects.filter.return_value = mock_queryset
-
-        with patch.object(command, "process_chunks_batch", return_value=1):
-            command.handle(committee_key=None, all=False, batch_size=50)
-
-        mock_committee_objects.filter.assert_called_with(is_active=True)
+    def test_extract_content(self, command, mock_committee):
+        with patch(
+            "apps.ai.management.commands.ai_create_committee_chunks.extract_committee_content"
+        ) as mock_extract:
+            mock_extract.return_value = ("prose content", "metadata content")
+            content = command.extract_content(mock_committee)
+            assert content == ("prose content", "metadata content")
+            mock_extract.assert_called_once_with(mock_committee)
