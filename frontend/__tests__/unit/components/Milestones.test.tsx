@@ -63,14 +63,15 @@ jest.mock('components/ItemCardList', () => {
         <div data-testid="show-avatar">{showAvatar.toString()}</div>
         <div data-testid="show-single-column">{showSingleColumn.toString()}</div>
         <div data-testid="icon">{getIconLabel(icon)}</div>
-        {data.map((item, index) => (
-          <div
-            key={item.url || item.title || `milestone-${index}`}
-            data-testid={`milestone-${index}`}
-          >
-            {renderDetails(item)}
-          </div>
-        ))}
+        {data.map((item, index) => {
+          const uniqueKey = `milestone-${index}-${item.url || `${item.organizationName || 'org'}-${item.repositoryName || 'repo'}-${item.title || 'milestone'}`}`
+
+          return (
+            <div key={uniqueKey} data-testid={`milestone-${index}`}>
+              {renderDetails(item)}
+            </div>
+          )
+        })}
       </div>
     )
   }
