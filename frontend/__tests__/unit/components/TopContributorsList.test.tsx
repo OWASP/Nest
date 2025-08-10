@@ -67,10 +67,6 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
 }))
 
 // Mock utility functions
-jest.mock('utils/capitalize', () => ({
-  capitalize: (str: string) => str?.charAt(0).toUpperCase() + str?.slice(1),
-}))
-
 jest.mock('utils/urlFormatter', () => ({
   getMemberUrl: (login: string) => `/members/${login}`,
 }))
