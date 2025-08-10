@@ -60,10 +60,6 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
   }) => <span data-testid={`icon-${icon.iconName}`} className={className} {...props} />,
 }))
 
-jest.mock('utils/capitalize', () => ({
-  capitalize: (str: string) => str.charAt(0).toUpperCase() + str.slice(1),
-}))
-
 jest.mock('utils/credentials', () => ({
   IS_PROJECT_HEALTH_ENABLED: true,
 }))
