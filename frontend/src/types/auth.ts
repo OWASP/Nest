@@ -10,16 +10,11 @@ export type ExtendedSession = Session & {
   user?: Session['user'] & {
     expires?: string
     isLeader?: boolean
+    isMentor?: boolean
     isOwaspStaff?: boolean
     login?: string
     name?: string
     email?: string
     image?: string
-  }
-}
-
-export type UserRolesData = {
-  currentUserRoles: {
-    roles: string[]
   }
 }

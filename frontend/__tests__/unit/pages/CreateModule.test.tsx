@@ -10,10 +10,6 @@ jest.mock('next-auth/react', () => ({
   useSession: jest.fn(),
 }))
 
-jest.mock('hooks/useUserRoles', () => ({
-  useUserRoles: jest.fn(),
-}))
-
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
   useParams: jest.fn(),

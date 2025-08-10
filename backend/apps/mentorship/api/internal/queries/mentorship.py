@@ -2,9 +2,8 @@
 
 import strawberry
 
-from apps.mentorship.models.mentee import Mentee
+from apps.github.models.user import User as GithubUser
 from apps.mentorship.models.mentor import Mentor
-from apps.nest.api.internal.permissions import IsAuthenticated
 
 
 @strawberry.type
@@ -18,17 +17,12 @@ class UserRolesResult:
 class MentorshipQuery:
     """GraphQL queries for mentorship-related data."""
 
-    @strawberry.field(permission_classes=[IsAuthenticated])
-    def current_user_roles(self, info: strawberry.Info) -> UserRolesResult:
-        """Get the mentorship roles for the currently authenticated user."""
-        user = info.context.request.user
+    @strawberry.field
+    def is_mentor(self, login: str) -> bool:
+        """Check if a GitHub login is a mentor."""
+        try:
+            github_user = GithubUser.objects.get(login=login)
+        except GithubUser.DoesNotExist:
+            return False
 
-        roles = []
-
-        if Mentee.objects.filter(nest_user=user).exists():
-            roles.append("contributor")
-
-        if Mentor.objects.filter(nest_user=user).exists():
-            roles.append("mentor")
-
-        return UserRolesResult(roles=roles)
+        return Mentor.objects.filter(nest_user__github_user=github_user).exists()
