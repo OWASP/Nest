@@ -82,9 +82,8 @@ class ModuleMutation:
             msg = "Only mentors can create modules."
             raise PermissionDenied(msg) from e
 
-        if creator_as_mentor not in program.admins.all():
-            msg = "You must be an admin of this program to create a module."
-            raise PermissionDenied(msg)
+        if not program.admins.filter(id=creator_as_mentor.id).exists():
+            raise PermissionDenied
 
         started_at, ended_at = _validate_module_dates(
             input_data.started_at,
@@ -135,19 +134,13 @@ class ModuleMutation:
             msg = "Only mentors can edit modules."
             logger.warning(
                 "User '%s' is not a mentor and cannot edit modules.",
-                user.email,
+                user.username,
                 exc_info=True,
             )
             raise PermissionDenied(msg) from err
 
         if not module.program.admins.filter(id=creator_as_mentor.id).exists():
-            msg = "You must be an admin of the module's program to edit it."
-            logger.warning(
-                "Permission denied for user '%s' to update module '%s'.",
-                user.email,
-                module.key,
-            )
-            raise PermissionDenied(msg)
+            raise PermissionDenied
 
         started_at, ended_at = _validate_module_dates(
             input_data.started_at,

@@ -66,7 +66,6 @@ hsl
 igoat
 inlinehilite
 isanori
-jane-doe
 jumpstart
 kasya
 libexpat

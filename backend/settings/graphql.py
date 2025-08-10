@@ -4,7 +4,6 @@ import strawberry
 
 from apps.github.api.internal.queries import GithubQuery
 from apps.mentorship.api.internal.mutations import (
-    MentorshipMutations,
     ModuleMutation,
     ProgramMutation,
 )
@@ -20,7 +19,6 @@ from apps.owasp.api.internal.queries import OwaspQuery
 
 @strawberry.type
 class Mutation(
-    MentorshipMutations,
     ModuleMutation,
     ProgramMutation,
     NestMutations,

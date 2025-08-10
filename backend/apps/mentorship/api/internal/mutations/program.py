@@ -34,13 +34,13 @@ class ProgramMutation:
             nest_user=user, defaults={"github_user": user.github_user}
         )
         if created:
-            logger.info("Created a new mentor profile for user '%s'.", user.email)
+            logger.info("Created a new mentor profile for user '%s'.", user.username)
 
         if input_data.ended_at <= input_data.started_at:
             msg = "End date must be after start date."
             logger.warning(
                 "Validation error for user '%s' creating program '%s': %s",
-                user.email,
+                user.username,
                 input_data.name,
                 msg,
             )
@@ -61,7 +61,7 @@ class ProgramMutation:
 
         logger.info(
             "User '%s' successfully created program '%s' (ID: %s).",
-            user.email,
+            user.username,
             program.name,
             program.id,
         )
@@ -87,16 +87,16 @@ class ProgramMutation:
             msg = "You must be a mentor to update a program."
             logger.warning(
                 "User '%s' is not a mentor and cannot update programs.",
-                user.email,
+                user.username,
                 exc_info=True,
             )
             raise PermissionDenied(msg) from err
 
-        if admin not in program.admins.all():
+        if not program.admins.filter(id=admin.id).exists():
             msg = "You must be an admin of this program to update it."
             logger.warning(
                 "Permission denied for user '%s' to update program '%s'.",
-                user.email,
+                user.username,
                 program.key,
             )
             raise PermissionDenied(msg)
@@ -155,9 +155,8 @@ class ProgramMutation:
             msg = "You must be a mentor to update a program."
             raise PermissionDenied(msg) from e
 
-        if mentor not in program.admins.all():
-            msg = "Only program admins can update the status."
-            raise PermissionDenied(msg)
+        if not program.admins.filter(id=mentor.id).exists():
+            raise PermissionDenied
 
         program.status = input_data.status.value
         program.save()

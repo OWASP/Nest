@@ -11,12 +11,10 @@ class ProgramIndex(IndexBase):
     index_name = "programs"
 
     fields = (
-        "idx_admins",
         "idx_description",
         "idx_ended_at",
         "idx_experience_levels",
         "idx_key",
-        "idx_modules",
         "idx_name",
         "idx_started_at",
         "idx_status",
@@ -39,11 +37,8 @@ class ProgramIndex(IndexBase):
             "custom",
         ],
         "searchableAttributes": [
-            "unordered(idx_admins.login)",
-            "unordered(idx_admins.name)",
             "unordered(idx_description)",
             "unordered(idx_experience_levels)",
-            "unordered(idx_modules)",
             "unordered(idx_name)",
         ],
     }

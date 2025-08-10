@@ -5,11 +5,10 @@ import logging
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from apps.core.utils.index import clear_algolia_cache_by_index
+from apps.core.utils.index import clear_index_cache
 from apps.mentorship.models import Program
 
 logger = logging.getLogger(__name__)
-logger.warning("program.py imported and signal registered")
 
 
 class ProgramPostSaveHandler:
@@ -22,4 +21,4 @@ class ProgramPostSaveHandler:
         The sender, instance, and kwargs arguments are provided by the post_save signal.
         """
         logger.info("Signal received for program '%s'. Clearing 'programs' index.", instance.name)
-        clear_algolia_cache_by_index("programs")
+        clear_index_cache("programs")

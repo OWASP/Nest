@@ -37,17 +37,6 @@ class ProgramIndexMixin:
         return self.experience_levels or []
 
     @property
-    def idx_admins(self) -> list[dict]:
-        """List of program admins with their names and GitHub usernames."""
-        return [
-            {
-                "name": getattr(admin, "name", "") or "",
-                "login": getattr(admin, "github_username", "") or "",
-            }
-            for admin in self.admins.all()
-        ]
-
-    @property
     def idx_started_at(self) -> str | None:
         """Formatted start datetime."""
         return self.started_at.isoformat() if self.started_at else None
@@ -56,8 +45,3 @@ class ProgramIndexMixin:
     def idx_ended_at(self) -> str | None:
         """Formatted end datetime for filtering/sorting."""
         return self.ended_at.isoformat() if self.ended_at else None
-
-    @property
-    def idx_modules(self) -> list[str]:
-        """List of associated module names for indexing."""
-        return list(self.modules.values_list("name", flat=True).distinct())

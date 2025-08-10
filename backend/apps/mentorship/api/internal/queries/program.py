@@ -20,7 +20,7 @@ class ProgramQuery:
     """Program queries."""
 
     @strawberry.field
-    def program(self, program_key: str) -> ProgramNode:
+    def get_program(self, program_key: str) -> ProgramNode:
         """Get a program by Key."""
         try:
             program = Program.objects.prefetch_related("admins__github_user").get(key=program_key)

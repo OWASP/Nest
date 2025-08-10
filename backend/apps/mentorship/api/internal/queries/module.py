@@ -26,7 +26,7 @@ class ModuleQuery:
         )
 
     @strawberry.field
-    def modules_by_project(self, project_key: str) -> list[ModuleNode]:
+    def get_project_modules(self, project_key: str) -> list[ModuleNode]:
         """Get all modules by project Key. Returns an empty list if project is not found."""
         return (
             Module.objects.filter(project__key=project_key)

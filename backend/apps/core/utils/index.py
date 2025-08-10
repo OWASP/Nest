@@ -9,6 +9,7 @@ from django.apps import apps
 from django.core.cache import cache
 
 from apps.common.utils import convert_to_camel_case
+from apps.core.constants import CACHE_PREFIX
 
 logger = logging.getLogger(__name__)
 
@@ -231,10 +232,7 @@ def get_params_for_index(index_name: str) -> dict:
     return params
 
 
-CACHE_PREFIX = "algolia_proxy"
-
-
-def clear_algolia_cache_by_index(index_name: str = "") -> None:
+def clear_index_cache(index_name: str) -> None:
     """Clear Algolia proxy cache entries from the cache store that match a given index name.
 
     Args:
@@ -245,27 +243,19 @@ def clear_algolia_cache_by_index(index_name: str = "") -> None:
         None
 
     """
-    try:
-        if not index_name:
-            logger.info("No index name provided, skipping cache clear.")
-            return
+    if not index_name:
+        logger.info("No index name provided, skipping cache clear.")
+        return
 
-        pattern = f"{CACHE_PREFIX}:{index_name}*"
-        keys_to_delete = list(cache.iter_keys(pattern))
+    pattern = f"{CACHE_PREFIX}:{index_name}*"
+    keys_to_delete = list(cache.iter_keys(pattern))
 
-        if not keys_to_delete:
-            logger.info("No matching cache keys found for pattern: %s", pattern)
-            return
+    if not keys_to_delete:
+        logger.info("No matching cache keys found for pattern: %s", pattern)
+        return
 
-        logger.info("Deleting %d cache keys for pattern: %s", len(keys_to_delete), pattern)
+    logger.info("Deleting %d cache keys for pattern: %s", len(keys_to_delete), pattern)
 
-        for key in keys_to_delete:
-            logger.info("Deleting key: %s", key)
-            cache.delete(key)
-
-    except AttributeError as e:
-        msg = (
-            "Cache backend does not support key iteration. "
-            "Consider using a compatible backend like django-redis."
-        )
-        raise NotImplementedError(msg) from e
+    for key in keys_to_delete:
+        logger.info("Deleting key: %s", key)
+        cache.delete(key)
