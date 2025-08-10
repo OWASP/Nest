@@ -2,9 +2,11 @@
 
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useDjangoSession } from 'hooks/useDjangoSession'
 import { useLogout } from 'hooks/useLogout'
 import Image from 'next/image'
-import { signIn, useSession } from 'next-auth/react'
+import Link from 'next/link'
+import { signIn } from 'next-auth/react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { ExtendedSession } from 'types/auth'
 
@@ -13,12 +15,13 @@ export default function UserMenu({
 }: {
   readonly isGitHubAuthEnabled: boolean
 }) {
-  const { data: session, status } = useSession()
+  const { isSyncing, session, status } = useDjangoSession()
   const { logout, isLoggingOut } = useLogout()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const dropdownId = useId()
   const isProjectLeader = (session as ExtendedSession)?.user?.isLeader
+  const isOwaspStaff = session?.user?.isOwaspStaff
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -32,7 +35,7 @@ export default function UserMenu({
 
   if (!isGitHubAuthEnabled) return null
 
-  if (status === 'loading') {
+  if (isSyncing) {
     return (
       <div className="flex h-10 w-10 items-center justify-center">
         <div className="animate-pulse h-10 w-10 rounded-full bg-gray-300 dark:bg-slate-700" />
@@ -56,6 +59,9 @@ export default function UserMenu({
     logout()
     setIsOpen(false)
   }
+
+  const userMenuItemClasses =
+    'block w-full px-4 py-2 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white'
 
   return (
     <div ref={dropdownRef} className="relative flex items-center justify-center">
@@ -84,19 +90,26 @@ export default function UserMenu({
           className="absolute right-0 top-full z-20 mt-2 w-48 overflow-hidden rounded-md bg-white shadow-lg dark:bg-slate-800"
         >
           {isProjectLeader && (
-            <a
+            <Link
               href="/my/mentorship"
-              className="block w-full px-4 py-2 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white"
+              className={userMenuItemClasses}
+              onClick={() => setIsOpen(false)}
             >
               My Mentorship
-            </a>
+            </Link>
           )}
 
-          <button
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            className="block w-full px-4 py-2 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white"
-          >
+          {isOwaspStaff && (
+            <Link
+              href="/projects/dashboard"
+              className={userMenuItemClasses}
+              onClick={() => setIsOpen(false)}
+            >
+              Project Health Dashboard
+            </Link>
+          )}
+
+          <button onClick={handleLogout} disabled={isLoggingOut} className={userMenuItemClasses}>
             {isLoggingOut ? 'Signing out...' : 'Sign out'}
           </button>
         </div>

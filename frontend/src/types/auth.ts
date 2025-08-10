@@ -8,8 +8,13 @@ export type ExtendedProfile = {
 export type ExtendedSession = Session & {
   accessToken?: string
   user?: Session['user'] & {
+    expires?: string
     isLeader?: boolean
+    isOwaspStaff?: boolean
     login?: string
+    name?: string
+    email?: string
+    image?: string
   }
 }
 

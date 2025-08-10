@@ -54,7 +54,7 @@ const authOptions: AuthOptions = {
       return Boolean(account?.provider === 'github' && account.access_token)
     },
 
-    async jwt({ token, account, profile }) {
+    async jwt({ token, account, profile, trigger, session }) {
       if (account?.access_token) {
         token.accessToken = account.access_token
       }
@@ -67,6 +67,9 @@ const authOptions: AuthOptions = {
         token.isLeader = isLeader
       }
 
+      if (trigger === 'update' && session) {
+        token.isOwaspStaff = (session as ExtendedSession).user.isOwaspStaff || false
+      }
       return token
     },
 
@@ -76,6 +79,7 @@ const authOptions: AuthOptions = {
       if (session.user) {
         ;(session as ExtendedSession).user.login = token.login as string
         ;(session as ExtendedSession).user.isLeader = token.isLeader as boolean
+        ;(session as ExtendedSession).user.isOwaspStaff = token.isOwaspStaff as boolean
       }
       return session
     },
