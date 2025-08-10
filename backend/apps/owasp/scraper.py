@@ -61,16 +61,28 @@ class OwaspScraper:
         containers = self.page_tree.xpath(flexible_xpath)
 
         found_keywords = set()
+        audience_choices = AudienceChoices.choices
 
-        all_list_items = []
         for container in containers:
-            all_list_items.extend(container.xpath(".//li"))
+            text_components = container.xpath(".//li | .//p")
+            for component in text_components:
+                item_text = component.text_content()
+                if not item_text:
+                    continue
 
-        for item in all_list_items:
-            item_text = item.text_content()
-            for lower_kw, original_kw in AudienceChoices.choices:
-                if original_kw in item_text:
-                    found_keywords.add(lower_kw)
+                for lower_kw, original_kw in audience_choices:
+                    if original_kw in item_text:
+                        found_keywords.add(lower_kw)
+
+            image_components = container.xpath(".//img")
+            for image in image_components:
+                alt_text = image.get("alt")
+                if not alt_text:
+                    continue
+
+                for lower_kw, original_kw in audience_choices:
+                    if original_kw in alt_text:
+                        found_keywords.add(lower_kw)
 
         return sorted(found_keywords)
 
