@@ -30,6 +30,10 @@ export const mockRepositoryData = {
       key: 'test-project',
       name: 'Test Project',
     },
+    organization: {
+      login: 'test-org',
+      name: 'Test Organization',
+    },
     releases: [
       {
         name: 'v1.0.0',

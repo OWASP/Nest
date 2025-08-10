@@ -26,6 +26,7 @@ export const GET_REPOSITORY_DATA = gql`
       openIssuesCount
       organization {
         login
+        name
       }
       project {
         key

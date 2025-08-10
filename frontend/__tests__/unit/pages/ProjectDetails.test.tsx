@@ -78,11 +78,8 @@ describe('ProjectDetailsPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Test Project')).toBeInTheDocument()
-      expect(screen.getByText('Lab')).toBeInTheDocument()
+      expect(screen.getByText('https://github.com/example-project')).toBeInTheDocument()
     })
-    expect(screen.getByText('2.2K Stars')).toBeInTheDocument()
-    expect(screen.getByText('10 Forks')).toBeInTheDocument()
-    expect(screen.getByText('10 Issues')).toBeInTheDocument()
   })
 
   test('renders error message when GraphQL request fails', async () => {

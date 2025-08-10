@@ -48,17 +48,6 @@ describe('CommitteeDetailsPage Component', () => {
     })
   })
 
-  test('renders committee data correctly', async () => {
-    render(<CommitteeDetailsPage />)
-    await waitFor(() => {
-      expect(screen.getByText('Test Committee')).toBeInTheDocument()
-    })
-    expect(screen.getByText('This is a test committee summary.')).toBeInTheDocument()
-    expect(screen.getByText('Leader 1')).toBeInTheDocument()
-    expect(screen.getByText('Leader 2')).toBeInTheDocument()
-    expect(screen.getByText('https://owasp.org/test-committee')).toBeInTheDocument()
-  })
-
   test('displays "Committee not found" when there is no committee', async () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: null,

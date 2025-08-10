@@ -15,6 +15,7 @@ import { GET_ORGANIZATION_DATA } from 'server/queries/organizationQueries'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import PageLayout from 'components/PageLayout'
 const OrganizationDetailsPage = () => {
   const { organizationKey } = useParams()
   const [organization, setOrganization] = useState(null)
@@ -112,20 +113,34 @@ const OrganizationDetailsPage = () => {
     },
   ]
 
+  // Create custom breadcrumbs with organization name
+  const customBreadcrumbs = [
+    {
+      title: 'Organizations',
+      path: '/organizations',
+    },
+    {
+      title: organization.name,
+      path: `/organizations/${organization.login}`,
+    },
+  ]
+
   return (
-    <DetailsCard
-      details={organizationDetails}
-      recentIssues={issues}
-      recentReleases={releases}
-      recentMilestones={milestones}
-      pullRequests={pullRequests}
-      repositories={repositories}
-      stats={organizationStats}
-      summary={organization.description}
-      title={organization.name}
-      topContributors={topContributors}
-      type="organization"
-    />
+    <PageLayout customBreadcrumbs={customBreadcrumbs}>
+      <DetailsCard
+        details={organizationDetails}
+        recentIssues={issues}
+        recentReleases={releases}
+        recentMilestones={milestones}
+        pullRequests={pullRequests}
+        repositories={repositories}
+        stats={organizationStats}
+        summary={organization.description}
+        title={organization.name}
+        topContributors={topContributors}
+        type="organization"
+      />
+    </PageLayout>
   )
 }
 
