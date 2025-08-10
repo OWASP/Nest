@@ -51,8 +51,11 @@ jest.mock('components/ItemCardList', () => {
     showSingleColumn: boolean
     renderDetails: (item: Milestone) => React.ReactNode
   }) => {
-    const getIconLabel = (iconProp: unknown): string =>
-      !iconProp ? 'no-icon' : typeof iconProp === 'string' ? iconProp : JSON.stringify(iconProp)
+    const getIconLabel = (iconProp: unknown): string => {
+      if (!iconProp) return 'no-icon'
+      if (typeof iconProp === 'string') return iconProp
+      return JSON.stringify(iconProp)
+    }
 
     return (
       <div data-testid="item-card-list">
