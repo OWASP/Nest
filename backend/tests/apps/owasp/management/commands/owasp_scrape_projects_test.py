@@ -97,7 +97,7 @@ class TestOwaspScrapeProjects:
         mock_scraper = mock.Mock(spec=OwaspScraper)
         mock_scraper.page_tree = True
         mock_scraper.get_urls.return_value = []
-        mock_scraper.get_audience.return_value = ["Builder", "Breaker", "Defender"]
+        mock_scraper.get_audience.return_value = ["builder", "breaker", "defender"]
 
         mock_active_projects = mock.MagicMock()
         mock_active_projects.__iter__.return_value = iter([mock_project])
@@ -119,4 +119,4 @@ class TestOwaspScrapeProjects:
         mock_bulk_save.assert_called_once()
         saved_project = mock_bulk_save.call_args[0][0][0]
         expected_audience = ["builder", "breaker", "defender"]
-        assert saved_project.audience == sorted(expected_audience)
+        assert saved_project.audience == expected_audience
