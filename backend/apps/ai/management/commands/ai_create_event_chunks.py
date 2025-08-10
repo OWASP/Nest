@@ -73,11 +73,16 @@ class Command(BaseCommand):
         batch_chunks = []
 
         event_content_type = ContentType.objects.get_for_model(Event)
+        event_ids = [e.id for e in events]
+        contexts_by_id = {
+            c.object_id: c
+            for c in Context.objects.filter(
+                content_type=event_content_type, object_id__in=event_ids
+            )
+        }
 
         for event in events:
-            context = Context.objects.filter(
-                content_type=event_content_type, object_id=event.id
-            ).first()
+            context = contexts_by_id.get(event.id)
 
             if not context:
                 self.stdout.write(self.style.WARNING(f"No context found for event {event.key}"))

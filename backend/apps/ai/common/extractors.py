@@ -42,11 +42,8 @@ def extract_committee_content(committee) -> tuple[str, str]:
         metadata_parts.append(f"Committee Leaders: {', '.join(committee.leaders_raw)}")
 
     if committee.related_urls:
-        valid_urls = [
-            url
-            for url in committee.related_urls
-            if url and url not in (committee.invalid_urls or [])
-        ]
+        invalid_urls = getattr(committee, "invalid_urls", []) or []
+        valid_urls = [url for url in committee.related_urls if url and url not in invalid_urls]
         if valid_urls:
             metadata_parts.append(f"Related URLs: {', '.join(valid_urls)}")
 
@@ -116,9 +113,9 @@ def extract_chapter_content(chapter) -> tuple[str, str]:
         metadata_parts.append(f"Chapter Leaders: {', '.join(chapter.leaders_raw)}")
 
     if chapter.related_urls:
-        valid_urls = [
-            url for url in chapter.related_urls if url and url not in (chapter.invalid_urls or [])
-        ]
+        invalid_urls = getattr(chapter, "invalid_urls", []) or []
+        valid_urls = [url for url in chapter.related_urls if url and url not in invalid_urls]
+
         if valid_urls:
             metadata_parts.append(f"Related URLs: {', '.join(valid_urls)}")
 
@@ -164,7 +161,7 @@ def extract_event_content(event) -> tuple[str, str]:
     if event.suggested_location:
         metadata_parts.append(f"Location: {event.suggested_location}")
 
-    if event.latitude and event.longitude:
+    if event.latitude is not None and event.longitude is not None:
         metadata_parts.append(f"Coordinates: {event.latitude}, {event.longitude}")
 
     if event.url:
@@ -227,15 +224,15 @@ def extract_project_content(project) -> tuple[str, str]:
         metadata_parts.append(f"Custom Tags: {', '.join(project.custom_tags)}")
 
     stats_parts = []
-    if project.stars_count > 0:
+    if (project.stars_count or 0) > 0:
         stats_parts.append(f"Stars: {project.stars_count}")
-    if project.forks_count > 0:
+    if (project.forks_count or 0) > 0:
         stats_parts.append(f"Forks: {project.forks_count}")
-    if project.contributors_count > 0:
+    if (project.contributors_count or 0) > 0:
         stats_parts.append(f"Contributors: {project.contributors_count}")
-    if project.releases_count > 0:
+    if (project.releases_count or 0) > 0:
         stats_parts.append(f"Releases: {project.releases_count}")
-    if project.open_issues_count > 0:
+    if (project.open_issues_count or 0) > 0:
         stats_parts.append(f"Open Issues: {project.open_issues_count}")
 
     if stats_parts:
@@ -245,9 +242,8 @@ def extract_project_content(project) -> tuple[str, str]:
         metadata_parts.append(f"Project Leaders: {', '.join(project.leaders_raw)}")
 
     if project.related_urls:
-        valid_urls = [
-            url for url in project.related_urls if url and url not in (project.invalid_urls or [])
-        ]
+        invalid_urls = getattr(project, "invalid_urls", []) or []
+        valid_urls = [url for url in project.related_urls if url and url not in invalid_urls]
         if valid_urls:
             metadata_parts.append(f"Related URLs: {', '.join(valid_urls)}")
 

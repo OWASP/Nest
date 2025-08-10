@@ -35,6 +35,7 @@ class Command(BaseCommand):
             queryset = Project.objects.all()
         else:
             queryset = Project.objects.filter(is_active=True)
+        queryset = queryset.order_by("id")
 
         if not (total_projects := queryset.count()):
             self.stdout.write("No projects found to process")

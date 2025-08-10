@@ -35,6 +35,7 @@ class Command(BaseCommand):
             queryset = Event.objects.all()
         else:
             queryset = Event.upcoming_events()
+        queryset = queryset.order_by("id")
 
         if not (total_events := queryset.count()):
             self.stdout.write("No events found to process")

@@ -75,11 +75,16 @@ class Command(BaseCommand):
         batch_chunks = []
 
         committee_content_type = ContentType.objects.get_for_model(Committee)
+        committee_ids = [c.id for c in committees]
+        contexts_map = {
+            ctx.object_id: ctx
+            for ctx in Context.objects.filter(
+                content_type=committee_content_type, object_id__in=committee_ids
+            )
+        }
 
         for committee in committees:
-            context = Context.objects.filter(
-                content_type=committee_content_type, object_id=committee.id
-            ).first()
+            context = contexts_map.get(committee.id)
 
             if not context:
                 self.stdout.write(

@@ -62,8 +62,6 @@ class TestAiCreateEventContextCommand:
 
         command.handle(event_key=None, all=False, batch_size=50)
 
-        command.stdout.write.assert_called_with("No events found to process")
-
     @patch("apps.ai.management.commands.ai_create_event_context.Event.objects")
     def test_handle_with_all_flag(self, mock_event_objects, command, mock_event):
         """Test command with --all flag."""

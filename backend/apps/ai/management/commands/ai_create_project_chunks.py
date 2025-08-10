@@ -73,11 +73,16 @@ class Command(BaseCommand):
         batch_chunks = []
 
         project_content_type = ContentType.objects.get_for_model(Project)
+        project_ids = [p.id for p in projects]
+        contexts_by_id = {
+            c.object_id: c
+            for c in Context.objects.filter(
+                content_type=project_content_type, object_id__in=project_ids
+            )
+        }
 
         for project in projects:
-            context = Context.objects.filter(
-                content_type=project_content_type, object_id=project.id
-            ).first()
+            context = contexts_by_id.get(project.id)
 
             if not context:
                 self.stdout.write(

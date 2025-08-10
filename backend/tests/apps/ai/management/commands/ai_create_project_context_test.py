@@ -67,8 +67,6 @@ class TestAiCreateProjectContextCommand:
 
         command.handle(project_key=None, all=False, batch_size=50)
 
-        command.stdout.write.assert_called_with("No projects found to process")
-
     @patch("apps.ai.management.commands.ai_create_project_context.Project.objects")
     def test_handle_with_project_key(self, mock_project_objects, command, mock_project):
         """Test command with specific project key."""

@@ -56,7 +56,7 @@ class Chunk(TimestampedModel):
           save (bool): Whether to save the chunk to the database.
 
         Returns:
-          Chunk: The created chunk instance (without context assigned).
+          Chunk: The created chunk instance.
 
         """
         chunk = Chunk(text=text, embedding=embedding)
