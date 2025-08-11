@@ -223,9 +223,11 @@ describe('MetricsScoreCircle', () => {
   describe('click handling', () => {
     it('calls onClick when provided and component is clicked', () => {
       const mockOnClick = jest.fn()
-      const { container } = render(<MetricsScoreCircle score={75} onClick={mockOnClick} />)
+      render(<MetricsScoreCircle score={75} onClick={mockOnClick} />)
 
-      const circleElement = container.querySelector('div')
+      // Find the clickable circle element by looking for the element with rounded-full class
+      // that also has the group class (this is the actual clickable div)
+      const circleElement = screen.getByText('75').closest('.group')
       expect(circleElement).toBeInTheDocument()
 
       fireEvent.click(circleElement!)
@@ -233,9 +235,9 @@ describe('MetricsScoreCircle', () => {
     })
 
     it('does not call onClick when not provided', () => {
-      const { container } = render(<MetricsScoreCircle score={75} />)
+      render(<MetricsScoreCircle score={75} />)
 
-      const circleElement = container.querySelector('div')
+      const circleElement = screen.getByText('75').closest('.group')
       fireEvent.click(circleElement!)
       // Should not throw any errors - test passes if no exception is thrown
       expect(circleElement).toBeInTheDocument()
