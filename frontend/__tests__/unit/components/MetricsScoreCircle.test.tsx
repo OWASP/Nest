@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
 import '@testing-library/jest-dom'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
@@ -217,5 +217,67 @@ describe('MetricsScoreCircle', () => {
       'data-content',
       'Current Project Health Score'
     )
+  })
+
+  // Test Click handling functionality
+  describe('click handling', () => {
+    it('calls onClick when provided and component is clicked', () => {
+      const mockOnClick = jest.fn()
+      const { container } = render(<MetricsScoreCircle score={75} onClick={mockOnClick} />)
+
+      const circleElement = container.querySelector('div')
+      expect(circleElement).toBeInTheDocument()
+
+      fireEvent.click(circleElement!)
+      expect(mockOnClick).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not call onClick when not provided', () => {
+      const { container } = render(<MetricsScoreCircle score={75} />)
+
+      const circleElement = container.querySelector('div')
+      fireEvent.click(circleElement!)
+      // Should not throw any errors - test passes if no exception is thrown
+      expect(circleElement).toBeInTheDocument()
+    })
+
+    it('adds cursor-pointer class when onClick is provided', () => {
+      const mockOnClick = jest.fn()
+      const { container } = render(<MetricsScoreCircle score={75} onClick={mockOnClick} />)
+
+      const circleElement = container.querySelector('[class*="cursor-pointer"]')
+      expect(circleElement).toBeInTheDocument()
+    })
+
+    it('does not add cursor-pointer class when onClick is not provided', () => {
+      const { container } = render(<MetricsScoreCircle score={75} />)
+
+      const circleElement = container.querySelector('[class*="cursor-pointer"]')
+      expect(circleElement).not.toBeInTheDocument()
+    })
+  })
+
+  // Test Maintains existing functionality with onClick
+  it('maintains all existing functionality when onClick is provided', () => {
+    const mockOnClick = jest.fn()
+    const { container } = render(<MetricsScoreCircle score={25} onClick={mockOnClick} />)
+
+    // Should still have red styling
+    expect(container.querySelector('[class*="bg-red"]')).toBeInTheDocument()
+
+    // Should still have pulse animation
+    expect(container.querySelector('[class*="animate-pulse"]')).toBeInTheDocument()
+
+    // Should still display correct score
+    expect(screen.getByText('25')).toBeInTheDocument()
+
+    // Should still have tooltip
+    expect(screen.getByTestId('tooltip-wrapper')).toHaveAttribute(
+      'data-content',
+      'Current Project Health Score'
+    )
+
+    // Should still have hover effects
+    expect(container.querySelector('[class*="hover:"]')).toBeInTheDocument()
   })
 })

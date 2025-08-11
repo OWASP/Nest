@@ -10,9 +10,9 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import upperFirst from 'lodash/upperFirst'
-import Link from 'next/link'
 import type { DetailsCardProps } from 'types/card'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/credentials'
+import { scrollToAnchor } from 'utils/scrollToAnchor'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
@@ -62,9 +62,18 @@ const DetailsCard = ({
           <div className="flex w-full items-center justify-between">
             <h1 className="text-4xl font-bold">{title}</h1>
             {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
-              <Link href="#issues-trend">
-                <MetricsScoreCircle score={healthMetricsData[0].score} />
-              </Link>
+              <a
+                href="#issues-trend"
+                onClick={(e) => {
+                  e.preventDefault()
+                  scrollToAnchor('issues-trend')
+                }}
+              >
+                <MetricsScoreCircle
+                  score={healthMetricsData[0].score}
+                  onClick={() => scrollToAnchor('issues-trend')}
+                />
+              </a>
             )}
           </div>
           {!isActive && (

@@ -200,7 +200,7 @@ describe('AnchorTitle Component', () => {
 
       expect(mockScrollTo).toHaveBeenCalledWith({
         behavior: 'smooth',
-        top: 20,
+        top: -10,
       })
     })
 
@@ -220,7 +220,7 @@ describe('AnchorTitle Component', () => {
       fireEvent.click(link)
 
       expect(mockScrollTo).toHaveBeenCalledWith({
-        top: 20,
+        top: -10,
         behavior: 'smooth',
       })
     })
@@ -469,7 +469,7 @@ describe('AnchorTitle Component', () => {
       fireEvent.click(link)
 
       expect(mockScrollTo).toHaveBeenCalledWith({
-        top: 520,
+        top: -10,
         behavior: 'smooth',
       })
 
