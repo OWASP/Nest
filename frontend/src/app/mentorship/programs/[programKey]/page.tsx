@@ -1,12 +1,12 @@
 'use client'
 
 import { useQuery } from '@apollo/client'
+import upperFirst from 'lodash/upperFirst'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ErrorDisplay } from 'app/global-error'
 import { GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
 import type { Module, Program } from 'types/mentorship'
-import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -59,7 +59,7 @@ const ProgramDetailsPage = () => {
 
   if (isLoading) return <LoadingSpinner />
 
-  if (!program) {
+  if (!program && !isLoading) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -70,7 +70,7 @@ const ProgramDetailsPage = () => {
   }
 
   const programDetails = [
-    { label: 'Status', value: titleCaseWord(program.status) },
+    { label: 'Status', value: upperFirst(program.status) },
     { label: 'Start Date', value: formatDate(program.startedAt) },
     { label: 'End Date', value: formatDate(program.endedAt) },
     { label: 'Mentees Limit', value: String(program.menteesLimit) },

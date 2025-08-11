@@ -54,10 +54,6 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
   ),
 }))
 
-jest.mock('utils/capitalize', () => ({
-  titleCaseWord: jest.fn((word: string) => word.charAt(0).toUpperCase() + word.slice(1)),
-}))
-
 jest.mock('utils/dateFormatter', () => ({
   formatDate: jest.fn((date: string) => new Date(date).toLocaleDateString()),
 }))

@@ -28,7 +28,7 @@ django = "^5.1"
 django-configurations = "^2.5.1"
 django-cors-headers = "^4.7.0"
 django-ninja = "^1.4.3"
-django-redis = "^5.4.0"
+django-redis = "^6.0.0"
 django-storages = { extras = ["s3"], version = "^1.14.4" }
 emoji = "^2.14.1"
 geopy = "^2.4.1"
@@ -37,7 +37,7 @@ humanize = "^4.11.0"
 jinja2 = "^3.1.6"
 langchain = "^0.3.26"
 langchain-community = "^0.3.26"
-lxml = "^5.3.0"
+lxml = "^6.0.0"
 markdown = "^3.7"
 openai = "^1.60.1"
 pgvector = "^0.4.1"
@@ -53,14 +53,14 @@ requests = "^2.32.3"
 sentry-sdk = { extras = ["django"], version = "^2.20.0" }
 slack-bolt = "^1.22.0"
 slack-sdk = "^3.35.0"
-strawberry-graphql = { extras = ["django"], version = "^0.270.1" }
-strawberry-graphql-django = "^0.59.1"
+strawberry-graphql = { extras = ["django"], version = "^0.278.1" }
+strawberry-graphql-django = "^0.65.1"
 thefuzz = "^0.22.1"
 
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.36.4"
 pre-commit = "^4.1.0"
-ruff = "^0.11.0"
+ruff = "^0.12.8"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"
@@ -107,7 +107,7 @@ plugins = ["strawberry.ext.mypy_plugin"]
 
 [[tool.mypy.overrides]]
 disable_error_code = ["attr-defined"]
-module = ["apps.*.models.mixins.*", "apps.*.admin.*", "schema.tests.*"]
+module = ["apps.*.models.mixins.*", "apps.*.admin.*"]
 
 [[tool.mypy.overrides]]
 disable_error_code = ["var-annotated"]

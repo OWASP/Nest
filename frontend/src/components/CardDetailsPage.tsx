@@ -9,12 +9,12 @@ import {
   faRectangleList,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import type { ExtendedSession } from 'types/auth'
 import type { DetailsCardProps } from 'types/card'
-import { capitalize } from 'utils/capitalize'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/credentials'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
@@ -131,7 +131,7 @@ const DetailsCard = ({
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
             icon={faRectangleList}
-            title={<AnchorTitle title={`${capitalize(type)} Details`} />}
+            title={<AnchorTitle title={`${upperFirst(type)} Details`} />}
             className={
               type === 'program' || type === 'module'
                 ? 'gap-2 md:col-span-7'

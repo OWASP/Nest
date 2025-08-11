@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation } from '@apollo/client'
 import { addToast } from '@heroui/toast'
+import upperFirst from 'lodash/upperFirst'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useEffect, useMemo, useState } from 'react'
@@ -11,7 +12,6 @@ import { GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
 import type { ExtendedSession } from 'types/auth'
 import type { Module, Program } from 'types/mentorship'
 import { ProgramStatusEnum } from 'types/mentorship'
-import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -80,7 +80,7 @@ const ProgramDetailsPage = () => {
       })
 
       addToast({
-        title: `Program status updated to ${titleCaseWord(newStatus)}`,
+        title: `Program status updated to ${upperFirst(newStatus)}`,
         description: 'The status has been successfully updated.',
         variant: 'solid',
         color: 'success',
@@ -117,7 +117,7 @@ const ProgramDetailsPage = () => {
 
   if (isLoading) return <LoadingSpinner />
 
-  if (!program) {
+  if (!program && !isLoading) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -128,7 +128,7 @@ const ProgramDetailsPage = () => {
   }
 
   const programDetails = [
-    { label: 'Status', value: titleCaseWord(program.status) },
+    { label: 'Status', value: upperFirst(program.status) },
     { label: 'Start Date', value: formatDate(program.startedAt) },
     { label: 'End Date', value: formatDate(program.endedAt) },
     { label: 'Mentees Limit', value: String(program.menteesLimit) },

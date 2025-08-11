@@ -1,12 +1,12 @@
 import { faUsers, faEllipsisV } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useState, useRef, useEffect } from 'react'
 import { ExtendedSession } from 'types/auth'
 import type { Module } from 'types/mentorship'
-import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import { getSimpleDuration } from 'components/ModuleCard'
 import TopContributorsList from 'components/TopContributorsList'
@@ -51,7 +51,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
   }
 
   const moduleDetails = [
-    { label: 'Experience Level', value: titleCaseWord(module.experienceLevel) },
+    { label: 'Experience Level', value: upperFirst(module.experienceLevel) },
     { label: 'Start Date', value: formatDate(module.startedAt) },
     { label: 'End Date', value: formatDate(module.endedAt) },
     { label: 'Duration', value: getSimpleDuration(module.startedAt, module.endedAt) },
