@@ -27,35 +27,35 @@ class TestGoogleAuthModel:
     def test_google_auth_creation(self):
         """Test GoogleAuth model creation."""
         auth = GoogleAuth(
-            user=self.member,
+            member=self.member,
             access_token=self.valid_token,
             refresh_token=self.valid_refresh_token,
             expires_at=self.future_time,
         )
 
-        assert auth.user == self.member
+        assert auth.member == self.member
         assert auth.access_token == self.valid_token
         assert auth.refresh_token == self.valid_refresh_token
         assert auth.expires_at == self.future_time
 
     def test_string_representation(self):
         """Test string representation of GoogleAuth."""
-        auth = GoogleAuth(user=self.member, access_token=self.valid_token)
+        auth = GoogleAuth(member=self.member, access_token=self.valid_token)
 
-        expected = f"GoogleAuth(user={self.member})"
+        expected = f"GoogleAuth(member={self.member})"
         assert str(auth) == expected
 
     def test_one_to_one_relationship(self):
         """Test one-to-one relationship with Member."""
-        auth = GoogleAuth(user=self.member, access_token=self.valid_token)
+        auth = GoogleAuth(member=self.member, access_token=self.valid_token)
 
         assert self.member.google_auth == auth
-        assert auth.user == self.member
+        assert auth.member == self.member
 
     def test_is_token_expired_with_future_expiry(self):
         """Test is_token_expired property with future expiry."""
         auth = GoogleAuth(
-            user=self.member, access_token=self.valid_token, expires_at=self.future_time
+            member=self.member, access_token=self.valid_token, expires_at=self.future_time
         )
 
         assert not auth.is_token_expired
@@ -63,14 +63,14 @@ class TestGoogleAuthModel:
     def test_is_token_expired_with_past_expiry(self):
         """Test is_token_expired property with past expiry."""
         auth = GoogleAuth(
-            user=self.member, access_token=self.valid_token, expires_at=self.expired_time
+            member=self.member, access_token=self.valid_token, expires_at=self.expired_time
         )
 
         assert auth.is_token_expired
 
     def test_is_token_expired_with_none_expiry(self):
         """Test is_token_expired property with None expiry."""
-        auth = GoogleAuth(user=self.member, access_token=self.valid_token, expires_at=None)
+        auth = GoogleAuth(member=self.member, access_token=self.valid_token, expires_at=None)
 
         assert auth.is_token_expired
 
@@ -119,7 +119,7 @@ class TestGoogleAuthModel:
         mock_get_flow.return_value = Mock(spec=Flow)
         mock_get_or_create.return_value = (
             GoogleAuth(
-                user=self.member,
+                member=self.member,
                 access_token=self.valid_token,
                 refresh_token=self.valid_refresh_token,
                 expires_at=self.future_time,
@@ -131,7 +131,7 @@ class TestGoogleAuthModel:
         assert result.access_token == self.valid_token
         assert result.refresh_token == self.valid_refresh_token
         assert result.expires_at == self.future_time
-        mock_get_or_create.assert_called_once_with(user=self.member)
+        mock_get_or_create.assert_called_once_with(member=self.member)
         mock_save.assert_not_called()
 
     @override_settings(
@@ -146,7 +146,7 @@ class TestGoogleAuthModel:
         """Test authenticate with existing expired token."""
         # Create existing auth with expired token
         existing_auth = GoogleAuth(
-            user=self.member,
+            member=self.member,
             access_token=self.valid_token,
             refresh_token=self.valid_refresh_token,
             expires_at=self.expired_time,
@@ -156,7 +156,7 @@ class TestGoogleAuthModel:
         GoogleAuth.authenticate("http://auth.url", self.member)  # NOSONAR
 
         mock_refresh.assert_called_once_with(existing_auth)
-        mock_get_or_create.assert_called_once_with(user=self.member)
+        mock_get_or_create.assert_called_once_with(member=self.member)
 
     @override_settings(
         IS_GOOGLE_AUTH_ENABLED=True,
@@ -180,7 +180,7 @@ class TestGoogleAuthModel:
         mock_get_flow.return_value = mock_flow_instance
         mock_get_or_create.return_value = (
             GoogleAuth(
-                user=self.member,
+                member=self.member,
                 access_token="",
                 refresh_token="",
                 expires_at=None,
@@ -193,7 +193,7 @@ class TestGoogleAuthModel:
         assert result.access_token == "new_access_token"  # noqa: S105
         assert result.refresh_token == "new_refresh_token"  # noqa: S105
         assert result.expires_at == self.future_time
-        mock_get_or_create.assert_called_once_with(user=self.member)
+        mock_get_or_create.assert_called_once_with(member=self.member)
 
         mock_flow_instance.fetch_token.assert_called_once_with(
             authorization_response="http://auth.url",  # NOSONAR
@@ -204,7 +204,9 @@ class TestGoogleAuthModel:
     def test_refresh_access_token_when_disabled(self):
         """Test refresh_access_token raises error when Google auth is disabled."""
         auth = GoogleAuth(
-            user=self.member, access_token=self.valid_token, refresh_token=self.valid_refresh_token
+            member=self.member,
+            access_token=self.valid_token,
+            refresh_token=self.valid_refresh_token,
         )
 
         with pytest.raises(ValueError, match="Google OAuth client ID"):
@@ -222,7 +224,7 @@ class TestGoogleAuthModel:
         """Test successful refresh_access_token."""
         # Create auth with refresh token
         auth = GoogleAuth(
-            user=self.member,
+            member=self.member,
             access_token=self.valid_token,
             refresh_token=self.valid_refresh_token,
             expires_at=self.expired_time,
@@ -253,9 +255,9 @@ class TestGoogleAuthModel:
 
     def test_verbose_names(self):
         """Test model field verbose names."""
-        auth = GoogleAuth(user=self.member, access_token=self.valid_token)
+        auth = GoogleAuth(member=self.member, access_token=self.valid_token)
 
-        assert auth._meta.get_field("user").verbose_name == "Slack Member"
+        assert auth._meta.get_field("member").verbose_name == "Slack Member"
         assert auth._meta.get_field("access_token").verbose_name == "Access Token"
         assert auth._meta.get_field("refresh_token").verbose_name == "Refresh Token"
         assert auth._meta.get_field("expires_at").verbose_name == "Token Expiry"
@@ -263,7 +265,7 @@ class TestGoogleAuthModel:
     def test_refresh_token_blank_allowed(self):
         """Test that refresh_token can be blank."""
         auth = GoogleAuth(
-            user=self.member,
+            member=self.member,
             access_token=self.valid_token,
             refresh_token="",  # Blank is allowed
         )
@@ -273,7 +275,7 @@ class TestGoogleAuthModel:
     def test_expires_at_null_allowed(self):
         """Test that expires_at can be null."""
         auth = GoogleAuth(
-            user=self.member,
+            member=self.member,
             access_token=self.valid_token,
             expires_at=None,  # Null is allowed
         )
@@ -303,12 +305,12 @@ class TestGoogleAuthIntegration:
 
             # Test authentication with valid token
             auth = GoogleAuth(
-                user=member,
+                member=member,
                 access_token="integration_token",  # noqa: S106
                 refresh_token="integration_refresh",  # noqa: S106
                 expires_at=timezone.now() + timedelta(hours=1),
             )
 
             assert not auth.is_token_expired
-            assert str(auth) == f"GoogleAuth(user={member})"
+            assert str(auth) == f"GoogleAuth(member={member})"
             assert member.google_auth == auth

@@ -13,7 +13,7 @@ AUTH_ERROR_MESSAGE = (
 class GoogleAuth(models.Model):
     """Model to store Google OAuth tokens for Slack integration."""
 
-    user = models.OneToOneField(
+    member = models.OneToOneField(
         "slack.Member",
         on_delete=models.CASCADE,
         related_name="google_auth",
@@ -52,11 +52,11 @@ class GoogleAuth(models.Model):
         )
 
     @staticmethod
-    def authenticate(auth_url, user):
-        """Authenticate a user and return a GoogleAuth instance."""
+    def authenticate(auth_url, member):
+        """Authenticate a member and return a GoogleAuth instance."""
         if not settings.IS_GOOGLE_AUTH_ENABLED:
             raise ValueError(AUTH_ERROR_MESSAGE)
-        auth = GoogleAuth.objects.get_or_create(user=user)[0]
+        auth = GoogleAuth.objects.get_or_create(member=member)[0]
         if auth.access_token and not auth.is_token_expired:
             return auth
         if auth.access_token:
@@ -104,4 +104,4 @@ class GoogleAuth(models.Model):
 
     def __str__(self):
         """Return a string representation of the GoogleAuth instance."""
-        return f"GoogleAuth(user={self.user})"
+        return f"GoogleAuth(member={self.member})"

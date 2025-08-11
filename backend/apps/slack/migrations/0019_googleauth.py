@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                     models.DateTimeField(blank=True, null=True, verbose_name="Token Expiry"),
                 ),
                 (
-                    "user",
+                    "member",
                     models.OneToOneField(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="google_auth",
