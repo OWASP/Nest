@@ -3,19 +3,9 @@
 from io import StringIO
 from unittest.mock import MagicMock, patch
 
-import pytest
 from django.core.management import call_command
 
 OWASP_EMPLOYEE_BADGE_NAME = "OWASP Employee"
-
-
-@pytest.fixture
-def mock_badge():
-    badge = MagicMock()
-    badge.name = OWASP_EMPLOYEE_BADGE_NAME
-    badge.css_class = "fa-user-shield"
-    badge.id = 1
-    return badge
 
 
 class TestSyncUserBadgesCommand:
