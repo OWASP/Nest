@@ -17,7 +17,7 @@ def mock_project():
     project.description = "A detailed pitch for an awesome test project."
     project.audience = ["builder", "defender"]
     project.type = "tool"
-    project.level_raw = 3.0
+    project.level_raw = 3.5
     project.owasp_url = "https://owasp.org/www-project-awesome/"
 
     leader1 = MagicMock()
@@ -48,7 +48,7 @@ class TestProjectMetadataCommand:
         assert metadata["pitch"] == "A detailed pitch for an awesome test project."
         assert metadata["audience"] == ["builder", "defender"]
         assert metadata["type"] == "tool"
-        assert metadata["level"] == 3
+        assert metadata["level"] == 3.5
         assert metadata["website"] == "https://owasp.org/www-project-awesome/"
 
         assert len(metadata["leaders"]) == 1
@@ -77,13 +77,11 @@ class TestProjectMetadataCommand:
 
         metadata = command.get_metadata(mock_project)
 
-        assert "website" not in metadata
-        assert "license" not in metadata
-        assert "tags" not in metadata
-        assert "repositories" not in metadata
-        assert "name" in metadata
-        assert "pitch" in metadata
-        assert "level" in metadata
+        for key in ["website", "license", "tags", "repositories"]:
+            assert key not in metadata
+
+        for key in ["name", "pitch", "level"]:
+            assert key in metadata
 
     def test_get_metadata_license_filtering(self, mock_project):
         command = Command()

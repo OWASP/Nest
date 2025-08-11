@@ -17,7 +17,7 @@ class Command(EntityMetadataBase):
         data = {
             "audience": project.audience,
             "leaders": [],
-            "level": int(project.level_raw),
+            "level": float(project.level_raw),
             "name": project.name,
             "pitch": project.description,
             "type": project.type,
