@@ -8,7 +8,7 @@ class TestSnapshotSitemap:
     def test_changefreq(self):
         sitemap = SnapshotSitemap()
 
-        assert sitemap.changefreq(MagicMock()) == "weekly"
+        assert sitemap.changefreq(MagicMock()) == "monthly"
 
     def test_inherits_from_base(self):
         assert issubclass(SnapshotSitemap, BaseSitemap)
@@ -29,4 +29,4 @@ class TestSnapshotSitemap:
     def test_location(self):
         sitemap = SnapshotSitemap()
 
-        assert sitemap.location(MagicMock(nest_key="bar")) == "/snapshots/bar"
+        assert sitemap.location(MagicMock(key="bar")) == "/snapshots/bar"
