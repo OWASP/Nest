@@ -50,8 +50,7 @@ def validate_audience(value):
         error_message = "Audience must be a list."
         raise ValidationError(error_message)
 
-    allowed = {choice.value for choice in AudienceChoices}
-    invalid_keywords = [v for v in value if v not in allowed]
-    if invalid_keywords:
-        error_message = f"Invalid audience keywords: {invalid_keywords}"
+    valid_choices = {choice.value for choice in AudienceChoices}
+    if invalid_values := [v for v in value if v not in valid_choices]:
+        error_message = f"Invalid audience keywords: {invalid_values}"
         raise ValidationError(error_message)
