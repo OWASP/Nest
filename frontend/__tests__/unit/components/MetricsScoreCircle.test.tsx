@@ -230,7 +230,9 @@ describe('MetricsScoreCircle', () => {
       const circleElement = screen.getByText('75').closest('.group')
       expect(circleElement).toBeInTheDocument()
 
-      fireEvent.click(circleElement!)
+      if (circleElement) {
+        fireEvent.click(circleElement)
+      }
       expect(mockOnClick).toHaveBeenCalledTimes(1)
     })
 
@@ -238,7 +240,9 @@ describe('MetricsScoreCircle', () => {
       render(<MetricsScoreCircle score={75} />)
 
       const circleElement = screen.getByText('75').closest('.group')
-      fireEvent.click(circleElement!)
+      if (circleElement) {
+        fireEvent.click(circleElement)
+      }
       // Should not throw any errors - test passes if no exception is thrown
       expect(circleElement).toBeInTheDocument()
     })

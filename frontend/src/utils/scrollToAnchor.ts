@@ -1,22 +1,19 @@
-export const scrollToAnchor = (targetId: string): void => {
+export function scrollToAnchor(targetId: string, additionalOffset = 80): void {
   try {
     const element = document.getElementById(targetId)
-    
+
     if (!element) {
       return
     }
+    const anchorElement = element.querySelector('div#anchor-title')
+    const headingHeight = (anchorElement instanceof HTMLElement) ? anchorElement.offsetHeight : 0
+    const yOffset = -headingHeight - additionalOffset
 
-    const headingHeight =
-      (element.querySelector('div#anchor-title') as HTMLElement)?.offsetHeight || 0
-
-    const yOffset = -headingHeight - 80
-    
     // Use modern window.scrollY instead of deprecated pageYOffset
     const y = element.getBoundingClientRect().top + window.scrollY + yOffset
-
-    window.scrollTo({ 
-      top: y, 
-      behavior: 'smooth' 
+    window.scrollTo({
+      top: y,
+      behavior: 'smooth'
     })
   } catch {
     // Silently handle scroll errors
@@ -25,7 +22,7 @@ export const scrollToAnchor = (targetId: string): void => {
 
 export const scrollToAnchorWithHistory = (targetId: string, updateHistory = true): void => {
   scrollToAnchor(targetId)
-  
+ 
   if (updateHistory) {
     try {
       const href = `#${targetId}`

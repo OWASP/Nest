@@ -71,7 +71,6 @@ const DetailsCard = ({
               >
                 <MetricsScoreCircle
                   score={healthMetricsData[0].score}
-                  onClick={() => scrollToAnchor('issues-trend')}
                 />
               </a>
             )}

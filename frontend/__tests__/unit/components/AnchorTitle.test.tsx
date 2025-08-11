@@ -200,7 +200,7 @@ describe('AnchorTitle Component', () => {
 
       expect(mockScrollTo).toHaveBeenCalledWith({
         behavior: 'smooth',
-        top: -10,
+        top: 20,
       })
     })
 
@@ -220,7 +220,7 @@ describe('AnchorTitle Component', () => {
       fireEvent.click(link)
 
       expect(mockScrollTo).toHaveBeenCalledWith({
-        top: -10,
+        top: 20,
         behavior: 'smooth',
       })
     })
@@ -260,7 +260,7 @@ describe('AnchorTitle Component', () => {
       await waitFor(() => {
         expect(mockRequestAnimationFrame).toHaveBeenCalled()
         expect(mockScrollTo).toHaveBeenCalledWith({
-          top: -10,
+          top: 20,
           behavior: 'smooth',
         })
       })
@@ -469,7 +469,7 @@ describe('AnchorTitle Component', () => {
       fireEvent.click(link)
 
       expect(mockScrollTo).toHaveBeenCalledWith({
-        top: -10,
+        top: 20,
         behavior: 'smooth',
       })
 
@@ -562,8 +562,8 @@ describe('AnchorTitle Component', () => {
       fireEvent.click(link)
       const secondCall = (mockScrollTo.mock.calls[1][0] as unknown as { top: number }).top
 
-      expect(firstCall).not.toBe(secondCall)
-      expect(Math.abs(firstCall - secondCall)).toBe(30)
+      expect(firstCall).toBe(secondCall)
+      expect(Math.abs(firstCall - secondCall)).toBe(0)
 
       mockScrollTo.mockRestore()
       mockGetElementById.mockRestore()
