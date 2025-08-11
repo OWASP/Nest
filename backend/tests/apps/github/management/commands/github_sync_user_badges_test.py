@@ -44,10 +44,9 @@ class TestSyncUserBadgesCommand:
         mock_former_employees.__iter__.return_value = [mock_former_employee]
         mock_former_employees.count.return_value = 1
 
-        # Configure filter side effects
         mock_user_filter.side_effect = [
-            mock_employees,  # is_owasp_employee=True
-            mock_former_employees,  # is_owasp_employee=False, badges=badge
+            mock_employees,
+            mock_former_employees,
         ]
 
         # Call the command
@@ -128,10 +127,10 @@ class TestSyncUserBadgesCommand:
 
         # Configure filter side effects for two command runs
         mock_user_filter.side_effect = [
-            mock_employees,  # is_owasp_employee=True (first run)
-            mock_non_employees_filter,  # is_owasp_employee=False (first run)
-            mock_employees,  # is_owasp_employee=True (second run)
-            mock_non_employees_filter,  # is_owasp_employee=False (second run)
+            mock_employees,
+            mock_non_employees_filter,
+            mock_employees,
+            mock_non_employees_filter,
         ]
 
         # First run
