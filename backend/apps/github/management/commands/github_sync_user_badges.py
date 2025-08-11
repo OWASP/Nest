@@ -37,27 +37,22 @@ class Command(BaseCommand):
             logger.info("Created 'OWASP Employee' badge")
             self.stdout.write(f"Created badge: {badge.name}")
 
-        # Add badge to OWASP employees
-        employees = User.objects.filter(is_owasp_employee=True)
-        count = 0
+        # Assign badge to employees who don't have it (avoiding N+1 queries)
+        employees_without_badge = User.objects.filter(is_owasp_employee=True).exclude(badges=badge)
+        count = employees_without_badge.count()
 
-        for user in employees:
-            # Check if the user already has the badge
-            if not user.badges.filter(id=badge.id).exists():
-                user.badges.add(badge)
-                count += 1
+        for user in employees_without_badge:
+            user.badges.add(badge)
 
-        if count:
-            logger.info("Added 'OWASP Employee' badge to %s users", count)
-            self.stdout.write(f"Added badge to {count} employees")
+        logger.info("Added 'OWASP Employee' badge to %s users", count)
+        self.stdout.write(f"Added badge to {count} employees")
 
         # Remove badge from non-OWASP employees
-        non_employees = User.objects.filter(is_owasp_employee=False).filter(badges=badge)
+        non_employees = User.objects.filter(is_owasp_employee=False, badges=badge)
         removed_count = non_employees.count()
 
         for user in non_employees:
             user.badges.remove(badge)
 
-        if removed_count:
-            logger.info("Removed 'OWASP Employee' badge from %s users", removed_count)
-            self.stdout.write(f"Removed badge from {removed_count} non-employees")
+        logger.info("Removed 'OWASP Employee' badge from %s users", removed_count)
+        self.stdout.write(f"Removed badge from {removed_count} non-employees")
