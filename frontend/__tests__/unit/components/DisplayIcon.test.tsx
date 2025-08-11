@@ -308,15 +308,43 @@ describe('DisplayIcon', () => {
   })
 
   describe('Event Handling', () => {
-    it('renders tooltip wrapper that can handle hover events', async () => {
+    it('renders interactive tooltip that responds to user events', async () => {
       const user = userEvent.setup()
       render(<DisplayIcon item="starsCount" icons={mockIcons} />)
 
       const tooltip = screen.getByTestId('tooltip')
       expect(tooltip).toBeInTheDocument()
 
+      await user.tab()
+      expect(tooltip).toBeInTheDocument()
+
       await user.hover(tooltip)
       expect(tooltip).toBeInTheDocument()
+
+      await user.unhover(tooltip)
+      expect(tooltip).toBeInTheDocument()
+
+      expect(tooltip).toHaveAttribute('data-tooltip-content', 'Stars')
+      expect(tooltip).toHaveAttribute('data-show-arrow', 'true')
+    })
+
+    it('maintains tooltip accessibility during interactions', async () => {
+      const user = userEvent.setup()
+      render(<DisplayIcon item="forksCount" icons={mockIcons} />)
+
+      const tooltip = screen.getByTestId('tooltip')
+
+      await user.tab()
+      expect(tooltip).toBeInTheDocument()
+
+      expect(tooltip).toHaveAttribute('data-placement', 'top')
+      expect(tooltip).toHaveAttribute('data-delay', '150')
+
+      const iconElement = screen.getByTestId('font-awesome-icon')
+      const textContent = screen.getByText('350')
+
+      expect(iconElement).toBeInTheDocument()
+      expect(textContent).toBeInTheDocument()
     })
   })
 })
