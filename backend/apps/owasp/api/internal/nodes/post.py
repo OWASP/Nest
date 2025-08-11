@@ -22,4 +22,4 @@ class PostNode:
     @strawberry.field
     def id(self) -> strawberry.ID:
         """Resolve a unique identifier."""
-        return self.id
+        return f"PostNode-{self.id}"

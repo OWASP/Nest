@@ -20,7 +20,6 @@ class TestProjectHealthMetricsNode:
             "created_at",
             "contributors_count",
             "forks_count",
-            "id",
             "is_funding_requirements_compliant",
             "is_leader_requirements_compliant",
             "last_commit_days",
