@@ -37,13 +37,8 @@ RECENT_RELEASES_LIMIT = 5
         "updated_at",
     ],
 )
-class RepositoryNode:
+class RepositoryNode(strawberry.relay.Node):
     """Repository node."""
-
-    @strawberry.field
-    def id(self) -> strawberry.ID:
-        """Resolve a unique identifier."""
-        return self.node_id
 
     @strawberry.field
     def issues(self) -> list[IssueNode]:

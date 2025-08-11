@@ -19,18 +19,13 @@ from apps.github.models.milestone import Milestone
         "url",
     ],
 )
-class MilestoneNode:
+class MilestoneNode(strawberry.relay.Node):
     """Github Milestone Node."""
 
     @strawberry.field
     def author(self) -> UserNode | None:
         """Resolve author."""
         return self.author
-
-    @strawberry.field
-    def id(self) -> strawberry.ID:
-        """Resolve a unique identifier."""
-        return self.node_id
 
     @strawberry.field
     def organization_name(self) -> str | None:

@@ -15,10 +15,5 @@ from apps.owasp.models.sponsor import Sponsor
         "url",
     ],
 )
-class SponsorNode:
+class SponsorNode(strawberry.relay.Node):
     """Sponsor node."""
-
-    @strawberry.field
-    def id(self) -> strawberry.ID:
-        """Resolve a unique identifier."""
-        return self.key

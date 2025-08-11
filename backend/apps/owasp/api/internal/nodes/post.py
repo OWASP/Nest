@@ -16,10 +16,5 @@ from apps.owasp.models.post import Post
         "url",
     ],
 )
-class PostNode:
+class PostNode(strawberry.relay.Node):
     """Post node."""
-
-    @strawberry.field
-    def id(self) -> strawberry.ID:
-        """Resolve a unique identifier."""
-        return f"PostNode-{self.id}"

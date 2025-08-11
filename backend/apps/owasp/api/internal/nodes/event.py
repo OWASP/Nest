@@ -20,10 +20,5 @@ from apps.owasp.models.event import Event
         "url",
     ],
 )
-class EventNode:
+class EventNode(strawberry.relay.Node):
     """Event node."""
-
-    @strawberry.field
-    def id(self) -> strawberry.ID:
-        """Resolve a unique identifier."""
-        return self.key

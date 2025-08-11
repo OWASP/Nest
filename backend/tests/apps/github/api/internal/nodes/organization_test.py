@@ -13,6 +13,7 @@ class TestOrganizationNode:
     def test_meta_configuration(self):
         field_names = {field.name for field in OrganizationNode.__strawberry_definition__.fields}
         expected_field_names = {
+            "_id",
             "avatar_url",
             "collaborators_count",
             "company",
@@ -20,7 +21,6 @@ class TestOrganizationNode:
             "description",
             "email",
             "followers_count",
-            "id",
             "location",
             "login",
             "name",
