@@ -25,6 +25,7 @@ class TestProjectNode:
             "stars_count",
             "summary",
             "type",
+            "id",
             "issues_count",
             "key",
             "languages",

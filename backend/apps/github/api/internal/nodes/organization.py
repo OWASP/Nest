@@ -40,6 +40,11 @@ class OrganizationNode:
     """GitHub organization node."""
 
     @strawberry.field
+    def id(self) -> strawberry.ID:
+        """Resolve a unique identifier."""
+        return self.node_id
+
+    @strawberry.field
     def stats(self) -> OrganizationStatsNode:
         """Resolve organization stats."""
         repositories = Repository.objects.filter(organization=self)

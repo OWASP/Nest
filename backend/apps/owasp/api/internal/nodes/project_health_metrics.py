@@ -47,6 +47,11 @@ class ProjectHealthMetricsNode(strawberry.relay.Node):
         return self.nest_created_at
 
     @strawberry.field
+    def id(self) -> strawberry.ID:
+        """Resolve a unique identifier."""
+        return self.id
+
+    @strawberry.field
     def last_commit_days(self) -> int:
         """Resolve last commit age in days."""
         return self.last_commit_days

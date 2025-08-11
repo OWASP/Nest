@@ -1,5 +1,6 @@
 """OWASP sponsors GraphQL node."""
 
+import strawberry
 import strawberry_django
 
 from apps.owasp.models.sponsor import Sponsor
@@ -16,3 +17,8 @@ from apps.owasp.models.sponsor import Sponsor
 )
 class SponsorNode:
     """Sponsor node."""
+
+    @strawberry.field
+    def id(self) -> strawberry.ID:
+        """Resolve a unique identifier."""
+        return self.key

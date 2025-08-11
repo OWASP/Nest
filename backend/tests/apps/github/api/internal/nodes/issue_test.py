@@ -17,6 +17,7 @@ class TestIssueNode:
             "title",
             "url",
             "author",
+            "id",
             "organization_name",
             "repository_name",
         }

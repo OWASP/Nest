@@ -41,6 +41,11 @@ class RepositoryNode:
     """Repository node."""
 
     @strawberry.field
+    def id(self) -> strawberry.ID:
+        """Resolve a unique identifier."""
+        return self.node_id
+
+    @strawberry.field
     def issues(self) -> list[IssueNode]:
         """Resolve recent issues."""
         # TODO(arkid15r): rename this to recent_issues.

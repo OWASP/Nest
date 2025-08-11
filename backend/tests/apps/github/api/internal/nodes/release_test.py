@@ -14,6 +14,7 @@ class TestReleaseNode:
         field_names = {field.name for field in ReleaseNode.__strawberry_definition__.fields}
         expected_field_names = {
             "author",
+            "id",
             "is_pre_release",
             "name",
             "organization_name",

@@ -16,6 +16,7 @@ class TestMilestoneNode:
             "body",
             "closed_issues_count",
             "created_at",
+            "id",
             "open_issues_count",
             "organization_name",
             "progress",

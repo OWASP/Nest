@@ -26,6 +26,11 @@ class ReleaseNode:
         return self.author
 
     @strawberry.field
+    def id(self) -> strawberry.ID:
+        """Resolve a unique identifier."""
+        return self.node_id
+
+    @strawberry.field
     def organization_name(self) -> str | None:
         """Resolve organization name."""
         return (

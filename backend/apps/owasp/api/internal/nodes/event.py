@@ -1,5 +1,6 @@
 """OWASP event GraphQL node."""
 
+import strawberry
 import strawberry_django
 
 from apps.owasp.models.event import Event
@@ -21,3 +22,8 @@ from apps.owasp.models.event import Event
 )
 class EventNode:
     """Event node."""
+
+    @strawberry.field
+    def id(self) -> strawberry.ID:
+        """Resolve a unique identifier."""
+        return self.key

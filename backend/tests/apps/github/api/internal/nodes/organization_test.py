@@ -20,6 +20,7 @@ class TestOrganizationNode:
             "description",
             "email",
             "followers_count",
+            "id",
             "location",
             "login",
             "name",
