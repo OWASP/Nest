@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('owasp', '0045_badge'),
-        ('owasp', '0045_project_audience'),
+        ("owasp", "0045_badge"),
+        ("owasp", "0045_project_audience"),
     ]
 
-    operations = [
-    ]
+    operations = []

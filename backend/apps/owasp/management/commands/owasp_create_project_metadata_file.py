@@ -3,7 +3,7 @@
 from apps.owasp.management.commands.common.entity_metadata import (
     EntityMetadataBase,
 )
-from apps.owasp.models.project import Project, ProjectLevel, ProjectType
+from apps.owasp.models.project import Project
 
 MIN_PROJECT_TAGS = 3
 
@@ -14,25 +14,13 @@ class Command(EntityMetadataBase):
 
     def get_metadata(self, project: Project) -> dict:
         """Map the Project model data to a dictionary that matches the schema."""
-        level_mapping = {
-            ProjectLevel.INCUBATOR: 2,
-            ProjectLevel.LAB: 3,
-            ProjectLevel.PRODUCTION: 3.5,
-            ProjectLevel.FLAGSHIP: 4,
-        }
-        type_mapping = {
-            ProjectType.CODE: "code",
-            ProjectType.DOCUMENTATION: "documentation",
-            ProjectType.TOOL: "tool",
-        }
-
         data = {
             "audience": project.audience,
             "leaders": [],
-            "level": level_mapping.get(project.level),
+            "level": int(project.level_raw),
             "name": project.name,
             "pitch": project.description,
-            "type": type_mapping.get(project.type),
+            "type": project.type,
         }
 
         for leader in project.leaders.all():
