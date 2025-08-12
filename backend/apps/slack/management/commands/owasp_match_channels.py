@@ -1,9 +1,7 @@
-"""Management command to populate EntityChannel records from Slack data."""
+"""A command to populate EntityChannel records from Slack data."""
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
-from django.db import transaction
-from django.db.models import Q
 from django.utils.text import slugify
 
 from apps.owasp.models.chapter import Chapter
@@ -17,34 +15,27 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         created = 0
-        with transaction.atomic():
-            for model in (Chapter, Committee, Project):
-                content_type = ContentType.objects.get_for_model(model)
-                # Use .only and .iterator for memory efficiency
-                for entity in model.objects.all().only("id", "name").iterator():
-                    # Normalize the name for matching (e.g., "OWASP Lima" -> "owasp-lima")
-                    needle = slugify(entity.name or "")
-                    if not needle:
-                        continue
-                    qs = Conversation.objects.all()
-                    workspace_id = options.get("workspace_id")
-                    if workspace_id:
-                        qs = qs.filter(workspace_id=workspace_id)
-                    alt_needle = needle.replace("-", "_")
-                    conversations = qs.filter(
-                        Q(name__icontains=needle) | Q(name__icontains=alt_needle)
+        for model in (Chapter, Committee, Project):
+            content_type = ContentType.objects.get_for_model(model)
+            # Use .only and .iterator for memory efficiency
+            for entity in model.objects.all().only("id", "name").iterator():
+                # Normalize the name for matching (e.g., "OWASP Lima" -> "owasp-lima")
+                needle = slugify(entity.name or "")
+                if not needle:
+                    continue
+                qs = Conversation.objects.all()
+                conversations = qs.filter(name__icontains=needle)
+                for conv in conversations:
+                    _, was_created = EntityChannel.objects.get_or_create(
+                        content_type=content_type,
+                        object_id=entity.pk,
+                        conversation=conv,
+                        defaults={
+                            "is_main_channel": False,
+                            "is_reviewed": False,
+                            "kind": "slack",
+                        },
                     )
-                    for conv in conversations:
-                        _, was_created = EntityChannel.objects.get_or_create(
-                            content_type=content_type,
-                            object_id=entity.pk,
-                            conversation=conv,
-                            defaults={
-                                "is_main_channel": False,
-                                "is_reviewed": False,
-                                "kind": "slack",
-                            },
-                        )
-                        if was_created:
-                            created += 1
+                    if was_created:
+                        created += 1
         self.stdout.write(self.style.SUCCESS(f"Created {created} EntityChannel records."))
