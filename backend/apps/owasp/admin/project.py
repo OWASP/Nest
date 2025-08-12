@@ -4,10 +4,10 @@ from django.contrib import admin
 
 from apps.owasp.models.project import Project
 
-from .mixins import GenericEntityAdminMixin, LeaderAdminMixin
+from .mixins import EntityMemberInline, GenericEntityAdminMixin
 
 
-class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
+class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     """Admin for Project model."""
 
     autocomplete_fields = (
@@ -16,7 +16,7 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
         "owners",
         "repositories",
     )
-    filter_horizontal = LeaderAdminMixin.filter_horizontal
+    inlines = [EntityMemberInline]
     list_display = (
         "custom_field_name",
         "created_at",

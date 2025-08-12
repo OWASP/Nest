@@ -1,8 +1,20 @@
 """OWASP admin mixins for common functionality."""
 
-from django.contrib import messages
+from django.contrib.contenttypes.admin import GenericTabularInline
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
+
+from apps.owasp.models.entity_member import EntityMember
+
+
+class EntityMemberInline(GenericTabularInline):
+    """EntityMember inline for admin."""
+
+    model = EntityMember
+    fields = ("member", "kind", "description", "order", "is_reviewed")
+    raw_id_fields = ("member",)
+    extra = 1
+    ordering = ("order", "member__login")
 
 
 class BaseOwaspAdminMixin:
@@ -77,40 +89,6 @@ class GenericEntityAdminMixin(BaseOwaspAdminMixin):
 
     custom_field_github_urls.short_description = "GitHub 🔗"
     custom_field_owasp_url.short_description = "OWASP 🔗"
-
-
-class LeaderAdminMixin(BaseOwaspAdminMixin):
-    """Admin mixin for entities that can have leaders."""
-
-    actions = ("approve_suggested_leaders",)
-    filter_horizontal = (
-        "leaders",
-        "suggested_leaders",
-    )
-
-    def approve_suggested_leaders(self, request, queryset):
-        """Approve suggested leaders for selected entities."""
-        total_approved = 0
-        for entity in queryset:
-            suggestions = entity.suggested_leaders.all()
-            if count := suggestions.count():
-                entity.leaders.add(*suggestions)
-                total_approved += count
-                entity_name = entity.name if hasattr(entity, "name") else str(entity)
-                self.message_user(
-                    request,
-                    f"Approved {count} leader suggestions for {entity_name}",
-                    messages.SUCCESS,
-                )
-
-        if total_approved:
-            self.message_user(
-                request,
-                f"Total approved suggestions: {total_approved}",
-                messages.INFO,
-            )
-
-    approve_suggested_leaders.short_description = "Approve suggested leaders"
 
 
 class StandardOwaspAdminMixin(BaseOwaspAdminMixin):
