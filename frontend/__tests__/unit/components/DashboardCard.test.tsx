@@ -77,9 +77,9 @@ describe('DashboardCard', () => {
 
     it('does not render stats paragraph if stats is not provided', () => {
       render(<DashboardCard {...baseProps} />)
-      expect(screen.queryByText('123')).not.toBeInTheDocument()
+      const p = screen.getByTestId('secondary-content').querySelector('p')
+      expect(p).not.toBeInTheDocument()
     })
-
     it('does not render <p> if stats is an empty string', () => {
       render(<DashboardCard {...baseProps} stats="" />)
       const p = screen.getByTestId('secondary-content').querySelector('p')
@@ -174,6 +174,21 @@ describe('DashboardCard', () => {
       render(<DashboardCard {...baseProps} stats="A11y" />)
       expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
       expect(screen.getByTestId('anchor-title')).toBeInTheDocument()
+
+      const heading = screen.getByRole('heading', { level: 3 })
+      expect(heading).toBeInTheDocument()
+
+      const statsP = screen.getByText('A11y')
+      expect(statsP.tagName).toBe('P')
+    })
+    it('maintains accessible markup with no stats', () => {
+      render(<DashboardCard {...baseProps} />)
+
+      const heading = screen.getByRole('heading', { level: 3 })
+      expect(heading).toBeInTheDocument()
+
+      const paragraphs = screen.queryAllByRole('paragraph')
+      expect(paragraphs).toHaveLength(0)
     })
   })
 
