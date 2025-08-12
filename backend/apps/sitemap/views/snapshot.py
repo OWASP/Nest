@@ -11,7 +11,7 @@ class SnapshotSitemap(BaseSitemap):
     prefix = "/snapshots"
 
     def items(self):
-        """Return a queryset of indexable Snapshot objects."""
+        """Return queryset of snapshots for sitemap generation."""
         return Snapshot.objects.filter(
             status=Snapshot.Status.COMPLETED,
         ).order_by(
