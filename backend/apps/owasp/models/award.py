@@ -14,6 +14,13 @@ class Award(TimestampedModel):
     https://github.com/OWASP/owasp.github.io/blob/main/_data/awards.yml
     """
 
+    class Category(models.TextChoices):
+        WASPY = "WASPY", "WASPY"
+        DISTINGUISHED_LIFETIME = (
+            "Distinguished Lifetime Memberships",
+            "Distinguished Lifetime Memberships",
+        )
+
     class Meta:
         db_table = "owasp_awards"
         indexes = [
@@ -33,7 +40,8 @@ class Award(TimestampedModel):
     category = models.CharField(
         verbose_name="Category",
         max_length=100,
-        help_text="Award category (e.g., 'WASPY', 'Lifetime Achievement')",
+        choices=Category.choices,
+        help_text="Award category (e.g., 'WASPY', 'Distinguished Lifetime Memberships')",
     )
     name = models.CharField(
         verbose_name="Name",
@@ -45,9 +53,7 @@ class Award(TimestampedModel):
     )
     year = models.IntegerField(
         verbose_name="Year",
-        null=True,
-        blank=True,
-        help_text="Year the award was given (null for category definitions)",
+        help_text="Year the award was given",
     )
 
     # Winner information
@@ -72,18 +78,6 @@ class Award(TimestampedModel):
         help_text="Path to winner's image",
     )
 
-    # Award type from YAML (category or award)
-    award_type = models.CharField(
-        verbose_name="Award Type",
-        max_length=20,
-        choices=[
-            ("category", "Category"),
-            ("award", "Award"),
-        ],
-        default="award",
-        help_text="Type of entry: category definition or individual award",
-    )
-
     # Optional foreign key to User model
     user = models.ForeignKey(
         "github.User",
@@ -97,29 +91,13 @@ class Award(TimestampedModel):
 
     def __str__(self) -> str:
         """Return string representation of the award."""
-        if self.award_type == "category":
-            return f"{self.name} (Category)"
-
         if self.winner_name:
             return f"{self.name} - {self.winner_name} ({self.year})"
-
         return f"{self.name} ({self.year})"
-
-    @property
-    def is_category(self) -> bool:
-        """Check if this is a category definition."""
-        return self.award_type == "category"
-
-    @property
-    def is_award(self) -> bool:
-        """Check if this is an individual award."""
-        return self.award_type == "award"
 
     @property
     def display_name(self) -> str:
         """Get display name for the award."""
-        if self.is_category:
-            return self.name
         return f"{self.name} ({self.year})"
 
     @classmethod
@@ -132,7 +110,7 @@ class Award(TimestampedModel):
         """
         from apps.github.models.user import User
 
-        return User.objects.filter(awards__category="WASPY", awards__award_type="award").distinct()
+        return User.objects.filter(awards__category=cls.Category.WASPY).distinct()
 
     @classmethod
     def get_user_waspy_awards(cls, user):
@@ -145,7 +123,7 @@ class Award(TimestampedModel):
             QuerySet of WASPY awards for the user
 
         """
-        return cls.objects.filter(user=user, category="WASPY", award_type="award")
+        return cls.objects.filter(user=user, category=cls.Category.WASPY)
 
     @staticmethod
     def update_data(award_data: dict, *, save: bool = True):
@@ -159,44 +137,9 @@ class Award(TimestampedModel):
             Award instance or list of Award instances
 
         """
-        if award_data.get("type") == "category":
-            return Award._create_category(award_data, save=save)
         if award_data.get("type") == "award":
             return Award._create_awards_from_winners(award_data, save=save)
         return None
-
-    @staticmethod
-    def _create_category(category_data: dict, *, save: bool = True):
-        """Create or update a category award."""
-        name = category_data.get("title", "")
-        description = category_data.get("description", "")
-
-        award, created = (
-            Award.objects.get_or_create(
-                name=name,
-                award_type="category",
-                defaults={
-                    "category": name,
-                    "description": description,
-                },
-            )
-            if save
-            else (
-                Award(
-                    name=name,
-                    category=name,
-                    award_type="category",
-                    description=description,
-                ),
-                True,
-            )
-        )
-
-        if not created and save:
-            award.description = description
-            award.save(update_fields=["description", "nest_updated_at"])
-
-        return award
 
     @staticmethod
     def _create_awards_from_winners(award_data: dict, *, save: bool = True):
@@ -213,7 +156,6 @@ class Award(TimestampedModel):
                 continue
 
             award_defaults = {
-                "award_type": "award",
                 "description": "",
                 "winner_info": winner_data.get("info", ""),
                 "winner_image": winner_data.get("image", ""),
