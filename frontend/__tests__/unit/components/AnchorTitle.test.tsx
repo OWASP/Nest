@@ -98,7 +98,7 @@ describe('AnchorTitle Component', () => {
 
       const titleElement = screen.getByText('Test')
       expect(titleElement).toHaveClass('flex', 'items-center', 'text-2xl', 'font-semibold')
-      expect(titleElement).toHaveAttribute('id', 'anchor-title')
+      expect(titleElement).toHaveAttribute('data-anchor-title', 'true')
     })
 
     it('renders FontAwesome link icon', () => {
@@ -372,7 +372,7 @@ describe('AnchorTitle Component', () => {
       render(<AnchorTitle title="Heading Test" />)
 
       const titleElement = screen.getByText('Heading Test')
-      expect(titleElement).toHaveAttribute('id', 'anchor-title')
+      expect(titleElement).toHaveAttribute('data-anchor-title', 'true')
       expect(titleElement).toHaveClass('text-2xl', 'font-semibold')
 
       const container = document.getElementById('heading-test')

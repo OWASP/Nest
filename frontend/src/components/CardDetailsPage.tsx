@@ -69,9 +69,7 @@ const DetailsCard = ({
                   scrollToAnchor('issues-trend')
                 }}
               >
-                <MetricsScoreCircle
-                  score={healthMetricsData[0].score}
-                />
+                <MetricsScoreCircle score={healthMetricsData?.[0]?.score ?? 0} />
               </a>
             )}
           </div>

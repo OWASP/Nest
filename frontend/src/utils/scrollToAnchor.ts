@@ -5,7 +5,7 @@ export function scrollToAnchor(targetId: string, additionalOffset = 80): void {
     if (!element) {
       return
     }
-    const anchorElement = element.querySelector('div#anchor-title')
+    const anchorElement = element.querySelector('[data-anchor-title]')
     const headingHeight = (anchorElement instanceof HTMLElement) ? anchorElement.offsetHeight : 0
     const yOffset = -headingHeight - additionalOffset
 

@@ -43,7 +43,7 @@ const AnchorTitle: React.FC<AnchorTitleProps> = ({ title }) => {
   return (
     <div id={id} className="relative">
       <div className="group relative flex items-center">
-        <div className="flex items-center text-2xl font-semibold" id="anchor-title">
+        <div className="flex items-center text-2xl font-semibold" data-anchor-title="true">
           {title}
         </div>
         <a
