@@ -1,13 +1,13 @@
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import ProjectsDashboardDropDown from 'components/ProjectsDashboardDropDown'
-import { faFilter, faSort } from '@font-awesome-icon/free-solid-svg-icons'
+import { faFilter, faSort } from '@fortawesome/free-solid-svg-icons'
 
 // Mock FontAwesome components
 jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: ({ icon, ...props }: any) => (
-    <span 
-      data-testid="font-awesome-icon" 
+    <span
+      data-testid="font-awesome-icon"
       data-icon={icon?.iconName || 'default'}
       {...props}
     />
@@ -22,18 +22,18 @@ jest.mock('@heroui/react', () => ({
   DropdownTrigger: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="dropdown-trigger">{children}</div>
   ),
-  DropdownMenu: ({ 
-    children, 
-    onAction, 
-    selectedKeys, 
-    selectionMode 
-  }: { 
+  DropdownMenu: ({
+    children,
+    onAction,
+    selectedKeys,
+    selectionMode
+  }: {
     children: React.ReactNode
     onAction: (key: string) => void
     selectedKeys?: string[]
     selectionMode: string
   }) => (
-    <div 
+    <div
       data-testid="dropdown-menu"
       data-selection-mode={selectionMode}
       data-selected-keys={selectedKeys?.join(',')}
@@ -59,10 +59,10 @@ jest.mock('@heroui/react', () => ({
       {children}
     </div>
   ),
-  DropdownSection: ({ 
-    children, 
-    title 
-  }: { 
+  DropdownSection: ({
+    children,
+    title
+  }: {
     children: React.ReactNode
     title: string
   }) => (
@@ -74,10 +74,10 @@ jest.mock('@heroui/react', () => ({
   DropdownItem: (props: { children: React.ReactNode }) => {
     // Since key is not accessible in props, we'll use the children text as identifier
     const itemText = typeof props.children === 'string' ? props.children : 'item'
-    
+
     return (
-      <div 
-        data-testid="dropdown-item" 
+      <div
+        data-testid="dropdown-item"
         data-key={itemText}
         style={{ cursor: 'pointer' }}
         role="menuitem"
@@ -94,12 +94,12 @@ jest.mock('@heroui/react', () => ({
       </div>
     )
   },
-  Button: ({ children, variant, ...props }: { 
+  Button: ({ children, variant, ...props }: {
     children: React.ReactNode
     variant?: string
   }) => (
-    <button 
-      data-testid="dropdown-button" 
+    <button
+      data-testid="dropdown-button"
       data-variant={variant}
       {...props}
     >
@@ -140,7 +140,7 @@ describe('ProjectsDashboardDropDown Component', () => {
   beforeEach(() => {
     mockOnAction = jest.fn()
     jest.clearAllMocks()
-    
+
     // Suppress only specific React warnings, not all errors
     const originalError = console.error
     jest.spyOn(console, 'error').mockImplementation((...args) => {
@@ -308,7 +308,7 @@ describe('ProjectsDashboardDropDown Component', () => {
       const items = screen.getAllByTestId('dropdown-item')
       const activeItem = items.find(item => item.textContent === 'Active')
       expect(activeItem).toBeDefined()
-      
+
       if (activeItem) {
         fireEvent.click(activeItem)
         expect(mockOnAction).toHaveBeenCalledWith('Active')
@@ -327,7 +327,7 @@ describe('ProjectsDashboardDropDown Component', () => {
       const items = screen.getAllByTestId('dropdown-item')
       const activeItem = items.find(item => item.textContent === 'Active')
       expect(activeItem).toBeDefined()
-      
+
       if (activeItem) {
         fireEvent.keyDown(activeItem, { key: 'Enter' })
         expect(mockOnAction).toHaveBeenCalledWith('Active')
@@ -346,14 +346,14 @@ describe('ProjectsDashboardDropDown Component', () => {
       const items = screen.getAllByTestId('dropdown-item')
       const activeItem = items.find(item => item.textContent === 'Active')
       const inactiveItem = items.find(item => item.textContent === 'Inactive')
-      
+
       expect(activeItem).toBeDefined()
       expect(inactiveItem).toBeDefined()
-      
+
       if (activeItem && inactiveItem) {
         fireEvent.click(activeItem)
         fireEvent.click(inactiveItem)
-        
+
         expect(mockOnAction).toHaveBeenCalledTimes(2)
         expect(mockOnAction).toHaveBeenCalledWith('Active')
         expect(mockOnAction).toHaveBeenCalledWith('Inactive')
@@ -456,7 +456,7 @@ describe('ProjectsDashboardDropDown Component', () => {
 
       const items = screen.getAllByTestId('dropdown-item')
       expect(items).toHaveLength(4)
-      
+
       // Check by getting text content from dropdown items specifically
       const itemTexts = items.map(item => item.textContent)
       expect(itemTexts).toContain('Active')
@@ -595,7 +595,7 @@ describe('ProjectsDashboardDropDown Component', () => {
   describe('DOM structure / classNames / styles', () => {
     it('renders sections with correct data attributes', () => {
       render(<ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} />)
-      
+
       const sections = screen.getAllByTestId('dropdown-section')
       expect(sections).toHaveLength(2)
       expect(sections[0]).toHaveAttribute('data-title', 'Status')
@@ -604,10 +604,10 @@ describe('ProjectsDashboardDropDown Component', () => {
 
     it('renders dropdown items correctly', () => {
       render(<ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} selectedLabels={[]} />)
-      
+
       const items = screen.getAllByTestId('dropdown-item')
       expect(items).toHaveLength(4)
-      
+
       // Check content without ambiguity
       const itemTexts = items.map(item => item.textContent)
       expect(itemTexts).toContain('Active')
@@ -625,7 +625,7 @@ describe('ProjectsDashboardDropDown Component', () => {
           onAction={mockOnAction}
         />
       )
-      
+
       const menu = screen.getByTestId('dropdown-menu')
       expect(menu).toHaveAttribute('data-selection-mode', 'single')
       expect(menu).toHaveAttribute('data-selected-keys', 'TestKey')
