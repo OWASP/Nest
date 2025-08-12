@@ -1,1 +1,0 @@
-"""Nest app management commands."""
