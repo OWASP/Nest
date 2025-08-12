@@ -4,18 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('slack', '0019_entitychannel'),
+        ("slack", "0019_entitychannel"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='entitychannel',
-            name='nest_created_at',
+            model_name="entitychannel",
+            name="nest_created_at",
         ),
         migrations.RemoveField(
-            model_name='entitychannel',
-            name='nest_updated_at',
+            model_name="entitychannel",
+            name="nest_updated_at",
         ),
     ]
