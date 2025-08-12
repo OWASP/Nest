@@ -34,18 +34,21 @@ class TestSyncUserBadgesCommand:
         mock_former_employees.__iter__.return_value = [mock_former_employee]
         mock_former_employees.count.return_value = 1
 
-        mock_user_filter.side_effect = [
-            mock_employees,
-            mock_former_employees,
-        ]
+        def user_filter_side_effect(**kwargs):
+            if kwargs.get("is_owasp_employee") is True:
+                return mock_employees
+            if kwargs.get("is_owasp_employee") is False:
+                return mock_former_employees
+            return MagicMock()
 
-        # Call the command
+        mock_user_filter.side_effect = user_filter_side_effect
+
         out = StringIO()
         call_command("owasp_update_badges", stdout=out)
 
-        # Verify badge assignments
-        mock_employee.badges.add.assert_called_once_with(mock_badge)
-        mock_former_employee.badges.remove.assert_called_once_with(mock_badge)
+        # Updated assertions for bulk add/remove
+        mock_badge.users.add.assert_called_once_with(mock_employee)
+        mock_badge.users.remove.assert_called_once_with(mock_former_employee)
 
         # Check command output
         output = out.getvalue()
@@ -65,17 +68,17 @@ class TestSyncUserBadgesCommand:
         mock_employees = MagicMock()
         mock_employees.__iter__.return_value = []
         mock_employees.count.return_value = 0
+        mock_employees.exclude.return_value = mock_employees  # Fix for count > 0
+
         mock_former_employees = MagicMock()
         mock_former_employees.__iter__.return_value = []
         mock_former_employees.count.return_value = 0
+        mock_former_employees.exclude.return_value = mock_former_employees
 
         mock_user_filter.side_effect = [mock_employees, mock_former_employees]
 
-        # Call the command
         out = StringIO()
         call_command("owasp_update_badges", stdout=out)
-
-        # Verify badge creation and defaults
 
         mock_badge_get_or_create.assert_called_once_with(
             name=OWASP_STAFF_BADGE_NAME,
@@ -85,8 +88,6 @@ class TestSyncUserBadgesCommand:
                 "weight": 100,
             },
         )
-
-        # Check command output
         output = out.getvalue()
         assert f"Created badge: {mock_badge.name}" in output
 
