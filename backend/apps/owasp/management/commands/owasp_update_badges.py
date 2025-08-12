@@ -9,6 +9,8 @@ from apps.owasp.models.badge import Badge
 
 logger = logging.getLogger(__name__)
 
+OWASP_STAFF_BADGE_NAME = "OWASP Staff"
+
 
 class Command(BaseCommand):
     """Sync badges for users based on their roles and attributes."""
@@ -18,23 +20,23 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """Execute the command."""
         self.stdout.write("Syncing user badges...")
-        self.sync_owasp_employee_badge()
+        self.sync_owasp_staff_badge()
         self.stdout.write(self.style.SUCCESS("User badges sync completed"))
 
-    def sync_owasp_employee_badge(self):
-        """Sync OWASP Employee badge for users."""
-        # Get or create the OWASP Employee badge
+    def sync_owasp_staff_badge(self):
+        """Sync OWASP Staff badge for users."""
+        # Get or create the OWASP Staff badge
         badge, created = Badge.objects.get_or_create(
-            name="OWASP Employee",
+            name=OWASP_STAFF_BADGE_NAME,
             defaults={
-                "description": "Official OWASP Employee",
+                "description": "Official OWASP Staff",
                 "css_class": "fa-user-shield",
                 "weight": 100,  # High weight for importance
             },
         )
 
         if created:
-            logger.info("Created 'OWASP Employee' badge")
+            logger.info("Created '%s' badge", OWASP_STAFF_BADGE_NAME)
             self.stdout.write(f"Created badge: {badge.name}")
 
         # Assign badge to employees who don't have it (avoiding N+1 queries)
@@ -44,7 +46,7 @@ class Command(BaseCommand):
         for user in employees_without_badge:
             user.badges.add(badge)
 
-        logger.info("Added 'OWASP Employee' badge to %s users", count)
+        logger.info("Added '%s' badge to %s users", OWASP_STAFF_BADGE_NAME, count)
         self.stdout.write(f"Added badge to {count} employees")
 
         # Remove badge from non-OWASP employees
@@ -54,5 +56,5 @@ class Command(BaseCommand):
         for user in non_employees:
             user.badges.remove(badge)
 
-        logger.info("Removed 'OWASP Employee' badge from %s users", removed_count)
+        logger.info("Removed '%s' badge from %s users", OWASP_STAFF_BADGE_NAME, removed_count)
         self.stdout.write(f"Removed badge from {removed_count} non-employees")

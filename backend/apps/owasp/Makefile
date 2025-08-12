@@ -56,3 +56,7 @@ owasp-update-events:
 owasp-update-sponsors:
 	@echo "Getting OWASP sponsors data"
 	@CMD="python manage.py owasp_update_sponsors" $(MAKE) exec-backend-command
+
+owasp-update-badges:
+	@echo "Syncing OWASP Staff badges"
+	@CMD="python manage.py owasp_update_badges" $(MAKE) exec-backend-command

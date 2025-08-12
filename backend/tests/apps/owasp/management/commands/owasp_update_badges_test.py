@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 from django.core.management import call_command
 
-OWASP_EMPLOYEE_BADGE_NAME = "OWASP Employee"
+from apps.owasp.management.commands.owasp_update_badges import OWASP_STAFF_BADGE_NAME
 
 
 class TestSyncUserBadgesCommand:
@@ -16,7 +16,7 @@ class TestSyncUserBadgesCommand:
     def test_sync_owasp_employee_badge(self, mock_user_filter, mock_badge_get_or_create):
         # Set up badge mock
         mock_badge = MagicMock()
-        mock_badge.name = OWASP_EMPLOYEE_BADGE_NAME
+        mock_badge.name = OWASP_STAFF_BADGE_NAME
         mock_badge.id = 1
         mock_badge_get_or_create.return_value = (mock_badge, False)
 
@@ -41,7 +41,7 @@ class TestSyncUserBadgesCommand:
 
         # Call the command
         out = StringIO()
-        call_command("github_sync_user_badges", stdout=out)
+        call_command("owasp_update_badges", stdout=out)
 
         # Verify badge assignments
         mock_employee.badges.add.assert_called_once_with(mock_badge)
@@ -58,7 +58,7 @@ class TestSyncUserBadgesCommand:
     def test_badge_creation(self, mock_user_filter, mock_badge_get_or_create):
         # Set up badge creation mock
         mock_badge = MagicMock()
-        mock_badge.name = OWASP_EMPLOYEE_BADGE_NAME
+        mock_badge.name = OWASP_STAFF_BADGE_NAME
         mock_badge_get_or_create.return_value = (mock_badge, True)
 
         # Set up empty querysets
@@ -73,14 +73,14 @@ class TestSyncUserBadgesCommand:
 
         # Call the command
         out = StringIO()
-        call_command("github_sync_user_badges", stdout=out)
+        call_command("owasp_update_badges", stdout=out)
 
         # Verify badge creation and defaults
 
         mock_badge_get_or_create.assert_called_once_with(
-            name="OWASP Employee",
+            name=OWASP_STAFF_BADGE_NAME,
             defaults={
-                "description": "Official OWASP Employee",
+                "description": "Official OWASP Staff",
                 "css_class": "fa-user-shield",
                 "weight": 100,
             },
@@ -96,7 +96,7 @@ class TestSyncUserBadgesCommand:
         """Test that running the command multiple times has the same effect as running it once."""
         # Set up badge mock
         mock_badge = MagicMock()
-        mock_badge.name = OWASP_EMPLOYEE_BADGE_NAME
+        mock_badge.name = OWASP_STAFF_BADGE_NAME
         mock_badge.id = 1
         mock_badge_get_or_create.return_value = (mock_badge, False)
 
@@ -125,11 +125,11 @@ class TestSyncUserBadgesCommand:
 
         # First run
         out1 = StringIO()
-        call_command("github_sync_user_badges", stdout=out1)
+        call_command("owasp_update_badges", stdout=out1)
 
         # Second run
         out2 = StringIO()
-        call_command("github_sync_user_badges", stdout=out2)
+        call_command("owasp_update_badges", stdout=out2)
 
         # Verify no add/remove operations were performed
         mock_employee_with_badge.badges.add.assert_not_called()
