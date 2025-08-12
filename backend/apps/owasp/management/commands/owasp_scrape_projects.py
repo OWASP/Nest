@@ -51,6 +51,8 @@ class Command(BaseCommand):
                 project.deactivate()
                 continue
 
+            project.audience = scraper.get_audience()
+
             # Get GitHub URLs.
             scraped_urls = sorted(
                 {

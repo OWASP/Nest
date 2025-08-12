@@ -169,7 +169,7 @@ describe('ToggleableList', () => {
     expect(header).toHaveClass('mb-4', 'text-2xl', 'font-semibold')
   })
 
-  it('applies correct CSS to button items', () => {
+  it('applies correct CSS to button items (no underline, no transition, only hover background)', () => {
     const randomItems = ['React', 'Vue', 'Angular']
     render(<ToggleableList items={randomItems} label="Styled Buttons" />)
     const button = screen.getByText('React')
@@ -180,14 +180,16 @@ describe('ToggleableList', () => {
       'px-3',
       'py-1',
       'text-sm',
+      'hover:bg-gray-200',
+      'dark:border-gray-300',
+      'dark:hover:bg-gray-700'
+    )
+    expect(button).not.toHaveClass(
+      'hover:underline',
       'transition-all',
       'duration-200',
       'ease-in-out',
-      'hover:scale-105',
-      'hover:bg-gray-200',
-      'hover:underline',
-      'dark:border-gray-300',
-      'dark:hover:bg-gray-700'
+      'hover:scale-105'
     )
   })
 })

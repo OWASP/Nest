@@ -24,6 +24,7 @@ class TestSitemapUrls(unittest.TestCase):
             "sitemap/committees.xml",
             "sitemap/members.xml",
             "sitemap/organizations.xml",
+            "sitemap/snapshots.xml",
             "sitemap/projects.xml",
             "sitemap/repositories.xml",
             "sitemap/static.xml",
