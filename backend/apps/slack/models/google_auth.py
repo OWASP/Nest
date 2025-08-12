@@ -19,11 +19,11 @@ class GoogleAuth(models.Model):
         related_name="google_auth",
         verbose_name="Slack Member",
     )
-    access_token = models.TextField(
+    access_token = models.BinaryField(
         verbose_name="Access Token",
         blank=True,
     )
-    refresh_token = models.TextField(
+    refresh_token = models.BinaryField(
         verbose_name="Refresh Token",
         blank=True,
     )
