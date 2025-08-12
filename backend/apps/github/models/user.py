@@ -27,7 +27,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         ]
         verbose_name_plural = "Users"
 
-    bio = models.TextField(verbose_name="Bio", max_length=1000, default="")
+    bio = models.TextField(verbose_name="Bio", max_length=1000, blank=True, default="")
     is_hireable = models.BooleanField(verbose_name="Is hireable", default=False)
     twitter_username = models.CharField(
         verbose_name="Twitter username", max_length=50, default="", blank=True
@@ -37,8 +37,8 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
     is_owasp_staff = models.BooleanField(
         default=False,
-        verbose_name="OWASP Staff",
-        help_text="Indicates if the user is an OWASP staff member.",
+        verbose_name="Is OWASP Staff",
+        help_text="Indicates if the user is an OWASP Foundation employee.",
     )
 
     contributions_count = models.PositiveIntegerField(
