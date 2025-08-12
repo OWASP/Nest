@@ -1,10 +1,14 @@
 from django.contrib import admin
-from django.contrib.contenttypes.admin import GenericTabularInline
 from ..models import EntityChannel
 
 @admin.action(description="Mark selected EntityChannels as reviewed")
-def mark_as_reviewed(modeladmin, request, queryset):
-    queryset.update(is_reviewed=True)
+def mark_as_reviewed(_modeladmin, request, queryset):
+    updated = queryset.update(is_reviewed=True)
+    # Provide feedback in the admin UI
+    request._messages.add(
+        level=20,
+        message=f"Marked {updated} EntityChannel(s) as reviewed.",
+    )
 
 @admin.register(EntityChannel)
 class EntityChannelAdmin(admin.ModelAdmin):
