@@ -2,7 +2,6 @@
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
-from django.db import transaction
 from thefuzz import fuzz
 
 from apps.github.models.user import User
@@ -31,7 +30,6 @@ class Command(BaseCommand):
             help="Threshold for fuzzy matching (0-100)",
         )
 
-    @transaction.atomic
     def handle(self, *_args, **kwargs):
         model_name = kwargs["model_name"].lower()
         threshold = max(0, min(kwargs["threshold"], 100))
