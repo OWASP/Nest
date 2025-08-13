@@ -64,9 +64,6 @@ def create_chunks_and_embeddings(
             )
             chunks.append(chunk)
 
-    except ValueError:
-        logger.exception("Context error")
-        raise
     except openai.OpenAIError:
         logger.exception("Failed to create chunks and embeddings")
         return []

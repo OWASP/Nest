@@ -47,7 +47,7 @@ class BaseChunkCommand(BaseAICommand):
             chunk_texts = Chunk.split_text(full_content)
             if not chunk_texts:
                 self.stdout.write(
-                    f"No chunks created for {self.entity_name()} {entity_key}: `{full_content}`"
+                    f"No chunks created for {self.entity_name()} {entity_key}"
                 )
                 continue
 
