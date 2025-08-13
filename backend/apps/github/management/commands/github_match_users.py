@@ -57,7 +57,7 @@ class Command(BaseCommand):
 
     def process_entities(self, model_class, users_list, threshold):
         """Process entries."""
-        model_label = model_class.__class__.__name__.capitalize()
+        model_label = model_class.__name__.capitalize()
         self.stdout.write(f"\n--- Processing {model_label} ---")
 
         new_members_to_create = []
