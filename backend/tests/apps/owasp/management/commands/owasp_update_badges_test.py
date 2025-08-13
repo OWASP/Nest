@@ -146,7 +146,8 @@ class TestSyncUserBadgesCommand:
         call_command("owasp_update_badges", stdout=out2)
 
         # Verify no add/remove operations were performed
-        mock_employee_with_badge.badges.add.assert_not_called()
+        mock_badge.users.add.assert_not_called()
+        mock_badge.users.remove.assert_not_called()
 
         # Check both outputs contain zero-count messages
         assert "Added badge to 0 employees" in out1.getvalue()
