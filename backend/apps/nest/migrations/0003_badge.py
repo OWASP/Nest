@@ -4,27 +4,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('nest', '0002_apikey'),
+        ("nest", "0002_apikey"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Badge',
+            name="Badge",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nest_created_at', models.DateTimeField(auto_now_add=True)),
-                ('nest_updated_at', models.DateTimeField(auto_now=True)),
-                ('css_class', models.CharField(default='', max_length=255, verbose_name='CSS Class')),
-                ('description', models.CharField(blank=True, default='', max_length=255, verbose_name='Description')),
-                ('name', models.CharField(max_length=255, unique=True, verbose_name='Name')),
-                ('weight', models.PositiveSmallIntegerField(default=0, verbose_name='Weight')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("nest_created_at", models.DateTimeField(auto_now_add=True)),
+                ("nest_updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "css_class",
+                    models.CharField(default="", max_length=255, verbose_name="CSS Class"),
+                ),
+                (
+                    "description",
+                    models.CharField(
+                        blank=True, default="", max_length=255, verbose_name="Description"
+                    ),
+                ),
+                ("name", models.CharField(max_length=255, unique=True, verbose_name="Name")),
+                ("weight", models.PositiveSmallIntegerField(default=0, verbose_name="Weight")),
             ],
             options={
-                'verbose_name_plural': 'Badges',
-                'db_table': 'nest_badges',
-                'ordering': ['weight', 'name'],
+                "verbose_name_plural": "Badges",
+                "db_table": "nest_badges",
+                "ordering": ["weight", "name"],
             },
         ),
     ]

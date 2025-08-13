@@ -4,13 +4,12 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('owasp', '0046_merge_0045_badge_0045_project_audience'),
+        ("owasp", "0046_merge_0045_badge_0045_project_audience"),
     ]
 
     operations = [
         migrations.DeleteModel(
-            name='Badge',
+            name="Badge",
         ),
     ]
