@@ -45,7 +45,12 @@ class GoogleAuth(models.Model):
         flow = GoogleAuth.get_flow()
         flow.redirect_uri = settings.GOOGLE_AUTH_REDIRECT_URI
         state = member.slack_user_id
-        return flow.authorization_url(state=state)
+        return flow.authorization_url(
+            access_type="offline",
+            include_granted_scopes="true",
+            prompt="consent",
+            state=state,
+        )
 
     @staticmethod
     def authenticate_callback(auth_response, member_id):
@@ -67,7 +72,10 @@ class GoogleAuth(models.Model):
         flow.fetch_token(authorization_response=auth_response)
         auth.access_token = flow.credentials.token
         auth.refresh_token = flow.credentials.refresh_token
-        auth.expires_at = flow.credentials.expiry
+        expires_at = flow.credentials.expiry
+        if expires_at and timezone.is_naive(expires_at):
+            expires_at = timezone.make_aware(expires_at)
+        auth.expires_at = expires_at
         auth.save()
         return auth
 

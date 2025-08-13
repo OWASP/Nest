@@ -20,8 +20,8 @@ class TestGoogleAuthModel:
     def setUp(self):
         """Set up test data."""
         self.member = Member(slack_user_id="U123456789", username="testuser")
-        self.valid_token = 0x587584
-        self.valid_refresh_token = 0x123456
+        self.valid_token = b"valid_token"
+        self.valid_refresh_token = b"valid_refresh_token"
         self.expired_time = timezone.now() - timedelta(hours=1)
         self.future_time = timezone.now() + timedelta(hours=1)
 
@@ -186,7 +186,10 @@ class TestGoogleAuthModel:
         mock_get_or_create.assert_called_once_with(member=self.member)
 
         mock_flow_instance.authorization_url.assert_called_once_with(
-            state=self.member.slack_user_id
+            access_type="offline",
+            include_granted_scopes="true",
+            prompt="consent",
+            state=self.member.slack_user_id,
         )
 
     @override_settings(IS_GOOGLE_AUTH_ENABLED=False)
@@ -221,8 +224,8 @@ class TestGoogleAuthModel:
 
         # Mock flow and new credentials
         mock_credentials = Mock()
-        mock_credentials.token = 0x25848  # NOSONAR
-        mock_credentials.refresh_token = 0x123456
+        mock_credentials.token = b"token"  # NOSONAR
+        mock_credentials.refresh_token = b"refresh_token"
         mock_credentials.expiry = self.future_time
 
         mock_flow_instance = Mock()
@@ -231,8 +234,8 @@ class TestGoogleAuthModel:
 
         GoogleAuth.refresh_access_token(auth)
 
-        assert auth.access_token == 0x25848
-        assert auth.refresh_token == 0x123456
+        assert auth.access_token == b"token"
+        assert auth.refresh_token == b"refresh_token"
         assert auth.expires_at == self.future_time
 
         mock_flow_instance.fetch_token.assert_called_once_with(
@@ -291,8 +294,8 @@ class TestGoogleAuthModel:
     ):
         """Test successful authenticate_callback."""
         mock_credentials = Mock()
-        mock_credentials.token = 0x25848  # NOSONAR
-        mock_credentials.refresh_token = 0x123456
+        mock_credentials.token = b"token"  # NOSONAR
+        mock_credentials.refresh_token = b"refresh_token"
         mock_credentials.expiry = self.future_time
 
         mock_flow_instance = Mock(spec=Flow)
@@ -300,10 +303,10 @@ class TestGoogleAuthModel:
         mock_member_get.return_value = self.member
         mock_get_flow.return_value = mock_flow_instance
         mock_get_or_create.return_value = (GoogleAuth(member=self.member), False)
-        result = GoogleAuth.authenticate_callback({}, member_id=self.member.id)
+        result = GoogleAuth.authenticate_callback({}, member_id=self.member.slack_user_id)
 
-        assert result.access_token == 0x25848
-        assert result.refresh_token == 0x123456
+        assert result.access_token == b"token"
+        assert result.refresh_token == b"refresh_token"
         assert result.expires_at == self.future_time
         mock_get_or_create.assert_called_once_with(member=self.member)
         mock_save.assert_called_once()
