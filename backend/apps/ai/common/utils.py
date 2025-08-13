@@ -16,21 +16,6 @@ from apps.ai.models.context import Context
 logger: logging.Logger = logging.getLogger(__name__)
 
 
-def create_context(content: str, content_object=None, source: str = "") -> Context:
-    """Create and save a Context instance independently.
-
-    Args:
-        content (str): The context content
-        content_object: Optional related object
-        source (str): Source identifier
-
-    Returns:
-        Context: Created Context instance
-
-    """
-    return Context.update_data(content=content, content_object=content_object, source=source)
-
-
 def create_chunks_and_embeddings(
     chunk_texts: list[str],
     context: Context,
@@ -55,10 +40,6 @@ def create_chunks_and_embeddings(
         ValueError: If context is None or invalid
 
     """
-    if context is None:
-        error_msg = "Context is required for chunk creation.please create a context first."
-        raise ValueError(error_msg)
-
     try:
         last_request_time = datetime.now(UTC) - timedelta(
             seconds=DEFAULT_LAST_REQUEST_OFFSET_SECONDS
@@ -66,7 +47,9 @@ def create_chunks_and_embeddings(
         time_since_last_request = datetime.now(UTC) - last_request_time
 
         if time_since_last_request < timedelta(seconds=MIN_REQUEST_INTERVAL_SECONDS):
-            time.sleep(MIN_REQUEST_INTERVAL_SECONDS - time_since_last_request.total_seconds())
+            time.sleep(
+                MIN_REQUEST_INTERVAL_SECONDS - time_since_last_request.total_seconds()
+            )
 
         response = openai_client.embeddings.create(
             input=chunk_texts,
@@ -76,17 +59,16 @@ def create_chunks_and_embeddings(
 
         chunks = []
         for text, embedding in zip(chunk_texts, embeddings, strict=True):
-            chunk = Chunk.update_data(text=text, embedding=embedding, save=False)
-            chunk.context = context
-            if save:
-                chunk.save()
+            chunk = Chunk.update_data(
+                text=text, embedding=embedding, context=context, save=save
+            )
             chunks.append(chunk)
 
-    except openai.OpenAIError:
-        logger.exception("Failed to create chunks and embeddings")
-        return []
     except ValueError:
         logger.exception("Context error")
         raise
+    except openai.OpenAIError:
+        logger.exception("Failed to create chunks and embeddings")
+        return []
     else:
         return chunks

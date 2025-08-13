@@ -45,6 +45,7 @@ class Chunk(TimestampedModel):
     def update_data(
         text: str,
         embedding,
+        context: Context,
         *,
         save: bool = True,
     ) -> "Chunk":
@@ -53,18 +54,16 @@ class Chunk(TimestampedModel):
         Args:
           text (str): The text content of the chunk.
           embedding (list): The embedding vector for the chunk.
+          context (Context): The context this chunk belongs to.
           save (bool): Whether to save the chunk to the database.
 
         Returns:
           Chunk: The created chunk instance.
 
         """
-        chunk = Chunk(text=text, embedding=embedding)
+        chunk = Chunk(text=text, embedding=embedding, context=context)
 
         if save:
-            if chunk.context_id is None:
-                error_msg = "Chunk must have a context assigned before saving."
-                raise ValueError(error_msg)
             chunk.save()
 
         return chunk

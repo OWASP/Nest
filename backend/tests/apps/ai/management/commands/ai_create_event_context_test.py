@@ -3,20 +3,17 @@
 from unittest.mock import Mock, patch
 
 import pytest
-from django.core.management.base import BaseCommand
 
 from apps.ai.management.commands.ai_create_event_context import Command
 
 
 @pytest.fixture
 def command():
-    """Return a command instance."""
     return Command()
 
 
 @pytest.fixture
 def mock_event():
-    """Return a mock Event instance."""
     event = Mock()
     event.id = 1
     event.key = "test-event"
@@ -24,36 +21,36 @@ def mock_event():
 
 
 class TestAiCreateEventContextCommand:
-    """Test suite for the ai_create_event_context command."""
+    def test_command_inheritance(self, command):
+        """Test that the command inherits from BaseContextCommand."""
+        from apps.ai.common.base import BaseContextCommand
+
+        assert isinstance(command, BaseContextCommand)
 
     def test_command_help_text(self, command):
         """Test that the command has the correct help text."""
-        assert command.help == "Update context for OWASP event data"
-
-    def test_command_inheritance(self, command):
-        """Test that the command inherits from BaseCommand."""
-        assert isinstance(command, BaseCommand)
+        assert command.help() == "Update context for OWASP event data"
 
     def test_model_class_property(self, command):
         """Test the model_class property returns Event."""
         from apps.owasp.models.event import Event
 
-        assert command.model_class == Event
+        assert command.model_class() == Event
 
     def test_entity_name_property(self, command):
         """Test the entity_name property."""
-        assert command.entity_name == "event"
+        assert command.entity_name() == "event"
 
     def test_entity_name_plural_property(self, command):
         """Test the entity_name_plural property."""
-        assert command.entity_name_plural == "events"
+        assert command.entity_name_plural() == "events"
 
     def test_key_field_name_property(self, command):
         """Test the key_field_name property."""
-        assert command.key_field_name == "key"
+        assert command.key_field_name() == "key"
 
     def test_extract_content(self, command, mock_event):
-        """Test content extraction from event."""
+        """Test the extract_content method."""
         with patch(
             "apps.ai.management.commands.ai_create_event_context.extract_event_content"
         ) as mock_extract:
@@ -70,3 +67,11 @@ class TestAiCreateEventContextCommand:
             result = command.get_default_queryset()
             assert result == mock_queryset
             mock_upcoming.assert_called_once()
+
+    def test_get_base_queryset(self, command):
+        """Test the get_base_queryset method."""
+        with patch.object(command.__class__.__bases__[0], "get_base_queryset") as mock_super:
+            mock_super.return_value = Mock()
+            result = command.get_base_queryset()
+            mock_super.assert_called_once()
+            assert result == mock_super.return_value

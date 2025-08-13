@@ -34,19 +34,19 @@ class TestAiCreateEventChunksCommand:
         """Test the model_class property returns Event."""
         from apps.owasp.models.event import Event
 
-        assert command.model_class == Event
+        assert command.model_class() == Event
 
     def test_entity_name_property(self, command):
         """Test the entity_name property."""
-        assert command.entity_name == "event"
+        assert command.entity_name() == "event"
 
     def test_entity_name_plural_property(self, command):
         """Test the entity_name_plural property."""
-        assert command.entity_name_plural == "events"
+        assert command.entity_name_plural() == "events"
 
     def test_key_field_name_property(self, command):
         """Test the key_field_name property."""
-        assert command.key_field_name == "key"
+        assert command.key_field_name() == "key"
 
     def test_extract_content(self, command, mock_event):
         """Test content extraction from event."""
@@ -58,23 +58,21 @@ class TestAiCreateEventChunksCommand:
             assert content == ("prose content", "metadata content")
             mock_extract.assert_called_once_with(mock_event)
 
-    def test_get_default_queryset(self, command):
-        """Test that the default queryset returns upcoming events."""
-        with patch(
-            "apps.ai.management.commands.ai_create_event_chunks.Event.upcoming_events"
-        ) as mock_upcoming:
-            mock_queryset = Mock()
-            mock_upcoming.return_value = mock_queryset
-            result = command.get_default_queryset()
-            assert result == mock_queryset
-            mock_upcoming.assert_called_once()
-
     def test_get_base_queryset(self, command):
         """Test get_base_queryset calls super().get_base_queryset()."""
         with patch(
-            "apps.ai.common.base.BaseAICommand.get_base_queryset",
+            "apps.ai.common.base.ai_command.BaseAICommand.get_base_queryset",
             return_value="base_qs",
         ) as mock_super:
             result = command.get_base_queryset()
             assert result == "base_qs"
             mock_super.assert_called_once()
+
+    def test_get_default_queryset(self, command):
+        """Test that the default queryset returns upcoming events."""
+        with patch("apps.owasp.models.event.Event.upcoming_events") as mock_upcoming:
+            mock_queryset = Mock()
+            mock_upcoming.return_value = mock_queryset
+            result = command.get_default_queryset()
+            assert result == mock_queryset
+            mock_upcoming.assert_called_once()

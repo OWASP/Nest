@@ -26,16 +26,16 @@ class TestAiCreateProjectChunksCommand:
     def test_model_class_property(self, command):
         from apps.owasp.models.project import Project
 
-        assert command.model_class == Project
+        assert command.model_class() == Project
 
     def test_entity_name_property(self, command):
-        assert command.entity_name == "project"
+        assert command.entity_name() == "project"
 
     def test_entity_name_plural_property(self, command):
-        assert command.entity_name_plural == "projects"
+        assert command.entity_name_plural() == "projects"
 
     def test_key_field_name_property(self, command):
-        assert command.key_field_name == "key"
+        assert command.key_field_name() == "key"
 
     def test_extract_content(self, command, mock_project):
         with patch(
@@ -47,6 +47,11 @@ class TestAiCreateProjectChunksCommand:
             mock_extract.assert_called_once_with(mock_project)
 
     def test_get_base_queryset_calls_super(self, command):
-        with patch("apps.ai.common.base.BaseChunkCommand.get_base_queryset") as mock_super:
-            command.get_base_queryset()
+        """Test that get_base_queryset calls the parent method."""
+        with patch(
+            "apps.ai.common.base.chunk_command.BaseChunkCommand.get_base_queryset"
+        ) as mock_super:
+            mock_super.return_value = "base_queryset"
+            result = command.get_base_queryset()
+            assert result == "base_queryset"
             mock_super.assert_called_once()

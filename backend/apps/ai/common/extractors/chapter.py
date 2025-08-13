@@ -26,12 +26,8 @@ def extract_chapter_content(chapter) -> tuple[str, str]:
         repo = chapter.owasp_repository
         if repo.description:
             prose_parts.append(f"Repository Description: {repo.description}")
-        if repo.topics and hasattr(repo.topics, "__iter__") and not isinstance(repo.topics, str):
-            try:
-                metadata_parts.append(f"Repository Topics: {', '.join(repo.topics)}")
-            except TypeError:
-                # If topics is not iterable, convert to string
-                metadata_parts.append(f"Repository Topics: {repo.topics}")
+        if repo.topics:
+            metadata_parts.append(f"Repository Topics: {', '.join(repo.topics)}")
 
     if chapter.name:
         metadata_parts.append(f"Chapter Name: {chapter.name}")

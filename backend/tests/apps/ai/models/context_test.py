@@ -158,3 +158,123 @@ class TestContextModel:
                 content_type=mock_content_type, object_id=1, content=content
             )
             assert result == mock_context
+
+    def test_str_method_with_name_attribute(self):
+        """Test __str__ method when content_object has name attribute."""
+        content_object = Mock()
+        content_object.name = "Test Object"
+
+        content_type = Mock()
+        content_type.model = "test_model"
+
+        with (
+            patch.object(Context, "content_object", content_object),
+            patch.object(Context, "content_type", content_type),
+        ):
+            context = Context()
+            context.content = (
+                "This is test content that is longer than 50 characters to test truncation"
+            )
+
+            result = str(context)
+            assert (
+                result
+                == "test_model Test Object: This is test content that is longer than 50 charac"
+            )
+
+    def test_str_method_with_key_attribute(self):
+        """Test __str__ method when content_object has key but no name attribute."""
+        content_object = Mock()
+        content_object.name = None
+        content_object.key = "test-key"
+
+        content_type = Mock()
+        content_type.model = "test_model"
+
+        with (
+            patch.object(Context, "content_object", content_object),
+            patch.object(Context, "content_type", content_type),
+        ):
+            context = Context()
+            context.content = "Short content"
+
+            result = str(context)
+            assert result == "test_model test-key: Short content"
+
+    def test_str_method_fallback_to_str(self):
+        """Test __str__ method falls back to str(content_object)."""
+        content_object = Mock()
+        content_object.name = None
+        content_object.key = None
+        content_object.__str__ = Mock(return_value="String representation")
+
+        content_type = Mock()
+        content_type.model = "test_model"
+
+        with (
+            patch.object(Context, "content_object", content_object),
+            patch.object(Context, "content_type", content_type),
+        ):
+            context = Context()
+            context.content = "Test content"
+
+            result = str(context)
+            assert result == "test_model String representation: Test content"
+
+    @patch("apps.ai.models.context.Context.objects.filter")
+    @patch("apps.ai.models.context.Context.__init__")
+    @patch("apps.ai.models.context.Context.save")
+    def test_update_data_new_context_with_save(self, mock_save, mock_init, mock_filter):
+        """Test update_data creating a new context with save=True."""
+        mock_filter.return_value.first.return_value = None
+        mock_init.return_value = None
+
+        content = "New test content"
+        mock_content_object = Mock()
+        mock_content_object.pk = 1
+        source = "test_source"
+
+        with patch(
+            "apps.ai.models.context.ContentType.objects.get_for_model"
+        ) as mock_get_for_model:
+            mock_content_type = Mock()
+            mock_get_for_model.return_value = mock_content_type
+
+            result = Context.update_data(content, mock_content_object, source=source, save=True)
+
+            mock_get_for_model.assert_called_once_with(mock_content_object)
+            mock_filter.assert_called_once_with(
+                content_type=mock_content_type, object_id=1, content=content
+            )
+            mock_save.assert_called_once()
+            assert isinstance(result, Context)
+
+    @patch("apps.ai.models.context.Context.objects.filter")
+    @patch("apps.ai.models.context.Context.__init__")
+    def test_update_data_new_context_without_save(self, mock_init, mock_filter):
+        """Test update_data creating a new context with save=False."""
+        mock_filter.return_value.first.return_value = None
+        mock_init.return_value = None
+
+        content = "New test content"
+        mock_content_object = Mock()
+        mock_content_object.pk = 1
+        source = "test_source"
+
+        with patch(
+            "apps.ai.models.context.ContentType.objects.get_for_model"
+        ) as mock_get_for_model:
+            mock_content_type = Mock()
+            mock_get_for_model.return_value = mock_content_type
+
+            with patch("apps.ai.models.context.Context.save") as mock_save:
+                result = Context.update_data(
+                    content, mock_content_object, source=source, save=False
+                )
+
+                mock_get_for_model.assert_called_once_with(mock_content_object)
+                mock_filter.assert_called_once_with(
+                    content_type=mock_content_type, object_id=1, content=content
+                )
+                mock_save.assert_not_called()
+                assert isinstance(result, Context)
