@@ -17,7 +17,11 @@ from apps.github.models.milestone import Milestone
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
 from apps.owasp.models.common import RepositoryBasedEntityModel
-from apps.owasp.models.enums.project import ProjectLevel, ProjectType
+from apps.owasp.models.enums.project import (
+    ProjectLevel,
+    ProjectType,
+    validate_audience,
+)
 from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins.project import ProjectIndexMixin
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
@@ -42,6 +46,12 @@ class Project(
         ]
         verbose_name_plural = "Projects"
 
+    audience = models.JSONField(
+        verbose_name="Audience",
+        default=list,
+        blank=True,
+        validators=[validate_audience],
+    )
     level = models.CharField(
         verbose_name="Level",
         max_length=20,
