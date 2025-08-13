@@ -10,13 +10,13 @@ title: OWASP Nest
 
 ![Node 22](https://img.shields.io/badge/Node-22-blue.svg) ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg) ![Code Style](https://img.shields.io/badge/ESLint-9.17-blue) ![Prettier](https://img.shields.io/badge/Prettier-3.4.2-blue)
 
-![CI/CD](https://img.shields.io/github/actions/workflow/status/owasp/nest/ci-cd.yaml?branch=main&color=41BE41&style=flat&label=Build) ![GitHub License](https://img.shields.io/github/license/owasp/nest?style=flat&color=41BE4A&label=License) ![Contributors](https://img.shields.io/github/contributors/owasp/nest?style=flat&label=Contributors) ![Last Commit](https://img.shields.io/github/last-commit/owasp/nest/main?style=flat&label=Last%20commit)
+![CI/CD](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-ci-cd.yaml?branch=main&color=41BE41&style=flat&label=Build) ![GitHub License](https://img.shields.io/github/license/owasp/nest?style=flat&color=41BE4A&label=License) ![Contributors](https://img.shields.io/github/contributors/owasp/nest?style=flat&label=Contributors) ![Last Commit](https://img.shields.io/github/last-commit/owasp/nest/main?style=flat&label=Last%20commit)
 
-##  What is OWASP Nest?
+## What is OWASP Nest?
 
 **OWASP Nest** is a comprehensive platform designed to enhance collaboration and contribution within the OWASP community. It serves as a central hub for exploring OWASP projects, finding contribution opportunities, and fostering community engagement in software security.
 
-###  **Key Features**
+### **Key Features**
 
  **Advanced Search Capabilities** – Find projects and issues efficiently using powerful filters.
  **Slack Integration** – Stay connected with a [Slack bot](https://owasp.slack.com/team/U07M1C4JASK) for real-time updates.
@@ -27,7 +27,7 @@ OWASP Nest makes it easier for both new and experienced contributors to engage m
 
 ---
 
-##  Meet the Leaders
+## Meet the Leaders
 
 OWASP Nest is led by a dedicated team ensuring the platform aligns with OWASP’s mission and fosters a thriving open-source ecosystem.
 
@@ -41,24 +41,25 @@ OWASP Nest is led by a dedicated team ensuring the platform aligns with OWASP’
 
 ---
 
-##  How to Contribute
+## How to Contribute
 
 OWASP Nest thrives on community contributions. Whether you're a developer, designer, writer, or security enthusiast, there are multiple ways to get involved:
 
--  **Code Contributions** – Help improve the platform by fixing issues or adding features.
--  **Code Reviews** – Ensure high-quality contributions by reviewing pull requests.
--  **Documentation** – Write or enhance guides to help users navigate the platform.
--  **Report Issues** – Identify bugs or suggest improvements.
--  **Community Engagement** – Share feedback, participate in discussions, or promote the project in your network.
+- **Code Contributions** – Help improve the platform by fixing issues or adding features.
+- **Code Reviews** – Ensure high-quality contributions by reviewing pull requests.
+- **Documentation** – Write or enhance guides to help users navigate the platform.
+- **Report Issues** – Identify bugs or suggest improvements.
+- **Community Engagement** – Share feedback, participate in discussions, or promote the project in your network.
 
-###  **Get Started Today!**
+### **Get Started Today!**
+
 1. Explore the [OWASP Nest Repository](https://github.com/OWASP/Nest)
 2. Read the [Contributing Guidelines](contributing.md)
 3. Follow the [Code of Conduct](code-of-conduct.md)
 
 ---
 
-##  Useful Links
+## Useful Links
 
  [OWASP Nest GitHub Repository](https://github.com/OWASP/Nest)
  [OWASP Project Nest Page](https://owasp.org/www-project-nest/)

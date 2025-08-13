@@ -10,11 +10,13 @@ const ToggleableList = ({
   label,
   icon,
   limit = 10,
+  isDisabled = false,
 }: {
   items: string[]
   label: React.ReactNode
   limit?: number
   icon?: IconDefinition
+  isDisabled?: boolean
 }) => {
   const [showAll, setShowAll] = useState(false)
   const router = useRouter()
@@ -37,8 +39,8 @@ const ToggleableList = ({
         {(showAll ? items : items.slice(0, limit)).map((item, index) => (
           <button
             key={index}
-            className="rounded-lg border border-gray-400 px-3 py-1 text-sm transition-all duration-200 ease-in-out hover:scale-105 hover:bg-gray-200 hover:underline dark:border-gray-300 dark:hover:bg-gray-700"
-            onClick={() => handleButtonClick({ item })}
+            className="rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700"
+            onClick={() => !isDisabled && handleButtonClick({ item })}
           >
             {item}
           </button>

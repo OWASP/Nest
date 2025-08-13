@@ -23,6 +23,14 @@ jest.mock('next/link', () => {
   return MockLink
 })
 
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+  }),
+}))
+
 jest.mock('next/image', () => ({
   __esModule: true,
   default: ({
@@ -58,10 +66,6 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
     className?: string
     [key: string]: unknown
   }) => <span data-testid={`icon-${icon.iconName}`} className={className} {...props} />,
-}))
-
-jest.mock('utils/capitalize', () => ({
-  capitalize: (str: string) => str.charAt(0).toUpperCase() + str.slice(1),
 }))
 
 jest.mock('utils/credentials', () => ({

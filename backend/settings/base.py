@@ -17,7 +17,8 @@ class Base(Configuration):
     AUTH_USER_MODEL = "nest.User"
     CORS_ALLOW_CREDENTIALS = True
     DEBUG = False
-
+    GITHUB_APP_ID = None
+    GITHUB_APP_INSTALLATION_ID = None
     IS_LOCAL_ENVIRONMENT = False
     IS_PRODUCTION_ENVIRONMENT = False
     IS_STAGING_ENVIRONMENT = False
