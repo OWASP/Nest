@@ -48,6 +48,10 @@ class MatchLeadersCommandMockTest(SimpleTestCase):
         ]:
             mock.reset_mock()
 
+        self.mock_chapter.__name__ = "Chapter"
+        self.mock_committee.__name__ = "Committee"
+        self.mock_project.__name__ = "Project"
+
         def entity_member_side_effect(*_, **kwargs):
             instance = MagicMock()
             instance.object_id = kwargs.get("object_id")
@@ -96,7 +100,6 @@ class MatchLeadersCommandMockTest(SimpleTestCase):
         mock_entity.pk = pk
         mock_entity.leaders_raw = leaders_raw
         mock_entity.__str__.return_value = name
-        type(mock_entity).__name__ = "MagicMockModel"
         return mock_entity
 
     def test_command_with_invalid_model_name(self):
@@ -110,7 +113,6 @@ class MatchLeadersCommandMockTest(SimpleTestCase):
         call_command("github_match_users", "chapter", stdout=out)
 
         mock_bulk_create = self.mock_entity_member.objects.bulk_create
-        # FIX: Use plain assert
         assert mock_bulk_create.called
 
         call_args_list = mock_bulk_create.call_args[0][0]
@@ -154,5 +156,4 @@ class MatchLeadersCommandMockTest(SimpleTestCase):
         call_command("github_match_users", "committee", stdout=out)
 
         assert not mock_fuzz.token_sort_ratio.called
-
         assert "Created 1 new leader records" in out.getvalue()
