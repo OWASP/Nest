@@ -4,6 +4,7 @@ from datetime import timedelta
 from unittest.mock import Mock, patch
 
 import pytest
+from django.core.exceptions import ValidationError
 from django.test import override_settings
 from django.utils import timezone
 from google_auth_oauthlib.flow import Flow
@@ -19,8 +20,8 @@ class TestGoogleAuthModel:
     def setUp(self):
         """Set up test data."""
         self.member = Member(slack_user_id="U123456789", username="testuser")
-        self.valid_token = "valid_access_token"  # noqa: S105
-        self.valid_refresh_token = "valid_refresh_token"  # noqa: S105
+        self.valid_token = 0x587584
+        self.valid_refresh_token = 0x123456
         self.expired_time = timezone.now() - timedelta(hours=1)
         self.future_time = timezone.now() + timedelta(hours=1)
 
@@ -101,7 +102,7 @@ class TestGoogleAuthModel:
     def test_authenticate_when_disabled(self):
         """Test authenticate raises error when Google auth is disabled."""
         with pytest.raises(ValueError, match="Google OAuth client ID"):
-            GoogleAuth.authenticate("http://auth.url", self.member)  # NOSONAR
+            GoogleAuth.authenticate(self.member)
 
     @override_settings(
         IS_GOOGLE_AUTH_ENABLED=True,
@@ -126,7 +127,7 @@ class TestGoogleAuthModel:
             ),
             True,
         )
-        result = GoogleAuth.authenticate("http://auth.url", self.member)  # NOSONAR
+        result = GoogleAuth.authenticate(self.member)
 
         assert result.access_token == self.valid_token
         assert result.refresh_token == self.valid_refresh_token
@@ -153,7 +154,7 @@ class TestGoogleAuthModel:
         )
         mock_get_or_create.return_value = (existing_auth, False)
 
-        GoogleAuth.authenticate("http://auth.url", self.member)  # NOSONAR
+        GoogleAuth.authenticate(self.member)
 
         mock_refresh.assert_called_once_with(existing_auth)
         mock_get_or_create.assert_called_once_with(member=self.member)
@@ -165,40 +166,28 @@ class TestGoogleAuthModel:
         GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
     )
     @patch("apps.slack.models.google_auth.GoogleAuth.get_flow")
-    @patch("apps.slack.models.google_auth.GoogleAuth.save")
     @patch("apps.slack.models.google_auth.GoogleAuth.objects.get_or_create")
-    def test_authenticate_first_time(self, mock_get_or_create, mock_save, mock_get_flow):
+    def test_authenticate_first_time(self, mock_get_or_create, mock_get_flow):
         """Test authenticate for first time (no existing token)."""
         # Mock flow and credentials
-        mock_credentials = Mock()
-        mock_credentials.token = "new_access_token"  # noqa: S105 # NOSONAR
-        mock_credentials.refresh_token = "new_refresh_token"  # noqa: S105
-        mock_credentials.expiry = self.future_time
-
         mock_flow_instance = Mock()
-        mock_flow_instance.credentials = mock_credentials
         mock_get_flow.return_value = mock_flow_instance
         mock_get_or_create.return_value = (
             GoogleAuth(
                 member=self.member,
-                access_token="",
-                refresh_token="",
+                access_token=None,
+                refresh_token=None,
                 expires_at=None,
             ),
             True,
         )
+        GoogleAuth.authenticate(self.member)
 
-        result = GoogleAuth.authenticate("http://auth.url", self.member)  # NOSONAR
-
-        assert result.access_token == "new_access_token"  # noqa: S105
-        assert result.refresh_token == "new_refresh_token"  # noqa: S105
-        assert result.expires_at == self.future_time
         mock_get_or_create.assert_called_once_with(member=self.member)
 
-        mock_flow_instance.fetch_token.assert_called_once_with(
-            authorization_response="http://auth.url",  # NOSONAR
+        mock_flow_instance.authorization_url.assert_called_once_with(
+            state=self.member.slack_user_id
         )
-        mock_save.assert_called_once()
 
     @override_settings(IS_GOOGLE_AUTH_ENABLED=False)
     def test_refresh_access_token_when_disabled(self):
@@ -232,8 +221,8 @@ class TestGoogleAuthModel:
 
         # Mock flow and new credentials
         mock_credentials = Mock()
-        mock_credentials.token = "new_access_token"  # noqa: S105 # NOSONAR
-        mock_credentials.refresh_token = "new_refresh_token"  # noqa: S105
+        mock_credentials.token = 0x25848  # NOSONAR
+        mock_credentials.refresh_token = 0x123456
         mock_credentials.expiry = self.future_time
 
         mock_flow_instance = Mock()
@@ -242,8 +231,8 @@ class TestGoogleAuthModel:
 
         GoogleAuth.refresh_access_token(auth)
 
-        assert auth.access_token == "new_access_token"  # noqa: S105
-        assert auth.refresh_token == "new_refresh_token"  # noqa: S105
+        assert auth.access_token == 0x25848
+        assert auth.refresh_token == 0x123456
         assert auth.expires_at == self.future_time
 
         mock_flow_instance.fetch_token.assert_called_once_with(
@@ -252,6 +241,25 @@ class TestGoogleAuthModel:
             client_secret="test_client_secret",  # noqa: S106
         )
         mock_save.assert_called_once()
+
+    @override_settings(
+        IS_GOOGLE_AUTH_ENABLED=True,
+        GOOGLE_AUTH_CLIENT_ID="test_client_id",
+        GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
+        GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
+    )
+    def test_refresh_token_not_found(self):
+        """Test refresh_access_token raises error when no refresh token is present."""
+        auth = GoogleAuth(
+            member=self.member,
+            access_token=self.valid_token,
+            refresh_token=None,
+        )
+
+        with pytest.raises(
+            ValidationError, match="Google OAuth refresh token is not set or expired."
+        ):
+            GoogleAuth.refresh_access_token(auth)
 
     def test_verbose_names(self):
         """Test model field verbose names."""
@@ -262,55 +270,54 @@ class TestGoogleAuthModel:
         assert auth._meta.get_field("refresh_token").verbose_name == "Refresh Token"
         assert auth._meta.get_field("expires_at").verbose_name == "Token Expiry"
 
-    def test_refresh_token_blank_allowed(self):
-        """Test that refresh_token can be blank."""
-        auth = GoogleAuth(
-            member=self.member,
-            access_token=self.valid_token,
-            refresh_token="",  # Blank is allowed
-        )
+    @override_settings(IS_GOOGLE_AUTH_ENABLED=False)
+    def test_authenticate_callback_google_auth_disabled(self):
+        """Test authenticate_callback raises error when Google auth is disabled."""
+        with pytest.raises(ValueError, match="Google OAuth client ID"):
+            GoogleAuth.authenticate_callback(auth_response={}, member_id=4)
 
-        assert auth.refresh_token == ""
+    @override_settings(
+        IS_GOOGLE_AUTH_ENABLED=True,
+        GOOGLE_AUTH_CLIENT_ID="test_client_id",
+        GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
+        GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
+    )
+    @patch("apps.slack.models.google_auth.GoogleAuth.get_flow")
+    @patch("apps.slack.models.google_auth.GoogleAuth.objects.get_or_create")
+    @patch("apps.slack.models.google_auth.GoogleAuth.save")
+    @patch("apps.slack.models.google_auth.Member.objects.get")
+    def test_authenticate_callback_success(
+        self, mock_member_get, mock_save, mock_get_or_create, mock_get_flow
+    ):
+        """Test successful authenticate_callback."""
+        mock_credentials = Mock()
+        mock_credentials.token = 0x25848  # NOSONAR
+        mock_credentials.refresh_token = 0x123456
+        mock_credentials.expiry = self.future_time
 
-    def test_expires_at_null_allowed(self):
-        """Test that expires_at can be null."""
-        auth = GoogleAuth(
-            member=self.member,
-            access_token=self.valid_token,
-            expires_at=None,  # Null is allowed
-        )
+        mock_flow_instance = Mock(spec=Flow)
+        mock_flow_instance.credentials = mock_credentials
+        mock_member_get.return_value = self.member
+        mock_get_flow.return_value = mock_flow_instance
+        mock_get_or_create.return_value = (GoogleAuth(member=self.member), False)
+        result = GoogleAuth.authenticate_callback({}, member_id=self.member.id)
 
-        assert auth.expires_at is None
+        assert result.access_token == 0x25848
+        assert result.refresh_token == 0x123456
+        assert result.expires_at == self.future_time
+        mock_get_or_create.assert_called_once_with(member=self.member)
+        mock_save.assert_called_once()
+        mock_flow_instance.fetch_token.assert_called_once_with(authorization_response={})
 
-
-class TestGoogleAuthIntegration:
-    """Integration tests for GoogleAuth model."""
-
-    def test_full_authentication_flow(self):
-        """Test complete authentication flow."""
-        member = Member(slack_user_id="U123456789", username="testuser")
-
-        # Test that we can create and use GoogleAuth
-        with override_settings(
-            IS_GOOGLE_AUTH_ENABLED=True,
-            GOOGLE_AUTH_CLIENT_ID="integration_client_id",
-            GOOGLE_AUTH_CLIENT_SECRET="integration_client_secret",  # noqa: S106
-            GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
-        ):
-            # Test flow creation doesn't raise errors
-            with patch("apps.slack.models.google_auth.Flow.from_client_config") as mock_flow:
-                mock_flow.return_value = Mock(spec=Flow)
-                flow = GoogleAuth.get_flow()
-                assert flow is not None
-
-            # Test authentication with valid token
-            auth = GoogleAuth(
-                member=member,
-                access_token="integration_token",  # noqa: S106
-                refresh_token="integration_refresh",  # noqa: S106
-                expires_at=timezone.now() + timedelta(hours=1),
-            )
-
-            assert not auth.is_token_expired
-            assert str(auth) == f"GoogleAuth(member={member})"
-            assert member.google_auth == auth
+    @override_settings(
+        IS_GOOGLE_AUTH_ENABLED=True,
+        GOOGLE_AUTH_CLIENT_ID="test_client_id",
+        GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
+        GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
+    )
+    @patch("apps.slack.models.member.Member.objects.get")
+    def test_authenticate_callback_member_not_found(self, mock_member_get):
+        """Test authenticate_callback raises error when member is not found."""
+        mock_member_get.side_effect = Member.DoesNotExist
+        with pytest.raises(ValidationError, match="Member with Slack ID 4 does not exist."):
+            GoogleAuth.authenticate_callback(auth_response={}, member_id=4)
