@@ -82,26 +82,18 @@ class Command(BaseCommand):
                         new_assignee = issue.assignees.first()
                         task, created = Task.objects.get_or_create(
                             issue=issue,
+                            assignee=new_assignee,
                             defaults={
                                 "module": module,
                                 "status": Task.Status.IN_PROGRESS,
-                                "assignee": new_assignee,
                             },
                         )
 
-                        if not created and task.assignee != new_assignee:
-                            task.assignee = new_assignee
-                            task.save(update_fields=["assignee"])
-                            self.stdout.write(
-                                self.style.SUCCESS(
-                                    f"Updated assignee for task of issue #{issue.id}"
-                                )
-                            )
-                        else:
+                        if created:
                             self.stdout.write(
                                 self.style.SUCCESS(
                                     f"Created task for assigned issue #{issue.id} "
-                                    f"in module '{module.name}'"
+                                    f"in module '{module.name}' assigned to {new_assignee.login}"
                                 )
                             )
 
