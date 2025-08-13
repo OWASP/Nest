@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
-from apps.common.clients import google_auth_client
+from apps.common.clients import get_google_auth_client
 from apps.slack.models.member import Member
 
 AUTH_ERROR_MESSAGE = (
@@ -84,7 +84,7 @@ class GoogleAuth(models.Model):
         """Create a Google OAuth flow instance."""
         if not settings.IS_GOOGLE_AUTH_ENABLED:
             raise ValueError(AUTH_ERROR_MESSAGE)
-        return google_auth_client
+        return get_google_auth_client()
 
     @property
     def is_token_expired(self):
