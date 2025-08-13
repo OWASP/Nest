@@ -1,6 +1,5 @@
 """Slack Google OAuth Authentication Model."""
 
-import boto3
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -8,7 +7,7 @@ from django.utils import timezone
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
-from apps.common.clients import get_google_auth_client
+from apps.common.clients import get_google_auth_client, kms_client
 from apps.slack.models.member import Member
 
 AUTH_ERROR_MESSAGE = (
@@ -111,12 +110,7 @@ class MemberGoogleCredentials(models.Model):
         """Create a KMS client instance."""
         if not settings.IS_AWS_KMS_ENABLED:
             raise ValueError(KMS_ERROR_MESSAGE)
-        return boto3.client(
-            "kms",
-            region_name=settings.AWS_REGION,
-            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-        )
+        return kms_client
 
     @property
     def access_token_str(self):
