@@ -12,7 +12,7 @@ def get_google_auth_client():
                 "client_id": settings.GOOGLE_AUTH_CLIENT_ID,
                 "client_secret": settings.GOOGLE_AUTH_CLIENT_SECRET,
                 "redirect_uris": [settings.GOOGLE_AUTH_REDIRECT_URI],
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "auth_uri": "https://accounts.google.com/o/oauth2/v2/auth",
                 "token_uri": "https://oauth2.googleapis.com/token",
             }
         },
