@@ -1,107 +1,158 @@
-"""Tests for the github_match_users Django management command."""
-
+import io
 from unittest.mock import MagicMock, patch
 
 import pytest
-from django.core.management.base import BaseCommand
+from django.core.management import call_command
+from django.core.management.base import CommandError
+from django.test import SimpleTestCase
 
-from apps.github.management.commands.github_match_users import Command
-
-
-@pytest.fixture
-def command():
-    """Return a command instance with a mocked stdout."""
-    cmd = Command()
-    cmd.stdout = MagicMock()
-    return cmd
+COMMAND_PATH = "apps.github.management.commands.github_match_users"
 
 
-class TestGithubMatchUsersCommand:
-    """Test suite for the command's setup and helper methods."""
+class MatchLeadersCommandMockTest(SimpleTestCase):
+    """Test suite for the github_match_users management command using mocks."""
 
-    def test_command_help_text(self, command):
-        """Test that the command has the new, correct help text."""
-        assert (
-            command.help
-            == "Matches entity leader names with GitHub Users and creates EntityMember records."
-        )
+    @classmethod
+    def setUpClass(cls):
+        """Start all necessary patchers once for the entire test class."""
+        super().setUpClass()
+        cls.user_patcher = patch(f"{COMMAND_PATH}.User")
+        cls.chapter_patcher = patch(f"{COMMAND_PATH}.Chapter")
+        cls.committee_patcher = patch(f"{COMMAND_PATH}.Committee")
+        cls.project_patcher = patch(f"{COMMAND_PATH}.Project")
+        cls.content_type_patcher = patch(f"{COMMAND_PATH}.ContentType")
+        cls.entity_member_patcher = patch(f"{COMMAND_PATH}.EntityMember")
 
-    def test_command_inheritance(self, command):
-        """Test that the command inherits from BaseCommand."""
-        assert isinstance(command, BaseCommand)
+        cls.mock_user = cls.user_patcher.start()
+        cls.mock_chapter = cls.chapter_patcher.start()
+        cls.mock_committee = cls.committee_patcher.start()
+        cls.mock_project = cls.project_patcher.start()
+        cls.mock_content_type = cls.content_type_patcher.start()
+        cls.mock_entity_member = cls.entity_member_patcher.start()
 
-    def test_add_arguments(self, command):
-        """Test that the command adds the correct arguments for the new version."""
-        parser = MagicMock()
-        command.add_arguments(parser)
+    @classmethod
+    def tearDownClass(cls):
+        """Stop all patchers after all tests have run."""
+        super().tearDownClass()
+        patch.stopall()
 
-        assert parser.add_argument.call_count == 2
-        parser.add_argument.assert_any_call(
-            "model_name",
-            type=str,
-            choices=("chapter", "committee", "project", "all"),
-            help="Model to process: chapter, committee, project, or all.",
-        )
-        parser.add_argument.assert_any_call(
-            "--threshold",
-            type=int,
-            default=75,
-            help="Threshold for fuzzy matching (0-100)",
-        )
+    def setUp(self):
+        """Configure the behavior of the mocks before each test."""
+        for mock in [
+            self.mock_user,
+            self.mock_chapter,
+            self.mock_committee,
+            self.mock_project,
+            self.mock_content_type,
+            self.mock_entity_member,
+        ]:
+            mock.reset_mock()
 
-    @pytest.mark.parametrize(
-        ("login", "name", "expected"),
-        [
-            ("validlogin", "Valid Name", True),
-            ("ok", "Valid Name", True),
-            ("validlogin", "V", False),
-            ("v", "Valid Name", False),
-            ("v", "V", False),
-            ("", "", False),
-            ("validlogin", "", False),
-            ("", "Valid Name", False),
-            ("validlogin", None, False),
-        ],
-    )
-    def test_is_valid_user(self, command, login, name, expected):
-        """Test the _is_valid_user method."""
-        with patch("apps.github.management.commands.github_match_users.ID_MIN_LENGTH", 2):
-            assert command._is_valid_user(login, name) == expected
+        def entity_member_side_effect(*_, **kwargs):
+            instance = MagicMock()
+            instance.object_id = kwargs.get("object_id")
+            instance.member_id = kwargs.get("member_id")
+            return instance
 
+        self.mock_entity_member.side_effect = entity_member_side_effect
 
-class TestFindUserMatches:
-    """Test suite for the _find_user_matches helper method."""
+        def bulk_create_side_effect(instances, *_, **__):
+            return instances
 
-    @pytest.fixture
-    def mock_users(self):
-        """Return a dictionary of mock users."""
-        return [
-            {"id": 1, "login": "john_doe", "name": "John Doe"},
-            {"id": 2, "login": "jane_doe", "name": "Jane Doe"},
+        self.mock_entity_member.objects.bulk_create.side_effect = bulk_create_side_effect
+
+        self.mock_users_data = [
+            {"id": 1, "login": "john.doe", "name": "John Doe"},
+            {"id": 2, "login": "jane.doe", "name": "Jane Doe"},
             {"id": 3, "login": "peter_jones", "name": "Peter Jones"},
+            {"id": 4, "login": "samantha", "name": "Samantha Smith"},
+            {"id": 5, "login": "a", "name": "B"},
+        ]
+        self.mock_user.objects.values.return_value = self.mock_users_data
+
+        self.mock_chapter_1 = self._create_mock_entity(
+            1, "Test Chapter 1", ["john.doe", "Unknown Person"]
+        )
+        self.mock_chapter_2 = self._create_mock_entity(2, "Test Chapter 2", ["Jane Doe"])
+        self.mock_chapter_3 = self._create_mock_entity(
+            3, "Test Chapter 3", ["peter_jones", "peter jones"]
+        )
+        self.mock_chapter_4 = self._create_mock_entity(4, "Fuzzy Chapter", ["Jone Doe"])
+        self.mock_chapter.objects.all.return_value = [
+            self.mock_chapter_1,
+            self.mock_chapter_2,
+            self.mock_chapter_3,
+            self.mock_chapter_4,
         ]
 
-    def test_exact_match(self, command, mock_users):
-        """Test exact matching by login and name."""
-        leaders_raw = ["john_doe", "Jane Doe"]
-        matches = command._find_user_matches(leaders_raw, mock_users, 90)
+        self.mock_committee_1 = self._create_mock_entity(101, "Test Committee", ["john.doe"])
+        self.mock_committee.objects.all.return_value = [self.mock_committee_1]
 
-        assert len(matches) == 2
-        assert any(u["id"] == 1 for u in matches)
-        assert any(u["id"] == 2 for u in matches)
+        self.mock_content_type.objects.get_for_model.return_value = MagicMock()
 
-    @patch("apps.github.management.commands.github_match_users.fuzz")
-    def test_fuzzy_match(self, mock_fuzz, command, mock_users):
-        """Test fuzzy matching."""
-        mock_fuzz.token_sort_ratio.side_effect = lambda _, s2: 90 if "peter" in s2.lower() else 10
-        leaders_raw = ["pete_jones"]
-        matches = command._find_user_matches(leaders_raw, mock_users, 80)
+    def _create_mock_entity(self, pk, name, leaders_raw):
+        """Create a mock entity object."""
+        mock_entity = MagicMock()
+        mock_entity.pk = pk
+        mock_entity.leaders_raw = leaders_raw
+        mock_entity.__str__.return_value = name
+        type(mock_entity).__name__ = "MagicMockModel"
+        return mock_entity
 
-        assert len(matches) == 1
-        assert matches[0]["id"] == 3
+    def test_command_with_invalid_model_name(self):
+        """Test that the command raises an error for an invalid model name."""
+        with pytest.raises(CommandError):
+            call_command("github_match_users", "invalid_model")
 
-    def test_unmatched_leader(self, command, mock_users):
-        """Test that an unknown leader returns no matches."""
-        leaders_raw = ["unknown_leader"]
-        matches = command._find_user_matches(leaders_raw, mock_users, 100)
-        assert matches == []
+    def test_exact_and_fuzzy_matches(self):
+        """Test exact and fuzzy matching for chapters."""
+        out = io.StringIO()
+        call_command("github_match_users", "chapter", stdout=out)
+
+        mock_bulk_create = self.mock_entity_member.objects.bulk_create
+        # FIX: Use plain assert
+        assert mock_bulk_create.called
+
+        call_args_list = mock_bulk_create.call_args[0][0]
+
+        assert len(call_args_list) == 4
+        created_members = {(m.object_id, m.member_id) for m in call_args_list}
+
+        assert (1, 1) in created_members
+        assert (3, 3) in created_members
+        assert (4, 1) in created_members
+        assert (2, 2) in created_members
+
+    def test_fuzzy_match_below_threshold(self):
+        """Test that a fuzzy match is not found when the score is below the threshold."""
+        out = io.StringIO()
+        call_command("github_match_users", "chapter", "--threshold=95", stdout=out)
+
+        mock_bulk_create = self.mock_entity_member.objects.bulk_create
+        assert mock_bulk_create.called
+        call_args_list = mock_bulk_create.call_args[0][0]
+
+        assert len(call_args_list) == 3
+        created_members = {(m.object_id, m.member_id) for m in call_args_list}
+        assert (4, 2) not in created_members
+
+    def test_is_valid_user_filtering(self):
+        """Test that users who do not meet the minimum length requirements are filtered out."""
+        mock_invalid_chapter = self._create_mock_entity(99, "Invalid Chapter", ["a"])
+        self.mock_chapter.objects.all.return_value = [mock_invalid_chapter]
+
+        out = io.StringIO()
+        call_command("github_match_users", "chapter", stdout=out)
+
+        assert not self.mock_entity_member.objects.bulk_create.called
+        assert "No new leader records to create" in out.getvalue()
+
+    @patch(f"{COMMAND_PATH}.fuzz")
+    def test_exact_match_is_preferred_over_fuzzy(self, mock_fuzz):
+        """Test that if an exact match is found, fuzzy matching is not performed."""
+        out = io.StringIO()
+        call_command("github_match_users", "committee", stdout=out)
+
+        assert not mock_fuzz.token_sort_ratio.called
+
+        assert "Created 1 new leader records" in out.getvalue()

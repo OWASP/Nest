@@ -4,7 +4,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
-from apps.github.models import User
+from apps.github.models.user import User
 
 
 class EntityMember(models.Model):
@@ -18,6 +18,7 @@ class EntityMember(models.Model):
         unique_together = ("content_type", "object_id", "member", "kind")
         indexes = [
             models.Index(fields=["content_type", "object_id"]),
+            models.Index(fields=["member"]),
         ]
         verbose_name_plural = "Entity Members"
 

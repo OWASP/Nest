@@ -20,8 +20,8 @@ class Command(BaseCommand):
         parser.add_argument(
             "model_name",
             type=str,
-            choices=("chapter", "committee", "project", "all"),
-            help="Model to process: chapter, committee, project, or all.",
+            choices=("chapter", "committee", "project"),
+            help="Model to process: chapter, committee, project.",
         )
         parser.add_argument(
             "--threshold",
@@ -40,19 +40,22 @@ class Command(BaseCommand):
             "project": Project,
         }
 
-        models_to_process = model_map.values() if model_name == "all" else [model_map[model_name]]
+        if model_name not in model_map:
+            self.stdout.write(
+                self.style.ERROR("Invalid model name! Choose from: chapter, committee, project")
+            )
+            return
 
-        self.stdout.write("Loading GitHub users into memory...")
+        models_to_process = model_map[model_name]
+
         all_users = list(User.objects.values("id", "login", "name"))
-        valid_users = [u for u in all_users if self._is_valid_user(u["login"], u["name"])]
-        self.stdout.write(f"Found {len(valid_users)} valid users for matching.")
+        valid_users = [u for u in all_users if self.is_valid_user(u["login"], u["name"])]
 
-        for model_class in models_to_process:
-            self._process_entities(model_class, valid_users, threshold)
+        self.process_entities(models_to_process, valid_users, threshold)
 
         self.stdout.write(self.style.SUCCESS("\nCommand finished successfully."))
 
-    def _process_entities(self, model_class, users_list, threshold):
+    def process_entities(self, model_class, users_list, threshold):
         """Process entries."""
         model_label = model_class.__class__.__name__.capitalize()
         self.stdout.write(f"\n--- Processing {model_label} ---")
@@ -65,7 +68,7 @@ class Command(BaseCommand):
             if not entity.leaders_raw:
                 continue
 
-            matched_users = self._find_user_matches(entity.leaders_raw, users_list, threshold)
+            matched_users = self.find_user_matches(entity.leaders_raw, users_list, threshold)
 
             if not matched_users:
                 continue
@@ -100,11 +103,11 @@ class Command(BaseCommand):
                 self.style.NOTICE(f"  -> No new leader records to create for {model_label}.")
             )
 
-    def _is_valid_user(self, login, name):
+    def is_valid_user(self, login, name):
         """Check if GitHub user meets minimum requirements."""
         return len(login) >= ID_MIN_LENGTH and len(name or "") >= ID_MIN_LENGTH
 
-    def _find_user_matches(self, leaders_raw, users_list, threshold):
+    def find_user_matches(self, leaders_raw, users_list, threshold):
         """Find user matches for a list of raw leader names."""
         matched_users = []
 
