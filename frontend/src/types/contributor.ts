@@ -3,6 +3,6 @@ export type Contributor = {
   contributionsCount?: number
   login: string
   name: string
-  projectKey: string
+  projectKey?: string
   projectName?: string
 }
