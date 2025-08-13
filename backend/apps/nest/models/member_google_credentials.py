@@ -1,5 +1,6 @@
 """Slack Google OAuth Authentication Model."""
 
+import boto3
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -13,6 +14,7 @@ from apps.slack.models.member import Member
 AUTH_ERROR_MESSAGE = (
     "Google OAuth client ID, secret, and redirect URI must be set in environment variables."
 )
+KMS_ERROR_MESSAGE = "AWS KMS is not enabled."
 
 
 class MemberGoogleCredentials(models.Model):
@@ -69,6 +71,8 @@ class MemberGoogleCredentials(models.Model):
         if not settings.IS_GOOGLE_AUTH_ENABLED:
             raise ValueError(AUTH_ERROR_MESSAGE)
 
+        if not settings.IS_AWS_KMS_ENABLED:
+            raise ValueError(KMS_ERROR_MESSAGE)
         member = None
         try:
             member = Member.objects.get(slack_user_id=member_id)
@@ -79,10 +83,15 @@ class MemberGoogleCredentials(models.Model):
         auth = MemberGoogleCredentials.objects.get_or_create(member=member)[0]
         # This is the first time authentication, so we need to fetch a new token
         flow = MemberGoogleCredentials.get_flow()
+        kms_client = GoogleAuth.get_kms_client()
         flow.redirect_uri = settings.GOOGLE_AUTH_REDIRECT_URI
         flow.fetch_token(authorization_response=auth_response)
-        auth.access_token = flow.credentials.token
-        auth.refresh_token = flow.credentials.refresh_token
+        auth.access_token = kms_client.encrypt(flow.credentials.token.encode("utf-8"))[
+            "CiphertextBlob"
+        ]
+        auth.refresh_token = kms_client.encrypt(flow.credentials.refresh_token.encode("utf-8"))[
+            "CiphertextBlob"
+        ]
         expires_at = flow.credentials.expiry
         if expires_at and timezone.is_naive(expires_at):
             expires_at = timezone.make_aware(expires_at)
@@ -96,6 +105,42 @@ class MemberGoogleCredentials(models.Model):
         if not settings.IS_GOOGLE_AUTH_ENABLED:
             raise ValueError(AUTH_ERROR_MESSAGE)
         return get_google_auth_client()
+
+    @staticmethod
+    def get_kms_client():
+        """Create a KMS client instance."""
+        if not settings.IS_AWS_KMS_ENABLED:
+            raise ValueError(KMS_ERROR_MESSAGE)
+        return boto3.client(
+            "kms",
+            region_name=settings.AWS_REGION,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        )
+
+    @property
+    def access_token_str(self):
+        """Return the access token as a string."""
+        client = GoogleAuth.get_kms_client()
+        return (
+            client.decrypt(KeyId=settings.AWS_KMS_KEY_ID, CiphertextBlob=self.access_token)[
+                "Plaintext"
+            ].decode("utf-8")
+            if self.access_token
+            else None
+        )
+
+    @property
+    def refresh_token_str(self):
+        """Return the refresh token as a string."""
+        client = GoogleAuth.get_kms_client()
+        return (
+            client.decrypt(KeyId=settings.AWS_KMS_KEY_ID, CiphertextBlob=self.refresh_token)[
+                "Plaintext"
+            ].decode("utf-8")
+            if self.refresh_token
+            else None
+        )
 
     @property
     def is_token_expired(self):
