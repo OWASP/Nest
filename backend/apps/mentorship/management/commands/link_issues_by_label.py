@@ -5,6 +5,7 @@ from django.db import transaction
 
 from apps.github.models.issue import Issue
 from apps.mentorship.models.module import Module
+from apps.mentorship.models.task import Task
 
 
 class Command(BaseCommand):
@@ -70,6 +71,40 @@ class Command(BaseCommand):
             with transaction.atomic():
                 module.issues.set(matched_issue_ids)
 
+                # Create tasks for assigned issues
+                if matched_issue_ids:
+                    issues = Issue.objects.filter(
+                        id__in=matched_issue_ids,
+                        assignees__isnull=False,
+                    ).distinct()
+
+                    for issue in issues:
+                        new_assignee = issue.assignees.first()
+                        task, created = Task.objects.get_or_create(
+                            issue=issue,
+                            defaults={
+                                "module": module,
+                                "status": Task.Status.IN_PROGRESS,
+                                "assignee": new_assignee,
+                            },
+                        )
+
+                        if not created and task.assignee != new_assignee:
+                            task.assignee = new_assignee
+                            task.save(update_fields=["assignee"])
+                            self.stdout.write(
+                                self.style.SUCCESS(
+                                    f"Updated assignee for task of issue #{issue.id}"
+                                )
+                            )
+                        else:
+                            self.stdout.write(
+                                self.style.SUCCESS(
+                                    f"Created task for assigned issue #{issue.id} "
+                                    f"in module '{module.name}'"
+                                )
+                            )
+
             num_linked = len(matched_issue_ids)
             total_links_created += num_linked
             total_modules_updated += 1
@@ -85,6 +120,7 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS(
                 f"Completed. {total_links_created} issue links set across "
-                f"{total_modules_updated} modules."
+                f"{total_modules_updated} modules.\n"
+                f"Created tasks for all assigned issues in linked modules."
             )
         )
