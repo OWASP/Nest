@@ -13,14 +13,12 @@ class AwardAdmin(admin.ModelAdmin):
         "name",
         "category",
         "year",
-        "award_type",
         "winner_name",
         "user",
         "nest_created_at",
         "nest_updated_at",
     )
     list_filter = (
-        "award_type",
         "category",
         "year",
     )
@@ -38,7 +36,7 @@ class AwardAdmin(admin.ModelAdmin):
     fieldsets = (
         (
             "Basic Information",
-            {"fields": ("name", "category", "award_type", "year", "description")},
+            {"fields": ("name", "category", "year", "description")},
         ),
         (
             "Winner Information",

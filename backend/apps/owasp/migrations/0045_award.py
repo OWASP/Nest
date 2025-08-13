@@ -25,7 +25,14 @@ class Migration(migrations.Migration):
                 (
                     "category",
                     models.CharField(
-                        help_text="Award category (e.g., 'WASPY', 'Lifetime Achievement')",
+                        choices=[
+                            ("WASPY", "WASPY"),
+                            (
+                                "Distinguished Lifetime Memberships",
+                                "Distinguished Lifetime Memberships",
+                            ),
+                        ],
+                        help_text="Award category (e.g., 'WASPY', 'Distinguished Lifetime Memberships')",
                         max_length=100,
                         verbose_name="Category",
                     ),
@@ -50,9 +57,7 @@ class Migration(migrations.Migration):
                 (
                     "year",
                     models.IntegerField(
-                        blank=True,
-                        help_text="Year the award was given (null for category definitions)",
-                        null=True,
+                        help_text="Year the award was given",
                         verbose_name="Year",
                     ),
                 ),
@@ -86,16 +91,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "award_type",
-                    models.CharField(
-                        choices=[("category", "Category"), ("award", "Award")],
-                        default="award",
-                        help_text="Type of entry: category definition or individual award",
-                        max_length=20,
-                        verbose_name="Award Type",
-                    ),
-                ),
-                (
                     "user",
                     models.ForeignKey(
                         blank=True,
@@ -116,11 +111,6 @@ class Migration(migrations.Migration):
                     models.Index(fields=["category", "year"], name="owasp_award_category_year"),
                     models.Index(fields=["-year"], name="owasp_award_year_desc"),
                     models.Index(fields=["name"], name="owasp_award_name"),
-                ],
-                "constraints": [
-                    models.UniqueConstraint(
-                        fields=("name", "year", "category"), name="unique_award_name_year_category"
-                    )
                 ],
             },
         ),

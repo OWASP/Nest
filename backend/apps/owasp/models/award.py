@@ -30,11 +30,6 @@ class Award(TimestampedModel):
         ]
         verbose_name = "Award"
         verbose_name_plural = "Awards"
-        constraints = [
-            models.UniqueConstraint(
-                fields=["name", "year", "category"], name="unique_award_name_year_category"
-            )
-        ]
 
     # Core fields based on YAML structure
     category = models.CharField(
