@@ -5,17 +5,17 @@ import type { Icon } from 'types/icon'
 import DisplayIcon from 'components/DisplayIcon'
 
 interface TooltipProps {
-    children: React.ReactNode
-    content: string
-    delay: number
-    closeDelay: number
-    showArrow: boolean
-    placement: string
+  children: React.ReactNode
+  content: string
+  delay: number
+  closeDelay: number
+  showArrow: boolean
+  placement: string
 }
 
 interface IconWrapperProps {
-    className?: string
-    icon: string
+  className?: string
+  icon: string
 }
 
 jest.mock('@heroui/tooltip', () => ({
@@ -49,15 +49,15 @@ jest.mock('wrappers/FontAwesomeIconWrapper', () => {
 })
 
 jest.mock('utils/data', () => ({
-    ICONS: {
-      starsCount: { label: 'Stars', icon: 'fa-star' },
-      forksCount: { label: 'Forks', icon: 'fa-code-fork' },
-      contributorsCount: { label: 'Contributors', icon: 'fa-users' },
-      contributionCount: { label: 'Contributors', icon: 'fa-users' },
-      issuesCount: { label: 'Issues', icon: 'fa-exclamation-circle' },
-      license: { label: 'License', icon: 'fa-balance-scale' },
-      unknownItem: { label: 'Unknown', icon: 'fa-question' },
-    }
+  ICONS: {
+    starsCount: { label: 'Stars', icon: 'fa-star' },
+    forksCount: { label: 'Forks', icon: 'fa-code-fork' },
+    contributorsCount: { label: 'Contributors', icon: 'fa-users' },
+    contributionCount: { label: 'Contributors', icon: 'fa-users' },
+    issuesCount: { label: 'Issues', icon: 'fa-exclamation-circle' },
+    license: { label: 'License', icon: 'fa-balance-scale' },
+    unknownItem: { label: 'Unknown', icon: 'fa-question' },
+  },
 }))
 
 describe('DisplayIcon', () => {
