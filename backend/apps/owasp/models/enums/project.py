@@ -1,6 +1,16 @@
 """Enums for OWASP projects."""
 
+from django.core.exceptions import ValidationError
+from django.db import models
 from django.db.models import TextChoices
+
+
+class AudienceChoices(models.TextChoices):
+    """Enum for OWASP project audience."""
+
+    BREAKER = "breaker", "Breaker"
+    BUILDER = "builder", "Builder"
+    DEFENDER = "defender", "Defender"
 
 
 class ProjectType(TextChoices):
@@ -32,3 +42,15 @@ class ProjectLevel(TextChoices):
     LAB = "lab", "Lab"
     PRODUCTION = "production", "Production"
     FLAGSHIP = "flagship", "Flagship"
+
+
+def validate_audience(value):
+    """Audience validator."""
+    if not isinstance(value, list):
+        error_message = "Audience must be a list."
+        raise ValidationError(error_message)
+
+    valid_choices = {choice.value for choice in AudienceChoices}
+    if invalid_values := [v for v in value if v not in valid_choices]:
+        error_message = f"Invalid audience keywords: {invalid_values}"
+        raise ValidationError(error_message)

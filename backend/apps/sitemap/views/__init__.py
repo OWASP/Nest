@@ -10,6 +10,7 @@ from .member import MemberSitemap
 from .organization import OrganizationSitemap
 from .project import ProjectSitemap
 from .repository import RepositorySitemap
+from .snapshot import SnapshotSitemap
 from .static import StaticSitemap
 
 
