@@ -13,6 +13,7 @@ GTM
 Héllo
 Kateryna
 NETTACKER
+NOASSERTION
 NOSONAR
 Nadu
 Nominatim
@@ -23,6 +24,7 @@ SEO
 SLF
 Sivagangai
 Sonarqube
+Stegen
 T04T40NHX
 Truncator
 Twitterbot

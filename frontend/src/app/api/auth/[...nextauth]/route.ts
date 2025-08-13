@@ -1,5 +1,7 @@
 import NextAuth, { type AuthOptions } from 'next-auth'
 import GitHubProvider from 'next-auth/providers/github'
+import { apolloClient } from 'server/apolloClient'
+import { IS_PROJECT_LEADER_QUERY, IS_MENTOR_QUERY } from 'server/queries/mentorshipQueries'
 import { ExtendedProfile, ExtendedSession } from 'types/auth'
 import {
   GITHUB_CLIENT_ID,
@@ -7,6 +9,34 @@ import {
   IS_GITHUB_AUTH_ENABLED,
   NEXTAUTH_SECRET,
 } from 'utils/credentials'
+
+async function checkIfProjectLeader(login: string): Promise<boolean> {
+  try {
+    const client = await apolloClient
+    const { data } = await client.query({
+      query: IS_PROJECT_LEADER_QUERY,
+      variables: { login },
+      fetchPolicy: 'no-cache',
+    })
+    return data?.isProjectLeader ?? false
+  } catch (err) {
+    throw new Error('Failed to fetch project leader status Error', err)
+  }
+}
+
+async function checkIfMentor(login: string): Promise<boolean> {
+  try {
+    const client = await apolloClient
+    const { data } = await client.query({
+      query: IS_MENTOR_QUERY,
+      variables: { login },
+      fetchPolicy: 'no-cache',
+    })
+    return data?.isMentor ?? false
+  } catch (err) {
+    throw new Error('Failed to fetch mentor status Error', err)
+  }
+}
 
 const providers = []
 
@@ -38,20 +68,35 @@ const authOptions: AuthOptions = {
       return Boolean(account?.provider === 'github' && account.access_token)
     },
 
-    async jwt({ token, account, profile }) {
+    async jwt({ token, account, profile, trigger, session }) {
       if (account?.access_token) {
         token.accessToken = account.access_token
       }
+
       if ((profile as ExtendedProfile)?.login) {
-        token.login = (profile as ExtendedProfile)?.login
+        const login = (profile as ExtendedProfile).login
+        token.login = login
+
+        const isLeader = await checkIfProjectLeader(login)
+        const isMentor = await checkIfMentor(login)
+        token.isLeader = isLeader
+        token.isMentor = isMentor
+      }
+
+      if (trigger === 'update' && session) {
+        token.isOwaspStaff = (session as ExtendedSession).user.isOwaspStaff || false
       }
       return token
     },
 
     async session({ session, token }) {
       ;(session as ExtendedSession).accessToken = token.accessToken as string
+
       if (session.user) {
         ;(session as ExtendedSession).user.login = token.login as string
+        ;(session as ExtendedSession).user.isMentor = token.isMentor as boolean
+        ;(session as ExtendedSession).user.isLeader = token.isLeader as boolean
+        ;(session as ExtendedSession).user.isOwaspStaff = token.isOwaspStaff as boolean
       }
       return session
     },
