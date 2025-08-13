@@ -1,10 +1,25 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import React from 'react'
 import type { Icon } from 'types/icon'
 import DisplayIcon from 'components/DisplayIcon'
 
+interface TooltipProps {
+    children: React.ReactNode
+    content: string
+    delay: number
+    closeDelay: number
+    showArrow: boolean
+    placement: string
+}
+
+interface IconWrapperProps {
+    className?: string
+    icon: string
+}
+
 jest.mock('@heroui/tooltip', () => ({
-  Tooltip: ({ children, content, delay, closeDelay, showArrow, placement }: never) => (
+  Tooltip: ({ children, content, delay, closeDelay, showArrow, placement }: TooltipProps) => (
     <div
       data-testid="tooltip"
       data-tooltip-content={content}
@@ -28,22 +43,21 @@ jest.mock('millify', () => ({
 }))
 
 jest.mock('wrappers/FontAwesomeIconWrapper', () => {
-  return function MockFontAwesomeIconWrapper({ className, icon }: never) {
+  return function MockFontAwesomeIconWrapper({ className, icon }: IconWrapperProps) {
     return <span data-testid="font-awesome-icon" data-icon={icon} className={className} />
   }
 })
 
 jest.mock('utils/data', () => ({
-  ICONS: {
-    starsCount: { label: 'Stars', icon: 'fa-star' },
-    forksCount: { label: 'Forks', icon: 'fa-code-fork' },
-    contributorsCount: { label: 'Contributors', icon: 'fa-users' },
-    contributionCount: { label: 'Contributors', icon: 'fa-users' },
-    issuesCount: { label: 'Issues', icon: 'fa-exclamation-circle' },
-    license: { label: 'License', icon: 'fa-balance-scale' },
-    unknownItem: { label: 'Unknown', icon: 'fa-question' },
-  },
-  iconKeys: 'starsCount' as never,
+    ICONS: {
+      starsCount: { label: 'Stars', icon: 'fa-star' },
+      forksCount: { label: 'Forks', icon: 'fa-code-fork' },
+      contributorsCount: { label: 'Contributors', icon: 'fa-users' },
+      contributionCount: { label: 'Contributors', icon: 'fa-users' },
+      issuesCount: { label: 'Issues', icon: 'fa-exclamation-circle' },
+      license: { label: 'License', icon: 'fa-balance-scale' },
+      unknownItem: { label: 'Unknown', icon: 'fa-question' },
+    }
 }))
 
 describe('DisplayIcon', () => {
@@ -240,7 +254,6 @@ describe('DisplayIcon', () => {
 
     it('applies flip-container class for forks and contributors items', () => {
       const testCases = [
-        { item: 'forksCount', value: 100 },
         { item: 'forksCount', value: 100 },
         { item: 'contributors_count', value: 50 },
         { item: 'contributionCount', value: 30 },
