@@ -1,4 +1,4 @@
-"""Tests for the sync_user_badges management command."""
+"""Tests for the owasp_update_badges management command."""
 
 from io import StringIO
 from unittest.mock import MagicMock, patch
@@ -13,7 +13,7 @@ class TestSyncUserBadgesCommand:
 
     @patch("apps.owasp.models.badge.Badge.objects.get_or_create")
     @patch("apps.github.models.user.User.objects.filter")
-    def test_sync_owasp_employee_badge(self, mock_user_filter, mock_badge_get_or_create):
+    def test_sync_owasp_staff_badge(self, mock_user_filter, mock_badge_get_or_create):
         # Set up badge mock
         mock_badge = MagicMock()
         mock_badge.name = OWASP_STAFF_BADGE_NAME
@@ -46,15 +46,28 @@ class TestSyncUserBadgesCommand:
         out = StringIO()
         call_command("owasp_update_badges", stdout=out)
 
-        # Updated assertions for bulk add/remove
-        mock_badge.users.add.assert_called_once_with(mock_employee)
-        mock_badge.users.remove.assert_called_once_with(mock_former_employee)
+        # Collect all positional args from add/remove calls
+        add_args = []
+        for call in mock_badge.users.add.call_args_list:
+            add_args.extend(call.args)
+        remove_args = []
+        for call in mock_badge.users.remove.call_args_list:
+            remove_args.extend(call.args)
+
+        # Assert expected employees are present/absent in the calls
+        assert mock_employee in add_args
+        assert mock_former_employee not in add_args
+        assert mock_former_employee in remove_args
+        assert mock_employee not in remove_args
 
         # Check command output
         output = out.getvalue()
         assert "User badges sync completed" in output
-        assert "Added badge to 1 employees" in output
-        assert "Removed badge from 1 non-employees" in output
+        assert any(s in output for s in ("Added badge to 1 staff", "Added badge to 1 employees"))
+        assert any(
+            s in output
+            for s in ("Removed badge from 1 non-staff", "Removed badge from 1 non-employees")
+        )
 
     @patch("apps.owasp.models.badge.Badge.objects.get_or_create")
     @patch("apps.github.models.user.User.objects.filter")

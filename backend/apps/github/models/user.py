@@ -14,7 +14,7 @@ from apps.github.constants import (
 from apps.github.models.common import GenericUserModel, NodeModel
 from apps.github.models.mixins.user import UserIndexMixin
 from apps.github.models.organization import Organization
-from apps.owasp.models.badge import Badge  # Add this import at the top
+from apps.owasp.models.badge import Badge
 
 
 class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
