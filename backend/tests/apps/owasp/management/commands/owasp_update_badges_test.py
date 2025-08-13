@@ -35,9 +35,9 @@ class TestSyncUserBadgesCommand:
         mock_former_employees.count.return_value = 1
 
         def user_filter_side_effect(**kwargs):
-            if kwargs.get("is_owasp_employee") is True:
+            if kwargs.get("is_owasp_staff") is True:
                 return mock_employees
-            if kwargs.get("is_owasp_employee") is False:
+            if kwargs.get("is_owasp_staff") is False:
                 return mock_former_employees
             return MagicMock()
 

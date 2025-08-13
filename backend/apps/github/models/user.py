@@ -14,6 +14,7 @@ from apps.github.constants import (
 from apps.github.models.common import GenericUserModel, NodeModel
 from apps.github.models.mixins.user import UserIndexMixin
 from apps.github.models.organization import Organization
+from apps.owasp.models.badge import Badge  # Add this import at the top
 
 
 class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
@@ -38,11 +39,19 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     is_owasp_staff = models.BooleanField(
         default=False,
         verbose_name="Is OWASP Staff",
-        help_text="Indicates if the user is an OWASP Foundation employee.",
+        help_text="Indicates if the user is OWASP Foundation staff.",
     )
 
     contributions_count = models.PositiveIntegerField(
         verbose_name="Contributions count", default=0
+    )
+
+    badges = models.ManyToManyField(
+        Badge,
+        related_name="users",
+        blank=True,
+        verbose_name="Badges",
+        help_text="Badges assigned to this user.",
     )
 
     def __str__(self) -> str:
