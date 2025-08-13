@@ -1,11 +1,11 @@
-import React from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
-import ProjectsDashboardDropDown from 'components/ProjectsDashboardDropDown'
 import { faFilter, faSort } from '@fortawesome/free-solid-svg-icons'
+import { render, screen, fireEvent } from '@testing-library/react'
+import React from 'react'
+import ProjectsDashboardDropDown from 'components/ProjectsDashboardDropDown'
 
 // Mock FontAwesome components
 jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, ...props }: any) => (
+  FontAwesomeIcon: ({ icon, ...props }: { icon?: { iconName?: string }; [key: string]: unknown }) => (
     <span
       data-testid="font-awesome-icon"
       data-icon={icon?.iconName || 'default'}
@@ -97,6 +97,7 @@ jest.mock('@heroui/react', () => ({
   Button: ({ children, variant, ...props }: {
     children: React.ReactNode
     variant?: string
+    [key: string]: unknown
   }) => (
     <button
       data-testid="dropdown-button"
@@ -307,12 +308,12 @@ describe('ProjectsDashboardDropDown Component', () => {
 
       const items = screen.getAllByTestId('dropdown-item')
       const activeItem = items.find(item => item.textContent === 'Active')
+      
+      // Use non-conditional expect
       expect(activeItem).toBeDefined()
-
-      if (activeItem) {
-        fireEvent.click(activeItem)
-        expect(mockOnAction).toHaveBeenCalledWith('Active')
-      }
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      fireEvent.click(activeItem!)
+      expect(mockOnAction).toHaveBeenCalledWith('Active')
     })
 
     it('calls onAction when dropdown item is activated with keyboard', () => {
@@ -326,12 +327,11 @@ describe('ProjectsDashboardDropDown Component', () => {
 
       const items = screen.getAllByTestId('dropdown-item')
       const activeItem = items.find(item => item.textContent === 'Active')
+      
       expect(activeItem).toBeDefined()
-
-      if (activeItem) {
-        fireEvent.keyDown(activeItem, { key: 'Enter' })
-        expect(mockOnAction).toHaveBeenCalledWith('Active')
-      }
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      fireEvent.keyDown(activeItem!, { key: 'Enter' })
+      expect(mockOnAction).toHaveBeenCalledWith('Active')
     })
 
     it('handles multiple clicks correctly', () => {
@@ -349,15 +349,15 @@ describe('ProjectsDashboardDropDown Component', () => {
 
       expect(activeItem).toBeDefined()
       expect(inactiveItem).toBeDefined()
+      
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      fireEvent.click(activeItem!)
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      fireEvent.click(inactiveItem!)
 
-      if (activeItem && inactiveItem) {
-        fireEvent.click(activeItem)
-        fireEvent.click(inactiveItem)
-
-        expect(mockOnAction).toHaveBeenCalledTimes(2)
-        expect(mockOnAction).toHaveBeenCalledWith('Active')
-        expect(mockOnAction).toHaveBeenCalledWith('Inactive')
-      }
+      expect(mockOnAction).toHaveBeenCalledTimes(2)
+      expect(mockOnAction).toHaveBeenCalledWith('Active')
+      expect(mockOnAction).toHaveBeenCalledWith('Inactive')
     })
   })
 
