@@ -170,7 +170,6 @@ class TestGoogleAuthModel:
 
         mock_flow_instance.authorization_url.assert_called_once_with(
             access_type="offline",
-            include_granted_scopes="true",
             prompt="consent",
             state=self.member.slack_user_id,
         )

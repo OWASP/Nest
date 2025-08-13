@@ -31,7 +31,13 @@ class GoogleAuth(models.Model):
 
     @staticmethod
     def authenticate(member):
-        """Authenticate a member and return a GoogleAuth instance."""
+        """Authenticate a member.
+
+        Returns:
+            - GoogleAuth instance if a valid/refreshable token exists, or
+            - (authorization_url, state) tuple to complete the OAuth flow.
+
+        """
         if not settings.IS_GOOGLE_AUTH_ENABLED:
             raise ValueError(AUTH_ERROR_MESSAGE)
         auth = GoogleAuth.objects.get_or_create(member=member)[0]
@@ -47,7 +53,6 @@ class GoogleAuth(models.Model):
         state = member.slack_user_id
         return flow.authorization_url(
             access_type="offline",
-            include_granted_scopes="true",
             prompt="consent",
             state=state,
         )
