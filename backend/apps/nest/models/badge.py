@@ -11,7 +11,7 @@ class Badge(BulkSaveModel, TimestampedModel):
     """Represents a user badge for roles or achievements."""
 
     class Meta:
-        db_table = "owasp_badges"
+        db_table = "nest_badges"
         ordering = ["weight", "name"]
         verbose_name_plural = "Badges"
 
