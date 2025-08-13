@@ -30,7 +30,7 @@ class TestAiCreateCommitteeContextCommand:
 
     def test_command_inheritance(self, command):
         """Test that the command inherits from BaseContextCommand."""
-        from apps.ai.common.base import BaseContextCommand
+        from apps.ai.common.base.context_command import BaseContextCommand
 
         assert isinstance(command, BaseContextCommand)
 

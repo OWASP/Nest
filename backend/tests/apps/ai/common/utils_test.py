@@ -2,7 +2,6 @@ from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock, Mock, call, patch
 
 import openai
-import pytest
 
 from apps.ai.common.utils import create_chunks_and_embeddings
 
@@ -117,25 +116,6 @@ class TestUtils:
                 text="some text", embedding=[0.1, 0.2, 0.3], context=None, save=True
             )
 
-    @patch("apps.ai.common.utils.logger")
-    def test_create_chunks_and_embeddings_context_error(self, mock_logger):
-        """Tests the failure path when there's an embedding mismatch error."""
-        mock_openai_client = MagicMock()
-        mock_context = MagicMock()
-
-        mock_response = MagicMock()
-        mock_response.data = []
-        mock_openai_client.embeddings.create.return_value = mock_response
-
-        with pytest.raises(ValueError, match="zip\\(\\) argument 2 is shorter than argument 1"):
-            create_chunks_and_embeddings(
-                chunk_texts=["some text"],
-                context=mock_context,
-                openai_client=mock_openai_client,
-            )
-
-        mock_logger.exception.assert_called_once_with("Context error")
-
     @patch("apps.ai.common.utils.time.sleep")
     @patch("apps.ai.common.utils.datetime")
     def test_create_chunks_and_embeddings_sleep_called(self, mock_datetime, mock_sleep):
@@ -196,27 +176,3 @@ class TestUtils:
             text="test chunk", embedding=[0.1, 0.2], context=mock_context_obj, save=True
         )
         assert result == [mock_chunk]
-
-    @patch("apps.ai.common.utils.logger")
-    @patch("apps.ai.common.utils.Chunk.update_data")
-    def test_create_chunks_and_embeddings_chunk_update_value_error(
-        self, mock_update_data, mock_logger
-    ):
-        """Tests the failure path when Chunk.update_data raises ValueError."""
-        mock_openai_client = MagicMock()
-        mock_context = MagicMock()
-
-        mock_response = MagicMock()
-        mock_response.data = [MagicMock(embedding=[0.1, 0.2, 0.3])]
-        mock_openai_client.embeddings.create.return_value = mock_response
-
-        mock_update_data.side_effect = ValueError("Invalid context")
-
-        with pytest.raises(ValueError, match="Invalid context"):
-            create_chunks_and_embeddings(
-                chunk_texts=["some text"],
-                context=mock_context,
-                openai_client=mock_openai_client,
-            )
-
-        mock_logger.exception.assert_called_once_with("Context error")

@@ -47,9 +47,7 @@ def create_chunks_and_embeddings(
         time_since_last_request = datetime.now(UTC) - last_request_time
 
         if time_since_last_request < timedelta(seconds=MIN_REQUEST_INTERVAL_SECONDS):
-            time.sleep(
-                MIN_REQUEST_INTERVAL_SECONDS - time_since_last_request.total_seconds()
-            )
+            time.sleep(MIN_REQUEST_INTERVAL_SECONDS - time_since_last_request.total_seconds())
 
         response = openai_client.embeddings.create(
             input=chunk_texts,
@@ -59,9 +57,7 @@ def create_chunks_and_embeddings(
 
         chunks = []
         for text, embedding in zip(chunk_texts, embeddings, strict=True):
-            chunk = Chunk.update_data(
-                text=text, embedding=embedding, context=context, save=save
-            )
+            chunk = Chunk.update_data(text=text, embedding=embedding, context=context, save=save)
             chunks.append(chunk)
 
     except openai.OpenAIError:
