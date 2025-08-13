@@ -87,64 +87,59 @@ class Command(BaseCommand):
         )
 
     def extract_project_content(self, project: Project) -> tuple[str, str]:
-        prose_parts = []
-        metadata_parts = []
+        prose_parts: list[str] = []
+        metadata_parts: list[str] = []
 
-        if project.name:
-            metadata_parts.append(f"Project Name: {project.name}")
+        # Basic project information
+        for value, label, target_list in [
+            (project.name, "Project Name", metadata_parts),
+            (project.description, "Description", prose_parts),
+            (project.summary, "Summary", prose_parts),
+            (project.level, "Project Level", metadata_parts),
+            (project.type, "Project Type", metadata_parts),
+        ]:
+            if value:
+                target_list.append(f"{label}: {value}")
 
-        if project.description:
-            prose_parts.append(f"Description: {project.description}")
-
-        if project.summary:
-            prose_parts.append(f"Summary: {project.summary}")
-
-        if project.level:
-            metadata_parts.append(f"Project Level: {project.level}")
-
-        if project.type:
-            metadata_parts.append(f"Project Type: {project.type}")
-
-        if hasattr(project, "owasp_repository") and project.owasp_repository:
-            repo = project.owasp_repository
+        # Repository content
+        repo = getattr(project, "owasp_repository", None)
+        if repo:
             if repo.description:
                 prose_parts.append(f"Repository Description: {repo.description}")
             if repo.topics:
                 metadata_parts.append(f"Repository Topics: {', '.join(repo.topics)}")
 
-        if project.languages:
-            metadata_parts.append(f"Programming Languages: {', '.join(project.languages)}")
+        # Process all metadata fields in groups
+        self._add_list_metadata(
+            metadata_parts,
+            [
+                (project.languages, "Programming Languages"),
+                (project.topics, "Topics"),
+                (project.licenses, "Licenses"),
+                (project.tags, "Tags"),
+                (project.custom_tags, "Custom Tags"),
+            ],
+        )
 
-        if project.topics:
-            metadata_parts.append(f"Topics: {', '.join(project.topics)}")
-
-        if project.licenses:
-            metadata_parts.append(f"Licenses: {', '.join(project.licenses)}")
-
-        if project.tags:
-            metadata_parts.append(f"Tags: {', '.join(project.tags)}")
-
-        if project.custom_tags:
-            metadata_parts.append(f"Custom Tags: {', '.join(project.custom_tags)}")
-
-        stats_parts = []
-        if project.stars_count > 0:
-            stats_parts.append(f"Stars: {project.stars_count}")
-        if project.forks_count > 0:
-            stats_parts.append(f"Forks: {project.forks_count}")
-        if project.contributors_count > 0:
-            stats_parts.append(f"Contributors: {project.contributors_count}")
-        if project.releases_count > 0:
-            stats_parts.append(f"Releases: {project.releases_count}")
-        if project.open_issues_count > 0:
-            stats_parts.append(f"Open Issues: {project.open_issues_count}")
-
+        # Statistics
+        stats_parts = [
+            f"{label}: {count}"
+            for count, label in [
+                (project.stars_count, "Stars"),
+                (project.forks_count, "Forks"),
+                (project.contributors_count, "Contributors"),
+                (project.releases_count, "Releases"),
+                (project.open_issues_count, "Open Issues"),
+            ]
+            if count > 0
+        ]
         if stats_parts:
             metadata_parts.append("Project Statistics: " + ", ".join(stats_parts))
 
-        if project.leaders_raw:
-            metadata_parts.append(f"Project Leaders: {', '.join(project.leaders_raw)}")
+        # Additional metadata and dates
+        self._add_additional_metadata(metadata_parts, project)
 
+        # Related URLs with validation
         if project.related_urls:
             valid_urls = [
                 url
@@ -154,25 +149,39 @@ class Command(BaseCommand):
             if valid_urls:
                 metadata_parts.append(f"Related URLs: {', '.join(valid_urls)}")
 
-        if project.created_at:
-            metadata_parts.append(f"Created: {project.created_at.strftime('%Y-%m-%d')}")
-
-        if project.updated_at:
-            metadata_parts.append(f"Last Updated: {project.updated_at.strftime('%Y-%m-%d')}")
-
-        if project.released_at:
-            metadata_parts.append(f"Last Release: {project.released_at.strftime('%Y-%m-%d')}")
-
-        if project.health_score is not None:
-            metadata_parts.append(f"Health Score: {project.health_score:.2f}")
-
-        metadata_parts.append(f"Active Project: {'Yes' if project.is_active else 'No'}")
-
-        metadata_parts.append(
-            f"Issue Tracking: {'Enabled' if project.track_issues else 'Disabled'}"
-        )
-
         return (
             DELIMITER.join(filter(None, prose_parts)),
             DELIMITER.join(filter(None, metadata_parts)),
+        )
+
+    def _add_list_metadata(self, metadata_parts, field_list):
+        """Add list-based metadata fields."""
+        for value_list, label in field_list:
+            if value_list:
+                metadata_parts.append(f"{label}: {', '.join(value_list)}")
+
+    def _add_additional_metadata(self, metadata_parts, project):
+        """Add additional metadata including dates and final fields."""
+        # Leaders
+        if project.leaders_raw:
+            metadata_parts.append(f"Project Leaders: {', '.join(project.leaders_raw)}")
+
+        # Date fields
+        for date_value, label in [
+            (project.created_at, "Created"),
+            (project.updated_at, "Last Updated"),
+            (project.released_at, "Last Release"),
+        ]:
+            if date_value:
+                metadata_parts.append(f"{label}: {date_value.strftime('%Y-%m-%d')}")
+
+        # Final metadata
+        if project.health_score is not None:
+            metadata_parts.append(f"Health Score: {project.health_score:.2f}")
+
+        metadata_parts.extend(
+            [
+                f"Active Project: {'Yes' if project.is_active else 'No'}",
+                f"Issue Tracking: {'Enabled' if project.track_issues else 'Disabled'}",
+            ]
         )
