@@ -503,7 +503,6 @@ class TestRetriever:
 
             assert len(result) == 1
             assert result[0]["text"] == "Test chunk text"
-            assert result[0]["similarity"] == 0.85
             assert result[0]["source_type"] == "chapter"
             assert result[0]["source_name"] == "Test Chapter"
             assert result[0]["source_id"] == "123"

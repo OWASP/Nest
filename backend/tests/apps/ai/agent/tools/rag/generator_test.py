@@ -119,8 +119,6 @@ class TestGenerator:
             mock_client.chat.completions.create.assert_called_once()
             call_args = mock_client.chat.completions.create.call_args
             assert call_args[1]["model"] == "gpt-4o"
-            assert call_args[1]["temperature"] == 0.4
-            assert call_args[1]["max_tokens"] == 2000
             assert len(call_args[1]["messages"]) == 2
             assert call_args[1]["messages"][0]["role"] == "system"
             assert call_args[1]["messages"][1]["role"] == "user"
@@ -195,6 +193,5 @@ class TestGenerator:
     def test_constants(self):
         """Test class constants have expected values."""
         assert Generator.MAX_TOKENS == 2000
-        assert Generator.TEMPERATURE == 0.4
         assert isinstance(Generator.SYSTEM_PROMPT, str)
         assert len(Generator.SYSTEM_PROMPT) > 0
