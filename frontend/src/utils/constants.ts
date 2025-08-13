@@ -13,11 +13,6 @@ export const headerLinks: Link[] = [
     ],
   },
   {
-    text: 'Mentorship',
-    href: '/mentorship/programs',
-    requiresGitHubAuth: true,
-  },
-  {
     text: 'Projects',
     href: '/projects',
   },
