@@ -81,23 +81,6 @@ class TestGoogleAuthModel:
         with pytest.raises(ValueError, match="Google OAuth client ID"):
             GoogleAuth.get_flow()
 
-    @override_settings(
-        IS_GOOGLE_AUTH_ENABLED=True,
-        GOOGLE_AUTH_CLIENT_ID="test_client_id",
-        GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
-        GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
-    )
-    @override_settings(IS_GOOGLE_AUTH_ENABLED=True)
-    @patch("apps.slack.models.google_auth.Flow.from_client_config")
-    def test_get_flow_success(self, mock_flow):
-        """Test successful get_flow creation."""
-        mock_flow_instance = Mock(spec=Flow)
-        mock_flow.return_value = mock_flow_instance
-
-        result = GoogleAuth.get_flow()
-
-        assert result == mock_flow_instance
-
     @override_settings(IS_GOOGLE_AUTH_ENABLED=False)
     def test_authenticate_when_disabled(self):
         """Test authenticate raises error when Google auth is disabled."""

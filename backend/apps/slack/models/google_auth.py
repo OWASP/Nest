@@ -4,8 +4,8 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
-from google_auth_oauthlib.flow import Flow
 
+from apps.common.clients import google_auth_client
 from apps.slack.models.member import Member
 
 AUTH_ERROR_MESSAGE = (
@@ -84,18 +84,7 @@ class GoogleAuth(models.Model):
         """Create a Google OAuth flow instance."""
         if not settings.IS_GOOGLE_AUTH_ENABLED:
             raise ValueError(AUTH_ERROR_MESSAGE)
-        return Flow.from_client_config(
-            client_config={
-                "web": {
-                    "client_id": settings.GOOGLE_AUTH_CLIENT_ID,
-                    "client_secret": settings.GOOGLE_AUTH_CLIENT_SECRET,
-                    "redirect_uris": [settings.GOOGLE_AUTH_REDIRECT_URI],
-                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                    "token_uri": "https://oauth2.googleapis.com/token",
-                }
-            },
-            scopes=["https://www.googleapis.com/auth/calendar.readonly"],
-        )
+        return google_auth_client
 
     @property
     def is_token_expired(self):
