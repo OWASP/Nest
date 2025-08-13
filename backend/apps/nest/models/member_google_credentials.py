@@ -85,12 +85,8 @@ class MemberGoogleCredentials(models.Model):
         kms_client = GoogleAuth.get_kms_client()
         flow.redirect_uri = settings.GOOGLE_AUTH_REDIRECT_URI
         flow.fetch_token(authorization_response=auth_response)
-        auth.access_token = kms_client.encrypt(flow.credentials.token.encode("utf-8"))[
-            "CiphertextBlob"
-        ]
-        auth.refresh_token = kms_client.encrypt(flow.credentials.refresh_token.encode("utf-8"))[
-            "CiphertextBlob"
-        ]
+        auth.access_token = kms_client.encrypt(flow.credentials.token)
+        auth.refresh_token = kms_client.encrypt(flow.credentials.refresh_token)
         expires_at = flow.credentials.expiry
         if expires_at and timezone.is_naive(expires_at):
             expires_at = timezone.make_aware(expires_at)
@@ -116,25 +112,13 @@ class MemberGoogleCredentials(models.Model):
     def access_token_str(self):
         """Return the access token as a string."""
         client = GoogleAuth.get_kms_client()
-        return (
-            client.decrypt(KeyId=settings.AWS_KMS_KEY_ID, CiphertextBlob=self.access_token)[
-                "Plaintext"
-            ].decode("utf-8")
-            if self.access_token
-            else None
-        )
+        return client.decrypt(self.access_token) if self.access_token else None
 
     @property
     def refresh_token_str(self):
         """Return the refresh token as a string."""
         client = GoogleAuth.get_kms_client()
-        return (
-            client.decrypt(KeyId=settings.AWS_KMS_KEY_ID, CiphertextBlob=self.refresh_token)[
-                "Plaintext"
-            ].decode("utf-8")
-            if self.refresh_token
-            else None
-        )
+        return client.decrypt(self.refresh_token) if self.refresh_token else None
 
     @property
     def is_token_expired(self):

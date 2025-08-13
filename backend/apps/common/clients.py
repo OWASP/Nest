@@ -20,9 +20,30 @@ def get_google_auth_client():
         scopes=settings.GOOGLE_AUTH_SCOPES,
     )
 
-kms_client = boto3.client(
-    "kms",
-    region_name=settings.AWS_REGION,
-    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-)
+
+class KmsClient:
+    """AWS KMS Client."""
+
+    def __init__(self):
+        """Initialize the KMS client."""
+        self.client = boto3.client(
+            "kms",
+            region_name=settings.AWS_REGION,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        )
+
+    def decrypt(self, text: bytes) -> str:
+        """Decrypt the ciphertext using KMS."""
+        return self.client.decrypt(KeyId=settings.AWS_KMS_KEY_ID, CiphertextBlob=text)[
+            "Plaintext"
+        ].decode("utf-8")
+
+    def encrypt(self, text: str) -> bytes:
+        """Encrypt the plaintext using KMS."""
+        return self.client.encrypt(KeyId=settings.AWS_KMS_KEY_ID, Plaintext=text.encode("utf-8"))[
+            "CiphertextBlob"
+        ]
+
+
+kms_client = KmsClient()
