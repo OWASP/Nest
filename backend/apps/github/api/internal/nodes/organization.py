@@ -36,7 +36,7 @@ class OrganizationStatsNode:
         "updated_at",
     ],
 )
-class OrganizationNode:
+class OrganizationNode(strawberry.relay.Node):
     """GitHub organization node."""
 
     @strawberry.field

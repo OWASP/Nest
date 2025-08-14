@@ -15,6 +15,7 @@ class TestProjectNode:
     def test_meta_configuration(self):
         field_names = {field.name for field in ProjectNode.__strawberry_definition__.fields}
         expected_field_names = {
+            "_id",
             "contributors_count",
             "created_at",
             "forks_count",
