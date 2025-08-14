@@ -33,10 +33,12 @@ def detect_and_update_compliance(official_levels: dict[str, str]) -> None:
             local_level = str(project.level)
             
             # Compare official level with local level
-            if project_name in official_levels:
-                official_level = str(official_levels[project_name])
+            # Compare official level with local level
+            lookup_name = project_name.strip()
+            if lookup_name in normalized_official_levels:
+                official_level = normalized_official_levels[lookup_name]
                 is_compliant = local_level == official_level
-                
+
                 # Update compliance status if it has changed
                 if metric.is_level_compliant != is_compliant:
                     metric.is_level_compliant = is_compliant
