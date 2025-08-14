@@ -21,11 +21,10 @@ def detect_and_update_compliance(official_levels: dict[str, str]) -> None:
     logger.info("Starting project level compliance detection")
     
     # Get all active projects
-    active_projects = Project.active_projects.all()
-    
+    # Latest metrics already filter to active projects (see get_latest_health_metrics)
     with transaction.atomic():
         # Get latest health metrics for all projects
-        latest_metrics = ProjectHealthMetrics.get_latest_health_metrics()
+        latest_metrics = ProjectHealthMetrics.get_latest_health_metrics().select_related("project")
         metrics_to_update = []
         
         for metric in latest_metrics:
