@@ -58,7 +58,8 @@ def create_chunks_and_embeddings(
         chunks = []
         for text, embedding in zip(chunk_texts, embeddings, strict=True):
             chunk = Chunk.update_data(text=text, embedding=embedding, context=context, save=save)
-            chunks.append(chunk)
+            if chunk is not None:
+                chunks.append(chunk)
 
     except openai.OpenAIError:
         logger.exception("Failed to create chunks and embeddings")

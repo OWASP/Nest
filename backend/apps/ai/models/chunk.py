@@ -48,7 +48,7 @@ class Chunk(TimestampedModel):
         context: Context,
         *,
         save: bool = True,
-    ) -> "Chunk":
+    ) -> "Chunk | None":
         """Update chunk data.
 
         Args:
@@ -61,6 +61,9 @@ class Chunk(TimestampedModel):
           Chunk: The created chunk instance.
 
         """
+        if Chunk.objects.filter(context=context, text=text).exists():
+            return None
+
         chunk = Chunk(text=text, embedding=embedding, context=context)
 
         if save:

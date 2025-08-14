@@ -156,7 +156,7 @@ class TestChapterExtractor:
         chapter.is_active = False
         chapter.owasp_repository = None
 
-        prose, metadata = extract_chapter_content(chapter)
+        _, metadata = extract_chapter_content(chapter)
 
         assert "Related URLs: https://valid.com, https://another-valid.com" in metadata
         assert "https://invalid.com" not in metadata
@@ -241,7 +241,7 @@ class TestChapterExtractor:
         chapter.is_active = False
         chapter.owasp_repository = None
 
-        prose, metadata = extract_chapter_content(chapter)
+        _, metadata = extract_chapter_content(chapter)
 
         assert "Related URLs: https://valid.com" in metadata
 
@@ -265,7 +265,7 @@ class TestChapterExtractor:
         chapter.is_active = False
         chapter.owasp_repository = None
 
-        prose, metadata = extract_chapter_content(chapter)
+        _, metadata = extract_chapter_content(chapter)
 
         assert "Related URLs:" not in metadata
 
@@ -294,6 +294,6 @@ class TestChapterExtractor:
         chapter.is_active = False
         chapter.owasp_repository = None
 
-        prose, metadata = extract_chapter_content(chapter)
+        _, metadata = extract_chapter_content(chapter)
 
         assert "Related URLs: https://valid.com, https://another-valid.com" in metadata

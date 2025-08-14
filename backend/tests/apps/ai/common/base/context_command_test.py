@@ -159,7 +159,7 @@ class TestBaseContextCommand:
 
             calls = mock_context_class.update_data.call_args_list
             for i, call in enumerate(calls):
-                args, kwargs = call
+                _, kwargs = call
                 assert kwargs["content_object"] == entities[i]
                 assert kwargs["content"] == "metadata content\n\nprose content"
                 assert kwargs["source"] == "owasp_test_entity"

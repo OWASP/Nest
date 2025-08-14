@@ -136,7 +136,7 @@ class TestEventExtractor:
         event.longitude = 0.0
         event.url = None
 
-        prose, metadata = extract_event_content(event)
+        _, metadata = extract_event_content(event)
 
         assert "Event Name: Test Event" in metadata
         assert "Coordinates: 0.0, 0.0" in metadata
@@ -202,7 +202,7 @@ class TestEventExtractor:
         event.longitude = None
         event.url = None
 
-        prose, metadata = extract_event_content(event)
+        _, metadata = extract_event_content(event)
 
         event.get_category_display.assert_called_once()
         assert "Category: Meetup" in metadata

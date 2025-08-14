@@ -130,7 +130,7 @@ class TestProjectExtractor:
         project.is_active = True
         project.owasp_repository = None
 
-        prose, metadata = extract_project_content(project)
+        _, metadata = extract_project_content(project)
 
         assert "Project Statistics: Stars: 100, Contributors: 5, Open Issues: 3" in metadata
 
@@ -162,7 +162,7 @@ class TestProjectExtractor:
         project.is_active = True
         project.owasp_repository = None
 
-        prose, metadata = extract_project_content(project)
+        _, metadata = extract_project_content(project)
 
         assert "Project Statistics:" not in metadata
 
@@ -194,7 +194,7 @@ class TestProjectExtractor:
         project.is_active = True
         project.owasp_repository = None
 
-        prose, metadata = extract_project_content(project)
+        _, metadata = extract_project_content(project)
 
         assert "Related URLs: https://valid.com" in metadata
         assert "https://invalid.com" not in metadata
@@ -227,7 +227,7 @@ class TestProjectExtractor:
         project.is_active = True
         project.owasp_repository = None
 
-        prose, metadata = extract_project_content(project)
+        _, metadata = extract_project_content(project)
 
         assert "Created: 2021-03-01" in metadata
         assert "Last Updated:" not in metadata
@@ -261,7 +261,7 @@ class TestProjectExtractor:
         project.is_active = True
         project.owasp_repository = None
 
-        prose, metadata = extract_project_content(project)
+        _, metadata = extract_project_content(project)
 
         assert "Health Score: 0.00" in metadata
 
@@ -331,7 +331,7 @@ class TestProjectExtractor:
         project.owasp_repository = None
         del project.invalid_urls
 
-        prose, metadata = extract_project_content(project)
+        _, metadata = extract_project_content(project)
 
         assert "Related URLs: https://valid.com" in metadata
 
@@ -436,6 +436,6 @@ class TestProjectExtractor:
         project.is_active = True
         project.owasp_repository = None
 
-        prose, metadata = extract_project_content(project)
+        _, metadata = extract_project_content(project)
 
         assert "Related URLs: https://valid.com, https://another.com" in metadata

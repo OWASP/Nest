@@ -60,6 +60,7 @@ class TestChunkModel:
             chunk_instance = Mock()
             chunk_instance.context_id = 123
             mock_chunk.return_value = chunk_instance
+            mock_chunk.objects.filter.return_value.exists.return_value = False
 
             result = Chunk.update_data(
                 text=text, embedding=embedding, context=mock_context, save=True
@@ -80,6 +81,7 @@ class TestChunkModel:
             chunk_instance = Mock()
             chunk_instance.context_id = None
             mock_chunk.return_value = chunk_instance
+            mock_chunk.objects.filter.return_value.exists.return_value = False
 
             result = Chunk.update_data(
                 text=text, embedding=embedding, context=mock_context, save=False
@@ -90,6 +92,22 @@ class TestChunkModel:
             )
             chunk_instance.save.assert_not_called()
             assert result is chunk_instance
+
+    def test_update_data_chunk_already_exists(self):
+        """Test that update_data returns None when chunk already exists."""
+        text = "Test chunk content"
+        embedding = [0.1, 0.2, 0.3]
+        mock_context = Mock(spec=Context)
+
+        with patch("apps.ai.models.chunk.Chunk") as mock_chunk:
+            mock_chunk.objects.filter.return_value.exists.return_value = True
+
+            result = Chunk.update_data(
+                text=text, embedding=embedding, context=mock_context, save=True
+            )
+
+            mock_chunk.assert_not_called()
+            assert result is None
 
     def test_meta_class_attributes(self):
         assert Chunk._meta.db_table == "ai_chunks"

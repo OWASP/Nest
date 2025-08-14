@@ -93,7 +93,7 @@ class TestCommitteeExtractor:
         committee.is_active = True
         committee.owasp_repository = None
 
-        prose, metadata = extract_committee_content(committee)
+        _, metadata = extract_committee_content(committee)
 
         assert "Related URLs: https://valid.com" in metadata
         assert "https://invalid.com" not in metadata
@@ -112,7 +112,7 @@ class TestCommitteeExtractor:
         committee.owasp_repository = None
         del committee.invalid_urls
 
-        prose, metadata = extract_committee_content(committee)
+        _, metadata = extract_committee_content(committee)
 
         assert "Related URLs: https://valid.com" in metadata
 
@@ -197,6 +197,6 @@ class TestCommitteeExtractor:
         committee.is_active = True
         committee.owasp_repository = None
 
-        prose, metadata = extract_committee_content(committee)
+        _, metadata = extract_committee_content(committee)
 
         assert "Related URLs:" not in metadata
