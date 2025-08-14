@@ -64,8 +64,8 @@ def user_filter_side_effect_factory(mock_employees, mock_former_employees):
 class TestSyncUserBadgesCommand:
     """Test the sync_user_badges management command."""
 
-    @patch("apps.owasp.models.badge.Badge.objects.get_or_create")
-    @patch("apps.github.models.user.User.objects.filter")
+    @patch("apps.owasp.management.commands.owasp_update_badges.Badge.objects.get_or_create")
+    @patch("apps.owasp.management.commands.owasp_update_badges.User.objects.filter")
     def test_sync_owasp_staff_badge(self, mock_user_filter, mock_badge_get_or_create):
         # Set up badge mock
         mock_badge = MagicMock()
@@ -105,8 +105,8 @@ class TestSyncUserBadgesCommand:
             for s in ("Removed badge from 1 non-staff", "Removed badge from 1 non-employees")
         )
 
-    @patch("apps.owasp.models.badge.Badge.objects.get_or_create")
-    @patch("apps.github.models.user.User.objects.filter")
+    @patch("apps.owasp.management.commands.owasp_update_badges.Badge.objects.get_or_create")
+    @patch("apps.owasp.management.commands.owasp_update_badges.User.objects.filter")
     def test_badge_creation(self, mock_user_filter, mock_badge_get_or_create):
         # Set up badge creation mock
         mock_badge = MagicMock()
@@ -142,8 +142,8 @@ class TestSyncUserBadgesCommand:
         output = out.getvalue()
         assert f"Created badge: {mock_badge.name}" in output
 
-    @patch("apps.owasp.models.badge.Badge.objects.get_or_create")
-    @patch("apps.github.models.user.User.objects.filter")
+    @patch("apps.owasp.management.commands.owasp_update_badges.Badge.objects.get_or_create")
+    @patch("apps.owasp.management.commands.owasp_update_badges.User.objects.filter")
     def test_command_idempotency(self, mock_user_filter, mock_badge_get_or_create):
         """Test that running the command multiple times has the same effect as running it once."""
         # Set up badge mock
