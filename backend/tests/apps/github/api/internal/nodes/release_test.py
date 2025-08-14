@@ -13,6 +13,7 @@ class TestReleaseNode:
     def test_meta_configuration(self):
         field_names = {field.name for field in ReleaseNode.__strawberry_definition__.fields}
         expected_field_names = {
+            "_id",
             "author",
             "is_pre_release",
             "name",
