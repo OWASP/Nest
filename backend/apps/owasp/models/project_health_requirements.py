@@ -57,6 +57,11 @@ class ProjectHealthRequirements(TimestampedModel):
     unassigned_issues_count = models.PositiveIntegerField(
         verbose_name="Unassigned issues", default=0
     )
+    compliance_penalty_weight = models.FloatField(
+        verbose_name="Compliance penalty weight (%)",
+        default=10.0,
+        help_text="Percentage penalty applied to non-compliant projects (0-100)",
+    )
 
     def __str__(self) -> str:
         """Project health requirements human readable representation."""

@@ -57,7 +57,20 @@ class Command(BaseCommand):
                 if int(getattr(metric, field)) <= int(getattr(requirements, field)):
                     score += weight
 
-            metric.score = score
+            # Apply compliance penalty if project is not level compliant
+            if not metric.is_level_compliant:
+                penalty_percentage = requirements.compliance_penalty_weight
+                penalty_amount = score * (penalty_percentage / 100.0)
+                score = max(0.0, score - penalty_amount)
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"Applied {penalty_percentage}% compliance penalty to {metric.project.name} "
+                        f"(penalty: {penalty_amount:.2f}, final score: {score:.2f})"
+                    )
+                )
+
+            # Ensure score stays within bounds (0-100)
+            metric.score = max(0.0, min(100.0, score))
             project_health_metrics.append(metric)
 
         ProjectHealthMetrics.bulk_save(
