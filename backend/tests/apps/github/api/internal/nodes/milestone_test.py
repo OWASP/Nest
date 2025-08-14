@@ -12,6 +12,7 @@ class TestMilestoneNode:
     def test_milestone_node_fields(self):
         field_names = {field.name for field in MilestoneNode.__strawberry_definition__.fields}
         expected_field_names = {
+            "_id",
             "author",
             "body",
             "closed_issues_count",
