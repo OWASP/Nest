@@ -5,8 +5,9 @@ import time
 
 from django.core.management.base import BaseCommand, CommandError
 
-from apps.owasp.utils.compliance_detector import ComplianceDetector
+from apps.owasp.utils.compliance_detector import detect_and_update_compliance
 from apps.owasp.utils.project_level_fetcher import fetch_official_project_levels
+from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """Execute compliance detection workflow."""
-        start_time = time.time()
+        start_time = time.perf_counter()
         dry_run = options['dry_run']
         verbose = options['verbose']
         timeout = options['timeout']
@@ -60,27 +61,24 @@ class Command(BaseCommand):
             
             self.stdout.write(f"Successfully fetched {len(official_levels)} official project levels")
             
-            # Step 2: Detect compliance issues
-            self.stdout.write("Detecting compliance issues...")
-            detector = ComplianceDetector()
-            report = detector.detect_compliance_issues(official_levels)
+            # Steps 2-4: Detect and update in one procedural call
+            self.stdout.write("Detecting and updating compliance issues...")
+            detect_and_update_compliance(official_levels)
             
-            # Step 3: Log and display compliance findings
-            self._log_compliance_findings(report)
+            # Recompute a lightweight summary from latest health metrics
+            latest_metrics = ProjectHealthMetrics.get_latest_health_metrics()
+            total = len(latest_metrics)
+            compliant = sum(1 for m in latest_metrics if m.is_level_compliant)
+            non_compliant = total - compliant
+            compliance_rate = (compliant / total * 100) if total else 0.0
             
-            # Step 4: Update compliance status (unless dry run)
-            if not dry_run:
-                self.stdout.write("Updating compliance status in database...")
-                detector.update_compliance_status(report)
-                self.stdout.write("Compliance status updated successfully")
-            else:
-                self.stdout.write("Skipping database updates due to dry-run mode")
+            # (If you still need detailed per-project logs, adapt _log_compliance_findings to compute from latest_metrics)
             
             # Step 5: Summary
-            execution_time = time.time() - start_time
+            execution_time = time.perf_counter() - start_time
             self.stdout.write(f"\nCompliance detection completed in {execution_time:.2f}s")
-            self.stdout.write(f"Summary: {len(report.compliant_projects)} compliant, {len(report.non_compliant_projects)} non-compliant")
-            self.stdout.write(f"Compliance rate: {report.compliance_rate:.1f}%")
+            self.stdout.write(f"Summary: {compliant} compliant, {non_compliant} non-compliant")
+            self.stdout.write(f"Compliance rate: {compliance_rate:.1f}%")
             
             # Log detailed summary for monitoring
             logger.info(
@@ -88,12 +86,10 @@ class Command(BaseCommand):
                 extra={
                     "execution_time": f"{execution_time:.2f}s",
                     "dry_run": dry_run,
-                    "total_projects": report.total_projects_checked,
-                    "compliant_projects": len(report.compliant_projects),
-                    "non_compliant_projects": len(report.non_compliant_projects),
-                    "local_only_projects": len(report.local_only_projects),
-                    "official_only_projects": len(report.official_only_projects),
-                    "compliance_rate": f"{report.compliance_rate:.1f}%"
+                    "total_projects": total,
+                    "compliant_projects": compliant,
+                    "non_compliant_projects": non_compliant,
+                    "compliance_rate": f"{compliance_rate:.1f}%"
                 }
             )
             
@@ -112,39 +108,4 @@ class Command(BaseCommand):
             
             raise CommandError(error_msg)
 
-    def _log_compliance_findings(self, report):
-        """Log and display detailed compliance findings."""
-        # Log level mismatches for non-compliant projects
-        if report.non_compliant_projects:
-            self.stderr.write(f"Found {len(report.non_compliant_projects)} non-compliant projects:")
-            for project_name in report.non_compliant_projects:
-                self.stderr.write(f"  - {project_name}")
-                logger.warning(
-                    "Level mismatch detected",
-                    extra={"project": project_name}
-                )
-        
-        # Log projects that exist locally but not in official data
-        if report.local_only_projects:
-            self.stdout.write(f"Found {len(report.local_only_projects)} projects that exist locally but not in official data:")
-            for project_name in report.local_only_projects:
-                self.stdout.write(f"  - {project_name}")
-                logger.warning(
-                    "Project exists locally but not in official data",
-                    extra={"project": project_name}
-                )
-        
-        # Log projects that exist in official data but not locally
-        if report.official_only_projects:
-            self.stdout.write(f"Found {len(report.official_only_projects)} projects in official data but not locally:")
-            for project_name in report.official_only_projects:
-                self.stdout.write(f"  - {project_name}")
-                logger.info(
-                    "Project exists in official data but not locally",
-                    extra={"project": project_name}
-                )
-        
-        # Log compliant projects
-        if report.compliant_projects:
-            self.stdout.write(f"Found {len(report.compliant_projects)} compliant projects")
 
