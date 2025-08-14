@@ -24,59 +24,38 @@ def make_mock_former_employees(mock_former_employee):
     return mock_former_employees
 
 
-def user_filter_side_effect_factory(mock_employees, mock_former_employees):
-    """Create a side effect function for User.objects.filter."""
-
-    # Extract complex conditions to simple helper functions
-    def get_staff_value_from_q_object(arg):
-        """Extract is_owasp_staff value from Q object."""
-        if not hasattr(arg, "children"):
-            return None
-
+def extract_is_owasp_staff(arg):
+    """Extract is_owasp_staff value from Q object, dict, or tuple."""
+    if hasattr(arg, "children"):
         for key, value in arg.children:
             if key == "is_owasp_staff":
                 return value
-        return None
+    if isinstance(arg, dict) and "is_owasp_staff" in arg:
+        return arg["is_owasp_staff"]
+    if isinstance(arg, tuple) and len(arg) == 2 and arg[0] == "is_owasp_staff":
+        return arg[1]
+    return None
 
-    def get_staff_value_from_arg(arg):
-        """Extract is_owasp_staff value from different arg types."""
-        # Check Q object
-        staff_value = get_staff_value_from_q_object(arg)
-        if staff_value is not None:
-            return staff_value
 
-        # Check dict
-        if isinstance(arg, dict) and "is_owasp_staff" in arg:
-            return arg["is_owasp_staff"]
-
-        # Check tuple
-        if isinstance(arg, tuple) and len(arg) == 2 and arg[0] == "is_owasp_staff":
-            return arg[1]
-
-        return None
+def user_filter_side_effect_factory(mock_employees, mock_former_employees):
+    """Create a side effect function for User.objects.filter."""
 
     def get_mock_for_staff_value(value):
-        """Return appropriate mock based on staff value."""
         if value is True:
             return mock_employees
         if value is False:
             return mock_former_employees
         return None
 
-    # Main side effect function with reduced complexity
     def user_filter_side_effect(*args, **kwargs):
-        # Handle direct keyword arguments first
         staff_value = kwargs.get("is_owasp_staff")
         if staff_value is not None:
             return get_mock_for_staff_value(staff_value)
-
-        # Process positional args
         for arg in args:
-            staff_value = get_staff_value_from_arg(arg)
+            staff_value = extract_is_owasp_staff(arg)
             result = get_mock_for_staff_value(staff_value)
             if result:
                 return result
-
         return MagicMock()
 
     return user_filter_side_effect
