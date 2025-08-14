@@ -18,7 +18,6 @@ class TestRepositoryNode:
         field_names = {field.name for field in RepositoryNode.__strawberry_definition__.fields}
         expected_field_names = {
             "_id",
-            "commits_count",
             "contributors_count",
             "created_at",
             "description",
