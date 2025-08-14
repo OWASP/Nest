@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("owasp", "0047_add_is_level_compliant_field"),
     ]

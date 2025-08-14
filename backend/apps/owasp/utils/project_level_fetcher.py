@@ -1,8 +1,6 @@
 """Service for fetching OWASP project levels from GitHub repository."""
 
-import json
 import logging
-from typing import Dict
 
 import requests
 from requests.exceptions import RequestException
@@ -12,7 +10,7 @@ from apps.owasp.constants import OWASP_PROJECT_LEVELS_URL
 logger = logging.getLogger(__name__)
 
 
-def fetch_official_project_levels(timeout: int = 30) -> Dict[str, str] | None:
+def fetch_official_project_levels(timeout: int = 30) -> dict[str, str] | None:
     """Fetch project levels from OWASP GitHub repository.
 
     Args:
@@ -32,14 +30,13 @@ def fetch_official_project_levels(timeout: int = 30) -> Dict[str, str] | None:
         data = response.json()
         if not isinstance(data, list):
             logger.exception(
-                "Invalid project levels data format", 
-                extra={"expected": "list", "got": type(data).__name__}
+                "Invalid project levels data format",
+                extra={"expected": "list", "got": type(data).__name__},
             )
             return None
 
         # Convert the list to a dict mapping project names to their levels
         project_levels = {}
-        
         for entry in data:
             if not isinstance(entry, dict):
                 continue
@@ -57,7 +54,6 @@ def fetch_official_project_levels(timeout: int = 30) -> Dict[str, str] | None:
     except (RequestException, ValueError) as e:
         logger.exception(
             "Failed to fetch project levels",
-            extra={"url": OWASP_PROJECT_LEVELS_URL, "error": str(e)}
+            extra={"url": OWASP_PROJECT_LEVELS_URL, "error": str(e)},
         )
         return None
-
