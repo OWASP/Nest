@@ -71,10 +71,13 @@ class Command(BaseCommand):
             # Step 3: Log and display compliance findings
             self._log_compliance_findings(report)
             
+from django.db import transaction
+
             # Step 4: Update compliance status (unless dry run)
             if not dry_run:
                 self.stdout.write("Updating compliance status in database...")
-                detector.update_compliance_status(report)
+                with transaction.atomic():
+                    detector.update_compliance_status(report)
                 self.stdout.write("Compliance status updated successfully")
             else:
                 self.stdout.write("Skipping database updates due to dry-run mode")
