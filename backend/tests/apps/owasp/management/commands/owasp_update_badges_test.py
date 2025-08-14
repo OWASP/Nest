@@ -35,31 +35,48 @@ class TestSyncUserBadgesCommand:
         mock_former_employees.count.return_value = 1
 
         def user_filter_side_effect(*args, **kwargs):
-            # Check keyword arguments first
+            # Handle keyword arguments
             if kwargs.get("is_owasp_staff") is True:
                 return mock_employees
             if kwargs.get("is_owasp_staff") is False:
                 return mock_former_employees
-            # Check positional Q objects or conditions
+
+            # Handle positional arguments
+            result = None
             for arg in args:
-                # Handle Q objects or similar conditions
-                if hasattr(arg, "children"):
-                    for key, value in arg.children:
-                        if key == "is_owasp_staff" and value is True:
-                            return mock_employees
-                        if key == "is_owasp_staff" and value is False:
-                            return mock_former_employees
-                # Handle dicts or tuples
-                if isinstance(arg, dict) and arg.get("is_owasp_staff") is True:
-                    return mock_employees
-                if isinstance(arg, dict) and arg.get("is_owasp_staff") is False:
-                    return mock_former_employees
-                if isinstance(arg, tuple) and len(arg) == 2 and arg[0] == "is_owasp_staff":
-                    if arg[1] is True:
-                        return mock_employees
-                    if arg[1] is False:
-                        return mock_former_employees
+                result = check_arg_for_staff_status(arg)
+                if result:
+                    return result
+
             return MagicMock()
+
+        def check_arg_for_staff_status(arg):
+            """Extract the staff status value and return the appropriate mock."""
+            # Extract the staff status value based on argument type
+            is_staff_value = None
+
+            # Q objects
+            if hasattr(arg, "children"):
+                for key, value in arg.children:
+                    if key == "is_owasp_staff":
+                        is_staff_value = value
+                        break
+
+            # Dict case
+            elif isinstance(arg, dict) and "is_owasp_staff" in arg:
+                is_staff_value = arg["is_owasp_staff"]
+
+            # Tuple case
+            elif isinstance(arg, tuple) and len(arg) == 2 and arg[0] == "is_owasp_staff":
+                is_staff_value = arg[1]
+
+            # Return the appropriate mock based on the extracted value
+            if is_staff_value is True:
+                return mock_employees
+            if is_staff_value is False:
+                return mock_former_employees
+
+            return None
 
         mock_user_filter.side_effect = user_filter_side_effect
 
@@ -101,7 +118,9 @@ class TestSyncUserBadgesCommand:
         mock_employees = MagicMock()
         mock_employees.__iter__.return_value = iter([])
         mock_employees.count.return_value = 0
-        mock_employees.exclude.return_value = mock_employees  # Ensure exclude() yields an empty iterable
+        mock_employees.exclude.return_value = (
+            mock_employees  # Ensure exclude() yields an empty iterable
+        )
 
         mock_former_employees = MagicMock()
         mock_former_employees.__iter__.return_value = iter([])
@@ -170,7 +189,17 @@ class TestSyncUserBadgesCommand:
         mock_badge.users.remove.assert_not_called()
 
         # Check both outputs contain zero-count messages (accept "employees" or "staff" wording)
-        assert any(s in out1.getvalue() for s in ("Added badge to 0 employees", "Added badge to 0 staff"))
-        assert any(s in out1.getvalue() for s in ("Removed badge from 0 non-employees", "Removed badge from 0 non-staff"))
-        assert any(s in out2.getvalue() for s in ("Added badge to 0 employees", "Added badge to 0 staff"))
-        assert any(s in out2.getvalue() for s in ("Removed badge from 0 non-employees", "Removed badge from 0 non-staff"))
+        assert any(
+            s in out1.getvalue() for s in ("Added badge to 0 employees", "Added badge to 0 staff")
+        )
+        assert any(
+            s in out1.getvalue()
+            for s in ("Removed badge from 0 non-employees", "Removed badge from 0 non-staff")
+        )
+        assert any(
+            s in out2.getvalue() for s in ("Added badge to 0 employees", "Added badge to 0 staff")
+        )
+        assert any(
+            s in out2.getvalue()
+            for s in ("Removed badge from 0 non-employees", "Removed badge from 0 non-staff")
+        )
