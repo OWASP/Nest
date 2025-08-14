@@ -53,12 +53,15 @@ class Command(BaseCommand):
             # Step 1: Fetch official project levels
             self.stdout.write("Fetching official project levels from OWASP GitHub repository...")
             official_levels = fetch_official_project_levels(timeout=timeout)
-            
-            if official_levels is None:
-                self.stderr.write("Failed to fetch official project levels")
-                raise CommandError("Failed to fetch official project levels")
-            
-            self.stdout.write(f"Successfully fetched {len(official_levels)} official project levels")
+
+            if official_levels is None or not official_levels:
+                msg = "Failed to fetch official project levels or received empty payload"
+                self.stderr.write(msg)
+                raise CommandError(msg)
+
+            self.stdout.write(
+                f"Successfully fetched {len(official_levels)} official project levels"
+            )
             
             # Step 2: Detect compliance issues
             self.stdout.write("Detecting compliance issues...")
