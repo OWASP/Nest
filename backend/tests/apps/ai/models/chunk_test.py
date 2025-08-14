@@ -72,41 +72,75 @@ class TestChunkModel:
             chunk_instance.save.assert_called_once()
             assert result is chunk_instance
 
-    def test_update_data_no_save(self):
-        text = "Test chunk content"
+    def test_update_data_creates_new_chunk_and_saves(self, mock_context):
+        """Test that a new chunk is created and saved."""
+        text = "New unique chunk content"
         embedding = [0.1, 0.2, 0.3]
-        mock_context = Mock(spec=Context)
 
-        with patch("apps.ai.models.chunk.Chunk") as mock_chunk:
-            chunk_instance = Mock()
-            chunk_instance.context_id = None
-            mock_chunk.return_value = chunk_instance
-            mock_chunk.objects.filter.return_value.exists.return_value = False
-
-            result = Chunk.update_data(
-                text=text, embedding=embedding, context=mock_context, save=False
-            )
-
-            mock_chunk.assert_called_once_with(
-                text=text, embedding=embedding, context=mock_context
-            )
-            chunk_instance.save.assert_not_called()
-            assert result is chunk_instance
-
-    def test_update_data_chunk_already_exists(self):
-        """Test that update_data returns None when chunk already exists."""
-        text = "Test chunk content"
-        embedding = [0.1, 0.2, 0.3]
-        mock_context = Mock(spec=Context)
-
-        with patch("apps.ai.models.chunk.Chunk") as mock_chunk:
-            mock_chunk.objects.filter.return_value.exists.return_value = True
+        with patch("apps.ai.models.chunk.Chunk") as mock_chunk_class:
+            mock_chunk_class.objects.filter.return_value.exists.return_value = False
+            mock_instance = Mock(spec=Chunk)
+            mock_chunk_class.return_value = mock_instance
 
             result = Chunk.update_data(
                 text=text, embedding=embedding, context=mock_context, save=True
             )
 
-            mock_chunk.assert_not_called()
+            mock_chunk_class.objects.filter.assert_called_once_with(
+                context__content_type=mock_context.content_type,
+                context__object_id=mock_context.object_id,
+                text=text,
+            )
+            mock_chunk_class.assert_called_once_with(
+                text=text, embedding=embedding, context=mock_context
+            )
+            mock_instance.save.assert_called_once()
+            assert result is mock_instance
+
+    def test_update_data_creates_new_chunk_no_save(self, mock_context):
+        """Test that a new chunk is created but NOT saved when save=False."""
+        text = "New unique chunk content"
+        embedding = [0.1, 0.2, 0.3]
+
+        with patch("apps.ai.models.chunk.Chunk") as mock_chunk_class:
+            mock_chunk_class.objects.filter.return_value.exists.return_value = False
+            mock_instance = Mock(spec=Chunk)
+            mock_chunk_class.return_value = mock_instance
+
+            result = Chunk.update_data(
+                text=text, embedding=embedding, context=mock_context, save=False
+            )
+
+            mock_chunk_class.objects.filter.assert_called_once_with(
+                context__content_type=mock_context.content_type,
+                context__object_id=mock_context.object_id,
+                text=text,
+            )
+            mock_chunk_class.assert_called_once_with(
+                text=text, embedding=embedding, context=mock_context
+            )
+            mock_instance.save.assert_not_called()
+            assert result is mock_instance
+
+    def test_update_data_returns_none_if_chunk_already_exists(self, mock_context):
+        """Test that update_data returns None when a chunk with the same text."""
+        text = "Existing chunk content"
+        embedding = [0.1, 0.2, 0.3]
+
+        with patch("apps.ai.models.chunk.Chunk") as mock_chunk_class:
+            mock_chunk_class.objects.filter.return_value.exists.return_value = True
+
+            result = Chunk.update_data(
+                text=text, embedding=embedding, context=mock_context, save=True
+            )
+
+            mock_chunk_class.objects.filter.assert_called_once_with(
+                context__content_type=mock_context.content_type,
+                context__object_id=mock_context.object_id,
+                text=text,
+            )
+
+            mock_chunk_class.assert_not_called()
             assert result is None
 
     def test_meta_class_attributes(self):
