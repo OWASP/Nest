@@ -8,6 +8,54 @@ from django.core.management import call_command
 from apps.owasp.management.commands.owasp_update_badges import OWASP_STAFF_BADGE_NAME
 
 
+def make_mock_employees(mock_employee):
+    mock_employees = MagicMock()
+    mock_employees_without_badge = MagicMock()
+    mock_employees_without_badge.__iter__.return_value = iter([mock_employee])
+    mock_employees_without_badge.count.return_value = 1
+    mock_employees.exclude.return_value = mock_employees_without_badge
+    return mock_employees, mock_employees_without_badge
+
+
+def make_mock_former_employees(mock_former_employee):
+    mock_former_employees = MagicMock()
+    mock_former_employees.__iter__.return_value = iter([mock_former_employee])
+    mock_former_employees.count.return_value = 1
+    return mock_former_employees
+
+
+def user_filter_side_effect_factory(mock_employees, mock_former_employees):
+    def check_arg_for_staff_status(arg):
+        is_staff_value = None
+        if hasattr(arg, "children"):
+            for key, value in arg.children:
+                if key == "is_owasp_staff":
+                    is_staff_value = value
+                    break
+        elif isinstance(arg, dict) and "is_owasp_staff" in arg:
+            is_staff_value = arg["is_owasp_staff"]
+        elif isinstance(arg, tuple) and len(arg) == 2 and arg[0] == "is_owasp_staff":
+            is_staff_value = arg[1]
+        if is_staff_value is True:
+            return mock_employees
+        if is_staff_value is False:
+            return mock_former_employees
+        return None
+
+    def user_filter_side_effect(*args, **kwargs):
+        if kwargs.get("is_owasp_staff") is True:
+            return mock_employees
+        if kwargs.get("is_owasp_staff") is False:
+            return mock_former_employees
+        for arg in args:
+            result = check_arg_for_staff_status(arg)
+            if result:
+                return result
+        return MagicMock()
+
+    return user_filter_side_effect
+
+
 class TestSyncUserBadgesCommand:
     """Test the sync_user_badges management command."""
 
@@ -22,74 +70,20 @@ class TestSyncUserBadgesCommand:
 
         # Set up employee mocks - with exclude() method properly mocked
         mock_employee = MagicMock()
-        mock_employees = MagicMock()
-        mock_employees_without_badge = MagicMock()
-        mock_employees_without_badge.__iter__.return_value = iter([mock_employee])
-        mock_employees_without_badge.count.return_value = 1
-        mock_employees.exclude.return_value = mock_employees_without_badge
-
-        # Set up former employee mocks
         mock_former_employee = MagicMock()
-        mock_former_employees = MagicMock()
-        mock_former_employees.__iter__.return_value = iter([mock_former_employee])
-        mock_former_employees.count.return_value = 1
+        mock_employees, _ = make_mock_employees(mock_employee)
+        mock_former_employees = make_mock_former_employees(mock_former_employee)
 
-        def user_filter_side_effect(*args, **kwargs):
-            # Handle keyword arguments
-            if kwargs.get("is_owasp_staff") is True:
-                return mock_employees
-            if kwargs.get("is_owasp_staff") is False:
-                return mock_former_employees
-
-            # Handle positional arguments
-            result = None
-            for arg in args:
-                result = check_arg_for_staff_status(arg)
-                if result:
-                    return result
-
-            return MagicMock()
-
-        def check_arg_for_staff_status(arg):
-            """Extract the staff status value and return the appropriate mock."""
-            # Extract the staff status value based on argument type
-            is_staff_value = None
-
-            # Q objects
-            if hasattr(arg, "children"):
-                for key, value in arg.children:
-                    if key == "is_owasp_staff":
-                        is_staff_value = value
-                        break
-
-            # Dict case
-            elif isinstance(arg, dict) and "is_owasp_staff" in arg:
-                is_staff_value = arg["is_owasp_staff"]
-
-            # Tuple case
-            elif isinstance(arg, tuple) and len(arg) == 2 and arg[0] == "is_owasp_staff":
-                is_staff_value = arg[1]
-
-            # Return the appropriate mock based on the extracted value
-            if is_staff_value is True:
-                return mock_employees
-            if is_staff_value is False:
-                return mock_former_employees
-
-            return None
-
-        mock_user_filter.side_effect = user_filter_side_effect
+        mock_user_filter.side_effect = user_filter_side_effect_factory(
+            mock_employees, mock_former_employees
+        )
 
         out = StringIO()
         call_command("owasp_update_badges", stdout=out)
 
         # Collect all positional args from add/remove calls
-        add_args = []
-        for call in mock_badge.users.add.call_args_list:
-            add_args.extend(call.args)
-        remove_args = []
-        for call in mock_badge.users.remove.call_args_list:
-            remove_args.extend(call.args)
+        add_args = [arg for call in mock_badge.users.add.call_args_list for arg in call.args]
+        remove_args = [arg for call in mock_badge.users.remove.call_args_list for arg in call.args]
 
         # Assert expected employees are present/absent in the calls
         assert mock_employee in add_args
