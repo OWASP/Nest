@@ -11,7 +11,6 @@ from django.utils.text import Truncator
 from django.utils.text import slugify as django_slugify
 from humanize import intword, naturaltime
 
-
 def convert_to_camel_case(text: str) -> str:
     """Convert a string to camelCase.
 

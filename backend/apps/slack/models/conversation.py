@@ -1,6 +1,7 @@
 """Slack app conversation model."""
 
 from datetime import UTC, datetime
+
 from typing import TYPE_CHECKING
 
 from django.db import models

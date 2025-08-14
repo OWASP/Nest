@@ -3,7 +3,6 @@
 from django.db import models
 from github.GithubException import UnknownObjectException
 
-
 class GenericUserModel(models.Model):
     """Generic user model."""
 

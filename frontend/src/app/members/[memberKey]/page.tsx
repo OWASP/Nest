@@ -9,6 +9,7 @@ import {
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { useTheme } from 'next-themes'
 import React, { useState, useEffect, useRef } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GET_USER_DATA } from 'server/queries/userQueries'
@@ -139,37 +140,57 @@ const UserDetailsPage: React.FC = () => {
     { icon: faCodeMerge, value: user?.contributionsCount || 0, unit: 'Contribution' },
   ]
 
-  const Heatmap = () => (
-    <div className="flex flex-col gap-4">
-      <div className="overflow-hidden rounded-lg bg-white shadow-xl dark:bg-gray-800">
-        <div className="relative">
-          <canvas ref={canvasRef} style={{ display: 'none' }} aria-hidden="true"></canvas>
-          {imageLink ? (
-            <div className="h-40 bg-[#10151c]">
-              <Image
-                width={100}
-                height={100}
-                src={imageLink || '/placeholder.svg'}
-                className="h-full w-full object-cover object-[54%_60%]"
-                alt="Contribution Heatmap"
-              />
-            </div>
-          ) : (
-            <div className="relative h-40 items-center justify-center bg-[#10151c]">
-              <Image
-                height={100}
-                width={100}
-                src="/img/heatmapBackground.png"
-                className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
-                alt="Heatmap Background"
-              />
-              <div className="heatmap-loader"></div>
-            </div>
-          )}
+  // Updated Heatmap function to work correctly for both light and dark themes
+  const Heatmap = () => {
+    const canvasRef = useRef<HTMLCanvasElement | null>(null)
+    const { theme } = useTheme()
+    const isDarkMode = theme === 'dark'
+
+    // Draw canvas whenever data, username, or theme changes
+    useEffect(() => {
+      if (canvasRef.current && data?.years?.length) {
+        drawContributions(canvasRef.current, {
+          data,
+          username,
+          themeName: isDarkMode ? 'dark' : 'light',
+        })
+        const imageURL = canvasRef.current.toDataURL()
+        setImageLink(imageURL)
+      }
+    }, [data, username, isDarkMode, setImageLink])
+
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="overflow-hidden rounded-lg bg-white shadow-xl dark:bg-gray-800">
+          <div className="relative">
+            <canvas ref={canvasRef} style={{ display: 'none' }} aria-hidden="true"></canvas>
+            {imageLink ? (
+              <div className="h-40">
+                <Image
+                  width={100}
+                  height={100}
+                  src={imageLink}
+                  className="h-full w-full object-cover object-[54%_60%]"
+                  alt="Contribution Heatmap"
+                />
+              </div>
+            ) : (
+              <div className="relative h-40 items-center justify-center">
+                <Image
+                  height={100}
+                  width={100}
+                  src={isDarkMode ? '/img/heatmapBackground-dark.png' : '/img/heatmapBackground-light.png'}
+                  className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
+                  alt="Heatmap Background"
+                />
+                <div className="heatmap-loader"></div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  )
+    )
+  };
 
   const UserSummary = () => (
     <div className="mt-4 flex items-center">
@@ -208,3 +229,4 @@ const UserDetailsPage: React.FC = () => {
 }
 
 export default UserDetailsPage
+

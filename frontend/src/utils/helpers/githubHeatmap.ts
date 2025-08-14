@@ -90,16 +90,27 @@ export const fetchHeatmapData = async (username: string): Promise<HeatmapRespons
 // The code below is a modified version of 'github-contributions-canvas'
 // https://www.npmjs.com/package/github-contributions-canvas?activeTab=code
 
+// Defined Light and Dark Themes
 const themes = {
-  blue: {
+  dark: {
     background: '#10151C',
     text: '#FFFFFF',
     meta: '#A6B1C1',
-    grade4: '#5F87A8',
-    grade3: '#46627B',
-    grade2: '#314257',
-    grade1: '#394d65',
-    grade0: '#202A37',
+    grade4: '#bafcc1ff',
+    grade3: '#73cb7aff',
+    grade2: '#49b14dff',
+    grade1: '#32a04aff',
+    grade0: '#222a36',
+  },
+  light: {
+    background: '#F8FAFC', // lighter background for light mode
+    text: '#333333',
+    meta: '#666666',
+    grade4: '#103f08ff',
+    grade3: '#145d11ff',
+    grade2: '#258332ff',
+    grade1: '#45a237ff',
+    grade0: '#dfdfde',
   },
 }
 
@@ -173,10 +184,10 @@ const canvasMargin = 20
 const yearHeight = textHeight + (boxWidth + boxMargin) * 8 + canvasMargin
 const scaleFactor = getPixelRatio()
 
+// Update getTheme to use themeName from opts
 function getTheme(opts: Options): Theme {
-  const { themeName } = opts
-  const name = themeName ?? 'blue'
-  return themes[name] ?? themes.blue
+  const name = opts.themeName ?? 'dark'
+  return themes[name] ?? themes.dark
 }
 
 function getDateInfo(data: DataStruct, date: string) {
@@ -276,12 +287,12 @@ function drawMetaData(ctx: CanvasRenderingContext2D, opts: DrawMetadataOptions) 
   ctx.strokeStyle = theme.grade0
 }
 
+// Update drawContributions to pass themeName
 export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
-  const { data } = opts
+  const { data, themeName } = opts
   let headerOffset = 0
-  if (!opts.skipHeader) {
-    headerOffset = headerHeight
-  }
+  if (!opts.skipHeader) headerOffset = headerHeight
+
   const height = data.years.length * yearHeight + canvasMargin + headerOffset + 10
   const width = 53 * (boxWidth + boxMargin) + canvasMargin * 2
 
@@ -289,31 +300,20 @@ export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
   canvas.height = height * scaleFactor
 
   const ctx = canvas.getContext('2d')
-
-  if (!ctx) {
-    throw new Error('Could not get 2d context from Canvas')
-  }
+  if (!ctx) throw new Error('Could not get 2d context from Canvas')
 
   ctx.scale(scaleFactor, scaleFactor)
   ctx.textBaseline = 'hanging'
+
+  const theme = getTheme(opts) 
+
   if (!opts.skipHeader) {
-    drawMetaData(ctx, {
-      ...opts,
-      width,
-      height,
-      data,
-    })
+    drawMetaData(ctx, { ...opts, width, height, data, themeName })
   }
 
   data.years.forEach((year, i) => {
     const offsetY = yearHeight * i + canvasMargin + headerOffset + 10
     const offsetX = canvasMargin
-    drawYear(ctx, {
-      ...opts,
-      year,
-      offsetX,
-      offsetY,
-      data,
-    })
+    drawYear(ctx, { ...opts, year, offsetX, offsetY, data, themeName })
   })
 }

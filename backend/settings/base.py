@@ -2,9 +2,7 @@
 
 import os
 from pathlib import Path
-
 from configurations import Configuration, values
-
 
 class Base(Configuration):
     """Base configuration."""
