@@ -6,13 +6,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('owasp', '0047_add_is_level_compliant_field'),
+        ("owasp", "0047_add_is_level_compliant_field"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='projecthealthrequirements',
-            name='compliance_penalty_weight',
-            field=models.FloatField(default=10.0, help_text='Percentage penalty applied to non-compliant projects (0-100)', verbose_name='Compliance penalty weight (%)'),
+            model_name="projecthealthrequirements",
+            name="compliance_penalty_weight",
+            field=models.FloatField(
+                default=10.0,
+                help_text="Percentage penalty applied to non-compliant projects (0-100)",
+                verbose_name="Compliance penalty weight (%)",
+            ),
+        ),
+        migrations.AddConstraint(
+            model_name="projecthealthrequirements",
+            constraint=models.CheckConstraint(
+                name="owasp_compliance_penalty_weight_0_100",
+                check=models.Q(compliance_penalty_weight__gte=0.0)
+                & models.Q(compliance_penalty_weight__lte=100.0),
+            ),
         ),
     ]

@@ -23,11 +23,13 @@ def fetch_official_project_levels(timeout: int = 30) -> Dict[str, str] | None:
 
     """
     try:
-        response = requests.get(OWASP_PROJECT_LEVELS_URL, timeout=timeout)
+        response = requests.get(
+            OWASP_PROJECT_LEVELS_URL,
+            timeout=timeout,
+            headers={"Accept": "application/json"},
+        )
         response.raise_for_status()
-        
-        data = json.loads(response.text)
-        
+        data = response.json()
         if not isinstance(data, list):
             logger.exception(
                 "Invalid project levels data format", 
@@ -41,20 +43,20 @@ def fetch_official_project_levels(timeout: int = 30) -> Dict[str, str] | None:
         for entry in data:
             if not isinstance(entry, dict):
                 continue
-            
             project_name = entry.get("name")
             level = entry.get("level")
-            
-            if isinstance(project_name, str) and project_name.strip():
-                # Convert level to string, handling both string and numeric levels
-                if isinstance(level, (str, int, float)):
-                    project_levels[project_name] = str(level)
+            if (
+                isinstance(project_name, str)
+                and isinstance(level, (str, int, float))
+                and project_name.strip()
+            ):
+                project_levels[project_name.strip()] = str(level)
 
         return project_levels
 
-    except (RequestException, json.JSONDecodeError) as e:
+    except (RequestException, ValueError) as e:
         logger.exception(
-            "Failed to fetch project levels", 
+            "Failed to fetch project levels",
             extra={"url": OWASP_PROJECT_LEVELS_URL, "error": str(e)}
         )
         return None

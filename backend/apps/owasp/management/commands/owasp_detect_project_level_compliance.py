@@ -4,6 +4,7 @@ import logging
 import time
 
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 
 from apps.owasp.utils.compliance_detector import detect_and_update_compliance
 from apps.owasp.utils.project_level_fetcher import fetch_official_project_levels
@@ -54,12 +55,15 @@ class Command(BaseCommand):
             # Step 1: Fetch official project levels
             self.stdout.write("Fetching official project levels from OWASP GitHub repository...")
             official_levels = fetch_official_project_levels(timeout=timeout)
-            
-            if official_levels is None:
-                self.stderr.write("Failed to fetch official project levels")
-                raise CommandError("Failed to fetch official project levels")
-            
-            self.stdout.write(f"Successfully fetched {len(official_levels)} official project levels")
+
+            if official_levels is None or not official_levels:
+                msg = "Failed to fetch official project levels or received empty payload"
+                self.stderr.write(msg)
+                raise CommandError(msg)
+
+            self.stdout.write(
+                f"Successfully fetched {len(official_levels)} official project levels"
+            )
             
             # Steps 2-4: Detect and update in one procedural call
             self.stdout.write("Detecting and updating compliance issues...")
@@ -73,6 +77,17 @@ class Command(BaseCommand):
             compliance_rate = (compliant / total * 100) if total else 0.0
             
             # (If you still need detailed per-project logs, adapt _log_compliance_findings to compute from latest_metrics)
+
+
+
+            # Step 4: Update compliance status (unless dry run)
+            if not dry_run:
+                self.stdout.write("Updating compliance status in database...")
+                with transaction.atomic():
+                    detector.update_compliance_status(report)
+                self.stdout.write("Compliance status updated successfully")
+            else:
+                self.stdout.write("Skipping database updates due to dry-run mode")
             
             # Step 5: Summary
             execution_time = time.perf_counter() - start_time
@@ -94,18 +109,51 @@ class Command(BaseCommand):
             )
             
         except Exception as e:
-            execution_time = time.time() - start_time
-            error_msg = f"Compliance detection failed after {execution_time:.2f}s: {str(e)}"
-            
-            logger.error(
+            execution_time = time.perf_counter() - start_time
+            error_msg = f"Compliance detection failed after {execution_time:.2f}s: {e!s}"
+
+            logger.exception(
                 "Compliance detection failed",
                 extra={
-                    "execution_time": f"{execution_time:.2f}s",
-                    "error": str(e)
+                    "execution_time_s": round(execution_time, 2),
+                    "error": e.__class__.__name__,
                 },
-                exc_info=True
             )
-            
-            raise CommandError(error_msg)
+            raise CommandError(error_msg) from e
+    def _log_compliance_findings(self, report):
+        """Log and display detailed compliance findings."""
+        # Log level mismatches for non-compliant projects
+        if report.non_compliant_projects:
+            self.stderr.write(f"Found {len(report.non_compliant_projects)} non-compliant projects:")
+            for project_name in report.non_compliant_projects:
+                self.stderr.write(f"  - {project_name}")
+                logger.warning(
+                    "Level mismatch detected",
+                    extra={"project": project_name}
+                )
+        
+        # Log projects that exist locally but not in official data
+        if report.local_only_projects:
+            self.stdout.write(f"Found {len(report.local_only_projects)} projects that exist locally but not in official data:")
+            for project_name in report.local_only_projects:
+                self.stdout.write(f"  - {project_name}")
+                logger.warning(
+                    "Project exists locally but not in official data",
+                    extra={"project": project_name}
+                )
+        
+        # Log projects that exist in official data but not locally
+        if report.official_only_projects:
+            self.stdout.write(f"Found {len(report.official_only_projects)} projects in official data but not locally:")
+            for project_name in report.official_only_projects:
+                self.stdout.write(f"  - {project_name}")
+                logger.info(
+                    "Project exists in official data but not locally",
+                    extra={"project": project_name}
+                )
+        
+        # Log compliant projects
+        if report.compliant_projects:
+            self.stdout.write(f"Found {len(report.compliant_projects)} compliant projects")
 
 
