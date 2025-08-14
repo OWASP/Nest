@@ -104,20 +104,18 @@ from django.db import transaction
             )
             
         except Exception as e:
-            execution_time = time.time() - start_time
-            error_msg = f"Compliance detection failed after {execution_time:.2f}s: {str(e)}"
-            
-            logger.error(
+            execution_time = time.perf_counter() - start_time
+            error_msg = f"Compliance detection failed after {execution_time:.2f}s: {e!s}"
+
+            logger.exception(
                 "Compliance detection failed",
                 extra={
-                    "execution_time": f"{execution_time:.2f}s",
-                    "error": str(e)
+                    "execution_time_s": round(execution_time, 2),
+                    "error": e.__class__.__name__,
                 },
-                exc_info=True
             )
-            
-            raise CommandError(error_msg)
 
+            raise CommandError(error_msg) from e
     def _log_compliance_findings(self, report):
         """Log and display detailed compliance findings."""
         # Log level mismatches for non-compliant projects
