@@ -1,5 +1,6 @@
 """Mentorship app admin."""
 
+from .interested_contributors import ParticipantInterestAdmin
 from .mentee import MenteeAdmin
 from .mentee_program import MenteeProgramAdmin
 from .mentor import MentorAdmin

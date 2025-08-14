@@ -69,6 +69,7 @@ class Issue(GenericIssueModel):
         related_name="issues",
     )
 
+    # M2Ms.
     assignees = models.ManyToManyField(
         "github.User",
         verbose_name="Assignees",

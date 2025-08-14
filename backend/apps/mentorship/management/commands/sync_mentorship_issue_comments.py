@@ -14,24 +14,27 @@ from apps.mentorship.models import ParticipantInterest, Program
 logger = logging.getLogger(__name__)
 
 INTEREST_PATTERNS = [
-    r"assign.*me",
-    r"i(?:'d| would)? like to work on",
-    r"can i work on",
-    r"i(?:'ll| will)? take",
-    r"i want to work on",
-    r"i am interested",
-    r"can i be assigned",
-    r"please assign.*me",
-    r"i can (?:help|work|fix|handle)",
-    r"let me (?:work|take|handle)",
-    r"i(?:'ll| will).*(?:fix|handle|work)",
-    r"assign.*to.*me",
-    r"i volunteer",
-    r"count me in",
-    r"i(?:'m| am) up for",
-    r"i could work",
-    r"happy.*work",
-    r"i(?:'d| would) love to work",
+    re.compile(p, re.IGNORECASE)
+    for p in [
+        r"assign.*me",
+        r"i(?:'d| would)? like to work on",
+        r"can i work on",
+        r"i(?:'ll| will)? take",
+        r"i want to work on",
+        r"i am interested",
+        r"can i be assigned",
+        r"please assign.*me",
+        r"i can (?:help|work|fix|handle)",
+        r"let me (?:work|take|handle)",
+        r"i(?:'ll| will).*(?:fix|handle|work)",
+        r"assign.*to.*me",
+        r"i volunteer",
+        r"count me in",
+        r"i(?:'m| am) up for",
+        r"i could work",
+        r"happy.*work",
+        r"i(?:'d| would) love to work",
+    ]
 ]
 
 
@@ -94,24 +97,28 @@ class Command(BaseCommand):
         """Find and register users who expressed interest in given issue as part of program."""
         interest_obj, _ = ParticipantInterest.objects.get_or_create(program=program, issue=issue)
 
-        new_users = []
+        existing_user_ids = set(interest_obj.users.values_list("id", flat=True))
+        to_add = []
+        new_user_logins = []
 
         for comment in issue.comments.select_related("author").all():
             if not comment.author:
                 continue
 
-            if interest_obj.users.filter(id=comment.author.id).exists():
+            if comment.author_id in existing_user_ids:
                 continue
 
-            body = (comment.body or "").lower()
-            if any(re.search(pattern, body) for pattern in INTEREST_PATTERNS):
-                interest_obj.users.add(comment.author)
-                new_users.append(comment.author.login)
+            body = comment.body or ""
+            if any(p.search(body) for p in INTEREST_PATTERNS):
+                to_add.append(comment.author)
+                new_user_logins.append(comment.author.login)
+                existing_user_ids.add(comment.author_id)
 
-        if new_users:
+        if to_add:
+            interest_obj.users.add(*to_add)
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"+ Added {len(new_users)} new user(s) "
-                    f"to issue #{issue.number}: {', '.join(new_users)}"
+                    f"+ Added {len(to_add)} new user(s) "
+                    f"to issue #{issue.number}: {', '.join(new_user_logins)}"
                 )
             )

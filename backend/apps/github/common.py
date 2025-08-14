@@ -149,6 +149,8 @@ def sync_repository(
                         issue.labels.add(Label.update_data(gh_issue_label))
                     except UnknownObjectException:
                         logger.exception("Couldn't get GitHub issue label %s", issue.url)
+        else:
+            logger.info("Skipping issues sync for %s", repository.name)
 
         # GitHub repository pull requests.
         kwargs = {
