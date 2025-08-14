@@ -75,19 +75,7 @@ class Command(BaseCommand):
             compliant = sum(1 for m in latest_metrics if m.is_level_compliant)
             non_compliant = total - compliant
             compliance_rate = (compliant / total * 100) if total else 0.0
-            
-            # (If you still need detailed per-project logs, adapt _log_compliance_findings to compute from latest_metrics)
 
-
-
-            # Step 4: Update compliance status (unless dry run)
-            if not dry_run:
-                self.stdout.write("Updating compliance status in database...")
-                with transaction.atomic():
-                    detector.update_compliance_status(report)
-                self.stdout.write("Compliance status updated successfully")
-            else:
-                self.stdout.write("Skipping database updates due to dry-run mode")
             
             # Step 5: Summary
             execution_time = time.perf_counter() - start_time
@@ -120,40 +108,4 @@ class Command(BaseCommand):
                 },
             )
             raise CommandError(error_msg) from e
-    def _log_compliance_findings(self, report):
-        """Log and display detailed compliance findings."""
-        # Log level mismatches for non-compliant projects
-        if report.non_compliant_projects:
-            self.stderr.write(f"Found {len(report.non_compliant_projects)} non-compliant projects:")
-            for project_name in report.non_compliant_projects:
-                self.stderr.write(f"  - {project_name}")
-                logger.warning(
-                    "Level mismatch detected",
-                    extra={"project": project_name}
-                )
-        
-        # Log projects that exist locally but not in official data
-        if report.local_only_projects:
-            self.stdout.write(f"Found {len(report.local_only_projects)} projects that exist locally but not in official data:")
-            for project_name in report.local_only_projects:
-                self.stdout.write(f"  - {project_name}")
-                logger.warning(
-                    "Project exists locally but not in official data",
-                    extra={"project": project_name}
-                )
-        
-        # Log projects that exist in official data but not locally
-        if report.official_only_projects:
-            self.stdout.write(f"Found {len(report.official_only_projects)} projects in official data but not locally:")
-            for project_name in report.official_only_projects:
-                self.stdout.write(f"  - {project_name}")
-                logger.info(
-                    "Project exists in official data but not locally",
-                    extra={"project": project_name}
-                )
-        
-        # Log compliant projects
-        if report.compliant_projects:
-            self.stdout.write(f"Found {len(report.compliant_projects)} compliant projects")
-
-
+  
