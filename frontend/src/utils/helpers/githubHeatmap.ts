@@ -93,24 +93,24 @@ export const fetchHeatmapData = async (username: string): Promise<HeatmapRespons
 // Defined Light and Dark Themes
 const themes = {
   dark: {
-    background: '#10151C',
+    background: '#1F2937',
     text: '#FFFFFF',
     meta: '#A6B1C1',
-    grade4: '#bafcc1ff',
-    grade3: '#73cb7aff',
-    grade2: '#49b14dff',
-    grade1: '#32a04aff',
-    grade0: '#222a36',
+    grade0: '#2C3A4D',
+    grade1: '#394d65',
+    grade2: '#314257',
+    grade3: '#46627B',
+    grade4: '#5F87A8',
   },
   light: {
-    background: '#F8FAFC', // lighter background for light mode
+    background: '#F3F4F6', // lighter background for light mode
     text: '#333333',
     meta: '#666666',
-    grade4: '#103f08ff',
-    grade3: '#145d11ff',
-    grade2: '#258332ff',
-    grade1: '#45a237ff',
-    grade0: '#dfdfde',
+    grade0: '#E7E7E6',
+    grade1: '#8BA7C0',
+    grade2: '#6C8EAB',
+    grade3: '#5C7BA2',
+    grade4: '#567498',
   },
 }
 
@@ -305,7 +305,7 @@ export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
   ctx.scale(scaleFactor, scaleFactor)
   ctx.textBaseline = 'hanging'
 
-  const theme = getTheme(opts) 
+  const theme = getTheme(opts)
 
   if (!opts.skipHeader) {
     drawMetaData(ctx, { ...opts, width, height, data, themeName })

@@ -161,7 +161,7 @@ const UserDetailsPage: React.FC = () => {
 
     return (
       <div className="flex flex-col gap-4">
-        <div className="overflow-hidden rounded-lg bg-white shadow-xl dark:bg-gray-800">
+        <div className="overflow-hidden rounded-lg bg-white dark:bg-gray-800">
           <div className="relative">
             <canvas ref={canvasRef} style={{ display: 'none' }} aria-hidden="true"></canvas>
             {imageLink ? (
@@ -179,7 +179,11 @@ const UserDetailsPage: React.FC = () => {
                 <Image
                   height={100}
                   width={100}
-                  src={isDarkMode ? '/img/heatmapBackground-dark.png' : '/img/heatmapBackground-light.png'}
+                  src={
+                    isDarkMode
+                      ? '/img/heatmapBackground-dark.png'
+                      : '/img/heatmapBackground-light.png'
+                  }
                   className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
                   alt="Heatmap Background"
                 />
@@ -190,7 +194,7 @@ const UserDetailsPage: React.FC = () => {
         </div>
       </div>
     )
-  };
+  }
 
   const UserSummary = () => (
     <div className="mt-4 flex items-center">
@@ -229,4 +233,3 @@ const UserDetailsPage: React.FC = () => {
 }
 
 export default UserDetailsPage
-
