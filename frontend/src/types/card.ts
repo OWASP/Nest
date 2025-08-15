@@ -7,6 +7,7 @@ import type { HealthMetricsProps } from 'types/healthMetrics'
 import type { Icon } from 'types/icon'
 import type { Issue } from 'types/issue'
 import type { Level } from 'types/level'
+import type { Module } from 'types/mentorship'
 import type { Milestone } from 'types/milestone'
 import type { RepositoryCardProps } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
@@ -19,9 +20,14 @@ export type CardProps = {
   level?: Level
   projectLink?: string
   projectName?: string
+  modules?: string[]
   social?: { title: string; icon: string; url: string }[]
   summary: string
   title: string
+  timeline?: {
+    start: string
+    end: string
+  }
   tooltipLabel?: string
   topContributors?: Contributor[]
   url: string
@@ -34,20 +40,28 @@ type Stats = {
   value: number
 }
 export interface DetailsCardProps {
+  accessLevel?: string
   description?: string
   details?: { label: string; value: string | JSX.Element }[]
+  domains?: string[]
   entityKey?: string
   geolocationData?: Chapter[]
   healthMetricsData?: HealthMetricsProps[]
   heatmap?: JSX.Element
   isActive?: boolean
   languages?: string[]
+  status?: string
+  setStatus?: (newStatus: string) => void
+  canUpdateStatus?: boolean
+  mentors?: Contributor[]
+  admins?: Contributor[]
   projectName?: string
   pullRequests?: PullRequest[]
   recentIssues?: Issue[]
   recentMilestones?: Milestone[]
   recentReleases?: Release[]
   repositories?: RepositoryCardProps[]
+  modules?: Module[]
   showAvatar?: boolean
   socialLinks?: string[]
   stats?: Stats[]
@@ -55,6 +69,7 @@ export interface DetailsCardProps {
   title?: string
   topContributors?: Contributor[]
   topics?: string[]
+  tags?: string[]
   type: string
   userSummary?: JSX.Element
 }
