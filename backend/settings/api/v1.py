@@ -54,5 +54,3 @@ api = NinjaAPI(**{**api_settings, **api_settings_customization})
 
 api.add_router("owasp", owasp_router)
 api.add_router("github", github_router)
-
-

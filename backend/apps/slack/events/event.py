@@ -19,6 +19,7 @@ from apps.slack.utils import get_text
 
 logger = logging.getLogger(__name__)
 
+
 class EventBase:
     """Base class for Slack events."""
 

@@ -143,8 +143,8 @@ const UserDetailsPage: React.FC = () => {
   // Updated Heatmap function to work correctly for both light and dark themes
   const Heatmap = () => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
-    const { theme } = useTheme()
-    const isDarkMode = theme === 'dark'
+    const { resolvedTheme } = useTheme()
+    const isDarkMode = (resolvedTheme ?? 'light') === 'dark'
 
     // Draw canvas whenever data, username, or theme changes
     useEffect(() => {
