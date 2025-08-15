@@ -164,8 +164,18 @@ jest.mock('components/LeadersList', () => ({
 
 jest.mock('components/MetricsScoreCircle', () => ({
   __esModule: true,
-  default: ({ score, ...props }: { score: number; [key: string]: unknown }) => (
-    <div data-testid="metrics-score-circle" {...props}>
+  default: ({
+    score,
+    clickable,
+    onClick: _onClick,
+    ...props
+  }: {
+    score: number
+    clickable?: boolean
+    onClick?: () => void
+    [key: string]: unknown
+  }) => (
+    <div data-testid="metrics-score-circle" role={clickable ? 'button' : undefined} {...props}>
       Score: {score}
     </div>
   ),
@@ -724,7 +734,7 @@ describe('CardDetailsPage', () => {
   })
 
   describe('Event Handling', () => {
-    it('renders clickable health metrics link', () => {
+    it('renders clickable health metrics button', () => {
       render(
         <CardDetailsPage
           {...defaultProps}
@@ -733,8 +743,9 @@ describe('CardDetailsPage', () => {
         />
       )
 
-      const healthLink = screen.getByRole('link')
-      expect(healthLink).toHaveAttribute('href', '#issues-trend')
+      const healthButton = screen.getByRole('button')
+      expect(healthButton).toBeInTheDocument()
+      expect(screen.getByTestId('metrics-score-circle')).toBeInTheDocument()
     })
 
     it('renders social links with correct hrefs and target attributes', () => {
