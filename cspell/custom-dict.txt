@@ -117,6 +117,7 @@ superfences
 tiktok
 tsc
 turbopack
+unhover
 usefixtures
 winsrdf
 wsgi
