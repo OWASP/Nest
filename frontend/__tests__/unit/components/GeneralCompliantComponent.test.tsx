@@ -1,73 +1,82 @@
-import { render, screen } from '@testing-library/react';
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
+import { faCertificate } from '@fortawesome/free-solid-svg-icons'
+import { render, screen } from '@testing-library/react'
+import React from 'react'
 
-import '@testing-library/jest-dom';
-import { faCertificate } from '@fortawesome/free-solid-svg-icons';
+import '@testing-library/jest-dom'
 
-import GeneralCompliantComponent from '../../../src/components/GeneralCompliantComponent';
+// Mock the Tooltip component to prevent async state update warnings
+jest.mock('@heroui/tooltip', () => ({
+  Tooltip: ({ children, content }: { children: React.ReactNode; content: string }) => (
+    <div data-testid="tooltip" title={content}>
+      {children}
+    </div>
+  ),
+}))
+
+import GeneralCompliantComponent from 'components/GeneralCompliantComponent'
 
 type GeneralCompliantComponentProps = {
-  compliant: boolean;
-  icon: any;
-  title: string;
-};
+  compliant: boolean
+  icon: IconProp
+  title: string
+}
 
 describe('GeneralCompliantComponent', () => {
   const baseProps: GeneralCompliantComponentProps = {
     compliant: true,
     icon: faCertificate,
     title: 'Test Title',
-  };
+  }
 
   it('renders successfully with minimal required props', () => {
-    render(<GeneralCompliantComponent {...baseProps} />);
-    expect(screen.getByText('Test Title')).toBeInTheDocument();
-  });
+    const { container } = render(<GeneralCompliantComponent {...baseProps} />)
+    expect(container).toBeInTheDocument()
+  })
 
- it('applies correct color for compliant=true', () => {
-  const { container } = render(<GeneralCompliantComponent {...baseProps} compliant={true} />);
-  const svg = container.querySelector('svg'); // Find the SVG icon
-  expect(svg).toBeInTheDocument();
-  expect(svg).toHaveClass('text-green-400/80'); // Check for the specific class
-});
+  it('applies correct color for compliant=true', () => {
+    const { container } = render(<GeneralCompliantComponent {...baseProps} compliant={true} />)
+    const svg = container.querySelector('svg')
+    expect(svg).toBeInTheDocument()
+    expect(svg).toHaveClass('text-green-400/80')
+  })
 
   it('applies correct color for compliant=false', () => {
-    const { container } = render(<GeneralCompliantComponent {...baseProps} compliant={false} />);
-    const svg = container.querySelector('svg'); // Find the SVG icon
-    expect(svg).toBeInTheDocument();
-    expect(svg).toHaveClass('text-red-400/80'); // Check for the specific class
-  });
+    const { container } = render(<GeneralCompliantComponent {...baseProps} compliant={false} />)
+    const svg = container.querySelector('svg')
+    expect(svg).toBeInTheDocument()
+    expect(svg).toHaveClass('text-red-400/80')
+  })
 
-  it('renders the correct icon and title', () => {
-    render(<GeneralCompliantComponent {...baseProps} title="My Title" />);
-    expect(screen.getByText('My Title')).toBeInTheDocument();
-  });
+  it('renders the correct icon structure', () => {
+    const { container } = render(<GeneralCompliantComponent {...baseProps} />)
+    const svgs = container.querySelectorAll('svg')
+    expect(svgs).toHaveLength(2)
+  })
 
-  it('renders tooltip with the title', () => {
-    const { getByText } = render(<GeneralCompliantComponent {...baseProps} title="Tooltip Title" />);
-    // Tooltip content is rendered, but may require hover simulation in real DOM
-    expect(getByText('Tooltip Title')).toBeInTheDocument();
-  });
+  it('renders tooltip wrapper with title attribute', () => {
+    render(<GeneralCompliantComponent {...baseProps} title="Tooltip Title" />)
+    const tooltip = screen.getByTestId('tooltip')
+    expect(tooltip).toBeInTheDocument()
+    expect(tooltip).toHaveAttribute('title', 'Tooltip Title')
+  })
 
   it('handles edge case: empty title', () => {
-    const { container } = render(<GeneralCompliantComponent {...baseProps} title="" />);
-    expect(container).toBeInTheDocument();
-  });
+    const { container } = render(<GeneralCompliantComponent {...baseProps} title="" />)
+    expect(container).toBeInTheDocument()
+  })
 
-  it('has accessible role and label', () => {
-  render(<GeneralCompliantComponent {...baseProps} />);
-  const iconElement = screen.getByText(baseProps.title); // Asserts the title text is visible
-  expect(iconElement).toBeInTheDocument();
-  // Or, if the icon has a specific role, you can check for that
-  // expect(screen.getByRole('img', { hidden: true })).toBeInTheDocument();
-});
+  it('has accessible SVG icons', () => {
+    const { container } = render(<GeneralCompliantComponent {...baseProps} />)
+    const svgs = container.querySelectorAll('svg[role="img"]')
+    expect(svgs).toHaveLength(2)
+    expect(svgs[0]).toHaveAttribute('aria-hidden', 'true')
+    expect(svgs[1]).toHaveAttribute('aria-hidden', 'true')
+  })
 
   it('renders with custom icon', () => {
-    const customIcon = faCertificate; // Replace with another icon if needed
-    const { container } = render(<GeneralCompliantComponent {...baseProps} icon={customIcon} />);
-    expect(container.querySelector('svg')).toBeInTheDocument();
-  });
-
-  // Add more tests as needed for event handling, state, etc.
-});
-
-// ...existing code...
+    const customIcon = faCertificate
+    const { container } = render(<GeneralCompliantComponent {...baseProps} icon={customIcon} />)
+    expect(container.querySelector('svg')).toBeInTheDocument()
+  })
+})

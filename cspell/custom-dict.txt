@@ -114,6 +114,7 @@ slackbot
 slideshare
 speakerdeck
 superfences
+svgs
 tiktok
 tsc
 turbopack
