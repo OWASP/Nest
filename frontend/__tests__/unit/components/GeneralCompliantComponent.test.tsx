@@ -50,8 +50,8 @@ describe('GeneralCompliantComponent', () => {
 
   it('renders the correct icon structure', () => {
     const { container } = render(<GeneralCompliantComponent {...baseProps} />)
-    const svgs = container.querySelectorAll('svg')
-    expect(svgs).toHaveLength(2)
+    const icons = container.querySelectorAll('svg')
+    expect(icons).toHaveLength(2)
   })
 
   it('renders tooltip wrapper with title attribute', () => {
@@ -68,10 +68,10 @@ describe('GeneralCompliantComponent', () => {
 
   it('has accessible SVG icons', () => {
     const { container } = render(<GeneralCompliantComponent {...baseProps} />)
-    const svgs = container.querySelectorAll('svg[role="img"]')
-    expect(svgs).toHaveLength(2)
-    expect(svgs[0]).toHaveAttribute('aria-hidden', 'true')
-    expect(svgs[1]).toHaveAttribute('aria-hidden', 'true')
+    const icons = container.querySelectorAll('svg[role="img"]')
+    expect(icons).toHaveLength(2)
+    expect(icons[0]).toHaveAttribute('aria-hidden', 'true')
+    expect(icons[1]).toHaveAttribute('aria-hidden', 'true')
   })
 
   it('renders with custom icon', () => {
