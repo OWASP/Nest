@@ -29,3 +29,4 @@ class TestMemberSitemap:
         sitemap = MemberSitemap()
 
         assert sitemap.location(MagicMock(nest_key="bar")) == "/members/bar"
+        assert sitemap.location(MagicMock(nest_key="baR")) == "/members/baR"

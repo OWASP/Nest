@@ -1,5 +1,6 @@
 """OWASP event GraphQL node."""
 
+import strawberry
 import strawberry_django
 
 from apps.owasp.models.event import Event
@@ -19,5 +20,5 @@ from apps.owasp.models.event import Event
         "url",
     ],
 )
-class EventNode:
+class EventNode(strawberry.relay.Node):
     """Event node."""
