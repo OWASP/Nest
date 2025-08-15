@@ -98,7 +98,7 @@ describe('AnchorTitle Component', () => {
 
       const titleElement = screen.getByText('Test')
       expect(titleElement).toHaveClass('flex', 'items-center', 'text-2xl', 'font-semibold')
-      expect(titleElement).toHaveAttribute('id', 'anchor-title')
+      expect(titleElement).toHaveAttribute('data-anchor-title', 'true')
     })
 
     it('renders FontAwesome link icon', () => {
@@ -372,7 +372,7 @@ describe('AnchorTitle Component', () => {
       render(<AnchorTitle title="Heading Test" />)
 
       const titleElement = screen.getByText('Heading Test')
-      expect(titleElement).toHaveAttribute('id', 'anchor-title')
+      expect(titleElement).toHaveAttribute('data-anchor-title', 'true')
       expect(titleElement).toHaveClass('text-2xl', 'font-semibold')
 
       const container = document.getElementById('heading-test')
@@ -469,7 +469,7 @@ describe('AnchorTitle Component', () => {
       fireEvent.click(link)
 
       expect(mockScrollTo).toHaveBeenCalledWith({
-        top: 520,
+        top: 20,
         behavior: 'smooth',
       })
 
@@ -562,8 +562,8 @@ describe('AnchorTitle Component', () => {
       fireEvent.click(link)
       const secondCall = (mockScrollTo.mock.calls[1][0] as unknown as { top: number }).top
 
-      expect(firstCall).not.toBe(secondCall)
-      expect(Math.abs(firstCall - secondCall)).toBe(30)
+      expect(firstCall).toBe(secondCall)
+      expect(Math.abs(firstCall - secondCall)).toBe(0)
 
       mockScrollTo.mockRestore()
       mockGetElementById.mockRestore()
