@@ -1,104 +1,90 @@
-"""Slack app conversation model."""
-
-from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+"""Github app common models."""
 
 from django.db import models
-
-from apps.common.models import BulkSaveModel, TimestampedModel
-from apps.slack.models.workspace import Workspace
-
-if TYPE_CHECKING:  # pragma: no cover
-    from apps.slack.models.message import Message
+from github.GithubException import UnknownObjectException
 
 
-class Conversation(TimestampedModel):
-    """Slack Conversation model."""
+class GenericUserModel(models.Model):
+    """Generic user model."""
 
     class Meta:
-        db_table = "slack_conversations"
-        verbose_name_plural = "Conversations"
+        abstract = True
 
-    # Slack conversation attributes.
-    created_at = models.DateTimeField(verbose_name="Created at", blank=True, null=True)
-    is_archived = models.BooleanField(verbose_name="Is archived", default=False)
-    is_channel = models.BooleanField(verbose_name="Is channel", default=False)
-    is_general = models.BooleanField(verbose_name="Is general", default=False)
-    is_group = models.BooleanField(verbose_name="Is group", default=False)
-    is_im = models.BooleanField(verbose_name="Is IM", default=False)
-    is_mpim = models.BooleanField(verbose_name="Is MPIM", default=False)
-    is_private = models.BooleanField(verbose_name="Is private", default=False)
-    is_shared = models.BooleanField(verbose_name="Is shared", default=False)
-    name = models.CharField(verbose_name="Name", max_length=100, default="")
-    purpose = models.TextField(verbose_name="Purpose", blank=True, default="")
-    slack_channel_id = models.CharField(verbose_name="Channel ID", max_length=50, unique=True)
-    slack_creator_id = models.CharField(verbose_name="Creator ID", max_length=255)
-    topic = models.TextField(verbose_name="Topic", blank=True, default="")
-    total_members_count = models.PositiveIntegerField(verbose_name="Members count", default=0)
-    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name="channels")
+    name = models.CharField(verbose_name="Name", max_length=200)
+    login = models.CharField(verbose_name="Login", max_length=100, unique=True)
+    email = models.EmailField(verbose_name="Email", max_length=100, default="", blank=True)
 
-    # Additional attributes.
-    sync_messages = models.BooleanField(verbose_name="Sync messages", default=False)
+    avatar_url = models.URLField(verbose_name="Avatar URL", max_length=200, default="")
+    company = models.CharField(verbose_name="Company", max_length=200, blank=True, default="")
+    location = models.CharField(verbose_name="Location", max_length=200, default="", blank=True)
 
-    def __str__(self):
-        """Channel human readable representation."""
-        return f"{self.workspace} #{self.name}"
+    collaborators_count = models.PositiveIntegerField(
+        verbose_name="Collaborators count", default=0
+    )
+    following_count = models.PositiveIntegerField(verbose_name="Following count", default=0)
+    followers_count = models.PositiveIntegerField(verbose_name="Followers count", default=0)
+    public_gists_count = models.PositiveIntegerField(verbose_name="Public gists count", default=0)
+    public_repositories_count = models.PositiveIntegerField(
+        verbose_name="Public repositories count", default=0
+    )
+
+    created_at = models.DateTimeField(verbose_name="Created at")
+    updated_at = models.DateTimeField(verbose_name="Updated at")
 
     @property
-    def latest_message(self) -> "Message | None":
-        """Get the latest message in the conversation."""
-        return self.messages.order_by("-created_at").first()
+    def nest_key(self):
+        """Nest key."""
+        return self.login
 
-    def from_slack(self, conversation_data, workspace: Workspace) -> None:
-        """Update instance based on Slack conversation data."""
-        self.created_at = datetime.fromtimestamp(int(conversation_data.get("created", 0)), tz=UTC)
+    @property
+    def title(self) -> str:
+        """Entity title."""
+        return (
+            f"{self.name} ({self.login})" if self.name and self.name != self.login else self.login
+        )
 
-        for attr_name in (
-            "is_archived",
-            "is_channel",
-            "is_general",
-            "is_group",
-            "is_im",
-            "is_mpim",
-            "is_private",
-            "is_shared",
-        ):
-            setattr(self, attr_name, conversation_data.get(attr_name, False))
+    @property
+    def url(self) -> str:
+        """Entity URL."""
+        return f"https://github.com/{self.login.lower()}"
 
-        self.name = conversation_data.get("name", "")
-        self.purpose = conversation_data.get("purpose", {}).get("value", "")
-        self.slack_creator_id = conversation_data.get("creator", "")
-        self.topic = conversation_data.get("topic", {}).get("value", "")
-        self.total_members_count = conversation_data.get("num_members", 0)
+    def from_github(self, data) -> None:
+        """Update instance based on GitHub data."""
+        field_mapping = {
+            "avatar_url": "avatar_url",
+            "collaborators_count": "collaborators",
+            "company": "company",
+            "created_at": "created_at",
+            "email": "email",
+            "followers_count": "followers",
+            "following_count": "following",
+            "location": "location",
+            "login": "login",
+            "name": "name",
+            "public_gists_count": "public_gists",
+            "public_repositories_count": "public_repos",
+            "updated_at": "updated_at",
+        }
 
-        self.workspace = workspace
+        # Direct fields.
+        for model_field, gh_field in field_mapping.items():
+            value = getattr(data, gh_field)
+            if value is not None:
+                setattr(self, model_field, value)
+
+
+class NodeModel(models.Model):
+    """Node model."""
+
+    class Meta:
+        abstract = True
+
+    node_id = models.CharField(verbose_name="Node ID", unique=True)
 
     @staticmethod
-    def bulk_save(conversations, fields=None):
-        """Bulk save conversations."""
-        BulkSaveModel.bulk_save(Conversation, conversations, fields=fields)
-
-    @staticmethod
-    def update_data(conversation_data, workspace, *, save=True):
-        """Update Channel data from Slack.
-
-        Args:
-            workspace (Workspace): Workspace instance
-            conversation_data: Dictionary with conversation data from Slack API
-            save: Whether to save the model after updating
-
-        Returns:
-            Updated or created Channel instance, or None if error
-
-        """
-        channel_id = conversation_data["id"]
+    def get_node_id(node):
+        """Extract node_id."""
         try:
-            conversation = Conversation.objects.get(slack_channel_id=channel_id)
-        except Conversation.DoesNotExist:
-            conversation = Conversation(slack_channel_id=channel_id)
-
-        conversation.from_slack(conversation_data, workspace)
-        if save:
-            conversation.save()
-
-        return conversation
+            return node.raw_data["node_id"]
+        except UnknownObjectException:
+            pass
