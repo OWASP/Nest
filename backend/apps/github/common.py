@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from datetime import UTC
 from datetime import timedelta as td
 
 from django.utils import timezone
@@ -242,7 +241,16 @@ def sync_issue_comments(gh_app, issue: Issue):
     logger.info("Starting comment sync for issue #%s", issue.number)
 
     try:
-        repo_full_name = f"{issue.repository.owner.login}/{issue.repository.name}"
+        repo = issue.repository
+        if not repo:
+            logger.warning("Issue #%s has no repository, skipping", issue.number)
+            return
+
+        if not repo.owner:
+            logger.warning("Repository for issue #%s has no owner, skipping", issue.number)
+            return
+
+        repo_full_name = f"{repo.owner.login}/{repo.name}"
         logger.info("Fetching repository: %s", repo_full_name)
 
         gh_repo = gh_app.get_repo(repo_full_name)
@@ -252,10 +260,7 @@ def sync_issue_comments(gh_app, issue: Issue):
         since = None
 
         if last_comment:
-            # Convert Django datetime to naive datetime for GitHub API
             since = last_comment.created_at
-            if timezone.is_aware(since):
-                since = timezone.make_naive(since, UTC)
             logger.info("Found last comment at: %s, fetching newer comments", since)
         else:
             logger.info("No existing comments found, fetching all comments")
@@ -270,7 +275,8 @@ def sync_issue_comments(gh_app, issue: Issue):
             if gh_comment.id in existing_github_ids:
                 logger.info("Skipping existing comment %s", gh_comment.id)
                 continue
-            if last_comment and gh_comment.created_at <= last_comment.created_at:
+
+            if since and gh_comment.created_at <= since:
                 logger.info("Skipping comment %s - not newer than our last comment", gh_comment.id)
                 continue
 
@@ -305,10 +311,9 @@ def sync_issue_comments(gh_app, issue: Issue):
 
     except UnknownObjectException as e:
         logger.warning(
-            "Could not access issue #%s in %s/%s. Error: %s",
+            "Could not access issue #%s in %s. Error: %s",
             issue.number,
-            issue.repository.owner.login,
-            issue.repository.name,
+            repo_full_name,
             str(e),
         )
     except Exception:
