@@ -1,5 +1,6 @@
 """GraphQL node for ApiKey model."""
 
+import strawberry
 import strawberry_django
 
 from apps.nest.models.api_key import ApiKey
@@ -15,5 +16,5 @@ from apps.nest.models.api_key import ApiKey
         "uuid",
     ],
 )
-class ApiKeyNode:
+class ApiKeyNode(strawberry.relay.Node):
     """GraphQL node for API keys."""
