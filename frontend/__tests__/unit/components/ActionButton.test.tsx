@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import React from 'react'
 import ActionButton from 'components/ActionButton'
 
@@ -117,10 +118,19 @@ describe('ActionButton', () => {
     }).not.toThrow()
   })
 
-  it(`changes background and text color on hover`, () => {
+  it(`changes background and text color on hover`, async () => {
+    const user = userEvent.setup()
     render(<ActionButton>Test Button</ActionButton>)
     const button = screen.getByRole('button')
+
     expect(button).toHaveClass('hover:bg-[#1D7BD7]')
     expect(button).toHaveClass('dark:hover:text-white')
+    await user.hover(button)
+    expect(button).toBeInTheDocument()
+    expect(button).toHaveTextContent('Test Button')
+
+    fireEvent.mouseLeave(button)
+    expect(button).toBeInTheDocument()
+    expect(button).toHaveTextContent('Test Button')
   })
 })
