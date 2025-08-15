@@ -11,9 +11,10 @@ class TestPullRequestNode:
     def test_pull_request_node_type(self):
         assert hasattr(PullRequestNode, "__strawberry_definition__")
 
-    def test_pull_request_node_fields(self):
+    def test_meta_configuration(self):
         field_names = {field.name for field in PullRequestNode.__strawberry_definition__.fields}
         expected_field_names = {
+            "_id",
             "author",
             "created_at",
             "organization_name",
