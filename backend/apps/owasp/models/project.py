@@ -91,7 +91,7 @@ class Project(
     custom_tags = models.JSONField(verbose_name="Custom tags", default=list, blank=True)
     track_issues = models.BooleanField(verbose_name="Track issues", default=True)
 
-    # Virtual fields
+    # GKs.
     members = GenericRelation("owasp.EntityMember")
 
     # FKs.

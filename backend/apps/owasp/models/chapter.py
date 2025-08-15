@@ -64,7 +64,7 @@ class Chapter(
     latitude = models.FloatField(verbose_name="Latitude", blank=True, null=True)
     longitude = models.FloatField(verbose_name="Longitude", blank=True, null=True)
 
-    # Virtual fields
+    # GRs.
     members = GenericRelation("owasp.EntityMember")
 
     def __str__(self) -> str:

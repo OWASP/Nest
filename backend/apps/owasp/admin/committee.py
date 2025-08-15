@@ -11,7 +11,7 @@ class CommitteeAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     """Admin for Committee model."""
 
     autocomplete_fields = ("owasp_repository",)
-    inlines = [EntityMemberInline]
+    inlines = (EntityMemberInline,)
     search_fields = ("name",)
 
 

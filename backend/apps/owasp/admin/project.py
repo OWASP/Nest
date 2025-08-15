@@ -16,7 +16,7 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
         "owners",
         "repositories",
     )
-    inlines = [EntityMemberInline]
+    inlines = (EntityMemberInline,)
     list_display = (
         "custom_field_name",
         "created_at",

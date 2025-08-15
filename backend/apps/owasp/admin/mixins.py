@@ -7,16 +7,6 @@ from django.utils.safestring import mark_safe
 from apps.owasp.models.entity_member import EntityMember
 
 
-class EntityMemberInline(GenericTabularInline):
-    """EntityMember inline for admin."""
-
-    model = EntityMember
-    fields = ("member", "kind", "description", "order", "is_reviewed")
-    raw_id_fields = ("member",)
-    extra = 1
-    ordering = ("order", "member__login")
-
-
 class BaseOwaspAdminMixin:
     """Base mixin for OWASP admin classes providing common patterns."""
 
@@ -42,6 +32,27 @@ class BaseOwaspAdminMixin:
     def get_base_search_fields(self, *additional_fields):
         """Get base search fields with additional fields."""
         return self.search_field_names + additional_fields
+
+
+class EntityMemberInline(GenericTabularInline):
+    """EntityMember inline for admin."""
+
+    ct_field = "entity_type"
+    ct_fk_field = "entity_id"
+    extra = 1
+    fields = (
+        "member",
+        "kind",
+        "description",
+        "order",
+        "is_reviewed",
+    )
+    model = EntityMember
+    ordering = (
+        "order",
+        "member__login",
+    )
+    raw_id_fields = ("member",)
 
 
 class GenericEntityAdminMixin(BaseOwaspAdminMixin):

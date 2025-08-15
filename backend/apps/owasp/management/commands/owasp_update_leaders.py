@@ -62,7 +62,7 @@ class Command(BaseCommand):
 
         new_members_to_create = []
 
-        content_type = ContentType.objects.get_for_model(model_class)
+        entity_type = ContentType.objects.get_for_model(model_class)
 
         for entity in model_class.objects.all():
             if not entity.leaders_raw:
@@ -78,8 +78,8 @@ class Command(BaseCommand):
             new_members_to_create.extend(
                 [
                     EntityMember(
-                        content_type=content_type,
-                        object_id=entity.pk,
+                        entity_type=entity_type,
+                        entity_id=entity.pk,
                         member_id=user["id"],
                         kind=EntityMember.MemberKind.LEADER,
                         is_reviewed=False,

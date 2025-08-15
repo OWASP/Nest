@@ -8,24 +8,32 @@ from apps.owasp.models.entity_member import EntityMember
 class EntityMemberAdmin(admin.ModelAdmin):
     """Admin for EntityMember records (generic link to any OWASP entity)."""
 
-    list_display = (
-        "member",
-        "kind",
-        "is_reviewed",
-        "order",
-    )
-    list_filter = ("kind", "is_reviewed")
-    search_fields = ("member__login", "member__name", "description", "object_id")
+    autocomplete_fields = ("member",)
     fields = (
-        "content_type",
-        "object_id",
+        "entity_type",
+        "entity_id",
         "member",
         "kind",
         "order",
         "is_reviewed",
         "description",
     )
-    autocomplete_fields = ("member",)
+    list_display = (
+        "member",
+        "kind",
+        "is_reviewed",
+        "order",
+    )
+    list_filter = (
+        "kind",
+        "is_reviewed",
+    )
+    search_fields = (
+        "member__login",
+        "member__name",
+        "description",
+        "entity_id",
+    )
 
 
 admin.site.register(EntityMember, EntityMemberAdmin)

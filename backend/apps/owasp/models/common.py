@@ -72,6 +72,20 @@ class RepositoryBasedEntityModel(models.Model):
         related_name="+",
     )
 
+    # M2Ms.
+    leaders = models.ManyToManyField(
+        "github.User",
+        verbose_name="Leaders",
+        related_name="assigned_%(class)s",
+        blank=True,
+    )
+    suggested_leaders = models.ManyToManyField(
+        "github.User",
+        verbose_name="Suggested leaders",
+        related_name="matched_%(class)s",
+        blank=True,
+    )
+
     @property
     def github_url(self) -> str:
         """Get GitHub URL."""
@@ -88,7 +102,7 @@ class RepositoryBasedEntityModel(models.Model):
         )
 
     @property
-    def leaders(self) -> models.QuerySet[User]:
+    def entity_leaders(self) -> models.QuerySet[User]:
         """Return entity's leaders."""
         return User.objects.filter(
             pk__in=self.members.filter(kind=EntityMember.MemberKind.LEADER).values_list(

@@ -28,7 +28,7 @@ class Committee(
         db_table = "owasp_committees"
         verbose_name_plural = "Committees"
 
-    # Virtual fields
+    # GRs.
     members = GenericRelation("owasp.EntityMember")
 
     def __str__(self) -> str:

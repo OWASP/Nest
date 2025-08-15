@@ -6,11 +6,11 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import SimpleTestCase
 
-COMMAND_PATH = "apps.github.management.commands.github_match_users"
+COMMAND_PATH = "apps.owasp.management.commands.owasp_update_leaders"
 
 
-class MatchLeadersCommandMockTest(SimpleTestCase):
-    """Test suite for the github_match_users management command using mocks."""
+class OwaspUpdateLeadersTest(SimpleTestCase):
+    """Test suite for the owasp_update_leaders management command using mocks."""
 
     @classmethod
     def setUpClass(cls):
@@ -54,7 +54,7 @@ class MatchLeadersCommandMockTest(SimpleTestCase):
 
         def entity_member_side_effect(*_, **kwargs):
             instance = MagicMock()
-            instance.object_id = kwargs.get("object_id")
+            instance.entity_id = kwargs.get("entity_id")
             instance.member_id = kwargs.get("member_id")
             return instance
 
@@ -105,12 +105,12 @@ class MatchLeadersCommandMockTest(SimpleTestCase):
     def test_command_with_invalid_model_name(self):
         """Test that the command raises an error for an invalid model name."""
         with pytest.raises(CommandError):
-            call_command("github_match_users", "invalid_model")
+            call_command("owasp_update_leaders", "invalid_model")
 
     def test_exact_and_fuzzy_matches(self):
         """Test exact and fuzzy matching for chapters."""
         out = io.StringIO()
-        call_command("github_match_users", "chapter", stdout=out)
+        call_command("owasp_update_leaders", "chapter", stdout=out)
 
         mock_bulk_create = self.mock_entity_member.objects.bulk_create
         assert mock_bulk_create.called
@@ -118,7 +118,7 @@ class MatchLeadersCommandMockTest(SimpleTestCase):
         call_args_list = mock_bulk_create.call_args[0][0]
 
         assert len(call_args_list) == 4
-        created_members = {(m.object_id, m.member_id) for m in call_args_list}
+        created_members = {(m.entity_id, m.member_id) for m in call_args_list}
 
         assert (1, 1) in created_members
         assert (3, 3) in created_members
@@ -128,14 +128,14 @@ class MatchLeadersCommandMockTest(SimpleTestCase):
     def test_fuzzy_match_below_threshold(self):
         """Test that a fuzzy match is not found when the score is below the threshold."""
         out = io.StringIO()
-        call_command("github_match_users", "chapter", "--threshold=95", stdout=out)
+        call_command("owasp_update_leaders", "chapter", "--threshold=95", stdout=out)
 
         mock_bulk_create = self.mock_entity_member.objects.bulk_create
         assert mock_bulk_create.called
         call_args_list = mock_bulk_create.call_args[0][0]
 
         assert len(call_args_list) == 3
-        created_members = {(m.object_id, m.member_id) for m in call_args_list}
+        created_members = {(m.entity_id, m.member_id) for m in call_args_list}
         assert (4, 2) not in created_members
 
     def test_is_valid_user_filtering(self):
@@ -144,7 +144,7 @@ class MatchLeadersCommandMockTest(SimpleTestCase):
         self.mock_chapter.objects.all.return_value = [mock_invalid_chapter]
 
         out = io.StringIO()
-        call_command("github_match_users", "chapter", stdout=out)
+        call_command("owasp_update_leaders", "chapter", stdout=out)
 
         assert not self.mock_entity_member.objects.bulk_create.called
         assert "No new leader records to create" in out.getvalue()
@@ -153,7 +153,7 @@ class MatchLeadersCommandMockTest(SimpleTestCase):
     def test_exact_match_is_preferred_over_fuzzy(self, mock_fuzz):
         """Test that if an exact match is found, fuzzy matching is not performed."""
         out = io.StringIO()
-        call_command("github_match_users", "committee", stdout=out)
+        call_command("owasp_update_leaders", "committee", stdout=out)
 
         assert not mock_fuzz.token_sort_ratio.called
         assert "Created 1 new leader records" in out.getvalue()
