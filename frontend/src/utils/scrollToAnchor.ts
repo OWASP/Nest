@@ -6,14 +6,14 @@ export function scrollToAnchor(targetId: string, additionalOffset = 80): void {
       return
     }
     const anchorElement = element.querySelector('[data-anchor-title]')
-    const headingHeight = (anchorElement instanceof HTMLElement) ? anchorElement.offsetHeight : 0
+    const headingHeight = anchorElement instanceof HTMLElement ? anchorElement.offsetHeight : 0
     const yOffset = -headingHeight - additionalOffset
 
     // Use modern window.scrollY instead of deprecated pageYOffset
     const y = element.getBoundingClientRect().top + window.scrollY + yOffset
     window.scrollTo({
       top: y,
-      behavior: 'smooth'
+      behavior: 'smooth',
     })
   } catch {
     // Silently handle scroll errors
@@ -22,7 +22,7 @@ export function scrollToAnchor(targetId: string, additionalOffset = 80): void {
 
 export const scrollToAnchorWithHistory = (targetId: string, updateHistory = true): void => {
   scrollToAnchor(targetId)
- 
+
   if (updateHistory) {
     try {
       const href = `#${targetId}`

@@ -10,7 +10,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import upperFirst from 'lodash/upperFirst'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import type { ExtendedSession } from 'types/auth'
@@ -97,15 +96,11 @@ const DetailsCard = ({
                 </button>
               )}
             {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
-              <Link
-                href="#issues-trend"
-                onClick={(e) => {
-                  e.preventDefault()
-                  scrollToAnchor('issues-trend')
-                }}
-              >
-                <MetricsScoreCircle score={healthMetricsData[0].score} />
-              </Link>
+              <MetricsScoreCircle
+                score={healthMetricsData[0].score}
+                clickable={true}
+                onClick={() => scrollToAnchor('issues-trend')}
+              />
             )}
           </div>
           {!isActive && (
