@@ -14,6 +14,7 @@ class TestIssueNode:
     def test_issue_node_fields(self):
         field_names = {field.name for field in IssueNode.__strawberry_definition__.fields}
         expected_field_names = {
+            "_id",
             "created_at",
             "state",
             "title",
