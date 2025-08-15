@@ -1,5 +1,6 @@
 """OWASP sponsors GraphQL node."""
 
+import strawberry
 import strawberry_django
 
 from apps.owasp.models.sponsor import Sponsor
@@ -14,5 +15,5 @@ from apps.owasp.models.sponsor import Sponsor
         "url",
     ],
 )
-class SponsorNode:
+class SponsorNode(strawberry.relay.Node):
     """Sponsor node."""

@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 
-from apps.owasp.models.badge import Badge
+from apps.nest.models.badge import Badge
 
 
 class BadgeAdmin(admin.ModelAdmin):
