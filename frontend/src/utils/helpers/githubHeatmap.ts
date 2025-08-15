@@ -94,23 +94,23 @@ export const fetchHeatmapData = async (username: string): Promise<HeatmapRespons
 const themes = {
   dark: {
     background: '#1F2937',
-    text: '#FFFFFF',
-    meta: '#A6B1C1',
     grade0: '#2C3A4D',
     grade1: '#394d65',
     grade2: '#314257',
     grade3: '#46627B',
     grade4: '#5F87A8',
+    meta: '#A6B1C1',
+    text: '#FFFFFF',
   },
   light: {
     background: '#F3F4F6', // lighter background for light mode
-    text: '#333333',
-    meta: '#666666',
     grade0: '#E7E7E6',
     grade1: '#8BA7C0',
     grade2: '#6C8EAB',
     grade3: '#5C7BA2',
     grade4: '#567498',
+    meta: '#666666',
+    text: '#333333',
   },
 }
 
@@ -184,10 +184,8 @@ const canvasMargin = 20
 const yearHeight = textHeight + (boxWidth + boxMargin) * 8 + canvasMargin
 const scaleFactor = getPixelRatio()
 
-// Update getTheme to use themeName from opts
 function getTheme(opts: Options): Theme {
-  const name = opts.themeName ?? 'dark'
-  return themes[name] ?? themes.dark
+  return themes[opts.themeName ?? 'dark']
 }
 
 function getDateInfo(data: DataStruct, date: string) {
@@ -287,12 +285,12 @@ function drawMetaData(ctx: CanvasRenderingContext2D, opts: DrawMetadataOptions) 
   ctx.strokeStyle = theme.grade0
 }
 
-// Update drawContributions to pass themeName
 export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
   const { data, themeName } = opts
   let headerOffset = 0
-  if (!opts.skipHeader) headerOffset = headerHeight
-
+  if (!opts.skipHeader) {
+    headerOffset = headerHeight
+  }
   const height = data.years.length * yearHeight + canvasMargin + headerOffset + 10
   const width = 53 * (boxWidth + boxMargin) + canvasMargin * 2
 
@@ -300,20 +298,33 @@ export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
   canvas.height = height * scaleFactor
 
   const ctx = canvas.getContext('2d')
-  if (!ctx) throw new Error('Could not get 2d context from Canvas')
+
+  if (!ctx) {
+    throw new Error('Could not get 2d context from Canvas')
+  }
 
   ctx.scale(scaleFactor, scaleFactor)
   ctx.textBaseline = 'hanging'
-
-  const theme = getTheme(opts)
-
   if (!opts.skipHeader) {
-    drawMetaData(ctx, { ...opts, width, height, data, themeName })
+    drawMetaData(ctx, {
+      ...opts,
+      width,
+      height,
+      data,
+      themeName,
+    })
   }
 
   data.years.forEach((year, i) => {
     const offsetY = yearHeight * i + canvasMargin + headerOffset + 10
     const offsetX = canvasMargin
-    drawYear(ctx, { ...opts, year, offsetX, offsetY, data, themeName })
+    drawYear(ctx, {
+      ...opts,
+      year,
+      offsetX,
+      offsetY,
+      data,
+      themeName,
+    })
   })
 }

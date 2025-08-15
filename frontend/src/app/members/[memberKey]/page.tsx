@@ -140,13 +140,11 @@ const UserDetailsPage: React.FC = () => {
     { icon: faCodeMerge, value: user?.contributionsCount || 0, unit: 'Contribution' },
   ]
 
-  // Updated Heatmap function to work correctly for both light and dark themes
   const Heatmap = () => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
     const { resolvedTheme } = useTheme()
     const isDarkMode = (resolvedTheme ?? 'light') === 'dark'
 
-    // Draw canvas whenever data, username, or theme changes
     useEffect(() => {
       if (canvasRef.current && data?.years?.length) {
         drawContributions(canvasRef.current, {
@@ -157,7 +155,7 @@ const UserDetailsPage: React.FC = () => {
         const imageURL = canvasRef.current.toDataURL()
         setImageLink(imageURL)
       }
-    }, [data, username, isDarkMode, setImageLink])
+    }, [isDarkMode])
 
     return (
       <div className="flex flex-col gap-4">
@@ -181,8 +179,8 @@ const UserDetailsPage: React.FC = () => {
                   width={100}
                   src={
                     isDarkMode
-                      ? '/img/heatmapBackground-dark.png'
-                      : '/img/heatmapBackground-light.png'
+                      ? '/img/heatmap-background-dark.png'
+                      : '/img/heatmap-background-light.png'
                   }
                   className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
                   alt="Heatmap Background"
