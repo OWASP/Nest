@@ -124,7 +124,7 @@ jest.mock('components/ChapterMapWrapper', () => ({
 
 jest.mock('components/HealthMetrics', () => ({
   __esModule: true,
-  default: ({ data, ...props }: { data: unknown[]; [key: string]: unknown }) => (
+  default: ({ data, ...props }: { data: unknown[];[key: string]: unknown }) => (
     <div data-testid="health-metrics" {...props}>
       Health Metrics ({data.length} items)
     </div>
@@ -155,7 +155,7 @@ jest.mock('components/InfoBlock', () => ({
 
 jest.mock('components/LeadersList', () => ({
   __esModule: true,
-  default: ({ leaders, ...props }: { leaders: string; [key: string]: unknown }) => (
+  default: ({ leaders, ...props }: { leaders: string;[key: string]: unknown }) => (
     <span data-testid="leaders-list" {...props}>
       {leaders}
     </span>
@@ -164,8 +164,12 @@ jest.mock('components/LeadersList', () => ({
 
 jest.mock('components/MetricsScoreCircle', () => ({
   __esModule: true,
-  default: ({ score, ...props }: { score: number; [key: string]: unknown }) => (
-    <div data-testid="metrics-score-circle" {...props}>
+  default: ({ score, clickable, onClick, ...props }: { score: number; clickable?: boolean; onClick?: () => void;[key: string]: unknown }) => (
+    <div
+      data-testid="metrics-score-circle"
+      role={clickable ? 'button' : undefined}
+      {...props}
+    >
       Score: {score}
     </div>
   ),
@@ -724,7 +728,7 @@ describe('CardDetailsPage', () => {
   })
 
   describe('Event Handling', () => {
-    it('renders clickable health metrics link', () => {
+    it('renders clickable health metrics button', () => {
       render(
         <CardDetailsPage
           {...defaultProps}
@@ -733,8 +737,9 @@ describe('CardDetailsPage', () => {
         />
       )
 
-      const healthLink = screen.getByRole('link')
-      expect(healthLink).toHaveAttribute('href', '#issues-trend')
+      const healthButton = screen.getByRole('button')
+      expect(healthButton).toBeInTheDocument()
+      expect(screen.getByTestId('metrics-score-circle')).toBeInTheDocument()
     })
 
     it('renders social links with correct hrefs and target attributes', () => {
