@@ -15,10 +15,10 @@ class Base(Configuration):
 
     ALLOWED_HOSTS = values.ListValue()
     AUTH_USER_MODEL = "nest.User"
-    AWS_ACCESS_KEY_ID = None
-    AWS_KMS_KEY_ID = None
-    AWS_REGION = None
-    AWS_SECRET_ACCESS_KEY = None
+    AWS_KMS_KEY_ID = values.Value(environ_name="AWS_KMS_KEY_ID", default=None)
+    AWS_ACCESS_KEY_ID = values.SecretValue(environ_name="AWS_ACCESS_KEY_ID", default=None)
+    AWS_SECRET_ACCESS_KEY = values.SecretValue(environ_name="AWS_SECRET_ACCESS_KEY", default=None)
+    AWS_REGION = values.Value(environ_name="AWS_REGION", default=None)
     CORS_ALLOW_CREDENTIALS = True
     DEBUG = False
     GITHUB_APP_ID = None
