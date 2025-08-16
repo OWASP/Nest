@@ -418,7 +418,7 @@ class TestRetriever:
 
     def test_supported_content_types(self):
         """Test that supported content types are defined correctly."""
-        assert Retriever.SUPPORTED_CONTENT_TYPES == (
+        assert Retriever.SUPPORTED_ENTITY_TYPES == (
             "event",
             "project",
             "chapter",
@@ -475,13 +475,14 @@ class TestRetriever:
             mock_content_object.name = "Test Chapter"
             mock_content_object.suggested_location = "New York"
 
-            mock_content_type = MagicMock()
-            mock_content_type.model = "chapter"
+            mock_entity_type = MagicMock()
+            mock_entity_type.model = "chapter"
 
             mock_context = MagicMock()
             mock_context.content_object = mock_content_object
-            mock_context.content_type = mock_content_type
-            mock_context.object_id = "123"
+            mock_context.entity = mock_content_object
+            mock_context.entity_type = mock_entity_type
+            mock_context.entity_id = "123"
 
             mock_chunk_instance = MagicMock()
             mock_chunk_instance.id = 1

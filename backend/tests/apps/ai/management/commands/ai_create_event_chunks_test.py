@@ -34,19 +34,19 @@ class TestAiCreateEventChunksCommand:
         """Test the model_class property returns Event."""
         from apps.owasp.models.event import Event
 
-        assert command.model_class() == Event
+        assert command.model_class == Event
 
     def test_entity_name_property(self, command):
         """Test the entity_name property."""
-        assert command.entity_name() == "event"
+        assert command.entity_name == "event"
 
     def test_entity_name_plural_property(self, command):
         """Test the entity_name_plural property."""
-        assert command.entity_name_plural() == "events"
+        assert command.entity_name_plural == "events"
 
     def test_key_field_name_property(self, command):
         """Test the key_field_name property."""
-        assert command.key_field_name() == "key"
+        assert command.key_field_name == "key"
 
     def test_extract_content(self, command, mock_event):
         """Test content extraction from event."""

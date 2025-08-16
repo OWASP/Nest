@@ -1,8 +1,10 @@
+"""Tests for the ai_create_event_context Django management command."""
+
 from unittest.mock import Mock, patch
 
 import pytest
 
-from apps.ai.management.commands.ai_create_project_context import Command
+from apps.ai.management.commands.ai_update_event_context import Command
 
 
 @pytest.fixture
@@ -11,14 +13,14 @@ def command():
 
 
 @pytest.fixture
-def mock_project():
-    project = Mock()
-    project.id = 1
-    project.key = "test-project"
-    return project
+def mock_event():
+    event = Mock()
+    event.id = 1
+    event.key = "test-event"
+    return event
 
 
-class TestAiCreateProjectContextCommand:
+class TestAiCreateEventContextCommand:
     def test_command_inheritance(self, command):
         """Test that the command inherits from BaseContextCommand."""
         from apps.ai.common.base.context_command import BaseContextCommand
@@ -27,35 +29,44 @@ class TestAiCreateProjectContextCommand:
 
     def test_command_help_text(self, command):
         """Test that the command has the correct help text."""
-        assert command.help() == "Update context for OWASP project data"
+        assert command.help() == "Update context for OWASP event data"
 
     def test_model_class_property(self, command):
-        """Test the model_class property returns Project."""
-        from apps.owasp.models.project import Project
+        """Test the model_class property returns Event."""
+        from apps.owasp.models.event import Event
 
-        assert command.model_class() == Project
+        assert command.model_class == Event
 
     def test_entity_name_property(self, command):
         """Test the entity_name property."""
-        assert command.entity_name() == "project"
+        assert command.entity_name == "event"
 
     def test_entity_name_plural_property(self, command):
         """Test the entity_name_plural property."""
-        assert command.entity_name_plural() == "projects"
+        assert command.entity_name_plural == "events"
 
     def test_key_field_name_property(self, command):
         """Test the key_field_name property."""
-        assert command.key_field_name() == "key"
+        assert command.key_field_name == "key"
 
-    def test_extract_content(self, command, mock_project):
+    def test_extract_content(self, command, mock_event):
         """Test the extract_content method."""
         with patch(
-            "apps.ai.management.commands.ai_create_project_context.extract_project_content"
+            "apps.ai.management.commands.ai_update_event_context.extract_event_content"
         ) as mock_extract:
             mock_extract.return_value = ("prose content", "metadata content")
-            content = command.extract_content(mock_project)
+            content = command.extract_content(mock_event)
             assert content == ("prose content", "metadata content")
-            mock_extract.assert_called_once_with(mock_project)
+            mock_extract.assert_called_once_with(mock_event)
+
+    def test_get_default_queryset(self, command):
+        """Test that the default queryset returns upcoming events."""
+        with patch("apps.owasp.models.event.Event.upcoming_events") as mock_upcoming:
+            mock_queryset = Mock()
+            mock_upcoming.return_value = mock_queryset
+            result = command.get_default_queryset()
+            assert result == mock_queryset
+            mock_upcoming.assert_called_once()
 
     def test_get_base_queryset(self, command):
         """Test the get_base_queryset method."""

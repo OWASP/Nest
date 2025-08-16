@@ -11,7 +11,7 @@ class BaseContextCommand(BaseAICommand):
 
     def help(self) -> str:
         """Return help text for the context creation command."""
-        return f"Update context for OWASP {self.entity_name()} data"
+        return f"Update context for OWASP {self.entity_name} data"
 
     def process_context_batch(self, entities: list[Model]) -> int:
         """Process a batch of entities to create contexts."""
@@ -25,7 +25,7 @@ class BaseContextCommand(BaseAICommand):
 
             if not full_content.strip():
                 entity_key = self.get_entity_key(entity)
-                self.stdout.write(f"No content for {self.entity_name()} {entity_key}")
+                self.stdout.write(f"No content for {self.entity_name} {entity_key}")
                 continue
 
             if Context.update_data(

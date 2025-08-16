@@ -14,24 +14,22 @@ class BaseChunkCommand(BaseAICommand):
 
     def help(self) -> str:
         """Return help text for the chunk creation command."""
-        return f"Create chunks for OWASP {self.entity_name()} data"
+        return f"Create chunks for OWASP {self.entity_name} data"
 
     def process_chunks_batch(self, entities: list[Model]) -> int:
         """Process a batch of entities to create chunks."""
         processed = 0
         batch_chunks = []
-        content_type = ContentType.objects.get_for_model(self.model_class())
+        content_type = ContentType.objects.get_for_model(self.model_class)
 
         for entity in entities:
-            context = Context.objects.filter(
-                content_type=content_type, object_id=entity.id
-            ).first()
+            context = Context.objects.filter(entity_type=content_type, entity_id=entity.id).first()
 
             entity_key = self.get_entity_key(entity)
 
             if not context:
                 self.stdout.write(
-                    self.style.WARNING(f"No context found for {self.entity_name()} {entity_key}")
+                    self.style.WARNING(f"No context found for {self.entity_name} {entity_key}")
                 )
                 continue
 
@@ -41,12 +39,12 @@ class BaseChunkCommand(BaseAICommand):
             )
 
             if not full_content.strip():
-                self.stdout.write(f"No content to chunk for {self.entity_name()} {entity_key}")
+                self.stdout.write(f"No content to chunk for {self.entity_name} {entity_key}")
                 continue
 
             chunk_texts = Chunk.split_text(full_content)
             if not chunk_texts:
-                self.stdout.write(f"No chunks created for {self.entity_name()} {entity_key}")
+                self.stdout.write(f"No chunks created for {self.entity_name} {entity_key}")
                 continue
 
             if chunks := create_chunks_and_embeddings(

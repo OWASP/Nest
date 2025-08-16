@@ -62,8 +62,8 @@ class Chunk(TimestampedModel):
 
         """
         if Chunk.objects.filter(
-            context__content_type=context.content_type,
-            context__object_id=context.object_id,
+            context__entity_type=context.entity_type,
+            context__entity_id=context.entity_id,
             text=text,
         ).exists():
             return None

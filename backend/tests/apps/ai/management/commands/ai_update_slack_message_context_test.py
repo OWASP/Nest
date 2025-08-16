@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from apps.ai.management.commands.ai_create_slack_message_context import Command
+from apps.ai.management.commands.ai_update_slack_message_context import Command
 
 
 @pytest.fixture
@@ -29,19 +29,19 @@ class TestAiCreateSlackMessageContextCommand:
         """Test the model_class property returns Message."""
         from apps.slack.models.message import Message
 
-        assert command.model_class() == Message
+        assert command.model_class == Message
 
     def test_entity_name_property(self, command):
         """Test the entity_name property."""
-        assert command.entity_name() == "message"
+        assert command.entity_name == "message"
 
     def test_entity_name_plural_property(self, command):
         """Test the entity_name_plural property."""
-        assert command.entity_name_plural() == "messages"
+        assert command.entity_name_plural == "messages"
 
     def test_key_field_name_property(self, command):
         """Test the key_field_name property."""
-        assert command.key_field_name() == "slack_message_id"
+        assert command.key_field_name == "slack_message_id"
 
     def test_source_name_property(self, command):
         """Test the source_name property."""

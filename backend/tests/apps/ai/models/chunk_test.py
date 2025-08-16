@@ -10,6 +10,8 @@ from apps.ai.models.context import Context
 def mock_context():
     mock = Mock(spec=Context)
     mock.id = 1
+    mock.entity_type = Mock()
+    mock.entity_id = 1
     return mock
 
 
@@ -87,8 +89,8 @@ class TestChunkModel:
             )
 
             mock_chunk_class.objects.filter.assert_called_once_with(
-                context__content_type=mock_context.content_type,
-                context__object_id=mock_context.object_id,
+                context__entity_type=mock_context.entity_type,
+                context__entity_id=mock_context.entity_id,
                 text=text,
             )
             mock_chunk_class.assert_called_once_with(
@@ -112,8 +114,8 @@ class TestChunkModel:
             )
 
             mock_chunk_class.objects.filter.assert_called_once_with(
-                context__content_type=mock_context.content_type,
-                context__object_id=mock_context.object_id,
+                context__entity_type=mock_context.entity_type,
+                context__entity_id=mock_context.entity_id,
                 text=text,
             )
             mock_chunk_class.assert_called_once_with(
@@ -135,8 +137,8 @@ class TestChunkModel:
             )
 
             mock_chunk_class.objects.filter.assert_called_once_with(
-                context__content_type=mock_context.content_type,
-                context__object_id=mock_context.object_id,
+                context__entity_type=mock_context.entity_type,
+                context__entity_id=mock_context.entity_id,
                 text=text,
             )
 

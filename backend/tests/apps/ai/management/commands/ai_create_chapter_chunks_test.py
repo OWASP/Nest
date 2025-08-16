@@ -26,16 +26,16 @@ class TestAiCreateChapterChunksCommand:
     def test_model_class_property(self, command):
         from apps.owasp.models.chapter import Chapter
 
-        assert command.model_class() == Chapter
+        assert command.model_class == Chapter
 
     def test_entity_name_property(self, command):
-        assert command.entity_name() == "chapter"
+        assert command.entity_name == "chapter"
 
     def test_entity_name_plural_property(self, command):
-        assert command.entity_name_plural() == "chapters"
+        assert command.entity_name_plural == "chapters"
 
     def test_key_field_name_property(self, command):
-        assert command.key_field_name() == "key"
+        assert command.key_field_name == "key"
 
     def test_extract_content(self, command, mock_chapter):
         with patch(

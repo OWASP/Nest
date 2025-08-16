@@ -1,6 +1,6 @@
 """A command to create chunks of OWASP event data for RAG."""
 
-from django.db.models import Model, QuerySet
+from django.db.models import QuerySet
 
 from apps.ai.common.base.chunk_command import BaseChunkCommand
 from apps.ai.common.extractors.event import extract_event_content
@@ -8,11 +8,10 @@ from apps.owasp.models.event import Event
 
 
 class Command(BaseChunkCommand):
-    def entity_name(self) -> str:
-        return "event"
-
-    def entity_name_plural(self) -> str:
-        return "events"
+    entity_name = "event"
+    entity_name_plural = "events"
+    key_field_name = "key"
+    model_class = Event
 
     def extract_content(self, entity: Event) -> tuple[str, str]:
         """Extract content from the event."""
@@ -25,9 +24,3 @@ class Command(BaseChunkCommand):
     def get_default_queryset(self) -> QuerySet:
         """Return upcoming events by default instead of is_active filter."""
         return Event.upcoming_events()
-
-    def key_field_name(self) -> str:
-        return "key"
-
-    def model_class(self) -> type[Model]:
-        return Event

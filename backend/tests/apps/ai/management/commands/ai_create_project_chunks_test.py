@@ -26,16 +26,16 @@ class TestAiCreateProjectChunksCommand:
     def test_model_class_property(self, command):
         from apps.owasp.models.project import Project
 
-        assert command.model_class() == Project
+        assert command.model_class == Project
 
     def test_entity_name_property(self, command):
-        assert command.entity_name() == "project"
+        assert command.entity_name == "project"
 
     def test_entity_name_plural_property(self, command):
-        assert command.entity_name_plural() == "projects"
+        assert command.entity_name_plural == "projects"
 
     def test_key_field_name_property(self, command):
-        assert command.key_field_name() == "key"
+        assert command.key_field_name == "key"
 
     def test_extract_content(self, command, mock_project):
         with patch(

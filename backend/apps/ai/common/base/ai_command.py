@@ -1,7 +1,6 @@
 """Base AI command class with common functionality."""
 
 import os
-from abc import ABC, abstractmethod
 from collections.abc import Callable
 from typing import Any
 
@@ -10,41 +9,26 @@ from django.core.management.base import BaseCommand
 from django.db.models import Model, QuerySet
 
 
-class BaseAICommand(BaseCommand, ABC):
+class BaseAICommand(BaseCommand):
     """Base class for AI management commands with common functionality."""
+
+    model_class: type[Model]
+    entity_name: str
+    entity_name_plural: str
+    key_field_name: str
 
     def __init__(self, *args, **kwargs):
         """Initialize the AI command with OpenAI client placeholder."""
         super().__init__(*args, **kwargs)
         self.openai_client: openai.OpenAI | None = None
 
-    @abstractmethod
-    def model_class(self) -> type[Model]:
-        """Return the Django model class this command operates on."""
-
-    @abstractmethod
-    def entity_name(self) -> str:
-        """Return the human-readable name for the entity (e.g., 'chapter', 'project')."""
-
-    @abstractmethod
-    def entity_name_plural(self) -> str:
-        """Return the plural form of the entity name."""
-
-    @abstractmethod
-    def key_field_name(self) -> str:
-        """Return the field name used for filtering by key (e.g., 'key', 'slug')."""
-
-    @abstractmethod
-    def extract_content(self, entity: Model) -> tuple[str, str]:
-        """Extract content from the entity. Return (prose_content, metadata_content)."""
-
     def source_name(self) -> str:
         """Return the source name for context creation. Override if different from default."""
-        return f"owasp_{self.entity_name()}"
+        return f"owasp_{self.entity_name}"
 
     def get_base_queryset(self) -> QuerySet:
         """Return the base queryset. Override for custom filtering logic."""
-        return self.model_class().objects.all()
+        return self.model_class.objects.all()
 
     def get_default_queryset(self) -> QuerySet:
         """Return the default queryset when no specific options are provided."""
@@ -53,20 +37,20 @@ class BaseAICommand(BaseCommand, ABC):
     def add_common_arguments(self, parser):
         """Add common arguments that most commands need."""
         parser.add_argument(
-            f"--{self.entity_name()}-key",
+            f"--{self.entity_name}-key",
             type=str,
-            help=f"Process only the {self.entity_name()} with this key",
+            help=f"Process only the {self.entity_name} with this key",
         )
         parser.add_argument(
             "--all",
             action="store_true",
-            help=f"Process all the {self.entity_name_plural()}",
+            help=f"Process all the {self.entity_name_plural}",
         )
         parser.add_argument(
             "--batch-size",
             type=int,
             default=50,
-            help=f"Number of {self.entity_name_plural()} to process in each batch",
+            help=f"Number of {self.entity_name_plural} to process in each batch",
         )
 
     def add_arguments(self, parser):
@@ -75,10 +59,10 @@ class BaseAICommand(BaseCommand, ABC):
 
     def get_queryset(self, options: dict[str, Any]) -> QuerySet:
         """Get the queryset based on command options."""
-        key_option = f"{self.entity_name()}_key"
+        key_option = f"{self.entity_name}_key"
 
         if options.get(key_option):
-            filter_kwargs = {self.key_field_name(): options[key_option]}
+            filter_kwargs = {self.key_field_name: options[key_option]}
             return self.get_base_queryset().filter(**filter_kwargs)
         if options.get("all"):
             return self.get_base_queryset()
@@ -86,7 +70,7 @@ class BaseAICommand(BaseCommand, ABC):
 
     def get_entity_key(self, entity: Model) -> str:
         """Get the key/identifier for an entity for display purposes."""
-        return str(getattr(entity, self.key_field_name(), entity.pk))
+        return str(getattr(entity, self.key_field_name, entity.pk))
 
     def setup_openai_client(self) -> bool:
         """Set up OpenAI client if API key is available."""
@@ -108,10 +92,10 @@ class BaseAICommand(BaseCommand, ABC):
         total_count = queryset.count()
 
         if not total_count:
-            self.stdout.write(f"No {self.entity_name_plural()} found to process")
+            self.stdout.write(f"No {self.entity_name_plural} found to process")
             return
 
-        self.stdout.write(f"Found {total_count} {self.entity_name_plural()} to process")
+        self.stdout.write(f"Found {total_count} {self.entity_name_plural} to process")
 
         processed_count = 0
         for offset in range(0, total_count, batch_size):
@@ -120,6 +104,6 @@ class BaseAICommand(BaseCommand, ABC):
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Completed processing {processed_count}/{total_count} {self.entity_name_plural()}"
+                f"Completed processing {processed_count}/{total_count} {self.entity_name_plural}"
             )
         )

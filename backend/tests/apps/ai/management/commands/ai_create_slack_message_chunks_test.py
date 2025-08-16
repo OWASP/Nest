@@ -26,16 +26,16 @@ class TestAiCreateSlackMessageChunksCommand:
     def test_model_class_property(self, command):
         from apps.slack.models.message import Message
 
-        assert command.model_class() == Message
+        assert command.model_class == Message
 
     def test_entity_name_property(self, command):
-        assert command.entity_name() == "message"
+        assert command.entity_name == "message"
 
     def test_entity_name_plural_property(self, command):
-        assert command.entity_name_plural() == "messages"
+        assert command.entity_name_plural == "messages"
 
     def test_key_field_name_property(self, command):
-        assert command.key_field_name() == "slack_message_id"
+        assert command.key_field_name == "slack_message_id"
 
     def test_source_name_property(self, command):
         """Test the source_name property."""

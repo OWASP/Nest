@@ -1,5 +1,6 @@
 """Tests for the BaseContextCommand class."""
 
+from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
@@ -12,19 +13,10 @@ from apps.ai.models.context import Context
 class ConcreteContextCommand(BaseContextCommand):
     """Concrete implementation of BaseContextCommand for testing."""
 
-    def model_class(self):
-        mock_model = Mock()
-        mock_model.__name__ = "MockContextTestModel"
-        return mock_model
-
-    def entity_name(self):
-        return "test_entity"
-
-    def entity_name_plural(self):
-        return "test_entities"
-
-    def key_field_name(self):
-        return "test_key"
+    model_class: type[Any] = Mock  # type: ignore[assignment]
+    entity_name = "test_entity"
+    entity_name_plural = "test_entities"
+    key_field_name = "test_key"
 
     def extract_content(self, entity):
         return ("prose content", "metadata content")
@@ -33,7 +25,11 @@ class ConcreteContextCommand(BaseContextCommand):
 @pytest.fixture
 def command():
     """Return a concrete context command instance for testing."""
-    return ConcreteContextCommand()
+    cmd = ConcreteContextCommand()
+    mock_model = Mock()
+    mock_model.__name__ = "MockContextTestModel"
+    cmd.model_class = mock_model
+    return cmd
 
 
 @pytest.fixture
@@ -71,11 +67,10 @@ class TestBaseContextCommand:
 
     def test_abstract_methods_implemented(self, command):
         """Test that all abstract methods are properly implemented."""
-        mock_model = command.model_class()
-        assert mock_model.__name__ == "MockContextTestModel"
-        assert command.entity_name() == "test_entity"
-        assert command.entity_name_plural() == "test_entities"
-        assert command.key_field_name() == "test_key"
+        assert command.model_class.__name__ == "MockContextTestModel"
+        assert command.entity_name == "test_entity"
+        assert command.entity_name_plural == "test_entities"
+        assert command.key_field_name == "test_key"
 
         mock_entity = Mock()
         result = command.extract_content(mock_entity)
@@ -306,21 +301,3 @@ class TestBaseContextCommand:
 
             write_calls = [str(call) for call in mock_write.call_args_list]
             assert any("No content for test_entity entity-2" in call for call in write_calls)
-
-
-class TestBaseContextCommandAbstractMethods:
-    """Test that BaseContextCommand requires implementation of abstract methods."""
-
-    def test_cannot_instantiate_base_class_directly(self):
-        """Test that BaseContextCommand cannot be instantiated directly."""
-        with pytest.raises(TypeError):
-            BaseContextCommand()
-
-    def test_abstract_methods_must_be_implemented(self):
-        """Test that subclasses must implement all abstract methods."""
-
-        class IncompleteContextCommand(BaseContextCommand):
-            """Incomplete implementation missing required methods."""
-
-        with pytest.raises(TypeError):
-            IncompleteContextCommand()

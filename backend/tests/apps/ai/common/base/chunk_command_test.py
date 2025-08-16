@@ -1,5 +1,6 @@
 """Tests for the BaseChunkCommand class."""
 
+from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
@@ -14,28 +15,24 @@ from apps.ai.models.context import Context
 class ConcreteChunkCommand(BaseChunkCommand):
     """Concrete implementation of BaseChunkCommand for testing."""
 
-    def model_class(self):
-        mock_model = Mock()
-        mock_model.__name__ = "MockChunkTestModel"
-        return mock_model
-
-    def entity_name(self):
-        return "test_entity"
-
-    def entity_name_plural(self):
-        return "test_entities"
-
-    def key_field_name(self):
-        return "test_key"
+    model_class: type[Any] = Mock  # type: ignore[assignment]
+    entity_name = "test_entity"
+    entity_name_plural = "test_entities"
+    key_field_name = "test_key"
 
     def extract_content(self, entity):
+        """Extract content from entity."""
         return ("prose content", "metadata content")
 
 
 @pytest.fixture
 def command():
     """Return a concrete chunk command instance for testing."""
-    return ConcreteChunkCommand()
+    cmd = ConcreteChunkCommand()
+    mock_model = Mock()
+    mock_model.__name__ = "MockChunkTestModel"
+    cmd.model_class = mock_model
+    return cmd
 
 
 @pytest.fixture
@@ -93,11 +90,10 @@ class TestBaseChunkCommand:
 
     def test_abstract_methods_implemented(self, command):
         """Test that all abstract methods are properly implemented."""
-        mock_model = command.model_class()
-        assert mock_model.__name__ == "MockChunkTestModel"
-        assert command.entity_name() == "test_entity"
-        assert command.entity_name_plural() == "test_entities"
-        assert command.key_field_name() == "test_key"
+        assert command.model_class.__name__ == "MockChunkTestModel"
+        assert command.entity_name == "test_entity"
+        assert command.entity_name_plural == "test_entities"
+        assert command.key_field_name == "test_key"
 
         mock_entity = Mock()
         result = command.extract_content(mock_entity)
@@ -416,21 +412,3 @@ class TestBaseChunkCommand:
                 mock_write.assert_called_once_with(
                     "No content to chunk for test_entity test-key-123"
                 )
-
-
-class TestBaseChunkCommandAbstractMethods:
-    """Test that BaseChunkCommand requires implementation of abstract methods."""
-
-    def test_cannot_instantiate_base_class_directly(self):
-        """Test that BaseChunkCommand cannot be instantiated directly."""
-        with pytest.raises(TypeError):
-            BaseChunkCommand()
-
-    def test_abstract_methods_must_be_implemented(self):
-        """Test that subclasses must implement all abstract methods."""
-
-        class IncompleteChunkCommand(BaseChunkCommand):
-            """Incomplete implementation missing required methods."""
-
-        with pytest.raises(TypeError):
-            IncompleteChunkCommand()

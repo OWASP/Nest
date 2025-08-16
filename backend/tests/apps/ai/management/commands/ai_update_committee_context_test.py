@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from apps.ai.management.commands.ai_create_committee_context import Command
+from apps.ai.management.commands.ai_update_committee_context import Command
 
 
 @pytest.fixture
@@ -42,24 +42,24 @@ class TestAiCreateCommitteeContextCommand:
         """Test the model_class method returns Committee."""
         from apps.owasp.models.committee import Committee
 
-        assert command.model_class() == Committee
+        assert command.model_class == Committee
 
     def test_entity_name_method(self, command):
         """Test the entity_name method."""
-        assert command.entity_name() == "committee"
+        assert command.entity_name == "committee"
 
     def test_entity_name_plural_method(self, command):
         """Test the entity_name_plural method."""
-        assert command.entity_name_plural() == "committees"
+        assert command.entity_name_plural == "committees"
 
     def test_key_field_name_method(self, command):
         """Test the key_field_name method."""
-        assert command.key_field_name() == "key"
+        assert command.key_field_name == "key"
 
     def test_extract_content_method(self, command, mock_committee):
         """Test the extract_content method."""
         with patch(
-            "apps.ai.management.commands.ai_create_committee_context.extract_committee_content"
+            "apps.ai.management.commands.ai_update_committee_context.extract_committee_content"
         ) as mock_extract:
             mock_extract.return_value = ("prose content", "metadata content")
             content = command.extract_content(mock_committee)

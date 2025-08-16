@@ -1,10 +1,12 @@
 """Unit tests for AI app context model."""
 
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
+from django.contrib.contenttypes.models import ContentType
 
 from apps.ai.models.context import Context
+from apps.common.models import TimestampedModel
 
 
 def create_model_mock(model_class):
@@ -12,6 +14,8 @@ def create_model_mock(model_class):
     mock._state = Mock()
     mock.pk = 1
     mock.id = 1
+    mock.chunks = Mock()
+    mock.chunks.count.return_value = 0
     return mock
 
 
@@ -26,14 +30,14 @@ class TestContextModel:
         assert field.__class__.__name__ == "TextField"
 
     def test_content_type_field_properties(self):
-        field = Context._meta.get_field("content_type")
+        field = Context._meta.get_field("entity_type")
         assert field.null is False
         assert field.blank is False
         assert hasattr(field, "remote_field")
         assert field.remote_field.on_delete.__name__ == "CASCADE"
 
     def test_object_id_field_properties(self):
-        field = Context._meta.get_field("object_id")
+        field = Context._meta.get_field("entity_id")
         assert field.__class__.__name__ == "PositiveIntegerField"
 
     def test_source_field_properties(self):
@@ -56,8 +60,6 @@ class TestContextModel:
         mock_save.assert_called_once()
 
     def test_context_inheritance_from_timestamped_model(self):
-        from apps.common.models import TimestampedModel
-
         assert issubclass(Context, TimestampedModel)
 
     @patch("apps.ai.models.context.Context.objects.create")
@@ -137,9 +139,11 @@ class TestContextModel:
         mock_delete.assert_called_once()
 
     @patch("apps.ai.models.context.Context.objects.filter")
-    def test_update_data_existing_context(self, mock_filter):
+    @patch("apps.ai.models.context.Context.objects.get_or_create")
+    @patch("apps.ai.models.context.regenerate_chunks_for_context")
+    def test_update_data_existing_context(self, mock_regenerate, mock_get_or_create, mock_filter):
         mock_context = create_model_mock(Context)
-        mock_filter.return_value.first.return_value = mock_context
+        mock_get_or_create.return_value = (mock_context, False)
 
         content = "Test"
         mock_content_object = Mock()
@@ -154,28 +158,43 @@ class TestContextModel:
             result = Context.update_data(content, mock_content_object, source="src", save=True)
 
             mock_get_for_model.assert_called_once_with(mock_content_object)
-            mock_filter.assert_called_once_with(
-                content_type=mock_content_type, object_id=1, content=content
+            mock_get_or_create.assert_called_once_with(
+                entity_type=mock_content_type,
+                entity_id=1,
+                defaults={"content": content, "source": "src"},
             )
+            mock_regenerate.assert_called_once_with(context=mock_context)
             assert result == mock_context
 
     def test_str_method_with_name_attribute(self):
-        """Test __str__ method when content_object has name attribute."""
+        """Test __str__ method when entity has name attribute."""
         content_object = Mock()
         content_object.name = "Test Object"
 
-        content_type = Mock()
-        content_type.model = "test_model"
+        entity_type = Mock(spec=ContentType)
+        entity_type.model = "test_model"
+
+        context = Context()
+        context.content = (
+            "This is test content that is longer than 50 characters to test truncation"
+        )
+        context.entity_type_id = 1
+        context.entity_id = "123"
 
         with (
-            patch.object(Context, "content_object", content_object),
-            patch.object(Context, "content_type", content_type),
+            patch.object(
+                type(context),
+                "entity",
+                new_callable=PropertyMock,
+                return_value=content_object,
+            ),
+            patch.object(
+                type(context),
+                "entity_type",
+                new_callable=PropertyMock,
+                return_value=entity_type,
+            ),
         ):
-            context = Context()
-            context.content = (
-                "This is test content that is longer than 50 characters to test truncation"
-            )
-
             result = str(context)
             assert (
                 result
@@ -183,51 +202,105 @@ class TestContextModel:
             )
 
     def test_str_method_with_key_attribute(self):
-        """Test __str__ method when content_object has key but no name attribute."""
+        """Test __str__ method when entity has key but no name attribute."""
         content_object = Mock()
         content_object.name = None
         content_object.key = "test-key"
 
-        content_type = Mock()
-        content_type.model = "test_model"
+        entity_type = Mock(spec=ContentType)
+        entity_type.model = "test_model"
+
+        context = Context()
+        context.content = "Short content"
+        context.entity_type_id = 1
+        context.entity_id = "123"
 
         with (
-            patch.object(Context, "content_object", content_object),
-            patch.object(Context, "content_type", content_type),
+            patch.object(
+                type(context),
+                "entity",
+                new_callable=PropertyMock,
+                return_value=content_object,
+            ),
+            patch.object(
+                type(context),
+                "entity_type",
+                new_callable=PropertyMock,
+                return_value=entity_type,
+            ),
         ):
-            context = Context()
-            context.content = "Short content"
-
             result = str(context)
             assert result == "test_model test-key: Short content"
 
+    def test_str_method_with_neither_name_nor_key(self):
+        """Test __str__ method when entity has neither name nor key attribute."""
+        content_object = Mock()
+        content_object.name = None
+        content_object.key = None
+        content_object.__str__ = Mock(return_value="Unknown")
+
+        entity_type = Mock(spec=ContentType)
+        entity_type.model = "test_model"
+
+        context = Context()
+        context.content = "Another test content"
+        context.entity_type_id = 1
+        context.entity_id = "456"
+
+        with (
+            patch.object(
+                type(context),
+                "entity",
+                new_callable=PropertyMock,
+                return_value=content_object,
+            ),
+            patch.object(
+                type(context),
+                "entity_type",
+                new_callable=PropertyMock,
+                return_value=entity_type,
+            ),
+        ):
+            result = str(context)
+            assert result == "test_model Unknown: Another test content"
+
     def test_str_method_fallback_to_str(self):
-        """Test __str__ method falls back to str(content_object)."""
+        """Test __str__ method falls back to str(entity)."""
         content_object = Mock()
         content_object.name = None
         content_object.key = None
         content_object.__str__ = Mock(return_value="String representation")
 
-        content_type = Mock()
-        content_type.model = "test_model"
+        entity_type = Mock(spec=ContentType)
+        entity_type.model = "test_model"
+
+        context = Context()
+        context.content = "Test content"
+        context.entity_type_id = 1
+        context.entity_id = "123"
 
         with (
-            patch.object(Context, "content_object", content_object),
-            patch.object(Context, "content_type", content_type),
+            patch.object(
+                type(context),
+                "entity",
+                new_callable=PropertyMock,
+                return_value=content_object,
+            ),
+            patch.object(
+                type(context),
+                "entity_type",
+                new_callable=PropertyMock,
+                return_value=entity_type,
+            ),
         ):
-            context = Context()
-            context.content = "Test content"
-
             result = str(context)
             assert result == "test_model String representation: Test content"
 
-    @patch("apps.ai.models.context.Context.objects.filter")
-    @patch("apps.ai.models.context.Context.__init__")
-    @patch("apps.ai.models.context.Context.save")
-    def test_update_data_new_context_with_save(self, mock_save, mock_init, mock_filter):
+    @patch("apps.ai.models.context.Context.objects.get_or_create")
+    def test_update_data_new_context_with_save(self, mock_get_or_create):
         """Test update_data creating a new context with save=True."""
-        mock_filter.return_value.first.return_value = None
-        mock_init.return_value = None
+        mock_context = create_model_mock(Context)
+        mock_get_or_create.return_value = (mock_context, True)
 
         content = "New test content"
         mock_content_object = Mock()
@@ -243,18 +316,18 @@ class TestContextModel:
             result = Context.update_data(content, mock_content_object, source=source, save=True)
 
             mock_get_for_model.assert_called_once_with(mock_content_object)
-            mock_filter.assert_called_once_with(
-                content_type=mock_content_type, object_id=1, content=content
+            mock_get_or_create.assert_called_once_with(
+                entity_type=mock_content_type,
+                entity_id=1,
+                defaults={"content": content, "source": source},
             )
-            mock_save.assert_called_once()
-            assert isinstance(result, Context)
+            assert result == mock_context
 
-    @patch("apps.ai.models.context.Context.objects.filter")
-    @patch("apps.ai.models.context.Context.__init__")
-    def test_update_data_new_context_without_save(self, mock_init, mock_filter):
+    @patch("apps.ai.models.context.Context.objects.get_or_create")
+    def test_update_data_new_context_without_save(self, mock_get_or_create):
         """Test update_data creating a new context with save=False."""
-        mock_filter.return_value.first.return_value = None
-        mock_init.return_value = None
+        mock_context = create_model_mock(Context)
+        mock_get_or_create.return_value = (mock_context, True)
 
         content = "New test content"
         mock_content_object = Mock()
@@ -267,14 +340,12 @@ class TestContextModel:
             mock_content_type = Mock()
             mock_get_for_model.return_value = mock_content_type
 
-            with patch("apps.ai.models.context.Context.save") as mock_save:
-                result = Context.update_data(
-                    content, mock_content_object, source=source, save=False
-                )
+            result = Context.update_data(content, mock_content_object, source=source, save=False)
 
-                mock_get_for_model.assert_called_once_with(mock_content_object)
-                mock_filter.assert_called_once_with(
-                    content_type=mock_content_type, object_id=1, content=content
-                )
-                mock_save.assert_not_called()
-                assert isinstance(result, Context)
+            mock_get_for_model.assert_called_once_with(mock_content_object)
+            mock_get_or_create.assert_called_once_with(
+                entity_type=mock_content_type,
+                entity_id=1,
+                defaults={"content": content, "source": source},
+            )
+            assert result == mock_context

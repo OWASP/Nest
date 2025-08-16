@@ -40,6 +40,8 @@ def create_chunks_and_embeddings(
         ValueError: If context is None or invalid
 
     """
+    from apps.ai.models.chunk import Chunk
+
     try:
         last_request_time = datetime.now(UTC) - timedelta(
             seconds=DEFAULT_LAST_REQUEST_OFFSET_SECONDS
@@ -66,3 +68,34 @@ def create_chunks_and_embeddings(
         return []
     else:
         return chunks
+
+
+def regenerate_chunks_for_context(context: Context):
+    """Regenerates all chunks for a single, specific context instance.
+
+    Args:
+      context (Context): The specific context instance to be updated.
+
+    """
+    from apps.ai.models.chunk import Chunk
+
+    old_chunk_count = context.chunks.count()
+    if old_chunk_count > 0:
+        context.chunks.all().delete()
+
+    new_chunk_texts = Chunk.split_text(context.content)
+
+    if not new_chunk_texts:
+        logger.warning("No content to chunk for Context. Process stopped.")
+        return
+
+    openai_client = openai.Client()
+
+    create_chunks_and_embeddings(
+        chunk_texts=new_chunk_texts,
+        context=context,
+        openai_client=openai_client,
+        save=True,
+    )
+
+    logger.info("Successfully completed chunk regeneration for new context")
