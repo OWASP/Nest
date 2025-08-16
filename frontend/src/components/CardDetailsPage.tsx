@@ -10,9 +10,12 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import upperFirst from 'lodash/upperFirst'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import type { ExtendedSession } from 'types/auth'
 import type { DetailsCardProps } from 'types/card'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/credentials'
+import { scrollToAnchor } from 'utils/scrollToAnchor'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
@@ -21,6 +24,8 @@ import InfoBlock from 'components/InfoBlock'
 import LeadersList from 'components/LeadersList'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import Milestones from 'components/Milestones'
+import ModuleCard from 'components/ModuleCard'
+import ProgramActions from 'components/ProgramActions'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
@@ -33,6 +38,15 @@ import TopContributorsList from 'components/TopContributorsList'
 const DetailsCard = ({
   description,
   details,
+  accessLevel,
+  status,
+  setStatus,
+  canUpdateStatus,
+  tags,
+  domains,
+  modules,
+  mentors,
+  admins,
   entityKey,
   geolocationData = null,
   healthMetricsData,
@@ -55,16 +69,38 @@ const DetailsCard = ({
   type,
   userSummary,
 }: DetailsCardProps) => {
+  const { data } = useSession()
+  const router = useRouter()
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <div className="mt-4 flex flex-row items-center">
           <div className="flex w-full items-center justify-between">
             <h1 className="text-4xl font-bold">{title}</h1>
+            {type === 'program' && accessLevel === 'admin' && canUpdateStatus && (
+              <ProgramActions status={status} setStatus={setStatus} />
+            )}
+            {type === 'module' &&
+              accessLevel === 'admin' &&
+              admins?.some(
+                (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
+              ) && (
+                <button
+                  type="button"
+                  className="flex items-center justify-center gap-2 text-nowrap rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-[#0D6EFD] text-blue-600 transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
+                  onClick={() => {
+                    router.push(`${window.location.pathname}/edit`)
+                  }}
+                >
+                  Edit Module
+                </button>
+              )}
             {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
-              <Link href="#issues-trend">
-                <MetricsScoreCircle score={healthMetricsData[0].score} />
-              </Link>
+              <MetricsScoreCircle
+                score={healthMetricsData[0].score}
+                clickable={true}
+                onClick={() => scrollToAnchor('issues-trend')}
+              />
             )}
           </div>
           {!isActive && (
@@ -98,7 +134,13 @@ const DetailsCard = ({
           <SecondaryCard
             icon={faRectangleList}
             title={<AnchorTitle title={`${upperFirst(type)} Details`} />}
-            className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
+            className={
+              type === 'program' || type === 'module'
+                ? 'gap-2 md:col-span-7'
+                : type !== 'chapter'
+                  ? 'gap-2 md:col-span-5'
+                  : 'gap-2 md:col-span-3'
+            }
           >
             {details?.map((detail) =>
               detail?.label === 'Leaders' ? (
@@ -171,11 +213,49 @@ const DetailsCard = ({
             )}
           </div>
         )}
+        {(type === 'program' || type === 'module') && (
+          <div
+            className={`mb-8 grid grid-cols-1 gap-6 ${(tags?.length || 0) === 0 || (domains?.length || 0) === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
+          >
+            {tags?.length > 0 && (
+              <ToggleableList
+                items={tags}
+                icon={faTags}
+                label={<AnchorTitle title="Tags" />}
+                isDisabled={true}
+              />
+            )}
+            {domains?.length > 0 && (
+              <ToggleableList
+                items={domains}
+                icon={faChartPie}
+                label={<AnchorTitle title="Domains" />}
+                isDisabled={true}
+              />
+            )}
+          </div>
+        )}
         {topContributors && (
           <TopContributorsList
             contributors={topContributors}
             icon={faUsers}
             maxInitialDisplay={12}
+          />
+        )}
+        {admins && admins.length > 0 && type === 'program' && (
+          <TopContributorsList
+            icon={faUsers}
+            contributors={admins}
+            maxInitialDisplay={6}
+            label="Admins"
+          />
+        )}
+        {mentors && mentors.length > 0 && (
+          <TopContributorsList
+            icon={faUsers}
+            contributors={mentors}
+            maxInitialDisplay={6}
+            label="Mentors"
           />
         )}
         {(type === 'project' ||
@@ -213,6 +293,14 @@ const DetailsCard = ({
               <RepositoriesCard maxInitialDisplay={4} repositories={repositories} />
             </SecondaryCard>
           )}
+        {type === 'program' && modules.length > 0 && (
+          <SecondaryCard
+            icon={faFolderOpen}
+            title={<AnchorTitle title={modules.length === 1 ? 'Module' : 'Modules'} />}
+          >
+            <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
+          </SecondaryCard>
+        )}
         {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
           <HealthMetrics data={healthMetricsData} />
         )}
@@ -230,7 +318,7 @@ const DetailsCard = ({
 
 export default DetailsCard
 
-const SocialLinks = ({ urls }) => {
+export const SocialLinks = ({ urls }) => {
   if (!urls || urls.length === 0) return null
   return (
     <div>
