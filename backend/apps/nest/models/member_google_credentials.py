@@ -85,8 +85,14 @@ class MemberGoogleCredentials(models.Model):
         kms_client = GoogleAuth.get_kms_client()
         flow.redirect_uri = settings.GOOGLE_AUTH_REDIRECT_URI
         flow.fetch_token(authorization_response=auth_response)
-        auth.access_token = kms_client.encrypt(flow.credentials.token)
-        auth.refresh_token = kms_client.encrypt(flow.credentials.refresh_token)
+        auth.access_token = (
+            kms_client.encrypt(flow.credentials.token) if flow.credentials.token else None
+        )
+        auth.refresh_token = (
+            kms_client.encrypt(flow.credentials.refresh_token)
+            if flow.credentials.refresh_token
+            else None
+        )
         expires_at = flow.credentials.expiry
         if expires_at and timezone.is_naive(expires_at):
             expires_at = timezone.make_aware(expires_at)
@@ -132,6 +138,8 @@ class MemberGoogleCredentials(models.Model):
         """Refresh the access token using the refresh token."""
         if not settings.IS_GOOGLE_AUTH_ENABLED:
             raise ValueError(AUTH_ERROR_MESSAGE)
+        if not settings.IS_AWS_KMS_ENABLED:
+            raise ValueError(KMS_ERROR_MESSAGE)
         refresh_error = "Google OAuth refresh token is not set or expired."
         if not auth.refresh_token:
             raise ValidationError(refresh_error)
@@ -143,10 +151,15 @@ class MemberGoogleCredentials(models.Model):
             client_secret=settings.GOOGLE_AUTH_CLIENT_SECRET,
         )
         credentials.refresh(Request())
-
-        auth.access_token = credentials.token
-        auth.refresh_token = credentials.refresh_token
-        auth.expires_at = credentials.expiry
+        kms_client = GoogleAuth.get_kms_client()
+        auth.access_token = kms_client.encrypt(credentials.token) if credentials.token else None
+        auth.refresh_token = (
+            kms_client.encrypt(credentials.refresh_token) if credentials.refresh_token else None
+        )
+        expires_at = credentials.expiry
+        if expires_at and timezone.is_naive(expires_at):
+            expires_at = timezone.make_aware(expires_at)
+        auth.expires_at = expires_at
         auth.save()
 
     def __str__(self):
