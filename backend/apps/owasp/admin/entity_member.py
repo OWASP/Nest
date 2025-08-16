@@ -35,7 +35,6 @@ class EntityMemberAdmin(admin.ModelAdmin):
     list_filter = (
         "kind",
         "is_reviewed",
-        "entity_type",
     )
     raw_id_fields = ("member",)
     search_fields = (
@@ -43,7 +42,7 @@ class EntityMemberAdmin(admin.ModelAdmin):
         "member__name",
         "description",
     )
-    ordering = ("-id",)
+    ordering = ("member__name", "order",)
 
     @admin.display(description="Entity", ordering="entity_type")
     def entity(self, obj):
