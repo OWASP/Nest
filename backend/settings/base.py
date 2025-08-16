@@ -20,8 +20,8 @@ class Base(Configuration):
     GITHUB_APP_ID = None
     GITHUB_APP_INSTALLATION_ID = None
     GOOGLE_AUTH_AUTH_URI = values.Value(environ_name="GOOGLE_AUTH_AUTH_URI")
-    GOOGLE_AUTH_CLIENT_ID = values.Value(environ_name="GOOGLE_AUTH_CLIENT_ID")
-    GOOGLE_AUTH_CLIENT_SECRET = values.Value(environ_name="GOOGLE_AUTH_CLIENT_SECRET")
+    GOOGLE_AUTH_CLIENT_ID = values.SecretValue(environ_name="GOOGLE_AUTH_CLIENT_ID")
+    GOOGLE_AUTH_CLIENT_SECRET = values.SecretValue(environ_name="GOOGLE_AUTH_CLIENT_SECRET")
     GOOGLE_AUTH_REDIRECT_URI = values.Value(environ_name="GOOGLE_AUTH_REDIRECT_URI")
     GOOGLE_AUTH_TOKEN_URI = values.Value(environ_name="GOOGLE_AUTH_TOKEN_URI")
 
