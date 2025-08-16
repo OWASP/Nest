@@ -54,6 +54,12 @@ class Migration(migrations.Migration):
             options={
                 "verbose_name_plural": "User badges",
                 "db_table": "nest_user_badges",
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=["user", "badge"],
+                        name="uq_userbadge_user_badge",
+                    )
+                ],
             },
         ),
     ]

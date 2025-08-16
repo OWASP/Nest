@@ -84,7 +84,7 @@ class TestSyncUserBadgesCommand:
         )
 
         out = StringIO()
-        call_command("owasp_update_badges", stdout=out)
+        call_command("nest_update_badges", stdout=out)
 
         # Collect all positional args from add/remove calls
         add_args = [arg for call in mock_badge.users.add.call_args_list for arg in call.args]
@@ -105,8 +105,8 @@ class TestSyncUserBadgesCommand:
             for s in ("Removed badge from 1 non-staff", "Removed badge from 1 non-employees")
         )
 
-    @patch("apps.owasp.management.commands.owasp_update_badges.Badge.objects.get_or_create")
-    @patch("apps.owasp.management.commands.owasp_update_badges.User.objects.filter")
+    @patch("apps.nest.management.commands.nest_update_badges.Badge.objects.get_or_create")
+    @patch("apps.nest.management.commands.nest_update_badges.User.objects.filter")
     def test_badge_creation(self, mock_user_filter, mock_badge_get_or_create):
         # Set up badge creation mock
         mock_badge = MagicMock()
@@ -129,7 +129,7 @@ class TestSyncUserBadgesCommand:
         mock_user_filter.side_effect = [mock_employees, mock_former_employees]
 
         out = StringIO()
-        call_command("owasp_update_badges", stdout=out)
+        call_command("nest_update_badges", stdout=out)
 
         mock_badge_get_or_create.assert_called_once_with(
             name=OWASP_STAFF_BADGE_NAME,
@@ -142,8 +142,8 @@ class TestSyncUserBadgesCommand:
         output = out.getvalue()
         assert f"Created badge: {mock_badge.name}" in output
 
-    @patch("apps.owasp.management.commands.owasp_update_badges.Badge.objects.get_or_create")
-    @patch("apps.owasp.management.commands.owasp_update_badges.User.objects.filter")
+    @patch("apps.nest.management.commands.nest_update_badges.Badge.objects.get_or_create")
+    @patch("apps.nest.management.commands.nest_update_badges.User.objects.filter")
     def test_command_idempotency(self, mock_user_filter, mock_badge_get_or_create):
         """Test that running the command multiple times has the same effect as running it once."""
         # Set up badge mock
@@ -177,11 +177,11 @@ class TestSyncUserBadgesCommand:
 
         # First run
         out1 = StringIO()
-        call_command("owasp_update_badges", stdout=out1)
+        call_command("nest_update_badges", stdout=out1)
 
         # Second run
         out2 = StringIO()
-        call_command("owasp_update_badges", stdout=out2)
+        call_command("nest_update_badges", stdout=out2)
 
         # Verify no add/remove operations were performed
         mock_badge.users.add.assert_not_called()
