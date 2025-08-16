@@ -60,12 +60,11 @@ class Award(TimestampedModel):
         default="",
         help_text="Detailed information about the winner",
     )
-    winner_image = models.CharField(
-        verbose_name="Winner Image",
-        max_length=500,
+    winner_image_url = models.URLField(
+        verbose_name="Winner Image URL",
         blank=True,
         default="",
-        help_text="Path to winner's image",
+        help_text="URL to winner's image",
     )
 
     # Optional foreign key to User model
@@ -148,7 +147,7 @@ class Award(TimestampedModel):
             award_defaults = {
                 "description": "",
                 "winner_info": winner_data.get("info", ""),
-                "winner_image": winner_data.get("image", ""),
+                "winner_image_url": winner_data.get("image", ""),
             }
 
             if save:
