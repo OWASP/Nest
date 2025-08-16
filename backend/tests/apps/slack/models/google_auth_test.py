@@ -180,7 +180,7 @@ class TestGoogleAuthModel:
         )
 
     @override_settings(IS_GOOGLE_AUTH_ENABLED=False)
-    def test_refresh_access_token_when_disabled(self):
+    def test_refresh_access_token_when_google_auth_disabled(self):
         """Test refresh_access_token raises error when Google auth is disabled."""
         auth = GoogleAuth(
             member=self.member,
@@ -191,8 +191,21 @@ class TestGoogleAuthModel:
         with pytest.raises(ValueError, match="Google OAuth client ID"):
             GoogleAuth.refresh_access_token(auth)
 
+    @override_settings(IS_GOOGLE_AUTH_ENABLED=True, IS_AWS_KMS_ENABLED=False)
+    def test_refresh_access_token_when_aws_kms_disabled(self):
+        """Test refresh_access_token raises error when AWS KMS is disabled."""
+        auth = GoogleAuth(
+            member=self.member,
+            access_token=self.valid_token,
+            refresh_token=self.valid_refresh_token,
+        )
+
+        with pytest.raises(ValueError, match="AWS KMS is not enabled."):
+            GoogleAuth.refresh_access_token(auth)
+
     @override_settings(
         IS_GOOGLE_AUTH_ENABLED=True,
+        IS_AWS_KMS_ENABLED=True,
         GOOGLE_AUTH_CLIENT_ID="test_client_id",
         GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
         GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
@@ -200,7 +213,10 @@ class TestGoogleAuthModel:
     @patch("apps.slack.models.google_auth.Credentials")
     @patch("apps.slack.models.google_auth.Request")
     @patch("apps.slack.models.google_auth.GoogleAuth.save")
-    def test_refresh_access_token_success(self, mock_save, mock_request, mock_credentials):
+    @patch("apps.slack.models.google_auth.GoogleAuth.get_kms_client")
+    def test_refresh_access_token_success(
+        self, mock_get_kms_client, mock_save, mock_request, mock_credentials
+    ):
         """Test successful refresh_access_token."""
         # Create auth with refresh token
         auth = GoogleAuth(
@@ -218,10 +234,13 @@ class TestGoogleAuthModel:
 
         mock_credentials.return_value = mock_credentials_instance
 
+        mock_get_kms_client.return_value = Mock()
+        mock_get_kms_client.return_value.encrypt.return_value = b"encrypted"
+
         GoogleAuth.refresh_access_token(auth)
 
-        assert auth.access_token == b"token"
-        assert auth.refresh_token == b"refresh_token"
+        assert auth.access_token == b"encrypted"
+        assert auth.refresh_token == b"encrypted"
         assert auth.expires_at == self.future_time
 
         mock_credentials.assert_called_once_with(
@@ -232,10 +251,13 @@ class TestGoogleAuthModel:
             client_secret=settings.GOOGLE_AUTH_CLIENT_SECRET,
         )
         mock_credentials_instance.refresh.assert_called_once_with(mock_request.return_value)
+        mock_get_kms_client.return_value.encrypt.assert_any_call(b"token")
+        mock_get_kms_client.return_value.encrypt.assert_any_call(b"refresh_token")
         mock_save.assert_called_once()
 
     @override_settings(
         IS_GOOGLE_AUTH_ENABLED=True,
+        IS_AWS_KMS_ENABLED=True,
         GOOGLE_AUTH_CLIENT_ID="test_client_id",
         GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
         GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
