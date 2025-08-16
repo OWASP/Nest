@@ -16,6 +16,10 @@ AUTH_ERROR_MESSAGE = (
 class GoogleAuth(models.Model):
     """Model to store Google OAuth tokens for Slack integration."""
 
+    class Meta:
+        db_table = "slack_google_auths"
+        verbose_name_plural = "Google Auths"
+
     member = models.OneToOneField(
         "slack.Member",
         on_delete=models.CASCADE,
