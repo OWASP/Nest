@@ -4,7 +4,7 @@ import logging
 import time
 from datetime import UTC, datetime, timedelta
 
-import openai
+from openai import OpenAI, OpenAIError
 
 from apps.ai.common.constants import (
     DEFAULT_LAST_REQUEST_OFFSET_SECONDS,
@@ -63,7 +63,7 @@ def create_chunks_and_embeddings(
             if chunk is not None:
                 chunks.append(chunk)
 
-    except openai.OpenAIError:
+    except OpenAIError:
         logger.exception("Failed to create chunks and embeddings")
         return []
     else:
@@ -89,7 +89,7 @@ def regenerate_chunks_for_context(context: Context):
         logger.warning("No content to chunk for Context. Process stopped.")
         return
 
-    openai_client = openai.Client()
+    openai_client = OpenAI()
 
     create_chunks_and_embeddings(
         chunk_texts=new_chunk_texts,

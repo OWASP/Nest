@@ -14,6 +14,7 @@ class Command(BaseContextCommand):
 
     def add_arguments(self, parser):
         """Override to use different default batch size for messages."""
+        super().add_arguments(parser)
         parser.add_argument(
             "--message-key",
             type=str,
