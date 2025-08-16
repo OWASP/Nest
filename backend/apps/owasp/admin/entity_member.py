@@ -42,7 +42,7 @@ class EntityMemberAdmin(admin.ModelAdmin):
         "member__name",
         "description",
     )
-    ordering = ("member__name", "order",)
+    ordering = ("member__name", "order")
 
     @admin.display(description="Entity", ordering="entity_type")
     def entity(self, obj):
