@@ -1,3 +1,4 @@
+from .interested_contributors import ParticipantInterest
 from .mentee import Mentee
 from .mentee_module import MenteeModule
 from .mentee_program import MenteeProgram
