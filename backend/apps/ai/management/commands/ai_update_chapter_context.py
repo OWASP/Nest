@@ -1,11 +1,11 @@
-"""A command to create chunks of OWASP chapter data for RAG."""
+"""A command to update context for OWASP chapter data."""
 
-from apps.ai.common.base.chunk_command import BaseChunkCommand
+from apps.ai.common.base.context_command import BaseContextCommand
 from apps.ai.common.extractors.chapter import extract_chapter_content
 from apps.owasp.models.chapter import Chapter
 
 
-class Command(BaseChunkCommand):
+class Command(BaseContextCommand):
     entity_name = "chapter"
     entity_name_plural = "chapters"
     key_field_name = "key"

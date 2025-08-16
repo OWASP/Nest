@@ -1,13 +1,13 @@
-"""A command to create chunks of OWASP event data for RAG."""
+"""A command to update context for OWASP event data."""
 
 from django.db.models import QuerySet
 
-from apps.ai.common.base.chunk_command import BaseChunkCommand
+from apps.ai.common.base.context_command import BaseContextCommand
 from apps.ai.common.extractors.event import extract_event_content
 from apps.owasp.models.event import Event
 
 
-class Command(BaseChunkCommand):
+class Command(BaseContextCommand):
     entity_name = "event"
     entity_name_plural = "events"
     key_field_name = "key"

@@ -1,12 +1,12 @@
-"""A command to create chunks of Slack messages."""
+"""A command to update context for Slack message data."""
 
 from django.db.models import QuerySet
 
-from apps.ai.common.base.chunk_command import BaseChunkCommand
+from apps.ai.common.base.context_command import BaseContextCommand
 from apps.slack.models.message import Message
 
 
-class Command(BaseChunkCommand):
+class Command(BaseContextCommand):
     entity_name = "message"
     entity_name_plural = "messages"
     key_field_name = "slack_message_id"
@@ -14,6 +14,7 @@ class Command(BaseChunkCommand):
 
     def add_arguments(self, parser):
         """Override to use different default batch size for messages."""
+        super().add_arguments(parser)
         parser.add_argument(
             "--message-key",
             type=str,

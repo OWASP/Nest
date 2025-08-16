@@ -1,13 +1,13 @@
-"""A command to create chunks of OWASP project data for RAG."""
+"""A command to update context for OWASP project data."""
 
 from django.db.models import QuerySet
 
-from apps.ai.common.base.chunk_command import BaseChunkCommand
+from apps.ai.common.base.context_command import BaseContextCommand
 from apps.ai.common.extractors.project import extract_project_content
 from apps.owasp.models.project import Project
 
 
-class Command(BaseChunkCommand):
+class Command(BaseContextCommand):
     entity_name = "project"
     entity_name_plural = "projects"
     key_field_name = "key"

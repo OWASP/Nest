@@ -28,12 +28,8 @@ class RagTool:
             ValueError: If the OpenAI API key is not set.
 
         """
-        try:
-            self.retriever = Retriever(embedding_model=embedding_model)
-            self.generator = Generator(chat_model=chat_model)
-        except Exception:
-            logger.exception("Failed to initialize RAG tool")
-            raise
+        self.retriever = Retriever(embedding_model=embedding_model)
+        self.generator = Generator(chat_model=chat_model)
 
     def query(
         self,

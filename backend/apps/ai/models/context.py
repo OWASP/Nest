@@ -1,0 +1,66 @@
+"""AI app context model."""
+
+import logging
+
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from django.db import models
+
+from apps.common.models import TimestampedModel
+
+logger = logging.getLogger(__name__)
+
+
+def regenerate_chunks_for_context(context):
+    """Import regenerate_chunks_for_context to avoid circular import."""
+    from apps.ai.common.utils import regenerate_chunks_for_context as _regenerate_chunks
+
+    return _regenerate_chunks(context)
+
+
+class Context(TimestampedModel):
+    """Context model for storing generated text related to OWASP entities."""
+
+    content = models.TextField(verbose_name="Generated Text")
+    entity_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    entity_id = models.PositiveIntegerField()
+    entity = GenericForeignKey("entity_type", "entity_id")
+    source = models.CharField(max_length=100, blank=True, default="")
+
+    class Meta:
+        db_table = "ai_contexts"
+        verbose_name = "Context"
+        unique_together = ("entity_type", "entity_id")
+
+    def __str__(self):
+        """Human readable representation."""
+        entity = (
+            getattr(self.entity, "name", None)
+            or getattr(self.entity, "key", None)
+            or str(self.entity)
+        )
+        return f"{self.entity_type.model} {entity}: {self.content[:50]}"
+
+    @staticmethod
+    def update_data(
+        content: str,
+        content_object,
+        source: str = "",
+        *,
+        save: bool = True,
+    ) -> "Context":
+        """Create or update context for a given entity."""
+        context, created = Context.objects.get_or_create(
+            entity_type=ContentType.objects.get_for_model(content_object),
+            entity_id=content_object.pk,
+            defaults={"content": content, "source": source},
+        )
+
+        if not created and (context.content != content or context.source != source):
+            context.content = content
+            context.source = source
+            if save:
+                context.save(update_fields=["content", "source"])
+            regenerate_chunks_for_context(context=context)
+
+        return context
