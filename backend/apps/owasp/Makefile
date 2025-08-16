@@ -60,3 +60,7 @@ owasp-update-events:
 owasp-update-sponsors:
 	@echo "Getting OWASP sponsors data"
 	@CMD="python manage.py owasp_update_sponsors" $(MAKE) exec-backend-command
+
+owasp-detect-project-level-compliance:
+	@echo "Detecting OWASP project level compliance"
+	@CMD="python manage.py owasp_detect_project_level_compliance" $(MAKE) exec-backend-command
