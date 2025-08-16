@@ -68,25 +68,24 @@ class Command(BaseCommand):
             if not entity.leaders_raw:
                 continue
 
-            matched_users = self.find_user_matches(entity.leaders_raw, users_list, threshold)
+            for index, leader_name in enumerate(entity.leaders_raw):
+                matched_user = self.find_single_user_matches(leader_name, users_list, threshold)
 
-            if not matched_users:
-                continue
+                if not matched_user:
+                    continue
 
-            self.stdout.write(f"  - Found {len(matched_users)} leader matches for '{entity}'")
+                self.stdout.write(f"Match for '{leader_name}': {matched_user['login']}")
 
-            new_members_to_create.extend(
-                [
+                new_members_to_create.append(
                     EntityMember(
                         entity_type=entity_type,
                         entity_id=entity.pk,
-                        member_id=user["id"],
+                        member_id=matched_user["id"],
                         kind=EntityMember.MemberKind.LEADER,
                         is_reviewed=False,
+                        order=((index + 1) * 10),
                     )
-                    for user in matched_users
-                ]
-            )
+                )
 
         if new_members_to_create:
             created_records = EntityMember.objects.bulk_create(
@@ -107,39 +106,29 @@ class Command(BaseCommand):
         """Check if GitHub user meets minimum requirements."""
         return len(login) >= ID_MIN_LENGTH and len(name or "") >= ID_MIN_LENGTH
 
-    def find_user_matches(self, leaders_raw, users_list, threshold):
+    def find_single_user_matches(self, leader_name, users_list, threshold):
         """Find user matches for a list of raw leader names."""
-        matched_users = []
+        if not leader_name:
+            return None
 
-        for leader_name in set(leaders_raw):
-            if not leader_name:
-                continue
+        leader_lower = leader_name.lower()
 
-            leader_lower = leader_name.lower()
-            best_fuzzy_match = None
-            highest_score = 0
+        for user in users_list:
+            if user["login"].lower() == leader_lower or (
+                user["name"] and user["name"].lower() == leader_lower
+            ):
+                return user
 
-            exact_match_found = False
-            for user in users_list:
-                if user["login"].lower() == leader_lower or (
-                    user["name"] and user["name"].lower() == leader_lower
-                ):
-                    matched_users.append(user)
-                    exact_match_found = True
+        best_fuzzy_match = None
+        highest_score = threshold - 1
 
-            if exact_match_found:
-                continue
+        for user in users_list:
+            score = fuzz.token_sort_ratio(leader_lower, user["login"].lower())
+            if user["name"]:
+                score = max(score, fuzz.token_sort_ratio(leader_lower, user["name"].lower()))
 
-            for user in users_list:
-                score = fuzz.token_sort_ratio(leader_lower, user["login"].lower())
-                if user["name"]:
-                    score = max(score, fuzz.token_sort_ratio(leader_lower, user["name"].lower()))
+            if score > highest_score:
+                highest_score = score
+                best_fuzzy_match = user
 
-                if score > highest_score:
-                    highest_score = score
-                    best_fuzzy_match = user
-
-            if highest_score >= threshold:
-                matched_users.append(best_fuzzy_match)
-
-        return list({user["id"]: user for user in matched_users}.values())
+        return best_fuzzy_match
