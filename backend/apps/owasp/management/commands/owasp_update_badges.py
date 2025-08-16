@@ -27,17 +27,21 @@ class Command(BaseCommand):
         if created:
             self.stdout.write(f"Created badge: {waspy_badge.name}")
 
-        # Get users with WASPY awards
-        waspy_winners = Award.get_waspy_award_winners()
+        # Get users with reviewed WASPY awards only
+        waspy_winners = User.objects.filter(
+            awards__category=Award.Category.WASPY, awards__is_reviewed=True
+        ).distinct()
 
         # Add badge to WASPY winners
         for user in waspy_winners:
             user.badges.add(waspy_badge)
 
-        # Remove badge from users without WASPY awards
+        # Remove badge from users without reviewed WASPY awards
         users_with_badge = User.objects.filter(badges=waspy_badge)
         for user in users_with_badge:
-            if not Award.get_user_waspy_awards(user).exists():
+            if not Award.objects.filter(
+                user=user, category=Award.Category.WASPY, is_reviewed=True
+            ).exists():
                 user.badges.remove(waspy_badge)
 
         self.stdout.write(f"Updated badges for {waspy_winners.count()} WASPY winners")

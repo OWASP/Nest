@@ -15,12 +15,14 @@ class AwardAdmin(admin.ModelAdmin):
         "year",
         "winner_name",
         "user",
+        "is_reviewed",
         "nest_created_at",
         "nest_updated_at",
     )
     list_filter = (
         "category",
         "year",
+        "is_reviewed",
     )
     search_fields = (
         "name",
@@ -41,7 +43,13 @@ class AwardAdmin(admin.ModelAdmin):
         (
             "Winner Information",
             {
-                "fields": ("winner_name", "winner_info", "winner_image", "user"),
+                "fields": (
+                    "winner_name",
+                    "winner_info",
+                    "winner_image_url",
+                    "user",
+                    "is_reviewed",
+                ),
                 "classes": ("collapse",),
             },
         ),

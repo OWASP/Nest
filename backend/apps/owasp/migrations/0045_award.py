@@ -81,13 +81,12 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "winner_image",
-                    models.CharField(
+                    "winner_image_url",
+                    models.URLField(
                         blank=True,
                         default="",
-                        help_text="Path to winner's image",
-                        max_length=500,
-                        verbose_name="Winner Image",
+                        help_text="URL to winner's image",
+                        verbose_name="Winner Image URL",
                     ),
                 ),
                 (
@@ -100,6 +99,14 @@ class Migration(migrations.Migration):
                         related_name="awards",
                         to="github.user",
                         verbose_name="User",
+                    ),
+                ),
+                (
+                    "is_reviewed",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Whether the user matching has been verified by a human",
+                        verbose_name="Is Reviewed",
                     ),
                 ),
             ],

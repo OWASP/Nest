@@ -77,6 +77,11 @@ class Award(TimestampedModel):
         verbose_name="User",
         help_text="Associated GitHub user (if matched)",
     )
+    is_reviewed = models.BooleanField(
+        verbose_name="Is Reviewed",
+        default=False,
+        help_text="Whether the user matching has been verified by a human",
+    )
 
     def __str__(self) -> str:
         """Return string representation of the award."""
