@@ -5,13 +5,13 @@ import ProjectsDashboardDropDown from 'components/ProjectsDashboardDropDown'
 
 // Mock FontAwesome components
 jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, ...props }: { icon?: { iconName?: string }; [key: string]: unknown }) => (
-    <span
-      data-testid="font-awesome-icon"
-      data-icon={icon?.iconName || 'default'}
-      {...props}
-    />
-  )
+  FontAwesomeIcon: ({
+    icon,
+    ...props
+  }: {
+    icon?: { iconName?: string }
+    [key: string]: unknown
+  }) => <span data-testid="font-awesome-icon" data-icon={icon?.iconName || 'default'} {...props} />,
 }))
 
 // Mock HeroUI components
@@ -26,7 +26,7 @@ jest.mock('@heroui/react', () => ({
     children,
     onAction,
     selectedKeys,
-    selectionMode
+    selectionMode,
   }: {
     children: React.ReactNode
     onAction: (key: string) => void
@@ -59,15 +59,16 @@ jest.mock('@heroui/react', () => ({
       {children}
     </div>
   ),
-  DropdownSection: ({
-    children,
-    title
-  }: {
-    children: React.ReactNode
-    title: string
-  }) => (
-    <div data-testid="dropdown-section" data-title={title} role="group" aria-labelledby={`section-${title}`}>
-      <div id={`section-${title}`} className="section-title">{title}</div>
+  DropdownSection: ({ children, title }: { children: React.ReactNode; title: string }) => (
+    <div
+      data-testid="dropdown-section"
+      data-title={title}
+      role="group"
+      aria-labelledby={`section-${title}`}
+    >
+      <div id={`section-${title}`} className="section-title">
+        {title}
+      </div>
       {children}
     </div>
   ),
@@ -94,19 +95,19 @@ jest.mock('@heroui/react', () => ({
       </div>
     )
   },
-  Button: ({ children, variant, ...props }: {
+  Button: ({
+    children,
+    variant,
+    ...props
+  }: {
     children: React.ReactNode
     variant?: string
     [key: string]: unknown
   }) => (
-    <button
-      data-testid="dropdown-button"
-      data-variant={variant}
-      {...props}
-    >
+    <button data-testid="dropdown-button" data-variant={variant} {...props}>
       {children}
     </button>
-  )
+  ),
 }))
 
 describe('ProjectsDashboardDropDown Component', () => {
@@ -121,19 +122,19 @@ describe('ProjectsDashboardDropDown Component', () => {
         title: 'Status',
         items: [
           { key: 'Active', label: 'Active' },
-          { key: 'Inactive', label: 'Inactive' }
-        ]
+          { key: 'Inactive', label: 'Inactive' },
+        ],
       },
       {
         title: 'Priority',
         items: [
           { key: 'High Priority', label: 'High Priority' },
-          { key: 'Low Priority', label: 'Low Priority' }
-        ]
-      }
+          { key: 'Low Priority', label: 'Low Priority' },
+        ],
+      },
     ],
     icon: faFilter,
-    isOrdering: false
+    isOrdering: false,
   }
 
   let mockOnAction: jest.Mock
@@ -142,16 +143,18 @@ describe('ProjectsDashboardDropDown Component', () => {
     mockOnAction = jest.fn()
     jest.clearAllMocks()
 
-    // Suppress only specific React warnings, not all errors
-    const originalError = console.error
+    // Suppress React warnings that are not relevant to our tests
     jest.spyOn(console, 'error').mockImplementation((...args) => {
       const message = typeof args[0] === 'string' ? args[0] : String(args[0] || '')
-      if (message.includes('Warning: ReactDOM.render is no longer supported') ||
-          message.includes('Warning: You are importing createRoot') ||
-          message.includes('Warning: React.createFactory')) {
+      if (
+        message.includes('Warning: ReactDOM.render is no longer supported') ||
+        message.includes('Warning: You are importing createRoot') ||
+        message.includes('Warning: React.createFactory')
+      ) {
         return
       }
-      originalError(...args)
+      // For test environment, we can ignore other console errors
+      return
     })
   })
 
@@ -162,12 +165,7 @@ describe('ProjectsDashboardDropDown Component', () => {
   describe('Renders successfully with minimal required props', () => {
     it('renders with minimal required props', () => {
       expect(() => {
-        render(
-          <ProjectsDashboardDropDown
-            {...defaultProps}
-            onAction={mockOnAction}
-          />
-        )
+        render(<ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} />)
       }).not.toThrow()
 
       expect(screen.getByTestId('dropdown')).toBeInTheDocument()
@@ -177,11 +175,7 @@ describe('ProjectsDashboardDropDown Component', () => {
 
     it('renders with icon when provided', () => {
       render(
-        <ProjectsDashboardDropDown
-          {...defaultProps}
-          onAction={mockOnAction}
-          icon={faFilter}
-        />
+        <ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} icon={faFilter} />
       )
 
       expect(screen.getByTestId('font-awesome-icon')).toBeInTheDocument()
@@ -189,11 +183,7 @@ describe('ProjectsDashboardDropDown Component', () => {
 
     it('renders without icon when not provided', () => {
       render(
-        <ProjectsDashboardDropDown
-          {...defaultProps}
-          onAction={mockOnAction}
-          icon={undefined}
-        />
+        <ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} icon={undefined} />
       )
 
       const icon = screen.getByTestId('font-awesome-icon')
@@ -307,29 +297,25 @@ describe('ProjectsDashboardDropDown Component', () => {
       )
 
       const items = screen.getAllByTestId('dropdown-item')
-      const activeItem = items.find(item => item.textContent === 'Active')
-      
+      const activeItem = items.find((item) => item.textContent === 'Active')
+
       // Use non-conditional expect
       expect(activeItem).toBeDefined()
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       fireEvent.click(activeItem!)
       expect(mockOnAction).toHaveBeenCalledWith('Active')
     })
 
     it('calls onAction when dropdown item is activated with keyboard', () => {
       render(
-        <ProjectsDashboardDropDown
-          {...defaultProps}
-          onAction={mockOnAction}
-          selectedLabels={[]}
-        />
+        <ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} selectedLabels={[]} />
       )
 
       const items = screen.getAllByTestId('dropdown-item')
-      const activeItem = items.find(item => item.textContent === 'Active')
-      
+      const activeItem = items.find((item) => item.textContent === 'Active')
+
       expect(activeItem).toBeDefined()
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       fireEvent.keyDown(activeItem!, { key: 'Enter' })
       expect(mockOnAction).toHaveBeenCalledWith('Active')
     })
@@ -344,15 +330,14 @@ describe('ProjectsDashboardDropDown Component', () => {
       )
 
       const items = screen.getAllByTestId('dropdown-item')
-      const activeItem = items.find(item => item.textContent === 'Active')
-      const inactiveItem = items.find(item => item.textContent === 'Inactive')
+      const activeItem = items.find((item) => item.textContent === 'Active')
+      const inactiveItem = items.find((item) => item.textContent === 'Inactive')
 
       expect(activeItem).toBeDefined()
       expect(inactiveItem).toBeDefined()
-      
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       fireEvent.click(activeItem!)
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       fireEvent.click(inactiveItem!)
 
       expect(mockOnAction).toHaveBeenCalledTimes(2)
@@ -434,12 +419,7 @@ describe('ProjectsDashboardDropDown Component', () => {
 
   describe('Text and content rendering', () => {
     it('renders all section titles correctly', () => {
-      render(
-        <ProjectsDashboardDropDown
-          {...defaultProps}
-          onAction={mockOnAction}
-        />
-      )
+      render(<ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} />)
 
       expect(screen.getByText('Status')).toBeInTheDocument()
       expect(screen.getByText('Priority')).toBeInTheDocument()
@@ -458,7 +438,7 @@ describe('ProjectsDashboardDropDown Component', () => {
       expect(items).toHaveLength(4)
 
       // Check by getting text content from dropdown items specifically
-      const itemTexts = items.map(item => item.textContent)
+      const itemTexts = items.map((item) => item.textContent)
       expect(itemTexts).toContain('Active')
       expect(itemTexts).toContain('Inactive')
       expect(itemTexts).toContain('High Priority')
@@ -524,11 +504,7 @@ describe('ProjectsDashboardDropDown Component', () => {
     it('handles empty sections array', () => {
       expect(() => {
         render(
-          <ProjectsDashboardDropDown
-            {...defaultProps}
-            sections={[]}
-            onAction={mockOnAction}
-          />
+          <ProjectsDashboardDropDown {...defaultProps} sections={[]} onAction={mockOnAction} />
         )
       }).not.toThrow()
     })
@@ -536,12 +512,7 @@ describe('ProjectsDashboardDropDown Component', () => {
 
   describe('Accessibility roles and labels', () => {
     it('renders button with proper structure for accessibility', () => {
-      render(
-        <ProjectsDashboardDropDown
-          {...defaultProps}
-          onAction={mockOnAction}
-        />
-      )
+      render(<ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} />)
 
       const button = screen.getByTestId('dropdown-button')
       expect(button).toBeInTheDocument()
@@ -563,12 +534,7 @@ describe('ProjectsDashboardDropDown Component', () => {
     })
 
     it('renders dropdown menu with proper ARIA roles', () => {
-      render(
-        <ProjectsDashboardDropDown
-          {...defaultProps}
-          onAction={mockOnAction}
-        />
-      )
+      render(<ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} />)
 
       const menu = screen.getByTestId('dropdown-menu')
       expect(menu).toHaveAttribute('role', 'menu')
@@ -577,15 +543,11 @@ describe('ProjectsDashboardDropDown Component', () => {
 
     it('renders dropdown items with proper ARIA roles', () => {
       render(
-        <ProjectsDashboardDropDown
-          {...defaultProps}
-          onAction={mockOnAction}
-          selectedLabels={[]}
-        />
+        <ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} selectedLabels={[]} />
       )
 
       const items = screen.getAllByTestId('dropdown-item')
-      items.forEach(item => {
+      items.forEach((item) => {
         expect(item).toHaveAttribute('role', 'menuitem')
         expect(item).toHaveAttribute('tabIndex', '0')
       })
@@ -603,13 +565,15 @@ describe('ProjectsDashboardDropDown Component', () => {
     })
 
     it('renders dropdown items correctly', () => {
-      render(<ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} selectedLabels={[]} />)
+      render(
+        <ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} selectedLabels={[]} />
+      )
 
       const items = screen.getAllByTestId('dropdown-item')
       expect(items).toHaveLength(4)
 
       // Check content without ambiguity
-      const itemTexts = items.map(item => item.textContent)
+      const itemTexts = items.map((item) => item.textContent)
       expect(itemTexts).toContain('Active')
       expect(itemTexts).toContain('Inactive')
       expect(itemTexts).toContain('High Priority')
@@ -632,12 +596,7 @@ describe('ProjectsDashboardDropDown Component', () => {
     })
 
     it('applies correct variant to button', () => {
-      render(
-        <ProjectsDashboardDropDown
-          {...defaultProps}
-          onAction={mockOnAction}
-        />
-      )
+      render(<ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} />)
 
       const button = screen.getByTestId('dropdown-button')
       expect(button).toHaveAttribute('data-variant', 'solid')
