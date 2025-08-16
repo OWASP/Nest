@@ -7,7 +7,7 @@ from django.utils import timezone
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
-from apps.common.clients import get_google_auth_client, kms_client
+from apps.common.clients import get_google_auth_client, get_kms_client
 from apps.slack.models.member import Member
 
 AUTH_ERROR_MESSAGE = (
@@ -112,7 +112,7 @@ class MemberGoogleCredentials(models.Model):
         """Create a KMS client instance."""
         if not settings.IS_AWS_KMS_ENABLED:
             raise ValueError(KMS_ERROR_MESSAGE)
-        return kms_client
+        return get_kms_client()
 
     @property
     def access_token_str(self):

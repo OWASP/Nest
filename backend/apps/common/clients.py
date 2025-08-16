@@ -44,4 +44,12 @@ class KmsClient:
         ]
 
 
-kms_client = KmsClient()
+_kms_client = None
+
+
+def get_kms_client() -> KmsClient:
+    """Get the AWS KMS client."""
+    global _kms_client  # noqa: PLW0603
+    if _kms_client is None:
+        _kms_client = KmsClient()
+    return _kms_client
