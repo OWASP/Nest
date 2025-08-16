@@ -107,11 +107,6 @@ class Migration(migrations.Migration):
                 "verbose_name": "Award",
                 "verbose_name_plural": "Awards",
                 "db_table": "owasp_awards",
-                "indexes": [
-                    models.Index(fields=["category", "year"], name="owasp_award_category_year"),
-                    models.Index(fields=["-year"], name="owasp_award_year_desc"),
-                    models.Index(fields=["name"], name="owasp_award_name"),
-                ],
             },
         ),
     ]
