@@ -14,7 +14,6 @@ from apps.github.constants import (
 from apps.github.models.common import GenericUserModel, NodeModel
 from apps.github.models.mixins.user import UserIndexMixin
 from apps.github.models.organization import Organization
-from apps.owasp.models.badge import Badge
 
 
 class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
@@ -44,14 +43,6 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
     contributions_count = models.PositiveIntegerField(
         verbose_name="Contributions count", default=0
-    )
-
-    badges = models.ManyToManyField(
-        Badge,
-        related_name="users",
-        blank=True,
-        verbose_name="Badges",
-        help_text="Badges assigned to this user.",
     )
 
     def __str__(self) -> str:

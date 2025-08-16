@@ -53,10 +53,6 @@ owasp-scrape-projects:
 owasp-sync-posts:
 	@CMD="python manage.py owasp_sync_posts" $(MAKE) exec-backend-command
 
-owasp-update-badges:
-	@echo "Updating OWASP Staff badges"
-	@CMD="python manage.py owasp_update_badges" $(MAKE) exec-backend-command
-
 owasp-update-events:
 	@echo "Getting OWASP events data"
 	@CMD="python manage.py owasp_update_events" $(MAKE) exec-backend-command

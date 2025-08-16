@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 from django.core.management import call_command
 
-from apps.owasp.management.commands.owasp_update_badges import OWASP_STAFF_BADGE_NAME
+from apps.nest.management.commands.nest_update_badges import OWASP_STAFF_BADGE_NAME
 
 
 def make_mock_employees(mock_employee):

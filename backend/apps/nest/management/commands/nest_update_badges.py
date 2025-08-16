@@ -5,7 +5,7 @@ import logging
 from django.core.management.base import BaseCommand
 
 from apps.github.models.user import User
-from apps.owasp.models.badge import Badge
+from apps.nest.models.badge import Badge
 
 logger = logging.getLogger(__name__)
 
@@ -20,10 +20,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """Execute the command."""
         self.stdout.write("Syncing user badges...")
-        self.sync_owasp_staff_badge()
+        self.update_owasp_staff_badge()
         self.stdout.write(self.style.SUCCESS("User badges sync completed"))
 
-    def sync_owasp_staff_badge(self):
+    def update_owasp_staff_badge(self):
         """Sync OWASP Staff badge for users."""
         # Get or create the OWASP Staff badge
         badge, created = Badge.objects.get_or_create(
