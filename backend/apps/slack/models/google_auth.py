@@ -4,6 +4,8 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
 
 from apps.common.clients import get_google_auth_client
 from apps.slack.models.member import Member
@@ -110,15 +112,15 @@ class GoogleAuth(models.Model):
         refresh_error = "Google OAuth refresh token is not set or expired."
         if not auth.refresh_token:
             raise ValidationError(refresh_error)
-
-        flow = GoogleAuth.get_flow()
-        flow.fetch_token(
+        credentials = Credentials(
+            token=auth.access_token,
             refresh_token=auth.refresh_token,
+            token_uri=settings.GOOGLE_AUTH_TOKEN_URI,
             client_id=settings.GOOGLE_AUTH_CLIENT_ID,
             client_secret=settings.GOOGLE_AUTH_CLIENT_SECRET,
         )
+        credentials.refresh(Request())
 
-        credentials = flow.credentials
         auth.access_token = credentials.token
         auth.refresh_token = credentials.refresh_token
         auth.expires_at = credentials.expiry

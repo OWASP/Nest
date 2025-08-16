@@ -4,6 +4,7 @@ from datetime import timedelta
 from unittest.mock import Mock, patch
 
 import pytest
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.test import override_settings
 from django.utils import timezone
@@ -192,9 +193,10 @@ class TestGoogleAuthModel:
         GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
         GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
     )
-    @patch("apps.slack.models.google_auth.GoogleAuth.get_flow")
+    @patch("apps.slack.models.google_auth.Credentials")
+    @patch("apps.slack.models.google_auth.Request")
     @patch("apps.slack.models.google_auth.GoogleAuth.save")
-    def test_refresh_access_token_success(self, mock_save, mock_get_flow):
+    def test_refresh_access_token_success(self, mock_save, mock_request, mock_credentials):
         """Test successful refresh_access_token."""
         # Create auth with refresh token
         auth = GoogleAuth(
@@ -205,14 +207,12 @@ class TestGoogleAuthModel:
         )
 
         # Mock flow and new credentials
-        mock_credentials = Mock()
-        mock_credentials.token = b"token"  # NOSONAR
-        mock_credentials.refresh_token = b"refresh_token"
-        mock_credentials.expiry = self.future_time
+        mock_credentials_instance = Mock()
+        mock_credentials_instance.token = b"token"  # NOSONAR
+        mock_credentials_instance.refresh_token = b"refresh_token"
+        mock_credentials_instance.expiry = self.future_time
 
-        mock_flow_instance = Mock()
-        mock_flow_instance.credentials = mock_credentials
-        mock_get_flow.return_value = mock_flow_instance
+        mock_credentials.return_value = mock_credentials_instance
 
         GoogleAuth.refresh_access_token(auth)
 
@@ -220,11 +220,14 @@ class TestGoogleAuthModel:
         assert auth.refresh_token == b"refresh_token"
         assert auth.expires_at == self.future_time
 
-        mock_flow_instance.fetch_token.assert_called_once_with(
+        mock_credentials.assert_called_once_with(
+            token=self.valid_token,
             refresh_token=self.valid_refresh_token,
-            client_id="test_client_id",
-            client_secret="test_client_secret",  # noqa: S106
+            token_uri=settings.GOOGLE_AUTH_TOKEN_URI,
+            client_id=settings.GOOGLE_AUTH_CLIENT_ID,
+            client_secret=settings.GOOGLE_AUTH_CLIENT_SECRET,
         )
+        mock_credentials_instance.refresh.assert_called_once_with(mock_request.return_value)
         mock_save.assert_called_once()
 
     @override_settings(

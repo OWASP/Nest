@@ -12,8 +12,8 @@ def get_google_auth_client():
                 "client_id": settings.GOOGLE_AUTH_CLIENT_ID,
                 "client_secret": settings.GOOGLE_AUTH_CLIENT_SECRET,
                 "redirect_uris": [settings.GOOGLE_AUTH_REDIRECT_URI],
-                "auth_uri": "https://accounts.google.com/o/oauth2/v2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
+                "auth_uri": settings.GOOGLE_AUTH_AUTH_URI,
+                "token_uri": settings.GOOGLE_AUTH_TOKEN_URI,
             }
         },
         scopes=["https://www.googleapis.com/auth/calendar.readonly"],
