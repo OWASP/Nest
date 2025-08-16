@@ -82,42 +82,8 @@ class Command(BaseCommand):
     def _process_awards_data(self, awards_data: list[dict], *, dry_run: bool = False):
         """Process the awards data from YAML."""
         for item in awards_data:
-            if item.get("type") == "category":
-                self._process_category(item, dry_run=dry_run)
-            elif item.get("type") == "award":
+            if item.get("type") == "award":
                 self._process_award(item, dry_run=dry_run)
-
-    def _process_category(self, category_data: dict, *, dry_run: bool = False):
-        """Process a category definition."""
-        category_name = category_data.get("title", "")
-        description = category_data.get("description", "")
-
-        if not category_name:
-            logger.warning("Skipping category with no title")
-            return
-
-        # Create or update category record
-        if not dry_run:
-            award, created = Award.objects.get_or_create(
-                name=category_name,
-                award_type="category",
-                defaults={
-                    "category": category_name,
-                    "description": description,
-                },
-            )
-
-            if created:
-                self.awards_created += 1
-                logger.debug("Created category: %s", category_name)
-            else:
-                # Update existing category
-                award.description = description
-                award.save(update_fields=["description", "nest_updated_at"])
-                self.awards_updated += 1
-                logger.debug("Updated category: %s", category_name)
-        else:
-            logger.debug("[DRY RUN] Would process category: %s", category_name)
 
     def _process_award(self, award_data: dict, *, dry_run: bool = False):
         """Process an individual award."""
@@ -130,30 +96,31 @@ class Command(BaseCommand):
             logger.warning("Skipping incomplete award: %s", award_data)
             return
 
-        # Process each winner
+        # Process each winner using the model's update_data method
         for winner_data in winners:
-            self._process_winner(award_name, category, year, winner_data, dry_run=dry_run)
+            # Prepare winner data with award context
+            winner_with_context = {
+                "title": award_name,
+                "category": category,
+                "year": year,
+                "name": winner_data.get("name", ""),
+                "info": winner_data.get("info", ""),
+                "image": winner_data.get("image", ""),
+            }
 
-    def _process_winner(
-        self,
-        award_name: str,
-        category: str,
-        year: int,
-        winner_data: dict,
-        *,
-        dry_run: bool = False,
-    ):
+            self._process_winner(winner_with_context, dry_run=dry_run)
+
+    def _process_winner(self, winner_data: dict, *, dry_run: bool = False):
         """Process an individual award winner."""
         winner_name = winner_data.get("name", "").strip()
-        winner_info = winner_data.get("info", "")
-        winner_image = winner_data.get("image", "")
+        award_name = winner_data.get("title", "")
 
         if not winner_name:
             logger.warning("Skipping winner with no name for award: %s", award_name)
             return
 
         # Try to match winner with existing user
-        matched_user = self._match_user(winner_name, winner_info)
+        matched_user = self._match_user(winner_name, winner_data.get("info", ""))
 
         if matched_user:
             self.users_matched += 1
@@ -164,42 +131,33 @@ class Command(BaseCommand):
             logger.warning("Could not match user: %s", winner_name)
 
         if not dry_run:
-            # Create or update award record
-            award, created = Award.objects.get_or_create(
-                name=award_name,
-                category=category,
-                year=year,
-                winner_name=winner_name,
-                defaults={
-                    "award_type": "award",
-                    "description": "",
-                    "winner_info": winner_info,
-                    "winner_image": winner_image,
-                    "user": matched_user,
-                },
-            )
+            # Check if award exists before update
+            try:
+                Award.objects.get(
+                    name=award_name,
+                    category=winner_data.get("category", ""),
+                    year=winner_data.get("year"),
+                    winner_name=winner_name,
+                )
+                is_new = False
+            except Award.DoesNotExist:
+                is_new = True
 
-            if created:
+            # Use the model's update_data method
+            award = Award.update_data(winner_data, save=True)
+
+            # Update user association if matched
+            if matched_user and award.user != matched_user:
+                award.user = matched_user
+                award.save(update_fields=["user", "nest_updated_at"])
+
+            # Track creation/update stats
+            if is_new:
                 self.awards_created += 1
                 logger.debug("Created award: %s for %s", award_name, winner_name)
             else:
-                # Update existing award
-                updated_fields = []
-                if award.winner_info != winner_info:
-                    award.winner_info = winner_info
-                    updated_fields.append("winner_info")
-                if award.winner_image != winner_image:
-                    award.winner_image = winner_image
-                    updated_fields.append("winner_image")
-                if award.user != matched_user:
-                    award.user = matched_user
-                    updated_fields.append("user")
-
-                if updated_fields:
-                    updated_fields.append("nest_updated_at")
-                    award.save(update_fields=updated_fields)
-                    self.awards_updated += 1
-                    logger.debug("Updated award: %s for %s", award_name, winner_name)
+                self.awards_updated += 1
+                logger.debug("Updated award: %s for %s", award_name, winner_name)
         else:
             logger.debug("[DRY RUN] Would process winner: %s for %s", winner_name, award_name)
 

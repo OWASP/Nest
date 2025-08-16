@@ -109,7 +109,6 @@ shell-db:
 sync-data: \
 	update-data \
 	enrich-data \
-	owasp-update-badges \
 	index-data
 
 test-backend:

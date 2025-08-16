@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from django.db import models
 
-from apps.common.models import TimestampedModel
+from apps.common.models import BulkSaveModel, TimestampedModel
 
 
-class Award(TimestampedModel):
+class Award(BulkSaveModel, TimestampedModel):
     """OWASP Award model.
 
     Represents OWASP awards based on the canonical source at:
@@ -120,63 +120,61 @@ class Award(TimestampedModel):
         return cls.objects.filter(user=user, category=cls.Category.WASPY)
 
     @staticmethod
-    def update_data(award_data: dict, *, save: bool = True):
-        """Update award data from YAML structure.
+    def bulk_save(awards, fields=None) -> None:  # type: ignore[override]
+        """Bulk save awards."""
+        BulkSaveModel.bulk_save(Award, awards, fields=fields)
+
+    @staticmethod
+    def update_data(award_data: dict, *, save: bool = True) -> Award:
+        """Update award data.
 
         Args:
-            award_data: Dictionary containing award data from YAML
+            award_data: Dictionary containing single award winner data
             save: Whether to save the award instance
 
         Returns:
-            Award instance or list of Award instances
+            Award instance
 
         """
-        if award_data.get("type") == "award":
-            return Award._create_awards_from_winners(award_data, save=save)
-        return None
-
-    @staticmethod
-    def _create_awards_from_winners(award_data: dict, *, save: bool = True):
-        """Create award instances for each winner."""
-        awards = []
-        award_name = award_data.get("title", "")
+        # Create unique identifier for get_or_create
+        name = award_data.get("title", "")
         category = award_data.get("category", "")
         year = award_data.get("year")
-        winners = award_data.get("winners", [])
+        winner_name = award_data.get("name", "").strip()
 
-        for winner_data in winners:
-            winner_name = winner_data.get("name", "").strip()
-            if not winner_name:
-                continue
+        try:
+            award = Award.objects.get(
+                name=name,
+                category=category,
+                year=year,
+                winner_name=winner_name,
+            )
+        except Award.DoesNotExist:
+            award = Award(
+                name=name,
+                category=category,
+                year=year,
+                winner_name=winner_name,
+            )
 
-            award_defaults = {
-                "description": "",
-                "winner_info": winner_data.get("info", ""),
-                "winner_image_url": winner_data.get("image", ""),
-            }
+        award.from_dict(award_data)
+        if save:
+            award.save()
 
-            if save:
-                award, created = Award.objects.get_or_create(
-                    name=award_name,
-                    category=category,
-                    year=year,
-                    winner_name=winner_name,
-                    defaults=award_defaults,
-                )
-                if not created:
-                    # Update existing award
-                    for field, value in award_defaults.items():
-                        setattr(award, field, value)
-                    award.save()
-            else:
-                award = Award(
-                    name=award_name,
-                    category=category,
-                    year=year,
-                    winner_name=winner_name,
-                    **award_defaults,
-                )
+        return award
 
-            awards.append(award)
+    def from_dict(self, data: dict) -> None:
+        """Update instance based on dict data.
 
-        return awards
+        Args:
+            data: Dictionary containing award data
+
+        """
+        fields = {
+            "description": data.get("description", ""),
+            "winner_info": data.get("info", ""),
+            "winner_image_url": data.get("image", ""),
+        }
+
+        for key, value in fields.items():
+            setattr(self, key, value)
