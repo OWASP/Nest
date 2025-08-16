@@ -64,8 +64,8 @@ def user_filter_side_effect_factory(mock_employees, mock_former_employees):
 class TestSyncUserBadgesCommand:
     """Test the sync_user_badges management command."""
 
-    @patch("apps.owasp.management.commands.owasp_update_badges.Badge.objects.get_or_create")
-    @patch("apps.owasp.management.commands.owasp_update_badges.User.objects.filter")
+    @patch("apps.nest.management.commands.nest_update_badges.Badge.objects.get_or_create")
+    @patch("apps.nest.management.commands.nest_update_badges.User.objects.filter")
     def test_sync_owasp_staff_badge(self, mock_user_filter, mock_badge_get_or_create):
         # Set up badge mock
         mock_badge = MagicMock()
