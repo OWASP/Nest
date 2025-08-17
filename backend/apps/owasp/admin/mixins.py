@@ -45,7 +45,6 @@ class EntityMemberInline(GenericTabularInline):
         "role",
         "description",
         "order",
-        "is_active",
         "is_reviewed",
     )
     model = EntityMember
