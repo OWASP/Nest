@@ -25,10 +25,6 @@ class TestMemberGoogleCredentialsModel:
         self.valid_refresh_token = b"valid_refresh_token"
         self.expired_time = timezone.now() - timedelta(hours=1)
         self.future_time = timezone.now() + timedelta(hours=1)
-        with patch("boto3.client") as mock_boto3_client:
-            self.mock_boto3_client = mock_boto3_client
-            self.mock_kms_client = Mock()
-            self.mock_boto3_client.return_value = self.mock_kms_client
 
     def test_member_google_credentials_creation(self):
         """Test MemberGoogleCredentials model creation."""
@@ -223,10 +219,7 @@ class TestMemberGoogleCredentialsModel:
     @patch("apps.nest.models.member_google_credentials.Credentials")
     @patch("apps.nest.models.member_google_credentials.Request")
     @patch("apps.nest.models.member_google_credentials.MemberGoogleCredentials.save")
-    @patch("apps.slack.models.google_auth.GoogleAuth.get_kms_client")
-    def test_refresh_access_token_success(
-        self, mock_get_kms_client, mock_save, mock_request, mock_credentials
-    ):
+    def test_refresh_access_token_success(self, mock_save, mock_request, mock_credentials):
         """Test successful refresh_access_token."""
         # Create auth with refresh token
         auth = MemberGoogleCredentials(
@@ -244,13 +237,10 @@ class TestMemberGoogleCredentialsModel:
 
         mock_credentials.return_value = mock_credentials_instance
 
-        mock_get_kms_client.return_value = Mock()
-        mock_get_kms_client.return_value.encrypt.return_value = b"encrypted"
-
         GoogleAuth.refresh_access_token(auth)
 
-        assert auth.access_token == b"encrypted"
-        assert auth.refresh_token == b"encrypted"
+        assert auth.access_token == b"token"
+        assert auth.refresh_token == b"refresh_token"
         assert auth.expires_at == self.future_time
 
         mock_credentials.assert_called_once_with(
@@ -261,8 +251,6 @@ class TestMemberGoogleCredentialsModel:
             client_secret=settings.GOOGLE_AUTH_CLIENT_SECRET,
         )
         mock_credentials_instance.refresh.assert_called_once_with(mock_request.return_value)
-        mock_get_kms_client.return_value.encrypt.assert_any_call(b"token")
-        mock_get_kms_client.return_value.encrypt.assert_any_call(b"refresh_token")
         mock_save.assert_called_once()
 
     @override_settings(
@@ -319,9 +307,8 @@ class TestMemberGoogleCredentialsModel:
     )
     @patch("apps.nest.models.member_google_credentials.MemberGoogleCredentials.save")
     @patch("apps.nest.models.member_google_credentials.Member.objects.get")
-    @patch("apps.slack.models.google_auth.GoogleAuth.get_kms_client")
     def test_authenticate_callback_success(
-        self, mock_get_kms_client, mock_member_get, mock_save, mock_get_or_create, mock_get_flow
+        self, mock_member_get, mock_save, mock_get_or_create, mock_get_flow
     ):
         """Test successful authenticate_callback."""
         mock_credentials = Mock()
@@ -335,19 +322,16 @@ class TestMemberGoogleCredentialsModel:
         mock_get_flow.return_value = mock_flow_instance
         mock_get_or_create.return_value = (MemberGoogleCredentials(member=self.member), False)
 
-        mock_get_kms_client.return_value.encrypt.return_value = b"encrypted_token"
         result = MemberGoogleCredentials.authenticate_callback(
             {}, member_id=self.member.slack_user_id
         )
 
-        assert result.access_token == b"encrypted_token"
-        assert result.refresh_token == b"encrypted_token"
+        assert result.access_token == b"token"
+        assert result.refresh_token == b"refresh_token"
         assert result.expires_at == self.future_time
         mock_get_or_create.assert_called_once_with(member=self.member)
         mock_save.assert_called_once()
         mock_flow_instance.fetch_token.assert_called_once_with(authorization_response={})
-        mock_get_kms_client.return_value.encrypt.assert_any_call(b"token")
-        mock_get_kms_client.return_value.encrypt.assert_any_call(b"refresh_token")
 
     @override_settings(
         IS_GOOGLE_AUTH_ENABLED=True,
@@ -362,49 +346,3 @@ class TestMemberGoogleCredentialsModel:
         mock_member_get.side_effect = Member.DoesNotExist
         with pytest.raises(ValidationError, match="Member with Slack ID 4 does not exist."):
             MemberGoogleCredentials.authenticate_callback(auth_response={}, member_id=4)
-
-    @override_settings(
-        IS_GOOGLE_AUTH_ENABLED=True,
-        IS_AWS_KMS_ENABLED=True,
-        GOOGLE_AUTH_CLIENT_ID="test_client_id",
-        GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
-        GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
-    )
-    @patch("apps.slack.models.google_auth.GoogleAuth.get_kms_client")
-    def test_return_decrypted_access_token(self, mock_get_kms_client):
-        """Test return_decrypted_access_token returns decrypted token."""
-        auth = GoogleAuth(
-            member=self.member,
-            access_token=b"encrypted_token",
-            refresh_token=b"encrypted_token",
-            expires_at=self.future_time,
-        )
-        mock_get_kms_client.return_value.decrypt.return_value = "decrypted_token"
-        result = auth.access_token_str
-        assert result == "decrypted_token"
-
-    @override_settings(
-        IS_GOOGLE_AUTH_ENABLED=True,
-        IS_AWS_KMS_ENABLED=True,
-        GOOGLE_AUTH_CLIENT_ID="test_client_id",
-        GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
-        GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
-    )
-    @patch("apps.slack.models.google_auth.GoogleAuth.get_kms_client")
-    def test_return_decrypted_refresh_token(self, mock_get_kms_client):
-        """Test return_decrypted_refresh_token returns decrypted token."""
-        auth = GoogleAuth(
-            member=self.member,
-            access_token=b"encrypted_token",
-            refresh_token=b"encrypted_token",
-            expires_at=self.future_time,
-        )
-        mock_get_kms_client.return_value.decrypt.return_value = "decrypted_token"
-        result = auth.refresh_token_str
-        assert result == "decrypted_token"
-
-    @override_settings(IS_AWS_KMS_ENABLED=False)
-    def test_get_kms_client_error(self):
-        """Test get_kms_client raises error when KMS is disabled."""
-        with pytest.raises(ValueError, match="AWS KMS is not enabled."):
-            GoogleAuth.get_kms_client()
