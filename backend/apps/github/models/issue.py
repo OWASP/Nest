@@ -54,6 +54,14 @@ class Issue(GenericIssueModel):
         null=True,
         related_name="created_issues",
     )
+    level = models.ForeignKey(
+        "mentorship.TaskLevel",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="tasks",
+        help_text="The difficulty level of this task.",
+    )
     milestone = models.ForeignKey(
         "github.Milestone",
         on_delete=models.CASCADE,
