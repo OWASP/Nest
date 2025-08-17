@@ -35,9 +35,13 @@ class EntityMember(models.Model):
     entity = GenericForeignKey("entity_type", "entity_id")
     entity_id = models.PositiveIntegerField()
     entity_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    is_active = models.BooleanField(
+        default=False,
+        help_text="Indicates if the membership is active",
+    )
     is_reviewed = models.BooleanField(
         default=False,
-        help_text="Indicates if the membership is verified",
+        help_text="Indicates if the membership is reviewed",
     )
     kind = models.CharField(
         max_length=6,

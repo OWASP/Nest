@@ -64,27 +64,26 @@ class Command(BaseCommand):
 
         entity_type = ContentType.objects.get_for_model(model_class)
 
-        for entity in model_class.objects.all():
+        for entity in model_class.objects.filter(is_active=True, has_active_repositories=True):
             if not entity.leaders_raw:
                 continue
 
             for index, leader_name in enumerate(entity.leaders_raw):
-                matched_user = self.find_single_user_matches(leader_name, users_list, threshold)
+                matched_users = self.find_all_user_matches(leader_name, users_list, threshold)
 
-                if not matched_user:
+                if not matched_users:
                     continue
 
-                self.stdout.write(f"Match for '{leader_name}': {matched_user['login']}")
-
-                new_members_to_create.append(
+                new_members_to_create.extend(
                     EntityMember(
                         entity_type=entity_type,
                         entity_id=entity.pk,
-                        member_id=matched_user["id"],
+                        member_id=user["id"],
                         kind=EntityMember.MemberKind.LEADER,
                         is_reviewed=False,
                         order=((index + 1) * 10),
                     )
+                    for user in matched_users
                 )
 
         if new_members_to_create:
@@ -106,29 +105,27 @@ class Command(BaseCommand):
         """Check if GitHub user meets minimum requirements."""
         return len(login) >= ID_MIN_LENGTH and len(name or "") >= ID_MIN_LENGTH
 
-    def find_single_user_matches(self, leader_name, users_list, threshold):
+    def find_all_user_matches(self, leader_name, users_list, threshold):
         """Find user matches for a list of raw leader names."""
         if not leader_name:
-            return None
+            return []
 
         leader_lower = leader_name.lower()
 
-        for user in users_list:
-            if user["login"].lower() == leader_lower or (
-                user["name"] and user["name"].lower() == leader_lower
-            ):
-                return user
+        matches = [
+            user
+            for user in users_list
+            if user["login"].lower() == leader_lower
+            or (user["name"] and user["name"].lower() == leader_lower)
+        ]
 
-        best_fuzzy_match = None
-        highest_score = threshold - 1
+        if not matches:
+            for user in users_list:
+                score = fuzz.token_sort_ratio(leader_lower, user["login"].lower())
+                if user["name"]:
+                    score = max(score, fuzz.token_sort_ratio(leader_lower, user["name"].lower()))
 
-        for user in users_list:
-            score = fuzz.token_sort_ratio(leader_lower, user["login"].lower())
-            if user["name"]:
-                score = max(score, fuzz.token_sort_ratio(leader_lower, user["name"].lower()))
+                if score >= threshold:
+                    matches.append(user)
 
-            if score > highest_score:
-                highest_score = score
-                best_fuzzy_match = user
-
-        return best_fuzzy_match
+        return list({user["id"]: user for user in matches}.values())

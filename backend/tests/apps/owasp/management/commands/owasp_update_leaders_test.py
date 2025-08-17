@@ -42,7 +42,7 @@ class TestOwaspUpdateLeaders:
         active_users = [u for u in mock_users_data if u["id"] != 4]
         mock_user.objects.values.return_value = active_users
 
-        mock_chapter.objects.all.return_value = [
+        mock_chapter.objects.filter.return_value = [
             self._create_mock_entity(1, "Ordered Chapter", ["jane.doe", "john.doe", "peter_jones"])
         ]
         mock_chapter.__name__ = "Chapter"
@@ -64,6 +64,10 @@ class TestOwaspUpdateLeaders:
 
         out = io.StringIO()
         call_command("owasp_update_leaders", "chapter", stdout=out)
+
+        mock_chapter.objects.filter.assert_called_once_with(
+            is_active=True, has_active_repositories=True
+        )
 
         mock_em.objects.bulk_create.assert_called_once()
         created_members = mock_em.objects.bulk_create.call_args[0][0]
@@ -87,7 +91,7 @@ class TestOwaspUpdateLeaders:
         self, mock_user, mock_chapter, mock_ct, mock_em, mock_users_data
     ):
         mock_user.objects.values.return_value = mock_users_data
-        mock_chapter.objects.all.return_value = [
+        mock_chapter.objects.filter.return_value = [
             self._create_mock_entity(1, "Fuzzy Chapter", ["Jone Doe"])
         ]
         mock_chapter.__name__ = "Chapter"
@@ -107,7 +111,7 @@ class TestOwaspUpdateLeaders:
         self, mock_chapter, mock_user, mock_ct, mock_em, mock_users_data
     ):
         mock_user.objects.values.return_value = mock_users_data
-        mock_chapter.objects.all.return_value = [
+        mock_chapter.objects.filter.return_value = [
             self._create_mock_entity(99, "Invalid Chapter", ["a"])
         ]
         mock_chapter.__name__ = "Chapter"
@@ -129,7 +133,7 @@ class TestOwaspUpdateLeaders:
         self, mock_chapter, mock_user, mock_ct, mock_em, mock_fuzz, mock_users_data
     ):
         mock_user.objects.values.return_value = mock_users_data
-        mock_chapter.objects.all.return_value = [
+        mock_chapter.objects.filter.return_value = [
             self._create_mock_entity(1, "Exact Chapter", ["john.doe"])
         ]
         mock_chapter.__name__ = "Chapter"

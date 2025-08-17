@@ -31,7 +31,13 @@ class Migration(migrations.Migration):
                 (
                     "is_reviewed",
                     models.BooleanField(
-                        default=False, help_text="Indicates if the membership is verified"
+                        default=False, help_text="Indicates if the membership is reviewed"
+                    ),
+                ),
+                (
+                    "is_active",
+                    models.BooleanField(
+                        default=False, help_text="Indicates if the membership is active"
                     ),
                 ),
                 (
