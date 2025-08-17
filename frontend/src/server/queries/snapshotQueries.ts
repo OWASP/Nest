@@ -69,6 +69,18 @@ export const GET_COMMUNITY_SNAPSHOTS = gql`
       title
       startAt
       endAt
+      newReleases {
+        name
+        tagName
+        publishedAt
+        organizationName
+        repositoryName
+        author {
+          name
+          login
+          avatarUrl
+        }
+      }
     }
   }
 `
