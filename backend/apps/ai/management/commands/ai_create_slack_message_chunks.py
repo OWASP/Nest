@@ -7,8 +7,6 @@ from apps.slack.models.message import Message
 
 
 class Command(BaseChunkCommand):
-    entity_name = "message"
-    entity_name_plural = "messages"
     key_field_name = "slack_message_id"
     model_class = Message
 

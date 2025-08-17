@@ -61,6 +61,5 @@ class Context(TimestampedModel):
             context.source = source
             if save:
                 context.save(update_fields=["content", "source"])
-            regenerate_chunks_for_context(context=context)
 
         return context

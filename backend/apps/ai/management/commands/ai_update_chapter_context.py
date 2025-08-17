@@ -6,8 +6,6 @@ from apps.owasp.models.chapter import Chapter
 
 
 class Command(BaseContextCommand):
-    entity_name = "chapter"
-    entity_name_plural = "chapters"
     key_field_name = "key"
     model_class = Chapter
 

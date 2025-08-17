@@ -8,8 +8,6 @@ from apps.owasp.models.project import Project
 
 
 class Command(BaseContextCommand):
-    entity_name = "project"
-    entity_name_plural = "projects"
     key_field_name = "key"
     model_class = Project
 

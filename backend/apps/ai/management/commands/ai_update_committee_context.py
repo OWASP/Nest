@@ -6,8 +6,6 @@ from apps.owasp.models.committee import Committee
 
 
 class Command(BaseContextCommand):
-    entity_name = "committee"
-    entity_name_plural = "committees"
     key_field_name = "key"
     model_class = Committee
 

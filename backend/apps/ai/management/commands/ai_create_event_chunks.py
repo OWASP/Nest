@@ -8,8 +8,6 @@ from apps.owasp.models.event import Event
 
 
 class Command(BaseChunkCommand):
-    entity_name = "event"
-    entity_name_plural = "events"
     key_field_name = "key"
     model_class = Event
 
