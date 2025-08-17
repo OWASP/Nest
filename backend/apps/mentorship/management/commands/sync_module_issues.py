@@ -1,6 +1,6 @@
 """A command to sync update relation between module and issue and create task."""
 
-import re
+from urllib.parse import urlparse
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
@@ -20,13 +20,13 @@ class Command(BaseCommand):
         "Syncs issues to modules by matching labels from all repositories "
         "associated with the module's project and creates related tasks."
     )
+    REPO_PATH_PARTS = 2
 
     def _extract_repo_full_name(self, repo_url):
-        """Extract the 'owner/repo' string from a GitHub repository URL."""
-        if repo_url and "github.com" in repo_url:
-            match = re.search(r"github\.com/([^/]+/[^/]+)", repo_url)
-            if match:
-                return match.group(1)
+        parsed = urlparse(repo_url or "")
+        if parsed.netloc.endswith("github.com"):
+            parts = parsed.path.strip("/").split("/")
+            return "/".join(parts[:2]) if len(parts) >= self.REPO_PATH_PARTS else None
         return None
 
     def _get_last_assigned_date(self, repo, issue_number, assignee_login):
@@ -47,7 +47,7 @@ class Command(BaseCommand):
 
         except GithubException as e:
             self.stderr.write(
-                self.style.ERROR(f"Unexpected error for {repo.full_name}#{issue_number}: {e}")
+                self.style.ERROR(f"Unexpected error for {repo.name}#{issue_number}: {e}")
             )
 
         return None
@@ -148,7 +148,7 @@ class Command(BaseCommand):
                             self.stdout.write(
                                 self.style.SUCCESS(
                                     f"Task created for user '{new_assignee.login}' on issue "
-                                    f"{issue.repository.full_name}#{issue.number} "
+                                    f"{issue.repository.name}#{issue.number} "
                                     f"in module '{module.name}' "
                                     f"(assigned on {assigned_date})"
                                 )

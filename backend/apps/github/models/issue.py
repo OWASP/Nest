@@ -60,7 +60,7 @@ class Issue(GenericIssueModel):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="tasks",
-        help_text="The difficulty level of this task.",
+        help_text="The difficulty level of this issue.",
     )
     milestone = models.ForeignKey(
         "github.Milestone",
