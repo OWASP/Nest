@@ -21,20 +21,24 @@ class EntityMemberAdmin(admin.ModelAdmin):
         "entity_type",
         "entity_id",
         "member",
-        "kind",
+        "role",
         "order",
+        "is_active",
         "is_reviewed",
         "description",
     )
     list_display = (
         "member",
         "entity",
-        "kind",
+        "owasp_url",
+        "role",
+        "is_active",
         "is_reviewed",
         "order",
     )
     list_filter = (
-        "kind",
+        "role",
+        "is_active",
         "is_reviewed",
     )
     raw_id_fields = ("member",)
@@ -48,22 +52,35 @@ class EntityMemberAdmin(admin.ModelAdmin):
     @admin.action(description="Approve selected members")
     def approve_members(self, request, queryset):
         """Approve selected members."""
-        updated_count = queryset.update(is_reviewed=True, is_active=True)
         self.message_user(
             request,
-            f"Successfully approved {updated_count} members.",
+            f"Successfully approved {queryset.update(is_active=True, is_reviewed=True)} members.",
         )
 
     @admin.display(description="Entity", ordering="entity_type")
     def entity(self, obj):
         """Return entity link."""
-        if obj.entity:
-            link = reverse(
-                f"admin:{obj.entity_type.app_label}_{obj.entity_type.model}_change",
-                args=[obj.entity_id],
+        return (
+            format_html(
+                '<a href="{}" target="_blank">{}</a>',
+                reverse(
+                    f"admin:{obj.entity_type.app_label}_{obj.entity_type.model}_change",
+                    args=[obj.entity_id],
+                ),
+                obj.entity,
             )
-            return format_html('<a href="{}">{}</a>', link, obj.entity)
-        return "— No Associated Entity —"
+            if obj.entity
+            else "-"
+        )
+
+    @admin.display(description="OWASP URL", ordering="entity_type")
+    def owasp_url(self, obj):
+        """Return entity OWASP site URL."""
+        return (
+            format_html('<a href="{}" target="_blank">↗️</a>', obj.entity.owasp_url)
+            if obj.entity
+            else "-"
+        )
 
     def get_search_results(self, request, queryset, search_term):
         """Get search results from entity name or key."""

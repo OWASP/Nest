@@ -53,19 +53,17 @@ class Command(BaseCommand):
 
         self.process_entities(models_to_process, valid_users, threshold)
 
-        self.stdout.write(self.style.SUCCESS("\nCommand finished successfully."))
-
     def process_entities(self, model_class, users_list, threshold):
         """Process entries."""
         model_label = model_class.__name__.capitalize()
-        self.stdout.write(f"\n--- Processing {model_label} ---")
+        self.stdout.write(f"Processing {model_label}s")
 
         new_members_to_create = []
 
         entity_type = ContentType.objects.get_for_model(model_class)
 
         for entity in model_class.objects.filter(is_active=True, has_active_repositories=True):
-            if not entity.leaders_raw:
+            if not entity.leaders_raw or not entity.is_indexable:
                 continue
 
             for index, leader_name in enumerate(entity.leaders_raw):
@@ -76,12 +74,12 @@ class Command(BaseCommand):
 
                 new_members_to_create.extend(
                     EntityMember(
-                        entity_type=entity_type,
                         entity_id=entity.pk,
-                        member_id=user["id"],
-                        kind=EntityMember.MemberKind.LEADER,
+                        entity_type=entity_type,
                         is_reviewed=False,
+                        member_id=user["id"],
                         order=((index + 1) * 10),
+                        role=EntityMember.Role.LEADER,
                     )
                     for user in matched_users
                 )
@@ -93,12 +91,12 @@ class Command(BaseCommand):
             )
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"  -> Created {len(created_records)} new leader records for {model_label}."
+                    f"Found {len(created_records)} member record(s) for {model_label}."
                 )
             )
         else:
             self.stdout.write(
-                self.style.NOTICE(f"  -> No new leader records to create for {model_label}.")
+                self.style.NOTICE(f"  -> No member records found for {model_label}.")
             )
 
     def is_valid_user(self, login, name):

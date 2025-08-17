@@ -105,7 +105,7 @@ class RepositoryBasedEntityModel(models.Model):
     def entity_leaders(self) -> models.QuerySet[User]:
         """Return entity's leaders."""
         return User.objects.filter(
-            pk__in=self.members.filter(kind=EntityMember.MemberKind.LEADER).values_list(
+            pk__in=self.members.filter(role=EntityMember.Role.LEADER).values_list(
                 "member_id", flat=True
             )
         )

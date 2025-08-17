@@ -101,7 +101,7 @@ class TestOwaspUpdateLeaders:
         call_command("owasp_update_leaders", "chapter", "--threshold=95", stdout=out)
 
         mock_em.objects.bulk_create.assert_not_called()
-        assert "No new leader records to create" in out.getvalue()
+        assert "No member records found for" in out.getvalue()
 
     @patch(f"{COMMAND_PATH}.EntityMember")
     @patch(f"{COMMAND_PATH}.ContentType")
@@ -122,7 +122,7 @@ class TestOwaspUpdateLeaders:
         call_command("owasp_update_leaders", "chapter", stdout=out)
 
         mock_em.objects.bulk_create.assert_not_called()
-        assert "No new leader records to create" in out.getvalue()
+        assert "No member records found for" in out.getvalue()
 
     @patch(f"{COMMAND_PATH}.fuzz")
     @patch(f"{COMMAND_PATH}.EntityMember")
@@ -149,4 +149,4 @@ class TestOwaspUpdateLeaders:
 
         mock_fuzz.token_sort_ratio.assert_not_called()
 
-        assert "Created 1 new leader records" in out.getvalue()
+        assert "Found 1 member record(s)" in out.getvalue()

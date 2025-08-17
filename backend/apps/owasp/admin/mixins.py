@@ -42,7 +42,7 @@ class EntityMemberInline(GenericTabularInline):
     extra = 1
     fields = (
         "member",
-        "kind",
+        "role",
         "description",
         "order",
         "is_reviewed",
