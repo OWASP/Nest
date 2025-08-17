@@ -15,6 +15,7 @@ from apps.owasp.models.project import Project
 class EntityMemberAdmin(admin.ModelAdmin):
     """Admin for EntityMember records (generic link to any OWASP entity)."""
 
+    actions = ("approve_members",)
     autocomplete_fields = ("member",)
     fields = (
         "entity_type",
@@ -43,6 +44,15 @@ class EntityMemberAdmin(admin.ModelAdmin):
         "description",
     )
     ordering = ("member__name", "order")
+
+    @admin.action(description="Approve selected members")
+    def approve_members(self, request, queryset):
+        """Approve selected members."""
+        updated_count = queryset.update(is_reviewed=True, is_active=True)
+        self.message_user(
+            request,
+            f"Successfully approved {updated_count} members.",
+        )
 
     @admin.display(description="Entity", ordering="entity_type")
     def entity(self, obj):
