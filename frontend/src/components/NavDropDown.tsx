@@ -36,7 +36,7 @@ export default function NavDropdown({ link, pathname }: NavDropDownProps) {
       className={cn(
         'dropdown navlink relative px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
         link.submenu.map((sub) => sub.href).includes(pathname) &&
-        'font-bold text-blue-800 dark:text-white'
+          'font-bold text-blue-800 dark:text-white'
       )}
     >
       <button
@@ -76,7 +76,7 @@ export default function NavDropdown({ link, pathname }: NavDropDownProps) {
                 'block w-full px-4 py-2 text-left text-sm transition-colors',
                 pathname === submenu.href
                   ? 'dark:bg-slate-650 bg-slate-500 font-bold text-white dark:text-white'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white font-medium'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white'
               )}
               onClick={() => setIsOpen(false)}
               onKeyDown={(e) => {
