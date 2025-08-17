@@ -1,7 +1,7 @@
 {
   "ci": {
     "collect": {
-      "url": ["https://google.com"],
+      "url": ["https://nest.owasp.dev"],
       "numberOfRuns": 1
     },
     "upload": {
