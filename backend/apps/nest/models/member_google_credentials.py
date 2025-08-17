@@ -7,7 +7,8 @@ from django.utils import timezone
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
-from apps.common.clients import get_google_auth_client, get_kms_client
+from apps.common.clients import get_google_auth_client
+from apps.common.model_fields import KmsEncryptedField
 from apps.slack.models.member import Member
 
 AUTH_ERROR_MESSAGE = (
@@ -29,8 +30,8 @@ class MemberGoogleCredentials(models.Model):
         related_name="member_google_credentials",
         verbose_name="Slack Member",
     )
-    access_token = models.BinaryField(verbose_name="Access Token", null=True)
-    refresh_token = models.BinaryField(verbose_name="Refresh Token", null=True)
+    access_token = KmsEncryptedField(verbose_name="Access Token", null=True)
+    refresh_token = KmsEncryptedField(verbose_name="Refresh Token", null=True)
     expires_at = models.DateTimeField(
         verbose_name="Token Expiry",
         null=True,
@@ -82,17 +83,10 @@ class MemberGoogleCredentials(models.Model):
         auth = MemberGoogleCredentials.objects.get_or_create(member=member)[0]
         # This is the first time authentication, so we need to fetch a new token
         flow = MemberGoogleCredentials.get_flow()
-        kms_client = GoogleAuth.get_kms_client()
         flow.redirect_uri = settings.GOOGLE_AUTH_REDIRECT_URI
         flow.fetch_token(authorization_response=auth_response)
-        auth.access_token = (
-            kms_client.encrypt(flow.credentials.token) if flow.credentials.token else None
-        )
-        auth.refresh_token = (
-            kms_client.encrypt(flow.credentials.refresh_token)
-            if flow.credentials.refresh_token
-            else None
-        )
+        auth.access_token = flow.credentials.token
+        auth.refresh_token = flow.credentials.refresh_token
         expires_at = flow.credentials.expiry
         if expires_at and timezone.is_naive(expires_at):
             expires_at = timezone.make_aware(expires_at)
@@ -106,25 +100,6 @@ class MemberGoogleCredentials(models.Model):
         if not settings.IS_GOOGLE_AUTH_ENABLED:
             raise ValueError(AUTH_ERROR_MESSAGE)
         return get_google_auth_client()
-
-    @staticmethod
-    def get_kms_client():
-        """Create a KMS client instance."""
-        if not settings.IS_AWS_KMS_ENABLED:
-            raise ValueError(KMS_ERROR_MESSAGE)
-        return get_kms_client()
-
-    @property
-    def access_token_str(self):
-        """Return the access token as a string."""
-        client = GoogleAuth.get_kms_client()
-        return client.decrypt(self.access_token) if self.access_token else None
-
-    @property
-    def refresh_token_str(self):
-        """Return the refresh token as a string."""
-        client = GoogleAuth.get_kms_client()
-        return client.decrypt(self.refresh_token) if self.refresh_token else None
 
     @property
     def is_token_expired(self):
@@ -151,11 +126,8 @@ class MemberGoogleCredentials(models.Model):
             client_secret=settings.GOOGLE_AUTH_CLIENT_SECRET,
         )
         credentials.refresh(Request())
-        kms_client = GoogleAuth.get_kms_client()
-        auth.access_token = kms_client.encrypt(credentials.token) if credentials.token else None
-        auth.refresh_token = (
-            kms_client.encrypt(credentials.refresh_token) if credentials.refresh_token else None
-        )
+        auth.access_token = credentials.token
+        auth.refresh_token = credentials.refresh_token
         expires_at = credentials.expiry
         if expires_at and timezone.is_naive(expires_at):
             expires_at = timezone.make_aware(expires_at)
