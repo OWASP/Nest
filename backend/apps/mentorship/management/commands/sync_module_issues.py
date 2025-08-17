@@ -20,13 +20,16 @@ class Command(BaseCommand):
         "Syncs issues to modules by matching labels from all repositories "
         "associated with the module's project and creates related tasks."
     )
+    ALLOWED_GITHUB_HOSTS = {"github.com", "www.github.com"}
     REPO_PATH_PARTS = 2
 
     def _extract_repo_full_name(self, repo_url):
         parsed = urlparse(repo_url or "")
-        if parsed.netloc.endswith("github.com"):
+        if parsed.netloc in self.ALLOWED_GITHUB_HOSTS:
             parts = parsed.path.strip("/").split("/")
-            return "/".join(parts[:2]) if len(parts) >= self.REPO_PATH_PARTS else None
+            if len(parts) >= self.REPO_PATH_PARTS:
+                return "/".join(parts[: self.REPO_PATH_PARTS])
+            return None
         return None
 
     def _get_last_assigned_date(self, repo, issue_number, assignee_login):
