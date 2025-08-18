@@ -49,10 +49,12 @@ class Command(BaseCommand):
             self.stdout.write("Fetching official project levels from OWASP GitHub repository...")
             official_levels = fetch_official_project_levels(timeout=timeout)
 
-            if official_levels is None or not official_levels:
-                msg = "Failed to fetch official project levels or received empty payload"
+            def fail(msg):
                 self.stderr.write(msg)
                 raise CommandError(msg)
+
+            if official_levels is None or not official_levels:
+                fail("Failed to fetch official project levels or received empty payload")
 
             self.stdout.write(
                 f"Successfully fetched {len(official_levels)} official project levels"
