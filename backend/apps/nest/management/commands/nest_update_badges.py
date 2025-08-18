@@ -40,7 +40,7 @@ class Command(BaseCommand):
             self.stdout.write(f"Created badge: {badge.name}")
 
         # Assign badge to employees who don't have it.
-        employees_without_badge = User.objects.filter(is_owasp_staff=True).exclude(badges=badge)
+        employees_without_badge = User.objects.filter(is_owasp_staff=True).exclude(badges__badge=badge)
         count = employees_without_badge.count()
 
         if count:
@@ -50,7 +50,7 @@ class Command(BaseCommand):
         self.stdout.write(f"Added badge to {count} employees")
 
         # Remove badge from non-OWASP employees.
-        non_employees = User.objects.filter(is_owasp_staff=False, badges=badge)
+        non_employees = User.objects.filter(is_owasp_staff=False, badges__badge=badge)
         removed_count = non_employees.count()
 
         if removed_count:
