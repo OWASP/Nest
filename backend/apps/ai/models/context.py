@@ -50,16 +50,18 @@ class Context(TimestampedModel):
         save: bool = True,
     ) -> "Context":
         """Create or update context for a given entity."""
-        context, created = Context.objects.get_or_create(
-            entity_type=ContentType.objects.get_for_model(content_object),
-            entity_id=content_object.pk,
-            defaults={"content": content, "source": source},
-        )
+        entity_type = ContentType.objects.get_for_model(content_object)
+        entity_id = content_object.pk
 
-        if not created and (context.content != content or context.source != source):
-            context.content = content
-            context.source = source
-            if save:
-                context.save()
+        try:
+            context = Context.objects.get(entity_type=entity_type, entity_id=entity_id)
+        except Context.DoesNotExist:
+            context = Context(entity_type=entity_type, entity_id=entity_id)
+
+        context.content = content
+        context.source = source
+
+        if save:
+            context.save()
 
         return context

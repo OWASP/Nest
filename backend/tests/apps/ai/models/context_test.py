@@ -138,11 +138,10 @@ class TestContextModel:
 
         mock_delete.assert_called_once()
 
-    @patch("apps.ai.models.context.Context.objects.filter")
-    @patch("apps.ai.models.context.Context.objects.get_or_create")
-    def test_update_data_existing_context(self, mock_get_or_create, mock_filter):
+    @patch("apps.ai.models.context.Context.objects.get")
+    def test_update_data_existing_context(self, mock_get):
         mock_context = create_model_mock(Context)
-        mock_get_or_create.return_value = (mock_context, False)
+        mock_get.return_value = mock_context
 
         content = "Test"
         mock_content_object = Mock()
@@ -152,17 +151,19 @@ class TestContextModel:
             "apps.ai.models.context.ContentType.objects.get_for_model"
         ) as mock_get_for_model:
             mock_content_type = Mock()
+            mock_content_type.get_source_expressions = Mock(return_value=[])
             mock_get_for_model.return_value = mock_content_type
 
             result = Context.update_data(content, mock_content_object, source="src", save=True)
 
             mock_get_for_model.assert_called_once_with(mock_content_object)
-            mock_get_or_create.assert_called_once_with(
+            mock_get.assert_called_once_with(
                 entity_type=mock_content_type,
                 entity_id=1,
-                defaults={"content": content, "source": "src"},
             )
             assert result == mock_context
+            assert mock_context.content == content
+            assert mock_context.source == "src"
 
     def test_str_method_with_name_attribute(self):
         """Test __str__ method when entity has name attribute."""
@@ -294,11 +295,14 @@ class TestContextModel:
             result = str(context)
             assert result == "test_model String representation: Test content"
 
-    @patch("apps.ai.models.context.Context.objects.get_or_create")
-    def test_update_data_new_context_with_save(self, mock_get_or_create):
+    @patch("apps.ai.models.context.Context.objects.get")
+    @patch("apps.ai.models.context.Context.__init__")
+    def test_update_data_new_context_with_save(self, mock_init, mock_get):
         """Test update_data creating a new context with save=True."""
-        mock_context = create_model_mock(Context)
-        mock_get_or_create.return_value = (mock_context, True)
+        from apps.ai.models.context import Context as ContextModel
+
+        mock_get.side_effect = ContextModel.DoesNotExist
+        mock_init.return_value = None  # __init__ should return None
 
         content = "New test content"
         mock_content_object = Mock()
@@ -308,24 +312,37 @@ class TestContextModel:
         with patch(
             "apps.ai.models.context.ContentType.objects.get_for_model"
         ) as mock_get_for_model:
-            mock_content_type = Mock()
+            mock_content_type = Mock(spec=ContentType)
+            mock_content_type.get_source_expressions = Mock(return_value=[])
             mock_get_for_model.return_value = mock_content_type
 
-            result = Context.update_data(content, mock_content_object, source=source, save=True)
+            # Mock the context instance and its save method
+            with patch.object(ContextModel, "save") as mock_save:
+                result = Context.update_data(
+                    content, mock_content_object, source=source, save=True
+                )
 
-            mock_get_for_model.assert_called_once_with(mock_content_object)
-            mock_get_or_create.assert_called_once_with(
-                entity_type=mock_content_type,
-                entity_id=1,
-                defaults={"content": content, "source": source},
-            )
-            assert result == mock_context
+                mock_get_for_model.assert_called_once_with(mock_content_object)
+                mock_get.assert_called_once_with(
+                    entity_type=mock_content_type,
+                    entity_id=1,
+                )
+                mock_init.assert_called_once_with(
+                    entity_type=mock_content_type,
+                    entity_id=1,
+                )
+                assert result.content == content
+                assert result.source == source
+                mock_save.assert_called_once()
 
-    @patch("apps.ai.models.context.Context.objects.get_or_create")
-    def test_update_data_new_context_without_save(self, mock_get_or_create):
+    @patch("apps.ai.models.context.Context.objects.get")
+    @patch("apps.ai.models.context.Context.__init__")
+    def test_update_data_new_context_without_save(self, mock_init, mock_get):
         """Test update_data creating a new context with save=False."""
-        mock_context = create_model_mock(Context)
-        mock_get_or_create.return_value = (mock_context, True)
+        from apps.ai.models.context import Context as ContextModel
+
+        mock_get.side_effect = ContextModel.DoesNotExist
+        mock_init.return_value = None  # __init__ should return None
 
         content = "New test content"
         mock_content_object = Mock()
@@ -335,15 +352,25 @@ class TestContextModel:
         with patch(
             "apps.ai.models.context.ContentType.objects.get_for_model"
         ) as mock_get_for_model:
-            mock_content_type = Mock()
+            mock_content_type = Mock(spec=ContentType)
+            mock_content_type.get_source_expressions = Mock(return_value=[])
             mock_get_for_model.return_value = mock_content_type
 
-            result = Context.update_data(content, mock_content_object, source=source, save=False)
+            # Mock the context instance and its save method
+            with patch.object(ContextModel, "save") as mock_save:
+                result = Context.update_data(
+                    content, mock_content_object, source=source, save=False
+                )
 
-            mock_get_for_model.assert_called_once_with(mock_content_object)
-            mock_get_or_create.assert_called_once_with(
-                entity_type=mock_content_type,
-                entity_id=1,
-                defaults={"content": content, "source": source},
-            )
-            assert result == mock_context
+                mock_get_for_model.assert_called_once_with(mock_content_object)
+                mock_get.assert_called_once_with(
+                    entity_type=mock_content_type,
+                    entity_id=1,
+                )
+                mock_init.assert_called_once_with(
+                    entity_type=mock_content_type,
+                    entity_id=1,
+                )
+                assert result.content == content
+                assert result.source == source
+                mock_save.assert_not_called()
