@@ -59,7 +59,7 @@ class Command(BaseCommand):
             )
             # Steps 2-4: Detect and update in one procedural call
             self.stdout.write("Detecting and updating compliance issues...")
-            detect_and_update_compliance(official_levels)
+            updated_count = detect_and_update_compliance(official_levels, dry_run=dry_run)
             # Recompute a lightweight summary from latest health metrics
             latest_metrics = ProjectHealthMetrics.get_latest_health_metrics()
             total = len(latest_metrics)
@@ -71,6 +71,10 @@ class Command(BaseCommand):
             self.stdout.write(f"\nCompliance detection completed in {execution_time:.2f}s")
             self.stdout.write(f"Summary: {compliant} compliant, {non_compliant} non-compliant")
             self.stdout.write(f"Compliance rate: {compliance_rate:.1f}%")
+            if dry_run:
+                self.stdout.write(f"DRY RUN: Would update {updated_count} projects")
+            else:
+                self.stdout.write(f"Updated {updated_count} projects")
             # Log detailed summary for monitoring
             logger.info(
                 "Compliance detection completed successfully",
