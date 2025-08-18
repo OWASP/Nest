@@ -54,11 +54,17 @@ class Command(BaseCommand):
         self.stdout.write(f"Added badge to {count} employees")
 
         # Remove badge from non-OWASP employees.
-        non_employees = User.objects.filter(is_owasp_staff=False, badges__badge=badge)
+        non_employees = User.objects.filter(
+            is_owasp_staff=False,
+            badges__badge=badge,
+        ).distinct()
         removed_count = non_employees.count()
 
         if removed_count:
-            UserBadge.objects.filter(user__in=non_employees, badge=badge).delete()
+            UserBadge.objects.filter(
+                user_id__in=non_employees.values_list("id", flat=True),
+                badge=badge,
+            ).delete()
 
         logger.info("Removed '%s' badge from %s users", OWASP_STAFF_BADGE_NAME, removed_count)
         self.stdout.write(f"Removed badge from {removed_count} non-employees")
