@@ -64,14 +64,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        style={{ minHeight: '100vh' }}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
         <Providers>
           <AutoScrollToTop />
           <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
           <BreadCrumbs />
-          {children}
+          <main className="flex-1 flex flex-col">
+            {children}
+          </main>
           <Footer />
           <ScrollToTop />
         </Providers>
