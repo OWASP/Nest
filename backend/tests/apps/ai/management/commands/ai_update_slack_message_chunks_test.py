@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 import pytest
 from django.core.management.base import BaseCommand
 
-from apps.ai.management.commands.ai_create_slack_message_chunks import Command
+from apps.ai.management.commands.ai_update_slack_message_chunks import Command
 
 
 @pytest.fixture

@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 from django.core.management.base import BaseCommand
 
-from apps.ai.management.commands.ai_create_event_chunks import Command
+from apps.ai.management.commands.ai_update_event_chunks import Command
 
 
 @pytest.fixture
@@ -51,7 +51,7 @@ class TestAiCreateEventChunksCommand:
     def test_extract_content(self, command, mock_event):
         """Test content extraction from event."""
         with patch(
-            "apps.ai.management.commands.ai_create_event_chunks.extract_event_content"
+            "apps.ai.management.commands.ai_update_event_chunks.extract_event_content"
         ) as mock_extract:
             mock_extract.return_value = ("prose content", "metadata content")
             content = command.extract_content(mock_event)

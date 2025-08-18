@@ -140,8 +140,7 @@ class TestContextModel:
 
     @patch("apps.ai.models.context.Context.objects.filter")
     @patch("apps.ai.models.context.Context.objects.get_or_create")
-    @patch("apps.ai.models.context.regenerate_chunks_for_context")
-    def test_update_data_existing_context(self, mock_regenerate, mock_get_or_create, mock_filter):
+    def test_update_data_existing_context(self, mock_get_or_create, mock_filter):
         mock_context = create_model_mock(Context)
         mock_get_or_create.return_value = (mock_context, False)
 
@@ -163,7 +162,6 @@ class TestContextModel:
                 entity_id=1,
                 defaults={"content": content, "source": "src"},
             )
-            mock_regenerate.assert_called_once_with(context=mock_context)
             assert result == mock_context
 
     def test_str_method_with_name_attribute(self):

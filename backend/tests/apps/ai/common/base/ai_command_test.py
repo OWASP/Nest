@@ -12,12 +12,16 @@ class MockTestModel:
 
     objects = Mock()
     pk = 1
+    __name__ = "TestEntity"
 
 
 @pytest.fixture
 def command():
     """Fixture for ConcreteAICommand instance."""
-    return ConcreteAICommand()
+    cmd = ConcreteAICommand()
+    cmd.entity_name = "test_entity"
+    cmd.entity_name_plural = "test_entities"
+    return cmd
 
 
 @pytest.fixture

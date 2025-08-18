@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 import pytest
 from django.core.management.base import BaseCommand
 
-from apps.ai.management.commands.ai_create_project_chunks import Command
+from apps.ai.management.commands.ai_update_project_chunks import Command
 
 
 @pytest.fixture
@@ -39,7 +39,7 @@ class TestAiCreateProjectChunksCommand:
 
     def test_extract_content(self, command, mock_project):
         with patch(
-            "apps.ai.management.commands.ai_create_project_chunks.extract_project_content"
+            "apps.ai.management.commands.ai_update_project_chunks.extract_project_content"
         ) as mock_extract:
             mock_extract.return_value = ("prose content", "metadata content")
             content = command.extract_content(mock_project)

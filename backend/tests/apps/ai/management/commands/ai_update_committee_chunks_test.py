@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 from django.core.management.base import BaseCommand
 
-from apps.ai.management.commands.ai_create_committee_chunks import Command
+from apps.ai.management.commands.ai_update_committee_chunks import Command
 
 
 @pytest.fixture
@@ -54,7 +54,7 @@ class TestAiCreateCommitteeChunksCommand:
     def test_extract_content_method(self, command, mock_committee):
         """Test the extract_content method."""
         with patch(
-            "apps.ai.management.commands.ai_create_committee_chunks.extract_committee_content"
+            "apps.ai.management.commands.ai_update_committee_chunks.extract_committee_content"
         ) as mock_extract:
             mock_extract.return_value = ("prose content", "metadata content")
             content = command.extract_content(mock_committee)
@@ -146,4 +146,4 @@ class TestAiCreateCommitteeChunksCommand:
 
     def test_help_method(self, command):
         """Test the help method."""
-        assert command.help() == "Create chunks for OWASP committee data"
+        assert command.help() == "Create or update chunks for OWASP committee data"

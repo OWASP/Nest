@@ -439,3 +439,75 @@ class TestProjectExtractor:
         _, metadata = extract_project_content(project)
 
         assert "Related URLs: https://valid.com, https://another.com" in metadata
+
+    def test_extract_project_content_repository_no_description_no_topics(self):
+        """Test extraction when repository exists but has neither description nor topics."""
+        project = MagicMock()
+        project.description = "Project description"
+        project.summary = None
+        project.name = "Test Project"
+        project.level = None
+        project.type = None
+        project.languages = []
+        project.topics = []
+        project.licenses = []
+        project.tags = []
+        project.custom_tags = []
+        project.stars_count = None
+        project.forks_count = None
+        project.contributors_count = None
+        project.releases_count = None
+        project.open_issues_count = None
+        project.leaders_raw = []
+        project.related_urls = []
+        project.invalid_urls = []
+        project.created_at = None
+        project.updated_at = None
+        project.released_at = None
+        project.health_score = None
+        project.is_active = True
+
+        repo = MagicMock()
+        repo.description = None
+        repo.topics = None
+        project.owasp_repository = repo
+
+        prose, metadata = extract_project_content(project)
+
+        assert "Description: Project description" in prose
+        assert "Repository Description:" not in prose
+        assert "Repository Topics:" not in metadata
+
+    def test_extract_project_content_created_and_released_only(self):
+        """Test extraction with created_at and released_at but no updated_at."""
+        project = MagicMock()
+        project.description = None
+        project.summary = None
+        project.name = "Date Test Project"
+        project.level = None
+        project.type = None
+        project.languages = []
+        project.topics = []
+        project.licenses = []
+        project.tags = []
+        project.custom_tags = []
+        project.stars_count = None
+        project.forks_count = None
+        project.contributors_count = None
+        project.releases_count = None
+        project.open_issues_count = None
+        project.leaders_raw = []
+        project.related_urls = []
+        project.invalid_urls = []
+        project.created_at = datetime(2021, 3, 1, tzinfo=UTC)
+        project.updated_at = None
+        project.released_at = datetime(2023, 8, 15, tzinfo=UTC)
+        project.health_score = None
+        project.is_active = True
+        project.owasp_repository = None
+
+        _, metadata = extract_project_content(project)
+
+        assert "Created: 2021-03-01" in metadata
+        assert "Last Updated:" not in metadata
+        assert "Last Release: 2023-08-15" in metadata

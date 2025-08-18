@@ -27,8 +27,10 @@ def command():
     """Return a concrete context command instance for testing."""
     cmd = ConcreteContextCommand()
     mock_model = Mock()
-    mock_model.__name__ = "MockContextTestModel"
+    mock_model.__name__ = "TestEntity"
     cmd.model_class = mock_model
+    cmd.entity_name = "test_entity"
+    cmd.entity_name_plural = "test_entities"
     return cmd
 
 
@@ -67,7 +69,7 @@ class TestBaseContextCommand:
 
     def test_abstract_methods_implemented(self, command):
         """Test that all abstract methods are properly implemented."""
-        assert command.model_class.__name__ == "MockContextTestModel"
+        assert command.model_class.__name__ == "TestEntity"
         assert command.entity_name == "test_entity"
         assert command.entity_name_plural == "test_entities"
         assert command.key_field_name == "test_key"

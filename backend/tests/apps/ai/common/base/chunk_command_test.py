@@ -1,7 +1,7 @@
 """Tests for the BaseChunkCommand class."""
 
 from typing import Any
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, call, patch
 
 import pytest
 from django.contrib.contenttypes.models import ContentType
@@ -30,8 +30,10 @@ def command():
     """Return a concrete chunk command instance for testing."""
     cmd = ConcreteChunkCommand()
     mock_model = Mock()
-    mock_model.__name__ = "MockChunkTestModel"
+    mock_model.__name__ = "TestEntity"
     cmd.model_class = mock_model
+    cmd.entity_name = "test_entity"
+    cmd.entity_name_plural = "test_entities"
     return cmd
 
 
@@ -52,6 +54,9 @@ def mock_context():
     context.id = 1
     context.content_type_id = 1
     context.object_id = 1
+    context.chunks.aggregate.return_value = {"latest_created": None}
+    context.chunks.all.return_value.delete.return_value = (0, {})
+    context.nest_updated_at = Mock()
     return context
 
 
@@ -85,12 +90,12 @@ class TestBaseChunkCommand:
 
     def test_help_method(self, command):
         """Test the help method returns appropriate help text."""
-        expected_help = "Create chunks for OWASP test_entity data"
+        expected_help = "Create or update chunks for OWASP test_entity data"
         assert command.help() == expected_help
 
     def test_abstract_methods_implemented(self, command):
         """Test that all abstract methods are properly implemented."""
-        assert command.model_class.__name__ == "MockChunkTestModel"
+        assert command.model_class.__name__ == "TestEntity"
         assert command.entity_name == "test_entity"
         assert command.entity_name_plural == "test_entities"
         assert command.key_field_name == "test_key"
@@ -143,7 +148,12 @@ class TestBaseChunkCommand:
             result = command.process_chunks_batch([mock_entity])
 
             assert result == 0
-            mock_write.assert_called_once_with("No content to chunk for test_entity test-key-123")
+            # Check that it wrote the initial message and the empty content message
+            expected_calls = [
+                call("Context for test-key-123 requires chunk creation/update"),
+                call("No content to chunk for test_entity test-key-123"),
+            ]
+            mock_write.assert_has_calls(expected_calls)
 
     @patch("apps.ai.common.base.chunk_command.ContentType.objects.get_for_model")
     @patch("apps.ai.common.base.chunk_command.Context.objects.filter")
@@ -167,7 +177,12 @@ class TestBaseChunkCommand:
             result = command.process_chunks_batch([mock_entity])
 
             assert result == 0
-            mock_write.assert_called_once()
+            # Check that both messages were written
+            expected_calls = [
+                call("Context for test-key-123 requires chunk creation/update"),
+                call("No chunks created for test_entity test-key-123"),
+            ]
+            mock_write.assert_has_calls(expected_calls)
             call_args = mock_write.call_args[0][0]
             assert "No chunks created for test_entity test-key-123" in call_args
 
@@ -207,7 +222,12 @@ class TestBaseChunkCommand:
                 save=False,
             )
             mock_bulk_save.assert_called_once_with(mock_chunks)
-            mock_write.assert_called_once_with("Created 3 chunks for test-key-123")
+            mock_write.assert_has_calls(
+                [
+                    call("Context for test-key-123 requires chunk creation/update"),
+                    call(command.style.SUCCESS("Created 3 new chunks for test-key-123")),
+                ]
+            )
 
     @patch("apps.ai.common.base.chunk_command.ContentType.objects.get_for_model")
     @patch("apps.ai.common.base.chunk_command.Context.objects.filter")
@@ -409,6 +429,8 @@ class TestBaseChunkCommand:
                 result = command.process_chunks_batch([mock_entity])
 
                 assert result == 0
-                mock_write.assert_called_once_with(
-                    "No content to chunk for test_entity test-key-123"
-                )
+                expected_calls = [
+                    call("Context for test-key-123 requires chunk creation/update"),
+                    call("No content to chunk for test_entity test-key-123"),
+                ]
+                mock_write.assert_has_calls(expected_calls)

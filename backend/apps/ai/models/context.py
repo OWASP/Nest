@@ -60,6 +60,6 @@ class Context(TimestampedModel):
             context.content = content
             context.source = source
             if save:
-                context.save(update_fields=["content", "source"])
+                context.save()
 
         return context
