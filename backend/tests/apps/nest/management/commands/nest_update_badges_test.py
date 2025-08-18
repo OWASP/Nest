@@ -11,6 +11,7 @@ from apps.nest.management.commands.nest_update_badges import OWASP_STAFF_BADGE_N
 def make_mock_employees(mock_employee):
     mock_employees = MagicMock()
     mock_employees_without_badge = MagicMock()
+    # This makes iterating over employees_without_badge yield mock_employee (not a list)
     mock_employees_without_badge.__iter__.return_value = iter([mock_employee])
     mock_employees_without_badge.count.return_value = 1
     mock_employees.exclude.return_value = mock_employees_without_badge
@@ -64,16 +65,24 @@ def user_filter_side_effect_factory(mock_employees, mock_former_employees):
 class TestSyncUserBadgesCommand:
     """Test the sync_user_badges management command."""
 
+    @patch("apps.nest.management.commands.nest_update_badges.UserBadge.objects.get_or_create")
+    @patch("apps.nest.management.commands.nest_update_badges.UserBadge.objects.filter")
     @patch("apps.nest.management.commands.nest_update_badges.Badge.objects.get_or_create")
     @patch("apps.nest.management.commands.nest_update_badges.User.objects.filter")
-    def test_sync_owasp_staff_badge(self, mock_user_filter, mock_badge_get_or_create):
+    def test_sync_owasp_staff_badge(
+        self,
+        mock_user_filter,
+        mock_badge_get_or_create,
+        mock_userbadge_filter,
+        mock_userbadge_get_or_create,
+    ):
         # Set up badge mock
         mock_badge = MagicMock()
         mock_badge.name = OWASP_STAFF_BADGE_NAME
         mock_badge.id = 1
         mock_badge_get_or_create.return_value = (mock_badge, False)
 
-        # Set up employee mocks - with exclude() method properly mocked
+        # Set up employee mocks
         mock_employee = MagicMock()
         mock_former_employee = MagicMock()
         mock_employees, _ = make_mock_employees(mock_employee)
@@ -86,15 +95,9 @@ class TestSyncUserBadgesCommand:
         out = StringIO()
         call_command("nest_update_badges", stdout=out)
 
-        # Collect all positional args from add/remove calls
-        add_args = [arg for call in mock_badge.users.add.call_args_list for arg in call.args]
-        remove_args = [arg for call in mock_badge.users.remove.call_args_list for arg in call.args]
-
-        # Assert expected employees are present/absent in the calls
-        assert mock_employee in add_args
-        assert mock_former_employee not in add_args
-        assert mock_former_employee in remove_args
-        assert mock_employee not in remove_args
+        # Assert correct badge assignment and removal calls
+        mock_userbadge_get_or_create.assert_any_call(user=mock_employee, badge=mock_badge)
+        mock_userbadge_filter.assert_any_call(user__in=mock_former_employees, badge=mock_badge)
 
         # Check command output
         output = out.getvalue()

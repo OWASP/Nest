@@ -6,6 +6,7 @@ from django.core.management.base import BaseCommand
 
 from apps.github.models.user import User
 from apps.nest.models.badge import Badge
+from apps.nest.models.user_badges import UserBadge
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,8 @@ class Command(BaseCommand):
         count = employees_without_badge.count()
 
         if count:
-            badge.users.add(*employees_without_badge)
+            for user in employees_without_badge:
+                UserBadge.objects.get_or_create(user=user, badge=badge)
 
         logger.info("Added '%s' badge to %s users", OWASP_STAFF_BADGE_NAME, count)
         self.stdout.write(f"Added badge to {count} employees")
@@ -56,7 +58,7 @@ class Command(BaseCommand):
         removed_count = non_employees.count()
 
         if removed_count:
-            badge.users.remove(*non_employees)
+            UserBadge.objects.filter(user__in=non_employees, badge=badge).delete()
 
         logger.info("Removed '%s' badge from %s users", OWASP_STAFF_BADGE_NAME, removed_count)
         self.stdout.write(f"Removed badge from {removed_count} non-employees")

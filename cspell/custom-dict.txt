@@ -119,6 +119,7 @@ tsc
 turbopack
 unhover
 usefixtures
+userbadge
 winsrdf
 wsgi
 xapp
