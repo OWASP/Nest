@@ -14,6 +14,7 @@ class TestApiKeyNode:
         defined_fields = {f.name for f in ApiKeyNode.__strawberry_definition__.fields}
 
         expected_fields = {
+            "_id",
             "created_at",
             "expires_at",
             "is_revoked",

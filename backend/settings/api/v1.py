@@ -25,7 +25,7 @@ if settings.IS_LOCAL_ENVIRONMENT:
         "servers": [
             {
                 "description": "Local",
-                "url": "http://localhost:8000",
+                "url": settings.SITE_URL,
             }
         ],
         "throttle": [],
@@ -35,7 +35,7 @@ elif settings.IS_STAGING_ENVIRONMENT:
         "servers": [
             {
                 "description": "Staging",
-                "url": "https://nest.owasp.dev",
+                "url": settings.SITE_URL,
             }
         ],
     }
@@ -44,13 +44,23 @@ elif settings.IS_PRODUCTION_ENVIRONMENT:
         "servers": [
             {
                 "description": "Production",
-                "url": "https://nest.owasp.org",
+                "url": settings.SITE_URL,
             }
         ],
     }
 
 
 api = NinjaAPI(**{**api_settings, **api_settings_customization})
+
+
+@api.get("/")
+def api_root(request):
+    """Handle API root endpoint requests."""
+    return {
+        "message": "Welcome to the OWASP Nest API v1",
+        "docs_url": request.build_absolute_uri("docs"),
+    }
+
 
 api.add_router("owasp", owasp_router)
 api.add_router("github", github_router)
