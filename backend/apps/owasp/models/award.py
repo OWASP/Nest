@@ -36,6 +36,7 @@ class Award(BulkSaveModel, TimestampedModel):
     name = models.CharField(
         verbose_name="Name",
         max_length=200,
+        unique=True,
         help_text="Award name/title (e.g., 'Event Person of the Year')",
     )
     description = models.TextField(
@@ -136,22 +137,20 @@ class Award(BulkSaveModel, TimestampedModel):
             Award instance
 
         """
-        # Create unique identifier for get_or_create
-        name = award_data.get("title", "")
+        # Create unique name for each winner to satisfy unique constraint
+        award_title = award_data.get("title", "")
         category = award_data.get("category", "")
         year = award_data.get("year")
         winner_name = award_data.get("name", "").strip()
 
+        # Create unique name combining award title, winner, and year
+        unique_name = f"{award_title} - {winner_name} ({year})"
+
         try:
-            award = Award.objects.get(
-                name=name,
-                category=category,
-                year=year,
-                winner_name=winner_name,
-            )
+            award = Award.objects.get(name=unique_name)
         except Award.DoesNotExist:
             award = Award(
-                name=name,
+                name=unique_name,
                 category=category,
                 year=year,
                 winner_name=winner_name,

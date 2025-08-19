@@ -131,14 +131,10 @@ class Command(BaseCommand):
             logger.warning("Could not match user: %s", winner_name)
 
         if not dry_run:
-            # Check if award exists before update
+            # Check if award exists before update using unique name
+            unique_name = f"{award_name} - {winner_name} ({winner_data.get('year')})"
             try:
-                Award.objects.get(
-                    name=award_name,
-                    category=winner_data.get("category", ""),
-                    year=winner_data.get("year"),
-                    winner_name=winner_name,
-                )
+                Award.objects.get(name=unique_name)
                 is_new = False
             except Award.DoesNotExist:
                 is_new = True

@@ -42,6 +42,7 @@ class Migration(migrations.Migration):
                     models.CharField(
                         help_text="Award name/title (e.g., 'Event Person of the Year')",
                         max_length=200,
+                        unique=True,
                         verbose_name="Name",
                     ),
                 ),
