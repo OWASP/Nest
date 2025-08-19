@@ -58,20 +58,25 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        style={{ minHeight: '100vh' }}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <Providers>
           <AutoScrollToTop />
           <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
           <BreadCrumbs />
-          {children}
+
+          {/* Wrap content in a flex-1 container to always push footer down */}
+          <main className="flex-1 flex flex-col">
+            {children }
+              
+          </main>
+
           <Footer />
           <ScrollToTop />
         </Providers>
