@@ -42,8 +42,6 @@
 
   --radius: 0.5rem;
 
-  /* Map tiles filter (shared across themes) */
-  --map-tiles-filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
 }
 
 /* =========================
@@ -83,6 +81,9 @@
   --chart-3: 30 80% 55%;
   --chart-4: 280 65% 60%;
   --chart-5: 340 75% 55%;
+  --map-tiles-filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+
+ 
 }
 
 /* =========================
