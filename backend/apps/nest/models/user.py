@@ -39,6 +39,8 @@ class User(AbstractUser):
         verbose_name="Badges",
         related_name="users",
         blank=True,
+        through="nest.UserBadge",       # use the custom through model
+        through_fields=("user", "badge"),
     )
 
     def __str__(self) -> str:
