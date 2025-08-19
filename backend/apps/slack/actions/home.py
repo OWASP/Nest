@@ -83,14 +83,18 @@ def handle_home_actions(ack, body, client: WebClient) -> None:
             }:
                 blocks = contribute.get_blocks(page=page, limit=10, presentation=home_presentation)
             case action if action == SIGN_IN_WITH_GOOGLE_ACTION:
-                auth = GoogleAuth.authenticate(Member.objects.get(slack_user_id=user_id))
-                if isinstance(auth, GoogleAuth):
-                    blocks = [markdown("You are already signed in with Google.")]
-                else:
-                    auth_url = auth[0]
-                    blocks = [
-                        markdown(f"Please sign in with Google through this link: {auth_url}")
-                    ]
+                try:
+                    auth = GoogleAuth.authenticate(Member.objects.get(slack_user_id=user_id))
+                    if isinstance(auth, GoogleAuth):
+                        blocks = [markdown("You are already signed in with Google.")]
+                    else:
+                        auth_url = auth[0]
+                        blocks = [
+                            markdown(f"Please sign in with Google through this link: {auth_url}")
+                        ]
+                except ValueError:
+                    blocks = [markdown("Error signing in with Google")]
+                    logger.exception("Google authentication error for user {user_id}")
 
             case _:
                 blocks = [markdown("Invalid action, please try again.")]

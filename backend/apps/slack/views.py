@@ -40,14 +40,15 @@ def google_auth_callback(request):
 
     """
     # Handle the Google OAuth callback logic here
-    member_id = request.GET.get("state")
     auth_response = request.build_absolute_uri()
+    # Google OAuth will raise an error if the redirect URI protocol is http,
+    # so we need to ensure it's https in the local environment
     if settings.IS_LOCAL_ENVIRONMENT:
-        auth_response = auth_response.replace("http://", "https://")
+        auth_response = auth_response.replace("http://", "https://")  # NOSONAR
     try:
-        GoogleAuth.authenticate_callback(auth_response, member_id)
-    except (ValueError, ValidationError):
-        return HttpResponse("Error during Google sign-in.", status=400)
+        GoogleAuth.authenticate_callback(auth_response)
+    except (ValueError, ValidationError) as e:
+        return HttpResponse(f"Error during Google sign-in: {e!s}", status=400)
     return HttpResponse(
         "You are successfully signed in with Google.<br>You can now close the page.", status=200
     )
