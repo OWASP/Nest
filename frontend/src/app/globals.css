@@ -82,17 +82,7 @@
   --chart-5: 340 75% 55%;
 }
 
-/* =========================
-   Base Styles
-   ========================= */
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
+
 
 
 
