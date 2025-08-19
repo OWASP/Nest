@@ -48,6 +48,8 @@ class MemberGoogleCredentials(models.Model):
         """
         if not settings.IS_GOOGLE_AUTH_ENABLED:
             raise ValueError(AUTH_ERROR_MESSAGE)
+        if not settings.IS_AWS_KMS_ENABLED:
+            raise ValueError(KMS_ERROR_MESSAGE)
         auth = MemberGoogleCredentials.objects.get_or_create(member=member)[0]
         if auth.access_token and not auth.is_token_expired:
             return auth

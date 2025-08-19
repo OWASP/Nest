@@ -85,13 +85,20 @@ class TestMemberGoogleCredentialsModel:
             MemberGoogleCredentials.get_flow()
 
     @override_settings(IS_GOOGLE_AUTH_ENABLED=False)
-    def test_authenticate_when_disabled(self):
+    def test_authenticate_when_google_auth_disabled(self):
         """Test authenticate raises error when Google auth is disabled."""
         with pytest.raises(ValueError, match="Google OAuth client ID"):
             MemberGoogleCredentials.authenticate(self.member)
 
+    @override_settings(IS_AWS_KMS_ENABLED=False, IS_GOOGLE_AUTH_ENABLED=True)
+    def test_authenticate_when_aws_kms_disabled(self):
+        """Test authenticate raises error when AWS KMS is disabled."""
+        with pytest.raises(ValueError, match="AWS KMS is not enabled"):
+            GoogleAuth.authenticate(self.member)
+
     @override_settings(
         IS_GOOGLE_AUTH_ENABLED=True,
+        IS_AWS_KMS_ENABLED=True,
         GOOGLE_AUTH_CLIENT_ID="test_client_id",
         GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
         GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
@@ -125,6 +132,7 @@ class TestMemberGoogleCredentialsModel:
 
     @override_settings(
         IS_GOOGLE_AUTH_ENABLED=True,
+        IS_AWS_KMS_ENABLED=True,
         GOOGLE_AUTH_CLIENT_ID="test_client_id",
         GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
         GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
@@ -153,6 +161,7 @@ class TestMemberGoogleCredentialsModel:
 
     @override_settings(
         IS_GOOGLE_AUTH_ENABLED=True,
+        IS_AWS_KMS_ENABLED=True,
         GOOGLE_AUTH_CLIENT_ID="test_client_id",
         GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
         GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
