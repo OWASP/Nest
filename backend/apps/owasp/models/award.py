@@ -105,7 +105,9 @@ class Award(BulkSaveModel, TimestampedModel):
         """
         from apps.github.models.user import User
 
-        return User.objects.filter(awards__category=cls.Category.WASPY).distinct()
+        return User.objects.filter(
+            awards__category=cls.Category.WASPY, awards__is_reviewed=True
+        ).distinct()
 
     @classmethod
     def get_user_waspy_awards(cls, user):
