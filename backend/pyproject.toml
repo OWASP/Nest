@@ -1,25 +1,15 @@
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = [ "poetry-core" ]
+
 [tool.poetry]
 name = "OWASP Nest"
 version = "0.1.0"
 description = "Your gateway to OWASP"
-authors = ["Arkadii Yakovets <arkadii.yakovets@owasp.org>"]
+authors = [ "Arkadii Yakovets <arkadii.yakovets@owasp.org>" ]
 readme = "README.md"
 
-packages = [{ include = "apps" }]
-
-[tool.coverage.run]
-branch = true
-omit = [
-    "__init__.py",
-    "**/admin.py",
-    "**/apps.py",
-    "**/migrations/*",
-    "**/mentorship/*",  # TODO: work in progress
-    "manage.py",
-    "settings/*",
-    "tests/*",
-    "wsgi.py",
-]
+packages = [ { include = "apps" } ]
 
 [tool.poetry.dependencies]
 algoliasearch = "^4.13.2"
@@ -29,7 +19,7 @@ django-configurations = "^2.5.1"
 django-cors-headers = "^4.7.0"
 django-ninja = "^1.4.3"
 django-redis = "^6.0.0"
-django-storages = { extras = ["s3"], version = "^1.14.4" }
+django-storages = { extras = [ "s3" ], version = "^1.14.4" }
 emoji = "^2.14.1"
 geopy = "^2.4.1"
 gunicorn = "^23.0.0"
@@ -50,11 +40,11 @@ python = "^3.13"
 python-dateutil = "^2.9.0.post0"
 pyyaml = "^6.0.2"
 reportlab = "^4.4.2"
-requests = "^2.32.3"
-sentry-sdk = { extras = ["django"], version = "^2.20.0" }
+requests = "^2.32.5"
+sentry-sdk = { extras = [ "django" ], version = "^2.20.0" }
 slack-bolt = "^1.22.0"
 slack-sdk = "^3.35.0"
-strawberry-graphql = { extras = ["django"], version = "^0.278.1" }
+strawberry-graphql = { extras = [ "django" ], version = "^0.278.1" }
 strawberry-graphql-django = "^0.65.1"
 thefuzz = "^0.22.1"
 
@@ -71,115 +61,122 @@ pytest-mock = "^3.0"
 pytest-xdist = "^3.0"
 python-dotenv = "^1.0.1"
 
-[tool.djlint]
-format = true
-format_css = true
-format_js = true
-indent = 4
+[tool.ruff]
+target-version = "py313"
+
+line-length = 99
+lint.select = [ "ALL" ]
+lint.extend-select = [ "I" ]
+lint.ignore = [
+  "ANN",     # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann/
+  "ARG002",  # https://docs.astral.sh/ruff/rules/unused-method-argument/
+  "C901",    # https://docs.astral.sh/ruff/rules/complex-structure/
+  "COM812",  # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
+  "D407",    # https://docs.astral.sh/ruff/rules/missing-dashed-underline-after-section/
+  "DJ012",   # https://docs.astral.sh/ruff/rules/django-unordered-body-content-in-model/
+  "FIX002",  # https://docs.astral.sh/ruff/rules/line-contains-todo/
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+  "PLR0912", # https://docs.astral.sh/ruff/rules/too-many-branches/
+  "PLR0913", # https://docs.astral.sh/ruff/rules/too-many-arguments/
+  "PLR0915", # https://docs.astral.sh/ruff/rules/too-many-statements/
+  "RUF012",  # https://docs.astral.sh/ruff/rules/mutable-class-default/
+  "TD003",   # https://docs.astral.sh/ruff/rules/missing-todo-link/
+]
+lint.per-file-ignores."**/__init__.py" = [
+  "D104", # https://docs.astral.sh/ruff/rules/undocumented-public-package/
+  "F401", # https://docs.astral.sh/ruff/rules/unused-import/
+]
+lint.per-file-ignores."**/management/commands/*.py" = [
+  "D101", # https://docs.astral.sh/ruff/rules/undocumented-public-class/
+  "D102", # https://docs.astral.sh/ruff/rules/undocumented-public-method/
+  "T201", # https://docs.astral.sh/ruff/rules/print/
+]
+lint.per-file-ignores."**/migrations/*.py" = [
+  "D100",   # https://docs.astral.sh/ruff/rules/undocumented-public-module/
+  "D101",   # https://docs.astral.sh/ruff/rules/undocumented-public-class/
+  "D104",   # https://docs.astral.sh/ruff/rules/undocumented-public-package/
+  "E501",   # https://docs.astral.sh/ruff/rules/line-too-long/
+  "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
+]
+lint.per-file-ignores."**/models/*.py" = [
+  "D106", # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
+]
+lint.per-file-ignores."**/rest/v1/*.py" = [
+  "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
+  "B008",   # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
+]
+lint.per-file-ignores."**/settings/*.py" = [
+  "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
+]
+lint.per-file-ignores."**/tests/**/*.py" = [
+  "D100",    # https://docs.astral.sh/ruff/rules/undocumented-public-module/
+  "D101",    # https://docs.astral.sh/ruff/rules/undocumented-public-class/
+  "D102",    # https://docs.astral.sh/ruff/rules/undocumented-public-method/
+  "D103",    # https://docs.astral.sh/ruff/rules/undocumented-public-function/
+  "D107",    # https://docs.astral.sh/ruff/rules/undocumented-public-init/
+  "PLR2004", # https://docs.astral.sh/ruff/rules/magic-value-comparison/
+  "RUF012",  # https://docs.astral.sh/ruff/rules/mutable-class-default/
+  "S101",    # https://docs.astral.sh/ruff/rules/assert/
+  "SLF001",  # https://docs.astral.sh/ruff/rules/private-member-access/
+]
 
 [tool.pytest.ini_options]
 DJANGO_CONFIGURATION = "Test"
 DJANGO_SETTINGS_MODULE = "settings.test"
 addopts = [
-    "--cov-config=pyproject.toml",
-    "--cov-fail-under=80",
-    "--cov-precision=2",
-    "--cov-report=term-missing",
-    "--cov=.",
-    "--dist=loadscope",
-    "--durations-min=1",
-    "--durations=5",
-    "--no-cov-on-fail",
-    "--numprocesses=auto",
+  "--cov-config=pyproject.toml",
+  "--cov-fail-under=80",
+  "--cov-precision=2",
+  "--cov-report=term-missing",
+  "--cov=.",
+  "--dist=loadscope",
+  "--durations-min=1",
+  "--durations=5",
+  "--no-cov-on-fail",
+  "--numprocesses=auto",
 ]
 filterwarnings = [
-    "ignore::DeprecationWarning:pytest_cov",
-    "ignore::DeprecationWarning:xdist",
-    "ignore::django.conf.RemovedInDjango60Warning:django",
-    "ignore::pydantic.warnings.PydanticDeprecatedSince20",
+  "ignore::DeprecationWarning:pytest_cov",
+  "ignore::DeprecationWarning:xdist",
+  "ignore::django.conf.RemovedInDjango60Warning:django",
+  "ignore::pydantic.warnings.PydanticDeprecatedSince20",
 ]
 log_level = "INFO"
+
+[tool.coverage.run]
+branch = true
+omit = [
+  "__init__.py",
+  "**/admin.py",
+  "**/apps.py",
+  "**/migrations/*",
+  "**/mentorship/*", # TODO: work in progress
+  "manage.py",
+  "settings/*",
+  "tests/*",
+  "wsgi.py",
+]
 
 [tool.mypy]
 explicit_package_bases = true
 ignore_missing_imports = true
 mypy_path = "backend"
-plugins = ["strawberry.ext.mypy_plugin"]
+plugins = [ "strawberry.ext.mypy_plugin" ]
 
 [[tool.mypy.overrides]]
-disable_error_code = ["attr-defined"]
-module = ["apps.*.models.mixins.*", "apps.*.admin.*"]
+disable_error_code = [ "attr-defined" ]
+module = [ "apps.*.models.mixins.*", "apps.*.admin.*" ]
 
 [[tool.mypy.overrides]]
-disable_error_code = ["var-annotated"]
-module = ["apps.*.migrations.*"]
+disable_error_code = [ "var-annotated" ]
+module = [ "apps.*.migrations.*" ]
 
 [[tool.mypy.overrides]]
-disable_error_code = ["return-value", "attr-defined", "misc"]
-module = ["apps.*.api.internal.queries.*", "apps.*.api.internal.nodes.*"]
+disable_error_code = [ "return-value", "attr-defined", "misc" ]
+module = [ "apps.*.api.internal.queries.*", "apps.*.api.internal.nodes.*" ]
 
-[tool.ruff]
-line-length = 99
-target-version = "py313"
-
-[tool.ruff.lint]
-extend-select = ["I"]
-ignore = [
-    "ANN",     # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann/
-    "ARG002",  # https://docs.astral.sh/ruff/rules/unused-method-argument/
-    "C901",    # https://docs.astral.sh/ruff/rules/complex-structure/
-    "COM812",  # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
-    "D407",    # https://docs.astral.sh/ruff/rules/missing-dashed-underline-after-section/
-    "DJ012",   # https://docs.astral.sh/ruff/rules/django-unordered-body-content-in-model/
-    "FIX002",  # https://docs.astral.sh/ruff/rules/line-contains-todo/
-    "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
-    "PLR0912", # https://docs.astral.sh/ruff/rules/too-many-branches/
-    "PLR0913", # https://docs.astral.sh/ruff/rules/too-many-arguments/
-    "PLR0915", # https://docs.astral.sh/ruff/rules/too-many-statements/
-    "RUF012",  # https://docs.astral.sh/ruff/rules/mutable-class-default/
-    "TD003",   # https://docs.astral.sh/ruff/rules/missing-todo-link/
-]
-select = ["ALL"]
-
-[tool.ruff.lint.per-file-ignores]
-"**/__init__.py" = [
-    "D104", # https://docs.astral.sh/ruff/rules/undocumented-public-package/
-    "F401", # https://docs.astral.sh/ruff/rules/unused-import/
-]
-"**/management/commands/*.py" = [
-    "D101", # https://docs.astral.sh/ruff/rules/undocumented-public-class/
-    "D102", # https://docs.astral.sh/ruff/rules/undocumented-public-method/
-    "T201", # https://docs.astral.sh/ruff/rules/print/
-]
-"**/migrations/*.py" = [
-    "D100",   # https://docs.astral.sh/ruff/rules/undocumented-public-module/
-    "D101",   # https://docs.astral.sh/ruff/rules/undocumented-public-class/
-    "D104",   # https://docs.astral.sh/ruff/rules/undocumented-public-package/
-    "E501",   # https://docs.astral.sh/ruff/rules/line-too-long/
-    "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
-]
-"**/models/*.py" = [
-    "D106", # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
-]
-"**/rest/v1/*.py" = [
-    "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
-    "B008",   # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
-]
-"**/settings/*.py" = [
-    "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
-]
-"**/tests/**/*.py" = [
-    "D100",    # https://docs.astral.sh/ruff/rules/undocumented-public-module/
-    "D101",    # https://docs.astral.sh/ruff/rules/undocumented-public-class/
-    "D102",    # https://docs.astral.sh/ruff/rules/undocumented-public-method/
-    "D103",    # https://docs.astral.sh/ruff/rules/undocumented-public-function/
-    "D107",    # https://docs.astral.sh/ruff/rules/undocumented-public-init/
-    "PLR2004", # https://docs.astral.sh/ruff/rules/magic-value-comparison/
-    "RUF012",  # https://docs.astral.sh/ruff/rules/mutable-class-default/
-    "S101",    # https://docs.astral.sh/ruff/rules/assert/
-    "SLF001",  # https://docs.astral.sh/ruff/rules/private-member-access/
-]
-
-[build-system]
-build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core"]
+[tool.djlint]
+format = true
+format_css = true
+format_js = true
+indent = 4
