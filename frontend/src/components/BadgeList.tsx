@@ -28,10 +28,31 @@ const BadgeList: React.FC<BadgeListProps> = ({ badges, className }) => {
       )
     } else if (badge.cssClass) {
       // Assuming Font Awesome classes like "fa-solid fa-star"
-      const [prefix, iconName] = badge.cssClass.split(' ')
+      // Normalize FA classnames like "fa-solid fa-star" to tuple ['fas', 'star']
+      const classes = badge.cssClass.split(/\s+/).filter(Boolean)
+      const styleClass =
+        classes.find((c) => ['fa-solid', 'fa-regular', 'fa-brands', 'fas', 'far', 'fab'].includes(c)) ??
+        'fa-solid'
+      const prefixMap: Record<string, IconPrefix> = {
+        'fa-solid': 'fas',
+        'fa-regular': 'far',
+        'fa-brands': 'fab',
+        fas: 'fas',
+        far: 'far',
+        fab: 'fab',
+      }
+      const iconClass =
+        classes.find(
+          (c) =>
+            c.startsWith('fa-') &&
+            !['fa-solid', 'fa-regular', 'fa-brands'].includes(c) &&
+            !['fas', 'far', 'fab'].includes(c),
+        ) ?? ''
+      const faPrefix = prefixMap[styleClass] ?? 'fas'
+      const faIcon = (iconClass.replace(/^fa-/, '') || 'question') as IconName
       return (
         <FontAwesomeIcon
-          icon={[prefix, iconName] as [IconPrefix, IconName]}
+          icon={[faPrefix, faIcon]}
           className="h-4 w-4 text-gray-600 dark:text-gray-300"
         />
       )
