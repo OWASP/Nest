@@ -485,8 +485,8 @@ jobs:
 
   lighthouse_ci:
     name: Run Lighthouse CI
-    needs:
-      - deploy-staging-nest-proxy
+    # needs:
+      # - deploy-staging-nest-proxy
 
     runs-on: ubuntu-latest
     steps:
@@ -502,8 +502,6 @@ jobs:
         working-directory: frontend
         run: |
           npx -y @lhci/cli@0.15.1 autorun
-        env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
   build-production-images:
     name: Build Production Images
