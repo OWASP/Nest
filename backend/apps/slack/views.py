@@ -47,8 +47,8 @@ def google_auth_callback(request):
         auth_response = auth_response.replace("http://", "https://")  # NOSONAR
     try:
         GoogleAuth.authenticate_callback(auth_response)
-    except (ValueError, ValidationError) as e:
-        return HttpResponse(f"Error during Google sign-in: {e!s}", status=400)
+    except (ValueError, ValidationError):
+        return HttpResponse("Error during Google sign-in", status=400)
     return HttpResponse(
         "You are successfully signed in with Google.<br>You can now close the page.", status=200
     )
