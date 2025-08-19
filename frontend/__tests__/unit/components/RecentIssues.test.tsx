@@ -1,6 +1,6 @@
-import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
+import React from 'react'
 import type { Issue } from 'types/issue'
 import RecentIssues from 'components/RecentIssues'
 
