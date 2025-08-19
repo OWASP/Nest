@@ -139,6 +139,8 @@ describe('<RecentIssues />', () => {
     const issue: Issue = { ...baseIssue, title: undefined }
     render(<RecentIssues data={[issue]} />)
     expect(screen.getByText('Recent Issues')).toBeInTheDocument()
+    expect(screen.getByText('repo')).toBeInTheDocument()
+    expect(screen.getByAltText('User One')).toBeInTheDocument()
   })
 
   it('has accessible roles and labels', () => {
