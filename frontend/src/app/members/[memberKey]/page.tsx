@@ -21,6 +21,7 @@ import type { Release } from 'types/release'
 import type { UserDetails } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
+import BadgeList from 'components/BadgeList'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
@@ -207,6 +208,10 @@ const UserDetailsPage: React.FC = () => {
         <Link href={user?.url || '#'} className="text-xl font-bold text-blue-400 hover:underline">
           @{user?.login}
         </Link>
+        {/* Full badges list with names below username */}
+        {user?.badges && user.badges.length > 0 && (
+          <BadgeList badges={user.badges} className="mt-2" />
+        )}
         <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
       </div>
     </div>

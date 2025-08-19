@@ -4,6 +4,7 @@ import { Button } from '@heroui/button'
 import millify from 'millify'
 import Image from 'next/image'
 import type { UserCardProps } from 'types/card'
+import BadgeCount from 'components/BadgeCount'
 
 const UserCard = ({
   avatar,
@@ -17,6 +18,7 @@ const UserCard = ({
   login,
   name,
   repositoriesCount,
+  badges,
 }: UserCardProps) => {
   return (
     <Button
@@ -44,6 +46,7 @@ const UserCard = ({
           <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
             {company || location || email || login}
           </p>
+
           {description && (
             <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
               {description}
@@ -62,6 +65,7 @@ const UserCard = ({
                 {millify(repositoriesCount, { precision: 1 })}
               </p>
             )}
+            <BadgeCount badges={badges} />
           </div>
         </div>
       </div>

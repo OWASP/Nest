@@ -86,6 +86,7 @@ export interface UserCardProps {
   login?: string
   name?: string
   repositoriesCount?: number
+  badges?: import('types/badge').Badge[]
 }
 
 export interface SnapshotCardProps {
