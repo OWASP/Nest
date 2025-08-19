@@ -1,5 +1,7 @@
 """Slack bot view for Slack events."""
 
+from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
@@ -40,5 +42,12 @@ def google_auth_callback(request):
     # Handle the Google OAuth callback logic here
     member_id = request.GET.get("state")
     auth_response = request.build_absolute_uri()
-    GoogleAuth.authenticate_callback(auth_response, member_id)
-    return HttpResponse("Google OAuth callback handled successfully.")
+    if settings.IS_LOCAL_ENVIRONMENT:
+        auth_response = auth_response.replace("http://", "https://")
+    try:
+        GoogleAuth.authenticate_callback(auth_response, member_id)
+    except (ValueError, ValidationError):
+        return HttpResponse("Error during Google sign-in.", status=400)
+    return HttpResponse(
+        "You are successfully signed in with Google.<br>You can now close the page.", status=200
+    )
