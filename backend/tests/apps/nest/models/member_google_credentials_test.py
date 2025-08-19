@@ -170,7 +170,10 @@ class TestMemberGoogleCredentialsModel:
     @patch(
         "apps.nest.models.member_google_credentials.MemberGoogleCredentials.objects.get_or_create"
     )
-    def test_authenticate_first_time(self, mock_get_or_create, mock_get_flow):
+    @patch("apps.slack.models.google_auth.TimestampSigner")
+    def test_authenticate_first_time(
+        self, mock_timestamp_signer, mock_get_or_create, mock_get_flow
+    ):
         """Test authenticate for first time (no existing token)."""
         # Mock flow and credentials
         mock_flow_instance = Mock()
@@ -184,6 +187,7 @@ class TestMemberGoogleCredentialsModel:
             ),
             True,
         )
+        mock_timestamp_signer.return_value.sign.return_value = "test_state"
         MemberGoogleCredentials.authenticate(self.member)
 
         mock_get_or_create.assert_called_once_with(member=self.member)
@@ -191,7 +195,7 @@ class TestMemberGoogleCredentialsModel:
         mock_flow_instance.authorization_url.assert_called_once_with(
             access_type="offline",
             prompt="consent",
-            state=self.member.slack_user_id,
+            state="test_state",
         )
 
     @override_settings(IS_GOOGLE_AUTH_ENABLED=False)
@@ -295,13 +299,13 @@ class TestMemberGoogleCredentialsModel:
     def test_authenticate_callback_member_google_credentials_disabled(self):
         """Test authenticate_callback raises error when Google auth is disabled."""
         with pytest.raises(ValueError, match="Google OAuth client ID"):
-            MemberGoogleCredentials.authenticate_callback(auth_response={}, member_id=4)
+            MemberGoogleCredentials.authenticate_callback(auth_response={})
 
     @override_settings(IS_AWS_KMS_ENABLED=False, IS_GOOGLE_AUTH_ENABLED=True)
     def test_authenticate_callback_kms_disabled(self):
         """Test authenticate_callback raises error when AWS KMS is disabled."""
         with pytest.raises(ValueError, match="AWS KMS is not enabled"):
-            MemberGoogleCredentials.authenticate_callback(auth_response={}, member_id=4)
+            MemberGoogleCredentials.authenticate_callback(auth_response={})
 
     @override_settings(
         IS_GOOGLE_AUTH_ENABLED=True,
@@ -316,8 +320,18 @@ class TestMemberGoogleCredentialsModel:
     )
     @patch("apps.nest.models.member_google_credentials.MemberGoogleCredentials.save")
     @patch("apps.nest.models.member_google_credentials.Member.objects.get")
+    @patch("apps.slack.models.google_auth.urlparse")
+    @patch("apps.slack.models.google_auth.parse_qs")
+    @patch("apps.slack.models.google_auth.TimestampSigner")
     def test_authenticate_callback_success(
-        self, mock_member_get, mock_save, mock_get_or_create, mock_get_flow
+        self,
+        mock_timestamp_signer,
+        mock_parse_qs,
+        mock_urlparse,
+        mock_member_get,
+        mock_save,
+        mock_get_or_create,
+        mock_get_flow,
     ):
         """Test successful authenticate_callback."""
         mock_credentials = Mock()
@@ -330,9 +344,11 @@ class TestMemberGoogleCredentialsModel:
         mock_member_get.return_value = self.member
         mock_get_flow.return_value = mock_flow_instance
         mock_get_or_create.return_value = (MemberGoogleCredentials(member=self.member), False)
+        mock_parse_qs.return_value = {"state": ["test_state"]}
+        mock_timestamp_signer.return_value.unsign.return_value = self.member.slack_user_id
 
         result = MemberGoogleCredentials.authenticate_callback(
-            {}, member_id=self.member.slack_user_id
+            {}
         )
 
         assert result.access_token == b"token"
@@ -350,8 +366,16 @@ class TestMemberGoogleCredentialsModel:
         GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
     )
     @patch("apps.slack.models.member.Member.objects.get")
-    def test_authenticate_callback_member_not_found(self, mock_member_get):
+    @patch("apps.slack.models.google_auth.urlparse")
+    @patch("apps.slack.models.google_auth.parse_qs")
+    @patch("apps.slack.models.google_auth.TimestampSigner")
+    def test_authenticate_callback_member_not_found(
+        self, mock_timestamp_signer, mock_parse_qs, mock_urlparse, mock_member_get
+    ):
         """Test authenticate_callback raises error when member is not found."""
         mock_member_get.side_effect = Member.DoesNotExist
+        mock_urlparse.return_value = Mock()
+        mock_parse_qs.return_value.get.return_value = ["test_state"]
+        mock_timestamp_signer.return_value.unsign.return_value = "4"
         with pytest.raises(ValidationError, match="Member with Slack ID 4 does not exist."):
-            MemberGoogleCredentials.authenticate_callback(auth_response={}, member_id=4)
+            MemberGoogleCredentials.authenticate_callback(auth_response={})

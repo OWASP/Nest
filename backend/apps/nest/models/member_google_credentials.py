@@ -105,7 +105,7 @@ class MemberGoogleCredentials(models.Model):
         try:
             member = Member.objects.get(slack_user_id=member_id)
         except Member.DoesNotExist as e:
-            error_message = f"Member with ID {member_id} does not exist."
+            error_message = f"Member with Slack ID {member_id} does not exist."
             logger.exception(error_message)
             raise ValidationError(error_message) from e
         auth = MemberGoogleCredentials.objects.get_or_create(member=member)[0]
