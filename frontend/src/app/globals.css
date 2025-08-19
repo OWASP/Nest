@@ -41,6 +41,9 @@
   --chart-5: 27 87% 67%;
 
   --radius: 0.5rem;
+
+  /* Map tiles filter (shared across themes) */
+  --map-tiles-filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
 }
 
 /* =========================
@@ -82,36 +85,26 @@
   --chart-5: 340 75% 55%;
 }
 
-
-
-
-
-
+/* =========================
+   Animations
+   ========================= */
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 @keyframes fade-in-out {
-  0%,
-  100% {
-    opacity: 0;
-  }
-
-  50% {
-    opacity: 1;
-  }
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
 }
 
 .animate-fade-in-out {
   animation: fade-in-out 2s ease-in-out infinite;
 }
 
+/* =========================
+   Base Styles
+   ========================= */
 * {
   margin: 0;
   padding: 0;
@@ -130,48 +123,27 @@ a {
   color: inherit;
 }
 
+/* =========================
+   More Animations
+   ========================= */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes fadeOut {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 0;
-  }
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 @keyframes scaleOut {
-  from {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  to {
-    opacity: 0;
-    transform: scale(0.9);
-  }
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.9); }
 }
 
 .animate-spin {
@@ -186,25 +158,28 @@ a {
   animation: scaleIn 0.3s ease-out;
 }
 
+/* =========================
+   Markdown & Lists
+   ========================= */
 .md-wrapper ol {
   list-style: decimal;
 }
 
+/* =========================
+   Base Layer
+   ========================= */
 @layer base {
   * {
     @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground;
   }
 }
 
-:root {
-  --map-tiles-filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3)
-    brightness(0.7);
-}
-
+/* =========================
+   Dark Theme - Map Tiles
+   ========================= */
 @media (prefers-color-scheme: dark) {
   .dark .map-tiles {
     filter: var(--map-tiles-filter, none);
@@ -224,6 +199,9 @@ a {
   display: none !important;
 }
 
+/* =========================
+   Hover Effects
+   ========================= */
 .icon-rotate {
   transition: transform 2.5s ease;
 }
@@ -240,6 +218,9 @@ a {
   transform: rotateY(180deg);
 }
 
+/* =========================
+   Scrollbar Styles
+   ========================= */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -266,6 +247,9 @@ a {
   background: #718096;
 }
 
+/* =========================
+   Popup & Tooltip Styles
+   ========================= */
 .popup-content {
   cursor: pointer;
   color: black;
@@ -306,6 +290,9 @@ a {
   opacity: 0.6;
 }
 
+/* =========================
+   General Utilities
+   ========================= */
 html {
   scroll-behavior: smooth;
 }
@@ -333,7 +320,6 @@ section {
   @apply absolute left-0 top-full mt-2 w-48 rounded-lg bg-white p-3 shadow-lg dark:bg-gray-800;
   @apply invisible opacity-0 transition-all duration-200 ease-in-out;
   @apply flex flex-col space-y-2;
-  /* Stack items vertically */
 }
 
 .dropdown:hover .dropdown-menu {
