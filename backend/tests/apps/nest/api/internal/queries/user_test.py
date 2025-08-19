@@ -16,8 +16,7 @@ def mock_info() -> MagicMock:
 class TestUserQueries:
     def test_me_field_exists(self):
         assert hasattr(UserQueries, "__strawberry_definition__")
-        field_names = [
-            f.name for f in UserQueries.__strawberry_definition__.fields]
+        field_names = [f.name for f in UserQueries.__strawberry_definition__.fields]
         assert "me" in field_names
 
     def test_me_returns_user(self):

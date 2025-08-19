@@ -9,5 +9,4 @@ class TestBadgeNode:
 
         fields = {f.name: f for f in BadgeNode.__strawberry_definition__.fields}
         # _id from relay + selected fields
-        assert set(fields.keys()) >= {
-            "_id", "id", "name", "description", "weight", "css_class"}
+        assert set(fields.keys()) >= {"_id", "id", "name", "description", "weight", "css_class"}

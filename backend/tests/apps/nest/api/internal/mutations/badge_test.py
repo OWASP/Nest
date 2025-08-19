@@ -3,7 +3,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from apps.nest.api.internal.mutations.badge import BadgeMutations
-from apps.nest.api.internal.nodes.badge import BadgeNode
 
 
 def mock_info() -> MagicMock:

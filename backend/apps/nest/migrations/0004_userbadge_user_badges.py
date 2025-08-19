@@ -6,34 +6,74 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('nest', '0003_badge'),
+        ("nest", "0003_badge"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='UserBadge',
+            name="UserBadge",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nest_created_at', models.DateTimeField(auto_now_add=True)),
-                ('nest_updated_at', models.DateTimeField(auto_now=True)),
-                ('awarded_at', models.DateTimeField(auto_now_add=True, verbose_name='Awarded At')),
-                ('notes', models.TextField(blank=True, default='', max_length=500, verbose_name='Notes')),
-                ('awarded_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='awarded_badges', to=settings.AUTH_USER_MODEL, verbose_name='Awarded By')),
-                ('badge', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_badges', to='nest.badge', verbose_name='Badge')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_badges', to=settings.AUTH_USER_MODEL, verbose_name='User')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("nest_created_at", models.DateTimeField(auto_now_add=True)),
+                ("nest_updated_at", models.DateTimeField(auto_now=True)),
+                ("awarded_at", models.DateTimeField(auto_now_add=True, verbose_name="Awarded At")),
+                (
+                    "notes",
+                    models.TextField(blank=True, default="", max_length=500, verbose_name="Notes"),
+                ),
+                (
+                    "awarded_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="awarded_badges",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Awarded By",
+                    ),
+                ),
+                (
+                    "badge",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="user_badges",
+                        to="nest.badge",
+                        verbose_name="Badge",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="user_badges",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="User",
+                    ),
+                ),
             ],
             options={
-                'verbose_name_plural': 'User Badges',
-                'db_table': 'nest_user_badges',
-                'ordering': ['-awarded_at'],
-                'unique_together': {('user', 'badge')},
+                "verbose_name_plural": "User Badges",
+                "db_table": "nest_user_badges",
+                "ordering": ["-awarded_at"],
+                "unique_together": {("user", "badge")},
             },
         ),
         migrations.AddField(
-            model_name='user',
-            name='badges',
-            field=models.ManyToManyField(blank=True, related_name='users', through='nest.UserBadge', through_fields=('user', 'badge'), to='nest.badge', verbose_name='Badges'),
+            model_name="user",
+            name="badges",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="users",
+                through="nest.UserBadge",
+                through_fields=("user", "badge"),
+                to="nest.badge",
+                verbose_name="Badges",
+            ),
         ),
     ]
