@@ -1,669 +1,629 @@
-// __tests__/unit/components/DonutBarChart.test.tsx
-import { screen, fireEvent, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import React from 'react'
 import { render } from '@testing-library/react'
+import { useTheme } from 'next-themes'
+import DonutBarChart from 'components/DonutBarChart'
 
-// Mock data for testing
-const mockChartData = {
-  balanced: [33.3, 33.3, 33.4],
-  healthy: [80, 15, 5],
-  single: [100],
-  decimal: [25.555, 30.777, 44.123],
-  large: [999999.999, 1000000.001, 2000000.5],
-  empty: [],
-  zeros: [0, 0, 0],
-  negative: [-10, 50, -20]
-}
-
-const mockTitles = {
-  normal: 'Test Chart Title',
-  empty: '',
-  long: 'This is a very long title that should test how the component handles lengthy text content in the title area',
-  special: 'Chart Title: 100% Success! @#$%^&*()',
-  unicode: 'Chart Title with emojis 📊 and unicode',
-  html: '<script>alert("xss")</script>Chart Title',
-  multiline: 'First Line\nSecond Line\nThird Line'
-}
-
-const mockIcons = {
-  chartPie: 'chart-pie',
-  chartBar: 'chart-bar',
-  analytics: 'analytics',
-  invalid: null,
-  undefined: undefined
-}
-
-const mockColorPalettes = {
-  primary: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
-  accessibility: ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728'],
-  high_contrast: ['#000000', '#FFFFFF', '#FF0000', '#00FF00']
-}
-
-// Mock component for testing
-interface MockChartProps {
-  data?: number[] | null
-  title?: string
-  icon?: string | null | undefined
-  options?: any
-}
-
-const MockChart: React.FC<MockChartProps> = ({ data = [], title, icon, options }) => {
-  // Handle null/undefined data gracefully
-  const safeData = data || []
-  
-  return (
-    <div data-testid="mock-chart">
-      {title && (
-        <div data-testid="chart-title" style={{ whiteSpace: 'pre-line' }}>{title}</div>
-      )}
-      {icon && (
-        <div data-testid="chart-icon" data-icon={icon}></div>
-      )}
-      <div data-testid="chart-data" data-chart-data={JSON.stringify(safeData)}>
-        {safeData.map((value, index) => (
-          <div 
-            key={index} 
-            data-testid="chart-segment" 
-            data-value={value != null ? value.toString() : 'null'}
-          />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// Helper functions
-const getChartData = (element: HTMLElement): number[] => {
-  const dataAttr = element.querySelector('[data-testid="chart-data"]')?.getAttribute('data-chart-data')
-  return dataAttr ? JSON.parse(dataAttr) : []
-}
-
-const getChartOptions = (element: HTMLElement): any => {
-  // This would normally read from the element's attributes or data
-  // For testing purposes, we'll return the appropriate palette based on test context
-  const testElement = element.closest('[data-testid="mock-chart"]')
-  const chartData = testElement?.querySelector('[data-testid="chart-data"]')
-  
-  // Try to determine which palette was used based on test context
-  // This is a simplified version for testing
-  return {
-    colors: mockColorPalettes.primary, // Default, can be overridden in specific tests
-    labels: ['A', 'B', 'C'],
-    legend: { show: true, position: 'bottom' },
-    chart: { animations: { enabled: true, speed: 800 } },
-    stroke: { show: true }
-  }
-}
-
-const validateChartOptions = (options: any): { isValid: boolean; errors: string[] } => {
-  const errors: string[] = []
-
-  if (!options.labels || !Array.isArray(options.labels)) {
-    errors.push('Chart options must include labels array')
-  }
-
-  if (!options.colors || !Array.isArray(options.colors)) {
-    errors.push('Chart options must include colors array')
-  }
-
-  if (options.legend) {
-    if (typeof options.legend.show !== 'boolean') {
-      errors.push('Legend show property must be boolean')
-    }
-    if (!['top', 'bottom', 'left', 'right'].includes(options.legend.position)) {
-      errors.push('Legend position must be valid')
-    }
-  }
-
-  if (!options.chart || !options.chart.animations) {
-    errors.push('Chart options must include animations configuration')
-  } else {
-    if (typeof options.chart.animations.enabled !== 'boolean') {
-      errors.push('Chart animations enabled must be boolean')
-    }
-    if (typeof options.chart.animations.speed !== 'number') {
-      errors.push('Chart animations speed must be number')
-    }
-  }
-
-  if (options.stroke && typeof options.stroke.show !== 'boolean') {
-    errors.push('Chart stroke show property must be boolean')
-  }
-
-  return {
-    isValid: errors.length === 0,
-    errors
-  }
-}
-
-// Mock ApexCharts
-jest.mock('apexcharts', () => ({
-  __esModule: true,
-  default: jest.fn().mockImplementation(() => ({
-    render: jest.fn().mockResolvedValue(undefined),
-    destroy: jest.fn(),
-    updateOptions: jest.fn().mockResolvedValue(undefined),
-    updateSeries: jest.fn(),
-    toggleSeries: jest.fn(),
-    showSeries: jest.fn(),
-    hideSeries: jest.fn(),
-    resetSeries: jest.fn(),
-    zoomX: jest.fn(),
-    toggleDataPointSelection: jest.fn(),
-    appendData: jest.fn(),
-    appendSeries: jest.fn(),
-    isSeriesHidden: jest.fn().mockReturnValue(false),
-  })),
+// Mock next-themes
+jest.mock('next-themes', () => ({
+  useTheme: jest.fn(),
 }))
 
+// Mock next/dynamic for react-apexcharts
+jest.mock('next/dynamic', () => {
+  return jest.fn(() => {
+    // Mock Chart component that mimics react-apexcharts
+    const MockChart = ({ options, series, height, type, ...props }: any) => (
+      <div 
+        data-testid="apex-chart"
+        data-options={JSON.stringify(options)}
+        data-series={JSON.stringify(series)}
+        data-height={height}
+        data-type={type}
+        {...props}
+      >
+        ApexCharts Mock
+      </div>
+    )
+    MockChart.displayName = 'Chart'
+    return MockChart
+  })
+})
+
+// Mock utils/round
+jest.mock('utils/round', () => ({
+  round: jest.fn((value: number, decimals: number) => {
+    return Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals)
+  }),
+}))
+
+// Mock components
+jest.mock('components/AnchorTitle', () => {
+  const MockAnchorTitle = ({ title }: { title: string }) => (
+    <div data-testid="anchor-title">{title}</div>
+  )
+  MockAnchorTitle.displayName = 'AnchorTitle'
+  return MockAnchorTitle
+})
+
+jest.mock('components/SecondaryCard', () => {
+  const MockSecondaryCard = ({ title, icon, children }: any) => (
+    <div data-testid="secondary-card" data-icon={icon}>
+      <div data-testid="card-title">{title}</div>
+      <div data-testid="card-content">{children}</div>
+    </div>
+  )
+  MockSecondaryCard.displayName = 'SecondaryCard'
+  return MockSecondaryCard
+})
+
 describe('DonutBarChart Component Test Suite', () => {
-  let mockApexChart: jest.Mock
-  
+  const mockUseTheme = useTheme as jest.MockedFunction<typeof useTheme>
+
   beforeEach(() => {
-    mockApexChart = require('apexcharts').default
-    mockApexChart.mockClear()
+    mockUseTheme.mockReturnValue({
+      theme: 'light',
+      setTheme: jest.fn(),
+      themes: ['light', 'dark'],
+      systemTheme: 'light',
+      resolvedTheme: 'light'
+    })
     jest.clearAllMocks()
   })
 
-  afterEach(() => {
-    jest.restoreAllMocks()
-  })
-
-  describe('Renders successfully with various data sets', () => {
-    it('renders with balanced data', () => {
+  describe('Basic rendering functionality', () => {
+    it('renders the component with required props', () => {
       render(
-        <MockChart
-          data={mockChartData.balanced}
-          title={mockTitles.normal}
-          icon={mockIcons.chartPie}
+        <DonutBarChart
+          icon="chart-pie"
+          title="Test Chart"
+          series={[50, 30, 20]}
         />
       )
 
-      expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
-      expect(screen.getByTestId('chart-title')).toHaveTextContent('Test Chart Title')
-      expect(screen.getByTestId('chart-icon')).toHaveAttribute('data-icon', 'chart-pie')
-      
-      const segments = screen.getAllByTestId('chart-segment')
-      expect(segments).toHaveLength(3)
-      expect(segments[0]).toHaveAttribute('data-value', '33.3')
-      expect(segments[1]).toHaveAttribute('data-value', '33.3')
-      expect(segments[2]).toHaveAttribute('data-value', '33.4')
+      expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
+      expect(screen.getByTestId('apex-chart')).toBeInTheDocument()
     })
 
-    it('renders with healthy data distribution', () => {
-      render(<MockChart data={mockChartData.healthy} />)
-      
-      const chartData = getChartData(screen.getByTestId('mock-chart'))
-      expect(chartData).toEqual([80, 15, 5])
+    it('renders title through AnchorTitle component', () => {
+      render(
+        <DonutBarChart
+          icon="chart-bar"
+          title="Health Metrics"
+          series={[60, 25, 15]}
+        />
+      )
+
+      expect(screen.getByTestId('anchor-title')).toHaveTextContent('Health Metrics')
     })
 
-    it('renders with single data point', () => {
-      render(<MockChart data={mockChartData.single} />)
-      
-      const segments = screen.getAllByTestId('chart-segment')
-      expect(segments).toHaveLength(1)
-      expect(segments[0]).toHaveAttribute('data-value', '100')
-    })
+    it('passes icon to SecondaryCard', () => {
+      render(
+        <DonutBarChart
+          icon="analytics"
+          title="System Status"
+          series={[80, 15, 5]}
+        />
+      )
 
-    it('renders with decimal values', () => {
-      render(<MockChart data={mockChartData.decimal} />)
-      
-      const chartData = getChartData(screen.getByTestId('mock-chart'))
-      expect(chartData).toEqual([25.555, 30.777, 44.123])
-    })
-
-    it('renders with large numbers', () => {
-      render(<MockChart data={mockChartData.large} />)
-      
-      const chartData = getChartData(screen.getByTestId('mock-chart'))
-      expect(chartData).toEqual([999999.999, 1000000.001, 2000000.5])
+      expect(screen.getByTestId('secondary-card')).toHaveAttribute('data-icon', 'analytics')
     })
   })
 
-  describe('Handles edge cases and invalid data', () => {
-    it('handles empty data array', () => {
-      expect(() => {
-        render(<MockChart data={mockChartData.empty} />)
-      }).not.toThrow()
+  describe('Series data handling', () => {
+    it('processes series data with rounding', () => {
+      const series = [33.333, 33.333, 33.334]
+      
+      render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Balanced Data"
+          series={series}
+        />
+      )
 
-      const segments = screen.queryAllByTestId('chart-segment')
-      expect(segments).toHaveLength(0)
+      const chart = screen.getByTestId('apex-chart')
+      const chartSeries = JSON.parse(chart.getAttribute('data-series') || '[]')
+      
+      // Should be rounded to 1 decimal place
+      expect(chartSeries).toEqual([33.3, 33.3, 33.3])
+    })
+
+    it('handles integer values correctly', () => {
+      const series = [50, 30, 20]
+      
+      render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Integer Data"
+          series={series}
+        />
+      )
+
+      const chart = screen.getByTestId('apex-chart')
+      const chartSeries = JSON.parse(chart.getAttribute('data-series') || '[]')
+      
+      expect(chartSeries).toEqual([50, 30, 20])
+    })
+
+    it('handles decimal values with proper rounding', () => {
+      const series = [25.555, 30.777, 43.668]
+      
+      render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Decimal Data"
+          series={series}
+        />
+      )
+
+      const chart = screen.getByTestId('apex-chart')
+      const chartSeries = JSON.parse(chart.getAttribute('data-series') || '[]')
+      
+      // Rounded to 1 decimal place
+      expect(chartSeries).toEqual([25.6, 30.8, 43.7])
     })
 
     it('handles zero values', () => {
-      render(<MockChart data={mockChartData.zeros} />)
+      const series = [0, 50, 0]
       
-      const segments = screen.getAllByTestId('chart-segment')
-      expect(segments).toHaveLength(3)
-      segments.forEach(segment => {
-        expect(segment).toHaveAttribute('data-value', '0')
-      })
-    })
+      render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="With Zeros"
+          series={series}
+        />
+      )
 
-    it('handles negative values', () => {
-      render(<MockChart data={mockChartData.negative} />)
+      const chart = screen.getByTestId('apex-chart')
+      const chartSeries = JSON.parse(chart.getAttribute('data-series') || '[]')
       
-      const chartData = getChartData(screen.getByTestId('mock-chart'))
-      expect(chartData).toEqual([-10, 50, -20])
+      expect(chartSeries).toEqual([0, 50, 0])
     })
 
-    it('handles undefined data', () => {
-      expect(() => {
-        render(<MockChart data={undefined} />)
-      }).not.toThrow()
+    it('handles single value', () => {
+      const series = [100]
+      
+      render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Single Value"
+          series={series}
+        />
+      )
+
+      const chart = screen.getByTestId('apex-chart')
+      const chartSeries = JSON.parse(chart.getAttribute('data-series') || '[]')
+      
+      expect(chartSeries).toEqual([100])
     })
 
-    it('handles null data', () => {
-      expect(() => {
-        render(<MockChart data={null as any} />)
-      }).not.toThrow()
+    it('handles empty series array', () => {
+      const series: number[] = []
+      
+      render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Empty Data"
+          series={series}
+        />
+      )
+
+      const chart = screen.getByTestId('apex-chart')
+      const chartSeries = JSON.parse(chart.getAttribute('data-series') || '[]')
+      
+      expect(chartSeries).toEqual([])
     })
   })
 
-  describe('Title and icon rendering variations', () => {
-    it('renders normal title correctly', () => {
-      render(<MockChart title={mockTitles.normal} />)
+  describe('Chart configuration', () => {
+    it('configures chart with correct options', () => {
+      render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Configuration Test"
+          series={[40, 35, 25]}
+        />
+      )
+
+      const chart = screen.getByTestId('apex-chart')
+      const options = JSON.parse(chart.getAttribute('data-options') || '{}')
       
-      expect(screen.getByTestId('chart-title')).toHaveTextContent('Test Chart Title')
+      expect(options.chart.animations.enabled).toBe(true)
+      expect(options.chart.animations.speed).toBe(1000)
+      expect(options.legend.show).toBe(true)
+      expect(options.legend.position).toBe('bottom')
+      expect(options.stroke.show).toBe(false)
+      expect(options.colors).toEqual(['#0ef94e', '#f9b90e', '#f94e0e'])
+      expect(options.labels).toEqual(['Healthy', 'Need Attention', 'Unhealthy'])
     })
 
-    it('handles empty title', () => {
-      render(<MockChart title={mockTitles.empty} />)
+    it('sets correct chart type and height', () => {
+      render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Type and Height Test"
+          series={[60, 25, 15]}
+        />
+      )
+
+      const chart = screen.getByTestId('apex-chart')
       
-      const title = screen.queryByTestId('chart-title')
-      if (title) {
-        expect(title).toHaveTextContent('')
-      }
+      expect(chart.getAttribute('data-type')).toBe('donut')
+      expect(chart.getAttribute('data-height')).toBe('250')
     })
 
-    it('handles long title', () => {
-      render(<MockChart title={mockTitles.long} />)
+    it('uses fixed color scheme', () => {
+      render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Color Test"
+          series={[33, 33, 34]}
+        />
+      )
+
+      const chart = screen.getByTestId('apex-chart')
+      const options = JSON.parse(chart.getAttribute('data-options') || '{}')
       
-      expect(screen.getByTestId('chart-title')).toHaveTextContent(mockTitles.long)
+      expect(options.colors).toEqual([
+        '#0ef94e', // green
+        '#f9b90e', // orange  
+        '#f94e0e'  // red
+      ])
     })
 
-    it('handles special characters in title', () => {
-      render(<MockChart title={mockTitles.special} />)
+    it('uses fixed labels', () => {
+      render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Labels Test"
+          series={[70, 20, 10]}
+        />
+      )
+
+      const chart = screen.getByTestId('apex-chart')
+      const options = JSON.parse(chart.getAttribute('data-options') || '{}')
       
-      expect(screen.getByTestId('chart-title')).toHaveTextContent('Chart Title: 100% Success! @#$%^&*()')
-    })
-
-    it('handles unicode characters in title', () => {
-      render(<MockChart title={mockTitles.unicode} />)
-      
-      // cspell:disable-next-line
-      expect(screen.getByTestId('chart-title')).toHaveTextContent('Chart Title with emojis 📊 and unicode')
-    })
-
-    it('safely handles HTML in title', () => {
-      render(<MockChart title={mockTitles.html} />)
-      
-      const title = screen.getByTestId('chart-title')
-      expect(title).toHaveTextContent('<script>alert("xss")</script>Chart Title')
-      // Ensure HTML is not executed
-      expect(title.innerHTML).not.toContain('<script>')
-    })
-  })
-
-  describe('Icon rendering and validation', () => {
-    it('renders valid chart pie icon', () => {
-      render(<MockChart icon={mockIcons.chartPie} />)
-      
-      expect(screen.getByTestId('chart-icon')).toHaveAttribute('data-icon', 'chart-pie')
-    })
-
-    it('renders valid chart bar icon', () => {
-      render(<MockChart icon={mockIcons.chartBar} />)
-      
-      expect(screen.getByTestId('chart-icon')).toHaveAttribute('data-icon', 'chart-bar')
-    })
-
-    it('handles null icon', () => {
-      render(<MockChart icon={mockIcons.invalid} />)
-      
-      expect(screen.queryByTestId('chart-icon')).not.toBeInTheDocument()
-    })
-
-    it('handles undefined icon', () => {
-      render(<MockChart icon={mockIcons.undefined} />)
-      
-      expect(screen.queryByTestId('chart-icon')).not.toBeInTheDocument()
-    })
-
-    it('renders analytics icon', () => {
-      render(<MockChart icon={mockIcons.analytics} />)
-      
-      expect(screen.getByTestId('chart-icon')).toHaveAttribute('data-icon', 'analytics')
-    })
-  })
-
-  describe('Chart options validation and configuration', () => {
-    it('validates complete valid chart options', () => {
-      const validOptions = {
-        labels: ['Label 1', 'Label 2', 'Label 3'],
-        colors: mockColorPalettes.primary,
-        legend: {
-          show: true,
-          position: 'bottom'
-        },
-        chart: {
-          animations: {
-            enabled: true,
-            speed: 800
-          }
-        },
-        stroke: {
-          show: true
-        }
-      }
-
-      const validation = validateChartOptions(validOptions)
-      expect(validation.isValid).toBe(true)
-      expect(validation.errors).toHaveLength(0)
-    })
-
-    it('identifies missing labels', () => {
-      const invalidOptions = {
-        colors: mockColorPalettes.primary,
-        legend: { show: true, position: 'bottom' },
-        chart: { animations: { enabled: true, speed: 800 } },
-        stroke: { show: true }
-      }
-
-      const validation = validateChartOptions(invalidOptions)
-      expect(validation.isValid).toBe(false)
-      expect(validation.errors).toContain('Chart options must include labels array')
-    })
-
-    it('identifies missing colors', () => {
-      const invalidOptions = {
-        labels: ['Label 1', 'Label 2'],
-        legend: { show: true, position: 'bottom' },
-        chart: { animations: { enabled: true, speed: 800 } },
-        stroke: { show: true }
-      }
-
-      const validation = validateChartOptions(invalidOptions)
-      expect(validation.isValid).toBe(false)
-      expect(validation.errors).toContain('Chart options must include colors array')
-    })
-
-    it('identifies invalid legend configuration', () => {
-      const invalidOptions = {
-        labels: ['Label 1', 'Label 2'],
-        colors: mockColorPalettes.primary,
-        legend: { show: 'yes', position: 'middle' }, // Invalid types
-        chart: { animations: { enabled: true, speed: 800 } },
-        stroke: { show: true }
-      }
-
-      const validation = validateChartOptions(invalidOptions)
-      expect(validation.isValid).toBe(false)
-      expect(validation.errors).toContain('Legend show property must be boolean')
-      expect(validation.errors).toContain('Legend position must be valid')
-    })
-
-    it('identifies missing animation configuration', () => {
-      const invalidOptions = {
-        labels: ['Label 1', 'Label 2'],
-        colors: mockColorPalettes.primary,
-        legend: { show: true, position: 'bottom' },
-        chart: {}, // Missing animations
-        stroke: { show: true }
-      }
-
-      const validation = validateChartOptions(invalidOptions)
-      expect(validation.isValid).toBe(false)
-      expect(validation.errors).toContain('Chart options must include animations configuration')
-    })
-
-    it('identifies invalid animation properties', () => {
-      const invalidOptions = {
-        labels: ['Label 1', 'Label 2'],
-        colors: mockColorPalettes.primary,
-        legend: { show: true, position: 'bottom' },
-        chart: {
-          animations: {
-            enabled: 'true', // Should be boolean
-            speed: '800'     // Should be number
-          }
-        },
-        stroke: { show: true }
-      }
-
-      const validation = validateChartOptions(invalidOptions)
-      expect(validation.isValid).toBe(false)
-      expect(validation.errors).toContain('Chart animations enabled must be boolean')
-      expect(validation.errors).toContain('Chart animations speed must be number')
-    })
-
-    it('identifies invalid stroke configuration', () => {
-      const invalidOptions = {
-        labels: ['Label 1', 'Label 2'],
-        colors: mockColorPalettes.primary,
-        legend: { show: true, position: 'bottom' },
-        chart: { animations: { enabled: true, speed: 800 } },
-        stroke: { show: 'false' } // Should be boolean
-      }
-
-      const validation = validateChartOptions(invalidOptions)
-      expect(validation.isValid).toBe(false)
-      expect(validation.errors).toContain('Chart stroke show property must be boolean')
+      expect(options.labels).toEqual(['Healthy', 'Need Attention', 'Unhealthy'])
     })
   })
 
   describe('Theme integration', () => {
-    it('renders correctly with light theme', () => {
-      const { container } = render(<MockChart data={mockChartData.balanced} />)
-      
-      expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
-      expect(container).toBeTruthy()
-    })
+    it('applies light theme colors to legend labels', () => {
+      mockUseTheme.mockReturnValue({
+        theme: 'light',
+        setTheme: jest.fn(),
+        themes: ['light', 'dark'],
+        systemTheme: 'light',
+        resolvedTheme: 'light'
+      })
 
-    it('renders correctly with dark theme', () => {
-      const { container } = render(<MockChart data={mockChartData.balanced} />)
-      
-      expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
-      expect(container).toBeTruthy()
-    })
-  })
-
-  describe('Color palette handling', () => {
-    it('handles primary color palette', () => {
-      const options = {
-        colors: mockColorPalettes.primary,
-        labels: ['A', 'B', 'C'],
-        legend: { show: true, position: 'bottom' },
-        chart: { animations: { enabled: true, speed: 800 } },
-        stroke: { show: true }
-      }
-
-      render(<MockChart data={mockChartData.balanced} options={options} />)
-      
-      const retrievedOptions = getChartOptions(screen.getByTestId('mock-chart'))
-      expect(retrievedOptions.colors).toEqual(mockColorPalettes.primary)
-    })
-
-    it('handles accessibility color palette', () => {
-      // For this test, we'll just verify the component renders without checking exact palette
-      const options = {
-        colors: mockColorPalettes.accessibility,
-        labels: ['A', 'B', 'C'],
-        legend: { show: true, position: 'bottom' },
-        chart: { animations: { enabled: true, speed: 800 } },
-        stroke: { show: true }
-      }
-
-      render(<MockChart data={mockChartData.balanced} options={options} />)
-      
-      // Just verify component renders successfully with accessibility palette
-      expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
-      expect(options.colors).toEqual(mockColorPalettes.accessibility)
-    })
-
-    it('handles high contrast color palette', () => {
-      // For this test, we'll just verify the component renders without checking exact palette
-      const options = {
-        colors: mockColorPalettes.high_contrast,
-        labels: ['A', 'B', 'C'],
-        legend: { show: true, position: 'bottom' },
-        chart: { animations: { enabled: true, speed: 800 } },
-        stroke: { show: true }
-      }
-
-      render(<MockChart data={mockChartData.balanced} options={options} />)
-      
-      // Just verify component renders successfully with high contrast palette
-      expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
-      expect(options.colors).toEqual(mockColorPalettes.high_contrast)
-    })
-  })
-
-  describe('Data transformation and processing', () => {
-    it('processes percentage data correctly', () => {
-      const percentageData = [25, 35, 40]
-      render(<MockChart data={percentageData} />)
-      
-      const chartData = getChartData(screen.getByTestId('mock-chart'))
-      expect(chartData.reduce((sum, val) => sum + val, 0)).toBe(100)
-    })
-
-    it('handles data normalization', () => {
-      const unnormalizedData = [100, 200, 300]
-      render(<MockChart data={unnormalizedData} />)
-      
-      const chartData = getChartData(screen.getByTestId('mock-chart'))
-      expect(chartData).toEqual(unnormalizedData)
-    })
-
-    it('preserves data precision', () => {
-      render(<MockChart data={mockChartData.decimal} />)
-      
-      const chartData = getChartData(screen.getByTestId('mock-chart'))
-      expect(chartData[0]).toBe(25.555)
-      expect(chartData[1]).toBe(30.777)
-      expect(chartData[2]).toBe(44.123)
-    })
-  })
-
-  describe('Accessibility and ARIA compliance', () => {
-    it('maintains proper structure for screen readers', () => {
       render(
-        <MockChart
-          data={mockChartData.balanced}
-          title={mockTitles.normal}
-          icon={mockIcons.chartPie}
+        <DonutBarChart
+          icon="chart-pie"
+          title="Light Theme"
+          series={[50, 30, 20]}
         />
       )
 
-      expect(screen.getByTestId('chart-title')).toBeInTheDocument()
-      expect(screen.getByTestId('chart-icon')).toBeInTheDocument()
-      expect(screen.getByTestId('chart-data')).toBeInTheDocument()
-    })
-
-    it('handles missing accessibility elements gracefully', () => {
-      render(<MockChart data={mockChartData.balanced} />)
+      const chart = screen.getByTestId('apex-chart')
+      const options = JSON.parse(chart.getAttribute('data-options') || '{}')
       
-      expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
-      expect(screen.queryByTestId('chart-title')).not.toBeInTheDocument()
-      expect(screen.queryByTestId('chart-icon')).not.toBeInTheDocument()
-    })
-  })
-
-  describe('Performance and memory management', () => {
-    it('handles large datasets without errors', () => {
-      const largeDataset = Array.from({ length: 1000 }, (_, i) => i + 1)
-      
-      expect(() => {
-        render(<MockChart data={largeDataset} />)
-      }).not.toThrow()
-      
-      const segments = screen.getAllByTestId('chart-segment')
-      expect(segments).toHaveLength(1000)
+      expect(options.legend.labels.colors).toBe('#1E1E2C')
     })
 
-    it('processes complex options without performance issues', () => {
-      const complexOptions = {
-        labels: Array.from({ length: 100 }, (_, i) => `Label ${i + 1}`),
-        colors: Array.from({ length: 100 }, (_, i) => `#${i.toString(16).padStart(6, '0')}`),
-        legend: { show: true, position: 'bottom' },
-        chart: {
-          animations: { enabled: true, speed: 800 },
-          toolbar: { show: true },
-          zoom: { enabled: true }
-        },
-        stroke: { show: true, width: 2 }
-      }
+    it('applies dark theme colors to legend labels', () => {
+      mockUseTheme.mockReturnValue({
+        theme: 'dark',
+        setTheme: jest.fn(),
+        themes: ['light', 'dark'],
+        systemTheme: 'dark',
+        resolvedTheme: 'dark'
+      })
 
-      expect(() => {
-        render(<MockChart data={mockChartData.balanced} options={complexOptions} />)
-      }).not.toThrow()
-    })
-  })
-
-  describe('Error boundaries and error handling', () => {
-    it('handles invalid JSON in options gracefully', () => {
-      expect(() => {
-        render(<MockChart data={mockChartData.balanced} options={{}} />)
-      }).not.toThrow()
-    })
-
-    it('recovers from data processing errors', () => {
-      const problematicData = [NaN, Infinity, -Infinity, null, undefined] as any
-      
-      expect(() => {
-        render(<MockChart data={problematicData} />)
-      }).not.toThrow()
-    })
-
-    it('handles component unmounting cleanly', () => {
-      const { unmount } = render(<MockChart data={mockChartData.balanced} />)
-      
-      expect(() => {
-        unmount()
-      }).not.toThrow()
-    })
-  })
-
-  describe('Integration with ApexCharts library', () => {
-    it('initializes ApexCharts with correct configuration', async () => {
-      const mockOptions = {
-        labels: ['A', 'B', 'C'],
-        colors: mockColorPalettes.primary,
-        legend: { show: true, position: 'bottom' },
-        chart: { animations: { enabled: true, speed: 800 } },
-        stroke: { show: true }
-      }
-
-      render(<MockChart data={mockChartData.balanced} options={mockOptions} />)
-
-      // For mock testing, we just verify the component renders
-      // In real implementation, ApexCharts would be called
-      expect(screen.getByTestId('mock-chart')).toBeInTheDocument()
-    })
-
-    it('handles chart updates correctly', async () => {
-      const { rerender } = render(
-        <MockChart data={mockChartData.balanced} title="Original Title" />
+      render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Dark Theme"
+          series={[45, 35, 20]}
+        />
       )
+
+      const chart = screen.getByTestId('apex-chart')
+      const options = JSON.parse(chart.getAttribute('data-options') || '{}')
+      
+      expect(options.legend.labels.colors).toBe('#ececec')
+    })
+
+    it('uses theme as key for Chart component', () => {
+      mockUseTheme.mockReturnValue({
+        theme: 'dark',
+        setTheme: jest.fn(),
+        themes: ['light', 'dark'],
+        systemTheme: 'dark',
+        resolvedTheme: 'dark'
+      })
+
+      render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Theme Key Test"
+          series={[55, 30, 15]}
+        />
+      )
+
+      const chart = screen.getByTestId('apex-chart')
+      // The key should be applied but we can't directly test it in our mock
+      // We verify the theme is being used in legend colors instead
+      const options = JSON.parse(chart.getAttribute('data-options') || '{}')
+      expect(options.legend.labels.colors).toBe('#ececec')
+    })
+  })
+
+  describe('Component structure and accessibility', () => {
+    it('maintains proper component hierarchy', () => {
+      render(
+        <DonutBarChart
+          icon="heart"
+          title="Structure Test"
+          series={[75, 15, 10]}
+        />
+      )
+
+      const card = screen.getByTestId('secondary-card')
+      const title = screen.getByTestId('anchor-title')
+      const chart = screen.getByTestId('apex-chart')
+      
+      expect(card).toBeInTheDocument()
+      expect(title).toBeInTheDocument()
+      expect(chart).toBeInTheDocument()
+      
+      // Verify hierarchy
+      expect(card).toContainElement(title)
+      expect(card).toContainElement(chart)
+    })
+
+    it('renders chart inside proper container div', () => {
+      render(
+        <DonutBarChart
+          icon="dashboard"
+          title="Container Test"
+          series={[40, 40, 20]}
+        />
+      )
+
+      const cardContent = screen.getByTestId('card-content')
+      const chart = screen.getByTestId('apex-chart')
+      
+      expect(cardContent).toContainElement(chart)
+    })
+  })
+
+  describe('Prop validation and edge cases', () => {
+    it('handles different icon types', () => {
+      const iconTypes = ['chart-pie', 'chart-bar', 'analytics', 'dashboard', 'heart']
+      
+      iconTypes.forEach(icon => {
+        const { unmount } = render(
+          <DonutBarChart
+            icon={icon as any}
+            title={`Test ${icon}`}
+            series={[50, 30, 20]}
+          />
+        )
+        
+        expect(screen.getByTestId('secondary-card')).toHaveAttribute('data-icon', icon)
+        unmount()
+      })
+    })
+
+    it('handles various title formats', () => {
+      const titles = [
+        'Simple Title',
+        'Title with Numbers 123',
+        'Title with Special Characters !@#$%',
+        'Very Long Title That Might Wrap Multiple Lines And Test Component Behavior',
+        'Title with Émojis 📊 and Unicode Characters',
+        ''
+      ]
+      
+      titles.forEach(title => {
+        const { unmount } = render(
+          <DonutBarChart
+            icon="chart-pie"
+            title={title}
+            series={[33, 33, 34]}
+          />
+        )
+        
+        expect(screen.getByTestId('anchor-title')).toHaveTextContent(title)
+        unmount()
+      })
+    })
+
+    it('handles large series values', () => {
+      const largeSeries = [999999.999, 1000000.001, 2000000.5]
+      
+      render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Large Values"
+          series={largeSeries}
+        />
+      )
+
+      const chart = screen.getByTestId('apex-chart')
+      const chartSeries = JSON.parse(chart.getAttribute('data-series') || '[]')
+      
+      // Should be rounded to 1 decimal place
+      expect(chartSeries).toEqual([1000000.0, 1000000.0, 2000000.5])
+    })
+
+    it('handles negative values', () => {
+      const negativeSeries = [-10.5, 50.7, -20.3]
+      
+      render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Negative Values"
+          series={negativeSeries}
+        />
+      )
+
+      const chart = screen.getByTestId('apex-chart')
+      const chartSeries = JSON.parse(chart.getAttribute('data-series') || '[]')
+      
+      expect(chartSeries).toEqual([-10.5, 50.7, -20.3])
+    })
+  })
+
+  describe('Performance and re-rendering', () => {
+    it('handles series updates correctly', () => {
+      const { rerender } = render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Update Test"
+          series={[50, 30, 20]}
+        />
+      )
+
+      let chart = screen.getByTestId('apex-chart')
+      let chartSeries = JSON.parse(chart.getAttribute('data-series') || '[]')
+      expect(chartSeries).toEqual([50, 30, 20])
 
       rerender(
-        <MockChart data={mockChartData.healthy} title="Updated Title" />
+        <DonutBarChart
+          icon="chart-pie"
+          title="Update Test"
+          series={[70, 20, 10]}
+        />
       )
 
-      expect(screen.getByTestId('chart-title')).toHaveTextContent('Updated Title')
-      const chartData = getChartData(screen.getByTestId('mock-chart'))
-      expect(chartData).toEqual(mockChartData.healthy)
+      chart = screen.getByTestId('apex-chart')
+      chartSeries = JSON.parse(chart.getAttribute('data-series') || '[]')
+      expect(chartSeries).toEqual([70, 20, 10])
     })
 
-    it('cleans up chart instances on unmount', () => {
-      const { unmount } = render(<MockChart data={mockChartData.balanced} />)
+    it('handles title updates correctly', () => {
+      const { rerender } = render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Original Title"
+          series={[40, 35, 25]}
+        />
+      )
+
+      expect(screen.getByTestId('anchor-title')).toHaveTextContent('Original Title')
+
+      rerender(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Updated Title"
+          series={[40, 35, 25]}
+        />
+      )
+
+      expect(screen.getByTestId('anchor-title')).toHaveTextContent('Updated Title')
+    })
+
+    it('handles icon updates correctly', () => {
+      const { rerender } = render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Icon Test"
+          series={[60, 25, 15]}
+        />
+      )
+
+      expect(screen.getByTestId('secondary-card')).toHaveAttribute('data-icon', 'chart-pie')
+
+      rerender(
+        <DonutBarChart
+          icon="chart-bar"
+          title="Icon Test"
+          series={[60, 25, 15]}
+        />
+      )
+
+      expect(screen.getByTestId('secondary-card')).toHaveAttribute('data-icon', 'chart-bar')
+    })
+
+    it('handles theme changes correctly', () => {
+      const { rerender } = render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Theme Change Test"
+          series={[45, 35, 20]}
+        />
+      )
+
+      let chart = screen.getByTestId('apex-chart')
+      let options = JSON.parse(chart.getAttribute('data-options') || '{}')
+      expect(options.legend.labels.colors).toBe('#1E1E2C') // light theme
+
+      mockUseTheme.mockReturnValue({
+        theme: 'dark',
+        setTheme: jest.fn(),
+        themes: ['light', 'dark'],
+        systemTheme: 'dark',
+        resolvedTheme: 'dark'
+      })
+
+      rerender(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Theme Change Test"
+          series={[45, 35, 20]}
+        />
+      )
+
+      chart = screen.getByTestId('apex-chart')
+      options = JSON.parse(chart.getAttribute('data-options') || '{}')
+      expect(options.legend.labels.colors).toBe('#ececec') // dark theme
+    })
+  })
+
+  describe('Integration with external dependencies', () => {
+    it('calls round utility function for each series value', () => {
+      const mockRound = require('utils/round').round
       
-      unmount()
-      
-      // For mock testing, we just verify unmount works without error
-      // In real implementation, ApexCharts cleanup would be verified
-      expect(true).toBe(true) // Placeholder assertion
+      render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Round Test"
+          series={[33.333, 44.444, 22.222]}
+        />
+      )
+
+      expect(mockRound).toHaveBeenCalledTimes(3)
+      expect(mockRound).toHaveBeenCalledWith(33.333, 1)
+      expect(mockRound).toHaveBeenCalledWith(44.444, 1)
+      expect(mockRound).toHaveBeenCalledWith(22.222, 1)
+    })
+
+    it('integrates properly with next-themes useTheme hook', () => {
+      render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Theme Integration"
+          series={[50, 30, 20]}
+        />
+      )
+
+      expect(mockUseTheme).toHaveBeenCalled()
+    })
+
+    it('uses dynamic import for Chart component (SSR safety)', () => {
+      render(
+        <DonutBarChart
+          icon="chart-pie"
+          title="Dynamic Import Test"
+          series={[40, 40, 20]}
+        />
+      )
+
+      // Chart should render (mocked) proving dynamic import works
+      expect(screen.getByTestId('apex-chart')).toBeInTheDocument()
     })
   })
 })
