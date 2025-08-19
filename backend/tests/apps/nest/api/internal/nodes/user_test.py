@@ -9,7 +9,7 @@ class TestGitHubAuthResult:
         assert AuthUserNode.__strawberry_definition__.name == "AuthUserNode"
 
         fields = {f.name: f for f in AuthUserNode.__strawberry_definition__.fields}
-        assert set(fields.keys()) == {"_id", "is_owasp_staff", "username"}
+        assert set(fields.keys()) == {"_id", "is_owasp_staff", "username", "badges"}
 
         username_field = fields["username"]
         is_owasp_staff_field = fields["is_owasp_staff"]

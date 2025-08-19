@@ -33,6 +33,14 @@ class User(AbstractUser):
         on_delete=models.CASCADE,
     )
 
+    # M2Ms.
+    badges = models.ManyToManyField(
+        "nest.Badge",
+        verbose_name="Badges",
+        related_name="users",
+        blank=True,
+    )
+
     def __str__(self) -> str:
         """Return a human-readable representation of the user.
 
