@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "build:tailwind": "ts-node --project tsconfig.tsnode.json scripts/generate-tailwind-config.ts",
     "build": "next build",
     "build:turbo": "next build --turbo",
     "dev": "next dev --port 3000",

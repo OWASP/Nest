@@ -51,13 +51,13 @@ importers:
         specifier: ^2.2.21
         version: 2.2.21(@heroui/system@2.4.20(@heroui/theme@2.4.20(tailwindcss@4.1.12))(framer-motion@12.23.12(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(@heroui/theme@2.4.20(tailwindcss@4.1.12))(framer-motion@12.23.12(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@next/eslint-plugin-next':
-        specifier: ^15.4.6
+        specifier: ^15.4.7
         version: 15.4.7
       '@next/third-parties':
-        specifier: ^15.4.6
+        specifier: ^15.4.7
         version: 15.4.7(next@15.4.7(@babel/core@7.28.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.54.2)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)
       '@sentry/nextjs':
-        specifier: ^10.4.0
+        specifier: ^10.5.0
         version: 10.5.0(@opentelemetry/context-async-hooks@2.0.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.0.1(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.0.1(@opentelemetry/api@1.9.0))(next@15.4.7(@babel/core@7.28.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.54.2)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)(webpack@5.101.3(@swc/core@1.13.3(@swc/helpers@0.5.17)))
       '@testing-library/user-event':
         specifier: ^14.6.1
@@ -111,7 +111,7 @@ importers:
         specifier: ^6.1.0
         version: 6.1.0
       next:
-        specifier: ^15.4.6
+        specifier: ^15.4.7
         version: 15.4.7(@babel/core@7.28.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.54.2)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       next-auth:
         specifier: ^4.24.11
@@ -132,11 +132,14 @@ importers:
         specifier: ^5.5.0
         version: 5.5.0(react@19.1.1)
       react-router-dom:
-        specifier: ^7.8.0
+        specifier: ^7.8.1
         version: 7.8.1(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       tailwind-merge:
         specifier: ^3.3.1
         version: 3.3.1
+      tailwindcss-animate:
+        specifier: ^1.0.7
+        version: 1.0.7(tailwindcss@4.1.12)
     devDependencies:
       '@axe-core/react':
         specifier: ^4.10.2
@@ -160,7 +163,7 @@ importers:
         specifier: ^4.1.12
         version: 4.1.12
       '@testing-library/jest-dom':
-        specifier: ^6.6.4
+        specifier: ^6.7.0
         version: 6.7.0
       '@testing-library/react':
         specifier: ^16.3.0
@@ -175,7 +178,7 @@ importers:
         specifier: ^14.1.2
         version: 14.1.2
       '@types/node':
-        specifier: ^22.17.1
+        specifier: ^22.17.2
         version: 22.17.2
       '@types/react':
         specifier: ^19.1.10
@@ -187,10 +190,10 @@ importers:
         specifier: ^2.0.4
         version: 2.0.4
       '@typescript-eslint/eslint-plugin':
-        specifier: ^8.39.1
+        specifier: ^8.40.0
         version: 8.40.0(@typescript-eslint/parser@8.40.0(eslint@9.33.0(jiti@2.5.1))(typescript@5.8.3))(eslint@9.33.0(jiti@2.5.1))(typescript@5.8.3)
       '@typescript-eslint/parser':
-        specifier: ^8.39.1
+        specifier: ^8.40.0
         version: 8.40.0(eslint@9.33.0(jiti@2.5.1))(typescript@5.8.3)
       autoprefixer:
         specifier: ^10.4.21
@@ -202,7 +205,7 @@ importers:
         specifier: ^9.33.0
         version: 9.33.0(jiti@2.5.1)
       eslint-config-next:
-        specifier: ^15.4.6
+        specifier: ^15.4.7
         version: 15.4.7(eslint@9.33.0(jiti@2.5.1))(typescript@5.8.3)
       eslint-config-prettier:
         specifier: ^10.1.8
@@ -261,9 +264,6 @@ importers:
       tailwindcss:
         specifier: ^4.1.12
         version: 4.1.12
-      tailwindcss-animate:
-        specifier: ^1.0.7
-        version: 1.0.7(tailwindcss@4.1.12)
       ts-jest:
         specifier: ^29.4.1
         version: 29.4.1(@babel/core@7.28.3)(@jest/transform@29.7.0)(@jest/types@30.0.5)(babel-jest@29.7.0(@babel/core@7.28.3))(jest-util@30.0.5)(jest@29.7.0(@types/node@22.17.2)(ts-node@10.9.2(@swc/core@1.13.3(@swc/helpers@0.5.17))(@types/node@22.17.2)(typescript@5.8.3)))(typescript@5.8.3)
@@ -274,7 +274,7 @@ importers:
         specifier: ~5.8.3
         version: 5.8.3
       typescript-eslint:
-        specifier: ^8.39.1
+        specifier: ^8.40.0
         version: 8.40.0(eslint@9.33.0(jiti@2.5.1))(typescript@5.8.3)
       util:
         specifier: ^0.12.5
