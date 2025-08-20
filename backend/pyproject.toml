@@ -22,6 +22,9 @@ django-redis = "^6.0.0"
 django-storages = { extras = [ "s3" ], version = "^1.14.4" }
 emoji = "^2.14.1"
 geopy = "^2.4.1"
+google-api-python-client = "^2.178.0"
+google-auth-httplib2 = "^0.2.0"
+google-auth-oauthlib = "^1.2.2"
 gunicorn = "^23.0.0"
 humanize = "^4.11.0"
 jinja2 = "^3.1.6"
@@ -47,9 +50,6 @@ slack-sdk = "^3.35.0"
 strawberry-graphql = { extras = [ "django" ], version = "^0.278.1" }
 strawberry-graphql-django = "^0.65.1"
 thefuzz = "^0.22.1"
-google-api-python-client = "^2.178.0"
-google-auth-httplib2 = "^0.2.0"
-google-auth-oauthlib = "^1.2.2"
 
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.36.4"
