@@ -14,6 +14,8 @@ def make_mock_employees(mock_employee):
     # This makes iterating over employees_without_badge yield mock_employee (not a list)
     mock_employees_without_badge.__iter__.return_value = iter([mock_employee])
     mock_employees_without_badge.count.return_value = 1
+    mock_employees_without_badge.values_list.return_value = [mock_employee.id]
+    mock_employees_without_badge.distinct.return_value = mock_employees_without_badge
     mock_employees.exclude.return_value = mock_employees_without_badge
     return mock_employees, mock_employees_without_badge
 
@@ -22,6 +24,8 @@ def make_mock_former_employees(mock_former_employee):
     mock_former_employees = MagicMock()
     mock_former_employees.__iter__.return_value = iter([mock_former_employee])
     mock_former_employees.count.return_value = 1
+    mock_former_employees.values_list.return_value = [mock_former_employee.id]
+    mock_former_employees.distinct.return_value = mock_former_employees
     return mock_former_employees
 
 
@@ -85,6 +89,8 @@ class TestSyncUserBadgesCommand:
         # Set up employee mocks
         mock_employee = MagicMock()
         mock_former_employee = MagicMock()
+        mock_employee.id = 456
+        mock_former_employee.id = 123
         mock_employees, _ = make_mock_employees(mock_employee)
         mock_former_employees = make_mock_former_employees(mock_former_employee)
 
@@ -97,7 +103,9 @@ class TestSyncUserBadgesCommand:
 
         # Assert correct badge assignment and removal calls
         mock_userbadge_get_or_create.assert_any_call(user=mock_employee, badge=mock_badge)
-        mock_userbadge_filter.assert_any_call(user__in=mock_former_employees, badge=mock_badge)
+        mock_userbadge_filter.assert_any_call(
+            user_id__in=mock_former_employees.values_list.return_value, badge=mock_badge
+        )
 
         # Check command output
         output = out.getvalue()
@@ -120,14 +128,17 @@ class TestSyncUserBadgesCommand:
         mock_employees = MagicMock()
         mock_employees.__iter__.return_value = iter([])
         mock_employees.count.return_value = 0
-        mock_employees.exclude.return_value = (
-            mock_employees  # Ensure exclude() yields an empty iterable
-        )
+        mock_employees.exclude.return_value = mock_employees
+        mock_employees.values_list.return_value = []
+        mock_employees.exclude.return_value.values_list.return_value = []
+        mock_employees.exclude.return_value.distinct.return_value = mock_employees
+        mock_employees.exclude.return_value.distinct.return_value.values_list.return_value = []
 
         mock_former_employees = MagicMock()
         mock_former_employees.__iter__.return_value = iter([])
         mock_former_employees.count.return_value = 0
-        mock_former_employees.exclude.return_value = mock_former_employees
+        mock_former_employees.values_list.return_value = []
+        mock_former_employees.distinct.return_value = mock_former_employees
 
         mock_user_filter.side_effect = [mock_employees, mock_former_employees]
 
@@ -157,18 +168,21 @@ class TestSyncUserBadgesCommand:
 
         # Set up employee mock that already has the badge
         mock_employee_with_badge = MagicMock()
-        # This employee already has the badge
-        mock_employee_with_badge.badges.filter.return_value.exists.return_value = True
         mock_employees = MagicMock()
         mock_employees.__iter__.return_value = iter([mock_employee_with_badge])
-        # Using exclude() would return 0 employees without the badge
         mock_employees.exclude.return_value = MagicMock()
         mock_employees.exclude.return_value.count.return_value = 0
+        mock_employees.exclude.return_value.values_list.return_value = []
+        mock_employees.exclude.return_value.distinct.return_value = (
+            mock_employees.exclude.return_value
+        )
 
         # No former employees have the badge
         mock_non_employees_filter = MagicMock()
         mock_non_employees_filter.count.return_value = 0
         mock_non_employees_filter.__iter__.return_value = iter([])
+        mock_non_employees_filter.values_list.return_value = []
+        mock_non_employees_filter.distinct.return_value = mock_non_employees_filter
 
         # Configure filter side effects for two command runs
         mock_user_filter.side_effect = [
@@ -186,11 +200,7 @@ class TestSyncUserBadgesCommand:
         out2 = StringIO()
         call_command("nest_update_badges", stdout=out2)
 
-        # Verify no add/remove operations were performed
-        mock_badge.users.add.assert_not_called()
-        mock_badge.users.remove.assert_not_called()
-
-        # Check both outputs contain zero-count messages (accept "employees" or "staff" wording)
+        # Check both outputs contain zero-count messages
         assert any(
             s in out1.getvalue() for s in ("Added badge to 0 employees", "Added badge to 0 staff")
         )

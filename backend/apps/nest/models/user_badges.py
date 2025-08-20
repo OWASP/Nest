@@ -13,6 +13,12 @@ class UserBadge(BulkSaveModel, TimestampedModel):
     class Meta:
         db_table = "nest_user_badges"
         verbose_name_plural = "User badges"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "badge"],
+                name="uq_userbadge_user_badge",
+            ),
+        ]
 
     note = models.CharField(
         verbose_name="Note",
@@ -38,4 +44,4 @@ class UserBadge(BulkSaveModel, TimestampedModel):
 
     def __str__(self) -> str:
         """Return a human-readable representation of the user badge."""
-        return f"{self.user.username} - {self.badge.name}"
+        return f"{self.user.login} - {self.badge.name}"
