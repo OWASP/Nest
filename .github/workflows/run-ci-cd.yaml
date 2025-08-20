@@ -483,6 +483,25 @@ jobs:
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml staging/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
 
+  run-lighthouse-ci:
+    name: Run Lighthouse CI
+    needs:
+      - deploy-staging-nest-proxy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+
+      - name: Run Lighthouse CI
+        working-directory: frontend
+        run: |
+          npx -y @lhci/cli@0.15.1 autorun
+
   build-production-images:
     name: Build Production Images
     env:
