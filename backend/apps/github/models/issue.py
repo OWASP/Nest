@@ -83,6 +83,16 @@ class Issue(GenericIssueModel):
         blank=True,
     )
 
+    @property
+    def latest_comment(self):
+        """Get the latest comment for this issue.
+
+        Returns:
+            Comment | None: The most recently created comment, or None if no comments exist.
+
+        """
+        return self.comments.order_by("-created_at").first()
+
     def from_github(self, gh_issue, *, author=None, milestone=None, repository=None):
         """Update the instance based on GitHub issue data.
 

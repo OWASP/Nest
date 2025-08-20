@@ -230,33 +230,33 @@ def sync_repository(
     return organization, repository
 
 
-def sync_issue_comments(gh_app, issue: Issue):
+def sync_issue_comments(gh_client, issue: Issue):
     """Sync new comments for a mentorship program specific issue on-demand.
 
     Args:
-        gh_app (Github): An authenticated PyGithub instance.
+        gh_client (Github): GitHub client.
         issue (Issue): The local database Issue object to sync comments for.
 
     """
     logger.info("Starting comment sync for issue #%s", issue.number)
 
     try:
-        repo = issue.repository
-        if not repo:
+        repository = issue.repository
+        if not repository:
             logger.warning("Issue #%s has no repository, skipping", issue.number)
             return
 
-        if not repo.owner:
+        if not repository.owner:
             logger.warning("Repository for issue #%s has no owner, skipping", issue.number)
             return
 
-        repo_full_name = f"{repo.owner.login}/{repo.name}"
-        logger.info("Fetching repository: %s", repo_full_name)
+        repository_full_name = f"{repository.owner.login}/{repository.name}"
+        logger.info("Fetching repository: %s", repository_full_name)
 
-        gh_repo = gh_app.get_repo(repo_full_name)
-        gh_issue = gh_repo.get_issue(number=issue.number)
+        gh_repository = gh_client.get_repo(repository_full_name)
+        gh_issue = gh_repository.get_issue(number=issue.number)
 
-        last_comment = issue.comments.order_by("-created_at").first()
+        last_comment = issue.latest_comment
         since = None
 
         if last_comment:
@@ -268,6 +268,7 @@ def sync_issue_comments(gh_app, issue: Issue):
         existing_github_ids = set(issue.comments.values_list("github_id", flat=True))
 
         comments_synced = 0
+        comments_to_save = []
 
         gh_comments = gh_issue.get_comments(since=since) if since else gh_issue.get_comments()
 
@@ -280,40 +281,41 @@ def sync_issue_comments(gh_app, issue: Issue):
                 logger.info("Skipping comment %s - not newer than our last comment", gh_comment.id)
                 continue
 
-            author_obj = User.update_data(gh_comment.user)
+            author = User.update_data(gh_comment.user)
 
-            if author_obj:
+            if author:
                 try:
-                    comment_obj = IssueComment.update_data(gh_comment, issue, author_obj)
-                    if comment_obj:
-                        comments_synced += 1
-                        logger.info(
-                            "Synced new comment %s for issue #%s", gh_comment.id, issue.number
-                        )
+                    comment = IssueComment.update_data(
+                        gh_comment, issue=issue, author=author, save=False
+                    )
+                    comments_to_save.append(comment)
+                    comments_synced += 1
+                    logger.info(
+                        "Prepared new comment %s for issue #%s", gh_comment.id, issue.number
+                    )
                 except Exception:
                     logger.exception(
-                        "Failed to create comment %s for issue #%s",
+                        "Failed to prepare comment %s for issue #%s",
                         gh_comment.id,
                         issue.number,
                     )
             else:
                 logger.warning("Could not sync author for comment %s", gh_comment.id)
 
-        if comments_synced > 0:
+        if comments_to_save:
+            IssueComment.bulk_save(comments_to_save)
             logger.info(
-                "Synced %d new comments for issue #%s in %s",
+                "Synced %d new comments for issue #%s",
                 comments_synced,
                 issue.number,
-                issue.repository.name,
             )
         else:
             logger.info("No new comments found for issue #%s", issue.number)
 
     except UnknownObjectException as e:
         logger.warning(
-            "Could not access issue #%s in %s. Error: %s",
+            "Could not access issue #%s. Error: %s",
             issue.number,
-            repo_full_name,
             str(e),
         )
     except Exception:
