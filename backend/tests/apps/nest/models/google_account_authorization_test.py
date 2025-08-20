@@ -1,4 +1,4 @@
-"""Tests for MemberGoogleCredentials model."""
+"""Tests for GoogleAccountAuthorization model."""
 
 from datetime import timedelta
 from unittest.mock import Mock, patch
@@ -10,12 +10,12 @@ from django.test import override_settings
 from django.utils import timezone
 from google_auth_oauthlib.flow import Flow
 
-from apps.nest.models.member_google_credentials import MemberGoogleCredentials
+from apps.nest.models.google_account_authorization import GoogleAccountAuthorization
 from apps.slack.models.member import Member
 
 
-class TestMemberGoogleCredentialsModel:
-    """Test cases for MemberGoogleCredentials model."""
+class TestGoogleAccountAuthorizationModel:
+    """Test cases for GoogleAccountAuthorization model."""
 
     @pytest.fixture(autouse=True)
     def setUp(self):
@@ -27,8 +27,8 @@ class TestMemberGoogleCredentialsModel:
         self.future_time = timezone.now() + timedelta(hours=1)
 
     def test_member_google_credentials_creation(self):
-        """Test MemberGoogleCredentials model creation."""
-        auth = MemberGoogleCredentials(
+        """Test GoogleAccountAuthorization model creation."""
+        auth = GoogleAccountAuthorization(
             member=self.member,
             access_token=self.valid_token,
             refresh_token=self.valid_refresh_token,
@@ -41,22 +41,22 @@ class TestMemberGoogleCredentialsModel:
         assert auth.expires_at == self.future_time
 
     def test_string_representation(self):
-        """Test string representation of MemberGoogleCredentials."""
-        auth = MemberGoogleCredentials(member=self.member, access_token=self.valid_token)
+        """Test string representation of GoogleAccountAuthorization."""
+        auth = GoogleAccountAuthorization(member=self.member, access_token=self.valid_token)
 
-        expected = f"MemberGoogleCredentials(member={self.member})"
+        expected = f"GoogleAccountAuthorization(member={self.member})"
         assert str(auth) == expected
 
     def test_one_to_one_relationship(self):
         """Test one-to-one relationship with Member."""
-        auth = MemberGoogleCredentials(member=self.member, access_token=self.valid_token)
+        auth = GoogleAccountAuthorization(member=self.member, access_token=self.valid_token)
 
         assert self.member.member_google_credentials == auth
         assert auth.member == self.member
 
     def test_is_token_expired_with_future_expiry(self):
         """Test is_token_expired property with future expiry."""
-        auth = MemberGoogleCredentials(
+        auth = GoogleAccountAuthorization(
             member=self.member, access_token=self.valid_token, expires_at=self.future_time
         )
 
@@ -64,7 +64,7 @@ class TestMemberGoogleCredentialsModel:
 
     def test_is_token_expired_with_past_expiry(self):
         """Test is_token_expired property with past expiry."""
-        auth = MemberGoogleCredentials(
+        auth = GoogleAccountAuthorization(
             member=self.member, access_token=self.valid_token, expires_at=self.expired_time
         )
 
@@ -72,7 +72,7 @@ class TestMemberGoogleCredentialsModel:
 
     def test_is_token_expired_with_none_expiry(self):
         """Test is_token_expired property with None expiry."""
-        auth = MemberGoogleCredentials(
+        auth = GoogleAccountAuthorization(
             member=self.member, access_token=self.valid_token, expires_at=None
         )
 
@@ -82,19 +82,19 @@ class TestMemberGoogleCredentialsModel:
     def test_get_flow_when_disabled(self):
         """Test get_flow raises error when Google auth is disabled."""
         with pytest.raises(ValueError, match="Google OAuth client ID"):
-            MemberGoogleCredentials.get_flow()
+            GoogleAccountAuthorization.get_flow()
 
     @override_settings(IS_GOOGLE_AUTH_ENABLED=False)
     def test_authenticate_when_google_auth_disabled(self):
         """Test authenticate raises error when Google auth is disabled."""
         with pytest.raises(ValueError, match="Google OAuth client ID"):
-            MemberGoogleCredentials.authenticate(self.member)
+            GoogleAccountAuthorization.authenticate(self.member)
 
     @override_settings(IS_AWS_KMS_ENABLED=False, IS_GOOGLE_AUTH_ENABLED=True)
     def test_authenticate_when_aws_kms_disabled(self):
         """Test authenticate raises error when AWS KMS is disabled."""
         with pytest.raises(ValueError, match="AWS KMS is not enabled"):
-            MemberGoogleCredentials.authenticate(self.member)
+            GoogleAccountAuthorization.authenticate(self.member)
 
     @override_settings(
         IS_GOOGLE_AUTH_ENABLED=True,
@@ -103,18 +103,18 @@ class TestMemberGoogleCredentialsModel:
         GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
         GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
     )
-    @patch("apps.nest.models.member_google_credentials.MemberGoogleCredentials.save")
+    @patch("apps.nest.models.google_account_authorization.GoogleAccountAuthorization.save")
     @patch(
-        "apps.nest.models.member_google_credentials.MemberGoogleCredentials.objects.get_or_create"
+        "apps.nest.models.google_account_authorization.GoogleAccountAuthorization.objects.get_or_create"
     )
-    @patch("apps.nest.models.member_google_credentials.MemberGoogleCredentials.get_flow")
+    @patch("apps.nest.models.google_account_authorization.GoogleAccountAuthorization.get_flow")
     def test_authenticate_existing_valid_token(self, mock_get_flow, mock_get_or_create, mock_save):
         """Test authenticate with existing valid token."""
         # Create existing auth with valid token
 
         mock_get_flow.return_value = Mock(spec=Flow)
         mock_get_or_create.return_value = (
-            MemberGoogleCredentials(
+            GoogleAccountAuthorization(
                 member=self.member,
                 access_token=self.valid_token,
                 refresh_token=self.valid_refresh_token,
@@ -122,7 +122,7 @@ class TestMemberGoogleCredentialsModel:
             ),
             True,
         )
-        result = MemberGoogleCredentials.authenticate(self.member)
+        result = GoogleAccountAuthorization.authenticate(self.member)
 
         assert result.access_token == self.valid_token
         assert result.refresh_token == self.valid_refresh_token
@@ -138,15 +138,15 @@ class TestMemberGoogleCredentialsModel:
         GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
     )
     @patch(
-        "apps.nest.models.member_google_credentials.MemberGoogleCredentials.refresh_access_token"
+        "apps.nest.models.google_account_authorization.GoogleAccountAuthorization.refresh_access_token"
     )
     @patch(
-        "apps.nest.models.member_google_credentials.MemberGoogleCredentials.objects.get_or_create"
+        "apps.nest.models.google_account_authorization.GoogleAccountAuthorization.objects.get_or_create"
     )
     def test_authenticate_existing_expired_token(self, mock_get_or_create, mock_refresh):
         """Test authenticate with existing expired token."""
         # Create existing auth with expired token
-        existing_auth = MemberGoogleCredentials(
+        existing_auth = GoogleAccountAuthorization(
             member=self.member,
             access_token=self.valid_token,
             refresh_token=self.valid_refresh_token,
@@ -154,7 +154,7 @@ class TestMemberGoogleCredentialsModel:
         )
         mock_get_or_create.return_value = (existing_auth, False)
 
-        MemberGoogleCredentials.authenticate(self.member)
+        GoogleAccountAuthorization.authenticate(self.member)
 
         mock_refresh.assert_called_once_with(existing_auth)
         mock_get_or_create.assert_called_once_with(member=self.member)
@@ -166,11 +166,11 @@ class TestMemberGoogleCredentialsModel:
         GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
         GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
     )
-    @patch("apps.nest.models.member_google_credentials.MemberGoogleCredentials.get_flow")
+    @patch("apps.nest.models.google_account_authorization.GoogleAccountAuthorization.get_flow")
     @patch(
-        "apps.nest.models.member_google_credentials.MemberGoogleCredentials.objects.get_or_create"
+        "apps.nest.models.google_account_authorization.GoogleAccountAuthorization.objects.get_or_create"
     )
-    @patch("apps.slack.models.google_auth.TimestampSigner")
+    @patch("apps.nest.models.google_account_authorization.TimestampSigner")
     def test_authenticate_first_time(
         self, mock_timestamp_signer, mock_get_or_create, mock_get_flow
     ):
@@ -179,7 +179,7 @@ class TestMemberGoogleCredentialsModel:
         mock_flow_instance = Mock()
         mock_get_flow.return_value = mock_flow_instance
         mock_get_or_create.return_value = (
-            MemberGoogleCredentials(
+            GoogleAccountAuthorization(
                 member=self.member,
                 access_token=None,
                 refresh_token=None,
@@ -188,7 +188,7 @@ class TestMemberGoogleCredentialsModel:
             True,
         )
         mock_timestamp_signer.return_value.sign.return_value = "test_state"
-        MemberGoogleCredentials.authenticate(self.member)
+        GoogleAccountAuthorization.authenticate(self.member)
 
         mock_get_or_create.assert_called_once_with(member=self.member)
 
@@ -201,26 +201,26 @@ class TestMemberGoogleCredentialsModel:
     @override_settings(IS_GOOGLE_AUTH_ENABLED=False)
     def test_refresh_access_token_when_google_auth_disabled(self):
         """Test refresh_access_token raises error when Google auth is disabled."""
-        auth = MemberGoogleCredentials(
+        auth = GoogleAccountAuthorization(
             member=self.member,
             access_token=self.valid_token,
             refresh_token=self.valid_refresh_token,
         )
 
         with pytest.raises(ValueError, match="Google OAuth client ID"):
-            MemberGoogleCredentials.refresh_access_token(auth)
+            GoogleAccountAuthorization.refresh_access_token(auth)
 
     @override_settings(IS_GOOGLE_AUTH_ENABLED=True, IS_AWS_KMS_ENABLED=False)
     def test_refresh_access_token_when_aws_kms_disabled(self):
         """Test refresh_access_token raises error when AWS KMS is disabled."""
-        auth = MemberGoogleCredentials(
+        auth = GoogleAccountAuthorization(
             member=self.member,
             access_token=self.valid_token,
             refresh_token=self.valid_refresh_token,
         )
 
         with pytest.raises(ValueError, match="AWS KMS is not enabled."):
-            MemberGoogleCredentials.refresh_access_token(auth)
+            GoogleAccountAuthorization.refresh_access_token(auth)
 
     @override_settings(
         IS_GOOGLE_AUTH_ENABLED=True,
@@ -229,13 +229,13 @@ class TestMemberGoogleCredentialsModel:
         GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
         GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
     )
-    @patch("apps.nest.models.member_google_credentials.Credentials")
-    @patch("apps.nest.models.member_google_credentials.Request")
-    @patch("apps.nest.models.member_google_credentials.MemberGoogleCredentials.save")
+    @patch("apps.nest.models.google_account_authorization.Credentials")
+    @patch("apps.nest.models.google_account_authorization.Request")
+    @patch("apps.nest.models.google_account_authorization.GoogleAccountAuthorization.save")
     def test_refresh_access_token_success(self, mock_save, mock_request, mock_credentials):
         """Test successful refresh_access_token."""
         # Create auth with refresh token
-        auth = MemberGoogleCredentials(
+        auth = GoogleAccountAuthorization(
             member=self.member,
             access_token=self.valid_token,
             refresh_token=self.valid_refresh_token,
@@ -250,7 +250,7 @@ class TestMemberGoogleCredentialsModel:
 
         mock_credentials.return_value = mock_credentials_instance
 
-        MemberGoogleCredentials.refresh_access_token(auth)
+        GoogleAccountAuthorization.refresh_access_token(auth)
 
         assert auth.access_token == b"token"
         assert auth.refresh_token == b"refresh_token"
@@ -275,7 +275,7 @@ class TestMemberGoogleCredentialsModel:
     )
     def test_refresh_token_not_found(self):
         """Test refresh_access_token raises error when no refresh token is present."""
-        auth = MemberGoogleCredentials(
+        auth = GoogleAccountAuthorization(
             member=self.member,
             access_token=self.valid_token,
             refresh_token=None,
@@ -284,11 +284,11 @@ class TestMemberGoogleCredentialsModel:
         with pytest.raises(
             ValidationError, match="Google OAuth refresh token is not set or expired."
         ):
-            MemberGoogleCredentials.refresh_access_token(auth)
+            GoogleAccountAuthorization.refresh_access_token(auth)
 
     def test_verbose_names(self):
         """Test model field verbose names."""
-        auth = MemberGoogleCredentials(member=self.member, access_token=self.valid_token)
+        auth = GoogleAccountAuthorization(member=self.member, access_token=self.valid_token)
 
         assert auth._meta.get_field("member").verbose_name == "Slack Member"
         assert auth._meta.get_field("access_token").verbose_name == "Access Token"
@@ -299,13 +299,13 @@ class TestMemberGoogleCredentialsModel:
     def test_authenticate_callback_member_google_credentials_disabled(self):
         """Test authenticate_callback raises error when Google auth is disabled."""
         with pytest.raises(ValueError, match="Google OAuth client ID"):
-            MemberGoogleCredentials.authenticate_callback(auth_response={})
+            GoogleAccountAuthorization.authenticate_callback(auth_response={})
 
     @override_settings(IS_AWS_KMS_ENABLED=False, IS_GOOGLE_AUTH_ENABLED=True)
     def test_authenticate_callback_kms_disabled(self):
         """Test authenticate_callback raises error when AWS KMS is disabled."""
         with pytest.raises(ValueError, match="AWS KMS is not enabled"):
-            MemberGoogleCredentials.authenticate_callback(auth_response={})
+            GoogleAccountAuthorization.authenticate_callback(auth_response={})
 
     @override_settings(
         IS_GOOGLE_AUTH_ENABLED=True,
@@ -314,15 +314,15 @@ class TestMemberGoogleCredentialsModel:
         GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
         GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
     )
-    @patch("apps.nest.models.member_google_credentials.MemberGoogleCredentials.get_flow")
+    @patch("apps.nest.models.google_account_authorization.GoogleAccountAuthorization.get_flow")
     @patch(
-        "apps.nest.models.member_google_credentials.MemberGoogleCredentials.objects.get_or_create"
+        "apps.nest.models.google_account_authorization.GoogleAccountAuthorization.objects.get_or_create"
     )
-    @patch("apps.nest.models.member_google_credentials.MemberGoogleCredentials.save")
-    @patch("apps.nest.models.member_google_credentials.Member.objects.get")
-    @patch("apps.slack.models.google_auth.urlparse")
-    @patch("apps.slack.models.google_auth.parse_qs")
-    @patch("apps.slack.models.google_auth.TimestampSigner")
+    @patch("apps.nest.models.google_account_authorization.GoogleAccountAuthorization.save")
+    @patch("apps.nest.models.google_account_authorization.Member.objects.get")
+    @patch("apps.nest.models.google_account_authorization.urlparse")
+    @patch("apps.nest.models.google_account_authorization.parse_qs")
+    @patch("apps.nest.models.google_account_authorization.TimestampSigner")
     def test_authenticate_callback_success(
         self,
         mock_timestamp_signer,
@@ -343,13 +343,11 @@ class TestMemberGoogleCredentialsModel:
         mock_flow_instance.credentials = mock_credentials
         mock_member_get.return_value = self.member
         mock_get_flow.return_value = mock_flow_instance
-        mock_get_or_create.return_value = (MemberGoogleCredentials(member=self.member), False)
+        mock_get_or_create.return_value = (GoogleAccountAuthorization(member=self.member), False)
         mock_parse_qs.return_value = {"state": ["test_state"]}
         mock_timestamp_signer.return_value.unsign.return_value = self.member.slack_user_id
 
-        result = MemberGoogleCredentials.authenticate_callback(
-            {}
-        )
+        result = GoogleAccountAuthorization.authenticate_callback({})
 
         assert result.access_token == b"token"
         assert result.refresh_token == b"refresh_token"
@@ -366,9 +364,9 @@ class TestMemberGoogleCredentialsModel:
         GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
     )
     @patch("apps.slack.models.member.Member.objects.get")
-    @patch("apps.slack.models.google_auth.urlparse")
-    @patch("apps.slack.models.google_auth.parse_qs")
-    @patch("apps.slack.models.google_auth.TimestampSigner")
+    @patch("apps.nest.models.google_account_authorization.urlparse")
+    @patch("apps.nest.models.google_account_authorization.parse_qs")
+    @patch("apps.nest.models.google_account_authorization.TimestampSigner")
     def test_authenticate_callback_member_not_found(
         self, mock_timestamp_signer, mock_parse_qs, mock_urlparse, mock_member_get
     ):
@@ -378,4 +376,4 @@ class TestMemberGoogleCredentialsModel:
         mock_parse_qs.return_value.get.return_value = ["test_state"]
         mock_timestamp_signer.return_value.unsign.return_value = "4"
         with pytest.raises(ValidationError, match="Member with Slack ID 4 does not exist."):
-            MemberGoogleCredentials.authenticate_callback(auth_response={})
+            GoogleAccountAuthorization.authenticate_callback(auth_response={})

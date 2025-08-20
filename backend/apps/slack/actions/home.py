@@ -30,7 +30,7 @@ logger: logging.Logger = logging.getLogger(__name__)
 
 def handle_home_actions(ack, body, client: WebClient) -> None:
     """Handle actions triggered in the home view."""
-    from apps.slack.models.google_auth import GoogleAuth
+    from apps.nest.models.google_account_authorization import GoogleAccountAuthorization
     from apps.slack.models.member import Member
 
     ack()
@@ -84,8 +84,10 @@ def handle_home_actions(ack, body, client: WebClient) -> None:
                 blocks = contribute.get_blocks(page=page, limit=10, presentation=home_presentation)
             case action if action == SIGN_IN_WITH_GOOGLE_ACTION:
                 try:
-                    auth = GoogleAuth.authenticate(Member.objects.get(slack_user_id=user_id))
-                    if isinstance(auth, GoogleAuth):
+                    auth = GoogleAccountAuthorization.authenticate(
+                        Member.objects.get(slack_user_id=user_id)
+                    )
+                    if isinstance(auth, GoogleAccountAuthorization):
                         blocks = [markdown("You are already signed in with Google.")]
                     else:
                         auth_url = auth[0]

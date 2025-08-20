@@ -1,4 +1,4 @@
-"""Slack Google OAuth Authentication Model."""
+"""Nest Google Account Authorization Model."""
 
 import logging
 from urllib.parse import parse_qs, urlparse
@@ -24,7 +24,7 @@ AUTH_ERROR_MESSAGE = (
 KMS_ERROR_MESSAGE = "AWS KMS is not enabled."
 
 
-class MemberGoogleCredentials(models.Model):
+class GoogleAccountAuthorization(models.Model):
     """Model to store Google OAuth tokens for Slack integration."""
 
     class Meta:
@@ -49,7 +49,7 @@ class MemberGoogleCredentials(models.Model):
         """Authenticate a member.
 
         Returns:
-            - MemberGoogleCredentials instance if a valid/refreshable token exists, or
+            - GoogleAccountAuthorization instance if a valid/refreshable token exists, or
             - (authorization_url, state) tuple to complete the OAuth flow.
 
         """
@@ -58,19 +58,19 @@ class MemberGoogleCredentials(models.Model):
             raise ValueError(AUTH_ERROR_MESSAGE)
         if not settings.IS_AWS_KMS_ENABLED:
             raise ValueError(KMS_ERROR_MESSAGE)
-        auth = MemberGoogleCredentials.objects.get_or_create(member=member)[0]
+        auth = GoogleAccountAuthorization.objects.get_or_create(member=member)[0]
         if auth.access_token and not auth.is_token_expired:
             return auth
         if auth.access_token:
             # If the access token is present but expired, refresh it
             try:
-                MemberGoogleCredentials.refresh_access_token(auth)
+                GoogleAccountAuthorization.refresh_access_token(auth)
             except ValidationError:
                 pass
             else:
                 return auth
         # If no access token is present, redirect to Google OAuth
-        flow = MemberGoogleCredentials.get_flow()
+        flow = GoogleAccountAuthorization.get_flow()
         flow.redirect_uri = settings.GOOGLE_AUTH_REDIRECT_URI
         return flow.authorization_url(
             access_type="offline",
@@ -80,7 +80,7 @@ class MemberGoogleCredentials(models.Model):
 
     @staticmethod
     def authenticate_callback(auth_response):
-        """Authenticate a member and return a MemberGoogleCredentials instance."""
+        """Authenticate a member and return a GoogleAccountAuthorization instance."""
         if not settings.IS_GOOGLE_AUTH_ENABLED:
             logger.exception(AUTH_ERROR_MESSAGE)
             raise ValueError(AUTH_ERROR_MESSAGE)
@@ -108,9 +108,9 @@ class MemberGoogleCredentials(models.Model):
             error_message = f"Member with Slack ID {member_id} does not exist."
             logger.exception(error_message)
             raise ValidationError(error_message) from e
-        auth = MemberGoogleCredentials.objects.get_or_create(member=member)[0]
+        auth = GoogleAccountAuthorization.objects.get_or_create(member=member)[0]
         # This is the first time authentication, so we need to fetch a new token
-        flow = MemberGoogleCredentials.get_flow()
+        flow = GoogleAccountAuthorization.get_flow()
         flow.redirect_uri = settings.GOOGLE_AUTH_REDIRECT_URI
         flow.fetch_token(authorization_response=auth_response)
         auth.access_token = flow.credentials.token
@@ -172,5 +172,5 @@ class MemberGoogleCredentials(models.Model):
         auth.save()
 
     def __str__(self):
-        """Return a string representation of the MemberGoogleCredentials instance."""
-        return f"MemberGoogleCredentials(member={self.member})"
+        """Return a string representation of the GoogleAccountAuthorization instance."""
+        return f"GoogleAccountAuthorization(member={self.member})"
