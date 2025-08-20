@@ -1,5 +1,3 @@
-// tailwind.config.cjs
-// This file exists to support tools that don't support ESM or TypeScript.
-// It imports the real config from tailwind.config.ts via a generated .js file.
-
-module.exports = require('./tailwind.config.js');
+// frontend/tailwind.config.cjs
+require('ts-node/register/transpile-only');
+module.exports = require('./tailwind.config.ts').default;
