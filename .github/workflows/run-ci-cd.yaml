@@ -483,11 +483,10 @@ jobs:
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml staging/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
 
-  lighthouse_ci:
+  run-lighthouse-ci:
     name: Run Lighthouse CI
     needs:
       - deploy-staging-nest-proxy
-
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
