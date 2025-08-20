@@ -72,7 +72,7 @@ const ProjectHealthMetricsDetails: FC = () => {
               />
             </div>
             <div className="flex items-center gap-2">
-              <MetricsScoreCircle score={metricsLatest.score} />
+              <MetricsScoreCircle score={metricsLatest.score} clickable={false} />
               <GeneralCompliantComponent
                 title={
                   metricsLatest.isFundingRequirementsCompliant
