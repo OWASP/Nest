@@ -1,7 +1,7 @@
 include backend/apps/ai/Makefile
 include backend/apps/github/Makefile
+include backend/apps/nest/Makefile
 include backend/apps/owasp/Makefile
-include backend/apps/nest/Makefile    # Changed from owasp to nest
 include backend/apps/slack/Makefile
 
 clean-backend-dependencies:

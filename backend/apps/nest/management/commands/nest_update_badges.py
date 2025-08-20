@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 
 from apps.github.models.user import User
 from apps.nest.models.badge import Badge
-from apps.nest.models.user_badges import UserBadge
+from apps.nest.models.user_badge import UserBadge
 
 logger = logging.getLogger(__name__)
 
