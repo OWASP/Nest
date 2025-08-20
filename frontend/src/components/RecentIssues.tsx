@@ -39,7 +39,7 @@ const RecentIssues: React.FC<RecentIssuesProps> = ({ data, showAvatar = true }) 
                 className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
                 onClick={() =>
                   router.push(
-                    `/organizations/${item.organizationName}/repositories/${item.repositoryName || ''}`
+                    `/organizations/${item.organizationName}/repositories/${item.repositoryName}`
                   )
                 }
               >
