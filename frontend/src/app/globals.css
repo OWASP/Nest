@@ -181,11 +181,11 @@ a {
 /* =========================
    Dark Theme - Map Tiles
    ========================= */
-@media (prefers-color-scheme: dark) {
+
   .dark .map-tiles {
     filter: var(--map-tiles-filter, none);
   }
-}
+
 
 .dark .leaflet-popup-content-wrapper {
   background-color: #2c3e50;
