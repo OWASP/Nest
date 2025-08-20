@@ -94,7 +94,7 @@ class TestMemberGoogleCredentialsModel:
     def test_authenticate_when_aws_kms_disabled(self):
         """Test authenticate raises error when AWS KMS is disabled."""
         with pytest.raises(ValueError, match="AWS KMS is not enabled"):
-            GoogleAuth.authenticate(self.member)
+            MemberGoogleCredentials.authenticate(self.member)
 
     @override_settings(
         IS_GOOGLE_AUTH_ENABLED=True,
@@ -204,19 +204,19 @@ class TestMemberGoogleCredentialsModel:
         )
 
         with pytest.raises(ValueError, match="Google OAuth client ID"):
-            GoogleAuth.refresh_access_token(auth)
+            MemberGoogleCredentials.refresh_access_token(auth)
 
     @override_settings(IS_GOOGLE_AUTH_ENABLED=True, IS_AWS_KMS_ENABLED=False)
     def test_refresh_access_token_when_aws_kms_disabled(self):
         """Test refresh_access_token raises error when AWS KMS is disabled."""
-        auth = GoogleAuth(
+        auth = MemberGoogleCredentials(
             member=self.member,
             access_token=self.valid_token,
             refresh_token=self.valid_refresh_token,
         )
 
         with pytest.raises(ValueError, match="AWS KMS is not enabled."):
-            GoogleAuth.refresh_access_token(auth)
+            MemberGoogleCredentials.refresh_access_token(auth)
 
     @override_settings(
         IS_GOOGLE_AUTH_ENABLED=True,
@@ -246,7 +246,7 @@ class TestMemberGoogleCredentialsModel:
 
         mock_credentials.return_value = mock_credentials_instance
 
-        GoogleAuth.refresh_access_token(auth)
+        MemberGoogleCredentials.refresh_access_token(auth)
 
         assert auth.access_token == b"token"
         assert auth.refresh_token == b"refresh_token"
@@ -295,13 +295,13 @@ class TestMemberGoogleCredentialsModel:
     def test_authenticate_callback_member_google_credentials_disabled(self):
         """Test authenticate_callback raises error when Google auth is disabled."""
         with pytest.raises(ValueError, match="Google OAuth client ID"):
-            GoogleAuth.authenticate_callback(auth_response={}, member_id=4)
+            MemberGoogleCredentials.authenticate_callback(auth_response={}, member_id=4)
 
     @override_settings(IS_AWS_KMS_ENABLED=False, IS_GOOGLE_AUTH_ENABLED=True)
     def test_authenticate_callback_kms_disabled(self):
         """Test authenticate_callback raises error when AWS KMS is disabled."""
         with pytest.raises(ValueError, match="AWS KMS is not enabled"):
-            GoogleAuth.authenticate_callback(auth_response={}, member_id=4)
+            MemberGoogleCredentials.authenticate_callback(auth_response={}, member_id=4)
 
     @override_settings(
         IS_GOOGLE_AUTH_ENABLED=True,
