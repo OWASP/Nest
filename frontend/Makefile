@@ -27,6 +27,9 @@ format-frontend-code:
 	|| (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" \
 		&& pnpm run format))
 
+lighthouse-ci:
+	@cd frontend && npx -y @lhci/cli@0.15.1 autorun --collect.url=http://localhost:3000
+
 lint-frontend-code:
 	@(cd frontend && pnpm run lint:check >/dev/null 2>&1 \
 	&& (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
