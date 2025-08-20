@@ -16,5 +16,5 @@ def get_google_auth_client():
                 "token_uri": settings.GOOGLE_AUTH_TOKEN_URI,
             }
         },
-        scopes=["https://www.googleapis.com/auth/calendar.readonly"],
+        scopes=settings.GOOGLE_AUTH_SCOPES,
     )

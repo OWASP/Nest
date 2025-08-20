@@ -15,12 +15,12 @@ AUTH_ERROR_MESSAGE = (
 )
 
 
-class GoogleAuth(models.Model):
+class MemberGoogleCredentials(models.Model):
     """Model to store Google OAuth tokens for Slack integration."""
 
     class Meta:
-        db_table = "slack_google_auths"
-        verbose_name_plural = "Google Auths"
+        db_table = "nest_member_google_credentials"
+        verbose_name_plural = "Member's Google Credentials"
 
     member = models.OneToOneField(
         "slack.Member",
@@ -40,21 +40,21 @@ class GoogleAuth(models.Model):
         """Authenticate a member.
 
         Returns:
-            - GoogleAuth instance if a valid/refreshable token exists, or
+            - MemberGoogleCredentials instance if a valid/refreshable token exists, or
             - (authorization_url, state) tuple to complete the OAuth flow.
 
         """
         if not settings.IS_GOOGLE_AUTH_ENABLED:
             raise ValueError(AUTH_ERROR_MESSAGE)
-        auth = GoogleAuth.objects.get_or_create(member=member)[0]
+        auth = MemberGoogleCredentials.objects.get_or_create(member=member)[0]
         if auth.access_token and not auth.is_token_expired:
             return auth
         if auth.access_token:
             # If the access token is present but expired, refresh it
-            GoogleAuth.refresh_access_token(auth)
+            MemberGoogleCredentials.refresh_access_token(auth)
             return auth
         # If no access token is present, redirect to Google OAuth
-        flow = GoogleAuth.get_flow()
+        flow = MemberGoogleCredentials.get_flow()
         flow.redirect_uri = settings.GOOGLE_AUTH_REDIRECT_URI
         state = member.slack_user_id
         return flow.authorization_url(
@@ -65,7 +65,7 @@ class GoogleAuth(models.Model):
 
     @staticmethod
     def authenticate_callback(auth_response, member_id):
-        """Authenticate a member and return a GoogleAuth instance."""
+        """Authenticate a member and return a MemberGoogleCredentials instance."""
         if not settings.IS_GOOGLE_AUTH_ENABLED:
             raise ValueError(AUTH_ERROR_MESSAGE)
 
@@ -76,9 +76,9 @@ class GoogleAuth(models.Model):
             error_message = f"Member with Slack ID {member_id} does not exist."
             raise ValidationError(error_message) from e
 
-        auth = GoogleAuth.objects.get_or_create(member=member)[0]
+        auth = MemberGoogleCredentials.objects.get_or_create(member=member)[0]
         # This is the first time authentication, so we need to fetch a new token
-        flow = GoogleAuth.get_flow()
+        flow = MemberGoogleCredentials.get_flow()
         flow.redirect_uri = settings.GOOGLE_AUTH_REDIRECT_URI
         flow.fetch_token(authorization_response=auth_response)
         auth.access_token = flow.credentials.token
@@ -127,5 +127,5 @@ class GoogleAuth(models.Model):
         auth.save()
 
     def __str__(self):
-        """Return a string representation of the GoogleAuth instance."""
-        return f"GoogleAuth(member={self.member})"
+        """Return a string representation of the MemberGoogleCredentials instance."""
+        return f"MemberGoogleCredentials(member={self.member})"
