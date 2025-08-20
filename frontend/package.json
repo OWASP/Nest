@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "build:tailwind": "ts-node --project tsconfig.tsnode.json scripts/generate-tailwind-config.ts",
     "build": "next build",
     "build:turbo": "next build --turbo",
     "dev": "next dev --port 3000",
@@ -11,11 +12,12 @@
     "lint": "eslint . --config eslint.config.mjs --fix --max-warnings=0",
     "lint:check": "eslint . --config eslint.config.mjs --max-warnings=0",
     "start": "next start",
-    "test:e2e": "npx playwright test",
-    "test:unit": "tsc --noEmit && NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest"
+    "test": "pnpm test:unit",
+    "test:unit": "tsc --noEmit && cross-env NODE_OPTIONS=--experimental-vm-modules --no-warnings=DEP0040 jest",
+    "test:e2e": "playwright test",
+    "test:all": "pnpm test:unit && pnpm test:e2e"
   },
   "dependencies": {
-    "@apollo/client": "^3.13.9",
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-brands-svg-icons": "^6.7.2",
     "@fortawesome/free-regular-svg-icons": "^6.7.2",
@@ -45,7 +47,6 @@
     "dompurify": "^3.2.6",
     "eslint-plugin-import": "^2.32.0",
     "framer-motion": "^12.23.12",
-    "graphql": "^16.11.0",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "lodash": "^4.17.21",
@@ -58,9 +59,12 @@
     "react-apexcharts": "^1.7.0",
     "react-dom": "^19.1.1",
     "react-icons": "^5.5.0",
+
+
     "react-router-dom": "^7.8.1",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7"
+
   },
   "devDependencies": {
     "@axe-core/react": "^4.10.2",
@@ -70,7 +74,11 @@
     "@swc/core": "^1.13.3",
     "@swc/jest": "^0.2.39",
     "@tailwindcss/postcss": "^4.1.12",
+
     "@testing-library/jest-dom": "^6.7.0",
+
+   
+
     "@testing-library/react": "^16.3.0",
     "@types/jest": "^29.5.14",
     "@types/leaflet": "^1.9.20",
@@ -83,6 +91,7 @@
     "@typescript-eslint/eslint-plugin": "^8.40.0",
     "@typescript-eslint/parser": "^8.40.0",
     "autoprefixer": "^10.4.21",
+    "cross-env": "^10.0.0",
     "eslint": "^9.33.0",
     "eslint-config-next": "^15.5.0",
     "eslint-config-prettier": "^10.1.8",
@@ -103,7 +112,8 @@
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",
     "require-in-the-middle": "^7.5.2",
-    "tailwindcss": "^3.4.17",
+    "tailwindcss": "^4.1.12",
+    "tailwindcss-animate": "^1.0.7",
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
     "typescript": "~5.8.3",
