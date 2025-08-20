@@ -96,11 +96,11 @@ class TestMemberGoogleCredentialsModel:
         GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
         GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
     )
-    @patch("apps.slack.models.member_google_credentials.MemberGoogleCredentials.save")
+    @patch("apps.nest.models.member_google_credentials.MemberGoogleCredentials.save")
     @patch(
-        "apps.slack.models.member_google_credentials.MemberGoogleCredentials.objects.get_or_create"
+        "apps.nest.models.member_google_credentials.MemberGoogleCredentials.objects.get_or_create"
     )
-    @patch("apps.slack.models.member_google_credentials.MemberGoogleCredentials.get_flow")
+    @patch("apps.nest.models.member_google_credentials.MemberGoogleCredentials.get_flow")
     def test_authenticate_existing_valid_token(self, mock_get_flow, mock_get_or_create, mock_save):
         """Test authenticate with existing valid token."""
         # Create existing auth with valid token
@@ -130,10 +130,10 @@ class TestMemberGoogleCredentialsModel:
         GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
     )
     @patch(
-        "apps.slack.models.member_google_credentials.MemberGoogleCredentials.refresh_access_token"
+        "apps.nest.models.member_google_credentials.MemberGoogleCredentials.refresh_access_token"
     )
     @patch(
-        "apps.slack.models.member_google_credentials.MemberGoogleCredentials.objects.get_or_create"
+        "apps.nest.models.member_google_credentials.MemberGoogleCredentials.objects.get_or_create"
     )
     def test_authenticate_existing_expired_token(self, mock_get_or_create, mock_refresh):
         """Test authenticate with existing expired token."""
@@ -157,9 +157,9 @@ class TestMemberGoogleCredentialsModel:
         GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
         GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
     )
-    @patch("apps.slack.models.member_google_credentials.MemberGoogleCredentials.get_flow")
+    @patch("apps.nest.models.member_google_credentials.MemberGoogleCredentials.get_flow")
     @patch(
-        "apps.slack.models.member_google_credentials.MemberGoogleCredentials.objects.get_or_create"
+        "apps.nest.models.member_google_credentials.MemberGoogleCredentials.objects.get_or_create"
     )
     def test_authenticate_first_time(self, mock_get_or_create, mock_get_flow):
         """Test authenticate for first time (no existing token)."""
@@ -203,9 +203,9 @@ class TestMemberGoogleCredentialsModel:
         GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
         GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
     )
-    @patch("apps.slack.models.member_google_credentials.Credentials")
-    @patch("apps.slack.models.member_google_credentials.Request")
-    @patch("apps.slack.models.member_google_credentials.MemberGoogleCredentials.save")
+    @patch("apps.nest.models.member_google_credentials.Credentials")
+    @patch("apps.nest.models.member_google_credentials.Request")
+    @patch("apps.nest.models.member_google_credentials.MemberGoogleCredentials.save")
     def test_refresh_access_token_success(self, mock_save, mock_request, mock_credentials):
         """Test successful refresh_access_token."""
         # Create auth with refresh token
@@ -280,12 +280,12 @@ class TestMemberGoogleCredentialsModel:
         GOOGLE_AUTH_CLIENT_SECRET="test_client_secret",  # noqa: S106
         GOOGLE_AUTH_REDIRECT_URI="http://localhost:8000/callback",
     )
-    @patch("apps.slack.models.member_google_credentials.MemberGoogleCredentials.get_flow")
+    @patch("apps.nest.models.member_google_credentials.MemberGoogleCredentials.get_flow")
     @patch(
-        "apps.slack.models.member_google_credentials.MemberGoogleCredentials.objects.get_or_create"
+        "apps.nest.models.member_google_credentials.MemberGoogleCredentials.objects.get_or_create"
     )
-    @patch("apps.slack.models.member_google_credentials.MemberGoogleCredentials.save")
-    @patch("apps.slack.models.member_google_credentials.Member.objects.get")
+    @patch("apps.nest.models.member_google_credentials.MemberGoogleCredentials.save")
+    @patch("apps.nest.models.member_google_credentials.Member.objects.get")
     def test_authenticate_callback_success(
         self, mock_member_get, mock_save, mock_get_or_create, mock_get_flow
     ):

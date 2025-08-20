@@ -25,7 +25,7 @@ class MemberGoogleCredentials(models.Model):
     member = models.OneToOneField(
         "slack.Member",
         on_delete=models.CASCADE,
-        related_name="google_auth",
+        related_name="member_google_credentials",
         verbose_name="Slack Member",
     )
     access_token = models.BinaryField(verbose_name="Access Token", null=True)
