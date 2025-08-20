@@ -105,11 +105,11 @@ class TestRetriever:
         ):
             retriever = Retriever()
 
-            content_object = MagicMock()
-            content_object.name = "Test Name"
-            content_object.title = "Test Title"
+            entity = MagicMock()
+            entity.name = "Test Name"
+            entity.title = "Test Title"
 
-            result = retriever.get_source_name(content_object)
+            result = retriever.get_source_name(entity)
             assert result == "Test Name"
 
     def test_get_source_name_with_title(self):
@@ -120,12 +120,12 @@ class TestRetriever:
         ):
             retriever = Retriever()
 
-            content_object = MagicMock()
-            content_object.name = None
-            content_object.title = "Test Title"
-            content_object.login = "test_login"
+            entity = MagicMock()
+            entity.name = None
+            entity.title = "Test Title"
+            entity.login = "test_login"
 
-            result = retriever.get_source_name(content_object)
+            result = retriever.get_source_name(entity)
             assert result == "Test Title"
 
     def test_get_source_name_with_login(self):
@@ -136,13 +136,13 @@ class TestRetriever:
         ):
             retriever = Retriever()
 
-            content_object = MagicMock()
-            content_object.name = None
-            content_object.title = None
-            content_object.login = "test_login"
-            content_object.key = "test_key"
+            entity = MagicMock()
+            entity.name = None
+            entity.title = None
+            entity.login = "test_login"
+            entity.key = "test_key"
 
-            result = retriever.get_source_name(content_object)
+            result = retriever.get_source_name(entity)
             assert result == "test_login"
 
     def test_get_source_name_fallback_to_str(self):
@@ -153,15 +153,15 @@ class TestRetriever:
         ):
             retriever = Retriever()
 
-            content_object = MagicMock()
-            content_object.name = None
-            content_object.title = None
-            content_object.login = None
-            content_object.key = None
-            content_object.summary = None
-            content_object.__str__ = MagicMock(return_value="String representation")
+            entity = MagicMock()
+            entity.name = None
+            entity.title = None
+            entity.login = None
+            entity.key = None
+            entity.summary = None
+            entity.__str__ = MagicMock(return_value="String representation")
 
-            result = retriever.get_source_name(content_object)
+            result = retriever.get_source_name(entity)
             assert result == "String representation"
 
     def test_get_additional_context_chapter(self):
@@ -172,21 +172,21 @@ class TestRetriever:
         ):
             retriever = Retriever()
 
-            content_object = MagicMock()
-            content_object.suggested_location = "New York"
-            content_object.region = "North America"
-            content_object.country = "USA"
-            content_object.postal_code = "10001"
-            content_object.currency = "USD"
-            content_object.meetup_group = "OWASP NYC"
-            content_object.tags = ["security", "web"]
-            content_object.topics = ["OWASP Top 10"]
-            content_object.leaders_raw = ["John Doe", "Jane Smith"]
-            content_object.related_urls = ["https://example.com"]
-            content_object.is_active = True
-            content_object.url = "https://owasp.org/chapter"
+            chapter = MagicMock()
+            chapter.suggested_location = "New York"
+            chapter.region = "North America"
+            chapter.country = "USA"
+            chapter.postal_code = "10001"
+            chapter.currency = "USD"
+            chapter.meetup_group = "OWASP NYC"
+            chapter.tags = ["security", "web"]
+            chapter.topics = ["OWASP Top 10"]
+            chapter.leaders_raw = ["John Doe", "Jane Smith"]
+            chapter.related_urls = ["https://example.com"]
+            chapter.is_active = True
+            chapter.url = "https://owasp.org/chapter"
 
-            result = retriever.get_additional_context(content_object, "chapter")
+            result = retriever.get_additional_context(chapter, "chapter")
 
             expected_keys = [
                 "location",
@@ -418,13 +418,13 @@ class TestRetriever:
 
     def test_supported_content_types(self):
         """Test that supported content types are defined correctly."""
-        assert Retriever.SUPPORTED_ENTITY_TYPES == (
-            "event",
-            "project",
+        assert set(Retriever.SUPPORTED_ENTITY_TYPES) == {
             "chapter",
             "committee",
+            "event",
             "message",
-        )
+            "project",
+        }
 
     @patch("apps.ai.agent.tools.rag.retriever.Chunk")
     def test_retrieve_with_app_label_content_types(self, mock_chunk):

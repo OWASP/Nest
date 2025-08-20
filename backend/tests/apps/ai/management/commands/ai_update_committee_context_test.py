@@ -166,7 +166,7 @@ class TestAiCreateCommitteeContextCommand:
                         assert result == 1
                         mock_context_class.update_data.assert_called_once_with(
                             content="Metadata\n\nContent",
-                            content_object=mock_committee,
+                            entity=mock_committee,
                             source="owasp_committee",
                         )
                         mock_write.assert_called_once_with("Created context for test-committee")

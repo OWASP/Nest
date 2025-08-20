@@ -21,7 +21,13 @@ logger = logging.getLogger(__name__)
 class Retriever:
     """A class for retrieving relevant text chunks for a RAG."""
 
-    SUPPORTED_ENTITY_TYPES = ("event", "project", "chapter", "committee", "message")
+    SUPPORTED_ENTITY_TYPES = (
+        "chapter",
+        "committee",
+        "event",
+        "message",
+        "project",
+    )
 
     def __init__(self, embedding_model: str = "text-embedding-3-small"):
         """Initialize the Retriever.

@@ -113,7 +113,7 @@ class TestBaseContextCommand:
             assert result == 1
             mock_context_class.update_data.assert_called_once_with(
                 content="metadata content\n\nprose content",
-                content_object=mock_entity,
+                entity=mock_entity,
                 source="owasp_test_entity",
             )
             mock_write.assert_called_once_with("Created context for test-key-123")
@@ -157,7 +157,7 @@ class TestBaseContextCommand:
             calls = mock_context_class.update_data.call_args_list
             for i, call in enumerate(calls):
                 _, kwargs = call
-                assert kwargs["content_object"] == entities[i]
+                assert kwargs["entity"] == entities[i]
                 assert kwargs["content"] == "metadata content\n\nprose content"
                 assert kwargs["source"] == "owasp_test_entity"
 

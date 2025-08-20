@@ -30,7 +30,7 @@ class BaseContextCommand(BaseAICommand):
 
             if Context.update_data(
                 content=full_content,
-                content_object=entity,
+                entity=entity,
                 source=self.source_name(),
             ):
                 processed += 1

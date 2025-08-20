@@ -44,14 +44,14 @@ class Context(TimestampedModel):
     @staticmethod
     def update_data(
         content: str,
-        content_object,
+        entity,
         source: str = "",
         *,
         save: bool = True,
     ) -> "Context":
         """Create or update context for a given entity."""
-        entity_type = ContentType.objects.get_for_model(content_object)
-        entity_id = content_object.pk
+        entity_type = ContentType.objects.get_for_model(entity)
+        entity_id = entity.pk
 
         try:
             context = Context.objects.get(entity_type=entity_type, entity_id=entity_id)
