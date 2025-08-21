@@ -2,4 +2,3 @@
 17 05 * * * cd /home/production; make sync-data > /var/log/nest/production/sync-data.log 2>&1
 17 17 * * * cd /home/production; make owasp-update-project-health-requirements && make owasp-update-project-health-metrics > /var/log/nest/production/update-project-health-metrics 2>&1
 22 17 * * * cd /home/production; make owasp-update-project-health-scores > /var/log/nest/production/update-project-health-scores 2>&1
-21 17 * * * cd /home/production; make owasp-detect-project-level-compliance > /var/log/nest/production/detect-project-level-compliance.log 2>&1

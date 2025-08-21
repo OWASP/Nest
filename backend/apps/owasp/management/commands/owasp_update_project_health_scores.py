@@ -58,7 +58,7 @@ class Command(BaseCommand):
                     score += weight
 
             # Apply compliance penalty if project is not level compliant
-            if not metric.is_level_compliant:
+            if not metric.project.is_level_compliant:
                 penalty_percentage = float(getattr(requirements, "compliance_penalty_weight", 0.0))
                 # Clamp to [0, 100]
                 penalty_percentage = max(0.0, min(100.0, penalty_percentage))
@@ -67,7 +67,8 @@ class Command(BaseCommand):
                 self.stdout.write(
                     self.style.WARNING(
                         f"Applied {penalty_percentage}% compliance penalty to {metric.project.name} "
-                        f"(penalty: {penalty_amount:.2f}, final score: {score:.2f})"
+                        f"(penalty: {penalty_amount:.2f}, final score: {score:.2f}) "
+                        f"[Local: {metric.project.level}, Official: {metric.project.project_level_official}]"
                     )
                 )
             # Ensure score stays within bounds (0-100)

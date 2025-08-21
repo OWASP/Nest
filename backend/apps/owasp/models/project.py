@@ -59,6 +59,13 @@ class Project(
         default=ProjectLevel.OTHER,
     )
     level_raw = models.CharField(verbose_name="Level raw", max_length=50, default="")
+    project_level_official = models.CharField(
+        verbose_name="Official Level",
+        max_length=20,
+        choices=ProjectLevel.choices,
+        default=ProjectLevel.OTHER,
+        help_text="Official project level from OWASP GitHub repository",
+    )
 
     type = models.CharField(
         verbose_name="Type",
@@ -146,6 +153,11 @@ class Project(
         # https://owasp.org/www-committee-project/#div-practice
         # Have multiple Project Leaders who are not all employed by the same company.
         return self.leaders_count > 1
+
+    @property
+    def is_level_compliant(self) -> bool:
+        """Indicate whether project level matches the official OWASP level."""
+        return self.level == self.project_level_official
 
     @property
     def is_tool_type(self) -> bool:

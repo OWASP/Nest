@@ -43,11 +43,6 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
     is_leader_requirements_compliant = models.BooleanField(
         verbose_name="Is leader requirements compliant", default=False
     )
-    is_level_compliant = models.BooleanField(
-        verbose_name="Is project level compliant",
-        default=True,
-        help_text="Whether the project's local level matches the official OWASP level",
-    )
     last_released_at = models.DateTimeField(verbose_name="Last released at", blank=True, null=True)
     last_committed_at = models.DateTimeField(
         verbose_name="Last committed at", blank=True, null=True

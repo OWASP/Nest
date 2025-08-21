@@ -1,5 +1,6 @@
 """Project health requirements model."""
 
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from apps.common.models import TimestampedModel
@@ -61,6 +62,7 @@ class ProjectHealthRequirements(TimestampedModel):
         verbose_name="Compliance penalty weight (%)",
         default=10.0,
         help_text="Percentage penalty applied to non-compliant projects (0-100)",
+        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)],
     )
 
     def __str__(self) -> str:
