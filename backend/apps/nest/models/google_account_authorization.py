@@ -51,7 +51,7 @@ class GoogleAccountAuthorization(models.Model):
     )
 
     @staticmethod
-    def authenticate(member: Member):
+    def authenticate(slack_user_id: str):
         """Authenticate a member.
 
         Returns:
@@ -64,6 +64,12 @@ class GoogleAccountAuthorization(models.Model):
             raise ValueError(AUTH_ERROR_MESSAGE)
         if not settings.IS_AWS_KMS_ENABLED:
             raise ValueError(KMS_ERROR_MESSAGE)
+        try:
+            member = Member.objects.get(slack_user_id=slack_user_id)
+        except Member.DoesNotExist as e:
+            error_message = f"Member with Slack ID {slack_user_id} does not exist."
+            logger.exception(error_message)
+            raise ValidationError(error_message) from e
         auth = GoogleAccountAuthorization.objects.get_or_create(member=member)[0]
         if auth.access_token and not auth.is_token_expired:
             return auth

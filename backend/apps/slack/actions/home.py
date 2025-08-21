@@ -2,15 +2,16 @@
 
 import logging
 
+from django.core.exceptions import ValidationError
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import get_header, markdown
-from apps.slack.common.handlers import chapters, committees, contribute, projects
+from apps.slack.common.handlers import chapters, committees, contribute, google_sign_in, projects
 from apps.slack.common.presentation import EntityPresentation
 from apps.slack.constants import (
-    SIGN_IN_WITH_GOOGLE_ACTION,
+    SIGN_IN_TO_GOOGLE_ACTION,
     VIEW_CHAPTERS_ACTION,
     VIEW_CHAPTERS_ACTION_NEXT,
     VIEW_CHAPTERS_ACTION_PREV,
@@ -30,9 +31,6 @@ logger: logging.Logger = logging.getLogger(__name__)
 
 def handle_home_actions(ack, body, client: WebClient) -> None:
     """Handle actions triggered in the home view."""
-    from apps.nest.models.google_account_authorization import GoogleAccountAuthorization
-    from apps.slack.models.member import Member
-
     ack()
 
     action_id = body["actions"][0]["action_id"]
@@ -82,19 +80,10 @@ def handle_home_actions(ack, body, client: WebClient) -> None:
                 VIEW_CONTRIBUTE_ACTION_NEXT,
             }:
                 blocks = contribute.get_blocks(page=page, limit=10, presentation=home_presentation)
-            case action if action == SIGN_IN_WITH_GOOGLE_ACTION:
+            case action if action == SIGN_IN_TO_GOOGLE_ACTION:
                 try:
-                    auth = GoogleAccountAuthorization.authenticate(
-                        Member.objects.get(slack_user_id=user_id)
-                    )
-                    if isinstance(auth, GoogleAccountAuthorization):
-                        blocks = [markdown("You are already signed in with Google.")]
-                    else:
-                        auth_url = auth[0]
-                        blocks = [
-                            markdown(f"Please sign in with Google through this link: {auth_url}")
-                        ]
-                except ValueError:
+                    blocks = google_sign_in.get_blocks(slack_user_id=user_id)
+                except (ValueError, ValidationError):
                     blocks = [markdown("Error signing in with Google")]
                     logger.exception("Google authentication error for user {user_id}")
 
@@ -130,7 +119,7 @@ if SlackConfig.app:
         VIEW_PROJECTS_ACTION_NEXT,
         VIEW_PROJECTS_ACTION_PREV,
         VIEW_PROJECTS_ACTION,
-        SIGN_IN_WITH_GOOGLE_ACTION,
+        SIGN_IN_TO_GOOGLE_ACTION,
     )
     for action in actions:
         SlackConfig.app.action(action)(handle_home_actions)
