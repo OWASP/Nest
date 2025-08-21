@@ -27,6 +27,9 @@ class Conversation(TimestampedModel):
     is_group = models.BooleanField(verbose_name="Is group", default=False)
     is_im = models.BooleanField(verbose_name="Is IM", default=False)
     is_mpim = models.BooleanField(verbose_name="Is MPIM", default=False)
+    is_nest_bot_assistant_enabled = models.BooleanField(
+        verbose_name="Is Nest Bot Assistant Enabled", default=False
+    )
     is_private = models.BooleanField(verbose_name="Is private", default=False)
     is_shared = models.BooleanField(verbose_name="Is shared", default=False)
     name = models.CharField(verbose_name="Name", max_length=100, default="")

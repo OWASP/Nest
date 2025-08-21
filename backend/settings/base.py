@@ -49,6 +49,7 @@ class Base(Configuration):
         "corsheaders",
         "ninja",
         "storages",
+        "django_rq",
     )
 
     LOCAL_APPS = (
@@ -138,6 +139,15 @@ class Base(Configuration):
                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
             },
             "TIMEOUT": 300,
+        }
+    }
+
+    RQ_QUEUES = {
+        "default": {
+            "HOST": REDIS_HOST,
+            "PORT": 6379,
+            "PASSWORD": REDIS_PASSWORD,
+            "DEFAULT_TIMEOUT": 360,
         }
     }
 
