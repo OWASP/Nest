@@ -7,7 +7,6 @@ from django.contrib.contenttypes.models import ContentType
 
 from apps.ai.models.context import Context
 from apps.common.models import TimestampedModel
-from apps.common.utils import truncate
 
 
 def create_model_mock(model_class):
@@ -196,8 +195,10 @@ class TestContextModel:
             ),
         ):
             result = str(context)
-            expected = f"test_model Test Object: {truncate(context.content, 50)}"
-            assert result == expected
+            assert (
+                result
+                == "test_model Test Object: This is test content that is longer than 50 cha..."
+            )
 
     def test_str_method_with_key_attribute(self):
         """Test __str__ method when entity has key but no name attribute."""
