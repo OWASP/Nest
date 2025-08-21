@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 from functools import lru_cache
 
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.utils import timezone
 
@@ -96,6 +97,9 @@ class Project(
 
     custom_tags = models.JSONField(verbose_name="Custom tags", default=list, blank=True)
     track_issues = models.BooleanField(verbose_name="Track issues", default=True)
+
+    # GKs.
+    members = GenericRelation("owasp.EntityMember")
 
     # FKs.
     owasp_repository = models.ForeignKey(

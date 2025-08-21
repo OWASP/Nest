@@ -19,7 +19,7 @@ from apps.github.models.milestone import Milestone
         "url",
     ],
 )
-class MilestoneNode:
+class MilestoneNode(strawberry.relay.Node):
     """Github Milestone Node."""
 
     @strawberry.field
