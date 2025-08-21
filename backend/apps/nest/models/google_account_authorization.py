@@ -13,8 +13,8 @@ from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
-from apps.common.clients import get_google_auth_client
 from apps.common.model_fields import KmsEncryptedField
+from apps.nest.auth.clients.google import get_google_auth_client
 from apps.slack.models.member import Member
 
 logger = logging.getLogger(__name__)
@@ -126,6 +126,7 @@ class GoogleAccountAuthorization(models.Model):
         if flow.credentials.refresh_token:
             auth.refresh_token = flow.credentials.refresh_token
         auth.expires_at = expires_at
+        auth.scopes = settings.GOOGLE_AUTH_SCOPES
         auth.save()
         return auth
 

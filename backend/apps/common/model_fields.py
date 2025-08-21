@@ -3,7 +3,7 @@
 from django.conf import settings
 from django.db import models
 
-from apps.common.clients import get_kms_client
+from apps.nest.clients.kms import get_kms_client
 
 KMS_ERROR_MESSAGE = "AWS KMS is not enabled."
 STR_ERROR_MESSAGE = "Value must be a string to encrypt."
