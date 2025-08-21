@@ -128,6 +128,44 @@ describe('NavDropdown Component', () => {
       const dropdown = screen.getByRole('button').parentElement
       expect(dropdown).not.toHaveClass('font-bold', 'text-blue-800')
     })
+
+    it('applies active styling to submenu item when pathname matches', async () => {
+      const propsWithActiveSubmenu = {
+        pathname: '/docs/getting-started',
+        link: mockLink,
+      }
+
+      const user = userEvent.setup()
+      render(<NavDropdown {...propsWithActiveSubmenu} />)
+
+      const button = screen.getByRole('button')
+      await user.click(button)
+
+      //active
+      const gettingStartedLink = screen.getByRole('link', { name: /getting started/i })
+
+      expect(gettingStartedLink).toHaveClass('font-bold', 'text-white')
+    })
+
+    it('does not apply active styling to other submenu items when one is active', async () => {
+      const propsWithActiveSubmenu = {
+        pathname: '/docs/getting-started',
+        link: mockLink,
+      }
+
+      const user = userEvent.setup()
+      render(<NavDropdown {...propsWithActiveSubmenu} />)
+
+      const button = screen.getByRole('button')
+      await user.click(button)
+
+      //inactive
+      const apiReferenceLink = screen.getByRole('link', { name: /api reference/i })
+      const examplesLink = screen.getByRole('link', { name: /examples/i })
+
+      expect(apiReferenceLink).toHaveClass('font-medium', 'text-slate-600')
+      expect(examplesLink).toHaveClass('font-medium', 'text-slate-600')
+    })
   })
 
   describe('Prop-based Behavior', () => {
