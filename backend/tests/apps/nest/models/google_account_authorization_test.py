@@ -51,7 +51,7 @@ class TestGoogleAccountAuthorizationModel:
         """Test one-to-one relationship with Member."""
         auth = GoogleAccountAuthorization(member=self.member, access_token=self.valid_token)
 
-        assert self.member.member_google_credentials == auth
+        assert self.member.google_account_authorization == auth
         assert auth.member == self.member
 
     def test_is_token_expired_with_future_expiry(self):

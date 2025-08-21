@@ -4,6 +4,7 @@ import logging
 from urllib.parse import parse_qs, urlparse
 
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.db import models
@@ -28,13 +29,13 @@ class GoogleAccountAuthorization(models.Model):
     """Model to store Google OAuth tokens for Slack integration."""
 
     class Meta:
-        db_table = "nest_member_google_credentials"
-        verbose_name_plural = "Member's Google Credentials"
+        db_table = "nest_google_accounts_authorizations"
+        verbose_name_plural = "Google Accounts Authorizations"
 
     member = models.OneToOneField(
         "slack.Member",
         on_delete=models.CASCADE,
-        related_name="member_google_credentials",
+        related_name="google_account_authorization",
         verbose_name="Slack Member",
     )
     access_token = KmsEncryptedField(verbose_name="Access Token", null=True)
@@ -42,6 +43,11 @@ class GoogleAccountAuthorization(models.Model):
     expires_at = models.DateTimeField(
         verbose_name="Token Expiry",
         null=True,
+    )
+    scopes = ArrayField(
+        models.CharField(max_length=255),
+        blank=True,
+        default=list,
     )
 
     @staticmethod
