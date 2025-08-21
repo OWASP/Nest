@@ -76,19 +76,18 @@ class Retriever:
                 return str(getattr(entity, attr))
         return str(entity)
 
-    def get_additional_context(self, entity, entity_type: str) -> dict[str, Any]:
+    def get_additional_context(self, entity) -> dict[str, Any]:
         """Get additional context information based on content type.
 
         Args:
             entity: The source object.
-            entity_type: The model name of the content object.
 
         Returns:
             A dictionary with additional context information.
 
         """
         context = {}
-        clean_content_type = entity_type.split(".")[-1] if "." in entity_type else entity_type
+        clean_content_type = entity.__class__.__name__.lower()
         if clean_content_type == "chapter":
             context.update(
                 {
@@ -230,9 +229,7 @@ class Retriever:
                 continue
 
             source_name = self.get_source_name(chunk.context.entity)
-            additional_context = self.get_additional_context(
-                chunk.context.entity, chunk.context.entity_type.model
-            )
+            additional_context = self.get_additional_context(chunk.context.entity)
 
             results.append(
                 {

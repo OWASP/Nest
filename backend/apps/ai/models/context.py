@@ -11,13 +11,6 @@ from apps.common.models import TimestampedModel
 logger = logging.getLogger(__name__)
 
 
-def regenerate_chunks_for_context(context):
-    """Import regenerate_chunks_for_context to avoid circular import."""
-    from apps.ai.common.utils import regenerate_chunks_for_context as _regenerate_chunks
-
-    return _regenerate_chunks(context)
-
-
 class Context(TimestampedModel):
     """Context model for storing generated text related to OWASP entities."""
 

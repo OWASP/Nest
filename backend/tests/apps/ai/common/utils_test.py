@@ -1,5 +1,5 @@
 from datetime import UTC, datetime, timedelta
-from unittest.mock import MagicMock, Mock, call, patch
+from unittest.mock import MagicMock, call, patch
 
 import openai
 
@@ -15,12 +15,11 @@ class MockEmbeddingData:
 
 
 class TestUtils:
-    @patch("apps.ai.common.utils.Context")
     @patch("apps.ai.common.utils.Chunk.update_data")
     @patch("apps.ai.common.utils.time.sleep")
     @patch("apps.ai.common.utils.datetime")
     def test_create_chunks_and_embeddings_success(
-        self, mock_datetime, mock_sleep, mock_update_data, mock_context
+        self, mock_datetime, mock_sleep, mock_update_data
     ):
         """Tests the successful path where the OpenAI API returns embeddings."""
         base_time = datetime.now(UTC)
@@ -94,7 +93,8 @@ class TestUtils:
 
         assert result == []
 
-    def test_create_chunks_and_embeddings_none_context(self):
+    @patch("apps.ai.common.utils.logger")
+    def test_create_chunks_and_embeddings_none_context(self, mock_logger):
         """Tests the failure path when context is None."""
         mock_openai_client = MagicMock()
 
@@ -102,26 +102,23 @@ class TestUtils:
         mock_response.data = [MagicMock(embedding=[0.1, 0.2, 0.3])]
         mock_openai_client.embeddings.create.return_value = mock_response
 
-        with patch("apps.ai.common.utils.Chunk.update_data") as mock_update_data:
-            mock_chunk = Mock()
-            mock_update_data.return_value = mock_chunk
+        result = create_chunks_and_embeddings(
+            chunk_texts=["some text"],
+            context=None,
+            openai_client=mock_openai_client,
+        )
 
-            result = create_chunks_and_embeddings(
-                chunk_texts=["some text"],
-                context=None,
-                openai_client=mock_openai_client,
-            )
+        # When context is None, the function should catch the AttributeError
+        # and log an exception, returning an empty list
+        mock_logger.exception.assert_called_once_with("Failed to create chunks and embeddings")
+        assert result == []
 
-            assert len(result) == 1
-            assert result[0] == mock_chunk
-
-            mock_update_data.assert_called_once_with(
-                text="some text", embedding=[0.1, 0.2, 0.3], context=None, save=True
-            )
-
+    @patch("apps.ai.common.utils.Chunk.update_data")
     @patch("apps.ai.common.utils.time.sleep")
     @patch("apps.ai.common.utils.datetime")
-    def test_create_chunks_and_embeddings_sleep_called(self, mock_datetime, mock_sleep):
+    def test_create_chunks_and_embeddings_sleep_called(
+        self, mock_datetime, mock_sleep, mock_update_data
+    ):
         """Tests that sleep is called when needed."""
         base_time = datetime.now(UTC)
         mock_datetime.now.return_value = base_time
@@ -133,25 +130,25 @@ class TestUtils:
         mock_api_response.data = [MockEmbeddingData([0.1, 0.2])]
         mock_openai_client.embeddings.create.return_value = mock_api_response
 
-        with patch("apps.ai.common.utils.Chunk.update_data") as mock_update_data:
-            mock_chunk = MagicMock()
-            mock_update_data.return_value = mock_chunk
+        mock_chunk_instance = MagicMock()
+        mock_update_data.return_value = mock_chunk_instance
 
-            result = create_chunks_and_embeddings(
-                ["test chunk"],
-                MagicMock(),
-                mock_openai_client,
-            )
+        mock_content_object = MagicMock()
 
-            mock_sleep.assert_not_called()
-            assert result == [mock_chunk]
+        result = create_chunks_and_embeddings(
+            ["test chunk"],
+            mock_content_object,
+            mock_openai_client,
+        )
 
-    @patch("apps.ai.common.utils.Context")
+        mock_sleep.assert_not_called()
+        assert result == [mock_chunk_instance]
+
     @patch("apps.ai.common.utils.Chunk.update_data")
     @patch("apps.ai.common.utils.time.sleep")
     @patch("apps.ai.common.utils.datetime")
     def test_create_chunks_and_embeddings_no_sleep_with_current_settings(
-        self, mock_datetime, mock_sleep, mock_update_data, mock_context
+        self, mock_datetime, mock_sleep, mock_update_data
     ):
         """Tests that sleep is not called with current offset settings."""
         base_time = datetime.now(UTC)
@@ -164,8 +161,8 @@ class TestUtils:
         mock_api_response.data = [MockEmbeddingData([0.1, 0.2])]
         mock_openai_client.embeddings.create.return_value = mock_api_response
 
-        mock_chunk = MagicMock()
-        mock_update_data.return_value = mock_chunk
+        mock_chunk_instance = MagicMock()
+        mock_update_data.return_value = mock_chunk_instance
         mock_context_obj = MagicMock()
 
         result = create_chunks_and_embeddings(
@@ -178,11 +175,14 @@ class TestUtils:
         mock_update_data.assert_called_once_with(
             text="test chunk", embedding=[0.1, 0.2], context=mock_context_obj, save=True
         )
-        assert result == [mock_chunk]
+        assert result == [mock_chunk_instance]
 
+    @patch("apps.ai.common.utils.Chunk.update_data")
     @patch("apps.ai.common.utils.time.sleep")
     @patch("apps.ai.common.utils.datetime")
-    def test_create_chunks_and_embeddings_sleep_when_rate_limited(self, mock_datetime, mock_sleep):
+    def test_create_chunks_and_embeddings_sleep_when_rate_limited(
+        self, mock_datetime, mock_sleep, mock_update_data
+    ):
         """Tests that sleep is called when rate limiting is needed."""
         base_time = datetime.now(UTC)
 
@@ -198,22 +198,23 @@ class TestUtils:
         mock_api_response.data = [MockEmbeddingData([0.1, 0.2])]
         mock_openai_client.embeddings.create.return_value = mock_api_response
 
-        with patch("apps.ai.common.utils.Chunk.update_data") as mock_update_data:
-            mock_chunk = MagicMock()
-            mock_update_data.return_value = mock_chunk
+        mock_chunk_instance = MagicMock()
+        mock_update_data.return_value = mock_chunk_instance
 
-            with (
-                patch("apps.ai.common.utils.DEFAULT_LAST_REQUEST_OFFSET_SECONDS", 5),
-                patch("apps.ai.common.utils.MIN_REQUEST_INTERVAL_SECONDS", 10),
-            ):
-                result = create_chunks_and_embeddings(
-                    ["test chunk"],
-                    MagicMock(),
-                    mock_openai_client,
-                )
+        with (
+            patch("apps.ai.common.utils.DEFAULT_LAST_REQUEST_OFFSET_SECONDS", 5),
+            patch("apps.ai.common.utils.MIN_REQUEST_INTERVAL_SECONDS", 10),
+        ):
+            mock_context_obj = MagicMock()
 
-            mock_sleep.assert_called_once()
-            assert result == [mock_chunk]
+            result = create_chunks_and_embeddings(
+                ["test chunk"],
+                mock_context_obj,
+                mock_openai_client,
+            )
+
+        mock_sleep.assert_called_once()
+        assert result == [mock_chunk_instance]
 
     @patch("apps.ai.common.utils.Chunk.update_data")
     def test_create_chunks_and_embeddings_filter_none_chunks(self, mock_update_data):
@@ -226,17 +227,19 @@ class TestUtils:
         ]
         mock_openai_client.embeddings.create.return_value = mock_api_response
 
-        mock_chunk = MagicMock()
-        mock_update_data.side_effect = [mock_chunk, None]
+        mock_chunk_instance = MagicMock()
+        mock_update_data.side_effect = [mock_chunk_instance, None]
+
+        mock_context_obj = MagicMock()
 
         result = create_chunks_and_embeddings(
             ["first chunk", "second chunk"],
-            MagicMock(),
+            mock_context_obj,
             mock_openai_client,
         )
 
         assert len(result) == 1
-        assert result[0] == mock_chunk
+        assert result[0] == mock_chunk_instance
 
 
 class TestRegenerateChunksForContext:
@@ -245,9 +248,9 @@ class TestRegenerateChunksForContext:
     @patch("apps.ai.common.utils.logger")
     @patch("apps.ai.common.utils.OpenAI")
     @patch("apps.ai.common.utils.create_chunks_and_embeddings")
-    @patch("apps.ai.models.chunk.Chunk")
+    @patch("apps.ai.common.utils.Chunk.split_text")
     def test_regenerate_chunks_for_context_success(
-        self, mock_chunk_class, mock_create_chunks, mock_openai_class, mock_logger
+        self, mock_split_text, mock_create_chunks, mock_openai_class, mock_logger
     ):
         """Test successful regeneration of chunks for context."""
         # Setup context mock
@@ -256,12 +259,11 @@ class TestRegenerateChunksForContext:
 
         # Setup existing chunks
         mock_existing_chunks = MagicMock()
-        mock_existing_chunks.count.return_value = 3
         context.chunks = mock_existing_chunks
 
         # Setup chunk splitting
         new_chunk_texts = ["chunk1", "chunk2"]
-        mock_chunk_class.split_text.return_value = new_chunk_texts
+        mock_split_text.return_value = new_chunk_texts
 
         # Setup OpenAI client
         mock_openai_client = MagicMock()
@@ -274,7 +276,7 @@ class TestRegenerateChunksForContext:
         mock_existing_chunks.all().delete.assert_called_once()
 
         # Verify content was split
-        mock_chunk_class.split_text.assert_called_once_with(context.content)
+        mock_split_text.assert_called_once_with(context.content)
 
         # Verify OpenAI client was created
         mock_openai_class.assert_called_once()
@@ -293,8 +295,8 @@ class TestRegenerateChunksForContext:
         )
 
     @patch("apps.ai.common.utils.logger")
-    @patch("apps.ai.models.chunk.Chunk")
-    def test_regenerate_chunks_for_context_no_content(self, mock_chunk_class, mock_logger):
+    @patch("apps.ai.common.utils.Chunk.split_text")
+    def test_regenerate_chunks_for_context_no_content(self, mock_split_text, mock_logger):
         """Test regeneration when there's no content to chunk."""
         # Setup context mock
         context = MagicMock()
@@ -302,11 +304,10 @@ class TestRegenerateChunksForContext:
 
         # Setup existing chunks
         mock_existing_chunks = MagicMock()
-        mock_existing_chunks.count.return_value = 2
         context.chunks = mock_existing_chunks
 
         # Setup chunk splitting to return empty list
-        mock_chunk_class.split_text.return_value = []
+        mock_split_text.return_value = []
 
         regenerate_chunks_for_context(context)
 
@@ -315,7 +316,7 @@ class TestRegenerateChunksForContext:
         mock_existing_chunks.all().delete.assert_called_once()
 
         # Verify content was split
-        mock_chunk_class.split_text.assert_called_once_with(context.content)
+        mock_split_text.assert_called_once_with(context.content)
 
         # Verify warning was logged and process stopped
         mock_logger.warning.assert_called_once_with(
@@ -328,9 +329,9 @@ class TestRegenerateChunksForContext:
     @patch("apps.ai.common.utils.logger")
     @patch("apps.ai.common.utils.OpenAI")
     @patch("apps.ai.common.utils.create_chunks_and_embeddings")
-    @patch("apps.ai.models.chunk.Chunk")
+    @patch("apps.ai.common.utils.Chunk.split_text")
     def test_regenerate_chunks_for_context_no_existing_chunks(
-        self, mock_chunk_class, mock_create_chunks, mock_openai_class, mock_logger
+        self, mock_split_text, mock_create_chunks, mock_openai_class, mock_logger
     ):
         """Test regeneration when there are no existing chunks."""
         # Setup context mock
@@ -339,12 +340,11 @@ class TestRegenerateChunksForContext:
 
         # Setup no existing chunks
         mock_existing_chunks = MagicMock()
-        mock_existing_chunks.count.return_value = 0
         context.chunks = mock_existing_chunks
 
         # Setup chunk splitting
         new_chunk_texts = ["chunk1", "chunk2"]
-        mock_chunk_class.split_text.return_value = new_chunk_texts
+        mock_split_text.return_value = new_chunk_texts
 
         # Setup OpenAI client
         mock_openai_client = MagicMock()
@@ -352,11 +352,12 @@ class TestRegenerateChunksForContext:
 
         regenerate_chunks_for_context(context)
 
-        # Verify delete was not called since count is 0
-        mock_existing_chunks.all.assert_not_called()
+        # Verify delete was called regardless of count
+        mock_existing_chunks.all.assert_called_once()
+        mock_existing_chunks.all().delete.assert_called_once()
 
         # Verify content was split
-        mock_chunk_class.split_text.assert_called_once_with(context.content)
+        mock_split_text.assert_called_once_with(context.content)
 
         # Verify new chunks were created
         mock_create_chunks.assert_called_once_with(

@@ -172,21 +172,22 @@ class TestRetriever:
         ):
             retriever = Retriever()
 
-            chapter = MagicMock()
-            chapter.suggested_location = "New York"
-            chapter.region = "North America"
-            chapter.country = "USA"
-            chapter.postal_code = "10001"
-            chapter.currency = "USD"
-            chapter.meetup_group = "OWASP NYC"
-            chapter.tags = ["security", "web"]
-            chapter.topics = ["OWASP Top 10"]
-            chapter.leaders_raw = ["John Doe", "Jane Smith"]
-            chapter.related_urls = ["https://example.com"]
-            chapter.is_active = True
-            chapter.url = "https://owasp.org/chapter"
+            content_object = MagicMock()
+            content_object.__class__.__name__ = "Chapter"
+            content_object.suggested_location = "New York"
+            content_object.region = "North America"
+            content_object.country = "USA"
+            content_object.postal_code = "10001"
+            content_object.currency = "USD"
+            content_object.meetup_group = "OWASP NYC"
+            content_object.tags = ["security", "web"]
+            content_object.topics = ["OWASP Top 10"]
+            content_object.leaders_raw = ["John Doe", "Jane Smith"]
+            content_object.related_urls = ["https://example.com"]
+            content_object.is_active = True
+            content_object.url = "https://owasp.org/chapter"
 
-            result = retriever.get_additional_context(chapter, "chapter")
+            result = retriever.get_additional_context(content_object)
 
             expected_keys = [
                 "location",
@@ -214,23 +215,52 @@ class TestRetriever:
             retriever = Retriever()
 
             content_object = MagicMock()
-            content_object.project_type = "tool"
+            content_object.__class__.__name__ = "Project"
             content_object.level = "flagship"
+            content_object.type = "tool"
+            content_object.languages = ["python"]
             content_object.topics = ["security"]
+            content_object.licenses = ["MIT"]
+            content_object.tags = ["web"]
+            content_object.custom_tags = ["api"]
+            content_object.stars_count = 100
+            content_object.forks_count = 20
+            content_object.contributors_count = 5
+            content_object.releases_count = 3
+            content_object.open_issues_count = 2
             content_object.leaders_raw = ["Alice"]
             content_object.related_urls = ["https://project.example.com"]
+            content_object.created_at = "2023-01-01"
+            content_object.updated_at = "2023-01-02"
+            content_object.released_at = "2023-01-03"
+            content_object.health_score = 85.5
             content_object.is_active = True
+            content_object.track_issues = True
             content_object.url = "https://owasp.org/project"
 
-            result = retriever.get_additional_context(content_object, "project")
+            result = retriever.get_additional_context(content_object)
 
             expected_keys = [
-                "project_type",
                 "level",
+                "project_type",
+                "languages",
                 "topics",
+                "licenses",
+                "tags",
+                "custom_tags",
+                "stars_count",
+                "forks_count",
+                "contributors_count",
+                "releases_count",
+                "open_issues_count",
                 "leaders",
                 "related_urls",
+                "created_at",
+                "updated_at",
+                "released_at",
+                "health_score",
                 "is_active",
+                "track_issues",
                 "url",
             ]
             for key in expected_keys:
@@ -245,6 +275,7 @@ class TestRetriever:
             retriever = Retriever()
 
             content_object = MagicMock()
+            content_object.__class__.__name__ = "Event"
             content_object.start_date = "2023-01-01"
             content_object.end_date = "2023-01-02"
             content_object.suggested_location = "San Francisco"
@@ -255,7 +286,7 @@ class TestRetriever:
             content_object.description = "Test event description"
             content_object.summary = "Test event summary"
 
-            result = retriever.get_additional_context(content_object, "event")
+            result = retriever.get_additional_context(content_object)
 
             expected_keys = [
                 "start_date",
@@ -280,6 +311,7 @@ class TestRetriever:
             retriever = Retriever()
 
             content_object = MagicMock()
+            content_object.__class__.__name__ = "Committee"
             content_object.is_active = True
             content_object.leaders = ["John Doe", "Jane Smith"]
             content_object.url = "https://committee.example.com"
@@ -289,7 +321,7 @@ class TestRetriever:
             content_object.topics = ["policy", "standards"]
             content_object.related_urls = ["https://related.example.com"]
 
-            result = retriever.get_additional_context(content_object, "committee")
+            result = retriever.get_additional_context(content_object)
 
             expected_keys = [
                 "is_active",
@@ -322,12 +354,13 @@ class TestRetriever:
             author.name = "testuser"
 
             content_object = MagicMock()
+            content_object.__class__.__name__ = "Message"
             content_object.conversation = conversation
             content_object.parent_message = parent_message
             content_object.ts = "1234567891.123456"
             content_object.author = author
 
-            result = retriever.get_additional_context(content_object, "message")
+            result = retriever.get_additional_context(content_object)
 
             expected_keys = ["channel", "thread_ts", "ts", "user"]
             for key in expected_keys:
@@ -347,30 +380,15 @@ class TestRetriever:
             retriever = Retriever()
 
             content_object = MagicMock()
+            content_object.__class__.__name__ = "Message"
             content_object.conversation = None
             content_object.parent_message = None
             content_object.ts = "1234567891.123456"
             content_object.author = None
 
-            result = retriever.get_additional_context(content_object, "message")
+            result = retriever.get_additional_context(content_object)
 
             assert result["ts"] == "1234567891.123456"
-
-    def test_get_additional_context_with_app_label(self):
-        """Test getting additional context with app.model format."""
-        with (
-            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
-            patch("openai.OpenAI"),
-        ):
-            retriever = Retriever()
-
-            content_object = MagicMock()
-            content_object.suggested_location = "Test Location"
-
-            result = retriever.get_additional_context(content_object, "owasp.chapter")
-
-            assert "location" in result
-            assert result["location"] == "Test Location"
 
     def test_extract_content_types_from_query_single_type(self):
         """Test extracting single content type from query."""
@@ -473,13 +491,13 @@ class TestRetriever:
 
             mock_content_object = MagicMock()
             mock_content_object.name = "Test Chapter"
+            mock_content_object.__class__.__name__ = "Chapter"
             mock_content_object.suggested_location = "New York"
 
             mock_entity_type = MagicMock()
             mock_entity_type.model = "chapter"
 
             mock_context = MagicMock()
-            mock_context.content_object = mock_content_object
             mock_context.entity = mock_content_object
             mock_context.entity_type = mock_entity_type
             mock_context.entity_id = "123"

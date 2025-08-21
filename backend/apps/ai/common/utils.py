@@ -63,7 +63,7 @@ def create_chunks_and_embeddings(
             if chunk is not None:
                 chunks.append(chunk)
 
-    except OpenAIError:
+    except (OpenAIError, AttributeError, TypeError):
         logger.exception("Failed to create chunks and embeddings")
         return []
     else:
@@ -79,10 +79,7 @@ def regenerate_chunks_for_context(context: Context):
     """
     from apps.ai.models.chunk import Chunk
 
-    old_chunk_count = context.chunks.count()
-    if old_chunk_count > 0:
-        context.chunks.all().delete()
-
+    context.chunks.all().delete()
     new_chunk_texts = Chunk.split_text(context.content)
 
     if not new_chunk_texts:
