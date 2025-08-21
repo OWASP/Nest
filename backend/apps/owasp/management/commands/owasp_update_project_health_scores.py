@@ -57,6 +57,17 @@ class Command(BaseCommand):
                 if int(getattr(metric, field)) <= int(getattr(requirements, field)):
                     score += weight
 
+            # Fetch requirements for this project level, skip if missing
+            requirements = project_health_requirements.get(metric.project.level)
+            if requirements is None:
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"Missing ProjectHealthRequirements for level '{metric.project.level}' — "
+                        f"skipping scoring for {metric.project.name}"
+                    )
+                )
+                continue
+
             # Apply compliance penalty if project is not level compliant
             if not metric.project.is_level_compliant:
                 penalty_percentage = float(getattr(requirements, "compliance_penalty_weight", 0.0))
