@@ -195,9 +195,9 @@ class TestContextModel:
             ),
         ):
             result = str(context)
-            assert (
-                result
-                == "test_model Test Object: This is test content that is longer than 50 charac"
+            assert result == (
+                "test_model Test Object: This is test content that is longer than 50 charac"
+                # cspell:ignore charac
             )
 
     def test_str_method_with_key_attribute(self):

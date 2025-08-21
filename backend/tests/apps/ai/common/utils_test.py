@@ -108,8 +108,6 @@ class TestUtils:
             openai_client=mock_openai_client,
         )
 
-        # When context is None, the function should catch the AttributeError
-        # and log an exception, returning an empty list
         mock_logger.exception.assert_called_once_with("Failed to create chunks and embeddings")
         assert result == []
 
@@ -253,35 +251,27 @@ class TestRegenerateChunksForContext:
         self, mock_split_text, mock_create_chunks, mock_openai_class, mock_logger
     ):
         """Test successful regeneration of chunks for context."""
-        # Setup context mock
         context = MagicMock()
         context.content = "This is test content for chunking"
 
-        # Setup existing chunks
         mock_existing_chunks = MagicMock()
         context.chunks = mock_existing_chunks
 
-        # Setup chunk splitting
         new_chunk_texts = ["chunk1", "chunk2"]
         mock_split_text.return_value = new_chunk_texts
 
-        # Setup OpenAI client
         mock_openai_client = MagicMock()
         mock_openai_class.return_value = mock_openai_client
 
         regenerate_chunks_for_context(context)
 
-        # Verify old chunks were deleted
         mock_existing_chunks.all.assert_called_once()
         mock_existing_chunks.all().delete.assert_called_once()
 
-        # Verify content was split
         mock_split_text.assert_called_once_with(context.content)
 
-        # Verify OpenAI client was created
         mock_openai_class.assert_called_once()
 
-        # Verify new chunks were created
         mock_create_chunks.assert_called_once_with(
             chunk_texts=new_chunk_texts,
             context=context,
@@ -289,7 +279,6 @@ class TestRegenerateChunksForContext:
             save=True,
         )
 
-        # Verify success log
         mock_logger.info.assert_called_once_with(
             "Successfully completed chunk regeneration for new context"
         )
@@ -298,32 +287,25 @@ class TestRegenerateChunksForContext:
     @patch("apps.ai.common.utils.Chunk.split_text")
     def test_regenerate_chunks_for_context_no_content(self, mock_split_text, mock_logger):
         """Test regeneration when there's no content to chunk."""
-        # Setup context mock
         context = MagicMock()
         context.content = "Some content"
 
-        # Setup existing chunks
         mock_existing_chunks = MagicMock()
         context.chunks = mock_existing_chunks
 
-        # Setup chunk splitting to return empty list
         mock_split_text.return_value = []
 
         regenerate_chunks_for_context(context)
 
-        # Verify old chunks were deleted
         mock_existing_chunks.all.assert_called_once()
         mock_existing_chunks.all().delete.assert_called_once()
 
-        # Verify content was split
         mock_split_text.assert_called_once_with(context.content)
 
-        # Verify warning was logged and process stopped
         mock_logger.warning.assert_called_once_with(
             "No content to chunk for Context. Process stopped."
         )
 
-        # Verify success log was not called
         mock_logger.info.assert_not_called()
 
     @patch("apps.ai.common.utils.logger")
@@ -334,32 +316,25 @@ class TestRegenerateChunksForContext:
         self, mock_split_text, mock_create_chunks, mock_openai_class, mock_logger
     ):
         """Test regeneration when there are no existing chunks."""
-        # Setup context mock
         context = MagicMock()
         context.content = "This is test content for chunking"
 
-        # Setup no existing chunks
         mock_existing_chunks = MagicMock()
         context.chunks = mock_existing_chunks
 
-        # Setup chunk splitting
         new_chunk_texts = ["chunk1", "chunk2"]
         mock_split_text.return_value = new_chunk_texts
 
-        # Setup OpenAI client
         mock_openai_client = MagicMock()
         mock_openai_class.return_value = mock_openai_client
 
         regenerate_chunks_for_context(context)
 
-        # Verify delete was called regardless of count
         mock_existing_chunks.all.assert_called_once()
         mock_existing_chunks.all().delete.assert_called_once()
 
-        # Verify content was split
         mock_split_text.assert_called_once_with(context.content)
 
-        # Verify new chunks were created
         mock_create_chunks.assert_called_once_with(
             chunk_texts=new_chunk_texts,
             context=context,
@@ -367,7 +342,6 @@ class TestRegenerateChunksForContext:
             save=True,
         )
 
-        # Verify success log
         mock_logger.info.assert_called_once_with(
             "Successfully completed chunk regeneration for new context"
         )
