@@ -34,4 +34,21 @@ const InfoItem = ({
   )
 }
 
+export const TextInfoItem = ({
+  icon,
+  label,
+  value,
+}: {
+  icon: IconDefinition
+  label: string
+  value: string
+}) => {
+  return (
+    <div className="flex items-center gap-2 text-sm text-gray-400">
+      <FontAwesomeIcon icon={icon} className="text-xs" />
+      <span className="font-medium">{label}:</span> {value}
+    </div>
+  )
+}
+
 export default InfoItem
