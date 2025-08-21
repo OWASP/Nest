@@ -1,18 +1,4 @@
 
-import { GoogleAnalytics } from '@next/third-parties/google'
-import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
-import React from 'react'
-import { Providers } from 'wrappers/provider'
-import { GTM_ID } from 'utils/env.client'
-import { IS_GITHUB_AUTH_ENABLED } from 'utils/env.server'
-import AutoScrollToTop from 'components/AutoScrollToTop'
-import BreadCrumbs from 'components/BreadCrumbs'
-import Footer from 'components/Footer'
-import Header from 'components/Header'
-import ScrollToTop from 'components/ScrollToTop'
-
-
 import { GoogleAnalytics } from '@next/third-parties/google';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
@@ -73,9 +59,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body

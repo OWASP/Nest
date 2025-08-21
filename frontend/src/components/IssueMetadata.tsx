@@ -1,21 +1,21 @@
-import { faCalendar, faFolderOpen } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useRouter } from 'next/navigation';
-import React from 'react';
-import type { Issue } from 'types/issue';
-import { formatDate } from 'utils/dateFormatter';
-import { TruncatedText } from 'components/TruncatedText';
+import { faCalendar, faFolderOpen } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useRouter } from 'next/navigation'
+import React from 'react'
+import type { Issue } from 'types/issue'
+import { formatDate } from 'utils/dateFormatter'
+import { TruncatedText } from 'components/TruncatedText'
 
 // Props interface
 interface IssueMetadataProps {
-  issue: Issue;
+  issue: Issue
 }
 
 /**
  * Reusable component to display issue metadata (created date and repository link)
  */
 export const IssueMetadata: React.FC<IssueMetadataProps> = ({ issue }) => {
-  const router = useRouter();
+  const router = useRouter()
 
   return (
     <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
@@ -42,7 +42,7 @@ export const IssueMetadata: React.FC<IssueMetadataProps> = ({ issue }) => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default IssueMetadata;
+export default IssueMetadata

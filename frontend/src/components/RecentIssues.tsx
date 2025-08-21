@@ -5,7 +5,6 @@ import type { Issue } from 'types/issue'
 import AnchorTitle from 'components/AnchorTitle'
 import { IssueMetadata } from 'components/IssueMetadata' // ← new reusable component
 import ItemCardList from 'components/ItemCardList'
-import { IssueMetadata } from 'components/IssueMetadata' // ← new reusable component
 
 interface RecentIssuesProps {
   data: Issue[]
