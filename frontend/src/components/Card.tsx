@@ -29,7 +29,7 @@ const Card = ({
   timeline,
 }: CardProps) => {
   return (
-    <div className="mx-auto mb-2 mt-4 flex w-full max-w-[95%] flex-col items-start rounded-md border border-border bg-white p-4 dark:bg-[#212529] md:max-w-6xl">
+    <div className="border-border mx-auto mt-4 mb-2 flex w-full max-w-[95%] flex-col items-start rounded-md border bg-white p-4 md:max-w-6xl dark:bg-[#212529]">
       {/* Card Header with Badge and Title */}
       <div className="w-full">
         <div className="flex items-center gap-3">
@@ -54,7 +54,7 @@ const Card = ({
           {/* Project title and link */}
           <Link href={url} target="_blank" rel="noopener noreferrer" className="flex-1">
             <h1
-              className="max-w-full break-words text-base font-semibold text-blue-400 hover:text-blue-600 sm:break-normal sm:text-lg lg:text-2xl"
+              className="max-w-full text-base font-semibold break-words text-blue-400 hover:text-blue-600 sm:text-lg sm:break-normal lg:text-2xl"
               style={{
                 transition: 'color 0.3s ease',
               }}

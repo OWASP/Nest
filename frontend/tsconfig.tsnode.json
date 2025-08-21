@@ -1,10 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "node",
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "include": [
-    "scripts/generate-tailwind-config.ts"
-  ]
+  "include": ["scripts/generate-tailwind-config.ts"]
 }

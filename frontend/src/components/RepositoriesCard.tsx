@@ -37,7 +37,7 @@ const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
   }
 
   return (
-    <div className="h-46 flex w-full flex-col gap-3 rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+    <div className="flex h-46 w-full flex-col gap-3 rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <button
         onClick={handleClick}
         className="text-start font-semibold text-blue-400 hover:underline"

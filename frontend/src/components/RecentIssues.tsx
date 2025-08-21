@@ -3,8 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React from 'react'
 import type { Issue } from 'types/issue'
 import AnchorTitle from 'components/AnchorTitle'
-import ItemCardList from 'components/ItemCardList'
 import { IssueMetadata } from 'components/IssueMetadata' // ← new reusable component
+import ItemCardList from 'components/ItemCardList'
 
 interface RecentIssuesProps {
   data: Issue[]

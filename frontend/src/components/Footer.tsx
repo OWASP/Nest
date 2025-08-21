@@ -9,27 +9,28 @@ import { footerIcons } from 'utils/constants'
 import { footerSections } from 'utils/constants'
 import { ENVIRONMENT, RELEASE_VERSION } from 'utils/credentials'
 
-export default function Footer() {
-  // State to keep track of the open section in the footer
+// Add className to props
+interface FooterProps {
+  className?: string
+}
+
+export default function Footer({ className }: FooterProps) {
   const [openSection, setOpenSection] = useState<string | null>(null)
 
-  // Function to toggle the section open/closed
   const toggleSection = useCallback((title: string) => {
-    // If the section is already open, close it, otherwise open it
     setOpenSection((prev) => (prev === title ? null : title))
   }, [])
 
   return (
-    <footer className="mt-auto w-full border-t bg-slate-200 dark:bg-slate-800 xl:max-w-full">
-      <div className="grid w-full place-content-center gap-12 px-4 py-4 text-slate-800 dark:text-slate-200 md:py-8">
+    <footer className={`w-full border-t bg-slate-200 dark:bg-slate-800 ${className || ''}`}>
+      <div className="grid w-full place-content-center gap-12 px-4 py-4 text-slate-800 md:py-8 dark:text-slate-200">
         <div className="grid w-full sm:grid-cols-2 sm:gap-20 md:grid-cols-4">
           {footerSections.map((section: Section) => (
             <div key={section.title} className="space-y-4">
-              {/*link*/}
               <Button
                 disableAnimation
                 onPress={() => toggleSection(section.title)}
-                className="flex w-full items-center justify-between bg-transparent pl-0 text-left text-lg font-semibold focus:outline-none focus:ring-slate-400 lg:cursor-default"
+                className="flex w-full items-center justify-between bg-transparent pl-0 text-left text-lg font-semibold focus:ring-slate-400 focus:outline-none lg:cursor-default"
                 aria-expanded={openSection === section.title}
                 aria-controls={`footer-section-${section.title}`}
               >
@@ -83,6 +84,7 @@ export default function Footer() {
             </Link>
           ))}
         </div>
+
         {/* Footer bottom section with copyright and version */}
         <div className="grid w-full place-content-center">
           <div className="flex w-full flex-col items-center gap-2 sm:flex-col sm:text-left">

@@ -54,7 +54,7 @@ const ModuleForm = ({
   }
 
   return (
-    <div className="flex w-full flex-col items-center justify-normal p-5 text-text">
+    <div className="text-text flex w-full flex-col items-center justify-normal p-5">
       <div className="mb-8 text-left">
         <h1 className="mb-2 text-4xl font-bold text-gray-800 dark:text-gray-200">{title}</h1>
       </div>
