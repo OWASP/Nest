@@ -15,10 +15,10 @@ class Base(Configuration):
 
     ALLOWED_HOSTS = values.ListValue()
     AUTH_USER_MODEL = "nest.User"
-    AWS_KMS_KEY_ID = values.Value(environ_name="AWS_KMS_KEY_ID", default=None)
-    AWS_ACCESS_KEY_ID = values.SecretValue(environ_name="AWS_ACCESS_KEY_ID", default=None)
-    AWS_SECRET_ACCESS_KEY = values.SecretValue(environ_name="AWS_SECRET_ACCESS_KEY", default=None)
-    AWS_REGION = values.Value(environ_name="AWS_REGION", default=None)
+    AWS_KMS_KEY_ID = values.Value()
+    AWS_ACCESS_KEY_ID = values.SecretValue()
+    AWS_SECRET_ACCESS_KEY = values.SecretValue()
+    AWS_REGION = values.Value()
     CORS_ALLOW_CREDENTIALS = True
     DEBUG = False
     GITHUB_APP_ID = None
@@ -30,14 +30,7 @@ class Base(Configuration):
     GOOGLE_AUTH_SCOPES = values.ListValue()
     GOOGLE_AUTH_TOKEN_URI = values.Value()
 
-    IS_AWS_KMS_ENABLED = values.BooleanValue(environ_name="IS_AWS_KMS_ENABLED", default=False)
-
-    if IS_AWS_KMS_ENABLED:
-        AWS_KMS_KEY_ID = values.Value(environ_name="AWS_KMS_KEY_ID")
-        AWS_ACCESS_KEY_ID = values.SecretValue(environ_name="AWS_ACCESS_KEY_ID")
-        AWS_SECRET_ACCESS_KEY = values.SecretValue(environ_name="AWS_SECRET_ACCESS_KEY")
-        AWS_REGION = values.Value(environ_name="AWS_REGION")
-
+    IS_AWS_KMS_ENABLED = values.BooleanValue(default=False)
     IS_GOOGLE_AUTH_ENABLED = values.BooleanValue(default=False)
     IS_LOCAL_ENVIRONMENT = False
     IS_PRODUCTION_ENVIRONMENT = False
