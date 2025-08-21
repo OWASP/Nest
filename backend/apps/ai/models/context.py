@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from apps.common.models import TimestampedModel
+from apps.common.utils import truncate
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ class Context(TimestampedModel):
             or getattr(self.entity, "key", None)
             or str(self.entity)
         )
-        return f"{self.entity_type.model} {entity}: {self.content[:50]}"
+        return f"{self.entity_type.model} {entity}: {truncate(self.content, 50)}"
 
     @staticmethod
     def update_data(
