@@ -5,10 +5,11 @@ from datetime import timedelta
 
 import django_rq
 
+from apps.slack.common.handlers.ai import get_blocks
 from apps.slack.common.question_detector import QuestionDetector
 from apps.slack.events.event import EventBase
 from apps.slack.models import Conversation, Member, Message
-from apps.slack.services.task import generate_ai_reply_if_unanswered
+from apps.slack.services.message_auto_reply import generate_ai_reply_if_unanswered
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,7 @@ class MessagePosted(EventBase):
     def __init__(self):
         """Initialize MessagePosted event handler."""
         self.question_detector = QuestionDetector()
+        self.bot_user_id = None
 
     def handle_event(self, event, client):
         """Handle an incoming message event."""
@@ -28,9 +30,25 @@ class MessagePosted(EventBase):
             logger.info("Ignored message due to subtype, bot_id, or thread_ts.")
             return
 
+        if not self.bot_user_id:
+            auth_response = client.auth_test()
+            self.bot_user_id = auth_response.get("user_id")
+
         channel_id = event.get("channel")
         user_id = event.get("user")
         text = event.get("text", "")
+        bot_mention_string = f"<@{self.bot_user_id}>"
+
+        if bot_mention_string in text:
+            query = text.replace(bot_mention_string, "").strip()
+
+            client.chat_postMessage(
+                channel=channel_id,
+                blocks=get_blocks(query=query),
+                text=query,
+                thread_ts=event.get("ts"),
+            )
+            return
 
         try:
             conversation = Conversation.objects.get(
