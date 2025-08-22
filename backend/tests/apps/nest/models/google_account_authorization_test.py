@@ -88,7 +88,7 @@ class TestGoogleAccountAuthorizationModel:
     def test_authorize_when_google_auth_disabled(self):
         """Test authorize raises error when Google auth is disabled."""
         with pytest.raises(ValueError, match="Google OAuth client ID"):
-            GoogleAccountAuthorization.authorize(self.member)
+            GoogleAccountAuthorization.authorize(self.member.slack_user_id)
 
     @override_settings(IS_AWS_KMS_ENABLED=False, IS_GOOGLE_AUTH_ENABLED=True)
     def test_authorize_when_aws_kms_disabled(self):
