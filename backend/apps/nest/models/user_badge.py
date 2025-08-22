@@ -20,6 +20,12 @@ class UserBadge(BulkSaveModel, TimestampedModel):
             ),
         ]
 
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Is active",
+        help_text="Indicates if the badge assignment is active.",
+    )
+
     note = models.CharField(
         verbose_name="Note",
         max_length=255,

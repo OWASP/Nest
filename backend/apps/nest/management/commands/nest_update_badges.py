@@ -48,7 +48,10 @@ class Command(BaseCommand):
 
         if count:
             for user in employees_without_badge:
-                UserBadge.objects.get_or_create(user=user, badge=badge)
+                user_badge, created = UserBadge.objects.get_or_create(user=user, badge=badge)
+                if not user_badge.is_active:
+                    user_badge.is_active = True
+                    user_badge.save(update_fields=["is_active"])
 
         logger.info("Added '%s' badge to %s users", OWASP_STAFF_BADGE_NAME, count)
         self.stdout.write(f"Added badge to {count} employees")
@@ -64,7 +67,7 @@ class Command(BaseCommand):
             UserBadge.objects.filter(
                 user_id__in=non_employees.values_list("id", flat=True),
                 badge=badge,
-            ).delete()
+            ).update(is_active=False)
 
         logger.info("Removed '%s' badge from %s users", OWASP_STAFF_BADGE_NAME, removed_count)
         self.stdout.write(f"Removed badge from {removed_count} non-employees")
