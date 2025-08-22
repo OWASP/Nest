@@ -8,7 +8,6 @@ from pyparsing import (
     ParseException,
     QuotedString,
     Regex,
-    Suppress,
     Word,
     ZeroOrMore,
     alphanums,
@@ -112,25 +111,14 @@ class QueryParser:
     # Grammar definitions (class-level constants)
     _FIELD_NAME = Word(alphas, alphanums + "_")
     _QUOTED_VALUE = QuotedString(quoteChar='"', escChar="\\", unquoteResults=False)
-    _UNQUOTED_VALUE = Word(alphanums + "+-.<>=/_")
+    _UNQUOTED_VALUE = Word(alphanums + '+-.<>=/_"')
     _FIELD_VALUE = _QUOTED_VALUE | _UNQUOTED_VALUE
-    _TOKEN_PATTERN = Group(_FIELD_NAME + Suppress(":") + _FIELD_VALUE)
-    _COMP_OPERATOR = Optional(oneOf(">= <= > < ="), default="=")
+    _COMPARISON_OPERATORS = {">", "<", ">=", "<=", "="}
+    _COMP_OPERATOR = Optional(oneOf(_COMPARISON_OPERATORS), default="=")
     _COMP_PATTERN = Group(_COMP_OPERATOR + _UNQUOTED_VALUE)
     _DATE_PATTERN = Regex(r"\d{4}-\d{2}-\d{2}")  # YYYY-MM-DD format
-
     _BOOLEAN_TRUE_VALUES = {"true", "1", "yes", "on"}
     _BOOLEAN_FALSE_VALUES = {"false", "0", "no", "off"}
-
-    @staticmethod
-    def _is_field_name(field_name: str) -> bool:
-        """Check if a field name is valid."""
-        try:
-            QueryParser._FIELD_NAME.parseString(field_name, parseAll=True)
-        except ParseException:
-            return False
-        else:
-            return bool(field_name.islower())
 
     def __init__(
         self,
@@ -167,13 +155,139 @@ class QueryParser:
                 error_type="CONFIGURATION_ERROR",
             ) from e
 
+    def parse(self, query: str) -> list[dict[str, str]]:
+        """Parse query string into structured conditions.
+
+        Args:
+            query: Query string to parse
+
+        Returns:
+            List of dictionaries representing parsed conditions
+
+        Raises:
+            QueryParserError: If parsing fails
+
+        """
+        conditions = []
+        query = query.strip()
+        if not self.case_sensitive:
+            query = query.lower()
+        tokens = self._split_tokens(query)
+        for token in tokens:
+            field, raw_value = self._parse_token(token)
+
+            if field is None:
+                conditions.append(self._create_text_search_condition(raw_value))
+                continue
+
+            field = field.lower()  # field name normalization
+
+            if field not in self.allowed_fields:
+                self._handle_unknown_field(field)
+                continue
+
+            field_type = self.allowed_fields[field]
+            try:
+                condition_dict = self.to_dict(field, field_type, raw_value)
+            except QueryParserError:
+                if self.strict:
+                    raise
+                continue
+            conditions.append(condition_dict)
+        return conditions
+
+    def to_dict(self, field: str, field_type: FieldType, raw_value: str) -> dict[str, str]:
+        """Convert condition to dictionary format.
+
+        Args:
+            field: Field name
+            field_type: FieldType of the condition
+            raw_value: Raw string value to parse
+
+        Returns:
+            Dictionary representation of the condition
+
+        Raises:
+            QueryParserError: If parsing fails
+
+        """
+        condition_dict = {
+            "type": field_type.value,
+            "field": field,
+        }
+        if field_type == FieldType.BOOLEAN:
+            condition_dict["boolean"] = self._parse_boolean_value(field, raw_value)
+        elif field_type == FieldType.NUMBER:
+            operator, numeric_value = self._parse_number_value(field, raw_value)
+            condition_dict["op"] = operator
+            condition_dict["number"] = str(numeric_value)
+        elif field_type == FieldType.DATE:
+            operator, date_value = self._parse_date_value(field, raw_value)
+            condition_dict["op"] = operator
+            condition_dict["date"] = date_value
+        else:  # STRING
+            condition_dict["string"] = self._parse_string_value(field, raw_value)
+
+        return condition_dict
+
+    def _create_text_search_condition(self, token: str) -> dict[str, str]:
+        """Create a text search condition for tokens that aren't field:value pairs.
+
+        Args:
+            token: Raw token string
+
+        Returns:
+            QueryCondition for text search
+
+        """
+        return {"type": FieldType.STRING.value, "field": self.default_field, "string": token}
+
+    def _handle_unknown_field(self, field: str) -> None:
+        """Handle unknown field based on strict mode setting.
+
+        Args:
+            field: Unknown field name
+
+        Raises:
+            QueryParserError: If in strict mode
+
+        """
+        if self.strict:
+            raise QueryParserError(
+                message=f"Unknown field '{field}'",
+                error_type="UNKNOWN_FIELD_ERROR",
+                field=field,
+            )
+
+    @staticmethod
+    def _is_field_name(field_name: str) -> bool:
+        """Check if a field name is valid."""
+        try:
+            QueryParser._FIELD_NAME.parseString(field_name, parseAll=True)
+        except ParseException:
+            return False
+        else:
+            return bool(field_name.islower())
+
+    @staticmethod
+    def _is_field_value(field_value: str) -> bool:
+        """Check if a field value is valid."""
+        try:
+            QueryParser._FIELD_VALUE.parseString(field_value, parseAll=True)
+        except ParseException:
+            return False
+        else:
+            return True
+
     @staticmethod
     def _raise_invalid_field_name(field: str) -> None:
+        """Raise an error for invalid field names."""
         msg = f"Field name '{field}' must be alphanumeric (letters, numbers, underscores only)"
         raise QueryParserError(message=msg, error_type="FIELD_NAME_ERROR", field=field)
 
     @staticmethod
     def _raise_invalid_field_type(field: str, field_type: str) -> None:
+        """Raise an error for invalid field types."""
         msg = f"Invalid field type '{field_type}' for field '{field}'"
         raise QueryParserError(message=msg, error_type="FIELD_TYPE_ERROR", field=field)
 
@@ -253,11 +367,32 @@ class QueryParser:
             Tuple of (field_name, raw_value) or (None, token) if parsing fails
 
         """
-        try:
-            result = QueryParser._TOKEN_PATTERN.parseString(token, parseAll=True)
-            return (result[0][0], result[0][1])
-        except ParseException:
+        token = token.strip()
+        if token[0] == '"':
             return (None, token)
+        if token.count(":") == 0:
+            return (None, token)
+        field, value = token.split(":", 1)
+        field = field.strip().lower()
+        value = value.strip()
+        if not QueryParser._is_field_name(field):
+            return (None, token)
+        if not QueryParser._is_field_value(value):
+            return (None, token)
+        return (field, value)
+
+    @staticmethod
+    def _remove_quotes(value: str) -> str:
+        """Remove surrounding quotes from a string.
+
+        Args:
+            value: Input string
+
+        Returns:
+            String without surrounding quotes
+
+        """
+        return value.strip().strip('"')
 
     @staticmethod
     def _parse_comparison_pattern(value: str) -> tuple[str, str]:
@@ -274,6 +409,7 @@ class QueryParser:
 
         """
         try:
+            value = QueryParser._remove_quotes(value)
             match = QueryParser._COMP_PATTERN.parseString(value, parseAll=True)
             return (match[0][0], match[0][1])
         except ParseException as e:
@@ -320,9 +456,11 @@ class QueryParser:
             QueryParserError: If value is not a valid boolean
 
         """
-        if value.lower() in QueryParser._BOOLEAN_TRUE_VALUES:
+        value = QueryParser._remove_quotes(value)
+        value = value.lower()
+        if value in QueryParser._BOOLEAN_TRUE_VALUES:
             return "True"
-        if value.lower() in QueryParser._BOOLEAN_FALSE_VALUES:
+        if value in QueryParser._BOOLEAN_FALSE_VALUES:
             return "False"
 
         raise QueryParserError(
@@ -347,6 +485,7 @@ class QueryParser:
 
         """
         try:
+            value = QueryParser._remove_quotes(value)
             operator, clean_value = QueryParser._parse_comparison_pattern(value)
             numeric_value = int(float(clean_value))
 
@@ -375,6 +514,7 @@ class QueryParser:
 
         """
         try:
+            value = QueryParser._remove_quotes(value)
             operator, clean_value = QueryParser._parse_comparison_pattern(value)
             result = QueryParser._DATE_PATTERN.parseString(clean_value, parseAll=True)
             return operator, result[0]
@@ -383,107 +523,3 @@ class QueryParser:
             raise QueryParserError(
                 message=f"Invalid date value '{value}'", error_type="DATE_VALUE_ERROR", field=field
             ) from e
-
-    def to_dict(self, field: str, field_type: FieldType, raw_value: str) -> dict[str, str]:
-        """Convert condition to dictionary format.
-
-        Args:
-            field: Field name
-            field_type: FieldType of the condition
-            raw_value: Raw string value to parse
-
-        Returns:
-            Dictionary representation of the condition
-
-        Raises:
-            QueryParserError: If parsing fails
-
-        """
-        condition_dict = {
-            "type": field_type.value,
-            "field": field,
-        }
-        if field_type == FieldType.BOOLEAN:
-            condition_dict["boolean"] = self._parse_boolean_value(field, raw_value)
-        elif field_type == FieldType.NUMBER:
-            operator, numeric_value = self._parse_number_value(field, raw_value)
-            condition_dict["op"] = operator
-            condition_dict["number"] = str(numeric_value)
-        elif field_type == FieldType.DATE:
-            operator, date_value = self._parse_date_value(field, raw_value)
-            condition_dict["op"] = operator
-            condition_dict["date"] = date_value
-        else:  # STRING
-            condition_dict["string"] = self._parse_string_value(field, raw_value)
-
-        return condition_dict
-
-    def _create_text_search_condition(self, token: str) -> dict[str, str]:
-        """Create a text search condition for tokens that aren't field:value pairs.
-
-        Args:
-            token: Raw token string
-
-        Returns:
-            QueryCondition for text search
-
-        """
-        return {"type": FieldType.STRING.value, "field": self.default_field, "string": token}
-
-    def _handle_unknown_field(self, field: str) -> None:
-        """Handle unknown field based on strict mode setting.
-
-        Args:
-            field: Unknown field name
-
-        Raises:
-            QueryParserError: If in strict mode
-
-        """
-        if self.strict:
-            raise QueryParserError(
-                message=f"Unknown field '{field}'",
-                error_type="UNKNOWN_FIELD_ERROR",
-                field=field,
-            )
-
-    def parse(self, query: str) -> list[dict[str, str]]:
-        """Parse query string into structured conditions.
-
-        Args:
-            query: Query string to parse
-
-        Returns:
-            List of dictionaries representing parsed conditions
-
-        Raises:
-            QueryParserError: If parsing fails
-
-        """
-        conditions = []
-        query = query.strip()
-        if not self.case_sensitive:
-            query = query.lower()
-        tokens = self._split_tokens(query)
-        for token in tokens:
-            field, raw_value = self._parse_token(token)
-
-            if field is None:
-                conditions.append(self._create_text_search_condition(raw_value))
-                continue
-
-            field = field.lower()  # field name normalization
-
-            if field not in self.allowed_fields:
-                self._handle_unknown_field(field)
-                continue
-
-            field_type = self.allowed_fields[field]
-            try:
-                condition_dict = self.to_dict(field, field_type, raw_value)
-            except QueryParserError:
-                if self.strict:
-                    raise
-                continue
-            conditions.append(condition_dict)
-        return conditions

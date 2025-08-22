@@ -23,6 +23,9 @@ class TestQueryParser:
         self.case_sensitive_strict_parser = QueryParser(
             allowed_fields=self.allowed_fields, strict=True, case_sensitive=True
         )
+        self.boolean_values = self.parser._BOOLEAN_TRUE_VALUES | self.parser._BOOLEAN_FALSE_VALUES
+        self.true_boolean_values = self.parser._BOOLEAN_TRUE_VALUES
+        self.comparison_operators = self.parser._COMPARISON_OPERATORS
 
     def test_invalid_parser_field_validation(self):
         with pytest.raises(QueryParserError) as ei:
@@ -56,25 +59,23 @@ class TestQueryParser:
         assert len(result) == 1
         assert result[0]["field"] == "author"
 
-    @pytest.mark.parametrize("op", ["<", "<=", ">", ">=", "="])
-    def test_comparison_operators(self, op):
-        result = self.parser.parse(f"stars:{op}100")
-        assert len(result) == 1
-        assert result[0]["field"] == "stars"
-        assert result[0]["type"] == "number"
-        assert result[0]["op"] == op
-        assert result[0]["number"] == "100"
+    def test_comparison_operators(self):
+        for op in self.comparison_operators:
+            result = self.parser.parse(f"stars:{op}100")
+            assert len(result) == 1
+            assert result[0]["field"] == "stars"
+            assert result[0]["type"] == "number"
+            assert result[0]["op"] == op
+            assert result[0]["number"] == "100"
 
-    boolean_values = ["true", "false", "True", "False", "TRUE", "FALSE"]
-
-    @pytest.mark.parametrize("bool_val", boolean_values)
-    def test_boolean_variations(self, bool_val):
-        result = self.parser.parse(f"archived:{bool_val}")
-        assert len(result) == 1
-        assert result[0]["field"] == "archived"
-        assert result[0]["type"] == "boolean"
-        expected = "True" if bool_val.lower() == "true" else "False"
-        assert result[0]["boolean"] == expected
+    def test_boolean_variations(self):
+        for bool_val in self.boolean_values:
+            result = self.parser.parse(f"archived:{bool_val}")
+            assert len(result) == 1
+            assert result[0]["field"] == "archived"
+            assert result[0]["type"] == "boolean"
+            expected = "True" if bool_val in self.true_boolean_values else "False"
+            assert result[0]["boolean"] == expected
 
     @pytest.mark.parametrize(
         ("query", "expected"),
