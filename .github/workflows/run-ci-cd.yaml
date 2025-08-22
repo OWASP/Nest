@@ -497,10 +497,10 @@ jobs:
         with:
           node-version: 22
 
-      - name: Run Lighthouse CI
+      - name: Run lighthouse-ci
         working-directory: frontend
         run: |
-          npx -y @lhci/cli@0.15.1 autorun
+          npx -y @lhci/cli@0.15.1 autorun --collect.url=https://nest.owasp.dev/
 
   build-production-images:
     name: Build Production Images
