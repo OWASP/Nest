@@ -3,8 +3,8 @@
 from enum import Enum
 
 from pyparsing import (
-    Combine,
     Group,
+    Optional,
     ParseException,
     QuotedString,
     Regex,
@@ -13,16 +13,39 @@ from pyparsing import (
     ZeroOrMore,
     alphanums,
     alphas,
+    oneOf,
 )
 
 
-class FieldType(Enum):
+class FieldType(str, Enum):
     """Supported field types for query parsing."""
 
     STRING = "string"
     NUMBER = "number"
     DATE = "date"
     BOOLEAN = "boolean"
+
+
+def is_in_enum(enum_class, value):
+    """Check if a value exists in the given enum class.
+
+    Args:
+        enum_class: The enum class to check against.
+        value: The value to check for existence in the enum.
+
+    Returns:
+        bool: True if the value exists in the enum, False otherwise.
+
+    Raises:
+        None: This function catches ValueError internally and returns False.
+
+    """
+    try:
+        enum_class(value)
+    except ValueError:
+        return False
+    else:
+        return True
 
 
 class QueryParserError(Exception):
@@ -32,8 +55,8 @@ class QueryParserError(Exception):
         self,
         message: str,
         error_type: str = "PARSE_ERROR",
-        query: str = "<query>",
-        field: str = "<field>",
+        query: str = "",
+        field: str = "",
     ):
         """Initialize QueryParserError.
 
@@ -82,25 +105,32 @@ class QueryParser:
     - Quoted strings for multi-word values
     - Boolean field support
     - Date field parsing with comparisons
-    - Only support implicit AND logic between conditions
     - Handle case sensitivity/insensitivity values
+    - Only supports implicit AND logic between conditions
     """
 
     # Grammar definitions (class-level constants)
     _FIELD_NAME = Word(alphas, alphanums + "_")
-    _QUOTED_VALUE = QuotedString('"', escChar="\\")
+    _QUOTED_VALUE = QuotedString(quoteChar='"', escChar="\\", unquoteResults=False)
     _UNQUOTED_VALUE = Word(alphanums + "+-.<>=/_")
     _FIELD_VALUE = _QUOTED_VALUE | _UNQUOTED_VALUE
     _TOKEN_PATTERN = Group(_FIELD_NAME + Suppress(":") + _FIELD_VALUE)
-    _COMP_OPERATOR = Combine(
-        Regex(r"^(>=|<=|>|<|=)?")
-    )  # valid operator {"=", ">", "<", ">=", "<="}
+    _COMP_OPERATOR = Optional(oneOf(">= <= > < ="), default="=")
     _COMP_PATTERN = Group(_COMP_OPERATOR + _UNQUOTED_VALUE)
-    _UNQUOTED_STRING = Word(alphanums + "+-.<>=/ ")
     _DATE_PATTERN = Regex(r"\d{4}-\d{2}-\d{2}")  # YYYY-MM-DD format
 
     _BOOLEAN_TRUE_VALUES = {"true", "1", "yes", "on"}
     _BOOLEAN_FALSE_VALUES = {"false", "0", "no", "off"}
+
+    @staticmethod
+    def _is_field_name(field_name: str) -> bool:
+        """Check if a field name is valid."""
+        try:
+            QueryParser._FIELD_NAME.parseString(field_name, parseAll=True)
+        except ParseException:
+            return False
+        else:
+            return bool(field_name.islower())
 
     def __init__(
         self,
@@ -114,13 +144,14 @@ class QueryParser:
 
         Args:
             allowed_fields: Dictionary mapping field names to their types
-                           (e.g., {"stars": "number", "language": "string"})
+                           (e.g., {"stars": "number", "language": "string"}).
+                           Field names must be lowercase.
             default_field: Default field name for free text search
             case_sensitive: If True, field names are case-sensitive
             strict: If True, raises exception for unknown fields; if False, issues warnings
 
         Raises:
-            QueryParserError: If allowed_fields contains invalid field types
+            QueryParserError: If allowed_fields contains invalid field names or types
 
         """
         try:
@@ -163,15 +194,15 @@ class QueryParser:
             QueryParserError: If field type is not supported
 
         """
-        if not QueryParser._FIELD_NAME.parseString(default_field, parseAll=True):
+        if not QueryParser._is_field_name(default_field):
             QueryParser._raise_invalid_field_name(default_field)
         validated_fields = {}
 
         for field, field_type in allowed_fields.items():
-            if not QueryParser._FIELD_NAME.parseString(field, parseAll=True):
-                QueryParser._raise_invalid_field_name(field)
-            if field_type not in FieldType._value2member_map_:
+            if not is_in_enum(FieldType, field_type):
                 QueryParser._raise_invalid_field_type(field, field_type)
+            if not QueryParser._is_field_name(field):
+                QueryParser._raise_invalid_field_name(field)
             validated_fields[field] = FieldType(field_type)
 
         validated_fields[default_field] = FieldType.STRING
@@ -224,11 +255,9 @@ class QueryParser:
         """
         try:
             result = QueryParser._TOKEN_PATTERN.parseString(token, parseAll=True)
-            return result[0][0], result[0][1]
+            return (result[0][0], result[0][1])
         except ParseException:
-            if token.startswith('"') and token.endswith('"'):
-                token = token[1:-1]
-            return None, token
+            return (None, token)
 
     @staticmethod
     def _parse_comparison_pattern(value: str) -> tuple[str, str]:
@@ -238,7 +267,7 @@ class QueryParser:
             value: Value string potentially containing comparison operator
 
         Returns:
-            Tuple of (operator, clean_value), if operator is none then (None, clean_value)
+            Tuple of (operator, clean_value), if operator is none then ("=", clean_value)
 
         Raises:
             QueryParserError: If the comparison pattern is invalid
@@ -246,9 +275,7 @@ class QueryParser:
         """
         try:
             match = QueryParser._COMP_PATTERN.parseString(value, parseAll=True)
-            if match[0][0] is None:
-                return "=", match[0][1]
-            return match[0][0], match[0][1]
+            return (match[0][0], match[0][1])
         except ParseException as e:
             raise QueryParserError(
                 message="Invalid comparison pattern in value", error_type="COMPARISON_ERROR"
@@ -256,7 +283,7 @@ class QueryParser:
 
     @staticmethod
     def _parse_string_value(field: str, value: str) -> str:
-        """Parse and validate string value.
+        """Parse and validate string value(handle quotes and unquoted string).
 
         Args:
             field: Field name
@@ -269,24 +296,25 @@ class QueryParser:
             QueryParserError: If string parsing fails
 
         """
+        if value.startswith('"') and value.endswith('"'):
+            return value
         try:
-            result = QueryParser._UNQUOTED_STRING.parseString(value)
+            result = QueryParser._UNQUOTED_VALUE.parseString(value)
             return result[0]
         except ParseException as e:
-            raise QueryParserError(
-                message="Invalid string value", error_type="STRING_VALUE_ERROR", field=field
-            ) from e
+            msg = f"Invalid string value for {field}:{value}"
+            raise QueryParserError(msg) from e
 
     @staticmethod
     def _parse_boolean_value(field: str, value: str) -> str:
-        """Parse boolean value from string.
+        """Parse boolean value from string and return its string representation.
 
         Args:
             field: Field name
             value: String value to parse
 
         Returns:
-            Boolean value
+            String representation of boolean value ("True" or "False")
 
         Raises:
             QueryParserError: If value is not a valid boolean
@@ -433,37 +461,29 @@ class QueryParser:
 
         """
         conditions = []
-        try:
-            if not self.case_sensitive:
-                query = query.lower().strip()
-            tokens = self._split_tokens(query)
-            for token in tokens:
-                if not token or token.strip() == "":
-                    continue
-                field, raw_value = self._parse_token(token)
-                if raw_value is None or raw_value.strip() == "":
-                    continue
+        query = query.strip()
+        if not self.case_sensitive:
+            query = query.lower()
+        tokens = self._split_tokens(query)
+        for token in tokens:
+            field, raw_value = self._parse_token(token)
 
-                if field is None:
-                    conditions.append(self._create_text_search_condition(raw_value))
-                    continue
+            if field is None:
+                conditions.append(self._create_text_search_condition(raw_value))
+                continue
 
-                field = field.lower()  # field name normalization
+            field = field.lower()  # field name normalization
 
-                if field not in self.allowed_fields:
-                    self._handle_unknown_field(field)
-                    continue
+            if field not in self.allowed_fields:
+                self._handle_unknown_field(field)
+                continue
 
-                field_type = self.allowed_fields[field]
+            field_type = self.allowed_fields[field]
+            try:
                 condition_dict = self.to_dict(field, field_type, raw_value)
-                conditions.append(condition_dict)
-        except QueryParserError:
-            raise
-        except Exception as e:
-            raise QueryParserError(
-                message=f"Unexpected error during parsing: {e!s}",
-                error_type="INTERNAL_ERROR",
-                query=query,
-            ) from e
-
+            except QueryParserError:
+                if self.strict:
+                    raise
+                continue
+            conditions.append(condition_dict)
         return conditions
