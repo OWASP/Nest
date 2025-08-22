@@ -19,6 +19,14 @@ class Base(Configuration):
     DEBUG = False
     GITHUB_APP_ID = None
     GITHUB_APP_INSTALLATION_ID = None
+    GOOGLE_AUTH_AUTH_URI = values.Value()
+    GOOGLE_AUTH_CLIENT_ID = values.SecretValue()
+    GOOGLE_AUTH_CLIENT_SECRET = values.SecretValue()
+    GOOGLE_AUTH_REDIRECT_URI = values.Value()
+    GOOGLE_AUTH_SCOPES = values.ListValue()
+    GOOGLE_AUTH_TOKEN_URI = values.Value()
+
+    IS_GOOGLE_AUTH_ENABLED = values.BooleanValue(default=False)
     IS_LOCAL_ENVIRONMENT = False
     IS_PRODUCTION_ENVIRONMENT = False
     IS_STAGING_ENVIRONMENT = False
