@@ -58,7 +58,6 @@ class GoogleAccountAuthorization(models.Model):
 
         """
         if not settings.IS_GOOGLE_AUTH_ENABLED:
-            logger.exception(AUTH_ERROR_MESSAGE)
             raise ValueError(AUTH_ERROR_MESSAGE)
         if not settings.IS_AWS_KMS_ENABLED:
             raise ValueError(KMS_ERROR_MESSAGE)
@@ -100,7 +99,6 @@ class GoogleAccountAuthorization(models.Model):
         state = parse_qs(parsed_url.query).get("state", [None])[0]
         if not state:
             error_message = "State parameter is missing in the authentication response."
-            logger.exception(error_message)
             raise ValidationError(error_message)
 
         try:
@@ -146,7 +144,6 @@ class GoogleAccountAuthorization(models.Model):
     def get_flow():
         """Create a Google OAuth flow instance."""
         if not settings.IS_GOOGLE_AUTH_ENABLED:
-            logger.exception(AUTH_ERROR_MESSAGE)
             raise ValueError(AUTH_ERROR_MESSAGE)
         return get_google_auth_client()
 
@@ -166,7 +163,6 @@ class GoogleAccountAuthorization(models.Model):
             raise ValueError(KMS_ERROR_MESSAGE)
         if not auth.refresh_token:
             refresh_error = "Google OAuth refresh token is not set or expired."
-            logger.exception(refresh_error)
             raise ValidationError(refresh_error)
         credentials = Credentials(
             token=auth.access_token,
