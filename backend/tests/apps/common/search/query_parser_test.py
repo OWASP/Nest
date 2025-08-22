@@ -23,9 +23,9 @@ class TestQueryParser:
         self.case_sensitive_strict_parser = QueryParser(
             allowed_fields=self.allowed_fields, strict=True, case_sensitive=True
         )
-        self.boolean_values = self.parser._BOOLEAN_TRUE_VALUES | self.parser._BOOLEAN_FALSE_VALUES
-        self.true_boolean_values = self.parser._BOOLEAN_TRUE_VALUES
-        self.comparison_operators = self.parser._COMPARISON_OPERATORS
+        self.boolean_values = {"true", "1", "yes", "on", "false", "0", "no", "off"}
+        self.true_boolean_values = {"true", "1", "yes", "on"}
+        self.comparison_operators = ["<", "<=", ">", ">=", "="]
 
     def test_invalid_parser_field_validation(self):
         with pytest.raises(QueryParserError) as ei:
@@ -103,37 +103,43 @@ class TestQueryParser:
         result = self.parser.parse(query)
         assert result == expected
 
-    malformed_queries = ['not_field:"operation"', "not_field:operation"]
+    unknown_field_queries = ['not_field:"operation"', "not_field:operation"]
 
-    @pytest.mark.parametrize("query", malformed_queries)
-    def test_malformed_queries(self, query):
+    @pytest.mark.parametrize("query", unknown_field_queries)
+    def test_unknown_field_non_strict_drops_token(self, query):
         result = self.parser.parse(query)
         assert not result
 
-    @pytest.mark.parametrize("query", malformed_queries)
-    def test_invalid_queries(self, query):
-        with pytest.raises(QueryParserError):
+    @pytest.mark.parametrize("query", unknown_field_queries)
+    def test_unknown_field_strict_raises(self, query):
+        with pytest.raises(QueryParserError) as ei:
             self.strict_parser.parse(query)
+        assert ei.value.error_type == "UNKNOWN_FIELD_ERROR"
 
     def test_date_format_validation(self):
-        valid_dates = ["2023-01-01", "2023-12-31"]
+        valid_dates = ["2023-12-31", '"2023-12-31"', '"2023-12-31']
         for date_str in valid_dates:
             result = self.parser.parse(f"created:{date_str}")
             assert len(result) == 1
-            assert result[0]["date"] == date_str
+            assert result[0]["date"] == '2023-12-31'
+            assert result[0]["field"] == "created"
+            assert result[0]["type"] == "date"
+            assert result[0]["op"] == "="
 
         invalid_dates = ["invalid-date", "2023-163-01", "2023-01-362"]
         for inv_date_str in invalid_dates:
-            with pytest.raises(QueryParserError, match="Invalid date value"):
+            with pytest.raises(QueryParserError, match="Invalid date value") as ei:
                 self.strict_parser.parse(f"created:{inv_date_str}")
+            assert ei.value.error_type == "DATE_VALUE_ERROR"
 
         for inv_date_str in invalid_dates:
             result = self.parser.parse(f"created:{inv_date_str}")
             assert not result
 
-    def test_invalid_initialization(self):
-        with pytest.raises(QueryParserError):
-            QueryParser(allowed_fields={"field": "invalid_type"})
+    def test_invalid_default_field_name(self):
+        with pytest.raises(QueryParserError) as ei:
+            QueryParser(allowed_fields={"test": "string"}, default_field="Default")
+        assert ei.value.error_type == "FIELD_NAME_ERROR"
 
     def test_custom_default_field(self):
         parser_with_default = QueryParser(
@@ -162,6 +168,8 @@ class TestQueryParser:
         result = long_field_parser.parse(f'verylongfieldname:"{long_value}"')
         assert isinstance(result, list)
         assert result[0]["string"] == '"' + long_value + '"'
+        assert result[0]["field"] == "verylongfieldname"
+        assert result[0]["type"] == "string"
 
     @pytest.mark.parametrize("val", ["0", "-1", "999999", "3.14159"])
     def test_numeric_values(self, val):
