@@ -34,7 +34,7 @@ class TestKmsEncryptedField:
         assert result is None
 
     @override_settings(IS_AWS_KMS_ENABLED=True)
-    @pytest.mark.parametrize("value", [5, b"rabbit", []])
+    @pytest.mark.parametrize("value", [5, b"rabbit", [6]])
     def test_get_prep_value_with_non_string(self, value):
         """Test get_prep_value with a non-string."""
         with pytest.raises(TypeError, match="Value must be a string to encrypt."):

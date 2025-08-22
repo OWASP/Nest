@@ -26,7 +26,7 @@ def google_auth_callback(request):
     if settings.IS_LOCAL_ENVIRONMENT:
         auth_response = auth_response.replace("http://", "https://")  # NOSONAR
     try:
-        GoogleAccountAuthorization.authenticate_callback(auth_response)
+        GoogleAccountAuthorization.authorize_callback(auth_response)
     except (ValueError, ValidationError):
         return HttpResponse("Error during Google sign-in", status=400)
     return HttpResponse(

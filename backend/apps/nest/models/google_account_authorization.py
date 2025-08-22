@@ -29,7 +29,7 @@ class GoogleAccountAuthorization(models.Model):
     """Model to store Google OAuth tokens for Slack integration."""
 
     class Meta:
-        db_table = "nest_google_accounts_authorizations"
+        db_table = "nest_google_account_authorizations"
         verbose_name_plural = "Google Accounts Authorizations"
 
     member = models.OneToOneField(
@@ -37,22 +37,20 @@ class GoogleAccountAuthorization(models.Model):
         on_delete=models.CASCADE,
         related_name="google_account_authorization",
         verbose_name="Slack Member",
-    )
-    access_token = KmsEncryptedField(verbose_name="Access Token", null=True)
-    refresh_token = KmsEncryptedField(verbose_name="Refresh Token", null=True)
-    expires_at = models.DateTimeField(
-        verbose_name="Token Expiry",
         null=True,
     )
-    scopes = ArrayField(
+    access_token = KmsEncryptedField(verbose_name="Access Token")
+    refresh_token = KmsEncryptedField(verbose_name="Refresh Token")
+    expires_at = models.DateTimeField(verbose_name="Token Expiry")
+    scope = ArrayField(
         models.CharField(max_length=255),
         blank=True,
         default=list,
     )
 
     @staticmethod
-    def authenticate(slack_user_id: str):
-        """Authenticate a member.
+    def authorize(slack_user_id: str):
+        """Authorize a member.
 
         Returns:
             - GoogleAccountAuthorization instance if a valid/refreshable token exists, or
@@ -70,18 +68,16 @@ class GoogleAccountAuthorization(models.Model):
             error_message = f"Member with Slack ID {slack_user_id} does not exist."
             logger.exception(error_message)
             raise ValidationError(error_message) from e
-        auth = GoogleAccountAuthorization.objects.get_or_create(member=member)[0]
-        if auth.access_token and not auth.is_token_expired:
-            return auth
-        if auth.access_token:
-            # If the access token is present but expired, refresh it
+        if GoogleAccountAuthorization.objects.filter(member=member).exists():
+            auth = GoogleAccountAuthorization.objects.get(member=member)
+            if not auth.is_token_expired:
+                return auth
             try:
                 GoogleAccountAuthorization.refresh_access_token(auth)
             except ValidationError:
                 pass
             else:
                 return auth
-        # If no access token is present, redirect to Google OAuth
         flow = GoogleAccountAuthorization.get_flow()
         flow.redirect_uri = settings.GOOGLE_AUTH_REDIRECT_URI
         return flow.authorization_url(
@@ -91,8 +87,8 @@ class GoogleAccountAuthorization(models.Model):
         )
 
     @staticmethod
-    def authenticate_callback(auth_response):
-        """Authenticate a member and return a GoogleAccountAuthorization instance."""
+    def authorize_callback(auth_response):
+        """Authorize a member and return a GoogleAccountAuthorization instance."""
         if not settings.IS_GOOGLE_AUTH_ENABLED:
             logger.exception(AUTH_ERROR_MESSAGE)
             raise ValueError(AUTH_ERROR_MESSAGE)
@@ -120,19 +116,29 @@ class GoogleAccountAuthorization(models.Model):
             error_message = f"Member with Slack ID {member_id} does not exist."
             logger.exception(error_message)
             raise ValidationError(error_message) from e
-        auth = GoogleAccountAuthorization.objects.get_or_create(member=member)[0]
-        # This is the first time authentication, so we need to fetch a new token
+        # This is the first time authorization, so we need to fetch a new token
         flow = GoogleAccountAuthorization.get_flow()
         flow.redirect_uri = settings.GOOGLE_AUTH_REDIRECT_URI
         flow.fetch_token(authorization_response=auth_response)
-        auth.access_token = flow.credentials.token
+
         expires_at = flow.credentials.expiry
         if expires_at and timezone.is_naive(expires_at):
             expires_at = timezone.make_aware(expires_at)
+
+        auth, _ = GoogleAccountAuthorization.objects.get_or_create(
+            member=member,
+            defaults={
+                "access_token": flow.credentials.token,
+                "refresh_token": flow.credentials.refresh_token,
+                "expires_at": expires_at,
+                "scope": settings.GOOGLE_AUTH_SCOPES,
+            },
+        )
+        auth.access_token = flow.credentials.token
         if flow.credentials.refresh_token:
             auth.refresh_token = flow.credentials.refresh_token
         auth.expires_at = expires_at
-        auth.scopes = settings.GOOGLE_AUTH_SCOPES
+        auth.scope = settings.GOOGLE_AUTH_SCOPES
         auth.save()
         return auth
 

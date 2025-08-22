@@ -19,7 +19,7 @@ class KmsEncryptedField(models.BinaryField):
         """Encrypt the value using KMS."""
         if not settings.IS_AWS_KMS_ENABLED:
             raise ValueError(KMS_ERROR_MESSAGE)
-        if value in (None, ""):
+        if not value:
             return None
         if not isinstance(value, str):
             raise TypeError(STR_ERROR_MESSAGE)

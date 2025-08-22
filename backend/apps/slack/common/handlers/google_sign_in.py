@@ -15,7 +15,7 @@ def get_blocks(slack_user_id: str):
     """
     from apps.nest.models.google_account_authorization import GoogleAccountAuthorization
 
-    auth = GoogleAccountAuthorization.authenticate(slack_user_id)
+    auth = GoogleAccountAuthorization.authorize(slack_user_id)
 
     if isinstance(auth, tuple):
         # If auth is a tuple, it contains (authorization_url, state)
