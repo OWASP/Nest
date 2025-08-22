@@ -14,6 +14,7 @@ from strawberry.django.views import GraphQLView
 from apps.core.api.internal.algolia import algolia_search
 from apps.core.api.internal.csrf import get_csrf_token
 from apps.core.api.internal.status import get_status
+from apps.nest.views import google_auth_callback
 from apps.owasp.api.internal.views.urls import urlpatterns as owasp_urls
 from apps.slack.apps import SlackConfig
 from settings.api.v1 import api as api_v1
@@ -37,6 +38,7 @@ if SlackConfig.app:
         path("integrations/slack/commands/", slack_request_handler),
         path("integrations/slack/events/", slack_request_handler),
         path("integrations/slack/interactivity/", slack_request_handler),
+        path("auth/google/callback/", google_auth_callback),
     ]
 
 if settings.DEBUG:
