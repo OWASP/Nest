@@ -9,7 +9,7 @@ class IssueUserInterestAdmin(admin.ModelAdmin):
     """IssueUserInterest admin."""
 
     list_display = ("module", "issue")
-    search_fields = ("module__name", "users__login", "issue__title")
+    search_fields = ("module__name", "user__login", "issue__title")
     list_filter = ("module",)
 
 

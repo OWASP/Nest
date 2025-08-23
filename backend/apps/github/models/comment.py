@@ -6,19 +6,20 @@ from apps.common.models import BulkSaveModel
 
 
 class Comment(BulkSaveModel, models.Model):
-    """Represents a comment on a GitHub entity (Issue, PR, etc.)."""
+    """Represents a comment on a GitHub Issue."""
 
     class Meta:
         verbose_name = "Comment"
         verbose_name_plural = "Comments"
+        ordering = ("-created_at",)
 
     github_id = models.BigIntegerField(unique=True)
     author = models.ForeignKey(
         "github.User", on_delete=models.SET_NULL, null=True, related_name="comments"
     )
     body = models.TextField()
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(db_index=True)
+    updated_at = models.DateTimeField(db_index=True)
 
     def __str__(self):
         """Return a string representation of the comment."""
