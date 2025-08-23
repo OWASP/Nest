@@ -19,6 +19,8 @@ class AwardAdmin(admin.ModelAdmin):
         "nest_created_at",
         "nest_updated_at",
     )
+    list_display_links = ("name", "winner_name")
+    list_per_page = 50
     list_filter = (
         "category",
         "year",
@@ -26,14 +28,16 @@ class AwardAdmin(admin.ModelAdmin):
     )
     search_fields = (
         "name",
-        "category",
         "winner_name",
         "description",
         "winner_info",
+        "user__login",
     )
     ordering = ("-year", "category", "name")
 
     autocomplete_fields = ("user",)
+    actions = ("mark_reviewed", "mark_not_reviewed")
+    list_select_related = ("user",)
 
     fieldsets = (
         (
@@ -64,6 +68,14 @@ class AwardAdmin(admin.ModelAdmin):
 
     readonly_fields = ("nest_created_at", "nest_updated_at")
 
-    def get_queryset(self, request):
-        """Optimize queryset with select_related."""
-        return super().get_queryset(request).select_related("user")
+    @admin.action(description="Mark selected awards as reviewed")
+    def mark_reviewed(self, request, queryset):
+        """Mark selected awards as reviewed."""
+        updated = queryset.update(is_reviewed=True)
+        self.message_user(request, f"Marked {updated} award(s) as reviewed.")
+
+    @admin.action(description="Mark selected awards as not reviewed")
+    def mark_not_reviewed(self, request, queryset):
+        """Mark selected awards as not reviewed."""
+        updated = queryset.update(is_reviewed=False)
+        self.message_user(request, f"Marked {updated} award(s) as not reviewed.")

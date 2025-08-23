@@ -86,14 +86,17 @@ class Award(BulkSaveModel, TimestampedModel):
 
     def __str__(self) -> str:
         """Return string representation of the award."""
+        parts = [self.name]
         if self.winner_name:
-            return f"{self.name} - {self.winner_name} ({self.year})"
-        return f"{self.name} ({self.year})"
+            parts.append(f"- {self.winner_name}")
+        if self.year is not None:
+            parts.append(f"({self.year})")
+        return " ".join(parts)
 
     @property
     def display_name(self) -> str:
         """Get display name for the award."""
-        return f"{self.name} ({self.year})"
+        return f"{self.name} ({self.year})" if self.year is not None else self.name
 
     @classmethod
     def get_waspy_award_winners(cls):
@@ -140,10 +143,10 @@ class Award(BulkSaveModel, TimestampedModel):
 
         """
         # Create unique name for each winner to satisfy unique constraint
-        award_title = award_data.get("title", "")
-        category = award_data.get("category", "")
+        award_title = (award_data.get("title") or "").strip()
+        category = (award_data.get("category") or "").strip()
         year = award_data.get("year")
-        winner_name = award_data.get("name", "").strip()
+        winner_name = (award_data.get("name") or "").strip()
 
         # Create unique name combining award title, winner, and year
         unique_name = f"{award_title} - {winner_name} ({year})"
@@ -157,6 +160,8 @@ class Award(BulkSaveModel, TimestampedModel):
                 year=year,
                 winner_name=winner_name,
             )
+        except Award.MultipleObjectsReturned:
+            award = Award.objects.filter(name=unique_name).order_by("id").first()
 
         award.from_dict(award_data)
         if save:
@@ -171,10 +176,14 @@ class Award(BulkSaveModel, TimestampedModel):
             data: Dictionary containing award data
 
         """
+        raw_image = (data.get("image") or data.get("winner_image_url") or "").strip()
+        if raw_image and raw_image.startswith("/"):
+            # Convert to absolute URL for admin/form validation
+            raw_image = f"https://owasp.org{raw_image}"
         fields = {
-            "description": data.get("description", ""),
-            "winner_info": data.get("info", ""),
-            "winner_image_url": data.get("image", ""),
+            "description": (data.get("description") or "").strip(),
+            "winner_info": (data.get("info") or data.get("winner_info") or "").strip(),
+            "winner_image_url": raw_image,
         }
 
         for key, value in fields.items():

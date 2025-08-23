@@ -8,13 +8,13 @@ class AwardModelTest(TestCase):
 
     def test_award_import(self):
         """Test that Award model can be imported."""
-        from apps.owasp.models.award import Award
+        from apps.owasp.models import Award
 
         assert Award is not None
 
     def test_award_category_choices(self):
         """Test Award category choices."""
-        from apps.owasp.models.award import Award
+        from apps.owasp.models import Award
 
         choices = Award.Category.choices
         assert ("WASPY", "WASPY") in choices
@@ -25,7 +25,7 @@ class AwardModelTest(TestCase):
 
     def test_award_meta(self):
         """Test Award model meta."""
-        from apps.owasp.models.award import Award
+        from apps.owasp.models import Award
 
         assert Award._meta.db_table == "owasp_awards"
         assert Award._meta.verbose_name == "Award"

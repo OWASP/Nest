@@ -58,10 +58,18 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.ERROR("Failed to download awards.yml from GitHub"))
                 return
 
-            awards_data = yaml.safe_load(yaml_content)
+            try:
+                awards_data = yaml.safe_load(yaml_content)
+            except yaml.YAMLError as e:
+                self.stdout.write(self.style.ERROR(f"Failed to parse awards.yml: {e}"))
+                return
 
             if not awards_data:
                 self.stdout.write(self.style.ERROR("Failed to parse awards.yml content"))
+                return
+
+            if not isinstance(awards_data, list):
+                self.stdout.write(self.style.ERROR("awards.yml root must be a list of entries"))
                 return
 
             # Process awards data
@@ -74,6 +82,10 @@ class Command(BaseCommand):
 
             # Print summary
             self._print_summary()
+
+            # Update badges after successful sync
+            if not options["dry_run"]:
+                self._update_badges()
 
         except Exception as e:
             logger.exception("Error syncing awards")
@@ -90,6 +102,7 @@ class Command(BaseCommand):
         award_name = award_data.get("title", "")
         category = award_data.get("category", "")
         year = award_data.get("year")
+        award_description = award_data.get("description", "") or ""
         winners = award_data.get("winners", [])
 
         if not award_name or not category or not year:
@@ -106,6 +119,7 @@ class Command(BaseCommand):
                 "name": winner_data.get("name", ""),
                 "info": winner_data.get("info", ""),
                 "image": winner_data.get("image", ""),
+                "description": award_description,
             }
 
             self._process_winner(winner_with_context, dry_run=dry_run)
@@ -138,6 +152,8 @@ class Command(BaseCommand):
                 is_new = False
             except Award.DoesNotExist:
                 is_new = True
+            except Award.MultipleObjectsReturned:
+                is_new = False
 
             # Use the model's update_data method
             award = Award.update_data(winner_data, save=True)
@@ -239,15 +255,29 @@ class Command(BaseCommand):
         if not text:
             return None
 
-        # Pattern 1: github.com/username
-        github_url_pattern = r"github\.com/([a-zA-Z0-9\-_]+)"
+        # Pattern 1: github.com/<username> (exclude known non-user segments)
+        excluded = {
+            "orgs",
+            "organizations",
+            "topics",
+            "enterprise",
+            "marketplace",
+            "settings",
+            "apps",
+            "features",
+            "pricing",
+            "sponsors",
+        }
+        github_url_pattern = r"(?:https?://)?(?:www\.)?github\.com/([A-Za-z0-9-]+)(?=[/\s]|$)"
         match = re.search(github_url_pattern, text, re.IGNORECASE)
         if match:
-            return match.group(1)
+            candidate = match.group(1)
+            if candidate.lower() not in excluded:
+                return candidate
 
-        # Pattern 2: @username mentions
-        mention_pattern = r"@([a-zA-Z0-9\-_]+)"
-        match = re.search(mention_pattern, text)
+        # Pattern 2: @username mentions (avoid emails/local-parts)
+        mention_pattern = r"(?<![A-Za-z0-9._%+-])@([A-Za-z0-9-]+)\b"
+        match = re.search(mention_pattern, text, re.IGNORECASE)
         if match:
             return match.group(1)
 
@@ -259,31 +289,25 @@ class Command(BaseCommand):
             return []
 
         potential_logins = []
-        clean_name = re.sub(r"[^a-zA-Z0-9\s\-_]", "", name).strip()
+        clean_name = re.sub(r"[^a-zA-Z0-9\s\-]", "", name).strip()
 
         # Convert to lowercase and replace spaces
         base_variations = [
             clean_name.lower().replace(" ", ""),
             clean_name.lower().replace(" ", "-"),
-            clean_name.lower().replace(" ", "_"),
         ]
 
         # Add variations with different cases
         for variation in base_variations:
-            potential_logins.extend(
-                [
-                    variation,
-                    variation.replace("-", ""),
-                    variation.replace("_", ""),
-                    variation.replace("-", "_"),
-                    variation.replace("_", "-"),
-                ]
-            )
+            potential_logins.extend([variation, variation.replace("-", "")])
 
         # Remove duplicates while preserving order
         seen = set()
         unique_logins = []
         for login in potential_logins:
+            # Skip invalid characters for GitHub logins
+            if "_" in login:
+                continue
             if login and login not in seen and len(login) >= min_login_length:
                 seen.add(login)
                 unique_logins.append(login)
@@ -306,3 +330,15 @@ class Command(BaseCommand):
                 self.stdout.write(f"  - {name}")
 
         self.stdout.write("\nSync completed successfully!")
+
+    def _update_badges(self):
+        """Update user badges based on synced awards."""
+        from django.core.management import call_command
+
+        self.stdout.write("Updating user badges...")
+        try:
+            call_command("owasp_update_badges")
+            self.stdout.write("Badge update completed successfully!")
+        except Exception as e:
+            logger.exception("Error updating badges")
+            self.stdout.write(self.style.ERROR(f"Error updating badges: {e!s}"))

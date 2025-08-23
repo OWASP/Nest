@@ -29,6 +29,8 @@ class Command(BaseCommand):
 
         # Get users with WASPY awards using the model method
         waspy_winners = Award.get_waspy_award_winners()
+        waspy_winner_ids = set(waspy_winners.values_list("id", flat=True))
+        waspy_winners_count = len(waspy_winner_ids)
 
         # Add badge to WASPY winners
         for user in waspy_winners:
@@ -36,10 +38,9 @@ class Command(BaseCommand):
 
         # Remove badge from users no longer on the WASPY winners list
         users_with_badge = User.objects.filter(badges=waspy_badge)
-        waspy_winner_ids = set(waspy_winners.values_list("id", flat=True))
 
         for user in users_with_badge:
             if user.id not in waspy_winner_ids:
                 user.badges.remove(waspy_badge)
 
-        self.stdout.write(f"Updated badges for {waspy_winners.count()} WASPY winners")
+        self.stdout.write(f"Updated badges for {waspy_winners_count} WASPY winners")
