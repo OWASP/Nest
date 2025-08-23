@@ -9,12 +9,12 @@ from github.GithubException import GithubException
 from apps.github.auth import get_github_client
 from apps.github.common import sync_issue_comments
 from apps.github.models.issue import Issue
-from apps.mentorship.models import ContributorInterest, Module, Program
+from apps.mentorship.models import IssueUserInterest, Module, Program
 
 logger = logging.getLogger(__name__)
 
 INTEREST_PATTERNS = [
-    re.compile(r"^/interested$", re.IGNORECASE),
+    re.compile(r"interested", re.IGNORECASE),
 ]
 
 
@@ -40,13 +40,12 @@ class Command(BaseCommand):
                     .values_list("id", flat=True)
                     .distinct()
                 )
-                self.stdout.write(
-                    f"Module '{module.name}' has {module_repos.count()} repositories."
-                )
 
                 if not module_repos.exists():
                     self.stdout.write(
-                        self.style.WARNING(f"Skipping. {module.name} has no repositories.")
+                        self.style.WARNING(
+                            f"Skipping. Module '{module.name}' has no repositories."
+                        )
                     )
                     continue
 
@@ -71,37 +70,40 @@ class Command(BaseCommand):
                     f"Syncing new comments for issue #{issue.number} '{issue.title[:20]}...'"
                 )
                 sync_issue_comments(gh, issue)
-
                 self._find_and_register_interest(issue, module)
 
         self.stdout.write(self.style.SUCCESS("\nProcessed successfully!"))
 
     def _find_and_register_interest(self, issue: Issue, module: Module):
-        """Find and register contributors who expressed interest in given issue."""
-        interest_obj, _ = ContributorInterest.objects.get_or_create(module=module, issue=issue)
+        """Find and register contributors who expressed interest in a given issue."""
+        existing_user_ids = set(
+            IssueUserInterest.objects.filter(module=module, issue=issue).values_list(
+                "user_id", flat=True
+            )
+        )
 
-        existing_user_ids = set(interest_obj.users.values_list("id", flat=True))
-        to_add = []
+        interests_to_create = []
         new_user_logins = []
 
         for comment in issue.comments.select_related("author").all():
-            if not comment.author:
-                continue
-
-            if comment.author_id in existing_user_ids:
+            if not comment.author or comment.author.id in existing_user_ids:
                 continue
 
             body = comment.body or ""
             if any(p.search(body) for p in INTEREST_PATTERNS):
-                to_add.append(comment.author)
-                new_user_logins.append(comment.author.login)
-                existing_user_ids.add(comment.author_id)
+                interests_to_create.append(
+                    IssueUserInterest(module=module, issue=issue, user=comment.author)
+                )
 
-        if to_add:
-            interest_obj.users.add(*to_add)
+                new_user_logins.append(comment.author.login)
+                existing_user_ids.add(comment.author.id)
+
+        if interests_to_create:
+            IssueUserInterest.objects.bulk_create(interests_to_create)
+
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"+ Added {len(to_add)} new contributor(s) "
-                    f"to issue #{issue.number}: {', '.join(new_user_logins)}"
+                    f"Registered {len(interests_to_create)} new interest(s) "
+                    f"for issue #{issue.number}: {', '.join(new_user_logins)}"
                 )
             )

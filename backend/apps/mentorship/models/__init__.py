@@ -1,4 +1,4 @@
-from .contributor_interest import ContributorInterest
+from .issue_user_interest import IssueUserInterest
 from .mentee import Mentee
 from .mentee_module import MenteeModule
 from .mentee_program import MenteeProgram

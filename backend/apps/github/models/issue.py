@@ -54,6 +54,13 @@ class Issue(GenericIssueModel):
         null=True,
         related_name="created_issues",
     )
+
+    comments = models.ManyToManyField(
+        "github.Comment",
+        related_name="issues",
+        blank=True,
+    )
+
     milestone = models.ForeignKey(
         "github.Milestone",
         on_delete=models.CASCADE,

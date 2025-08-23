@@ -8,8 +8,8 @@ from datetime import timedelta as td
 from django.utils import timezone
 from github.GithubException import UnknownObjectException
 
+from apps.github.models.comment import Comment
 from apps.github.models.issue import Issue
-from apps.github.models.issue_comment import IssueComment
 from apps.github.models.label import Label
 from apps.github.models.milestone import Milestone
 from apps.github.models.organization import Organization
@@ -246,10 +246,6 @@ def sync_issue_comments(gh_client, issue: Issue):
             logger.warning("Issue #%s has no repository, skipping", issue.number)
             return
 
-        if not repository.owner:
-            logger.warning("Repository for issue #%s has no owner, skipping", issue.number)
-            return
-
         repository_full_name = f"{repository.owner.login}/{repository.name}"
         logger.info("Fetching repository: %s", repository_full_name)
 
@@ -257,17 +253,14 @@ def sync_issue_comments(gh_client, issue: Issue):
         gh_issue = gh_repository.get_issue(number=issue.number)
 
         last_comment = issue.latest_comment
-        since = None
+        since = last_comment.created_at if last_comment else None
 
-        if last_comment:
-            since = last_comment.created_at
+        if since:
             logger.info("Found last comment at: %s, fetching newer comments", since)
         else:
             logger.info("No existing comments found, fetching all comments")
 
         existing_github_ids = set(issue.comments.values_list("github_id", flat=True))
-
-        comments_synced = 0
         comments_to_save = []
 
         gh_comments = gh_issue.get_comments(since=since) if since else gh_issue.get_comments()
@@ -282,31 +275,25 @@ def sync_issue_comments(gh_client, issue: Issue):
                 continue
 
             author = User.update_data(gh_comment.user)
-
             if author:
-                try:
-                    comment = IssueComment.update_data(
-                        gh_comment, issue=issue, author=author, save=False
-                    )
-                    comments_to_save.append(comment)
-                    comments_synced += 1
-                    logger.info(
-                        "Prepared new comment %s for issue #%s", gh_comment.id, issue.number
-                    )
-                except Exception:
-                    logger.exception(
-                        "Failed to prepare comment %s for issue #%s",
-                        gh_comment.id,
-                        issue.number,
-                    )
+                comment = Comment.update_data(gh_comment, author=author, save=False)
+                comments_to_save.append(comment)
+                logger.info("Prepared new comment %s for issue #%s", gh_comment.id, issue.number)
             else:
                 logger.warning("Could not sync author for comment %s", gh_comment.id)
 
         if comments_to_save:
-            IssueComment.bulk_save(comments_to_save)
+            new_comment_github_ids = [c.github_id for c in comments_to_save]
+
+            Comment.bulk_save(comments_to_save)
+
+            newly_saved_comments = Comment.objects.filter(github_id__in=new_comment_github_ids)
+
+            issue.comments.add(*newly_saved_comments)
+
             logger.info(
-                "Synced %d new comments for issue #%s",
-                comments_synced,
+                "Synced and associated %d new comments for issue #%s",
+                newly_saved_comments.count(),
                 issue.number,
             )
         else:
