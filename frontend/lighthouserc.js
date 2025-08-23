@@ -1,7 +1,5 @@
 const LHCI_CHROME_FLAGS =
   process.env.LHCI_CHROME_FLAGS || '--disable-dev-shm-usage --headless --no-sandbox'
-const LHCI_OUTPUT_DIR = process.env.LHCI_OUTPUT_DIR || '.lighthouseci/'
-const LHCI_UPLOAD_TARGET = process.env.LHCI_UPLOAD_TARGET || 'filesystem'
 const LHCI_URL = process.env.LHCI_URL || 'http://localhost:3000/'
 
 module.exports = {
@@ -22,9 +20,7 @@ module.exports = {
       url: [LHCI_URL],
     },
     upload: {
-      outputDir: LHCI_OUTPUT_DIR,
-      reportFilenamePattern: '%%DATETIME%%-%%HOSTNAME%%%%PATHNAME%%.%%EXTENSION%%',
-      target: LHCI_UPLOAD_TARGET,
+      target: 'temporary-public-storage',
     },
   },
 }

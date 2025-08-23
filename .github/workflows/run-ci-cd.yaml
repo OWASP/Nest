@@ -512,20 +512,6 @@ jobs:
         run: |
           pnpm run lighthouse-ci
 
-      - name: Check for report files (temporary debug)
-        run: ls -la frontend/.lighthouseci
-
-      - name: Upload Lighthouse artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: lighthouse-report
-          path: |
-            frontend/.lighthouseci/*.html
-            frontend/.lighthouseci/*.json
-          if-no-files-found: ignore
-          include-hidden-files: true
-          retention-days: 30
-
   build-production-images:
     name: Build Production Images
     env:
