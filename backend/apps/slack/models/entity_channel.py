@@ -23,7 +23,7 @@ class EntityChannel(models.Model):
 
     # Channel.
     channel = GenericForeignKey("channel_type", "channel_id")
-    channel_id = models.PositiveIntegerField()
+    channel_id = models.PositiveBigIntegerField()
     channel_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
@@ -32,7 +32,7 @@ class EntityChannel(models.Model):
 
     # Entity.
     entity = GenericForeignKey("entity_type", "entity_id")
-    entity_id = models.PositiveIntegerField()
+    entity_id = models.PositiveBigIntegerField()
     entity_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
@@ -48,7 +48,7 @@ class EntityChannel(models.Model):
         help_text="Indicates if the channel has been reviewed",
     )
     platform = models.CharField(
-        max_length=5,
+        max_length=32,
         default=Platform.SLACK,
         choices=Platform.choices,
         help_text="Platform of the channel (e.g., Slack)",

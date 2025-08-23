@@ -20,8 +20,8 @@ class Migration(migrations.Migration):
                         auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ("channel_id", models.PositiveIntegerField()),
-                ("entity_id", models.PositiveIntegerField()),
+                ("channel_id", models.PositiveBigIntegerField()),
+                ("entity_id", models.PositiveBigIntegerField()),
                 (
                     "is_default",
                     models.BooleanField(
@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
                         choices=[("slack", "Slack")],
                         default="slack",
                         help_text="Platform of the channel (e.g., Slack)",
-                        max_length=5,
+                        max_length=32,
                     ),
                 ),
                 (

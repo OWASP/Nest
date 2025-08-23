@@ -27,13 +27,14 @@ class Command(BaseCommand):
                 conversations = qs.filter(name__icontains=needle)
                 for conv in conversations:
                     _, was_created = EntityChannel.objects.get_or_create(
-                        content_type=content_type,
-                        object_id=entity.pk,
-                        conversation=conv,
+                        entity_id=entity.pk,
+                        entity_type=content_type,
+                        channel_id=conv.pk,
+                        channel_type=ContentType.objects.get_for_model(Conversation),
                         defaults={
-                            "is_main_channel": False,
+                            "is_default": False,
                             "is_reviewed": False,
-                            "kind": "slack",
+                            "platform": EntityChannel.Platform.SLACK,
                         },
                     )
                     if was_created:
