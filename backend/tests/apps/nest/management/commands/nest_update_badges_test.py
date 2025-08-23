@@ -98,6 +98,8 @@ class TestSyncUserBadgesCommand:
             mock_employees, mock_former_employees
         )
 
+        mock_userbadge_get_or_create.return_value = (MagicMock(), True)
+
         out = StringIO()
         call_command("nest_update_badges", stdout=out)
 
