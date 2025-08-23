@@ -1,4 +1,4 @@
-"""Tests for the owasp_update_badges management command."""
+"""Tests for the nest_update_badges management command."""
 
 from io import StringIO
 from unittest.mock import MagicMock, patch
@@ -67,7 +67,7 @@ def user_filter_side_effect_factory(mock_employees, mock_former_employees):
 
 
 class TestSyncUserBadgesCommand:
-    """Test the sync_user_badges management command."""
+    """Tests for the nest_update_badges management command."""
 
     @patch("apps.nest.management.commands.nest_update_badges.UserBadge.objects.get_or_create")
     @patch("apps.nest.management.commands.nest_update_badges.UserBadge.objects.filter")
