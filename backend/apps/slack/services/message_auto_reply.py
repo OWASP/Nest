@@ -4,6 +4,7 @@ import logging
 
 from django_rq import job
 from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
 
 from apps.slack.common.handlers.ai import get_blocks, process_ai_query
 from apps.slack.models import Message
@@ -22,16 +23,26 @@ def generate_ai_reply_if_unanswered(message_id: int):
     if not message.conversation.is_nest_bot_assistant_enabled:
         return
 
-    if message.thread_replies.exists():
-        return
+    try:
+        client = WebClient(token=message.conversation.workspace.bot_token)
+        result = client.conversations_replies(
+            channel=message.conversation.slack_channel_id,
+            ts=message.slack_message_id,
+            limit=1,
+        )
+        if result.get("messages") and result["messages"][0].get("reply_count", 0) > 0:
+            return
+
+    except SlackApiError:
+        logger.exception("Error checking for replies for message")
 
     ai_response_text = process_ai_query(query=message.text)
     if not ai_response_text:
         return
 
-    WebClient(token=message.conversation.workspace.bot_token).chat_postMessage(
+    client.chat_postMessage(
         channel=message.conversation.slack_channel_id,
         blocks=get_blocks(ai_response_text),
-        text=message.text,
+        text=ai_response_text,
         thread_ts=message.slack_message_id,
     )

@@ -1,6 +1,6 @@
 """Tests for question detector functionality."""
 
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -14,14 +14,6 @@ class TestQuestionDetector:
     def detector(self):
         """Fixture to provide QuestionDetector instance."""
         return QuestionDetector()
-
-    @pytest.fixture
-    def mock_detector_dependencies(self):
-        """Mock any external dependencies if needed."""
-        with patch("apps.slack.common.question_detector.QuestionDetector") as mock_class:
-            mock_instance = Mock()
-            mock_class.return_value = mock_instance
-            yield mock_instance
 
     def test_init(self, detector):
         """Test QuestionDetector initialization."""
