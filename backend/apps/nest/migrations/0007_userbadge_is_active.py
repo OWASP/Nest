@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('nest', '0006_userbadge_uq_userbadge_user_badge'),
+        ("nest", "0006_userbadge_uq_userbadge_user_badge"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userbadge',
-            name='is_active',
-            field=models.BooleanField(default=True, help_text='Indicates if the badge assignment is active.', verbose_name='Is active'),
+            model_name="userbadge",
+            name="is_active",
+            field=models.BooleanField(
+                default=True,
+                help_text="Indicates if the badge assignment is active.",
+                verbose_name="Is active",
+            ),
         ),
     ]
