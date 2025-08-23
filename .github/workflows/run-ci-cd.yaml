@@ -499,8 +499,17 @@ jobs:
 
       - name: Run lighthouse-ci
         working-directory: frontend
+        env:
+          LHCI_URL: 'https://nest.owasp.dev/'
         run: |
-          npx -y @lhci/cli@0.15.1 autorun --collect.url=https://nest.owasp.dev/
+          pnpm run lighthouse-ci
+
+      - name: Upload Ligthouse artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: frontend/.lighthouseci/**
 
   build-production-images:
     name: Build Production Images
