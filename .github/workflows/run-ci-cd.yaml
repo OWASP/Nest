@@ -485,8 +485,8 @@ jobs:
 
   run-lighthouse-ci:
     name: Run Lighthouse CI
-    # needs:
-      # - deploy-staging-nest-proxy
+    needs:
+      - deploy-staging-nest-proxy
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -506,6 +506,7 @@ jobs:
           cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Run lighthouse-ci
+        timeout-minutes: 15
         working-directory: frontend
         env:
           LHCI_URL: 'https://nest.owasp.dev/'
