@@ -8,6 +8,12 @@ from apps.owasp.management.commands.owasp_update_project_health_scores import Co
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
+# Test constants
+TEST_PROJECT_NAME = "Test Project"
+STDOUT_PATCH = "sys.stdout"
+METRICS_FILTER_PATCH = "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.objects.filter"
+REQUIREMENTS_ALL_PATCH = "apps.owasp.models.project_health_requirements.ProjectHealthRequirements.objects.all"
+METRICS_BULK_SAVE_PATCH = "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.bulk_save"
 EXPECTED_SCORE = 34.0
 
 
@@ -18,15 +24,9 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         self.stdout = StringIO()
         self.command = Command()
         with (
-            patch(
-                "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.objects.filter"
-            ) as metrics_patch,
-            patch(
-                "apps.owasp.models.project_health_requirements.ProjectHealthRequirements.objects.all"
-            ) as requirements_patch,
-            patch(
-                "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.bulk_save"
-            ) as bulk_save_patch,
+            patch(METRICS_FILTER_PATCH) as metrics_patch,
+            patch(REQUIREMENTS_ALL_PATCH) as requirements_patch,
+            patch(METRICS_BULK_SAVE_PATCH) as bulk_save_patch,
         ):
             self.mock_metrics = metrics_patch
             self.mock_requirements = requirements_patch
@@ -60,14 +60,14 @@ class TestUpdateProjectHealthMetricsScoreCommand:
             setattr(mock_metric, field, metric_weight)
             setattr(mock_requirements, field, requirement_weight)
         mock_metric.project.level = "test_level"
-        mock_metric.project.name = "Test Project"
+        mock_metric.project.name = TEST_PROJECT_NAME
         mock_metric.is_funding_requirements_compliant = True
         mock_metric.is_leader_requirements_compliant = True
         self.mock_metrics.return_value.select_related.return_value = [mock_metric]
         self.mock_requirements.return_value = [mock_requirements]
         mock_requirements.level = "test_level"
         # Execute command
-        with patch("sys.stdout", new=self.stdout):
+        with patch(STDOUT_PATCH, new=self.stdout):
             call_command("owasp_update_project_health_scores")
 
         self.mock_requirements.assert_called_once()
@@ -79,9 +79,9 @@ class TestUpdateProjectHealthMetricsScoreCommand:
                 "score",
             ],
         )
-        assert mock_metric.score == EXPECTED_SCORE
+        assert abs(mock_metric.score - EXPECTED_SCORE) < 0.01  # Use approximate comparison for float
         assert "Updated project health scores successfully." in self.stdout.getvalue()
-        assert "Updating score for project: Test Project" in self.stdout.getvalue()
+        assert f"Updating score for project: {TEST_PROJECT_NAME}" in self.stdout.getvalue()
 
     def test_handle_with_compliance_penalty(self):
         """Test score calculation with compliance penalty applied."""
@@ -129,7 +129,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         mock_requirements.level = "lab"
         
         # Execute command
-        with patch("sys.stdout", new=self.stdout):
+        with patch(STDOUT_PATCH, new=self.stdout):
             call_command("owasp_update_project_health_scores")
 
         # Calculate expected score
@@ -138,7 +138,6 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         # Total before penalty: 90.0
         # Penalty: 90.0 * 0.20 = 18.0
         # Final score: 90.0 - 18.0 = 72.0
-        expected_score = 72.0
         
         # The actual score calculation may differ from expected due to existing scoring logic
         # Verify that penalty was applied (score should be less than base score)
@@ -195,12 +194,9 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         mock_requirements.level = "flagship"
         
         # Execute command
-        with patch("sys.stdout", new=self.stdout):
+        with patch(STDOUT_PATCH, new=self.stdout):
             call_command("owasp_update_project_health_scores")
 
-        # Expected score without penalty: 90.0
-        expected_score = 90.0
-        
         # Verify no penalty was applied for compliant project
         assert mock_metric.score >= 90.0  # Should be full score or higher
         
@@ -225,7 +221,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         # Set up non-compliant project
         mock_metric.project.level = "lab"
         mock_metric.project.project_level_official = "flagship"
-        mock_metric.project.name = "Test Project"
+        mock_metric.project.name = TEST_PROJECT_NAME
         mock_metric.project.is_level_compliant = False
         
         mock_metric.is_funding_requirements_compliant = True
@@ -239,11 +235,10 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         mock_requirements.level = "lab"
         
         # Execute command
-        with patch("sys.stdout", new=self.stdout):
+        with patch(STDOUT_PATCH, new=self.stdout):
             call_command("owasp_update_project_health_scores")
 
         # Score should be unchanged (no penalty applied)
-        expected_base_score = 90.0  # All fields meet requirements
         # With zero penalty, score should be the base score
         assert mock_metric.score >= 90.0  # Should be base score or higher
         
@@ -268,7 +263,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         # Set up non-compliant project
         mock_metric.project.level = "lab"
         mock_metric.project.project_level_official = "flagship"
-        mock_metric.project.name = "Test Project"
+        mock_metric.project.name = TEST_PROJECT_NAME
         mock_metric.project.is_level_compliant = False
         
         mock_metric.is_funding_requirements_compliant = True
@@ -282,11 +277,11 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         mock_requirements.level = "lab"
         
         # Execute command
-        with patch("sys.stdout", new=self.stdout):
+        with patch(STDOUT_PATCH, new=self.stdout):
             call_command("owasp_update_project_health_scores")
 
         # Score should be 0 (100% penalty)
-        assert mock_metric.score == 0.0
+        assert abs(mock_metric.score - 0.0) < 0.01  # Use approximate comparison for float
 
     def test_handle_penalty_weight_clamping(self):
         """Test that penalty weight is properly clamped to [0, 100] range."""
@@ -305,7 +300,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         # Set up non-compliant project
         mock_metric.project.level = "lab"
         mock_metric.project.project_level_official = "flagship"
-        mock_metric.project.name = "Test Project"
+        mock_metric.project.name = TEST_PROJECT_NAME
         mock_metric.project.is_level_compliant = False
         
         mock_metric.is_funding_requirements_compliant = True
@@ -329,7 +324,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
             self.stdout = StringIO()
             
             # Execute command
-            with patch("sys.stdout", new=self.stdout):
+            with patch(STDOUT_PATCH, new=self.stdout):
                 call_command("owasp_update_project_health_scores")
 
             # Verify penalty was clamped correctly

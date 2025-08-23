@@ -13,6 +13,14 @@ from apps.owasp.models.project import Project
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
+# Test constants
+PROJECT_FILTER_PATCH = "apps.owasp.models.project.Project.objects.filter"
+PROJECT_BULK_SAVE_PATCH = "apps.owasp.models.project.Project.bulk_save"
+METRICS_BULK_SAVE_PATCH = "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.bulk_save"
+METRICS_FILTER_PATCH = "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.objects.filter"
+REQUIREMENTS_ALL_PATCH = "apps.owasp.models.project_health_requirements.ProjectHealthRequirements.objects.all"
+STDOUT_PATCH = "sys.stdout"
+
 
 class TestProjectLevelComplianceIntegration:
     """Integration tests for the complete project level compliance workflow."""
@@ -112,10 +120,10 @@ class TestProjectLevelComplianceIntegration:
         requirements = [flagship_requirements, lab_requirements, production_requirements]
 
         # Step 5: Execute health metrics command (includes official level fetching)
-        with patch("apps.owasp.models.project.Project.objects.filter") as mock_projects, \
-             patch("apps.owasp.models.project.Project.bulk_save") as mock_project_bulk_save, \
-             patch("apps.owasp.models.project_health_metrics.ProjectHealthMetrics.bulk_save") as mock_metrics_bulk_save, \
-             patch("sys.stdout", new=self.stdout):
+        with patch(PROJECT_FILTER_PATCH) as mock_projects, \
+             patch(PROJECT_BULK_SAVE_PATCH), \
+             patch(METRICS_BULK_SAVE_PATCH), \
+             patch(STDOUT_PATCH, new=self.stdout):
             
             mock_projects.return_value = projects
             
@@ -138,10 +146,10 @@ class TestProjectLevelComplianceIntegration:
         # Step 7: Execute health scores command
         self.stdout = StringIO()  # Reset stdout
         
-        with patch("apps.owasp.models.project_health_metrics.ProjectHealthMetrics.objects.filter") as mock_metrics_filter, \
-             patch("apps.owasp.models.project_health_requirements.ProjectHealthRequirements.objects.all") as mock_requirements, \
-             patch("apps.owasp.models.project_health_metrics.ProjectHealthMetrics.bulk_save") as mock_scores_bulk_save, \
-             patch("sys.stdout", new=self.stdout):
+        with patch(METRICS_FILTER_PATCH) as mock_metrics_filter, \
+             patch(REQUIREMENTS_ALL_PATCH) as mock_requirements, \
+             patch(METRICS_BULK_SAVE_PATCH), \
+             patch(STDOUT_PATCH, new=self.stdout):
             
             mock_metrics_filter.return_value.select_related.return_value = metrics
             mock_requirements.return_value = requirements
@@ -188,10 +196,10 @@ class TestProjectLevelComplianceIntegration:
 
         projects = [project_a, project_b, project_c, project_d]
 
-        with patch("apps.owasp.models.project.Project.objects.filter") as mock_projects, \
-             patch("apps.owasp.models.project.Project.bulk_save") as mock_bulk_save, \
-             patch("apps.owasp.models.project_health_metrics.ProjectHealthMetrics.bulk_save"), \
-             patch("sys.stdout", new=self.stdout):
+        with patch(PROJECT_FILTER_PATCH) as mock_projects, \
+             patch(PROJECT_BULK_SAVE_PATCH), \
+             patch(METRICS_BULK_SAVE_PATCH), \
+             patch(STDOUT_PATCH, new=self.stdout):
             
             mock_projects.return_value = projects
             
@@ -283,10 +291,10 @@ class TestProjectLevelComplianceIntegration:
             self.create_mock_requirements("other", 5.0),
         ]
 
-        with patch("apps.owasp.models.project_health_metrics.ProjectHealthMetrics.objects.filter") as mock_metrics_filter, \
-             patch("apps.owasp.models.project_health_requirements.ProjectHealthRequirements.objects.all") as mock_requirements, \
-             patch("apps.owasp.models.project_health_metrics.ProjectHealthMetrics.bulk_save"), \
-             patch("sys.stdout", new=self.stdout):
+        with patch(METRICS_FILTER_PATCH) as mock_metrics_filter, \
+             patch(REQUIREMENTS_ALL_PATCH) as mock_requirements, \
+             patch(METRICS_BULK_SAVE_PATCH), \
+             patch(STDOUT_PATCH, new=self.stdout):
             
             mock_metrics_filter.return_value.select_related.return_value = metrics
             mock_requirements.return_value = requirements
@@ -315,10 +323,10 @@ class TestProjectLevelComplianceIntegration:
         # Test with extreme penalty weight
         extreme_requirements = self.create_mock_requirements("lab", 999.0)  # Should be clamped to 100
         
-        with patch("apps.owasp.models.project_health_metrics.ProjectHealthMetrics.objects.filter") as mock_metrics_filter, \
-             patch("apps.owasp.models.project_health_requirements.ProjectHealthRequirements.objects.all") as mock_requirements, \
-             patch("apps.owasp.models.project_health_metrics.ProjectHealthMetrics.bulk_save"), \
-             patch("sys.stdout", new=self.stdout):
+        with patch(METRICS_FILTER_PATCH) as mock_metrics_filter, \
+             patch(REQUIREMENTS_ALL_PATCH) as mock_requirements, \
+             patch(METRICS_BULK_SAVE_PATCH), \
+             patch(STDOUT_PATCH, new=self.stdout):
             
             mock_metrics_filter.return_value.select_related.return_value = [edge_case_metric]
             mock_requirements.return_value = [extreme_requirements]
@@ -326,7 +334,7 @@ class TestProjectLevelComplianceIntegration:
             call_command("owasp_update_project_health_scores")
             
             # Verify penalty was clamped to 100% and score is 0
-            assert edge_case_metric.score == 0.0
+            assert abs(edge_case_metric.score - 0.0) < 0.01  # Use approximate comparison for float
             
             output = self.stdout.getvalue()
             assert "Applied 100.0% compliance penalty" in output

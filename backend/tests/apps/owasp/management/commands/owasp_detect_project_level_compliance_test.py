@@ -10,6 +10,12 @@ from django.db.models.base import ModelState
 from apps.owasp.management.commands.owasp_detect_project_level_compliance import Command
 from apps.owasp.models.project import Project
 
+# Test constants
+OWASP_ZAP_NAME = "OWASP ZAP"
+OWASP_WEBGOAT_NAME = "OWASP WebGoat"
+PROJECT_FILTER_PATCH = "apps.owasp.models.project.Project.objects.filter"
+STDOUT_PATCH = "sys.stdout"
+
 
 class TestDetectProjectLevelComplianceCommand:
     """Test cases for the project level compliance detection command."""
@@ -35,13 +41,13 @@ class TestDetectProjectLevelComplianceCommand:
         """Test command output when all projects are compliant."""
         # Create mock compliant projects
         projects = [
-            self.create_mock_project("OWASP ZAP", "flagship", "flagship", True),
+            self.create_mock_project(OWASP_ZAP_NAME, "flagship", "flagship", True),
             self.create_mock_project("OWASP Top 10", "flagship", "flagship", True),
-            self.create_mock_project("OWASP WebGoat", "production", "production", True),
+            self.create_mock_project(OWASP_WEBGOAT_NAME, "production", "production", True),
         ]
 
-        with patch("apps.owasp.models.project.Project.objects.filter") as mock_filter, \
-             patch("sys.stdout", new=self.stdout):
+        with patch(PROJECT_FILTER_PATCH) as mock_filter, \
+             patch(STDOUT_PATCH, new=self.stdout):
             
             mock_filter.return_value.select_related.return_value = projects
             
@@ -61,13 +67,13 @@ class TestDetectProjectLevelComplianceCommand:
         """Test command output with both compliant and non-compliant projects."""
         # Create mixed compliance projects
         projects = [
-            self.create_mock_project("OWASP ZAP", "flagship", "flagship", True),
-            self.create_mock_project("OWASP WebGoat", "lab", "production", False),
+            self.create_mock_project(OWASP_ZAP_NAME, "flagship", "flagship", True),
+            self.create_mock_project(OWASP_WEBGOAT_NAME, "lab", "production", False),
             self.create_mock_project("OWASP Top 10", "production", "flagship", False),
         ]
 
-        with patch("apps.owasp.models.project.Project.objects.filter") as mock_filter, \
-             patch("sys.stdout", new=self.stdout):
+        with patch(PROJECT_FILTER_PATCH) as mock_filter, \
+             patch(STDOUT_PATCH, new=self.stdout):
             
             mock_filter.return_value.select_related.return_value = projects
             
@@ -83,18 +89,18 @@ class TestDetectProjectLevelComplianceCommand:
             assert "⚠ WARNING: Found 2 non-compliant projects" in output
             
             # Verify non-compliant projects are listed
-            assert "✗ OWASP WebGoat: Local=lab, Official=production" in output
+            assert f"✗ {OWASP_WEBGOAT_NAME}: Local=lab, Official=production" in output
             assert "✗ OWASP Top 10: Local=production, Official=flagship" in output
 
     def test_handle_verbose_output(self):
         """Test command with verbose flag shows all projects."""
         projects = [
-            self.create_mock_project("OWASP ZAP", "flagship", "flagship", True),
-            self.create_mock_project("OWASP WebGoat", "lab", "production", False),
+            self.create_mock_project(OWASP_ZAP_NAME, "flagship", "flagship", True),
+            self.create_mock_project(OWASP_WEBGOAT_NAME, "lab", "production", False),
         ]
 
-        with patch("apps.owasp.models.project.Project.objects.filter") as mock_filter, \
-             patch("sys.stdout", new=self.stdout):
+        with patch(PROJECT_FILTER_PATCH) as mock_filter, \
+             patch(STDOUT_PATCH, new=self.stdout):
             
             mock_filter.return_value.select_related.return_value = projects
             
@@ -103,13 +109,13 @@ class TestDetectProjectLevelComplianceCommand:
             output = self.stdout.getvalue()
             
             # Verify both compliant and non-compliant projects are shown
-            assert "✓ OWASP ZAP: flagship (matches official)" in output
-            assert "✗ OWASP WebGoat: Local=lab, Official=production" in output
+            assert f"✓ {OWASP_ZAP_NAME}: flagship (matches official)" in output
+            assert f"✗ {OWASP_WEBGOAT_NAME}: Local=lab, Official=production" in output
 
     def test_handle_no_projects(self):
         """Test command output when no active projects exist."""
-        with patch("apps.owasp.models.project.Project.objects.filter") as mock_filter, \
-             patch("sys.stdout", new=self.stdout):
+        with patch(PROJECT_FILTER_PATCH) as mock_filter, \
+             patch(STDOUT_PATCH, new=self.stdout):
             
             mock_filter.return_value.select_related.return_value = []
             
@@ -126,12 +132,12 @@ class TestDetectProjectLevelComplianceCommand:
     def test_handle_projects_without_official_levels(self):
         """Test command detects projects with default official levels."""
         projects = [
-            self.create_mock_project("OWASP ZAP", "flagship", "flagship", True),
-            self.create_mock_project("OWASP WebGoat", "lab", "other", True),  # Default official level
+            self.create_mock_project(OWASP_ZAP_NAME, "flagship", "flagship", True),
+            self.create_mock_project(OWASP_WEBGOAT_NAME, "lab", "other", True),  # Default official level
         ]
 
-        with patch("apps.owasp.models.project.Project.objects.filter") as mock_filter, \
-             patch("sys.stdout", new=self.stdout):
+        with patch(PROJECT_FILTER_PATCH) as mock_filter, \
+             patch(STDOUT_PATCH, new=self.stdout):
             
             # Mock the filter for projects without official levels
             mock_filter.return_value.select_related.return_value = projects
