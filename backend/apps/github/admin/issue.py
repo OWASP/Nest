@@ -22,7 +22,6 @@ class IssueAdmin(admin.ModelAdmin):
     )
     list_filter = (
         "state",
-        "created_at",
         "is_locked",
     )
     search_fields = ("title",)

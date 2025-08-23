@@ -8,6 +8,10 @@ from apps.common.models import BulkSaveModel
 class Comment(BulkSaveModel, models.Model):
     """Represents a comment on a GitHub entity (Issue, PR, etc.)."""
 
+    class Meta:
+        verbose_name = "Comment"
+        verbose_name_plural = "Comments"
+
     github_id = models.BigIntegerField(unique=True)
     author = models.ForeignKey(
         "github.User", on_delete=models.SET_NULL, null=True, related_name="comments"
@@ -15,10 +19,6 @@ class Comment(BulkSaveModel, models.Model):
     body = models.TextField()
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
-
-    class Meta:
-        verbose_name = "Comment"
-        verbose_name_plural = "Comments"
 
     def __str__(self):
         """Return a string representation of the comment."""
