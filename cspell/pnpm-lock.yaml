@@ -80,8 +80,8 @@ packages:
   '@cspell/dict-companies@3.2.5':
     resolution: {integrity: sha512-H51R0w7c6RwJJPqH7Gs65tzP6ouZsYDEHmmol6MIIk0kQaOIBuFP2B3vIxHLUr2EPRVFZsMW8Ni7NmVyaQlwsg==}
 
-  '@cspell/dict-cpp@6.0.9':
-    resolution: {integrity: sha512-Xdq9MwGh0D5rsnbOqFW24NIClXXRhN11KJdySMibpcqYGeomxB2ODFBuhj1H7azO7kVGkGH0Okm4yQ2TRzBx0g==}
+  '@cspell/dict-cpp@6.0.10':
+    resolution: {integrity: sha512-VyD8o7kUH2R9Ep/KXRoFy97QJn8qVW6wcQUfGVowNkc/Ux9o3gZlWlQwpzoyhTrg9uHKzKp5aL25eE7e5K1v1g==}
 
   '@cspell/dict-cryptocurrencies@5.0.5':
     resolution: {integrity: sha512-R68hYYF/rtlE6T/dsObStzN5QZw+0aQBinAXuWCVqwdS7YZo0X33vGMfChkHaiCo3Z2+bkegqHlqxZF4TD3rUA==}
@@ -460,7 +460,7 @@ snapshots:
       '@cspell/dict-aws': 4.0.15
       '@cspell/dict-bash': 4.2.1
       '@cspell/dict-companies': 3.2.5
-      '@cspell/dict-cpp': 6.0.9
+      '@cspell/dict-cpp': 6.0.10
       '@cspell/dict-cryptocurrencies': 5.0.5
       '@cspell/dict-csharp': 4.0.7
       '@cspell/dict-css': 4.0.18
@@ -540,7 +540,7 @@ snapshots:
 
   '@cspell/dict-companies@3.2.5': {}
 
-  '@cspell/dict-cpp@6.0.9': {}
+  '@cspell/dict-cpp@6.0.10': {}
 
   '@cspell/dict-cryptocurrencies@5.0.5': {}
 

@@ -3,12 +3,7 @@ import GitHubProvider from 'next-auth/providers/github'
 import { apolloClient } from 'server/apolloClient'
 import { IS_PROJECT_LEADER_QUERY, IS_MENTOR_QUERY } from 'server/queries/mentorshipQueries'
 import { ExtendedProfile, ExtendedSession } from 'types/auth'
-import {
-  GITHUB_CLIENT_ID,
-  GITHUB_CLIENT_SECRET,
-  IS_GITHUB_AUTH_ENABLED,
-  NEXTAUTH_SECRET,
-} from 'utils/credentials'
+import { isGithubAuthEnabled } from 'utils/credentials'
 
 async function checkIfProjectLeader(login: string): Promise<boolean> {
   try {
@@ -40,11 +35,11 @@ async function checkIfMentor(login: string): Promise<boolean> {
 
 const providers = []
 
-if (IS_GITHUB_AUTH_ENABLED) {
+if (isGithubAuthEnabled()) {
   providers.push(
     GitHubProvider({
-      clientId: GITHUB_CLIENT_ID,
-      clientSecret: GITHUB_CLIENT_SECRET,
+      clientId: process.env.NEXT_SERVER_GITHUB_CLIENT_ID,
+      clientSecret: process.env.NEXT_SERVER_GITHUB_CLIENT_SECRET,
       profile(profile) {
         return {
           email: profile.email,
@@ -101,7 +96,7 @@ const authOptions: AuthOptions = {
       return session
     },
   },
-  secret: NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET,
 }
 
 const handler = NextAuth(authOptions)
