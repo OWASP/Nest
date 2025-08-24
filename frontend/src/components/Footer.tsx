@@ -7,7 +7,7 @@ import { useState, useCallback } from 'react'
 import type { Section } from 'types/section'
 import { footerIcons } from 'utils/constants'
 import { footerSections } from 'utils/constants'
-import { ENVIRONMENT, RELEASE_VERSION } from 'utils/credentials'
+import { ENVIRONMENT, RELEASE_VERSION } from 'utils/env.client'
 
 export default function Footer() {
   // State to keep track of the open section in the footer
@@ -44,9 +44,8 @@ export default function Footer() {
               </Button>
               <div
                 id={`footer-section-${section.title}`}
-                className={`space-y-2 overflow-hidden text-sm transition-all duration-300 ease-in-out lg:max-h-full ${
-                  openSection === section.title ? 'max-h-96' : 'max-h-0 lg:max-h-full'
-                }`}
+                className={`space-y-2 overflow-hidden text-sm transition-all duration-300 ease-in-out lg:max-h-full ${openSection === section.title ? 'max-h-96' : 'max-h-0 lg:max-h-full'
+                  }`}
               >
                 {section.links.map((link, index) => (
                   <div key={index} className="py-1">
