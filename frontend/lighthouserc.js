@@ -6,9 +6,7 @@ const ROUTES = ['/', '/about', '/chapters', '/projects']
 
 const getUrls = () => {
   const baseUrl = LHCI_BASE_URL.endsWith('/') ? LHCI_BASE_URL.slice(0, -1) : LHCI_BASE_URL
-  const routes = ROUTES
-
-  return routes.map((route) => `${baseUrl}${route}`)
+  return ROUTES.map((route) => `${baseUrl}${route}`)
 }
 
 module.exports = {
