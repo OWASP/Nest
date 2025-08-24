@@ -485,8 +485,8 @@ jobs:
 
   run-lighthouse-ci:
     name: Run Lighthouse CI
-    needs:
-      - deploy-staging-nest-proxy
+    # needs:
+      # - deploy-staging-nest-proxy
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
