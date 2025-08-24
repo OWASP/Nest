@@ -446,8 +446,8 @@ jobs:
           touch .env.frontend
           echo "NEXT_SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env.frontend
           echo "NEXT_SERVER_CSRF_URL=${{ secrets.NEXT_SERVER_CSRF_URL }}" >> .env.frontend
-          echo "NEXT_SERVER_GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" >> .env.frontend
-          echo "NEXT_SERVER_GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" >> .env.frontend
+          echo "NEXT_SERVER_GITHUB_CLIENT_ID=${{ secrets.NEST_GITHUB_CLIENT_ID }}" >> .env.frontend
+          echo "NEXT_SERVER_GITHUB_CLIENT_SECRET=${{ secrets.NEST_GITHUB_CLIENT_SECRET }}" >> .env.frontend
           echo "NEXT_SERVER_GRAPHQL_URL=${{ secrets.NEXT_SERVER_GRAPHQL_URL }}" >> .env.frontend
           echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> .env.frontend
           echo "NEXTAUTH_URL=${{ secrets.VITE_API_URL }}" >> .env.frontend
@@ -701,8 +701,8 @@ jobs:
           touch .env.frontend
           echo "NEXT_SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env.frontend
           echo "NEXT_SERVER_CSRF_URL=${{ secrets.NEXT_SERVER_CSRF_URL }}" >> .env.frontend
-          echo "NEXT_SERVER_GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" >> .env.frontend
-          echo "NEXT_SERVER_GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" >> .env.frontend
+          echo "NEXT_SERVER_GITHUB_CLIENT_ID=${{ secrets.NEST_GITHUB_CLIENT_ID }}" >> .env.frontend
+          echo "NEXT_SERVER_GITHUB_CLIENT_SECRET=${{ secrets.NEST_GITHUB_CLIENT_SECRET }}" >> .env.frontend
           echo "NEXT_SERVER_GRAPHQL_URL=${{ secrets.NEXT_SERVER_GRAPHQL_URL }}" >> .env.frontend
           echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> .env.frontend
           echo "NEXTAUTH_URL=${{ secrets.VITE_API_URL }}" >> .env.frontend
