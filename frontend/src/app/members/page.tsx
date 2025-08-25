@@ -46,6 +46,7 @@ const UsersPage = () => {
         login={user.login}
         name={user.name || `@${user.login}`}
         repositoriesCount={user.publicRepositoriesCount}
+        badges={user.badges}
       />
     )
   }
