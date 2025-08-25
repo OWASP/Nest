@@ -131,3 +131,24 @@ class TestProjectModel:
         assert project.level == ProjectLevel.LAB
         assert project.type == ProjectType.TOOL
         assert project.updated_at == owasp_repository.updated_at
+
+    @pytest.mark.parametrize(
+        ("local_level", "official_level", "expected_result"),
+        [
+            (ProjectLevel.LAB, ProjectLevel.LAB, True),
+            (ProjectLevel.FLAGSHIP, ProjectLevel.FLAGSHIP, True),
+            (ProjectLevel.LAB, ProjectLevel.FLAGSHIP, False),
+            (ProjectLevel.FLAGSHIP, ProjectLevel.LAB, False),
+            (ProjectLevel.INCUBATOR, ProjectLevel.PRODUCTION, False),
+            (ProjectLevel.OTHER, ProjectLevel.OTHER, True),
+        ],
+    )
+    def test_is_level_compliant(self, local_level, official_level, expected_result):
+        """Test project level compliance detection."""
+        project = Project(level=local_level, project_level_official=official_level)
+        assert project.is_level_compliant == expected_result
+
+    def test_is_level_compliant_default_values(self):
+        """Test project level compliance with default values."""
+        project = Project()  # Both default to ProjectLevel.OTHER
+        assert project.is_level_compliant is True
