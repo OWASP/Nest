@@ -107,6 +107,30 @@ services:
       - frontend-next:/home/owasp/.next
       - frontend-node-modules:/home/owasp/node_modules
 
+  worker:
+    container_name: nest-worker
+    command: >
+      sh -c '
+        python manage.py rqworker default --with-scheduler
+      '
+    build:
+      context: ../backend
+      dockerfile: docker/Dockerfile.local
+    depends_on:
+      cache:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    env_file: ../backend/.env
+    environment:
+      DJANGO_REDIS_HOST: ${DJANGO_REDIS_HOST:-cache}
+      DJANGO_REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-cache-password}
+    networks:
+      - nest-network
+    volumes:
+      - ../backend:/home/owasp
+      - backend-venv:/home/owasp/.venv
+
 networks:
   nest-network:
 
