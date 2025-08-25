@@ -17,4 +17,5 @@ export type Snapshot = {
   key: string
   startAt: string
   title: string
+  newReleases?: Release[]
 }

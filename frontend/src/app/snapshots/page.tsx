@@ -7,6 +7,7 @@ import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { GET_COMMUNITY_SNAPSHOTS } from 'server/queries/snapshotQueries'
 import type { Snapshot } from 'types/snapshot'
 import LoadingSpinner from 'components/LoadingSpinner'
+import Release from 'components/Release'
 import SnapshotCard from 'components/SnapshotCard'
 
 const SnapshotsPage: React.FC = () => {
@@ -47,13 +48,32 @@ const SnapshotsPage: React.FC = () => {
     }
 
     return (
-      <SnapshotCard
-        key={snapshot.key}
-        title={snapshot.title}
-        button={SubmitButton}
-        startAt={snapshot.startAt}
-        endAt={snapshot.endAt}
-      />
+      <div className="space-y-4">
+        <SnapshotCard
+          key={snapshot.key}
+          title={snapshot.title}
+          button={SubmitButton}
+          startAt={snapshot.startAt}
+          endAt={snapshot.endAt}
+        />
+
+        {snapshot.newReleases && snapshot.newReleases.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Releases in this snapshot:
+            </h4>
+            <div className="grid gap-2">
+              {snapshot.newReleases.map((release, index) => (
+                <Release
+                  key={`${snapshot.key}-release-${index}`}
+                  release={release}
+                  showAvatar={true}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     )
   }
 
