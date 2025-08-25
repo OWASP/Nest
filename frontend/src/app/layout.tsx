@@ -1,4 +1,17 @@
 
+import { GoogleAnalytics } from '@next/third-parties/google'
+import type { Metadata } from 'next'
+import { Geist, Geist_Mono } from 'next/font/google'
+import React from 'react'
+import { Providers } from 'wrappers/provider'
+import { GTM_ID, isGithubAuthEnabled } from 'utils/credentials'
+import AutoScrollToTop from 'components/AutoScrollToTop'
+import BreadCrumbs from 'components/BreadCrumbs'
+import Footer from 'components/Footer'
+import Header from 'components/Header'
+import ScrollToTop from 'components/ScrollToTop'
+
+
 import { GoogleAnalytics } from '@next/third-parties/google';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
@@ -72,7 +85,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         </a>
         <Providers>
           <AutoScrollToTop />
-          <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
+          <Header isGitHubAuthEnabled={isGithubAuthEnabled()} />
           <BreadCrumbs />
           {/* Single document-wide main landmark for a11y; no nested mains */}
           <main id="main-content" className="flex min-w-0 flex-1 flex-col">
