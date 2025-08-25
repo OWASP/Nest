@@ -45,6 +45,15 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         verbose_name="Contributions count", default=0
     )
 
+    badges = models.ManyToManyField(
+        "nest.Badge",
+        verbose_name="Badges",
+        related_name="github_users",
+        blank=True,
+        through="nest.GithubUserBadge", 
+        through_fields=("github_user", "badge"),
+    )
+
     def __str__(self) -> str:
         """Return a human-readable representation of the user.
 

@@ -36,6 +36,33 @@ class Badge(BulkSaveModel, TimestampedModel):
         default=0,
     )
 
+
+class UserBadge(TimestampedModel):
+    """Through model for User and Badge."""
+
+    class Meta:
+        db_table = "nest_user_badges"
+        verbose_name_plural = "User badges"
+        unique_together = ("user", "badge")
+
+    user = models.ForeignKey("nest.User", on_delete=models.CASCADE)
+    badge = models.ForeignKey("nest.Badge", on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        """Return a human-readable representation of the user badge."""
+        return f"{self.user} - {self.badge}"
+
+
+class GithubUserBadge(TimestampedModel):
+    """Through model for Github User and Badge."""
+
+    class Meta:
+        db_table = "nest_github_user_badges"
+        verbose_name_plural = "GitHub user badges"
+        unique_together = ("github_user", "badge")
+
+    github_user = models.ForeignKey("github.User", on_delete=models.CASCADE)
+    badge = models.ForeignKey("nest.Badge", on_delete=models.CASCADE)
     def __str__(self) -> str:
         """Return the badge string representation."""
-        return self.name
+        return f"{self.github_user} - {self.badge}"
