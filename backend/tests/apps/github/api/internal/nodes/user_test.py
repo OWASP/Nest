@@ -19,6 +19,7 @@ class TestUserNode:
         field_names = {field.name for field in UserNode.__strawberry_definition__.fields}
         expected_field_names = {
             "avatar_url",
+            "badges",
             "bio",
             "company",
             "contributions_count",
