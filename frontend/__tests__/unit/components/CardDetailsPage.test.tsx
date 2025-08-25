@@ -68,7 +68,8 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
   }) => <span data-testid={`icon-${icon.iconName}`} className={className} {...props} />,
 }))
 
-jest.mock('utils/credentials', () => ({
+
+jest.mock('utils/env.client', () => ({
   IS_PROJECT_HEALTH_ENABLED: true,
 }))
 
@@ -124,7 +125,7 @@ jest.mock('components/ChapterMapWrapper', () => ({
 
 jest.mock('components/HealthMetrics', () => ({
   __esModule: true,
-  default: ({ data, ...props }: { data: unknown[]; [key: string]: unknown }) => (
+  default: ({ data, ...props }: { data: unknown[];[key: string]: unknown }) => (
     <div data-testid="health-metrics" {...props}>
       Health Metrics ({data.length} items)
     </div>
@@ -155,7 +156,7 @@ jest.mock('components/InfoBlock', () => ({
 
 jest.mock('components/LeadersList', () => ({
   __esModule: true,
-  default: ({ leaders, ...props }: { leaders: string; [key: string]: unknown }) => (
+  default: ({ leaders, ...props }: { leaders: string;[key: string]: unknown }) => (
     <span data-testid="leaders-list" {...props}>
       {leaders}
     </span>

@@ -3,7 +3,7 @@ import GitHubProvider from 'next-auth/providers/github'
 import { apolloClient } from 'server/apolloClient'
 import { IS_PROJECT_LEADER_QUERY, IS_MENTOR_QUERY } from 'server/queries/mentorshipQueries'
 import { ExtendedProfile, ExtendedSession } from 'types/auth'
-import { isGithubAuthEnabled } from 'utils/credentials'
+import { isGithubAuthEnabled } from 'utils/env.server'
 
 async function checkIfProjectLeader(login: string): Promise<boolean> {
   try {
@@ -85,13 +85,13 @@ const authOptions: AuthOptions = {
     },
 
     async session({ session, token }) {
-      ;(session as ExtendedSession).accessToken = token.accessToken as string
+      ; (session as ExtendedSession).accessToken = token.accessToken as string
 
       if (session.user) {
-        ;(session as ExtendedSession).user.login = token.login as string
-        ;(session as ExtendedSession).user.isMentor = token.isMentor as boolean
-        ;(session as ExtendedSession).user.isLeader = token.isLeader as boolean
-        ;(session as ExtendedSession).user.isOwaspStaff = token.isOwaspStaff as boolean
+        ; (session as ExtendedSession).user.login = token.login as string
+          ; (session as ExtendedSession).user.isMentor = token.isMentor as boolean
+          ; (session as ExtendedSession).user.isLeader = token.isLeader as boolean
+          ; (session as ExtendedSession).user.isOwaspStaff = token.isOwaspStaff as boolean
       }
       return session
     },

@@ -1,5 +1,5 @@
 import { handleAppError } from 'app/global-error'
-import { API_URL } from 'utils/credentials'
+import { API_URL } from 'utils/env.client'
 
 export const fetchMetricsPDF = async (path: string, fileName: string): Promise<void> => {
   const response = await fetch(`${API_URL}owasp/project-health-metrics/${path}`, {

@@ -95,7 +95,7 @@ jest.mock('utils/constants', () => ({
   ],
 }))
 
-jest.mock('utils/credentials', () => ({
+jest.mock('utils/env.client', () => ({
   ENVIRONMENT: 'production',
   RELEASE_VERSION: '1.2.3',
 }))
