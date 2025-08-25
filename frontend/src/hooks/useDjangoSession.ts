@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client'
+import { useMutation } from "@apollo/client/react";
 import { addToast } from '@heroui/toast'
 import { useSession, signOut } from 'next-auth/react'
 import { useEffect, useState } from 'react'

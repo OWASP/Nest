@@ -1,6 +1,5 @@
-'use client'
-
-import { useMutation, useQuery } from '@apollo/client'
+'use client';
+import { useMutation, useQuery } from "@apollo/client/react";
 import { addToast } from '@heroui/toast'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'

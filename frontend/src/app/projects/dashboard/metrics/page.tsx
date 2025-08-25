@@ -1,6 +1,5 @@
-'use client'
-
-import { useQuery } from '@apollo/client'
+'use client';
+import { useQuery } from "@apollo/client/react";
 import { faFilter } from '@fortawesome/free-solid-svg-icons'
 import { Pagination } from '@heroui/react'
 import { useSearchParams, useRouter } from 'next/navigation'

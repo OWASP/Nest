@@ -1,6 +1,5 @@
-'use client'
-
-import { useMutation, useQuery } from '@apollo/client'
+'use client';
+import { useMutation, useQuery } from "@apollo/client/react";
 import {
   faSpinner,
   faKey,

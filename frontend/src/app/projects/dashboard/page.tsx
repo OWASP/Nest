@@ -1,5 +1,5 @@
-'use client'
-import { useQuery } from '@apollo/client'
+'use client';
+import { useQuery } from "@apollo/client/react";
 import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import {
   faCheck,

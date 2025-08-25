@@ -1,5 +1,5 @@
-'use client'
-import { useQuery } from '@apollo/client'
+'use client';
+import { useQuery } from "@apollo/client/react";
 import {
   faCircleCheck,
   faClock,

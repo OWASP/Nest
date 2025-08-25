@@ -1,6 +1,5 @@
-'use client'
-
-import { useQuery } from '@apollo/client'
+'use client';
+import { useQuery } from "@apollo/client/react";
 import upperFirst from 'lodash/upperFirst'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
