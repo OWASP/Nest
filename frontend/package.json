@@ -76,7 +76,7 @@
     "@types/leaflet": "^1.9.20",
     "@types/leaflet.markercluster": "^1.5.5",
     "@types/markdown-it": "^14.1.2",
-    "@types/node": "^22.17.2",
+    "@types/node": "^22.18.0",
     "@types/react": "^19.1.11",
     "@types/react-dom": "^19.1.7",
     "@types/react-gtm-module": "^2.0.4",
