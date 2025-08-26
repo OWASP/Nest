@@ -2,12 +2,16 @@ const LHCI_BASE_URL = process.env.LHCI_BASE_URL || 'http://localhost:3000'
 const LHCI_CHROME_FLAGS =
   process.env.LHCI_CHROME_FLAGS || '--disable-dev-shm-usage --headless --no-sandbox'
 
-const ROUTES = ['/', '/about', '/chapters', '/projects']
-
-const getUrls = () => {
-  const baseUrl = LHCI_BASE_URL.endsWith('/') ? LHCI_BASE_URL.slice(0, -1) : LHCI_BASE_URL
-  return ROUTES.map((route) => `${baseUrl}${route}`)
-}
+const URL_PATHS = [
+  '/',
+  '/about',
+  '/chapters',
+  '/contribute',
+  '/members',
+  '/organizations',
+  '/projects',
+  '/snapshots',
+]
 
 module.exports = {
   ci: {
@@ -24,7 +28,7 @@ module.exports = {
       settings: {
         chromeFlags: LHCI_CHROME_FLAGS,
       },
-      url: getUrls(),
+      url: URL_PATHS.map((url_path) => `${LHCI_BASE_URL}${url_path}`),
     },
     upload: {
       target: 'temporary-public-storage',

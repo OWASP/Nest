@@ -495,23 +495,23 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
         with:
-          version: 10
           run_install: true
+          version: 10
 
       - name: Set up Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
-          node-version: 22
-          cache: 'pnpm'
           cache-dependency-path: frontend/pnpm-lock.yaml
+          cache: 'pnpm'
+          node-version: 22
 
       - name: Run lighthouse-ci
-        timeout-minutes: 15
-        working-directory: frontend
         env:
-          LHCI_BASE_URL: 'https://nest.owasp.dev/'
+          LHCI_BASE_URL: 'https://nest.owasp.dev'
         run: |
           pnpm run lighthouse-ci
+        timeout-minutes: 15
+        working-directory: frontend
 
   build-production-images:
     name: Build Production Images
