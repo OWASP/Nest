@@ -226,15 +226,21 @@ class TestUpdateProjectHealthMetricsCommand:
         ]
 
         for official_level, expected_mapped in test_cases:
-            with patch(PROJECT_FILTER_PATCH) as mock_filter:
+            with patch(PROJECT_FILTER_PATCH) as mock_filter, \
+                 patch(PROJECT_BULK_SAVE_PATCH) as mock_bulk_save:
                 
                 mock_filter.return_value = [project]
                 project.project_level_official = "other"  # Reset
                 
                 official_levels = {TEST_PROJECT_NAME: official_level}
-                self.command.update_official_levels(official_levels)
+                updated_count = self.command.update_official_levels(official_levels)
                 
                 assert project.project_level_official == expected_mapped
+                if expected_mapped != "other":  # Only count as update if level changed
+                    assert updated_count == 1
+                    mock_bulk_save.assert_called_once()
+                else:
+                    assert updated_count == 0
 
     @patch('requests.get')
     def test_handle_with_official_levels_integration(self, mock_get):

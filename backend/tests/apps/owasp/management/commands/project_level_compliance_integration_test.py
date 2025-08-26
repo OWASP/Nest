@@ -225,9 +225,9 @@ class TestProjectLevelComplianceIntegration:
 
         project = self.create_mock_project("Test Project", "lab", "lab")
 
-        with patch("apps.owasp.models.project.Project.objects.filter") as mock_projects, \
-             patch("apps.owasp.models.project_health_metrics.ProjectHealthMetrics.bulk_save"), \
-             patch("sys.stdout", new=self.stdout):
+        with patch(PROJECT_FILTER_PATCH) as mock_projects, \
+             patch(METRICS_BULK_SAVE_PATCH), \
+             patch(STDOUT_PATCH, new=self.stdout):
             
             mock_projects.return_value = [project]
             
@@ -245,9 +245,9 @@ class TestProjectLevelComplianceIntegration:
         """Test that --skip-official-levels flag works correctly."""
         project = self.create_mock_project("Test Project", "lab", "flagship")
 
-        with patch("apps.owasp.models.project.Project.objects.filter") as mock_projects, \
-             patch("apps.owasp.models.project_health_metrics.ProjectHealthMetrics.bulk_save"), \
-             patch("sys.stdout", new=self.stdout):
+        with patch(PROJECT_FILTER_PATCH) as mock_projects, \
+             patch(METRICS_BULK_SAVE_PATCH), \
+             patch(STDOUT_PATCH, new=self.stdout):
             
             mock_projects.return_value = [project]
             
