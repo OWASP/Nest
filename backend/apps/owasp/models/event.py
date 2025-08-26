@@ -29,6 +29,7 @@ class Event(BulkSaveModel, TimestampedModel):
         db_table = "owasp_events"
         indexes = [
             models.Index(fields=["-start_date"], name="event_start_date_desc_idx"),
+            models.Index(fields=["type"], name="event_type_idx"),
         ]
         verbose_name_plural = "Events"
 
@@ -51,7 +52,7 @@ class Event(BulkSaveModel, TimestampedModel):
 
         CONFIRMED = "confirmed", "Confirmed"
         TENTATIVE = "tentative", "Tentative"
-        CANCELED = "canceled", "Canceled"
+        CANCELLED = "cancelled", "Cancelled"
 
     category = models.CharField(
         verbose_name="Category",
