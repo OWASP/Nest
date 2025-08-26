@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import React from 'react'
-import { isGithubAuthEnabled } from 'utils/env.server'
+import { IS_GITHUB_AUTH_ENABLED } from 'utils/env.server'
 import DashboardWrapper from 'components/DashboardWrapper'
 import FontLoaderWrapper from 'components/FontLoaderWrapper'
 import ProjectsDashboardNavBar from 'components/ProjectsDashboardNavBar'
@@ -8,7 +8,7 @@ import ProjectsDashboardNavBar from 'components/ProjectsDashboardNavBar'
 const ProjectsHealthDashboardLayout: React.FC<{ readonly children: React.ReactNode }> = ({
   children,
 }) => {
-  if (!isGithubAuthEnabled()) {
+  if (!IS_GITHUB_AUTH_ENABLED) {
     notFound()
   }
   return (

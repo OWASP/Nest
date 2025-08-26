@@ -1,10 +1,10 @@
 import { notFound, redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import React from 'react'
-import { isGithubAuthEnabled } from 'utils/env.server'
+import { IS_GITHUB_AUTH_ENABLED } from 'utils/env.server'
 
 export default async function ApiKeysLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  if (!isGithubAuthEnabled()) {
+  if (!IS_GITHUB_AUTH_ENABLED) {
     notFound()
   }
   const session = await getServerSession()

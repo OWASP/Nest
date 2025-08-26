@@ -16,13 +16,13 @@ jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))
 jest.mock('utils/env.server', () => ({
-  isGithubAuthEnabled: jest.fn(() => true),
+  IS_GITHUB_AUTH_ENABLED: true,
 }))
 describe('LoginPage', () => {
   const pushMock = jest.fn()
 
   beforeEach(() => {
-    ; (useRouter as jest.Mock).mockReturnValue({ push: pushMock })
+    ;(useRouter as jest.Mock).mockReturnValue({ push: pushMock })
   })
 
   afterEach(() => {
@@ -31,14 +31,14 @@ describe('LoginPage', () => {
   })
 
   test('renders loading state', () => {
-    ; (useSession as jest.Mock).mockReturnValue({ status: 'loading' })
+    ;(useSession as jest.Mock).mockReturnValue({ status: 'loading' })
 
     render(<LoginPage />)
     expect(screen.getByText(/Checking session/i)).toBeInTheDocument()
   })
 
   test('shows redirect spinner if authenticated and calls router.push and addToast', () => {
-    ; (useSession as jest.Mock).mockReturnValue({ status: 'authenticated' })
+    ;(useSession as jest.Mock).mockReturnValue({ status: 'authenticated' })
 
     render(<LoginPage />)
     expect(screen.getByText(/Redirecting/i)).toBeInTheDocument()
@@ -52,14 +52,14 @@ describe('LoginPage', () => {
   })
 
   test('shows login button if unauthenticated', () => {
-    ; (useSession as jest.Mock).mockReturnValue({ status: 'unauthenticated' })
+    ;(useSession as jest.Mock).mockReturnValue({ status: 'unauthenticated' })
     render(<LoginPage />)
 
     expect(screen.getByText(/Sign in with GitHub/i)).toBeInTheDocument()
   })
 
   test('calls signIn on GitHub login button click', () => {
-    ; (useSession as jest.Mock).mockReturnValue({ status: 'unauthenticated' })
+    ;(useSession as jest.Mock).mockReturnValue({ status: 'unauthenticated' })
 
     render(<LoginPage />)
 
