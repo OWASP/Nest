@@ -1,2 +1,1 @@
-"""OWASP utilities."""
 
