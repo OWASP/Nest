@@ -40,20 +40,48 @@ class Event(BulkSaveModel, TimestampedModel):
         OTHER = "other", "Other"
         PARTNER = "partner", "Partner"
 
+    class Type(models.TextChoices):
+        """Event type."""
+
+        CALENDAR = "calendar", "Calendar"
+        EXISTING = "existing", "Existing"
+
+    class Status(models.TextChoices):
+        """Event status."""
+
+        CONFIRMED = "confirmed", "Confirmed"
+        TENTATIVE = "tentative", "Tentative"
+        CANCELED = "canceled", "Canceled"
+
     category = models.CharField(
         verbose_name="Category",
         max_length=11,
         choices=Category.choices,
         default=Category.OTHER,
     )
+    calendar_id = models.CharField(
+        verbose_name="Calendar ID", max_length=1024, blank=True, default=""
+    )
     name = models.CharField(verbose_name="Name", max_length=100)
     start_date = models.DateField(verbose_name="Start Date")
     end_date = models.DateField(verbose_name="End Date", null=True, blank=True)
     description = models.TextField(verbose_name="Description", default="", blank=True)
     key = models.CharField(verbose_name="Key", max_length=100, unique=True)
+    status = models.CharField(
+        verbose_name="Status",
+        max_length=11,
+        choices=Status.choices,
+        default=Status.CONFIRMED,
+    )
     summary = models.TextField(verbose_name="Summary", blank=True, default="")
     suggested_location = models.CharField(
         verbose_name="Suggested Location", max_length=255, blank=True, default=""
+    )
+    type = models.CharField(
+        verbose_name="Type",
+        max_length=11,
+        choices=Type.choices,
+        default=Type.EXISTING,
     )
     url = models.URLField(verbose_name="URL", default="", blank=True)
     latitude = models.FloatField(verbose_name="Latitude", null=True, blank=True)
@@ -74,6 +102,7 @@ class Event(BulkSaveModel, TimestampedModel):
         return (
             Event.objects.filter(
                 start_date__gt=timezone.now(),
+                type=Event.Type.EXISTING,
             )
             .exclude(
                 Q(name__exact="") | Q(url__exact=""),
