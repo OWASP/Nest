@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import React from 'react'
 import { Providers } from 'wrappers/provider'
-import { GTM_ID, IS_GITHUB_AUTH_ENABLED } from 'utils/credentials'
+import { GTM_ID, isGithubAuthEnabled } from 'utils/credentials'
 import AutoScrollToTop from 'components/AutoScrollToTop'
 import BreadCrumbs from 'components/BreadCrumbs'
 import Footer from 'components/Footer'
@@ -68,7 +68,7 @@ export default function RootLayout({
       >
         <Providers>
           <AutoScrollToTop />
-          <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
+          <Header isGitHubAuthEnabled={isGithubAuthEnabled()} />
           <BreadCrumbs />
           <main className="flex-1 flex flex-col">
             {children}
