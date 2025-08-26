@@ -62,6 +62,14 @@ class Event(BulkSaveModel, TimestampedModel):
     calendar_id = models.CharField(
         verbose_name="Calendar ID", max_length=1024, blank=True, default=""
     )
+    channel_id = models.CharField(verbose_name="Channel ID", max_length=15, default="")
+    member = models.ForeignKey(
+        "slack.Member",
+        on_delete=models.CASCADE,
+        related_name="calendar_events",
+        verbose_name="Slack Member",
+        null=True,
+    )
     name = models.CharField(verbose_name="Name", max_length=100)
     start_date = models.DateField(verbose_name="Start Date")
     end_date = models.DateField(verbose_name="End Date", null=True, blank=True)
