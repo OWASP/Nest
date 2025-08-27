@@ -61,7 +61,12 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "User Badges",
                 "db_table": "nest_user_badges",
                 "ordering": ["-awarded_at"],
-                "unique_together": {("user", "badge")},
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=("user", "badge"),
+                        name="uniq_user_badge",
+                    ),
+                ],
             },
         ),
         migrations.AddField(

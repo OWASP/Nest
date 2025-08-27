@@ -60,6 +60,7 @@ gamesec
 geocoders
 geoloc
 geopy
+githubuserbadge
 graphiql
 gunicorn
 heroui
@@ -120,6 +121,7 @@ tsc
 turbopack
 unhover
 usefixtures
+userbadge
 winsrdf
 wsgi
 xapp

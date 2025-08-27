@@ -4,6 +4,7 @@ import strawberry
 import strawberry_django
 
 from apps.nest.models import User
+from apps.nest.models.badge import Badge
 
 from .badge import BadgeNode
 
@@ -20,4 +21,4 @@ class AuthUserNode(strawberry.relay.Node):
     @strawberry_django.field
     def badges(self) -> list[BadgeNode]:
         """List badges assigned to the user sorted by weight and name."""
-        return self.badges.order_by("weight", "name")
+        return Badge.objects.filter(userbadge__user=self.instance).order_by("weight", "name")

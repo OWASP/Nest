@@ -8,6 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("github", "0034_merge_20250804_1817"),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("nest", "0004_userbadge_user_badges"),
     ]
 
@@ -71,7 +72,12 @@ class Migration(migrations.Migration):
             options={
                 "verbose_name_plural": "GitHub user badges",
                 "db_table": "nest_github_user_badges",
-                "unique_together": {("github_user", "badge")},
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=("github_user", "badge"),
+                        name="uniq_github_user_badge",
+                    ),
+                ],
             },
         ),
     ]

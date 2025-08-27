@@ -63,6 +63,7 @@ class GithubUserBadge(TimestampedModel):
 
     github_user = models.ForeignKey("github.User", on_delete=models.CASCADE)
     badge = models.ForeignKey("nest.Badge", on_delete=models.CASCADE)
+
     def __str__(self) -> str:
         """Return the badge string representation."""
         return f"{self.github_user} - {self.badge}"

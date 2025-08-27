@@ -50,7 +50,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         verbose_name="Badges",
         related_name="github_users",
         blank=True,
-        through="nest.GithubUserBadge", 
+        through="nest.GithubUserBadge",
         through_fields=("github_user", "badge"),
     )
 
