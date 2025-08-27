@@ -19,7 +19,7 @@ describe('BadgesTooltip', () => {
   })
 
   it('renders trigger icon when badges are present', () => {
-    const badges = [{ name: 'A', cssClass: 'fa-solid fa-star' }]
+    const badges = [{ id: 'test-badge', name: 'A', cssClass: 'fa-solid fa-star' }]
     render(<BadgesTooltip badges={badges} />)
     expect(screen.getByTestId('fa-icon')).toBeInTheDocument()
   })

@@ -1,5 +1,4 @@
 import { Tooltip } from '@heroui/tooltip'
-import Image from 'next/image'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import type { Badge as BadgeType } from 'types/badge'
 
@@ -12,28 +11,15 @@ type BadgesProps = {
 
 const BadgeIcon = ({ badge }: { badge: BadgeType }) => {
   const title = badge.description || badge.name
-  const cssClass = badge.cssClass || ''
+  const cssClass = badge.cssClass || 'fa-solid fa-medal'
 
-  // Support local icons by using cssClass prefix 'local:icon-file-name' → /images/icons/icon-file-name.svg
-  if (badge.iconPath || cssClass.startsWith('local:')) {
-    const localPath = badge.iconPath || `/images/icons/${cssClass.replace('local:', '')}.svg`
-    return (
-      <Tooltip content={title} placement="top" showArrow delay={100} closeDelay={100}>
-        <Image src={localPath} alt={badge.name} width={16} height={16} className="h-4 w-4" />
-      </Tooltip>
-    )
-  }
-
-  if (cssClass) {
-    return (
-      <Tooltip content={title} placement="top" showArrow delay={100} closeDelay={100}>
-        <span className="inline-flex h-4 w-4 items-center justify-center">
-          <FontAwesomeIconWrapper icon={cssClass} className="h-4 w-4" />
-        </span>
-      </Tooltip>
-    )
-  }
-  return null
+  return (
+    <Tooltip content={title} placement="top" showArrow delay={100} closeDelay={100}>
+      <span className="inline-flex h-4 w-4 items-center justify-center">
+        <FontAwesomeIconWrapper icon={cssClass} className="h-4 w-4" />
+      </span>
+    </Tooltip>
+  )
 }
 
 const Badges = ({ badges = [], max, compact = false, className = '' }: BadgesProps) => {

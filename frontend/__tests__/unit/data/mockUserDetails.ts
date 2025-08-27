@@ -13,6 +13,36 @@ export const mockUserDetailsData = {
     publicRepositoriesCount: 3,
     createdAt: 1723002473,
     contributionsCount: 100,
+    badges: [
+      {
+        id: '1',
+        name: 'Core Contributor',
+        description: 'Active core contributor to OWASP projects',
+        cssClass: 'fa-solid fa-star',
+        weight: 1,
+      },
+      {
+        id: '2',
+        name: 'Security Expert',
+        description: 'Recognized security expert in the community',
+        cssClass: 'fa-solid fa-shield-halved',
+        weight: 2,
+      },
+      {
+        id: '3',
+        name: 'Bug Hunter',
+        description: 'Found critical security vulnerabilities',
+        cssClass: 'fa-solid fa-bug',
+        weight: 3,
+      },
+      {
+        id: '4',
+        name: 'Project Lead',
+        description: 'Leads multiple OWASP projects',
+        cssClass: 'fa-solid fa-crown',
+        weight: 1,
+      },
+    ],
   },
   recentIssues: [
     {

@@ -54,9 +54,9 @@ describe('UserCard badges', () => {
   }
 
   it('shows medal icon with count when badges provided', () => {
-    const badges: { name: string; cssClass: string }[] = [
-      { name: 'A', cssClass: 'fa-solid fa-star' },
-      { name: 'B', cssClass: 'fa-solid fa-bolt' },
+    const badges: { id: string; name: string; cssClass: string }[] = [
+      { id: 'badge-a', name: 'A', cssClass: 'fa-solid fa-star' },
+      { id: 'badge-b', name: 'B', cssClass: 'fa-solid fa-bolt' },
     ]
     render(<UserCard {...baseProps} badges={badges} />)
 

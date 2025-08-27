@@ -2,14 +2,6 @@ import React from 'react'
 import { render, screen } from 'wrappers/testUtil'
 import Badges from 'components/Badges'
 
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: ({ src, alt }: { src: string; alt: string }) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={src} alt={alt} />
-  ),
-}))
-
 jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: ({ className }: { className?: string }) => (
     <span data-testid="fa-icon" className={className} />
@@ -24,11 +16,12 @@ describe('Badges', () => {
   it('renders nothing when badges are empty', () => {
     const { container } = render(<Badges badges={[]} />)
     // HeroUI injects an overlay container by default; check that no badge content exists
-    expect(container.querySelector('img, span[data-testid="fa-icon"]')).toBeNull()
+    expect(container.querySelector('span[data-testid="fa-icon"]')).toBeNull()
   })
 
   it('renders up to max badges in compact mode and shows overflow count', () => {
     const badges = Array.from({ length: 8 }).map((_, i) => ({
+      id: `badge-${i + 1}`,
       name: `Badge ${i + 1}`,
       cssClass: 'fa-solid fa-star',
     }))
@@ -40,11 +33,15 @@ describe('Badges', () => {
     expect(screen.getByText('+2')).toBeInTheDocument()
   })
 
-  it('supports local icons via cssClass local: prefix', () => {
-    const badges = [{ name: 'OWASP', cssClass: 'local:owasp' }]
+  it('renders badges with FontAwesome icons', () => {
+    const badges = [{ id: 'test-badge', name: 'Test Badge', cssClass: 'fa-solid fa-star' }]
     render(<Badges badges={badges} />)
+    expect(screen.getByTestId('fa-icon')).toBeInTheDocument()
+  })
 
-    const img = screen.getByRole('img') as HTMLImageElement
-    expect(img.src).toContain('/images/icons/owasp.svg')
+  it('renders default medal icon when no cssClass provided', () => {
+    const badges = [{ id: 'test-badge', name: 'Test Badge' }]
+    render(<Badges badges={badges} />)
+    expect(screen.getByTestId('fa-icon')).toBeInTheDocument()
   })
 })
