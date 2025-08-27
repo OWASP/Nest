@@ -19,6 +19,7 @@ class IssueAdmin(admin.ModelAdmin):
         "repository",
         "created_at",
         "title",
+        "level",
         "custom_field_github_url",
     )
     list_filter = (

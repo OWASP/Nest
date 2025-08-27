@@ -13,6 +13,7 @@ class ModuleAdmin(admin.ModelAdmin):
         "program",
         "project",
     )
+    autocomplete_fields = ("issues",)
 
     search_fields = (
         "name",
