@@ -1,5 +1,5 @@
-'use client';
-import { useQuery } from "@apollo/client/react";
+'use client'
+import { useQuery } from '@apollo/client/react'
 import { faPlus, faGraduationCap } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToast } from '@heroui/toast'

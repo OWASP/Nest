@@ -1,5 +1,5 @@
-'use client';
-import { useQuery } from "@apollo/client/react";
+'use client'
+import { useQuery } from '@apollo/client/react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'

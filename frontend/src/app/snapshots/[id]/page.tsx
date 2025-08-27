@@ -1,5 +1,5 @@
-'use client';
-import { useQuery } from "@apollo/client/react";
+'use client'
+import { useQuery } from '@apollo/client/react'
 import { faCalendar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter, useParams } from 'next/navigation'

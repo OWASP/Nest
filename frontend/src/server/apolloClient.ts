@@ -25,7 +25,7 @@ async function createApolloClient() {
     cache: new InMemoryCache().restore(globalThis.__APOLLO_STATE__ ?? {}),
     link: authLink.concat(httpLink),
     ssrMode: true,
-  });
+  })
 }
 
 // This is a no-op Apollo client for end-to-end tests.

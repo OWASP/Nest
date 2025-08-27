@@ -1,4 +1,4 @@
-import { useMutation } from "@apollo/client/react";
+import { useMutation } from '@apollo/client/react'
 import { signOut } from 'next-auth/react'
 import { useState } from 'react'
 import { LOGOUT_DJANGO_MUTATION } from 'server/queries/authQueries'

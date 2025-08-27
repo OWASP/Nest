@@ -1,5 +1,5 @@
-'use client';
-import { useMutation, useQuery } from "@apollo/client/react";
+'use client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import upperFirst from 'lodash/upperFirst'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'

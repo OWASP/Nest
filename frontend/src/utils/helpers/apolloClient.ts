@@ -29,7 +29,7 @@ const createApolloClient = () => {
   return new ApolloClient({
     cache: new InMemoryCache(),
     link: authLink.concat(httpLink),
-  });
+  })
 }
 const apolloClient = createApolloClient()
 

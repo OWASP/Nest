@@ -1,5 +1,5 @@
-'use client';
-import { useApolloClient } from "@apollo/client/react";
+'use client'
+import { useApolloClient } from '@apollo/client/react'
 import clsx from 'clsx'
 import debounce from 'lodash/debounce'
 import { useRouter } from 'next/navigation'

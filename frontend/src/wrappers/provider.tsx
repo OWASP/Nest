@@ -1,5 +1,5 @@
-'use client';
-import { ApolloProvider } from "@apollo/client/react";
+'use client'
+import { ApolloProvider } from '@apollo/client/react'
 import { HeroUIProvider, ToastProvider } from '@heroui/react'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { SessionProvider } from 'next-auth/react'
