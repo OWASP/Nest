@@ -106,6 +106,7 @@ pypoetry
 pyyaml
 repositorycontributor
 requirepass
+rqworker
 rsc
 saft
 sakanashi
@@ -121,6 +122,7 @@ tsc
 turbopack
 unhover
 usefixtures
+webgoat
 winsrdf
 wsgi
 xapp
