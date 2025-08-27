@@ -1,4 +1,5 @@
 import { Tooltip } from '@heroui/tooltip'
+import React from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import type { Badge } from 'types/badge'
 
