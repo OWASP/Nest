@@ -32,7 +32,7 @@
     "@heroui/theme": "^2.4.20",
     "@heroui/toast": "^2.0.14",
     "@heroui/tooltip": "^2.2.21",
-    "@next/eslint-plugin-next": "^15.5.1",
+    "@next/eslint-plugin-next": "^15.5.2",
     "@next/third-parties": "^15.5.1",
     "@sentry/nextjs": "^10.6.0",
     "@testing-library/user-event": "^14.6.1",
