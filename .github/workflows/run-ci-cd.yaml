@@ -299,6 +299,19 @@ jobs:
           push: true
           tags: owasp/nest:backend-staging
 
+      - name: Prepare frontend public environment
+        run: |
+          touch frontend/.env
+          echo "NEXT_PUBLIC_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
+          echo "NEXT_PUBLIC_CSRF_URL=${{ secrets.VITE_CSRF_URL }}" >> frontend/.env
+          echo "NEXT_PUBLIC_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
+          echo "NEXT_PUBLIC_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
+          echo "NEXT_PUBLIC_GTM_ID=${{ secrets.NEXT_PUBLIC_GTM_ID }}" >> frontend/.env
+          echo "NEXT_PUBLIC_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
+          echo "NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED=${{ secrets.NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED }}" >> frontend/.env
+          echo "NEXT_PUBLIC_RELEASE_VERSION=${{ env.RELEASE_VERSION }}" >> frontend/.env
+          echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
+
       - name: Get backend image size
         id: backend-size
         run: |
@@ -431,19 +444,6 @@ jobs:
 
           # Frontend
           touch .env.frontend
-
-          # Public.
-          echo "NEXT_PUBLIC_API_URL=${{ secrets.VITE_API_URL }}" >> .env.frontend
-          echo "NEXT_PUBLIC_CSRF_URL=${{ secrets.VITE_CSRF_URL }}" >> .env.frontend
-          echo "NEXT_PUBLIC_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> .env.frontend
-          echo "NEXT_PUBLIC_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> .env.frontend
-          echo "NEXT_PUBLIC_GTM_ID=${{ secrets.NEXT_PUBLIC_GTM_ID }}" >> .env.frontend
-          echo "NEXT_PUBLIC_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> .env.frontend
-          echo "NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED=${{ secrets.NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED }}" >> .env.frontend
-          echo "NEXT_PUBLIC_RELEASE_VERSION=${{ env.RELEASE_VERSION }}" >> .env.frontend
-          echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> .env.frontend
-
-          # Private.
           echo "NEXT_SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env.frontend
           echo "NEXT_SERVER_CSRF_URL=${{ secrets.NEXT_SERVER_CSRF_URL }}" >> .env.frontend
           echo "NEXT_SERVER_GITHUB_CLIENT_ID=${{ secrets.NEST_GITHUB_CLIENT_ID }}" >> .env.frontend
@@ -566,6 +566,19 @@ jobs:
           RAW_SIZE=$(docker image inspect "$IMAGE_NAME" --format='{{.Size}}')
           DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
           echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
+
+      - name: Prepare frontend public environment
+        run: |
+          touch frontend/.env
+          echo "NEXT_PUBLIC_API_URL=${{ secrets.VITE_API_URL }}" >> frontend/.env
+          echo "NEXT_PUBLIC_CSRF_URL=${{ secrets.VITE_CSRF_URL }}" >> frontend/.env
+          echo "NEXT_PUBLIC_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> frontend/.env
+          echo "NEXT_PUBLIC_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> frontend/.env
+          echo "NEXT_PUBLIC_GTM_ID=${{ secrets.NEXT_PUBLIC_GTM_ID }}" >> frontend/.env
+          echo "NEXT_PUBLIC_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> frontend/.env
+          echo "NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED=${{ secrets.NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED }}" >> frontend/.env
+          echo "NEXT_PUBLIC_RELEASE_VERSION=${{ env.RELEASE_VERSION }}" >> frontend/.env
+          echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> frontend/.env
 
       - name: Build frontend image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
@@ -697,19 +710,6 @@ jobs:
 
           # Frontend
           touch .env.frontend
-
-          # Public.
-          echo "NEXT_PUBLIC_API_URL=${{ secrets.VITE_API_URL }}" >> .env.frontend
-          echo "NEXT_PUBLIC_CSRF_URL=${{ secrets.VITE_CSRF_URL }}" >> .env.frontend
-          echo "NEXT_PUBLIC_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> .env.frontend
-          echo "NEXT_PUBLIC_GRAPHQL_URL=${{ secrets.VITE_GRAPHQL_URL }}" >> .env.frontend
-          echo "NEXT_PUBLIC_GTM_ID=${{ secrets.NEXT_PUBLIC_GTM_ID }}" >> .env.frontend
-          echo "NEXT_PUBLIC_IDX_URL=${{ secrets.VITE_IDX_URL }}" >> .env.frontend
-          echo "NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED=${{ secrets.NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED }}" >> .env.frontend
-          echo "NEXT_PUBLIC_RELEASE_VERSION=${{ env.RELEASE_VERSION }}" >> .env.frontend
-          echo "NEXT_PUBLIC_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}" >> .env.frontend
-
-          # Private.
           echo "NEXT_SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env.frontend
           echo "NEXT_SERVER_CSRF_URL=${{ secrets.NEXT_SERVER_CSRF_URL }}" >> .env.frontend
           echo "NEXT_SERVER_GITHUB_CLIENT_ID=${{ secrets.NEST_GITHUB_CLIENT_ID }}" >> .env.frontend
