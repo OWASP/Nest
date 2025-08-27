@@ -43,7 +43,7 @@
     "clsx": "^2.1.1",
     "core-js": "^3.45.1",
     "date-fns": "^4.1.0",
-    "dayjs": "^1.11.13",
+    "dayjs": "^1.11.14",
     "dompurify": "^3.2.6",
     "eslint-plugin-import": "^2.32.0",
     "framer-motion": "^12.23.12",
