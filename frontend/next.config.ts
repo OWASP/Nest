@@ -50,5 +50,6 @@ export default withSentryConfig(nextConfig, {
     disable: false,
     ignore: ['**/node_modules/**'],
   },
+  telemetry: false,
   widenClientFileUpload: true,
 })
