@@ -7,7 +7,7 @@ import { useState, useCallback } from 'react'
 import type { Section } from 'types/section'
 import { footerIcons } from 'utils/constants'
 import { footerSections } from 'utils/constants'
-import { ENVIRONMENT, RELEASE_VERSION } from 'utils/credentials'
+import { ENVIRONMENT, RELEASE_VERSION } from 'utils/env.client'
 
 // Add className to props
 interface FooterProps {

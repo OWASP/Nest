@@ -4,7 +4,8 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import React from 'react'
 import { Providers } from 'wrappers/provider'
-import { GTM_ID, isGithubAuthEnabled } from 'utils/credentials'
+import { GTM_ID } from 'utils/env.client'
+import { IS_GITHUB_AUTH_ENABLED } from 'utils/env.server'
 import AutoScrollToTop from 'components/AutoScrollToTop'
 import BreadCrumbs from 'components/BreadCrumbs'
 import Footer from 'components/Footer'
@@ -85,7 +86,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         </a>
         <Providers>
           <AutoScrollToTop />
-          <Header isGitHubAuthEnabled={isGithubAuthEnabled()} />
+          <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
           <BreadCrumbs />
           {/* Single document-wide main landmark for a11y; no nested mains */}
           <main id="main-content" className="flex min-w-0 flex-1 flex-col">

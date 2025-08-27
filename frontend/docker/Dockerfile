@@ -53,7 +53,7 @@ COPY --from=builder --chown=root:root --chmod=555 /app/public public
 COPY --from=builder --chown=root:root --chmod=555  /app/.next/standalone .
 
 # Create cache directory and assign ownership to nextjs user with write permission, so that cache can be stored.
-RUN mkdir -p /app/.next/cache && chown -R nextjs:nodejs /app/.next/cache && chmod -R 755 /app/.next/cache
+RUN mkdir -p /app/.next/cache && chown -R nextjs:nodejs /app/.next/cache && chmod -R 755 /app/.next/cache && rm .env
 COPY --from=builder --chown=root:root --chmod=555 /app/.next/static .next/static
 
 USER nextjs
