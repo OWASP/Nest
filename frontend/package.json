@@ -80,7 +80,7 @@
     "@types/react": "^19.1.11",
     "@types/react-dom": "^19.1.7",
     "@types/react-gtm-module": "^2.0.4",
-    "@typescript-eslint/eslint-plugin": "^8.40.0",
+    "@typescript-eslint/eslint-plugin": "^8.41.0",
     "@typescript-eslint/parser": "^8.40.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.34.0",
