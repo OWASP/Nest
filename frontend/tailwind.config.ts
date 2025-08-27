@@ -1,6 +1,9 @@
-import { heroui } from '@heroui/react';
-import type { Config } from 'tailwindcss';
-import animate from 'tailwindcss-animate';
+
+import type { Config } from "tailwindcss";
+
+import { heroui } from "@heroui/react";
+import animate from "tailwindcss-animate";
+
 
 const config: Config = {
   content: [
