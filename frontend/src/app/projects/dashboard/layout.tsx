@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import React from 'react'
-import { IS_GITHUB_AUTH_ENABLED } from 'utils/credentials'
+import { IS_GITHUB_AUTH_ENABLED } from 'utils/env.server'
 import DashboardWrapper from 'components/DashboardWrapper'
 import FontLoaderWrapper from 'components/FontLoaderWrapper'
 import ProjectsDashboardNavBar from 'components/ProjectsDashboardNavBar'

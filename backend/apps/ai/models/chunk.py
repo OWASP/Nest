@@ -1,11 +1,10 @@
 """AI app chunk model."""
 
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pgvector.django import VectorField
 
+from apps.ai.models.context import Context
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import truncate
 
@@ -16,25 +15,16 @@ class Chunk(TimestampedModel):
     class Meta:
         db_table = "ai_chunks"
         verbose_name = "Chunk"
-        unique_together = ("content_type", "object_id", "text")
+        unique_together = ("context", "text")
 
-    content_object = GenericForeignKey("content_type", "object_id")
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
+    context = models.ForeignKey(Context, on_delete=models.CASCADE, related_name="chunks")
     embedding = VectorField(verbose_name="Embedding", dimensions=1536)
-    object_id = models.PositiveIntegerField(default=0)
     text = models.TextField(verbose_name="Text")
 
     def __str__(self):
         """Human readable representation."""
-        content_name = (
-            getattr(self.content_object, "name", None)
-            or getattr(self.content_object, "key", None)
-            or str(self.content_object)
-        )
-        return (
-            f"Chunk {self.id} for {self.content_type.model} {content_name}: "
-            f"{truncate(self.text, 50)}"
-        )
+        context_str = str(self.context) if self.context else "No Context"
+        return f"Chunk {self.id} for {context_str}: {truncate(self.text, 50)}"
 
     @staticmethod
     def bulk_save(chunks, fields=None):
@@ -54,8 +44,8 @@ class Chunk(TimestampedModel):
     @staticmethod
     def update_data(
         text: str,
-        content_object,
         embedding,
+        context: Context,
         *,
         save: bool = True,
     ) -> "Chunk | None":
@@ -63,24 +53,22 @@ class Chunk(TimestampedModel):
 
         Args:
           text (str): The text content of the chunk.
-          content_object: The object this chunk belongs to (Message, Chapter, etc.).
           embedding (list): The embedding vector for the chunk.
+          context (Context): The context this chunk belongs to.
           save (bool): Whether to save the chunk to the database.
 
         Returns:
-          Chunk: The updated chunk instance or None if it already exists.
+          Chunk: The created chunk instance.
 
         """
-        content_type = ContentType.objects.get_for_model(content_object)
-
         if Chunk.objects.filter(
-            content_type=content_type, object_id=content_object.id, text=text
+            context__entity_type=context.entity_type,
+            context__entity_id=context.entity_id,
+            text=text,
         ).exists():
             return None
 
-        chunk = Chunk(
-            content_type=content_type, object_id=content_object.id, text=text, embedding=embedding
-        )
+        chunk = Chunk(text=text, embedding=embedding, context=context)
 
         if save:
             chunk.save()
