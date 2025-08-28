@@ -38,7 +38,8 @@ class TestUserNode:
             "updated_at",
             "url",
         }
-        assert expected_field_names.issubset(field_names)
+        missing = expected_field_names - field_names
+        assert not missing, f"Missing fields on UserNode: {sorted(missing)}"
 
     def test_created_at_field(self):
         """Test created_at field resolution."""
