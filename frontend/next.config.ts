@@ -1,6 +1,6 @@
 import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
-import { SENTRY_AUTH_TOKEN } from 'utils/credentials'
+import { SENTRY_AUTH_TOKEN } from 'utils/env.server'
 
 const isLocal = process.env.NEXT_PUBLIC_ENVIRONMENT === 'local'
 
@@ -50,5 +50,6 @@ export default withSentryConfig(nextConfig, {
     disable: false,
     ignore: ['**/node_modules/**'],
   },
+  telemetry: false,
   widenClientFileUpload: true,
 })
