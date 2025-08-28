@@ -21,6 +21,7 @@ class Remainder(models.Model):
         "slack.EntityChannel",
         verbose_name="Slack Channel",
         on_delete=models.CASCADE,
+        null=True,
     )
     message = models.TextField(verbose_name="Reminder Message")
     remind_at = models.DateTimeField(verbose_name="Reminder Time")
