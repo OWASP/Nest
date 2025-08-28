@@ -29,7 +29,6 @@ class Event(BulkSaveModel, TimestampedModel):
         db_table = "owasp_events"
         indexes = [
             models.Index(fields=["-start_date"], name="event_start_date_desc_idx"),
-            models.Index(fields=["type"], name="event_type_idx"),
         ]
         verbose_name_plural = "Events"
 
@@ -40,19 +39,12 @@ class Event(BulkSaveModel, TimestampedModel):
         GLOBAL = "global", "Global"
         OTHER = "other", "Other"
         PARTNER = "partner", "Partner"
-
-    class Type(models.TextChoices):
-        """Event type."""
-
-        CALENDAR = "calendar", "Calendar"
-        EXISTING = "existing", "Existing"
+        COMMUNITY = "community", "Community"
 
     class Status(models.TextChoices):
         """Event status."""
 
         CONFIRMED = "confirmed", "Confirmed"
-        TENTATIVE = "tentative", "Tentative"
-        CANCELLED = "cancelled", "Cancelled"
 
     category = models.CharField(
         verbose_name="Category",
@@ -60,16 +52,9 @@ class Event(BulkSaveModel, TimestampedModel):
         choices=Category.choices,
         default=Category.OTHER,
     )
+    # Google Calendar event entity ID
     calendar_id = models.CharField(
         verbose_name="Calendar ID", max_length=1024, blank=True, default=""
-    )
-    channel_id = models.CharField(verbose_name="Channel ID", max_length=15, default="")
-    member = models.ForeignKey(
-        "slack.Member",
-        on_delete=models.CASCADE,
-        related_name="calendar_events",
-        verbose_name="Slack Member",
-        null=True,
     )
     name = models.CharField(verbose_name="Name", max_length=100)
     start_date = models.DateField(verbose_name="Start Date")
@@ -85,12 +70,6 @@ class Event(BulkSaveModel, TimestampedModel):
     summary = models.TextField(verbose_name="Summary", blank=True, default="")
     suggested_location = models.CharField(
         verbose_name="Suggested Location", max_length=255, blank=True, default=""
-    )
-    type = models.CharField(
-        verbose_name="Type",
-        max_length=11,
-        choices=Type.choices,
-        default=Type.EXISTING,
     )
     url = models.URLField(verbose_name="URL", default="", blank=True)
     latitude = models.FloatField(verbose_name="Latitude", null=True, blank=True)
@@ -111,10 +90,10 @@ class Event(BulkSaveModel, TimestampedModel):
         return (
             Event.objects.filter(
                 start_date__gt=timezone.now(),
-                type=Event.Type.EXISTING,
             )
             .exclude(
                 Q(name__exact="") | Q(url__exact=""),
+                category=Event.Category.COMMUNITY,
             )
             .order_by(
                 "start_date",
