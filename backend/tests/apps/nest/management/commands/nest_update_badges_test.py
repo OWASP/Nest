@@ -77,8 +77,8 @@ class TestSyncUserBadgesCommand:
         self,
         mock_user_filter,
         mock_badge_get_or_create,
-        mock_userbadge_filter,
-        mock_userbadge_get_or_create,
+        mock_user_badge_filter,
+        mock_user_badge_get_or_create,
     ):
         # Set up badge mock
         mock_badge = MagicMock()
@@ -98,14 +98,14 @@ class TestSyncUserBadgesCommand:
             mock_employees, mock_former_employees
         )
 
-        mock_userbadge_get_or_create.return_value = (MagicMock(), True)
+        mock_user_badge_get_or_create.return_value = (MagicMock(), True)
 
         out = StringIO()
         call_command("nest_update_badges", stdout=out)
 
         # Assert correct badge assignment and removal calls
-        mock_userbadge_get_or_create.assert_any_call(user=mock_employee, badge=mock_badge)
-        mock_userbadge_filter.assert_any_call(
+        mock_user_badge_get_or_create.assert_any_call(user=mock_employee, badge=mock_badge)
+        mock_user_badge_filter.assert_any_call(
             user_id__in=mock_former_employees.values_list.return_value, badge=mock_badge
         )
 

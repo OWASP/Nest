@@ -12,20 +12,17 @@ class UserBadge(BulkSaveModel, TimestampedModel):
 
     class Meta:
         db_table = "nest_user_badges"
+        unique_together = (
+            "badge",
+            "user",
+        )
         verbose_name_plural = "User badges"
-        constraints = [
-            models.UniqueConstraint(
-                fields=["user", "badge"],
-                name="uq_userbadge_user_badge",
-            ),
-        ]
 
     is_active = models.BooleanField(
         default=True,
         verbose_name="Is active",
         help_text="Indicates if the badge assignment is active.",
     )
-
     note = models.CharField(
         verbose_name="Note",
         max_length=255,

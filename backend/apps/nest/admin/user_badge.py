@@ -8,27 +8,9 @@ from apps.nest.models.user_badge import UserBadge
 class UserBadgeAdmin(admin.ModelAdmin):
     """Admin for UserBadge model."""
 
-    autocomplete_fields = ("user", "badge")
-    fieldsets = (
-        (
-            "User and Badge",
-            {
-                "fields": (
-                    "user",
-                    "badge",
-                )
-            },
-        ),
-        ("Note", {"fields": ("note",)}),
-        (
-            "Timestamps",
-            {
-                "fields": (
-                    "nest_created_at",
-                    "nest_updated_at",
-                )
-            },
-        ),
+    autocomplete_fields = (
+        "badge",
+        "user",
     )
     list_display = (
         "user",
@@ -37,11 +19,17 @@ class UserBadgeAdmin(admin.ModelAdmin):
         "nest_created_at",
         "nest_updated_at",
     )
+    list_filter = ("is_active", "badge__name")
     readonly_fields = (
         "nest_created_at",
         "nest_updated_at",
     )
-    search_fields = ("user__login", "badge__name", "note")
+    search_fields = (
+        "badge__name",
+        "note",
+        "user__login",
+        "user__name",
+    )
 
 
 admin.site.register(UserBadge, UserBadgeAdmin)
