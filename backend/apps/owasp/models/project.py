@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 from functools import lru_cache
 
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.utils import timezone
 
@@ -17,7 +18,11 @@ from apps.github.models.milestone import Milestone
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
 from apps.owasp.models.common import RepositoryBasedEntityModel
-from apps.owasp.models.enums.project import ProjectLevel, ProjectType
+from apps.owasp.models.enums.project import (
+    ProjectLevel,
+    ProjectType,
+    validate_audience,
+)
 from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins.project import ProjectIndexMixin
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
@@ -42,6 +47,12 @@ class Project(
         ]
         verbose_name_plural = "Projects"
 
+    audience = models.JSONField(
+        verbose_name="Audience",
+        default=list,
+        blank=True,
+        validators=[validate_audience],
+    )
     level = models.CharField(
         verbose_name="Level",
         max_length=20,
@@ -79,6 +90,9 @@ class Project(
 
     custom_tags = models.JSONField(verbose_name="Custom tags", default=list, blank=True)
     track_issues = models.BooleanField(verbose_name="Track issues", default=True)
+
+    # GKs.
+    members = GenericRelation("owasp.EntityMember")
 
     # FKs.
     owasp_repository = models.ForeignKey(

@@ -9,6 +9,7 @@ from apps.github.models.user import User
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.committee import Committee
 from apps.owasp.models.project import Project
+from apps.owasp.models.snapshot import Snapshot
 from apps.sitemap.views.base import BaseSitemap
 
 
@@ -36,6 +37,7 @@ class StaticSitemap(BaseSitemap):
             "/members": User,
             "/organizations": Organization,
             "/projects": Project,
+            "/snapshots": Snapshot,
         }
 
         return (

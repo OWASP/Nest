@@ -9,7 +9,9 @@ from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
-from apps.owasp.api.internal.nodes.project_health_metrics import ProjectHealthMetricsNode
+from apps.owasp.api.internal.nodes.project_health_metrics import (
+    ProjectHealthMetricsNode,
+)
 from apps.owasp.models.project import Project
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
@@ -24,6 +26,7 @@ RECENT_PULL_REQUESTS_LIMIT = 5
         "contributors_count",
         "created_at",
         "forks_count",
+        "id",
         "is_active",
         "level",
         "name",

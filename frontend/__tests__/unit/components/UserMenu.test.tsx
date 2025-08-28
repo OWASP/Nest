@@ -1,14 +1,17 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { useDjangoSession } from 'hooks/useDjangoSession'
 import { useLogout } from 'hooks/useLogout'
-import type { Session } from 'next-auth'
-import { useSession, signIn } from 'next-auth/react'
-import { userAuthStatus } from 'utils/constants'
+import { signIn } from 'next-auth/react'
+import { ExtendedSession } from 'types/auth'
 import UserMenu from 'components/UserMenu'
 
 // Mock next-auth
 jest.mock('next-auth/react', () => ({
-  useSession: jest.fn(),
   signIn: jest.fn(),
+}))
+
+jest.mock('hooks/useDjangoSession', () => ({
+  useDjangoSession: jest.fn(),
 }))
 
 // Mock useLogout hook
@@ -46,7 +49,7 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
 }))
 
 describe('UserMenu Component', () => {
-  const mockUseSession = useSession as jest.MockedFunction<typeof useSession>
+  const mockUseSession = useDjangoSession as jest.MockedFunction<typeof useDjangoSession>
   const mockSignIn = signIn as jest.MockedFunction<typeof signIn>
   const mockUseLogout = useLogout as jest.MockedFunction<typeof useLogout>
 
@@ -56,11 +59,12 @@ describe('UserMenu Component', () => {
     isLoggingOut: false,
   }
 
-  const mockSession: Session = {
+  const mockSession: ExtendedSession = {
     user: {
       name: 'John Doe',
       email: 'john@example.com',
       image: 'https://example.com/avatar.jpg',
+      isOwaspStaff: true,
     },
     expires: '2024-12-31',
   }
@@ -74,9 +78,9 @@ describe('UserMenu Component', () => {
   describe('Renders successfully with minimal required props', () => {
     it('renders nothing when GitHub auth is disabled', () => {
       mockUseSession.mockReturnValue({
-        data: null,
-        status: userAuthStatus.UNAUTHENTICATED as 'unauthenticated',
-        update: jest.fn(),
+        session: null,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       const { container } = render(<UserMenu isGitHubAuthEnabled={false} />)
@@ -85,9 +89,9 @@ describe('UserMenu Component', () => {
 
     it('renders with GitHub auth enabled', () => {
       mockUseSession.mockReturnValue({
-        data: null,
-        status: userAuthStatus.UNAUTHENTICATED as 'unauthenticated',
-        update: jest.fn(),
+        session: { user: null, expires: '2024-12-31' },
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -98,9 +102,9 @@ describe('UserMenu Component', () => {
   describe('Conditional rendering logic', () => {
     it('renders loading state when session status is loading', () => {
       mockUseSession.mockReturnValue({
-        data: null,
-        status: userAuthStatus.LOADING as 'loading',
-        update: jest.fn(),
+        isSyncing: true,
+        session: null,
+        status: 'loading',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -112,9 +116,9 @@ describe('UserMenu Component', () => {
 
     it('renders sign in button when user is not authenticated', () => {
       mockUseSession.mockReturnValue({
-        data: null,
-        status: userAuthStatus.UNAUTHENTICATED as 'unauthenticated',
-        update: jest.fn(),
+        session: null,
+        isSyncing: false,
+        status: 'unauthenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -126,9 +130,9 @@ describe('UserMenu Component', () => {
 
     it('renders user avatar and dropdown when user is authenticated', () => {
       mockUseSession.mockReturnValue({
-        data: mockSession,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -143,9 +147,9 @@ describe('UserMenu Component', () => {
 
     it('shows dropdown menu when user avatar is clicked', async () => {
       mockUseSession.mockReturnValue({
-        data: mockSession,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -164,9 +168,9 @@ describe('UserMenu Component', () => {
   describe('Prop-based behavior', () => {
     it('returns null when isGitHubAuthEnabled is false regardless of session state', () => {
       mockUseSession.mockReturnValue({
-        data: mockSession,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       const { container } = render(<UserMenu isGitHubAuthEnabled={false} />)
@@ -176,9 +180,9 @@ describe('UserMenu Component', () => {
     it('shows different UI based on authentication status', () => {
       // Test unauthenticated state
       mockUseSession.mockReturnValue({
-        data: null,
-        status: userAuthStatus.UNAUTHENTICATED as 'unauthenticated',
-        update: jest.fn(),
+        session: null,
+        isSyncing: false,
+        status: 'unauthenticated',
       })
 
       const { rerender } = render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -186,9 +190,9 @@ describe('UserMenu Component', () => {
 
       // Test authenticated state
       mockUseSession.mockReturnValue({
-        data: mockSession,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       rerender(<UserMenu isGitHubAuthEnabled={true} />)
@@ -200,9 +204,9 @@ describe('UserMenu Component', () => {
   describe('Event handling', () => {
     it('calls signIn when sign in button is clicked', async () => {
       mockUseSession.mockReturnValue({
-        data: null,
-        status: userAuthStatus.UNAUTHENTICATED as 'unauthenticated',
-        update: jest.fn(),
+        session: null,
+        isSyncing: false,
+        status: 'unauthenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -218,9 +222,9 @@ describe('UserMenu Component', () => {
 
     it('toggles dropdown when avatar button is clicked', async () => {
       mockUseSession.mockReturnValue({
-        data: mockSession,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -248,9 +252,9 @@ describe('UserMenu Component', () => {
 
     it('calls logout and closes dropdown when sign out is clicked', async () => {
       mockUseSession.mockReturnValue({
-        data: mockSession,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -275,9 +279,9 @@ describe('UserMenu Component', () => {
 
     it('closes dropdown when clicking outside', async () => {
       mockUseSession.mockReturnValue({
-        data: mockSession,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       render(
@@ -308,9 +312,9 @@ describe('UserMenu Component', () => {
   describe('State changes / internal logic', () => {
     it('manages dropdown open/close state correctly', async () => {
       mockUseSession.mockReturnValue({
-        data: mockSession,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -339,9 +343,9 @@ describe('UserMenu Component', () => {
       })
 
       mockUseSession.mockReturnValue({
-        data: mockSession,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       const { rerender } = render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -387,9 +391,9 @@ describe('UserMenu Component', () => {
       }
 
       mockUseSession.mockReturnValue({
-        data: sessionWithoutImage,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: sessionWithoutImage,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -408,9 +412,9 @@ describe('UserMenu Component', () => {
       }
 
       mockUseSession.mockReturnValue({
-        data: sessionWithUndefinedImage,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: sessionWithUndefinedImage,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -423,9 +427,9 @@ describe('UserMenu Component', () => {
   describe('Text and content rendering', () => {
     it('renders correct sign in button text and icon', () => {
       mockUseSession.mockReturnValue({
-        data: null,
-        status: userAuthStatus.UNAUTHENTICATED as 'unauthenticated',
-        update: jest.fn(),
+        session: null,
+        isSyncing: false,
+        status: 'unauthenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -437,9 +441,9 @@ describe('UserMenu Component', () => {
 
     it('renders correct sign out button text', async () => {
       mockUseSession.mockReturnValue({
-        data: mockSession,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -461,9 +465,9 @@ describe('UserMenu Component', () => {
       })
 
       mockUseSession.mockReturnValue({
-        data: mockSession,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       const { rerender } = render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -494,9 +498,9 @@ describe('UserMenu Component', () => {
   describe('Handles edge cases and invalid inputs', () => {
     it('handles null session gracefully', () => {
       mockUseSession.mockReturnValue({
-        data: null,
-        status: userAuthStatus.UNAUTHENTICATED as 'unauthenticated',
-        update: jest.fn(),
+        session: null,
+        isSyncing: false,
+        status: 'unauthenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -505,9 +509,9 @@ describe('UserMenu Component', () => {
 
     it('handles undefined session gracefully', () => {
       mockUseSession.mockReturnValue({
-        data: undefined,
-        status: userAuthStatus.UNAUTHENTICATED as 'unauthenticated',
-        update: jest.fn(),
+        session: undefined,
+        isSyncing: false,
+        status: 'unauthenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -516,9 +520,9 @@ describe('UserMenu Component', () => {
 
     it('handles session with null user gracefully', () => {
       mockUseSession.mockReturnValue({
-        data: { user: null, expires: '2024-12-31' },
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: { user: null, expires: '2024-12-31' },
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -529,9 +533,9 @@ describe('UserMenu Component', () => {
 
     it('handles rapid clicking without breaking', async () => {
       mockUseSession.mockReturnValue({
-        data: mockSession,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -554,9 +558,9 @@ describe('UserMenu Component', () => {
   describe('Accessibility roles and labels', () => {
     it('has correct ARIA attributes for dropdown button', () => {
       mockUseSession.mockReturnValue({
-        data: mockSession,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -569,9 +573,9 @@ describe('UserMenu Component', () => {
 
     it('updates aria-expanded when dropdown opens/closes', async () => {
       mockUseSession.mockReturnValue({
-        data: mockSession,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -593,9 +597,9 @@ describe('UserMenu Component', () => {
 
     it('has correct alt text for avatar image', () => {
       mockUseSession.mockReturnValue({
-        data: mockSession,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -606,9 +610,9 @@ describe('UserMenu Component', () => {
 
     it('dropdown has correct id that matches aria-controls', async () => {
       mockUseSession.mockReturnValue({
-        data: mockSession,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -627,9 +631,9 @@ describe('UserMenu Component', () => {
   describe('DOM structure / classNames / styles', () => {
     it('applies correct CSS classes to sign in button', () => {
       mockUseSession.mockReturnValue({
-        data: null,
-        status: userAuthStatus.UNAUTHENTICATED as 'unauthenticated',
-        update: jest.fn(),
+        session: null,
+        isSyncing: false,
+        status: 'unauthenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -640,18 +644,29 @@ describe('UserMenu Component', () => {
         'relative',
         'flex',
         'h-10',
-        'cursor-pointer',
         'items-center',
         'justify-center',
-        'gap-2'
+        'gap-2',
+        'rounded-md',
+        'bg-[#87a1bc]',
+        'p-4',
+        'text-sm',
+        'font-medium',
+        'text-black',
+        'hover:ring-1',
+        'hover:ring-[#b0c7de]',
+        'dark:bg-slate-900',
+        'dark:text-white',
+        'dark:hover:bg-slate-900/90',
+        'dark:hover:ring-[#46576b]'
       )
     })
 
     it('applies correct CSS classes to loading state', () => {
       mockUseSession.mockReturnValue({
-        data: null,
-        status: userAuthStatus.LOADING as 'loading',
-        update: jest.fn(),
+        session: null,
+        isSyncing: true,
+        status: 'unauthenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -665,9 +680,9 @@ describe('UserMenu Component', () => {
 
     it('applies correct CSS classes to avatar container', () => {
       mockUseSession.mockReturnValue({
-        data: mockSession,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -681,9 +696,9 @@ describe('UserMenu Component', () => {
 
     it('applies correct CSS classes to dropdown menu', async () => {
       mockUseSession.mockReturnValue({
-        data: mockSession,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -702,16 +717,19 @@ describe('UserMenu Component', () => {
           'mt-2',
           'w-48',
           'overflow-hidden',
-          'rounded-md'
+          'rounded-md',
+          'bg-white',
+          'shadow-lg',
+          'dark:bg-slate-800'
         )
       })
     })
 
     it('applies correct CSS classes to sign out button', async () => {
       mockUseSession.mockReturnValue({
-        data: mockSession,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -739,9 +757,9 @@ describe('UserMenu Component', () => {
       const removeEventListenerSpy = jest.spyOn(document, 'removeEventListener')
 
       mockUseSession.mockReturnValue({
-        data: mockSession,
-        status: userAuthStatus.AUTHENTICATED as 'authenticated',
-        update: jest.fn(),
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
       })
 
       const { unmount } = render(<UserMenu isGitHubAuthEnabled={true} />)

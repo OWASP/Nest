@@ -1,6 +1,6 @@
 import { AppError } from 'app/global-error'
 import type { AlgoliaResponse } from 'types/algolia'
-import { IDX_URL } from 'utils/credentials'
+import { IDX_URL } from 'utils/env.client'
 import { getCsrfToken } from 'utils/utility'
 
 export const fetchAlgoliaData = async <T>(
