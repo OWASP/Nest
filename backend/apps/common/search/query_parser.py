@@ -11,7 +11,6 @@ from pyparsing import (
     Word,
     ZeroOrMore,
     alphanums,
-    alphas,
     oneOf,
 )
 
@@ -104,7 +103,7 @@ class QueryParser:
     - Quoted strings for multi-word values
     - Boolean field support
     - Date field parsing with comparisons
-    - Handle case sensitivity/insensitivity values
+    - Case sensitivity: normalize field names only, preserve values
     - Only supports implicit AND logic between conditions
     """
 
@@ -113,8 +112,7 @@ class QueryParser:
     _QUOTED_VALUE = QuotedString(quoteChar='"', escChar="\\", unquoteResults=False)
     _UNQUOTED_VALUE = Word(alphanums + '+-.<>=/_"')
     _FIELD_VALUE = _QUOTED_VALUE | _UNQUOTED_VALUE
-    _COMPARISON_OPERATORS = {">", "<", ">=", "<=", "="}
-    _COMPARISON_OPERATOR = Optional(oneOf(_COMPARISON_OPERATORS), default="=")
+    _COMPARISON_OPERATOR = Optional(oneOf(">= <= > < ="), default="=")
     _COMPARISON_PATTERN = Group(_COMPARISON_OPERATOR + _UNQUOTED_VALUE)
     _DATE_PATTERN = Regex(r"\d{4}-\d{2}-\d{2}") | Regex(r"\d{8}")  # YYYY-MM-DD or YYYYMMDD format
     _BOOLEAN_TRUE_VALUES = {"true", "1", "yes", "on"}
