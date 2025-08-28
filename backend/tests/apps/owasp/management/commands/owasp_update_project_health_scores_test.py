@@ -170,7 +170,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         # Final score: 100.0 - 20.0 = 80.0
 
         # Verify that penalty was applied
-        assert mock_metric.score == 80.0  # Should be 80 after 20% penalty
+        assert abs(mock_metric.score - 80.0) < FLOAT_PRECISION  # Should be 80 after 20% penalty
 
         # Verify penalty was logged
         output = self.stdout.getvalue()
@@ -249,7 +249,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         # Verify no penalty was applied for compliant project
         # Expected: total possible 100 points without penalty
         # (48 + 10 + 42 = 100 points total)
-        assert mock_metric.score == 100.0  # Should be maximum score
+        assert abs(mock_metric.score - 100.0) < FLOAT_PRECISION  # Should be maximum score
 
         # Verify no penalty was logged
         output = self.stdout.getvalue()
@@ -318,7 +318,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
 
         # Score should be unchanged (no penalty applied)
         # Expected: total possible 100 points without penalty
-        assert mock_metric.score == 100.0  # Should be maximum score
+        assert abs(mock_metric.score - 100.0) < FLOAT_PRECISION  # Should be maximum score
 
         # Verify penalty was applied but with 0% (should be logged)
         output = self.stdout.getvalue()

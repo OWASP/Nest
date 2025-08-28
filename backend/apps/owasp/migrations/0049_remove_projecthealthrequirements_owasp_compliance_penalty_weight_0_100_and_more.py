@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("owasp", "0048_add_compliance_penalty_weight"),
     ]
@@ -14,6 +13,14 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="projecthealthrequirements",
             name="compliance_penalty_weight",
-            field=models.FloatField(default=10.0, help_text="Percentage penalty applied to non-compliant projects (0-100)", validators=[django.core.validators.MinValueValidator(0.0), django.core.validators.MaxValueValidator(100.0)], verbose_name="Compliance penalty weight (%)"),
+            field=models.FloatField(
+                default=10.0,
+                help_text="Percentage penalty applied to non-compliant projects (0-100)",
+                validators=[
+                    django.core.validators.MinValueValidator(0.0),
+                    django.core.validators.MaxValueValidator(100.0),
+                ],
+                verbose_name="Compliance penalty weight (%)",
+            ),
         ),
     ]
