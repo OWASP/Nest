@@ -53,7 +53,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
   }, [mobileMenuOpen])
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 w-full max-w-[100vw] bg-owasp-blue shadow-md dark:bg-slate-800">
+    <header className="bg-owasp-blue fixed inset-x-0 top-0 z-50 w-full max-w-screen shadow-md dark:bg-slate-800">
       <div className="flex h-16 w-full items-center px-4 max-md:justify-between" id="navbar-sticky">
         {/* Logo */}
         <Link href="/" onClick={() => setMobileMenuOpen(false)}>
@@ -108,7 +108,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               })}
           </div>
         </div>
-        <div className="flex items-center justify-normal space-x-4">
+        <div className="flex items-center justify-normal gap-4">
           <NavButton
             href="https://github.com/OWASP/Nest"
             defaultIcon={faRegularStar}
@@ -133,7 +133,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           <div className="md:hidden">
             <Button
               onPress={toggleMobileMenu}
-              className="bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus:outline-none"
+              className="bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus:outline-hidden"
             >
               <span className="sr-only">Open main menu</span>
               {mobileMenuOpen ? (
@@ -147,11 +147,11 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
       </div>
       <div
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-64 transform bg-owasp-blue shadow-md transition-transform dark:bg-slate-800',
+          'bg-owasp-blue fixed inset-y-0 left-0 z-50 w-64 transform shadow-md transition-transform dark:bg-slate-800',
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <div className="flex h-full flex-col justify-between space-y-1 px-2 pb-3 pt-2">
+        <div className="flex h-full flex-col justify-between space-y-1 px-2 pt-2 pb-3">
           {/* Logo */}
           <div className="flex flex-col justify-center gap-1">
             <Link href="/" onClick={() => setMobileMenuOpen(false)}>

@@ -62,7 +62,7 @@ const Pagination: React.FC<PaginationProps> = ({
       <div className="flex flex-wrap items-center justify-center gap-2">
         <Button
           type="button"
-          className="flex h-10 min-w-[2.5rem] items-center justify-center rounded-md border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+          className="flex h-10 min-w-10 items-center justify-center rounded-md border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
           onPress={() => onPageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
         >
@@ -82,7 +82,7 @@ const Pagination: React.FC<PaginationProps> = ({
               <Button
                 type="button"
                 aria-current={currentPage === number ? 'page' : undefined}
-                className={`flex h-10 min-w-[2.5rem] items-center justify-center rounded-md px-3 text-sm font-medium ${
+                className={`flex h-10 min-w-10 items-center justify-center rounded-md px-3 text-sm font-medium ${
                   currentPage === number
                     ? 'bg-[#83a6cc] text-white dark:bg-white dark:text-black'
                     : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
@@ -96,7 +96,7 @@ const Pagination: React.FC<PaginationProps> = ({
         ))}
         <Button
           type="button"
-          className="flex h-10 min-w-[2.5rem] items-center justify-center rounded-md border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+          className="flex h-10 min-w-10 items-center justify-center rounded-md border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
           onPress={() => onPageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage === totalPages}
         >

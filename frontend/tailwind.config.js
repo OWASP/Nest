@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 import { heroui } from '@heroui/react'
+
 module.exports = {
   content: [
     './src/**/*.{js,ts,jsx,tsx,mdx}',
@@ -56,17 +57,18 @@ module.exports = {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
-    },
-    keyframes: {
-      scroll: {
-        '0%': { transform: 'translateX(0)' },
-        '100%': { transform: 'translateX(-500%)' },
+      keyframes: {
+        scroll: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-500%)' },
+        },
       },
-    },
-    animation: {
-      scroll: 'scroll 0.5s linear infinite',
+      animation: {
+        scroll: 'scroll 0.5s linear infinite',
+      },
     },
   },
   darkMode: 'class',
-  plugins: [heroui(), import('tailwindcss-animate')],
+  /* eslint-disable @typescript-eslint/no-require-imports */
+  plugins: [heroui(), require('tailwindcss-animate')],
 }

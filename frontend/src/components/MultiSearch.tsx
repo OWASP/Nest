@@ -228,7 +228,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           <>
             <FontAwesomeIcon
               icon={faSearch}
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+              className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
             />
             <input
               type="text"
@@ -237,11 +237,11 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
               onChange={handleSearchChange}
               onFocus={handleFocusSearch}
               placeholder={placeholder}
-              className="h-12 w-full rounded-lg border border-gray-300 pl-10 pr-10 text-lg text-black focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300"
+              className="h-12 w-full rounded-lg border border-gray-300 pr-10 pl-10 text-lg text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300"
             />
             {searchQuery && (
               <button
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:text-gray-600"
+                className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:text-gray-600"
                 onClick={handleClearSearch}
               >
                 <FontAwesomeIcon icon={faTimes} />
@@ -249,7 +249,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
             )}
           </>
         ) : (
-          <div className="animate-pulse h-12 w-full rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+          <div className="h-12 w-full animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
         )}
         {showSuggestions && suggestions.length > 0 && (
           <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-md border bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
@@ -276,7 +276,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                       >
                         <FontAwesomeIcon
                           icon={getIconForIndex(suggestion.indexName)}
-                          className="mr-2 flex-shrink-0 text-gray-400"
+                          className="mr-2 shrink-0 text-gray-400"
                         />
                         <span className="block max-w-full truncate">{hit.name || hit.login}</span>
                       </button>
