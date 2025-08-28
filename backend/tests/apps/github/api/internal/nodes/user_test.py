@@ -32,6 +32,7 @@ class TestUserNode:
             "location",
             "login",
             "name",
+            "badges",
             "public_repositories_count",
             "releases_count",
             "updated_at",
