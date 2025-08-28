@@ -109,7 +109,7 @@ class QueryParser:
     """
 
     # Grammar definitions (class-level constants)
-    _FIELD_NAME = Word(alphas, alphanums + "_")
+    _FIELD_NAME = Regex(r"[a-z0-9_]+")
     _QUOTED_VALUE = QuotedString(quoteChar='"', escChar="\\", unquoteResults=False)
     _UNQUOTED_VALUE = Word(alphanums + '+-.<>=/_"')
     _FIELD_VALUE = _QUOTED_VALUE | _UNQUOTED_VALUE
@@ -278,7 +278,8 @@ class QueryParser:
             QueryParser._FIELD_NAME.parseString(field_name, parseAll=True)
         except ParseException:
             return False
-        return field_name.islower()
+        else:
+            return True
 
     @staticmethod
     def _is_empty_string(token: str) -> bool:
