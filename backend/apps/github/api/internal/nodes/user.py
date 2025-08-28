@@ -4,6 +4,7 @@ import strawberry
 import strawberry_django
 
 from apps.github.models.user import User
+from apps.nest.api.internal.nodes.badge import BadgeNode
 
 
 @strawberry_django.type(
@@ -51,3 +52,17 @@ class UserNode:
     def url(self) -> str:
         """Resolve URL."""
         return self.url
+
+    @strawberry.field
+    def badges(self) -> list[BadgeNode]:
+        """Return active badges for the user, ordered by badge weight and name."""
+        # related_name on UserBadge is "badges"; prefetch badge and filter active
+        user_badges = (
+            self.badges.select_related("badge")
+            .filter(is_active=True)
+            .order_by(
+                "badge__weight",
+                "badge__name",
+            )
+        )
+        return [ub.badge for ub in user_badges]
