@@ -13,4 +13,4 @@ class BadgeQueries:
     @strawberry.field
     def badges(self) -> list[BadgeNode]:
         """Return all badges ordered by weight and name."""
-        return list(Badge.objects.all().order_by("weight", "name"))
+        return Badge.objects.all().order_by("weight", "name")

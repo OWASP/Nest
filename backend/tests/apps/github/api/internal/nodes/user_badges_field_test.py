@@ -17,12 +17,11 @@ class TestUserNodeBadgesField:
 
         # Mock chained calls: filter(...).order_by(...) -> [ub1]
         ordered_qs = MagicMock()
-        ordered_qs.__iter__.return_value = iter([])
         ub1 = MagicMock()
         ub1.badge = MagicMock()
         ordered_qs.__iter__.return_value = iter([ub1])
         user_badge_qs.filter.return_value = ordered_qs
-        ordered_qs.order_by.return_value = [ub1]
+        ordered_qs.order_by.return_value = ordered_qs
 
         # Use the resolver through the class to keep Strawberry decorators intact
         result = UserNode.badges(user)  # pass instance as self

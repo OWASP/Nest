@@ -56,7 +56,7 @@ class UserNode:
     @strawberry.field
     def badges(self) -> list[BadgeNode]:
         """Return active badges for the user, ordered by badge weight and name."""
-        # related_name on UserBadge is "badges"; prefetch badge and filter active
+        # related_name on UserBadge is "badges"; join badge via select_related and filter active
         user_badges = (
             self.badges.select_related("badge")
             .filter(is_active=True)
