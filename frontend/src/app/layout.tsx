@@ -27,6 +27,8 @@ import ScrollToTop from 'components/ScrollToTop';
 
 import 'app/globals.css';
 
+export const dynamic = 'force-dynamic'
+
 const geistSans = Geist({
   subsets: ['latin'],
   variable: '--font-geist-sans',
