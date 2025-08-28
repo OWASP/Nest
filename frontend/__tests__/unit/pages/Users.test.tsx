@@ -88,8 +88,14 @@ describe('UsersPage Component', () => {
       expect(screen.getByText('Security Co')).toBeInTheDocument()
     })
 
-    const viewButtons = screen.getAllByText('View Profile')
-    expect(viewButtons).toHaveLength(2)
+    const userCards = screen.getAllByText('John Doe')
+    expect(userCards).toHaveLength(1)
+    const buttons = screen.getAllByRole('button')
+
+    const viewProfileButtons = buttons.filter((button) =>
+      button.textContent?.includes('View Profile')
+    )
+    expect(viewProfileButtons).toHaveLength(4)
   })
 
   test('displays "No Users found" when there are no users', async () => {
