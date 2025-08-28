@@ -103,7 +103,7 @@ class QueryParser:
     - Quoted strings for multi-word values
     - Boolean field support
     - Date field parsing with comparisons
-    - Case sensitivity: normalize field names only, preserve values
+    - Case sensitivity: normalize field names only, preserve original value casing
     - Only supports implicit AND logic between conditions
     """
 
@@ -130,10 +130,11 @@ class QueryParser:
 
         Args:
             field_schema: Dictionary mapping field names to their types
-                         (e.g., {"stars": "number", "language": "string"}).
-                         Field names must be lowercase.
+                        (e.g., {"stars": "number", "language": "string"}).
+                        Field names must be lowercase.
             default_field: Default field name for free text search
-            case_sensitive: If True, field names are case-sensitive
+            case_sensitive: Controls value-case behavior for downstream search,
+                        field names are always normalized to lowercase.
             strict: If True, raises exception for unknown fields; if False, issues warnings
 
         Raises:
