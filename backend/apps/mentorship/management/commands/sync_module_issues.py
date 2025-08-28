@@ -32,6 +32,16 @@ class Command(BaseCommand):
             return None
         return None
 
+    def _get_status(self, issue, assignee):
+        """Map GitHub issue state + assignment to task status."""
+        if issue.state.lower() == "closed":
+            return Task.Status.COMPLETED
+
+        if assignee:
+            return Task.Status.IN_PROGRESS
+
+        return Task.Status.TODO
+
     def _get_last_assigned_date(self, repo, issue_number, assignee_login):
         """Find the most recent 'assigned' event for a specific user using PyGithub."""
         try:
@@ -136,12 +146,14 @@ class Command(BaseCommand):
                                 )
 
                     if new_assignee:
+                        status = self._get_status(issue, new_assignee)
+
                         task, created = Task.objects.get_or_create(
                             issue=issue,
                             assignee=new_assignee,
                             defaults={
                                 "module": module,
-                                "status": Task.Status.IN_PROGRESS,
+                                "status": status,
                                 "assigned_at": assigned_date,
                             },
                         )
@@ -156,9 +168,17 @@ class Command(BaseCommand):
                                     f"(assigned on {assigned_date})"
                                 )
                             )
-                        elif task.module != module:
-                            task.module = module
-                            task.save(update_fields=["module"])
+                        else:
+                            updates = {}
+                            if task.module != module:
+                                updates["module"] = module
+                            if task.status != status:
+                                updates["status"] = status
+
+                            if updates:
+                                for field, value in updates.items():
+                                    setattr(task, field, value)
+                                task.save(update_fields=list(updates.keys()))
 
         num_linked = len(matched_issue_ids)
         if num_linked > 0:
