@@ -5,7 +5,7 @@ from apps.common.search.query_parser import QueryParser, QueryParserError
 
 class TestQueryParser:
     def setup_method(self):
-        self.allowed_fields = {
+        self.field_schema = {
             "author": "string",
             "stars": "number",
             "issues": "number",
@@ -15,26 +15,26 @@ class TestQueryParser:
             "created": "date",
         }
 
-        self.parser = QueryParser(allowed_fields=self.allowed_fields)
+        self.parser = QueryParser(field_schema=self.field_schema)
         self.case_sensitive_parser = QueryParser(
-            allowed_fields=self.allowed_fields, default_field="test", case_sensitive=True
+            field_schema=self.field_schema, default_field="test", case_sensitive=True
         )
-        self.strict_parser = QueryParser(allowed_fields=self.allowed_fields, strict=True)
+        self.strict_parser = QueryParser(field_schema=self.field_schema, strict=True)
         self.case_sensitive_strict_parser = QueryParser(
-            allowed_fields=self.allowed_fields, strict=True, case_sensitive=True
+            field_schema=self.field_schema, strict=True, case_sensitive=True
         )
         self.boolean_values = {"true", "1", "yes", "on", "false", "0", "no", "off"}
         self.true_boolean_values = {"true", "1", "yes", "on"}
         self.comparison_operators = ["<", "<=", ">", ">=", "="]
 
     def test_invalid_parser_field_validation(self):
-        with pytest.raises(QueryParserError) as ei:
-            QueryParser(allowed_fields={"field": "invalid_type"})
-        assert ei.value.error_type == "FIELD_TYPE_ERROR"
+        with pytest.raises(QueryParserError) as exception_info:
+            QueryParser(field_schema={"field": "invalid_type"})
+        assert exception_info.value.error_type == "FIELD_TYPE_ERROR"
 
-        with pytest.raises(QueryParserError) as ei:
-            QueryParser(allowed_fields={"field-with-dash": "string"})
-        assert ei.value.error_type == "FIELD_NAME_ERROR"
+        with pytest.raises(QueryParserError) as exception_info:
+            QueryParser(field_schema={"field-with-dash": "string"})
+        assert exception_info.value.error_type == "FIELD_NAME_ERROR"
 
     @pytest.mark.parametrize(
         ("parser_type", "expected_string"),
@@ -48,34 +48,27 @@ class TestQueryParser:
     def test_basic_field_parsing_all_types(self, parser_type, expected_string):
         parser = getattr(self, parser_type)
         result = parser.parse('Author:"John Doe"')
-        assert len(result) == 1
-        assert result[0]["field"] == "author"
-        assert result[0]["type"] == "string"
-        assert result[0]["string"] == expected_string
+        expected = [{"field": "author", "type": "string", "string": expected_string}]
+        assert result == expected
 
     def test_parser_configuration_differences(self):
         query = "AUTHOR:test"
         result = self.case_sensitive_parser.parse(query)
-        assert len(result) == 1
-        assert result[0]["field"] == "author"
+        expected = [{"field": "author", "type": "string", "string": "test"}]
+        assert result == expected
 
     def test_comparison_operators(self):
         for op in self.comparison_operators:
             result = self.parser.parse(f"stars:{op}100")
-            assert len(result) == 1
-            assert result[0]["field"] == "stars"
-            assert result[0]["type"] == "number"
-            assert result[0]["op"] == op
-            assert result[0]["number"] == "100"
+            expected = [{"field": "stars", "type": "number", "op": op, "number": "100"}]
+            assert result == expected
 
     def test_boolean_variations(self):
         for bool_val in self.boolean_values:
             result = self.parser.parse(f"archived:{bool_val}")
-            assert len(result) == 1
-            assert result[0]["field"] == "archived"
-            assert result[0]["type"] == "boolean"
-            expected = "True" if bool_val in self.true_boolean_values else "False"
-            assert result[0]["boolean"] == expected
+            expected_bool = "True" if bool_val in self.true_boolean_values else "False"
+            expected = [{"field": "archived", "type": "boolean", "boolean": expected_bool}]
+            assert result == expected
 
     @pytest.mark.parametrize(
         ("query", "expected"),
@@ -112,39 +105,34 @@ class TestQueryParser:
 
     @pytest.mark.parametrize("query", unknown_field_queries)
     def test_unknown_field_strict_raises(self, query):
-        with pytest.raises(QueryParserError) as ei:
+        with pytest.raises(QueryParserError) as exception_info:
             self.strict_parser.parse(query)
-        assert ei.value.error_type == "UNKNOWN_FIELD_ERROR"
+        assert exception_info.value.error_type == "UNKNOWN_FIELD_ERROR"
 
     def test_date_format_validation(self):
-        valid_dates = ["2023-12-31", '"2023-12-31"', '"2023-12-31']
+        valid_dates = ["2023-12-31", '"2023-12-31"', '"2023-12-31', "20231231"]
         for date_str in valid_dates:
             result = self.parser.parse(f"created:{date_str}")
-            assert len(result) == 1
-            assert result[0]["date"] == '2023-12-31'
-            assert result[0]["field"] == "created"
-            assert result[0]["type"] == "date"
-            assert result[0]["op"] == "="
+            expected = [{"date": "2023-12-31", "field": "created", "type": "date", "op": "="}]
+            assert result == expected
 
         invalid_dates = ["invalid-date", "2023-163-01", "2023-01-362"]
         for inv_date_str in invalid_dates:
-            with pytest.raises(QueryParserError, match="Invalid date value") as ei:
+            with pytest.raises(QueryParserError) as exception_info:
                 self.strict_parser.parse(f"created:{inv_date_str}")
-            assert ei.value.error_type == "DATE_VALUE_ERROR"
+            assert exception_info.value.error_type == "DATE_VALUE_ERROR"
 
         for inv_date_str in invalid_dates:
             result = self.parser.parse(f"created:{inv_date_str}")
             assert not result
 
     def test_invalid_default_field_name(self):
-        with pytest.raises(QueryParserError) as ei:
-            QueryParser(allowed_fields={"test": "string"}, default_field="Default")
-        assert ei.value.error_type == "FIELD_NAME_ERROR"
+        with pytest.raises(QueryParserError) as exception_info:
+            QueryParser(field_schema={"test": "string"}, default_field="Default")
+        assert exception_info.value.error_type == "FIELD_NAME_ERROR"
 
     def test_custom_default_field(self):
-        parser_with_default = QueryParser(
-            allowed_fields={"test": "string"}, default_field="default"
-        )
+        parser_with_default = QueryParser(field_schema={"test": "string"}, default_field="default")
         result = parser_with_default.parse("query:test free_text")
         expected = [
             {"type": "string", "field": "default", "string": "free_text"},
@@ -157,25 +145,22 @@ class TestQueryParser:
     )
     def test_boundary_conditions(self, query):
         result = self.parser.parse(query)
-        assert len(result) == 1
-        assert result[0]["field"] == "query"
-        assert result[0]["type"] == "string"
-        assert result[0]["string"] == query
+        expected = [{"field": "query", "type": "string", "string": query}]
+        assert result == expected
 
     def test_long_field_names_and_values(self):
-        long_field_parser = QueryParser(allowed_fields={"verylongfieldname": "string"})
+        long_field_parser = QueryParser(field_schema={"verylongfieldname": "string"})
         long_value = "a" * 1000
         result = long_field_parser.parse(f'verylongfieldname:"{long_value}"')
-        assert isinstance(result, list)
-        assert result[0]["string"] == '"' + long_value + '"'
-        assert result[0]["field"] == "verylongfieldname"
-        assert result[0]["type"] == "string"
+        expected = [
+            {"string": '"' + long_value + '"', "field": "verylongfieldname", "type": "string"}
+        ]
+        assert result == expected
 
     @pytest.mark.parametrize("val", ["0", "-1", "999999", "3.14159"])
     def test_numeric_values(self, val):
         result = self.parser.parse(f"stars:{val}")
-        assert len(result) == 1
-        assert result[0]["type"] == "number"
-        assert result[0]["field"] == "stars"
-        assert result[0]["number"] == str(int(float(val)))
-        assert result[0]["op"] == "="
+        expected = [
+            {"type": "number", "field": "stars", "number": str(int(float(val))), "op": "="}
+        ]
+        assert result == expected
