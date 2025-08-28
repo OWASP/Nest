@@ -12,9 +12,24 @@ from apps.owasp.models.project import Project
 
 # Test constants
 OWASP_ZAP_NAME = "OWASP ZAP"
-OWASP_WEBGOAT_NAME = "OWASP WebGoat"
+OWASP_TEST_PROJECT_NAME = "OWASP Test Project"
+OWASP_TOP_TEN_NAME = "OWASP Top 10"
 PROJECT_FILTER_PATCH = "apps.owasp.models.project.Project.objects.filter"
 STDOUT_PATCH = "sys.stdout"
+FLAGSHIP_LEVEL = "flagship"
+PRODUCTION_LEVEL = "production"
+LAB_LEVEL = "lab"
+OTHER_LEVEL = "other"
+COMPLIANCE_SUMMARY_HEADER = "PROJECT LEVEL COMPLIANCE SUMMARY"
+TOTAL_PROJECTS_PREFIX = "Total active projects:"
+COMPLIANT_PROJECTS_PREFIX = "Compliant projects:"
+NON_COMPLIANT_PROJECTS_PREFIX = "Non-compliant projects:"
+COMPLIANCE_RATE_PREFIX = "Compliance rate:"
+ALL_COMPLIANT_MESSAGE = "✓ All projects are level compliant!"
+WARNING_PREFIX = "WARNING: Found"
+INFO_PREFIX = "INFO:"
+SUCCESS_CHECK = "✓"
+ERROR_CHECK = "✗"
 
 
 class TestDetectProjectLevelComplianceCommand:
@@ -25,131 +40,182 @@ class TestDetectProjectLevelComplianceCommand:
         """Set up test environment."""
         self.stdout = StringIO()
         self.command = Command()
-        yield
-
-    def create_mock_project(self, name, level, official_level, is_compliant):
-        """Helper to create a mock project."""
-        project = MagicMock(spec=Project)
-        project._state = ModelState()
-        project.name = name
-        project.level = level
-        project.project_level_official = official_level
-        project.is_level_compliant = is_compliant
-        return project
 
     def test_handle_all_compliant_projects(self):
         """Test command output when all projects are compliant."""
         # Create mock compliant projects
-        projects = [
-            self.create_mock_project(OWASP_ZAP_NAME, "flagship", "flagship", True),
-            self.create_mock_project("OWASP Top 10", "flagship", "flagship", True),
-            self.create_mock_project(OWASP_WEBGOAT_NAME, "production", "production", True),
-        ]
+        project1 = MagicMock(spec=Project)
+        project1._state = ModelState()
+        project1.name = OWASP_ZAP_NAME
+        project1.level = FLAGSHIP_LEVEL
+        project1.project_level_official = FLAGSHIP_LEVEL
+        project1.is_level_compliant = True
 
-        with patch(PROJECT_FILTER_PATCH) as mock_filter, \
-             patch(STDOUT_PATCH, new=self.stdout):
-            
+        project2 = MagicMock(spec=Project)
+        project2._state = ModelState()
+        project2.name = OWASP_TOP_TEN_NAME
+        project2.level = FLAGSHIP_LEVEL
+        project2.project_level_official = FLAGSHIP_LEVEL
+        project2.is_level_compliant = True
+
+        project3 = MagicMock(spec=Project)
+        project3._state = ModelState()
+        project3.name = OWASP_TEST_PROJECT_NAME
+        project3.level = PRODUCTION_LEVEL
+        project3.project_level_official = PRODUCTION_LEVEL
+        project3.is_level_compliant = True
+
+        projects = [project1, project2, project3]
+
+        with patch(PROJECT_FILTER_PATCH) as mock_filter, patch(STDOUT_PATCH, new=self.stdout):
             mock_filter.return_value.select_related.return_value = projects
-            
+
             call_command("owasp_detect_project_level_compliance")
-            
+
             output = self.stdout.getvalue()
-            
+
             # Verify summary output
-            assert "PROJECT LEVEL COMPLIANCE SUMMARY" in output
-            assert "Total active projects: 3" in output
-            assert "Compliant projects: 3" in output
-            assert "Non-compliant projects: 0" in output
-            assert "Compliance rate: 100.0%" in output
-            assert "✓ All projects are level compliant!" in output
+            assert COMPLIANCE_SUMMARY_HEADER in output
+            assert f"{TOTAL_PROJECTS_PREFIX} 3" in output
+            assert f"{COMPLIANT_PROJECTS_PREFIX} 3" in output
+            assert f"{NON_COMPLIANT_PROJECTS_PREFIX} 0" in output
+            assert f"{COMPLIANCE_RATE_PREFIX} 100.0%" in output
+            assert ALL_COMPLIANT_MESSAGE in output
 
     def test_handle_mixed_compliance_projects(self):
         """Test command output with both compliant and non-compliant projects."""
         # Create mixed compliance projects
-        projects = [
-            self.create_mock_project(OWASP_ZAP_NAME, "flagship", "flagship", True),
-            self.create_mock_project(OWASP_WEBGOAT_NAME, "lab", "production", False),
-            self.create_mock_project("OWASP Top 10", "production", "flagship", False),
-        ]
+        project1 = MagicMock(spec=Project)
+        project1._state = ModelState()
+        project1.name = OWASP_ZAP_NAME
+        project1.level = FLAGSHIP_LEVEL
+        project1.project_level_official = FLAGSHIP_LEVEL
+        project1.is_level_compliant = True
 
-        with patch(PROJECT_FILTER_PATCH) as mock_filter, \
-             patch(STDOUT_PATCH, new=self.stdout):
-            
+        project2 = MagicMock(spec=Project)
+        project2._state = ModelState()
+        project2.name = OWASP_TEST_PROJECT_NAME
+        project2.level = LAB_LEVEL
+        project2.project_level_official = PRODUCTION_LEVEL
+        project2.is_level_compliant = False
+
+        project3 = MagicMock(spec=Project)
+        project3._state = ModelState()
+        project3.name = OWASP_TOP_TEN_NAME
+        project3.level = PRODUCTION_LEVEL
+        project3.project_level_official = FLAGSHIP_LEVEL
+        project3.is_level_compliant = False
+
+        projects = [project1, project2, project3]
+
+        with patch(PROJECT_FILTER_PATCH) as mock_filter, patch(STDOUT_PATCH, new=self.stdout):
             mock_filter.return_value.select_related.return_value = projects
-            
+
             call_command("owasp_detect_project_level_compliance")
-            
+
             output = self.stdout.getvalue()
-            
+
             # Verify summary output
-            assert "Total active projects: 3" in output
-            assert "Compliant projects: 1" in output
-            assert "Non-compliant projects: 2" in output
-            assert "Compliance rate: 33.3%" in output
-            assert "⚠ WARNING: Found 2 non-compliant projects" in output
-            
+            assert f"{TOTAL_PROJECTS_PREFIX} 3" in output
+            assert f"{COMPLIANT_PROJECTS_PREFIX} 1" in output
+            assert f"{NON_COMPLIANT_PROJECTS_PREFIX} 2" in output
+            assert f"{COMPLIANCE_RATE_PREFIX} 33.3%" in output
+            assert f"{WARNING_PREFIX} 2 non-compliant projects" in output
+
             # Verify non-compliant projects are listed
-            assert f"✗ {OWASP_WEBGOAT_NAME}: Local=lab, Official=production" in output
-            assert "✗ OWASP Top 10: Local=production, Official=flagship" in output
+            error_msg1 = (
+                f"{ERROR_CHECK} {OWASP_TEST_PROJECT_NAME}: "
+                f"Local={LAB_LEVEL}, Official={PRODUCTION_LEVEL}"
+            )
+            assert error_msg1 in output
+            error_msg2 = (
+                f"{ERROR_CHECK} {OWASP_TOP_TEN_NAME}: "
+                f"Local={PRODUCTION_LEVEL}, Official={FLAGSHIP_LEVEL}"
+            )
+            assert error_msg2 in output
 
     def test_handle_verbose_output(self):
         """Test command with verbose flag shows all projects."""
-        projects = [
-            self.create_mock_project(OWASP_ZAP_NAME, "flagship", "flagship", True),
-            self.create_mock_project(OWASP_WEBGOAT_NAME, "lab", "production", False),
-        ]
+        project1 = MagicMock(spec=Project)
+        project1._state = ModelState()
+        project1.name = OWASP_ZAP_NAME
+        project1.level = FLAGSHIP_LEVEL
+        project1.project_level_official = FLAGSHIP_LEVEL
+        project1.is_level_compliant = True
 
-        with patch(PROJECT_FILTER_PATCH) as mock_filter, \
-             patch(STDOUT_PATCH, new=self.stdout):
-            
+        project2 = MagicMock(spec=Project)
+        project2._state = ModelState()
+        project2.name = OWASP_TEST_PROJECT_NAME
+        project2.level = LAB_LEVEL
+        project2.project_level_official = PRODUCTION_LEVEL
+        project2.is_level_compliant = False
+
+        projects = [project1, project2]
+
+        with patch(PROJECT_FILTER_PATCH) as mock_filter, patch(STDOUT_PATCH, new=self.stdout):
             mock_filter.return_value.select_related.return_value = projects
-            
+
             call_command("owasp_detect_project_level_compliance", "--verbose")
-            
+
             output = self.stdout.getvalue()
-            
+
             # Verify both compliant and non-compliant projects are shown
-            assert f"✓ {OWASP_ZAP_NAME}: flagship (matches official)" in output
-            assert f"✗ {OWASP_WEBGOAT_NAME}: Local=lab, Official=production" in output
+            success_msg = f"{SUCCESS_CHECK} {OWASP_ZAP_NAME}: {FLAGSHIP_LEVEL} (matches official)"
+            assert success_msg in output
+            error_msg = (
+                f"{ERROR_CHECK} {OWASP_TEST_PROJECT_NAME}: "
+                f"Local={LAB_LEVEL}, Official={PRODUCTION_LEVEL}"
+            )
+            assert error_msg in output
 
     def test_handle_no_projects(self):
         """Test command output when no active projects exist."""
-        with patch(PROJECT_FILTER_PATCH) as mock_filter, \
-             patch(STDOUT_PATCH, new=self.stdout):
-            
+        with patch(PROJECT_FILTER_PATCH) as mock_filter, patch(STDOUT_PATCH, new=self.stdout):
             mock_filter.return_value.select_related.return_value = []
-            
+
             call_command("owasp_detect_project_level_compliance")
-            
+
             output = self.stdout.getvalue()
-            
+
             # Verify summary for empty project list
-            assert "Total active projects: 0" in output
-            assert "Compliant projects: 0" in output
-            assert "Non-compliant projects: 0" in output
-            assert "✓ All projects are level compliant!" in output
+            assert f"{TOTAL_PROJECTS_PREFIX} 0" in output
+            assert f"{COMPLIANT_PROJECTS_PREFIX} 0" in output
+            assert f"{NON_COMPLIANT_PROJECTS_PREFIX} 0" in output
+            assert ALL_COMPLIANT_MESSAGE in output
 
     def test_handle_projects_without_official_levels(self):
         """Test command detects projects with default official levels."""
-        projects = [
-            self.create_mock_project(OWASP_ZAP_NAME, "flagship", "flagship", True),
-            self.create_mock_project(OWASP_WEBGOAT_NAME, "lab", "other", True),  # Default official level
-        ]
+        project1 = MagicMock(spec=Project)
+        project1._state = ModelState()
+        project1.name = OWASP_ZAP_NAME
+        project1.level = FLAGSHIP_LEVEL
+        project1.project_level_official = FLAGSHIP_LEVEL
+        project1.is_level_compliant = True
 
-        with patch(PROJECT_FILTER_PATCH) as mock_filter, \
-             patch(STDOUT_PATCH, new=self.stdout):
-            
+        project2 = MagicMock(spec=Project)
+        project2._state = ModelState()
+        project2.name = OWASP_TEST_PROJECT_NAME
+        project2.level = LAB_LEVEL
+        project2.project_level_official = OTHER_LEVEL  # Default official level
+        project2.is_level_compliant = True
+
+        projects = [project1, project2]
+
+        with patch(PROJECT_FILTER_PATCH) as mock_filter, patch(STDOUT_PATCH, new=self.stdout):
             # Mock the filter for projects without official levels
             mock_filter.return_value.select_related.return_value = projects
             mock_filter.return_value.filter.return_value.count.return_value = 1
-            
+
             call_command("owasp_detect_project_level_compliance")
-            
+
             output = self.stdout.getvalue()
-            
+
             # Verify info message about default official levels
-            assert "ℹ INFO: 1 projects have default official levels" in output
-            assert "Run 'owasp_update_project_health_metrics' to sync official levels" in output
+            assert f"{INFO_PREFIX} 1 projects have default official levels" in output
+            assert (
+                "Run 'make update-data' to sync official levels, "
+                "then 'make sync-data' for scoring." in output
+            )
 
     def test_compliance_rate_calculation(self):
         """Test compliance rate calculation with various scenarios."""
@@ -160,22 +226,33 @@ class TestDetectProjectLevelComplianceCommand:
             ([True, False, True], 2, 1, 66.7),  # Mixed
         ]
 
-        for compliance_statuses, expected_compliant, expected_non_compliant, expected_rate in test_cases:
-            projects = [
-                self.create_mock_project(f"Project {i}", "lab", "lab" if compliant else "flagship", compliant)
-                for i, compliant in enumerate(compliance_statuses)
-            ]
+        for (
+            compliance_statuses,
+            expected_compliant,
+            expected_non_compliant,
+            expected_rate,
+        ) in test_cases:
+            projects = []
+            for i, is_compliant in enumerate(compliance_statuses):
+                project = MagicMock(spec=Project)
+                project._state = ModelState()
+                project.name = f"Project {i}"
+                project.level = LAB_LEVEL
+                project.project_level_official = LAB_LEVEL if is_compliant else FLAGSHIP_LEVEL
+                project.is_level_compliant = is_compliant
+                projects.append(project)
 
-            with patch("apps.owasp.models.project.Project.objects.filter") as mock_filter, \
-                 patch("sys.stdout", new=StringIO()) as mock_stdout:
-                
+            with (
+                patch("apps.owasp.models.project.Project.objects.filter") as mock_filter,
+                patch("sys.stdout", new=StringIO()) as mock_stdout,
+            ):
                 mock_filter.return_value.select_related.return_value = projects
                 mock_filter.return_value.filter.return_value.count.return_value = 0
-                
+
                 call_command("owasp_detect_project_level_compliance")
-                
+
                 output = mock_stdout.getvalue()
-                
-                assert f"Compliant projects: {expected_compliant}" in output
-                assert f"Non-compliant projects: {expected_non_compliant}" in output
-                assert f"Compliance rate: {expected_rate:.1f}%" in output
+
+                assert f"{COMPLIANT_PROJECTS_PREFIX} {expected_compliant}" in output
+                assert f"{NON_COMPLIANT_PROJECTS_PREFIX} {expected_non_compliant}" in output
+                assert f"{COMPLIANCE_RATE_PREFIX} {expected_rate:.1f}%" in output

@@ -36,6 +36,11 @@ class Command(BaseCommand):
         project_health_requirements = {
             phr.level: phr for phr in ProjectHealthRequirements.objects.all()
         }
+
+        # Compliance tracking
+        penalties_applied = 0
+        total_projects_scored = 0
+
         for metric in ProjectHealthMetrics.objects.filter(
             score__isnull=True,
         ).select_related(
@@ -68,8 +73,11 @@ class Command(BaseCommand):
                 )
                 continue
 
+            total_projects_scored += 1
+
             # Apply compliance penalty if project is not level compliant
             if not metric.project.is_level_compliant:
+                penalties_applied += 1
                 penalty_percentage = float(getattr(requirements, "compliance_penalty_weight", 0.0))
                 # Clamp to [0, 100]
                 penalty_percentage = max(0.0, min(100.0, penalty_percentage))
@@ -77,9 +85,10 @@ class Command(BaseCommand):
                 score = max(0.0, score - penalty_amount)
                 self.stdout.write(
                     self.style.WARNING(
-                        f"Applied {penalty_percentage}% compliance penalty to {metric.project.name} "
-                        f"(penalty: {penalty_amount:.2f}, final score: {score:.2f}) "
-                        f"[Local: {metric.project.level}, Official: {metric.project.project_level_official}]"
+                        f"Applied {penalty_percentage}% compliance penalty to "
+                        f"{metric.project.name} (penalty: {penalty_amount:.2f}, "
+                        f"final score: {score:.2f}) [Local: {metric.project.level}, "
+                        f"Official: {metric.project.project_level_official}]"
                     )
                 )
             # Ensure score stays within bounds (0-100)
@@ -92,4 +101,18 @@ class Command(BaseCommand):
                 "score",
             ],
         )
+
+        # Summary with compliance impact
         self.stdout.write(self.style.SUCCESS("Updated project health scores successfully."))
+        if penalties_applied > 0:
+            compliance_rate = (
+                (total_projects_scored - penalties_applied) / total_projects_scored * 100
+                if total_projects_scored
+                else 0
+            )
+            self.stdout.write(
+                self.style.NOTICE(
+                    f"Compliance Summary: {penalties_applied}/{total_projects_scored} projects "
+                    f"received penalties ({compliance_rate:.1f}% compliant)"
+                )
+            )

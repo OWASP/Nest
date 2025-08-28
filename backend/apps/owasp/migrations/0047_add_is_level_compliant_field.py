@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('owasp', '0046_merge_0045_badge_0045_project_audience'),
+        ("owasp", "0046_merge_0045_badge_0045_project_audience"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='projecthealthmetrics',
-            name='is_level_compliant',
-            field=models.BooleanField(default=True, help_text="Whether the project's local level matches the official OWASP level", verbose_name='Is project level compliant'),
+            model_name="projecthealthmetrics",
+            name="is_level_compliant",
+            field=models.BooleanField(
+                default=True,
+                help_text="Whether the project's local level matches the official OWASP level",
+                verbose_name="Is project level compliant",
+            ),
         ),
     ]

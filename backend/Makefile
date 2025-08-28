@@ -108,6 +108,8 @@ shell-db:
 
 sync-data: \
 	update-data \
+	owasp-update-project-health-metrics \
+	owasp-update-project-health-scores \
 	enrich-data \
 	index-data
 
@@ -133,6 +135,7 @@ update-data: \
 	github-update-related-organizations \
 	github-update-users \
 	owasp-aggregate-projects \
+	owasp-sync-official-project-levels \
 	owasp-update-events \
 	owasp-sync-posts \
 	owasp-update-sponsors \
