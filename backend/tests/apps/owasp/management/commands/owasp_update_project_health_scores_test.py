@@ -1,5 +1,5 @@
 from io import StringIO
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 from django.core.management import call_command
@@ -76,7 +76,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
             setattr(mock_requirements, field, requirement_weight)
         mock_metric.project.level = "test_level"
         mock_metric.project.name = TEST_PROJECT_NAME
-        mock_metric.project.is_level_compliant = MagicMock(return_value=True)
+        type(mock_metric.project).is_level_compliant = PropertyMock(return_value=True)
         mock_metric.is_funding_requirements_compliant = True
         mock_metric.is_leader_requirements_compliant = True
         self.mock_metrics.return_value.select_related.return_value = [mock_metric]
@@ -149,7 +149,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         mock_metric.project.level = LAB_LEVEL
         mock_metric.project.project_level_official = FLAGSHIP_LEVEL
         mock_metric.project.name = NON_COMPLIANT_PROJECT_NAME
-        mock_metric.project.is_level_compliant = MagicMock(return_value=False)
+        type(mock_metric.project).is_level_compliant = PropertyMock(return_value=False)
 
         # Set compliance requirements
         mock_metric.is_funding_requirements_compliant = True
@@ -231,7 +231,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         mock_metric.project.level = FLAGSHIP_LEVEL
         mock_metric.project.project_level_official = FLAGSHIP_LEVEL
         mock_metric.project.name = COMPLIANT_PROJECT_NAME
-        mock_metric.project.is_level_compliant = MagicMock(return_value=True)
+        type(mock_metric.project).is_level_compliant = PropertyMock(return_value=True)
 
         mock_metric.is_funding_requirements_compliant = True
         mock_metric.is_leader_requirements_compliant = True
@@ -301,7 +301,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         mock_metric.project.level = LAB_LEVEL
         mock_metric.project.project_level_official = FLAGSHIP_LEVEL
         mock_metric.project.name = TEST_PROJECT_NAME
-        mock_metric.project.is_level_compliant = MagicMock(return_value=False)
+        type(mock_metric.project).is_level_compliant = PropertyMock(return_value=False)
 
         mock_metric.is_funding_requirements_compliant = True
         mock_metric.is_leader_requirements_compliant = True
@@ -370,7 +370,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         mock_metric.project.level = LAB_LEVEL
         mock_metric.project.project_level_official = FLAGSHIP_LEVEL
         mock_metric.project.name = TEST_PROJECT_NAME
-        mock_metric.project.is_level_compliant = MagicMock(return_value=False)
+        type(mock_metric.project).is_level_compliant = PropertyMock(return_value=False)
 
         mock_metric.is_funding_requirements_compliant = True
         mock_metric.is_leader_requirements_compliant = True
@@ -440,7 +440,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         mock_metric.project.level = LAB_LEVEL
         mock_metric.project.project_level_official = FLAGSHIP_LEVEL
         mock_metric.project.name = TEST_PROJECT_NAME
-        mock_metric.project.is_level_compliant = MagicMock(return_value=False)
+        type(mock_metric.project).is_level_compliant = PropertyMock(return_value=False)
         mock_metric.is_funding_requirements_compliant = True
         mock_metric.is_leader_requirements_compliant = True
 
