@@ -72,6 +72,7 @@ jumpstart
 kasya
 lhci
 libexpat
+lighthouseci
 linkify
 lte
 lxml

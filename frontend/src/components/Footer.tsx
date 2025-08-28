@@ -7,7 +7,7 @@ import { useState, useCallback } from 'react'
 import type { Section } from 'types/section'
 import { footerIcons } from 'utils/constants'
 import { footerSections } from 'utils/constants'
-import { ENVIRONMENT, RELEASE_VERSION } from 'utils/credentials'
+import { ENVIRONMENT, RELEASE_VERSION } from 'utils/env.client'
 
 export default function Footer() {
   // State to keep track of the open section in the footer

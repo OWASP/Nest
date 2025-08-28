@@ -9,3 +9,4 @@ __all__ = [
     "User",
     "UserBadge",
 ]
+
