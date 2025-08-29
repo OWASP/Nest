@@ -78,7 +78,7 @@ const ModuleForm = ({
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-200 dark:focus:ring-blue-400 dark:focus:border-blue-400"
+                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
                   />
                 </div>
 
@@ -93,7 +93,7 @@ const ModuleForm = ({
                     onChange={handleInputChange}
                     rows={4}
                     required
-                    className="w-full resize-none rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-200 dark:focus:ring-blue-400 dark:focus:border-blue-400"
+                    className="w-full resize-none rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
                   />
                 </div>
               </div>
@@ -115,7 +115,7 @@ const ModuleForm = ({
                     value={formData.startedAt}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-200 dark:focus:ring-blue-400 dark:focus:border-blue-400"
+                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
                   />
                 </div>
                 <div>
@@ -129,7 +129,7 @@ const ModuleForm = ({
                     value={formData.endedAt}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-200 dark:focus:ring-blue-400 dark:focus:border-blue-400"
+                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
                   />
                 </div>
                 <div>
@@ -141,7 +141,7 @@ const ModuleForm = ({
                     id="experienceLevel"
                     value={formData.experienceLevel}
                     onChange={handleInputChange}
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-200 dark:focus:ring-blue-400 dark:focus:border-blue-400"
+                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
                   >
                     {EXPERIENCE_LEVELS.map((lvl) => (
                       <option key={lvl.key} value={lvl.key}>
@@ -169,7 +169,7 @@ const ModuleForm = ({
                     value={formData.domains}
                     onChange={handleInputChange}
                     placeholder="AI, Web Development"
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-200 dark:focus:ring-blue-400 dark:focus:border-blue-400"
+                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
                   />
                 </div>
                 <div>
@@ -183,7 +183,7 @@ const ModuleForm = ({
                     value={formData.tags}
                     onChange={handleInputChange}
                     placeholder="javascript, react"
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-200 dark:focus:ring-blue-400 dark:focus:border-blue-400"
+                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
                   />
                 </div>
                 <div>
@@ -211,7 +211,7 @@ const ModuleForm = ({
                       value={formData.mentorLogins}
                       onChange={handleInputChange}
                       placeholder="johndoe, jane-doe"
-                      className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-200 dark:focus:ring-blue-400 dark:focus:border-blue-400"
+                      className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
                     />
                   </div>
                 )}
@@ -354,7 +354,7 @@ export const ProjectSelector = ({ value, defaultName, onProjectChange }: Project
         onChange={handleInputChange}
         onBlur={handleBlur}
         className={clsx(
-          'w-96 rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-200 dark:focus:ring-blue-400 dark:focus:border-blue-400'
+          'w-96 rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400'
         )}
       />
 

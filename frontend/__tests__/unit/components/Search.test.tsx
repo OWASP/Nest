@@ -335,7 +335,7 @@ describe('SearchBar Component', () => {
       render(<SearchBar {...defaultProps} isLoaded={false} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toHaveClass(
-        'h-12 w-full rounded-lg border border-gray-300 pl-10 pr-10 text-lg text-black focus:border-blue-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300'
+        'h-12 w-full rounded-lg border-1 border-gray-300 pl-10 pr-10 text-lg text-black focus:border-blue-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300'
       )
     })
 

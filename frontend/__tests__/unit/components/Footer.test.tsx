@@ -316,7 +316,7 @@ describe('Footer', () => {
       expect(footer).toHaveClass(
         'mt-auto',
         'w-full',
-        'border-t',
+        'border-t-1',
         'bg-slate-200',
         'dark:bg-slate-800',
         'xl:max-w-full'
