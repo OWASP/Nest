@@ -29,7 +29,7 @@ const Card = ({
   timeline,
 }: CardProps) => {
   return (
-    <div className="mx-auto mt-4 mb-2 flex w-full max-w-[95%] flex-col items-start rounded-md border border-gray-200 bg-white p-4 md:max-w-6xl dark:border-gray-700 dark:bg-[#212529]">
+    <div className="mx-auto mt-4 mb-2 flex w-full max-w-[95%] flex-col items-start rounded-md border-1 border-gray-200 bg-white p-4 md:max-w-6xl dark:border-gray-700 dark:bg-[#212529]">
       {/* Card Header with Badge and Title */}
       <div className="w-full">
         <div className="flex items-center gap-3">
@@ -44,7 +44,7 @@ const Card = ({
               showArrow
             >
               <span
-                className="flex h-8 w-8 min-w-8 items-center justify-center rounded-full text-xs shadow-sm"
+                className="flex h-8 w-8 min-w-8 items-center justify-center rounded-full text-xs shadow"
                 style={{ backgroundColor: level.color }}
               >
                 <FontAwesomeIconWrapper icon={level.icon} className="text-white" />
@@ -120,7 +120,7 @@ const Card = ({
                 >
                   <FontAwesomeIcon
                     icon={getSocialIcon(item.url)}
-                    className="h-5 w-5 text-blue-500 hover:text-gray-600 dark:dark:hover:text-gray-400"
+                    className="h-5 w-5 text-blue-500 hover:text-gray-600 dark:hover:text-gray-400"
                   />
                 </Link>
               ))}

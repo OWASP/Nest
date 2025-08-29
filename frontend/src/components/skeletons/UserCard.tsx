@@ -12,14 +12,14 @@ const UserCardSkeleton: React.FC<UserCardSkeletonProps> = ({
       role="status"
       className="group flex h-64 w-80 flex-col items-center rounded-lg bg-white p-6 text-left shadow-lg dark:bg-gray-800 dark:shadow-gray-900/30"
     >
-      <div className="gap4 flex w-full flex-col items-center">
+      <div className="gap-4 flex w-full flex-col items-center">
         {showAvatar && (
           <div className="relative h-20 w-20 overflow-hidden rounded-full ring-2 ring-gray-100 dark:ring-gray-700">
             <Skeleton className="h-full w-full rounded-full" />
           </div>
         )}
 
-        <div className="gap2 flex w-full flex-col items-center">
+        <div className="gap-2 flex w-full flex-col items-center">
           {showName && <Skeleton className="h-7 w-40" />}
         </div>
       </div>

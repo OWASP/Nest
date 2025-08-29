@@ -329,7 +329,7 @@ describe('Rendering', () => {
       })
     })
 
-    it('handles input focus and blur-sm correctly', async () => {
+    it('handles input focus and blur correctly', async () => {
       const user = userEvent.setup()
       render(<MultiSearchBar {...defaultProps} />)
 

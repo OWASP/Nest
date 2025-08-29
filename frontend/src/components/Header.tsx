@@ -53,7 +53,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
   }, [mobileMenuOpen])
 
   return (
-    <header className="bg-owasp-blue fixed inset-x-0 top-0 z-50 w-full max-w-screen shadow-md dark:bg-slate-800">
+    <header className="bg-owasp-blue fixed inset-x-0 top-0 z-50 w-full shadow-md dark:bg-slate-800">
       <div className="flex h-16 w-full items-center px-4 max-md:justify-between" id="navbar-sticky">
         {/* Logo */}
         <Link href="/" onClick={() => setMobileMenuOpen(false)}>
@@ -198,7 +198,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                           className={cn(
                             'block w-full px-4 py-2 text-left text-sm text-slate-700 transition duration-150 ease-in-out first:rounded-t-md last:rounded-b-md hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
                             pathname === sub.href &&
-                              'bg-blue-50 font-medium text-blue-600 dark:bg-blue-900/20 dark:text-blue-200'
+                            'bg-blue-50 font-medium text-blue-600 dark:bg-blue-900/20 dark:text-blue-200'
                           )}
                           onClick={toggleMobileMenu}
                         >

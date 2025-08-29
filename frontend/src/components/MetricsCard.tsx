@@ -39,7 +39,7 @@ const MetricsCard: FC<{ metric: HealthMetricsProps }> = ({ metric }) => {
         </div>
         <div
           className={clsx(
-            'truncate rounded border-l border-gray-200 bg-linear-to-br from-white/20 to-transparent dark:border-gray-600',
+            'truncate rounded border-l-1 border-l-gray-200 bg-linear-to-br from-white/20 to-transparent dark:border-l-gray-600',
             {
               'bg-green-500 text-green-900': metric.score >= 75,
               'bg-orange-500 text-orange-900': metric.score >= 50 && metric.score < 75,

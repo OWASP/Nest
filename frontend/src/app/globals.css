@@ -12,8 +12,8 @@
 */
 /* Removed global border override that was conflicting with custom border colors */
 
-@utility dark {
-  & ::selection {
+@layer base {
+  .dark ::selection {
     @apply bg-blue-500 text-white;
   }
 }
@@ -92,7 +92,7 @@
 }
 
 @layer utilities {
-  @keyframes spin {
+  @keyframes custom-spin {
     0% {
       transform: rotate(0deg);
     }
@@ -179,8 +179,8 @@
     }
   }
 
-  .animate-spin {
-    animation: spin 1s linear infinite;
+  .animate-custom-spin {
+    animation: custom-spin 1s linear infinite;
   }
 
   .animate-fadeIn {

@@ -237,7 +237,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
               onChange={handleSearchChange}
               onFocus={handleFocusSearch}
               placeholder={placeholder}
-              className="h-12 w-full rounded-lg border border-gray-300 pr-10 pl-10 text-lg text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300"
+              className="h-12 w-full rounded-lg border-1 border-gray-300 pr-10 pl-10 text-lg text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300"
             />
             {searchQuery && (
               <button
@@ -252,11 +252,11 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           <div className="h-12 w-full animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
         )}
         {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-md border bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+          <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-md border-1 border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
             {suggestions.map((suggestion, index) => (
               <div
                 key={suggestion.indexName}
-                className="border-b text-gray-600 last:border-b-0 dark:border-gray-700 dark:text-gray-300"
+                className="border-b-1 border-b-gray-200 text-gray-600 last:border-b-0 dark:border-b-gray-700 dark:text-gray-300"
               >
                 <ul>
                   {suggestion.hits.map((hit, subIndex) => (

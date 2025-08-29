@@ -11,7 +11,7 @@ export function ApiKeysSkeleton() {
         </div>
 
         {/* Info box skeleton */}
-        <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+        <div className="mb-6 rounded-lg border-1 border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
           <div className="flex items-start gap-3">
             <div className="mt-0.5 h-5 w-5 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
             <div className="flex-1">
@@ -23,7 +23,7 @@ export function ApiKeysSkeleton() {
         </div>
 
         {/* API Keys section skeleton */}
-        <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6 shadow-xs dark:border-gray-700 dark:bg-gray-800">
+        <div className="mb-6 rounded-lg border-1 border-gray-200 bg-white p-6 shadow-xs dark:border-gray-700 dark:bg-gray-800">
           <div className="mb-4 flex items-center gap-3">
             <div className="h-5 w-5 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
             <div className="h-6 w-32 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
@@ -40,7 +40,7 @@ export function ApiKeysSkeleton() {
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-700">
+                <tr className="border-b-1 border-b-gray-200 dark:border-b-gray-700">
                   <th className="py-3 text-left font-semibold">Name</th>
                   <th className="py-3 text-left font-semibold">Id</th>
                   <th className="py-3 text-left font-semibold">Created</th>
@@ -51,7 +51,7 @@ export function ApiKeysSkeleton() {
               </thead>
               <tbody>
                 {[...Array(totalRows)].map((_, i) => (
-                  <tr key={i} className="border-b border-gray-200 dark:border-gray-700">
+                  <tr key={i} className="border-b-1 border-b-gray-200 dark:border-b-gray-700">
                     <td className="py-3">
                       <div className="h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
                     </td>
@@ -78,12 +78,12 @@ export function ApiKeysSkeleton() {
         </div>
 
         {/* API Usage section skeleton */}
-        <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6 shadow-xs dark:border-gray-700 dark:bg-gray-800">
+        <div className="mb-6 rounded-lg border-1 border-gray-200 bg-white p-6 shadow-xs dark:border-gray-700 dark:bg-gray-800">
           <div className="mb-4 h-6 w-32 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
           <div className="flex flex-col gap-4">
             <div className="h-4 w-full animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
             <div className="h-16 w-full animate-pulse rounded bg-gray-100 dark:bg-gray-800"></div>
-            <div className="rounded-md border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+            <div className="rounded-md border-1 border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
               <div className="mb-2 h-4 w-full animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
               <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
             </div>

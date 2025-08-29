@@ -206,19 +206,19 @@ const ProgramForm = ({
             </section>
 
             {/* Submit Buttons */}
-            <div className="border-t pt-8">
+            <div className="border-t-1 border-t-gray-200 pt-8 dark:border-t-gray-700">
               <div className="flex flex-col justify-end gap-4 sm:flex-row">
                 <button
                   type="button"
                   onClick={() => history.back()}
-                  className="rounded-lg border px-6 py-3 font-medium text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
+                  className="rounded-lg border-1 border-gray-200 px-6 py-3 font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex items-center justify-center gap-2 rounded-md border border-[#0D6EFD] px-4 py-2 text-[#0D6EFD] hover:bg-[#0D6EFD] hover:text-white dark:text-sky-600 dark:hover:bg-sky-100"
+                  className="flex items-center justify-center gap-2 rounded-md border-1 border-[#0D6EFD] px-4 py-2 text-[#0D6EFD] hover:bg-[#0D6EFD] hover:text-white dark:text-sky-600 dark:hover:bg-sky-100"
                 >
                   {loading ? 'Saving...' : submitText}
                 </button>

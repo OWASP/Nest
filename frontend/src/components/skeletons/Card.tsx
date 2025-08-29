@@ -17,7 +17,7 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
 
   return (
     <div role="status" className="flex w-full justify-center">
-      <div className="bg-card hover:bg-accent/10 mb-6 w-full rounded-lg border p-6 transition-colors duration-300 ease-linear md:max-w-6xl">
+      <div className="bg-card hover:bg-accent/10 mb-6 w-full rounded-lg border-1 border-border p-6 transition-colors duration-300 ease-linear md:max-w-6xl">
         <div className="flex flex-col gap-6">
           {/* Header Section */}
           <div className="flex w-full flex-col items-start justify-between gap-4 sm:flex-row">

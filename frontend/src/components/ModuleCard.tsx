@@ -74,7 +74,7 @@ const ModuleItem = ({ details }: { details: Module }) => {
   }
 
   return (
-    <div className="flex h-46 w-full flex-col gap-3 rounded-lg border p-4 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+    <div className="flex h-46 w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <button
         type="button"
         onClick={handleClick}

@@ -204,7 +204,7 @@ export default function Page() {
             <Button
               onPress={openCreateModal}
               isDisabled={!canCreateNewKey}
-              className="rounded-sm bg-black font-medium text-white transition-colors hover:bg-gray-900/90 disabled:bg-gray-300 disabled:text-gray-500"
+              className="rounded bg-black font-medium text-white transition-colors hover:bg-gray-900/90 disabled:bg-gray-300 disabled:text-gray-500"
             >
               <FontAwesomeIcon icon={faPlus} className="mr-1" />
               Create New Key ({activeKeyCount}/{MAX_ACTIVE_KEYS})
@@ -227,7 +227,7 @@ export default function Page() {
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <tr className="border-b-1 border-b-gray-200 dark:border-b-gray-700">
                     <th className="py-3 text-left font-semibold">Name</th>
                     <th className="py-3 text-left font-semibold">ID</th>
                     <th className="py-3 text-left font-semibold">Created</th>
@@ -237,7 +237,10 @@ export default function Page() {
                 </thead>
                 <tbody>
                   {data.apiKeys.map((key: ApiKey) => (
-                    <tr key={key.uuid} className="border-b border-gray-200 dark:border-gray-700">
+                    <tr
+                      key={key.uuid}
+                      className="border-b-1 border-b-gray-200 dark:border-b-gray-700"
+                    >
                       <td className="py-3">{key.name}</td>
                       <td className="py-3 font-mono text-sm">{key.uuid}</td>
                       <td className="py-3">{format(new Date(key.createdAt), 'PP')}</td>
