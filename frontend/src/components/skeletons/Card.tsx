@@ -17,7 +17,7 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
 
   return (
     <div role="status" className="flex w-full justify-center">
-      <div className="mb-6 w-full rounded-lg border border-border bg-card p-6 transition-colors duration-300 ease-linear hover:bg-accent/10 md:max-w-6xl">
+      <div className="border-border bg-card hover:bg-accent/10 mb-6 w-full rounded-lg border p-6 transition-colors duration-300 ease-linear md:max-w-6xl">
         <div className="flex flex-col gap-6">
           {/* Header Section */}
           <div className="flex w-full flex-col items-start justify-between gap-4 sm:flex-row">
@@ -57,7 +57,7 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
               {showContributors && (
                 <div className="mt-3 flex w-full flex-wrap items-center gap-2">
                   {[...Array(NUM_CONTRIBUTORS)].map((_, i) => (
-                    <Skeleton key={i} className="h-8 w-8 rounded-full border-2 border-background" />
+                    <Skeleton key={i} className="border-background h-8 w-8 rounded-full border-2" />
                   ))}
                 </div>
               )}

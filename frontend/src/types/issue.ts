@@ -6,6 +6,7 @@ export type Issue = {
   hint: string
   labels: string[]
   number?: string
+  repositoryName?: string
   organizationName?: string
   projectName: string
   projectUrl: string

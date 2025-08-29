@@ -28,10 +28,7 @@ format-frontend-code:
 		&& pnpm run format))
 
 lighthouse-ci:
-	@cd frontend && pnpm run lighthouse-ci
-
-lighthouse-ci-desktop:
-	@cd frontend && pnpm run lighthouse-ci:desktop
+	@cd frontend && npx -y @lhci/cli@0.15.1 autorun --collect.url=http://localhost:3000
 
 lint-frontend-code:
 	@(cd frontend && pnpm run lint:check >/dev/null 2>&1 \

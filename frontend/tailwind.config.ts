@@ -1,18 +1,21 @@
-/** @type {import('tailwindcss').Config} */
-import { heroui } from '@heroui/react'
-module.exports = {
+import { heroui } from '@heroui/react';
+import type { Config } from 'tailwindcss';
+import animate from 'tailwindcss-animate';
+
+const config: Config = {
   content: [
     './src/**/*.{js,ts,jsx,tsx,mdx}',
     './node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}',
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        background: 'var(--background)',
-        border: 'var(--border)',
-        text: 'var(--text)',
-        'owasp-blue': '#98AFC7',
+        background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+        border: 'hsl(var(--border))',
+        text: 'hsl(var(--text))',
+        'owasp-blue': '#98AFC7',
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
@@ -56,17 +59,18 @@ module.exports = {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
-    },
-    keyframes: {
-      scroll: {
-        '0%': { transform: 'translateX(0)' },
-        '100%': { transform: 'translateX(-500%)' },
+      keyframes: {
+        scroll: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-500%)' },
+        },
+      },
+      animation: {
+        scroll: 'scroll 0.5s linear infinite',
       },
     },
-    animation: {
-      scroll: 'scroll 0.5s linear infinite',
-    },
   },
-  darkMode: 'class',
-  plugins: [heroui(), import('tailwindcss-animate')],
-}
+  plugins: [heroui(), animate],
+};
+
+export default config;

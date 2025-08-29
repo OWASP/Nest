@@ -1,0 +1,9 @@
+ignoredBuiltDependencies:
+  - '@heroui/shared-utils'
+  - '@sentry/cli'
+  - core-js
+  - unrs-resolver
+onlyBuiltDependencies:
+  - '@swc/core'
+  - '@tailwindcss/oxide'
+  - sharp

@@ -66,7 +66,7 @@ export default function NavDropdown({ link, pathname }: NavDropDownProps) {
       {isOpen && (
         <div
           id={dropdownId}
-          className="absolute left-0 top-full z-10 mt-1 w-48 overflow-hidden rounded-md bg-white shadow-lg dark:bg-slate-800"
+          className="absolute top-full left-0 z-10 mt-1 w-48 overflow-hidden rounded-md bg-white shadow-lg dark:bg-slate-800"
         >
           {link.submenu.map((submenu, idx) => (
             <Link

@@ -51,16 +51,16 @@ const MetricsScoreCircle: FC<MetricsScoreCircleProps> = ({ score, onClick, click
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
         )}
         <div className="relative z-10 flex flex-col items-center text-center">
-          <span className="text-[0.5rem] font-medium uppercase tracking-wide opacity-60">
+          <span className="text-[0.5rem] font-medium tracking-wide uppercase opacity-60">
             Health
           </span>
-          <span className="text-xl font-extrabold leading-none">{score}</span>
-          <span className="text-[0.5rem] font-medium uppercase tracking-wide opacity-60">
+          <span className="text-xl leading-none font-extrabold">{score}</span>
+          <span className="text-[0.5rem] font-medium tracking-wide uppercase opacity-60">
             Score
           </span>
         </div>
         {score < 30 && (
-          <div className="animate-pulse absolute inset-0 rounded-full bg-red-400/20"></div>
+          <div className="absolute inset-0 animate-pulse rounded-full bg-red-400/20"></div>
         )}
       </div>
     </Tooltip>

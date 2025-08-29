@@ -1,29 +1,29 @@
-import { GoogleAnalytics } from '@next/third-parties/google'
-import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
-import React from 'react'
-import { Providers } from 'wrappers/provider'
-import { GTM_ID } from 'utils/env.client'
-import { IS_GITHUB_AUTH_ENABLED } from 'utils/env.server'
-import AutoScrollToTop from 'components/AutoScrollToTop'
-import BreadCrumbs from 'components/BreadCrumbs'
-import Footer from 'components/Footer'
-import Header from 'components/Header'
-import ScrollToTop from 'components/ScrollToTop'
 
-import 'app/globals.css'
+import { GoogleAnalytics } from '@next/third-parties/google';
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import React from 'react';
+import { Providers } from 'wrappers/provider';
+import { GTM_ID, IS_GITHUB_AUTH_ENABLED } from 'utils/credentials';
+import AutoScrollToTop from 'components/AutoScrollToTop';
+import BreadCrumbs from 'components/BreadCrumbs';
+import Footer from 'components/Footer';
+import Header from 'components/Header';
+import ScrollToTop from 'components/ScrollToTop';
+
+import 'app/globals.css';
 
 export const dynamic = 'force-dynamic'
 
 const geistSans = Geist({
   subsets: ['latin'],
   variable: '--font-geist-sans',
-})
+});
 
 const geistMono = Geist_Mono({
   subsets: ['latin'],
   variable: '--font-geist-mono',
-})
+});
 
 export const metadata: Metadata = {
   description: 'Your gateway to OWASP. Discover, engage, and help shape the future!',
@@ -57,29 +57,34 @@ export const metadata: Metadata = {
     site: '@owasp',
     title: 'Home – OWASP Nest',
   },
-}
+};
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        style={{ minHeight: '100vh' }}
+        className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col overflow-x-hidden antialiased supports-[min-height:100dvh]:min-h-[100dvh]`}
       >
+        {/* Visually hidden but keyboard-focusable skip link for accessibility */}
+        <a
+          href="#main-content"
+          className="sr-only z-50 bg-white p-2 focus:not-sr-only focus:absolute focus:top-2 focus:left-2"
+        >
+          Skip to content
+        </a>
         <Providers>
           <AutoScrollToTop />
           <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
           <BreadCrumbs />
-          {children}
-          <Footer />
+          {/* Single document-wide main landmark for a11y; no nested mains */}
+          <main id="main-content" className="flex min-w-0 flex-1 flex-col">
+            {children}
+          </main>
+          <Footer className="mt-auto" />
           <ScrollToTop />
         </Providers>
       </body>
       <GoogleAnalytics gaId={GTM_ID} />
     </html>
-  )
+  );
 }
