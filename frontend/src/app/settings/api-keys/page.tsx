@@ -239,7 +239,7 @@ export default function Page() {
                   {data.apiKeys.map((key: ApiKey) => (
                     <tr
                       key={key.uuid}
-                      className="border-b-1 border-b-gray-200 dark:border-b-gray-700"
+                      className="border-b border-b-gray-200 dark:border-b-gray-700"
                     >
                       <td className="py-3">{key.name}</td>
                       <td className="py-3 font-mono text-sm">{key.uuid}</td>

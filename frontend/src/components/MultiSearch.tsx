@@ -229,6 +229,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
             <FontAwesomeIcon
               icon={faSearch}
               className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
+              aria-hidden="true"
             />
             <input
               type="text"
@@ -241,8 +242,10 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
             />
             {searchQuery && (
               <button
+                type="button"
                 className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:text-gray-600"
                 onClick={handleClearSearch}
+                aria-label="Clear search"
               >
                 <FontAwesomeIcon icon={faTimes} />
               </button>

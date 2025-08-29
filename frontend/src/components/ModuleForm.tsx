@@ -218,19 +218,19 @@ const ModuleForm = ({
               </div>
             </section>
 
-            <div className="border-t-1 border-t-gray-200 pt-8 dark:border-t-gray-700">
+            <div className="border-t border-t-gray-200 pt-8 dark:border-t-gray-700">
               <div className="flex flex-col justify-end gap-4 sm:flex-row">
                 <button
                   type="button"
                   onClick={() => router.back()}
-                  className="rounded-lg border-1 border-gray-200 px-6 py-3 font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
+                  className="rounded-lg border border-gray-200 px-6 py-3 font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !formData.projectId}
-                  className="flex items-center justify-center gap-2 rounded-md border-1 border-sky-600 px-4 py-2 text-sky-600 hover:bg-sky-600 hover:text-white disabled:cursor-not-allowed disabled:border-gray-400 disabled:bg-gray-200 disabled:text-gray-500 dark:disabled:bg-gray-700"
+                  className="flex items-center justify-center gap-2 rounded-md border border-sky-600 px-4 py-2 text-sky-600 hover:bg-sky-600 hover:text-white disabled:cursor-not-allowed disabled:border-gray-400 disabled:bg-gray-200 disabled:text-gray-500 dark:disabled:bg-gray-700"
                 >
                   {loading ? 'Saving...' : submitText}
                 </button>
@@ -354,7 +354,7 @@ export const ProjectSelector = ({ value, defaultName, onProjectChange }: Project
         onChange={handleInputChange}
         onBlur={handleBlur}
         className={clsx(
-          'w-96 rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400'
+          'w-full max-w-md rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden sm:w-96 dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400'
         )}
       />
 

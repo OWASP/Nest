@@ -301,7 +301,7 @@
     border-radius: 50%;
     width: 25px;
     height: 25px;
-    animation: spin 1.2s linear infinite;
+    animation: custom-spin 1.2s linear infinite;
     position: absolute;
     transform: translate(-50%, -50%);
     top: 45%;
