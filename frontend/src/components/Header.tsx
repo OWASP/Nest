@@ -151,7 +151,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <div className="flex h-full flex-col justify-between space-y-1 px-2 pt-2 pb-3">
+        <div className="flex h-full flex-col justify-between gap-1 px-2 pt-2 pb-3">
           {/* Logo */}
           <div className="flex flex-col justify-center gap-1">
             <Link href="/" onClick={() => setMobileMenuOpen(false)}>

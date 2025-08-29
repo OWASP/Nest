@@ -1,7 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 import { heroui } from '@heroui/react'
+import tailwindcssAnimate from 'tailwindcss-animate'
 
-module.exports = {
+export default {
   content: [
     './src/**/*.{js,ts,jsx,tsx,mdx}',
     './node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}',
@@ -69,6 +70,5 @@ module.exports = {
     },
   },
   darkMode: 'class',
-  /* eslint-disable @typescript-eslint/no-require-imports */
-  plugins: [heroui(), require('tailwindcss-animate')],
+  plugins: [heroui(), tailwindcssAnimate],
 }

@@ -32,7 +32,7 @@ const DialogComp: React.FC<ModalProps> = ({
           <Markdown className="text-base text-gray-600 dark:text-gray-300" content={summary} />
           {hint && (
             <div className="rounded-md p-2">
-              <p className="space-x-2 text-xl font-semibold">
+              <p className="flex flex-row gap-2 text-xl font-semibold">
                 <FontAwesomeIcon icon={faBolt} size="xs" /> How to tackle it
               </p>
               <Markdown

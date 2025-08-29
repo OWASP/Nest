@@ -61,8 +61,8 @@ const ModuleForm = ({
 
       <div className="overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-[#212529]">
         <form onSubmit={onSubmit}>
-          <div className="space-y-8 p-8">
-            <section className="space-y-6">
+          <div className="flex flex-col gap-8 p-8">
+            <section className="flex flex-col gap-6">
               <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
                 Module Information
               </h2>
@@ -99,7 +99,7 @@ const ModuleForm = ({
               </div>
             </section>
 
-            <section className="space-y-6">
+            <section className="flex flex-col gap-6">
               <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
                 Module Configuration
               </h2>
@@ -153,7 +153,7 @@ const ModuleForm = ({
               </div>
             </section>
 
-            <section className="space-y-6">
+            <section className="flex flex-col gap-6">
               <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
                 Additional Details
               </h2>

@@ -29,7 +29,7 @@ const Card = ({
   timeline,
 }: CardProps) => {
   return (
-    <div className="mx-auto mt-4 mb-2 flex w-full max-w-[95%] flex-col items-start rounded-md border bg-white p-4 md:max-w-6xl dark:bg-[#212529]">
+    <div className="mx-auto mt-4 mb-2 flex w-full max-w-[95%] flex-col items-start rounded-md border border-gray-200 bg-white p-4 md:max-w-6xl dark:border-gray-700 dark:bg-[#212529]">
       {/* Card Header with Badge and Title */}
       <div className="w-full">
         <div className="flex items-center gap-3">
@@ -129,7 +129,7 @@ const Card = ({
         )}
 
         {/* Flexible bottom row with contributors and action button */}
-        <div className="flex w-full flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
           {/* Contributors section */}
           <div className="flex flex-wrap items-center gap-2">
             {topContributors?.map((contributor, index) => (

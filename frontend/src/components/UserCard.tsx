@@ -23,7 +23,7 @@ const UserCard = ({
       onPress={button.onclick}
       className={`group flex flex-col items-center rounded-lg p-6 ${className}`}
     >
-      <div className="flex w-full flex-col items-center space-y-4">
+      <div className="flex w-full flex-col items-center gap-4">
         <div className="relative h-20 w-20 overflow-hidden rounded-full ring-2 ring-gray-100 group-hover:ring-blue-400 dark:ring-gray-700">
           {avatar ? (
             <Image fill src={`${avatar}&s=160`} alt={name || 'user'} objectFit="cover" />

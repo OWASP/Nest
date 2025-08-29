@@ -43,7 +43,7 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
 
           {/* Description Section */}
           {showSummary && (
-            <div className="flex flex-col space-y-3">
+            <div className="flex flex-col gap-3">
               <Skeleton className="h-3 w-full gap-1" />
               <Skeleton className="h-3 w-full gap-1" />
               <Skeleton className="h-3 w-full gap-1" />
@@ -62,7 +62,7 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
                 </div>
               )}
               {showSocial && (
-                <div className="flex space-x-2">
+                <div className="flex flex-row gap-2">
                   <Skeleton className="h-8 w-8 rounded-full" />
                   <Skeleton className="h-8 w-8 rounded-full" />
                   <Skeleton className="h-8 w-8 rounded-full" />

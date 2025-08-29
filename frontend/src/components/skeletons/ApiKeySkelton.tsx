@@ -80,7 +80,7 @@ export function ApiKeysSkeleton() {
         {/* API Usage section skeleton */}
         <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6 shadow-xs dark:border-gray-700 dark:bg-gray-800">
           <div className="mb-4 h-6 w-32 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             <div className="h-4 w-full animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
             <div className="h-16 w-full animate-pulse rounded bg-gray-100 dark:bg-gray-800"></div>
             <div className="rounded-md border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">

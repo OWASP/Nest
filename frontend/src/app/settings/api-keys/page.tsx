@@ -216,7 +216,7 @@ export default function Page() {
               Error loading API keys
             </div>
           ) : loading ? (
-            <div className="space-y-4">
+            <div className="flex flex-col gap-4">
               <ApiKeysSkeleton />
             </div>
           ) : !data?.apiKeys?.length ? (
@@ -264,7 +264,7 @@ export default function Page() {
 
         <SecondaryCard>
           <h2 className="mb-4 text-xl font-semibold">API Key Usage</h2>
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             <p>
               Include your API key in the{' '}
               <code className="mx-1 rounded bg-gray-100 px-1 py-0.5 font-mono dark:bg-gray-800">
@@ -290,7 +290,7 @@ export default function Page() {
           <ModalHeader>Create New API Key</ModalHeader>
           <ModalBody>
             {newlyCreatedKey ? (
-              <div className="space-y-4">
+              <div className="flex flex-col gap-4">
                 <div className="rounded-md bg-green-50 p-4 dark:bg-green-900/20">
                   <p className="font-medium text-green-800 dark:text-green-400">
                     API key created successfully!
@@ -327,7 +327,7 @@ export default function Page() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="flex flex-col gap-4">
                 <div>
                   <label htmlFor="api-key-name" className="mb-2 block text-sm font-medium">
                     API Key Name
