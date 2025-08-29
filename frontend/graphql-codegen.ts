@@ -1,12 +1,8 @@
 import { CodegenConfig } from '@graphql-codegen/cli'
 
 const PUBLIC_API_URL = process.env.PUBLIC_API_URL || 'http://localhost:8000'
-let csrfToken = null
 
-const fetchCsrfTokenServer = async (): Promise<string> => {
-  if (csrfToken != null) {
-    return csrfToken
-  }
+const createCodegenConfig = async (): Promise<CodegenConfig> => {
   const response = await fetch(`${PUBLIC_API_URL}/csrf/`, {
     credentials: 'include',
     method: 'GET',
@@ -16,44 +12,41 @@ const fetchCsrfTokenServer = async (): Promise<string> => {
     throw new Error(`Failed to fetch CSRF token: ${response.status} ${response.statusText}`)
   }
   const data = await response.json()
-  csrfToken = data.csrftoken
+  const csrfToken = data.csrftoken
 
-  return data.csrftoken
-}
-
-const config: CodegenConfig = {
-  documents: ['src/**/*.{ts,tsx}'],
-  generates: {
-    './src/types/__generated__/graphql.ts': {
-      config: {
-        avoidOptionals: {
-          // Use `null` for nullable fields instead of optionals
-          field: true,
-          // Allow nullable input fields to remain unspecified
-          inputValue: false,
+  return {
+    documents: ['src/**/*.{ts,tsx}'],
+    generates: {
+      './src/types/__generated__/graphql.ts': {
+        config: {
+          avoidOptionals: {
+            // Use `null` for nullable fields instead of optionals
+            field: true,
+            // Allow nullable input fields to remain unspecified
+            inputValue: false,
+          },
+          // Use `unknown` instead of `any` for unconfigured scalars
+          defaultScalarType: 'unknown',
+          // Apollo Client always includes `__typename` fields
+          nonOptionalTypename: true,
+          // Apollo Client doesn't add the `__typename` field to root types so
+          // don't generate a type for the `__typename` for root operation types.
+          skipTypeNameForRoot: true,
         },
-        // Use `unknown` instead of `any` for unconfigured scalars
-        defaultScalarType: 'unknown',
-        // Apollo Client always includes `__typename` fields
-        nonOptionalTypename: true,
-        // Apollo Client doesn't add the `__typename` field to root types so
-        // don't generate a type for the `__typename` for root operation types.
-        skipTypeNameForRoot: true,
-      },
-      plugins: ['typescript', 'typescript-operations'],
-    },
-  },
-  // Don't exit with non-zero status when there are no documents
-  ignoreNoDocuments: true,
-  overwrite: true,
-  schema: {
-    [`${PUBLIC_API_URL}/graphql/`]: {
-      headers: {
-        Cookie: `csrftoken=${await fetchCsrfTokenServer()}`,
-        'x-csrftoken': `${await fetchCsrfTokenServer()}`,
+        plugins: ['typescript', 'typescript-operations'],
       },
     },
-  },
+    // Don't exit with non-zero status when there are no documents
+    ignoreNoDocuments: true,
+    overwrite: true,
+    schema: {
+      [`${PUBLIC_API_URL}/graphql/`]: {
+        headers: {
+          Cookie: `csrftoken=${csrfToken}`,
+          'x-csrftoken': `${csrfToken}`,
+        },
+      },
+    },
+  }
 }
-
-export default config
+export default await createCodegenConfig()
