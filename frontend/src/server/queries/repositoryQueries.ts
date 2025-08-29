@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client'
 
 export const GET_REPOSITORY_DATA = gql`
-  query GetRepository($repositoryKey: String!, $organizationKey: String!) {
+  query GetRepositoryData($repositoryKey: String!, $organizationKey: String!) {
     repository(repositoryKey: $repositoryKey, organizationKey: $organizationKey) {
       commitsCount
       contributorsCount
@@ -85,7 +85,7 @@ export const GET_REPOSITORY_DATA = gql`
 `
 
 export const GET_REPOSITORY_METADATA = gql`
-  query GetRepository($repositoryKey: String!, $organizationKey: String!) {
+  query GetRepositoryMetadata($repositoryKey: String!, $organizationKey: String!) {
     repository(repositoryKey: $repositoryKey, organizationKey: $organizationKey) {
       description
       name

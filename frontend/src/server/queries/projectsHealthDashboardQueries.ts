@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client'
 
 export const GET_PROJECT_HEALTH_STATS = gql`
-  query {
+  query GetProjectHealthStats {
     projectHealthStats {
       averageScore
       monthlyOverallScores

@@ -55,7 +55,7 @@ export const GET_SNAPSHOT_DETAILS = gql`
 `
 
 export const GET_SNAPSHOT_DETAILS_METADATA = gql`
-  query GetSnapshotDetails($key: String!) {
+  query GetSnapshotDetailsMetadata($key: String!) {
     snapshot(key: $key) {
       title
     }

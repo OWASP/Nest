@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client'
 
 export const GET_ORGANIZATION_DATA = gql`
-  query GetOrganization($login: String!) {
+  query GetOrganizationData($login: String!) {
     organization(login: $login) {
       avatarUrl
       collaboratorsCount
@@ -95,7 +95,7 @@ export const GET_ORGANIZATION_DATA = gql`
 `
 
 export const GET_ORGANIZATION_METADATA = gql`
-  query GetOrganization($login: String!) {
+  query GetOrganizationMetadata($login: String!) {
     organization(login: $login) {
       description
       login
