@@ -22,21 +22,9 @@ const fetchCsrfTokenServer = async (): Promise<string> => {
 }
 
 const config: CodegenConfig = {
-  overwrite: true,
-  schema: {
-    [`${PUBLIC_API_URL}/graphql/`]: {
-      headers: {
-        Cookie: `csrftoken=${await fetchCsrfTokenServer()}`,
-        'x-csrftoken': `${await fetchCsrfTokenServer()}`,
-      },
-    },
-  },
   documents: ['src/**/*.{ts,tsx}'],
-  // Don't exit with non-zero status when there are no documents
-  ignoreNoDocuments: true,
   generates: {
     './src/types/__generated__/graphql.ts': {
-      plugins: ['typescript', 'typescript-operations'],
       config: {
         avoidOptionals: {
           // Use `null` for nullable fields instead of optionals
@@ -51,6 +39,18 @@ const config: CodegenConfig = {
         // Apollo Client doesn't add the `__typename` field to root types so
         // don't generate a type for the `__typename` for root operation types.
         skipTypeNameForRoot: true,
+      },
+      plugins: ['typescript', 'typescript-operations'],
+    },
+  },
+  // Don't exit with non-zero status when there are no documents
+  ignoreNoDocuments: true,
+  overwrite: true,
+  schema: {
+    [`${PUBLIC_API_URL}/graphql/`]: {
+      headers: {
+        Cookie: `csrftoken=${await fetchCsrfTokenServer()}`,
+        'x-csrftoken': `${await fetchCsrfTokenServer()}`,
       },
     },
   },
