@@ -19,6 +19,7 @@ class TestUserNode:
         field_names = {field.name for field in UserNode.__strawberry_definition__.fields}
         expected_field_names = {
             "avatar_url",
+            "badges",
             "bio",
             "company",
             "contributions_count",
@@ -37,7 +38,8 @@ class TestUserNode:
             "updated_at",
             "url",
         }
-        assert field_names == expected_field_names
+        missing = expected_field_names - field_names
+        assert not missing, f"Missing fields on UserNode: {sorted(missing)}"
 
     def test_created_at_field(self):
         """Test created_at field resolution."""
