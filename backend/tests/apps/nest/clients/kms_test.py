@@ -38,3 +38,11 @@ class TestKmsClient:
         decrypted = self.kms_client.decrypt(b"encrypted")
         assert decrypted == "test"
         self.mock_kms_client.decrypt.assert_called_once_with(CiphertextBlob=b"encrypted")
+
+    @override_settings(AWS_REGION="us-west-2", AWS_KMS_KEY_ID="test_key_id")
+    def test_singleton(self):
+        """Test singleton behavior."""
+        instance1 = KmsClient()
+        instance2 = KmsClient()
+        assert instance1 is instance2
+        assert instance1.client is instance2.client
