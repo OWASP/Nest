@@ -33,6 +33,10 @@ owasp-update-project-health-metrics:
 	@echo "Updating OWASP project health metrics"
 	@CMD="python manage.py owasp_update_project_health_metrics" $(MAKE) exec-backend-command
 
+owasp-sync-official-project-levels:
+	@echo "Syncing official OWASP project levels"
+	@CMD="python manage.py owasp_update_project_health_metrics --sync-official-levels-only" $(MAKE) exec-backend-command
+
 owasp-update-project-health-requirements:
 	@echo "Updating OWASP project health requirements"
 	@CMD="python manage.py owasp_update_project_health_requirements" $(MAKE) exec-backend-command
