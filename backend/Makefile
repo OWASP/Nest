@@ -110,6 +110,7 @@ shell-db:
 sync-data: \
 	update-data \
 	enrich-data \
+	owasp-update-badges \
 	index-data
 
 test-backend:
@@ -135,6 +136,7 @@ update-data: \
 	github-update-users \
 	owasp-aggregate-projects \
 	owasp-update-events \
+	owasp-sync-awards \
 	owasp-sync-posts \
 	owasp-update-sponsors \
 	slack-sync-data
