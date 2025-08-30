@@ -70,6 +70,7 @@
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.34.0",
     "@graphql-codegen/cli": "^5.0.7",
+    "@graphql-codegen/near-operation-file-preset": "^3.1.0",
     "@graphql-codegen/typescript": "^4.1.6",
     "@graphql-codegen/typescript-operations": "^4.6.1",
     "@lhci/cli": "^0.15.1",
