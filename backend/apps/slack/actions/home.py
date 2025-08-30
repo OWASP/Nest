@@ -2,14 +2,16 @@
 
 import logging
 
+from django.core.exceptions import ValidationError
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import get_header, markdown
-from apps.slack.common.handlers import chapters, committees, contribute, projects
+from apps.slack.common.handlers import chapters, committees, contribute, google_sign_in, projects
 from apps.slack.common.presentation import EntityPresentation
 from apps.slack.constants import (
+    SIGN_IN_TO_GOOGLE_ACTION,
     VIEW_CHAPTERS_ACTION,
     VIEW_CHAPTERS_ACTION_NEXT,
     VIEW_CHAPTERS_ACTION_PREV,
@@ -78,6 +80,14 @@ def handle_home_actions(ack, body, client: WebClient) -> None:
                 VIEW_CONTRIBUTE_ACTION_NEXT,
             }:
                 blocks = contribute.get_blocks(page=page, limit=10, presentation=home_presentation)
+
+            case action if action == SIGN_IN_TO_GOOGLE_ACTION:
+                try:
+                    blocks = google_sign_in.get_blocks(slack_user_id=user_id)
+                except (ValueError, ValidationError):
+                    blocks = [markdown("Error signing in with Google")]
+                    logger.exception("Google authentication error for user {user_id}")
+
             case _:
                 blocks = [markdown("Invalid action, please try again.")]
 
@@ -98,6 +108,7 @@ def handle_home_actions(ack, body, client: WebClient) -> None:
 # Register the actions
 if SlackConfig.app:
     actions = (
+        SIGN_IN_TO_GOOGLE_ACTION,
         VIEW_CHAPTERS_ACTION_NEXT,
         VIEW_CHAPTERS_ACTION_PREV,
         VIEW_CHAPTERS_ACTION,
