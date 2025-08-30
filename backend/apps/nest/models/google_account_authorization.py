@@ -39,6 +39,7 @@ class GoogleAccountAuthorization(models.Model):
         models.CharField(max_length=255),
         blank=True,
         default=list,
+        verbose_name="OAuth Scopes",
     )
 
     # OTOs.
@@ -71,13 +72,13 @@ class GoogleAccountAuthorization(models.Model):
             logger.exception(error_message)
             raise ValidationError(error_message) from e
 
-        if GoogleAccountAuthorization.objects.filter(member=member).exists():
-            auth = GoogleAccountAuthorization.objects.get(member=member)
+        if auth := GoogleAccountAuthorization.objects.filter(member=member).first():
             if not auth.is_token_expired:
                 return auth
             try:
                 GoogleAccountAuthorization.refresh_access_token(auth)
             except ValidationError:
+                # If refresh fails, we need to reauthorize.
                 pass
             else:
                 return auth

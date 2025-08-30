@@ -25,6 +25,7 @@ urlpatterns = [
     path("idx/", csrf_protect(algolia_search)),
     path("graphql/", csrf_protect(GraphQLView.as_view(schema=schema, graphiql=settings.DEBUG))),
     path("api/v1/", api_v1.urls),
+    path("auth/google/callback/", google_auth_callback),
     path("a/", admin.site.urls),
     path("owasp/", include(owasp_urls)),
     path("status/", get_status),
@@ -38,7 +39,6 @@ if SlackConfig.app:
         path("integrations/slack/commands/", slack_request_handler),
         path("integrations/slack/events/", slack_request_handler),
         path("integrations/slack/interactivity/", slack_request_handler),
-        path("auth/google/callback/", google_auth_callback),
     ]
 
 if settings.DEBUG:

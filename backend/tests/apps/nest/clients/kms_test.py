@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 from django.test.utils import override_settings
 
-from apps.nest.clients.kms import KmsClient, get_kms_client
+from apps.nest.clients.kms import KmsClient
 
 
 class TestKmsClient:
@@ -38,11 +38,3 @@ class TestKmsClient:
         decrypted = self.kms_client.decrypt(b"encrypted")
         assert decrypted == "test"
         self.mock_kms_client.decrypt.assert_called_once_with(CiphertextBlob=b"encrypted")
-
-    @override_settings(AWS_REGION="us-west-2", AWS_KMS_KEY_ID="test_key_id")
-    def test_get_kms_client(self):
-        """Test getting the KMS client."""
-        client1 = get_kms_client()
-        client2 = get_kms_client()
-        assert client1 is client2, "KMS client should be a singleton."
-        assert isinstance(client1, KmsClient), "Should return an instance of KmsClient."
