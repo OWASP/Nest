@@ -15,8 +15,8 @@ jest.mock('next/navigation', () => ({
 jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))
-jest.mock('utils/credentials', () => ({
-  isGithubAuthEnabled: jest.fn(() => true),
+jest.mock('utils/env.server', () => ({
+  IS_GITHUB_AUTH_ENABLED: true,
 }))
 describe('LoginPage', () => {
   const pushMock = jest.fn()
