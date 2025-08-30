@@ -800,8 +800,8 @@ jobs:
           echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env.frontend
 
           # GitHub App private key
-          echo "$NEST_GITHUB_APP_PRIVATE_KEY" > .github.pem
-          chmod 600 .github.pem
+          install -m 600 /dev/null .github.pem
+          printf '%s' "$NEST_GITHUB_APP_PRIVATE_KEY" > .github.pem
 
       - name: Run Nest deploy
         working-directory: .github/ansible
