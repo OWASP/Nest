@@ -20,11 +20,6 @@ updates:
     schedule:
       interval: daily
 
-  - package-ecosystem: docker
-    directory: /schema/docker
-    schedule:
-      interval: daily
-
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -45,12 +40,6 @@ updates:
 
   - package-ecosystem: pip
     directory: /docs
-    schedule:
-      interval: daily
-    target-branch: main
-
-  - package-ecosystem: pip
-    directory: /schema
     schedule:
       interval: daily
     target-branch: main

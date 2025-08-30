@@ -80,6 +80,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: null,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       const { container } = render(<UserMenu isGitHubAuthEnabled={false} />)
@@ -88,8 +89,9 @@ describe('UserMenu Component', () => {
 
     it('renders with GitHub auth enabled', () => {
       mockUseSession.mockReturnValue({
-        session: null,
+        session: { user: null, expires: '2024-12-31' },
         isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -102,6 +104,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         isSyncing: true,
         session: null,
+        status: 'loading',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -115,6 +118,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: null,
         isSyncing: false,
+        status: 'unauthenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -128,6 +132,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: mockSession,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -144,6 +149,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: mockSession,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -164,6 +170,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: mockSession,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       const { container } = render(<UserMenu isGitHubAuthEnabled={false} />)
@@ -175,6 +182,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: null,
         isSyncing: false,
+        status: 'unauthenticated',
       })
 
       const { rerender } = render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -184,6 +192,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: mockSession,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       rerender(<UserMenu isGitHubAuthEnabled={true} />)
@@ -197,6 +206,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: null,
         isSyncing: false,
+        status: 'unauthenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -214,6 +224,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: mockSession,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -243,6 +254,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: mockSession,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -269,6 +281,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: mockSession,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       render(
@@ -301,6 +314,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: mockSession,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -331,6 +345,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: mockSession,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       const { rerender } = render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -378,6 +393,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: sessionWithoutImage,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -398,6 +414,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: sessionWithUndefinedImage,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -412,6 +429,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: null,
         isSyncing: false,
+        status: 'unauthenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -425,6 +443,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: mockSession,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -448,6 +467,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: mockSession,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       const { rerender } = render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -480,6 +500,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: null,
         isSyncing: false,
+        status: 'unauthenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -490,6 +511,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: undefined,
         isSyncing: false,
+        status: 'unauthenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -500,6 +522,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: { user: null, expires: '2024-12-31' },
         isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -512,6 +535,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: mockSession,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -536,6 +560,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: mockSession,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -550,6 +575,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: mockSession,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -573,6 +599,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: mockSession,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -585,6 +612,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: mockSession,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -605,6 +633,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: null,
         isSyncing: false,
+        status: 'unauthenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -615,10 +644,21 @@ describe('UserMenu Component', () => {
         'relative',
         'flex',
         'h-10',
-        'cursor-pointer',
         'items-center',
         'justify-center',
-        'gap-2'
+        'gap-2',
+        'rounded-md',
+        'bg-[#87a1bc]',
+        'p-4',
+        'text-sm',
+        'font-medium',
+        'text-black',
+        'hover:ring-1',
+        'hover:ring-[#b0c7de]',
+        'dark:bg-slate-900',
+        'dark:text-white',
+        'dark:hover:bg-slate-900/90',
+        'dark:hover:ring-[#46576b]'
       )
     })
 
@@ -626,6 +666,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: null,
         isSyncing: true,
+        status: 'unauthenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -641,6 +682,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: mockSession,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -649,13 +691,14 @@ describe('UserMenu Component', () => {
       expect(container).toHaveClass('relative', 'flex', 'items-center', 'justify-center')
 
       const avatarButton = screen.getByRole('button')
-      expect(avatarButton).toHaveClass('w-auto', 'focus:outline-none')
+      expect(avatarButton).toHaveClass('w-auto', 'focus:outline-hidden')
     })
 
     it('applies correct CSS classes to dropdown menu', async () => {
       mockUseSession.mockReturnValue({
         session: mockSession,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -686,6 +729,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: mockSession,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
@@ -715,6 +759,7 @@ describe('UserMenu Component', () => {
       mockUseSession.mockReturnValue({
         session: mockSession,
         isSyncing: false,
+        status: 'authenticated',
       })
 
       const { unmount } = render(<UserMenu isGitHubAuthEnabled={true} />)

@@ -12,7 +12,7 @@ interface SearchPageLayoutProps {
 
   onPageChange: (page: number) => void
   searchPlaceholder: string
-  empty: string
+  empty?: string
   indexName: string
   loadingImageUrl?: string
   children?: React.ReactNode
@@ -40,7 +40,7 @@ const SearchPageLayout = ({
     }
   }, [isLoaded, isFirstLoad])
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-normal p-5 text-text">
+    <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5">
       <div className="flex w-full items-center justify-center">
         <SearchBar
           isLoaded={isFirstLoad}
