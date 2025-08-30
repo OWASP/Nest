@@ -30,22 +30,24 @@ class GoogleAccountAuthorization(models.Model):
 
     class Meta:
         db_table = "nest_google_account_authorizations"
-        verbose_name_plural = "Google Accounts Authorizations"
+        verbose_name_plural = "Google Account Authorizations"
 
+    access_token = KmsEncryptedField(verbose_name="Access Token")
+    expires_at = models.DateTimeField(verbose_name="Token Expiry")
+    refresh_token = KmsEncryptedField(verbose_name="Refresh Token")
+    scope = ArrayField(
+        models.CharField(max_length=255),
+        blank=True,
+        default=list,
+    )
+
+    # OTOs.
     member = models.OneToOneField(
         "slack.Member",
         on_delete=models.CASCADE,
         related_name="google_account_authorization",
         verbose_name="Slack Member",
         null=True,
-    )
-    access_token = KmsEncryptedField(verbose_name="Access Token")
-    refresh_token = KmsEncryptedField(verbose_name="Refresh Token")
-    expires_at = models.DateTimeField(verbose_name="Token Expiry")
-    scope = ArrayField(
-        models.CharField(max_length=255),
-        blank=True,
-        default=list,
     )
 
     @staticmethod
@@ -61,12 +63,14 @@ class GoogleAccountAuthorization(models.Model):
             raise ValueError(AUTH_ERROR_MESSAGE)
         if not settings.IS_AWS_KMS_ENABLED:
             raise ValueError(KMS_ERROR_MESSAGE)
+
         try:
             member = Member.objects.get(slack_user_id=slack_user_id)
         except Member.DoesNotExist as e:
             error_message = f"Member with Slack ID {slack_user_id} does not exist."
             logger.exception(error_message)
             raise ValidationError(error_message) from e
+
         if GoogleAccountAuthorization.objects.filter(member=member).exists():
             auth = GoogleAccountAuthorization.objects.get(member=member)
             if not auth.is_token_expired:
@@ -77,8 +81,10 @@ class GoogleAccountAuthorization(models.Model):
                 pass
             else:
                 return auth
+
         flow = GoogleAccountAuthorization.get_flow()
         flow.redirect_uri = settings.GOOGLE_AUTH_REDIRECT_URI
+
         return flow.authorization_url(
             access_type="offline",
             prompt="consent",
@@ -95,9 +101,9 @@ class GoogleAccountAuthorization(models.Model):
         if not settings.IS_AWS_KMS_ENABLED:
             logger.exception(KMS_ERROR_MESSAGE)
             raise ValueError(KMS_ERROR_MESSAGE)
+
         parsed_url = urlparse(auth_response)
-        state = parse_qs(parsed_url.query).get("state", [None])[0]
-        if not state:
+        if not (state := parse_qs(parsed_url.query).get("state", [None])[0]):
             error_message = "State parameter is missing in the authentication response."
             raise ValidationError(error_message)
 
@@ -114,7 +120,8 @@ class GoogleAccountAuthorization(models.Model):
             error_message = f"Member with Slack ID {member_id} does not exist."
             logger.exception(error_message)
             raise ValidationError(error_message) from e
-        # This is the first time authorization, so we need to fetch a new token
+
+        # This is the first time authorization, so we need to fetch a new token.
         flow = GoogleAccountAuthorization.get_flow()
         flow.redirect_uri = settings.GOOGLE_AUTH_REDIRECT_URI
         flow.fetch_token(authorization_response=auth_response)
@@ -127,8 +134,8 @@ class GoogleAccountAuthorization(models.Model):
             member=member,
             defaults={
                 "access_token": flow.credentials.token,
-                "refresh_token": flow.credentials.refresh_token,
                 "expires_at": expires_at,
+                "refresh_token": flow.credentials.refresh_token,
                 "scope": settings.GOOGLE_AUTH_SCOPES,
             },
         )
@@ -164,25 +171,30 @@ class GoogleAccountAuthorization(models.Model):
         if not auth.refresh_token:
             refresh_error = "Google OAuth refresh token is not set or expired."
             raise ValidationError(refresh_error)
+
         credentials = Credentials(
-            token=auth.access_token,
-            refresh_token=auth.refresh_token,
-            token_uri=settings.GOOGLE_AUTH_TOKEN_URI,
             client_id=settings.GOOGLE_AUTH_CLIENT_ID,
             client_secret=settings.GOOGLE_AUTH_CLIENT_SECRET,
+            refresh_token=auth.refresh_token,
+            token_uri=settings.GOOGLE_AUTH_TOKEN_URI,
+            token=auth.access_token,
         )
+
         try:
             credentials.refresh(Request())
         except RefreshError as e:
             error_message = "Error refreshing Google OAuth token"
             logger.exception(error_message)
             raise ValidationError(error_message) from e
+
         auth.access_token = credentials.token
         expires_at = credentials.expiry
+
         if expires_at and timezone.is_naive(expires_at):
             expires_at = timezone.make_aware(expires_at)
         if credentials.refresh_token:
             auth.refresh_token = credentials.refresh_token
+
         auth.expires_at = expires_at
         auth.save()
 

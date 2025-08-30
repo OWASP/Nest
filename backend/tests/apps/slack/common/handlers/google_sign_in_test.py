@@ -16,7 +16,7 @@ class TestGoogleSignInHandler:
         blocks = get_blocks("test_slack_user_id")
         mock_auth.assert_called_once_with("test_slack_user_id")
         assert blocks == [
-            markdown("Please sign in to Google: <test_url|Click here>"),
+            markdown("Please sign in with Google on <test_url|this page>"),
         ]
 
     @patch("apps.nest.models.google_account_authorization.GoogleAccountAuthorization.authorize")
@@ -25,4 +25,4 @@ class TestGoogleSignInHandler:
         mock_auth.return_value = Mock()
         blocks = get_blocks("test_slack_user_id")
         mock_auth.assert_called_once_with("test_slack_user_id")
-        assert blocks == [markdown("✅ You are already signed in to Google.")]
+        assert blocks == [markdown("✅ You are already signed in.")]

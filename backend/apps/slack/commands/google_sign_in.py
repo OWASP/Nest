@@ -10,6 +10,8 @@ class GoogleSignIn(CommandBase):
     @property
     def command_name(self):
         """Return the command name."""
+        # TODO(arkid15r): change command to something more related to OWASP Nest
+        # (e.g. /nest or /nestbot).
         return "/google-sign-in"
 
     def render_blocks(self, command):

@@ -80,6 +80,7 @@ def handle_home_actions(ack, body, client: WebClient) -> None:
                 VIEW_CONTRIBUTE_ACTION_NEXT,
             }:
                 blocks = contribute.get_blocks(page=page, limit=10, presentation=home_presentation)
+
             case action if action == SIGN_IN_TO_GOOGLE_ACTION:
                 try:
                     blocks = google_sign_in.get_blocks(slack_user_id=user_id)
@@ -107,6 +108,7 @@ def handle_home_actions(ack, body, client: WebClient) -> None:
 # Register the actions
 if SlackConfig.app:
     actions = (
+        SIGN_IN_TO_GOOGLE_ACTION,
         VIEW_CHAPTERS_ACTION_NEXT,
         VIEW_CHAPTERS_ACTION_PREV,
         VIEW_CHAPTERS_ACTION,
@@ -119,7 +121,6 @@ if SlackConfig.app:
         VIEW_PROJECTS_ACTION_NEXT,
         VIEW_PROJECTS_ACTION_PREV,
         VIEW_PROJECTS_ACTION,
-        SIGN_IN_TO_GOOGLE_ACTION,
     )
     for action in actions:
         SlackConfig.app.action(action)(handle_home_actions)

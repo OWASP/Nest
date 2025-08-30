@@ -17,11 +17,10 @@ def get_blocks(slack_user_id: str):
 
     auth = GoogleAccountAuthorization.authorize(slack_user_id)
 
-    if isinstance(auth, tuple):
-        # If auth is a tuple, it contains (authorization_url, state)
-        authorization_url = auth[0]
-        return [
-            markdown(f"Please sign in to Google: <{authorization_url}|Click here>"),
-        ]
-
-    return [markdown("✅ You are already signed in to Google.")]
+    return [
+        markdown(
+            f"Please sign in with Google on <{auth[0]}|this page>"
+            if isinstance(auth, tuple)
+            else "✅ You are already signed in."
+        ),
+    ]

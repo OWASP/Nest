@@ -89,7 +89,7 @@ def get_header() -> list[dict[str, Any]]:
                     "type": "button",
                     "text": {
                         "type": "plain_text",
-                        "text": "Sign In to Google",
+                        "text": "Sign in with Google",
                         "emoji": True,
                     },
                     "value": "sign_in_to_google",

@@ -9,10 +9,10 @@ def get_google_auth_client() -> Flow:
     return Flow.from_client_config(
         client_config={
             "web": {
+                "auth_uri": settings.GOOGLE_AUTH_AUTH_URI,
                 "client_id": settings.GOOGLE_AUTH_CLIENT_ID,
                 "client_secret": settings.GOOGLE_AUTH_CLIENT_SECRET,
                 "redirect_uris": [settings.GOOGLE_AUTH_REDIRECT_URI],
-                "auth_uri": settings.GOOGLE_AUTH_AUTH_URI,
                 "token_uri": settings.GOOGLE_AUTH_TOKEN_URI,
             }
         },

@@ -18,13 +18,16 @@ class KmsClient:
 
     def decrypt(self, text: bytes) -> str:
         """Decrypt the ciphertext using KMS."""
-        return self.client.decrypt(CiphertextBlob=text)["Plaintext"].decode("utf-8")
+        return self.client.decrypt(
+            CiphertextBlob=text,
+        )["Plaintext"].decode("utf-8")
 
     def encrypt(self, text: str) -> bytes:
         """Encrypt the plaintext using KMS."""
-        return self.client.encrypt(KeyId=settings.AWS_KMS_KEY_ID, Plaintext=text.encode("utf-8"))[
-            "CiphertextBlob"
-        ]
+        return self.client.encrypt(
+            KeyId=settings.AWS_KMS_KEY_ID,
+            Plaintext=text.encode("utf-8"),
+        )["CiphertextBlob"]
 
 
 _kms_client = None
