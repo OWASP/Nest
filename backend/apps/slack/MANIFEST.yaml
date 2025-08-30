@@ -26,6 +26,9 @@ features:
       description: chapters
       usage_hint: --help
       should_escape: false
+    - command: /google-sign-in
+      url: https://nest.owasp.org/integrations/slack/commands/
+      description: sign in to google
     - command: /gsoc
       url: https://nest.owasp.org/integrations/slack/commands/
       description: get started with GSoC 2025
