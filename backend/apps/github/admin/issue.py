@@ -17,7 +17,6 @@ class IssueAdmin(admin.ModelAdmin):
     )
     list_display = (
         "repository",
-        "created_at",
         "title",
         "custom_field_github_url",
     )

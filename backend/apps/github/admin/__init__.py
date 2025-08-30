@@ -1,5 +1,6 @@
 """Github app admin."""
 
+from .comment import CommentAdmin
 from .issue import IssueAdmin
 from .label import LabelAdmin
 from .milestone import MilestoneAdmin
