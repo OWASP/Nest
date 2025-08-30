@@ -3,10 +3,7 @@ import { heroui } from '@heroui/react'
 import tailwindcssAnimate from 'tailwindcss-animate'
 
 export default {
-  content: [
-    './src/**/*.{js,ts,jsx,tsx,mdx}',
-    './node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}',
-  ],
+  content: ['node_modules/@heroui/theme/dist/**/*.{js,jsx,ts,tsx}', 'src/**/*.{js,jsx,ts,tsx}'],
   theme: {
     extend: {
       colors: {
