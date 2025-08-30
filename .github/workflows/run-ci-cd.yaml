@@ -438,7 +438,6 @@ jobs:
           DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
           DJANGO_SLACK_BOT_TOKEN: ${{ secrets.DJANGO_SLACK_BOT_TOKEN }}
           DJANGO_SLACK_SIGNING_SECRET: ${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}
-          SLACK_BOT_TOKEN_T04T40NHX: ${{ secrets.SLACK_BOT_TOKEN_T04T40NHX }}
           NEXT_SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           NEXT_SERVER_CSRF_URL: ${{ secrets.NEXT_SERVER_CSRF_URL }}
           NEXT_SERVER_GITHUB_CLIENT_ID: ${{ secrets.NEST_GITHUB_CLIENT_ID }}
@@ -446,6 +445,7 @@ jobs:
           NEXT_SERVER_GRAPHQL_URL: ${{ secrets.NEXT_SERVER_GRAPHQL_URL }}
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
           NEXTAUTH_URL: ${{ secrets.VITE_API_URL }}
+          SLACK_BOT_TOKEN_T04T40NHX: ${{ secrets.SLACK_BOT_TOKEN_T04T40NHX }}
         run: |
           # Backend
           touch .env.backend
@@ -743,7 +743,7 @@ jobs:
           DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
           DJANGO_SLACK_BOT_TOKEN: ${{ secrets.DJANGO_SLACK_BOT_TOKEN }}
           DJANGO_SLACK_SIGNING_SECRET: ${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}
-          SLACK_BOT_TOKEN_T04T40NHX: ${{ secrets.SLACK_BOT_TOKEN_T04T40NHX }}
+          NEST_GITHUB_APP_PRIVATE_KEY: ${{ secrets.NEST_GITHUB_APP_PRIVATE_KEY }}
           NEXT_SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           NEXT_SERVER_CSRF_URL: ${{ secrets.NEXT_SERVER_CSRF_URL }}
           NEXT_SERVER_GITHUB_CLIENT_ID: ${{ secrets.NEST_GITHUB_CLIENT_ID }}
@@ -751,7 +751,7 @@ jobs:
           NEXT_SERVER_GRAPHQL_URL: ${{ secrets.NEXT_SERVER_GRAPHQL_URL }}
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
           NEXTAUTH_URL: ${{ secrets.VITE_API_URL }}
-          NEST_GITHUB_APP_PRIVATE_KEY: ${{ secrets.NEST_GITHUB_APP_PRIVATE_KEY }}
+          SLACK_BOT_TOKEN_T04T40NHX: ${{ secrets.SLACK_BOT_TOKEN_T04T40NHX }}
         run: |
           # Backend
           touch .env.backend
