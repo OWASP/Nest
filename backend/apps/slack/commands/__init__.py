@@ -10,6 +10,7 @@ from . import (
     contribute,
     donate,
     events,
+    google_sign_in,
     gsoc,
     jobs,
     leaders,
