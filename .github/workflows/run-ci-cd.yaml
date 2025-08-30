@@ -311,16 +311,18 @@ jobs:
           NEXT_PUBLIC_RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
           NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
         run: |
-          touch frontend/.env
-          echo "NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL" >> frontend/.env
-          echo "NEXT_PUBLIC_CSRF_URL=$NEXT_PUBLIC_CSRF_URL" >> frontend/.env
-          echo "NEXT_PUBLIC_ENVIRONMENT=$NEXT_PUBLIC_ENVIRONMENT" >> frontend/.env
-          echo "NEXT_PUBLIC_GRAPHQL_URL=$NEXT_PUBLIC_GRAPHQL_URL" >> frontend/.env
-          echo "NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID" >> frontend/.env
-          echo "NEXT_PUBLIC_IDX_URL=$NEXT_PUBLIC_IDX_URL" >> frontend/.env
-          echo "NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED=$NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED" >> frontend/.env
-          echo "NEXT_PUBLIC_RELEASE_VERSION=$NEXT_PUBLIC_RELEASE_VERSION" >> frontend/.env
-          echo "NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN" >> frontend/.env
+          umask 077
+          cat > frontend/.env <<EOF
+          NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+          NEXT_PUBLIC_CSRF_URL=$NEXT_PUBLIC_CSRF_URL
+          NEXT_PUBLIC_ENVIRONMENT=$NEXT_PUBLIC_ENVIRONMENT
+          NEXT_PUBLIC_GRAPHQL_URL=$NEXT_PUBLIC_GRAPHQL_URL
+          NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID
+          NEXT_PUBLIC_IDX_URL=$NEXT_PUBLIC_IDX_URL
+          NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED=$NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED
+          NEXT_PUBLIC_RELEASE_VERSION=$NEXT_PUBLIC_RELEASE_VERSION
+          NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
+          EOF
 
       - name: Get backend image size
         id: backend-size
@@ -411,10 +413,13 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 
       - name: Prepare SSH key
+        env:
+          NEST_SSH_PRIVATE_KEY: ${{ secrets.NEST_SSH_PRIVATE_KEY }}
+          NEST_SSH_PRIVATE_KEY_PATH: ${{ env.NEST_SSH_PRIVATE_KEY_PATH }}
         run: |
           mkdir -m 700 ~/.ssh
-          echo "${{ secrets.NEST_SSH_PRIVATE_KEY }}" > ${{ env.NEST_SSH_PRIVATE_KEY_PATH }}
-          chmod 400 ${{ env.NEST_SSH_PRIVATE_KEY_PATH }}
+          install -m 400 /dev/null "$NEST_SSH_PRIVATE_KEY_PATH"
+          printf '%s' "$NEST_SSH_PRIVATE_KEY" > "$NEST_SSH_PRIVATE_KEY_PATH"
 
       - name: Prepare secrets
         env:
@@ -448,48 +453,56 @@ jobs:
           SLACK_BOT_TOKEN_T04T40NHX: ${{ secrets.SLACK_BOT_TOKEN_T04T40NHX }}
         run: |
           # Backend
-          touch .env.backend
-          echo "DJANGO_ALGOLIA_APPLICATION_ID=$DJANGO_ALGOLIA_APPLICATION_ID" >> .env.backend
-          echo "DJANGO_ALGOLIA_WRITE_API_KEY=$DJANGO_ALGOLIA_WRITE_API_KEY" >> .env.backend
-          echo "DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS" >> .env.backend
-          echo "DJANGO_AWS_ACCESS_KEY_ID=$DJANGO_AWS_ACCESS_KEY_ID" >> .env.backend
-          echo "DJANGO_AWS_SECRET_ACCESS_KEY=$DJANGO_AWS_SECRET_ACCESS_KEY" >> .env.backend
-          echo "DJANGO_CONFIGURATION=$DJANGO_CONFIGURATION" >> .env.backend
-          echo "DJANGO_DB_HOST=$DJANGO_DB_HOST" >> .env.backend
-          echo "DJANGO_DB_NAME=$DJANGO_DB_NAME" >> .env.backend
-          echo "DJANGO_DB_PASSWORD=$DJANGO_DB_PASSWORD" >> .env.backend
-          echo "DJANGO_DB_PORT=$DJANGO_DB_PORT" >> .env.backend
-          echo "DJANGO_DB_USER=$DJANGO_DB_USER" >> .env.backend
-          echo "DJANGO_OPEN_AI_SECRET_KEY=$DJANGO_OPEN_AI_SECRET_KEY" >> .env.backend
-          echo "DJANGO_REDIS_HOST=$DJANGO_REDIS_HOST" >> .env.backend
-          echo "DJANGO_REDIS_PASSWORD=$DJANGO_REDIS_PASSWORD" >> .env.backend
-          echo "DJANGO_RELEASE_VERSION=$DJANGO_RELEASE_VERSION" >> .env.backend
-          echo "DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY" >> .env.backend
-          echo "DJANGO_SENTRY_DSN=$DJANGO_SENTRY_DSN" >> .env.backend
-          echo "DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE" >> .env.backend
-          echo "DJANGO_SLACK_BOT_TOKEN=$DJANGO_SLACK_BOT_TOKEN" >> .env.backend
-          echo "DJANGO_SLACK_SIGNING_SECRET=$DJANGO_SLACK_SIGNING_SECRET" >> .env.backend
-          echo "SLACK_BOT_TOKEN_T04T40NHX=$SLACK_BOT_TOKEN_T04T40NHX" >> .env.backend
+          umask 077
+          cat > .env.backend <<EOF
+          DJANGO_ALGOLIA_APPLICATION_ID=$DJANGO_ALGOLIA_APPLICATION_ID
+          DJANGO_ALGOLIA_WRITE_API_KEY=$DJANGO_ALGOLIA_WRITE_API_KEY
+          DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS
+          DJANGO_AWS_ACCESS_KEY_ID=$DJANGO_AWS_ACCESS_KEY_ID
+          DJANGO_AWS_SECRET_ACCESS_KEY=$DJANGO_AWS_SECRET_ACCESS_KEY
+          DJANGO_CONFIGURATION=$DJANGO_CONFIGURATION
+          DJANGO_DB_HOST=$DJANGO_DB_HOST
+          DJANGO_DB_NAME=$DJANGO_DB_NAME
+          DJANGO_DB_PASSWORD=$DJANGO_DB_PASSWORD
+          DJANGO_DB_PORT=$DJANGO_DB_PORT
+          DJANGO_DB_USER=$DJANGO_DB_USER
+          DJANGO_OPEN_AI_SECRET_KEY=$DJANGO_OPEN_AI_SECRET_KEY
+          DJANGO_REDIS_HOST=$DJANGO_REDIS_HOST
+          DJANGO_REDIS_PASSWORD=$DJANGO_REDIS_PASSWORD
+          DJANGO_RELEASE_VERSION=$DJANGO_RELEASE_VERSION
+          DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY
+          DJANGO_SENTRY_DSN=$DJANGO_SENTRY_DSN
+          DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
+          DJANGO_SLACK_BOT_TOKEN=$DJANGO_SLACK_BOT_TOKEN
+          DJANGO_SLACK_SIGNING_SECRET=$DJANGO_SLACK_SIGNING_SECRET
+          SLACK_BOT_TOKEN_T04T40NHX=$SLACK_BOT_TOKEN_T04T40NHX
+          EOF
 
           # Cache
-          touch .env.cache
-          echo "REDIS_PASSWORD=$DJANGO_REDIS_PASSWORD" >> .env.cache
+          umask 077
+          cat > .env.cache <<EOF
+          REDIS_PASSWORD=$DJANGO_REDIS_PASSWORD"
+          EOF
 
           # Database
-          touch .env.db
-          echo "POSTGRES_DB=$DJANGO_DB_NAME" >> .env.db
-          echo "POSTGRES_PASSWORD=$DJANGO_DB_PASSWORD" >> .env.db
-          echo "POSTGRES_USER=$DJANGO_DB_USER" >> .env.db
+          umask 077
+          cat > .env.db <<EOF
+          POSTGRES_DB=$DJANGO_DB_NAME
+          POSTGRES_PASSWORD=$DJANGO_DB_PASSWORD
+          POSTGRES_USER=$DJANGO_DB_USER
+          EOF
 
           # Frontend
-          touch .env.frontend
-          echo "NEXT_SENTRY_AUTH_TOKEN=$NEXT_SENTRY_AUTH_TOKEN" >> .env.frontend
-          echo "NEXT_SERVER_CSRF_URL=$NEXT_SERVER_CSRF_URL" >> .env.frontend
-          echo "NEXT_SERVER_GITHUB_CLIENT_ID=$NEXT_SERVER_GITHUB_CLIENT_ID" >> .env.frontend
-          echo "NEXT_SERVER_GITHUB_CLIENT_SECRET=$NEXT_SERVER_GITHUB_CLIENT_SECRET" >> .env.frontend
-          echo "NEXT_SERVER_GRAPHQL_URL=$NEXT_SERVER_GRAPHQL_URL" >> .env.frontend
-          echo "NEXTAUTH_SECRET=$NEXTAUTH_SECRET" >> .env.frontend
-          echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env.frontend
+          umask 077
+          cat > .env.frontend <<EOF
+          NEXT_SENTRY_AUTH_TOKEN=$NEXT_SENTRY_AUTH_TOKEN
+          NEXT_SERVER_CSRF_URL=$NEXT_SERVER_CSRF_URL
+          NEXT_SERVER_GITHUB_CLIENT_ID=$NEXT_SERVER_GITHUB_CLIENT_ID
+          NEXT_SERVER_GITHUB_CLIENT_SECRET=$NEXT_SERVER_GITHUB_CLIENT_SECRET
+          NEXT_SERVER_GRAPHQL_URL=$NEXT_SERVER_GRAPHQL_URL
+          NEXTAUTH_SECRET=$NEXTAUTH_SECRET
+          NEXTAUTH_URL=$NEXTAUTH_URL
+          EOF
 
       - name: Run Nest deploy
         working-directory: .github/ansible
@@ -513,10 +526,13 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 
       - name: Prepare SSH key
+        env:
+          PROXY_SSH_PRIVATE_KEY: ${{ secrets.PROXY_SSH_PRIVATE_KEY }}
+          PROXY_SSH_PRIVATE_KEY_PATH: ${{ env.PROXY_SSH_PRIVATE_KEY_PATH }}
         run: |
           mkdir -m 700 ~/.ssh
-          echo "${{ secrets.PROXY_SSH_PRIVATE_KEY }}" > ${{ env.PROXY_SSH_PRIVATE_KEY_PATH }}
-          chmod 400 ${{ env.PROXY_SSH_PRIVATE_KEY_PATH }}
+          install -m 400 /dev/null "$PROXY_SSH_PRIVATE_KEY_PATH"
+          printf '%s' "$PROXY_SSH_PRIVATE_KEY" > "$PROXY_SSH_PRIVATE_KEY_PATH"
 
       - name: Run proxy deploy
         working-directory: .github/ansible
@@ -618,16 +634,18 @@ jobs:
           NEXT_PUBLIC_RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
           NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
         run: |
-          touch frontend/.env
-          echo "NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL" >> frontend/.env
-          echo "NEXT_PUBLIC_CSRF_URL=$NEXT_PUBLIC_CSRF_URL" >> frontend/.env
-          echo "NEXT_PUBLIC_ENVIRONMENT=$NEXT_PUBLIC_ENVIRONMENT" >> frontend/.env
-          echo "NEXT_PUBLIC_GRAPHQL_URL=$NEXT_PUBLIC_GRAPHQL_URL" >> frontend/.env
-          echo "NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID" >> frontend/.env
-          echo "NEXT_PUBLIC_IDX_URL=$NEXT_PUBLIC_IDX_URL" >> frontend/.env
-          echo "NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED=$NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED" >> frontend/.env
-          echo "NEXT_PUBLIC_RELEASE_VERSION=$NEXT_PUBLIC_RELEASE_VERSION" >> frontend/.env
-          echo "NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN" >> frontend/.env
+          umask 077
+          cat > frontend/.env <<EOF
+          NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+          NEXT_PUBLIC_CSRF_URL=$NEXT_PUBLIC_CSRF_URL
+          NEXT_PUBLIC_ENVIRONMENT=$NEXT_PUBLIC_ENVIRONMENT
+          NEXT_PUBLIC_GRAPHQL_URL=$NEXT_PUBLIC_GRAPHQL_URL
+          NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID
+          NEXT_PUBLIC_IDX_URL=$NEXT_PUBLIC_IDX_URL
+          NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED=$NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED
+          NEXT_PUBLIC_RELEASE_VERSION=$NEXT_PUBLIC_RELEASE_VERSION
+          NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
+          EOF
 
       - name: Build frontend image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
@@ -714,10 +732,13 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 
       - name: Prepare SSH key
+        env:
+          NEST_SSH_PRIVATE_KEY: ${{ secrets.NEST_SSH_PRIVATE_KEY }}
+          NEST_SSH_PRIVATE_KEY_PATH: ${{ env.NEST_SSH_PRIVATE_KEY_PATH }}
         run: |
           mkdir -m 700 ~/.ssh
-          echo "${{ secrets.NEST_SSH_PRIVATE_KEY }}" > ${{ env.NEST_SSH_PRIVATE_KEY_PATH }}
-          chmod 400 ${{ env.NEST_SSH_PRIVATE_KEY_PATH }}
+          install -m 400 /dev/null "$NEST_SSH_PRIVATE_KEY_PATH"
+          printf '%s' "$NEST_SSH_PRIVATE_KEY" > "$NEST_SSH_PRIVATE_KEY_PATH"
 
       - name: Prepare secrets
         env:
@@ -754,50 +775,58 @@ jobs:
           SLACK_BOT_TOKEN_T04T40NHX: ${{ secrets.SLACK_BOT_TOKEN_T04T40NHX }}
         run: |
           # Backend
-          touch .env.backend
-          echo "DJANGO_ALGOLIA_APPLICATION_ID=$DJANGO_ALGOLIA_APPLICATION_ID" >> .env.backend
-          echo "DJANGO_ALGOLIA_WRITE_API_KEY=$DJANGO_ALGOLIA_WRITE_API_KEY" >> .env.backend
-          echo "DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS" >> .env.backend
-          echo "DJANGO_AWS_ACCESS_KEY_ID=$DJANGO_AWS_ACCESS_KEY_ID" >> .env.backend
-          echo "DJANGO_AWS_SECRET_ACCESS_KEY=$DJANGO_AWS_SECRET_ACCESS_KEY" >> .env.backend
-          echo "DJANGO_CONFIGURATION=$DJANGO_CONFIGURATION" >> .env.backend
-          echo "DJANGO_DB_HOST=$DJANGO_DB_HOST" >> .env.backend
-          echo "DJANGO_DB_NAME=$DJANGO_DB_NAME" >> .env.backend
-          echo "DJANGO_DB_PASSWORD=$DJANGO_DB_PASSWORD" >> .env.backend
-          echo "DJANGO_DB_PORT=$DJANGO_DB_PORT" >> .env.backend
-          echo "DJANGO_DB_USER=$DJANGO_DB_USER" >> .env.backend
-          echo "DJANGO_GITHUB_APP_ID=$DJANGO_GITHUB_APP_ID" >> .env.backend
-          echo "DJANGO_GITHUB_APP_INSTALLATION_ID=$DJANGO_GITHUB_APP_INSTALLATION_ID" >> .env.backend
-          echo "DJANGO_OPEN_AI_SECRET_KEY=$DJANGO_OPEN_AI_SECRET_KEY" >> .env.backend
-          echo "DJANGO_REDIS_HOST=$DJANGO_REDIS_HOST" >> .env.backend
-          echo "DJANGO_REDIS_PASSWORD=$DJANGO_REDIS_PASSWORD" >> .env.backend
-          echo "DJANGO_RELEASE_VERSION=$DJANGO_RELEASE_VERSION" >> .env.backend
-          echo "DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY" >> .env.backend
-          echo "DJANGO_SENTRY_DSN=$DJANGO_SENTRY_DSN" >> .env.backend
-          echo "DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE" >> .env.backend
-          echo "DJANGO_SLACK_BOT_TOKEN=$DJANGO_SLACK_BOT_TOKEN" >> .env.backend
-          echo "DJANGO_SLACK_SIGNING_SECRET=$DJANGO_SLACK_SIGNING_SECRET" >> .env.backend
-          echo "SLACK_BOT_TOKEN_T04T40NHX=$SLACK_BOT_TOKEN_T04T40NHX" >> .env.backend
+          umask 077
+          cat > .env.backend <<EOF
+          DJANGO_ALGOLIA_APPLICATION_ID=$DJANGO_ALGOLIA_APPLICATION_ID
+          DJANGO_ALGOLIA_WRITE_API_KEY=$DJANGO_ALGOLIA_WRITE_API_KEY
+          DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS
+          DJANGO_AWS_ACCESS_KEY_ID=$DJANGO_AWS_ACCESS_KEY_ID
+          DJANGO_AWS_SECRET_ACCESS_KEY=$DJANGO_AWS_SECRET_ACCESS_KEY
+          DJANGO_CONFIGURATION=$DJANGO_CONFIGURATION
+          DJANGO_DB_HOST=$DJANGO_DB_HOST
+          DJANGO_DB_NAME=$DJANGO_DB_NAME
+          DJANGO_DB_PASSWORD=$DJANGO_DB_PASSWORD
+          DJANGO_DB_PORT=$DJANGO_DB_PORT
+          DJANGO_DB_USER=$DJANGO_DB_USER
+          DJANGO_GITHUB_APP_ID=$DJANGO_GITHUB_APP_ID
+          DJANGO_GITHUB_APP_INSTALLATION_ID=$DJANGO_GITHUB_APP_INSTALLATION_ID
+          DJANGO_OPEN_AI_SECRET_KEY=$DJANGO_OPEN_AI_SECRET_KEY
+          DJANGO_REDIS_HOST=$DJANGO_REDIS_HOST
+          DJANGO_REDIS_PASSWORD=$DJANGO_REDIS_PASSWORD
+          DJANGO_RELEASE_VERSION=$DJANGO_RELEASE_VERSION
+          DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY
+          DJANGO_SENTRY_DSN=$DJANGO_SENTRY_DSN
+          DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
+          DJANGO_SLACK_BOT_TOKEN=$DJANGO_SLACK_BOT_TOKEN
+          DJANGO_SLACK_SIGNING_SECRET=$DJANGO_SLACK_SIGNING_SECRET
+          SLACK_BOT_TOKEN_T04T40NHX=$SLACK_BOT_TOKEN_T04T40NHX
+          EOF
 
           # Cache
-          touch .env.cache
-          echo "REDIS_PASSWORD=$DJANGO_REDIS_PASSWORD" >> .env.cache
+          umask 077
+          cat > .env.cache <<EOF
+          REDIS_PASSWORD=$DJANGO_REDIS_PASSWORD
+          EOF
 
           # Database
-          touch .env.db
-          echo "POSTGRES_DB=$DJANGO_DB_NAME" >> .env.db
-          echo "POSTGRES_PASSWORD=$DJANGO_DB_PASSWORD" >> .env.db
-          echo "POSTGRES_USER=$DJANGO_DB_USER" >> .env.db
+          umask 077
+          cat > .env.db <<EOF
+          POSTGRES_DB=$DJANGO_DB_NAME
+          POSTGRES_PASSWORD=$DJANGO_DB_PASSWORD
+          POSTGRES_USER=$DJANGO_DB_USER
+          EOF
 
           # Frontend
-          touch .env.frontend
-          echo "NEXT_SENTRY_AUTH_TOKEN=$NEXT_SENTRY_AUTH_TOKEN" >> .env.frontend
-          echo "NEXT_SERVER_CSRF_URL=$NEXT_SERVER_CSRF_URL" >> .env.frontend
-          echo "NEXT_SERVER_GITHUB_CLIENT_ID=$NEXT_SERVER_GITHUB_CLIENT_ID" >> .env.frontend
-          echo "NEXT_SERVER_GITHUB_CLIENT_SECRET=$NEXT_SERVER_GITHUB_CLIENT_SECRET" >> .env.frontend
-          echo "NEXT_SERVER_GRAPHQL_URL=$NEXT_SERVER_GRAPHQL_URL" >> .env.frontend
-          echo "NEXTAUTH_SECRET=$NEXTAUTH_SECRET" >> .env.frontend
-          echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env.frontend
+          umask 077
+          cat > .env.frontend <<EOF
+          NEXT_SENTRY_AUTH_TOKEN=$NEXT_SENTRY_AUTH_TOKEN
+          NEXT_SERVER_CSRF_URL=$NEXT_SERVER_CSRF_URL
+          NEXT_SERVER_GITHUB_CLIENT_ID=$NEXT_SERVER_GITHUB_CLIENT_ID
+          NEXT_SERVER_GITHUB_CLIENT_SECRET=$NEXT_SERVER_GITHUB_CLIENT_SECRET
+          NEXT_SERVER_GRAPHQL_URL=$NEXT_SERVER_GRAPHQL_URL
+          NEXTAUTH_SECRET=$NEXTAUTH_SECRET
+          NEXTAUTH_URL=$NEXTAUTH_URL
+          EOF
 
           # GitHub App private key
           install -m 600 /dev/null .github.pem
@@ -825,10 +854,13 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 
       - name: Prepare SSH key
+        env:
+          PROXY_SSH_PRIVATE_KEY: ${{ secrets.PROXY_SSH_PRIVATE_KEY }}
+          PROXY_SSH_PRIVATE_KEY_PATH: ${{ env.PROXY_SSH_PRIVATE_KEY_PATH }}
         run: |
           mkdir -m 700 ~/.ssh
-          echo "${{ secrets.PROXY_SSH_PRIVATE_KEY }}" > ${{ env.PROXY_SSH_PRIVATE_KEY_PATH }}
-          chmod 400 ${{ env.PROXY_SSH_PRIVATE_KEY_PATH }}
+          install -m 400 /dev/null "$PROXY_SSH_PRIVATE_KEY_PATH"
+          printf '%s' "$PROXY_SSH_PRIVATE_KEY" > "$PROXY_SSH_PRIVATE_KEY_PATH"
 
       - name: Run proxy deploy
         working-directory: .github/ansible
