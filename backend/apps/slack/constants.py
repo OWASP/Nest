@@ -24,6 +24,8 @@ OWASP_THREAT_MODELING_CHANNEL_ID = "#C1CS3C6AF"
 
 OWASP_WORKSPACE_ID = "T04T40NHX"
 
+SIGN_IN_TO_GOOGLE_ACTION = "sign_in_to_google_action"
+
 VIEW_PROJECTS_ACTION = "view_projects_action"
 VIEW_PROJECTS_ACTION_NEXT = "view_projects_action_next"
 VIEW_PROJECTS_ACTION_PREV = "view_projects_action_prev"
