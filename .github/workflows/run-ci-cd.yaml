@@ -481,7 +481,7 @@ jobs:
           # Cache
           umask 077
           cat > .env.cache <<EOF
-          REDIS_PASSWORD=$DJANGO_REDIS_PASSWORD"
+          REDIS_PASSWORD=$DJANGO_REDIS_PASSWORD
           EOF
 
           # Database
