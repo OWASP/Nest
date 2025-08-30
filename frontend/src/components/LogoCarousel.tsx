@@ -22,7 +22,7 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
       <div className="relative overflow-hidden py-2">
         <div
           ref={scrollerRef}
-          className="animate-scroll flex w-full gap-6"
+          className="flex w-full animate-scroll gap-6"
           style={{ animationDuration: `${sponsors.length * 2}s` }}
         >
           {sponsors.map((sponsor, index) => (
@@ -53,13 +53,13 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
           ))}
         </div>
       </div>
-      <div className="text-muted-foreground mt-4 flex w-full flex-col items-center justify-center text-center text-sm">
+      <div className="mt-4 flex w-full flex-col items-center justify-center text-center text-sm text-muted-foreground">
         <p>
           These logos represent the corporate supporters, whose contributions fuel OWASP Foundation
           security initiatives. Visit{' '}
           <Link
             href="https://owasp.org/supporters/"
-            className="text-primary font-medium hover:underline"
+            className="font-medium text-primary hover:underline"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -71,7 +71,7 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
           If you're interested in sponsoring the OWASP Nest project ❤️{' '}
           <Link
             href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
-            className="text-primary font-medium hover:underline"
+            className="font-medium text-primary hover:underline"
             target="_blank"
             rel="noopener noreferrer"
           >

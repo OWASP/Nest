@@ -333,7 +333,7 @@
   }
 
   .dropdown-menu {
-    @apply absolute top-full left-0 mt-2 w-48 rounded-lg bg-white p-3 shadow-lg dark:bg-gray-800;
+    @apply absolute left-0 top-full mt-2 w-48 rounded-lg bg-white p-3 shadow-lg dark:bg-gray-800;
     @apply invisible opacity-0 transition-all duration-200 ease-in-out;
     @apply flex flex-col gap-2;
     /* Stack items vertically */
