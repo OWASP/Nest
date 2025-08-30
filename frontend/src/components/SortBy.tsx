@@ -58,7 +58,7 @@ const SortBy = ({
         >
           <button
             onClick={() => onOrderChange(selectedOrder === 'asc' ? 'desc' : 'asc')}
-            className="shadow-xs inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gray-200 p-0 hover:bg-gray-300 dark:bg-[#323232] dark:text-gray-300 dark:hover:bg-[#454545]"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gray-200 p-0 shadow-xs hover:bg-gray-300 dark:bg-[#323232] dark:text-gray-300 dark:hover:bg-[#454545]"
           >
             {selectedOrder === 'asc' ? (
               <FontAwesomeIcon
