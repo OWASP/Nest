@@ -46,12 +46,9 @@ class TestBadgeQueries:
     def test_badges_resolution(self, mock_manager):
         """Resolver should return badges ordered by weight and name."""
         mock_badge = MagicMock(spec=Badge)
-        mock_qs = MagicMock()
-        mock_manager.all.return_value = mock_qs
-        mock_qs.order_by.return_value = [mock_badge]
+        mock_manager.order_by.return_value = [mock_badge]
 
         result = BadgeQueries().badges()
 
         assert list(result) == [mock_badge]
-        mock_manager.all.assert_called_once_with()
-        mock_qs.order_by.assert_called_once_with("weight", "name")
+        mock_manager.order_by.assert_called_once_with("weight", "name")

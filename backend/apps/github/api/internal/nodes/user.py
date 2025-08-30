@@ -31,7 +31,7 @@ class UserNode:
     @strawberry.field
     def badges(self) -> list[BadgeNode]:
         """Return user badges."""
-        return (
+        user_badges = (
             self.badges.select_related("badge")
             .filter(is_active=True)
             .order_by(
@@ -39,6 +39,7 @@ class UserNode:
                 "badge__name",
             )
         )
+        return [ub.badge for ub in user_badges]
 
     @strawberry.field
     def created_at(self) -> float:
