@@ -62,7 +62,7 @@ const LoginPageContent: FC<LoginPageContentProps> = ({ isGitHubAuthEnabled }) =>
 
   return (
     <div className="flex min-h-[80vh] items-center justify-center">
-      <div className="bg-owasp-blue flex w-full max-w-sm flex-col gap-6 rounded-2xl border border-gray-200 p-8 shadow-xl dark:border-slate-700 dark:bg-slate-800">
+      <div className="flex w-full max-w-sm flex-col gap-6 rounded-2xl border border-gray-200 bg-owasp-blue p-8 shadow-xl dark:border-slate-700 dark:bg-slate-800">
         <h2 className="text-center text-2xl font-bold text-gray-900 dark:text-white">
           Welcome back
         </h2>

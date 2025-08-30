@@ -71,7 +71,7 @@ const ItemCardList = ({
                     </Link>
                   </Tooltip>
                 )}
-                <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
+                <h3 className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
                   <Link
                     className="text-blue-400 hover:underline"
                     href={item?.url || ''}
