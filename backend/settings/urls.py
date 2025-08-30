@@ -14,6 +14,7 @@ from strawberry.django.views import GraphQLView
 from apps.core.api.internal.algolia import algolia_search
 from apps.core.api.internal.csrf import get_csrf_token
 from apps.core.api.internal.status import get_status
+from apps.nest.views import google_auth_callback
 from apps.owasp.api.internal.views.urls import urlpatterns as owasp_urls
 from apps.slack.apps import SlackConfig
 from settings.api.v1 import api as api_v1
@@ -24,6 +25,7 @@ urlpatterns = [
     path("idx/", csrf_protect(algolia_search)),
     path("graphql/", csrf_protect(GraphQLView.as_view(schema=schema, graphiql=settings.DEBUG))),
     path("api/v1/", api_v1.urls),
+    path("auth/google/callback/", google_auth_callback),
     path("a/", admin.site.urls),
     path("owasp/", include(owasp_urls)),
     path("status/", get_status),
