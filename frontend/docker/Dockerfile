@@ -27,7 +27,7 @@ COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --ignore-scripts
 
-COPY --chmod=444 .env .pnpmrc next.config.ts postcss.config.js tailwind.config.js tsconfig.json ./
+COPY --chmod=444 .env .pnpmrc next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
 COPY --chmod=555 public public
 COPY --chmod=555 src src
 

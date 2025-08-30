@@ -29,7 +29,7 @@ const ProjectsDashboardNavBar: React.FC = () => {
         base: 'flex md:w-64 md:flex-col flex-row items-start justify-start py-4',
         item: [
           'data-[active=true]:bg-gray-200',
-          'data-[active=true]:dark:bg-gray-800',
+          'dark:data-[active=true]:bg-gray-800',
           'data-[active=true]:text-align-left',
           'w-full',
           'data-[active=true]:rounded',
