@@ -35,7 +35,7 @@ const eslintConfig = [
       'build',
       'dist',
       'next-env.d.ts',
-      'src/types/__generated__',
+      'src/types/__generated__/**/*',
     ],
   },
   js.configs.recommended,

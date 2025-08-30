@@ -4,7 +4,6 @@ const PUBLIC_API_URL = process.env.PUBLIC_API_URL || 'http://localhost:8000'
 
 const createCodegenConfig = async (): Promise<CodegenConfig> => {
   const response = await fetch(`${PUBLIC_API_URL}/csrf/`, {
-    credentials: 'include',
     method: 'GET',
   })
 
@@ -15,7 +14,7 @@ const createCodegenConfig = async (): Promise<CodegenConfig> => {
   const csrfToken = data.csrftoken
 
   return {
-    documents: ['src/**/*.{ts,tsx}'],
+    documents: ['src/**/*.{ts,tsx}', '!src/types/__generated__/**'],
     generates: {
       './src/types/__generated__/graphql.ts': {
         config: {
@@ -43,10 +42,11 @@ const createCodegenConfig = async (): Promise<CodegenConfig> => {
       [`${PUBLIC_API_URL}/graphql/`]: {
         headers: {
           Cookie: `csrftoken=${csrfToken}`,
-          'x-csrftoken': `${csrfToken}`,
+          'X-CSRFToken': csrfToken,
         },
       },
     },
   }
 }
+
 export default await createCodegenConfig()

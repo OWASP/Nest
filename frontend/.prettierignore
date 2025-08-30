@@ -1,3 +1,3 @@
 .pnpm-store/
 pnpm-lock.yaml
-src/types/__generated__/
+src/types/__generated__/**/*
