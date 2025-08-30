@@ -417,9 +417,10 @@ jobs:
           NEST_SSH_PRIVATE_KEY: ${{ secrets.NEST_SSH_PRIVATE_KEY }}
           NEST_SSH_PRIVATE_KEY_PATH: ${{ env.NEST_SSH_PRIVATE_KEY_PATH }}
         run: |
-          mkdir -m 700 ~/.ssh
-          install -m 400 /dev/null "$NEST_SSH_PRIVATE_KEY_PATH"
-          printf '%s' "$NEST_SSH_PRIVATE_KEY" > "$NEST_SSH_PRIVATE_KEY_PATH"
+          SSH_KEY_PATH="${NEST_SSH_PRIVATE_KEY_PATH/#\~/$HOME}"
+          mkdir -p -m 700 "$(dirname "$SSH_KEY_PATH")"
+          install -m 400 /dev/null "$SSH_KEY_PATH"
+          printf '%s' "$NEST_SSH_PRIVATE_KEY" > "$SSH_KEY_PATH"
 
       - name: Prepare secrets
         env:
@@ -530,9 +531,10 @@ jobs:
           PROXY_SSH_PRIVATE_KEY: ${{ secrets.PROXY_SSH_PRIVATE_KEY }}
           PROXY_SSH_PRIVATE_KEY_PATH: ${{ env.PROXY_SSH_PRIVATE_KEY_PATH }}
         run: |
-          mkdir -m 700 ~/.ssh
-          install -m 400 /dev/null "$PROXY_SSH_PRIVATE_KEY_PATH"
-          printf '%s' "$PROXY_SSH_PRIVATE_KEY" > "$PROXY_SSH_PRIVATE_KEY_PATH"
+          SSH_KEY_PATH="${PROXY_SSH_PRIVATE_KEY_PATH/#\~/$HOME}"
+          mkdir -p -m 700 "$(dirname "$SSH_KEY_PATH")"
+          install -m 400 /dev/null "$SSH_KEY_PATH"
+          printf '%s' "$PROXY_SSH_PRIVATE_KEY" > "$SSH_KEY_PATH"
 
       - name: Run proxy deploy
         working-directory: .github/ansible
@@ -736,9 +738,10 @@ jobs:
           NEST_SSH_PRIVATE_KEY: ${{ secrets.NEST_SSH_PRIVATE_KEY }}
           NEST_SSH_PRIVATE_KEY_PATH: ${{ env.NEST_SSH_PRIVATE_KEY_PATH }}
         run: |
-          mkdir -m 700 ~/.ssh
-          install -m 400 /dev/null "$NEST_SSH_PRIVATE_KEY_PATH"
-          printf '%s' "$NEST_SSH_PRIVATE_KEY" > "$NEST_SSH_PRIVATE_KEY_PATH"
+          SSH_KEY_PATH="${NEST_SSH_PRIVATE_KEY_PATH/#\~/$HOME}"
+          mkdir -p -m 700 "$(dirname "$SSH_KEY_PATH")"
+          install -m 400 /dev/null "$SSH_KEY_PATH"
+          printf '%s' "$NEST_SSH_PRIVATE_KEY" > "$SSH_KEY_PATH"
 
       - name: Prepare secrets
         env:
@@ -858,9 +861,10 @@ jobs:
           PROXY_SSH_PRIVATE_KEY: ${{ secrets.PROXY_SSH_PRIVATE_KEY }}
           PROXY_SSH_PRIVATE_KEY_PATH: ${{ env.PROXY_SSH_PRIVATE_KEY_PATH }}
         run: |
-          mkdir -m 700 ~/.ssh
-          install -m 400 /dev/null "$PROXY_SSH_PRIVATE_KEY_PATH"
-          printf '%s' "$PROXY_SSH_PRIVATE_KEY" > "$PROXY_SSH_PRIVATE_KEY_PATH"
+          SSH_KEY_PATH="${PROXY_SSH_PRIVATE_KEY_PATH/#\~/$HOME}"
+          mkdir -p -m 700 "$(dirname "$SSH_KEY_PATH")"
+          install -m 400 /dev/null "$SSH_KEY_PATH"
+          printf '%s' "$PROXY_SSH_PRIVATE_KEY" > "$SSH_KEY_PATH"
 
       - name: Run proxy deploy
         working-directory: .github/ansible
