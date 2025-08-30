@@ -20,16 +20,16 @@ export default function Footer() {
   }, [])
 
   return (
-    <footer className="mt-auto w-full border-t bg-slate-200 dark:bg-slate-800 xl:max-w-full">
-      <div className="grid w-full place-content-center gap-12 px-4 py-4 text-slate-800 dark:text-slate-200 md:py-8">
+    <footer className="mt-auto w-full border-t-1 border-t-slate-300 bg-slate-200 xl:max-w-full dark:border-t-slate-600 dark:bg-slate-800">
+      <div className="grid w-full place-content-center gap-6 px-4 py-4 text-slate-800 md:py-8 dark:text-slate-200">
         <div className="grid w-full sm:grid-cols-2 sm:gap-20 md:grid-cols-4">
           {footerSections.map((section: Section) => (
-            <div key={section.title} className="space-y-4">
+            <div key={section.title} className="flex flex-col gap-4">
               {/*link*/}
               <Button
                 disableAnimation
                 onPress={() => toggleSection(section.title)}
-                className="flex w-full items-center justify-between bg-transparent pl-0 text-left text-lg font-semibold focus:outline-none focus:ring-slate-400 lg:cursor-default"
+                className="flex w-full items-center justify-between bg-transparent pl-0 text-left text-lg font-semibold focus:ring-slate-400 focus:outline-hidden lg:cursor-default"
                 aria-expanded={openSection === section.title}
                 aria-controls={`footer-section-${section.title}`}
               >
@@ -44,7 +44,7 @@ export default function Footer() {
               </Button>
               <div
                 id={`footer-section-${section.title}`}
-                className={`space-y-2 overflow-hidden text-sm transition-all duration-300 ease-in-out lg:max-h-full ${
+                className={`flex flex-col gap-2 overflow-hidden text-sm transition-all duration-300 ease-in-out lg:max-h-full ${
                   openSection === section.title ? 'max-h-96' : 'max-h-0 lg:max-h-full'
                 }`}
               >
@@ -69,7 +69,7 @@ export default function Footer() {
         </div>
 
         {/* Social Media Icons Section */}
-        <div className="mb-0 flex justify-center space-x-6">
+        <div className="mb-0 flex flex-row justify-center gap-6">
           {footerIcons.map((social) => (
             <Link
               key={social.label}
