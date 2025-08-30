@@ -141,7 +141,7 @@ export default function Home() {
             <h1 className="text-3xl font-medium tracking-tighter sm:text-5xl md:text-6xl">
               Welcome to OWASP Nest
             </h1>
-            <p className="text-muted-foreground max-w-[700px] pt-6 md:text-xl">
+            <p className="max-w-[700px] pt-6 text-muted-foreground md:text-xl">
               Your gateway to OWASP. Discover, engage, and help shape the future!
             </p>
           </div>
@@ -255,7 +255,7 @@ export default function Home() {
               {data.recentProjects?.map((project) => (
                 <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <Link href={`/projects/${project.key}`} className="text-blue-400 hover:underline">
-                    <h3 className="mb-2 truncate text-lg font-semibold text-wrap md:text-nowrap">
+                    <h3 className="mb-2 truncate text-wrap text-lg font-semibold md:text-nowrap">
                       <TruncatedText text={project.name} />
                     </h3>
                   </Link>
@@ -369,7 +369,7 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="mt-8 mb-20">
+        <div className="mb-20 mt-8">
           <SecondaryCard className="text-center">
             <h3 className="mb-4 text-2xl font-semibold">Ready to Make a Difference?</h3>
             <p className="mb-6 text-gray-600 dark:text-gray-400">

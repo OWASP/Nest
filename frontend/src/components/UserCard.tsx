@@ -38,26 +38,26 @@ const UserCard = ({
         </div>
 
         <div className="text-center">
-          <h3 className="max-w-[250px] truncate text-lg font-semibold text-gray-900 sm:text-xl dark:text-white">
+          <h3 className="max-w-[250px] truncate text-lg font-semibold text-gray-900 dark:text-white sm:text-xl">
             {name}
           </h3>
-          <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 sm:text-base dark:text-gray-400">
+          <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
             {company || location || email || login}
           </p>
           {description && (
-            <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 sm:text-base dark:text-gray-400">
+            <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
               {description}
             </p>
           )}
           <div className="flex justify-center gap-3">
             {followersCount > 0 && (
-              <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 sm:text-base dark:text-gray-400">
+              <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
                 <FontAwesomeIcon icon={faUsers} className="mr-1 h-4 w-4" />
                 {millify(followersCount, { precision: 1 })}
               </p>
             )}
             {repositoriesCount > 0 && (
-              <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 sm:text-base dark:text-gray-400">
+              <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
                 <FontAwesomeIcon icon={faFolderOpen} className="mr-1 h-4 w-4" />
                 {millify(repositoriesCount, { precision: 1 })}
               </p>

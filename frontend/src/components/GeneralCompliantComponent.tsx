@@ -27,7 +27,7 @@ const GeneralCompliantComponent: FC<{
         />
         <FontAwesomeIcon
           icon={icon}
-          className={clsx('absolute top-1/2 left-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2', {
+          className={clsx('absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2', {
             'text-green-900/90': compliant,
             'text-red-900/90': !compliant,
           })}

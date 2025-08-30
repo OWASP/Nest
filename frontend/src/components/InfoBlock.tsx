@@ -27,7 +27,7 @@ const InfoBlock = ({
 
   return (
     <div className={`flex ${className}`}>
-      <FontAwesomeIcon icon={icon} className="mt-1 mr-3 w-5" />
+      <FontAwesomeIcon icon={icon} className="mr-3 mt-1 w-5" />
       <div>
         <div className="text-sm md:text-base">
           {label && <div className="text-sm font-medium">{label}</div>}
