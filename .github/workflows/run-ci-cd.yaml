@@ -311,7 +311,7 @@ jobs:
           NEXT_PUBLIC_RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
           NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
         run: |
-          umask 077
+          umask 377
           cat > frontend/.env <<EOF
           NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
           NEXT_PUBLIC_CSRF_URL=$NEXT_PUBLIC_CSRF_URL
@@ -419,8 +419,10 @@ jobs:
         run: |
           SSH_KEY_PATH="${NEST_SSH_PRIVATE_KEY_PATH/#\~/$HOME}"
           mkdir -p -m 700 "$(dirname "$SSH_KEY_PATH")"
-          install -m 400 /dev/null "$SSH_KEY_PATH"
-          printf '%s' "$NEST_SSH_PRIVATE_KEY" > "$SSH_KEY_PATH"
+          umask 377
+          cat > "$SSH_KEY_PATH" <<EOF
+          $NEST_SSH_PRIVATE_KEY
+          EOF
 
       - name: Prepare secrets
         env:
@@ -454,7 +456,7 @@ jobs:
           SLACK_BOT_TOKEN_T04T40NHX: ${{ secrets.SLACK_BOT_TOKEN_T04T40NHX }}
         run: |
           # Backend
-          umask 077
+          umask 377
           cat > .env.backend <<EOF
           DJANGO_ALGOLIA_APPLICATION_ID=$DJANGO_ALGOLIA_APPLICATION_ID
           DJANGO_ALGOLIA_WRITE_API_KEY=$DJANGO_ALGOLIA_WRITE_API_KEY
@@ -480,13 +482,13 @@ jobs:
           EOF
 
           # Cache
-          umask 077
+          umask 377
           cat > .env.cache <<EOF
           REDIS_PASSWORD=$DJANGO_REDIS_PASSWORD
           EOF
 
           # Database
-          umask 077
+          umask 377
           cat > .env.db <<EOF
           POSTGRES_DB=$DJANGO_DB_NAME
           POSTGRES_PASSWORD=$DJANGO_DB_PASSWORD
@@ -494,7 +496,7 @@ jobs:
           EOF
 
           # Frontend
-          umask 077
+          umask 377
           cat > .env.frontend <<EOF
           NEXT_SENTRY_AUTH_TOKEN=$NEXT_SENTRY_AUTH_TOKEN
           NEXT_SERVER_CSRF_URL=$NEXT_SERVER_CSRF_URL
@@ -533,8 +535,10 @@ jobs:
         run: |
           SSH_KEY_PATH="${PROXY_SSH_PRIVATE_KEY_PATH/#\~/$HOME}"
           mkdir -p -m 700 "$(dirname "$SSH_KEY_PATH")"
-          install -m 400 /dev/null "$SSH_KEY_PATH"
-          printf '%s' "$PROXY_SSH_PRIVATE_KEY" > "$SSH_KEY_PATH"
+          umask 377
+          cat > "$SSH_KEY_PATH" <<EOF
+          $PROXY_SSH_PRIVATE_KEY
+          EOF
 
       - name: Run proxy deploy
         working-directory: .github/ansible
@@ -636,7 +640,7 @@ jobs:
           NEXT_PUBLIC_RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
           NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
         run: |
-          umask 077
+          umask 377
           cat > frontend/.env <<EOF
           NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
           NEXT_PUBLIC_CSRF_URL=$NEXT_PUBLIC_CSRF_URL
@@ -740,8 +744,10 @@ jobs:
         run: |
           SSH_KEY_PATH="${NEST_SSH_PRIVATE_KEY_PATH/#\~/$HOME}"
           mkdir -p -m 700 "$(dirname "$SSH_KEY_PATH")"
-          install -m 400 /dev/null "$SSH_KEY_PATH"
-          printf '%s' "$NEST_SSH_PRIVATE_KEY" > "$SSH_KEY_PATH"
+          umask 377
+          cat > "$SSH_KEY_PATH" <<EOF
+          $NEST_SSH_PRIVATE_KEY
+          EOF
 
       - name: Prepare secrets
         env:
@@ -778,7 +784,7 @@ jobs:
           SLACK_BOT_TOKEN_T04T40NHX: ${{ secrets.SLACK_BOT_TOKEN_T04T40NHX }}
         run: |
           # Backend
-          umask 077
+          umask 377
           cat > .env.backend <<EOF
           DJANGO_ALGOLIA_APPLICATION_ID=$DJANGO_ALGOLIA_APPLICATION_ID
           DJANGO_ALGOLIA_WRITE_API_KEY=$DJANGO_ALGOLIA_WRITE_API_KEY
@@ -806,13 +812,13 @@ jobs:
           EOF
 
           # Cache
-          umask 077
+          umask 377
           cat > .env.cache <<EOF
           REDIS_PASSWORD=$DJANGO_REDIS_PASSWORD
           EOF
 
           # Database
-          umask 077
+          umask 377
           cat > .env.db <<EOF
           POSTGRES_DB=$DJANGO_DB_NAME
           POSTGRES_PASSWORD=$DJANGO_DB_PASSWORD
@@ -820,7 +826,7 @@ jobs:
           EOF
 
           # Frontend
-          umask 077
+          umask 377
           cat > .env.frontend <<EOF
           NEXT_SENTRY_AUTH_TOKEN=$NEXT_SENTRY_AUTH_TOKEN
           NEXT_SERVER_CSRF_URL=$NEXT_SERVER_CSRF_URL
@@ -832,8 +838,10 @@ jobs:
           EOF
 
           # GitHub App private key
-          install -m 600 /dev/null .github.pem
-          printf '%s' "$NEST_GITHUB_APP_PRIVATE_KEY" > .github.pem
+          umask 377
+          cat > .github.pem <<EOF
+          "$NEST_GITHUB_APP_PRIVATE_KEY"
+          EOF
 
       - name: Run Nest deploy
         working-directory: .github/ansible
@@ -863,8 +871,10 @@ jobs:
         run: |
           SSH_KEY_PATH="${PROXY_SSH_PRIVATE_KEY_PATH/#\~/$HOME}"
           mkdir -p -m 700 "$(dirname "$SSH_KEY_PATH")"
-          install -m 400 /dev/null "$SSH_KEY_PATH"
-          printf '%s' "$PROXY_SSH_PRIVATE_KEY" > "$SSH_KEY_PATH"
+          umask 377
+          cat > "$SSH_KEY_PATH" <<EOF
+          $PROXY_SSH_PRIVATE_KEY
+          EOF
 
       - name: Run proxy deploy
         working-directory: .github/ansible
