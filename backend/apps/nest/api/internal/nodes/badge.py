@@ -9,11 +9,11 @@ from apps.nest.models.badge import Badge
 @strawberry_django.type(
     Badge,
     fields=[
+        "css_class",
+        "description",
         "id",
         "name",
-        "description",
         "weight",
-        "css_class",
     ],
 )
 class BadgeNode(strawberry.relay.Node):
