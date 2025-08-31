@@ -51,8 +51,9 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
   }, [mobileMenuOpen])
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 w-full max-w-[100vw] bg-owasp-blue shadow-md dark:bg-slate-800">
-      {/* Desktop Navbar */}
+
+    <header className="bg-owasp-blue fixed inset-x-0 top-0 z-50 w-full shadow-md dark:bg-slate-800">
+
       <div className="flex h-16 w-full items-center px-4 max-md:justify-between" id="navbar-sticky">
         {/* Logo */}
         <Link href="/" onClick={() => setMobileMenuOpen(false)}>
@@ -99,7 +100,19 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                 </Link>
               ))}
           </div>
-        </nav>
+
+        </div>
+        <div className="flex items-center justify-normal gap-4">
+          <NavButton
+            href="https://github.com/OWASP/Nest"
+            defaultIcon={faRegularStar}
+            hoverIcon={faSolidStar}
+            defaultIconColor="#FDCE2D"
+            hoverIconColor="#FDCE2D"
+            text="Star"
+            className="hidden"
+          />
+
 
         {/* Desktop Actions */}
         <div className="flex items-center space-x-4">
@@ -125,39 +138,54 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           </Button>
           <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
           <ModeToggle />
-          <Button
-            onPress={toggleMobileMenu}
-            className="rounded bg-transparent p-2 text-slate-300 hover:bg-transparent hover:text-slate-100 focus:outline-none md:hidden"
-            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-          >
-            <FontAwesomeIcon icon={mobileMenuOpen ? faTimes : faBars} className="h-6 w-6" />
-          </Button>
+
+          <div className="md:hidden">
+            <Button
+              onPress={toggleMobileMenu}
+              className="bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus:outline-hidden"
+            >
+              <span className="sr-only">Open main menu</span>
+              {mobileMenuOpen ? (
+                <FontAwesomeIcon icon={faTimes} className="h-6 w-6" />
+              ) : (
+                <FontAwesomeIcon icon={faBars} className="h-6 w-6" />
+              )}
+            </Button>
+          </div>
         </div>
       </div>
+      <div
+        className={cn(
+          'bg-owasp-blue fixed inset-y-0 left-0 z-50 w-64 transform shadow-md transition-transform dark:bg-slate-800',
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
+        <div className="flex h-full flex-col justify-between gap-1 px-2 pt-2 pb-3">
+          {/* Logo */}
+          <div className="flex flex-col justify-center gap-1">
+            <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+              <div className="flex h-full items-center">
+                <Image
+                  width={64}
+                  height={64}
+                  priority={true}
+                  src={'/img/owasp_icon_white_sm.png'}
+                  className="hidden h-16 dark:block"
+                  alt="OWASP Logo"
+                />
+                <Image
+                  width={64}
+                  height={64}
+                  priority={true}
+                  src={'/img/owasp_icon_black_sm.png'}
+                  className="block h-16 dark:hidden"
+                  alt="OWASP Logo"
+                />
+                <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
+                  Nest
+                </div>
+              </div>
 
-      {/* Mobile Sidebar Menu */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-y-0 left-0 z-50 w-64 transform overflow-y-auto bg-owasp-blue px-2 pb-4 pt-2 shadow-md dark:bg-slate-800 md:hidden">
-          <div className="flex flex-col space-y-6">
-            {/* Mobile Logo */}
-            <Link href="/" onClick={toggleMobileMenu} className="flex items-center">
-              <Image
-                width={64}
-                height={64}
-                priority
-                src="/img/owasp_icon_white_sm.png"
-                className="hidden dark:block"
-                alt="OWASP Logo"
-              />
-              <Image
-                width={64}
-                height={64}
-                priority
-                src="/img/owasp_icon_black_sm.png"
-                className="block dark:hidden"
-                alt="OWASP Logo"
-              />
-              <span className="text-2xl text-slate-800 dark:text-slate-300">Nest</span>
             </Link>
 
             {/* Mobile Navigation */}

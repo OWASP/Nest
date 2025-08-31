@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import React from 'react'
-import { IS_GITHUB_AUTH_ENABLED } from 'utils/credentials'
+import { IS_GITHUB_AUTH_ENABLED } from 'utils/env.server'
 
 export default async function ApiKeysLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   if (!IS_GITHUB_AUTH_ENABLED) {

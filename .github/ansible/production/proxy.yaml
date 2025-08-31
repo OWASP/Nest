@@ -1,29 +1,17 @@
   - name: Deploy Production Nest Proxy
     hosts: production_nest_proxy
     tasks:
-      - name: Copy proxy docker-compose.yaml
-        ansible.builtin.copy:
-          src: '{{ github_workspace }}/proxy/docker-compose.yaml'
-          dest: ~/docker-compose.yaml
+      - name: Copy proxy configuration files
+        copy:
+          src: '{{ github_workspace }}/proxy/{{ item }}'
+          dest: ~/
           mode: '0644'
-
-      - name: Copy proxy configuration file
-        ansible.builtin.copy:
-          src: '{{ github_workspace }}/proxy/production.conf'
-          dest: ~/production.conf
-          mode: '0644'
-
-      - name: Copy headers.conf
-        ansible.builtin.copy:
-          src: '{{ github_workspace }}/proxy/headers.conf'
-          dest: ~/headers.conf
-          mode: '0644'
-
-      - name: Copy redirects.conf
-        ansible.builtin.copy:
-          src: '{{ github_workspace }}/proxy/redirects.conf'
-          dest: ~/redirects.conf
-          mode: '0644'
+        loop:
+          - blocked_ips.conf
+          - docker-compose.yaml
+          - headers.conf
+          - production.conf
+          - redirects.conf
 
       - name: Retart services
         shell:
