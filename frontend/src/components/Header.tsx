@@ -13,8 +13,6 @@ import { useEffect, useState } from 'react'
 import { desktopViewMinWidth, headerLinks } from 'utils/constants'
 import { cn } from 'utils/utility'
 import ModeToggle from 'components/ModeToggle'
-import NavButton from 'components/NavButton'
-import NavDropdown from 'components/NavDropDown'
 import UserMenu from 'components/UserMenu'
 
 export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthEnabled: boolean }) {
@@ -54,6 +52,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 w-full max-w-[100vw] bg-owasp-blue shadow-md dark:bg-slate-800">
+      {/* Desktop Navbar */}
       <div className="flex h-16 w-full items-center px-4 max-md:justify-between" id="navbar-sticky">
         {/* Logo */}
         <Link href="/" onClick={() => setMobileMenuOpen(false)}>
@@ -61,188 +60,177 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
             <Image
               width={64}
               height={64}
-              priority={true}
-              src={'/img/owasp_icon_white_sm.png'}
+              priority
+              src="/img/owasp_icon_white_sm.png"
               className="hidden dark:block"
               alt="OWASP Logo"
             />
             <Image
               width={64}
               height={64}
-              priority={true}
-              src={'/img/owasp_icon_black_sm.png'}
+              priority
+              src="/img/owasp_icon_black_sm.png"
               className="block dark:hidden"
               alt="OWASP Logo"
             />
-            <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
-              Nest
-            </div>
+            <span className="text-2xl text-slate-800 dark:text-slate-300">Nest</span>
           </div>
         </Link>
-        {/* Desktop Header Links */}
-        <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium md:block">
-          <div className="flex justify-start pl-6">
+
+        {/* Desktop Links */}
+        <nav className="hidden flex-1 justify-start pl-6 font-medium md:flex">
+          <div className="flex space-x-1">
             {headerLinks
               .filter((link) => {
-                if (link.requiresGitHubAuth) {
-                  return isGitHubAuthEnabled
-                }
+                if (link.requiresGitHubAuth) return isGitHubAuthEnabled
                 return true
               })
-              .map((link, i) => {
-                return link.submenu ? (
-                  <NavDropdown link={link} pathname={pathname} key={i} />
-                ) : (
-                  <Link
-                    key={link.text}
-                    href={link.href || '/'}
-                    className={cn(
-                      'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
-                      pathname === link.href && 'font-bold text-blue-800 dark:text-white'
-                    )}
-                    aria-current="page"
-                  >
-                    {link.text}
-                  </Link>
-                )
-              })}
+              .map((link) => (
+                <Link
+                  key={link.text}
+                  href={link.href || '/'}
+                  className={cn(
+                    'navlink px-3 py-2 text-sm text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                    pathname === link.href && 'font-bold text-blue-800 dark:text-white'
+                  )}
+                  aria-current={pathname === link.href ? 'page' : undefined}
+                >
+                  {link.text}
+                </Link>
+              ))}
           </div>
-        </div>
-        <div className="flex items-center justify-normal space-x-4">
-          <NavButton
-            href="https://github.com/OWASP/Nest"
-            defaultIcon={faRegularStar}
-            hoverIcon={faSolidStar}
-            defaultIconColor="#FDCE2D"
-            hoverIconColor="#FDCE2D"
-            text="Star"
-            className="hidden"
-          />
+        </nav>
 
-          <NavButton
+        {/* Desktop Actions */}
+        <div className="flex items-center space-x-4">
+          <Button
+            as="a"
+            href="https://github.com/OWASP/Nest"
+            variant="secondary"
+            size="sm"
+            className="hidden text-yellow-300 hover:text-yellow-200 md:flex"
+          >
+            <FontAwesomeIcon icon={faRegularStar} className="mr-1" />
+            Star
+          </Button>
+          <Button
+            as="a"
             href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
-            defaultIcon={faRegularHeart}
-            hoverIcon={faSolidHeart}
-            defaultIconColor="#b55f95"
-            hoverIconColor="#d9156c"
-            text="Sponsor"
-            className="hidden"
-          />
+            variant="secondary"
+            size="sm"
+            className="hidden text-pink-300 hover:text-pink-200 md:flex"
+          >
+            <FontAwesomeIcon icon={faRegularHeart} className="mr-1" />
+            Sponsor
+          </Button>
           <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
           <ModeToggle />
-          <div className="md:hidden">
-            <Button
-              onPress={toggleMobileMenu}
-              className="bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus:outline-none"
-            >
-              <span className="sr-only">Open main menu</span>
-              {mobileMenuOpen ? (
-                <FontAwesomeIcon icon={faTimes} className="h-6 w-6" />
-              ) : (
-                <FontAwesomeIcon icon={faBars} className="h-6 w-6" />
-              )}
-            </Button>
-          </div>
+          <Button
+            onPress={toggleMobileMenu}
+            className="rounded bg-transparent p-2 text-slate-300 hover:bg-transparent hover:text-slate-100 focus:outline-none md:hidden"
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+          >
+            <FontAwesomeIcon icon={mobileMenuOpen ? faTimes : faBars} className="h-6 w-6" />
+          </Button>
         </div>
       </div>
-      <div
-        className={cn(
-          'fixed inset-y-0 left-0 z-50 w-64 transform bg-owasp-blue shadow-md transition-transform dark:bg-slate-800',
-          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-        )}
-      >
-        <div className="flex h-full flex-col justify-between space-y-1 px-2 pb-3 pt-2">
-          {/* Logo */}
-          <div className="flex flex-col justify-center gap-1">
-            <Link href="/" onClick={() => setMobileMenuOpen(false)}>
-              <div className="flex h-full items-center">
-                <Image
-                  width={64}
-                  height={64}
-                  priority={true}
-                  src={'/img/owasp_icon_white_sm.png'}
-                  className="hidden h-16 dark:block"
-                  alt="OWASP Logo"
-                />
-                <Image
-                  width={64}
-                  height={64}
-                  priority={true}
-                  src={'/img/owasp_icon_black_sm.png'}
-                  className="block h-16 dark:hidden"
-                  alt="OWASP Logo"
-                />
-                <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
-                  Nest
-                </div>
-              </div>
-            </Link>
-            {headerLinks
-              .filter((link) => {
-                if (link.requiresGitHubAuth) {
-                  return isGitHubAuthEnabled
-                }
-                return true
-              })
-              .map((link) =>
-                link.submenu ? (
-                  <div key={link.text} className="flex flex-col">
-                    <div className="block px-3 py-2 font-medium text-slate-700 dark:text-slate-300">
-                      {link.text}
-                    </div>
-                    <div className="ml-4">
-                      {link.submenu.map((sub, i) => (
-                        <Link
-                          key={i}
-                          href={sub.href || '/'}
-                          className={cn(
-                            'block w-full px-4 py-2 text-left text-sm text-slate-700 transition duration-150 ease-in-out first:rounded-t-md last:rounded-b-md hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
-                            pathname === sub.href &&
-                              'bg-blue-50 font-medium text-blue-600 dark:bg-blue-900/20 dark:text-blue-200'
-                          )}
-                          onClick={toggleMobileMenu}
-                        >
-                          {sub.text}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <Link
-                    key={link.text}
-                    href={link.href || '/'}
-                    className={cn(
-                      'navlink block px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
-                      pathname === link.href && 'font-bold text-blue-800 dark:text-white'
-                    )}
-                    onClick={toggleMobileMenu}
-                  >
-                    {link.text}
-                  </Link>
-                )
-              )}
-          </div>
 
-          <div className="flex flex-col gap-y-2">
-            <NavButton
-              href="https://github.com/OWASP/Nest"
-              defaultIcon={faRegularStar}
-              hoverIcon={faSolidStar}
-              defaultIconColor="#FDCE2D"
-              hoverIconColor="#FDCE2D"
-              text="Star On Github"
-            />
-            <NavButton
-              href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
-              defaultIcon={faRegularHeart}
-              hoverIcon={faSolidHeart}
-              defaultIconColor="#b55f95"
-              hoverIconColor="#d9156c"
-              text="Sponsor Us"
-            />
+      {/* Mobile Sidebar Menu */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-y-0 left-0 z-50 w-64 transform overflow-y-auto bg-owasp-blue px-2 pb-4 pt-2 shadow-md dark:bg-slate-800 md:hidden">
+          <div className="flex flex-col space-y-6">
+            {/* Mobile Logo */}
+            <Link href="/" onClick={toggleMobileMenu} className="flex items-center">
+              <Image
+                width={64}
+                height={64}
+                priority
+                src="/img/owasp_icon_white_sm.png"
+                className="hidden dark:block"
+                alt="OWASP Logo"
+              />
+              <Image
+                width={64}
+                height={64}
+                priority
+                src="/img/owasp_icon_black_sm.png"
+                className="block dark:hidden"
+                alt="OWASP Logo"
+              />
+              <span className="text-2xl text-slate-800 dark:text-slate-300">Nest</span>
+            </Link>
+
+            {/* Mobile Navigation */}
+            <nav className="flex flex-col space-y-1">
+              {headerLinks
+                .filter((link) => {
+                  if (link.requiresGitHubAuth) return isGitHubAuthEnabled
+                  return true
+                })
+                .map((link) =>
+                  link.submenu ? (
+                    <div key={link.text} className="flex flex-col">
+                      <span className="px-3 py-2 font-medium text-slate-700 dark:text-slate-300">
+                        {link.text}
+                      </span>
+                      <div className="ml-4 space-y-1">
+                        {link.submenu.map((sub) => (
+                          <Link
+                            key={sub.text}
+                            href={sub.href || '/'}
+                            className={cn(
+                              'block rounded px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
+                              pathname === sub.href && 'bg-blue-50 font-medium text-blue-600 dark:bg-blue-900/20'
+                            )}
+                            onClick={toggleMobileMenu}
+                          >
+                            {sub.text}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <Link
+                      key={link.text}
+                      href={link.href || '/'}
+                      className={cn(
+                        'block rounded px-3 py-2 text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
+                        pathname === link.href && 'font-bold text-blue-800 dark:text-white'
+                      )}
+                      onClick={toggleMobileMenu}
+                    >
+                      {link.text}
+                    </Link>
+                  )
+                )}
+            </nav>
+
+            {/* Mobile Actions */}
+            <div className="flex flex-col space-y-3">
+              <Button
+                as="a"
+                href="https://github.com/OWASP/Nest"
+                variant="secondary"
+                size="md"
+                className="w-full justify-center"
+              >
+                <FontAwesomeIcon icon={faRegularStar} className="mr-2" />
+                Star On Github
+              </Button>
+              <Button
+                as="a"
+                href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
+                variant="secondary"
+                size="md"
+                className="w-full justify-center"
+              >
+                <FontAwesomeIcon icon={faRegularHeart} className="mr-2" />
+                Sponsor Us
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </header>
   )
 }
