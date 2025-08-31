@@ -465,7 +465,7 @@ describe('UserDetailsPage', () => {
 
     render(<UserDetailsPage />)
     await waitFor(() => {
-      expect(screen.getAllByText('Unknown').length).toBe(3)
+      expect(screen.getAllByText('N/A').length).toBe(3)
     })
   })
   test('does not render sponsor block', async () => {
