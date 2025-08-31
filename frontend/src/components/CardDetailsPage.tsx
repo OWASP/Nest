@@ -84,7 +84,7 @@ const DetailsCard = ({
         value === 'Not available' ||
         value === 'Unknown'
       ) {
-        return 'Unknown'
+        return 'N/A'
       }
 
       if (typeof value !== 'string') {
