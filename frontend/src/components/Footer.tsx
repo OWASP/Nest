@@ -20,8 +20,8 @@ export default function Footer() {
   }, [])
 
   return (
-    <footer className="mt-auto w-full border-t-1 border-t-slate-300 bg-slate-200 xl:max-w-full dark:border-t-slate-600 dark:bg-slate-800">
-      <div className="grid w-full place-content-center gap-6 px-4 py-4 text-slate-800 md:py-8 dark:text-slate-200">
+    <footer className="mt-auto w-full border-t-1 border-t-slate-300 bg-slate-200 dark:border-t-slate-600 dark:bg-slate-800 xl:max-w-full">
+      <div className="grid w-full place-content-center gap-6 px-4 py-4 text-slate-800 dark:text-slate-200 md:py-8">
         <div className="grid w-full sm:grid-cols-2 sm:gap-20 md:grid-cols-4">
           {footerSections.map((section: Section) => (
             <div key={section.title} className="flex flex-col gap-4">
@@ -29,7 +29,7 @@ export default function Footer() {
               <Button
                 disableAnimation
                 onPress={() => toggleSection(section.title)}
-                className="flex w-full items-center justify-between bg-transparent pl-0 text-left text-lg font-semibold focus:ring-slate-400 focus:outline-hidden lg:cursor-default"
+                className="focus:outline-hidden flex w-full items-center justify-between bg-transparent pl-0 text-left text-lg font-semibold focus:ring-slate-400 lg:cursor-default"
                 aria-expanded={openSection === section.title}
                 aria-controls={`footer-section-${section.title}`}
               >
