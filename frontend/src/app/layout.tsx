@@ -1,4 +1,3 @@
-
 import { GoogleAnalytics } from '@next/third-parties/google';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
@@ -12,8 +11,6 @@ import Header from 'components/Header';
 import ScrollToTop from 'components/ScrollToTop';
 
 import 'app/globals.css';
-
-export const dynamic = 'force-dynamic'
 
 const geistSans = Geist({
   subsets: ['latin'],
@@ -59,28 +56,22 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col overflow-x-hidden antialiased supports-[min-height:100dvh]:min-h-[100dvh]`}
+        className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
       >
-        {/* Visually hidden but keyboard-focusable skip link for accessibility */}
-        <a
-          href="#main-content"
-          className="sr-only z-50 bg-white p-2 focus:not-sr-only focus:absolute focus:top-2 focus:left-2"
-        >
-          Skip to content
-        </a>
         <Providers>
           <AutoScrollToTop />
           <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
           <BreadCrumbs />
-          {/* Single document-wide main landmark for a11y; no nested mains */}
-          <main id="main-content" className="flex min-w-0 flex-1 flex-col">
-            {children}
-          </main>
-          <Footer className="mt-auto" />
+          <main className="flex min-w-0 flex-1 flex-col">{children}</main>
+          <Footer />
           <ScrollToTop />
         </Providers>
       </body>
