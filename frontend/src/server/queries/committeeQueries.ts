@@ -3,6 +3,7 @@ import { gql } from '@apollo/client'
 export const GET_COMMITTEE_DATA = gql`
   query GetCommittee($key: String!) {
     committee(key: $key) {
+      id
       contributorsCount
       createdAt
       forksCount
@@ -17,6 +18,7 @@ export const GET_COMMITTEE_DATA = gql`
       url
     }
     topContributors(committee: $key) {
+      id
       avatarUrl
       login
       name
@@ -27,6 +29,7 @@ export const GET_COMMITTEE_DATA = gql`
 export const GET_COMMITTEE_METADATA = gql`
   query GetCommittee($key: String!) {
     committee(key: $key) {
+      id
       name
       summary
     }
