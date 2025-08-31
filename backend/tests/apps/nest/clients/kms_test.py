@@ -18,6 +18,8 @@ class TestKmsClient:
             self.mock_boto3_client = mock_boto3_client
             self.mock_kms_client = Mock()
             self.mock_boto3_client.return_value = self.mock_kms_client
+            if hasattr(KmsClient, "instance"):
+                del KmsClient.instance
             self.kms_client = KmsClient()
 
     @override_settings(AWS_REGION="us-west-2", AWS_KMS_KEY_ID="test_key_id")
