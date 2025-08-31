@@ -38,7 +38,7 @@ export const GET_PROJECT_HEALTH_METRICS_LIST = gql`
   }
 `
 export const GET_PROJECT_HEALTH_METRICS_DETAILS = gql`
-  query Project($projectKey: String!) {
+  query GetProjectHealthMetricsDetails($projectKey: String!) {
     project(key: $projectKey) {
       healthMetricsLatest {
         ageDays
