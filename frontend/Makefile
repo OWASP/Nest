@@ -27,6 +27,9 @@ format-frontend-code:
 	|| (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" \
 		&& pnpm run format))
 
+graphql-codegen:
+	@cd frontend && pnpm run graphql-codegen
+
 lighthouse-ci:
 	@cd frontend && pnpm run lighthouse-ci
 
