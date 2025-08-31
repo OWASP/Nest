@@ -71,7 +71,8 @@ export default function RootLayout({
           <AutoScrollToTop />
           <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
           <BreadCrumbs />
-          {children}
+           <main className="flex min-w-0 flex-1 flex-col">{children}</main>
+          
           <Footer />
           <ScrollToTop />
         </Providers>
