@@ -86,3 +86,13 @@ repos:
     rev: v2.6.0
     hooks:
       - id: pyproject-fmt
+
+  - repo: local
+    hooks:
+      - id: graphql-codegen
+        name: Run GraphQL Codegen
+        entry: bash -c 'cd frontend/ && pnpm run graphql-codegen && git diff --exit-code --quiet src/types/__generated__/'
+        files: frontend/src/server
+        language: node
+        pass_filenames: false
+        stages: [commit]
