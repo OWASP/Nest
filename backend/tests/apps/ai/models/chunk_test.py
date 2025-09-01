@@ -29,19 +29,29 @@ class TestChunkModel:
         assert "This is a test chunk with some content that" in result
 
     def test_bulk_save_with_chunks(self):
-        mock_chunks = [Mock(), Mock(), Mock()]
+        mock_chunks = [Mock(spec=Chunk), Mock(spec=Chunk), Mock(spec=Chunk)]
+        for chunk in mock_chunks:
+            chunk.context = Mock()
+            chunk.text = "test text"
 
-        with patch("apps.common.models.BulkSaveModel.bulk_save") as mock_bulk_save:
-            Chunk.bulk_save(mock_chunks)
-            mock_bulk_save.assert_called_once_with(Chunk, mock_chunks, fields=None)
+        with patch("apps.ai.models.chunk.Chunk.objects.filter") as mock_filter:
+            mock_filter.return_value.exists.return_value = False
+            with patch("apps.common.models.BulkSaveModel.bulk_save") as mock_bulk_save:
+                Chunk.bulk_save(mock_chunks)
+                mock_bulk_save.assert_called_once_with(Chunk, mock_chunks, fields=None)
 
     def test_bulk_save_with_fields_parameter(self):
-        mock_chunks = [Mock(), Mock()]
+        mock_chunks = [Mock(spec=Chunk), Mock(spec=Chunk)]
+        for chunk in mock_chunks:
+            chunk.context = Mock()
+            chunk.text = "test text"
         fields = ["text", "embedding"]
 
-        with patch("apps.common.models.BulkSaveModel.bulk_save") as mock_bulk_save:
-            Chunk.bulk_save(mock_chunks, fields=fields)
-            mock_bulk_save.assert_called_once_with(Chunk, mock_chunks, fields=fields)
+        with patch("apps.ai.models.chunk.Chunk.objects.filter") as mock_filter:
+            mock_filter.return_value.exists.return_value = False
+            with patch("apps.common.models.BulkSaveModel.bulk_save") as mock_bulk_save:
+                Chunk.bulk_save(mock_chunks, fields=fields)
+                mock_bulk_save.assert_called_once_with(Chunk, mock_chunks, fields=fields)
 
     def test_split_text(self):
         text = "This is a long text that should be split into multiple chunks. " * 10
@@ -89,8 +99,7 @@ class TestChunkModel:
             )
 
             mock_chunk_class.objects.filter.assert_called_once_with(
-                context__entity_type=mock_context.entity_type,
-                context__entity_id=mock_context.entity_id,
+                context=mock_context,
                 text=text,
             )
             mock_chunk_class.assert_called_once_with(
@@ -114,8 +123,7 @@ class TestChunkModel:
             )
 
             mock_chunk_class.objects.filter.assert_called_once_with(
-                context__entity_type=mock_context.entity_type,
-                context__entity_id=mock_context.entity_id,
+                context=mock_context,
                 text=text,
             )
             mock_chunk_class.assert_called_once_with(
@@ -137,8 +145,7 @@ class TestChunkModel:
             )
 
             mock_chunk_class.objects.filter.assert_called_once_with(
-                context__entity_type=mock_context.entity_type,
-                context__entity_id=mock_context.entity_id,
+                context=mock_context,
                 text=text,
             )
 
