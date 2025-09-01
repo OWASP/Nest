@@ -23,7 +23,7 @@ export function ApiKeysSkeleton() {
         </div>
 
         {/* API Keys section skeleton */}
-        <div className="shadow-xs mb-6 rounded-lg border-1 border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+        <div className="mb-6 rounded-lg border-1 border-gray-200 bg-white p-6 shadow-xs dark:border-gray-700 dark:bg-gray-800">
           <div className="mb-4 flex items-center gap-3">
             <div className="h-5 w-5 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
             <div className="h-6 w-32 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
@@ -78,7 +78,7 @@ export function ApiKeysSkeleton() {
         </div>
 
         {/* API Usage section skeleton */}
-        <div className="shadow-xs mb-6 rounded-lg border-1 border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+        <div className="mb-6 rounded-lg border-1 border-gray-200 bg-white p-6 shadow-xs dark:border-gray-700 dark:bg-gray-800">
           <div className="mb-4 h-6 w-32 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
           <div className="flex flex-col gap-4">
             <div className="h-4 w-full animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
