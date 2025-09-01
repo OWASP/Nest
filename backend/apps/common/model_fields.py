@@ -3,7 +3,7 @@
 from django.conf import settings
 from django.db import models
 
-from apps.nest.clients.kms import kms_client
+from apps.nest.clients.kms import KmsClient
 
 KMS_ERROR_MESSAGE = "AWS KMS is not enabled."
 STR_ERROR_MESSAGE = "Value must be a string to encrypt."
@@ -23,7 +23,7 @@ class KmsEncryptedField(models.BinaryField):
             return None
         if not isinstance(value, str):
             raise TypeError(STR_ERROR_MESSAGE)
-        ciphertext = kms_client.encrypt(value)
+        ciphertext = KmsClient().encrypt(value)
         return super().get_prep_value(ciphertext)
 
     def _get_from_db_helper(self, value):
@@ -36,7 +36,7 @@ class KmsEncryptedField(models.BinaryField):
             return value
         if not isinstance(value, (bytes, bytearray, memoryview)):
             raise TypeError(BYTES_ERROR_MESSAGE)
-        return kms_client.decrypt(bytes(value)) if value else None
+        return KmsClient().decrypt(bytes(value)) if value else None
 
     def from_db_value(self, value, expression, connection):
         """Decrypt the value from the database using KMS."""
