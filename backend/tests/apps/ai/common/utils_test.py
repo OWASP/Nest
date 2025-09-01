@@ -94,13 +94,16 @@ class TestUtils:
         assert result == []
 
     @patch("apps.ai.common.utils.logger")
-    def test_create_chunks_and_embeddings_none_context(self, mock_logger):
+    @patch("apps.ai.common.utils.Chunk.update_data")
+    def test_create_chunks_and_embeddings_none_context(self, mock_update_data, mock_logger):
         """Tests the failure path when context is None."""
         mock_openai_client = MagicMock()
 
         mock_response = MagicMock()
         mock_response.data = [MagicMock(embedding=[0.1, 0.2, 0.3])]
         mock_openai_client.embeddings.create.return_value = mock_response
+
+        mock_update_data.side_effect = AttributeError("Context is required")
 
         result = create_chunks_and_embeddings(
             chunk_texts=["some text"],

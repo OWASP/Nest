@@ -104,6 +104,7 @@ pymdownx
 pypoetry
 pyyaml
 repositorycontributor
+repositorys
 requirepass
 rqworker
 rsc
