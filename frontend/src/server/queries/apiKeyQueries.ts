@@ -4,6 +4,7 @@ export const GET_API_KEYS = gql`
   query GetApiKeys {
     activeApiKeyCount
     apiKeys {
+      id
       createdAt
       expiresAt
       isRevoked
@@ -17,6 +18,7 @@ export const CREATE_API_KEY = gql`
   mutation CreateApiKey($name: String!, $expiresAt: DateTime!) {
     createApiKey(name: $name, expiresAt: $expiresAt) {
       apiKey {
+        id
         createdAt
         expiresAt
         isRevoked

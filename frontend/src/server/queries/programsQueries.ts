@@ -51,6 +51,7 @@ export const GET_PROGRAM_DETAILS = gql`
       domains
       tags
       admins {
+        id
         login
         name
         avatarUrl
@@ -73,6 +74,7 @@ export const GET_PROGRAM_AND_MODULES = gql`
       domains
       tags
       admins {
+        id
         login
         name
         avatarUrl
@@ -87,6 +89,7 @@ export const GET_PROGRAM_AND_MODULES = gql`
       startedAt
       endedAt
       mentors {
+        id
         login
         name
         avatarUrl
@@ -102,6 +105,7 @@ export const GET_PROGRAM_ADMIN_DETAILS = gql`
       key
       name
       admins {
+        id
         login
         name
         avatarUrl
