@@ -18,16 +18,14 @@ class Reminder(models.Model):
         related_name="reminders",
         null=True,
     )
-    channel = models.ForeignKey(
-        "slack.EntityChannel",
-        verbose_name="Slack Channel",
-        related_name="reminders",
-        on_delete=models.CASCADE,
-    )
+    channel_id = models.CharField(verbose_name="Channel ID", max_length=15, default="")
     message = models.TextField(verbose_name="Reminder Message")
     remind_at = models.DateTimeField(verbose_name="Reminder Time")
     periodic = models.BooleanField(default=False, verbose_name="Is Periodic")
 
     def __str__(self) -> str:
         """Reminder human readable representation."""
-        return f"Reminder for {self.member} in {self.channel}: {self.message} at {self.remind_at}"
+        return (
+            f"Reminder for {self.member} in channel: "
+            f"{self.channel_id}: {self.message} at {self.remind_at}"
+        )
