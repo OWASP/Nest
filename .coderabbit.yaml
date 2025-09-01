@@ -11,7 +11,8 @@ reviews:
   auto_review:
     enabled: true
     drafts: true
-    base_branches: [.*]
+    base_branches:
+      - .*
   collapse_walkthrough: false
   high_level_summary: true
   high_level_summary_in_walkthrough: true
