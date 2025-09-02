@@ -3,6 +3,7 @@ import { gql } from '@apollo/client'
 export const LOGOUT_DJANGO_MUTATION = gql`
   mutation LogoutDjango {
     logoutUser {
+      id
       code
       message
       ok
@@ -16,6 +17,7 @@ export const SYNC_DJANGO_SESSION_MUTATION = gql`
       message
       ok
       user {
+        id
         isOwaspStaff
       }
     }
