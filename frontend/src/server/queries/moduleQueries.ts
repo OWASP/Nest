@@ -37,6 +37,7 @@ export const GET_MODULE_BY_ID = gql`
       startedAt
       endedAt
       mentors {
+        id
         login
         name
         avatarUrl
@@ -50,6 +51,7 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
     getProgram(programKey: $programKey) {
       id
       admins {
+        id
         login
         name
         avatarUrl
@@ -68,6 +70,7 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
       startedAt
       endedAt
       mentors {
+        id
         login
         name
         avatarUrl
