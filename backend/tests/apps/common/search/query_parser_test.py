@@ -28,13 +28,13 @@ class TestQueryParser:
         self.comparison_operators = ["<", "<=", ">", ">=", "="]
 
     def test_invalid_parser_field_validation(self):
-        with pytest.raises(QueryParserError) as exception_info:
+        with pytest.raises(QueryParserError) as e:
             QueryParser(field_schema={"field": "invalid_type"})
-        assert exception_info.value.error_type == "FIELD_TYPE_ERROR"
+        assert e.value.error_type == "FIELD_TYPE_ERROR"
 
-        with pytest.raises(QueryParserError) as exception_info:
+        with pytest.raises(QueryParserError) as e:
             QueryParser(field_schema={"field-with-dash": "string"})
-        assert exception_info.value.error_type == "FIELD_NAME_ERROR"
+        assert e.value.error_type == "FIELD_NAME_ERROR"
 
     @pytest.mark.parametrize(
         ("parser_type", "expected_string"),
@@ -105,9 +105,9 @@ class TestQueryParser:
 
     @pytest.mark.parametrize("query", unknown_field_queries)
     def test_unknown_field_strict_raises(self, query):
-        with pytest.raises(QueryParserError) as exception_info:
+        with pytest.raises(QueryParserError) as e:
             self.strict_parser.parse(query)
-        assert exception_info.value.error_type == "UNKNOWN_FIELD_ERROR"
+        assert e.value.error_type == "UNKNOWN_FIELD_ERROR"
 
     def test_date_format_validation(self):
         valid_dates = ["2023-12-31", '"2023-12-31"', '"2023-12-31', "20231231"]
@@ -118,18 +118,18 @@ class TestQueryParser:
 
         invalid_dates = ["invalid-date", "2023-163-01", "2023-01-362"]
         for inv_date_str in invalid_dates:
-            with pytest.raises(QueryParserError) as exception_info:
+            with pytest.raises(QueryParserError) as e:
                 self.strict_parser.parse(f"created:{inv_date_str}")
-            assert exception_info.value.error_type == "DATE_VALUE_ERROR"
+            assert e.value.error_type == "DATE_VALUE_ERROR"
 
         for inv_date_str in invalid_dates:
             result = self.parser.parse(f"created:{inv_date_str}")
             assert not result
 
     def test_invalid_default_field_name(self):
-        with pytest.raises(QueryParserError) as exception_info:
+        with pytest.raises(QueryParserError) as e:
             QueryParser(field_schema={"test": "string"}, default_field="Default")
-        assert exception_info.value.error_type == "FIELD_NAME_ERROR"
+        assert e.value.error_type == "FIELD_NAME_ERROR"
 
     def test_custom_default_field(self):
         parser_with_default = QueryParser(field_schema={"test": "string"}, default_field="default")

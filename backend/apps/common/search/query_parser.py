@@ -83,7 +83,7 @@ class QueryParserError(Exception):
 
         return "\n".join(parts)
 
-    def to_response(self) -> dict:
+    def to_dict(self) -> dict:
         """Return error information as dictionary for API responses."""
         return {
             "error": True,
@@ -108,15 +108,15 @@ class QueryParser:
     """
 
     # Grammar definitions (class-level constants)
-    _FIELD_NAME = Regex(r"[a-z0-9_]+")
-    _QUOTED_VALUE = QuotedString(quoteChar='"', escChar="\\", unquoteResults=False)
-    _UNQUOTED_VALUE = Word(alphanums + '+-.<>=/_"')
-    _FIELD_VALUE = _QUOTED_VALUE | _UNQUOTED_VALUE
-    _COMPARISON_OPERATOR = Optional(oneOf(">= <= > < ="), default="=")
-    _COMPARISON_PATTERN = Group(_COMPARISON_OPERATOR + _UNQUOTED_VALUE)
-    _DATE_PATTERN = Regex(r"\d{4}-\d{2}-\d{2}") | Regex(r"\d{8}")  # YYYY-MM-DD or YYYYMMDD format
-    _BOOLEAN_TRUE_VALUES = {"true", "1", "yes", "on"}
-    _BOOLEAN_FALSE_VALUES = {"false", "0", "no", "off"}
+    FIELD_NAME = Regex(r"[a-z0-9_]+")
+    QUOTED_VALUE = QuotedString(quoteChar='"', escChar="\\", unquoteResults=False)
+    UNQUOTED_VALUE = Word(alphanums + '+-.<>=/_"')
+    FIELD_VALUE = QUOTED_VALUE | UNQUOTED_VALUE
+    COMPARISON_OPERATOR = Optional(oneOf(">= <= > < ="), default="=")
+    COMPARISON_PATTERN = Group(COMPARISON_OPERATOR + UNQUOTED_VALUE)
+    DATE_PATTERN = Regex(r"\d{4}-\d{2}-\d{2}") | Regex(r"\d{8}")  # YYYY-MM-DD or YYYYMMDD format
+    BOOLEAN_TRUE_VALUES = {"true", "1", "yes", "on"}
+    BOOLEAN_FALSE_VALUES = {"false", "0", "no", "off"}
 
     def __init__(
         self,
@@ -187,7 +187,7 @@ class QueryParser:
                     continue
 
                 field_type = self.field_schema[field]
-                condition = self.create_condition(field, field_type, raw_value)
+                condition = self.to_dict(field, field_type, raw_value)
                 if condition:
                     conditions.append(condition)
         except QueryParserError as e:
@@ -196,7 +196,7 @@ class QueryParser:
         else:
             return conditions
 
-    def create_condition(
+    def to_dict(
         self, field: str, field_type: FieldType, raw_value: str
     ) -> dict[str, str] | None:
         """Create a structured condition dictionary from field and raw value.
@@ -207,7 +207,7 @@ class QueryParser:
             raw_value: Raw string value to parse
 
         Returns:
-            Dictionary representation of the condition
+            Dictionary representation of the condition or None if invalid
 
         Raises:
             QueryParserError: If parsing fails
@@ -274,7 +274,7 @@ class QueryParser:
     def _is_field_name(field_name: str) -> bool:
         """Check if a field name is valid."""
         try:
-            QueryParser._FIELD_NAME.parseString(field_name, parseAll=True)
+            QueryParser.FIELD_NAME.parseString(field_name, parseAll=True)
         except ParseException:
             return False
 
@@ -325,6 +325,13 @@ class QueryParser:
                 QueryParser._raise_invalid_field_name(field)
             validated_fields[field] = FieldType(field_type)
 
+        # Ensure default_field is STRING
+        if default_field in validated_fields and validated_fields[default_field] is not FieldType.STRING:
+            raise QueryParserError(
+                message="default_field must be of type 'string'",
+                error_type="CONFIGURATION_ERROR",
+                field=default_field,
+            )
         validated_fields[default_field] = FieldType.STRING
         return validated_fields
 
@@ -340,8 +347,9 @@ class QueryParser:
 
         """
         reg_components = {
-            "key_value": r'\S+:"[^"]*"',
-            "quoted_string": r'"[^"]*"',
+            # Support escaped quotes within quotes
+            "key_value": r'\S+:"([^"\\]|\\.)*"',
+            "quoted_string": r'"([^"\\]|\\.)*"',
             "unquoted_word": r"\S+",
         }
 
@@ -430,7 +438,7 @@ class QueryParser:
         """
         try:
             value = QueryParser._remove_quotes(value)
-            match = QueryParser._COMPARISON_PATTERN.parseString(value, parseAll=True)
+            match = QueryParser.COMPARISON_PATTERN.parseString(value, parseAll=True)
             return match[0][0], match[0][1]
         except (ValueError, ParseException) as e:
             raise QueryParserError(
@@ -453,7 +461,7 @@ class QueryParser:
 
         """
         try:
-            result = QueryParser._FIELD_VALUE.parseString(value, parseAll=True)
+            result = QueryParser.FIELD_VALUE.parseString(value, parseAll=True)
             return result[0]
         except (ValueError, ParseException) as e:
             raise QueryParserError(
@@ -462,22 +470,25 @@ class QueryParser:
 
     @staticmethod
     def _parse_boolean_value(value: str) -> str:
-        """Parse boolean value from string and return its string representation.
+        """Parse boolean string to standardized string format.
+
+        Converts boolean-like strings to "True" or "False" for consistent
+        storage in dictionaries without needing type conversion.
 
         Args:
-            value: String value to parse
+            value: Boolean string to parse
 
         Returns:
-            String ("True" or "False") based on the boolean input value.
+            "True" or "False" as string
 
         Raises:
             QueryParserError: If value is not a valid boolean
 
         """
         value = QueryParser._remove_quotes(value).lower()
-        if value in QueryParser._BOOLEAN_TRUE_VALUES:
+        if value in QueryParser.BOOLEAN_TRUE_VALUES:
             return "True"
-        if value in QueryParser._BOOLEAN_FALSE_VALUES:
+        if value in QueryParser.BOOLEAN_FALSE_VALUES:
             return "False"
         raise QueryParserError(
             message=f"Invalid boolean value: {value}", error_type="BOOLEAN_VALUE_ERROR"
@@ -505,7 +516,7 @@ class QueryParser:
             return operator, str(numeric_value)
         except QueryParserError:
             raise
-        except (ValueError, ParseException) as e:
+        except (ValueError, OverflowError, ParseException) as e:
             raise QueryParserError(
                 message=f"Invalid numeric value: {e!s}", error_type="NUMBER_VALUE_ERROR"
             ) from e
@@ -528,7 +539,7 @@ class QueryParser:
         try:
             value = QueryParser._remove_quotes(value)
             operator, clean_value = QueryParser._parse_comparison_pattern(value)
-            result = QueryParser._DATE_PATTERN.parseString(clean_value, parseAll=True)
+            result = QueryParser.DATE_PATTERN.parseString(clean_value, parseAll=True)
             result[0] = QueryParser._normalize_date(result[0])
             return operator, result[0]
         except QueryParserError:
