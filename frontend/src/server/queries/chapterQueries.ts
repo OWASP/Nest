@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client'
 
 export const GET_CHAPTER_DATA = gql`
-  query GetChapter($key: String!) {
+  query GetChapterData($key: String!) {
     chapter(key: $key) {
       id
       geoLocation {
@@ -28,7 +28,7 @@ export const GET_CHAPTER_DATA = gql`
 `
 
 export const GET_CHAPTER_METADATA = gql`
-  query GetChapter($key: String!) {
+  query GetChapterMetadata($key: String!) {
     chapter(key: $key) {
       id
       name
