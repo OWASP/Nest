@@ -3,6 +3,7 @@ import { gql } from '@apollo/client'
 export const GET_ORGANIZATION_DATA = gql`
   query GetOrganizationData($login: String!) {
     organization(login: $login) {
+      id
       avatarUrl
       collaboratorsCount
       company
@@ -24,12 +25,15 @@ export const GET_ORGANIZATION_DATA = gql`
       url
     }
     topContributors(organization: $login) {
+      id
       avatarUrl
       login
       name
     }
     recentPullRequests(limit: 5, organization: $login, distinct: true) {
+      id
       author {
+        id
         avatarUrl
         login
         name
@@ -41,7 +45,9 @@ export const GET_ORGANIZATION_DATA = gql`
       url
     }
     recentReleases(limit: 5, organization: $login, distinct: true) {
+      id
       author {
+        id
         avatarUrl
         login
         name
@@ -54,7 +60,9 @@ export const GET_ORGANIZATION_DATA = gql`
       url
     }
     recentMilestones(limit: 5, organization: $login, distinct: true) {
+      id
       author {
+        id
         avatarUrl
         login
         name
@@ -68,19 +76,23 @@ export const GET_ORGANIZATION_DATA = gql`
       url
     }
     repositories(organization: $login, limit: 12) {
+      id
       contributorsCount
       forksCount
       key
       name
       openIssuesCount
       organization {
+        id
         login
       }
       starsCount
       url
     }
     recentIssues(limit: 5, organization: $login, distinct: true) {
+      id
       author {
+        id
         avatarUrl
         login
         name
@@ -97,6 +109,7 @@ export const GET_ORGANIZATION_DATA = gql`
 export const GET_ORGANIZATION_METADATA = gql`
   query GetOrganizationMetadata($login: String!) {
     organization(login: $login) {
+      id
       description
       login
       name
