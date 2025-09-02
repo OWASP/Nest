@@ -18,10 +18,10 @@ from pyparsing import (
 class FieldType(str, Enum):
     """Supported field types for query parsing."""
 
-    STRING = "string"
-    NUMBER = "number"
-    DATE = "date"
     BOOLEAN = "boolean"
+    DATE = "date"
+    NUMBER = "number"
+    STRING = "string"
 
 
 def has_enum_value(enum_class, value):
@@ -42,8 +42,8 @@ def has_enum_value(enum_class, value):
         enum_class(value)
     except ValueError:
         return False
-    else:
-        return True
+
+    return True
 
 
 class QueryParserError(Exception):
@@ -277,8 +277,8 @@ class QueryParser:
             QueryParser._FIELD_NAME.parseString(field_name, parseAll=True)
         except ParseException:
             return False
-        else:
-            return True
+
+        return True
 
     @staticmethod
     def _is_empty_string(token: str) -> bool:
@@ -402,19 +402,17 @@ class QueryParser:
         return value.strip().strip('"')
 
     @staticmethod
-    def _normalize_date(date: str) -> str:
+    def _normalize_date(value: str) -> str:
         """Normalize the date string to YYYY-MM-DD format.
 
         Args:
-            date: Raw date string
+            value: Raw date string
 
         Returns:
             Normalized date string
 
         """
-        if "-" not in date:
-            return f"{date[:4]}-{date[4:6]}-{date[6:]}"
-        return date
+        return value if "-" in value else f"{value[:4]}-{value[4:6]}-{value[6:]}"
 
     @staticmethod
     def _parse_comparison_pattern(value: str) -> tuple[str, str]:
