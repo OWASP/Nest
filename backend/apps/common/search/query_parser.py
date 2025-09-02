@@ -196,9 +196,7 @@ class QueryParser:
         else:
             return conditions
 
-    def to_dict(
-        self, field: str, field_type: FieldType, raw_value: str
-    ) -> dict[str, str] | None:
+    def to_dict(self, field: str, field_type: FieldType, raw_value: str) -> dict[str, str] | None:
         """Create a structured condition dictionary from field and raw value.
 
         Args:
@@ -326,7 +324,10 @@ class QueryParser:
             validated_fields[field] = FieldType(field_type)
 
         # Ensure default_field is STRING
-        if default_field in validated_fields and validated_fields[default_field] is not FieldType.STRING:
+        if (
+            default_field in validated_fields
+            and validated_fields[default_field] is not FieldType.STRING
+        ):
             raise QueryParserError(
                 message="default_field must be of type 'string'",
                 error_type="CONFIGURATION_ERROR",
