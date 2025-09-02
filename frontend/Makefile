@@ -2,7 +2,8 @@ SHELL := /bin/bash
 
 check-frontend: \
 	format-frontend-code \
-	lint-frontend-code
+	lint-frontend-code \
+	generate-graphql-types
 
 clean-frontend-dependencies:
 	@rm -rf frontend/.next
@@ -41,6 +42,12 @@ lint-frontend-code:
 	&& (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
 	|| (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" \
 		&& pnpm run lint))
+
+generate-graphql-types:
+	@(cd frontend && pnpm run graphql-codegen >/dev/null 2>&1 \
+	&& (printf "pnpm run graphql-codegen"; for i in $$(seq 1 49); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
+	|| (printf "pnpm run graphql-codegen"; for i in $$(seq 1 49); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" \
+		&& pnpm run graphql-codegen))
 
 shell-frontend:
 	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it
