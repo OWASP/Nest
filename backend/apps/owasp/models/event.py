@@ -53,8 +53,8 @@ class Event(BulkSaveModel, TimestampedModel):
         default=Category.OTHER,
     )
     # Google Calendar event entity ID
-    calendar_id = models.CharField(
-        verbose_name="Calendar ID", max_length=1024, blank=True, default=""
+    google_calendar_id = models.CharField(
+        verbose_name="Google Calendar ID", max_length=1024, blank=True, default=""
     )
     name = models.CharField(verbose_name="Name", max_length=100)
     start_date = models.DateField(verbose_name="Start Date")
