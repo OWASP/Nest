@@ -724,6 +724,7 @@ export type RepositoryContributorNode = {
   __typename?: 'RepositoryContributorNode';
   avatarUrl: Scalars['String']['output'];
   contributionsCount: Scalars['Int']['output'];
+  id: Scalars['ID']['output'];
   login: Scalars['String']['output'];
   name: Scalars['String']['output'];
   projectKey: Scalars['String']['output'];
