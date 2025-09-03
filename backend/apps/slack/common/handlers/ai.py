@@ -55,7 +55,7 @@ def get_error_blocks() -> list[dict]:
     """
     return [
         markdown(
-            "⚠️*Sorry, I cannot answer your question.*\n"
+            "⚠️ Unfortunately, I'm unable to answer your question at this time.\n"
             "Please try again later or contact support if the issue persists."
         )
     ]

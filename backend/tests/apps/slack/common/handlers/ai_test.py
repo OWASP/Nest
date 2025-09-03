@@ -115,7 +115,7 @@ class TestAiHandler:
     def test_get_error_blocks(self, mock_markdown):
         """Test error blocks generation."""
         expected_error_message = (
-            "⚠️*Sorry, I cannot answer your question.*\n"
+            "⚠️ Unfortunately, I'm unable to answer your question at this time.\n"
             "Please try again later or contact support if the issue persists."
         )
         expected_block = {

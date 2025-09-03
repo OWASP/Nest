@@ -47,9 +47,9 @@ class Base(Configuration):
     THIRD_PARTY_APPS = (
         "algoliasearch_django",
         "corsheaders",
+        "django_rq",
         "ninja",
         "storages",
-        "django_rq",
     )
 
     LOCAL_APPS = (
