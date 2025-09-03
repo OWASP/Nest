@@ -5,7 +5,7 @@ import debounce from 'lodash/debounce'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { SEARCH_PROJECTS } from 'server/queries/projectQueries'
+import { SearchProjectNamesDocument } from 'types/__generated__/projectQueries.generated'
 
 interface ModuleFormProps {
   formData: {
@@ -271,7 +271,7 @@ export const ProjectSelector = ({ value, defaultName, onProjectChange }: Project
 
       try {
         const { data } = await client.query({
-          query: SEARCH_PROJECTS,
+          query: SearchProjectNamesDocument,
           variables: { query },
         })
 

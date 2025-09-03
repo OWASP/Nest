@@ -5,9 +5,12 @@ import { Pagination } from '@heroui/react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
-import { GET_PROJECT_HEALTH_METRICS_LIST } from 'server/queries/projectsHealthDashboardQueries'
+import { Ordering } from 'types/__generated__/graphql'
+import {
+  GetProjectHealthMetricsDocument,
+  GetProjectHealthMetricsQuery,
+} from 'types/__generated__/projectsHealthDashboardQueries.generated'
 import { DropDownSectionProps } from 'types/DropDownSectionProps'
-import { HealthMetricsProps } from 'types/healthMetrics'
 import { getKeysLabels } from 'utils/getKeysLabels'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetricsCard from 'components/MetricsCard'
@@ -53,11 +56,11 @@ const MetricsPage: FC = () => {
 
   let currentFilters = {}
   let currentOrdering = {
-    score: 'DESC',
+    score: Ordering.Desc,
   }
   const healthFilter = searchParams.get('health')
   const levelFilter = searchParams.get('level')
-  const orderingParam = searchParams.get('order')
+  const orderingParam = searchParams.get('order') as Ordering
   const currentFilterKeys = []
   if (healthFilter) {
     currentFilters = {
@@ -74,34 +77,38 @@ const MetricsPage: FC = () => {
   }
   if (orderingParam) {
     currentOrdering = {
-      score: orderingParam.toUpperCase(),
+      score: orderingParam,
     }
   }
 
-  const [metrics, setMetrics] = useState<HealthMetricsProps[]>([])
-  const [metricsLength, setMetricsLength] = useState<number>(0)
+  const [metrics, setMetrics] = useState<GetProjectHealthMetricsQuery['projectHealthMetrics']>([])
+  const [metricsLength, setMetricsLength] =
+    useState<GetProjectHealthMetricsQuery['projectHealthMetricsDistinctLength']>(0)
   const [pagination, setPagination] = useState({ offset: 0, limit: PAGINATION_LIMIT })
   const [filters, setFilters] = useState(currentFilters)
   const [ordering, setOrdering] = useState(
     currentOrdering || {
-      score: 'DESC',
+      score: Ordering.Desc,
     }
   )
   const [activeFilters, setActiveFilters] = useState(currentFilterKeys)
-  const [activeOrdering, setActiveOrdering] = useState(orderingParam ? [orderingParam] : ['desc'])
+  const [activeOrdering, setActiveOrdering] = useState(
+    orderingParam ? [orderingParam] : [Ordering.Desc]
+  )
   const {
     data,
     error: graphQLRequestError,
     loading,
     fetchMore,
-  } = useQuery(GET_PROJECT_HEALTH_METRICS_LIST, {
+  } = useQuery(GetProjectHealthMetricsDocument, {
     variables: {
       filters,
       pagination: { offset: 0, limit: PAGINATION_LIMIT },
       ordering: [
         ordering,
         {
-          ['project_Name']: 'ASC',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          project_Name: Ordering.Asc,
         },
       ],
     },
@@ -202,13 +209,13 @@ const MetricsPage: FC = () => {
             selectionMode="single"
             selectedKeys={activeOrdering}
             selectedLabels={getKeysLabels(orderingSections, activeOrdering)}
-            onAction={(key: string) => {
+            onAction={(key: Ordering) => {
               // Reset pagination to the first page when changing ordering
               setPagination({ offset: 0, limit: PAGINATION_LIMIT })
               const newParams = new URLSearchParams(searchParams.toString())
               newParams.set('order', key)
               setOrdering({
-                score: key.toUpperCase(),
+                score: key,
               })
               setActiveOrdering([key])
               router.replace(`/projects/dashboard/metrics?${newParams.toString()}`)
@@ -234,7 +241,7 @@ const MetricsPage: FC = () => {
                 No metrics found. Try adjusting your filters.
               </div>
             ) : (
-              metrics.map((metric) => <MetricsCard key={metric.id} metric={metric} />)
+              metrics.map((metric) => <MetricsCard key={metric.id} metric={metric} />) //TODO: update types
             )}
           </div>
           <div className="mt-4 flex items-center justify-center">
@@ -253,7 +260,8 @@ const MetricsPage: FC = () => {
                     ordering: [
                       ordering,
                       {
-                        ['project_Name']: 'ASC',
+                        // eslint-disable-next-line @typescript-eslint/naming-convention
+                        project_Name: Ordering.Asc,
                       },
                     ],
                   },

@@ -14,8 +14,10 @@ import {
 import { useParams } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
-import { GET_PROJECT_HEALTH_METRICS_DETAILS } from 'server/queries/projectsHealthDashboardQueries'
-import { HealthMetricsProps } from 'types/healthMetrics'
+import {
+  GetProjectHealthMetricsDetailsDocument,
+  GetProjectHealthMetricsDetailsQuery,
+} from 'types/__generated__/projectsHealthDashboardQueries.generated'
 import BarChart from 'components/BarChart'
 import GeneralCompliantComponent from 'components/GeneralCompliantComponent'
 import LineChart from 'components/LineChart'
@@ -24,14 +26,16 @@ import MetricsPDFButton from 'components/MetricsPDFButton'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 
 const ProjectHealthMetricsDetails: FC = () => {
-  const { projectKey } = useParams()
-  const [metricsList, setMetricsList] = useState<HealthMetricsProps[]>()
-  const [metricsLatest, setMetricsLatest] = useState<HealthMetricsProps>()
+  const { projectKey } = useParams<{ projectKey: string }>()
+  const [metricsList, setMetricsList] =
+    useState<GetProjectHealthMetricsDetailsQuery['project']['healthMetricsList']>()
+  const [metricsLatest, setMetricsLatest] =
+    useState<GetProjectHealthMetricsDetailsQuery['project']['healthMetricsLatest']>()
   const {
     loading,
     error: graphqlError,
     data,
-  } = useQuery(GET_PROJECT_HEALTH_METRICS_DETAILS, {
+  } = useQuery(GetProjectHealthMetricsDetailsDocument, {
     variables: { projectKey },
   })
 
@@ -53,7 +57,7 @@ const ProjectHealthMetricsDetails: FC = () => {
 
   const labels =
     metricsList?.map((m) =>
-      new Date(m.createdAt).toLocaleString('default', {
+      new Date(m.createdAt as string).toLocaleString('default', {
         month: 'short',
         day: 'numeric',
       })

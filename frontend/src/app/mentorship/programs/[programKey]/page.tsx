@@ -4,8 +4,10 @@ import upperFirst from 'lodash/upperFirst'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ErrorDisplay } from 'app/global-error'
-import { GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
-import type { Module, Program } from 'types/mentorship'
+import {
+  GetProgramAndModulesDocument,
+  GetProgramAndModulesQuery,
+} from 'types/__generated__/programsQueries.generated'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -19,14 +21,14 @@ const ProgramDetailsPage = () => {
     data,
     refetch,
     loading: isQueryLoading,
-  } = useQuery(GET_PROGRAM_AND_MODULES, {
+  } = useQuery(GetProgramAndModulesDocument, {
     variables: { programKey },
     skip: !programKey,
     notifyOnNetworkStatusChange: true,
   })
 
-  const [program, setProgram] = useState<Program | null>(null)
-  const [modules, setModules] = useState<Module[]>([])
+  const [program, setProgram] = useState<GetProgramAndModulesQuery['getProgram'] | null>(null)
+  const [modules, setModules] = useState<GetProgramAndModulesQuery['getProgramModules']>([])
   const [isRefetching, setIsRefetching] = useState(false)
 
   const isLoading = isQueryLoading || isRefetching
@@ -70,8 +72,8 @@ const ProgramDetailsPage = () => {
 
   const programDetails = [
     { label: 'Status', value: upperFirst(program.status) },
-    { label: 'Start Date', value: formatDate(program.startedAt) },
-    { label: 'End Date', value: formatDate(program.endedAt) },
+    { label: 'Start Date', value: formatDate(program.startedAt as string) },
+    { label: 'End Date', value: formatDate(program.endedAt as string) },
     { label: 'Mentees Limit', value: String(program.menteesLimit) },
     {
       label: 'Experience Levels',

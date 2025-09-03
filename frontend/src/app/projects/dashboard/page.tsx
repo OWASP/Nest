@@ -15,8 +15,10 @@ import {
 import millify from 'millify'
 import { useState, useEffect, FC } from 'react'
 import { handleAppError } from 'app/global-error'
-import { GET_PROJECT_HEALTH_STATS } from 'server/queries/projectsHealthDashboardQueries'
-import type { ProjectHealthStats } from 'types/projectHealthStats'
+import {
+  GetProjectHealthStatsDocument,
+  GetProjectHealthStatsQuery,
+} from 'types/__generated__/projectsHealthDashboardQueries.generated'
 import DashboardCard from 'components/DashboardCard'
 import DonutBarChart from 'components/DonutBarChart'
 import LineChart from 'components/LineChart'
@@ -25,9 +27,9 @@ import MetricsPDFButton from 'components/MetricsPDFButton'
 import ProjectTypeDashboardCard from 'components/ProjectTypeDashboardCard'
 
 const ProjectsDashboardPage: FC = () => {
-  const [stats, setStats] = useState<ProjectHealthStats>()
+  const [stats, setStats] = useState<GetProjectHealthStatsQuery['projectHealthStats']>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_HEALTH_STATS)
+  const { data, error: graphQLRequestError } = useQuery(GetProjectHealthStatsDocument)
 
   useEffect(() => {
     if (data) {

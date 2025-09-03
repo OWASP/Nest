@@ -6,10 +6,12 @@ import { useRouter, useParams } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
-import { GET_SNAPSHOT_DETAILS } from 'server/queries/snapshotQueries'
+import {
+  GetSnapshotDetailsDocument,
+  GetSnapshotDetailsQuery,
+} from 'types/__generated__/snapshotQueries.generated'
 import type { Chapter } from 'types/chapter'
 import type { Project } from 'types/project'
-import type { SnapshotDetails } from 'types/snapshot'
 import { level } from 'utils/data'
 import { formatDate } from 'utils/dateFormatter'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
@@ -18,12 +20,12 @@ import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const SnapshotDetailsPage: React.FC = () => {
-  const { id: snapshotKey } = useParams()
-  const [snapshot, setSnapshot] = useState<SnapshotDetails | null>(null)
+  const { id: snapshotKey } = useParams<{ id: string }>()
+  const [snapshot, setSnapshot] = useState<GetSnapshotDetailsQuery['snapshot'] | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const router = useRouter()
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_SNAPSHOT_DETAILS, {
+  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetSnapshotDetailsDocument, {
     variables: { key: snapshotKey },
   })
 
@@ -120,7 +122,7 @@ const SnapshotDetailsPage: React.FC = () => {
               <div className="flex items-center">
                 <FontAwesomeIcon icon={faCalendar} className="mr-1 h-4 w-4" />
                 <span>
-                  {formatDate(snapshot.startAt)} - {formatDate(snapshot.endAt)}
+                  {formatDate(snapshot.startAt as string)} - {formatDate(snapshot.endAt as string)}
                 </span>
               </div>
             </div>
@@ -135,27 +137,30 @@ const SnapshotDetailsPage: React.FC = () => {
           </h2>
           <div className="mb-4">
             <ChapterMapWrapper
-              geoLocData={snapshot.newChapters}
+              geoLocData={snapshot.newChapters} // TODO: update type
               showLocal={false}
               style={{ height: '400px', width: '100%', zIndex: '0' }}
             />
           </div>
           <div className="flex flex-col gap-6">
+            {' '}
+            // TODO: update type
             {snapshot.newChapters.filter((chapter) => chapter.isActive).map(renderChapterCard)}
           </div>
         </div>
       )}
 
-      {snapshot.newProjects && snapshot.newProjects.length > 0 && (
-        <div className="mb-8">
-          <h2 className="mb-4 text-2xl font-semibold text-gray-700 dark:text-gray-200">
-            New Projects
-          </h2>
-          <div className="flex flex-col gap-6">
-            {snapshot.newProjects.filter((project) => project.isActive).map(renderProjectCard)}
+      {snapshot.newProjects &&
+        snapshot.newProjects.length > 0 && ( // TODO: update type
+          <div className="mb-8">
+            <h2 className="mb-4 text-2xl font-semibold text-gray-700 dark:text-gray-200">
+              New Projects
+            </h2>
+            <div className="flex flex-col gap-6">
+              {snapshot.newProjects.filter((project) => project.isActive).map(renderProjectCard)}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {snapshot.newReleases && snapshot.newReleases.length > 0 && (
         <div className="mb-8">
@@ -182,7 +187,7 @@ const SnapshotDetailsPage: React.FC = () => {
                   </div>
                   <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
                     <FontAwesomeIcon icon={faCalendar} className="mr-1.5 h-3 w-3" />
-                    Released: {formatDate(release.publishedAt)}
+                    Released: {formatDate(release.publishedAt as string)}
                   </div>
                 </div>
               </div>

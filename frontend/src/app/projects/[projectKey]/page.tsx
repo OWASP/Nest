@@ -12,18 +12,16 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
-import type { Contributor } from 'types/contributor'
-import type { Project } from 'types/project'
+import { GetProjectDocument, GetProjectQuery } from 'types/__generated__/projectQueries.generated'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 const ProjectDetailsPage = () => {
-  const { projectKey } = useParams()
+  const { projectKey } = useParams<{ projectKey: string }>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [project, setProject] = useState<Project | null>(null)
-  const [topContributors, setTopContributors] = useState<Contributor[]>([])
-  const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_DATA, {
+  const [project, setProject] = useState<GetProjectQuery['project'] | null>(null)
+  const [topContributors, setTopContributors] = useState<GetProjectQuery['topContributors']>([])
+  const { data, error: graphQLRequestError } = useQuery(GetProjectDocument, {
     variables: { key: projectKey },
   })
   useEffect(() => {

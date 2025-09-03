@@ -7,7 +7,7 @@ import type React from 'react'
 import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UPDATE_PROGRAM } from 'server/mutations/programsMutations'
-import { GET_PROGRAM_DETAILS } from 'server/queries/programsQueries'
+import { GetProgramDetailsDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
@@ -23,7 +23,7 @@ const EditProgramPage = () => {
     data,
     error,
     loading: queryLoading,
-  } = useQuery(GET_PROGRAM_DETAILS, {
+  } = useQuery(GetProgramDetailsDocument, {
     variables: { programKey },
     skip: !programKey,
     fetchPolicy: 'network-only',
@@ -74,8 +74,8 @@ const EditProgramPage = () => {
         name: program.name || '',
         description: program.description || '',
         menteesLimit: program.menteesLimit ?? 5,
-        startedAt: formatDateForInput(program.startedAt),
-        endedAt: formatDateForInput(program.endedAt),
+        startedAt: formatDateForInput(program.startedAt as string),
+        endedAt: formatDateForInput(program.endedAt as string),
         tags: (program.tags || []).join(', '),
         domains: (program.domains || []).join(', '),
         adminLogins: (program.admins || [])

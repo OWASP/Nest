@@ -17,8 +17,12 @@ import { Input } from '@heroui/react'
 import { addToast } from '@heroui/toast'
 import { format, addDays } from 'date-fns'
 import { useState } from 'react'
-import { CREATE_API_KEY, GET_API_KEYS, REVOKE_API_KEY } from 'server/queries/apiKeyQueries'
-import type { ApiKey } from 'types/apiKey'
+import {
+  CreateApiKeyDocument,
+  GetApiKeysDocument,
+  GetApiKeysQuery,
+  RevokeApiKeyDocument,
+} from 'types/__generated__/apiKeyQueries.generated'
 import SecondaryCard from 'components/SecondaryCard'
 import { ApiKeysSkeleton } from 'components/skeletons/ApiKeySkelton'
 
@@ -30,14 +34,14 @@ export default function Page() {
   const [newKeyExpiry, setNewKeyExpiry] = useState('')
   const [showNewKey, setShowNewKey] = useState(false)
   const [newlyCreatedKey, setNewlyCreatedKey] = useState<string | null>(null)
-  const [keyToRevoke, setKeyToRevoke] = useState<ApiKey | null>(null)
+  const [keyToRevoke, setKeyToRevoke] = useState<GetApiKeysQuery['apiKeys'][0] | null>(null)
 
-  const { loading, error, data, refetch } = useQuery(GET_API_KEYS, {
+  const { loading, error, data, refetch } = useQuery(GetApiKeysDocument, {
     notifyOnNetworkStatusChange: true,
     errorPolicy: 'all',
   })
 
-  const [createApiKey, { loading: createLoading }] = useMutation(CREATE_API_KEY, {
+  const [createApiKey, { loading: createLoading }] = useMutation(CreateApiKeyDocument, {
     onCompleted: (data) => {
       const result = data.createApiKey
       if (!result?.ok) {
@@ -61,7 +65,7 @@ export default function Page() {
     },
   })
 
-  const [revokeApiKey] = useMutation(REVOKE_API_KEY, {
+  const [revokeApiKey] = useMutation(RevokeApiKeyDocument, {
     onCompleted: () => {
       addToast({ title: 'Success', description: 'API key revoked', color: 'success' })
       refetch()
@@ -235,16 +239,16 @@ export default function Page() {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.apiKeys.map((key: ApiKey) => (
+                  {data.apiKeys.map((key: GetApiKeysQuery['apiKeys'][0]) => (
                     <tr
-                      key={key.uuid}
+                      key={key.uuid as string}
                       className="border-b border-b-gray-200 dark:border-b-gray-700"
                     >
                       <td className="py-3">{key.name}</td>
-                      <td className="py-3 font-mono text-sm">{key.uuid}</td>
-                      <td className="py-3">{format(new Date(key.createdAt), 'PP')}</td>
+                      <td className="py-3 font-mono text-sm">{key.uuid as string}</td>
+                      <td className="py-3">{format(new Date(key.createdAt as string), 'PP')}</td>
                       <td className="py-3">
-                        {key.expiresAt ? format(new Date(key.expiresAt), 'PP') : 'Never'}
+                        {key.expiresAt ? format(new Date(key.expiresAt as string), 'PP') : 'Never'}
                       </td>
                       <td className="py-3 text-right">
                         <Button

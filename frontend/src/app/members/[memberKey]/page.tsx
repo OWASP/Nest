@@ -12,26 +12,22 @@ import { useParams } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import React, { useState, useEffect, useRef } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
-import { GET_USER_DATA } from 'server/queries/userQueries'
-import type { Issue } from 'types/issue'
-import type { Milestone } from 'types/milestone'
-import type { RepositoryCardProps } from 'types/project'
-import type { PullRequest } from 'types/pullRequest'
-import type { Release } from 'types/release'
-import type { UserDetails } from 'types/user'
+import { GetUserDataDocument, GetUserDataQuery } from 'types/__generated__/userQueries.generated'
 import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const UserDetailsPage: React.FC = () => {
-  const { memberKey } = useParams()
-  const [user, setUser] = useState<UserDetails | null>()
-  const [issues, setIssues] = useState<Issue[]>([])
-  const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
-  const [milestones, setMilestones] = useState<Milestone[]>([])
-  const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
-  const [releases, setReleases] = useState<Release[]>([])
+  const { memberKey } = useParams<{ memberKey: string }>()
+  const [user, setUser] = useState<GetUserDataQuery['user'] | null>()
+  const [issues, setIssues] = useState<GetUserDataQuery['recentIssues']>([])
+  const [topRepositories, setTopRepositories] = useState<
+    GetUserDataQuery['topContributedRepositories']
+  >([])
+  const [milestones, setMilestones] = useState<GetUserDataQuery['recentMilestones']>([])
+  const [pullRequests, setPullRequests] = useState<GetUserDataQuery['recentPullRequests']>([])
+  const [releases, setReleases] = useState<GetUserDataQuery['recentReleases']>([])
   const [data, setData] = useState<HeatmapData>({} as HeatmapData)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [username, setUsername] = useState('')
@@ -40,7 +36,7 @@ const UserDetailsPage: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const theme = 'blue'
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_USER_DATA, {
+  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetUserDataDocument, {
     variables: { key: memberKey },
   })
 

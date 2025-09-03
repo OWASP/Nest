@@ -8,9 +8,11 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useMemo, useState } from 'react'
 
-import { GET_MY_PROGRAMS } from 'server/queries/programsQueries'
+import {
+  GetMyProgramsDocument,
+  GetMyProgramsQuery,
+} from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
-import type { Program } from 'types/mentorship'
 
 import ActionButton from 'components/ActionButton'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -29,7 +31,7 @@ const MyMentorshipPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState(initialQuery)
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery)
   const [page, setPage] = useState(initialPage)
-  const [programs, setPrograms] = useState<Program[]>([])
+  const [programs, setPrograms] = useState<GetMyProgramsQuery['myPrograms']['programs']>([])
   const [totalPages, setTotalPages] = useState(1)
 
   const debounceSearch = useMemo(() => debounce((q) => setDebouncedQuery(q), 400), [])
@@ -53,7 +55,7 @@ const MyMentorshipPage: React.FC = () => {
     data: programData,
     loading: loadingPrograms,
     error,
-  } = useQuery(GET_MY_PROGRAMS, {
+  } = useQuery(GetMyProgramsDocument, {
     variables: { search: debouncedQuery, page, limit: 24 },
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
@@ -138,7 +140,7 @@ const MyMentorshipPage: React.FC = () => {
               <ProgramCard
                 accessLevel="admin"
                 key={p.id}
-                program={p}
+                program={p} // TODO: fix component type
                 onEdit={handleEdit}
                 onView={handleView}
               />

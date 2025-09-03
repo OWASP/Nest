@@ -19,11 +19,16 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GET_PROJECT_METADATA, GET_TOP_CONTRIBUTORS } from 'server/queries/projectQueries'
-import { GET_LEADER_DATA } from 'server/queries/userQueries'
-import type { Contributor } from 'types/contributor'
-import type { Project } from 'types/project'
-import type { User } from 'types/user'
+import {
+  GetProjectMetadataDocument,
+  GetProjectMetadataQuery,
+  GetTopContributorsDocument,
+  GetTopContributorsQuery,
+} from 'types/__generated__/projectQueries.generated'
+import {
+  GetLeaderDataDocument,
+  GetLeaderDataQuery,
+} from 'types/__generated__/userQueries.generated'
 import { aboutText, technologies } from 'utils/aboutData'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
@@ -42,14 +47,14 @@ const projectKey = 'nest'
 
 const About = () => {
   const { data: projectMetadataResponse, error: projectMetadataRequestError } = useQuery(
-    GET_PROJECT_METADATA,
+    GetProjectMetadataDocument,
     {
       variables: { key: projectKey },
     }
   )
 
   const { data: topContributorsResponse, error: topContributorsRequestError } = useQuery(
-    GET_TOP_CONTRIBUTORS,
+    GetTopContributorsDocument,
     {
       variables: {
         excludedUsernames: Object.keys(leaders),
@@ -60,8 +65,12 @@ const About = () => {
     }
   )
 
-  const [projectMetadata, setProjectMetadata] = useState<Project | null>(null)
-  const [topContributors, setTopContributors] = useState<Contributor[]>([])
+  const [projectMetadata, setProjectMetadata] = useState<GetProjectMetadataQuery['project'] | null>(
+    null
+  )
+  const [topContributors, setTopContributors] = useState<
+    GetTopContributorsQuery['topContributors']
+  >([])
 
   useEffect(() => {
     if (projectMetadataResponse?.project) {
@@ -247,7 +256,7 @@ const About = () => {
 }
 
 const LeaderData = ({ username }: { username: string }) => {
-  const { data, loading, error } = useQuery(GET_LEADER_DATA, {
+  const { data, loading, error } = useQuery(GetLeaderDataDocument, {
     variables: { key: username },
   })
   const router = useRouter()
@@ -261,7 +270,7 @@ const LeaderData = ({ username }: { username: string }) => {
     return <p>No data available for {username}</p>
   }
 
-  const handleButtonClick = (user: User) => {
+  const handleButtonClick = (user: GetLeaderDataQuery['user']) => {
     router.push(`/members/${user.login}`)
   }
 
