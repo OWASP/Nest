@@ -33,11 +33,11 @@ describe('<SortBy />', () => {
       render(<SortBy {...defaultProps} />)
     })
     const sortButton = screen.getByRole('button', { name: /Sort By/ })
-    expect(sortButton).toBeInTheDocument()
-    // The dropdown options aren't directly visible in the DOM
-    // We're checking for the selected value instead
-    const selectedOption = screen.getByText('Name', { selector: '[data-slot="value"]' })
-    expect(selectedOption).toBeInTheDocument()
+    await act(async () => {
+      sortButton.click()
+    })
+    expect(await screen.findByRole('option', { name: 'Name' })).toBeInTheDocument()
+    expect(await screen.findByRole('option', { name: 'Date' })).toBeInTheDocument()
   })
 
   it('calls onSortChange when a different option is selected', async () => {
@@ -92,5 +92,6 @@ describe('<SortBy />', () => {
     const sortButton = screen.getByRole('button', { name: /Sort By/ })
     const container = sortButton.closest('div')
     expect(container).toBeInTheDocument()
+    expect(hiddenSelect).toHaveAccessibleName(/Sort By/)
   })
 })
