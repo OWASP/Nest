@@ -14,6 +14,14 @@ export const GET_SNAPSHOT_DETAILS = gql`
         publishedAt
         tagName
         projectName
+        organizationName
+        repositoryName
+        author {
+          id
+          avatarUrl
+          login
+          name
+        }
       }
       newProjects {
         id
