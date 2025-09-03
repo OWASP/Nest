@@ -11,6 +11,14 @@ class Reminder(models.Model):
         verbose_name = "Nest Reminder"
         verbose_name_plural = "Nest Reminders"
 
+    channel_id = models.CharField(verbose_name="Channel ID", max_length=15, default="")
+    event = models.ForeignKey(
+        "owasp.Event",
+        verbose_name="Event",
+        on_delete=models.SET_NULL,
+        related_name="reminders",
+        null=True,
+    )
     member = models.ForeignKey(
         "slack.Member",
         verbose_name="Slack Member",
@@ -18,7 +26,6 @@ class Reminder(models.Model):
         related_name="reminders",
         null=True,
     )
-    channel_id = models.CharField(verbose_name="Channel ID", max_length=15, default="")
     message = models.TextField(verbose_name="Reminder Message")
 
     def __str__(self) -> str:
