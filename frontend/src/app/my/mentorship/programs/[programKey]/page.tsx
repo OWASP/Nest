@@ -1,17 +1,18 @@
 'use client'
-
-import { useQuery, useMutation } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import upperFirst from 'lodash/upperFirst'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { UPDATE_PROGRAM_STATUS_MUTATION } from 'server/mutations/programsMutations'
-import { GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
+import { ProgramStatusEnum } from 'types/__generated__/graphql'
+import { UpdateProgramStatusDocument } from 'types/__generated__/programsMutations.generated'
+import {
+  GetProgramAndModulesDocument,
+  GetProgramAndModulesQuery,
+} from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
-import type { Module, Program } from 'types/mentorship'
-import { ProgramStatusEnum } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -25,11 +26,11 @@ const ProgramDetailsPage = () => {
   const { data: session } = useSession()
   const username = (session as ExtendedSession)?.user?.login
 
-  const [program, setProgram] = useState<Program | null>(null)
-  const [modules, setModules] = useState<Module[]>([])
+  const [program, setProgram] = useState<GetProgramAndModulesQuery['getProgram'] | null>(null)
+  const [modules, setModules] = useState<GetProgramAndModulesQuery['getProgramModules']>([])
   const [isRefetching, setIsRefetching] = useState(false)
 
-  const [updateProgram] = useMutation(UPDATE_PROGRAM_STATUS_MUTATION, {
+  const [updateProgram] = useMutation(UpdateProgramStatusDocument, {
     onError: handleAppError,
   })
 
@@ -37,7 +38,7 @@ const ProgramDetailsPage = () => {
     data,
     refetch,
     loading: isQueryLoading,
-  } = useQuery(GET_PROGRAM_AND_MODULES, {
+  } = useQuery(GetProgramAndModulesDocument, {
     variables: { programKey },
     skip: !programKey,
     notifyOnNetworkStatusChange: true,
@@ -76,7 +77,7 @@ const ProgramDetailsPage = () => {
             status: newStatus,
           },
         },
-        refetchQueries: [{ query: GET_PROGRAM_AND_MODULES, variables: { programKey } }],
+        refetchQueries: [{ query: GetProgramAndModulesDocument, variables: { programKey } }],
       })
 
       addToast({
@@ -129,8 +130,8 @@ const ProgramDetailsPage = () => {
 
   const programDetails = [
     { label: 'Status', value: upperFirst(program.status) },
-    { label: 'Start Date', value: formatDate(program.startedAt) },
-    { label: 'End Date', value: formatDate(program.endedAt) },
+    { label: 'Start Date', value: formatDate(program.startedAt as string) },
+    { label: 'End Date', value: formatDate(program.endedAt as string) },
     { label: 'Mentees Limit', value: String(program.menteesLimit) },
     {
       label: 'Experience Levels',
@@ -140,7 +141,7 @@ const ProgramDetailsPage = () => {
 
   return (
     <DetailsCard
-      modules={modules}
+      modules={modules} //TODO: update type
       status={program.status}
       setStatus={updateStatus}
       canUpdateStatus={canUpdateStatus}

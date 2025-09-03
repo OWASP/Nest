@@ -1,15 +1,15 @@
 'use client'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { faCalendar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter, useParams } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
-import { GET_SNAPSHOT_DETAILS } from 'server/queries/snapshotQueries'
-import type { Chapter } from 'types/chapter'
-import type { Project } from 'types/project'
-import type { SnapshotDetails } from 'types/snapshot'
+import {
+  GetSnapshotDetailsDocument,
+  GetSnapshotDetailsQuery,
+} from 'types/__generated__/snapshotQueries.generated'
 import { level } from 'utils/data'
 import { formatDate } from 'utils/dateFormatter'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
@@ -18,12 +18,12 @@ import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const SnapshotDetailsPage: React.FC = () => {
-  const { id: snapshotKey } = useParams()
-  const [snapshot, setSnapshot] = useState<SnapshotDetails | null>(null)
+  const { id: snapshotKey } = useParams<{ id: string }>()
+  const [snapshot, setSnapshot] = useState<GetSnapshotDetailsQuery['snapshot'] | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const router = useRouter()
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_SNAPSHOT_DETAILS, {
+  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetSnapshotDetailsDocument, {
     variables: { key: snapshotKey },
   })
 
@@ -38,7 +38,7 @@ const SnapshotDetailsPage: React.FC = () => {
     }
   }, [graphQLData, graphQLRequestError, snapshotKey])
 
-  const renderProjectCard = (project: Project) => {
+  const renderProjectCard = (project: GetSnapshotDetailsQuery['snapshot']['newProjects'][0]) => {
     const params: string[] = ['forksCount', 'starsCount', 'contributorsCount']
     const filteredIcons = getFilteredIcons(project, params)
 
@@ -66,7 +66,7 @@ const SnapshotDetailsPage: React.FC = () => {
     )
   }
 
-  const renderChapterCard = (chapter: Chapter) => {
+  const renderChapterCard = (chapter: GetSnapshotDetailsQuery['snapshot']['newChapters'][0]) => {
     const params: string[] = ['updatedAt']
     const filteredIcons = getFilteredIcons(chapter, params)
     const formattedUrls = handleSocialUrls(chapter.relatedUrls)
@@ -120,7 +120,7 @@ const SnapshotDetailsPage: React.FC = () => {
               <div className="flex items-center">
                 <FontAwesomeIcon icon={faCalendar} className="mr-1 h-4 w-4" />
                 <span>
-                  {formatDate(snapshot.startAt)} - {formatDate(snapshot.endAt)}
+                  {formatDate(snapshot.startAt as string)} - {formatDate(snapshot.endAt as string)}
                 </span>
               </div>
             </div>
@@ -135,12 +135,13 @@ const SnapshotDetailsPage: React.FC = () => {
           </h2>
           <div className="mb-4">
             <ChapterMapWrapper
-              geoLocData={snapshot.newChapters}
+              geoLocData={snapshot.newChapters} // TODO: update type
               showLocal={false}
               style={{ height: '400px', width: '100%', zIndex: '0' }}
             />
           </div>
           <div className="flex flex-col gap-6">
+            {' '}
             {snapshot.newChapters.filter((chapter) => chapter.isActive).map(renderChapterCard)}
           </div>
         </div>
@@ -182,7 +183,7 @@ const SnapshotDetailsPage: React.FC = () => {
                   </div>
                   <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
                     <FontAwesomeIcon icon={faCalendar} className="mr-1.5 h-3 w-3" />
-                    Released: {formatDate(release.publishedAt)}
+                    Released: {formatDate(release.publishedAt as string)}
                   </div>
                 </div>
               </div>

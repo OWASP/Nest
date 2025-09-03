@@ -1,19 +1,21 @@
 'use client'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import { GET_COMMUNITY_SNAPSHOTS } from 'server/queries/snapshotQueries'
-import type { Snapshot } from 'types/snapshot'
+import {
+  GetCommunitySnapshotsDocument,
+  GetCommunitySnapshotsQuery,
+} from 'types/__generated__/snapshotQueries.generated'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SnapshotCard from 'components/SnapshotCard'
 
 const SnapshotsPage: React.FC = () => {
-  const [snapshots, setSnapshots] = useState<Snapshot[] | null>(null)
+  const [snapshots, setSnapshots] = useState<GetCommunitySnapshotsQuery['snapshots'] | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_COMMUNITY_SNAPSHOTS)
+  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetCommunitySnapshotsDocument)
 
   useEffect(() => {
     if (graphQLData) {
@@ -35,11 +37,11 @@ const SnapshotsPage: React.FC = () => {
 
   const router = useRouter()
 
-  const handleButtonClick = (snapshot: Snapshot) => {
+  const handleButtonClick = (snapshot: GetCommunitySnapshotsQuery['snapshots'][0]) => {
     router.push(`/snapshots/${snapshot.key}`)
   }
 
-  const renderSnapshotCard = (snapshot: Snapshot) => {
+  const renderSnapshotCard = (snapshot: GetCommunitySnapshotsQuery['snapshots'][0]) => {
     const SubmitButton = {
       label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
@@ -51,8 +53,8 @@ const SnapshotsPage: React.FC = () => {
         key={snapshot.key}
         title={snapshot.title}
         button={SubmitButton}
-        startAt={snapshot.startAt}
-        endAt={snapshot.endAt}
+        startAt={snapshot.startAt as string}
+        endAt={snapshot.endAt as string}
       />
     )
   }
@@ -68,7 +70,7 @@ const SnapshotsPage: React.FC = () => {
           {!snapshots?.length ? (
             <div className="col-span-full py-8 text-center">No Snapshots found</div>
           ) : (
-            snapshots.map((snapshot: Snapshot) => (
+            snapshots.map((snapshot: GetCommunitySnapshotsQuery['snapshots'][0]) => (
               <div key={snapshot.key}>{renderSnapshotCard(snapshot)}</div>
             ))
           )}
