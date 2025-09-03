@@ -39,6 +39,12 @@ class Event(BulkSaveModel, TimestampedModel):
         GLOBAL = "global", "Global"
         OTHER = "other", "Other"
         PARTNER = "partner", "Partner"
+        COMMUNITY = "community", "Community"
+
+    class Status(models.TextChoices):
+        """Event status."""
+
+        CONFIRMED = "confirmed", "Confirmed"
 
     category = models.CharField(
         verbose_name="Category",
@@ -46,11 +52,21 @@ class Event(BulkSaveModel, TimestampedModel):
         choices=Category.choices,
         default=Category.OTHER,
     )
+    # Google Calendar event entity ID
+    google_calendar_id = models.CharField(
+        verbose_name="Google Calendar ID", max_length=1024, blank=True, default=""
+    )
     name = models.CharField(verbose_name="Name", max_length=100)
     start_date = models.DateField(verbose_name="Start Date")
     end_date = models.DateField(verbose_name="End Date", null=True, blank=True)
     description = models.TextField(verbose_name="Description", default="", blank=True)
     key = models.CharField(verbose_name="Key", max_length=100, unique=True)
+    status = models.CharField(
+        verbose_name="Status",
+        max_length=11,
+        choices=Status.choices,
+        default=Status.CONFIRMED,
+    )
     summary = models.TextField(verbose_name="Summary", blank=True, default="")
     suggested_location = models.CharField(
         verbose_name="Suggested Location", max_length=255, blank=True, default=""
@@ -77,6 +93,7 @@ class Event(BulkSaveModel, TimestampedModel):
             )
             .exclude(
                 Q(name__exact="") | Q(url__exact=""),
+                category=Event.Category.COMMUNITY,
             )
             .order_by(
                 "start_date",
