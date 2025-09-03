@@ -10,8 +10,6 @@ import {
   GetSnapshotDetailsDocument,
   GetSnapshotDetailsQuery,
 } from 'types/__generated__/snapshotQueries.generated'
-import type { Chapter } from 'types/chapter'
-import type { Project } from 'types/project'
 import { level } from 'utils/data'
 import { formatDate } from 'utils/dateFormatter'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
@@ -40,7 +38,7 @@ const SnapshotDetailsPage: React.FC = () => {
     }
   }, [graphQLData, graphQLRequestError, snapshotKey])
 
-  const renderProjectCard = (project: Project) => {
+  const renderProjectCard = (project: GetSnapshotDetailsQuery['snapshot']['newProjects'][0]) => {
     const params: string[] = ['forksCount', 'starsCount', 'contributorsCount']
     const filteredIcons = getFilteredIcons(project, params)
 
@@ -68,7 +66,7 @@ const SnapshotDetailsPage: React.FC = () => {
     )
   }
 
-  const renderChapterCard = (chapter: Chapter) => {
+  const renderChapterCard = (chapter: GetSnapshotDetailsQuery['snapshot']['newChapters'][0]) => {
     const params: string[] = ['updatedAt']
     const filteredIcons = getFilteredIcons(chapter, params)
     const formattedUrls = handleSocialUrls(chapter.relatedUrls)
@@ -144,23 +142,21 @@ const SnapshotDetailsPage: React.FC = () => {
           </div>
           <div className="flex flex-col gap-6">
             {' '}
-            // TODO: update type
             {snapshot.newChapters.filter((chapter) => chapter.isActive).map(renderChapterCard)}
           </div>
         </div>
       )}
 
-      {snapshot.newProjects &&
-        snapshot.newProjects.length > 0 && ( // TODO: update type
-          <div className="mb-8">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-700 dark:text-gray-200">
-              New Projects
-            </h2>
-            <div className="flex flex-col gap-6">
-              {snapshot.newProjects.filter((project) => project.isActive).map(renderProjectCard)}
-            </div>
+      {snapshot.newProjects && snapshot.newProjects.length > 0 && (
+        <div className="mb-8">
+          <h2 className="mb-4 text-2xl font-semibold text-gray-700 dark:text-gray-200">
+            New Projects
+          </h2>
+          <div className="flex flex-col gap-6">
+            {snapshot.newProjects.filter((project) => project.isActive).map(renderProjectCard)}
           </div>
-        )}
+        </div>
+      )}
 
       {snapshot.newReleases && snapshot.newReleases.length > 0 && (
         <div className="mb-8">

@@ -6,13 +6,13 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { UPDATE_PROGRAM_STATUS_MUTATION } from 'server/mutations/programsMutations'
+import { ProgramStatusEnum } from 'types/__generated__/graphql'
+import { UpdateProgramStatusDocument } from 'types/__generated__/programsMutations.generated'
 import {
   GetProgramAndModulesDocument,
   GetProgramAndModulesQuery,
 } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
-import { ProgramStatusEnum } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -30,8 +30,7 @@ const ProgramDetailsPage = () => {
   const [modules, setModules] = useState<GetProgramAndModulesQuery['getProgramModules']>([])
   const [isRefetching, setIsRefetching] = useState(false)
 
-  // TODO: update type
-  const [updateProgram] = useMutation(UPDATE_PROGRAM_STATUS_MUTATION, {
+  const [updateProgram] = useMutation(UpdateProgramStatusDocument, {
     onError: handleAppError,
   })
 
@@ -142,7 +141,7 @@ const ProgramDetailsPage = () => {
 
   return (
     <DetailsCard
-      modules={modules}
+      modules={modules} //TODO: update type
       status={program.status}
       setStatus={updateStatus}
       canUpdateStatus={canUpdateStatus}

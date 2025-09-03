@@ -8,7 +8,6 @@ import {
   GetCommunitySnapshotsDocument,
   GetCommunitySnapshotsQuery,
 } from 'types/__generated__/snapshotQueries.generated'
-import type { Snapshot } from 'types/snapshot'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SnapshotCard from 'components/SnapshotCard'
 
@@ -38,11 +37,11 @@ const SnapshotsPage: React.FC = () => {
 
   const router = useRouter()
 
-  const handleButtonClick = (snapshot: Snapshot) => {
+  const handleButtonClick = (snapshot: GetCommunitySnapshotsQuery['snapshots'][0]) => {
     router.push(`/snapshots/${snapshot.key}`)
   }
 
-  const renderSnapshotCard = (snapshot: Snapshot) => {
+  const renderSnapshotCard = (snapshot: GetCommunitySnapshotsQuery['snapshots'][0]) => {
     const SubmitButton = {
       label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
@@ -54,8 +53,8 @@ const SnapshotsPage: React.FC = () => {
         key={snapshot.key}
         title={snapshot.title}
         button={SubmitButton}
-        startAt={snapshot.startAt}
-        endAt={snapshot.endAt}
+        startAt={snapshot.startAt as string}
+        endAt={snapshot.endAt as string}
       />
     )
   }
@@ -71,11 +70,9 @@ const SnapshotsPage: React.FC = () => {
           {!snapshots?.length ? (
             <div className="col-span-full py-8 text-center">No Snapshots found</div>
           ) : (
-            snapshots.map(
-              (
-                snapshot: GetCommunitySnapshotsQuery['snapshots'][0] // TODO: update type
-              ) => <div key={snapshot.key}>{renderSnapshotCard(snapshot)}</div>
-            )
+            snapshots.map((snapshot: GetCommunitySnapshotsQuery['snapshots'][0]) => (
+              <div key={snapshot.key}>{renderSnapshotCard(snapshot)}</div>
+            ))
           )}
         </div>
       </div>

@@ -4,6 +4,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { twMerge } from 'tailwind-merge'
 import { fetchCsrfToken } from 'server/fetchCsrfToken'
 
+import { GetSnapshotDetailsQuery } from 'types/__generated__/snapshotQueries.generated'
 import type { Chapter } from 'types/chapter'
 import type { Committee } from 'types/committee'
 import type { Icon } from 'types/icon'
@@ -17,7 +18,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-type ProjectType = Project | Issue | Committee | Chapter
+type ProjectType =
+  | Project
+  | Issue
+  | Committee
+  | Chapter
+  | GetSnapshotDetailsQuery['snapshot']['newChapters'][0]
+  | GetSnapshotDetailsQuery['snapshot']['newProjects'][0]
 
 export const getFilteredIcons = (project: ProjectType, params: string[]): Icon => {
   const filteredIcons = params.reduce((acc: Icon, key) => {
