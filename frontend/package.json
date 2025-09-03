@@ -25,7 +25,7 @@
     "@fortawesome/react-fontawesome": "^3.0.1",
     "@heroui/button": "^2.2.24",
     "@heroui/modal": "^2.2.21",
-    "@heroui/react": "^2.8.2",
+    "@heroui/react": "^2.8.3",
     "@heroui/select": "^2.4.25",
     "@heroui/skeleton": "^2.2.15",
     "@heroui/system": "^2.4.20",
