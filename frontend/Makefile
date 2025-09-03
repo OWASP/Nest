@@ -23,10 +23,10 @@ exec-frontend-command-it:
 	@docker exec -it nest-frontend $(CMD)
 
 format-frontend-code:
-	@(cd frontend && pnpm run format:check >/dev/null 2>&1 \
-	&& (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
-	|| (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" \
-		&& pnpm run format))
+	@(cd frontend && (pnpm list prettier --depth=0 | grep -q 'prettier' || pnpm add -D prettier >/dev/null 2>&1) \
+	  && pnpm run format:check >/dev/null 2>&1 \
+	  && (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
+	  || (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" && pnpm run format))
 
 graphql-codegen:
 	@cd frontend && pnpm run graphql-codegen
@@ -38,10 +38,10 @@ lighthouse-ci-desktop:
 	@cd frontend && pnpm run lighthouse-ci:desktop
 
 lint-frontend-code:
-	@(cd frontend && pnpm run lint:check >/dev/null 2>&1 \
-	&& (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
-	|| (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" \
-		&& pnpm run lint))
+	@(cd frontend && (pnpm list eslint --depth=0 | grep -q 'eslint' || pnpm add -D eslint >/dev/null 2>&1) \
+	  && pnpm run lint:check >/dev/null 2>&1 \
+	  && (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
+	  || (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" && pnpm run lint))
 
 generate-graphql-types:
 	@(cd frontend && pnpm run graphql-codegen >/dev/null 2>&1 \
