@@ -15,7 +15,7 @@ class GoogleCalendarClient:
         self.service = build("calendar", "v3", credentials=google_account.credentials)
 
     def get_events(self):
-        """Retrieve events from the Google Calendar."""
+        """Retrieve events from Google Calendar."""
         events_result = (
             self.service.events()
             .list(
