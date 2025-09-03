@@ -53,15 +53,15 @@ const ModuleForm = ({
   }
 
   return (
-    <div className="flex w-full flex-col items-center justify-normal p-5 text-text">
+    <div className="text-text flex w-full flex-col items-center justify-normal p-5">
       <div className="mb-8 text-left">
         <h1 className="mb-2 text-4xl font-bold text-gray-800 dark:text-gray-200">{title}</h1>
       </div>
 
       <div className="overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-[#212529]">
         <form onSubmit={onSubmit}>
-          <div className="space-y-8 p-8">
-            <section className="space-y-6">
+          <div className="flex flex-col gap-8 p-8">
+            <section className="flex flex-col gap-6">
               <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
                 Module Information
               </h2>
@@ -77,7 +77,7 @@ const ModuleForm = ({
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
                   />
                 </div>
 
@@ -92,13 +92,13 @@ const ModuleForm = ({
                     onChange={handleInputChange}
                     rows={4}
                     required
-                    className="w-full resize-none rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full resize-none rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
                   />
                 </div>
               </div>
             </section>
 
-            <section className="space-y-6">
+            <section className="flex flex-col gap-6">
               <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
                 Module Configuration
               </h2>
@@ -114,7 +114,7 @@ const ModuleForm = ({
                     value={formData.startedAt}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
                   />
                 </div>
                 <div>
@@ -128,7 +128,7 @@ const ModuleForm = ({
                     value={formData.endedAt}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
                   />
                 </div>
                 <div>
@@ -140,7 +140,7 @@ const ModuleForm = ({
                     id="experienceLevel"
                     value={formData.experienceLevel}
                     onChange={handleInputChange}
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
                   >
                     {EXPERIENCE_LEVELS.map((lvl) => (
                       <option key={lvl.key} value={lvl.key}>
@@ -152,7 +152,7 @@ const ModuleForm = ({
               </div>
             </section>
 
-            <section className="space-y-6">
+            <section className="flex flex-col gap-6">
               <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
                 Additional Details
               </h2>
@@ -168,7 +168,7 @@ const ModuleForm = ({
                     value={formData.domains}
                     onChange={handleInputChange}
                     placeholder="AI, Web Development"
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
                   />
                 </div>
                 <div>
@@ -182,7 +182,7 @@ const ModuleForm = ({
                     value={formData.tags}
                     onChange={handleInputChange}
                     placeholder="javascript, react"
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
                   />
                 </div>
                 <div>
@@ -210,19 +210,19 @@ const ModuleForm = ({
                       value={formData.mentorLogins}
                       onChange={handleInputChange}
                       placeholder="johndoe, jane-doe"
-                      className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+                      className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
                     />
                   </div>
                 )}
               </div>
             </section>
 
-            <div className="border-t pt-8">
+            <div className="border-t border-t-gray-200 pt-8 dark:border-t-gray-700">
               <div className="flex flex-col justify-end gap-4 sm:flex-row">
                 <button
                   type="button"
                   onClick={() => router.back()}
-                  className="rounded-lg border px-6 py-3 font-medium text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
+                  className="rounded-lg border border-gray-200 px-6 py-3 font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
                 >
                   Cancel
                 </button>
@@ -353,7 +353,7 @@ export const ProjectSelector = ({ value, defaultName, onProjectChange }: Project
         onChange={handleInputChange}
         onBlur={handleBlur}
         className={clsx(
-          'w-96 rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:bg-gray-800 dark:text-gray-200'
+          'w-full max-w-md rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden sm:w-96 dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400'
         )}
       />
 

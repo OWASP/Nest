@@ -2,7 +2,8 @@ SHELL := /bin/bash
 
 check-frontend: \
 	format-frontend-code \
-	lint-frontend-code
+	lint-frontend-code \
+	generate-graphql-types
 
 clean-frontend-dependencies:
 	@rm -rf frontend/.next
@@ -27,14 +28,26 @@ format-frontend-code:
 	|| (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" \
 		&& pnpm run format))
 
+graphql-codegen:
+	@cd frontend && pnpm run graphql-codegen
+
 lighthouse-ci:
-	@cd frontend && npx -y @lhci/cli@0.15.1 autorun --collect.url=http://localhost:3000
+	@cd frontend && pnpm run lighthouse-ci
+
+lighthouse-ci-desktop:
+	@cd frontend && pnpm run lighthouse-ci:desktop
 
 lint-frontend-code:
 	@(cd frontend && pnpm run lint:check >/dev/null 2>&1 \
 	&& (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
 	|| (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" \
 		&& pnpm run lint))
+
+generate-graphql-types:
+	@(cd frontend && pnpm run graphql-codegen >/dev/null 2>&1 \
+	&& (printf "pnpm run graphql-codegen"; for i in $$(seq 1 49); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
+	|| (printf "pnpm run graphql-codegen"; for i in $$(seq 1 49); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" \
+		&& pnpm run graphql-codegen))
 
 shell-frontend:
 	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it
