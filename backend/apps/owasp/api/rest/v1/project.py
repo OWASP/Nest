@@ -41,7 +41,7 @@ class ProjectSchema(Schema):
     operation_id="list_projects",
     response={200: list[ProjectSchema]},
     summary="List projects",
-    tags=["owasp"],
+    tags=["Projects"],
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
@@ -53,7 +53,7 @@ def list_projects(
         description="Ordering field",
     ),
 ) -> list[ProjectSchema]:
-    """Get all projects."""
+    """Get projects."""
     projects = filters.filter(Project.objects.all())
 
     if ordering:
