@@ -11,14 +11,14 @@ export const GET_SNAPSHOT_DETAILS = gql`
       newReleases {
         id
         name
-        publishedAt
-        tagName
-        projectName
         organizationName
+        projectName
+        publishedAt
         repositoryName
+        tagName
         author {
-          id
           avatarUrl
+          id
           login
           name
         }
