@@ -117,17 +117,8 @@ const DetailsCard = ({
         )}
 
         {userSummary && (
-          <SecondaryCard icon={faCircleInfo} title={<AnchorTitle title="Summary" />}>
+          <SecondaryCard>
             {userSummary}
-          </SecondaryCard>
-        )}
-
-        {heatmap && (
-          <SecondaryCard
-            icon={faSquarePollVertical}
-            title={<AnchorTitle title="Contribution Heatmap" />}
-          >
-            {heatmap}
           </SecondaryCard>
         )}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">

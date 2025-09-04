@@ -158,56 +158,64 @@ const UserDetailsPage: React.FC = () => {
     }, [isDarkMode])
 
     return (
-      <div className="flex flex-col gap-4">
-        <div className="overflow-hidden rounded-lg bg-white dark:bg-gray-800">
-          <div className="relative">
-            <canvas ref={canvasRef} style={{ display: 'none' }} aria-hidden="true"></canvas>
-            {imageLink ? (
-              <div className="h-40">
-                <Image
-                  width={100}
-                  height={100}
-                  src={imageLink}
-                  className="h-full w-full object-cover object-[54%_60%]"
-                  alt="Contribution Heatmap"
-                />
-              </div>
-            ) : (
-              <div className="relative h-40 items-center justify-center">
-                <Image
-                  height={100}
-                  width={100}
-                  src={
-                    isDarkMode
-                      ? '/img/heatmap-background-dark.png'
-                      : '/img/heatmap-background-light.png'
-                  }
-                  className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
-                  alt="Heatmap Background"
-                />
-                <div className="heatmap-loader"></div>
-              </div>
-            )}
-          </div>
+      // <div className="flex flex-col gap-4">
+      <div className="overflow-hidden rounded-lg bg-white dark:bg-gray-800">
+        <div className="relative">
+          <canvas ref={canvasRef} style={{ display: 'none' }} aria-hidden="true"></canvas>
+          {imageLink ? (
+            <div className="h-32">
+              <Image
+                width={100}
+                height={100}
+                src={imageLink}
+                className="h-full w-full object-cover object-[54%_60%]"
+                alt="Contribution Heatmap"
+              />
+            </div>
+          ) : (
+            <div className="relative h-32 items-center justify-center">
+              <Image
+                height={100}
+                width={100}
+                src={
+                  isDarkMode
+                    ? '/img/heatmap-background-dark.png'
+                    : '/img/heatmap-background-light.png'
+                }
+                className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
+                alt="Heatmap Background"
+              />
+              <div className="heatmap-loader"></div>
+            </div>
+          )}
         </div>
       </div>
     )
   }
 
   const UserSummary = () => (
-    <div className="mt-4 flex items-center">
-      <Image
-        width={64}
-        height={64}
-        className="mr-4 h-16 w-16 rounded-full border-2 border-white bg-white object-cover shadow-md dark:border-gray-800 dark:bg-gray-600/60"
-        src={user?.avatarUrl || '/placeholder.svg'}
-        alt={user?.name || user?.login || 'User Avatar'}
-      />
-      <div className="w-full">
-        <Link href={user?.url || '#'} className="text-xl font-bold text-blue-400 hover:underline">
-          @{user?.login}
-        </Link>
-        <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
+    <div className="flex flex-col sm:flex-row">
+      <div className="w-full sm:w-1/3 mb-4 sm:mb-0">
+        <Image
+          width={200}
+          height={200}
+          className="mx-auto max-w-[140px] sm:max-w-none rounded-lg border-2 border-white bg-white object-cover shadow-md dark:border-gray-800 dark:bg-gray-600/60"
+          src={user?.avatarUrl || '/placeholder.svg'}
+          alt={user?.name || user?.login || 'User Avatar'}
+        />
+      </div>
+      <div className="w-full sm:w-2/3 sm:pl-6 flex flex-col">
+        <div className="mb-4">
+          <Link href={user?.url || '#'} className="text-xl font-bold text-blue-400 hover:underline">
+            @{user?.login}
+          </Link>
+          <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
+        </div>
+        {!isPrivateContributor && (
+          <div className="hidden sm:block">
+            <Heatmap />
+          </div>
+        )}
       </div>
     </div>
   )
@@ -215,7 +223,6 @@ const UserDetailsPage: React.FC = () => {
   return (
     <DetailsCard
       details={userDetails}
-      heatmap={isPrivateContributor ? undefined : <Heatmap />}
       pullRequests={pullRequests}
       recentIssues={issues}
       recentMilestones={milestones}
