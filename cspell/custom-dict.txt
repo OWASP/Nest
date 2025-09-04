@@ -61,6 +61,7 @@ gamesec
 geocoders
 geoloc
 geopy
+googleapiclient
 graphiql
 gunicorn
 heroui
