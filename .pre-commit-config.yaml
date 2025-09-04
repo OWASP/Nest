@@ -64,6 +64,7 @@ repos:
       - id: check-yaml
       - id: detect-private-key
       - id: end-of-file-fixer
+        exclude: frontend/src/types/__generated__
         exclude_types:
           - svg
       - id: file-contents-sorter
