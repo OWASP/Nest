@@ -53,7 +53,7 @@ elif settings.IS_PRODUCTION_ENVIRONMENT:
 api = NinjaAPI(**{**api_settings, **api_settings_customization})
 
 
-@api.get("/")
+@api.get("/", include_in_schema=False)
 def api_root(request):
     """Handle API root endpoint requests."""
     return {

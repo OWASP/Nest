@@ -59,7 +59,7 @@ class UserErrorResponse(Schema):
     operation_id="list_users",
     response={HTTPStatus.OK: list[UserSchema]},
     summary="List users",
-    tags=["GitHub"],
+    tags=["github"],
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
@@ -89,7 +89,7 @@ def list_users(
         HTTPStatus.OK: UserSchema,
     },
     summary="Get user by login",
-    tags=["GitHub"],
+    tags=["github"],
 )
 def get_user(request: HttpRequest, login: str) -> UserSchema | UserErrorResponse:
     """Get user by login."""

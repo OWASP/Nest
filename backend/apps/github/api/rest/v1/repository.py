@@ -29,7 +29,7 @@ class RepositorySchema(Schema):
     description="Retrieve a paginated list of GitHub repositories.",
     operation_id="list_repositories",
     summary="List repositories",
-    tags=["GitHub"],
+    tags=["github"],
     response={200: list[RepositorySchema]},
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
