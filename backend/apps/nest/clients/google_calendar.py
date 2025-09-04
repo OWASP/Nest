@@ -16,14 +16,18 @@ class GoogleCalendarClient:
             "calendar", "v3", credentials=google_account_authorization.credentials
         )
 
-    def get_events(self):
+    def get_events(self, min_time=None, max_time=None) -> list[dict]:
         """Retrieve events from Google Calendar."""
+        if not min_time:
+            min_time = timezone.now()
+        if not max_time:
+            max_time = min_time + timezone.timedelta(days=1)
         events_result = (
             self.service.events()
             .list(
                 calendarId="primary",
-                timeMin=timezone.now().isoformat(),
-                maxResults=10,
+                timeMin=min_time.isoformat(),
+                timeMax=max_time.isoformat(),
                 singleEvents=True,
                 orderBy="startTime",
             )
