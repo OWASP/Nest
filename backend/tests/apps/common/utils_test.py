@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.conf import settings
+from django.utils import timezone
 
 from apps.common.utils import (
     convert_to_camel_case,
@@ -12,6 +13,7 @@ from apps.common.utils import (
     join_values,
     natural_date,
     natural_number,
+    parse_date_and_convert_to_local,
     round_down,
 )
 
@@ -139,3 +141,14 @@ class TestUtils:
     )
     def test_round_down(self, value, base, expected):
         assert round_down(value, base) == expected
+
+    @pytest.mark.parametrize(
+        ("date_str", "expected"),
+        [
+            ("2025-05-26T09:00:00-07:00", timezone.datetime(2025, 5, 26, 16, 0, 0, tzinfo=UTC)),
+            ("2025-12-31T23:59:59+00:00", timezone.datetime(2025, 12, 31, 23, 59, 59, tzinfo=UTC)),
+            ("2025-01-01T00:00:00Z", timezone.datetime(2025, 1, 1, 0, 0, 0, tzinfo=UTC)),
+        ],
+    )
+    def test_parse_date_and_convert_to_local(self, date_str, expected):
+        assert parse_date_and_convert_to_local(date_str) == expected
