@@ -8,10 +8,20 @@ from slack_sdk.errors import SlackApiError
 
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import get_header, markdown
-from apps.slack.common.handlers import chapters, committees, contribute, google_sign_in, projects
+from apps.slack.common.handlers import (
+    calendar_events,
+    chapters,
+    committees,
+    contribute,
+    google_sign_in,
+    projects,
+)
 from apps.slack.common.presentation import EntityPresentation
 from apps.slack.constants import (
     SIGN_IN_TO_GOOGLE_ACTION,
+    VIEW_CALENDAR_EVENTS_ACTION,
+    VIEW_CALENDAR_EVENTS_ACTION_NEXT,
+    VIEW_CALENDAR_EVENTS_ACTION_PREV,
     VIEW_CHAPTERS_ACTION,
     VIEW_CHAPTERS_ACTION_NEXT,
     VIEW_CHAPTERS_ACTION_PREV,
@@ -80,7 +90,16 @@ def handle_home_actions(ack, body, client: WebClient) -> None:
                 VIEW_CONTRIBUTE_ACTION_NEXT,
             }:
                 blocks = contribute.get_blocks(page=page, limit=10, presentation=home_presentation)
-
+            case action if action in {
+                VIEW_CALENDAR_EVENTS_ACTION,
+                VIEW_CALENDAR_EVENTS_ACTION_PREV,
+                VIEW_CALENDAR_EVENTS_ACTION_NEXT,
+            }:
+                blocks = calendar_events.get_blocks(
+                    slack_user_id=user_id,
+                    page=page,
+                    presentation=home_presentation,
+                )
             case action if action == SIGN_IN_TO_GOOGLE_ACTION:
                 try:
                     blocks = google_sign_in.get_blocks(slack_user_id=user_id)
@@ -118,6 +137,9 @@ if SlackConfig.app:
         VIEW_CONTRIBUTE_ACTION_NEXT,
         VIEW_CONTRIBUTE_ACTION_PREV,
         VIEW_CONTRIBUTE_ACTION,
+        VIEW_CALENDAR_EVENTS_ACTION_NEXT,
+        VIEW_CALENDAR_EVENTS_ACTION_PREV,
+        VIEW_CALENDAR_EVENTS_ACTION,
         VIEW_PROJECTS_ACTION_NEXT,
         VIEW_PROJECTS_ACTION_PREV,
         VIEW_PROJECTS_ACTION,
