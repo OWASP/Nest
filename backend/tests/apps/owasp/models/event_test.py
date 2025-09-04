@@ -1,7 +1,8 @@
-from datetime import date
+from datetime import UTC, date
 from unittest.mock import Mock, patch
 
 import pytest
+from django.utils import timezone
 
 from apps.owasp.models.event import Event
 
@@ -132,6 +133,51 @@ class TestEventModel:
             mock_event.from_dict.assert_called_once_with(category, data)
             mock_event.save.assert_called_once()
             assert result == mock_event
+
+    def test_parse_google_calendar_events(self):
+        """Test the parsing of Google Calendar events."""
+        events_list = [
+            {
+                "id": "12345",
+                "summary": "Google Calendar Event",
+                "start": {
+                    "dateTime": "2025-05-26T09:00:00-07:00",
+                    "timeZone": "America/Los_Angeles",
+                },
+                "end": {
+                    "dateTime": "2025-05-30T16:00:00-07:00",
+                    "timeZone": "America/Los_Angeles",
+                },
+                "status": "confirmed",
+            }
+        ]
+        events = Event.parse_google_calendar_events(events_list)
+        assert len(events) == 1
+        assert isinstance(events[0], Event)
+        assert events[0].name == "Google Calendar Event"
+        assert events[0].google_calendar_id == "12345"
+        assert events[0].start_date == timezone.datetime(2025, 5, 26, 16, 0, 0, tzinfo=UTC)
+        assert events[0].end_date == timezone.datetime(2025, 5, 30, 23, 0, 0, tzinfo=UTC)
+
+    def test_parse_non_confirmed_google_calendar_events(self):
+        """Test the parsing of non-confirmed Google Calendar events."""
+        events_list = [
+            {
+                "id": "12345",
+                "summary": "Non-Confirmed Event",
+                "start": {
+                    "dateTime": "2025-05-26T09:00:00-07:00",
+                    "timeZone": "America/Los_Angeles",
+                },
+                "end": {
+                    "dateTime": "2025-05-30T17:00:00-07:00",
+                    "timeZone": "America/Los_Angeles",
+                },
+                "status": "tentative",
+            }
+        ]
+        events = Event.parse_google_calendar_events(events_list)
+        assert len(events) == 0
 
     def test_from_dict(self):
         """Test the from_dict method with example data."""
