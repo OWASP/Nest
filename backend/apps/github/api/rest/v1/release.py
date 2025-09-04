@@ -36,7 +36,7 @@ class ReleaseSchema(Schema):
     description="Retrieve a paginated list of GitHub releases.",
     operation_id="list_releases",
     summary="List releases",
-    tags=["GitHub"],
+    tags=["github"],
     response={200: list[ReleaseSchema]},
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
