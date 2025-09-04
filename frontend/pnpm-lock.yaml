@@ -12,8 +12,8 @@ importers:
         specifier: ^3.14.0
         version: 3.14.0(@types/react@19.1.12)(graphql-ws@6.0.6(graphql@16.11.0)(ws@8.18.3))(graphql@16.11.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@fortawesome/fontawesome-svg-core':
-        specifier: ^6.7.2
-        version: 6.7.2
+        specifier: ^7.0.1
+        version: 7.0.1
       '@fortawesome/free-brands-svg-icons':
         specifier: ^6.7.2
         version: 6.7.2
@@ -25,7 +25,7 @@ importers:
         version: 6.7.2
       '@fortawesome/react-fontawesome':
         specifier: ^3.0.2
-        version: 3.0.2(@fortawesome/fontawesome-svg-core@6.7.2)(react@19.1.1)
+        version: 3.0.2(@fortawesome/fontawesome-svg-core@7.0.1)(react@19.1.1)
       '@graphql-typed-document-node/core':
         specifier: ^3.2.0
         version: 3.2.0(graphql@16.11.0)
@@ -806,8 +806,12 @@ packages:
     resolution: {integrity: sha512-Zs+YeHUC5fkt7Mg1l6XTniei3k4bwG/yo3iFUtZWd/pMx9g3fdvkSK9E0FOC+++phXOka78uJcYb8JaFkW52Xg==}
     engines: {node: '>=6'}
 
-  '@fortawesome/fontawesome-svg-core@6.7.2':
-    resolution: {integrity: sha512-yxtOBWDrdi5DD5o1pmVdq3WMCvnobT0LU6R8RyyVXPvFRd2o79/0NCuQoCjNTeZz9EzA9xS3JxNWfv54RIHFEA==}
+  '@fortawesome/fontawesome-common-types@7.0.1':
+    resolution: {integrity: sha512-0VpNtO5cNe1/HQWMkl4OdncYK/mv9hnBte0Ew0n6DMzmo3Q3WzDFABHm6LeNTipt5zAyhQ6Ugjiu8aLaEjh1gg==}
+    engines: {node: '>=6'}
+
+  '@fortawesome/fontawesome-svg-core@7.0.1':
+    resolution: {integrity: sha512-x0cR55ILVqFpUioSMf6ebpRCMXMcheGN743P05W2RB5uCNpJUqWIqW66Lap8PfL/lngvjTbZj0BNSUweIr/fHQ==}
     engines: {node: '>=6'}
 
   '@fortawesome/free-brands-svg-icons@6.7.2':
@@ -8338,9 +8342,11 @@ snapshots:
 
   '@fortawesome/fontawesome-common-types@6.7.2': {}
 
-  '@fortawesome/fontawesome-svg-core@6.7.2':
+  '@fortawesome/fontawesome-common-types@7.0.1': {}
+
+  '@fortawesome/fontawesome-svg-core@7.0.1':
     dependencies:
-      '@fortawesome/fontawesome-common-types': 6.7.2
+      '@fortawesome/fontawesome-common-types': 7.0.1
 
   '@fortawesome/free-brands-svg-icons@6.7.2':
     dependencies:
@@ -8354,9 +8360,9 @@ snapshots:
     dependencies:
       '@fortawesome/fontawesome-common-types': 6.7.2
 
-  '@fortawesome/react-fontawesome@3.0.2(@fortawesome/fontawesome-svg-core@6.7.2)(react@19.1.1)':
+  '@fortawesome/react-fontawesome@3.0.2(@fortawesome/fontawesome-svg-core@7.0.1)(react@19.1.1)':
     dependencies:
-      '@fortawesome/fontawesome-svg-core': 6.7.2
+      '@fortawesome/fontawesome-svg-core': 7.0.1
       react: 19.1.1
 
   '@graphql-codegen/add@3.2.3(graphql@16.11.0)':
