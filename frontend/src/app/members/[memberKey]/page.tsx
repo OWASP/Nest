@@ -35,9 +35,7 @@ const UserDetailsPage: React.FC = () => {
   const [data, setData] = useState<HeatmapData>({} as HeatmapData)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [username, setUsername] = useState('')
-  const [imageLink, setImageLink] = useState('')
   const [isPrivateContributor, setIsPrivateContributor] = useState(false)
-  const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const theme = 'blue'
 
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_USER_DATA, {
@@ -75,13 +73,6 @@ const UserDetailsPage: React.FC = () => {
     fetchData()
   }, [memberKey, user])
 
-  useEffect(() => {
-    if (canvasRef.current && data && data.years && data.years.length > 0) {
-      drawContributions(canvasRef.current, { data, username, theme })
-      const imageURL = canvasRef.current.toDataURL()
-      setImageLink(imageURL)
-    }
-  }, [username, data])
 
   const formattedBio = user?.bio?.split(' ').map((word, index) => {
     // Regex to match GitHub usernames, but if last character is not a word character or @, it's a punctuation
@@ -142,6 +133,7 @@ const UserDetailsPage: React.FC = () => {
 
   const Heatmap = () => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
+    const [imgSrc, setImgSrc] = useState('')
     const { resolvedTheme } = useTheme()
     const isDarkMode = (resolvedTheme ?? 'light') === 'dark'
 
@@ -153,21 +145,22 @@ const UserDetailsPage: React.FC = () => {
           themeName: isDarkMode ? 'dark' : 'light',
         })
         const imageURL = canvasRef.current.toDataURL()
-        setImageLink(imageURL)
+        setImgSrc(imageURL)
+      } else {
+        setImgSrc('')
       }
-    }, [isDarkMode])
+    }, [isDarkMode, data, username])
 
     return (
-      // <div className="flex flex-col gap-4">
       <div className="overflow-hidden rounded-lg bg-white dark:bg-gray-800">
         <div className="relative">
           <canvas ref={canvasRef} style={{ display: 'none' }} aria-hidden="true"></canvas>
-          {imageLink ? (
+          {imgSrc ? (
             <div className="h-32">
               <Image
                 width={100}
                 height={100}
-                src={imageLink}
+                src={imgSrc}
                 className="h-full w-full object-cover object-[54%_60%]"
                 alt="Contribution Heatmap"
               />
