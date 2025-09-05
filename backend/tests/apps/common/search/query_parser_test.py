@@ -48,26 +48,26 @@ class TestQueryParser:
     def test_basic_field_parsing_all_types(self, parser_type, expected_string):
         parser = getattr(self, parser_type)
         result = parser.parse('Author:"John Doe"')
-        expected = [{"field": "author", "type": "string", "string": expected_string}]
+        expected = [{"field": "author", "type": "string", "value": expected_string}]
         assert result == expected
 
     def test_parser_configuration_differences(self):
         query = "AUTHOR:test"
         result = self.case_sensitive_parser.parse(query)
-        expected = [{"field": "author", "type": "string", "string": "test"}]
+        expected = [{"field": "author", "type": "string", "value": "test"}]
         assert result == expected
 
     def test_comparison_operators(self):
         for op in self.comparison_operators:
             result = self.parser.parse(f"stars:{op}100")
-            expected = [{"field": "stars", "type": "number", "op": op, "number": "100"}]
+            expected = [{"field": "stars", "type": "number", "op": op, "value": 100}]
             assert result == expected
 
     def test_boolean_variations(self):
         for bool_val in self.boolean_values:
             result = self.parser.parse(f"archived:{bool_val}")
-            expected_bool = "True" if bool_val in self.true_boolean_values else "False"
-            expected = [{"field": "archived", "type": "boolean", "boolean": expected_bool}]
+            expected_bool = bool_val in self.true_boolean_values
+            expected = [{"field": "archived", "type": "boolean", "value": expected_bool}]
             assert result == expected
 
     @pytest.mark.parametrize(
@@ -76,18 +76,18 @@ class TestQueryParser:
             (
                 'author:"John Doe" stars:>100 archived:false some "free text"',
                 [
-                    {"type": "string", "field": "author", "string": '"john doe"'},
-                    {"type": "number", "field": "stars", "op": ">", "number": "100"},
-                    {"type": "boolean", "field": "archived", "boolean": "False"},
-                    {"type": "string", "field": "query", "string": "some"},
-                    {"type": "string", "field": "query", "string": '"free text"'},
+                    {"type": "string", "field": "author", "value": '"john doe"'},
+                    {"type": "number", "field": "stars", "op": ">", "value": 100},
+                    {"type": "boolean", "field": "archived", "value": False},
+                    {"type": "string", "field": "query", "value": "some"},
+                    {"type": "string", "field": "query", "value": "free text"},
                 ],
             ),
             (
                 'project:"my-awesome-project" language:"C++"',
                 [
-                    {"type": "string", "field": "project", "string": '"my-awesome-project"'},
-                    {"type": "string", "field": "language", "string": '"c++"'},
+                    {"type": "string", "field": "project", "value": '"my-awesome-project"'},
+                    {"type": "string", "field": "language", "value": '"c++"'},
                 ],
             ),
         ],
@@ -113,7 +113,7 @@ class TestQueryParser:
         valid_dates = ["2023-12-31", '"2023-12-31"', '"2023-12-31', "20231231"]
         for date_str in valid_dates:
             result = self.parser.parse(f"created:{date_str}")
-            expected = [{"date": "2023-12-31", "field": "created", "type": "date", "op": "="}]
+            expected = [{"value": "2023-12-31", "field": "created", "type": "date", "op": "="}]
             assert result == expected
 
         invalid_dates = ["invalid-date", "2023-163-01", "2023-01-362"]
@@ -135,7 +135,7 @@ class TestQueryParser:
         parser_with_default = QueryParser(field_schema={"test": "string"}, default_field="default")
         result = parser_with_default.parse("query:test free_text")
         expected = [
-            {"type": "string", "field": "default", "string": "free_text"},
+            {"type": "string", "field": "default", "value": "free_text"},
         ]
         assert result == expected
 
@@ -145,7 +145,7 @@ class TestQueryParser:
     )
     def test_boundary_conditions(self, query):
         result = self.parser.parse(query)
-        expected = [{"field": "query", "type": "string", "string": query}]
+        expected = [{"type": "string", "field": "query", "value": query.strip('"')}]
         assert result == expected
 
     def test_long_field_names_and_values(self):
@@ -153,14 +153,18 @@ class TestQueryParser:
         long_value = "a" * 1000
         result = long_field_parser.parse(f'verylongfieldname:"{long_value}"')
         expected = [
-            {"string": '"' + long_value + '"', "field": "verylongfieldname", "type": "string"}
+            {"value": '"' + long_value + '"', "field": "verylongfieldname", "type": "string"}
         ]
         assert result == expected
 
     @pytest.mark.parametrize("val", ["0", "-1", "999999", "3.14159"])
     def test_numeric_values(self, val):
         result = self.parser.parse(f"stars:{val}")
-        expected = [
-            {"type": "number", "field": "stars", "number": str(int(float(val))), "op": "="}
-        ]
+        expected = [{"type": "number", "field": "stars", "value": int(float(val)), "op": "="}]
         assert result == expected
+
+    def test_overflow_numerical_value(self):
+        overflow_number = "1e3000"
+        with pytest.raises(QueryParserError) as e:
+            self.strict_parser.parse(f"stars:{overflow_number}")
+        assert e.value.error_type == "NUMBER_VALUE_ERROR"

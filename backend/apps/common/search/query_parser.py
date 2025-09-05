@@ -1,10 +1,10 @@
 """Query parser module for parsing search queries into structured conditions."""
 
+from dataclasses import asdict, dataclass
 from enum import Enum
 
 from pyparsing import (
     Group,
-    Optional,
     ParseException,
     QuotedString,
     Regex,
@@ -12,6 +12,9 @@ from pyparsing import (
     ZeroOrMore,
     alphanums,
     oneOf,
+)
+from pyparsing import (
+    Optional as PyparsingOptional,
 )
 
 
@@ -25,25 +28,29 @@ class FieldType(str, Enum):
 
 
 def has_enum_value(enum_class, value):
-    """Check if a value exists in the given enum class.
-
-    Args:
-        enum_class: The enum class to check against.
-        value: The value to check for existence in the enum.
-
-    Returns:
-        bool: True if the value exists in the enum, False otherwise.
-
-    Raises:
-        None: This function catches ValueError internally and returns False.
-
-    """
+    """Check if a value exists in the given enum class."""
     try:
         enum_class(value)
     except ValueError:
         return False
-
     return True
+
+
+@dataclass
+class QueryCondition:
+    """Dataclass representing a parsed query condition."""
+
+    type: str
+    field: str
+    value: str | int | bool
+    op: str | None = None
+
+    def to_dict(self) -> dict:
+        """Convert the QueryCondition to a dictionary representation."""
+        data = asdict(self)
+        if data.get("op") is None:
+            data.pop("op")
+        return data
 
 
 class QueryParserError(Exception):
@@ -103,7 +110,8 @@ class QueryParser:
     - Quoted strings for multi-word values
     - Boolean field support
     - Date field parsing with comparisons
-    - Case sensitivity: normalize field names only, preserve original value casing
+    - Case sensitivity: normalize field names only, preserve original value casing when
+      case sensitive is True
     - Only supports implicit AND logic between conditions
     """
 
@@ -112,7 +120,7 @@ class QueryParser:
     QUOTED_VALUE = QuotedString(quoteChar='"', escChar="\\", unquoteResults=False)
     UNQUOTED_VALUE = Word(alphanums + '+-.<>=/_"')
     FIELD_VALUE = QUOTED_VALUE | UNQUOTED_VALUE
-    COMPARISON_OPERATOR = Optional(oneOf(">= <= > < ="), default="=")
+    COMPARISON_OPERATOR = PyparsingOptional(oneOf(">= <= > < ="), default="=")
     COMPARISON_PATTERN = Group(COMPARISON_OPERATOR + UNQUOTED_VALUE)
     DATE_PATTERN = Regex(r"\d{4}-\d{2}-\d{2}") | Regex(r"\d{8}")  # YYYY-MM-DD or YYYYMMDD format
     BOOLEAN_TRUE_VALUES = {"true", "1", "yes", "on"}
@@ -154,7 +162,7 @@ class QueryParser:
                 error_type="CONFIGURATION_ERROR",
             ) from e
 
-    def parse(self, query: str) -> list[dict[str, str]]:
+    def parse(self, query: str) -> list[dict]:
         """Parse query string into structured conditions.
 
         Args:
@@ -167,7 +175,7 @@ class QueryParser:
             QueryParserError: If parsing fails
 
         """
-        conditions = []
+        conditions: list[dict] = []
         query = query.strip()
         if not self.case_sensitive:
             query = query.lower()
@@ -193,10 +201,10 @@ class QueryParser:
         except QueryParserError as e:
             e.query = query
             raise
-        else:
-            return conditions
 
-    def to_dict(self, field: str, field_type: FieldType, raw_value: str) -> dict[str, str] | None:
+        return conditions
+
+    def to_dict(self, field: str, field_type: FieldType, raw_value: str) -> dict | None:
         """Create a structured condition dictionary from field and raw value.
 
         Args:
@@ -208,48 +216,51 @@ class QueryParser:
             Dictionary representation of the condition or None if invalid
 
         Raises:
-            QueryParserError: If parsing fails
+            QueryParserError: If parsing fails and strict mode is enabled
 
         """
-        condition = {
-            "type": field_type.value,
-            "field": field,
-        }
+        op_field = None
+        value_field: str | int | bool = ""  # placeholder initialization
         try:
             match field_type:
                 case FieldType.BOOLEAN:
-                    condition["boolean"] = self._parse_boolean_value(
-                        raw_value
-                    )  # "True" or "False"
+                    value_field = self._parse_boolean_value(raw_value)
                 case FieldType.NUMBER:
                     operator, numeric_value = self._parse_number_value(raw_value)
-                    condition["op"] = operator
-                    condition["number"] = numeric_value
+                    op_field = operator
+                    value_field = numeric_value
                 case FieldType.DATE:
                     operator, date_value = self._parse_date_value(raw_value)
-                    condition["op"] = operator
-                    condition["date"] = date_value
+                    op_field = operator
+                    value_field = date_value
                 case FieldType.STRING:
-                    condition["string"] = self._parse_string_value(raw_value)
+                    value_field = self._parse_string_value(raw_value)
         except QueryParserError as e:
             if self.strict:
                 e.field = field
                 raise
             return None
-        else:
-            return condition
+        condition = QueryCondition(
+            type=field_type.value, field=field, op=op_field, value=value_field
+        )
+        return condition.to_dict()
 
-    def _create_text_search_condition(self, token: str) -> dict[str, str]:
+    def _create_text_search_condition(self, token: str) -> dict:
         """Create a text search condition for tokens that aren't field:value pairs.
 
         Args:
             token: Raw token string
 
         Returns:
-            QueryCondition for text search
+            QueryCondition dictionary for text search
 
         """
-        return {"type": FieldType.STRING.value, "field": self.default_field, "string": token}
+        condition = QueryCondition(
+            type=FieldType.STRING.value,
+            field=self.default_field,
+            value=QueryParser._remove_quotes(token),
+        )
+        return condition.to_dict()
 
     def _handle_unknown_field(self, field: str) -> None:
         """Handle unknown field based on strict mode setting.
@@ -470,17 +481,14 @@ class QueryParser:
             ) from e
 
     @staticmethod
-    def _parse_boolean_value(value: str) -> str:
-        """Parse boolean string to standardized string format.
-
-        Converts boolean-like strings to "True" or "False" for consistent
-        storage in dictionaries without needing type conversion.
+    def _parse_boolean_value(value: str) -> bool:
+        """Parse boolean string to actual boolean.
 
         Args:
             value: Boolean string to parse
 
         Returns:
-            "True" or "False" as string
+            Actual boolean value (True/False)
 
         Raises:
             QueryParserError: If value is not a valid boolean
@@ -488,23 +496,23 @@ class QueryParser:
         """
         value = QueryParser._remove_quotes(value).lower()
         if value in QueryParser.BOOLEAN_TRUE_VALUES:
-            return "True"
+            return True
         if value in QueryParser.BOOLEAN_FALSE_VALUES:
-            return "False"
+            return False
         raise QueryParserError(
             message=f"Invalid boolean value: {value}", error_type="BOOLEAN_VALUE_ERROR"
         )
 
     @staticmethod
-    def _parse_number_value(value: str) -> tuple[str, str]:
+    def _parse_number_value(value: str) -> tuple[str, int]:
         """Parse numeric value with optional comparison operator.
 
         Args:
             value: String value to parse
 
         Returns:
-            Tuple of (operator, numeric_value) where numeric_value is string
-            of integer representation and "=" is the default operator.
+            Tuple of (operator, numeric_value) where numeric_value is integer
+            and "=" is the default operator.
 
         Raises:
             QueryParserError: If value is not a valid number
@@ -514,13 +522,13 @@ class QueryParser:
             value = QueryParser._remove_quotes(value)
             operator, clean_value = QueryParser._parse_comparison_pattern(value)
             numeric_value = int(float(clean_value))
-            return operator, str(numeric_value)
         except QueryParserError:
             raise
         except (ValueError, OverflowError, ParseException) as e:
             raise QueryParserError(
                 message=f"Invalid numeric value: {e!s}", error_type="NUMBER_VALUE_ERROR"
             ) from e
+        return operator, numeric_value
 
     @staticmethod
     def _parse_date_value(value: str) -> tuple[str, str]:
