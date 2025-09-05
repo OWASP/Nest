@@ -256,10 +256,7 @@ class RepositoryBasedEntityModel(models.Model):
         if not content:
             return []
 
-        urls = []
-        for line in content.split("\n"):
-            line_urls = re.findall(r"https?:\/\/[^\s\)]+", line.strip())
-            urls.extend(line_urls)
+        urls = re.findall(r"https?:\/\/[^\s\)]+", content.strip())
 
         if domain:
             return [url for url in urls if urlparse(url).netloc == domain]
