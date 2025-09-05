@@ -60,6 +60,7 @@ class TestOpenAi:
         response = openai_instance.complete()
 
         assert response is None
+
         mock_logger.exception.assert_called_once_with(
             "An error occurred during OpenAI API request."
         )

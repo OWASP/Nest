@@ -37,7 +37,7 @@ export const TruncatedText = ({
   return (
     <span
       ref={textRef}
-      className={`block overflow-hidden truncate text-ellipsis whitespace-nowrap ${className}`}
+      className={`block truncate overflow-hidden text-ellipsis whitespace-nowrap ${className}`}
     >
       {text || children}
     </span>

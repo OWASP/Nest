@@ -1,5 +1,6 @@
 """OWASP blog posts GraphQL nodes."""
 
+import strawberry
 import strawberry_django
 
 from apps.owasp.models.post import Post
@@ -15,5 +16,5 @@ from apps.owasp.models.post import Post
         "url",
     ],
 )
-class PostNode:
+class PostNode(strawberry.relay.Node):
     """Post node."""
