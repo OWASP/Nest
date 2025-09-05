@@ -522,6 +522,8 @@ class QueryParser:
             value = QueryParser._remove_quotes(value)
             operator, clean_value = QueryParser._parse_comparison_pattern(value)
             numeric_value = int(float(clean_value))
+            if (numeric_value > 2**64 or numeric_value < 0):
+                raise OverflowError
         except QueryParserError:
             raise
         except (ValueError, OverflowError, ParseException) as e:
