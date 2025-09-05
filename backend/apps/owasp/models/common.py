@@ -18,6 +18,7 @@ from apps.github.constants import (
 from apps.github.models.user import User
 from apps.github.utils import get_repository_file_content
 from apps.owasp.models.entity_member import EntityMember
+from apps.owasp.models.enums.project import AudienceChoices
 
 logger = logging.getLogger(__name__)
 
@@ -102,6 +103,16 @@ class RepositoryBasedEntityModel(models.Model):
         )
 
     @property
+    def info_md_url(self) -> str | None:
+        """Return entity's raw info.md GitHub URL."""
+        return (
+            "https://raw.githubusercontent.com/OWASP/"
+            f"{self.owasp_repository.key}/{self.owasp_repository.default_branch}/info.md"
+            if self.owasp_repository
+            else None
+        )
+
+    @property
     def entity_leaders(self) -> models.QuerySet[User]:
         """Return entity's leaders."""
         return User.objects.filter(
@@ -159,6 +170,22 @@ class RepositoryBasedEntityModel(models.Model):
         open_ai.set_input(get_repository_file_content(self.index_md_url))
         open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
         self.summary = open_ai.complete() or ""
+
+    def get_audience(self):
+        """Get audience from info.md file on GitHub."""
+        content = get_repository_file_content(self.info_md_url)
+        if not content:
+            return []
+
+        found_keywords = set()
+        audience_choices = AudienceChoices.choices
+
+        for line in content.split("\n"):
+            for lower_kw, original_kw in audience_choices:
+                if original_kw in line:
+                    found_keywords.add(lower_kw)
+
+        return sorted(found_keywords)
 
     def get_leaders(self):
         """Get leaders from leaders.md file on GitHub."""
@@ -223,6 +250,22 @@ class RepositoryBasedEntityModel(models.Model):
             return f"https://github.com/{match.group(1)}".lower()
 
         return url
+
+    def get_urls(self, domain=None):
+        """Get URLs from info.md file on GitHub."""
+        content = get_repository_file_content(self.info_md_url)
+        if not content:
+            return []
+
+        urls = []
+        for line in content.split("\n"):
+            line_urls = re.findall(r"https?:\/\/[^\s\)]+", line.strip())
+            urls.extend(line_urls)
+
+        if domain:
+            return [url for url in urls if urlparse(url).netloc == domain]
+
+        return urls
 
     def parse_tags(self, tags) -> list[str]:
         """Parse entity tags."""
