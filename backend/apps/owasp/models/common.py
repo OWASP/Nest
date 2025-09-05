@@ -178,10 +178,9 @@ class RepositoryBasedEntityModel(models.Model):
             return []
 
         found_keywords = set()
-        audience_choices = AudienceChoices.choices
 
         for line in content.split("\n"):
-            for lower_kw, original_kw in audience_choices:
+            for lower_kw, original_kw in AudienceChoices.choices:
                 if original_kw in line:
                     found_keywords.add(lower_kw)
 
@@ -263,7 +262,7 @@ class RepositoryBasedEntityModel(models.Model):
             urls.extend(line_urls)
 
         if domain:
-            return [url for url in urls if urlparse(url).netloc == domain]
+            return [url for url in urls if urlparse(url).netloc.endswith(domain)]
 
         return urls
 

@@ -14,6 +14,34 @@ class EntityModel(RepositoryBasedEntityModel):
 
 class TestRepositoryBasedEntityModel:
     @pytest.mark.parametrize(
+        ("content", "expected_audience"),
+        [
+            (
+                """### Top Ten Card Game Information
+* [Incubator Project](#)
+* [Type of Project](#)
+* [Version 0.0.0](#)
+* [Builder](#)
+* [Breaker](#)""",
+                ["breaker", "builder"],
+            ),
+            ("This test contains no audience information.", []),
+            ("", []),
+            (None, []),
+        ],
+    )
+    def test_get_audience(self, content, expected_audience):
+        model = EntityModel()
+        repository = Repository()
+        repository.name = "www-project-example"
+        model.owasp_repository = repository
+
+        with patch("apps.owasp.models.common.get_repository_file_content", return_value=content):
+            audience = model.get_audience()
+
+        assert audience == expected_audience
+
+    @pytest.mark.parametrize(
         ("content", "expected_leaders"),
         [
             ("- [Leader1](https://example.com)", ["Leader1"]),
@@ -91,6 +119,47 @@ class TestRepositoryBasedEntityModel:
             metadata = model.get_metadata()
 
         assert metadata == expected_metadata
+
+    @pytest.mark.parametrize(
+        ("content", "domain", "expected_urls"),
+        [
+            (
+                """* [Homepage](https://owasp.org)
+* [Project Repo](https://github.com/OWASP/www-project)""",
+                None,
+                ["https://owasp.org", "https://github.com/OWASP/www-project"],
+            ),
+            (
+                """* [Homepage](https://owasp.org)
+* [Project Repo](https://github.com/OWASP/www-project)""",
+                "owasp.org",
+                ["https://owasp.org"],
+            ),
+            (
+                """* [Subdomain](https://test.owasp.org)""",
+                "owasp.org",
+                ["https://test.owasp.org"],
+            ),
+            (
+                """* [Homepage](https://owasp.org)""",
+                "example.com",
+                [],
+            ),
+            ("This test contains no URLs.", None, []),
+            ("", None, []),
+            (None, None, []),
+        ],
+    )
+    def test_get_urls(self, content, domain, expected_urls):
+        model = EntityModel()
+        repository = Repository()
+        repository.name = "www-project-example"
+        model.owasp_repository = repository
+
+        with patch("apps.owasp.models.common.get_repository_file_content", return_value=content):
+            urls = model.get_urls(domain=domain)
+
+        assert urls == expected_urls
 
     @pytest.mark.parametrize(
         ("key", "expected_url"),
