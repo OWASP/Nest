@@ -42,7 +42,6 @@ class UserNode:
         return [ub.badge for ub in user_badges]
 
     @strawberry.field
-    
     def created_at(self) -> float:
         """Resolve created at."""
         return self.idx_created_at

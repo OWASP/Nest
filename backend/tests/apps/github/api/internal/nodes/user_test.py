@@ -16,9 +16,7 @@ class TestUserNode:
 
     def test_meta_configuration(self):
         """Test if Meta is properly configured."""
-        field_names = {
-            field.name for field in UserNode.__strawberry_definition__.fields
-        }
+        field_names = {field.name for field in UserNode.__strawberry_definition__.fields}
         expected_field_names = {
             "avatar_url",
             "badges",
@@ -85,7 +83,6 @@ class TestUserNode:
 
     def test_badges_resolution_orders_and_filters_active(self):
         """Badges resolution should filter active and order by badge weight/name."""
-
         user = Mock()
         user_badge_qs = Mock()
         user.user_badges.select_related.return_value = user_badge_qs
@@ -96,7 +93,7 @@ class TestUserNode:
         user_badge_qs.filter.return_value = ordered_qs
         ordered_qs.order_by.return_value = [ub1]
 
-        result = UserNode.badges(user)  
+        result = UserNode.badges(user)
 
         user.user_badges.select_related.assert_called_once_with("badge")
         user_badge_qs.filter.assert_called_once_with(is_active=True)
