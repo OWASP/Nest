@@ -32,7 +32,7 @@ class UserNode:
     def badges(self) -> list[BadgeNode]:
         """Return user badges."""
         user_badges = (
-            self.badges.select_related("badge")
+            self.user_badges.select_related("badge")
             .filter(is_active=True)
             .order_by(
                 "badge__weight",
@@ -42,6 +42,7 @@ class UserNode:
         return [ub.badge for ub in user_badges]
 
     @strawberry.field
+    
     def created_at(self) -> float:
         """Resolve created at."""
         return self.idx_created_at
