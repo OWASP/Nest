@@ -241,15 +241,13 @@ def sync_issue_comments(gh_client, issue: Issue):
     logger.info("Starting comment sync for issue #%s", issue.number)
 
     try:
-        repository = issue.repository
-        if not repository:
+        if not (repository := issue.repository):
             logger.warning("Issue #%s has no repository, skipping", issue.number)
             return
 
-        repository_full_name = f"{repository.owner.login}/{repository.name}"
-        logger.info("Fetching repository: %s", repository_full_name)
+        logger.info("Fetching repository: %s", repository.path)
 
-        gh_repository = gh_client.get_repo(repository_full_name)
+        gh_repository = gh_client.get_repo(repository.path)
         gh_issue = gh_repository.get_issue(number=issue.number)
 
         last_comment = issue.latest_comment

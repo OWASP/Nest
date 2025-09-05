@@ -7,6 +7,7 @@ class IssueUserInterest(models.Model):
     """Represents users interested in a specific issue within a module."""
 
     class Meta:
+        db_table = "mentorship_issue_user_interests"
         verbose_name = "Issue User Interest"
         verbose_name_plural = "Issue User Interests"
         unique_together = ("module", "issue", "user")
