@@ -136,11 +136,6 @@ class TestRepositoryBasedEntityModel:
                 ["https://owasp.org"],
             ),
             (
-                """* [Subdomain](https://test.owasp.org)""",
-                "owasp.org",
-                ["https://test.owasp.org"],
-            ),
-            (
                 """* [Homepage](https://owasp.org)""",
                 "example.com",
                 [],

@@ -46,14 +46,13 @@ class Command(BaseCommand):
             prefix = f"{idx + offset + 1} of {active_projects_count}"
             print(f"{prefix:<10} {project.owasp_url}")
 
-            project.leaders_raw = project.get_leaders()
-
             scraper = OwaspScraper(project.owasp_url)
             if scraper.page_tree is None:
                 project.deactivate()
                 continue
 
             project.audience = project.get_audience()
+            project.leaders_raw = project.get_leaders()
 
             # Get GitHub URLs.
             scraped_urls = sorted(

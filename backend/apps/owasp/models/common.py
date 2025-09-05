@@ -262,7 +262,7 @@ class RepositoryBasedEntityModel(models.Model):
             urls.extend(line_urls)
 
         if domain:
-            return [url for url in urls if urlparse(url).netloc.endswith(domain)]
+            return [url for url in urls if urlparse(url).netloc == domain]
 
         return urls
 
