@@ -48,11 +48,15 @@ class Command(BaseCommand):
 
             scraper = OwaspScraper(project.owasp_url)
             if scraper.page_tree is None:
+                print("what")
                 project.deactivate()
                 continue
 
             project.audience = project.get_audience()
             project.leaders_raw = project.get_leaders()
+            leaders_emails = project.get_leaders_emails()
+            if leaders_emails:
+                project.sync_leaders(leaders_emails)
 
             # Get GitHub URLs.
             scraped_urls = sorted(

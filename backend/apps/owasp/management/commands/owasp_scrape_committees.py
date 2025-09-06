@@ -40,6 +40,10 @@ class Command(BaseCommand):
                 continue
 
             committee.leaders_raw = committee.get_leaders()
+            leaders_emails = committee.get_leaders_emails()
+            if leaders_emails:
+                committee.sync_leaders(leaders_emails)
+
             # Get related URLs.
             scraped_urls = sorted(
                 {

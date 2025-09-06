@@ -40,6 +40,10 @@ class Command(BaseCommand):
                 continue
 
             chapter.leaders_raw = chapter.get_leaders()
+            leaders_emails = chapter.get_leaders_emails()
+            if leaders_emails:
+                chapter.sync_leaders(leaders_emails)
+
             # Get related URLs.
             scraped_urls = sorted(
                 {
