@@ -208,6 +208,26 @@ class RepositoryBasedEntityModel(models.Model):
 
         return leaders
 
+    def get_leaders_emails(self):
+        """Get leaders emails from leaders.md file on GitHub."""
+        content = get_repository_file_content(self.leaders_md_url)
+        if not content:
+            return {}
+
+        leaders = {}
+        for line in content.split("\n"):
+            matches = re.findall(
+                r"[-*]\s*(?:\[([^\]]+)\]\(mailto:([^)]+)\)|([^[\n]+))", line.strip()
+            )
+
+            for match in matches:
+                if match[0] and match[1]:  # Name with email
+                    leaders[match[0].strip()] = match[1].strip()
+                elif match[2]:  # Name without email
+                    leaders[match[2].strip()] = None
+
+        return leaders
+
     def get_metadata(self):
         """Get entity metadata."""
         try:

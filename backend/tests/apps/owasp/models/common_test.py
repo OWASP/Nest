@@ -77,6 +77,82 @@ class TestRepositoryBasedEntityModel:
         assert leaders == expected_leaders
 
     @pytest.mark.parametrize(
+        ("content", "expected_leaders"),
+        [
+            (
+                """### Leaders
+                    * [First Leader](mailto:first.leader@owasp.org)
+                    - Second Leader
+                    * [Third Leader](mailto:third.leader@owasp.org)""",
+                {
+                    "First Leader": "first.leader@owasp.org",
+                    "Second Leader": None,
+                    "Third Leader": "third.leader@owasp.org",
+                },
+            ),
+            (
+                """- [Alice](mailto:alice@example.com)
+                    - [Bob](mailto:bob@example.com)""",
+                {
+                    "Alice": "alice@example.com",
+                    "Bob": "bob@example.com",
+                },
+            ),
+            (
+                """* Charlie
+                    * Diana""",
+                {
+                    "Charlie": None,
+                    "Diana": None,
+                },
+            ),
+            (
+                """## Chapter Leaders
+                    Here are the leaders for this chapter:
+
+                    * [Eve](mailto:eve@example.com)
+                      - Frank
+                    Just some random text here.
+                    1. Not a leader list item""",
+                {
+                    "Eve": "eve@example.com",
+                    "Frank": None,
+                },
+            ),
+            (
+                "",
+                {},
+            ),
+            (
+                None,
+                {},
+            ),
+            (
+                "* [  Spaced Leader  ](mailto:  spaced@owasp.org  )",
+                {
+                    "Spaced Leader": "spaced@owasp.org",
+                },
+            ),
+            (
+                "- Just One Leader",
+                {
+                    "Just One Leader": None,
+                },
+            ),
+        ],
+    )
+    def test_get_leaders_emails(self, content, expected_leaders):
+        model = EntityModel()
+        repository = Repository()
+        repository.name = "www-project-example"
+        model.owasp_repository = repository
+
+        with patch("apps.owasp.models.common.get_repository_file_content", return_value=content):
+            leaders_emails = model.get_leaders_emails()
+
+        assert leaders_emails == expected_leaders
+
+    @pytest.mark.parametrize(
         ("content", "expected_metadata"),
         [
             (

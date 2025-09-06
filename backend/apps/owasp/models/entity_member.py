@@ -49,9 +49,13 @@ class EntityMember(models.Model):
     )
     member = models.ForeignKey(
         User,
+        blank=True,
+        null=True,
         on_delete=models.CASCADE,
         related_name="+",
     )
+    member_email = models.EmailField(blank=True, default="")
+    member_name = models.CharField(default="", max_length=255)
     order = models.PositiveSmallIntegerField(
         default=0,
         help_text="Display order/priority of members",
@@ -64,4 +68,5 @@ class EntityMember(models.Model):
 
     def __str__(self):
         """EntityMember human readable representation."""
-        return f"{self.member.login} as {self.get_role_display()} for {self.entity}"
+        display_name = self.member.login if self.member else self.member_name
+        return f"{display_name} as {self.get_role_display()} for {self.entity}"
