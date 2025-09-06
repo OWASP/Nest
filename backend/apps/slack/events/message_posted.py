@@ -31,7 +31,7 @@ class MessagePosted(EventBase):
 
         if event.get("thread_ts"):
             try:
-                Message.objects.get(
+                Message.objects.filter(
                     slack_message_id=event.get("thread_ts"),
                     conversation__slack_channel_id=event.get("channel"),
                 ).update(has_replies=True)

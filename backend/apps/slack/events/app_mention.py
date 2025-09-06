@@ -34,9 +34,10 @@ class AppMention(EventBase):
 
         logger.info("Handling app mention")
 
+        reply_blocks = get_blocks(query=query)
         client.chat_postMessage(
             channel=channel_id,
-            blocks=get_blocks(query=query),
+            blocks=reply_blocks,
             text=query,
-            thread_ts=event.get("ts"),
+            thread_ts=event.get("thread_ts") or event.get("ts"),
         )
