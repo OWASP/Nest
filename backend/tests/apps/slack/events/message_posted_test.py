@@ -45,7 +45,6 @@ class TestMessagePosted:
         """Test MessagePosted initialization."""
         assert message_handler.event_type == "message"
         assert message_handler.question_detector is not None
-        assert message_handler.bot_user_id is None
 
     def test_handle_event_ignores_subtype_messages(self, message_handler):
         """Test that messages with subtype are ignored."""
@@ -88,62 +87,13 @@ class TestMessagePosted:
         }
         client = Mock()
 
-        message_handler.handle_event(event, client)
+        with patch("apps.slack.events.message_posted.Message") as mock_message:
+            mock_message.DoesNotExist = Exception
+            mock_message.objects.get.side_effect = Exception("Message not found")
+
+            message_handler.handle_event(event, client)
 
         client.chat_postMessage.assert_not_called()
-
-    @patch("apps.slack.events.message_posted.get_blocks")
-    def test_handle_event_bot_mention(self, mock_get_blocks, message_handler):
-        """Test handling of bot mention in message."""
-        event = {
-            "channel": "C123456",
-            "user": "U123456",
-            "text": "<@U987654> What is OWASP?",
-            "ts": "1234567890.123456",
-        }
-
-        expected_blocks = [
-            {"type": "section", "text": {"type": "mrkdwn", "text": "OWASP response"}}
-        ]
-        mock_get_blocks.return_value = expected_blocks
-
-        client = Mock()
-        client.auth_test.return_value = {"user_id": "U987654"}
-
-        message_handler.handle_event(event, client)
-
-        client.auth_test.assert_called_once()
-        mock_get_blocks.assert_called_once_with(query="What is OWASP?")
-        client.chat_postMessage.assert_called_once_with(
-            channel="C123456",
-            blocks=expected_blocks,
-            text="What is OWASP?",
-            thread_ts="1234567890.123456",
-        )
-
-    @patch("apps.slack.events.message_posted.get_blocks")
-    def test_handle_event_bot_mention_reuses_bot_user_id(self, mock_get_blocks, message_handler):
-        """Test that bot_user_id is cached after first auth_test call."""
-        message_handler.bot_user_id = "U987654"
-
-        event = {
-            "channel": "C123456",
-            "user": "U123456",
-            "text": "<@U987654> What is OWASP?",
-            "ts": "1234567890.123456",
-        }
-
-        expected_blocks = [
-            {"type": "section", "text": {"type": "mrkdwn", "text": "OWASP response"}}
-        ]
-        mock_get_blocks.return_value = expected_blocks
-
-        client = Mock()
-
-        message_handler.handle_event(event, client)
-
-        client.auth_test.assert_not_called()
-        mock_get_blocks.assert_called_once_with(query="What is OWASP?")
 
     def test_handle_event_conversation_not_found(self, message_handler):
         """Test handling when conversation is not found."""
@@ -287,7 +237,7 @@ class TestMessagePosted:
         mock_message_model.update_data.assert_called_once_with(
             data=event, conversation=conversation_mock, author=member_mock, save=True
         )
-        mock_django_rq.get_queue.assert_called_once_with("default")
+        mock_django_rq.get_queue.assert_called_once_with("ai")
         mock_queue.enqueue_in.assert_called_once()
 
     def test_handle_event_member_not_found(self, message_handler, conversation_mock):
@@ -300,11 +250,16 @@ class TestMessagePosted:
         }
 
         client = Mock()
-        client.auth_test.return_value = {"user_id": "U987654"}
+        client.users_info.return_value = {"user": {"id": "U999999", "name": "Test User"}}
+
+        # Create a proper workspace mock
+        workspace_mock = Mock()
+        conversation_mock.workspace = workspace_mock
 
         with (
             patch("apps.slack.events.message_posted.Conversation") as mock_conversation,
             patch("apps.slack.events.message_posted.Member") as mock_member,
+            patch("apps.slack.events.message_posted.Message") as mock_message_model,
         ):
             mock_conversation.objects.get.return_value = conversation_mock
 
@@ -312,6 +267,11 @@ class TestMessagePosted:
 
             mock_member.DoesNotExist = Member.DoesNotExist
             mock_member.objects.get.side_effect = Member.DoesNotExist
+            mock_member.update_data.return_value = Mock()
+
+            mock_message = Mock()
+            mock_message.id = 1
+            mock_message_model.update_data.return_value = mock_message
 
             with (
                 patch.object(
@@ -321,9 +281,12 @@ class TestMessagePosted:
                 ),
                 patch("apps.slack.events.message_posted.django_rq") as mock_django_rq,
             ):
+                mock_queue = Mock()
+                mock_django_rq.get_queue.return_value = mock_queue
+
                 message_handler.handle_event(event, client)
 
-                mock_django_rq.get_queue.assert_not_called()
+                mock_django_rq.get_queue.assert_called_once()
 
     def test_handle_event_empty_text(self, message_handler):
         """Test handling event with empty text."""
@@ -344,31 +307,3 @@ class TestMessagePosted:
                 return_value=False,
             ):
                 message_handler.handle_event(event, client)
-
-    @patch("apps.slack.events.message_posted.get_blocks")
-    def test_handle_event_bot_mention_strips_whitespace(self, mock_get_blocks, message_handler):
-        """Test that bot mention query strips whitespace properly."""
-        event = {
-            "channel": "C123456",
-            "user": "U123456",
-            "text": "<@U987654>   What is OWASP?   ",
-            "ts": "1234567890.123456",
-        }
-
-        expected_blocks = [
-            {"type": "section", "text": {"type": "mrkdwn", "text": "OWASP response"}}
-        ]
-        mock_get_blocks.return_value = expected_blocks
-
-        client = Mock()
-        client.auth_test.return_value = {"user_id": "U987654"}
-
-        message_handler.handle_event(event, client)
-
-        mock_get_blocks.assert_called_once_with(query="What is OWASP?")
-        client.chat_postMessage.assert_called_once_with(
-            channel="C123456",
-            blocks=expected_blocks,
-            text="What is OWASP?",
-            thread_ts="1234567890.123456",
-        )

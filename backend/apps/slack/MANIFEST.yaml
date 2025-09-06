@@ -108,6 +108,7 @@ oauth_config:
       - mpim:read
       - users:read
     bot:
+      - app_mentions:read
       - channels:read
       - chat:write
       - commands
@@ -129,6 +130,7 @@ settings:
       - team_join
     bot_events:
       - app_home_opened
+      - app_mention
       - member_joined_channel
       - message.channels
       - team_join

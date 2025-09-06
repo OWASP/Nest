@@ -12,7 +12,7 @@ from apps.slack.models import Message
 logger = logging.getLogger(__name__)
 
 
-@job("default")
+@job("ai")
 def generate_ai_reply_if_unanswered(message_id: int):
     """Check if a message is still unanswered and generate AI reply."""
     try:

@@ -3,6 +3,7 @@ def configure_slack_events():
     from apps.slack.apps import SlackConfig
     from apps.slack.events import (
         app_home_opened,
+        app_mention,
         message_posted,
         team_join,
         url_verification,

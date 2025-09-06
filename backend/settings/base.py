@@ -143,10 +143,11 @@ class Base(Configuration):
     }
 
     RQ_QUEUES = {
-        "default": {
+        "ai": {
             "HOST": REDIS_HOST,
             "PORT": 6379,
             "PASSWORD": REDIS_PASSWORD,
+            "DB": 1,
             "DEFAULT_TIMEOUT": 360,
         }
     }

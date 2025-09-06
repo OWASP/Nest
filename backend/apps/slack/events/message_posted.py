@@ -5,7 +5,7 @@ from datetime import timedelta
 
 import django_rq
 
-from apps.slack.common.handlers.ai import get_blocks
+from apps.ai.common.constants import QUEUE_RESPONSE_TIME_MINUTES
 from apps.slack.common.question_detector import QuestionDetector
 from apps.slack.events.event import EventBase
 from apps.slack.models import Conversation, Member, Message
@@ -22,33 +22,26 @@ class MessagePosted(EventBase):
     def __init__(self):
         """Initialize MessagePosted event handler."""
         self.question_detector = QuestionDetector()
-        self.bot_user_id = None
 
     def handle_event(self, event, client):
         """Handle an incoming message event."""
-        if event.get("subtype") or event.get("bot_id") or event.get("thread_ts"):
+        if event.get("subtype") or event.get("bot_id"):
             logger.info("Ignored message due to subtype, bot_id, or thread_ts.")
             return
 
-        if not self.bot_user_id:
-            auth_response = client.auth_test()
-            self.bot_user_id = auth_response.get("user_id")
+        if event.get("thread_ts"):
+            try:
+                Message.objects.get(
+                    slack_message_id=event.get("thread_ts"),
+                    conversation__slack_channel_id=event.get("channel"),
+                ).update(has_replies=True)
+            except Message.DoesNotExist:
+                logger.warning("Thread message not found.")
+            return
 
         channel_id = event.get("channel")
         user_id = event.get("user")
         text = event.get("text", "")
-        bot_mention_string = f"<@{self.bot_user_id}>"
-
-        if bot_mention_string in text:
-            query = text.replace(bot_mention_string, "").strip()
-
-            client.chat_postMessage(
-                channel=channel_id,
-                blocks=get_blocks(query=query),
-                text=query,
-                thread_ts=event.get("ts"),
-            )
-            return
 
         try:
             conversation = Conversation.objects.get(
@@ -64,14 +57,17 @@ class MessagePosted(EventBase):
 
         try:
             author = Member.objects.get(slack_user_id=user_id, workspace=conversation.workspace)
-            message = Message.update_data(
-                data=event, conversation=conversation, author=author, save=True
-            )
-
-            django_rq.get_queue("default").enqueue_in(
-                timedelta(minutes=1), generate_ai_reply_if_unanswered, message.id
-            )
-
         except Member.DoesNotExist:
-            logger.warning("Could not find Member")
-            return
+            user_info = client.users_info(user=user_id)
+            author = Member.update_data(user_info["user"], conversation.workspace, save=True)
+            logger.info("Created new member")
+
+        message = Message.update_data(
+            data=event, conversation=conversation, author=author, save=True
+        )
+
+        django_rq.get_queue("ai").enqueue_in(
+            timedelta(minutes=QUEUE_RESPONSE_TIME_MINUTES),
+            generate_ai_reply_if_unanswered,
+            message.id,
+        )
