@@ -55,7 +55,7 @@ class Command(BaseCommand):
             project.leaders_raw = project.get_leaders()
 
             # Get GitHub URLs.
-            github_urls = sorted(
+            scraped_urls = sorted(
                 {
                     repository_url
                     for url in set(project.get_urls(domain="github.com"))
@@ -66,7 +66,7 @@ class Command(BaseCommand):
 
             invalid_urls: set[str] = set()
             related_urls: set[str] = set()
-            for scraped_url in github_urls:
+            for scraped_url in scraped_urls:
                 verified_url = scraper.verify_url(scraped_url)
                 if not verified_url:
                     invalid_urls.add(scraped_url)
