@@ -2,6 +2,7 @@
 import { faHeart as faRegularHeart } from '@fortawesome/free-regular-svg-icons'
 import { faStar as faRegularStar } from '@fortawesome/free-regular-svg-icons'
 import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
+import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { faHeart as faSolidHeart } from '@fortawesome/free-solid-svg-icons'
 import { faStar as faSolidStar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -16,11 +17,14 @@ import ModeToggle from 'components/ModeToggle'
 import NavButton from 'components/NavButton'
 import NavDropdown from 'components/NavDropDown'
 import UserMenu from 'components/UserMenu'
+import { signIn } from 'next-auth/react'
+import { useDjangoSession } from 'hooks/useDjangoSession'
 
 export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthEnabled: boolean }) {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
+  const { status } = useDjangoSession()
 
   useEffect(() => {
     const handleResize = () => {
@@ -224,6 +228,15 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           </div>
 
           <div className="flex flex-col gap-y-2">
+            {isGitHubAuthEnabled && status === 'unauthenticated' && (
+              <button
+                onClick={() => signIn('github', { callbackUrl: '/', prompt: 'login' })}
+                className="group focus-visible:ring-ring relative flex h-10 cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-md bg-[#87a1bc] p-4 text-sm font-medium whitespace-pre text-black hover:ring-1 hover:ring-[#b0c7de] hover:ring-offset-0 focus-visible:ring-1 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 md:flex dark:bg-slate-900 dark:text-white dark:hover:bg-slate-900/90 dark:hover:ring-[#46576b]"
+              >
+                <FontAwesomeIcon icon={faGithub} />
+                <span>Sign In</span>
+              </button>
+            )}
             <NavButton
               href="https://github.com/OWASP/Nest"
               defaultIcon={faRegularStar}
