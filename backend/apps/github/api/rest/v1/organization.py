@@ -42,7 +42,7 @@ class OrganizationSchema(Schema):
     operation_id="list_organizations",
     response={200: list[OrganizationSchema]},
     summary="List organizations",
-    tags=["github"],
+    tags=["Community"],
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)

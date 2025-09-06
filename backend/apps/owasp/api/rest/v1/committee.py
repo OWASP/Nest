@@ -30,7 +30,7 @@ class CommitteeSchema(Schema):
     operation_id="list_committees",
     response={200: list[CommitteeSchema]},
     summary="List committees",
-    tags=["owasp"],
+    tags=["Committees"],
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)

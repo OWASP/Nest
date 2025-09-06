@@ -345,6 +345,8 @@ jobs:
           load: true
           platforms: linux/amd64
           push: true
+          secrets: |
+            SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           tags: owasp/nest:frontend-staging
 
       - name: Get frontend image size
@@ -446,7 +448,6 @@ jobs:
           DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
           DJANGO_SLACK_BOT_TOKEN: ${{ secrets.DJANGO_SLACK_BOT_TOKEN }}
           DJANGO_SLACK_SIGNING_SECRET: ${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}
-          NEXT_SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           NEXT_SERVER_CSRF_URL: ${{ secrets.NEXT_SERVER_CSRF_URL }}
           NEXT_SERVER_GITHUB_CLIENT_ID: ${{ secrets.NEST_GITHUB_CLIENT_ID }}
           NEXT_SERVER_GITHUB_CLIENT_SECRET: ${{ secrets.NEST_GITHUB_CLIENT_SECRET }}
@@ -498,7 +499,6 @@ jobs:
           # Frontend
           umask 377
           cat > .env.frontend <<EOF
-          NEXT_SENTRY_AUTH_TOKEN=$NEXT_SENTRY_AUTH_TOKEN
           NEXT_SERVER_CSRF_URL=$NEXT_SERVER_CSRF_URL
           NEXT_SERVER_GITHUB_CLIENT_ID=$NEXT_SERVER_GITHUB_CLIENT_ID
           NEXT_SERVER_GITHUB_CLIENT_SECRET=$NEXT_SERVER_GITHUB_CLIENT_SECRET
@@ -664,6 +664,8 @@ jobs:
           load: true
           platforms: linux/amd64
           push: true
+          secrets: |
+            SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           tags: owasp/nest:frontend-production
 
       - name: Get frontend image size
@@ -774,7 +776,6 @@ jobs:
           DJANGO_SLACK_BOT_TOKEN: ${{ secrets.DJANGO_SLACK_BOT_TOKEN }}
           DJANGO_SLACK_SIGNING_SECRET: ${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}
           NEST_GITHUB_APP_PRIVATE_KEY: ${{ secrets.NEST_GITHUB_APP_PRIVATE_KEY }}
-          NEXT_SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           NEXT_SERVER_CSRF_URL: ${{ secrets.NEXT_SERVER_CSRF_URL }}
           NEXT_SERVER_GITHUB_CLIENT_ID: ${{ secrets.NEST_GITHUB_CLIENT_ID }}
           NEXT_SERVER_GITHUB_CLIENT_SECRET: ${{ secrets.NEST_GITHUB_CLIENT_SECRET }}
@@ -828,7 +829,6 @@ jobs:
           # Frontend
           umask 377
           cat > .env.frontend <<EOF
-          NEXT_SENTRY_AUTH_TOKEN=$NEXT_SENTRY_AUTH_TOKEN
           NEXT_SERVER_CSRF_URL=$NEXT_SERVER_CSRF_URL
           NEXT_SERVER_GITHUB_CLIENT_ID=$NEXT_SERVER_GITHUB_CLIENT_ID
           NEXT_SERVER_GITHUB_CLIENT_SECRET=$NEXT_SERVER_GITHUB_CLIENT_SECRET
