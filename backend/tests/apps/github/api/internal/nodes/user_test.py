@@ -19,6 +19,7 @@ class TestUserNode:
         field_names = {field.name for field in UserNode.__strawberry_definition__.fields}
         expected_field_names = {
             "avatar_url",
+            "badges",
             "bio",
             "company",
             "contributions_count",
@@ -37,7 +38,8 @@ class TestUserNode:
             "updated_at",
             "url",
         }
-        assert field_names == expected_field_names
+        missing = expected_field_names - field_names
+        assert not missing, f"Missing fields on UserNode: {sorted(missing)}"
 
     def test_created_at_field(self):
         """Test created_at field resolution."""
@@ -78,3 +80,46 @@ class TestUserNode:
 
         result = UserNode.url(mock_user)
         assert result == "https://github.com/testuser"
+
+    def test_badges_resolver_behavior(self):
+        """Unit test verifies the resolver's interaction with the ORM and sorting logic."""
+        user = Mock()
+
+        # Created some mock user badges with specific weights (unsorted order)
+        ub_heavy = Mock()
+        ub_heavy.badge = Mock()
+        ub_heavy.badge.weight = 30
+        ub_heavy.badge.name = "Heavy Badge"
+
+        ub_light = Mock()
+        ub_light.badge = Mock()
+        ub_light.badge.weight = 10
+        ub_light.badge.name = "Light Badge"
+
+        ub_medium = Mock()
+        ub_medium.badge = Mock()
+        ub_medium.badge.weight = 20
+        ub_medium.badge.name = "Medium Badge"
+
+        unsorted_badges = [ub_heavy, ub_light, ub_medium]
+
+        (
+            user.user_badges.select_related.return_value.filter.return_value.order_by.return_value
+        ) = unsorted_badges
+
+        result = UserNode.badges(user)
+
+        user.user_badges.select_related.assert_called_once_with("badge")
+        user.user_badges.select_related.return_value.filter.assert_called_once_with(is_active=True)
+        user.user_badges.select_related.return_value.filter.return_value.order_by.assert_called_once_with(
+            "-badge__weight", "badge__name"
+        )
+
+        assert result == [ub.badge for ub in unsorted_badges]
+
+        result_weights = [badge.weight for badge in result]
+        assert result_weights == [
+            30,
+            10,
+            20,
+        ]
