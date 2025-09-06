@@ -12,6 +12,7 @@ import type { Milestone } from 'types/milestone'
 import type { RepositoryCardProps } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
+import { Badge } from './badge'
 
 export type CardProps = {
   button: Button
@@ -76,6 +77,7 @@ export interface DetailsCardProps {
 
 export interface UserCardProps {
   avatar: string
+  badges?: Badge[]
   button: Button
   className?: string
   company?: string

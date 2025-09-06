@@ -1,3 +1,4 @@
+import type { Badge } from 'types/badge'
 import type { Issue } from 'types/issue'
 import type { RepositoryCardProps } from 'types/project'
 import type { Release } from 'types/release'
@@ -10,6 +11,7 @@ export type RepositoryDetails = {
 export type User<T = number> = {
   avatarUrl: string
   bio?: string
+  badges:Badge[]
   company?: string
   contributionsCount: number
   createdAt: T
