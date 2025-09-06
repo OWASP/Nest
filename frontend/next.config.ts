@@ -38,15 +38,15 @@ const nextConfig: NextConfig = {
 
 export default withSentryConfig(nextConfig, {
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
-  authToken: process.env.NEXT_SENTRY_AUTH_TOKEN,
   disableLogger: false,
   org: 'owasp-org',
   project: 'nest-frontend',
+  silent: isLocal,
   telemetry: false,
   widenClientFileUpload: true,
-  ...(isLocal
-    ? {}
-    : {
+  ...(process.env.NEXT_SENTRY_AUTH_TOKEN
+    ? {
+        authToken: process.env.NEXT_SENTRY_AUTH_TOKEN,
         // https://docs.sentry.io/platforms/javascript/guides/nextjs/sourcemaps/
         sourcemaps: {
           assets: ['**/*.js', '**/*.js.map'],
@@ -54,5 +54,6 @@ export default withSentryConfig(nextConfig, {
           disable: false,
           ignore: ['**/node_modules/**'],
         },
-      }),
+      }
+    : {}),
 })
