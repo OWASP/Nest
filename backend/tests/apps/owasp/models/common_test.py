@@ -14,6 +14,34 @@ class EntityModel(RepositoryBasedEntityModel):
 
 class TestRepositoryBasedEntityModel:
     @pytest.mark.parametrize(
+        ("content", "expected_audience"),
+        [
+            (
+                """### Top Ten Card Game Information
+* [Incubator Project](#)
+* [Type of Project](#)
+* [Version 0.0.0](#)
+* [Builder](#)
+* [Breaker](#)""",
+                ["breaker", "builder"],
+            ),
+            ("This test contains no audience information.", []),
+            ("", []),
+            (None, []),
+        ],
+    )
+    def test_get_audience(self, content, expected_audience):
+        model = EntityModel()
+        repository = Repository()
+        repository.name = "www-project-example"
+        model.owasp_repository = repository
+
+        with patch("apps.owasp.models.common.get_repository_file_content", return_value=content):
+            audience = model.get_audience()
+
+        assert audience == expected_audience
+
+    @pytest.mark.parametrize(
         ("content", "expected_leaders"),
         [
             ("- [Leader1](https://example.com)", ["Leader1"]),
@@ -47,6 +75,82 @@ class TestRepositoryBasedEntityModel:
             leaders = model.get_leaders()
 
         assert leaders == expected_leaders
+
+    @pytest.mark.parametrize(
+        ("content", "expected_leaders"),
+        [
+            (
+                """### Leaders
+                    * [First Leader](mailto:first.leader@owasp.org)
+                    - Second Leader
+                    * [Third Leader](mailto:third.leader@owasp.org)""",
+                {
+                    "First Leader": "first.leader@owasp.org",
+                    "Second Leader": None,
+                    "Third Leader": "third.leader@owasp.org",
+                },
+            ),
+            (
+                """- [Alice](mailto:alice@example.com)
+                    - [Bob](mailto:bob@example.com)""",
+                {
+                    "Alice": "alice@example.com",
+                    "Bob": "bob@example.com",
+                },
+            ),
+            (
+                """* Charlie
+                    * Diana""",
+                {
+                    "Charlie": None,
+                    "Diana": None,
+                },
+            ),
+            (
+                """## Chapter Leaders
+                    Here are the leaders for this chapter:
+
+                    * [Eve](mailto:eve@example.com)
+                      - Frank
+                    Just some random text here.
+                    1. Not a leader list item""",
+                {
+                    "Eve": "eve@example.com",
+                    "Frank": None,
+                },
+            ),
+            (
+                "",
+                {},
+            ),
+            (
+                None,
+                {},
+            ),
+            (
+                "* [  Spaced Leader  ](mailto:  spaced@owasp.org  )",
+                {
+                    "Spaced Leader": "spaced@owasp.org",
+                },
+            ),
+            (
+                "- Just One Leader",
+                {
+                    "Just One Leader": None,
+                },
+            ),
+        ],
+    )
+    def test_get_leaders_emails(self, content, expected_leaders):
+        model = EntityModel()
+        repository = Repository()
+        repository.name = "www-project-example"
+        model.owasp_repository = repository
+
+        with patch("apps.owasp.models.common.get_repository_file_content", return_value=content):
+            leaders_emails = model.get_leaders_emails()
+
+        assert leaders_emails == expected_leaders
 
     @pytest.mark.parametrize(
         ("content", "expected_metadata"),
@@ -91,6 +195,42 @@ class TestRepositoryBasedEntityModel:
             metadata = model.get_metadata()
 
         assert metadata == expected_metadata
+
+    @pytest.mark.parametrize(
+        ("content", "domain", "expected_urls"),
+        [
+            (
+                """* [Homepage](https://owasp.org)
+* [Project Repo](https://github.com/OWASP/www-project)""",
+                None,
+                ["https://owasp.org", "https://github.com/OWASP/www-project"],
+            ),
+            (
+                """* [Homepage](https://owasp.org)
+* [Project Repo](https://github.com/OWASP/www-project)""",
+                "owasp.org",
+                ["https://owasp.org"],
+            ),
+            (
+                """* [Homepage](https://owasp.org)""",
+                "example.com",
+                [],
+            ),
+            ("This test contains no URLs.", None, []),
+            ("", None, []),
+            (None, None, []),
+        ],
+    )
+    def test_get_urls(self, content, domain, expected_urls):
+        model = EntityModel()
+        repository = Repository()
+        repository.name = "www-project-example"
+        model.owasp_repository = repository
+
+        with patch("apps.owasp.models.common.get_repository_file_content", return_value=content):
+            urls = model.get_urls(domain=domain)
+
+        assert urls == expected_urls
 
     @pytest.mark.parametrize(
         ("key", "expected_url"),

@@ -8,8 +8,10 @@ import re
 from urllib.parse import urlparse
 
 import yaml
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
+from apps.common.models import BulkSaveModel
 from apps.common.open_ai import OpenAi
 from apps.github.constants import (
     GITHUB_REPOSITORY_RE,
@@ -18,6 +20,7 @@ from apps.github.constants import (
 from apps.github.models.user import User
 from apps.github.utils import get_repository_file_content
 from apps.owasp.models.entity_member import EntityMember
+from apps.owasp.models.enums.project import AudienceChoices
 
 logger = logging.getLogger(__name__)
 
@@ -102,6 +105,16 @@ class RepositoryBasedEntityModel(models.Model):
         )
 
     @property
+    def info_md_url(self) -> str | None:
+        """Return entity's raw info.md GitHub URL."""
+        return (
+            "https://raw.githubusercontent.com/OWASP/"
+            f"{self.owasp_repository.key}/{self.owasp_repository.default_branch}/info.md"
+            if self.owasp_repository
+            else None
+        )
+
+    @property
     def entity_leaders(self) -> models.QuerySet[User]:
         """Return entity's leaders."""
         return User.objects.filter(
@@ -160,6 +173,21 @@ class RepositoryBasedEntityModel(models.Model):
         open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
         self.summary = open_ai.complete() or ""
 
+    def get_audience(self):
+        """Get audience from info.md file on GitHub."""
+        content = get_repository_file_content(self.info_md_url)
+        if not content:
+            return []
+
+        found_keywords = set()
+
+        for line in content.split("\n"):
+            for lower_kw, original_kw in AudienceChoices.choices:
+                if original_kw in line:
+                    found_keywords.add(lower_kw)
+
+        return sorted(found_keywords)
+
     def get_leaders(self):
         """Get leaders from leaders.md file on GitHub."""
         content = get_repository_file_content(self.leaders_md_url)
@@ -179,6 +207,26 @@ class RepositoryBasedEntityModel(models.Model):
                     if name.strip()
                 ]
             )
+
+        return leaders
+
+    def get_leaders_emails(self):
+        """Get leaders emails from leaders.md file on GitHub."""
+        content = get_repository_file_content(self.leaders_md_url)
+        if not content:
+            return {}
+
+        leaders = {}
+        for line in content.split("\n"):
+            matches = re.findall(
+                r"[-*]\s*(?:\[([^\]]+)\]\(mailto:([^)]+)\)|([^[\n]+))", line.strip()
+            )
+
+            for match in matches:
+                if match[0] and match[1]:  # Name with email
+                    leaders[match[0].strip()] = match[1].strip()
+                elif match[2]:  # Name without email
+                    leaders[match[2].strip()] = None
 
         return leaders
 
@@ -224,6 +272,19 @@ class RepositoryBasedEntityModel(models.Model):
 
         return url
 
+    def get_urls(self, domain=None):
+        """Get URLs from info.md file on GitHub."""
+        content = get_repository_file_content(self.info_md_url)
+        if not content:
+            return []
+
+        urls = re.findall(r"https?:\/\/[^\s\)]+", content.strip())
+
+        if domain:
+            return [url for url in urls if urlparse(url).netloc == domain]
+
+        return urls
+
     def parse_tags(self, tags) -> list[str]:
         """Parse entity tags."""
         if not tags:
@@ -234,3 +295,44 @@ class RepositoryBasedEntityModel(models.Model):
             if isinstance(tags, str)
             else tags
         )
+
+    def sync_leaders(self, leaders_emails):
+        """Sync Leaders data.
+
+        Args:
+            leaders_emails (dict[str, str | None]): A dictionary
+            where keys are the full names of the leaders
+            and values are their corresponding email addresses (or None if no email is provided).
+
+        """
+        content_type = ContentType.objects.get_for_model(self.__class__)
+        existing_leaders = {
+            leader.member_name: leader
+            for leader in EntityMember.objects.filter(
+                entity_type=content_type, entity_id=self.id, role=EntityMember.Role.LEADER
+            )
+        }
+
+        members_to_save = []
+        for order, (name, email) in enumerate(leaders_emails.items()):
+            if name in existing_leaders:
+                leader = existing_leaders[name]
+                if leader.member_email != (email or ""):
+                    leader.member_email = email or ""
+                    members_to_save.append(leader)
+            else:
+                members_to_save.append(
+                    EntityMember(
+                        entity_type=content_type,
+                        entity_id=self.id,
+                        member_name=name,
+                        member_email=email or "",
+                        role=EntityMember.Role.LEADER,
+                        order=order,
+                        is_active=True,
+                        is_reviewed=False,
+                    )
+                )
+
+        if members_to_save:
+            BulkSaveModel.bulk_save(EntityMember, members_to_save, ["member_email"])
