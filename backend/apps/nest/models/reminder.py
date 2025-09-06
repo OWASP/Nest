@@ -1,6 +1,10 @@
 """Nest Reminder model."""
 
 from django.db import models
+from django.utils import timezone
+
+from apps.nest.models.reminder_schedule import ReminderSchedule
+from apps.slack.models.member import Member
 
 
 class Reminder(models.Model):
@@ -27,6 +31,29 @@ class Reminder(models.Model):
         null=True,
     )
     message = models.TextField(verbose_name="Reminder Message")
+
+    @staticmethod
+    def set_reminder(
+        channel: str,
+        event,
+        slack_user_id: str,
+        reminder_time: timezone.datetime,
+        recurrence: str,
+        message: str = "",
+    ):
+        """Set a reminder for a user."""
+        member = Member.objects.get(slack_user_id=slack_user_id)
+        reminder = Reminder.objects.create(
+            channel_id=channel,
+            event=event,
+            member=member,
+            message=message,
+        )
+        ReminderSchedule.objects.create(
+            reminder=reminder,
+            scheduled_time=reminder_time,
+            recurrence=recurrence,
+        )
 
     def __str__(self) -> str:
         """Reminder human readable representation."""
