@@ -133,11 +133,11 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           <div className="md:hidden">
             <Button
               onPress={toggleMobileMenu}
-              className="bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus:outline-hidden"
+              className="flex h-11 w-11 items-center justify-center bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus:outline-hidden"
             >
               <span className="sr-only">Open main menu</span>
               {mobileMenuOpen ? (
-                <FontAwesomeIcon icon={faTimes} className="h-8 w-8" />
+                <FontAwesomeIcon icon={faTimes} size="2x" />
               ) : (
                 <FontAwesomeIcon icon={faBars} className="h-6 w-6" />
               )}
@@ -190,13 +190,13 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                     <div className="block px-3 py-3 font-medium text-slate-700 dark:text-slate-300">
                       {link.text}
                     </div>
-                    <div className="ml-4 space-y-4">
+                    <div className="ml-4">
                       {link.submenu.map((sub, i) => (
                         <Link
                           key={i}
                           href={sub.href || '/'}
                           className={cn(
-                            'block w-full px-4 py-2 text-left text-sm text-slate-700 transition duration-150 ease-in-out first:rounded-t-md last:rounded-b-md hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
+                            'block w-full px-4 py-3 text-left text-sm text-slate-700 transition duration-150 ease-in-out first:rounded-t-md last:rounded-b-md hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
                             pathname === sub.href &&
                               'bg-blue-50 font-medium text-blue-600 dark:bg-blue-900/20 dark:text-blue-200'
                           )}
@@ -212,7 +212,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                     key={link.text}
                     href={link.href || '/'}
                     className={cn(
-                      'navlink dark:hover:text-white block px-3 py-2 text-slate-700 transition duration-150 ease-in-out hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700',
+                      'navlink block px-3 py-2 text-slate-700 transition duration-150 ease-in-out hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
                       pathname === link.href && 'font-bold text-blue-800 dark:text-white'
                     )}
                     onClick={toggleMobileMenu}
