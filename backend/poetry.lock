@@ -3649,6 +3649,7 @@ files = [
     {file = "rpds_py-0.27.1-pp39-pypy39_pp73-musllinux_1_2_x86_64.whl", hash = "sha256:2c426b99a068601b5f4623573df7a7c3d72e87533a2dd2253353a03e7502566c"},
     {file = "rpds_py-0.27.1-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:4fc9b7fe29478824361ead6e14e4f5aed570d477e06088826537e202d25fe859"},
     {file = "rpds_py-0.27.1.tar.gz", hash = "sha256:26a1c73171d10b7acccbded82bf6a586ab8203601e565badc74bbbf8bc5a10f8"},
+]
 
 [[package]]
 name = "rq"
@@ -4396,4 +4397,4 @@ cffi = ["cffi (>=1.17) ; python_version >= \"3.13\" and platform_python_implemen
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "3462d7c088c327cf8cc6600964f04a087851d8e708e6210ce480f53676de9535"
+content-hash = "c0a7776e26b82c16ef0b31b5d81e7057ebc4b3b8afa030a85a37a1c20bf2e4f9"
