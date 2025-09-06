@@ -313,15 +313,15 @@ class RepositoryBasedEntityModel(models.Model):
             )
         }
 
-        members_to_save = []
+        leaders = []
         for order, (name, email) in enumerate(leaders_emails.items()):
             if name in existing_leaders:
                 leader = existing_leaders[name]
                 if leader.member_email != (email or ""):
                     leader.member_email = email or ""
-                    members_to_save.append(leader)
+                    leaders.append(leader)
             else:
-                members_to_save.append(
+                leaders.append(
                     EntityMember(
                         entity_type=content_type,
                         entity_id=self.id,
@@ -334,5 +334,5 @@ class RepositoryBasedEntityModel(models.Model):
                     )
                 )
 
-        if members_to_save:
-            BulkSaveModel.bulk_save(EntityMember, members_to_save, ["member_email"])
+        if leaders:
+            BulkSaveModel.bulk_save(EntityMember, leaders, ["member_email"])
