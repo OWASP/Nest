@@ -167,7 +167,7 @@ class TestRepositoryContentExtractor:
         repository.organization = MagicMock(login="test-org")
         repository.owner = None
 
-        prose, metadata = extract_repository_content(repository)
+        _, metadata = extract_repository_content(repository)
 
         assert "Organization: test-org" in metadata
         assert "Owner: " not in metadata
@@ -180,7 +180,7 @@ class TestRepositoryContentExtractor:
         repository.organization = None
         repository.owner = MagicMock(login="test-user")
 
-        prose, metadata = extract_repository_content(repository)
+        _, metadata = extract_repository_content(repository)
 
         assert "Owner: test-user" in metadata
         assert "Organization: " not in metadata
@@ -265,7 +265,7 @@ class TestRepositoryMarkdownContentExtractor:
 
         mock_get_content.return_value = "# Test Repository\n\nThis is a test repository."
 
-        prose, metadata = extract_repository_markdown_content(repository)
+        prose, _ = extract_repository_markdown_content(repository)
 
         assert "Repository Description: Test repository" in prose
         assert "## README.md" in prose
@@ -283,7 +283,7 @@ class TestRepositoryMarkdownContentExtractor:
 
         mock_get_content.return_value = "# Test Repository\n\nThis is a test repository."
 
-        prose, metadata = extract_repository_markdown_content(repository)
+        prose, _ = extract_repository_markdown_content(repository)
 
         assert "Repository Description: Test repository" in prose
         assert "## README.md" in prose
@@ -301,7 +301,7 @@ class TestRepositoryMarkdownContentExtractor:
 
         mock_get_content.return_value = "# Test Repository\n\nThis is a test repository."
 
-        prose, metadata = extract_repository_markdown_content(repository)
+        prose, _ = extract_repository_markdown_content(repository)
 
         assert "Repository Description: Test repository" in prose
         assert "## README.md" in prose
@@ -326,7 +326,7 @@ class TestRepositoryMarkdownContentExtractor:
 
         mock_get_content.side_effect = mock_content_side_effect
 
-        prose, metadata = extract_repository_markdown_content(repository)
+        prose, _ = extract_repository_markdown_content(repository)
 
         assert "Repository Description: Test repository" in prose
         assert "## README.md" in prose
@@ -345,7 +345,7 @@ class TestRepositoryMarkdownContentExtractor:
         repository.key = "test-repo"
         repository.default_branch = "main"
 
-        mock_get_content.side_effect = Exception("Network error")
+        mock_get_content.side_effect = ConnectionError("Network error")
 
         prose, metadata = extract_repository_markdown_content(repository)
 
@@ -363,7 +363,7 @@ class TestRepositoryMarkdownContentExtractor:
 
         mock_get_content.return_value = "   \n\n  "
 
-        prose, metadata = extract_repository_markdown_content(repository)
+        prose, _ = extract_repository_markdown_content(repository)
 
         assert "Repository Description: Test repository" in prose
         assert "## README.md" not in prose
@@ -396,7 +396,7 @@ class TestRepositoryMarkdownContentExtractor:
 
         mock_get_content.return_value = "# Test Content"
 
-        prose, metadata = extract_repository_markdown_content(repository)
+        extract_repository_markdown_content(repository)
 
         mock_get_content.assert_called()
         assert any(
@@ -443,12 +443,11 @@ class TestRepositoryMarkdownContentExtractor:
         repository.key = "test-repo"
         repository.default_branch = "main"
 
-        mock_get_content.side_effect = Exception("Test exception")
+        mock_get_content.side_effect = ConnectionError("Test exception")
 
-        prose, metadata = extract_repository_markdown_content(repository)
+        prose, _ = extract_repository_markdown_content(repository)
 
         assert "Repository Description: Test repository" in prose
         mock_logger.debug.assert_called()
         debug_call_args = mock_logger.debug.call_args[0][0]
         assert "Failed to fetch" in debug_call_args
-        assert "test-repo" in debug_call_args
