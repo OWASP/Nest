@@ -43,16 +43,14 @@ class Command(BaseCommand):
             self.stdout.write(f"Created badge: {badge.name}")
 
         # Assign badge to employees who don't have it.
-        employees_without_badge = User.objects.filter(
-            is_owasp_staff=True,
-        ).exclude(
-            user_badges__badge=badge,
+        employees_missing_or_inactive = User.objects.filter(is_owasp_staff=True).exclude(
+            badges__badge=badge, badges__is_active=True
         )
-        count = employees_without_badge.count()
+        count = employees_missing_or_inactive.count()
 
         if count:
-            for user in employees_without_badge:
-                user_badge, created = UserBadge.objects.get_or_create(user=user, badge=badge)
+            for user in employees_missing_or_inactive:
+                user_badge, _ = UserBadge.objects.get_or_create(user=user, badge=badge)
                 if not user_badge.is_active:
                     user_badge.is_active = True
                     user_badge.save(update_fields=["is_active"])
@@ -98,12 +96,14 @@ class Command(BaseCommand):
         ).distinct()
 
         # Assign badge to WASPY award winners who don't have it
-        users_without_badge = waspy_award_users.exclude(badges__badge=badge)
-        count = users_without_badge.count()
+        users_missing_or_inactive = waspy_award_users.exclude(
+            badges__badge=badge, badges__is_active=True
+        )
+        count = users_missing_or_inactive.count()
 
         if count:
-            for user in users_without_badge:
-                user_badge, created = UserBadge.objects.get_or_create(user=user, badge=badge)
+            for user in users_missing_or_inactive:
+                user_badge, _ = UserBadge.objects.get_or_create(user=user, badge=badge)
                 if not user_badge.is_active:
                     user_badge.is_active = True
                     user_badge.save(update_fields=["is_active"])
