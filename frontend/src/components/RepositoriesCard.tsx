@@ -37,7 +37,7 @@ const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
   }
 
   return (
-    <div className="h-46 flex w-full flex-col gap-3 rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+    <div className="flex h-46 w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <button
         onClick={handleClick}
         className="text-start font-semibold text-blue-400 hover:underline"
@@ -45,7 +45,7 @@ const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
         <TruncatedText text={details?.name} />
       </button>
 
-      <div className="space-y-2 text-sm">
+      <div className="flex flex-col gap-2 text-sm">
         <InfoItem icon={faStar} pluralizedName="Stars" unit="Star" value={details.starsCount} />
         <InfoItem icon={faCodeFork} pluralizedName="Forks" unit="Fork" value={details.forksCount} />
         <InfoItem

@@ -9,6 +9,7 @@ class RepositoryContributorNode:
 
     avatar_url: str
     contributions_count: int
+    id: strawberry.ID
     login: str
     name: str
     project_key: str

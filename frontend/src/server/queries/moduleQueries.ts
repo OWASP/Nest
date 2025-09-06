@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client'
 
 export const GET_MODULES_BY_PROGRAM = gql`
-  query ModulesByProgram($programKey: String!) {
+  query GetModulesByProgram($programKey: String!) {
     getProgramModules(programKey: $programKey) {
       id
       key
@@ -14,18 +14,15 @@ export const GET_MODULES_BY_PROGRAM = gql`
       projectName
       mentors {
         id
-        githubUser {
-          id
-          login
-          avatarUrl
-        }
+        login
+        avatarUrl
       }
     }
   }
 `
 
 export const GET_MODULE_BY_ID = gql`
-  query GetModule($moduleKey: String!, $programKey: String!) {
+  query GetModuleByID($moduleKey: String!, $programKey: String!) {
     getModule(moduleKey: $moduleKey, programKey: $programKey) {
       id
       key
@@ -37,6 +34,7 @@ export const GET_MODULE_BY_ID = gql`
       startedAt
       endedAt
       mentors {
+        id
         login
         name
         avatarUrl
@@ -46,10 +44,11 @@ export const GET_MODULE_BY_ID = gql`
 `
 
 export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
-  query GetProgramAndModules($programKey: String!, $moduleKey: String!) {
+  query GetProgramAdminsAndModules($programKey: String!, $moduleKey: String!) {
     getProgram(programKey: $programKey) {
       id
       admins {
+        id
         login
         name
         avatarUrl
@@ -68,6 +67,7 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
       startedAt
       endedAt
       mentors {
+        id
         login
         name
         avatarUrl

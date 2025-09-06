@@ -22,21 +22,22 @@ describe('<SortBy />', () => {
     await act(async () => {
       render(<SortBy {...defaultProps} />)
     })
-    const select = screen.getByLabelText('Sort By :')
-    expect(select).toBeInTheDocument()
-    expect(select).toHaveValue('name')
+    const sortButton = screen.getByRole('button', { name: /Sort By/ })
+    expect(sortButton).toBeInTheDocument()
+    const selectedOption = screen.getByText('Name', { selector: '[data-slot="value"]' })
+    expect(selectedOption).toBeInTheDocument()
   })
 
   it('renders all options and selects the correct one', async () => {
     await act(async () => {
       render(<SortBy {...defaultProps} />)
     })
-    const select = screen.getByLabelText('Sort By :')
-    expect(select).toHaveValue('name')
-    // The dropdown options aren't directly visible in the DOM
-    // We're checking for the selected value instead
-    const selectedOption = screen.getByText('Name', { selector: '[data-slot="value"]' })
-    expect(selectedOption).toBeInTheDocument()
+    const sortButton = screen.getByRole('button', { name: /Sort By/ })
+    await act(async () => {
+      sortButton.click()
+    })
+    expect(await screen.findByRole('option', { name: 'Name' })).toBeInTheDocument()
+    expect(await screen.findByRole('option', { name: 'Date' })).toBeInTheDocument()
   })
 
   it('calls onSortChange when a different option is selected', async () => {
@@ -44,7 +45,8 @@ describe('<SortBy />', () => {
       render(<SortBy {...defaultProps} />)
     })
     await act(async () => {
-      fireEvent.change(screen.getByLabelText('Sort By :'), { target: { value: 'date' } })
+      const hiddenSelect = screen.getByRole('combobox', { hidden: true })
+      fireEvent.change(hiddenSelect, { target: { value: 'date' } })
     })
     expect(defaultProps.onSortChange).toHaveBeenCalledWith('date')
   })
@@ -83,12 +85,13 @@ describe('<SortBy />', () => {
     await act(async () => {
       render(<SortBy {...defaultProps} />)
     })
-    const select = screen.getByLabelText('Sort By :')
-    expect(select.tagName).toBe('SELECT')
+    const hiddenSelect = screen.getByRole('combobox', { hidden: true })
+    expect(hiddenSelect.tagName).toBe('SELECT')
 
     // Use getAllByText to handle multiple elements with same text
-    const containers = screen.getAllByText('Sort By :')
-    const container = containers[0].closest('div')
+    const sortButton = screen.getByRole('button', { name: /Sort By/ })
+    const container = sortButton.closest('div')
     expect(container).toBeInTheDocument()
+    expect(hiddenSelect).toHaveAccessibleName(/Sort By/)
   })
 })

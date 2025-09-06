@@ -95,7 +95,7 @@ jest.mock('utils/constants', () => ({
   ],
 }))
 
-jest.mock('utils/credentials', () => ({
+jest.mock('utils/env.client', () => ({
   ENVIRONMENT: 'production',
   RELEASE_VERSION: '1.2.3',
 }))
@@ -316,7 +316,7 @@ describe('Footer', () => {
       expect(footer).toHaveClass(
         'mt-auto',
         'w-full',
-        'border-t',
+        'border-t-1',
         'bg-slate-200',
         'dark:bg-slate-800',
         'xl:max-w-full'

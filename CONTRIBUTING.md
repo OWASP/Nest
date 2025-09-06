@@ -316,7 +316,7 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
    - Run the following command to create a super user for accessing the admin interface:
 
      ```bash
-     make setup
+     make create-superuser
      ```
 
 1. **Generate a GitHub Personal Access Token**:

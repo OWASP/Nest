@@ -467,7 +467,9 @@ describe('LoginPageContent', () => {
       expect(loginCard).toHaveClass(
         'w-full',
         'max-w-sm',
-        'space-y-6',
+        'flex',
+        'flex-col',
+        'gap-6',
         'rounded-2xl',
         'border',
         'border-gray-200',

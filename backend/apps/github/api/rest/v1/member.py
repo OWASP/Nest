@@ -17,18 +17,18 @@ from apps.github.models.user import User
 router = Router()
 
 
-class UserFilterSchema(FilterSchema):
+class MemberFilterSchema(FilterSchema):
     """Filter schema for User."""
 
     company: str | None = Field(
         None,
         description="Company of the user",
     )
-    location: str | None = Field(None, description="Location of the user", example="India")
+    location: str | None = Field(None, description="Location of the member", example="India")
 
 
-class UserSchema(Schema):
-    """Schema for User."""
+class MemberSchema(Schema):
+    """Schema for Member."""
 
     avatar_url: str
     bio: str
@@ -47,53 +47,53 @@ class UserSchema(Schema):
     url: str
 
 
-class UserErrorResponse(Schema):
-    """Error response schema for User."""
+class MemberErrorResponse(Schema):
+    """Member error response schema."""
 
     message: str
 
 
 @router.get(
     "/",
-    description="Retrieve a paginated list of GitHub users.",
-    operation_id="list_users",
-    response={HTTPStatus.OK: list[UserSchema]},
-    summary="List users",
-    tags=["GitHub"],
+    description="Retrieve a paginated list of OWASP community members.",
+    operation_id="list_members",
+    response={HTTPStatus.OK: list[MemberSchema]},
+    summary="List members",
+    tags=["Community"],
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
-def list_users(
+def list_members(
     request: HttpRequest,
-    filters: UserFilterSchema = Query(...),
+    filters: MemberFilterSchema = Query(...),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None,
         description="Ordering field",
     ),
-) -> list[UserSchema]:
-    """Get all users."""
-    users = filters.filter(User.objects.all())
+) -> list[MemberSchema]:
+    """Get all members."""
+    members = filters.filter(User.objects.all())
 
     if ordering:
-        users = users.order_by(ordering)
+        members = members.order_by(ordering)
 
-    return users
+    return members
 
 
 @router.get(
     "/{login}",
-    description="Retrieve a GitHub user by login.",
-    operation_id="get_user",
+    description="Retrieve a member by login.",
+    operation_id="get_member",
     response={
-        HTTPStatus.NOT_FOUND: UserErrorResponse,
-        HTTPStatus.OK: UserSchema,
+        HTTPStatus.NOT_FOUND: MemberErrorResponse,
+        HTTPStatus.OK: MemberSchema,
     },
-    summary="Get user by login",
-    tags=["GitHub"],
+    summary="Get member by login",
+    tags=["Community"],
 )
-def get_user(request: HttpRequest, login: str) -> UserSchema | UserErrorResponse:
+def get_member(request: HttpRequest, login: str) -> MemberSchema | MemberErrorResponse:
     """Get user by login."""
     if user := User.objects.filter(login=login).first():
         return user
 
-    return Response({"message": "User not found"}, status=HTTPStatus.NOT_FOUND)
+    return Response({"message": "Member not found"}, status=HTTPStatus.NOT_FOUND)

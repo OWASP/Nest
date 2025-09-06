@@ -3,6 +3,7 @@ import { gql } from '@apollo/client'
 export const GET_PROJECT_DATA = gql`
   query GetProject($key: String!) {
     project(key: $key) {
+      id
       contributorsCount
       forksCount
       issuesCount
@@ -13,6 +14,7 @@ export const GET_PROJECT_DATA = gql`
       level
       name
       healthMetricsList(limit: 30) {
+        id
         createdAt
         forksCount
         lastCommitDays
@@ -28,6 +30,7 @@ export const GET_PROJECT_DATA = gql`
       }
       recentIssues {
         author {
+          id
           avatarUrl
           login
           name
@@ -41,6 +44,7 @@ export const GET_PROJECT_DATA = gql`
       }
       recentReleases {
         author {
+          id
           avatarUrl
           login
           name
@@ -53,6 +57,7 @@ export const GET_PROJECT_DATA = gql`
         url
       }
       repositories {
+        id
         contributorsCount
         forksCount
         key
@@ -74,6 +79,7 @@ export const GET_PROJECT_DATA = gql`
       url
       recentMilestones(limit: 5) {
         author {
+          id
           avatarUrl
           login
           name
@@ -88,6 +94,7 @@ export const GET_PROJECT_DATA = gql`
       }
       recentPullRequests {
         author {
+          id
           avatarUrl
           login
           name
@@ -100,6 +107,7 @@ export const GET_PROJECT_DATA = gql`
       }
     }
     topContributors(project: $key) {
+      id
       avatarUrl
       login
       name
@@ -110,6 +118,7 @@ export const GET_PROJECT_DATA = gql`
 export const GET_PROJECT_METADATA = gql`
   query GetProjectMetadata($key: String!) {
     project(key: $key) {
+      id
       contributorsCount
       forksCount
       issuesCount
@@ -117,6 +126,7 @@ export const GET_PROJECT_METADATA = gql`
       starsCount
       summary
       recentMilestones(limit: 25) {
+        id
         title
         url
         body
@@ -140,6 +150,7 @@ export const GET_TOP_CONTRIBUTORS = gql`
       limit: $limit
       project: $key
     ) {
+      id
       avatarUrl
       login
       name

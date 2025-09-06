@@ -3,17 +3,28 @@ import { gql } from '@apollo/client'
 export const GET_SNAPSHOT_DETAILS = gql`
   query GetSnapshotDetails($key: String!) {
     snapshot(key: $key) {
+      id
       endAt
       key
       startAt
       title
       newReleases {
+        id
         name
-        publishedAt
-        tagName
+        organizationName
         projectName
+        publishedAt
+        repositoryName
+        tagName
+        author {
+          avatarUrl
+          id
+          login
+          name
+        }
       }
       newProjects {
+        id
         key
         name
         summary
@@ -24,12 +35,14 @@ export const GET_SNAPSHOT_DETAILS = gql`
         isActive
         repositoriesCount
         topContributors {
+          id
           avatarUrl
           login
           name
         }
       }
       newChapters {
+        id
         key
         name
         createdAt
@@ -37,6 +50,7 @@ export const GET_SNAPSHOT_DETAILS = gql`
         region
         summary
         topContributors {
+          id
           avatarUrl
           login
           name
@@ -55,8 +69,9 @@ export const GET_SNAPSHOT_DETAILS = gql`
 `
 
 export const GET_SNAPSHOT_DETAILS_METADATA = gql`
-  query GetSnapshotDetails($key: String!) {
+  query GetSnapshotDetailsMetadata($key: String!) {
     snapshot(key: $key) {
+      id
       title
     }
   }
@@ -65,6 +80,7 @@ export const GET_SNAPSHOT_DETAILS_METADATA = gql`
 export const GET_COMMUNITY_SNAPSHOTS = gql`
   query GetCommunitySnapshots {
     snapshots(limit: 12) {
+      id
       key
       title
       startAt
