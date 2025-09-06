@@ -15,10 +15,16 @@ class Award(BulkSaveModel, TimestampedModel):
         indexes = [
             models.Index(fields=["-year"], name="award_year_desc_idx"),
         ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["category", "name", "year"],
+                name="uniq_award_cat_name_year",
+            ),
+        ]
         verbose_name_plural = "Awards"
 
     category = models.CharField(verbose_name="Category", max_length=100)
-    name = models.CharField(verbose_name="Name", max_length=255, unique=True)
+    name = models.CharField(verbose_name="Name", max_length=255)
     description = models.TextField(verbose_name="Description", blank=True, default="")
     year = models.IntegerField(verbose_name="Year")
     is_reviewed = models.BooleanField(
