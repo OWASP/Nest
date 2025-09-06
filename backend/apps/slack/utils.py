@@ -12,6 +12,8 @@ from urllib.parse import urljoin
 if TYPE_CHECKING:  # pragma: no cover
     from django.db.models import QuerySet
 
+from argparse import ArgumentParser
+
 import requests
 import yaml
 from lxml import html
@@ -213,6 +215,45 @@ def get_text(blocks: tuple) -> str:
                     text.append(block["text"]["text"])
 
     return NL.join(text).strip()
+
+
+def parse_slack_reminder_args(text: str):
+    """Parse Slack reminder command arguments.
+
+    Args:
+        text (str): The text containing the Slack reminder command arguments.
+
+    Returns:
+        Namespace: The parsed arguments as a Namespace object.
+
+    """
+    parser = ArgumentParser(prog="/set-reminder", description="Set a reminder for a Slack event.")
+    parser.add_argument("channel", type=str, help="The channel to send the reminder to.")
+    parser.add_argument("event_number", type=int, help="The event number to set the reminder for.")
+    parser.add_argument(
+        "minutes_before", type=int, help="Minutes before the event to send the reminder."
+    )
+    parser.add_argument(
+        "message",
+        type=str,
+        nargs="?",
+        default="",
+        help="Optional message to include in the reminder.",
+    )
+    parser.add_argument(
+        "recurrence",
+        type=str,
+        nargs="?",
+        choices=["once", "daily", "weekly"],
+        default=None,
+        help="Optional recurrence pattern for the reminder.",
+    )
+
+    try:
+        return parser.parse_args(text.split())
+
+    except SystemExit:
+        return None
 
 
 def strip_markdown(text: str) -> str:
