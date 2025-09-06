@@ -36,7 +36,6 @@ const UserDetailsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [username, setUsername] = useState('')
   const [isPrivateContributor, setIsPrivateContributor] = useState(false)
-  const theme = 'blue'
 
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_USER_DATA, {
     variables: { key: memberKey },
@@ -187,25 +186,26 @@ const UserDetailsPage: React.FC = () => {
   }
 
   const UserSummary = () => (
-    <div className="flex flex-col sm:flex-row">
-      <div className="w-full sm:w-1/3 mb-4 sm:mb-0">
+    <div className="flex flex-col lg:flex-row items-start">
+      <div className="flex-shrink-0 mb-4 lg:mb-0 lg:mr-6 self-center lg:self-start">
         <Image
           width={200}
           height={200}
-          className="mx-auto max-w-[140px] sm:max-w-none rounded-lg border-2 border-white bg-white object-cover shadow-md dark:border-gray-800 dark:bg-gray-600/60"
+          className="w-[200px] h-[200px] rounded-full border-2 border-white bg-white object-cover shadow-md dark:border-gray-800 dark:bg-gray-600/60"
           src={user?.avatarUrl || '/placeholder.svg'}
           alt={user?.name || user?.login || 'User Avatar'}
         />
       </div>
-      <div className="w-full sm:w-2/3 sm:pl-6 flex flex-col">
-        <div className="mb-4">
+      <div className="flex-1 flex flex-col w-full">
+        <div className="mb-0 lg:mb-4 text-center lg:text-left">
           <Link href={user?.url || '#'} className="text-xl font-bold text-blue-400 hover:underline">
             @{user?.login}
           </Link>
           <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
         </div>
+
         {!isPrivateContributor && (
-          <div className="hidden sm:block">
+          <div className="hidden lg:block w-full">
             <Heatmap />
           </div>
         )}
