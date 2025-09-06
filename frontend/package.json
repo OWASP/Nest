@@ -68,7 +68,7 @@
   "devDependencies": {
     "@axe-core/react": "^4.10.2",
     "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.34.0",
+    "@eslint/js": "^9.35.0",
     "@graphql-codegen/cli": "^5.0.7",
     "@graphql-codegen/near-operation-file-preset": "^3.1.0",
     "@graphql-codegen/typed-document-node": "^5.1.2",
@@ -91,7 +91,7 @@
     "@types/react-gtm-module": "^2.0.4",
     "@typescript-eslint/eslint-plugin": "^8.42.0",
     "@typescript-eslint/parser": "^8.42.0",
-    "eslint": "^9.34.0",
+    "eslint": "^9.35.0",
     "eslint-config-next": "^15.5.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-alias": "^1.1.2",
