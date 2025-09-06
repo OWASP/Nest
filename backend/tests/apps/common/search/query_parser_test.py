@@ -160,7 +160,14 @@ class TestQueryParser:
     @pytest.mark.parametrize("val", ["0", "-1", "999999", "3.14159"])
     def test_numeric_values(self, val):
         result = self.parser.parse(f"stars:{val}")
-        expected = [{"type": "number", "field": "stars", "value": int(float(val)), "op": "="}]
+        expected = [
+            {
+                "type": "number",
+                "field": "stars",
+                "value": max(0, int(float(val))),
+                "op": ">" if float(val) < 0 else "=",
+            }
+        ]
         assert result == expected
 
     def test_overflow_numerical_value(self):

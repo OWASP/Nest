@@ -145,22 +145,11 @@ class QueryParser:
                         field names are always normalized to lowercase.
             strict: If True, raises exception for unknown fields; if False, issues warnings
 
-        Raises:
-            QueryParserError: If field_schema contains invalid field names or types
-
         """
-        try:
-            self.field_schema = self._validate_field_schema(field_schema, default_field)
-            self.default_field = default_field
-            self.case_sensitive = case_sensitive
-            self.strict = strict
-        except QueryParserError:
-            raise
-        except Exception as e:
-            raise QueryParserError(
-                message=f"Invalid query parser configuration: {e!s}",
-                error_type="CONFIGURATION_ERROR",
-            ) from e
+        self.field_schema = self._validate_field_schema(field_schema, default_field)
+        self.default_field = default_field
+        self.case_sensitive = case_sensitive
+        self.strict = strict
 
     def parse(self, query: str) -> list[dict]:
         """Parse query string into structured conditions.
@@ -357,6 +346,9 @@ class QueryParser:
         Returns:
             List of individual tokens
 
+        Raises:
+            QueryParserError: If tokenization fails
+
         """
         reg_components = {
             # Support escaped quotes within quotes
@@ -452,7 +444,7 @@ class QueryParser:
             value = QueryParser._remove_quotes(value)
             match = QueryParser.COMPARISON_PATTERN.parseString(value, parseAll=True)
             return match[0][0], match[0][1]
-        except (ValueError, ParseException) as e:
+        except ParseException as e:
             raise QueryParserError(
                 message=f"Invalid comparison pattern in value: {e!s}",
                 error_type="COMPARISON_ERROR",
@@ -475,7 +467,7 @@ class QueryParser:
         try:
             result = QueryParser.FIELD_VALUE.parseString(value, parseAll=True)
             return result[0]
-        except (ValueError, ParseException) as e:
+        except ParseException as e:
             raise QueryParserError(
                 message=f"Invalid string value: {e!s}", error_type="STRING_VALUE_ERROR"
             ) from e
@@ -511,24 +503,27 @@ class QueryParser:
             value: String value to parse
 
         Returns:
-            Tuple of (operator, numeric_value) where numeric_value is integer
-            and "=" is the default operator.
+            Tuple of (operator, numeric_value) where numeric_value is integer,
+            clamped to [0, 2^32] range and "=" is the default operator.
 
         Raises:
-            QueryParserError: If value is not a valid number
+            QueryParserError: If value is not a valid number or int overflow occurs
 
         """
         try:
             value = QueryParser._remove_quotes(value)
             operator, clean_value = QueryParser._parse_comparison_pattern(value)
             numeric_value = int(float(clean_value))
-            if (numeric_value > 2**64 or numeric_value < 0):
-                raise OverflowError
-        except QueryParserError:
-            raise
-        except (ValueError, OverflowError, ParseException) as e:
+            if numeric_value > 2**32 or numeric_value < 0:
+                operator = ">" if numeric_value < 0 else operator
+                numeric_value = max(0, min(numeric_value, 2**32))
+        except ValueError as e:
             raise QueryParserError(
                 message=f"Invalid numeric value: {e!s}", error_type="NUMBER_VALUE_ERROR"
+            ) from e
+        except OverflowError as e:
+            raise QueryParserError(
+                message=f"Numeric value overflow: {e!s}", error_type="NUMBER_VALUE_ERROR"
             ) from e
         return operator, numeric_value
 
@@ -553,9 +548,7 @@ class QueryParser:
             result = QueryParser.DATE_PATTERN.parseString(clean_value, parseAll=True)
             result[0] = QueryParser._normalize_date(result[0])
             return operator, result[0]
-        except QueryParserError:
-            raise
-        except (ValueError, ParseException) as e:
+        except ParseException as e:
             raise QueryParserError(
                 message=f"Invalid date value: {e!s}", error_type="DATE_VALUE_ERROR"
             ) from e
