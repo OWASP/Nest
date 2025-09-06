@@ -35,7 +35,7 @@ class UserNode:
             self.user_badges.select_related("badge")
             .filter(is_active=True)
             .order_by(
-                "-badge__weight",
+                "badge__weight",
                 "badge__name",
             )
         )

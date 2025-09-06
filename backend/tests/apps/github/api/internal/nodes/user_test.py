@@ -82,44 +82,41 @@ class TestUserNode:
         assert result == "https://github.com/testuser"
 
     def test_badges_resolver_behavior(self):
-        """Unit test verifies the resolver's interaction with the ORM and sorting logic."""
-        user = Mock()
+        """Unit test verifies the badges method returns badges sorted by weight."""
+        badge_high = Mock()
+        badge_high.weight = 1
+        badge_high.name = "High Priority Badge"
 
-        # Created some mock user badges with specific weights (unsorted order)
-        ub_heavy = Mock()
-        ub_heavy.badge = Mock()
-        ub_heavy.badge.weight = 30
-        ub_heavy.badge.name = "Heavy Badge"
+        badge_medium = Mock()
+        badge_medium.weight = 5
+        badge_medium.name = "Medium Priority Badge"
 
-        ub_light = Mock()
-        ub_light.badge = Mock()
-        ub_light.badge.weight = 10
-        ub_light.badge.name = "Light Badge"
+        badge_low = Mock()
+        badge_low.weight = 10
+        badge_low.name = "Low Priority Badge"
 
-        ub_medium = Mock()
-        ub_medium.badge = Mock()
-        ub_medium.badge.weight = 20
-        ub_medium.badge.name = "Medium Badge"
+        user_badge_high = Mock()
+        user_badge_high.badge = badge_high
 
-        unsorted_badges = [ub_heavy, ub_light, ub_medium]
+        user_badge_medium = Mock()
+        user_badge_medium.badge = badge_medium
 
-        (
-            user.user_badges.select_related.return_value.filter.return_value.order_by.return_value
-        ) = unsorted_badges
+        user_badge_low = Mock()
+        user_badge_low.badge = badge_low
 
-        result = UserNode.badges(user)
+        sorted_user_badges = [user_badge_high, user_badge_medium, user_badge_low]
 
-        user.user_badges.select_related.assert_called_once_with("badge")
-        user.user_badges.select_related.return_value.filter.assert_called_once_with(is_active=True)
-        user.user_badges.select_related.return_value.filter.return_value.order_by.assert_called_once_with(
-            "-badge__weight", "badge__name"
+        mock_user = Mock()
+        mock_queryset = Mock()
+        mock_queryset.filter.return_value.order_by.return_value = sorted_user_badges
+        mock_user.user_badges.select_related.return_value = mock_queryset
+
+        result = UserNode.badges(mock_user)
+
+        mock_user.user_badges.select_related.assert_called_once_with("badge")
+        mock_queryset.filter.assert_called_once_with(is_active=True)
+        mock_queryset.filter.return_value.order_by.assert_called_once_with(
+            "badge__weight", "badge__name"
         )
 
-        assert result == [ub.badge for ub in unsorted_badges]
-
-        result_weights = [badge.weight for badge in result]
-        assert result_weights == [
-            30,
-            10,
-            20,
-        ]
+        assert result == [ub.badge for ub in sorted_user_badges]
