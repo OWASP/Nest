@@ -86,7 +86,6 @@ class TestRepositoryBasedEntityModel:
                     * [Third Leader](mailto:third.leader@owasp.org)""",
                 {
                     "First Leader": "first.leader@owasp.org",
-                    "Second Leader": None,
                     "Third Leader": "third.leader@owasp.org",
                 },
             ),
@@ -99,12 +98,8 @@ class TestRepositoryBasedEntityModel:
                 },
             ),
             (
-                """* Charlie
-                    * Diana""",
-                {
-                    "Charlie": None,
-                    "Diana": None,
-                },
+                '- <a href="mailto:exmaple@example.com">Leader1</a>',
+                {},
             ),
             (
                 """## Chapter Leaders
@@ -114,10 +109,7 @@ class TestRepositoryBasedEntityModel:
                       - Frank
                     Just some random text here.
                     1. Not a leader list item""",
-                {
-                    "Eve": "eve@example.com",
-                    "Frank": None,
-                },
+                {"Eve": "eve@example.com"},
             ),
             (
                 "",
@@ -131,12 +123,6 @@ class TestRepositoryBasedEntityModel:
                 "* [  Spaced Leader  ](mailto:  spaced@owasp.org  )",
                 {
                     "Spaced Leader": "spaced@owasp.org",
-                },
-            ),
-            (
-                "- Just One Leader",
-                {
-                    "Just One Leader": None,
                 },
             ),
         ],
