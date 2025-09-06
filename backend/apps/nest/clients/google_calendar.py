@@ -34,3 +34,9 @@ class GoogleCalendarClient:
             .execute()
         )
         return events_result.get("items", [])
+
+    def get_event(self, google_calendar_id: str) -> dict:
+        """Retrieve a specific event from Google Calendar."""
+        return (
+            self.service.events().get(calendarId="primary", eventId=google_calendar_id).execute()
+        )

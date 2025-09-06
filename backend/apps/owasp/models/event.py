@@ -180,29 +180,37 @@ class Event(BulkSaveModel, TimestampedModel):
             list: A list of Event instances.
 
         """
-        parsed_events = []
-        for event in events:
-            start = event.get("start", {}).get("dateTime", {})
-            end = event.get("end", {}).get("dateTime", {})
-            if not start:
-                continue
+        return [event for event in (Event.parse_google_calendar_event(e) for e in events) if event]
 
-            if event.get("status") != "confirmed":
-                continue
+    @staticmethod
+    def parse_google_calendar_event(event: dict) -> Event | None:
+        """Parse a single Google Calendar event into the current Event instance.
 
-            event_instance = Event(
-                name=event.get("summary", ""),
-                description=event.get("description", ""),
-                url=event.get("htmlLink", ""),
-                start_date=parse_date_and_convert_to_local(start),
-                end_date=parse_date_and_convert_to_local(end),
-                google_calendar_id=event.get("id", ""),
-                category=Event.Category.COMMUNITY,
-                suggested_location=event.get("location", ""),
-            )
-            parsed_events.append(event_instance)
-        # We will not save the events to DB until the user chooses what to schedule.
-        return parsed_events
+        Args:
+            event (dict): A Google Calendar event dictionary.
+
+        Returns:
+            Event: An Event instance if parsing is successful, otherwise None.
+
+        """
+        start = event.get("start", {}).get("dateTime", {})
+        end = event.get("end", {}).get("dateTime", {})
+        if not start:
+            return None
+
+        if event.get("status") != "confirmed":
+            return None
+
+        return Event(
+            name=event.get("summary", ""),
+            description=event.get("description", ""),
+            url=event.get("htmlLink", ""),
+            start_date=parse_date_and_convert_to_local(start),
+            end_date=parse_date_and_convert_to_local(end),
+            google_calendar_id=event.get("id", ""),
+            category=Event.Category.COMMUNITY,
+            suggested_location=event.get("location", ""),
+        )
 
     @staticmethod
     def update_data(category, data, *, save: bool = True) -> Event | None:
