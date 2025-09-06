@@ -34,7 +34,8 @@ COPY --chmod=555 src src
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN pnpm run build
+RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
+    NEXT_SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) pnpm run build
 
 # Production image, copy all the files and run next.
 FROM base AS runner

@@ -14,12 +14,28 @@ export const mockSnapshotDetailsData = {
         publishedAt: '2024-12-13T14:43:46+00:00',
         tagName: 'v0.9.2',
         projectName: 'test-project-1',
+        organizationName: 'owasp',
+        repositoryName: 'test-project-1',
+        author: {
+          id: '1',
+          avatarUrl: 'https://avatars.githubusercontent.com/u/2201626?v=4',
+          login: 'arkid15r',
+          name: 'Arkadii Yakovets',
+        },
       },
       {
         name: 'Latest pre-release',
         publishedAt: '2024-12-13T13:17:30+00:00',
         tagName: 'pre-release',
         projectName: 'test-project-2',
+        organizationName: 'owasp',
+        repositoryName: 'test-project-2',
+        author: {
+          id: '2',
+          avatarUrl: 'https://avatars.githubusercontent.com/u/97700473?v=4',
+          login: 'test-user',
+          name: 'test user',
+        },
       },
     ],
     newProjects: [

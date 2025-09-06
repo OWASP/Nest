@@ -38,7 +38,7 @@ class LabelSchema(Schema):
     operation_id="list_labels",
     response={200: list[LabelSchema]},
     summary="List labels",
-    tags=["GitHub"],
+    tags=["Labels"],
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)

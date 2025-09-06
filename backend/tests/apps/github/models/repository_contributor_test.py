@@ -100,6 +100,7 @@ class TestRepositoryContributor(TestCase):
                             "user__avatar_url": MOCK_AVATAR_URL,
                             "user__login": "testuser",
                             "user__name": name,
+                            "id": "test-id",
                         }
                     ]
 

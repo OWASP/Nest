@@ -17,6 +17,7 @@ class TestRepositoryContributorQuery:
             {
                 "avatar_url": "https://example.com/avatar1.jpg",
                 "contributions_count": 50,
+                "id": "1",
                 "login": "alice",
                 "name": "Alice Smith",
                 "project_key": "www-project-test",
@@ -25,6 +26,7 @@ class TestRepositoryContributorQuery:
             {
                 "avatar_url": "https://example.com/avatar2.jpg",
                 "contributions_count": 30,
+                "id": "2",
                 "login": "bob",
                 "name": "Bob Jones",
                 "project_key": None,
@@ -124,6 +126,7 @@ class TestRepositoryContributorQuery:
             {
                 "avatar_url": "https://example.com/avatar.jpg",
                 "contributions_count": 25,
+                "id": "3",
                 "login": "testuser",
                 "name": "Test User",
                 "project_key": "www-project-example",

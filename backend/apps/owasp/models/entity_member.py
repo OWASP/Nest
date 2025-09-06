@@ -11,6 +11,7 @@ class EntityMember(models.Model):
     """EntityMember model."""
 
     class Role(models.TextChoices):
+        CANDIDATE = "candidate", "Candidate"
         LEADER = "leader", "Leader"
         MEMBER = "member", "Member"
 
@@ -56,7 +57,7 @@ class EntityMember(models.Model):
         help_text="Display order/priority of members",
     )
     role = models.CharField(
-        max_length=6,
+        max_length=9,
         choices=Role.choices,
         default=Role.LEADER,
     )
