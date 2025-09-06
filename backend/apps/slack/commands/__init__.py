@@ -2,6 +2,7 @@ from apps.slack.apps import SlackConfig
 from apps.slack.commands.command import CommandBase
 
 from . import (
+    ai,
     board,
     chapters,
     committees,
