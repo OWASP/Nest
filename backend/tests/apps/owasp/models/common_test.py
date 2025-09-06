@@ -15,9 +15,9 @@ class EntityModel(RepositoryBasedEntityModel):
 class TestRepositoryBasedEntityModel:
     def setup_method(self):
         """Set up test fixtures."""
+        self.content_type = Mock()
         self.model = EntityModel()
         self.model.id = 1
-        self.content_type = Mock()
 
     @pytest.mark.parametrize(
         ("content", "expected_audience"),
@@ -307,12 +307,12 @@ class TestRepositoryBasedEntityModel:
         mock_content_type.objects.get_for_model.return_value = self.content_type
 
         existing_leader = Mock()
-        existing_leader.member_name = "John Doe"
+        existing_leader.member_name = "John"
         existing_leader.member_email = "john@example.com"
 
         mock_entity_member.objects.filter.return_value = [existing_leader]
 
-        leaders_emails = {"John Doe": "john@example.com"}
+        leaders_emails = {"John": "john@example.com"}
 
         self.model.sync_leaders(leaders_emails)
 
