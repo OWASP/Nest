@@ -33,7 +33,6 @@ def schedule_reminder(
 
 def set_reminder(
     channel: str,
-    event: Event | None,
     event_number: str,
     slack_user_id: str,
     minutes_before: int,
