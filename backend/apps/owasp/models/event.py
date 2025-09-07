@@ -60,7 +60,7 @@ class Event(BulkSaveModel, TimestampedModel):
     start_date = models.DateField(verbose_name="Start Date")
     end_date = models.DateField(verbose_name="End Date", null=True, blank=True)
     description = models.TextField(verbose_name="Description", default="", blank=True)
-    key = models.CharField(verbose_name="Key", max_length=100, unique=True)
+    key = models.CharField(verbose_name="Key", max_length=100, unique=True, null=True)
     status = models.CharField(
         verbose_name="Status",
         max_length=11,
@@ -360,10 +360,11 @@ class Event(BulkSaveModel, TimestampedModel):
             **kwargs: Arbitrary keyword arguments.
 
         """
-        if not self.suggested_location:
-            self.generate_suggested_location()
+        if self.category != Event.Category.COMMUNITY:
+            if not self.suggested_location:
+                self.generate_suggested_location()
 
-        if not self.latitude or not self.longitude:
-            self.generate_geo_location()
+            if not self.latitude or not self.longitude:
+                self.generate_geo_location()
 
         super().save(*args, **kwargs)

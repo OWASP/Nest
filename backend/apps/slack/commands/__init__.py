@@ -18,6 +18,7 @@ from . import (
     owasp,
     policies,
     projects,
+    set_reminder,
     sponsor,
     sponsors,
     staff,
