@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.utils import timezone
 from github.GithubException import GithubException
 
 from apps.github.auth import get_github_client
@@ -23,8 +24,13 @@ class Command(BaseCommand):
     ALLOWED_GITHUB_HOSTS = {"github.com", "www.github.com"}
     REPO_PATH_PARTS = 2
 
-    def _extract_repo_full_name(self, repo_url):
-        parsed = urlparse(repo_url or "")
+    def _extract_repo_full_name(self, repository):
+        """Extract repository full name from Repository model or URL string."""
+        if hasattr(repository, "path"):
+            return repository.path
+
+        repo_url = str(repository) if repository else ""
+        parsed = urlparse(repo_url)
         if parsed.netloc in self.ALLOWED_GITHUB_HOSTS:
             parts = parsed.path.strip("/").split("/")
             if len(parts) >= self.REPO_PATH_PARTS:
@@ -45,18 +51,19 @@ class Command(BaseCommand):
     def _get_last_assigned_date(self, repo, issue_number, assignee_login):
         """Find the most recent 'assigned' event for a specific user using PyGithub."""
         try:
-            issue = repo.get_issue(number=issue_number)
-
-            events_list = list(issue.get_events())
-            events_list.reverse()
-
-            for event in events_list:
+            gh_issue = repo.get_issue(number=issue_number)
+            last_dt = None
+            for event in gh_issue.get_events():
                 if (
                     event.event == "assigned"
                     and event.assignee
                     and event.assignee.login == assignee_login
                 ):
-                    return event.created_at
+                    last_dt = event.created_at
+
+            if last_dt and timezone.is_naive(last_dt):
+                return timezone.make_aware(last_dt, timezone.utc)
+            return last_dt  # noqa: TRY300
 
         except GithubException as e:
             self.stderr.write(
@@ -69,15 +76,14 @@ class Command(BaseCommand):
         """Build a map from (repository_id, normalized_label_name) to a set of issue IDs."""
         self.stdout.write("Building a repository-aware map of labels to issues...")
         repo_label_to_issue_ids = {}
-
-        issues_query = Issue.objects.select_related("repository").prefetch_related("labels")
-        for issue in issues_query:
-            if not issue.repository_id:
-                continue
-            for label in issue.labels.all():
-                normalized_label = normalize_name(label.name)
-                key = (issue.repository_id, normalized_label)
-                repo_label_to_issue_ids.setdefault(key, set()).add(issue.id)
+        rows = (
+            Issue.objects.filter(labels__isnull=False, repository__isnull=False)
+            .values_list("id", "repository_id", "labels__name")
+            .iterator(chunk_size=5000)
+        )
+        for issue_id, repo_id, label_name in rows:
+            key = (repo_id, normalize_name(label_name))
+            repo_label_to_issue_ids.setdefault(key, set()).add(issue_id)
 
         self.stdout.write(
             f"Map built. Found issues for {len(repo_label_to_issue_ids)} unique repo-label pairs."
@@ -120,11 +126,26 @@ class Command(BaseCommand):
                 )
 
                 for issue in issues:
-                    new_assignee = issue.assignees.first()
-                    assigned_date = None
-                    if new_assignee and issue.repository:
-                        repo_full_name = self._extract_repo_full_name(str(issue.repository.url))
+                    assignee = issue.assignees.first()
+                    if not assignee:
+                        continue
 
+                    status = self._get_status(issue, assignee)
+                    task, created = Task.objects.get_or_create(
+                        issue=issue,
+                        assignee=assignee,
+                        defaults={"module": module, "status": status},
+                    )
+
+                    updates = {}
+                    if task.module != module:
+                        updates["module"] = module
+                    if task.status != status:
+                        updates["status"] = status
+
+                    # Only fetch assigned_at when needed.
+                    if (created or task.assigned_at is None) and issue.repository:
+                        repo_full_name = self._extract_repo_full_name(issue.repository)
                         if repo_full_name:
                             if repo_full_name not in repo_cache:
                                 try:
@@ -136,49 +157,30 @@ class Command(BaseCommand):
                                         )
                                     )
                                     repo_cache[repo_full_name] = None
-
-                            repo = repo_cache[repo_full_name]
+                            repo = repo_cache.get(repo_full_name)
                             if repo:
                                 assigned_date = self._get_last_assigned_date(
                                     repo=repo,
                                     issue_number=issue.number,
-                                    assignee_login=new_assignee.login,
+                                    assignee_login=assignee.login,
                                 )
+                                if assigned_date:
+                                    updates["assigned_at"] = assigned_date
 
-                    if new_assignee:
-                        status = self._get_status(issue, new_assignee)
-
-                        task, created = Task.objects.get_or_create(
-                            issue=issue,
-                            assignee=new_assignee,
-                            defaults={
-                                "module": module,
-                                "status": status,
-                                "assigned_at": assigned_date,
-                            },
+                    if created:
+                        num_tasks_created += 1
+                        self.stdout.write(
+                            self.style.SUCCESS(
+                                f"Task created for user '{assignee.login}' on issue "
+                                f"{issue.repository.name}#{issue.number} "
+                                f"in module '{module.name}'"
+                            )
                         )
 
-                        if created:
-                            num_tasks_created += 1
-                            self.stdout.write(
-                                self.style.SUCCESS(
-                                    f"Task created for user '{new_assignee.login}' on issue "
-                                    f"{issue.repository.name}#{issue.number} "
-                                    f"in module '{module.name}' "
-                                    f"(assigned on {assigned_date})"
-                                )
-                            )
-                        else:
-                            updates = {}
-                            if task.module != module:
-                                updates["module"] = module
-                            if task.status != status:
-                                updates["status"] = status
-
-                            if updates:
-                                for field, value in updates.items():
-                                    setattr(task, field, value)
-                                task.save(update_fields=list(updates.keys()))
+                    if updates:
+                        for field, value in updates.items():
+                            setattr(task, field, value)
+                        task.save(update_fields=list(updates.keys()))
 
         num_linked = len(matched_issue_ids)
         if num_linked > 0:
