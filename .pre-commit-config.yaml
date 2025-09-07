@@ -10,7 +10,7 @@ repos:
         exclude: (.github|pnpm-lock.yaml)
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.8
+    rev: v0.12.12
     hooks:
       - id: ruff
         args:
@@ -64,6 +64,7 @@ repos:
       - id: check-yaml
       - id: detect-private-key
       - id: end-of-file-fixer
+        exclude: frontend/src/types/__generated__
         exclude_types:
           - svg
       - id: file-contents-sorter
@@ -80,3 +81,8 @@ repos:
         files: backend/tests
       - id: trailing-whitespace
         exclude: pnpm-lock.yaml
+
+  - repo: https://github.com/tox-dev/pyproject-fmt
+    rev: v2.6.0
+    hooks:
+      - id: pyproject-fmt

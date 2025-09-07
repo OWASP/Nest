@@ -106,7 +106,7 @@ const About = () => {
   return (
     <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
-        <h1 className="mb-6 mt-4 text-4xl font-bold">About</h1>
+        <h1 className="mt-4 mb-6 text-4xl font-bold">About</h1>
         <SecondaryCard icon={faScroll} title={<AnchorTitle title="History" />}>
           {aboutText.map((text) => (
             <div key={text} className="mb-4">
@@ -141,7 +141,7 @@ const About = () => {
               {technologies.map((tech) => (
                 <div key={tech.section} className="mb-2">
                   <h3 className="mb-3 font-semibold text-blue-400">{tech.section}</h3>
-                  <ul className="space-y-3">
+                  <ul className="flex flex-col gap-3">
                     {Object.entries(tech.tools).map(([name, details]) => (
                       <li key={name} className="flex flex-row items-center gap-2">
                         <Image

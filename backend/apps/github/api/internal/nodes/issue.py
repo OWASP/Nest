@@ -16,7 +16,7 @@ from apps.github.models.issue import Issue
         "url",
     ],
 )
-class IssueNode:
+class IssueNode(strawberry.relay.Node):
     """GitHub issue node."""
 
     @strawberry.field

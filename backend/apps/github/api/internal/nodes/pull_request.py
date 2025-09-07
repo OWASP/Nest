@@ -14,7 +14,7 @@ from apps.github.models.pull_request import PullRequest
         "title",
     ],
 )
-class PullRequestNode:
+class PullRequestNode(strawberry.relay.Node):
     """GitHub pull request node."""
 
     @strawberry.field

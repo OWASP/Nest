@@ -15,7 +15,9 @@ from apps.github.constants import (
     GITHUB_REPOSITORY_RE,
     GITHUB_USER_RE,
 )
+from apps.github.models.user import User
 from apps.github.utils import get_repository_file_content
+from apps.owasp.models.entity_member import EntityMember
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +99,15 @@ class RepositoryBasedEntityModel(models.Model):
             f"{self.owasp_repository.key}/{self.owasp_repository.default_branch}/index.md"
             if self.owasp_repository
             else None
+        )
+
+    @property
+    def entity_leaders(self) -> models.QuerySet[User]:
+        """Return entity's leaders."""
+        return User.objects.filter(
+            pk__in=self.members.filter(role=EntityMember.Role.LEADER).values_list(
+                "member_id", flat=True
+            )
         )
 
     @property

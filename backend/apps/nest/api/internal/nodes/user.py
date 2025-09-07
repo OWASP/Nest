@@ -1,12 +1,13 @@
 """GraphQL node for User model."""
 
+import strawberry
 import strawberry_django
 
 from apps.nest.models import User
 
 
 @strawberry_django.type(User, fields=["username"])
-class AuthUserNode:
+class AuthUserNode(strawberry.relay.Node):
     """GraphQL node for User model."""
 
     @strawberry_django.field

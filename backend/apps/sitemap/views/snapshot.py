@@ -21,4 +21,4 @@ class SnapshotSitemap(BaseSitemap):
 
     def location(self, obj):
         """Return the URL path for an object."""
-        return f"{self.prefix}/{obj.key}".lower()
+        return f"{self.prefix}/{obj.key}"

@@ -34,4 +34,4 @@ class RepositorySitemap(BaseSitemap):
             str: The URL path for the repository.
 
         """
-        return f"/organizations/{obj.organization.nest_key}{self.prefix}/{obj.key}".lower()
+        return f"/organizations/{obj.organization.nest_key}{self.prefix}/{obj.key}"

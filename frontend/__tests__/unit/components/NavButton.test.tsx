@@ -213,7 +213,7 @@ describe('<NavButton />', () => {
         'hover:ring-1',
         'hover:ring-[#b0c7de]',
         'hover:ring-offset-0',
-        'focus-visible:outline-none',
+        'focus-visible:outline-hidden',
         'focus-visible:ring-1',
         'focus-visible:ring-ring'
       )
@@ -323,7 +323,7 @@ describe('<NavButton />', () => {
     it('should maintain focus visibility with focus-visible classes', () => {
       renderNavButton()
       const link = screen.getByRole('link')
-      expect(link).toHaveClass('focus-visible:outline-none', 'focus-visible:ring-1')
+      expect(link).toHaveClass('focus-visible:outline-hidden', 'focus-visible:ring-1')
     })
   })
 

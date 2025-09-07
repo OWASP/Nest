@@ -37,7 +37,7 @@ RECENT_RELEASES_LIMIT = 5
         "updated_at",
     ],
 )
-class RepositoryNode:
+class RepositoryNode(strawberry.relay.Node):
     """Repository node."""
 
     @strawberry.field

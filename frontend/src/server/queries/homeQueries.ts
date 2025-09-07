@@ -3,6 +3,7 @@ import { gql } from '@apollo/client'
 export const GET_MAIN_PAGE_DATA = gql`
   query GetMainPageData($distinct: Boolean) {
     recentProjects(limit: 3) {
+      id
       createdAt
       key
       leaders
@@ -12,6 +13,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       type
     }
     recentPosts(limit: 6) {
+      id
       authorName
       authorImageUrl
       publishedAt
@@ -19,6 +21,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       url
     }
     recentChapters(limit: 3) {
+      id
       createdAt
       key
       leaders
@@ -26,12 +29,15 @@ export const GET_MAIN_PAGE_DATA = gql`
       suggestedLocation
     }
     topContributors(hasFullName: true, limit: 40) {
+      id
       avatarUrl
       login
       name
     }
     recentIssues(limit: 5, distinct: $distinct) {
+      id
       author {
+        id
         avatarUrl
         login
         name
@@ -43,7 +49,9 @@ export const GET_MAIN_PAGE_DATA = gql`
       url
     }
     recentPullRequests(limit: 5, distinct: $distinct) {
+      id
       author {
+        id
         avatarUrl
         login
         name
@@ -55,7 +63,9 @@ export const GET_MAIN_PAGE_DATA = gql`
       url
     }
     recentReleases(limit: 5, distinct: $distinct) {
+      id
       author {
+        id
         avatarUrl
         login
         name
@@ -68,6 +78,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       url
     }
     sponsors {
+      id
       imageUrl
       name
       sponsorType
@@ -81,6 +92,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       slackWorkspaceStats
     }
     upcomingEvents(limit: 9) {
+      id
       category
       endDate
       key
@@ -91,7 +103,9 @@ export const GET_MAIN_PAGE_DATA = gql`
       url
     }
     recentMilestones(limit: 5, state: "all", distinct: $distinct) {
+      id
       author {
+        id
         avatarUrl
         login
         name

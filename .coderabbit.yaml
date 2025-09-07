@@ -9,8 +9,10 @@ reviews:
   assess_linked_issues: true
   auto_apply_labels: false
   auto_review:
-    enabled: true
+    base_branches:
+      - feature/*
     drafts: true
+    enabled: true
   collapse_walkthrough: false
   high_level_summary: true
   high_level_summary_in_walkthrough: true

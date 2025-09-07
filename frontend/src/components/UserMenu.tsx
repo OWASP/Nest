@@ -38,7 +38,7 @@ export default function UserMenu({
   if (isSyncing) {
     return (
       <div className="flex h-10 w-10 items-center justify-center">
-        <div className="animate-pulse h-10 w-10 rounded-full bg-gray-300 dark:bg-slate-700" />
+        <div className="h-10 w-10 animate-pulse rounded-full bg-gray-300 dark:bg-slate-700" />
       </div>
     )
   }
@@ -70,7 +70,7 @@ export default function UserMenu({
         aria-expanded={isOpen}
         aria-haspopup="true"
         aria-controls={dropdownId}
-        className="w-auto focus:outline-none"
+        className="w-auto focus:outline-hidden"
         disabled={isLoggingOut}
       >
         <div className="h-10 w-10 overflow-hidden rounded-full">
@@ -87,7 +87,7 @@ export default function UserMenu({
       {isOpen && (
         <div
           id={dropdownId}
-          className="absolute right-0 top-full z-20 mt-2 w-48 overflow-hidden rounded-md bg-white shadow-lg dark:bg-slate-800"
+          className="absolute top-full right-0 z-20 mt-2 w-48 overflow-hidden rounded-md bg-white shadow-lg dark:bg-slate-800"
         >
           {isProjectLeader && (
             <Link

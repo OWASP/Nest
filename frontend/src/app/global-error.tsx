@@ -40,7 +40,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ statusCode, title, m
           <p className="font-inter mt-2 text-lg text-black dark:text-white">{message}</p>
           <Button
             onPress={() => router.push('/')}
-            className="font-inter mt-8 h-12 w-40 rounded-lg bg-owasp-blue text-base font-medium text-white transition-colors hover:bg-blue-400"
+            className="font-inter bg-owasp-blue mt-8 h-12 w-40 rounded-lg text-base font-medium text-white transition-colors hover:bg-blue-400"
           >
             Return To Home
           </Button>

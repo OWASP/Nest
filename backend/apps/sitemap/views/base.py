@@ -45,7 +45,7 @@ class BaseSitemap(Sitemap):
 
     def location(self, obj):
         """Return the URL path for an object."""
-        return f"{self.prefix}/{obj.nest_key}".lower()
+        return f"{self.prefix}/{obj.nest_key}"
 
     def priority(self, obj):
         """Return the priority score for an object."""

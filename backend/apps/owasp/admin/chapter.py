@@ -4,14 +4,14 @@ from django.contrib import admin
 
 from apps.owasp.models.chapter import Chapter
 
-from .mixins import GenericEntityAdminMixin, LeaderAdminMixin
+from .mixins import EntityMemberInline, GenericEntityAdminMixin
 
 
-class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin, LeaderAdminMixin):
+class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     """Admin for Chapter model."""
 
     autocomplete_fields = ("owasp_repository",)
-    filter_horizontal = LeaderAdminMixin.filter_horizontal
+    inlines = (EntityMemberInline,)
     list_display = (
         "name",
         "created_at",

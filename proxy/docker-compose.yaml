@@ -3,6 +3,7 @@ services:
     container_name: nest-certbot
     image: certbot/certbot
     volumes:
+      - ./blocked_ips.conf:/etc/nginx/blocked_ips.conf
       - ./headers.conf:/etc/nginx/headers.conf
       - ./letsencrypt:/etc/letsencrypt
       - ./production.conf:/etc/nginx/conf.d/production.conf
@@ -18,6 +19,7 @@ services:
       - 80:80
       - 443:443
     volumes:
+      - ./blocked_ips.conf:/etc/nginx/blocked_ips.conf
       - ./headers.conf:/etc/nginx/headers.conf
       - ./letsencrypt:/etc/letsencrypt
       - ./production.conf:/etc/nginx/conf.d/production.conf

@@ -1,8 +1,12 @@
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = [ "poetry-core" ]
+
 [tool.poetry]
 name = "owasp-nest-documentation"
 version = "0.1.0"
 description = "OWASP Nest Documentation"
-authors = ["Arkadii Yakovets <arkadii.yakovets@owasp.org>"]
+authors = [ "Arkadii Yakovets <arkadii.yakovets@owasp.org>" ]
 license = "MIT"
 
 [tool.poetry.dependencies]
@@ -12,7 +16,3 @@ mkdocs-minify-plugin = "^0.8.0"
 mkdocstrings = "^0.30.0"
 pymdown-extensions = "^10.14.3"
 python = "^3.13"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"

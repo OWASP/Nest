@@ -21,7 +21,13 @@ logger = logging.getLogger(__name__)
 class Retriever:
     """A class for retrieving relevant text chunks for a RAG."""
 
-    SUPPORTED_CONTENT_TYPES = ["event", "project", "chapter", "committee", "message"]
+    SUPPORTED_ENTITY_TYPES = (
+        "chapter",
+        "committee",
+        "event",
+        "message",
+        "project",
+    )
 
     def __init__(self, embedding_model: str = "text-embedding-3-small"):
         """Initialize the Retriever.
@@ -36,7 +42,6 @@ class Retriever:
         if not (openai_api_key := os.getenv("DJANGO_OPEN_AI_SECRET_KEY")):
             error_msg = "DJANGO_OPEN_AI_SECRET_KEY environment variable not set"
             raise ValueError(error_msg)
-
         self.openai_client = openai.OpenAI(api_key=openai_api_key)
         self.embedding_model = embedding_model
         logger.info("Retriever initialized with embedding model: %s", self.embedding_model)
@@ -64,121 +69,116 @@ class Retriever:
             logger.exception("Unexpected error while generating embedding")
             raise
 
-    def get_source_name(self, content_object) -> str:
+    def get_source_name(self, entity) -> str:
         """Get the name/identifier for the content object."""
         for attr in ("name", "title", "login", "key", "summary"):
-            if getattr(content_object, attr, None):
-                return str(getattr(content_object, attr))
+            if getattr(entity, attr, None):
+                return str(getattr(entity, attr))
+        return str(entity)
 
-        return str(content_object)
-
-    def get_additional_context(self, content_object, content_type: str) -> dict[str, Any]:
+    def get_additional_context(self, entity) -> dict[str, Any]:
         """Get additional context information based on content type.
 
         Args:
-            content_object: The source object.
-            content_type: The model name of the content object.
+            entity: The source object.
 
         Returns:
             A dictionary with additional context information.
 
         """
         context = {}
-        clean_content_type = content_type.split(".")[-1] if "." in content_type else content_type
-
+        clean_content_type = entity.__class__.__name__.lower()
         if clean_content_type == "chapter":
             context.update(
                 {
-                    "location": getattr(content_object, "suggested_location", None),
-                    "region": getattr(content_object, "region", None),
-                    "country": getattr(content_object, "country", None),
-                    "postal_code": getattr(content_object, "postal_code", None),
-                    "currency": getattr(content_object, "currency", None),
-                    "meetup_group": getattr(content_object, "meetup_group", None),
-                    "tags": getattr(content_object, "tags", []),
-                    "topics": getattr(content_object, "topics", []),
-                    "leaders": getattr(content_object, "leaders_raw", []),
-                    "related_urls": getattr(content_object, "related_urls", []),
-                    "is_active": getattr(content_object, "is_active", None),
-                    "url": getattr(content_object, "url", None),
+                    "location": getattr(entity, "suggested_location", None),
+                    "region": getattr(entity, "region", None),
+                    "country": getattr(entity, "country", None),
+                    "postal_code": getattr(entity, "postal_code", None),
+                    "currency": getattr(entity, "currency", None),
+                    "meetup_group": getattr(entity, "meetup_group", None),
+                    "tags": getattr(entity, "tags", []),
+                    "topics": getattr(entity, "topics", []),
+                    "leaders": getattr(entity, "leaders_raw", []),
+                    "related_urls": getattr(entity, "related_urls", []),
+                    "is_active": getattr(entity, "is_active", None),
+                    "url": getattr(entity, "url", None),
                 }
             )
         elif clean_content_type == "project":
             context.update(
                 {
-                    "level": getattr(content_object, "level", None),
-                    "project_type": getattr(content_object, "type", None),
-                    "languages": getattr(content_object, "languages", []),
-                    "topics": getattr(content_object, "topics", []),
-                    "licenses": getattr(content_object, "licenses", []),
-                    "tags": getattr(content_object, "tags", []),
-                    "custom_tags": getattr(content_object, "custom_tags", []),
-                    "stars_count": getattr(content_object, "stars_count", None),
-                    "forks_count": getattr(content_object, "forks_count", None),
-                    "contributors_count": getattr(content_object, "contributors_count", None),
-                    "releases_count": getattr(content_object, "releases_count", None),
-                    "open_issues_count": getattr(content_object, "open_issues_count", None),
-                    "leaders": getattr(content_object, "leaders_raw", []),
-                    "related_urls": getattr(content_object, "related_urls", []),
-                    "created_at": getattr(content_object, "created_at", None),
-                    "updated_at": getattr(content_object, "updated_at", None),
-                    "released_at": getattr(content_object, "released_at", None),
-                    "health_score": getattr(content_object, "health_score", None),
-                    "is_active": getattr(content_object, "is_active", None),
-                    "track_issues": getattr(content_object, "track_issues", None),
-                    "url": getattr(content_object, "url", None),
+                    "level": getattr(entity, "level", None),
+                    "project_type": getattr(entity, "type", None),
+                    "languages": getattr(entity, "languages", []),
+                    "topics": getattr(entity, "topics", []),
+                    "licenses": getattr(entity, "licenses", []),
+                    "tags": getattr(entity, "tags", []),
+                    "custom_tags": getattr(entity, "custom_tags", []),
+                    "stars_count": getattr(entity, "stars_count", None),
+                    "forks_count": getattr(entity, "forks_count", None),
+                    "contributors_count": getattr(entity, "contributors_count", None),
+                    "releases_count": getattr(entity, "releases_count", None),
+                    "open_issues_count": getattr(entity, "open_issues_count", None),
+                    "leaders": getattr(entity, "leaders_raw", []),
+                    "related_urls": getattr(entity, "related_urls", []),
+                    "created_at": getattr(entity, "created_at", None),
+                    "updated_at": getattr(entity, "updated_at", None),
+                    "released_at": getattr(entity, "released_at", None),
+                    "health_score": getattr(entity, "health_score", None),
+                    "is_active": getattr(entity, "is_active", None),
+                    "track_issues": getattr(entity, "track_issues", None),
+                    "url": getattr(entity, "url", None),
                 }
             )
         elif clean_content_type == "event":
             context.update(
                 {
-                    "start_date": getattr(content_object, "start_date", None),
-                    "end_date": getattr(content_object, "end_date", None),
-                    "location": getattr(content_object, "suggested_location", None),
-                    "category": getattr(content_object, "category", None),
-                    "latitude": getattr(content_object, "latitude", None),
-                    "longitude": getattr(content_object, "longitude", None),
-                    "url": getattr(content_object, "url", None),
-                    "description": getattr(content_object, "description", None),
-                    "summary": getattr(content_object, "summary", None),
+                    "start_date": getattr(entity, "start_date", None),
+                    "end_date": getattr(entity, "end_date", None),
+                    "location": getattr(entity, "suggested_location", None),
+                    "category": getattr(entity, "category", None),
+                    "latitude": getattr(entity, "latitude", None),
+                    "longitude": getattr(entity, "longitude", None),
+                    "url": getattr(entity, "url", None),
+                    "description": getattr(entity, "description", None),
+                    "summary": getattr(entity, "summary", None),
                 }
             )
         elif clean_content_type == "committee":
             context.update(
                 {
-                    "is_active": getattr(content_object, "is_active", None),
-                    "leaders": getattr(content_object, "leaders", []),
-                    "url": getattr(content_object, "url", None),
-                    "description": getattr(content_object, "description", None),
-                    "summary": getattr(content_object, "summary", None),
-                    "tags": getattr(content_object, "tags", []),
-                    "topics": getattr(content_object, "topics", []),
-                    "related_urls": getattr(content_object, "related_urls", []),
+                    "is_active": getattr(entity, "is_active", None),
+                    "leaders": getattr(entity, "leaders", []),
+                    "url": getattr(entity, "url", None),
+                    "description": getattr(entity, "description", None),
+                    "summary": getattr(entity, "summary", None),
+                    "tags": getattr(entity, "tags", []),
+                    "topics": getattr(entity, "topics", []),
+                    "related_urls": getattr(entity, "related_urls", []),
                 }
             )
         elif clean_content_type == "message":
             context.update(
                 {
                     "channel": (
-                        getattr(content_object.conversation, "slack_channel_id", None)
-                        if hasattr(content_object, "conversation") and content_object.conversation
+                        getattr(entity.conversation, "slack_channel_id", None)
+                        if hasattr(entity, "conversation") and entity.conversation
                         else None
                     ),
                     "thread_ts": (
-                        getattr(content_object.parent_message, "ts", None)
-                        if hasattr(content_object, "parent_message")
-                        and content_object.parent_message
+                        getattr(entity.parent_message, "ts", None)
+                        if hasattr(entity, "parent_message") and entity.parent_message
                         else None
                     ),
-                    "ts": getattr(content_object, "ts", None),
+                    "ts": getattr(entity, "ts", None),
                     "user": (
-                        getattr(content_object.author, "name", None)
-                        if hasattr(content_object, "author") and content_object.author
+                        getattr(entity.author, "name", None)
+                        if hasattr(entity, "author") and entity.author
                         else None
                     ),
                 }
             )
-
         return {k: v for k, v in context.items() if v is not None}
 
     def retrieve(
@@ -201,14 +201,11 @@ class Retriever:
 
         """
         query_embedding = self.get_query_embedding(query)
-
         if not content_types:
             content_types = self.extract_content_types_from_query(query)
-
         queryset = Chunk.objects.annotate(
             similarity=1 - CosineDistance("embedding", query_embedding)
         ).filter(similarity__gte=similarity_threshold)
-
         if content_types:
             content_type_query = Q()
             for name in content_types:
@@ -216,36 +213,31 @@ class Retriever:
                 if "." in lower_name:
                     app_label, model = lower_name.split(".", 1)
                     content_type_query |= Q(
-                        content_type__app_label=app_label, content_type__model=model
+                        context__entity_type__app_label=app_label,
+                        context__entity_type__model=model,
                     )
                 else:
-                    content_type_query |= Q(content_type__model=lower_name)
+                    content_type_query |= Q(context__entity_type__model=lower_name)
             queryset = queryset.filter(content_type_query)
 
-        chunks = (
-            queryset.select_related("content_type")
-            .prefetch_related("content_object")
-            .order_by("-similarity")[:limit]
-        )
+        chunks = queryset.select_related("context__entity_type").order_by("-similarity")[:limit]
 
         results = []
         for chunk in chunks:
-            if not chunk.content_object:
+            if not chunk.context or not chunk.context.entity:
                 logger.warning("Content object is None for chunk %s. Skipping.", chunk.id)
                 continue
 
-            source_name = self.get_source_name(chunk.content_object)
-            additional_context = self.get_additional_context(
-                chunk.content_object, chunk.content_type.model
-            )
+            source_name = self.get_source_name(chunk.context.entity)
+            additional_context = self.get_additional_context(chunk.context.entity)
 
             results.append(
                 {
                     "text": chunk.text,
                     "similarity": float(chunk.similarity),
-                    "source_type": chunk.content_type.model,
+                    "source_type": chunk.context.entity_type.model,
                     "source_name": source_name,
-                    "source_id": chunk.object_id,
+                    "source_id": chunk.context.entity_id,
                     "additional_context": additional_context,
                 }
             )
@@ -262,13 +254,12 @@ class Retriever:
             A list of detected content type names.
 
         """
-        detected_types = []
         query_words = set(re.findall(r"\b\w+\b", query.lower()))
 
         detected_types = [
-            content_type
-            for content_type in self.SUPPORTED_CONTENT_TYPES
-            if content_type in query_words or f"{content_type}s" in query_words
+            entity_type
+            for entity_type in self.SUPPORTED_ENTITY_TYPES
+            if entity_type in query_words or f"{entity_type}s" in query_words
         ]
 
         if detected_types:

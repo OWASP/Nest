@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
 import '@testing-library/jest-dom'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
@@ -172,12 +172,20 @@ describe('MetricsScoreCircle', () => {
   })
 
   // Test 9: Event handling - hover effects (visual testing through classes)
-  it('has hover effect classes applied', () => {
-    const { container } = render(<MetricsScoreCircle score={75} />)
+  it('has hover effect classes applied when clickable', () => {
+    const { container } = render(<MetricsScoreCircle score={75} clickable={true} />)
 
     // Check for hover-related classes
     const hoverElement = container.querySelector('[class*="hover:"]')
     expect(hoverElement).toBeInTheDocument()
+  })
+
+  it('does not have hover effect classes when not clickable', () => {
+    const { container } = render(<MetricsScoreCircle score={75} clickable={false} />)
+
+    // Should not have hover-related classes
+    const hoverElement = container.querySelector('[class*="hover:"]')
+    expect(hoverElement).not.toBeInTheDocument()
   })
 
   // Test 10: Component integration test
@@ -217,5 +225,161 @@ describe('MetricsScoreCircle', () => {
       'data-content',
       'Current Project Health Score'
     )
+  })
+
+  // Test 11: Click handling functionality
+  describe('click handling', () => {
+    it('calls onClick when clickable and onClick provided', () => {
+      const mockOnClick = jest.fn()
+      render(<MetricsScoreCircle score={75} clickable={true} onClick={mockOnClick} />)
+
+      const circleElement = screen.getByText('75').closest('.group')
+      if (circleElement) {
+        fireEvent.click(circleElement)
+      }
+
+      expect(mockOnClick).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not call onClick when not clickable', () => {
+      const mockOnClick = jest.fn()
+      render(<MetricsScoreCircle score={75} clickable={false} onClick={mockOnClick} />)
+
+      const circleElement = screen.getByText('75').closest('.group')
+      if (circleElement) {
+        fireEvent.click(circleElement)
+      }
+
+      expect(mockOnClick).not.toHaveBeenCalled()
+    })
+
+    it('does not call onClick when no onClick provided', () => {
+      render(<MetricsScoreCircle score={75} clickable={true} />)
+
+      const circleElement = screen.getByText('75').closest('.group')
+      if (circleElement) {
+        fireEvent.click(circleElement)
+      }
+      // Should not throw any errors - test passes if no exception is thrown
+      expect(circleElement).toBeInTheDocument()
+    })
+
+    it('has cursor pointer when clickable', () => {
+      const { container } = render(<MetricsScoreCircle score={75} clickable={true} />)
+
+      const clickableElement = container.querySelector('[class*="cursor-pointer"]')
+      expect(clickableElement).toBeInTheDocument()
+    })
+
+    it('does not have cursor pointer when not clickable', () => {
+      const { container } = render(<MetricsScoreCircle score={75} clickable={false} />)
+
+      const clickableElement = container.querySelector('[class*="cursor-pointer"]')
+      expect(clickableElement).not.toBeInTheDocument()
+    })
+  })
+
+  // Test 12: Accessibility for clickable component
+  describe('accessibility for clickable component', () => {
+    it('has button role when clickable', () => {
+      render(<MetricsScoreCircle score={75} clickable={true} />)
+
+      const buttonElement = screen.getByRole('button')
+      expect(buttonElement).toBeInTheDocument()
+    })
+
+    it('does not have button role when not clickable', () => {
+      render(<MetricsScoreCircle score={75} clickable={false} />)
+
+      const buttonElement = screen.queryByRole('button')
+      expect(buttonElement).not.toBeInTheDocument()
+    })
+
+    it('has tabIndex when clickable', () => {
+      const { container } = render(<MetricsScoreCircle score={75} clickable={true} />)
+
+      const clickableElement = container.querySelector('[tabindex="0"]')
+      expect(clickableElement).toBeInTheDocument()
+    })
+
+    it('does not have tabIndex when not clickable', () => {
+      const { container } = render(<MetricsScoreCircle score={75} clickable={false} />)
+
+      const clickableElement = container.querySelector('[tabindex]')
+      expect(clickableElement).not.toBeInTheDocument()
+    })
+
+    it('handles keyboard navigation when clickable', () => {
+      const mockOnClick = jest.fn()
+      render(<MetricsScoreCircle score={75} clickable={true} onClick={mockOnClick} />)
+
+      const buttonElement = screen.getByRole('button')
+
+      // Test Enter key
+      fireEvent.keyDown(buttonElement, { key: 'Enter' })
+      expect(mockOnClick).toHaveBeenCalledTimes(1)
+
+      // Test Space key
+      fireEvent.keyDown(buttonElement, { key: ' ' })
+      expect(mockOnClick).toHaveBeenCalledTimes(2)
+    })
+
+    it('does not handle keyboard navigation when not clickable', () => {
+      const mockOnClick = jest.fn()
+      render(<MetricsScoreCircle score={75} clickable={false} onClick={mockOnClick} />)
+
+      const circleElement = screen.getByText('75').closest('.group')
+      if (circleElement) {
+        fireEvent.keyDown(circleElement, { key: 'Enter' })
+        fireEvent.keyDown(circleElement, { key: ' ' })
+      }
+
+      expect(mockOnClick).not.toHaveBeenCalled()
+    })
+  })
+
+  // Test 13: Maintains existing functionality with new props
+  it('maintains all existing functionality when clickable is true', () => {
+    const { container } = render(<MetricsScoreCircle score={25} clickable={true} />)
+
+    // Should still have red styling
+    expect(container.querySelector('[class*="bg-red"]')).toBeInTheDocument()
+
+    // Should still have pulse animation
+    expect(container.querySelector('[class*="animate-pulse"]')).toBeInTheDocument()
+
+    // Should still display correct score
+    expect(screen.getByText('25')).toBeInTheDocument()
+
+    // Should still have tooltip
+    expect(screen.getByTestId('tooltip-wrapper')).toHaveAttribute(
+      'data-content',
+      'Current Project Health Score'
+    )
+
+    // Should have hover effects
+    expect(container.querySelector('[class*="hover:"]')).toBeInTheDocument()
+  })
+
+  it('maintains all existing functionality when clickable is false', () => {
+    const { container } = render(<MetricsScoreCircle score={25} clickable={false} />)
+
+    // Should still have red styling
+    expect(container.querySelector('[class*="bg-red"]')).toBeInTheDocument()
+
+    // Should still have pulse animation
+    expect(container.querySelector('[class*="animate-pulse"]')).toBeInTheDocument()
+
+    // Should still display correct score
+    expect(screen.getByText('25')).toBeInTheDocument()
+
+    // Should still have tooltip
+    expect(screen.getByTestId('tooltip-wrapper')).toHaveAttribute(
+      'data-content',
+      'Current Project Health Score'
+    )
+
+    // Should NOT have hover effects
+    expect(container.querySelector('[class*="hover:"]')).not.toBeInTheDocument()
   })
 })

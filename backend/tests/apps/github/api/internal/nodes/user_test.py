@@ -1,5 +1,9 @@
 """Test cases for UserNode."""
 
+from unittest.mock import Mock
+
+import pytest
+
 from apps.github.api.internal.nodes.user import UserNode
 
 
@@ -34,3 +38,43 @@ class TestUserNode:
             "url",
         }
         assert field_names == expected_field_names
+
+    def test_created_at_field(self):
+        """Test created_at field resolution."""
+        mock_user = Mock()
+        mock_user.idx_created_at = 1234567890.0
+
+        result = UserNode.created_at(mock_user)
+        assert result == pytest.approx(1234567890.0)
+
+    def test_issues_count_field(self):
+        """Test issues_count field resolution."""
+        mock_user = Mock()
+        mock_user.idx_issues_count = 42
+
+        result = UserNode.issues_count(mock_user)
+        assert result == 42
+
+    def test_releases_count_field(self):
+        """Test releases_count field resolution."""
+        mock_user = Mock()
+        mock_user.idx_releases_count = 15
+
+        result = UserNode.releases_count(mock_user)
+        assert result == 15
+
+    def test_updated_at_field(self):
+        """Test updated_at field resolution."""
+        mock_user = Mock()
+        mock_user.idx_updated_at = 1234567890.0
+
+        result = UserNode.updated_at(mock_user)
+        assert result == pytest.approx(1234567890.0)
+
+    def test_url_field(self):
+        """Test url field resolution."""
+        mock_user = Mock()
+        mock_user.url = "https://github.com/testuser"
+
+        result = UserNode.url(mock_user)
+        assert result == "https://github.com/testuser"

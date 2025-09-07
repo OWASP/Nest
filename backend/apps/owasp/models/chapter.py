@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from apps.common.geocoding import get_location_coordinates
@@ -62,6 +63,9 @@ class Chapter(
     )  # AI suggested location.
     latitude = models.FloatField(verbose_name="Latitude", blank=True, null=True)
     longitude = models.FloatField(verbose_name="Longitude", blank=True, null=True)
+
+    # GRs.
+    members = GenericRelation("owasp.EntityMember")
 
     def __str__(self) -> str:
         """Chapter human readable representation."""

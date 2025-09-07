@@ -17,7 +17,7 @@ from apps.owasp.constants import OWASP_ORGANIZATION_NAME
         "tag_name",
     ],
 )
-class ReleaseNode:
+class ReleaseNode(strawberry.relay.Node):
     """GitHub release node."""
 
     @strawberry.field

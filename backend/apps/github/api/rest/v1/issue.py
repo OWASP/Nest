@@ -42,7 +42,7 @@ class IssueSchema(Schema):
     operation_id="list_issues",
     response={200: list[IssueSchema]},
     summary="List issues",
-    tags=["GitHub"],
+    tags=["Issues"],
 )
 @decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
 @paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)

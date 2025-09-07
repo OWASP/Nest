@@ -10,7 +10,7 @@ class Staging(Base):
     """Staging configuration."""
 
     sentry_sdk.init(
-        dsn=Base.SENTRY_DSN,
+        dsn=values.SecretValue(environ_name="SENTRY_DSN"),
         environment=Base.ENVIRONMENT.lower(),
         profiles_sample_rate=0.5,
         release=Base.RELEASE_VERSION,
