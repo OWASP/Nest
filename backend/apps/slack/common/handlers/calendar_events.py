@@ -3,6 +3,8 @@
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from googleapiclient.errors import Error
+from httplib2.error import ServerNotFoundError
 
 from apps.common.constants import NL
 from apps.slack.blocks import get_pagination_buttons, markdown
@@ -60,7 +62,7 @@ def get_reminder_blocks(args, slack_user_id: str) -> list[dict]:
     from apps.nest.controllers.calendar_events import set_reminder
 
     try:
-        reminder = set_reminder(
+        reminder_schedule = set_reminder(
             channel=args.channel,
             event_number=args.event_number,
             slack_user_id=slack_user_id,
@@ -70,7 +72,16 @@ def get_reminder_blocks(args, slack_user_id: str) -> list[dict]:
         )
     except ValidationError as e:
         return [markdown(f"*{e.message}*")]
-
+    except (ServerNotFoundError, Error):
+        return [markdown("*An unexpected error occurred. Please try again later.*")]
     return [
-        markdown(f"*{args.minutes_before}-minutes Reminder set for event '{reminder.event.name}'*")
+        markdown(
+            f"*{args.minutes_before}-minutes Reminder set for event"
+            f" '{reminder_schedule.reminder.event.name}'*"
+            f" in {args.channel}"
+            f"{NL} Scheduled Time: "
+            f"{reminder_schedule.scheduled_time.strftime('%Y-%m-%d %H:%M %Z')}"
+            f"{NL} Recurrence: {reminder_schedule.recurrence}"
+            f"{f'{NL} Message: {args.message}' if args.message else ''}"
+        )
     ]

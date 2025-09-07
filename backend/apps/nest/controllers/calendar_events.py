@@ -16,7 +16,7 @@ def schedule_reminder(
     reminder: Reminder,
     scheduled_time: timezone.datetime,
     recurrence=ReminderSchedule.Recurrence.ONCE,
-):
+) -> ReminderSchedule:
     """Schedule a reminder."""
     if scheduled_time < timezone.now():
         message = "Scheduled time must be in the future."
@@ -24,7 +24,7 @@ def schedule_reminder(
     if recurrence not in ReminderSchedule.Recurrence.values:
         message = "Invalid recurrence value."
         raise ValidationError(message)
-    ReminderSchedule.objects.create(
+    return ReminderSchedule.objects.create(
         reminder=reminder,
         scheduled_time=scheduled_time,
         recurrence=recurrence,
@@ -38,7 +38,7 @@ def set_reminder(
     minutes_before: int,
     recurrence: str | None = None,
     message: str = "",
-) -> Reminder:
+) -> ReminderSchedule:
     """Set a reminder for a user."""
     auth = GoogleAccountAuthorization.authorize(slack_user_id)
     if not isinstance(auth, GoogleAccountAuthorization):
@@ -62,6 +62,7 @@ def set_reminder(
     if recurrence and recurrence not in ReminderSchedule.Recurrence.values:
         message = "Invalid recurrence value."
         raise ValidationError(message)
+    event.save()
     member = Member.objects.get(slack_user_id=slack_user_id)
     reminder = Reminder.objects.create(
         channel_id=channel,
@@ -69,9 +70,8 @@ def set_reminder(
         member=member,
         message=f"{event.name} - {message}" if message else event.name,
     )
-    schedule_reminder(
+    return schedule_reminder(
         reminder=reminder,
         scheduled_time=reminder_time,
         recurrence=recurrence or ReminderSchedule.Recurrence.ONCE,
     )
-    return reminder
