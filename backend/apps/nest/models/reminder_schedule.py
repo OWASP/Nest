@@ -7,6 +7,12 @@ class ReminderSchedule(models.Model):
     """Model representing a reminder schedule."""
 
     class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["reminder", "scheduled_time"],
+                name="unique_reminder_schedule",
+            )
+        ]
         db_table = "nest_reminder_schedules"
         verbose_name = "Nest Reminder Schedule"
         verbose_name_plural = "Nest Reminder Schedules"
