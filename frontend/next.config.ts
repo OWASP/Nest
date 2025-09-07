@@ -30,9 +30,6 @@ const nextConfig: NextConfig = {
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/productionBrowserSourceMaps
   productionBrowserSourceMaps: true,
   serverExternalPackages: ['import-in-the-middle', 'require-in-the-middle'],
-  turbopack: {
-    resolveExtensions: ['.ts', '.tsx', '.mjs', '.json', '.yaml', '.js', '.jsx'],
-  },
   ...(isLocal ? {} : { output: 'standalone' }),
 }
 
@@ -50,7 +47,7 @@ export default withSentryConfig(nextConfig, {
         // https://docs.sentry.io/platforms/javascript/guides/nextjs/sourcemaps/
         sourcemaps: {
           assets: ['**/*.js', '**/*.js.map'],
-          deleteSourcemapsAfterUpload: true,
+          deleteSourcemapsAfterUpload: false,
           disable: false,
           ignore: ['**/node_modules/**'],
         },

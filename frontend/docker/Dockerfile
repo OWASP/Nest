@@ -35,7 +35,9 @@ COPY --chmod=555 src src
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
-    NEXT_SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) pnpm run build
+    NEXT_SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) pnpm run build && \
+    ls -R .next/static/chunks && \
+    find .next -name "*.map" || echo "No source maps found"
 
 # Production image, copy all the files and run next.
 FROM base AS runner
