@@ -62,7 +62,6 @@ def get_reminder_blocks(args, slack_user_id: str) -> list[dict]:
     try:
         reminder = set_reminder(
             channel=args.channel,
-            event=None,
             event_number=args.event_number,
             slack_user_id=slack_user_id,
             minutes_before=args.minutes_before,
