@@ -1,6 +1,5 @@
 import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
-import { SENTRY_AUTH_TOKEN } from 'utils/env.server'
 
 const isLocal = process.env.NEXT_PUBLIC_ENVIRONMENT === 'local'
 
@@ -31,25 +30,27 @@ const nextConfig: NextConfig = {
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/productionBrowserSourceMaps
   productionBrowserSourceMaps: true,
   serverExternalPackages: ['import-in-the-middle', 'require-in-the-middle'],
-  turbopack: {
-    resolveExtensions: ['.ts', '.tsx', '.mjs', '.json', '.yaml', '.js', '.jsx'],
-  },
   ...(isLocal ? {} : { output: 'standalone' }),
 }
 
 export default withSentryConfig(nextConfig, {
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
-  authToken: SENTRY_AUTH_TOKEN,
   disableLogger: false,
   org: 'owasp-org',
   project: 'nest-frontend',
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/sourcemaps/
-  sourcemaps: {
-    assets: ['**/*.js', '**/*.js.map'],
-    deleteSourcemapsAfterUpload: true,
-    disable: false,
-    ignore: ['**/node_modules/**'],
-  },
+  silent: isLocal,
   telemetry: false,
   widenClientFileUpload: true,
+  ...(process.env.NEXT_SENTRY_AUTH_TOKEN
+    ? {
+        authToken: process.env.NEXT_SENTRY_AUTH_TOKEN,
+        // https://docs.sentry.io/platforms/javascript/guides/nextjs/sourcemaps/
+        sourcemaps: {
+          assets: ['./.next/**'],
+          deleteSourcemapsAfterUpload: false,
+          disable: false,
+          ignore: ['**/node_modules/**'],
+        },
+      }
+    : {}),
 })
