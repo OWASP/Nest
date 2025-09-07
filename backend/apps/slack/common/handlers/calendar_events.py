@@ -1,6 +1,7 @@
 """Google Calendar Events Handlers."""
 
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from apps.common.constants import NL
@@ -56,45 +57,21 @@ def get_blocks(slack_user_id: str, presentation, page: int = 1) -> list[dict]:
 
 def get_reminder_blocks(args, slack_user_id: str) -> list[dict]:
     """Get the blocks for setting a reminder."""
-    from apps.nest.clients.google_calendar import GoogleCalendarClient
-    from apps.nest.models.google_account_authorization import GoogleAccountAuthorization
-    from apps.nest.models.reminder import Reminder
-    from apps.owasp.models.event import Event
+    from apps.nest.controllers.calendar_events import set_reminder
 
-    auth = GoogleAccountAuthorization.authorize(slack_user_id)
-    if not isinstance(auth, GoogleAccountAuthorization):
-        return [markdown(f"*Please sign in with Google first through this <{auth[0]}|link>*")]
-    client = GoogleCalendarClient(auth)
-    google_calendar_id = cache.get(f"{slack_user_id}_{args.event_number}")
-    if not google_calendar_id:
-        return [
-            markdown(
-                "*Invalid or expired event number. Please check the event number and try again.*"
-            )
-        ]
-    event = Event.parse_google_calendar_event(client.get_event(google_calendar_id))
-
-    if not event:
-        return [markdown("*Could not retrieve the event details. Please try again later.*")]
-    reminder_time = event.start_date - timezone.timedelta(minutes=args.minutes_before)
-    if reminder_time <= timezone.now():
-        return [
-            markdown(
-                "*The reminder time must be in the future. Please adjust the minutes before.*"
-            )
-        ]
-    Reminder.set_reminder(
-        slack_user_id=slack_user_id,
-        channel=args.channel,
-        event=event,
-        reminder_time=reminder_time,
-        message=args.message,
-        recurrence=args.recurrence,
-    )
+    try:
+        reminder = set_reminder(
+            channel=args.channel,
+            event=None,
+            event_number=args.event_number,
+            slack_user_id=slack_user_id,
+            minutes_before=args.minutes_before,
+            recurrence=args.recurrence,
+            message=args.message,
+        )
+    except ValidationError as e:
+        return [markdown(f"*{e.message}*")]
 
     return [
-        markdown(
-            f"*Reminder set for event '{event.name}'"
-            f" at {reminder_time.strftime('%Y-%m-%d %H:%M')} GMT*"
-        )
+        markdown(f"*{args.minutes_before}-minutes Reminder set for event '{reminder.event.name}'*")
     ]
