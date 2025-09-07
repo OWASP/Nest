@@ -88,13 +88,8 @@ def list_members(
         HTTPStatus.NOT_FOUND: MemberErrorResponse,
         HTTPStatus.OK: MemberSchema,
     },
-<<<<<<< HEAD:backend/apps/github/api/rest/v1/user.py
-    summary="Get user by login",
-    tags=["github"],
-=======
     summary="Get member by login",
     tags=["Community"],
->>>>>>> main:backend/apps/github/api/rest/v1/member.py
 )
 def get_member(request: HttpRequest, login: str) -> MemberSchema | MemberErrorResponse:
     """Get user by login."""
