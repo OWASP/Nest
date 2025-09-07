@@ -44,6 +44,9 @@ class Issue(GenericIssueModel):
     )
 
     comments_count = models.PositiveIntegerField(verbose_name="Comments", default=0)
+    last_comment_sync = models.DateTimeField(
+        verbose_name="Last comment sync", blank=True, null=True, db_index=True
+    )
 
     # FKs.
     author = models.ForeignKey(
