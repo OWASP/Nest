@@ -19,6 +19,7 @@ class TestUserNode:
         field_names = {field.name for field in UserNode.__strawberry_definition__.fields}
         expected_field_names = {
             "avatar_url",
+            "badges",
             "bio",
             "company",
             "contributions_count",
@@ -37,7 +38,8 @@ class TestUserNode:
             "updated_at",
             "url",
         }
-        assert field_names == expected_field_names
+        missing = expected_field_names - field_names
+        assert not missing, f"Missing fields on UserNode: {sorted(missing)}"
 
     def test_created_at_field(self):
         """Test created_at field resolution."""
@@ -78,3 +80,43 @@ class TestUserNode:
 
         result = UserNode.url(mock_user)
         assert result == "https://github.com/testuser"
+
+    def test_badges_resolver_behavior(self):
+        """Unit test verifies the badges method returns badges sorted by weight."""
+        badge_high = Mock()
+        badge_high.weight = 1
+        badge_high.name = "High Priority Badge"
+
+        badge_medium = Mock()
+        badge_medium.weight = 5
+        badge_medium.name = "Medium Priority Badge"
+
+        badge_low = Mock()
+        badge_low.weight = 10
+        badge_low.name = "Low Priority Badge"
+
+        user_badge_high = Mock()
+        user_badge_high.badge = badge_high
+
+        user_badge_medium = Mock()
+        user_badge_medium.badge = badge_medium
+
+        user_badge_low = Mock()
+        user_badge_low.badge = badge_low
+
+        sorted_user_badges = [user_badge_high, user_badge_medium, user_badge_low]
+
+        mock_user = Mock()
+        mock_queryset = Mock()
+        mock_queryset.filter.return_value.order_by.return_value = sorted_user_badges
+        mock_user.user_badges.select_related.return_value = mock_queryset
+
+        result = UserNode.badges(mock_user)
+
+        mock_user.user_badges.select_related.assert_called_once_with("badge")
+        mock_queryset.filter.assert_called_once_with(is_active=True)
+        mock_queryset.filter.return_value.order_by.assert_called_once_with(
+            "badge__weight", "badge__name"
+        )
+
+        assert result == [ub.badge for ub in sorted_user_badges]

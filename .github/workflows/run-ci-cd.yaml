@@ -346,7 +346,7 @@ jobs:
           platforms: linux/amd64
           push: true
           secrets: |
-            SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           tags: owasp/nest:frontend-staging
 
       - name: Get frontend image size
@@ -665,7 +665,7 @@ jobs:
           platforms: linux/amd64
           push: true
           secrets: |
-            SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           tags: owasp/nest:frontend-production
 
       - name: Get frontend image size
