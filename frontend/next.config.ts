@@ -38,6 +38,9 @@ export default withSentryConfig(nextConfig, {
   disableLogger: false,
   org: 'owasp-org',
   project: 'nest-frontend',
+  release: {
+    name: process.env.RELEASE_VERSION,
+  },
   silent: isLocal,
   telemetry: false,
   widenClientFileUpload: true,
