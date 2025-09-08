@@ -49,8 +49,7 @@ export default withSentryConfig(nextConfig, {
         authToken: process.env.NEXT_SENTRY_AUTH_TOKEN,
         // https://docs.sentry.io/platforms/javascript/guides/nextjs/sourcemaps/
         sourcemaps: {
-          assets: ['./.next/**'],
-          deleteSourcemapsAfterUpload: false,
+          deleteSourcemapsAfterUpload: true,
           disable: false,
           ignore: ['**/node_modules/**'],
         },
