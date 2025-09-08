@@ -201,17 +201,18 @@ class Event(BulkSaveModel, TimestampedModel):
         if event.get("status") != "confirmed":
             return None
 
-        if event_instance := Event.objects.filter(google_calendar_id=event.get("id")).first():
+        if event_instance := Event.objects.filter(key=event.get("id")).first():
             return event_instance
 
+        # We will not save until the user chooses to have this event.
         return Event(
             name=event.get("summary", ""),
-            key=event.get("id", ""),
+            key=event.get("id"),
             description=event.get("description", ""),
             url=event.get("htmlLink", ""),
             start_date=parse_date_and_convert_to_local(start),
             end_date=parse_date_and_convert_to_local(end),
-            google_calendar_id=event.get("id", ""),
+            google_calendar_id=event.get("id"),
             category=Event.Category.COMMUNITY,
             suggested_location=event.get("location", ""),
         )
