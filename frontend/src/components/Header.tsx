@@ -6,6 +6,7 @@ import { faHeart as faSolidHeart } from '@fortawesome/free-solid-svg-icons'
 import { faStar as faSolidStar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
+import { useIsMobile } from 'hooks/useIsMobile'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -16,7 +17,6 @@ import ModeToggle from 'components/ModeToggle'
 import NavButton from 'components/NavButton'
 import NavDropdown from 'components/NavDropDown'
 import UserMenu from 'components/UserMenu'
-import { useIsMobile } from 'hooks/useIsMobile'
 
 export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthEnabled: boolean }) {
   const pathname = usePathname()
