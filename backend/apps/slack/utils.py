@@ -243,7 +243,7 @@ def parse_slack_reminder_args(text: str):
     parser.add_argument(
         "--message",
         type=str,
-        nargs="?",
+        nargs="*",
         default="",
         help="Optional message to include in the reminder.",
     )
@@ -256,11 +256,7 @@ def parse_slack_reminder_args(text: str):
         help="Optional recurrence pattern for the reminder.",
     )
 
-    try:
-        return parser.parse_args(text.split())
-
-    except SystemExit:
-        return None
+    return parser.parse_args(text.split())
 
 
 def strip_markdown(text: str) -> str:
