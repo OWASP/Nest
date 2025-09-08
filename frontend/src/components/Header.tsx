@@ -16,9 +16,11 @@ import ModeToggle from 'components/ModeToggle'
 import NavButton from 'components/NavButton'
 import NavDropdown from 'components/NavDropDown'
 import UserMenu from 'components/UserMenu'
+import { useIsMobile } from 'hooks/useIsMobile'
 
 export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthEnabled: boolean }) {
   const pathname = usePathname()
+  const isMobile = useIsMobile()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
 
@@ -128,7 +130,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
             text="Sponsor"
             className="hidden"
           />
-          <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
+          {!isMobile && <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />}
           <ModeToggle />
           <div className="md:hidden">
             <Button
@@ -224,6 +226,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           </div>
 
           <div className="flex flex-col gap-y-2">
+            {isMobile && <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />}
             <NavButton
               href="https://github.com/OWASP/Nest"
               defaultIcon={faRegularStar}
