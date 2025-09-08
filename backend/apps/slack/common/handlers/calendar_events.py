@@ -29,9 +29,10 @@ def get_blocks(slack_user_id: str, presentation, page: int = 1) -> list[dict]:
     blocks = [
         markdown(
             f"*Your upcoming calendar events from {min_time.strftime('%Y-%m-%d %H:%M')}"
-            f" to {max_time.strftime('%Y-%m-%d %H:%M')}*"
-            f"{NL}Set a reminder for an event with `/set-reminder [channel]"
-            " [event number] [minutes before] [optional message] [recurrence]`"
+            f" to {max_time.strftime('%Y-%m-%d %H:%M %Z')}*"
+            f"{NL}You can set a reminder for an event with `/set-reminder --channel [channel]"
+            " --event_number [event number] --minutes_before [minutes before]"
+            " --message [optional message] --recurrence [recurrence]`"
         )
     ]
     for i, event in enumerate(parsed_events):
