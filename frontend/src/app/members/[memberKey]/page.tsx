@@ -72,7 +72,6 @@ const UserDetailsPage: React.FC = () => {
     fetchData()
   }, [memberKey, user])
 
-
   const formattedBio = user?.bio?.split(' ').map((word, index) => {
     // Regex to match GitHub usernames, but if last character is not a word character or @, it's a punctuation
     const mentionMatch = word.match(/^@([\w-]+(?:\.[\w-]+)*)([^\w@])?$/)
@@ -148,7 +147,7 @@ const UserDetailsPage: React.FC = () => {
       } else {
         setImgSrc('')
       }
-    }, [isDarkMode, data, username])
+    }, [isDarkMode])
 
     return (
       <div className="overflow-hidden rounded-lg bg-white dark:bg-gray-800">
@@ -186,18 +185,18 @@ const UserDetailsPage: React.FC = () => {
   }
 
   const UserSummary = () => (
-    <div className="flex flex-col lg:flex-row items-start">
-      <div className="flex-shrink-0 mb-4 lg:mb-0 lg:mr-6 self-center lg:self-start">
+    <div className="flex flex-col items-start lg:flex-row">
+      <div className="mb-4 flex-shrink-0 self-center lg:mr-6 lg:mb-0 lg:self-start">
         <Image
           width={200}
           height={200}
-          className="w-[200px] h-[200px] rounded-full border-2 border-white bg-white object-cover shadow-md dark:border-gray-800 dark:bg-gray-600/60"
+          className="h-[200px] w-[200px] rounded-full border-2 border-white bg-white object-cover shadow-md dark:border-gray-800 dark:bg-gray-600/60"
           src={user?.avatarUrl || '/placeholder.svg'}
           alt={user?.name || user?.login || 'User Avatar'}
         />
       </div>
-      <div className="flex-1 flex flex-col w-full">
-        <div className="mb-0 lg:mb-4 text-center lg:text-left">
+      <div className="flex w-full flex-1 flex-col">
+        <div className="mb-0 text-center lg:mb-4 lg:ml-[26px] lg:text-left">
           <Link href={user?.url || '#'} className="text-xl font-bold text-blue-400 hover:underline">
             @{user?.login}
           </Link>
@@ -205,7 +204,7 @@ const UserDetailsPage: React.FC = () => {
         </div>
 
         {!isPrivateContributor && (
-          <div className="hidden lg:block w-full">
+          <div className="hidden w-full lg:block">
             <Heatmap />
           </div>
         )}
