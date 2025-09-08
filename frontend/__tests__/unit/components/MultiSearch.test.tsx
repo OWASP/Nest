@@ -146,7 +146,7 @@ describe('Rendering', () => {
       'h-12',
       'w-full',
       'rounded-lg',
-      'border',
+      'border-1',
       'border-gray-300',
       'pl-10',
       'pr-10',

@@ -69,7 +69,9 @@ inlinehilite
 isanori
 jumpstart
 kasya
+lhci
 libexpat
+lighthouseci
 linkify
 lte
 lxml
@@ -117,6 +119,7 @@ superfences
 tiktok
 tsc
 turbopack
+unhover
 usefixtures
 winsrdf
 wsgi

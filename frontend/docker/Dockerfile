@@ -27,14 +27,18 @@ COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --ignore-scripts
 
-COPY --chmod=444 .env .pnpmrc next.config.ts postcss.config.js tailwind.config.js tsconfig.json ./
+COPY --chmod=444 .env .pnpmrc next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
 COPY --chmod=555 public public
 COPY --chmod=555 src src
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN pnpm run build
+RUN --mount=type=secret,id=RELEASE_VERSION \
+    --mount=type=secret,id=SENTRY_AUTH_TOKEN \
+    export NEXT_SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) && \
+    export RELEASE_VERSION=$(cat /run/secrets/RELEASE_VERSION) && \
+    pnpm run build
 
 # Production image, copy all the files and run next.
 FROM base AS runner
@@ -53,7 +57,7 @@ COPY --from=builder --chown=root:root --chmod=555 /app/public public
 COPY --from=builder --chown=root:root --chmod=555  /app/.next/standalone .
 
 # Create cache directory and assign ownership to nextjs user with write permission, so that cache can be stored.
-RUN mkdir -p /app/.next/cache && chown -R nextjs:nodejs /app/.next/cache && chmod -R 755 /app/.next/cache
+RUN mkdir -p /app/.next/cache && chown -R nextjs:nodejs /app/.next/cache && chmod -R 755 /app/.next/cache && rm .env
 COPY --from=builder --chown=root:root --chmod=555 /app/.next/static .next/static
 
 USER nextjs

@@ -16,6 +16,7 @@ export const SYNC_DJANGO_SESSION_MUTATION = gql`
       message
       ok
       user {
+        id
         isOwaspStaff
       }
     }

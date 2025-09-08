@@ -4,31 +4,44 @@ import logging
 import time
 from datetime import UTC, datetime, timedelta
 
+from openai import OpenAI, OpenAIError
+
 from apps.ai.common.constants import (
     DEFAULT_LAST_REQUEST_OFFSET_SECONDS,
     MIN_REQUEST_INTERVAL_SECONDS,
 )
 from apps.ai.models.chunk import Chunk
+from apps.ai.models.context import Context
 
 logger: logging.Logger = logging.getLogger(__name__)
 
 
 def create_chunks_and_embeddings(
-    all_chunk_texts: list[str],
-    content_object,
+    chunk_texts: list[str],
+    context: Context,
     openai_client,
+    model: str = "text-embedding-3-small",
+    *,
+    save: bool = True,
 ) -> list[Chunk]:
     """Create chunks and embeddings from given texts using OpenAI embeddings.
 
     Args:
-      all_chunk_texts (list[str]): List of text chunks to embed.
-      content_object: The object to associate the chunks with.
-      openai_client: Initialized OpenAI client instance.
+        chunk_texts (list[str]): List of text chunks to process
+        context (Context): The context these chunks belong to
+        openai_client: Initialized OpenAI client
+        model (str): Embedding model to use
+        save (bool): Whether to save chunks immediately
 
     Returns:
-      list[Chunk]: List of Chunk instances (not saved).
+        list[Chunk]: List of created Chunk instances (empty if failed)
+
+    Raises:
+        ValueError: If context is None or invalid
 
     """
+    from apps.ai.models.chunk import Chunk
+
     try:
         last_request_time = datetime.now(UTC) - timedelta(
             seconds=DEFAULT_LAST_REQUEST_OFFSET_SECONDS
@@ -39,26 +52,47 @@ def create_chunks_and_embeddings(
             time.sleep(MIN_REQUEST_INTERVAL_SECONDS - time_since_last_request.total_seconds())
 
         response = openai_client.embeddings.create(
-            input=all_chunk_texts,
-            model="text-embedding-3-small",
+            input=chunk_texts,
+            model=model,
         )
+        embeddings = [d.embedding for d in response.data]
 
-        return [
-            chunk
-            for text, embedding in zip(
-                all_chunk_texts,
-                [d.embedding for d in response.data],
-                strict=True,
-            )
-            if (
-                chunk := Chunk.update_data(
-                    text=text,
-                    content_object=content_object,
-                    embedding=embedding,
-                    save=False,
-                )
-            )
-        ]
-    except Exception:
-        logger.exception("OpenAI API error")
+        chunks = []
+        for text, embedding in zip(chunk_texts, embeddings, strict=True):
+            chunk = Chunk.update_data(text=text, embedding=embedding, context=context, save=save)
+            if chunk is not None:
+                chunks.append(chunk)
+
+    except (OpenAIError, AttributeError, TypeError):
+        logger.exception("Failed to create chunks and embeddings")
         return []
+    else:
+        return chunks
+
+
+def regenerate_chunks_for_context(context: Context):
+    """Regenerates all chunks for a single, specific context instance.
+
+    Args:
+      context (Context): The specific context instance to be updated.
+
+    """
+    from apps.ai.models.chunk import Chunk
+
+    context.chunks.all().delete()
+    new_chunk_texts = Chunk.split_text(context.content)
+
+    if not new_chunk_texts:
+        logger.warning("No content to chunk for Context. Process stopped.")
+        return
+
+    openai_client = OpenAI()
+
+    create_chunks_and_embeddings(
+        chunk_texts=new_chunk_texts,
+        context=context,
+        openai_client=openai_client,
+        save=True,
+    )
+
+    logger.info("Successfully completed chunk regeneration for new context")

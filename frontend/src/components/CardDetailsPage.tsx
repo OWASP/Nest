@@ -10,12 +10,12 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import upperFirst from 'lodash/upperFirst'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import type { ExtendedSession } from 'types/auth'
 import type { DetailsCardProps } from 'types/card'
-import { IS_PROJECT_HEALTH_ENABLED } from 'utils/credentials'
+import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
+import { scrollToAnchor } from 'utils/scrollToAnchor'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
@@ -87,7 +87,7 @@ const DetailsCard = ({
               ) && (
                 <button
                   type="button"
-                  className="flex items-center justify-center gap-2 text-nowrap rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-[#0D6EFD] text-blue-600 transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
+                  className="flex items-center justify-center gap-2 rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-nowrap text-[#0D6EFD] transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
                   onClick={() => {
                     router.push(`${window.location.pathname}/edit`)
                   }}
@@ -96,9 +96,11 @@ const DetailsCard = ({
                 </button>
               )}
             {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
-              <Link href="#issues-trend">
-                <MetricsScoreCircle score={healthMetricsData[0].score} />
-              </Link>
+              <MetricsScoreCircle
+                score={healthMetricsData[0].score}
+                clickable={true}
+                onClick={() => scrollToAnchor('issues-trend')}
+              />
             )}
           </div>
           {!isActive && (
