@@ -134,30 +134,101 @@ class TestEventModel:
             mock_event.save.assert_called_once()
             assert result == mock_event
 
-    def test_parse_google_calendar_events(self):
-        """Test the parsing of Google Calendar events."""
+    @patch("apps.owasp.models.event.Event.objects.filter")
+    def test_parse_google_calendar_event(self, mock_filter):
+        """Test the parsing of Google Calendar event."""
+        event_dict = {
+            "id": "12345",
+            "summary": "Google Calendar Event",
+            "start": {
+                "dateTime": "2025-05-26T09:00:00-07:00",
+                "timeZone": "America/Los_Angeles",
+            },
+            "end": {
+                "dateTime": "2025-05-30T16:00:00-07:00",
+                "timeZone": "America/Los_Angeles",
+            },
+            "status": "confirmed",
+        }
+
+        mock_filter.return_value.first.return_value = None
+        event = Event.parse_google_calendar_event(event_dict)
+        assert isinstance(event, Event)
+        assert event.name == "Google Calendar Event"
+        assert event.google_calendar_id == "12345"
+        assert event.start_date == timezone.datetime(2025, 5, 26, 16, 0, 0, tzinfo=UTC)
+        assert event.end_date == timezone.datetime(2025, 5, 30, 23, 0, 0, tzinfo=UTC)
+
+    @patch("apps.owasp.models.event.Event.objects.filter")
+    def test_parse_existing_google_calendar_event(self, mock_filter):
+        """Test parsing when the event already exists."""
+        event_dict = {
+            "id": "12345",
+            "summary": "Existing Google Calendar Event",
+            "start": {
+                "dateTime": "2025-05-26T09:00:00-07:00",
+                "timeZone": "America/Los_Angeles",
+            },
+            "end": {
+                "dateTime": "2025-05-30T16:00:00-07:00",
+                "timeZone": "America/Los_Angeles",
+            },
+            "status": "confirmed",
+        }
+
+        mock_existing_event = Mock(spec=Event)
+        mock_filter.return_value.first.return_value = mock_existing_event
+
+        event = Event.parse_google_calendar_event(event_dict)
+        assert event == mock_existing_event
+        mock_filter.assert_called_once_with(key="12345")
+
+    @patch("apps.owasp.models.event.Event.objects.filter")
+    def test_parse_google_calendar_events(self, mock_filter):
+        """Test the parsing of multiple Google Calendar events."""
         events_list = [
             {
                 "id": "12345",
-                "summary": "Google Calendar Event",
+                "summary": "Event One",
                 "start": {
                     "dateTime": "2025-05-26T09:00:00-07:00",
                     "timeZone": "America/Los_Angeles",
                 },
                 "end": {
-                    "dateTime": "2025-05-30T16:00:00-07:00",
+                    "dateTime": "2025-05-30T17:00:00-07:00",
                     "timeZone": "America/Los_Angeles",
                 },
                 "status": "confirmed",
-            }
+            },
+            {
+                "id": "67890",
+                "summary": "Event Two",
+                "end": {
+                    "dateTime": "2025-06-12T15:00:00-07:00",
+                    "timeZone": "America/Los_Angeles",
+                },
+                "status": "confirmed",
+            },
+            {
+                "id": "67390",
+                "summary": "Event Two",
+                "start": {
+                    "dateTime": "2025-06-10T10:00:00-07:00",
+                    "timeZone": "America/Los_Angeles",
+                },
+                "end": {
+                    "dateTime": "2025-06-12T15:00:00-07:00",
+                    "timeZone": "America/Los_Angeles",
+                },
+                "status": "cancelled",
+            },
         ]
+
+        mock_filter.return_value.first.return_value = None
+
         events = Event.parse_google_calendar_events(events_list)
         assert len(events) == 1
-        assert isinstance(events[0], Event)
-        assert events[0].name == "Google Calendar Event"
-        assert events[0].google_calendar_id == "12345"
-        assert events[0].start_date == timezone.datetime(2025, 5, 26, 16, 0, 0, tzinfo=UTC)
-        assert events[0].end_date == timezone.datetime(2025, 5, 30, 23, 0, 0, tzinfo=UTC)
+        assert events[0].name == "Event One"
 
     def test_parse_non_confirmed_google_calendar_events(self):
         """Test the parsing of non-confirmed Google Calendar events."""
