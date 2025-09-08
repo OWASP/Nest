@@ -44,25 +44,32 @@ def set_reminder(
     if not isinstance(auth, GoogleAccountAuthorization):
         message = "User is not authorized with Google. Please sign in first."
         raise ValidationError(message)
-    client = GoogleCalendarClient(auth)
+
     google_calendar_id = cache.get(f"{slack_user_id}_{event_number}")
     if not google_calendar_id:
         message = (
             "Invalid or expired event number. Please get a new event number from the events list."
         )
         raise ValidationError(message)
+
+    client = GoogleCalendarClient(auth)
     event = Event.parse_google_calendar_event(client.get_event(google_calendar_id))
     if not event:
         message = "Could not retrieve the event details. Please try again later."
         raise ValidationError(message)
+
     reminder_time = event.start_date - timezone.timedelta(minutes=minutes_before)
     if reminder_time < timezone.now():
         message = "Reminder time must be in the future. Please adjust the minutes before."
         raise ValidationError(message)
+
     if recurrence and recurrence not in ReminderSchedule.Recurrence.values:
         message = "Invalid recurrence value."
         raise ValidationError(message)
+
+    # Saving event to the database after validation
     event.save()
+
     member = Member.objects.get(slack_user_id=slack_user_id)
     reminder = Reminder.objects.create(
         channel_id=channel,
