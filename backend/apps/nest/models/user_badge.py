@@ -40,7 +40,7 @@ class UserBadge(BulkSaveModel, TimestampedModel):
     )
     user = models.ForeignKey(
         "github.User",
-        related_name="badges",
+        related_name="user_badges",
         on_delete=models.CASCADE,
         verbose_name="User",
     )
