@@ -41,8 +41,8 @@ def get_blocks(slack_user_id: str, presentation, page: int = 1) -> list[dict]:
             markdown(
                 f"*Name: {event.name}*"
                 f"{NL}*Number: {event_number}*"
-                f"{NL}- Starts at: {event.start_date.strftime('%Y-%m-%d %H:%M')} GMT"
-                f"{NL}- Ends at: {event.end_date.strftime('%Y-%m-%d %H:%M')} GMT"
+                f"{NL}- Starts at: {event.start_date.strftime('%Y-%m-%d %H:%M %Z')}"
+                f"{NL}- Ends at: {event.end_date.strftime('%Y-%m-%d %H:%M %Z')}"
             )
         )
     if presentation.include_pagination and (
@@ -68,7 +68,7 @@ def get_reminder_blocks(args, slack_user_id: str) -> list[dict]:
             slack_user_id=slack_user_id,
             minutes_before=args.minutes_before,
             recurrence=args.recurrence,
-            message=args.message,
+            message=" ".join(args.message) if args.message else "",
         )
     except ValidationError as e:
         return [markdown(f"*{e.message}*")]
@@ -76,12 +76,12 @@ def get_reminder_blocks(args, slack_user_id: str) -> list[dict]:
         return [markdown("*An unexpected error occurred. Please try again later.*")]
     return [
         markdown(
-            f"*{args.minutes_before}-minutes Reminder set for event"
+            f"*{args.minutes_before}-minute reminder set for event"
             f" '{reminder_schedule.reminder.event.name}'*"
             f" in {args.channel}"
             f"{NL} Scheduled Time: "
             f"{reminder_schedule.scheduled_time.strftime('%Y-%m-%d %H:%M %Z')}"
             f"{NL} Recurrence: {reminder_schedule.recurrence}"
-            f"{f'{NL} Message: {args.message}' if args.message else ''}"
+            f"{NL} Message: {reminder_schedule.reminder.message}"
         )
     ]
