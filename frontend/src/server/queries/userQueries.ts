@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client'
 
 export const GET_LEADER_DATA = gql`
-  query GetUser($key: String!) {
+  query GetLeaderData($key: String!) {
     user(login: $key) {
       id
       avatarUrl
@@ -12,7 +12,7 @@ export const GET_LEADER_DATA = gql`
 `
 
 export const GET_USER_DATA = gql`
-  query GetUser($key: String!) {
+  query GetUserData($key: String!) {
     recentIssues(limit: 5, login: $key) {
       id
       createdAt
@@ -86,7 +86,7 @@ export const GET_USER_DATA = gql`
   }
 `
 export const GET_USER_METADATA = gql`
-  query GetUser($key: String!) {
+  query GetUserMetadata($key: String!) {
     user(login: $key) {
       id
       bio

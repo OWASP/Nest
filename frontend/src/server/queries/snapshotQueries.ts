@@ -11,9 +11,17 @@ export const GET_SNAPSHOT_DETAILS = gql`
       newReleases {
         id
         name
-        publishedAt
-        tagName
+        organizationName
         projectName
+        publishedAt
+        repositoryName
+        tagName
+        author {
+          avatarUrl
+          id
+          login
+          name
+        }
       }
       newProjects {
         id
@@ -61,7 +69,7 @@ export const GET_SNAPSHOT_DETAILS = gql`
 `
 
 export const GET_SNAPSHOT_DETAILS_METADATA = gql`
-  query GetSnapshotDetails($key: String!) {
+  query GetSnapshotDetailsMetadata($key: String!) {
     snapshot(key: $key) {
       id
       title
