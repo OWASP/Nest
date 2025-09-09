@@ -5,25 +5,25 @@ export const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-
     // check whether the browser supports matchMedia API
     if (typeof window.matchMedia !== 'function') return
-    
+
     const mediaQuery = window.matchMedia(`(max-width: ${desktopViewMinWidth - 1}px)`)
 
-    const updateMatch = (e: MediaQueryListEvent | MediaQueryList) => {
+    const handleChange = (e: MediaQueryListEvent | MediaQueryList) => {
       setIsMobile(e.matches)
     }
 
-    updateMatch(mediaQuery)
+    handleChange(mediaQuery)
 
-    if (typeof mediaQuery.addEventListener === 'function') { // check for modern browser so it doesn't throw an error
-      mediaQuery.addEventListener('change', updateMatch)
-      return () => mediaQuery.removeEventListener('change', updateMatch)
-    } else if(typeof mediaQuery.addListener === 'function') { // check for old browser
-      mediaQuery.addListener(updateMatch)
-      return () => mediaQuery.removeListener(updateMatch)
-    } else return;
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleChange)
+      return () => mediaQuery.removeEventListener('change', handleChange)
+    } else {
+      // Safari browser < 14 fallback
+      mediaQuery.addListener(handleChange)
+      return () => mediaQuery.removeListener(handleChange)
+    }
   }, [])
 
   return isMobile
