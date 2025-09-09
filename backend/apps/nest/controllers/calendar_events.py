@@ -8,7 +8,6 @@ from apps.nest.clients.google_calendar import GoogleCalendarClient
 from apps.nest.models.google_account_authorization import GoogleAccountAuthorization
 from apps.nest.models.reminder import Reminder
 from apps.nest.models.reminder_schedule import ReminderSchedule
-from apps.nest.schedulers.calendar_events.slack import SlackScheduler
 from apps.owasp.models.event import Event
 from apps.slack.models.member import Member
 
@@ -78,12 +77,8 @@ def set_reminder(
         member=member,
         message=f"{event.name} - {message}" if message else event.name,
     )
-    reminder_schedule = schedule_reminder(
+    return schedule_reminder(
         reminder=reminder,
         scheduled_time=reminder_time,
         recurrence=recurrence or ReminderSchedule.Recurrence.ONCE,
     )
-    scheduler = SlackScheduler(reminder_schedule)
-    scheduler.schedule()
-    scheduler.send_notification_message(f"@{member.username} set a reminder: {reminder.message}")
-    return reminder_schedule

@@ -45,7 +45,9 @@ class ReminderSchedule(models.Model):
             case self.Recurrence.DAILY:
                 return f"{time_str} * * *"
             case self.Recurrence.WEEKLY:
-                return f"{time_str} * * {self.scheduled_time.weekday()}"
+                # Mapping Python's weekday (0=Monday) to cron's (0=Sunday)
+                dow = (self.scheduled_time.weekday() + 1) % 7
+                return f"{time_str} * * {dow}"
             case self.Recurrence.MONTHLY:
                 return f"{time_str} {self.scheduled_time.day} * *"
             # For 'once' or any other case, return None
