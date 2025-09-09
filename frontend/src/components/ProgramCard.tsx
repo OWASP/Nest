@@ -57,8 +57,8 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onEdit, onView, acce
 
   return (
     <div className="h-64 w-80 rounded-[5px] border border-gray-400 bg-white p-6 text-left transition-transform duration-300 hover:scale-[1.02] hover:brightness-105 dark:border-gray-600 dark:bg-gray-800">
-      <div className="flex h-full flex-col justify-between">
-        <div>
+      <div className="flex h-full flex-col">
+        <div className="flex flex-1 flex-col">
           <div className="mb-2 flex items-start justify-between">
             {isTitleLong ? (
               <Tooltip content={program.name} placement="top" className="w-64">
@@ -86,17 +86,19 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onEdit, onView, acce
                 ? `Started: ${formatDate(program.startedAt)}`
                 : 'No dates set'}
           </div>
-          {isDescriptionLong ? (
-            <Tooltip content={description} placement="bottom" className="w-88">
-              <p className="mb-4 line-clamp-4 overflow-hidden text-sm text-gray-700 dark:text-gray-300">
+          <div className="flex flex-1 flex-col justify-start">
+            {isDescriptionLong ? (
+              <Tooltip content={description} placement="bottom" className="w-88">
+                <p className="line-clamp-4 overflow-hidden text-sm text-gray-700 dark:text-gray-300">
+                  {description}
+                </p>
+              </Tooltip>
+            ) : (
+              <p className="line-clamp-4 overflow-hidden text-sm text-gray-700 dark:text-gray-300">
                 {description}
               </p>
-            </Tooltip>
-          ) : (
-            <p className="mb-4 line-clamp-4 overflow-hidden text-sm text-gray-700 dark:text-gray-300">
-              {description}
-            </p>
-          )}
+            )}
+          </div>
         </div>
 
         <div className="mt-auto flex gap-2">

@@ -111,7 +111,7 @@ const SnapshotDetailsPage: React.FC = () => {
 
   return (
     <div className="mx-auto min-h-screen max-w-6xl p-4">
-      <div className="shadow-xs mb-8 mt-8 rounded-lg border-1 border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+      <div className="mt-8 mb-8 rounded-lg border-1 border-gray-200 bg-white p-6 shadow-xs dark:border-gray-700 dark:bg-gray-800">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="mb-2 text-3xl font-bold text-gray-700 dark:text-gray-200">
