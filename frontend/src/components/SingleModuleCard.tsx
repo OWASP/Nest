@@ -35,11 +35,6 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
     accessLevel === 'admin' &&
     admins?.some((admin) => admin.login === ((data as ExtendedSession)?.user?.login as string))
 
-  const handleView = () => {
-    setDropdownOpen(false)
-    router.push(`${window.location.pathname}/modules/${module.key}`)
-  }
-
   const handleEdit = () => {
     setDropdownOpen(false)
     router.push(`${window.location.pathname}/modules/${module.key}/edit`)
@@ -79,7 +74,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
             className="flex-1"
           >
             <h1
-              className="max-w-full text-base font-semibold break-words text-blue-400 hover:text-blue-600 sm:text-lg sm:break-normal lg:text-2xl"
+              className="max-w-full break-words text-base font-semibold text-blue-400 hover:text-blue-600 sm:break-normal sm:text-lg lg:text-2xl"
               style={{
                 transition: 'color 0.3s ease',
               }}
@@ -99,12 +94,6 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
 
           {dropdownOpen && (
             <div className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
-              <button
-                onClick={handleView}
-                className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                View Module
-              </button>
               {showEdit && isAdmin && (
                 <button
                   onClick={handleEdit}

@@ -54,7 +54,7 @@ const TopContributorsList = ({
                 width={24}
               />
               <Link
-                className="cursor-pointer overflow-hidden font-semibold text-ellipsis whitespace-nowrap text-blue-400 hover:underline"
+                className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-blue-400 hover:underline"
                 href={getMemberUrl(item?.login)}
                 title={item?.name || item?.login}
               >

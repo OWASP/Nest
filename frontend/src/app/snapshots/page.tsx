@@ -63,7 +63,7 @@ const SnapshotsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
-      <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5">
+      <div className="flex min-h-screen w-full flex-col items-center justify-normal p-5 text-text">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {!snapshots?.length ? (
             <div className="col-span-full py-8 text-center">No Snapshots found</div>
