@@ -61,6 +61,8 @@ def get_blocks(slack_user_id: str, presentation, page: int = 1) -> list[dict]:
 def get_reminder_blocks(args, slack_user_id: str) -> list[dict]:
     """Get the blocks for setting a reminder."""
     from apps.nest.controllers.calendar_events import set_reminder
+    from apps.nest.schedulers.calendar_events.slack import SlackScheduler
+    from apps.nest.schedulers.tasks.slack import send_message
 
     try:
         reminder_schedule = set_reminder(
@@ -70,6 +72,14 @@ def get_reminder_blocks(args, slack_user_id: str) -> list[dict]:
             minutes_before=args.minutes_before,
             recurrence=args.recurrence,
             message=" ".join(args.message) if args.message else "",
+        )
+        scheduler = SlackScheduler(reminder_schedule)
+        scheduler.schedule()
+        send_message(
+            f"<@{reminder_schedule.reminder.member.slack_user_id}> set a reminder: "
+            f"{reminder_schedule.reminder.message}"
+            f" at {reminder_schedule.scheduled_time.strftime('%Y-%m-%d %H:%M %Z')}",
+            reminder_schedule.reminder.channel_id,
         )
     except ValidationError as e:
         return [markdown(f"*{e.message}*")]
