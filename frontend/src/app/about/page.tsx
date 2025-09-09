@@ -5,7 +5,6 @@ import {
   faClock,
   faUserGear,
   faMapSigns,
-  faScroll,
   faUsers,
   faTools,
   faArrowUpRightFromSquare,
@@ -24,7 +23,7 @@ import { GET_LEADER_DATA } from 'server/queries/userQueries'
 import type { Contributor } from 'types/contributor'
 import type { Project } from 'types/project'
 import type { User } from 'types/user'
-import { aboutText, technologies } from 'utils/aboutData'
+import { technologies, missionContent, keyFeatures, getInvolvedContent, projectHistory } from 'utils/aboutData'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -107,14 +106,30 @@ const About = () => {
     <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <h1 className="mt-4 mb-6 text-4xl font-bold">About</h1>
-        <SecondaryCard icon={faScroll} title={<AnchorTitle title="History" />}>
-          {aboutText.map((text) => (
-            <div key={text} className="mb-4">
-              <div key={text}>
-                <Markdown content={text} />
+        <div className="grid gap-6 md:grid-cols-2 mb-6">
+          <SecondaryCard icon={faMapSigns} title={<AnchorTitle title="Mission" />}>
+            <h3 className="mb-2 text-xl font-semibold text-blue-400">Our Mission</h3>
+            <p className="text-gray-600 dark:text-gray-300">{missionContent.mission}</p>
+          </SecondaryCard>
+
+          <SecondaryCard icon={faUsers} title={<AnchorTitle title="Who It's For" />}>
+            <h3 className="mb-2 text-xl font-semibold text-blue-400">Target Audience</h3>
+            <p className="text-gray-600 dark:text-gray-300">{missionContent.whoItsFor}</p>
+          </SecondaryCard>
+        </div>
+
+        <SecondaryCard icon={faCircleCheck} title={<AnchorTitle title="Key Features" />}>
+          <div className="grid gap-4 md:grid-cols-2">
+            {keyFeatures.map((feature, index) => (
+              <div
+                key={index}
+                className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+              >
+                <h3 className="mb-2 text-lg font-semibold text-blue-400">{feature.title}</h3>
+                <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </SecondaryCard>
 
         <SecondaryCard icon={faArrowUpRightFromSquare} title={<AnchorTitle title="Leaders" />}>
@@ -223,6 +238,34 @@ const About = () => {
             </div>
           </SecondaryCard>
         )}
+
+        <SecondaryCard icon={faUsers} title={<AnchorTitle title="Get Involved" />}>
+          <p className="mb-4 text-gray-600 dark:text-gray-300">{getInvolvedContent.description}</p>
+          <ul className="mb-6 list-inside list-disc space-y-2">
+            {getInvolvedContent.ways.map((way, index) => (
+              <li key={index} className="text-gray-600 dark:text-gray-300">{way}</li>
+            ))}
+          </ul>
+          <Markdown content={getInvolvedContent.callToAction} />
+        </SecondaryCard>
+
+        <SecondaryCard icon={faClock} title={<AnchorTitle title="Project History" />}>
+          <div className="space-y-6">
+            {projectHistory.map((milestone, index) => (
+              <div key={index} className="relative pl-8">
+                {index !== projectHistory.length - 1 && (
+                  <div className="absolute left-[11px] top-8 h-full w-0.5 bg-blue-400"></div>
+                )}
+                <div className="absolute left-0 top-2 h-6 w-6 rounded-full bg-blue-400"></div>
+                <div className="pt-1">
+                  <h3 className="text-lg font-semibold text-blue-400">{milestone.year}</h3>
+                  <h4 className="mb-1 font-medium">{milestone.title}</h4>
+                  <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SecondaryCard>
 
         <div className="grid gap-6 md:grid-cols-4">
           {[
