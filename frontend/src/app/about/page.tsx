@@ -273,8 +273,8 @@ const About = () => {
             { label: 'Stars', value: projectMetadata.starsCount },
             { label: 'Contributors', value: projectMetadata.contributorsCount },
             { label: 'Open Issues', value: projectMetadata.issuesCount },
-          ].map((stat, index) => (
-            <div key={index}>
+          ].map((stat) => (
+            <div key={stat.label}>
               <SecondaryCard className="text-center">
                 <div className="mb-2 text-3xl font-bold text-blue-400">
                   <AnimatedCounter end={Math.floor(stat.value / 10) * 10} duration={2} />+
