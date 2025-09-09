@@ -3,6 +3,50 @@ services:
     container_name: production-nest-backend
     image: owasp/nest:backend-production
     env_file: .env.backend
+    entrypoint: [/home/owasp/entrypoint-production.sh]
+    depends_on:
+      production-nest-cache:
+        condition: service_healthy
+      production-nest-db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - nest-app-network
+      - nest-cache-network
+      - nest-db-network
+    volumes:
+      - ./backend/data:/home/owasp/data
+      - ~/.github.pem:/home/owasp/.github.pem:ro
+
+  production-nest-backend-worker:
+    container_name: production-nest-backend-worker
+    image: owasp/nest:backend-production
+    env_file: .env.backend
+    command: >
+      sh -c '
+        python manage.py rqworker
+      '
+    depends_on:
+      production-nest-cache:
+        condition: service_healthy
+      production-nest-db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - nest-app-network
+      - nest-cache-network
+      - nest-db-network
+    volumes:
+      - ./backend/data:/home/owasp/data
+      - ~/.github.pem:/home/owasp/.github.pem:ro
+  production-nest-backend-scheduler:
+    container_name: production-nest-backend-scheduler
+    image: owasp/nest:backend-production
+    env_file: .env.backend
+    command: >
+      sh -c '
+        python manage.py rqscheduler
+      '
     depends_on:
       production-nest-cache:
         condition: service_healthy
