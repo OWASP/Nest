@@ -242,8 +242,8 @@ const About = () => {
         <SecondaryCard icon={faUsers} title={<AnchorTitle title="Get Involved" />}>
           <p className="mb-4 text-gray-600 dark:text-gray-300">{getInvolvedContent.description}</p>
           <ul className="mb-6 list-inside list-disc space-y-2">
-            {getInvolvedContent.ways.map((way, index) => (
-              <li key={index} className="text-gray-600 dark:text-gray-300">{way}</li>
+            {getInvolvedContent.ways.map((way) => (
+              <li key={way} className="text-gray-600 dark:text-gray-300">{way}</li>
             ))}
           </ul>
           <Markdown content={getInvolvedContent.callToAction} />
