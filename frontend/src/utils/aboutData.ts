@@ -3,8 +3,6 @@ import type {
   ProjectHistory,
   GetInvolved,
   MissionContent,
-  Leaders,
-  TechnologySection,
 } from 'types/about'
 
 export const aboutText = [

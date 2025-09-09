@@ -20,12 +20,3 @@ export interface MissionContent {
   whoItsFor: string
 }
 
-export type TechnologySection = {
-  section: string
-  tools: {
-    [toolName: string]: {
-      icon: string
-      url: string
-    }
-  }
-}

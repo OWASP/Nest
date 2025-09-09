@@ -120,9 +120,9 @@ const About = () => {
 
         <SecondaryCard icon={faCircleCheck} title={<AnchorTitle title="Key Features" />}>
           <div className="grid gap-4 md:grid-cols-2">
-            {keyFeatures.map((feature, index) => (
+            {keyFeatures.map((feature) => (
               <div
-                key={index}
+                key={feature.title}
                 className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
               >
                 <h3 className="mb-2 text-lg font-semibold text-blue-400">{feature.title}</h3>
@@ -252,11 +252,11 @@ const About = () => {
         <SecondaryCard icon={faClock} title={<AnchorTitle title="Project History" />}>
           <div className="space-y-6">
             {projectHistory.map((milestone, index) => (
-              <div key={index} className="relative pl-8">
+              <div key={`${milestone.year}-${milestone.title}`} className="relative pl-8">
                 {index !== projectHistory.length - 1 && (
                   <div className="absolute left-[11px] top-8 h-full w-0.5 bg-blue-400"></div>
                 )}
-                <div className="absolute left-0 top-2 h-6 w-6 rounded-full bg-blue-400"></div>
+                <div aria-hidden="true" className="absolute left-0 top-2 h-6 w-6 rounded-full bg-blue-400"></div>
                 <div className="pt-1">
                   <h3 className="text-lg font-semibold text-blue-400">{milestone.year}</h3>
                   <h4 className="mb-1 font-medium">{milestone.title}</h4>
