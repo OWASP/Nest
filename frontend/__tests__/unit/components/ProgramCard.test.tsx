@@ -24,6 +24,14 @@ jest.mock('components/ActionButton', () => ({
   ),
 }))
 
+jest.mock('@heroui/tooltip', () => ({
+  Tooltip: ({ children, content }: { children: React.ReactNode; content: string }) => (
+    <div data-testid="tooltip" title={content}>
+      {children}
+    </div>
+  ),
+}))
+
 describe('ProgramCard', () => {
   const mockOnEdit = jest.fn()
   const mockOnView = jest.fn()
@@ -178,23 +186,31 @@ describe('ProgramCard', () => {
   })
 
   describe('Description Handling', () => {
-    it('truncates long descriptions to 100 characters', () => {
-      const longDescription = 'A'.repeat(150)
+    it('renders long descriptions with line-clamp-4 CSS class', () => {
+      const longDescription = 'A'.repeat(300) // Long enough to trigger line clamping
       const longDescProgram = { ...baseMockProgram, description: longDescription }
 
       render(<ProgramCard program={longDescProgram} onView={mockOnView} accessLevel="user" />)
 
-      const expectedText = 'A'.repeat(100) + '...'
-      expect(screen.getByText(expectedText)).toBeInTheDocument()
+      // Check that the full description is rendered (CSS handles the visual truncation)
+      expect(screen.getByText(longDescription)).toBeInTheDocument()
+
+      // Check that the paragraph has the line-clamp-4 class
+      const descriptionElement = screen.getByText(longDescription)
+      expect(descriptionElement).toHaveClass('line-clamp-4')
     })
 
-    it('shows full description when under 100 characters', () => {
+    it('shows full description when short', () => {
       const shortDescription = 'Short description'
       const shortDescProgram = { ...baseMockProgram, description: shortDescription }
 
       render(<ProgramCard program={shortDescProgram} onView={mockOnView} accessLevel="user" />)
 
       expect(screen.getByText('Short description')).toBeInTheDocument()
+
+      // Check that it still has line-clamp-4 class for consistency
+      const descriptionElement = screen.getByText('Short description')
+      expect(descriptionElement).toHaveClass('line-clamp-4')
     })
 
     it('shows fallback text when description is empty', () => {
