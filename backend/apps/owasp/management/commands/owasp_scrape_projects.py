@@ -48,7 +48,6 @@ class Command(BaseCommand):
 
             scraper = OwaspScraper(project.owasp_url)
             if scraper.page_tree is None:
-                print("what")
                 project.deactivate()
                 continue
 
