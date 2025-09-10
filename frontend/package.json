@@ -33,7 +33,7 @@
     "@heroui/system": "^2.4.21",
     "@heroui/theme": "^2.4.21",
     "@heroui/toast": "^2.0.15",
-    "@heroui/tooltip": "^2.2.22",
+    "@heroui/tooltip": "^2.2.23",
     "@next/eslint-plugin-next": "^15.5.2",
     "@next/third-parties": "^15.5.2",
     "@sentry/nextjs": "^10.10.0",
