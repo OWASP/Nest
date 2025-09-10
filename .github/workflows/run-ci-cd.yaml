@@ -346,6 +346,7 @@ jobs:
           platforms: linux/amd64
           push: true
           secrets: |
+            RELEASE_VERSION=${{ needs.set-release-version.outputs.release_version }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           tags: owasp/nest:frontend-staging
 
@@ -665,6 +666,7 @@ jobs:
           platforms: linux/amd64
           push: true
           secrets: |
+            RELEASE_VERSION=${{ needs.set-release-version.outputs.release_version }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           tags: owasp/nest:frontend-production
 

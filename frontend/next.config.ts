@@ -38,6 +38,9 @@ export default withSentryConfig(nextConfig, {
   disableLogger: false,
   org: 'owasp-org',
   project: 'nest-frontend',
+  release: {
+    name: process.env.RELEASE_VERSION,
+  },
   silent: isLocal,
   telemetry: false,
   widenClientFileUpload: true,
@@ -46,8 +49,7 @@ export default withSentryConfig(nextConfig, {
         authToken: process.env.NEXT_SENTRY_AUTH_TOKEN,
         // https://docs.sentry.io/platforms/javascript/guides/nextjs/sourcemaps/
         sourcemaps: {
-          assets: ['./.next/**'],
-          deleteSourcemapsAfterUpload: false,
+          deleteSourcemapsAfterUpload: true,
           disable: false,
           ignore: ['**/node_modules/**'],
         },
