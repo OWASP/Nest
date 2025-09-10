@@ -84,7 +84,7 @@ api = NinjaAPI(**{**api_settings, **api_settings_customization})
 def api_root(request):
     """Handle API root endpoint requests."""
     return {
-        "message": "Welcome to the OWASP Nest API v1",
+        "message": "Welcome to the OWASP Nest API v0",
         "docs_url": request.build_absolute_uri("docs"),
     }
 
