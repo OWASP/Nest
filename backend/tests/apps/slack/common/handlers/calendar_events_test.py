@@ -78,7 +78,7 @@ class TestCalendarEvents:
     @patch("apps.nest.models.google_account_authorization.GoogleAccountAuthorization.authorize")
     def test_get_blocks_no_auth(self, mock_authorize):
         """Test get_blocks function when no authorization."""
-        mock_authorize.return_value = ("http://auth.url", "state123")
+        mock_authorize.return_value = ("http://auth.url", "state123")  # NOSONAR
         blocks = get_blocks(
             "test_slack_user_id", presentation=EntityPresentation(include_pagination=True), page=1
         )

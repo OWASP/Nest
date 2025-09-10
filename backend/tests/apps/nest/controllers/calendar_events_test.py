@@ -13,6 +13,8 @@ from apps.nest.models.reminder_schedule import ReminderSchedule
 from apps.owasp.models.event import Event
 from apps.slack.models.member import Member
 
+MESSAGE = "Reminder Message"
+
 
 class TestCalendarEventsControllers:
     """Test cases for Nest Calendar Events controllers."""
@@ -43,7 +45,7 @@ class TestCalendarEventsControllers:
         user_id = "U123456"
         minutes_before = 15
         recurrence = "daily"
-        message = "Reminder message"
+        message = MESSAGE
 
         # Mock return values
         mock_member = Member(slack_user_id=user_id)
@@ -106,14 +108,14 @@ class TestCalendarEventsControllers:
                 user_id="U123456",
                 minutes_before=0,
                 recurrence="daily",
-                message="Reminder message",
+                message=MESSAGE,
             )
         assert excinfo.value.message == "Minutes before must be a positive integer."
 
     @patch("apps.nest.controllers.calendar_events.GoogleAccountAuthorization.authorize")
     def test_set_reminder_unauthorized_user(self, mock_authorize):
         """Test setting a reminder with an unauthorized user."""
-        mock_authorize.return_value = ("http://auth.url", "state")
+        mock_authorize.return_value = ("http://auth.url", "state")  # NOSONAR
         with pytest.raises(ValidationError) as excinfo:
             set_reminder(
                 channel="C123456",
@@ -121,7 +123,7 @@ class TestCalendarEventsControllers:
                 user_id="U123456",
                 minutes_before=15,
                 recurrence="daily",
-                message="Reminder message",
+                message=MESSAGE,
             )
         assert excinfo.value.message == "User is not authorized with Google. Please sign in first."
         mock_authorize.assert_called_once_with("U123456")
@@ -143,7 +145,7 @@ class TestCalendarEventsControllers:
                 user_id="U123456",
                 minutes_before=15,
                 recurrence="daily",
-                message="Reminder message",
+                message=MESSAGE,
             )
         assert excinfo.value.message == (
             "Invalid or expired event number. Please get a new event number from the events list."
@@ -177,7 +179,7 @@ class TestCalendarEventsControllers:
                 user_id="U123456",
                 minutes_before=15,
                 recurrence="daily",
-                message="Reminder message",
+                message=MESSAGE,
             )
         assert (
             excinfo.value.message
@@ -222,7 +224,7 @@ class TestCalendarEventsControllers:
                 user_id="U123456",
                 minutes_before=15,
                 recurrence="daily",
-                message="Reminder message",
+                message=MESSAGE,
             )
         assert (
             excinfo.value.message
@@ -267,7 +269,7 @@ class TestCalendarEventsControllers:
                 user_id="U123456",
                 minutes_before=15,
                 recurrence="invalid_recurrence",
-                message="Reminder message",
+                message=MESSAGE,
             )
         assert excinfo.value.message == "Invalid recurrence value."
         mock_authorize.assert_called_once_with("U123456")
