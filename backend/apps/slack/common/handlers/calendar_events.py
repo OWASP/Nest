@@ -3,7 +3,6 @@
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from googleapiclient.errors import Error
 from httplib2.error import ServerNotFoundError
 
 from apps.common.constants import NL
@@ -19,13 +18,16 @@ def get_blocks(slack_user_id: str, presentation, page: int = 1) -> list[dict]:
     auth = GoogleAccountAuthorization.authorize(slack_user_id)
     if not isinstance(auth, GoogleAccountAuthorization):
         return [markdown(f"*Please sign in with Google first through this <{auth[0]}|link>*")]
-    client = GoogleCalendarClient(auth)
-    min_time = timezone.now() + timezone.timedelta(days=(page - 1))
-    max_time = min_time + timezone.timedelta(days=1)
-    events = client.get_events(min_time=min_time, max_time=max_time)
-    if not events:
-        return [markdown("*No upcoming calendar events found.*")]
+    try:
+        client = GoogleCalendarClient(auth)
+        min_time = timezone.now() + timezone.timedelta(days=(page - 1))
+        max_time = min_time + timezone.timedelta(days=1)
+        events = client.get_events(min_time=min_time, max_time=max_time)
+    except ServerNotFoundError:
+        return [markdown("*Please check your internet connection.*")]
     parsed_events = Event.parse_google_calendar_events(events)
+    if not (events or parsed_events):
+        return [markdown("*No upcoming calendar events found.*")]
     blocks = [
         markdown(
             f"*Your upcoming calendar events from {min_time.strftime('%Y-%m-%d %H:%M')}"
@@ -72,8 +74,7 @@ def get_reminder_blocks(args, slack_user_id: str) -> list[dict]:
             recurrence=args.recurrence,
             message=" ".join(args.message) if args.message else "",
         )
-        scheduler = SlackScheduler(reminder_schedule)
-        scheduler.schedule()
+        SlackScheduler(reminder_schedule).schedule()
         SlackScheduler.send_message(
             f"<@{reminder_schedule.reminder.member.slack_user_id}> set a reminder: "
             f"{reminder_schedule.reminder.message}"
@@ -82,8 +83,8 @@ def get_reminder_blocks(args, slack_user_id: str) -> list[dict]:
         )
     except ValidationError as e:
         return [markdown(f"*{e.message}*")]
-    except (ServerNotFoundError, Error):
-        return [markdown("*An unexpected error occurred. Please try again later.*")]
+    except ServerNotFoundError:
+        return [markdown("*Please check your internet connection.*")]
     return [
         markdown(
             f"*{args.minutes_before}-minute reminder set for event"
