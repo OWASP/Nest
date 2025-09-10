@@ -12,3 +12,32 @@ class BaseScheduler:
         """Initialize the BaseScheduler with a ReminderSchedule instance."""
         self.reminder_schedule = reminder_schedule
         self.scheduler = get_scheduler("default")
+
+    def schedule(self):
+        """Schedule the reminder."""
+        if self.reminder_schedule.recurrence == ReminderSchedule.Recurrence.ONCE:
+            self.scheduler.enqueue_at(
+                self.reminder_schedule.scheduled_time,
+                self.__class__.send_message,
+                message=self.reminder_schedule.reminder.message,
+                channel_id=self.reminder_schedule.reminder.channel_id,
+            )
+            return
+
+        self.scheduler.cron(
+            self.reminder_schedule.cron_expression,
+            func=self.__class__.send_message,
+            args=(
+                self.reminder_schedule.reminder.message,
+                self.reminder_schedule.reminder.channel_id,
+            ),
+            queue_name="default",
+            use_local_timezone=True,
+            result_ttl=500,
+        )
+
+    @staticmethod
+    def send_message(message: str, channel_id: str):
+        """Send message to the specified channel. To be implemented by subclasses."""
+        error_message = "Subclasses must implement this method."
+        raise NotImplementedError(error_message)
