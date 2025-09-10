@@ -38,7 +38,7 @@ def get_blocks(slack_user_id: str, presentation, page: int = 1) -> list[dict]:
         )
     ]
     for i, event in enumerate(parsed_events):
-        event_number = i + 1
+        event_number = (i + 1) + 1000 * (page - 1)
         cache.set(f"{slack_user_id}_{event_number}", event.google_calendar_id, timeout=3600)
         blocks.append(
             markdown(
