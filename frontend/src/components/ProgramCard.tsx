@@ -3,7 +3,6 @@ import { faEdit } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
 import type React from 'react'
-import { useState, useEffect } from 'react'
 import { Program } from 'types/mentorship'
 import ActionButton from 'components/ActionButton'
 
@@ -15,25 +14,6 @@ interface ProgramCardProps {
 }
 
 const ProgramCard: React.FC<ProgramCardProps> = ({ program, onEdit, onView, accessLevel }) => {
-  const [screenSize, setScreenSize] = useState<'sm' | 'md' | 'lg'>('md')
-
-  useEffect(() => {
-    const updateScreenSize = () => {
-      const width = window.innerWidth
-      if (width < 768) {
-        setScreenSize('sm')
-      } else if (width < 1024) {
-        setScreenSize('md')
-      } else {
-        setScreenSize('lg')
-      }
-    }
-
-    updateScreenSize()
-    window.addEventListener('resize', updateScreenSize)
-    return () => window.removeEventListener('resize', updateScreenSize)
-  }, [])
-
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString('en-US', {
       month: 'short',
@@ -49,28 +29,24 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onEdit, onView, acce
 
   const description = program.description || 'No description available.'
 
-  const titleThresholds = { sm: 40, md: 60, lg: 80 }
-  const descriptionThresholds = { sm: 150, md: 200, lg: 250 }
-
-  const isTitleLong = program.name.length > titleThresholds[screenSize]
-  const isDescriptionLong = description.length > descriptionThresholds[screenSize]
-
   return (
-    <div className="h-64 w-80 rounded-[5px] border border-gray-400 bg-white p-6 text-left transition-transform duration-300 hover:scale-[1.02] hover:brightness-105 dark:border-gray-600 dark:bg-gray-800">
+    <div className="h-72 w-72 rounded-lg border border-gray-400 bg-white p-6 text-left transition-transform duration-300 hover:scale-[1.02] hover:brightness-105 md:h-80 md:w-80 lg:h-80 lg:w-96 dark:border-gray-600 dark:bg-gray-800">
       <div className="flex h-full flex-col">
-        <div className="flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col pb-8">
           <div className="mb-2 flex items-start justify-between">
-            {isTitleLong ? (
-              <Tooltip content={program.name} placement="top" className="w-64">
-                <h3 className="line-clamp-2 h-12 overflow-hidden text-base font-semibold text-gray-600 dark:text-white">
-                  {program.name}
-                </h3>
-              </Tooltip>
-            ) : (
+            <Tooltip
+              closeDelay={100}
+              delay={100}
+              showArrow
+              content={program.name}
+              placement="bottom"
+              className="w-88"
+              isDisabled={program.name.length > 50 ? false : true}
+            >
               <h3 className="line-clamp-2 h-12 overflow-hidden text-base font-semibold text-gray-600 dark:text-white">
                 {program.name}
               </h3>
-            )}
+            </Tooltip>
             {accessLevel === 'admin' && (
               <span
                 className={`rounded-full px-2 py-1 text-xs font-medium capitalize ${roleClass[program.userRole] ?? roleClass.default}`}
@@ -87,21 +63,13 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onEdit, onView, acce
                 : 'No dates set'}
           </div>
           <div className="flex flex-1 flex-col justify-start">
-            {isDescriptionLong ? (
-              <Tooltip content={description} placement="bottom" className="w-88">
-                <p className="line-clamp-4 overflow-hidden text-sm text-gray-700 dark:text-gray-300">
-                  {description}
-                </p>
-              </Tooltip>
-            ) : (
-              <p className="line-clamp-4 overflow-hidden text-sm text-gray-700 dark:text-gray-300">
-                {description}
-              </p>
-            )}
+            <p className="line-clamp-4 overflow-hidden text-sm text-gray-700 dark:text-gray-300">
+              {description}
+            </p>
           </div>
         </div>
 
-        <div className="mt-auto flex gap-2">
+        <div className="flex gap-2">
           {accessLevel === 'admin' ? (
             <>
               <ActionButton onClick={() => onView(program.key)}>

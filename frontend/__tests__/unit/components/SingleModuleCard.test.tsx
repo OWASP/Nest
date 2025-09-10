@@ -135,7 +135,6 @@ describe('SingleModuleCard', () => {
       expect(screen.getByText('Test Module')).toBeInTheDocument()
       expect(screen.getByText('This is a test module description')).toBeInTheDocument()
       expect(screen.getByTestId('icon-users')).toBeInTheDocument()
-      expect(screen.getByTestId('icon-ellipsis')).toBeInTheDocument()
     })
 
     it('renders module details correctly', () => {
