@@ -186,7 +186,7 @@ describe('ProgramCard', () => {
   })
 
   describe('Description Handling', () => {
-    it('renders long descriptions with line-clamp-4 CSS class', () => {
+    it('renders long descriptions with line-clamp-6 CSS class', () => {
       const longDescription = 'A'.repeat(300) // Long enough to trigger line clamping
       const longDescProgram = { ...baseMockProgram, description: longDescription }
 
@@ -195,9 +195,9 @@ describe('ProgramCard', () => {
       // Check that the full description is rendered (CSS handles the visual truncation)
       expect(screen.getByText(longDescription)).toBeInTheDocument()
 
-      // Check that the paragraph has the line-clamp-4 class
+      // Check that the paragraph has the line-clamp-6 class
       const descriptionElement = screen.getByText(longDescription)
-      expect(descriptionElement).toHaveClass('line-clamp-4')
+      expect(descriptionElement).toHaveClass('line-clamp-6')
     })
 
     it('shows full description when short', () => {
@@ -208,9 +208,9 @@ describe('ProgramCard', () => {
 
       expect(screen.getByText('Short description')).toBeInTheDocument()
 
-      // Check that it still has line-clamp-4 class for consistency
+      // Check that it still has line-clamp-6 class for consistency
       const descriptionElement = screen.getByText('Short description')
-      expect(descriptionElement).toHaveClass('line-clamp-4')
+      expect(descriptionElement).toHaveClass('line-clamp-6')
     })
 
     it('shows fallback text when description is empty', () => {
