@@ -6,6 +6,7 @@ import { faHeart as faSolidHeart } from '@fortawesome/free-solid-svg-icons'
 import { faStar as faSolidStar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
+import { useIsMobile } from 'hooks/useIsMobile'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -19,6 +20,7 @@ import UserMenu from 'components/UserMenu'
 
 export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthEnabled: boolean }) {
   const pathname = usePathname()
+  const isMobile = useIsMobile()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
 
@@ -128,7 +130,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
             text="Sponsor"
             className="hidden"
           />
-          <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
+          {!isMobile && <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />}
           <ModeToggle />
           <div className="md:hidden">
             <Button
@@ -224,6 +226,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           </div>
 
           <div className="flex flex-col gap-y-2">
+            {isMobile && <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />}
             <NavButton
               href="https://github.com/OWASP/Nest"
               defaultIcon={faRegularStar}
