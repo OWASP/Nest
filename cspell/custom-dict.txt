@@ -109,6 +109,8 @@ pypoetry
 pyyaml
 repositorycontributor
 requirepass
+rqscheduler
+rqworker
 rsc
 saft
 sakanashi
