@@ -35,17 +35,27 @@ def convert_to_camel_case(text: str) -> str:
     return "".join(segments)
 
 
-def parse_date_and_convert_to_local(date_string: str) -> datetime | None:
+def parse_date_and_convert_to_local(date_string: str | None) -> datetime | None:
     """Parse a date string and convert it to the local timezone.
 
     Args:
-        date_string (str): The date string to parse.
+        date_string (str | None): The date string to parse.
 
     Returns:
-        datetime: The converted datetime object in the local timezone, or None if parsing fails.
+        datetime | None: The converted datetime object in the local timezone,
+        or None if parsing fails.
 
     """
-    return timezone.localtime(parser.parse(date_string)) if date_string else None
+    if not date_string:
+        return None
+    try:
+        parsed = parser.parse(date_string)
+    except (ValueError, TypeError):
+        return None
+
+    if timezone.is_naive(parsed):
+        parsed = timezone.make_aware(parsed, timezone=UTC)
+    return timezone.localtime(parsed)
 
 
 def convert_to_snake_case(text: str) -> str:
