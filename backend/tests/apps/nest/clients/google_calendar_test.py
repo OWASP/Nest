@@ -8,6 +8,9 @@ from django.utils import timezone
 from apps.nest.clients.google_calendar import GoogleCalendarClient
 from apps.nest.models.google_account_authorization import GoogleAccountAuthorization
 
+EVENT_NAME = "Test Event"
+EVENT_START = "2025-05-26T09:00:00-07:00"
+
 
 class TestGoogleCalendarClient:
     """Test cases for Google Calendar API client."""
@@ -32,8 +35,8 @@ class TestGoogleCalendarClient:
         mock_get_events.return_value = [
             {
                 "id": "12345",
-                "summary": "Test Event",
-                "start": {"dateTime": "2025-05-26T09:00:00-07:00"},
+                "summary": EVENT_NAME,
+                "start": {"dateTime": EVENT_START},
                 "end": {"dateTime": "2025-05-30T17:00:00-07:00"},
             }
         ]
@@ -48,7 +51,7 @@ class TestGoogleCalendarClient:
         events = client.get_events()
         assert len(events) == 1
         assert events[0]["id"] == "12345"
-        assert events[0]["summary"] == "Test Event"
+        assert events[0]["summary"] == EVENT_NAME
 
     @override_settings(IS_GOOGLE_AUTH_ENABLED=True, IS_AWS_KMS_ENABLED=True)
     @patch.object(GoogleCalendarClient, "get_event")
@@ -56,8 +59,8 @@ class TestGoogleCalendarClient:
         """Test the retrieval of a single event from Google Calendar."""
         mock_get_event.return_value = {
             "id": "12345",
-            "summary": "Test Event",
-            "start": {"dateTime": "2025-05-26T09:00:00-07:00"},
+            "summary": EVENT_NAME,
+            "start": {"dateTime": EVENT_START},
             "end": {"dateTime": "2025-05-30T17:00:00-07:00"},
         }
 
@@ -68,9 +71,9 @@ class TestGoogleCalendarClient:
                 expires_at=timezone.now() + timezone.timedelta(hours=1),
             )
         )
-        event = client.get_event(event_id="12345")
+        event = client.get_event(google_calendar_id="12345")
         assert event["id"] == "12345"
-        assert event["summary"] == "Test Event"
-        assert event["start"]["dateTime"] == "2025-05-26T09:00:00-07:00"
+        assert event["summary"] == EVENT_NAME
+        assert event["start"]["dateTime"] == EVENT_START
         assert event["end"]["dateTime"] == "2025-05-30T17:00:00-07:00"
-        mock_get_event.assert_called_once_with(event_id="12345")
+        mock_get_event.assert_called_once_with(google_calendar_id="12345")
