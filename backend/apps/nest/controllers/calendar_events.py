@@ -2,7 +2,6 @@
 
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
-from django.db import transaction
 from django.utils import timezone
 
 from apps.nest.clients.google_calendar import GoogleCalendarClient
@@ -32,7 +31,6 @@ def schedule_reminder(
     )
 
 
-@transaction.atomic
 def set_reminder(
     channel: str,
     event_number: str,
