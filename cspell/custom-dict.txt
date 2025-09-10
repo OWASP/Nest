@@ -57,6 +57,7 @@ demojize
 dismissable
 dsn
 env
+excinfo
 facebookexternalhit
 gamesec
 geocoders
