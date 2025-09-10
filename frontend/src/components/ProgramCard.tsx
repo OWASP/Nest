@@ -63,7 +63,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onEdit, onView, acce
                 : 'No dates set'}
           </div>
           <div className="flex flex-1 flex-col justify-start">
-            <p className="line-clamp-4 overflow-hidden text-sm text-gray-700 dark:text-gray-300">
+            <p className="line-clamp-6 overflow-hidden text-sm text-gray-700 dark:text-gray-300">
               {description}
             </p>
           </div>
