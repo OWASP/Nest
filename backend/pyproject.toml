@@ -47,6 +47,7 @@ slack-sdk = "^3.35.0"
 strawberry-graphql = { extras = [ "django" ], version = "^0.282.0" }
 strawberry-graphql-django = "^0.65.1"
 thefuzz = "^0.22.1"
+pyparsing = "^3.2.3"
 
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.36.4"
