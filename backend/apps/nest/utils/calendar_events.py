@@ -1,5 +1,6 @@
 """Nest Calendar Events utilities."""
 
+import shlex
 from argparse import ArgumentParser
 
 
@@ -30,16 +31,15 @@ def parse_reminder_args(text: str):
         "--message",
         type=str,
         nargs="*",
-        default="",
+        default=[],
         help="Optional message to include in the reminder.",
     )
     parser.add_argument(
         "--recurrence",
         type=str,
-        nargs="?",
         choices=["once", "daily", "weekly", "monthly"],
         default="once",
         help="Optional recurrence pattern for the reminder.",
     )
 
-    return parser.parse_args(text.split())
+    return parser.parse_args(shlex.split(text or ""))
