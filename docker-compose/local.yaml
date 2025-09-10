@@ -29,7 +29,7 @@ services:
       - 8000:8000
     volumes:
       - ../backend:/home/owasp
-      - backend-venv:/home/owasp/.venv
+      - backend-venv-mentorship:/home/owasp/.venv
 
   cache:
     command: >
@@ -48,7 +48,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - cache-data:/data
+      - cache-data-mentorship:/data
 
   db:
     container_name: nest-db
@@ -65,7 +65,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - db-data-mentorship:/var/lib/postgresql/data
 
   docs:
     container_name: nest-docs
@@ -82,7 +82,7 @@ services:
       - 8001:8001
     volumes:
       - ../docs:/home/owasp/docs
-      - docs-venv:/home/owasp/.venv
+      - docs-venv-mentorship:/home/owasp/.venv
 
   frontend:
     container_name: nest-frontend
@@ -104,8 +104,8 @@ services:
       - 3000:3000
     volumes:
       - ../frontend:/home/owasp
-      - frontend-next:/home/owasp/.next
-      - frontend-node-modules:/home/owasp/node_modules
+      - frontend-next-mentorship:/home/owasp/.next
+      - frontend-node-modules-mentorship:/home/owasp/node_modules
 
   worker:
     container_name: nest-worker
@@ -140,9 +140,9 @@ networks:
   nest-network:
 
 volumes:
-  backend-venv:
-  cache-data:
-  db-data:
-  docs-venv:
-  frontend-next:
-  frontend-node-modules:
+  backend-venv-mentorship:
+  cache-data-mentorship:
+  db-data-mentorship:
+  docs-venv-mentorship:
+  frontend-next-mentorship:
+  frontend-node-modules-mentorship:
