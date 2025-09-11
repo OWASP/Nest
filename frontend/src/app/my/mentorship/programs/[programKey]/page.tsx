@@ -12,6 +12,7 @@ import { GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
 import type { ExtendedSession } from 'types/auth'
 import type { Module, Program } from 'types/mentorship'
 import { ProgramStatusEnum } from 'types/mentorship'
+import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -128,13 +129,13 @@ const ProgramDetailsPage = () => {
   }
 
   const programDetails = [
-    { label: 'Status', value: upperFirst(program.status) },
+    { label: 'Status', value: titleCaseWord(program.status) },
     { label: 'Start Date', value: formatDate(program.startedAt) },
     { label: 'End Date', value: formatDate(program.endedAt) },
     { label: 'Mentees Limit', value: String(program.menteesLimit) },
     {
       label: 'Experience Levels',
-      value: program.experienceLevels?.join(', ') || 'N/A',
+      value: program.experienceLevels?.map((level) => titleCaseWord(level)).join(', ') || 'N/A',
     },
   ]
 
