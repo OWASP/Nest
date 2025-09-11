@@ -36,6 +36,7 @@ test.describe('About Page', () => {
 
   test('renders main sections correctly', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'About' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Project History', exact: true })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'History' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Leaders' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Roadmap' })).toBeVisible()
@@ -90,5 +91,15 @@ test.describe('About Page', () => {
 
   test('breadcrumb renders correct segments on /about', async ({ page }) => {
     await expectBreadCrumbsToBeVisible(page, ['Home', 'About'])
+  })
+
+  test('renders key features section', async ({ page }) => {
+    await expect(page.getByText('Key Features')).toBeVisible()
+    await expect(page.getByText('Advanced Search Capabilities')).toBeVisible()
+  })
+
+  test('renders project history timeline section', async ({ page }) => {
+    await expect(page.getByText('Project History')).toBeVisible()
+    await expect(page.getByText('Project Inception')).toBeVisible()
   })
 })

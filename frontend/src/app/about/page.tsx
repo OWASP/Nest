@@ -23,7 +23,13 @@ import { GET_LEADER_DATA } from 'server/queries/userQueries'
 import type { Contributor } from 'types/contributor'
 import type { Project } from 'types/project'
 import type { User } from 'types/user'
-import { technologies, missionContent, keyFeatures, getInvolvedContent, projectHistory } from 'utils/aboutData'
+import {
+  technologies,
+  missionContent,
+  keyFeatures,
+  getInvolvedContent,
+  projectHistory,
+} from 'utils/aboutData'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -106,14 +112,12 @@ const About = () => {
     <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <h1 className="mt-4 mb-6 text-4xl font-bold">About</h1>
-        <div className="grid gap-6 md:grid-cols-2 mb-6">
+        <div className="grid gap-6 md:grid-cols-2">
           <SecondaryCard icon={faMapSigns} title={<AnchorTitle title="Mission" />}>
-            <h3 className="mb-2 text-xl font-semibold text-blue-400">Our Mission</h3>
             <p className="text-gray-600 dark:text-gray-300">{missionContent.mission}</p>
           </SecondaryCard>
 
           <SecondaryCard icon={faUsers} title={<AnchorTitle title="Who It's For" />}>
-            <h3 className="mb-2 text-xl font-semibold text-blue-400">Target Audience</h3>
             <p className="text-gray-600 dark:text-gray-300">{missionContent.whoItsFor}</p>
           </SecondaryCard>
         </div>
@@ -121,12 +125,11 @@ const About = () => {
         <SecondaryCard icon={faCircleCheck} title={<AnchorTitle title="Key Features" />}>
           <div className="grid gap-4 md:grid-cols-2">
             {keyFeatures.map((feature) => (
-              <div
-                key={feature.title}
-                className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
-              >
+              <div key={feature.title} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                 <h3 className="mb-2 text-lg font-semibold text-blue-400">{feature.title}</h3>
-                <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
+                <p data-testid="feature-description" className="text-gray-600 dark:text-gray-300">
+                  {feature.description}
+                </p>
               </div>
             ))}
           </div>
@@ -231,7 +234,12 @@ const About = () => {
                           </Tooltip>
                         </h3>
                       </Link>
-                      <p className="text-gray-600 dark:text-gray-300">{milestone.body}</p>
+                      <p
+                        data-testid="milestone-description"
+                        className="text-gray-600 dark:text-gray-300"
+                      >
+                        {milestone.body}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -243,7 +251,9 @@ const About = () => {
           <p className="mb-4 text-gray-600 dark:text-gray-300">{getInvolvedContent.description}</p>
           <ul className="mb-6 list-inside list-disc space-y-2">
             {getInvolvedContent.ways.map((way) => (
-              <li key={way} className="text-gray-600 dark:text-gray-300">{way}</li>
+              <li key={way} className="text-gray-600 dark:text-gray-300">
+                {way}
+              </li>
             ))}
           </ul>
           <Markdown content={getInvolvedContent.callToAction} />
@@ -252,11 +262,14 @@ const About = () => {
         <SecondaryCard icon={faClock} title={<AnchorTitle title="Project History" />}>
           <div className="space-y-6">
             {projectHistory.map((milestone, index) => (
-              <div key={`${milestone.year}-${milestone.title}`} className="relative pl-8">
+              <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
                 {index !== projectHistory.length - 1 && (
-                  <div className="absolute left-[11px] top-8 h-full w-0.5 bg-blue-400"></div>
+                  <div className="absolute top-6 left-[7px] h-full w-0.5 bg-blue-400"></div>
                 )}
-                <div aria-hidden="true" className="absolute left-0 top-2 h-6 w-6 rounded-full bg-blue-400"></div>
+                <div
+                  aria-hidden="true"
+                  className="absolute top-2 left-0 h-4 w-4 rounded-full bg-blue-400"
+                ></div>
                 <div className="pt-1">
                   <h3 className="text-lg font-semibold text-blue-400">{milestone.year}</h3>
                   <h4 className="mb-1 font-medium">{milestone.title}</h4>

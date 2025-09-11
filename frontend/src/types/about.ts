@@ -19,4 +19,3 @@ export interface MissionContent {
   mission: string
   whoItsFor: string
 }
-
