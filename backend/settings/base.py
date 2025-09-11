@@ -52,6 +52,7 @@ class Base(Configuration):
 
     LOCAL_APPS = (
         "apps.ai",
+        "apps.api",
         "apps.common",
         "apps.core",
         "apps.github",
