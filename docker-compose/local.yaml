@@ -6,6 +6,7 @@ services:
         python manage.py migrate &&
         python manage.py runserver 0.0.0.0:8000
       '
+    image: nest-local-backend
     build:
       context: ../backend
       dockerfile: docker/Dockerfile.local
@@ -37,9 +38,7 @@ services:
       sh -c '
         python manage.py rqworker
       '
-    build:
-      context: ../backend
-      dockerfile: docker/Dockerfile.local
+    image: nest-local-backend
     depends_on:
       cache:
         condition: service_healthy
@@ -66,9 +65,7 @@ services:
       sh -c '
         python manage.py rqscheduler
       '
-    build:
-      context: ../backend
-      dockerfile: docker/Dockerfile.local
+    image: nest-local-backend
     depends_on:
       cache:
         condition: service_healthy
