@@ -254,17 +254,14 @@ def sync_issue_comments(gh_client: Github, issue: Issue):
         gh_repository = gh_client.get_repo(repository.path)
         gh_issue = gh_repository.get_issue(number=issue.number)
 
-        if latest_comment := issue.latest_comment:
-            since = latest_comment.nest_created_at
-        else:
-            since = None
+        since = issue.latest_comment.nest_created_at if issue.latest_comment else None
 
         existing_comments = {c.github_id: c for c in issue.comments.select_related("author").all()}
         comments_to_save = []
         comments_to_update = []
 
         # Since Used to tell GitHub to fetch comments created or updated after this time.
-        gh_comments = gh_issue.get_comments(since=None) if since else gh_issue.get_comments()
+        gh_comments = gh_issue.get_comments(since=since) if since else gh_issue.get_comments()
 
         for gh_comment in gh_comments:
             if existing_comment := existing_comments.get(gh_comment.id):
