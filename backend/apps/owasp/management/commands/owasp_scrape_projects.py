@@ -53,8 +53,7 @@ class Command(BaseCommand):
 
             project.audience = project.get_audience()
             project.leaders_raw = project.get_leaders()
-            leaders_emails = project.get_leaders_emails()
-            if leaders_emails:
+            if leaders_emails := project.get_leaders_emails():
                 project.sync_leaders(leaders_emails)
 
             # Get GitHub URLs.

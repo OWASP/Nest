@@ -300,27 +300,6 @@ class TestRepositoryBasedEntityModel:
     @patch("apps.owasp.models.common.ContentType")
     @patch("apps.owasp.models.common.EntityMember")
     @patch("apps.owasp.models.common.BulkSaveModel")
-    def test_sync_leaders_existing_no_change(
-        self, mock_bulk_save, mock_entity_member, mock_content_type
-    ):
-        """Test sync_leaders doesn't save when existing leader's email unchanged."""
-        mock_content_type.objects.get_for_model.return_value = self.content_type
-
-        existing_leader = Mock()
-        existing_leader.member_name = "John"
-        existing_leader.member_email = "john@example.com"
-
-        mock_entity_member.objects.filter.return_value = [existing_leader]
-
-        leaders_emails = {"John": "john@example.com"}
-
-        self.model.sync_leaders(leaders_emails)
-
-        mock_bulk_save.bulk_save.assert_not_called()
-
-    @patch("apps.owasp.models.common.ContentType")
-    @patch("apps.owasp.models.common.EntityMember")
-    @patch("apps.owasp.models.common.BulkSaveModel")
     def test_sync_leaders_mixed_scenario(
         self, mock_bulk_save, mock_entity_member, mock_content_type
     ):
@@ -340,9 +319,7 @@ class TestRepositoryBasedEntityModel:
 
         self.model.sync_leaders(leaders_emails)
 
-        assert existing_leader.member_email == "new@example.com"
-
         call_args = mock_bulk_save.bulk_save.call_args
         leaders_to_save = call_args[0][1]
+
         assert len(leaders_to_save) == 2  # Updated existing + new leader
-        assert leaders_to_save[0] == existing_leader

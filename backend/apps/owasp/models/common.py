@@ -306,33 +306,22 @@ class RepositoryBasedEntityModel(models.Model):
 
         """
         content_type = ContentType.objects.get_for_model(self.__class__)
-        existing_leaders = {
-            leader.member_name: leader
-            for leader in EntityMember.objects.filter(
-                entity_type=content_type, entity_id=self.id, role=EntityMember.Role.LEADER
-            )
-        }
 
         leaders = []
         for order, (name, email) in enumerate(leaders_emails.items()):
-            if name in existing_leaders:
-                leader = existing_leaders[name]
-                if leader.member_email != (email or ""):
-                    leader.member_email = email or ""
-                    leaders.append(leader)
-            else:
-                leaders.append(
-                    EntityMember(
-                        entity_type=content_type,
-                        entity_id=self.id,
-                        member_name=name,
-                        member_email=email or "",
-                        role=EntityMember.Role.LEADER,
-                        order=order,
-                        is_active=True,
-                        is_reviewed=False,
-                    )
+            leaders.append(
+                EntityMember.update_data(
+                    {
+                        "entity_id": self.id,
+                        "entity_type": content_type,
+                        "member_email": email or "",
+                        "member_name": name,
+                        "order": (order + 1) * 100,
+                        "role": EntityMember.Role.LEADER,
+                    },
+                    save=False,
                 )
+            )
 
         if leaders:
-            BulkSaveModel.bulk_save(EntityMember, leaders, ["member_email"])
+            BulkSaveModel.bulk_save(EntityMember, leaders)
