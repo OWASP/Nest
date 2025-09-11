@@ -16,7 +16,7 @@ algoliasearch = "^4.13.2"
 algoliasearch-django = "^4.0.0"
 django = "^5.1"
 django-configurations = "^2.5.1"
-django-cors-headers = "^4.7.0"
+django-cors-headers = "^4.8.0"
 django-ninja = "^1.4.3"
 django-redis = "^6.0.0"
 django-storages = { extras = [ "s3" ], version = "^1.14.4" }
