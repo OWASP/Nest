@@ -17,17 +17,8 @@ class EntityMemberAdmin(admin.ModelAdmin):
 
     actions = ("approve_members",)
     autocomplete_fields = ("member",)
-    fields = (
-        "entity_type",
-        "entity_id",
-        "member",
-        "role",
-        "order",
-        "is_active",
-        "is_reviewed",
-        "description",
-    )
     list_display = (
+        "member_name",
         "member",
         "entity",
         "owasp_url",
