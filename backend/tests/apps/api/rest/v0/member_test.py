@@ -37,7 +37,6 @@ class TestMemberSchema:
         assert member.location == member_data["location"]
         assert member.avatar_url == member_data["avatar_url"]
         assert member.bio == member_data["bio"]
-        assert member.email == member_data["email"]
         assert member.followers_count == member_data["followers_count"]
         assert member.following_count == member_data["following_count"]
         assert member.public_repositories_count == member_data["public_repositories_count"]
@@ -46,3 +45,5 @@ class TestMemberSchema:
         assert member.url == member_data["url"]
         assert member.created_at == datetime.fromisoformat(member_data["created_at"])
         assert member.updated_at == datetime.fromisoformat(member_data["updated_at"])
+
+        assert not hasattr(member, "email")
