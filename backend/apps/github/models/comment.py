@@ -1,36 +1,40 @@
 """GitHub app comment model."""
 
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
-from apps.common.models import BulkSaveModel
+from apps.common.models import BulkSaveModel, TimestampedModel
+from apps.common.utils import truncate
 
 
-class Comment(BulkSaveModel, models.Model):
+class Comment(BulkSaveModel, TimestampedModel):
     """Represents a comment on a GitHub Issue."""
 
     class Meta:
+        db_table = "github_comment"
         verbose_name = "Comment"
         verbose_name_plural = "Comments"
-        ordering = ("-created_at",)
+        ordering = ("-nest_created_at",)
 
-    github_id = models.BigIntegerField(unique=True)
+    github_id = models.BigIntegerField(unique=True, verbose_name="Github ID")
     author = models.ForeignKey(
         "github.User", on_delete=models.SET_NULL, null=True, related_name="comments"
     )
-    body = models.TextField()
-    created_at = models.DateTimeField(db_index=True)
-    updated_at = models.DateTimeField(db_index=True)
+    body = models.TextField(verbose_name="Body")
+
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
 
     def __str__(self):
         """Return a string representation of the comment."""
-        return f"{self.author} - {self.body[:40]}"
+        return f"{self.author} - {truncate(self.body, 50)}"
 
     def from_github(self, gh_comment, author=None):
         """Populate fields from a GitHub API comment object."""
         field_mapping = {
             "body": "body",
-            "created_at": "created_at",
-            "updated_at": "updated_at",
         }
 
         for model_field, gh_field in field_mapping.items():

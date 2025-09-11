@@ -5,6 +5,7 @@ import re
 
 from django.core.management.base import BaseCommand
 
+from apps.common.utils import truncate
 from apps.github.auth import get_github_client
 from apps.github.common import sync_issue_comments
 from apps.github.models.issue import Issue
@@ -46,7 +47,7 @@ class Command(BaseCommand):
             self.stdout.write(f"\nProcessing module: {module.name}...")
             self.process_module(module)
 
-        self.stdout.write(self.style.SUCCESS("\nProcessed successfully!"))
+        self.stdout.write(self.style.SUCCESS("Processed successfully!"))
 
     def process_module(self, module: Module) -> None:
         """Process a single mentorship module.
@@ -70,14 +71,14 @@ class Command(BaseCommand):
             return
 
         relevant_issues = Issue.objects.filter(
-            repository_id__in=module_repos, state="open"
+            repository_id__in=module_repos, state=Issue.State.OPEN
         ).distinct()
 
         self.stdout.write(f"Found {relevant_issues.count()} open issues across repositories")
 
         for issue in relevant_issues:
             self.stdout.write(
-                f"Syncing comments for issue #{issue.number} '{issue.title[:20]}...'"
+                f"Syncing comments for issue #{issue.number} '{truncate(issue.title, 20)}...'"
             )
             sync_issue_comments(gh, issue)
             self.process_issue_interests(issue, module)
@@ -93,7 +94,9 @@ class Command(BaseCommand):
         existing_interests = IssueUserInterest.objects.filter(module=module, issue=issue)
         existing_user_ids = set(existing_interests.values_list("user_id", flat=True))
 
-        all_comments = issue.comments.select_related("author").order_by("author_id", "-created_at")
+        all_comments = issue.comments.select_related("author").order_by(
+            "author_id", "-nest_created_at"
+        )
 
         interests_to_create = []
         interests_to_remove = []

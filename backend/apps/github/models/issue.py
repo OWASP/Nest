@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from apps.common.index import IndexBase
@@ -44,9 +45,6 @@ class Issue(GenericIssueModel):
     )
 
     comments_count = models.PositiveIntegerField(verbose_name="Comments", default=0)
-    last_comment_sync = models.DateTimeField(
-        verbose_name="Last comment sync", blank=True, null=True, db_index=True
-    )
 
     # FKs.
     author = models.ForeignKey(
@@ -58,11 +56,7 @@ class Issue(GenericIssueModel):
         related_name="created_issues",
     )
 
-    comments = models.ManyToManyField(
-        "github.Comment",
-        related_name="issues",
-        blank=True,
-    )
+    comments = GenericRelation("github.Comment", related_query_name="issue")
 
     milestone = models.ForeignKey(
         "github.Milestone",
@@ -101,7 +95,7 @@ class Issue(GenericIssueModel):
             Comment | None: The most recently created comment, or None if no comments exist.
 
         """
-        return self.comments.order_by("-created_at").first()
+        return self.comments.order_by("-nest_created_at").first()
 
     def from_github(self, gh_issue, *, author=None, milestone=None, repository=None):
         """Update the instance based on GitHub issue data.

@@ -11,10 +11,10 @@ class CommentAdmin(admin.ModelAdmin):
     list_display = (
         "body",
         "author",
-        "created_at",
-        "updated_at",
+        "nest_created_at",
+        "nest_updated_at",
     )
-    list_filter = ("created_at", "updated_at")
+    list_filter = ("nest_created_at", "nest_updated_at")
     search_fields = ("body", "author__login")
 
 
