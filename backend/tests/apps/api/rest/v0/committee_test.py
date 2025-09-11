@@ -24,6 +24,7 @@ from apps.api.rest.v0.committee import CommitteeSchema
 )
 def test_committee_serializer_validation(committee_data):
     committee = CommitteeSchema(**committee_data)
+
     assert committee.name == committee_data["name"]
     assert committee.description == committee_data["description"]
     assert committee.created_at == datetime.fromisoformat(committee_data["created_at"])
