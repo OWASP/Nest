@@ -51,13 +51,16 @@ class Command(BaseCommand):
                 project.deactivate()
                 continue
 
-            project.audience = scraper.get_audience()
+            project.audience = project.get_audience()
+            project.leaders_raw = project.get_leaders()
+            if leaders_emails := project.get_leaders_emails():
+                project.sync_leaders(leaders_emails)
 
             # Get GitHub URLs.
             scraped_urls = sorted(
                 {
                     repository_url
-                    for url in set(scraper.get_urls(domain="github.com"))
+                    for url in set(project.get_urls(domain="github.com"))
                     if (repository_url := normalize_url(project.get_related_url(url)))
                     and repository_url not in {project.github_url, project.owasp_url}
                 }
