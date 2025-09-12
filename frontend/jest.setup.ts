@@ -6,6 +6,29 @@ import 'core-js/actual/structured-clone'
 global.React = React
 global.TextEncoder = TextEncoder
 
+// Add fetch polyfill for jsdom test environment
+// Node.js 18+ has native fetch, but jsdom doesn't include it
+if (typeof global.fetch === 'undefined') {
+  // Use a simple mock fetch for testing
+  global.fetch = jest.fn().mockResolvedValue({
+    ok: true,
+    status: 200,
+    statusText: 'OK',
+    headers: new Headers(),
+    url: '',
+    redirected: false,
+    type: 'basic' as const,
+    json: () => Promise.resolve({}),
+    text: () => Promise.resolve(''),
+    blob: () => Promise.resolve(new Blob()),
+    arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+    formData: () => Promise.resolve(new FormData()),
+    clone: () => ({}) as Response,
+    body: null,
+    bodyUsed: false,
+  } as Response)
+}
+
 jest.mock('next-auth/react', () => {
   return {
     ...jest.requireActual('next-auth/react'),

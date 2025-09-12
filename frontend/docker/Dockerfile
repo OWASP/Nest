@@ -34,10 +34,11 @@ COPY --chmod=555 src src
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
-    NEXT_SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) pnpm run build && \
-    ls -R .next/static/chunks && \
-    find .next -name "*.map" || echo "No source maps found"
+RUN --mount=type=secret,id=RELEASE_VERSION \
+    --mount=type=secret,id=SENTRY_AUTH_TOKEN \
+    export NEXT_SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) && \
+    export RELEASE_VERSION=$(cat /run/secrets/RELEASE_VERSION) && \
+    pnpm run build
 
 # Production image, copy all the files and run next.
 FROM base AS runner
