@@ -4,7 +4,7 @@ from django.conf import settings
 from ninja import NinjaAPI, Swagger
 from ninja.throttling import AuthRateThrottle
 
-from apps.api.rest.auth.api_key import ApiKeyHeader as ApiKey
+from apps.api.rest.auth.api_key import ApiKey as ApiKey
 from apps.api.rest.v0.committee import router as committee_router
 from apps.api.rest.v0.event import router as event_router
 from apps.api.rest.v0.issue import router as issue_router
@@ -38,7 +38,7 @@ ROUTERS = {
 
 
 api_settings = {
-    "auth": ApiKey(),
+    "auth": ApiKey(),  # The `api_key` param name is based on the ApiKey class name.
     "description": "Open Worldwide Application Security Project API",
     "docs": Swagger(settings={"persistAuthorization": True}),
     "throttle": [AuthRateThrottle("10/s")],
