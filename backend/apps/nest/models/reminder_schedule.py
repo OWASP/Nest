@@ -37,6 +37,13 @@ class ReminderSchedule(models.Model):
         default=Recurrence.ONCE,
     )
 
+    job_id = models.CharField(
+        verbose_name="Job ID",
+        max_length=255,
+        blank=True,
+        help_text="ID of the scheduled job in the task queue.",
+    )
+
     @property
     def cron_expression(self) -> str | None:
         """Get cron expression for the scheduled time."""

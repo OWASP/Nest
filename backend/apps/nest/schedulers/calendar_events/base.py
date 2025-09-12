@@ -16,15 +16,16 @@ class BaseScheduler:
     def schedule(self):
         """Schedule the reminder."""
         if self.reminder_schedule.recurrence == ReminderSchedule.Recurrence.ONCE:
-            self.scheduler.enqueue_at(
+            self.reminder_schedule.job_id = self.scheduler.enqueue_at(
                 self.reminder_schedule.scheduled_time,
                 self.__class__.send_message,
                 message=self.reminder_schedule.reminder.message,
                 channel_id=self.reminder_schedule.reminder.channel_id,
-            )
+            ).get_id()
+            self.reminder_schedule.save()
             return
 
-        self.scheduler.cron(
+        self.reminder_schedule.job_id = self.scheduler.cron(
             self.reminder_schedule.cron_expression,
             func=self.__class__.send_message,
             args=(
@@ -34,7 +35,14 @@ class BaseScheduler:
             queue_name="default",
             use_local_timezone=True,
             result_ttl=500,
-        )
+        ).get_id()
+        self.reminder_schedule.save()
+
+    def cancel(self):
+        """Cancel the scheduled reminder."""
+        if self.reminder_schedule.job_id:
+            self.scheduler.cancel(self.reminder_schedule.job_id)
+            self.reminder_schedule.delete()
 
     @staticmethod
     def send_message(message: str, channel_id: str):
