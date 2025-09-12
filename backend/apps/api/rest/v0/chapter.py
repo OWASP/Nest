@@ -7,7 +7,7 @@ from typing import Literal
 from django.conf import settings
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
-from ninja import Field, FilterSchema, Query, Router, Schema
+from ninja import Field, FilterSchema, Path, Query, Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 from ninja.responses import Response
@@ -26,8 +26,8 @@ class ChapterErrorResponse(Schema):
 class ChapterFilterSchema(FilterSchema):
     """Filter schema for Chapter."""
 
-    country: str | None = Field(None, description="Country of the chapter", example="India")
-    region: str | None = Field(None, description="Region of the chapter", example="Asia")
+    country: str | None = Field(None, description="Country of the chapter")
+    region: str | None = Field(None, description="Region of the chapter")
 
 
 class ChapterSchema(Schema):
@@ -43,7 +43,6 @@ class ChapterSchema(Schema):
 @router.get(
     "/",
     description="Retrieve a paginated list of OWASP chapters.",
-    operation_id="list_chapters",
     response={200: list[ChapterSchema]},
     summary="List chapters",
     tags=["Chapters"],
@@ -59,18 +58,12 @@ def list_chapters(
     ),
 ) -> list[ChapterSchema]:
     """Get chapters."""
-    chapters = filters.filter(Chapter.objects.all())
-
-    if ordering:
-        chapters = chapters.order_by(ordering)
-
-    return chapters
+    return filters.filter(Chapter.active_chapters.order_by(ordering or "-created_at"))
 
 
 @router.get(
-    "/{key}",
+    "/{str:chapter_id}",
     description="Retrieve chapter details.",
-    operation_id="get_chapter",
     response={
         HTTPStatus.NOT_FOUND: ChapterErrorResponse,
         HTTPStatus.OK: ChapterSchema,
@@ -78,10 +71,15 @@ def list_chapters(
     summary="Get chapter",
     tags=["Chapters"],
 )
-def get_member(request: HttpRequest, key: str) -> ChapterSchema | ChapterErrorResponse:
+def get_chapter(
+    request: HttpRequest,
+    chapter_id: str = Path(example="London"),
+) -> ChapterSchema | ChapterErrorResponse:
     """Get chapter."""
-    if chapter := Chapter.objects.filter(
-        key=key if key.startswith("www-chapter-") else f"www-chapter-{key}"
+    if chapter := Chapter.active_chapters.filter(
+        key__iexact=(
+            chapter_id if chapter_id.startswith("www-chapter-") else f"www-chapter-{chapter_id}"
+        )
     ).first():
         return chapter
 
