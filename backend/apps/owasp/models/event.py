@@ -18,7 +18,7 @@ from apps.common.constants import NL
 from apps.common.geocoding import get_location_coordinates
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.open_ai import OpenAi
-from apps.common.utils import join_values, slugify
+from apps.common.utils import join_values, parse_date_and_convert_to_local, slugify
 from apps.github.utils import normalize_url
 
 
@@ -57,8 +57,8 @@ class Event(BulkSaveModel, TimestampedModel):
         verbose_name="Google Calendar ID", max_length=1024, blank=True, default=""
     )
     name = models.CharField(verbose_name="Name", max_length=100)
-    start_date = models.DateField(verbose_name="Start Date")
-    end_date = models.DateField(verbose_name="End Date", null=True, blank=True)
+    start_date = models.DateTimeField(verbose_name="Start Date")
+    end_date = models.DateTimeField(verbose_name="End Date", null=True, blank=True)
     description = models.TextField(verbose_name="Description", default="", blank=True)
     key = models.CharField(verbose_name="Key", max_length=100, unique=True)
     status = models.CharField(
@@ -168,6 +168,54 @@ class Event(BulkSaveModel, TimestampedModel):
                 return None
 
         return None
+
+    @staticmethod
+    def parse_google_calendar_events(events: list[dict]) -> list[Event]:
+        """Parse Google Calendar events into Event instances.
+
+        Args:
+            events (list): A list of Google Calendar event dictionaries.
+
+        Returns:
+            list: A list of Event instances.
+
+        """
+        return [event for event in (Event.parse_google_calendar_event(e) for e in events) if event]
+
+    @staticmethod
+    def parse_google_calendar_event(event: dict) -> Event | None:
+        """Parse a single Google Calendar event into the current Event instance.
+
+        Args:
+            event (dict): A Google Calendar event dictionary.
+
+        Returns:
+            Event: An Event instance if parsing is successful, otherwise None.
+
+        """
+        start = event.get("start", {}).get("dateTime", {})
+        end = event.get("end", {}).get("dateTime", {})
+        if not start:
+            return None
+
+        if event.get("status") != "confirmed":
+            return None
+
+        if event_instance := Event.objects.filter(key=event.get("id")).first():
+            return event_instance
+
+        # We will not save until the user chooses to have this event.
+        return Event(
+            name=event.get("summary", ""),
+            key=event.get("id"),
+            description=event.get("description", ""),
+            url=event.get("htmlLink", ""),
+            start_date=parse_date_and_convert_to_local(start),
+            end_date=parse_date_and_convert_to_local(end),
+            google_calendar_id=event.get("id"),
+            category=Event.Category.COMMUNITY,
+            suggested_location=event.get("location", ""),
+        )
 
     @staticmethod
     def update_data(category, data, *, save: bool = True) -> Event | None:
@@ -317,10 +365,11 @@ class Event(BulkSaveModel, TimestampedModel):
             **kwargs: Arbitrary keyword arguments.
 
         """
-        if not self.suggested_location:
-            self.generate_suggested_location()
+        if self.category != Event.Category.COMMUNITY:
+            if not self.suggested_location:
+                self.generate_suggested_location()
 
-        if not self.latitude or not self.longitude:
-            self.generate_geo_location()
+            if not self.latitude or not self.longitude:
+                self.generate_geo_location()
 
         super().save(*args, **kwargs)

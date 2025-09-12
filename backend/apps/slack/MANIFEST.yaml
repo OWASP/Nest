@@ -61,6 +61,11 @@ features:
       url: https://nest.owasp.org/integrations/slack/commands/
       description: Check out available job opportunities
       should_escape: false
+    - command: /set-reminder
+      url: https://nest.owasp.org/integrations/slack/commands/
+      description: Set a reminder for a specific channel
+      usage_hint: --channel <#channel_name> --event_number <event_number> --minutes_before <minutes_before_event> --message <optional_message>
+      should_escape: false
     - command: /sponsor
       url: https://nest.owasp.org/integrations/slack/commands/
       description: Coming soon

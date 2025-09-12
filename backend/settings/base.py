@@ -61,6 +61,7 @@ class Base(Configuration):
         "corsheaders",
         "ninja",
         "storages",
+        "django_rq",
     )
 
     LOCAL_APPS = (
@@ -107,6 +108,16 @@ class Base(Configuration):
 
     ROOT_URLCONF = "settings.urls"
 
+    REDIS_HOST = values.SecretValue(environ_name="REDIS_HOST")
+    REDIS_PASSWORD = values.SecretValue(environ_name="REDIS_PASSWORD")
+
+    RQ_QUEUES = {
+        "default": {
+            "USE_REDIS_CACHE": "default",
+            "DEFAULT_TIMEOUT": 360,
+        },
+    }
+
     TEMPLATES = [
         {
             "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -140,8 +151,6 @@ class Base(Configuration):
     API_PAGE_SIZE = 100
     API_CACHE_TIME_SECONDS = 86400  # 24 hours.
 
-    REDIS_HOST = values.SecretValue(environ_name="REDIS_HOST")
-    REDIS_PASSWORD = values.SecretValue(environ_name="REDIS_PASSWORD")
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",

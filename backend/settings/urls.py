@@ -25,6 +25,7 @@ urlpatterns = [
     path("idx/", csrf_protect(algolia_search)),
     path("graphql/", csrf_protect(GraphQLView.as_view(schema=schema, graphiql=settings.DEBUG))),
     path("api/v1/", api_v1.urls),
+    path("django-rq/", include("django_rq.urls")),
     path("auth/google/callback/", google_auth_callback),
     path("a/", admin.site.urls),
     path("owasp/", include(owasp_urls)),
