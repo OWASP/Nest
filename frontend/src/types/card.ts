@@ -1,5 +1,6 @@
 import type { IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import type { JSX } from 'react'
+import type { Badge } from 'types/badge'
 import type { Button } from 'types/button'
 import type { Chapter } from 'types/chapter'
 import type { Contributor } from 'types/contributor'
@@ -12,7 +13,6 @@ import type { Milestone } from 'types/milestone'
 import type { RepositoryCardProps } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
-import { Badge } from './badge'
 
 export type CardProps = {
   button: Button
@@ -78,6 +78,7 @@ export interface DetailsCardProps {
 export interface UserCardProps {
   avatar: string
   badges?: Badge[]
+  badgeCount?: number
   button: Button
   className?: string
   company?: string

@@ -4,6 +4,7 @@ import strawberry
 import strawberry_django
 
 from apps.github.models.user import User
+from apps.nest.api.internal.nodes.badge import BadgeNode
 
 
 @strawberry_django.type(
@@ -26,6 +27,17 @@ from apps.github.models.user import User
 )
 class UserNode:
     """GitHub user node."""
+
+    @strawberry.field
+    def badges(self) -> list[BadgeNode]:
+        """List badges assigned to the user sorted by weight and name."""
+        user_badges = self.badges.filter(is_active=True).select_related("badge")
+        return [user_badge.badge for user_badge in user_badges]
+
+    @strawberry.field
+    def badge_count(self) -> int:
+        """Resolve badge count."""
+        return self.badges.filter(is_active=True).count()
 
     @strawberry.field
     def created_at(self) -> float:
