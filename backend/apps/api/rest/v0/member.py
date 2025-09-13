@@ -77,6 +77,7 @@ def list_members(
 @router.get(
     "/{str:member_id}",
     description="Retrieve member details.",
+    operation_id="get_member",
     response={
         HTTPStatus.NOT_FOUND: MemberErrorResponse,
         HTTPStatus.OK: MemberSchema,

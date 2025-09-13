@@ -43,6 +43,7 @@ class ChapterSchema(Schema):
 @router.get(
     "/",
     description="Retrieve a paginated list of OWASP chapters.",
+    operation_id="list_chapters",
     response={200: list[ChapterSchema]},
     summary="List chapters",
     tags=["Chapters"],
@@ -64,6 +65,7 @@ def list_chapters(
 @router.get(
     "/{str:chapter_id}",
     description="Retrieve chapter details.",
+    operation_id="get_chapter",
     response={
         HTTPStatus.NOT_FOUND: ChapterErrorResponse,
         HTTPStatus.OK: ChapterSchema,

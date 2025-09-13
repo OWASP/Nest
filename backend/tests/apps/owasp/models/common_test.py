@@ -2,6 +2,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
+from apps.common.utils import clean_url, validate_url
 from apps.github.models.repository import Repository
 from apps.owasp.models.common import RepositoryBasedEntityModel
 
@@ -195,7 +196,7 @@ class TestRepositoryBasedEntityModel:
                 """* [Homepage](https://owasp.org)
 * [Project Repo](https://github.com/OWASP/www-project)""",
                 None,
-                ["https://owasp.org", "https://github.com/OWASP/www-project"],
+                ["https://github.com/OWASP/www-project", "https://owasp.org"],
             ),
             (
                 """* [Homepage](https://owasp.org)
@@ -208,6 +209,48 @@ class TestRepositoryBasedEntityModel:
                 "example.com",
                 [],
             ),
+            # Test markdown link with self-referencing URL
+            (
+                """Website: [https://mltop10.info](https://mltop10.info)
+Edition: 2023""",
+                None,
+                ["https://mltop10.info"],
+            ),
+            # Test mixed content with markdown links and standalone URLs
+            (
+                """Website: [https://mltop10.info](https://mltop10.info)
+[Source Code](https://github.com/OWASP/www-project-machine-learning-security-top-10/tree/master/docs/2023)
+([Download PDF](https://mltop10.info/OWASP-Machine-Learning-Security-Top-10.pdf))
+Release Notes: https://github.com/OWASP/www-project-machine-learning-security-top-10/releases""",
+                None,
+                [
+                    "https://github.com/OWASP/www-project-machine-learning-security-top-10/releases",
+                    "https://github.com/OWASP/www-project-machine-learning-security-top-10/tree/master/docs/2023",
+                    "https://mltop10.info",
+                    "https://mltop10.info/OWASP-Machine-Learning-Security-Top-10.pdf",
+                ],
+            ),
+            # Test markdown links with text
+            (
+                """* [Project Homepage](https://example.com)
+* [Documentation](https://docs.example.com)""",
+                None,
+                ["https://docs.example.com", "https://example.com"],
+            ),
+            # Test URLs with trailing punctuation
+            (
+                """Check out https://example.com, and also https://test.org!""",
+                None,
+                ["https://example.com", "https://test.org"],
+            ),
+            # Test malformed URLs (should be filtered out)
+            (
+                """* [Broken](https://)
+* [Valid](https://example.com)""",
+                None,
+                ["https://example.com"],
+            ),
+            # Test empty and None content
             ("This test contains no URLs.", None, []),
             ("", None, []),
             (None, None, []),
@@ -282,6 +325,42 @@ class TestRepositoryBasedEntityModel:
             tags = model.parse_tags(tags)
 
         assert tags == expected_tags
+
+    @pytest.mark.parametrize(
+        ("url", "expected_result"),
+        [
+            ("https://example.com", "https://example.com"),
+            ("https://example.com.", "https://example.com"),
+            ("https://example.com,", "https://example.com"),
+            ("https://example.com!", "https://example.com"),
+            ("https://example.com?", "https://example.com"),
+            ("  https://example.com  ", "https://example.com"),
+            ("https://", "https://"),
+            ("", None),
+            (None, None),
+            ("not-a-url", "not-a-url"),
+            ("ftp://example.com", "ftp://example.com"),
+        ],
+    )
+    def test_clean_url(self, url, expected_result):
+        """Test the clean_url helper method."""
+        assert clean_url(url) == expected_result
+
+    @pytest.mark.parametrize(
+        ("url", "expected_result"),
+        [
+            ("https://example.com", True),
+            ("http://example.com", True),
+            ("https://", False),
+            ("", False),
+            (None, False),
+            ("not-a-url", False),
+            ("ftp://example.com", False),  # Only http/https allowed
+        ],
+    )
+    def test_validate_url(self, url, expected_result):
+        """Test the validate_url helper method."""
+        assert validate_url(url) == expected_result
 
     @patch("apps.owasp.models.common.ContentType")
     @patch("apps.owasp.models.common.EntityMember")

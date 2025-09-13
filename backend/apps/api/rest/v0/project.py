@@ -46,6 +46,7 @@ class ProjectSchema(Schema):
 @router.get(
     "/",
     description="Retrieve a paginated list of OWASP projects.",
+    operation_id="list_projects",
     response={200: list[ProjectSchema]},
     summary="List projects",
     tags=["Projects"],
@@ -68,6 +69,7 @@ def list_projects(
 @router.get(
     "/{str:project_id}",
     description="Retrieve project details.",
+    operation_id="get_project",
     response={
         HTTPStatus.NOT_FOUND: ProjectErrorResponse,
         HTTPStatus.OK: ProjectSchema,
