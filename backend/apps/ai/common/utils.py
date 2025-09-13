@@ -83,7 +83,7 @@ def is_json_content(content: str) -> bool:
     """
     try:
         json.loads(content)
-    except (json.JSONDecodeError, TypeError, ValueError):
+    except (TypeError, ValueError):
         return False
     return True
 

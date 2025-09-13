@@ -4,7 +4,7 @@ import json
 import logging
 import time
 
-from apps.ai.common.constants import DELIMITER
+from apps.ai.common.constants import DELIMITER, GITHUB_REQUEST_INTERVAL_SECONDS
 from apps.github.utils import get_repository_file_content
 
 logger = logging.getLogger(__name__)
@@ -137,9 +137,9 @@ def extract_repository_content(repository) -> tuple[str, str]:
 
                 if content and content.strip():
                     markdown_content[file_path] = content
-                time.sleep(0.5)
+                time.sleep(GITHUB_REQUEST_INTERVAL_SECONDS)
 
-        except (ValueError, TypeError, OSError, ConnectionError):
+        except (ValueError, TypeError, OSError):
             logger.debug("Failed to fetch markdown file")
             continue
 
