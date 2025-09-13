@@ -2,6 +2,7 @@
 
 import logging
 import re
+from typing import Any
 
 from django.core.management.base import BaseCommand
 
@@ -103,25 +104,22 @@ class Command(BaseCommand):
         new_user_logins = []
         removed_user_logins = []
 
-        user_interest_status = {}
-        processed_users = set()
+        user_interest_status: dict[int, dict[str, Any]] = {}
 
         for comment in all_comments:
-            if not comment.author or comment.author.id in processed_users:
+            if not comment.author:
                 continue
-
-            body = comment.body or ""
             user_id = comment.author.id
-            user_login = comment.author.login
-
-            is_interested = any(pattern.search(body) for pattern in INTEREST_PATTERNS)
-
-            user_interest_status[user_id] = {
-                "is_interested": is_interested,
-                "login": user_login,
-                "author": comment.author,
-            }
-            processed_users.add(user_id)
+            entry = user_interest_status.get(user_id)
+            is_match = any(p.search(comment.body or "") for p in INTEREST_PATTERNS)
+            if entry:
+                entry["is_interested"] = entry["is_interested"] or is_match
+            else:
+                user_interest_status[user_id] = {
+                    "is_interested": is_match,
+                    "login": comment.author.login,
+                    "author": comment.author,
+                }
 
         for user_id, status in user_interest_status.items():
             is_interested = status["is_interested"]
