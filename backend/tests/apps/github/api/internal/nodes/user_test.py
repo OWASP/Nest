@@ -97,7 +97,9 @@ class TestUserNode:
         """Test badges field resolution with no badges."""
         mock_user = Mock()
         mock_badges_queryset = Mock()
-        mock_badges_queryset.filter.return_value.select_related.return_value.order_by.return_value = []
+        (
+            mock_badges_queryset.filter.return_value.select_related.return_value.order_by.return_value
+        ) = []
         mock_user.badges = mock_badges_queryset
 
         result = UserNode.badges(mock_user)
@@ -111,9 +113,9 @@ class TestUserNode:
         mock_user_badge.badge = mock_badge
 
         mock_badges_queryset = Mock()
-        mock_badges_queryset.filter.return_value.select_related.return_value.order_by.return_value = [
-            mock_user_badge
-        ]
+        (
+            mock_badges_queryset.filter.return_value.select_related.return_value.order_by.return_value
+        ) = [mock_user_badge]
         mock_user.badges = mock_badges_queryset
 
         result = UserNode.badges(mock_user)
@@ -154,7 +156,9 @@ class TestUserNode:
         # Set up the mock queryset to return badges in the expected sorted order
         # (highest weight first, then by name for same weight)
         mock_badges_queryset = Mock()
-        mock_badges_queryset.filter.return_value.select_related.return_value.order_by.return_value = [
+        (
+            mock_badges_queryset.filter.return_value.select_related.return_value.order_by.return_value
+        ) = [
             mock_user_badge_high,  # weight 100
             mock_user_badge_medium_a,  # weight 50, name "Medium Weight A"
             mock_user_badge_medium_b,  # weight 50, name "Medium Weight B"
@@ -185,7 +189,9 @@ class TestUserNode:
         """Test badges field only returns active badges."""
         mock_user = Mock()
         mock_badges_queryset = Mock()
-        mock_badges_queryset.filter.return_value.select_related.return_value.order_by.return_value = []
+        (
+            mock_badges_queryset.filter.return_value.select_related.return_value.order_by.return_value
+        ) = []
         mock_user.badges = mock_badges_queryset
 
         UserNode.badges(mock_user)

@@ -27,7 +27,7 @@ const Badges = ({ name, cssClass, showTooltip = true }: BadgeProps) => {
     return (
       <div className="inline-flex items-center">
         {showTooltip ? (
-          <Tooltip content={`${name} (icon not found)`} className='bg-gray-800'>
+          <Tooltip content={`${name} (icon not found)`} className="bg-gray-800">
             <FontAwesomeIcon icon={['fas', 'medal']} className="h-4 w-4 text-gray-400" />
           </Tooltip>
         ) : (

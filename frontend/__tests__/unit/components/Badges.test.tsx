@@ -40,9 +40,8 @@ jest.mock('@fortawesome/free-solid-svg-icons', () => ({
   },
 }))
 
-// Mock Tooltip component
-jest.mock('@heroui/tooltip', () => {
-  const MockTooltip = ({
+jest.mock('@heroui/tooltip', () => ({
+  Tooltip: ({
     children,
     content,
     ...props
@@ -54,13 +53,8 @@ jest.mock('@heroui/tooltip', () => {
     <div data-testid="tooltip" data-content={content} {...props}>
       {children}
     </div>
-  )
-  MockTooltip.displayName = 'MockTooltip'
-  return {
-    __esModule: true,
-    Tooltip: MockTooltip,
-  }
-})
+  ),
+}))
 
 describe('Badges', () => {
   const defaultProps = {
