@@ -54,6 +54,7 @@ class RepositoryContributorQuery:
             RepositoryContributorNode(
                 avatar_url=tc["avatar_url"],
                 contributions_count=tc["contributions_count"],
+                id=tc["login"],
                 login=tc["login"],
                 name=tc["name"],
                 project_key=tc.get("project_key"),

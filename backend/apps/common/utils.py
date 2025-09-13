@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from datetime import UTC, datetime
+from urllib.parse import urlparse
 
 from django.conf import settings
 from django.template.defaultfilters import pluralize
@@ -43,6 +44,22 @@ def convert_to_snake_case(text: str) -> str:
 
     """
     return re.sub(r"(?<!^)(?=[A-Z])", "_", text).lower()
+
+
+def clean_url(url: str) -> str | None:
+    """Clean a URL by removing whitespace and trailing punctuation.
+
+    Args:
+        url (str): Raw URL string.
+
+    Returns:
+        str | None: Cleaned URL string or None if empty.
+
+    """
+    if not url:
+        return None
+
+    return url.strip().rstrip(".,;:!?") or None
 
 
 def get_absolute_url(path: str) -> str:
@@ -174,3 +191,24 @@ def truncate(text: str, limit: int, truncate: str = "...") -> str:
 
     """
     return Truncator(text).chars(limit, truncate=truncate)
+
+
+def validate_url(url: str) -> bool:
+    """Validate that a URL has proper scheme and netloc.
+
+    Args:
+        url (str): URL string to validate.
+
+    Returns:
+        bool: True if URL is valid, False otherwise.
+
+    """
+    if not url:
+        return False
+
+    try:
+        parsed = urlparse(url)
+    except ValueError:
+        return False
+
+    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
