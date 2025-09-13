@@ -106,6 +106,7 @@ pymdownx
 pypoetry
 pyyaml
 repositorycontributor
+repositorys
 requirepass
 rsc
 saft
