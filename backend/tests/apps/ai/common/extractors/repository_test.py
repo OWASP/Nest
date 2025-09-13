@@ -1,13 +1,52 @@
 """Tests for repository content extractor."""
 
+import json
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 from apps.ai.common.constants import DELIMITER
 from apps.ai.common.extractors.repository import (
     extract_repository_content,
-    extract_repository_markdown_content,
 )
+
+
+def create_mock_repository(**kwargs):
+    """Create a properly configured mock repository."""
+    repository = MagicMock()
+    repository.name = kwargs.get("name")
+    repository.key = kwargs.get("key")
+    repository.description = kwargs.get("description")
+    repository.homepage = kwargs.get("homepage")
+    repository.license = kwargs.get("license")
+    repository.topics = kwargs.get("topics", [])
+    repository.is_archived = kwargs.get("is_archived", False)
+    repository.is_empty = kwargs.get("is_empty", False)
+    repository.is_owasp_repository = kwargs.get("is_owasp_repository", False)
+    repository.is_owasp_site_repository = kwargs.get("is_owasp_site_repository", False)
+    repository.is_funding_policy_compliant = kwargs.get("is_funding_policy_compliant", False)
+    repository.has_funding_yml = kwargs.get("has_funding_yml", False)
+    repository.funding_yml = kwargs.get("funding_yml", {})
+    repository.pages_status = kwargs.get("pages_status")
+    repository.has_downloads = kwargs.get("has_downloads", False)
+    repository.has_issues = kwargs.get("has_issues", False)
+    repository.has_pages = kwargs.get("has_pages", False)
+    repository.has_projects = kwargs.get("has_projects", False)
+    repository.has_wiki = kwargs.get("has_wiki", False)
+    repository.commits_count = kwargs.get("commits_count")
+    repository.contributors_count = kwargs.get("contributors_count")
+    repository.forks_count = kwargs.get("forks_count")
+    repository.open_issues_count = kwargs.get("open_issues_count")
+    repository.stars_count = kwargs.get("stars_count")
+    repository.subscribers_count = kwargs.get("subscribers_count")
+    repository.watchers_count = kwargs.get("watchers_count")
+    repository.created_at = kwargs.get("created_at")
+    repository.updated_at = kwargs.get("updated_at")
+    repository.pushed_at = kwargs.get("pushed_at")
+    repository.track_issues = kwargs.get("track_issues", False)
+    repository.default_branch = kwargs.get("default_branch")
+    repository.organization = kwargs.get("organization")
+    repository.owner = kwargs.get("owner")
+    return repository
 
 
 class TestRepositoryContentExtractor:
@@ -15,224 +54,199 @@ class TestRepositoryContentExtractor:
 
     def test_extract_repository_content_full_data(self):
         """Test extraction with complete repository data."""
-        repository = MagicMock()
-        repository.name = "test-repo"
-        repository.key = "test-repo-key"
-        repository.description = "A test repository for testing purposes"
-        repository.homepage = "https://test-repo.example.com"
-        repository.license = "MIT"
-        repository.topics = ["security", "testing", "python"]
-        repository.is_archived = False
-        repository.is_empty = False
-        repository.is_owasp_repository = True
-        repository.is_owasp_site_repository = True
-        repository.is_funding_policy_compliant = True
-        repository.has_funding_yml = True
-        repository.funding_yml = {"github": "owasp"}
-        repository.pages_status = "enabled"
-        repository.has_downloads = True
-        repository.has_issues = True
-        repository.has_pages = True
-        repository.has_projects = True
-        repository.has_wiki = True
-        repository.commits_count = 1500
-        repository.contributors_count = 25
-        repository.forks_count = 100
-        repository.open_issues_count = 15
-        repository.stars_count = 500
-        repository.subscribers_count = 50
-        repository.watchers_count = 75
-        repository.created_at = datetime(2020, 1, 15, tzinfo=UTC)
-        repository.updated_at = datetime(2024, 6, 10, tzinfo=UTC)
-        repository.pushed_at = datetime(2024, 6, 9, tzinfo=UTC)
-        repository.track_issues = True
-
         organization = MagicMock()
         organization.login = "test-org"
-        repository.organization = organization
 
         owner = MagicMock()
         owner.login = "test-user"
-        repository.owner = owner
 
-        prose, metadata = extract_repository_content(repository)
+        repository = create_mock_repository(
+            name="test-repo",
+            key="test-repo-key",
+            description="A test repository for testing purposes",
+            homepage="https://test-repo.example.com",
+            license="MIT",
+            topics=["security", "testing", "python"],
+            is_owasp_repository=True,
+            is_owasp_site_repository=True,
+            is_funding_policy_compliant=True,
+            has_funding_yml=True,
+            funding_yml={"github": "owasp"},
+            pages_status="enabled",
+            has_downloads=True,
+            has_issues=True,
+            has_pages=True,
+            has_projects=True,
+            has_wiki=True,
+            commits_count=1500,
+            contributors_count=25,
+            forks_count=100,
+            open_issues_count=15,
+            stars_count=500,
+            subscribers_count=50,
+            watchers_count=75,
+            created_at=datetime(2020, 1, 15, tzinfo=UTC),
+            updated_at=datetime(2024, 6, 10, tzinfo=UTC),
+            pushed_at=datetime(2024, 6, 9, tzinfo=UTC),
+            track_issues=True,
+            default_branch="main",
+            organization=organization,
+            owner=owner,
+        )
 
-        assert "Description: A test repository for testing purposes" in prose
+        json_content, metadata = extract_repository_content(repository)
+
+        data = json.loads(json_content)
+        assert data["name"] == "test-repo"
+        assert data["key"] == "test-repo-key"
+        assert data["description"] == "A test repository for testing purposes"
+        assert data["homepage"] == "https://test-repo.example.com"
+        assert data["license"] == "MIT"
+        assert data["topics"] == ["security", "testing", "python"]
+        assert data["status"]["owasp_repository"] is True
+        assert data["status"]["owasp_site_repository"] is True
+        assert data["funding"]["policy_compliant"] is True
+        assert data["funding"]["has_funding_yml"] is True
+        assert data["funding"]["funding_yml_data"] is True
+        assert data["pages_status"] == "enabled"
+        assert data["features"] == ["downloads", "issues", "pages", "projects", "wiki"]
+        assert data["statistics"]["commits"] == 1500
+        assert data["statistics"]["contributors"] == 25
+        assert data["statistics"]["forks"] == 100
+        assert data["statistics"]["open_issues"] == 15
+        assert data["statistics"]["stars"] == 500
+        assert data["statistics"]["subscribers"] == 50
+        assert data["statistics"]["watchers"] == 75
+        assert data["dates"]["created"] == "2020-01-15"
+        assert data["dates"]["last_updated"] == "2024-06-10"
+        assert data["dates"]["last_pushed"] == "2024-06-09"
+        assert data["ownership"]["organization"] == "test-org"
+        assert data["ownership"]["owner"] == "test-user"
+        assert data["track_issues"] is True
 
         assert "Repository Name: test-repo" in metadata
         assert "Repository Key: test-repo-key" in metadata
-        assert "Homepage: https://test-repo.example.com" in metadata
-        assert "License: MIT" in metadata
-        assert "Topics: security, testing, python" in metadata
-        assert "Repository Status: OWASP Repository, OWASP Site Repository" in metadata
-        assert "Funding Policy Compliant" in metadata
-        assert "Has FUNDING.yml" in metadata
-        assert "Has FUNDING.yml Data" in metadata
-        assert "Pages Status: enabled" in metadata
-        assert "Repository Features: Downloads, Issues, Pages, Projects, Wiki" in metadata
-        assert "Commits: 1500" in metadata
-        assert "Contributors: 25" in metadata
-        assert "Forks: 100" in metadata
-        assert "Open Issues: 15" in metadata
-        assert "Stars: 500" in metadata
-        assert "Subscribers: 50" in metadata
-        assert "Watchers: 75" in metadata
-        assert "Created: 2020-01-15" in metadata
-        assert "Last Updated: 2024-06-10" in metadata
-        assert "Last Pushed: 2024-06-09" in metadata
         assert "Organization: test-org" in metadata
         assert "Owner: test-user" in metadata
-        assert "Track Issues: True" in metadata
 
     def test_extract_repository_content_minimal_data(self):
         """Test extraction with minimal repository data."""
-        repository = MagicMock()
-        repository.name = "minimal-repo"
-        repository.key = "minimal-repo-key"
-        repository.description = None
-        repository.homepage = None
-        repository.license = None
-        repository.topics = []
-        repository.is_archived = False
-        repository.is_empty = False
-        repository.is_owasp_repository = False
-        repository.is_owasp_site_repository = False
-        repository.is_funding_policy_compliant = False
-        repository.has_funding_yml = False
-        repository.funding_yml = {}
-        repository.pages_status = None
-        repository.has_downloads = False
-        repository.has_issues = False
-        repository.has_pages = False
-        repository.has_projects = False
-        repository.has_wiki = False
-        repository.commits_count = None
-        repository.contributors_count = None
-        repository.forks_count = None
-        repository.open_issues_count = None
-        repository.stars_count = None
-        repository.subscribers_count = None
-        repository.watchers_count = None
-        repository.created_at = None
-        repository.updated_at = None
-        repository.pushed_at = None
-        repository.organization = None
-        repository.owner = None
-        repository.track_issues = False
+        repository = create_mock_repository(name="minimal-repo", key="minimal-repo-key")
 
-        prose, metadata = extract_repository_content(repository)
+        json_content, metadata = extract_repository_content(repository)
 
-        assert prose == ""
+        data = json.loads(json_content)
+        assert data["name"] == "minimal-repo"
+        assert data["key"] == "minimal-repo-key"
 
         assert "Repository Name: minimal-repo" in metadata
         assert "Repository Key: minimal-repo-key" in metadata
 
     def test_extract_repository_content_archived_repository(self):
         """Test extraction with archived repository."""
-        repository = MagicMock()
-        repository.name = "archived-repo"
-        repository.key = "archived-repo-key"
-        repository.description = "This repository is archived"
-        repository.is_archived = True
-        repository.is_empty = False
-        repository.is_owasp_repository = True
-        repository.is_owasp_site_repository = False
+        repository = create_mock_repository(
+            name="archived-repo",
+            key="archived-repo-key",
+            description="This repository is archived",
+            is_archived=True,
+            is_owasp_repository=True,
+        )
 
-        prose, metadata = extract_repository_content(repository)
+        json_content, metadata = extract_repository_content(repository)
 
-        assert "Description: This repository is archived" in prose
-        assert "Repository Status: Archived, OWASP Repository" in metadata
+        data = json.loads(json_content)
+        assert data["name"] == "archived-repo"
+        assert data["key"] == "archived-repo-key"
+        assert data["description"] == "This repository is archived"
+        assert data["status"]["archived"] is True
+        assert data["status"]["owasp_repository"] is True
+
+        assert "Repository Name: archived-repo" in metadata
+        assert "Repository Key: archived-repo-key" in metadata
 
     def test_extract_repository_content_empty_repository(self):
         """Test extraction with empty repository."""
-        repository = MagicMock()
-        repository.name = "empty-repo"
-        repository.key = "empty-repo-key"
-        repository.description = "This repository is empty"
-        repository.is_archived = False
-        repository.is_empty = True
-        repository.is_owasp_repository = False
-        repository.is_owasp_site_repository = False
+        repository = create_mock_repository(
+            name="empty-repo",
+            key="empty-repo-key",
+            description="This repository is empty",
+            is_empty=True,
+        )
 
-        prose, metadata = extract_repository_content(repository)
+        json_content, metadata = extract_repository_content(repository)
 
-        assert "Description: This repository is empty" in prose
-        assert "Repository Status: Empty" in metadata
+        data = json.loads(json_content)
+        assert data["name"] == "empty-repo"
+        assert data["key"] == "empty-repo-key"
+        assert data["description"] == "This repository is empty"
+        assert data["status"]["empty"] is True
+
+        assert "Repository Name: empty-repo" in metadata
+        assert "Repository Key: empty-repo-key" in metadata
 
     def test_extract_repository_content_with_organization_only(self):
         """Test extraction when repository has organization but no owner."""
-        repository = MagicMock()
-        repository.name = "org-repo"
-        repository.key = "org-repo-key"
-        repository.organization = MagicMock(login="test-org")
-        repository.owner = None
+        organization = MagicMock()
+        organization.login = "test-org"
 
-        _, metadata = extract_repository_content(repository)
+        repository = create_mock_repository(
+            name="org-repo", key="org-repo-key", organization=organization
+        )
 
+        json_content, metadata = extract_repository_content(repository)
+
+        data = json.loads(json_content)
+        assert data["name"] == "org-repo"
+        assert data["key"] == "org-repo-key"
+        assert data["ownership"]["organization"] == "test-org"
+        assert "owner" not in data["ownership"]
+
+        assert "Repository Name: org-repo" in metadata
+        assert "Repository Key: org-repo-key" in metadata
         assert "Organization: test-org" in metadata
-        assert "Owner: " not in metadata
 
     def test_extract_repository_content_with_owner_only(self):
         """Test extraction when repository has owner but no organization."""
-        repository = MagicMock()
-        repository.name = "user-repo"
-        repository.key = "user-repo-key"
-        repository.organization = None
-        repository.owner = MagicMock(login="test-user")
+        owner = MagicMock()
+        owner.login = "test-user"
 
-        _, metadata = extract_repository_content(repository)
+        repository = create_mock_repository(name="user-repo", key="user-repo-key", owner=owner)
 
+        json_content, metadata = extract_repository_content(repository)
+
+        data = json.loads(json_content)
+        assert data["name"] == "user-repo"
+        assert data["key"] == "user-repo-key"
+        assert data["ownership"]["owner"] == "test-user"
+        assert "organization" not in data["ownership"]
+
+        assert "Repository Name: user-repo" in metadata
+        assert "Repository Key: user-repo-key" in metadata
         assert "Owner: test-user" in metadata
-        assert "Organization: " not in metadata
 
     def test_extract_repository_content_delimiter_usage(self):
         """Test that DELIMITER is used correctly between content parts."""
-        repository = MagicMock()
-        repository.name = "delimiter-test"
-        repository.key = "delimiter-test-key"
-        repository.description = "First description"
-        repository.homepage = "https://example.com"
-        repository.license = "MIT"
-        repository.topics = []
-        repository.is_archived = False
-        repository.is_empty = False
-        repository.is_owasp_repository = False
-        repository.is_owasp_site_repository = False
-        repository.is_funding_policy_compliant = False
-        repository.has_funding_yml = False
-        repository.funding_yml = {}
-        repository.pages_status = None
-        repository.has_downloads = False
-        repository.has_issues = False
-        repository.has_pages = False
-        repository.has_projects = False
-        repository.has_wiki = False
-        repository.commits_count = None
-        repository.contributors_count = None
-        repository.forks_count = None
-        repository.open_issues_count = None
-        repository.stars_count = None
-        repository.subscribers_count = None
-        repository.watchers_count = None
-        repository.created_at = None
-        repository.updated_at = None
-        repository.pushed_at = None
-        repository.organization = None
-        repository.owner = None
-        repository.track_issues = False
+        repository = create_mock_repository(
+            name="delimiter-test",
+            key="delimiter-test-key",
+            description="First description",
+            homepage="https://example.com",
+            license="MIT",
+        )
 
-        prose, metadata = extract_repository_content(repository)
+        json_content, metadata = extract_repository_content(repository)
+
+        data = json.loads(json_content)
+        assert data["name"] == "delimiter-test"
+        assert data["key"] == "delimiter-test-key"
+        assert data["description"] == "First description"
+        assert data["homepage"] == "https://example.com"
+        assert data["license"] == "MIT"
 
         expected_metadata = (
-            f"Repository Name: delimiter-test{DELIMITER}"
-            f"Repository Key: delimiter-test-key{DELIMITER}"
-            f"Homepage: https://example.com{DELIMITER}"
-            f"License: MIT"
+            f"Repository Name: delimiter-test{DELIMITER}Repository Key: delimiter-test-key"
         )
         assert metadata == expected_metadata
-
-        expected_prose = "Description: First description"
-        assert prose == expected_prose
 
 
 class TestRepositoryMarkdownContentExtractor:
@@ -241,162 +255,244 @@ class TestRepositoryMarkdownContentExtractor:
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
     def test_extract_repository_markdown_content_with_description(self, mock_get_content):
         """Test extraction with repository description."""
-        repository = MagicMock()
-        repository.description = "Test repository with markdown content"
-        repository.organization = MagicMock(login="test-org")
-        repository.key = "test-repo"
-        repository.default_branch = "main"
+        organization = MagicMock()
+        organization.login = "test-org"
+
+        repository = create_mock_repository(
+            name="test-repo",
+            key="test-repo",
+            description="Test repository with markdown content",
+            default_branch="main",
+            organization=organization,
+        )
 
         mock_get_content.return_value = ""
 
-        prose, metadata = extract_repository_markdown_content(repository)
+        json_content, metadata = extract_repository_content(repository)
 
-        assert "Repository Description: Test repository with markdown content" in prose
-        assert metadata == ""
+        data = json.loads(json_content)
+        assert data["description"] == "Test repository with markdown content"
+        assert data["ownership"]["organization"] == "test-org"
+
+        assert "Repository Name: test-repo" in metadata
+        assert "Repository Key: test-repo" in metadata
+        assert "Organization: test-org" in metadata
 
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
     def test_extract_repository_markdown_content_with_readme(self, mock_get_content):
         """Test extraction with README.md file."""
-        repository = MagicMock()
-        repository.description = "Test repository"
-        repository.organization = MagicMock(login="test-org")
-        repository.key = "test-repo"
-        repository.default_branch = "main"
+        organization = MagicMock()
+        organization.login = "test-org"
+
+        repository = create_mock_repository(
+            name="test-repo",
+            key="test-repo",
+            description="Test repository",
+            default_branch="main",
+            organization=organization,
+        )
 
         mock_get_content.return_value = "# Test Repository\n\nThis is a test repository."
 
-        prose, _ = extract_repository_markdown_content(repository)
+        json_content, _ = extract_repository_content(repository)
 
-        assert "Repository Description: Test repository" in prose
-        assert "## README.md" in prose
-        assert "# Test Repository\n\nThis is a test repository." in prose
+        data = json.loads(json_content)
+        assert data["description"] == "Test repository"
+        assert data["ownership"]["organization"] == "test-org"
+        assert "markdown_content" in data
+        assert "README.md" in data["markdown_content"]
+        assert (
+            data["markdown_content"]["README.md"]
+            == "# Test Repository\n\nThis is a test repository."
+        )
 
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
     def test_extract_repository_markdown_content_with_owner_fallback(self, mock_get_content):
         """Test extraction when organization is None, falls back to owner."""
-        repository = MagicMock()
-        repository.description = "Test repository"
-        repository.organization = None
-        repository.owner = MagicMock(login="test-user")
-        repository.key = "test-repo"
-        repository.default_branch = "main"
+        owner = MagicMock()
+        owner.login = "test-user"
+
+        repository = create_mock_repository(
+            name="test-repo",
+            key="test-repo",
+            description="Test repository",
+            default_branch="main",
+            owner=owner,
+        )
 
         mock_get_content.return_value = "# Test Repository\n\nThis is a test repository."
 
-        prose, _ = extract_repository_markdown_content(repository)
+        json_content, _ = extract_repository_content(repository)
 
-        assert "Repository Description: Test repository" in prose
-        assert "## README.md" in prose
+        data = json.loads(json_content)
+        assert data["description"] == "Test repository"
+        assert data["ownership"]["owner"] == "test-user"
+        assert "markdown_content" in data
+        assert "README.md" in data["markdown_content"]
 
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
     def test_extract_repository_markdown_content_with_default_branch_fallback(
         self, mock_get_content
     ):
         """Test extraction when default_branch is None, falls back to 'main'."""
-        repository = MagicMock()
-        repository.description = "Test repository"
-        repository.organization = MagicMock(login="test-org")
-        repository.key = "test-repo"
-        repository.default_branch = None
+        organization = MagicMock()
+        organization.login = "test-org"
+
+        repository = create_mock_repository(
+            name="test-repo",
+            key="test-repo",
+            description="Test repository",
+            organization=organization,
+        )
 
         mock_get_content.return_value = "# Test Repository\n\nThis is a test repository."
 
-        prose, _ = extract_repository_markdown_content(repository)
+        json_content, _ = extract_repository_content(repository)
 
-        assert "Repository Description: Test repository" in prose
-        assert "## README.md" in prose
+        data = json.loads(json_content)
+        assert data["description"] == "Test repository"
+        assert data["ownership"]["organization"] == "test-org"
+        assert "markdown_content" in data
+        assert "README.md" in data["markdown_content"]
 
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
     def test_extract_repository_markdown_content_multiple_files(self, mock_get_content):
         """Test extraction with multiple markdown files."""
-        repository = MagicMock()
-        repository.description = "Test repository"
-        repository.organization = MagicMock(login="test-org")
-        repository.key = "test-repo"
-        repository.default_branch = "main"
+        organization = MagicMock()
+        organization.login = "test-org"
+
+        repository = create_mock_repository(
+            name="test-repo",
+            key="test-repo",
+            description="Test repository",
+            default_branch="main",
+            organization=organization,
+        )
 
         def mock_content_side_effect(url):
             if "README.md" in url:
                 return "# README Content"
-            if "CONTRIBUTING.md" in url:
-                return "# Contributing Guidelines"
-            if "CODE_OF_CONDUCT.md" in url:
-                return "# Code of Conduct"
+            if "index.md" in url:
+                return "# Index Content"
+            if "info.md" in url:
+                return "# Info Content"
+            if "leaders.md" in url:
+                return "# Leaders Content"
             return ""
 
         mock_get_content.side_effect = mock_content_side_effect
 
-        prose, _ = extract_repository_markdown_content(repository)
+        json_content, _ = extract_repository_content(repository)
 
-        assert "Repository Description: Test repository" in prose
-        assert "## README.md" in prose
-        assert "# README Content" in prose
-        assert "## CONTRIBUTING.md" in prose
-        assert "# Contributing Guidelines" in prose
-        assert "## CODE_OF_CONDUCT.md" in prose
-        assert "# Code of Conduct" in prose
+        data = json.loads(json_content)
+        assert data["description"] == "Test repository"
+        assert data["ownership"]["organization"] == "test-org"
+        assert "markdown_content" in data
+        assert "README.md" in data["markdown_content"]
+        assert data["markdown_content"]["README.md"] == "# README Content"
+        assert "index.md" in data["markdown_content"]
+        assert data["markdown_content"]["index.md"] == "# Index Content"
+        assert "info.md" in data["markdown_content"]
+        assert data["markdown_content"]["info.md"] == "# Info Content"
+        assert "leaders.md" in data["markdown_content"]
+        assert data["markdown_content"]["leaders.md"] == "# Leaders Content"
 
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
     def test_extract_repository_markdown_content_file_fetch_exception(self, mock_get_content):
         """Test extraction when file fetching raises an exception."""
-        repository = MagicMock()
-        repository.description = "Test repository"
-        repository.organization = MagicMock(login="test-org")
-        repository.key = "test-repo"
-        repository.default_branch = "main"
+        organization = MagicMock()
+        organization.login = "test-org"
+
+        repository = create_mock_repository(
+            name="test-repo",
+            key="test-repo",
+            description="Test repository",
+            default_branch="main",
+            organization=organization,
+        )
 
         mock_get_content.side_effect = ConnectionError("Network error")
 
-        prose, metadata = extract_repository_markdown_content(repository)
+        json_content, metadata = extract_repository_content(repository)
 
-        assert "Repository Description: Test repository" in prose
-        assert metadata == ""
+        data = json.loads(json_content)
+        assert data["description"] == "Test repository"
+        assert data["ownership"]["organization"] == "test-org"
+        assert "markdown_content" not in data
+
+        assert "Repository Name: test-repo" in metadata
+        assert "Repository Key: test-repo" in metadata
+        assert "Organization: test-org" in metadata
 
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
     def test_extract_repository_markdown_content_empty_file_content(self, mock_get_content):
         """Test extraction when file content is empty or whitespace."""
-        repository = MagicMock()
-        repository.description = "Test repository"
-        repository.organization = MagicMock(login="test-org")
-        repository.key = "test-repo"
-        repository.default_branch = "main"
+        organization = MagicMock()
+        organization.login = "test-org"
+
+        repository = create_mock_repository(
+            name="test-repo",
+            key="test-repo",
+            description="Test repository",
+            default_branch="main",
+            organization=organization,
+        )
 
         mock_get_content.return_value = "   \n\n  "
 
-        prose, _ = extract_repository_markdown_content(repository)
+        json_content, _ = extract_repository_content(repository)
 
-        assert "Repository Description: Test repository" in prose
-        assert "## README.md" not in prose
+        data = json.loads(json_content)
+        assert data["description"] == "Test repository"
+        assert data["ownership"]["organization"] == "test-org"
+        assert "markdown_content" not in data
 
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
     def test_extract_repository_markdown_content_no_description(self, mock_get_content):
         """Test extraction when repository has no description."""
-        repository = MagicMock()
-        repository.description = None
-        repository.organization = MagicMock(login="test-org")
-        repository.key = "test-repo"
-        repository.default_branch = "main"
+        organization = MagicMock()
+        organization.login = "test-org"
+
+        repository = create_mock_repository(
+            name="test-repo",
+            key="test-repo",
+            description=None,
+            default_branch="main",
+            organization=organization,
+        )
 
         mock_get_content.return_value = "# Test Repository\n\nThis is a test repository."
 
-        prose, metadata = extract_repository_markdown_content(repository)
+        json_content, metadata = extract_repository_content(repository)
 
-        assert "## README.md" in prose
-        assert "# Test Repository\n\nThis is a test repository." in prose
-        assert metadata == ""
+        data = json.loads(json_content)
+        assert data["name"] == "test-repo"
+        assert data["key"] == "test-repo"
+        assert data["ownership"]["organization"] == "test-org"
+        assert "markdown_content" in data
+        assert "README.md" in data["markdown_content"]
+
+        assert "Repository Name: test-repo" in metadata
+        assert "Repository Key: test-repo" in metadata
+        assert "Organization: test-org" in metadata
 
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
     def test_extract_repository_markdown_content_url_construction(self, mock_get_content):
         """Test that URLs are constructed correctly for file fetching."""
-        repository = MagicMock()
-        repository.description = "Test repository"
-        repository.organization = MagicMock(login="test-org")
-        repository.key = "test-repo"
-        repository.default_branch = "develop"
+        organization = MagicMock()
+        organization.login = "test-org"
+
+        repository = create_mock_repository(
+            name="test-repo",
+            key="test-repo",
+            description="Test repository",
+            default_branch="develop",
+            organization=organization,
+        )
 
         mock_get_content.return_value = "# Test Content"
 
-        extract_repository_markdown_content(repository)
+        extract_repository_content(repository)
 
         mock_get_content.assert_called()
         assert any(
@@ -406,30 +502,42 @@ class TestRepositoryMarkdownContentExtractor:
 
     def test_extract_repository_markdown_content_no_owner_or_org(self):
         """Test extraction when repository has neither organization nor owner."""
-        repository = MagicMock()
-        repository.description = "Test repository"
-        repository.organization = None
-        repository.owner = None
-        repository.key = "test-repo"
-        repository.default_branch = "main"
+        repository = create_mock_repository(
+            name="test-repo", key="test-repo", description="Test repository", default_branch="main"
+        )
 
-        prose, metadata = extract_repository_markdown_content(repository)
+        json_content, metadata = extract_repository_content(repository)
 
-        assert "Repository Description: Test repository" in prose
-        assert metadata == ""
+        data = json.loads(json_content)
+        assert data["description"] == "Test repository"
+        assert data["name"] == "test-repo"
+        assert data["key"] == "test-repo"
+
+        assert "Repository Name: test-repo" in metadata
+        assert "Repository Key: test-repo" in metadata
 
     def test_extract_repository_markdown_content_no_key(self):
         """Test extraction when repository has no key."""
-        repository = MagicMock()
-        repository.description = "Test repository"
-        repository.organization = MagicMock(login="test-org")
-        repository.key = None
-        repository.default_branch = "main"
+        organization = MagicMock()
+        organization.login = "test-org"
 
-        prose, metadata = extract_repository_markdown_content(repository)
+        repository = create_mock_repository(
+            name="test-repo",
+            key=None,
+            description="Test repository",
+            default_branch="main",
+            organization=organization,
+        )
 
-        assert "Repository Description: Test repository" in prose
-        assert metadata == ""
+        json_content, metadata = extract_repository_content(repository)
+
+        data = json.loads(json_content)
+        assert data["description"] == "Test repository"
+        assert data["name"] == "test-repo"
+        assert data["ownership"]["organization"] == "test-org"
+
+        assert "Repository Name: test-repo" in metadata
+        assert "Organization: test-org" in metadata
 
     @patch("apps.ai.common.extractors.repository.logger")
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
@@ -437,17 +545,25 @@ class TestRepositoryMarkdownContentExtractor:
         self, mock_get_content, mock_logger
     ):
         """Test that debug logging occurs when file fetching fails."""
-        repository = MagicMock()
-        repository.description = "Test repository"
-        repository.organization = MagicMock(login="test-org")
-        repository.key = "test-repo"
-        repository.default_branch = "main"
+        organization = MagicMock()
+        organization.login = "test-org"
+
+        repository = create_mock_repository(
+            name="test-repo",
+            key="test-repo",
+            description="Test repository",
+            default_branch="main",
+            organization=organization,
+        )
 
         mock_get_content.side_effect = ConnectionError("Test exception")
 
-        prose, _ = extract_repository_markdown_content(repository)
+        json_content, _ = extract_repository_content(repository)
 
-        assert "Repository Description: Test repository" in prose
+        data = json.loads(json_content)
+        assert data["description"] == "Test repository"
+        assert data["ownership"]["organization"] == "test-org"
+
         mock_logger.debug.assert_called()
         debug_call_args = mock_logger.debug.call_args[0][0]
         assert "Failed to fetch" in debug_call_args

@@ -52,16 +52,16 @@ class TestAiUpdateRepositoryChunksCommand:
 
     def test_source_name(self, command):
         """Test the source_name method returns the correct value."""
-        assert command.source_name() == "owasp_repository_markdown"
+        assert command.source_name() == "owasp_repository"
 
     def test_extract_content(self, command, mock_repository):
         """Test the extract_content method."""
         with patch(
-            "apps.ai.management.commands.ai_update_repository_chunks.extract_repository_markdown_content"
+            "apps.ai.management.commands.ai_update_repository_chunks.extract_repository_content"
         ) as mock_extract:
-            mock_extract.return_value = ("prose content", "metadata content")
+            mock_extract.return_value = ("json content", "metadata content")
             content = command.extract_content(mock_repository)
-            assert content == ("prose content", "metadata content")
+            assert content == ("json content", "metadata content")
             mock_extract.assert_called_once_with(mock_repository)
 
     def test_get_base_queryset(self, command):

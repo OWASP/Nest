@@ -3,7 +3,7 @@
 from django.db.models import QuerySet
 
 from apps.ai.common.base.context_command import BaseContextCommand
-from apps.ai.common.extractors.repository import extract_repository_markdown_content
+from apps.ai.common.extractors.repository import extract_repository_content
 from apps.github.models.repository import Repository
 
 
@@ -13,7 +13,7 @@ class Command(BaseContextCommand):
 
     def extract_content(self, entity: Repository) -> tuple[str, str]:
         """Extract content from the repository."""
-        return extract_repository_markdown_content(entity)
+        return extract_repository_content(entity)
 
     def get_base_queryset(self) -> QuerySet:
         """Return the base queryset with filtering for OWASP site repositories."""
@@ -33,4 +33,4 @@ class Command(BaseContextCommand):
 
     def source_name(self) -> str:
         """Return the source name for context creation."""
-        return "owasp_repository_markdown"
+        return "owasp_repository"

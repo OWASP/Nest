@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Max, Model
 
 from apps.ai.common.base.ai_command import BaseAICommand
-from apps.ai.common.utils import create_chunks_and_embeddings
+from apps.ai.common.utils import create_chunks_and_embeddings, is_json_content
 from apps.ai.models.chunk import Chunk
 from apps.ai.models.context import Context
 
@@ -43,10 +43,14 @@ class BaseChunkCommand(BaseAICommand):
                     count, _ = context.chunks.all().delete()
                     self.stdout.write(f"Deleted {count} stale chunks for {entity_key}")
 
-                prose_content, metadata_content = self.extract_content(entity)
-                full_content = (
-                    f"{metadata_content}\n\n{prose_content}" if metadata_content else prose_content
-                )
+                content, metadata_content = self.extract_content(entity)
+
+                if is_json_content(content):
+                    full_content = content
+                else:
+                    full_content = (
+                        f"{metadata_content}\n\n{content}" if metadata_content else content
+                    )
 
                 if not full_content.strip():
                     self.stdout.write(f"No content to chunk for {self.entity_name} {entity_key}")
