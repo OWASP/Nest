@@ -52,8 +52,6 @@ def extract_repository_content(repository) -> tuple[str, str]:
         funding["policy_compliant"] = True
     if repository.has_funding_yml:
         funding["has_funding_yml"] = True
-    if repository.funding_yml:
-        funding["funding_yml_data"] = True
     if funding:
         repository_data["funding"] = funding
 

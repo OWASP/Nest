@@ -107,7 +107,6 @@ class TestRepositoryContentExtractor:
         assert data["status"]["owasp_site_repository"] is True
         assert data["funding"]["policy_compliant"] is True
         assert data["funding"]["has_funding_yml"] is True
-        assert data["funding"]["funding_yml_data"] is True
         assert data["pages_status"] == "enabled"
         assert data["features"] == ["downloads", "issues", "pages", "projects", "wiki"]
         assert data["statistics"]["commits"] == 1500
