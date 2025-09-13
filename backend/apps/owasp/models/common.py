@@ -13,6 +13,7 @@ from django.db import models
 
 from apps.common.models import BulkSaveModel
 from apps.common.open_ai import OpenAi
+from apps.common.utils import clean_url, validate_url
 from apps.github.constants import (
     GITHUB_REPOSITORY_RE,
     GITHUB_USER_RE,
@@ -278,12 +279,31 @@ class RepositoryBasedEntityModel(models.Model):
         if not content:
             return []
 
-        urls = re.findall(r"https?:\/\/[^\s\)]+", content.strip())
+        urls = set()
+
+        markdown_links = re.findall(r"\[([^\]]*)\]\((https?://[^\s\)]+)\)", content)
+        for _text, url in markdown_links:
+            cleaned_url = clean_url(url)
+            if cleaned_url and validate_url(cleaned_url):
+                urls.add(cleaned_url)
+
+        standalone_urls = re.findall(r"(?<!\]\()https?://[^\s\)]+", content)
+        for url in standalone_urls:
+            cleaned_url = clean_url(url)
+            if cleaned_url and validate_url(cleaned_url):
+                urls.add(cleaned_url)
 
         if domain:
-            return [url for url in urls if urlparse(url).netloc == domain]
+            domain_urls = set()
+            for url in urls:
+                try:
+                    if urlparse(url).netloc == domain:
+                        domain_urls.add(url)
+                except ValueError:
+                    pass
+            urls = domain_urls
 
-        return urls
+        return sorted(urls)
 
     def parse_tags(self, tags) -> list[str]:
         """Parse entity tags."""

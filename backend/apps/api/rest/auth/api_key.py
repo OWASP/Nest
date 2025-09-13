@@ -5,15 +5,15 @@ from http import HTTPStatus
 from ninja.errors import HttpError
 from ninja.security import APIKeyHeader
 
-from apps.api.models.api_key import ApiKey
+from apps.api.models.api_key import ApiKey as ApiKeyModel
 
 
-class ApiKeyHeader(APIKeyHeader):
-    """Custom API key authentication class for Ninja."""
+class ApiKey(APIKeyHeader):
+    """API key authentication."""
 
     param_name = "X-API-Key"
 
-    def authenticate(self, request, key: str) -> ApiKey:
+    def authenticate(self, request, key: str) -> ApiKeyModel:
         """Authenticate the API key from the request header.
 
         Args:
@@ -24,10 +24,12 @@ class ApiKeyHeader(APIKeyHeader):
             APIKey: The APIKey object if the key is valid, otherwise None.
 
         """
-        if not key:
-            raise HttpError(HTTPStatus.UNAUTHORIZED, "Missing API key in 'X-API-Key' header")
+        error_message = f"Missing or invalid API key in '{self.param_name}' header"
 
-        if api_key := ApiKey.authenticate(raw_key=key):
+        if not key:
+            raise HttpError(HTTPStatus.UNAUTHORIZED, error_message)
+
+        if api_key := ApiKeyModel.authenticate(raw_key=key):
             return api_key
 
-        raise HttpError(HTTPStatus.UNAUTHORIZED, "Invalid API key")
+        raise HttpError(HTTPStatus.UNAUTHORIZED, error_message)

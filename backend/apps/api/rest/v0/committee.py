@@ -56,6 +56,7 @@ def list_committees(
 @router.get(
     "/{str:committee_id}",
     description="Retrieve committee details.",
+    operation_id="get_committee",
     response={
         HTTPStatus.NOT_FOUND: CommitteeErrorResponse,
         HTTPStatus.OK: CommitteeSchema,
