@@ -41,6 +41,7 @@ class EntityMemberInline(GenericTabularInline):
     ct_fk_field = "entity_id"
     extra = 1
     fields = (
+        "member_name",
         "member",
         "role",
         "description",
