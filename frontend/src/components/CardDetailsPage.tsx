@@ -1,6 +1,5 @@
 import {
   faCircleInfo,
-  faSquarePollVertical,
   faChartPie,
   faFolderOpen,
   faCode,
@@ -50,7 +49,6 @@ const DetailsCard = ({
   entityKey,
   geolocationData = null,
   healthMetricsData,
-  heatmap,
   isActive = true,
   languages,
   projectName,
@@ -116,20 +114,7 @@ const DetailsCard = ({
           </SecondaryCard>
         )}
 
-        {userSummary && (
-          <SecondaryCard icon={faCircleInfo} title={<AnchorTitle title="Summary" />}>
-            {userSummary}
-          </SecondaryCard>
-        )}
-
-        {heatmap && (
-          <SecondaryCard
-            icon={faSquarePollVertical}
-            title={<AnchorTitle title="Contribution Heatmap" />}
-          >
-            {heatmap}
-          </SecondaryCard>
-        )}
+        {userSummary && <SecondaryCard>{userSummary}</SecondaryCard>}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
             icon={faRectangleList}

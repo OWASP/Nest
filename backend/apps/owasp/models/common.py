@@ -8,9 +8,12 @@ import re
 from urllib.parse import urlparse
 
 import yaml
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
+from apps.common.models import BulkSaveModel
 from apps.common.open_ai import OpenAi
+from apps.common.utils import clean_url, validate_url
 from apps.github.constants import (
     GITHUB_REPOSITORY_RE,
     GITHUB_USER_RE,
@@ -18,6 +21,7 @@ from apps.github.constants import (
 from apps.github.models.user import User
 from apps.github.utils import get_repository_file_content
 from apps.owasp.models.entity_member import EntityMember
+from apps.owasp.models.enums.project import AudienceChoices
 
 logger = logging.getLogger(__name__)
 
@@ -102,6 +106,16 @@ class RepositoryBasedEntityModel(models.Model):
         )
 
     @property
+    def info_md_url(self) -> str | None:
+        """Return entity's raw info.md GitHub URL."""
+        return (
+            "https://raw.githubusercontent.com/OWASP/"
+            f"{self.owasp_repository.key}/{self.owasp_repository.default_branch}/info.md"
+            if self.owasp_repository
+            else None
+        )
+
+    @property
     def entity_leaders(self) -> models.QuerySet[User]:
         """Return entity's leaders."""
         return User.objects.filter(
@@ -160,6 +174,21 @@ class RepositoryBasedEntityModel(models.Model):
         open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
         self.summary = open_ai.complete() or ""
 
+    def get_audience(self):
+        """Get audience from info.md file on GitHub."""
+        content = get_repository_file_content(self.info_md_url)
+        if not content:
+            return []
+
+        found_keywords = set()
+
+        for line in content.split("\n"):
+            for lower_kw, original_kw in AudienceChoices.choices:
+                if original_kw in line:
+                    found_keywords.add(lower_kw)
+
+        return sorted(found_keywords)
+
     def get_leaders(self):
         """Get leaders from leaders.md file on GitHub."""
         content = get_repository_file_content(self.leaders_md_url)
@@ -179,6 +208,26 @@ class RepositoryBasedEntityModel(models.Model):
                     if name.strip()
                 ]
             )
+
+        return leaders
+
+    def get_leaders_emails(self):
+        """Get leaders emails from leaders.md file on GitHub."""
+        content = get_repository_file_content(self.leaders_md_url)
+        if not content:
+            return {}
+
+        leaders = {}
+        for line in content.split("\n"):
+            matches = re.findall(
+                r"^[-*]\s*\[([^\]]+)\]\(mailto:([^)]+)(\)|([^[<\n]))", line.strip()
+            )
+
+            for match in matches:
+                if match[0] and match[1]:  # Name with email
+                    leaders[match[0].strip()] = match[1].strip()
+                elif match[2]:  # Name without email
+                    leaders[match[2].strip()] = None
 
         return leaders
 
@@ -224,6 +273,38 @@ class RepositoryBasedEntityModel(models.Model):
 
         return url
 
+    def get_urls(self, domain=None):
+        """Get URLs from info.md file on GitHub."""
+        content = get_repository_file_content(self.info_md_url)
+        if not content:
+            return []
+
+        urls = set()
+
+        markdown_links = re.findall(r"\[([^\]]*)\]\((https?://[^\s\)]+)\)", content)
+        for _text, url in markdown_links:
+            cleaned_url = clean_url(url)
+            if cleaned_url and validate_url(cleaned_url):
+                urls.add(cleaned_url)
+
+        standalone_urls = re.findall(r"(?<!\]\()https?://[^\s\)]+", content)
+        for url in standalone_urls:
+            cleaned_url = clean_url(url)
+            if cleaned_url and validate_url(cleaned_url):
+                urls.add(cleaned_url)
+
+        if domain:
+            domain_urls = set()
+            for url in urls:
+                try:
+                    if urlparse(url).netloc == domain:
+                        domain_urls.add(url)
+                except ValueError:
+                    pass
+            urls = domain_urls
+
+        return sorted(urls)
+
     def parse_tags(self, tags) -> list[str]:
         """Parse entity tags."""
         if not tags:
@@ -234,3 +315,33 @@ class RepositoryBasedEntityModel(models.Model):
             if isinstance(tags, str)
             else tags
         )
+
+    def sync_leaders(self, leaders_emails):
+        """Sync Leaders data.
+
+        Args:
+            leaders_emails (dict[str, str | None]): A dictionary
+            where keys are the full names of the leaders
+            and values are their corresponding email addresses (or None if no email is provided).
+
+        """
+        content_type = ContentType.objects.get_for_model(self.__class__)
+
+        leaders = []
+        for order, (name, email) in enumerate(leaders_emails.items()):
+            leaders.append(
+                EntityMember.update_data(
+                    {
+                        "entity_id": self.id,
+                        "entity_type": content_type,
+                        "member_email": email or "",
+                        "member_name": name,
+                        "order": (order + 1) * 100,
+                        "role": EntityMember.Role.LEADER,
+                    },
+                    save=False,
+                )
+            )
+
+        if leaders:
+            BulkSaveModel.bulk_save(EntityMember, leaders)

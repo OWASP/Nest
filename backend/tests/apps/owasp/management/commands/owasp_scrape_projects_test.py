@@ -33,8 +33,8 @@ class TestOwaspScrapeProjects:
         """Test audience validation logic."""
         mock_scraper = mock.Mock(spec=OwaspScraper)
         mock_scraper.page_tree = True
-        mock_scraper.get_urls.return_value = []
-        mock_scraper.get_audience.return_value = ["builder", "breaker", "defender"]
+        mock_project.get_urls.return_value = []
+        mock_project.get_audience.return_value = ["builder", "breaker", "defender"]
 
         mock_active_projects = mock.MagicMock()
         mock_active_projects.__iter__.return_value = iter([mock_project])
@@ -71,12 +71,12 @@ class TestOwaspScrapeProjects:
     def test_urls(self, mock_github, mock_bulk_save, command, mock_project, offset, project_count):
         """Tests the existing URL scraping logic, ensuring it still passes."""
         mock_scraper = mock.Mock(spec=OwaspScraper)
-        mock_scraper.get_urls.return_value = [
+        mock_project.get_urls.return_value = [
             "https://github.com/org/repo1",
             "https://github.com/org/repo2",
             "https://invalid.com/repo3",
         ]
-        mock_scraper.get_audience.return_value = []
+        mock_project.get_audience.return_value = []
         mock_scraper.verify_url.side_effect = lambda url: None if "invalid" in url else url
         mock_scraper.page_tree = True
 
