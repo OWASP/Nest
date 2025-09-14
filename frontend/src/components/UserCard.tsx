@@ -71,7 +71,7 @@ const UserCard = ({
             )}
             {badgeCount > 0 && (
               <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 sm:text-base dark:text-gray-400">
-                <FontAwesomeIcon icon={faMedal} className="mr-1 h-4 w-4" />
+                <FontAwesomeIcon icon={faMedal} className="mr-1 h-4 w-4" aria-label="badges" />
                 {millify(badgeCount, { precision: 1 })}{' '}
               </p>
             )}
