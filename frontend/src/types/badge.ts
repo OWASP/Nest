@@ -1,7 +1,7 @@
 export type Badge = {
-  id: string
-  name: string
-  cssClass?: string
-  description?: string
-  weight: number
+  readonly id: string
+  readonly name: string
+  readonly cssClass?: string
+  readonly description?: string
+  readonly weight: number
 }
