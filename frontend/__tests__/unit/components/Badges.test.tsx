@@ -20,10 +20,22 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
 
 // Mock FontAwesome library
 jest.mock('@fortawesome/fontawesome-svg-core', () => ({
-  library: {
-    add: jest.fn(),
-  },
-  ICON_NAME: {} as unknown,
+  library: { add: jest.fn() },
+  // Simulate FA lookup; throw if not found
+  findIconDefinition: jest.fn(({ iconName }: { iconName: string }) => {
+    const valid = new Set([
+      'medal',
+      'shield-alt',
+      'code',
+      'user-graduate',
+      'crown',
+      'star',
+      'trophy',
+      'user-tie',
+    ])
+    if (valid.has(iconName)) return { iconName }
+    throw new Error('not found')
+  }),
 }))
 
 // Mock FontAwesome icons
