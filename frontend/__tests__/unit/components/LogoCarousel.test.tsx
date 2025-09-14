@@ -221,9 +221,9 @@ describe('MovingLogos (LogoCarousel)', () => {
         .getAllByTestId('sponsor-link')
         .filter(
           (link) =>
-            link.getAttribute('href')?.includes('sponsor1.com') ||
-            link.getAttribute('href')?.includes('sponsor2.com') ||
-            link.getAttribute('href')?.includes('sponsor3.com')
+            link.getAttribute('href') === 'https://sponsor1.com' ||
+            link.getAttribute('href') === 'https://sponsor2.com' ||
+            link.getAttribute('href') === 'https://sponsor3.com'
         )
       expect(sponsorLinks).toHaveLength(6)
 
@@ -235,7 +235,7 @@ describe('MovingLogos (LogoCarousel)', () => {
 
       const newSponsorLinks = screen
         .getAllByTestId('sponsor-link')
-        .filter((link) => link.getAttribute('href')?.includes('new.com'))
+        .filter((link) => link.getAttribute('href') === 'https://new.com')
       expect(newSponsorLinks).toHaveLength(2)
 
       expect(newSponsorLinks[0]).toHaveAttribute('href', 'https://new.com')
