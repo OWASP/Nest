@@ -127,7 +127,6 @@ describe('UserDetailsPage', () => {
 
     expect(screen.getByText('Test User')).toBeInTheDocument()
     expect(screen.getByText('Statistics')).toBeInTheDocument()
-    expect(screen.getByText('Contribution Heatmap')).toBeInTheDocument()
     expect(screen.getByText('Test Company')).toBeInTheDocument()
     expect(screen.getByText('Test Location')).toBeInTheDocument()
     expect(screen.getByText('10 Followers')).toBeInTheDocument()
@@ -270,13 +269,22 @@ describe('UserDetailsPage', () => {
     ;(useQuery as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
+      loading: false,
+    })
+    ;(fetchHeatmapData as jest.Mock).mockResolvedValue({
+      years: [{ year: '2023' }], // Provide years data to satisfy condition in component
     })
 
     render(<UserDetailsPage />)
 
+    // Wait for useEffect to process the fetchHeatmapData result
     await waitFor(() => {
-      const heatmapTitle = screen.getByText('Contribution Heatmap')
-      expect(heatmapTitle).toBeInTheDocument()
+      const heatmapContainer = screen
+        .getByAltText('Heatmap Background')
+        .closest('div.hidden.lg\\:block')
+      expect(heatmapContainer).toBeInTheDocument()
+      expect(heatmapContainer).toHaveClass('hidden')
+      expect(heatmapContainer).toHaveClass('lg:block')
     })
   })
 
@@ -306,6 +314,15 @@ describe('UserDetailsPage', () => {
     await waitFor(() => {
       const userName = screen.getByText('Test User')
       expect(userName).toBeInTheDocument()
+      const avatar = screen.getByAltText('Test User')
+      expect(avatar).toHaveClass('rounded-full')
+      expect(avatar).toHaveClass('h-[200px]')
+      expect(avatar).toHaveClass('w-[200px]')
+
+      // Check for responsive classes
+      const summaryContainer = avatar.closest('div.flex')
+      expect(summaryContainer).toHaveClass('flex-col')
+      expect(summaryContainer).toHaveClass('lg:flex-row')
     })
   })
 
@@ -503,6 +520,9 @@ describe('UserDetailsPage', () => {
     render(<UserDetailsPage />)
     await waitFor(() => {
       expect(screen.getAllByText('N/A').length).toBe(3)
+      const bioContainer = screen.getByText('@testuser').closest('div')
+      expect(bioContainer).toHaveClass('text-center')
+      expect(bioContainer).toHaveClass('lg:text-left')
     })
   })
   test('does not render sponsor block', async () => {

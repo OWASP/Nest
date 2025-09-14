@@ -52,9 +52,7 @@ jest.mock('@heroui/react', () => ({
 const graphQLError = new Error('GraphQL Error')
 
 jest.mock('next/navigation', () => ({
-  useSearchParams: jest.fn(() => ({
-    get: jest.fn(),
-  })),
+  useSearchParams: jest.fn(() => new URLSearchParams()),
   useRouter: jest.fn(() => ({
     push: jest.fn(),
     replace: jest.fn(),

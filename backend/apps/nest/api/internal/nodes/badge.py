@@ -1,8 +1,7 @@
 """GraphQL node for Badge model."""
-
 import strawberry_django
-
 from apps.nest.models import Badge
+
 
 
 @strawberry_django.type(

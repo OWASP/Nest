@@ -39,11 +39,15 @@ class Command(BaseCommand):
                 committee.deactivate()
                 continue
 
+            committee.leaders_raw = committee.get_leaders()
+            if leaders_emails := committee.get_leaders_emails():
+                committee.sync_leaders(leaders_emails)
+
             # Get related URLs.
             scraped_urls = sorted(
                 {
                     repository_url
-                    for url in set(scraper.get_urls())
+                    for url in set(committee.get_urls())
                     if (
                         repository_url := normalize_url(
                             committee.get_related_url(
