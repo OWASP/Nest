@@ -51,8 +51,9 @@ const ProgramsPage = () => {
       searchQuery={searchQuery}
       totalPages={totalPages}
     >
-      <div className="mt-16 grid grid-cols-1 gap-x-4 gap-y-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-        {programs?.filter((p) => p.status === ProgramStatusEnum.Published).map(renderProgramCard)}
+      <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+        {programs &&
+          programs.filter((p) => p.status === ProgramStatusEnum.Published).map(renderProgramCard)}
       </div>
     </SearchPageLayout>
   )

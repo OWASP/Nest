@@ -230,7 +230,7 @@ const ModuleForm = ({
                 <button
                   type="submit"
                   disabled={loading || !formData.projectId}
-                  className="flex items-center justify-center gap-2 rounded-md border border-sky-600 px-4 py-2 text-sky-600 hover:bg-sky-600 hover:text-white disabled:cursor-not-allowed disabled:border-gray-400 disabled:bg-gray-200 disabled:text-gray-500 dark:disabled:bg-gray-700"
+                  className="flex items-center justify-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-4 py-2 whitespace-nowrap text-[#1D7BD7] transition-all hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white"
                 >
                   {loading ? 'Saving...' : submitText}
                 </button>
