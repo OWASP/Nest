@@ -67,7 +67,7 @@ describe('ProgramDetailsPage', () => {
       expect(screen.getByText('Jan 1, 2025')).toBeInTheDocument()
       expect(screen.getByText('Dec 31, 2025')).toBeInTheDocument()
       expect(screen.getByText('20')).toBeInTheDocument()
-      expect(screen.getByText('beginner, intermediate')).toBeInTheDocument()
+      expect(screen.getByText('Beginner, Intermediate')).toBeInTheDocument()
     })
   })
 })
