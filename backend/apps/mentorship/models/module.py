@@ -63,6 +63,7 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         default=list,
         verbose_name="Labels",
     )
+
     # M2Ms.
     issues = models.ManyToManyField(
         "github.Issue",
