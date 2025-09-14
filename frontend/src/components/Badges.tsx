@@ -19,10 +19,23 @@ const Badges = ({ name, cssClass, showTooltip = true }: BadgeProps) => {
   const safeCssClass = cssClass || 'fa-medal'
   const iconName = String(safeCssClass).replace(/^fa-/, '') as IconName
 
-  // Check if the icon exists in FontAwesome
-  const iconExists = fas[iconName]
+import { IconName, IconLookup, findIconDefinition, library } from '@fortawesome/fontawesome-svg-core'
 
-  if (!iconExists) {
+  const safeCssClass = (cssClass ?? 'fa-medal') as string
+  // Remove one or more 'fa-' prefixes, normalize underscores to dashes
+  const iconName = String(safeCssClass).trim().replace(/^(?:fa-)+/, '').replace(/_/g, '-') as IconName
+
+  // Check if the icon exists in the FA library
+  const lookup: IconLookup = { prefix: 'fas', iconName }
+  let iconFound = false
+  try {
+    findIconDefinition(lookup)
+    iconFound = true
+  } catch {
+    iconFound = false
+  }
+
+  if (!iconFound) {
     // Fallback to a default icon if the specified icon doesn't exist
     return (
       <div className="inline-flex items-center">
