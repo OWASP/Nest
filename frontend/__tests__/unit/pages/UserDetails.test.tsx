@@ -668,8 +668,8 @@ describe('UserDetailsPage', () => {
         const badges = badgesContainer?.querySelectorAll('[data-testid^="badge-"]')
 
         expect(badges).toHaveLength(2)
-        expect(badges?.[0]).toHaveAttribute('data-testid', 'badge-contributor')
-        expect(badges?.[1]).toHaveAttribute('data-testid', 'badge-security-expert')
+        expect(badges?.[0]).toHaveAttribute('data-testid', 'badge-security-expert')
+        expect(badges?.[1]).toHaveAttribute('data-testid', 'badge-contributor')
       })
     })
 
