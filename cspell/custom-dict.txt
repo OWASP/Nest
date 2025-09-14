@@ -57,6 +57,11 @@ dsn
 env
 facebookexternalhit
 fas
+far
+fab
+fa-solid
+fa-regular
+fa-brands
 gamesec
 geocoders
 geoloc
