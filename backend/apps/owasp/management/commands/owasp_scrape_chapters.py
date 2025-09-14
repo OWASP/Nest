@@ -4,10 +4,11 @@ import logging
 import time
 
 from django.core.management.base import BaseCommand
+from github.GithubException import UnknownObjectException
 
+from apps.github.auth import get_github_client
 from apps.github.utils import normalize_url
 from apps.owasp.models.chapter import Chapter
-from apps.owasp.scraper import OwaspScraper
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -26,6 +27,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options) -> None:
         """Handle the command execution."""
+        gh = get_github_client()
+
         active_chapters = Chapter.active_chapters.order_by("-created_at")
         active_chapters_count = active_chapters.count()
         offset = options["offset"]
@@ -34,8 +37,9 @@ class Command(BaseCommand):
             prefix = f"{idx + offset + 1} of {active_chapters_count}"
             print(f"{prefix:<10} {chapter.owasp_url}")
 
-            scraper = OwaspScraper(chapter.owasp_url)
-            if scraper.page_tree is None:
+            try:
+                gh.get_repo(f"owasp/{chapter.key}")
+            except UnknownObjectException:
                 chapter.deactivate()
                 continue
 
@@ -62,7 +66,7 @@ class Command(BaseCommand):
             invalid_urls = set()
             related_urls = set()
             for scraped_url in scraped_urls:
-                verified_url = scraper.verify_url(scraped_url)
+                verified_url = chapter.verify_url(scraped_url)
                 if not verified_url:
                     invalid_urls.add(scraped_url)
                     continue

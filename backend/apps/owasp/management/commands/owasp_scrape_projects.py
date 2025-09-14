@@ -10,7 +10,6 @@ from apps.github.auth import get_github_client
 from apps.github.constants import GITHUB_USER_RE
 from apps.github.utils import normalize_url
 from apps.owasp.models.project import Project
-from apps.owasp.scraper import OwaspScraper
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -46,8 +45,9 @@ class Command(BaseCommand):
             prefix = f"{idx + offset + 1} of {active_projects_count}"
             print(f"{prefix:<10} {project.owasp_url}")
 
-            scraper = OwaspScraper(project.owasp_url)
-            if scraper.page_tree is None:
+            try:
+                gh.get_repo(f"owasp/{project.key}")
+            except UnknownObjectException:
                 project.deactivate()
                 continue
 
@@ -69,7 +69,7 @@ class Command(BaseCommand):
             invalid_urls: set[str] = set()
             related_urls: set[str] = set()
             for scraped_url in scraped_urls:
-                verified_url = scraper.verify_url(scraped_url)
+                verified_url = project.verify_url(scraped_url)
                 if not verified_url:
                     invalid_urls.add(scraped_url)
                     continue

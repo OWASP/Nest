@@ -1,3 +1,4 @@
+import os
 from unittest import mock
 
 import pytest
@@ -5,7 +6,6 @@ import pytest
 from apps.owasp.management.commands.owasp_scrape_committees import (
     Command,
     Committee,
-    OwaspScraper,
     normalize_url,
 )
 
@@ -34,18 +34,18 @@ class TestOwaspScrapeCommittees:
             (1, 8),
         ],
     )
-    @mock.patch.dict("os.environ", {"SCRAPER_API_KEY": "test-token"})
+    @mock.patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"})
     @mock.patch.object(Committee, "bulk_save", autospec=True)
-    def test_handle(self, mock_bulk_save, command, mock_committee, offset, committees):
-        mock_scraper = mock.Mock(spec=OwaspScraper)
+    @mock.patch("apps.owasp.management.commands.owasp_scrape_committees.get_github_client")
+    def test_handle(
+        self, mock_github, mock_bulk_save, command, mock_committee, offset, committees
+    ):
         mock_committee.get_urls.return_value = [
             "https://example.com/repo1",
             "https://example.com/repo2",
             "https://invalid.com/repo3",
         ]
-        mock_scraper.verify_url.side_effect = lambda url: None if "invalid" in url else url
-        mock_scraper.page_tree = True
-
+        mock_committee.verify_url.side_effect = lambda url: None if "invalid" in url else url
         mock_committee.get_related_url.side_effect = lambda url, **_: url
 
         mock_committees_list = [mock_committee] * committees
@@ -60,14 +60,14 @@ class TestOwaspScrapeCommittees:
         )
         mock_active_committees.order_by.return_value = mock_active_committees
 
+        mock_github_instance = mock.Mock()
+        mock_github.return_value = mock_github_instance
+        mock_github_instance.get_repo.return_value = mock.Mock()
+
         with (
             mock.patch.object(Committee, "active_committees", mock_active_committees),
             mock.patch("builtins.print") as mock_print,
             mock.patch("time.sleep", return_value=None),
-            mock.patch(
-                "apps.owasp.management.commands.owasp_scrape_committees.OwaspScraper",
-                return_value=mock_scraper,
-            ),
             mock.patch(
                 "apps.owasp.management.commands.owasp_scrape_committees.normalize_url",
                 side_effect=normalize_url,

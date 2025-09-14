@@ -5,8 +5,10 @@ from __future__ import annotations
 import itertools
 import logging
 import re
+from http import HTTPStatus
 from urllib.parse import urlparse
 
+import requests
 import yaml
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -24,6 +26,8 @@ from apps.owasp.models.entity_member import EntityMember
 from apps.owasp.models.enums.project import AudienceChoices
 
 logger = logging.getLogger(__name__)
+
+TIMEOUT = 5, 10
 
 
 class RepositoryBasedEntityModel(models.Model):
@@ -345,3 +349,35 @@ class RepositoryBasedEntityModel(models.Model):
 
         if leaders:
             BulkSaveModel.bulk_save(EntityMember, leaders)
+
+    def verify_url(self, url):
+        """Verify URL."""
+        location = urlparse(url).netloc.lower()
+        if not location:
+            return None
+
+        if location.endswith(("linkedin.com", "slack.com", "youtube.com")):
+            return url
+
+        try:
+            # Check for redirects.
+            response = requests.get(url, allow_redirects=False, timeout=TIMEOUT)
+        except requests.exceptions.RequestException:
+            logger.exception("Request failed", extra={"url": url})
+            return None
+
+        if response.status_code == HTTPStatus.OK:
+            return url
+
+        if response.status_code in {
+            HTTPStatus.MOVED_PERMANENTLY,  # 301
+            HTTPStatus.FOUND,  # 302
+            HTTPStatus.SEE_OTHER,  # 303
+            HTTPStatus.TEMPORARY_REDIRECT,  # 307
+            HTTPStatus.PERMANENT_REDIRECT,  # 308
+        }:
+            return self.verify_url(response.headers["Location"])
+
+        logger.warning("Couldn't verify URL %s", url)
+
+        return None

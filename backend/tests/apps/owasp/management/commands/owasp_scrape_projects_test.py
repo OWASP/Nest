@@ -5,7 +5,6 @@ import pytest
 
 from apps.owasp.management.commands.owasp_scrape_projects import (
     Command,
-    OwaspScraper,
     Project,
 )
 
@@ -31,8 +30,6 @@ class TestOwaspScrapeProjects:
     @mock.patch("apps.owasp.management.commands.owasp_scrape_projects.get_github_client")
     def test_audience(self, mock_github, mock_bulk_save, command, mock_project):
         """Test audience validation logic."""
-        mock_scraper = mock.Mock(spec=OwaspScraper)
-        mock_scraper.page_tree = True
         mock_project.get_urls.return_value = []
         mock_project.get_audience.return_value = ["builder", "breaker", "defender"]
 
@@ -46,10 +43,6 @@ class TestOwaspScrapeProjects:
             mock.patch.object(Project, "active_projects", mock_active_projects),
             mock.patch("builtins.print"),
             mock.patch("time.sleep"),
-            mock.patch(
-                "apps.owasp.management.commands.owasp_scrape_projects.OwaspScraper",
-                return_value=mock_scraper,
-            ),
         ):
             command.handle(offset=0)
 
@@ -70,15 +63,13 @@ class TestOwaspScrapeProjects:
     @mock.patch("apps.owasp.management.commands.owasp_scrape_projects.get_github_client")
     def test_urls(self, mock_github, mock_bulk_save, command, mock_project, offset, project_count):
         """Tests the existing URL scraping logic, ensuring it still passes."""
-        mock_scraper = mock.Mock(spec=OwaspScraper)
         mock_project.get_urls.return_value = [
             "https://github.com/org/repo1",
             "https://github.com/org/repo2",
             "https://invalid.com/repo3",
         ]
         mock_project.get_audience.return_value = []
-        mock_scraper.verify_url.side_effect = lambda url: None if "invalid" in url else url
-        mock_scraper.page_tree = True
+        mock_project.verify_url.side_effect = lambda url: None if "invalid" in url else url
 
         mock_github_instance = mock.Mock()
         mock_github.return_value = mock_github_instance
@@ -102,10 +93,6 @@ class TestOwaspScrapeProjects:
             mock.patch.object(Project, "active_projects", mock_active_projects),
             mock.patch("builtins.print") as mock_print,
             mock.patch("time.sleep", return_value=None),
-            mock.patch(
-                "apps.owasp.management.commands.owasp_scrape_projects.OwaspScraper",
-                return_value=mock_scraper,
-            ),
         ):
             command.handle(offset=offset)
 
