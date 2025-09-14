@@ -212,7 +212,10 @@ const UserDetailsPage: React.FC = () => {
         {user?.badges && user.badges.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-2">
             <span className="text-sm text-gray-500 dark:text-gray-400">Badges:</span>
-            {user.badges.map((badge) => (
+            {user.badges
+              .slice()
+              .sort((a,b) => (b.weight - a.weight)
+                .map((badge) => (
               <Badges
                 key={badge.id}
                 name={badge.name}
