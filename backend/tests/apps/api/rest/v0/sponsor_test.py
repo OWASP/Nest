@@ -8,6 +8,7 @@ class TestSponsorSchema:
         "sponsor_data",
         [
             {
+                "key": "gold-sponsor-inc.",
                 "name": "Gold Sponsor Inc.",
                 "description": "A top-tier gold sponsor.",
                 "url": "https://goldsponsor.com",
@@ -18,6 +19,7 @@ class TestSponsorSchema:
                 "is_member": True,
             },
             {
+                "key": "silver-sponsor-llc",
                 "name": "Silver Sponsor LLC",
                 "description": "A reliable silver sponsor.",
                 "url": "https://silversponsor.com",
@@ -30,7 +32,9 @@ class TestSponsorSchema:
         ],
     )
     def test_sponsor_schema_creation(self, sponsor_data):
+        """Test schema creation with valid data."""
         schema_instance = SponsorSchema(**sponsor_data)
+        assert schema_instance.key == sponsor_data["key"]
         assert schema_instance.name == sponsor_data["name"]
         assert schema_instance.description == sponsor_data["description"]
         assert schema_instance.url == sponsor_data["url"]
@@ -39,3 +43,21 @@ class TestSponsorSchema:
         assert schema_instance.sponsor_type == sponsor_data["sponsor_type"]
         assert schema_instance.member_type == sponsor_data["member_type"]
         assert schema_instance.is_member == sponsor_data["is_member"]
+
+    def test_sponsor_schema_with_minimal_data(self):
+        """Test schema with minimal required fields."""
+        minimal_data = {
+            "key": "test-sponsor",
+            "name": "Test Sponsor",
+            "description": "",
+            "url": "",
+            "job_url": "",
+            "image_url": "",
+            "sponsor_type": "SILVER",
+            "member_type": "",
+            "is_member": False,
+        }
+        schema = SponsorSchema(**minimal_data)
+        assert schema.key == "test-sponsor"
+        assert schema.name == "Test Sponsor"
+        assert schema.job_url == ""
