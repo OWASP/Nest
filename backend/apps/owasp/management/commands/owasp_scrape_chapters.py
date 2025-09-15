@@ -37,14 +37,7 @@ class Command(BaseCommand):
             prefix = f"{idx + offset + 1} of {active_chapters_count}"
             print(f"{prefix:<10} {chapter.owasp_url}")
 
-            try:
-                gh.get_repo(f"owasp/{chapter.key}")
-            except UnknownObjectException:
-                chapter.deactivate()
-                continue
-            except GithubException as e:
-                logger.warning("GitHub API error for %s: %s", chapter.key, e)
-                time.sleep(1)
+            if not self._validate_github_repo(gh, chapter):
                 continue
 
             chapter.leaders_raw = chapter.get_leaders()
@@ -91,3 +84,17 @@ class Command(BaseCommand):
 
         # Bulk save data.
         Chapter.bulk_save(chapters)
+
+    def _validate_github_repo(self, gh, chapter) -> bool:
+        """Validate if GitHub repository exists for the chapter."""
+        try:
+            gh.get_repo(f"owasp/{chapter.key}")
+        except UnknownObjectException:
+            chapter.deactivate()
+            return False
+        except GithubException as e:
+            logger.warning("GitHub API error for %s: %s", chapter.key, e)
+            time.sleep(1)
+            return False
+        else:
+            return True

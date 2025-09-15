@@ -37,14 +37,7 @@ class Command(BaseCommand):
             prefix = f"{idx + offset + 1} of {active_committees_count}"
             print(f"{prefix:<10} {committee.owasp_url}")
 
-            try:
-                gh.get_repo(f"owasp/{committee.key}")
-            except UnknownObjectException:
-                committee.deactivate()
-                continue
-            except GithubException as e:
-                logger.warning("GitHub API error for %s: %s", committee.key, e)
-                time.sleep(1)
+            if not self._validate_github_repo(gh, committee):
                 continue
 
             committee.leaders_raw = committee.get_leaders()
@@ -91,3 +84,17 @@ class Command(BaseCommand):
 
         # Bulk save data.
         Committee.bulk_save(committees)
+
+    def _validate_github_repo(self, gh, committee) -> bool:
+        """Validate if GitHub repository exists for the committee."""
+        try:
+            gh.get_repo(f"owasp/{committee.key}")
+        except UnknownObjectException:
+            committee.deactivate()
+            return False
+        except GithubException as e:
+            logger.warning("GitHub API error for %s: %s", committee.key, e)
+            time.sleep(1)
+            return False
+        else:
+            return True
