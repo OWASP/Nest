@@ -50,7 +50,4 @@ class UserQuery:
             User or None: The user object if found, otherwise None.
 
         """
-        try:
-            return User.objects.get(login=login)
-        except User.DoesNotExist:
-            return None
+        return User.objects.filter(has_public_member_page=True, login=login).first()

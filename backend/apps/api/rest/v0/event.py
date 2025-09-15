@@ -43,9 +43,4 @@ def list_events(
     ),
 ) -> list[EventSchema]:
     """Get all events."""
-    events = Event.objects.all()
-
-    if ordering:
-        events = events.order_by(ordering)
-
-    return events
+    return Event.objects.order_by(ordering or "-start_date")

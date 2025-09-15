@@ -1,18 +1,26 @@
 """Organization API."""
 
 from datetime import datetime
+from http import HTTPStatus
 from typing import Literal
 
 from django.conf import settings
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
-from ninja import Field, FilterSchema, Query, Router, Schema
+from ninja import Field, FilterSchema, Path, Query, Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
+from ninja.responses import Response
 
 from apps.github.models.organization import Organization
 
 router = Router()
+
+
+class OrganizationErrorResponse(Schema):
+    """Organization error response schema."""
+
+    message: str
 
 
 class OrganizationFilterSchema(FilterSchema):
@@ -54,10 +62,34 @@ def list_organization(
         description="Ordering field",
     ),
 ) -> list[OrganizationSchema]:
-    """Get all organizations."""
-    organizations = filters.filter(Organization.objects.filter(is_owasp_related_organization=True))
+    """Get organizations."""
+    return filters.filter(
+        Organization.objects.filter(
+            is_owasp_related_organization=True,
+        ).order_by(ordering or "-created_at")
+    )
 
-    if ordering:
-        organizations = organizations.order_by(ordering)
 
-    return organizations
+@router.get(
+    "/{str:organization_id}",
+    description="Retrieve project details.",
+    operation_id="get_organization",
+    response={
+        HTTPStatus.NOT_FOUND: OrganizationErrorResponse,
+        HTTPStatus.OK: OrganizationSchema,
+    },
+    summary="Get organization",
+    tags=["Community"],
+)
+def get_organization(
+    request: HttpRequest,
+    organization_id: str = Path(example="OWASP"),
+) -> OrganizationSchema | OrganizationErrorResponse:
+    """Get project."""
+    if organization := Organization.objects.filter(
+        is_owasp_related_organization=True,
+        login__iexact=organization_id,
+    ).first():
+        return organization
+
+    return Response({"message": "Organization not found"}, status=HTTPStatus.NOT_FOUND)

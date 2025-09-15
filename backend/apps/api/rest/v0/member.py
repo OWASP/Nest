@@ -7,7 +7,7 @@ from typing import Literal
 from django.conf import settings
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
-from ninja import Field, FilterSchema, Query, Router, Schema
+from ninja import Field, FilterSchema, Path, Query, Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
 from ninja.responses import Response
@@ -24,7 +24,7 @@ class MemberFilterSchema(FilterSchema):
         None,
         description="Company of the user",
     )
-    location: str | None = Field(None, description="Location of the member", example="India")
+    location: str | None = Field(None, description="Location of the member")
 
 
 class MemberSchema(Schema):
@@ -34,7 +34,6 @@ class MemberSchema(Schema):
     bio: str
     company: str
     created_at: datetime
-    email: str
     followers_count: int
     following_count: int
     location: str
@@ -72,28 +71,26 @@ def list_members(
     ),
 ) -> list[MemberSchema]:
     """Get all members."""
-    members = filters.filter(User.objects.all())
-
-    if ordering:
-        members = members.order_by(ordering)
-
-    return members
+    return filters.filter(User.objects.order_by(ordering or "-created_at"))
 
 
 @router.get(
-    "/{login}",
-    description="Retrieve a member by login.",
+    "/{str:member_id}",
+    description="Retrieve member details.",
     operation_id="get_member",
     response={
         HTTPStatus.NOT_FOUND: MemberErrorResponse,
         HTTPStatus.OK: MemberSchema,
     },
-    summary="Get member by login",
+    summary="Get member",
     tags=["Community"],
 )
-def get_member(request: HttpRequest, login: str) -> MemberSchema | MemberErrorResponse:
-    """Get user by login."""
-    if user := User.objects.filter(login=login).first():
+def get_member(
+    request: HttpRequest,
+    member_id: str = Path(example="OWASP"),
+) -> MemberSchema | MemberErrorResponse:
+    """Get member."""
+    if user := User.objects.filter(login__iexact=member_id).first():
         return user
 
     return Response({"message": "Member not found"}, status=HTTPStatus.NOT_FOUND)

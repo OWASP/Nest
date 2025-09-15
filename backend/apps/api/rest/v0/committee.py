@@ -1,18 +1,26 @@
 """Committee API."""
 
 from datetime import datetime
+from http import HTTPStatus
 from typing import Literal
 
 from django.conf import settings
 from django.http import HttpRequest
 from django.views.decorators.cache import cache_page
-from ninja import Query, Router, Schema
+from ninja import Path, Query, Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import PageNumberPagination, paginate
+from ninja.responses import Response
 
 from apps.owasp.models.committee import Committee
 
 router = Router()
+
+
+class CommitteeErrorResponse(Schema):
+    """Committee error response schema."""
+
+    message: str
 
 
 class CommitteeSchema(Schema):
@@ -41,10 +49,34 @@ def list_committees(
         description="Ordering field",
     ),
 ) -> list[CommitteeSchema]:
-    """Get all committees."""
-    committees = Committee.objects.all()
+    """Get committees."""
+    return Committee.active_committees.order_by(ordering or "-created_at")
 
-    if ordering:
-        committees = committees.order_by(ordering)
 
-    return committees
+@router.get(
+    "/{str:committee_id}",
+    description="Retrieve committee details.",
+    operation_id="get_committee",
+    response={
+        HTTPStatus.NOT_FOUND: CommitteeErrorResponse,
+        HTTPStatus.OK: CommitteeSchema,
+    },
+    summary="Get committee",
+    tags=["Committees"],
+)
+def get_chapter(
+    request: HttpRequest,
+    committee_id: str = Path(example="project"),
+) -> CommitteeSchema | CommitteeErrorResponse:
+    """Get chapter."""
+    if committee := Committee.active_committees.filter(
+        is_active=True,
+        key__iexact=(
+            committee_id
+            if committee_id.startswith("www-committee-")
+            else f"www-committee-{committee_id}"
+        ),
+    ).first():
+        return committee
+
+    return Response({"message": "Committee not found"}, status=HTTPStatus.NOT_FOUND)
