@@ -1,4 +1,4 @@
-"""A command to update OWASP projects from owasp.org data."""
+"""A command to update OWASP projects from GitHub data."""
 
 import logging
 import time
@@ -15,7 +15,7 @@ logger: logging.Logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = "Scrape owasp.org pages and update relevant projects."
+    help = "Update OWASP projects using GitHub API and parsed Markdown sources."
 
     def add_arguments(self, parser) -> None:
         """Add command-line arguments to the parser.
