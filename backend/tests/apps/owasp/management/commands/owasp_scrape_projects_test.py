@@ -120,6 +120,7 @@ class TestOwaspScrapeProjects:
             status=404, data={}, headers={}
         )
 
+        mock_project.key = "missing-project"
         mock_projects_list = [mock_project]
         mock_active_projects = mock.MagicMock()
         mock_active_projects.__iter__.return_value = iter(mock_projects_list)

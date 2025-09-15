@@ -105,6 +105,7 @@ class TestOwaspScrapeCommittees:
             status=404, data={}, headers={}
         )
 
+        mock_committee.key = "missing-committee"
         mock_committees_list = [mock_committee]
         mock_active_committees = mock.MagicMock()
         mock_active_committees.__iter__.return_value = iter(mock_committees_list)

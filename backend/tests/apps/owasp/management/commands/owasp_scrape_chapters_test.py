@@ -103,7 +103,7 @@ class TestOwaspScrapeChapters:
         mock_github_instance.get_repo.side_effect = UnknownObjectException(
             status=404, data={}, headers={}
         )
-
+        mock_chapter.key = "missing-chapter"
         mock_chapters_list = [mock_chapter]
         mock_active_chapters = mock.MagicMock()
         mock_active_chapters.__iter__.return_value = iter(mock_chapters_list)

@@ -27,8 +27,6 @@ from apps.owasp.models.enums.project import AudienceChoices
 
 logger = logging.getLogger(__name__)
 
-TIMEOUT = 5, 10
-
 
 class RepositoryBasedEntityModel(models.Model):
     """Repository based entity model."""
@@ -361,7 +359,7 @@ class RepositoryBasedEntityModel(models.Model):
 
         try:
             # Check for redirects.
-            response = requests.get(url, allow_redirects=False, timeout=TIMEOUT)
+            response = requests.get(url, allow_redirects=False, timeout=(5, 10))
         except requests.exceptions.RequestException:
             logger.exception("Request failed", extra={"url": url})
             return None
