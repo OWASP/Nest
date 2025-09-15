@@ -2,6 +2,7 @@ import os
 from unittest import mock
 
 import pytest
+from github.GithubException import UnknownObjectException
 
 from apps.owasp.management.commands.owasp_scrape_projects import (
     Command,
@@ -105,3 +106,38 @@ class TestOwaspScrapeProjects:
             "https://github.com/org/repo1",
             "https://github.com/org/repo2",
         ]
+
+    @mock.patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"})
+    @mock.patch.object(Project, "bulk_save", autospec=True)
+    @mock.patch("apps.owasp.management.commands.owasp_scrape_projects.get_github_client")
+    def test_handle_deactivates_project_on_unknown_repo(
+        self, mock_github, mock_bulk_save, command, mock_project
+    ):
+        """Test that a project is deactivated if its repo is not found on GitHub."""
+        mock_github_instance = mock.Mock()
+        mock_github.return_value = mock_github_instance
+        mock_github_instance.get_repo.side_effect = UnknownObjectException(
+            status=404, data={}, headers={}
+        )
+
+        mock_projects_list = [mock_project]
+        mock_active_projects = mock.MagicMock()
+        mock_active_projects.__iter__.return_value = iter(mock_projects_list)
+        mock_active_projects.count.return_value = len(mock_projects_list)
+        mock_active_projects.__getitem__.return_value = mock_projects_list
+        mock_active_projects.order_by.return_value = mock_active_projects
+
+        with (
+            mock.patch.object(Project, "active_projects", mock_active_projects),
+            mock.patch("builtins.print"),
+            mock.patch("time.sleep", return_value=None),
+        ):
+            command.handle(offset=0)
+
+        mock_github_instance.get_repo.assert_called_once_with(f"owasp/{mock_project.key}")
+        mock_project.deactivate.assert_called_once()
+
+        mock_project.get_audience.assert_not_called()
+        mock_project.get_urls.assert_not_called()
+
+        mock_bulk_save.assert_called_once_with([])

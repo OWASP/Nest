@@ -4,7 +4,7 @@ import logging
 import time
 
 from django.core.management.base import BaseCommand
-from github.GithubException import UnknownObjectException
+from github.GithubException import GithubException, UnknownObjectException
 
 from apps.github.auth import get_github_client
 from apps.github.constants import GITHUB_USER_RE
@@ -49,6 +49,10 @@ class Command(BaseCommand):
                 gh.get_repo(f"owasp/{project.key}")
             except UnknownObjectException:
                 project.deactivate()
+                continue
+            except GithubException as e:
+                logger.warning("GitHub API error for %s: %s", project.key, e)
+                time.sleep(1)
                 continue
 
             project.audience = project.get_audience()

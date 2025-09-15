@@ -2,6 +2,7 @@ import os
 from unittest import mock
 
 import pytest
+from github.GithubException import UnknownObjectException
 
 from apps.owasp.management.commands.owasp_scrape_committees import (
     Command,
@@ -90,3 +91,38 @@ class TestOwaspScrapeCommittees:
             expected_related_urls = ["https://example.com/repo1", "https://example.com/repo2"]
             assert committee.invalid_urls == sorted(expected_invalid_urls)
             assert committee.related_urls == sorted(expected_related_urls)
+
+    @mock.patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"})
+    @mock.patch.object(Committee, "bulk_save", autospec=True)
+    @mock.patch("apps.owasp.management.commands.owasp_scrape_committees.get_github_client")
+    def test_handle_deactivates_committee_on_unknown_repo(
+        self, mock_github, mock_bulk_save, command, mock_committee
+    ):
+        """Test that a committee is deactivated if its repo is not found on GitHub."""
+        mock_github_instance = mock.Mock()
+        mock_github.return_value = mock_github_instance
+        mock_github_instance.get_repo.side_effect = UnknownObjectException(
+            status=404, data={}, headers={}
+        )
+
+        mock_committees_list = [mock_committee]
+        mock_active_committees = mock.MagicMock()
+        mock_active_committees.__iter__.return_value = iter(mock_committees_list)
+        mock_active_committees.count.return_value = len(mock_committees_list)
+        mock_active_committees.__getitem__.return_value = mock_committees_list
+        mock_active_committees.order_by.return_value = mock_active_committees
+
+        with (
+            mock.patch.object(Committee, "active_committees", mock_active_committees),
+            mock.patch("builtins.print"),
+            mock.patch("time.sleep", return_value=None),
+        ):
+            command.handle(offset=0)
+
+        mock_github_instance.get_repo.assert_called_once_with(f"owasp/{mock_committee.key}")
+        mock_committee.deactivate.assert_called_once()
+
+        mock_committee.get_leaders.assert_not_called()
+        mock_committee.get_urls.assert_not_called()
+
+        mock_bulk_save.assert_called_once_with([])

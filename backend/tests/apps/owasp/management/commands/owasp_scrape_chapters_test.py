@@ -2,6 +2,7 @@ import os
 from unittest import mock
 
 import pytest
+from github.GithubException import UnknownObjectException
 
 from apps.owasp.management.commands.owasp_scrape_chapters import (
     Chapter,
@@ -89,3 +90,38 @@ class TestOwaspScrapeChapters:
             expected_related_urls = ["https://example.com/repo1", "https://example.com/repo2"]
             assert chapter.invalid_urls == sorted(expected_invalid_urls)
             assert chapter.related_urls == sorted(expected_related_urls)
+
+    @mock.patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"})
+    @mock.patch.object(Chapter, "bulk_save", autospec=True)
+    @mock.patch("apps.owasp.management.commands.owasp_scrape_chapters.get_github_client")
+    def test_handle_deactivates_chapter_on_unknown_repo(
+        self, mock_github, mock_bulk_save, command, mock_chapter
+    ):
+        """Test that a chapter is deactivated if its repo is not found on GitHub."""
+        mock_github_instance = mock.Mock()
+        mock_github.return_value = mock_github_instance
+        mock_github_instance.get_repo.side_effect = UnknownObjectException(
+            status=404, data={}, headers={}
+        )
+
+        mock_chapters_list = [mock_chapter]
+        mock_active_chapters = mock.MagicMock()
+        mock_active_chapters.__iter__.return_value = iter(mock_chapters_list)
+        mock_active_chapters.count.return_value = len(mock_chapters_list)
+        mock_active_chapters.__getitem__.return_value = mock_chapters_list
+        mock_active_chapters.order_by.return_value = mock_active_chapters
+
+        with (
+            mock.patch.object(Chapter, "active_chapters", mock_active_chapters),
+            mock.patch("builtins.print"),
+            mock.patch("time.sleep", return_value=None),
+        ):
+            command.handle(offset=0)
+
+        mock_github_instance.get_repo.assert_called_once_with(f"owasp/{mock_chapter.key}")
+        mock_chapter.deactivate.assert_called_once()
+
+        mock_chapter.get_leaders.assert_not_called()
+        mock_chapter.get_urls.assert_not_called()
+
+        mock_bulk_save.assert_called_once_with([])
