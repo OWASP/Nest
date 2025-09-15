@@ -26,7 +26,7 @@ class TestGoogleAccountAuthorizationModel:
         self.expired_time = timezone.now() - timedelta(hours=1)
         self.future_time = timezone.now() + timedelta(hours=1)
 
-    def test_member_google_credentials_creation(self):
+    def test_google_account_authorization_creation(self):
         """Test GoogleAccountAuthorization model creation."""
         auth = GoogleAccountAuthorization(
             member=self.member,
@@ -81,19 +81,19 @@ class TestGoogleAccountAuthorizationModel:
     @override_settings(IS_GOOGLE_AUTH_ENABLED=False)
     def test_get_flow_when_disabled(self):
         """Test get_flow raises error when Google auth is disabled."""
-        with pytest.raises(ValueError, match="Google OAuth client ID"):
+        with pytest.raises(ValueError, match=r"Google OAuth client ID"):
             GoogleAccountAuthorization.get_flow()
 
     @override_settings(IS_GOOGLE_AUTH_ENABLED=False)
     def test_authorize_when_google_auth_disabled(self):
         """Test authorize raises error when Google auth is disabled."""
-        with pytest.raises(ValueError, match="Google OAuth client ID"):
+        with pytest.raises(ValueError, match=r"Google OAuth client ID"):
             GoogleAccountAuthorization.authorize(self.member.slack_user_id)
 
     @override_settings(IS_AWS_KMS_ENABLED=False, IS_GOOGLE_AUTH_ENABLED=True)
     def test_authorize_when_aws_kms_disabled(self):
         """Test authorize raises error when AWS KMS is disabled."""
-        with pytest.raises(ValueError, match="AWS KMS is not enabled"):
+        with pytest.raises(ValueError, match=r"AWS KMS is not enabled"):
             GoogleAccountAuthorization.authorize(self.member)
 
     @override_settings(
@@ -109,7 +109,7 @@ class TestGoogleAccountAuthorizationModel:
         mock_get_member.side_effect = Member.DoesNotExist
         with pytest.raises(
             ValidationError,
-            match=f"Member with Slack ID {self.member.slack_user_id} does not exist.",
+            match=rf"Member with Slack ID {self.member.slack_user_id} does not exist.",
         ):
             GoogleAccountAuthorization.authorize(self.member.slack_user_id)
 
@@ -224,7 +224,7 @@ class TestGoogleAccountAuthorizationModel:
             refresh_token=self.valid_refresh_token,
         )
 
-        with pytest.raises(ValueError, match="Google OAuth client ID"):
+        with pytest.raises(ValueError, match=r"Google OAuth client ID"):
             GoogleAccountAuthorization.refresh_access_token(auth)
 
     @override_settings(IS_GOOGLE_AUTH_ENABLED=True, IS_AWS_KMS_ENABLED=False)
@@ -236,7 +236,7 @@ class TestGoogleAccountAuthorizationModel:
             refresh_token=self.valid_refresh_token,
         )
 
-        with pytest.raises(ValueError, match="AWS KMS is not enabled."):
+        with pytest.raises(ValueError, match=r"AWS KMS is not enabled."):
             GoogleAccountAuthorization.refresh_access_token(auth)
 
     @override_settings(
@@ -299,7 +299,7 @@ class TestGoogleAccountAuthorizationModel:
         )
 
         with pytest.raises(
-            ValidationError, match="Google OAuth refresh token is not set or expired."
+            ValidationError, match=r"Google OAuth refresh token is not set or expired."
         ):
             GoogleAccountAuthorization.refresh_access_token(auth)
 
@@ -315,13 +315,13 @@ class TestGoogleAccountAuthorizationModel:
     @override_settings(IS_GOOGLE_AUTH_ENABLED=False)
     def test_authorize_callback_member_google_credentials_disabled(self):
         """Test authorize_callback raises error when Google auth is disabled."""
-        with pytest.raises(ValueError, match="Google OAuth client ID"):
+        with pytest.raises(ValueError, match=r"Google OAuth client ID"):
             GoogleAccountAuthorization.authorize_callback(auth_response={})
 
     @override_settings(IS_AWS_KMS_ENABLED=False, IS_GOOGLE_AUTH_ENABLED=True)
     def test_authorize_callback_kms_disabled(self):
         """Test authorize_callback raises error when AWS KMS is disabled."""
-        with pytest.raises(ValueError, match="AWS KMS is not enabled"):
+        with pytest.raises(ValueError, match=r"AWS KMS is not enabled"):
             GoogleAccountAuthorization.authorize_callback(auth_response={})
 
     @override_settings(
@@ -401,5 +401,5 @@ class TestGoogleAccountAuthorizationModel:
         mock_urlparse.return_value = Mock()
         mock_parse_qs.return_value.get.return_value = ["test_state"]
         mock_timestamp_signer.return_value.unsign.return_value = "4"
-        with pytest.raises(ValidationError, match="Member with Slack ID 4 does not exist."):
+        with pytest.raises(ValidationError, match=r"Member with Slack ID 4 does not exist."):
             GoogleAccountAuthorization.authorize_callback(auth_response={})
