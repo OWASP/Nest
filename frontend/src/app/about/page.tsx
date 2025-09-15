@@ -186,6 +186,18 @@ const About = () => {
           </div>
         </SecondaryCard>
 
+        <SecondaryCard icon={faUsers} title={<AnchorTitle title="Get Involved" />}>
+          <p className="mb-4 text-gray-600 dark:text-gray-300">{getInvolvedContent.description}</p>
+          <ul className="mb-6 list-inside list-disc space-y-2">
+            {getInvolvedContent.ways.map((way) => (
+              <li key={way} className="text-gray-600 dark:text-gray-300">
+                {way}
+              </li>
+            ))}
+          </ul>
+          <Markdown content={getInvolvedContent.callToAction} />
+        </SecondaryCard>
+
         {projectMetadata.recentMilestones.length > 0 && (
           <SecondaryCard icon={faMapSigns} title={<AnchorTitle title="Roadmap" />}>
             <div className="grid gap-4">
@@ -246,18 +258,6 @@ const About = () => {
             </div>
           </SecondaryCard>
         )}
-
-        <SecondaryCard icon={faUsers} title={<AnchorTitle title="Get Involved" />}>
-          <p className="mb-4 text-gray-600 dark:text-gray-300">{getInvolvedContent.description}</p>
-          <ul className="mb-6 list-inside list-disc space-y-2">
-            {getInvolvedContent.ways.map((way) => (
-              <li key={way} className="text-gray-600 dark:text-gray-300">
-                {way}
-              </li>
-            ))}
-          </ul>
-          <Markdown content={getInvolvedContent.callToAction} />
-        </SecondaryCard>
 
         <SecondaryCard icon={faClock} title={<AnchorTitle title="Project History" />}>
           <div className="space-y-6">
