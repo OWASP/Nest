@@ -41,12 +41,7 @@ class UserNode:
     @strawberry.field
     def badge_count(self) -> int:
         """Resolve badge count."""
-        return ( 
-            self.badges.filter(is_active=True)
-            .value("badge_id")
-            .distinct()
-            .count()
-        )
+        return self.badges.filter(is_active=True).value("badge_id").distinct().count()
 
     @strawberry.field
     def created_at(self) -> float:

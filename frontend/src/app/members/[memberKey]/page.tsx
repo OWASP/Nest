@@ -204,22 +204,20 @@ const UserDetailsPage: React.FC = () => {
             <span className="text-sm text-gray-500 dark:text-gray-400">Badges:</span>
             {user.badges
               .slice()
-              .sort((a,b) => (b.weight - a.weight)
-                .map((badge) => (
-              <Badges
-                key={badge.id}
-                name={badge.name}
-                cssClass={badge.cssClass || 'fa-medal'}
-                description={badge.description || ''}
-                weight={badge.weight}
-                showTooltip={true}
-              />
-            ))}
-            {!isPrivateContributor && (
+              .sort((a, b) => b.weight - a.weight)
+              .map((badge) => (
+                <Badges
+                  key={badge.id}
+                  name={badge.name}
+                  cssClass={badge.cssClass || 'fa-medal'}
+                  showTooltip={true}
+                />
+              ))}
+          </div>
+        )}
+        {!isPrivateContributor && (
           <div className="hidden w-full lg:block">
             <Heatmap />
-          </div>
-            )}
           </div>
         )}
       </div>

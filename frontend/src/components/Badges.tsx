@@ -1,4 +1,9 @@
-import { IconName, library } from '@fortawesome/fontawesome-svg-core'
+import {
+  IconName,
+  IconLookup,
+  findIconDefinition,
+  library,
+} from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
@@ -7,23 +12,17 @@ library.add(fas)
 
 type BadgeProps = {
   name: string
-  weight: number
-  description: string
   cssClass: string
   showTooltip?: boolean
 }
 
 const Badges = ({ name, cssClass, showTooltip = true }: BadgeProps) => {
-  // Extract icon name from cssClass (remove 'fa-' prefix)
-  // Handle edge cases where cssClass might be null, undefined, or not a string
-  const safeCssClass = cssClass || 'fa-medal'
-  const iconName = String(safeCssClass).replace(/^fa-/, '') as IconName
-
-import { IconName, IconLookup, findIconDefinition, library } from '@fortawesome/fontawesome-svg-core'
-
   const safeCssClass = (cssClass ?? 'fa-medal') as string
   // Remove one or more 'fa-' prefixes, normalize underscores to dashes
-  const iconName = String(safeCssClass).trim().replace(/^(?:fa-)+/, '').replace(/_/g, '-') as IconName
+  const iconName = String(safeCssClass)
+    .trim()
+    .replace(/^(?:fa-)+/, '')
+    .replace(/_/g, '-') as IconName
 
   // Check if the icon exists in the FA library
   const lookup: IconLookup = { prefix: 'fas', iconName }
