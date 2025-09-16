@@ -69,7 +69,26 @@ const ProgramDetailsPage = () => {
             status: newStatus,
           },
         },
-        refetchQueries: [{ query: GET_PROGRAM_AND_MODULES, variables: { programKey } }],
+        update: (cache, { data: mutationData }) => {
+          const updated = mutationData?.updateProgramStatus
+          if (!updated) return
+          try {
+            const existing = cache.readQuery({
+              query: GET_PROGRAM_AND_MODULES,
+              variables: { programKey },
+            }) as any
+            if (existing?.getProgram) {
+              cache.writeQuery({
+                query: GET_PROGRAM_AND_MODULES,
+                variables: { programKey },
+                data: {
+                  ...existing,
+                  getProgram: { ...existing.getProgram, status: updated.status },
+                },
+              })
+            }
+          } catch {}
+        },
       })
 
       addToast({

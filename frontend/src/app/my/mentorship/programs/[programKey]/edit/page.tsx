@@ -105,7 +105,28 @@ const EditProgramPage = () => {
 
       await updateProgram({
         variables: { input },
-        refetchQueries: [{ query: GET_PROGRAM_AND_MODULES, variables: { programKey: input.key } }],
+        update: (cache, { data: mutationData }) => {
+          const updated = mutationData?.updateProgram
+          if (!updated) return
+          cache.writeQuery({
+            query: GET_PROGRAM_DETAILS,
+            variables: { programKey: input.key },
+            data: { getProgram: updated },
+          })
+          try {
+            const existing = cache.readQuery({
+              query: GET_PROGRAM_AND_MODULES,
+              variables: { programKey: input.key },
+            }) as any
+            if (existing?.getProgram) {
+              cache.writeQuery({
+                query: GET_PROGRAM_AND_MODULES,
+                variables: { programKey: input.key },
+                data: { ...existing, getProgram: { ...existing.getProgram, ...updated } },
+              })
+            }
+          } catch {}
+        },
       })
 
       addToast({

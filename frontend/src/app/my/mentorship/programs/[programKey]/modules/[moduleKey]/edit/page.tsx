@@ -111,7 +111,26 @@ const EditModulePage = () => {
 
       await updateModule({
         variables: { input },
-        refetchQueries: [{ query: GET_PROGRAM_AND_MODULES, variables: { programKey } }],
+        update: (cache, { data: mutationData }) => {
+          const updated = mutationData?.updateModule
+          if (!updated) return
+          try {
+            const existing = cache.readQuery({
+              query: GET_PROGRAM_AND_MODULES,
+              variables: { programKey },
+            }) as any
+            if (existing?.getProgramModules) {
+              const nextModules = existing.getProgramModules.map((m: any) =>
+                m.key === updated.key ? { ...m, ...updated } : m
+              )
+              cache.writeQuery({
+                query: GET_PROGRAM_AND_MODULES,
+                variables: { programKey },
+                data: { ...existing, getProgramModules: nextModules },
+              })
+            }
+          } catch {}
+        },
       })
 
       addToast({

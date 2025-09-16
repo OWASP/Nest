@@ -96,7 +96,26 @@ const CreateModulePage = () => {
 
       await createModule({
         variables: { input },
-        refetchQueries: [{ query: GET_PROGRAM_AND_MODULES, variables: { programKey } }],
+        update: (cache, { data: mutationData }) => {
+          const created = mutationData?.createModule
+          if (!created) return
+          try {
+            const existing = cache.readQuery({
+              query: GET_PROGRAM_AND_MODULES,
+              variables: { programKey },
+            }) as any
+            if (existing?.getProgramModules) {
+              cache.writeQuery({
+                query: GET_PROGRAM_AND_MODULES,
+                variables: { programKey },
+                data: {
+                  ...existing,
+                  getProgramModules: [created, ...existing.getProgramModules],
+                },
+              })
+            }
+          } catch {}
+        },
       })
 
       addToast({
