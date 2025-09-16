@@ -32,7 +32,7 @@ class Command(BaseCommand):
             parser (argparse.ArgumentParser): The argument parser instance.
 
         """
-        parser.add_argument("--offset", default=1310, required=False, type=int)
+        parser.add_argument("--offset", default=0, required=False, type=int)
         parser.add_argument(
             "--repository",
             required=False,

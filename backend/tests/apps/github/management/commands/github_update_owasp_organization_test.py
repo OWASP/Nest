@@ -74,7 +74,11 @@ def mock_gh_repo():
 )
 @mock.patch("apps.github.management.commands.github_update_owasp_organization.get_github_client")
 @mock.patch("apps.github.management.commands.github_update_owasp_organization.sync_repository")
+@mock.patch(
+    "apps.github.management.commands.github_update_owasp_organization.Command._sync_entity_markdown_data"
+)
 def test_handle(
+    mock__sync_entity_markdown_data,
     mock_sync_repository,
     mock_get_github_client,
     command,
@@ -86,6 +90,8 @@ def test_handle(
     mock_get_github_client.return_value = mock_gh_client
     mock_org = mock.Mock()
     mock_gh_client.get_organization.return_value = mock_org
+
+    mock__sync_entity_markdown_data.return_value = None
 
     def create_mock_repo(name):
         mock_repo = mock.Mock()
