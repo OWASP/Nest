@@ -642,6 +642,7 @@ describe('UserMenu Component', () => {
       expect(signInButton).toHaveClass(
         'group',
         'relative',
+        'cursor-pointer',
         'flex',
         'h-10',
         'items-center',
