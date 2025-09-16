@@ -1,6 +1,7 @@
 import { faEye } from '@fortawesome/free-regular-svg-icons'
 import { faEdit } from '@fortawesome/free-solid-svg-icons'
 import { fireEvent, render, screen } from '@testing-library/react'
+import { useRouter } from 'next/navigation'
 import React from 'react'
 import type { Program } from 'types/mentorship'
 import { ProgramStatusEnum } from 'types/mentorship'
@@ -15,6 +16,10 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
   ),
 }))
 
+jest.mock('hooks/useUpdateProgramStatus', () => ({
+  useUpdateProgramStatus: () => ({ updateProgramStatus: jest.fn() }),
+}))
+
 jest.mock('components/ActionButton', () => ({
   __esModule: true,
   default: ({ children, onClick }: { children: React.ReactNode; onClick: () => void }) => (
@@ -25,7 +30,6 @@ jest.mock('components/ActionButton', () => ({
 }))
 
 describe('ProgramCard', () => {
-  const mockOnEdit = jest.fn()
   const mockOnView = jest.fn()
 
   const baseMockProgram: Program = {
@@ -85,20 +89,6 @@ describe('ProgramCard', () => {
       expect(screen.getByText('admin')).toBeInTheDocument()
     })
 
-    // it('shows Preview buttons for admin access', () => {
-    //   render(
-    //     <ProgramCard
-    //       program={baseMockProgram}
-    //       onView={mockOnView}
-    //       isAdmin={true}
-    //       accessLevel="admin"
-    //     />
-    //   )
-
-    //   expect(screen.getByText('Preview')).toBeInTheDocument()
-    //   expect(screen.getByText('Edit')).toBeInTheDocument()
-    // })
-
     it('calls onView when Preview button is clicked', () => {
       render(
         <ProgramCard
@@ -115,7 +105,9 @@ describe('ProgramCard', () => {
       expect(mockOnView).toHaveBeenCalledWith('test-program')
     })
 
-    it('calls onEdit when Edit button is clicked', () => {
+    it('navigates to edit page when Edit Program is clicked', () => {
+      const router = useRouter()
+
       render(
         <ProgramCard
           program={baseMockProgram}
@@ -125,10 +117,10 @@ describe('ProgramCard', () => {
         />
       )
 
-      const editButton = screen.getByText('Edit').closest('button')
-      fireEvent.click(editButton!)
+      fireEvent.click(screen.getByTestId('program-actions-button'))
+      fireEvent.click(screen.getByText('Edit Program'))
 
-      expect(mockOnEdit).toHaveBeenCalledWith('test-program')
+      expect(router.push).toHaveBeenCalledWith('/my/mentorship/programs/test-program/edit')
     })
   })
 
@@ -317,7 +309,9 @@ describe('ProgramCard', () => {
         />
       )
 
-      expect(screen.getByText('Jan 1, 2024 – Dec 31, 2024')).toBeInTheDocument()
+      expect(
+        screen.getByText((t) => t.includes('Jan 1, 2024') && t.includes('Dec 31, 2024'))
+      ).toBeInTheDocument()
     })
 
     it('shows only start date when endedAt is missing', () => {
@@ -379,7 +373,7 @@ describe('ProgramCard', () => {
       expect(screen.getByTestId('icon-eye')).toBeInTheDocument()
     })
 
-    it('renders edit icon for Edit button', () => {
+    it('renders actions button for admin menu', () => {
       render(
         <ProgramCard
           program={baseMockProgram}
@@ -389,7 +383,7 @@ describe('ProgramCard', () => {
         />
       )
 
-      expect(screen.getByTestId('icon-edit')).toBeInTheDocument()
+      expect(screen.getByTestId('program-actions-button')).toBeInTheDocument()
     })
 
     it('renders eye icon for View Details button', () => {
@@ -407,7 +401,7 @@ describe('ProgramCard', () => {
   })
 
   describe('Edge Cases', () => {
-    it('handles missing onEdit prop gracefully for admin access', () => {
+    it('shows Edit Program in actions menu for admin access', () => {
       render(
         <ProgramCard
           isAdmin={true}
@@ -417,8 +411,8 @@ describe('ProgramCard', () => {
         />
       )
 
-      // Should still render Edit button even without onEdit
-      expect(screen.getByText('Edit')).toBeInTheDocument()
+      fireEvent.click(screen.getByTestId('program-actions-button'))
+      expect(screen.getByText('Edit Program')).toBeInTheDocument()
     })
 
     it('handles program with minimal data', () => {
