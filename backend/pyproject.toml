@@ -47,15 +47,16 @@ slack-sdk = "^3.35.0"
 strawberry-graphql = { extras = [ "django" ], version = "^0.282.0" }
 strawberry-graphql-django = "^0.65.1"
 thefuzz = "^0.22.1"
+pyparsing = "^3.2.3"
 
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.36.4"
 pre-commit = "^4.1.0"
-ruff = "^0.12.8"
+ruff = "^0.13.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"
-pytest-cov = "^6.0"
+pytest-cov = "^7.0"
 pytest-django = "^4.5"
 pytest-mock = "^3.0"
 pytest-xdist = "^3.0"
@@ -101,10 +102,6 @@ lint.per-file-ignores."**/migrations/*.py" = [
 lint.per-file-ignores."**/models/*.py" = [
   "D106", # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
 ]
-lint.per-file-ignores."**/rest/v1/*.py" = [
-  "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
-  "B008",   # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
-]
 lint.per-file-ignores."**/settings/*.py" = [
   "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
 ]
@@ -118,6 +115,11 @@ lint.per-file-ignores."**/tests/**/*.py" = [
   "RUF012",  # https://docs.astral.sh/ruff/rules/mutable-class-default/
   "S101",    # https://docs.astral.sh/ruff/rules/assert/
   "SLF001",  # https://docs.astral.sh/ruff/rules/private-member-access/
+]
+
+lint.per-file-ignores."apps/api/rest/**/*.py" = [
+  "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
+  "B008",   # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
 ]
 
 [tool.pytest.ini_options]

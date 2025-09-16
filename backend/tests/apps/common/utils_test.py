@@ -5,6 +5,7 @@ import pytest
 from django.conf import settings
 
 from apps.common.utils import (
+    clean_url,
     convert_to_camel_case,
     convert_to_snake_case,
     get_absolute_url,
@@ -13,6 +14,7 @@ from apps.common.utils import (
     natural_date,
     natural_number,
     round_down,
+    validate_url,
 )
 
 
@@ -139,3 +141,58 @@ class TestUtils:
     )
     def test_round_down(self, value, base, expected):
         assert round_down(value, base) == expected
+
+    @pytest.mark.parametrize(
+        ("url", "expected"),
+        [
+            ("https://example.com", "https://example.com"),
+            ("https://example.com.", "https://example.com"),
+            ("https://example.com,", "https://example.com"),
+            ("https://example.com!", "https://example.com"),
+            ("https://example.com?", "https://example.com"),
+            ("https://example.com;", "https://example.com"),
+            ("https://example.com:", "https://example.com"),
+            ("  https://example.com  ", "https://example.com"),
+            ("https://example.com/path", "https://example.com/path"),
+            ("https://example.com/path?", "https://example.com/path"),
+            ("https://example.com/path!", "https://example.com/path"),
+            ("", None),
+            (None, None),
+            ("   ", None),
+            ("https://", "https://"),
+            ("not-a-url", "not-a-url"),
+        ],
+    )
+    def test_clean_url(self, url, expected):
+        """Test the clean_url function."""
+        assert clean_url(url) == expected
+
+    @pytest.mark.parametrize(
+        ("url", "expected"),
+        [
+            ("https://example.com", True),
+            ("http://example.com", True),
+            ("https://example.com/path", True),
+            ("https://example.com/path?query=1", True),
+            ("https://example.com/path#fragment", True),
+            ("https://subdomain.example.com", True),
+            ("https://example.com:8080", True),
+            ("https://example.com:8080/path", True),
+            ("", False),
+            (None, False),
+            ("not-a-url", False),
+            ("ftp://example.com", False),
+            ("https://", False),
+            ("http://", False),
+            ("https://example", True),  # Valid single label domain
+            ("https://example.", True),  # Valid with trailing dot
+            ("https://example.com.", True),  # Valid with trailing dot
+            ("https://192.168.1.1", True),  # Valid IP address
+            ("https://[::1]", True),  # Valid IPv6 address
+            ("https://example.com:99999", True),  # Valid port (urlparse accepts it)
+        ],
+    )
+    def test_validate_url(self, url, expected):
+        """Test the validate_url function."""
+        result = validate_url(url)
+        assert result == expected
