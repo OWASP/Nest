@@ -76,7 +76,7 @@ const ProgramForm = ({
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
 
@@ -91,7 +91,7 @@ const ProgramForm = ({
                     onChange={handleInputChange}
                     rows={4}
                     required
-                    className="w-full resize-none rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full resize-none rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
               </div>
@@ -114,7 +114,7 @@ const ProgramForm = ({
                     value={formData.startedAt}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
                 <div>
@@ -128,7 +128,7 @@ const ProgramForm = ({
                     value={formData.endedAt}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
                 <div>
@@ -143,7 +143,7 @@ const ProgramForm = ({
                     onChange={handleInputChange}
                     min={1}
                     required
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
               </div>
@@ -166,7 +166,7 @@ const ProgramForm = ({
                     value={formData.tags}
                     onChange={handleInputChange}
                     placeholder="javascript, react"
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
                 <div>
@@ -180,7 +180,7 @@ const ProgramForm = ({
                     value={formData.domains}
                     onChange={handleInputChange}
                     placeholder="AI, Web Development"
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
                 {isEdit && (
@@ -198,7 +198,7 @@ const ProgramForm = ({
                       value={formData.adminLogins}
                       onChange={handleInputChange}
                       placeholder="johndoe, jane-doe"
-                      className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                      className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
                     />
                   </div>
                 )}
@@ -206,19 +206,19 @@ const ProgramForm = ({
             </section>
 
             {/* Submit Buttons */}
-            <div className="border-t-1 border-t-gray-200 pt-8 dark:border-t-gray-700">
+            <div className="border-t border-gray-200 pt-8 dark:border-gray-700">
               <div className="flex flex-col justify-end gap-4 sm:flex-row">
                 <button
                   type="button"
                   onClick={() => history.back()}
-                  className="rounded-lg border-1 border-gray-200 px-6 py-3 font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
+                  className="rounded-lg border border-gray-300 px-6 py-3 font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex items-center justify-center gap-2 rounded-md border-1 border-[#0D6EFD] px-4 py-2 text-[#0D6EFD] hover:bg-[#0D6EFD] hover:text-white dark:text-sky-600 dark:hover:bg-sky-100"
+                  className="flex items-center justify-center gap-2 rounded-md border border-[#0D6EFD] px-4 py-2 text-[#0D6EFD] hover:bg-[#0D6EFD] hover:text-white dark:text-sky-600 dark:hover:bg-sky-100"
                 >
                   {loading ? 'Saving...' : submitText}
                 </button>

@@ -1,24 +1,32 @@
 import { faEye } from '@fortawesome/free-regular-svg-icons'
-import { faEdit } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useUpdateProgramStatus } from 'hooks/useUpdateProgramStatus'
 import type React from 'react'
+import { GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
 import { Program } from 'types/mentorship'
 import ActionButton from 'components/ActionButton'
+import ProgramActions from 'components/ProgramActions'
 
 interface ProgramCardProps {
   program: Program
-  onEdit?: (key: string) => void
   onView: (key: string) => void
   accessLevel: 'admin' | 'user'
+  isAdmin: boolean
 }
 
-const ProgramCard: React.FC<ProgramCardProps> = ({ program, onEdit, onView, accessLevel }) => {
+const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel, isAdmin }) => {
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
     })
+  const { updateProgramStatus } = useUpdateProgramStatus({
+    programKey: program.key,
+    programName: program.name,
+    isAdmin,
+    refetchQueries: [{ query: GET_PROGRAM_AND_MODULES, variables: { programKey: program.key } }],
+  })
 
   const roleClass = {
     admin: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
@@ -64,10 +72,13 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onEdit, onView, acce
                 <FontAwesomeIcon icon={faEye} className="mr-1" />
                 Preview
               </ActionButton>
-              <ActionButton onClick={() => onEdit(program.key)}>
-                <FontAwesomeIcon icon={faEdit} className="mr-1" />
-                Edit
-              </ActionButton>
+              {isAdmin && (
+                <ProgramActions
+                  programKey={program.key}
+                  status={program.status}
+                  setStatus={updateProgramStatus}
+                />
+              )}
             </>
           ) : (
             <ActionButton onClick={() => onView(program.key)}>

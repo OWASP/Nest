@@ -7,11 +7,12 @@ import type React from 'react'
 import { useState, useRef, useEffect } from 'react'
 
 interface ProgramActionsProps {
+  programKey: string
   status: string
-  setStatus: (newStatus: 'DRAFT' | 'PUBLISHED' | 'COMPLETED') => void
+  setStatus: (newStatus: string) => void
 }
 
-const ProgramActions: React.FC<ProgramActionsProps> = ({ status, setStatus }) => {
+const ProgramActions: React.FC<ProgramActionsProps> = ({ programKey, status, setStatus }) => {
   const router = useRouter()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -19,10 +20,10 @@ const ProgramActions: React.FC<ProgramActionsProps> = ({ status, setStatus }) =>
   const handleAction = (actionKey: string) => {
     switch (actionKey) {
       case 'edit Program':
-        router.push(`${window.location.pathname}/edit`)
+        router.push(`/my/mentorship/programs/${programKey}/edit`)
         break
       case 'create_module':
-        router.push(`${window.location.pathname}/modules/create`)
+        router.push(`/my/mentorship/programs/${programKey}/modules/create`)
         break
       case 'publish':
         setStatus('PUBLISHED')

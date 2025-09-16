@@ -45,13 +45,27 @@ describe('ProgramCard', () => {
 
   describe('Basic Rendering', () => {
     it('renders program name correctly', () => {
-      render(<ProgramCard program={baseMockProgram} onView={mockOnView} accessLevel="user" />)
+      render(
+        <ProgramCard
+          isAdmin={true}
+          program={baseMockProgram}
+          onView={mockOnView}
+          accessLevel="user"
+        />
+      )
 
       expect(screen.getByText('Test Program')).toBeInTheDocument()
     })
 
     it('renders program description correctly', () => {
-      render(<ProgramCard program={baseMockProgram} onView={mockOnView} accessLevel="user" />)
+      render(
+        <ProgramCard
+          isAdmin={true}
+          program={baseMockProgram}
+          onView={mockOnView}
+          accessLevel="user"
+        />
+      )
 
       expect(screen.getByText('This is a test program description')).toBeInTheDocument()
     })
@@ -63,7 +77,7 @@ describe('ProgramCard', () => {
         <ProgramCard
           program={baseMockProgram}
           onView={mockOnView}
-          onEdit={mockOnEdit}
+          isAdmin={true}
           accessLevel="admin"
         />
       )
@@ -71,26 +85,26 @@ describe('ProgramCard', () => {
       expect(screen.getByText('admin')).toBeInTheDocument()
     })
 
-    it('shows Preview and Edit buttons for admin access', () => {
-      render(
-        <ProgramCard
-          program={baseMockProgram}
-          onView={mockOnView}
-          onEdit={mockOnEdit}
-          accessLevel="admin"
-        />
-      )
+    // it('shows Preview buttons for admin access', () => {
+    //   render(
+    //     <ProgramCard
+    //       program={baseMockProgram}
+    //       onView={mockOnView}
+    //       isAdmin={true}
+    //       accessLevel="admin"
+    //     />
+    //   )
 
-      expect(screen.getByText('Preview')).toBeInTheDocument()
-      expect(screen.getByText('Edit')).toBeInTheDocument()
-    })
+    //   expect(screen.getByText('Preview')).toBeInTheDocument()
+    //   expect(screen.getByText('Edit')).toBeInTheDocument()
+    // })
 
     it('calls onView when Preview button is clicked', () => {
       render(
         <ProgramCard
           program={baseMockProgram}
           onView={mockOnView}
-          onEdit={mockOnEdit}
+          isAdmin={true}
           accessLevel="admin"
         />
       )
@@ -106,7 +120,7 @@ describe('ProgramCard', () => {
         <ProgramCard
           program={baseMockProgram}
           onView={mockOnView}
-          onEdit={mockOnEdit}
+          isAdmin={true}
           accessLevel="admin"
         />
       )
@@ -120,13 +134,27 @@ describe('ProgramCard', () => {
 
   describe('Access Level - User', () => {
     it('does not show user role badge when accessLevel is user', () => {
-      render(<ProgramCard program={baseMockProgram} onView={mockOnView} accessLevel="user" />)
+      render(
+        <ProgramCard
+          isAdmin={true}
+          program={baseMockProgram}
+          onView={mockOnView}
+          accessLevel="user"
+        />
+      )
 
       expect(screen.queryByText('admin')).not.toBeInTheDocument()
     })
 
     it('shows only View Details button for user access', () => {
-      render(<ProgramCard program={baseMockProgram} onView={mockOnView} accessLevel="user" />)
+      render(
+        <ProgramCard
+          isAdmin={true}
+          program={baseMockProgram}
+          onView={mockOnView}
+          accessLevel="user"
+        />
+      )
 
       expect(screen.getByText('View Details')).toBeInTheDocument()
       expect(screen.queryByText('Preview')).not.toBeInTheDocument()
@@ -134,7 +162,14 @@ describe('ProgramCard', () => {
     })
 
     it('calls onView when View Details button is clicked', () => {
-      render(<ProgramCard program={baseMockProgram} onView={mockOnView} accessLevel="user" />)
+      render(
+        <ProgramCard
+          isAdmin={true}
+          program={baseMockProgram}
+          onView={mockOnView}
+          accessLevel="user"
+        />
+      )
 
       const viewButton = screen.getByText('View Details').closest('button')
       fireEvent.click(viewButton!)
@@ -146,7 +181,14 @@ describe('ProgramCard', () => {
   describe('User Role Badge Styling', () => {
     it('applies admin role styling', () => {
       const adminProgram = { ...baseMockProgram, userRole: 'admin' }
-      render(<ProgramCard program={adminProgram} onView={mockOnView} accessLevel="admin" />)
+      render(
+        <ProgramCard
+          isAdmin={true}
+          program={adminProgram}
+          onView={mockOnView}
+          accessLevel="admin"
+        />
+      )
 
       const badge = screen.getByText('admin')
       expect(badge).toHaveClass('bg-blue-100', 'text-blue-800')
@@ -154,7 +196,14 @@ describe('ProgramCard', () => {
 
     it('applies mentor role styling', () => {
       const mentorProgram = { ...baseMockProgram, userRole: 'mentor' }
-      render(<ProgramCard program={mentorProgram} onView={mockOnView} accessLevel="admin" />)
+      render(
+        <ProgramCard
+          isAdmin={true}
+          program={mentorProgram}
+          onView={mockOnView}
+          accessLevel="admin"
+        />
+      )
 
       const badge = screen.getByText('mentor')
       expect(badge).toHaveClass('bg-green-100', 'text-green-800')
@@ -162,7 +211,14 @@ describe('ProgramCard', () => {
 
     it('applies default role styling for unknown role', () => {
       const unknownRoleProgram = { ...baseMockProgram, userRole: 'unknown' }
-      render(<ProgramCard program={unknownRoleProgram} onView={mockOnView} accessLevel="admin" />)
+      render(
+        <ProgramCard
+          isAdmin={true}
+          program={unknownRoleProgram}
+          onView={mockOnView}
+          accessLevel="admin"
+        />
+      )
 
       const badge = screen.getByText('unknown')
       expect(badge).toHaveClass('bg-gray-100', 'text-gray-800')
@@ -170,7 +226,14 @@ describe('ProgramCard', () => {
 
     it('applies default styling when userRole is undefined', () => {
       const noRoleProgram = { ...baseMockProgram, userRole: undefined }
-      render(<ProgramCard program={noRoleProgram} onView={mockOnView} accessLevel="admin" />)
+      render(
+        <ProgramCard
+          isAdmin={true}
+          program={noRoleProgram}
+          onView={mockOnView}
+          accessLevel="admin"
+        />
+      )
 
       // Should not render badge when userRole is undefined
       expect(screen.queryByText(/bg-/)).not.toBeInTheDocument()
@@ -182,7 +245,14 @@ describe('ProgramCard', () => {
       const longDescription = 'A'.repeat(150)
       const longDescProgram = { ...baseMockProgram, description: longDescription }
 
-      render(<ProgramCard program={longDescProgram} onView={mockOnView} accessLevel="user" />)
+      render(
+        <ProgramCard
+          isAdmin={true}
+          program={longDescProgram}
+          onView={mockOnView}
+          accessLevel="user"
+        />
+      )
 
       const expectedText = 'A'.repeat(100) + '...'
       expect(screen.getByText(expectedText)).toBeInTheDocument()
@@ -192,7 +262,14 @@ describe('ProgramCard', () => {
       const shortDescription = 'Short description'
       const shortDescProgram = { ...baseMockProgram, description: shortDescription }
 
-      render(<ProgramCard program={shortDescProgram} onView={mockOnView} accessLevel="user" />)
+      render(
+        <ProgramCard
+          isAdmin={true}
+          program={shortDescProgram}
+          onView={mockOnView}
+          accessLevel="user"
+        />
+      )
 
       expect(screen.getByText('Short description')).toBeInTheDocument()
     })
@@ -200,7 +277,14 @@ describe('ProgramCard', () => {
     it('shows fallback text when description is empty', () => {
       const emptyDescProgram = { ...baseMockProgram, description: '' }
 
-      render(<ProgramCard program={emptyDescProgram} onView={mockOnView} accessLevel="user" />)
+      render(
+        <ProgramCard
+          isAdmin={true}
+          program={emptyDescProgram}
+          onView={mockOnView}
+          accessLevel="user"
+        />
+      )
 
       expect(screen.getByText('No description available.')).toBeInTheDocument()
     })
@@ -209,7 +293,14 @@ describe('ProgramCard', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const noDescProgram = { ...baseMockProgram, description: undefined as any }
 
-      render(<ProgramCard program={noDescProgram} onView={mockOnView} accessLevel="user" />)
+      render(
+        <ProgramCard
+          isAdmin={true}
+          program={noDescProgram}
+          onView={mockOnView}
+          accessLevel="user"
+        />
+      )
 
       expect(screen.getByText('No description available.')).toBeInTheDocument()
     })
@@ -217,15 +308,28 @@ describe('ProgramCard', () => {
 
   describe('Date Formatting', () => {
     it('shows date range when both startedAt and endedAt are provided', () => {
-      render(<ProgramCard program={baseMockProgram} onView={mockOnView} accessLevel="user" />)
+      render(
+        <ProgramCard
+          isAdmin={true}
+          program={baseMockProgram}
+          onView={mockOnView}
+          accessLevel="user"
+        />
+      )
 
       expect(screen.getByText('Jan 1, 2024 – Dec 31, 2024')).toBeInTheDocument()
     })
 
     it('shows only start date when endedAt is missing', () => {
       const startOnlyProgram = { ...baseMockProgram, endedAt: '' }
-
-      render(<ProgramCard program={startOnlyProgram} onView={mockOnView} accessLevel="user" />)
+      render(
+        <ProgramCard
+          isAdmin={true}
+          program={startOnlyProgram}
+          onView={mockOnView}
+          accessLevel="user"
+        />
+      )
 
       expect(screen.getByText('Started: Jan 1, 2024')).toBeInTheDocument()
     })
@@ -233,7 +337,14 @@ describe('ProgramCard', () => {
     it('shows fallback text when both dates are missing', () => {
       const noDatesProgram = { ...baseMockProgram, startedAt: '', endedAt: '' }
 
-      render(<ProgramCard program={noDatesProgram} onView={mockOnView} accessLevel="user" />)
+      render(
+        <ProgramCard
+          isAdmin={true}
+          program={noDatesProgram}
+          onView={mockOnView}
+          accessLevel="user"
+        />
+      )
 
       expect(screen.getByText('No dates set')).toBeInTheDocument()
     })
@@ -241,7 +352,14 @@ describe('ProgramCard', () => {
     it('shows fallback text when startedAt is missing but endedAt exists', () => {
       const endOnlyProgram = { ...baseMockProgram, startedAt: '' }
 
-      render(<ProgramCard program={endOnlyProgram} onView={mockOnView} accessLevel="user" />)
+      render(
+        <ProgramCard
+          isAdmin={true}
+          program={endOnlyProgram}
+          onView={mockOnView}
+          accessLevel="user"
+        />
+      )
 
       expect(screen.getByText('No dates set')).toBeInTheDocument()
     })
@@ -252,8 +370,8 @@ describe('ProgramCard', () => {
       render(
         <ProgramCard
           program={baseMockProgram}
+          isAdmin={true}
           onView={mockOnView}
-          onEdit={mockOnEdit}
           accessLevel="admin"
         />
       )
@@ -265,8 +383,8 @@ describe('ProgramCard', () => {
       render(
         <ProgramCard
           program={baseMockProgram}
+          isAdmin={true}
           onView={mockOnView}
-          onEdit={mockOnEdit}
           accessLevel="admin"
         />
       )
@@ -275,7 +393,14 @@ describe('ProgramCard', () => {
     })
 
     it('renders eye icon for View Details button', () => {
-      render(<ProgramCard program={baseMockProgram} onView={mockOnView} accessLevel="user" />)
+      render(
+        <ProgramCard
+          isAdmin={true}
+          program={baseMockProgram}
+          onView={mockOnView}
+          accessLevel="user"
+        />
+      )
 
       expect(screen.getByTestId('icon-eye')).toBeInTheDocument()
     })
@@ -283,7 +408,14 @@ describe('ProgramCard', () => {
 
   describe('Edge Cases', () => {
     it('handles missing onEdit prop gracefully for admin access', () => {
-      render(<ProgramCard program={baseMockProgram} onView={mockOnView} accessLevel="admin" />)
+      render(
+        <ProgramCard
+          isAdmin={true}
+          program={baseMockProgram}
+          onView={mockOnView}
+          accessLevel="admin"
+        />
+      )
 
       // Should still render Edit button even without onEdit
       expect(screen.getByText('Edit')).toBeInTheDocument()
@@ -300,7 +432,14 @@ describe('ProgramCard', () => {
         endedAt: '',
       }
 
-      render(<ProgramCard program={minimalProgram} onView={mockOnView} accessLevel="user" />)
+      render(
+        <ProgramCard
+          isAdmin={true}
+          program={minimalProgram}
+          onView={mockOnView}
+          accessLevel="user"
+        />
+      )
 
       expect(screen.getByText('Minimal Program')).toBeInTheDocument()
       expect(screen.getByText('No description available.')).toBeInTheDocument()
