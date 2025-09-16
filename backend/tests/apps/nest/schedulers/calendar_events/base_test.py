@@ -69,6 +69,22 @@ class TestBaseScheduler:
             result_ttl=500,
         )
 
+    @patch("apps.nest.schedulers.calendar_events.base.get_scheduler")
+    def test_cancel(self, mock_get_scheduler):
+        """Test cancelling a scheduled reminder."""
+        mock_reminder_schedule = MagicMock()
+        mock_reminder_schedule.job_id = "job_123"
+
+        scheduler_instance = MagicMock()
+
+        mock_get_scheduler.return_value = scheduler_instance
+
+        base_scheduler = BaseScheduler(reminder_schedule=mock_reminder_schedule)
+        base_scheduler.cancel()
+
+        scheduler_instance.cancel.assert_called_once_with("job_123")
+        mock_reminder_schedule.delete.assert_called_once()
+
     def test_send_message_not_implemented(self):
         """Test that send_message raises NotImplementedError."""
         with pytest.raises(NotImplementedError) as exc_info:
