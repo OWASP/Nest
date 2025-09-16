@@ -18,15 +18,24 @@ type BadgeProps = {
 }
 
 const Badges = ({ name, cssClass, showTooltip = true }: BadgeProps) => {
-  const safeCssClass = (cssClass ?? 'fa-medal') as string
-  // Remove one or more 'fa-' prefixes, normalize underscores to dashes
-  const iconName = String(safeCssClass)
-    .trim()
-    .replace(/^(?:fa-)+/, '')
-    .replace(/_/g, '-') as IconName
+  const safeCssClass = String(cssClass ?? 'fa-medal').trim()
+  const tokens = safeCssClass.split(/\s+/)
+  const styleToken = tokens.find((t) => /^fa-(solid|regular|brands)$/i.test(t))
+  const stylePrefix: IconLookup['prefix'] =
+    styleToken?.toLowerCase() === 'fa-regular'
+      ? 'far'
+      : styleToken?.toLowerCase() === 'fa-brands'
+        ? 'fab'
+        : 'fas'
+  const iconToken =
+    tokens
+      .slice()
+      .reverse()
+      .find((t) => /^fa-[a-z0-9-]+$/i.test(t) && !/^fa-(solid|regular|brands)$/i.test(t)) || 'fa-medal'
+  const iconName = iconToken.replace(/^fa-/, '').replace(/_/g, '-') as IconName
 
-  // Check if the icon exists in the FA library
-  const lookup: IconLookup = { prefix: 'fas', iconName }
+  // Check if the icon exists in the FA library for the derived style
+  const lookup: IconLookup = { prefix: stylePrefix, iconName }
   let iconFound = false
   try {
     findIconDefinition(lookup)
