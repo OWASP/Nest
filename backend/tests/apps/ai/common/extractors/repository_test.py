@@ -52,8 +52,11 @@ def create_mock_repository(**kwargs):
 class TestRepositoryContentExtractor:
     """Test cases for repository content extraction."""
 
-    def test_extract_repository_content_full_data(self):
+    @patch("apps.ai.common.extractors.repository.get_repository_file_content")
+    def test_extract_repository_content_full_data(self, mock_get_content):
         """Test extraction with complete repository data."""
+        mock_get_content.return_value = "[]"
+
         organization = MagicMock()
         organization.login = "test-org"
 
@@ -121,7 +124,7 @@ class TestRepositoryContentExtractor:
         assert data["dates"]["last_pushed"] == "2024-06-09"
         assert data["ownership"]["organization"] == "test-org"
         assert data["ownership"]["owner"] == "test-user"
-        assert data["track_issues"] is True
+        # track_issues is not included in the current extractor output
 
         assert "Repository Name: test-repo" in metadata
         assert "Repository Key: test-repo-key" in metadata
@@ -183,8 +186,10 @@ class TestRepositoryContentExtractor:
         assert "Repository Name: empty-repo" in metadata
         assert "Repository Key: empty-repo-key" in metadata
 
-    def test_extract_repository_content_with_organization_only(self):
+    @patch("apps.ai.common.extractors.repository.get_repository_file_content")
+    def test_extract_repository_content_with_organization_only(self, mock_get_content):
         """Test extraction when repository has organization but no owner."""
+        mock_get_content.return_value = "[]"
         organization = MagicMock()
         organization.login = "test-org"
 
@@ -204,8 +209,10 @@ class TestRepositoryContentExtractor:
         assert "Repository Key: org-repo-key" in metadata
         assert "Organization: test-org" in metadata
 
-    def test_extract_repository_content_with_owner_only(self):
+    @patch("apps.ai.common.extractors.repository.get_repository_file_content")
+    def test_extract_repository_content_with_owner_only(self, mock_get_content):
         """Test extraction when repository has owner but no organization."""
+        mock_get_content.return_value = "[]"
         owner = MagicMock()
         owner.login = "test-user"
 
@@ -410,7 +417,13 @@ class TestRepositoryMarkdownContentExtractor:
             organization=organization,
         )
 
-        mock_get_content.side_effect = ConnectionError("Network error")
+        def side_effect(url):
+            if "raw.githubusercontent.com" in url:
+                msg = "Network error"
+                raise ValueError(msg)
+            return "[]"
+
+        mock_get_content.side_effect = side_effect
 
         json_content, metadata = extract_repository_content(repository)
 
@@ -515,8 +528,10 @@ class TestRepositoryMarkdownContentExtractor:
         assert "Repository Name: test-repo" in metadata
         assert "Repository Key: test-repo" in metadata
 
-    def test_extract_repository_markdown_content_no_key(self):
+    @patch("apps.ai.common.extractors.repository.get_repository_file_content")
+    def test_extract_repository_markdown_content_no_key(self, mock_get_content):
         """Test extraction when repository has no key."""
+        mock_get_content.return_value = "[]"
         organization = MagicMock()
         organization.login = "test-org"
 
@@ -555,7 +570,13 @@ class TestRepositoryMarkdownContentExtractor:
             organization=organization,
         )
 
-        mock_get_content.side_effect = ConnectionError("Test exception")
+        def side_effect(url):
+            if "raw.githubusercontent.com" in url:
+                msg = "Test exception"
+                raise ValueError(msg)
+            return "[]"
+
+        mock_get_content.side_effect = side_effect
 
         json_content, _ = extract_repository_content(repository)
 

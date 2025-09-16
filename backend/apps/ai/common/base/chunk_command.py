@@ -4,9 +4,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Max, Model
 
 from apps.ai.common.base.ai_command import BaseAICommand
-from apps.ai.common.utils import create_chunks_and_embeddings, is_json_content
+from apps.ai.common.utils import create_chunks_and_embeddings
 from apps.ai.models.chunk import Chunk
 from apps.ai.models.context import Context
+from apps.common.utils import is_valid_json
 
 
 class BaseChunkCommand(BaseAICommand):
@@ -45,7 +46,7 @@ class BaseChunkCommand(BaseAICommand):
 
                 content, metadata_content = self.extract_content(entity)
 
-                if is_json_content(content):
+                if is_valid_json(content):
                     full_content = content
                 else:
                     full_content = (

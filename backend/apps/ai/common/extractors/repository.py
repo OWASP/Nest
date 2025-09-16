@@ -5,6 +5,7 @@ import logging
 import time
 
 from apps.ai.common.constants import DELIMITER, GITHUB_REQUEST_INTERVAL_SECONDS
+from apps.common.utils import is_valid_json
 from apps.github.utils import get_repository_file_content
 
 logger = logging.getLogger(__name__)
@@ -108,9 +109,6 @@ def extract_repository_content(repository) -> tuple[str, str]:
     if ownership:
         repository_data["ownership"] = ownership
 
-    if repository.track_issues:
-        repository_data["track_issues"] = repository.track_issues
-
     markdown_files = [
         "README.md",
         "index.md",
@@ -118,18 +116,34 @@ def extract_repository_content(repository) -> tuple[str, str]:
         "leaders.md",
     ]
 
-    markdown_content = {}
-    for file_path in markdown_files:
-        try:
-            if repository.organization:
-                owner = repository.organization.login
-            else:
-                owner = repository.owner.login if repository.owner else ""
+    if repository.organization:
+        owner = repository.organization.login
+    else:
+        owner = repository.owner.login if repository.owner else ""
+    branch = repository.default_branch or "main"
 
+    tab_files = []
+    if owner and repository.key:
+        contents_url = (
+            f"https://api.github.com/repos/{owner}/{repository.key}/contents/?ref={branch}"
+        )
+        response = get_repository_file_content(contents_url)
+        if response and is_valid_json(response):
+            items = json.loads(response)
+            for item in items:
+                name = item.get("name", "")
+                if name.startswith("tab_") and name.endswith(".md"):
+                    tab_files.append(name)
+
+    all_markdown_files = markdown_files + tab_files
+
+    markdown_content = {}
+    for file_path in all_markdown_files:
+        try:
             if owner and repository.key:
                 raw_url = (
                     f"https://raw.githubusercontent.com/{owner}/{repository.key}/"
-                    f"{repository.default_branch or 'main'}/{file_path}"
+                    f"{branch}/{file_path}"
                 )
                 content = get_repository_file_content(raw_url)
 

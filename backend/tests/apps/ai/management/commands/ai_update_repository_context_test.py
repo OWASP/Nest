@@ -44,7 +44,7 @@ class TestAiUpdateRepositoryContextCommand:
 
     def test_entity_name_plural_property(self, command):
         """Test the entity_name_plural property."""
-        assert command.entity_name_plural == "repositorys"
+        assert command.entity_name_plural == "repositories"
 
     def test_key_field_name_property(self, command):
         """Test the key_field_name property."""
@@ -65,7 +65,7 @@ class TestAiUpdateRepositoryContextCommand:
             mock_extract.assert_called_once_with(mock_repository)
 
     def test_get_base_queryset(self, command):
-        """Test the get_base_queryset method applies correct filters."""
+        """Test that the get_base_queryset method applies correct filters."""
         with patch.object(command.__class__.__bases__[0], "get_base_queryset") as mock_super:
             mock_queryset = Mock()
             mock_super.return_value = mock_queryset
@@ -122,7 +122,7 @@ class TestAiUpdateRepositoryContextCommand:
         assert command.model_class is not None
         assert command.key_field_name == "key"
         assert command.entity_name == "repository"
-        assert command.entity_name_plural == "repositorys"
+        assert command.entity_name_plural == "repositories"
 
     def test_queryset_filters_owasp_site_repositories(self, command):
         """Test that the queryset only includes OWASP site repositories."""

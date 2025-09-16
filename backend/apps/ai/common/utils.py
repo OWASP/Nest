@@ -1,6 +1,5 @@
 """AI utils."""
 
-import json
 import logging
 import time
 from datetime import UTC, datetime, timedelta
@@ -69,23 +68,6 @@ def create_chunks_and_embeddings(
         return []
     else:
         return chunks
-
-
-def is_json_content(content: str) -> bool:
-    """Check if content is JSON format.
-
-    Args:
-        content: The content to check
-
-    Returns:
-        bool: True if content is valid JSON, False otherwise
-
-    """
-    try:
-        json.loads(content)
-    except (TypeError, ValueError):
-        return False
-    return True
 
 
 def regenerate_chunks_for_context(context: Context):

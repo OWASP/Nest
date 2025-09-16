@@ -11,6 +11,11 @@ class Command(BaseChunkCommand):
     key_field_name = "key"
     model_class = Repository
 
+    def __init__(self, *args, **kwargs):
+        """Initialize command for repository."""
+        super().__init__(*args, **kwargs)
+        self.entity_name_plural = "repositories"
+
     def extract_content(self, entity: Repository) -> tuple[str, str]:
         """Extract content from the repository."""
         return extract_repository_content(entity)

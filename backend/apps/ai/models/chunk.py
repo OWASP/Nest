@@ -1,16 +1,12 @@
 """AI app chunk model."""
 
-import logging
-
-from django.db import DatabaseError, models
+from django.db import models
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pgvector.django import VectorField
 
 from apps.ai.models.context import Context
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import truncate
-
-logger = logging.getLogger(__name__)
 
 
 class Chunk(TimestampedModel):
@@ -32,25 +28,8 @@ class Chunk(TimestampedModel):
 
     @staticmethod
     def bulk_save(chunks, fields=None):
-        """Bulk save chunks with duplicate handling."""
-        unique_chunks = []
-        unique_chunks = [
-            chunk
-            for chunk in chunks
-            if not Chunk.objects.filter(context=chunk.context, text=chunk.text).exists()
-        ]
-
-        if unique_chunks:
-            try:
-                BulkSaveModel.bulk_save(Chunk, unique_chunks, fields=fields)
-            except (ValueError, TypeError, DatabaseError):
-                for chunk in unique_chunks:
-                    try:
-                        chunk.save()
-                    except (ValueError, TypeError, DatabaseError) as save_error:
-                        logger.exception("Failed to save chunk", exc_info=save_error)
-        else:
-            chunks.clear()
+        """Bulk save chunks."""
+        BulkSaveModel.bulk_save(Chunk, chunks, fields=fields)
 
     @staticmethod
     def split_text(text: str) -> list[str]:
@@ -82,7 +61,11 @@ class Chunk(TimestampedModel):
           Chunk: The created chunk instance.
 
         """
-        if Chunk.objects.filter(context=context, text=text).exists():
+        if Chunk.objects.filter(
+            context__entity_type=context.entity_type,
+            context__entity_id=context.entity_id,
+            text=text,
+        ).exists():
             return None
 
         chunk = Chunk(text=text, embedding=embedding, context=context)

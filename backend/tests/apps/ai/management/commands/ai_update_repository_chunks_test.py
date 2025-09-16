@@ -44,7 +44,7 @@ class TestAiUpdateRepositoryChunksCommand:
 
     def test_entity_name_plural_property(self, command):
         """Test the entity_name_plural property."""
-        assert command.entity_name_plural == "repositorys"
+        assert command.entity_name_plural == "repositories"
 
     def test_key_field_name_property(self, command):
         """Test the key_field_name property."""
@@ -122,4 +122,4 @@ class TestAiUpdateRepositoryChunksCommand:
         assert command.model_class is not None
         assert command.key_field_name == "key"
         assert command.entity_name == "repository"
-        assert command.entity_name_plural == "repositorys"
+        assert command.entity_name_plural == "repositories"
