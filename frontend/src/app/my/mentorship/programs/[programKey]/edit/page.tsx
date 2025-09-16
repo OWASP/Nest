@@ -7,7 +7,7 @@ import type React from 'react'
 import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UPDATE_PROGRAM } from 'server/mutations/programsMutations'
-import { GET_PROGRAM_DETAILS } from 'server/queries/programsQueries'
+import { GET_PROGRAM_DETAILS, GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
 import type { ExtendedSession } from 'types/auth'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
@@ -103,7 +103,10 @@ const EditProgramPage = () => {
         status: formData.status,
       }
 
-      await updateProgram({ variables: { input } })
+      await updateProgram({
+        variables: { input },
+        refetchQueries: [{ query: GET_PROGRAM_AND_MODULES, variables: { programKey: input.key } }],
+      })
 
       addToast({
         title: 'Program Updated',
@@ -113,7 +116,7 @@ const EditProgramPage = () => {
         timeout: 3000,
       })
 
-      router.push(`/my/mentorship/programs/${slugify(formData.name)}?refresh=true`)
+      router.push(`/my/mentorship/programs/${slugify(formData.name)}`)
     } catch (err) {
       addToast({
         title: 'Update Failed',

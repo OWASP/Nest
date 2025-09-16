@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UPDATE_MODULE } from 'server/mutations/moduleMutations'
 import { GET_PROGRAM_ADMINS_AND_MODULES } from 'server/queries/moduleQueries'
+import { GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
 import type { ExtendedSession } from 'types/auth'
 import { EXPERIENCE_LEVELS, type ModuleFormData } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
@@ -108,7 +109,10 @@ const EditModulePage = () => {
         mentorLogins: parseCommaSeparated(formData.mentorLogins),
       }
 
-      await updateModule({ variables: { input } })
+      await updateModule({
+        variables: { input },
+        refetchQueries: [{ query: GET_PROGRAM_AND_MODULES, variables: { programKey } }],
+      })
 
       addToast({
         title: 'Module Updated',
@@ -117,7 +121,7 @@ const EditModulePage = () => {
         variant: 'solid',
         timeout: 3000,
       })
-      router.push(`/my/mentorship/programs/${programKey}?refresh=true`)
+      router.push(`/my/mentorship/programs/${programKey}`)
     } catch (err) {
       handleAppError(err)
     }

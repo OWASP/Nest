@@ -3,7 +3,7 @@
 import { useQuery, useMutation } from '@apollo/client'
 import { addToast } from '@heroui/toast'
 import upperFirst from 'lodash/upperFirst'
-import { useParams, useSearchParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
@@ -19,32 +19,24 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProgramDetailsPage = () => {
   const { programKey } = useParams() as { programKey: string }
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const shouldRefresh = searchParams.get('refresh') === 'true'
 
   const { data: session } = useSession()
   const username = (session as ExtendedSession)?.user?.login
 
   const [program, setProgram] = useState<Program | null>(null)
   const [modules, setModules] = useState<Module[]>([])
-  const [isRefetching, setIsRefetching] = useState(false)
 
   const [updateProgram] = useMutation(UPDATE_PROGRAM_STATUS_MUTATION, {
     onError: handleAppError,
   })
 
-  const {
-    data,
-    refetch,
-    loading: isQueryLoading,
-  } = useQuery(GET_PROGRAM_AND_MODULES, {
+  const { data, loading: isQueryLoading } = useQuery(GET_PROGRAM_AND_MODULES, {
     variables: { programKey },
     skip: !programKey,
     notifyOnNetworkStatusChange: true,
   })
 
-  const isLoading = isQueryLoading || isRefetching
+  const isLoading = isQueryLoading
 
   const isAdmin = useMemo(
     () => !!program?.admins?.some((admin) => admin.login === username),
@@ -93,28 +85,11 @@ const ProgramDetailsPage = () => {
   }
 
   useEffect(() => {
-    const processResult = async () => {
-      if (shouldRefresh) {
-        setIsRefetching(true)
-        try {
-          await refetch()
-        } finally {
-          setIsRefetching(false)
-          const params = new URLSearchParams(searchParams.toString())
-          params.delete('refresh')
-          const cleaned = params.toString()
-          router.replace(cleaned ? `?${cleaned}` : window.location.pathname, { scroll: false })
-        }
-      }
-
-      if (data?.getProgram) {
-        setProgram(data.getProgram)
-        setModules(data.getProgramModules || [])
-      }
+    if (data?.getProgram) {
+      setProgram(data.getProgram)
+      setModules(data.getProgramModules || [])
     }
-
-    processResult()
-  }, [shouldRefresh, data, refetch, router, searchParams])
+  }, [data])
 
   if (isLoading) return <LoadingSpinner />
 

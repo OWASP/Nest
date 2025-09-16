@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 import { ErrorDisplay } from 'app/global-error'
 import { CREATE_MODULE } from 'server/mutations/moduleMutations'
-import { GET_PROGRAM_ADMIN_DETAILS } from 'server/queries/programsQueries'
+import { GET_PROGRAM_ADMIN_DETAILS, GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
 import type { ExtendedSession } from 'types/auth'
 import { EXPERIENCE_LEVELS } from 'types/mentorship'
 import { parseCommaSeparated } from 'utils/parser'
@@ -94,7 +94,10 @@ const CreateModulePage = () => {
         mentorLogins: parseCommaSeparated(formData.mentorLogins),
       }
 
-      await createModule({ variables: { input } })
+      await createModule({
+        variables: { input },
+        refetchQueries: [{ query: GET_PROGRAM_AND_MODULES, variables: { programKey } }],
+      })
 
       addToast({
         title: 'Module Created',
@@ -104,7 +107,7 @@ const CreateModulePage = () => {
         timeout: 3000,
       })
 
-      router.push(`/my/mentorship/programs/${programKey}?refresh=true`)
+      router.push(`/my/mentorship/programs/${programKey}`)
     } catch (err) {
       addToast({
         title: 'Creation Failed',
