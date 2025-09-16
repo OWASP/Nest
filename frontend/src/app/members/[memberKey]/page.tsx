@@ -186,15 +186,15 @@ const UserDetailsPage: React.FC = () => {
   }
 
   const UserSummary = () => (
-    <div className="mt-4 flex items-center">
+    <div className="mt-4 flex flex-col items-center lg:flex-row">
       <Image
-        width={64}
-        height={64}
-        className="mr-4 h-16 w-16 rounded-full border-2 border-white bg-white object-cover shadow-md dark:border-gray-800 dark:bg-gray-600/60"
+        width={200}
+        height={200}
+        className="mr-4 h-[200px] w-[200px] rounded-full border-2 border-white bg-white object-cover shadow-md dark:border-gray-800 dark:bg-gray-600/60"
         src={user?.avatarUrl || '/placeholder.svg'}
         alt={user?.name || user?.login || 'User Avatar'}
       />
-      <div className="w-full">
+      <div className="w-full text-center lg:text-left">
         <Link href={user?.url || '#'} className="text-xl font-bold text-blue-400 hover:underline">
           @{user?.login}
         </Link>

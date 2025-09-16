@@ -71,8 +71,6 @@ jest.mock('@heroui/tooltip', () => ({
 describe('Badges', () => {
   const defaultProps = {
     name: 'Test Badge',
-    weight: 1,
-    description: 'Test description',
     cssClass: 'fa-medal',
   }
 
@@ -116,7 +114,7 @@ describe('Badges', () => {
       expect(screen.getByTestId('icon-crown')).toBeInTheDocument()
     })
 
-    it('renders correct icon for cssClass with multiple fa- prefixes', () => {
+    it('renders fallback medal icon for cssClass with multiple fa- prefixes', () => {
       render(<Badges {...defaultProps} cssClass="fa-fa-crown" />)
 
       // Should fall back to medal icon since 'fa-crown' is not a valid FontAwesome icon
@@ -138,15 +136,6 @@ describe('Badges', () => {
       render(<Badges {...defaultProps} cssClass="fa-invalid" />)
 
       expect(screen.getByTestId('icon-medal')).toBeInTheDocument()
-      expect(screen.getByTestId('tooltip')).toHaveAttribute(
-        'data-content',
-        'Test Badge (icon not found)'
-      )
-    })
-
-    it('shows fallback tooltip content for invalid icon', () => {
-      render(<Badges {...defaultProps} cssClass="fa-nonexistent" />)
-
       expect(screen.getByTestId('tooltip')).toHaveAttribute(
         'data-content',
         'Test Badge (icon not found)'
@@ -182,7 +171,7 @@ describe('Badges', () => {
       expect(screen.getByTestId('tooltip')).toHaveAttribute('data-content', 'Special Badge')
     })
 
-    it('displays modified tooltip content for invalid icon', () => {
+    it('displays badge name for invalid icon with fallback message', () => {
       render(<Badges {...defaultProps} name="Invalid Badge" cssClass="fa-invalid" />)
 
       expect(screen.getByTestId('tooltip')).toHaveAttribute(
@@ -224,7 +213,7 @@ describe('Badges', () => {
       expect(screen.getByTestId('icon-user-tie')).toBeInTheDocument()
     })
 
-    it('handles cssClass with underscores', () => {
+    it('handles cssClass with underscores (falls back to medal)', () => {
       render(<Badges {...defaultProps} cssClass="fa-user_tie" />)
 
       // The component should fall back to medal icon since 'user_tie' is not a valid FontAwesome icon
@@ -233,7 +222,7 @@ describe('Badges', () => {
   })
 
   describe('Styling and Classes', () => {
-    it('applies correct classes to valid icon', () => {
+    it('applies correct classes to icon', () => {
       render(<Badges {...defaultProps} cssClass="fa-medal" />)
 
       const icon = screen.getByTestId('icon-medal')
