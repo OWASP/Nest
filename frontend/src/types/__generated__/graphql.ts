@@ -37,7 +37,7 @@ export type AuthUserNode = Node & {
   username: Scalars['String']['output'];
 };
 
-export type BadgeNode = Node & {
+export type BadgeNode = {
   __typename?: 'BadgeNode';
   cssClass: Scalars['String']['output'];
   description: Scalars['String']['output'];
@@ -859,6 +859,7 @@ export type UpdateProgramStatusInput = {
 export type UserNode = {
   __typename?: 'UserNode';
   avatarUrl: Scalars['String']['output'];
+  badgeCount: Scalars['Int']['output'];
   badges: Array<BadgeNode>;
   bio: Scalars['String']['output'];
   company: Scalars['String']['output'];

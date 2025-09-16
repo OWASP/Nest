@@ -87,12 +87,16 @@ class TestUserNode:
         """Test badge_count field resolution."""
         mock_user = Mock()
         mock_badges_queryset = Mock()
-        mock_badges_queryset.filter.return_value.count.return_value = 3
+        (
+            mock_badges_queryset.filter.return_value.values.return_value.distinct.return_value.count.return_value
+        ) = 3
         mock_user.badges = mock_badges_queryset
 
         result = UserNode.badge_count(mock_user)
         assert result == 3
         mock_badges_queryset.filter.assert_called_once_with(is_active=True)
+        mock_badges_queryset.filter.return_value.values.assert_called_once_with("badge_id")
+        mock_badges_queryset.filter.return_value.values.return_value.distinct.assert_called_once()
 
     def test_badges_field_empty(self):
         """Test badges field resolution with no badges."""

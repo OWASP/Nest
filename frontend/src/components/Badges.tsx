@@ -4,9 +4,9 @@ import {
   findIconDefinition,
   library,
 } from '@fortawesome/fontawesome-svg-core'
-import { fas } from '@fortawesome/free-solid-svg-icons'
-import { far } from '@fortawesome/free-regular-svg-icons'
 import { fab } from '@fortawesome/free-brands-svg-icons'
+import { far } from '@fortawesome/free-regular-svg-icons'
+import { fas } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
 
@@ -31,7 +31,8 @@ const Badges = ({ name, cssClass, showTooltip = true }: BadgeProps) => {
     tokens
       .slice()
       .reverse()
-      .find((t) => /^fa-[a-z0-9-]+$/i.test(t) && !/^fa-(solid|regular|brands)$/i.test(t)) || 'fa-medal'
+      .find((t) => /^fa-[a-z0-9-]+$/i.test(t) && !/^fa-(solid|regular|brands)$/i.test(t)) ||
+    'fa-medal'
   const iconName = iconToken.replace(/^fa-/, '').replace(/_/g, '-') as IconName
 
   // Check if the icon exists in the FA library for the derived style
