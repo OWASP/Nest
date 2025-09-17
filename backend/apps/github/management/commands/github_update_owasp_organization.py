@@ -2,7 +2,10 @@
 
 import logging
 import time
+from http import HTTPStatus
+from urllib.parse import urlparse
 
+import requests
 from django.core.management.base import BaseCommand
 from github.GithubException import GithubException, UnknownObjectException
 
@@ -182,7 +185,7 @@ class Command(BaseCommand):
         invalid_urls: set[str] = set()
         related_urls: set[str] = set()
         for scraped_url in scraped_urls:
-            verified_url = project.verify_url(scraped_url)
+            verified_url = self._verify_url(scraped_url)
             if not verified_url:
                 invalid_urls.add(scraped_url)
                 continue
@@ -225,7 +228,7 @@ class Command(BaseCommand):
         invalid_urls = set()
         related_urls = set()
         for scraped_url in scraped_urls:
-            verified_url = entity.verify_url(scraped_url)
+            verified_url = self._verify_url(scraped_url)
             if not verified_url:
                 invalid_urls.add(scraped_url)
                 continue
@@ -252,3 +255,35 @@ class Command(BaseCommand):
             return False
         else:
             return True
+
+    def _verify_url(self, url):
+        """Verify URL."""
+        location = urlparse(url).netloc.lower()
+        if not location:
+            return None
+
+        if location.endswith(("linkedin.com", "slack.com", "youtube.com")):
+            return url
+
+        try:
+            # Check for redirects.
+            response = requests.get(url, allow_redirects=False, timeout=(5, 10))
+        except requests.exceptions.RequestException:
+            logger.exception("Request failed", extra={"url": url})
+            return None
+
+        if response.status_code == HTTPStatus.OK:
+            return url
+
+        if response.status_code in {
+            HTTPStatus.MOVED_PERMANENTLY,  # 301
+            HTTPStatus.FOUND,  # 302
+            HTTPStatus.SEE_OTHER,  # 303
+            HTTPStatus.TEMPORARY_REDIRECT,  # 307
+            HTTPStatus.PERMANENT_REDIRECT,  # 308
+        }:
+            return self._verify_url(response.headers["Location"])
+
+        logger.warning("Couldn't verify URL %s", url)
+
+        return None
