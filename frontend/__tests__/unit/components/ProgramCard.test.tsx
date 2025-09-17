@@ -51,7 +51,7 @@ describe('ProgramCard', () => {
     it('renders program name correctly', () => {
       render(
         <ProgramCard
-          isAdmin={true}
+          isAdmin={false}
           program={baseMockProgram}
           onView={mockOnView}
           accessLevel="user"
@@ -64,7 +64,7 @@ describe('ProgramCard', () => {
     it('renders program description correctly', () => {
       render(
         <ProgramCard
-          isAdmin={true}
+          isAdmin={false}
           program={baseMockProgram}
           onView={mockOnView}
           accessLevel="user"
@@ -128,7 +128,7 @@ describe('ProgramCard', () => {
     it('does not show user role badge when accessLevel is user', () => {
       render(
         <ProgramCard
-          isAdmin={true}
+          isAdmin={false}
           program={baseMockProgram}
           onView={mockOnView}
           accessLevel="user"
@@ -141,7 +141,7 @@ describe('ProgramCard', () => {
     it('shows only View Details button for user access', () => {
       render(
         <ProgramCard
-          isAdmin={true}
+          isAdmin={false}
           program={baseMockProgram}
           onView={mockOnView}
           accessLevel="user"
@@ -156,7 +156,7 @@ describe('ProgramCard', () => {
     it('calls onView when View Details button is clicked', () => {
       render(
         <ProgramCard
-          isAdmin={true}
+          isAdmin={false}
           program={baseMockProgram}
           onView={mockOnView}
           accessLevel="user"
@@ -239,7 +239,7 @@ describe('ProgramCard', () => {
 
       render(
         <ProgramCard
-          isAdmin={true}
+          isAdmin={false}
           program={longDescProgram}
           onView={mockOnView}
           accessLevel="user"
@@ -256,7 +256,7 @@ describe('ProgramCard', () => {
 
       render(
         <ProgramCard
-          isAdmin={true}
+          isAdmin={false}
           program={shortDescProgram}
           onView={mockOnView}
           accessLevel="user"
@@ -271,7 +271,7 @@ describe('ProgramCard', () => {
 
       render(
         <ProgramCard
-          isAdmin={true}
+          isAdmin={false}
           program={emptyDescProgram}
           onView={mockOnView}
           accessLevel="user"
@@ -287,7 +287,7 @@ describe('ProgramCard', () => {
 
       render(
         <ProgramCard
-          isAdmin={true}
+          isAdmin={false}
           program={noDescProgram}
           onView={mockOnView}
           accessLevel="user"
@@ -302,7 +302,7 @@ describe('ProgramCard', () => {
     it('shows date range when both startedAt and endedAt are provided', () => {
       render(
         <ProgramCard
-          isAdmin={true}
+          isAdmin={false}
           program={baseMockProgram}
           onView={mockOnView}
           accessLevel="user"
@@ -318,7 +318,7 @@ describe('ProgramCard', () => {
       const startOnlyProgram = { ...baseMockProgram, endedAt: '' }
       render(
         <ProgramCard
-          isAdmin={true}
+          isAdmin={false}
           program={startOnlyProgram}
           onView={mockOnView}
           accessLevel="user"
@@ -333,7 +333,7 @@ describe('ProgramCard', () => {
 
       render(
         <ProgramCard
-          isAdmin={true}
+          isAdmin={false}
           program={noDatesProgram}
           onView={mockOnView}
           accessLevel="user"
@@ -348,7 +348,7 @@ describe('ProgramCard', () => {
 
       render(
         <ProgramCard
-          isAdmin={true}
+          isAdmin={false}
           program={endOnlyProgram}
           onView={mockOnView}
           accessLevel="user"
@@ -389,7 +389,7 @@ describe('ProgramCard', () => {
     it('renders eye icon for View Details button', () => {
       render(
         <ProgramCard
-          isAdmin={true}
+          isAdmin={false}
           program={baseMockProgram}
           onView={mockOnView}
           accessLevel="user"
@@ -428,7 +428,7 @@ describe('ProgramCard', () => {
 
       render(
         <ProgramCard
-          isAdmin={true}
+          isAdmin={false}
           program={minimalProgram}
           onView={mockOnView}
           accessLevel="user"
