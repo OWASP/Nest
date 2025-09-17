@@ -3,7 +3,7 @@ from http import HTTPStatus
 from unittest import mock
 
 import pytest
-from github import GithubException, UnknownObjectException
+from github.GithubException import GithubException, UnknownObjectException
 
 from apps.github.management.commands.github_update_owasp_organization import (
     Chapter,
@@ -12,6 +12,7 @@ from apps.github.management.commands.github_update_owasp_organization import (
     Project,
     Repository,
 )
+from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 
 
 @pytest.mark.parametrize(
@@ -38,14 +39,6 @@ def test_add_arguments(argument_name, expected_properties):
 @pytest.fixture
 def command():
     return Command()
-
-
-@pytest.fixture
-def mock_gh_repo():
-    repo = mock.Mock(spec=Repository)
-    repo.name = "test-repo"
-    repo.html_url = "https://github.com/OWASP/test-repo"
-    return repo
 
 
 @pytest.mark.parametrize(
@@ -446,7 +439,7 @@ class TestPrivateMethods:
         result = command._validate_github_repo(mock_gh, mock_entity)
 
         assert result is True
-        mock_gh.get_repo.assert_called_once_with("owasp/test-entity")
+        mock_gh.get_repo.assert_called_once_with(f"{OWASP_ORGANIZATION_NAME}/test-entity")
         mock_entity.deactivate.assert_not_called()
 
     def test_validate_github_repo_not_found(self, command, mock_entity):
@@ -457,7 +450,7 @@ class TestPrivateMethods:
         result = command._validate_github_repo(mock_gh, mock_entity)
 
         assert result is False
-        mock_gh.get_repo.assert_called_once_with("owasp/test-entity")
+        mock_gh.get_repo.assert_called_once_with(f"{OWASP_ORGANIZATION_NAME}/test-entity")
         mock_entity.deactivate.assert_called_once()
 
     @mock.patch("time.sleep")

@@ -172,6 +172,20 @@ class Command(BaseCommand):
 
         model_class.bulk_save(entities)
 
+    def _validate_github_repo(self, gh, entity) -> bool:
+        """Validate if GitHub repository exists for an entity."""
+        try:
+            gh.get_repo(f"{OWASP_ORGANIZATION_NAME}/{entity.key}")
+        except UnknownObjectException:
+            entity.deactivate()
+            return False
+        except GithubException as e:
+            logger.warning("GitHub API error for %s: %s", entity.key, e)
+            time.sleep(1)
+            return False
+        else:
+            return True
+
     def _get_project_urls(self, project, gh):
         scraped_urls = sorted(
             {
@@ -241,20 +255,6 @@ class Command(BaseCommand):
                 logger.info("Skipped related URL %s", verified_url)
 
         return sorted(invalid_urls), sorted(related_urls)
-
-    def _validate_github_repo(self, gh, entity) -> bool:
-        """Validate if GitHub repository exists for an entity."""
-        try:
-            gh.get_repo(f"owasp/{entity.key}")
-        except UnknownObjectException:
-            entity.deactivate()
-            return False
-        except GithubException as e:
-            logger.warning("GitHub API error for %s: %s", entity.key, e)
-            time.sleep(1)
-            return False
-        else:
-            return True
 
     def _verify_url(self, url):
         """Verify URL."""
