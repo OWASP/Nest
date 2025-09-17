@@ -2,6 +2,7 @@
 
 from unittest.mock import patch
 
+from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 
 from apps.nest.models.reminder_schedule import ReminderSchedule
@@ -107,7 +108,7 @@ class TestCalendarEventsUtils:
         reminder = ReminderSchedule(scheduled_time=past_time, recurrence="monthly")
         mock_get.return_value = reminder
         update_reminder_schedule_date(REMINDER_ID)
-        expected_time = past_time.replace(month=(past_time.month + 1) % 12 or 12)
+        expected_time = past_time + relativedelta(months=1)
         assert reminder.scheduled_time == expected_time
         mock_save.assert_called_once_with(update_fields=["scheduled_time"])
         mock_get.assert_called_once_with(pk=REMINDER_ID)

@@ -230,6 +230,21 @@ class TestCalendarEvents:
         assert "*Invalid event number.*" in blocks[0]["text"]["text"]
 
     @patch("apps.nest.controllers.calendar_events.set_reminder")
+    def test_get_setting_reminder_blocks_value_error(self, mock_set_reminder):
+        """Test get_setting_reminder_blocks function when ValueError is raised."""
+        mock_set_reminder.side_effect = ValueError("Some value error occurred.")
+        args = MagicMock(
+            channel="C123456",
+            event_number=1,
+            minutes_before=10,
+            message=["Test", "reminder", "message"],
+            recurrence="daily",
+        )
+        blocks = get_setting_reminder_blocks(args, "test_slack_user_id")
+        assert len(blocks) == 1
+        assert "*Some value error occurred.*" in blocks[0]["text"]["text"]
+
+    @patch("apps.nest.controllers.calendar_events.set_reminder")
     def test_get_setting_reminder_blocks_service_error(self, mock_set_reminder):
         """Test get_setting_reminder_blocks function when service error occurs."""
         mock_set_reminder.side_effect = ServerNotFoundError()
