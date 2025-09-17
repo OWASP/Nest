@@ -5,7 +5,11 @@ from unittest.mock import patch
 from django.utils import timezone
 
 from apps.nest.models.reminder_schedule import ReminderSchedule
-from apps.nest.utils.calendar_events import parse_reminder_args, update_reminder_schedule_date
+from apps.nest.utils.calendar_events import (
+    parse_cancel_reminder_args,
+    parse_reminder_args,
+    update_reminder_schedule_date,
+)
 
 REMINDER_ID = 4
 
@@ -35,6 +39,12 @@ class TestCalendarEventsUtils:
         assert args.minutes_before == 10  # Default value
         assert args.message == []  # Default value
         assert args.recurrence == "once"  # Default value
+
+    def test_parse_cancel_reminder_args(self):
+        """Test parse_cancel_reminder_args with valid arguments."""
+        text = "--number 3"
+        args = parse_cancel_reminder_args(text)
+        assert args.number == 3
 
     @patch("apps.nest.models.reminder_schedule.ReminderSchedule.objects.get")
     def test_update_reminder_schedule_date_once(self, mock_get):
