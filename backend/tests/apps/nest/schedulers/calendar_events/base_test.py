@@ -59,6 +59,7 @@ class TestBaseScheduler:
         mock_reminder_schedule.cron_expression = "0 9 * * *"
         mock_reminder_schedule.reminder.message = "Daily Reminder"
         mock_reminder_schedule.reminder.channel_id = "C123456"
+        mock_reminder_schedule.pk = 4
 
         scheduler_instance = MagicMock()
         mock_get_scheduler.return_value = scheduler_instance
@@ -69,7 +70,7 @@ class TestBaseScheduler:
         scheduler_instance.cron.assert_called_once_with(
             "0 9 * * *",
             func=BaseScheduler.send_message_and_update,
-            args=("Daily Reminder", "C123456", mock_reminder_schedule),
+            args=("Daily Reminder", "C123456", 4),
             queue_name="default",
             use_local_timezone=True,
             result_ttl=500,
