@@ -4,6 +4,7 @@ import shlex
 from argparse import ArgumentParser
 from datetime import timedelta
 
+from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 
 from apps.nest.models.reminder_schedule import ReminderSchedule
@@ -94,9 +95,7 @@ def update_reminder_schedule_date(reminder_schedule_id: int) -> None:
         case ReminderSchedule.Recurrence.WEEKLY:
             reminder_schedule.scheduled_time += timedelta(weeks=1)
         case ReminderSchedule.Recurrence.MONTHLY:
-            reminder_schedule.scheduled_time = reminder_schedule.scheduled_time.replace(
-                month=(reminder_schedule.scheduled_time.month + 1) % 12 or 12
-            )
+            reminder_schedule.scheduled_time += relativedelta(months=1)
         case _:
             return  # No update for 'once' or unrecognized recurrence
 

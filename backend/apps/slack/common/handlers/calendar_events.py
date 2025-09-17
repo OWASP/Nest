@@ -127,6 +127,8 @@ def get_setting_reminder_blocks(args, slack_user_id: str) -> list[dict]:
         )
     except ValidationError as e:
         return [markdown(f"*{e.message}*")]
+    except ValueError as e:
+        return [markdown(f"*{e!s}*")]
     except ServerNotFoundError:
         return [markdown("*Please check your internet connection.*")]
     return [
