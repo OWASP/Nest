@@ -72,19 +72,24 @@ const ProgramDetailsPage = () => {
         update: (cache, { data: mutationData }) => {
           const updated = mutationData?.updateProgramStatus
           if (!updated) return
-          const existing = cache.readQuery({
-            query: GET_PROGRAM_AND_MODULES,
-            variables: { programKey },
-          }) as { getProgram: Program }
-          if (existing?.getProgram) {
-            cache.writeQuery({
+          try {
+            const existing = cache.readQuery({
               query: GET_PROGRAM_AND_MODULES,
               variables: { programKey },
-              data: {
-                ...existing,
-                getProgram: { ...existing.getProgram, status: updated.status },
-              },
-            })
+            }) as { getProgram: Program }
+            if (existing?.getProgram) {
+              cache.writeQuery({
+                query: GET_PROGRAM_AND_MODULES,
+                variables: { programKey },
+                data: {
+                  ...existing,
+                  getProgram: { ...existing.getProgram, status: updated.status },
+                },
+              })
+            }
+          } catch (_err) {
+            handleAppError(_err)
+            return
           }
         },
       })

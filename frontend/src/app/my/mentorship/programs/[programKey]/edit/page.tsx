@@ -114,16 +114,21 @@ const EditProgramPage = () => {
             variables: { programKey: input.key },
             data: { getProgram: updated },
           })
-          const existing = cache.readQuery({
-            query: GET_PROGRAM_AND_MODULES,
-            variables: { programKey: input.key },
-          }) as { getProgram: Program }
-          if (existing?.getProgram) {
-            cache.writeQuery({
+          try {
+            const existing = cache.readQuery({
               query: GET_PROGRAM_AND_MODULES,
               variables: { programKey: input.key },
-              data: { ...existing, getProgram: { ...existing.getProgram, ...updated } },
-            })
+            }) as { getProgram: Program }
+            if (existing?.getProgram) {
+              cache.writeQuery({
+                query: GET_PROGRAM_AND_MODULES,
+                variables: { programKey: input.key },
+                data: { ...existing, getProgram: { ...existing.getProgram, ...updated } },
+              })
+            }
+          } catch (_err) {
+            handleAppError(_err)
+            return
           }
         },
       })

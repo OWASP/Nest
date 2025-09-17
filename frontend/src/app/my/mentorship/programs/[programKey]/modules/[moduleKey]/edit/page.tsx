@@ -114,19 +114,24 @@ const EditModulePage = () => {
         update: (cache, { data: mutationData }) => {
           const updated = mutationData?.updateModule
           if (!updated) return
-          const existing = cache.readQuery({
-            query: GET_PROGRAM_AND_MODULES,
-            variables: { programKey },
-          }) as { getProgramModules: Module[] }
-          if (existing?.getProgramModules) {
-            const nextModules = existing.getProgramModules.map((m: Module) =>
-              m.key === updated.key ? { ...m, ...updated } : m
-            )
-            cache.writeQuery({
+          try {
+            const existing = cache.readQuery({
               query: GET_PROGRAM_AND_MODULES,
               variables: { programKey },
-              data: { ...existing, getProgramModules: nextModules },
-            })
+            }) as { getProgramModules: Module[] }
+            if (existing?.getProgramModules) {
+              const nextModules = existing.getProgramModules.map((m: Module) =>
+                m.key === updated.key ? { ...m, ...updated } : m
+              )
+              cache.writeQuery({
+                query: GET_PROGRAM_AND_MODULES,
+                variables: { programKey },
+                data: { ...existing, getProgramModules: nextModules },
+              })
+            }
+          } catch (_err) {
+            handleAppError(_err)
+            return
           }
         },
       })
