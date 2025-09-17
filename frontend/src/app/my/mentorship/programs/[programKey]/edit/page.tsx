@@ -9,6 +9,7 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UPDATE_PROGRAM } from 'server/mutations/programsMutations'
 import { GET_PROGRAM_DETAILS, GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
 import type { ExtendedSession } from 'types/auth'
+import { Program } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
 import slugify from 'utils/slugify'
@@ -113,19 +114,17 @@ const EditProgramPage = () => {
             variables: { programKey: input.key },
             data: { getProgram: updated },
           })
-          try {
-            const existing = cache.readQuery({
+          const existing = cache.readQuery({
+            query: GET_PROGRAM_AND_MODULES,
+            variables: { programKey: input.key },
+          }) as { getProgram: Program }
+          if (existing?.getProgram) {
+            cache.writeQuery({
               query: GET_PROGRAM_AND_MODULES,
               variables: { programKey: input.key },
-            }) as any
-            if (existing?.getProgram) {
-              cache.writeQuery({
-                query: GET_PROGRAM_AND_MODULES,
-                variables: { programKey: input.key },
-                data: { ...existing, getProgram: { ...existing.getProgram, ...updated } },
-              })
-            }
-          } catch {}
+              data: { ...existing, getProgram: { ...existing.getProgram, ...updated } },
+            })
+          }
         },
       })
 

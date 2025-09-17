@@ -9,7 +9,7 @@ import { ErrorDisplay } from 'app/global-error'
 import { CREATE_MODULE } from 'server/mutations/moduleMutations'
 import { GET_PROGRAM_ADMIN_DETAILS, GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
 import type { ExtendedSession } from 'types/auth'
-import { EXPERIENCE_LEVELS } from 'types/mentorship'
+import { EXPERIENCE_LEVELS, Module } from 'types/mentorship'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
@@ -99,22 +99,20 @@ const CreateModulePage = () => {
         update: (cache, { data: mutationData }) => {
           const created = mutationData?.createModule
           if (!created) return
-          try {
-            const existing = cache.readQuery({
+          const existing = cache.readQuery({
+            query: GET_PROGRAM_AND_MODULES,
+            variables: { programKey },
+          }) as { getProgramModules: Module[] }
+          if (existing?.getProgramModules) {
+            cache.writeQuery({
               query: GET_PROGRAM_AND_MODULES,
               variables: { programKey },
-            }) as any
-            if (existing?.getProgramModules) {
-              cache.writeQuery({
-                query: GET_PROGRAM_AND_MODULES,
-                variables: { programKey },
-                data: {
-                  ...existing,
-                  getProgramModules: [created, ...existing.getProgramModules],
-                },
-              })
-            }
-          } catch {}
+              data: {
+                ...existing,
+                getProgramModules: [created, ...existing.getProgramModules],
+              },
+            })
+          }
         },
       })
 
