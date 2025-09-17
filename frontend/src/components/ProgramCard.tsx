@@ -49,7 +49,6 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel,
           </h3>
           {accessLevel === 'admin' && isAdmin && (
             <ProgramActions
-              className={'px-4 py-2'}
               programKey={program.key}
               status={program.status}
               setStatus={updateProgramStatus}
