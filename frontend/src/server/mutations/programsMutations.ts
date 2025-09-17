@@ -9,12 +9,16 @@ export const UPDATE_PROGRAM = gql`
       description
       status
       menteesLimit
+      experienceLevels
       startedAt
       endedAt
       tags
       domains
       admins {
+        id
         login
+        name
+        avatarUrl
       }
     }
   }
@@ -28,6 +32,7 @@ export const CREATE_PROGRAM = gql`
       name
       description
       menteesLimit
+      experienceLevels
       startedAt
       endedAt
       tags

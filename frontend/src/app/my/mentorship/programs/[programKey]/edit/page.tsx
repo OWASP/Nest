@@ -9,7 +9,7 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UPDATE_PROGRAM } from 'server/mutations/programsMutations'
 import { GET_PROGRAM_DETAILS, GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
 import type { ExtendedSession } from 'types/auth'
-import { Program } from 'types/mentorship'
+import { Module, Program } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
 import slugify from 'utils/slugify'
@@ -109,18 +109,25 @@ const EditProgramPage = () => {
         update: (cache, { data: mutationData }) => {
           const updated = mutationData?.updateProgram
           if (!updated) return
-          cache.writeQuery({
-            query: GET_PROGRAM_DETAILS,
-            variables: { programKey: input.key },
-            data: { getProgram: updated },
-          })
           try {
-            const existing = cache.readQuery({
+            cache.writeQuery<{ getProgram?: Program; getProgramModules?: Module[] }>({
+              query: GET_PROGRAM_DETAILS,
+              variables: { programKey: input.key },
+              data: { getProgram: updated },
+            })
+          } catch (_err) {
+            handleAppError(_err)
+          }
+          try {
+            const existing = cache.readQuery<{
+              getProgram?: Program
+              getProgramModules?: Module[]
+            }>({
               query: GET_PROGRAM_AND_MODULES,
               variables: { programKey: input.key },
-            }) as { getProgram: Program }
+            })
             if (existing?.getProgram) {
-              cache.writeQuery({
+              cache.writeQuery<{ getProgram?: Program; getProgramModules?: Module[] }>({
                 query: GET_PROGRAM_AND_MODULES,
                 variables: { programKey: input.key },
                 data: { ...existing, getProgram: { ...existing.getProgram, ...updated } },
