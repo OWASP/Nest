@@ -9,6 +9,26 @@ from apps.common.constants import NL
 from apps.slack.blocks import get_pagination_buttons, markdown
 
 
+def get_cancel_reminder_blocks(reminder_schedule_id: int, slack_user_id: str) -> list[dict]:
+    """Get the blocks for canceling a reminder."""
+    from apps.nest.models.reminder_schedule import ReminderSchedule
+    from apps.nest.schedulers.calendar_events.slack import SlackScheduler
+
+    try:
+        reminder_schedule = ReminderSchedule.objects.get(pk=reminder_schedule_id)
+    except ReminderSchedule.DoesNotExist:
+        return [markdown("*Please provide a valid reminder number.*")]
+    if reminder_schedule.reminder.member.slack_user_id != slack_user_id:
+        return [markdown("*You can only cancel your own reminders.*")]
+    SlackScheduler(reminder_schedule).cancel()
+    return [
+        markdown(
+            f"*Canceled the reminder for event '{reminder_schedule.reminder.event.name}'*"
+            f" in {reminder_schedule.reminder.channel_id}"
+        )
+    ]
+
+
 def get_events_blocks(slack_user_id: str, presentation, page: int = 1) -> list[dict]:
     """Get Google Calendar events blocks for Slack home view."""
     from apps.nest.clients.google_calendar import GoogleCalendarClient
