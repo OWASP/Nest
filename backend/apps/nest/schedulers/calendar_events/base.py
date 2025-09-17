@@ -36,7 +36,7 @@ class BaseScheduler:
                 args=(
                     self.reminder_schedule.reminder.message,
                     self.reminder_schedule.reminder.channel_id,
-                    self.reminder_schedule,
+                    self.reminder_schedule.pk,
                 ),
                 queue_name="default",
                 use_local_timezone=True,
@@ -58,9 +58,7 @@ class BaseScheduler:
         raise NotImplementedError(error_message)
 
     @staticmethod
-    def send_message_and_update(
-        message: str, channel_id: str, reminder_schedule: ReminderSchedule
-    ):
+    def send_message_and_update(message: str, channel_id: str, reminder_schedule_id: int):
         """Send message and update the reminder schedule."""
         error_message = "Subclasses must implement this method."
         raise NotImplementedError(error_message)

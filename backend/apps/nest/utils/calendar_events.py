@@ -71,16 +71,20 @@ def parse_cancel_reminder_args(text: str):
     return parser.parse_args(shlex.split(text or ""))
 
 
-def update_reminder_schedule_date(reminder_schedule: ReminderSchedule) -> None:
+def update_reminder_schedule_date(reminder_schedule_id: int) -> None:
     """Update the scheduled_time of a ReminderSchedule based on its recurrence pattern.
 
     Args:
-        reminder_schedule (ReminderSchedule): The ReminderSchedule instance to update.
+        reminder_schedule_id (int): The ID of the ReminderSchedule instance to update.
 
     Returns:
         None: The function updates the instance in place and saves it.
 
     """
+    try:
+        reminder_schedule = ReminderSchedule.objects.get(pk=reminder_schedule_id)
+    except ReminderSchedule.DoesNotExist:
+        return
     if reminder_schedule.scheduled_time > timezone.now():
         return  # No update needed if the scheduled time is in the future
 
@@ -90,8 +94,8 @@ def update_reminder_schedule_date(reminder_schedule: ReminderSchedule) -> None:
         case ReminderSchedule.Recurrence.WEEKLY:
             reminder_schedule.scheduled_time += timedelta(weeks=1)
         case ReminderSchedule.Recurrence.MONTHLY:
-            reminder_schedule.scheduled_time.replace(
-                month=reminder_schedule.scheduled_time.month + 1
+            reminder_schedule.scheduled_time = reminder_schedule.scheduled_time.replace(
+                month=(reminder_schedule.scheduled_time.month + 1) % 12 or 12
             )
         case _:
             return  # No update for 'once' or unrecognized recurrence
