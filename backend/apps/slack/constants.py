@@ -34,6 +34,8 @@ VIEW_PROJECTS_ACTION = "view_projects_action"
 VIEW_PROJECTS_ACTION_NEXT = "view_projects_action_next"
 VIEW_PROJECTS_ACTION_PREV = "view_projects_action_prev"
 
+VIEW_REMINDERS_ACTION = "view_reminders_action"
+
 VIEW_COMMITTEES_ACTION = "view_committees_action"
 VIEW_COMMITTEES_ACTION_NEXT = "view_committees_action_next"
 VIEW_COMMITTEES_ACTION_PREV = "view_committees_action_prev"

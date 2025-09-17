@@ -34,6 +34,7 @@ from apps.slack.constants import (
     VIEW_PROJECTS_ACTION,
     VIEW_PROJECTS_ACTION_NEXT,
     VIEW_PROJECTS_ACTION_PREV,
+    VIEW_REMINDERS_ACTION,
 )
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -95,7 +96,7 @@ def handle_home_actions(ack, body, client: WebClient) -> None:
                 VIEW_CALENDAR_EVENTS_ACTION_PREV,
                 VIEW_CALENDAR_EVENTS_ACTION_NEXT,
             }:
-                blocks = calendar_events.get_blocks(
+                blocks = calendar_events.get_events_blocks(
                     slack_user_id=user_id,
                     page=page,
                     presentation=home_presentation,
@@ -107,6 +108,8 @@ def handle_home_actions(ack, body, client: WebClient) -> None:
                     blocks = [markdown("Error signing in with Google")]
                     logger.exception("Google authentication error for user {user_id}")
 
+            case action if action == VIEW_REMINDERS_ACTION:
+                blocks = calendar_events.get_reminders_blocks(slack_user_id=user_id)
             case _:
                 blocks = [markdown("Invalid action, please try again.")]
 
@@ -143,6 +146,7 @@ if SlackConfig.app:
         VIEW_PROJECTS_ACTION_NEXT,
         VIEW_PROJECTS_ACTION_PREV,
         VIEW_PROJECTS_ACTION,
+        VIEW_REMINDERS_ACTION,
     )
     for action in actions:
         SlackConfig.app.action(action)(handle_home_actions)

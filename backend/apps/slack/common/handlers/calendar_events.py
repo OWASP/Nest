@@ -9,7 +9,7 @@ from apps.common.constants import NL
 from apps.slack.blocks import get_pagination_buttons, markdown
 
 
-def get_blocks(slack_user_id: str, presentation, page: int = 1) -> list[dict]:
+def get_events_blocks(slack_user_id: str, presentation, page: int = 1) -> list[dict]:
     """Get Google Calendar events blocks for Slack home view."""
     from apps.nest.clients.google_calendar import GoogleCalendarClient
     from apps.nest.models.google_account_authorization import GoogleAccountAuthorization
@@ -60,7 +60,31 @@ def get_blocks(slack_user_id: str, presentation, page: int = 1) -> list[dict]:
     return blocks
 
 
-def get_reminder_blocks(args, slack_user_id: str) -> list[dict]:
+def get_reminders_blocks(slack_user_id: str) -> list[dict]:
+    """Get reminders blocks for Slack home view."""
+    from apps.nest.models.reminder_schedule import ReminderSchedule
+
+    reminders_schedules = ReminderSchedule.objects.filter(
+        reminder__member__slack_user_id=slack_user_id,
+    ).order_by("scheduled_time")
+    if not reminders_schedules:
+        return [markdown("*No reminders found. You can set one with `/set-reminder`*")]
+    blocks = [markdown("*Your upcoming reminders:*")]
+    blocks.extend(
+        markdown(
+            f"{NL}- Reminder Number: {reminder_schedule.pk}"
+            f"{NL}- Channel: {reminder_schedule.reminder.channel_id}"
+            f"{NL}- Scheduled Time: "
+            f"{reminder_schedule.scheduled_time.strftime('%Y-%m-%d, %H:%M %Z')}"
+            f"{NL}- Recurrence: {reminder_schedule.recurrence}"
+            f"{NL}- Message: {reminder_schedule.reminder.message or 'No message'}"
+        )
+        for reminder_schedule in reminders_schedules
+    )
+    return blocks
+
+
+def get_setting_reminder_blocks(args, slack_user_id: str) -> list[dict]:
     """Get the blocks for setting a reminder."""
     from apps.nest.controllers.calendar_events import set_reminder
     from apps.nest.schedulers.calendar_events.slack import SlackScheduler

@@ -2,6 +2,12 @@
 
 import shlex
 from argparse import ArgumentParser
+from datetime import timedelta
+
+from dateutil.relativedelta import relativedelta
+from django.utils import timezone
+
+from apps.nest.models.reminder_schedule import ReminderSchedule
 
 
 def parse_reminder_args(text: str):
@@ -43,3 +49,29 @@ def parse_reminder_args(text: str):
     )
 
     return parser.parse_args(shlex.split(text or ""))
+
+
+def update_reminder_schedule_date(reminder_schedule: ReminderSchedule) -> None:
+    """Update the scheduled_time of a ReminderSchedule based on its recurrence pattern.
+
+    Args:
+        reminder_schedule (ReminderSchedule): The ReminderSchedule instance to update.
+
+    Returns:
+        None: The function updates the instance in place and saves it.
+
+    """
+    if reminder_schedule.scheduled_time > timezone.now():
+        return  # No update needed if the scheduled time is in the future
+
+    match reminder_schedule.recurrence:
+        case ReminderSchedule.Recurrence.DAILY:
+            reminder_schedule.scheduled_time += timedelta(days=1)
+        case ReminderSchedule.Recurrence.WEEKLY:
+            reminder_schedule.scheduled_time += timedelta(weeks=1)
+        case ReminderSchedule.Recurrence.MONTHLY:
+            reminder_schedule.scheduled_time += relativedelta(months=1)
+        case _:
+            return  # No update for 'once' or unrecognized recurrence
+
+    reminder_schedule.save(update_fields=["scheduled_time"])
