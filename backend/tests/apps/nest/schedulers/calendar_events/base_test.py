@@ -3,6 +3,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.utils import timezone
 
 from apps.nest.schedulers.calendar_events.base import BaseScheduler
 
@@ -28,7 +29,7 @@ class TestBaseScheduler:
         """Test scheduling a one-time reminder."""
         mock_reminder_schedule = MagicMock()
         mock_reminder_schedule.recurrence = "once"
-        mock_reminder_schedule.scheduled_time = "2024-10-10 10:00:00"
+        mock_reminder_schedule.scheduled_time = timezone.datetime(2024, 10, 10, 10, 0, 0)
         mock_reminder_schedule.reminder.message = "Test Message"
         mock_reminder_schedule.reminder.channel_id = "C123456"
 
@@ -38,12 +39,17 @@ class TestBaseScheduler:
         base_scheduler = BaseScheduler(reminder_schedule=mock_reminder_schedule)
         base_scheduler.schedule()
 
-        scheduler_instance.enqueue_at.assert_called_once_with(
-            "2024-10-10 10:00:00",
+        scheduler_instance.enqueue_at.assert_any_call(
+            mock_reminder_schedule.scheduled_time,
             BaseScheduler.send_message,
             message="Test Message",
             channel_id="C123456",
         )
+        scheduler_instance.enqueue_at.assert_any_call(
+            mock_reminder_schedule.scheduled_time + timezone.timedelta(minutes=1),
+            mock_reminder_schedule.reminder.delete,
+        )
+        mock_reminder_schedule.save.assert_called_once_with(update_fields=["job_id"])
 
     @patch("apps.nest.schedulers.calendar_events.base.get_scheduler")
     def test_schedule_recurring(self, mock_get_scheduler):
@@ -62,12 +68,13 @@ class TestBaseScheduler:
 
         scheduler_instance.cron.assert_called_once_with(
             "0 9 * * *",
-            func=BaseScheduler.send_message,
-            args=("Daily Reminder", "C123456"),
+            func=BaseScheduler.send_message_and_update,
+            args=("Daily Reminder", "C123456", mock_reminder_schedule),
             queue_name="default",
             use_local_timezone=True,
             result_ttl=500,
         )
+        mock_reminder_schedule.save.assert_called_once_with(update_fields=["job_id"])
 
     @patch("apps.nest.schedulers.calendar_events.base.get_scheduler")
     def test_cancel(self, mock_get_scheduler):
@@ -83,10 +90,16 @@ class TestBaseScheduler:
         base_scheduler.cancel()
 
         scheduler_instance.cancel.assert_called_once_with("job_123")
-        mock_reminder_schedule.delete.assert_called_once()
+        mock_reminder_schedule.reminder.delete.assert_called_once()
 
     def test_send_message_not_implemented(self):
         """Test that send_message raises NotImplementedError."""
         with pytest.raises(NotImplementedError) as exc_info:
             BaseScheduler.send_message("Test Message", "C123456")
+        assert str(exc_info.value) == "Subclasses must implement this method."
+
+    def test_send_message_and_update_not_implemented(self):
+        """Test that send_message_and_update raises NotImplementedError."""
+        with pytest.raises(NotImplementedError) as exc_info:
+            BaseScheduler.send_message_and_update("Test Message", "C123456", MagicMock())
         assert str(exc_info.value) == "Subclasses must implement this method."
