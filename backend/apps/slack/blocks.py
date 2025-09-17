@@ -99,11 +99,21 @@ def get_header() -> list[dict[str, Any]]:
                     "type": "button",
                     "text": {
                         "type": "plain_text",
-                        "text": "View Calendar Events",
+                        "text": "Calendar Events",
                         "emoji": True,
                     },
                     "value": "view_calendar_events",
                     "action_id": "view_calendar_events_action",
+                },
+                {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Reminders",
+                        "emoji": True,
+                    },
+                    "value": "view_reminders",
+                    "action_id": "view_reminders_action",
                 },
             ],
         },
