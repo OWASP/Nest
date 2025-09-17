@@ -4,7 +4,6 @@ import shlex
 from argparse import ArgumentParser
 from datetime import timedelta
 
-from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 
 from apps.nest.models.reminder_schedule import ReminderSchedule
@@ -51,6 +50,27 @@ def parse_reminder_args(text: str):
     return parser.parse_args(shlex.split(text or ""))
 
 
+def parse_cancel_reminder_args(text: str):
+    """Parse cancel reminder command arguments.
+
+    Args:
+        text (str): The text containing the cancel reminder command arguments.
+
+    Returns:
+        Namespace: The parsed arguments as a Namespace object.
+
+    """
+    parser = ArgumentParser(prog="/cancel-reminder", description="Cancel a scheduled reminder.")
+    parser.add_argument(
+        "--number",
+        type=int,
+        help="The reminder number to cancel.",
+        required=True,
+    )
+
+    return parser.parse_args(shlex.split(text or ""))
+
+
 def update_reminder_schedule_date(reminder_schedule: ReminderSchedule) -> None:
     """Update the scheduled_time of a ReminderSchedule based on its recurrence pattern.
 
@@ -70,7 +90,9 @@ def update_reminder_schedule_date(reminder_schedule: ReminderSchedule) -> None:
         case ReminderSchedule.Recurrence.WEEKLY:
             reminder_schedule.scheduled_time += timedelta(weeks=1)
         case ReminderSchedule.Recurrence.MONTHLY:
-            reminder_schedule.scheduled_time += relativedelta(months=1)
+            reminder_schedule.scheduled_time.replace(
+                month=reminder_schedule.scheduled_time.month + 1
+            )
         case _:
             return  # No update for 'once' or unrecognized recurrence
 

@@ -16,6 +16,11 @@ features:
       description: project directory
       usage_hint: <search query>
       should_escape: false
+    - command: /cancel-reminder
+      url: https://nest.owasp.org/integrations/slack/commands/
+      description: Cancel a previously set reminder
+      usage_hint: --number <reminder_number>
+      should_escape: false
     - command: /committees
       url: https://nest.owasp.org/integrations/slack/commands/
       description: committees

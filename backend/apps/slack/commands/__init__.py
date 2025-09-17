@@ -3,6 +3,7 @@ from apps.slack.commands.command import CommandBase
 
 from . import (
     board,
+    cancel_reminder,
     chapters,
     committees,
     community,
