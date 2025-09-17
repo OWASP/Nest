@@ -1,6 +1,12 @@
 """Test cases for Nest calendar events utilities."""
 
-from apps.nest.utils.calendar_events import parse_reminder_args
+from unittest.mock import patch
+
+from dateutil.relativedelta import relativedelta
+from django.utils import timezone
+
+from apps.nest.models.reminder_schedule import ReminderSchedule
+from apps.nest.utils.calendar_events import parse_reminder_args, update_reminder_schedule_date
 
 
 class TestCalendarEventsUtils:
@@ -28,3 +34,48 @@ class TestCalendarEventsUtils:
         assert args.minutes_before == 10  # Default value
         assert args.message == []  # Default value
         assert args.recurrence == "once"  # Default value
+
+    def test_update_reminder_schedule_date_once(self):
+        """Test update_reminder_schedule_date with 'once' recurrence (no update)."""
+        reminder = ReminderSchedule(scheduled_time=timezone.now(), recurrence="once")
+        original_time = reminder.scheduled_time
+        update_reminder_schedule_date(reminder)
+        assert reminder.scheduled_time == original_time  # No change expected
+
+    def test_update_reminder_schedule_date_future_date(self):
+        """Test update_reminder_schedule_date with a future scheduled_time (no update)."""
+        future_time = timezone.now() + timezone.timedelta(days=1)
+        reminder = ReminderSchedule(scheduled_time=future_time, recurrence="daily")
+        original_time = reminder.scheduled_time
+        update_reminder_schedule_date(reminder)
+        assert reminder.scheduled_time == original_time  # No change expected
+
+    @patch("apps.nest.models.reminder_schedule.ReminderSchedule.save")
+    def test_update_reminder_schedule_date_daily(self, mock_save):
+        """Test update_reminder_schedule_date with 'daily' recurrence."""
+        past_time = timezone.now() - timezone.timedelta(days=1)
+        reminder = ReminderSchedule(scheduled_time=past_time, recurrence="daily")
+        update_reminder_schedule_date(reminder)
+        expected_time = past_time + timezone.timedelta(days=1)
+        assert reminder.scheduled_time == expected_time
+        mock_save.assert_called_once_with(update_fields=["scheduled_time"])
+
+    @patch("apps.nest.models.reminder_schedule.ReminderSchedule.save")
+    def test_update_reminder_schedule_date_weekly(self, mock_save):
+        """Test update_reminder_schedule_date with 'weekly' recurrence."""
+        past_time = timezone.now() - timezone.timedelta(weeks=1)
+        reminder = ReminderSchedule(scheduled_time=past_time, recurrence="weekly")
+        update_reminder_schedule_date(reminder)
+        expected_time = past_time + timezone.timedelta(weeks=1)
+        assert reminder.scheduled_time == expected_time
+        mock_save.assert_called_once_with(update_fields=["scheduled_time"])
+
+    @patch("apps.nest.models.reminder_schedule.ReminderSchedule.save")
+    def test_update_reminder_schedule_date_monthly(self, mock_save):
+        """Test update_reminder_schedule_date with 'monthly' recurrence."""
+        past_time = timezone.now() - timezone.timedelta(days=30)
+        reminder = ReminderSchedule(scheduled_time=past_time, recurrence="monthly")
+        update_reminder_schedule_date(reminder)
+        expected_time = past_time + relativedelta(months=1)
+        assert reminder.scheduled_time == expected_time
+        mock_save.assert_called_once_with(update_fields=["scheduled_time"])

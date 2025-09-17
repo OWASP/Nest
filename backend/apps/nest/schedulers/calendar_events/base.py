@@ -1,8 +1,8 @@
 """Base Scheduler for Nest Calendar Events."""
 
+from django.utils import timezone
 from django_rq import get_scheduler
 
-from django.utils import timezone
 from apps.nest.models.reminder_schedule import ReminderSchedule
 
 
