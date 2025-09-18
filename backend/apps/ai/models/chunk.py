@@ -35,8 +35,8 @@ class Chunk(TimestampedModel):
     def split_text(text: str) -> list[str]:
         """Split text into chunks."""
         return RecursiveCharacterTextSplitter(
-            chunk_size=300,
-            chunk_overlap=40,
+            chunk_size=500,
+            chunk_overlap=80,
             length_function=len,
             separators=["\n\n", "\n", " ", ""],
         ).split_text(text)
