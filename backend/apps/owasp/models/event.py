@@ -57,8 +57,8 @@ class Event(BulkSaveModel, TimestampedModel):
         verbose_name="Google Calendar ID", max_length=1024, blank=True, default=""
     )
     name = models.CharField(verbose_name="Name", max_length=100)
-    start_date = models.DateTimeField(verbose_name="Start Date")
-    end_date = models.DateTimeField(verbose_name="End Date", null=True, blank=True)
+    start_date = models.DateField(verbose_name="Start Date")
+    end_date = models.DateField(verbose_name="End Date", null=True, blank=True)
     description = models.TextField(verbose_name="Description", default="", blank=True)
     key = models.CharField(verbose_name="Key", max_length=100, unique=True)
     status = models.CharField(
@@ -202,6 +202,8 @@ class Event(BulkSaveModel, TimestampedModel):
             return None
 
         if event_instance := Event.objects.filter(key=event.get("id")).first():
+            # We need the start date to check if the minutes before is valid.
+            event_instance.start_date = parse_date_and_convert_to_local(start)
             return event_instance
 
         # We will not save until the user chooses to have this event.

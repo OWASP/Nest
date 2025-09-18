@@ -16,8 +16,8 @@ services:
     volumes:
       - ./backend/data:/home/owasp/data
 
-  staging-nest-backend-worker:
-    container_name: staging-nest-backend-worker
+  staging-nest-worker:
+    container_name: staging-nest-worker
     image: owasp/nest:backend-staging
     env_file: .env.backend
     command: >
@@ -37,8 +37,8 @@ services:
     volumes:
       - ./backend/data:/home/owasp/data
 
-  staging-nest-backend-scheduler:
-    container_name: staging-nest-backend-scheduler
+  staging-nest-scheduler:
+    container_name: staging-nest-scheduler
     image: owasp/nest:backend-staging
     env_file: .env.backend
     command: >

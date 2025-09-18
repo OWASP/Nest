@@ -32,8 +32,8 @@ services:
       - ../backend:/home/owasp
       - backend-venv:/home/owasp/.venv
 
-  backend-worker:
-    container_name: nest-backend-worker
+  worker:
+    container_name: nest-worker
     command: >
       sh -c '
         python manage.py rqworker
@@ -59,8 +59,8 @@ services:
       - backend-venv:/home/owasp/.venv
       - ../backend:/home/owasp
 
-  backend-scheduler:
-    container_name: nest-backend-scheduler
+  scheduler:
+    container_name: nest-scheduler
     command: >
       sh -c '
         python manage.py rqscheduler
