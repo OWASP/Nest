@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from datetime import UTC, datetime
 from urllib.parse import urlparse
@@ -100,6 +101,23 @@ def get_user_ip_address(request) -> str:
 
     x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
     return x_forwarded_for.split(",")[0] if x_forwarded_for else request.META.get("REMOTE_ADDR")
+
+
+def is_valid_json(content: str) -> bool:
+    """Check if content is JSON format.
+
+    Args:
+        content: The content to check
+
+    Returns:
+        bool: True if content is valid JSON, False otherwise
+
+    """
+    try:
+        json.loads(content)
+    except (TypeError, ValueError):
+        return False
+    return True
 
 
 def join_values(fields: list, delimiter: str = " ") -> str:
