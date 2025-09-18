@@ -22,10 +22,10 @@ class TestSlackScheduler:
 
     @patch("apps.nest.schedulers.calendar_events.slack.SlackScheduler.send_message")
     @patch("apps.nest.schedulers.calendar_events.slack.update_reminder_schedule_date")
-    def test_send_message_and_update(self, mock_update_reminder_schedule_date, mock_send_message):
+    def test_send_and_update(self, mock_update_reminder_schedule_date, mock_send_message):
         """Test sending a message and updating it via Slack."""
         mock_reminder_schedule = MagicMock()
-        SlackScheduler.send_message_and_update("Test Message", "C123456", mock_reminder_schedule)
+        SlackScheduler.send_and_update("Test Message", "C123456", mock_reminder_schedule)
 
         mock_send_message.assert_called_once_with("Test Message", "C123456")
         mock_update_reminder_schedule_date.assert_called_once_with(mock_reminder_schedule)

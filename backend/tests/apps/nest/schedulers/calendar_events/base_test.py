@@ -69,7 +69,7 @@ class TestBaseScheduler:
 
         scheduler_instance.cron.assert_called_once_with(
             "0 9 * * *",
-            func=BaseScheduler.send_message_and_update,
+            func=BaseScheduler.send_and_update,
             args=("Daily Reminder", "C123456", 4),
             queue_name="default",
             use_local_timezone=True,
@@ -99,8 +99,8 @@ class TestBaseScheduler:
             BaseScheduler.send_message("Test Message", "C123456")
         assert str(exc_info.value) == "Subclasses must implement this method."
 
-    def test_send_message_and_update_not_implemented(self):
-        """Test that send_message_and_update raises NotImplementedError."""
+    def test_send_and_update_not_implemented(self):
+        """Test that send_and_update raises NotImplementedError."""
         with pytest.raises(NotImplementedError) as exc_info:
-            BaseScheduler.send_message_and_update("Test Message", "C123456", MagicMock())
+            BaseScheduler.send_and_update("Test Message", "C123456", MagicMock())
         assert str(exc_info.value) == "Subclasses must implement this method."

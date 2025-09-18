@@ -21,7 +21,7 @@ class TestCalendarEventsUtils:
     def test_parse_reminder_args_all_args(self):
         """Test parse_reminder_args with all arguments provided."""
         text = (
-            "--channel C123456 --event_number 1 --minutes_before 15 "
+            "reminder set --channel C123456 --event_number 1 --minutes_before 15 "
             '--message "Meeting with team" --recurrence weekly'
         )
         args = parse_reminder_args(text)
@@ -33,7 +33,7 @@ class TestCalendarEventsUtils:
 
     def test_parse_reminder_args_missing_optional_args(self):
         """Test parse_reminder_args with only required arguments."""
-        text = "--channel C123456 --event_number 2"
+        text = "reminder set --channel C123456 --event_number 2"
         args = parse_reminder_args(text)
         assert args.channel == "C123456"
         assert args.event_number == 2
@@ -43,7 +43,7 @@ class TestCalendarEventsUtils:
 
     def test_parse_cancel_reminder_args(self):
         """Test parse_cancel_reminder_args with valid arguments."""
-        text = "--number 3"
+        text = "reminder cancel --number 3"
         args = parse_cancel_reminder_args(text)
         assert args.number == 3
 
