@@ -1,17 +1,14 @@
 'use client'
 
-import { useQuery, useMutation } from '@apollo/client'
-import { addToast } from '@heroui/toast'
-import upperFirst from 'lodash/upperFirst'
+import { useQuery } from '@apollo/client'
+import { useUpdateProgramStatus } from 'hooks/useUpdateProgramStatus'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useEffect, useMemo, useState } from 'react'
-import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { UPDATE_PROGRAM_STATUS_MUTATION } from 'server/mutations/programsMutations'
+import { ErrorDisplay } from 'app/global-error'
 import { GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
 import type { ExtendedSession } from 'types/auth'
 import type { Module, Program } from 'types/mentorship'
-import { ProgramStatusEnum } from 'types/mentorship'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
@@ -29,10 +26,6 @@ const ProgramDetailsPage = () => {
   const [program, setProgram] = useState<Program | null>(null)
   const [modules, setModules] = useState<Module[]>([])
   const [isRefetching, setIsRefetching] = useState(false)
-
-  const [updateProgram] = useMutation(UPDATE_PROGRAM_STATUS_MUTATION, {
-    onError: handleAppError,
-  })
 
   const {
     data,
@@ -56,41 +49,12 @@ const ProgramDetailsPage = () => {
     return true
   }, [isAdmin, program])
 
-  const updateStatus = async (newStatus: ProgramStatusEnum) => {
-    if (!program || !isAdmin) {
-      addToast({
-        title: 'Permission Denied',
-        description: 'Only admins can update the program status.',
-        variant: 'solid',
-        color: 'danger',
-        timeout: 3000,
-      })
-      return
-    }
-
-    try {
-      await updateProgram({
-        variables: {
-          inputData: {
-            key: program.key,
-            name: program.name,
-            status: newStatus,
-          },
-        },
-        refetchQueries: [{ query: GET_PROGRAM_AND_MODULES, variables: { programKey } }],
-      })
-
-      addToast({
-        title: `Program status updated to ${upperFirst(newStatus)}`,
-        description: 'The status has been successfully updated.',
-        variant: 'solid',
-        color: 'success',
-        timeout: 3000,
-      })
-    } catch (err) {
-      handleAppError(err)
-    }
-  }
+  const { updateProgramStatus } = useUpdateProgramStatus({
+    programKey,
+    programName: program?.name || '',
+    isAdmin,
+    refetchQueries: [{ query: GET_PROGRAM_AND_MODULES, variables: { programKey } }],
+  })
 
   useEffect(() => {
     const processResult = async () => {
@@ -141,9 +105,10 @@ const ProgramDetailsPage = () => {
 
   return (
     <DetailsCard
+      programKey={program.key}
       modules={modules}
       status={program.status}
-      setStatus={updateStatus}
+      setStatus={updateProgramStatus}
       canUpdateStatus={canUpdateStatus}
       details={programDetails}
       admins={program.admins}

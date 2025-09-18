@@ -29,6 +29,9 @@ jest.mock('next-auth/react', () => {
     useSession: jest.fn(),
   }
 })
+jest.mock('hooks/useUpdateProgramStatus', () => ({
+  useUpdateProgramStatus: () => ({ updateProgramStatus: jest.fn() }),
+}))
 
 const mockUseQuery = useQuery as jest.Mock
 const mockPush = jest.fn()
