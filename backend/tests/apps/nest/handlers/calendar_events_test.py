@@ -1,4 +1,4 @@
-"""Test cases for Nest Calendar Events controllers."""
+"""Test cases for Nest Calendar Events handlers."""
 
 from unittest.mock import patch
 
@@ -6,7 +6,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from apps.nest.controllers.calendar_events import schedule_reminder, set_reminder
+from apps.nest.handlers.calendar_events import schedule_reminder, set_reminder
 from apps.nest.models.google_account_authorization import GoogleAccountAuthorization
 from apps.nest.models.reminder import Reminder
 from apps.nest.models.reminder_schedule import ReminderSchedule
@@ -16,17 +16,17 @@ from apps.slack.models.member import Member
 MESSAGE = "Reminder Message"
 
 
-class TestCalendarEventsControllers:
-    """Test cases for Nest Calendar Events controllers."""
+class TestCalendarEventsHandlers:
+    """Test cases for Nest Calendar Events handlers."""
 
-    @patch("apps.nest.controllers.calendar_events.GoogleCalendarClient")
-    @patch("apps.nest.controllers.calendar_events.cache")
-    @patch("apps.nest.controllers.calendar_events.GoogleAccountAuthorization.authorize")
-    @patch("apps.nest.controllers.calendar_events.Event.parse_google_calendar_event")
-    @patch("apps.nest.controllers.calendar_events.Event.save")
-    @patch("apps.nest.controllers.calendar_events.Member.objects.get")
-    @patch("apps.nest.controllers.calendar_events.Reminder.objects.create")
-    @patch("apps.nest.controllers.calendar_events.schedule_reminder")
+    @patch("apps.nest.handlers.calendar_events.GoogleCalendarClient")
+    @patch("apps.nest.handlers.calendar_events.cache")
+    @patch("apps.nest.handlers.calendar_events.GoogleAccountAuthorization.authorize")
+    @patch("apps.nest.handlers.calendar_events.Event.parse_google_calendar_event")
+    @patch("apps.nest.handlers.calendar_events.Event.save")
+    @patch("apps.nest.handlers.calendar_events.Member.objects.get")
+    @patch("apps.nest.handlers.calendar_events.Reminder.objects.create")
+    @patch("apps.nest.handlers.calendar_events.schedule_reminder")
     def test_set_reminder_success(
         self,
         mock_schedule_reminder,
@@ -112,7 +112,7 @@ class TestCalendarEventsControllers:
             )
         assert excinfo.value.message == "Minutes before must be a positive integer."
 
-    @patch("apps.nest.controllers.calendar_events.GoogleAccountAuthorization.authorize")
+    @patch("apps.nest.handlers.calendar_events.GoogleAccountAuthorization.authorize")
     def test_set_reminder_unauthorized_user(self, mock_authorize):
         """Test setting a reminder with an unauthorized user."""
         mock_authorize.return_value = ("http://auth.url", "state")  # NOSONAR
@@ -128,8 +128,8 @@ class TestCalendarEventsControllers:
         assert excinfo.value.message == "User is not authorized with Google. Please sign in first."
         mock_authorize.assert_called_once_with("U123456")
 
-    @patch("apps.nest.controllers.calendar_events.cache")
-    @patch("apps.nest.controllers.calendar_events.GoogleAccountAuthorization.authorize")
+    @patch("apps.nest.handlers.calendar_events.cache")
+    @patch("apps.nest.handlers.calendar_events.GoogleAccountAuthorization.authorize")
     def test_set_reminder_invalid_event_number(self, mock_authorize, mock_cache):
         """Test setting a reminder with an invalid event number."""
         mock_authorize.return_value = GoogleAccountAuthorization(
@@ -153,10 +153,10 @@ class TestCalendarEventsControllers:
         mock_authorize.assert_called_once_with("U123456")
         mock_cache.get.assert_called_once_with("U123456_invalid_event_number")
 
-    @patch("apps.nest.controllers.calendar_events.GoogleAccountAuthorization.authorize")
-    @patch("apps.nest.controllers.calendar_events.Event.parse_google_calendar_event")
-    @patch("apps.nest.controllers.calendar_events.cache")
-    @patch("apps.nest.controllers.calendar_events.GoogleCalendarClient")
+    @patch("apps.nest.handlers.calendar_events.GoogleAccountAuthorization.authorize")
+    @patch("apps.nest.handlers.calendar_events.Event.parse_google_calendar_event")
+    @patch("apps.nest.handlers.calendar_events.cache")
+    @patch("apps.nest.handlers.calendar_events.GoogleCalendarClient")
     def test_set_reminder_event_retrieval_failure(
         self,
         mock_google_client,
@@ -190,10 +190,10 @@ class TestCalendarEventsControllers:
         mock_parse_event.assert_called_once()
         mock_google_client.assert_called_once()
 
-    @patch("apps.nest.controllers.calendar_events.GoogleAccountAuthorization.authorize")
-    @patch("apps.nest.controllers.calendar_events.Event.parse_google_calendar_event")
-    @patch("apps.nest.controllers.calendar_events.cache")
-    @patch("apps.nest.controllers.calendar_events.GoogleCalendarClient")
+    @patch("apps.nest.handlers.calendar_events.GoogleAccountAuthorization.authorize")
+    @patch("apps.nest.handlers.calendar_events.Event.parse_google_calendar_event")
+    @patch("apps.nest.handlers.calendar_events.cache")
+    @patch("apps.nest.handlers.calendar_events.GoogleCalendarClient")
     def test_set_reminder_past_reminder_time(
         self,
         mock_google_client,
@@ -235,10 +235,10 @@ class TestCalendarEventsControllers:
         mock_parse_event.assert_called_once()
         mock_google_client.assert_called_once()
 
-    @patch("apps.nest.controllers.calendar_events.GoogleAccountAuthorization.authorize")
-    @patch("apps.nest.controllers.calendar_events.Event.parse_google_calendar_event")
-    @patch("apps.nest.controllers.calendar_events.cache")
-    @patch("apps.nest.controllers.calendar_events.GoogleCalendarClient")
+    @patch("apps.nest.handlers.calendar_events.GoogleAccountAuthorization.authorize")
+    @patch("apps.nest.handlers.calendar_events.Event.parse_google_calendar_event")
+    @patch("apps.nest.handlers.calendar_events.cache")
+    @patch("apps.nest.handlers.calendar_events.GoogleCalendarClient")
     def test_set_reminder_invalid_recurrence(
         self,
         mock_google_client,
@@ -277,7 +277,7 @@ class TestCalendarEventsControllers:
         mock_parse_event.assert_called_once()
         mock_google_client.assert_called_once()
 
-    @patch("apps.nest.controllers.calendar_events.ReminderSchedule.objects.create")
+    @patch("apps.nest.handlers.calendar_events.ReminderSchedule.objects.create")
     def test_schedule_reminder_success(self, mock_reminder_create):
         """Test scheduling a reminder successfully."""
         # Mock inputs

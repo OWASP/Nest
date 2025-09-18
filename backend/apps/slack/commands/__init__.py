@@ -3,7 +3,6 @@ from apps.slack.commands.command import CommandBase
 
 from . import (
     board,
-    cancel_reminder,
     chapters,
     committees,
     community,
@@ -15,11 +14,11 @@ from . import (
     gsoc,
     jobs,
     leaders,
+    nestbot,
     news,
     owasp,
     policies,
     projects,
-    set_reminder,
     sponsor,
     sponsors,
     staff,

@@ -1,4 +1,4 @@
-"""Controllers for Calendar Events."""
+"""Handlers for Calendar Events."""
 
 from django.core.cache import cache
 from django.core.exceptions import ValidationError

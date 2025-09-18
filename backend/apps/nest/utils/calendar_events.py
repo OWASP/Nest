@@ -20,7 +20,14 @@ def parse_reminder_args(text: str):
         Namespace: The parsed arguments as a Namespace object.
 
     """
-    parser = ArgumentParser(prog="/set-reminder", description="Set a reminder for a Slack event.")
+    parser = ArgumentParser(prog="/nestbot", description="Set a reminder for a calendar event.")
+    parser.add_argument(
+        "reminder",
+        type=str,
+        help="The reminder command.",
+        choices=["remind", "reminder"],
+    )
+    parser.add_argument("set", type=str, help="The set command.", choices=["set"])
     parser.add_argument(
         "--channel", type=str, help="The channel to send the reminder to.", required=True
     )
@@ -61,7 +68,14 @@ def parse_cancel_reminder_args(text: str):
         Namespace: The parsed arguments as a Namespace object.
 
     """
-    parser = ArgumentParser(prog="/cancel-reminder", description="Cancel a scheduled reminder.")
+    parser = ArgumentParser(prog="/nestbot", description="Cancel a scheduled reminder.")
+    parser.add_argument(
+        "reminder",
+        type=str,
+        help="The reminder command.",
+        choices=["remind", "reminder"],
+    )
+    parser.add_argument("cancel", type=str, help="The cancel command.", choices=["cancel"])
     parser.add_argument(
         "--number",
         type=int,

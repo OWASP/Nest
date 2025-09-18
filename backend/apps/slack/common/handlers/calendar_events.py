@@ -106,7 +106,7 @@ def get_reminders_blocks(slack_user_id: str) -> list[dict]:
 
 def get_setting_reminder_blocks(args, slack_user_id: str) -> list[dict]:
     """Get the blocks for setting a reminder."""
-    from apps.nest.controllers.calendar_events import set_reminder
+    from apps.nest.handlers.calendar_events import set_reminder
     from apps.nest.schedulers.calendar_events.slack import SlackScheduler
 
     try:

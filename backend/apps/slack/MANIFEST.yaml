@@ -16,11 +16,6 @@ features:
       description: project directory
       usage_hint: <search query>
       should_escape: false
-    - command: /cancel-reminder
-      url: https://nest.owasp.org/integrations/slack/commands/
-      description: Cancel a previously set reminder
-      usage_hint: --number <reminder_number>
-      should_escape: false
     - command: /committees
       url: https://nest.owasp.org/integrations/slack/commands/
       description: committees
@@ -66,10 +61,10 @@ features:
       url: https://nest.owasp.org/integrations/slack/commands/
       description: Check out available job opportunities
       should_escape: false
-    - command: /set-reminder
+    - command: /nestbot
       url: https://nest.owasp.org/integrations/slack/commands/
-      description: Set a reminder for a specific channel
-      usage_hint: --channel <#channel_name> --event_number <event_number> --minutes_before <minutes_before_event> --message <optional_message>
+      description: NestBot root command
+      usage_hint: reminder set --channel <#channel> --minutes_before <minutes> --event_number <number>
       should_escape: false
     - command: /sponsor
       url: https://nest.owasp.org/integrations/slack/commands/
