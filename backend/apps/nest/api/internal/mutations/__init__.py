@@ -2,10 +2,9 @@
 
 import strawberry
 
-from .api_key import ApiKeyMutations
 from .user import UserMutations
 
 
 @strawberry.type
-class NestMutations(ApiKeyMutations, UserMutations):
+class NestMutations(UserMutations):
     """Nest mutations."""

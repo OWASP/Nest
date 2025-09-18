@@ -16,6 +16,10 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
         "owners",
         "repositories",
     )
+    exclude = (
+        "leaders",
+        "suggested_leaders",
+    )
     inlines = (EntityMemberInline,)
     list_display = (
         "custom_field_name",

@@ -10,7 +10,7 @@ class GenericUserModel(models.Model):
     class Meta:
         abstract = True
 
-    name = models.CharField(verbose_name="Name", max_length=200)
+    name = models.CharField(verbose_name="Name", max_length=200, blank=True, default="")
     login = models.CharField(verbose_name="Login", max_length=100, unique=True)
     email = models.EmailField(verbose_name="Email", max_length=100, default="", blank=True)
 
