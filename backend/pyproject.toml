@@ -4,7 +4,7 @@ requires = [ "poetry-core" ]
 
 [tool.poetry]
 name = "OWASP Nest"
-version = "0.1.0"
+version = "0.0.0"
 description = "Your gateway to OWASP"
 authors = [ "Arkadii Yakovets <arkadii.yakovets@owasp.org>" ]
 readme = "README.md"

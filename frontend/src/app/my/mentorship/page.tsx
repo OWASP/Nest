@@ -128,7 +128,7 @@ const MyMentorshipPage: React.FC = () => {
         searchPlaceholder="Search your programs"
         indexName="my-programs"
       >
-        <div className="mt-16 grid grid-cols-1 gap-x-4 gap-y-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
           {programs.length === 0 ? (
             <div className="col-span-full flex min-h-[40vh] flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
               <p className="text-lg font-semibold">Program not found</p>

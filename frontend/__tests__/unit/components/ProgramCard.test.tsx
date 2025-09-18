@@ -29,6 +29,14 @@ jest.mock('components/ActionButton', () => ({
   ),
 }))
 
+jest.mock('@heroui/tooltip', () => ({
+  Tooltip: ({ children, content }: { children: React.ReactNode; content: string }) => (
+    <div data-testid="tooltip" title={content}>
+      {children}
+    </div>
+  ),
+}))
+
 describe('ProgramCard', () => {
   const mockOnView = jest.fn()
 
@@ -233,8 +241,8 @@ describe('ProgramCard', () => {
   })
 
   describe('Description Handling', () => {
-    it('truncates long descriptions to 100 characters', () => {
-      const longDescription = 'A'.repeat(150)
+    it('renders long descriptions with line-clamp-6 CSS class', () => {
+      const longDescription = 'A'.repeat(300) // Long enough to trigger line clamping
       const longDescProgram = { ...baseMockProgram, description: longDescription }
 
       render(
@@ -246,11 +254,15 @@ describe('ProgramCard', () => {
         />
       )
 
-      const expectedText = 'A'.repeat(100) + '...'
-      expect(screen.getByText(expectedText)).toBeInTheDocument()
+      // Check that the full description is rendered (CSS handles the visual truncation)
+      expect(screen.getByText(longDescription)).toBeInTheDocument()
+
+      // Check that the paragraph has the line-clamp-6 class
+      const descriptionElement = screen.getByText(longDescription)
+      expect(descriptionElement).toHaveClass('line-clamp-6')
     })
 
-    it('shows full description when under 100 characters', () => {
+    it('shows full description when short', () => {
       const shortDescription = 'Short description'
       const shortDescProgram = { ...baseMockProgram, description: shortDescription }
 
@@ -264,6 +276,10 @@ describe('ProgramCard', () => {
       )
 
       expect(screen.getByText('Short description')).toBeInTheDocument()
+
+      // Check that it still has line-clamp-6 class for consistency
+      const descriptionElement = screen.getByText('Short description')
+      expect(descriptionElement).toHaveClass('line-clamp-6')
     })
 
     it('shows fallback text when description is empty', () => {

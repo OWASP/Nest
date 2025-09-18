@@ -1,6 +1,7 @@
 import { faEye } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useUpdateProgramStatus } from 'hooks/useUpdateProgramStatus'
+import { Tooltip } from '@heroui/tooltip'
 import type React from 'react'
 import { GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
 import { Program } from 'types/mentorship'
@@ -35,10 +36,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel,
     default: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
   }
 
-  const description =
-    program.description?.length > 100
-      ? `${program.description.slice(0, 100)}...`
-      : program.description || 'No description available.'
+  const description = program.description || 'No description available.'
 
   return (
     <div className="flex h-64 w-80 flex-col justify-between rounded-[5px] border border-gray-400 bg-white p-6 text-left transition-transform duration-300 hover:scale-[1.02] hover:brightness-105 dark:border-gray-600 dark:bg-gray-800">
@@ -62,15 +60,31 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel,
               : program.startedAt
                 ? `Started: ${formatDate(program.startedAt)}`
                 : 'No dates set'}
-          </span>
-          {accessLevel === 'admin' && (
-            <span
-              className={`rounded-full px-2 py-1 text-xs font-medium capitalize ${
-                roleClass[program.userRole] ?? roleClass.default
-              }`}
-            >
-              {program.userRole}
-            </span>
+          </div>
+          <div className="flex flex-1 flex-col justify-start">
+            <p className="line-clamp-6 overflow-hidden text-sm text-gray-700 dark:text-gray-300">
+              {description}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          {accessLevel === 'admin' ? (
+            <>
+              <ActionButton onClick={() => onView(program.key)}>
+                <FontAwesomeIcon icon={faEye} className="mr-1" />
+                Preview
+              </ActionButton>
+              <ActionButton onClick={() => onEdit(program.key)}>
+                <FontAwesomeIcon icon={faEdit} className="mr-1" />
+                Edit
+              </ActionButton>
+            </>
+          ) : (
+            <ActionButton onClick={() => onView(program.key)}>
+              <FontAwesomeIcon icon={faEye} className="mr-1" />
+              View Details
+            </ActionButton>
           )}
         </div>
         <p className="mb-4 text-sm text-gray-700 dark:text-gray-300">{description}</p>
