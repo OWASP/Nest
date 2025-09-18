@@ -417,11 +417,13 @@ class TestRepositoryMarkdownContentExtractor:
             organization=organization,
         )
 
+        problematic_url = "https://raw.githubusercontent.com/test-org/test-repo/main/README.md"
+        network_error_message = "Network error"
+
         def side_effect(url):
-            if "raw.githubusercontent.com" in url:
-                msg = "Network error"
-                raise ValueError(msg)
-            return "[]"
+            if url == problematic_url:
+                raise ValueError(network_error_message)
+            return ""
 
         mock_get_content.side_effect = side_effect
 
@@ -435,6 +437,7 @@ class TestRepositoryMarkdownContentExtractor:
         assert "Repository Name: test-repo" in metadata
         assert "Repository Key: test-repo" in metadata
         assert "Organization: test-org" in metadata
+        mock_get_content.assert_any_call(problematic_url)
 
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
     def test_extract_repository_markdown_content_empty_file_content(self, mock_get_content):
@@ -570,10 +573,12 @@ class TestRepositoryMarkdownContentExtractor:
             organization=organization,
         )
 
+        error_trigger_url = "https://raw.githubusercontent.com/test-org/test-repo/main/README.md"
+        error_message = "Test exception"
+
         def side_effect(url):
-            if "raw.githubusercontent.com" in url:
-                msg = "Test exception"
-                raise ValueError(msg)
+            if url == error_trigger_url:
+                raise ValueError(error_message)
             return "[]"
 
         mock_get_content.side_effect = side_effect
@@ -584,6 +589,6 @@ class TestRepositoryMarkdownContentExtractor:
         assert data["description"] == "Test repository"
         assert data["ownership"]["organization"] == "test-org"
 
-        mock_logger.debug.assert_called()
+        mock_logger.debug.assert_called_once()
         debug_call_args = mock_logger.debug.call_args[0][0]
-        assert "Failed to fetch" in debug_call_args
+        assert "Failed to fetch markdown file" in debug_call_args
