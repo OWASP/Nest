@@ -34,6 +34,14 @@ ai-update-project-context:
 	@echo "Updating project context"
 	@CMD="python manage.py ai_update_project_context" $(MAKE) exec-backend-command
 
+ai-update-repository-chunks:
+	@echo "Updating repository chunks"
+	@CMD="python manage.py ai_update_repository_chunks" $(MAKE) exec-backend-command
+
+ai-update-repository-context:
+	@echo "Updating repository context"
+	@CMD="python manage.py ai_update_repository_context" $(MAKE) exec-backend-command
+
 ai-update-slack-message-chunks:
 	@echo "Updating Slack message chunks"
 	@CMD="python manage.py ai_update_slack_message_chunks" $(MAKE) exec-backend-command
