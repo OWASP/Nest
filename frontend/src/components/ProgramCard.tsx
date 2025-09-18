@@ -78,7 +78,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel,
             </span>
             {accessLevel === 'admin' && (
               <span
-                className={`rounded-full px-2 py-1 text-xs font-medium capitalize ${
+                className={`ml-2 rounded-full px-2 py-1 text-xs font-medium capitalize ${
                   roleClass[program.userRole] ?? roleClass.default
                 }`}
               >
