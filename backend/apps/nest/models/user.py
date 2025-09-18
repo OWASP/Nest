@@ -11,7 +11,7 @@ from django.utils import timezone
 if TYPE_CHECKING:
     from django.db.models import QuerySet
 
-    from apps.nest.models.api_key import ApiKey
+    from apps.api.models.api_key import ApiKey
 
 
 class User(AbstractUser):

@@ -50,7 +50,7 @@ const ProgramsPage = () => {
       searchQuery={searchQuery}
       totalPages={totalPages}
     >
-      <div className="mt-16 grid grid-cols-1 gap-x-4 gap-y-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+      <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
         {programs && programs.filter((p) => p.status === 'published').map(renderProgramCard)}
       </div>
     </SearchPageLayout>

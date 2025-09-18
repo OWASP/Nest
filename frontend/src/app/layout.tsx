@@ -71,12 +71,14 @@ export default function RootLayout({
         style={{ minHeight: '100vh' }}
       >
         <Providers>
-          <AutoScrollToTop />
-          <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
-          <BreadCrumbs />
-          {children}
-          <Footer />
-          <ScrollToTop />
+          <div className="flex min-h-screen flex-col">
+            <AutoScrollToTop />
+            <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
+            <BreadCrumbs />
+            <main className="flex flex-1 flex-col justify-center">{children}</main>
+            <Footer />
+            <ScrollToTop />
+          </div>
         </Providers>
       </body>
       <GoogleAnalytics gaId={GTM_ID} />

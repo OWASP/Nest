@@ -11,6 +11,10 @@ class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     """Admin for Chapter model."""
 
     autocomplete_fields = ("owasp_repository",)
+    exclude = (
+        "leaders",
+        "suggested_leaders",
+    )
     inlines = (EntityMemberInline,)
     list_display = (
         "name",

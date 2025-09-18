@@ -37,6 +37,15 @@ export type AuthUserNode = Node & {
   username: Scalars['String']['output'];
 };
 
+export type BadgeNode = Node & {
+  __typename?: 'BadgeNode';
+  cssClass: Scalars['String']['output'];
+  description: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  weight: Scalars['Int']['output'];
+};
+
 export type ChapterNode = Node & {
   __typename?: 'ChapterNode';
   country: Scalars['String']['output'];
@@ -850,6 +859,7 @@ export type UpdateProgramStatusInput = {
 export type UserNode = {
   __typename?: 'UserNode';
   avatarUrl: Scalars['String']['output'];
+  badges: Array<BadgeNode>;
   bio: Scalars['String']['output'];
   company: Scalars['String']['output'];
   contributionsCount: Scalars['Int']['output'];

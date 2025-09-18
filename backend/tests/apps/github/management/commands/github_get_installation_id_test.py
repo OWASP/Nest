@@ -147,6 +147,6 @@ class TestGitHubGetInstallationId(SimpleTestCase):
         ):
             command.handle()
 
-        args, kwargs = mock_app_auth.call_args
+        _, kwargs = mock_app_auth.call_args
         assert kwargs["app_id"] == 123456
         assert isinstance(kwargs["private_key"], str)

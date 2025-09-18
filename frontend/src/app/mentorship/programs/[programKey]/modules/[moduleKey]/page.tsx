@@ -1,12 +1,12 @@
 'use client'
 
 import { useQuery } from '@apollo/client'
-import upperFirst from 'lodash/upperFirst'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_PROGRAM_ADMINS_AND_MODULES } from 'server/queries/moduleQueries'
 import type { Module } from 'types/mentorship'
+import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -49,7 +49,7 @@ const ModuleDetailsPage = () => {
   }
 
   const moduleDetails = [
-    { label: 'Experience Level', value: upperFirst(module.experienceLevel) },
+    { label: 'Experience Level', value: titleCaseWord(module.experienceLevel) },
     { label: 'Start Date', value: formatDate(module.startedAt) },
     { label: 'End Date', value: formatDate(module.endedAt) },
     {

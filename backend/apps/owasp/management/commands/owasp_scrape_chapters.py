@@ -39,11 +39,15 @@ class Command(BaseCommand):
                 chapter.deactivate()
                 continue
 
+            chapter.leaders_raw = chapter.get_leaders()
+            if leaders_emails := chapter.get_leaders_emails():
+                chapter.sync_leaders(leaders_emails)
+
             # Get related URLs.
             scraped_urls = sorted(
                 {
                     repository_url
-                    for url in set(scraper.get_urls())
+                    for url in set(chapter.get_urls())
                     if (
                         repository_url := normalize_url(
                             chapter.get_related_url(
