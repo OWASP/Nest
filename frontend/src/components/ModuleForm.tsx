@@ -168,7 +168,7 @@ const ModuleForm = ({
                     value={formData.domains}
                     onChange={handleInputChange}
                     placeholder="AI, Web Development"
-                    className="bg-gray-30 w-full rounded-lg border border-gray-600 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
                 <div>

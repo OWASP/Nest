@@ -186,19 +186,19 @@ const ProgramForm = ({
                 {isEdit && (
                   <div className="lg:col-span-2">
                     <label
-                      htmlFor="mentor-github-usernames"
+                      htmlFor="admin-github-usernames"
                       className="mb-2 block text-sm font-semibold"
                     >
                       Admin GitHub Usernames
                     </label>
                     <input
-                      id="mentor-github-usernames"
+                      id="admin-github-usernames"
                       type="text"
                       name="adminLogins"
                       value={formData.adminLogins}
                       onChange={handleInputChange}
                       placeholder="johndoe, jane-doe"
-                      className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-600 text-gray-800 focus:outline-hidden sm:text-base dark:bg-gray-800 dark:text-gray-400"
+                      className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
                     />
                   </div>
                 )}
