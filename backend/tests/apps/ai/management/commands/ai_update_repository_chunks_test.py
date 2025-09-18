@@ -4,6 +4,7 @@ import pytest
 
 from apps.ai.common.base.chunk_command import BaseChunkCommand
 from apps.ai.management.commands.ai_update_repository_chunks import Command
+from apps.github.models.repository import Repository
 
 
 @pytest.fixture
@@ -33,8 +34,6 @@ class TestAiUpdateRepositoryChunksCommand:
 
     def test_model_class_property(self, command):
         """Test the model_class property returns Repository."""
-        from apps.github.models.repository import Repository
-
         assert command.model_class == Repository
 
     def test_entity_name_property(self, command):

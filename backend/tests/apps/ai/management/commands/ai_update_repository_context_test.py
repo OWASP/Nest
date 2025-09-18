@@ -2,7 +2,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from apps.ai.common.base.context_command import BaseContextCommand
 from apps.ai.management.commands.ai_update_repository_context import Command
+from apps.github.models.repository import Repository
 
 
 @pytest.fixture
@@ -24,8 +26,6 @@ def mock_repository():
 class TestAiUpdateRepositoryContextCommand:
     def test_command_inheritance(self, command):
         """Test that the command inherits from BaseContextCommand."""
-        from apps.ai.common.base.context_command import BaseContextCommand
-
         assert isinstance(command, BaseContextCommand)
 
     def test_command_help_text(self, command):
@@ -34,8 +34,6 @@ class TestAiUpdateRepositoryContextCommand:
 
     def test_model_class_property(self, command):
         """Test the model_class property returns Repository."""
-        from apps.github.models.repository import Repository
-
         assert command.model_class == Repository
 
     def test_entity_name_property(self, command):
