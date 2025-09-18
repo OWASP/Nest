@@ -2,6 +2,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from apps.ai.common.base.chunk_command import BaseChunkCommand
 from apps.ai.management.commands.ai_update_repository_chunks import Command
 
 
@@ -24,8 +25,6 @@ def mock_repository():
 class TestAiUpdateRepositoryChunksCommand:
     def test_command_inheritance(self, command):
         """Test that the command inherits from BaseChunkCommand."""
-        from apps.ai.common.base.chunk_command import BaseChunkCommand
-
         assert isinstance(command, BaseChunkCommand)
 
     def test_command_help_text(self, command):

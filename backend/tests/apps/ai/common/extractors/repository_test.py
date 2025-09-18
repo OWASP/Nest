@@ -106,10 +106,10 @@ class TestRepositoryContentExtractor:
         assert data["homepage"] == "https://test-repo.example.com"
         assert data["license"] == "MIT"
         assert data["topics"] == ["security", "testing", "python"]
-        assert data["status"]["owasp_repository"] is True
-        assert data["status"]["owasp_site_repository"] is True
-        assert data["funding"]["policy_compliant"] is True
-        assert data["funding"]["has_funding_yml"] is True
+        assert data["status"]["owasp_repository"]
+        assert data["status"]["owasp_site_repository"]
+        assert data["funding"]["policy_compliant"]
+        assert data["funding"]["has_funding_yml"]
         assert data["pages_status"] == "enabled"
         assert data["features"] == ["downloads", "issues", "pages", "projects", "wiki"]
         assert data["statistics"]["commits"] == 1500
@@ -124,7 +124,6 @@ class TestRepositoryContentExtractor:
         assert data["dates"]["last_pushed"] == "2024-06-09"
         assert data["ownership"]["organization"] == "test-org"
         assert data["ownership"]["owner"] == "test-user"
-        # track_issues is not included in the current extractor output
 
         assert "Repository Name: test-repo" in metadata
         assert "Repository Key: test-repo-key" in metadata
@@ -160,8 +159,8 @@ class TestRepositoryContentExtractor:
         assert data["name"] == "archived-repo"
         assert data["key"] == "archived-repo-key"
         assert data["description"] == "This repository is archived"
-        assert data["status"]["archived"] is True
-        assert data["status"]["owasp_repository"] is True
+        assert data["status"]["archived"]
+        assert data["status"]["owasp_repository"]
 
         assert "Repository Name: archived-repo" in metadata
         assert "Repository Key: archived-repo-key" in metadata
@@ -181,7 +180,7 @@ class TestRepositoryContentExtractor:
         assert data["name"] == "empty-repo"
         assert data["key"] == "empty-repo-key"
         assert data["description"] == "This repository is empty"
-        assert data["status"]["empty"] is True
+        assert data["status"]["empty"]
 
         assert "Repository Name: empty-repo" in metadata
         assert "Repository Key: empty-repo-key" in metadata
