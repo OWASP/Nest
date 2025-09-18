@@ -25,10 +25,6 @@ class SponsorErrorResponse(Schema):
 class SponsorFilterSchema(FilterSchema):
     """Filter schema for Sponsor."""
 
-    sponsor_type: Sponsor.SponsorType | None = Field(
-        None,
-        description="Type of sponsor",
-    )
     is_member: bool | None = Field(
         None,
         description="Member status of the sponsor",
@@ -38,19 +34,25 @@ class SponsorFilterSchema(FilterSchema):
         description="Member type of the sponsor",
     )
 
+    sponsor_type: str | None = Field(
+        None,
+        description="Filter by the type of sponsorship (e.g., Gold, Silver, Platinum).",
+        example="Silver",
+    )
+
 
 class SponsorSchema(Schema):
     """Schema for Sponsor."""
 
-    key: str
-    name: str
     description: str
-    url: str
-    job_url: str
     image_url: str
-    sponsor_type: str
-    member_type: str
     is_member: bool
+    job_url: str
+    key: str
+    member_type: str
+    name: str
+    sponsor_type: str
+    url: str
 
 
 @router.get(
@@ -71,8 +73,8 @@ def list_sponsors(
         description="Ordering field",
     ),
 ) -> list[SponsorSchema]:
-    """Get all sponsors."""
-    return filters.filter(Sponsor.objects.all()).order_by(ordering or "name")
+    """Get sponsors."""
+    return filters.filter(Sponsor.objects.order_by(ordering or "name"))
 
 
 @router.get(
@@ -91,12 +93,7 @@ def get_sponsor(
     sponsor_key: str = Path(..., example="adobe"),
 ) -> SponsorSchema | SponsorErrorResponse:
     """Get sponsor."""
-    sponsor = Sponsor.objects.filter(key=sponsor_key).first()
+    if sponsor := Sponsor.objects.filter(key__iexact=sponsor_key).first():
+        return sponsor
 
-    if not sponsor:
-        return Response(
-            {"message": "Sponsor not found"},
-            status=HTTPStatus.NOT_FOUND,
-        )
-
-    return sponsor
+    return Response({"message": "Sponsor not found"}, status=HTTPStatus.NOT_FOUND)
