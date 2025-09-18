@@ -32,7 +32,7 @@ class BaseScheduler:
         else:
             self.reminder_schedule.job_id = self.scheduler.cron(
                 self.reminder_schedule.cron_expression,
-                func=self.__class__.send_message_and_update,
+                func=self.__class__.send_and_update,
                 args=(
                     self.reminder_schedule.reminder.message,
                     self.reminder_schedule.reminder.channel_id,
@@ -58,7 +58,7 @@ class BaseScheduler:
         raise NotImplementedError(error_message)
 
     @staticmethod
-    def send_message_and_update(message: str, channel_id: str, reminder_schedule_id: int):
+    def send_and_update(message: str, channel_id: str, reminder_schedule_id: int):
         """Send message and update the reminder schedule."""
         error_message = "Subclasses must implement this method."
         raise NotImplementedError(error_message)

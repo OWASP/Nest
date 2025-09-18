@@ -176,7 +176,7 @@ class TestCalendarEvents:
         mock_filter.assert_called_once_with(reminder__member__slack_user_id="test_slack_user_id")
         mock_filter.return_value.order_by.assert_called_once_with("scheduled_time")
 
-    @patch("apps.nest.controllers.calendar_events.set_reminder")
+    @patch("apps.nest.handlers.calendar_events.set_reminder")
     @patch("apps.nest.schedulers.calendar_events.slack.SlackScheduler")
     def test_get_setting_reminder_blocks_success(self, mock_slack_scheduler, mock_set_reminder):
         """Test get_setting_reminder_blocks function for successful reminder setting."""
@@ -214,7 +214,7 @@ class TestCalendarEvents:
         mock_slack_scheduler.return_value.schedule.assert_called_once()
         mock_slack_scheduler.send_message.assert_called_once()
 
-    @patch("apps.nest.controllers.calendar_events.set_reminder")
+    @patch("apps.nest.handlers.calendar_events.set_reminder")
     def test_get_setting_reminder_blocks_validation_error(self, mock_set_reminder):
         """Test get_setting_reminder_blocks function when ValidationError is raised."""
         mock_set_reminder.side_effect = ValidationError("Invalid event number.")
@@ -229,7 +229,7 @@ class TestCalendarEvents:
         assert len(blocks) == 1
         assert "*Invalid event number.*" in blocks[0]["text"]["text"]
 
-    @patch("apps.nest.controllers.calendar_events.set_reminder")
+    @patch("apps.nest.handlers.calendar_events.set_reminder")
     def test_get_setting_reminder_blocks_value_error(self, mock_set_reminder):
         """Test get_setting_reminder_blocks function when ValueError is raised."""
         mock_set_reminder.side_effect = ValueError("Some value error occurred.")
@@ -244,7 +244,7 @@ class TestCalendarEvents:
         assert len(blocks) == 1
         assert "*Some value error occurred.*" in blocks[0]["text"]["text"]
 
-    @patch("apps.nest.controllers.calendar_events.set_reminder")
+    @patch("apps.nest.handlers.calendar_events.set_reminder")
     def test_get_setting_reminder_blocks_service_error(self, mock_set_reminder):
         """Test get_setting_reminder_blocks function when service error occurs."""
         mock_set_reminder.side_effect = ServerNotFoundError()

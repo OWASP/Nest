@@ -18,7 +18,7 @@ class SlackScheduler(BaseScheduler):
             )
 
     @staticmethod
-    def send_message_and_update(message: str, channel_id: str, reminder_schedule_id: int):
+    def send_and_update(message: str, channel_id: str, reminder_schedule_id: int):
         """Send message and update the reminder schedule."""
         SlackScheduler.send_message(message, channel_id)
         update_reminder_schedule_date(reminder_schedule_id)

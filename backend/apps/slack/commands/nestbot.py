@@ -27,7 +27,7 @@ class NestBot(CommandBase):
                 args = parse_reminder_args(command.get("text", ""))
             except SystemExit:  # NOSONAR
                 return [
-                    markdown("*Invalid command arguments. Please check your input and try again.*")
+                    markdown("*Invalid command format. Please check your input and try again.*")
                 ]
             else:
                 return get_setting_reminder_blocks(args, self.get_user_id(command))

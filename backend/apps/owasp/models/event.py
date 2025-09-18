@@ -18,7 +18,7 @@ from apps.common.constants import NL
 from apps.common.geocoding import get_location_coordinates
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.open_ai import OpenAi
-from apps.common.utils import join_values, parse_date_and_convert_to_local, slugify
+from apps.common.utils import convert_to_local, join_values, parse_date, slugify
 from apps.github.utils import normalize_url
 
 
@@ -203,7 +203,7 @@ class Event(BulkSaveModel, TimestampedModel):
 
         if event_instance := Event.objects.filter(key=event.get("id")).first():
             # We need the start date to check if the minutes before is valid.
-            event_instance.start_date = parse_date_and_convert_to_local(start)
+            event_instance.start_date = convert_to_local(parse_date(start))
             return event_instance
 
         # We will not save until the user chooses to have this event.
@@ -212,8 +212,8 @@ class Event(BulkSaveModel, TimestampedModel):
             key=event.get("id"),
             description=event.get("description", ""),
             url=event.get("htmlLink", ""),
-            start_date=parse_date_and_convert_to_local(start),
-            end_date=parse_date_and_convert_to_local(end),
+            start_date=convert_to_local(parse_date(start)),
+            end_date=convert_to_local(parse_date(end)),
             google_calendar_id=event.get("id"),
             category=Event.Category.COMMUNITY,
             suggested_location=event.get("location", ""),
