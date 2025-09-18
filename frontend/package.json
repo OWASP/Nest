@@ -45,7 +45,7 @@
     "core-js": "^3.45.1",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.18",
-    "dompurify": "^3.2.6",
+    "dompurify": "^3.2.7",
     "eslint-plugin-import": "^2.32.0",
     "framer-motion": "^12.23.13",
     "graphql": "^16.11.0",
