@@ -13,5 +13,5 @@ export default async function authenticationMiddleware(request: NextRequest) {
 
 export const config = {
   //protected routes
-  matcher: ['/my/mentorship/:path*'],
+  matcher: [],
 }

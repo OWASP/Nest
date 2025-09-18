@@ -8,9 +8,8 @@ import React, { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UPDATE_MODULE } from 'server/mutations/moduleMutations'
 import { GET_PROGRAM_ADMINS_AND_MODULES } from 'server/queries/moduleQueries'
-import { GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
 import type { ExtendedSession } from 'types/auth'
-import { EXPERIENCE_LEVELS, Module, type ModuleFormData } from 'types/mentorship'
+import { EXPERIENCE_LEVELS, type ModuleFormData } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -109,32 +108,7 @@ const EditModulePage = () => {
         mentorLogins: parseCommaSeparated(formData.mentorLogins),
       }
 
-      await updateModule({
-        variables: { input },
-        update: (cache, { data: mutationData }) => {
-          const updated = mutationData?.updateModule
-          if (!updated) return
-          try {
-            const existing = cache.readQuery({
-              query: GET_PROGRAM_AND_MODULES,
-              variables: { programKey },
-            }) as { getProgramModules: Module[] }
-            if (existing?.getProgramModules) {
-              const nextModules = existing.getProgramModules.map((m: Module) =>
-                m.key === updated.key ? { ...m, ...updated } : m
-              )
-              cache.writeQuery({
-                query: GET_PROGRAM_AND_MODULES,
-                variables: { programKey },
-                data: { ...existing, getProgramModules: nextModules },
-              })
-            }
-          } catch (_err) {
-            handleAppError(_err)
-            return
-          }
-        },
-      })
+      await updateModule({ variables: { input } })
 
       addToast({
         title: 'Module Updated',

@@ -7,9 +7,8 @@ import type React from 'react'
 import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UPDATE_PROGRAM } from 'server/mutations/programsMutations'
-import { GET_PROGRAM_DETAILS, GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
+import { GET_PROGRAM_DETAILS } from 'server/queries/programsQueries'
 import type { ExtendedSession } from 'types/auth'
-import { Module, Program } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
 import slugify from 'utils/slugify'
@@ -104,41 +103,7 @@ const EditProgramPage = () => {
         status: formData.status,
       }
 
-      await updateProgram({
-        variables: { input },
-        update: (cache, { data: mutationData }) => {
-          const updated = mutationData?.updateProgram
-          if (!updated) return
-          try {
-            cache.writeQuery<{ getProgram?: Program; getProgramModules?: Module[] }>({
-              query: GET_PROGRAM_DETAILS,
-              variables: { programKey: input.key },
-              data: { getProgram: updated },
-            })
-          } catch (_err) {
-            handleAppError(_err)
-          }
-          try {
-            const existing = cache.readQuery<{
-              getProgram?: Program
-              getProgramModules?: Module[]
-            }>({
-              query: GET_PROGRAM_AND_MODULES,
-              variables: { programKey: input.key },
-            })
-            if (existing?.getProgram) {
-              cache.writeQuery<{ getProgram?: Program; getProgramModules?: Module[] }>({
-                query: GET_PROGRAM_AND_MODULES,
-                variables: { programKey: input.key },
-                data: { ...existing, getProgram: { ...existing.getProgram, ...updated } },
-              })
-            }
-          } catch (_err) {
-            handleAppError(_err)
-            return
-          }
-        },
-      })
+      await updateProgram({ variables: { input } })
 
       addToast({
         title: 'Program Updated',
