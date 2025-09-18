@@ -77,7 +77,7 @@ const ModuleForm = ({
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] focus:border-[#1D7BD7] dark:focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
 
@@ -92,7 +92,7 @@ const ModuleForm = ({
                     onChange={handleInputChange}
                     rows={4}
                     required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] focus:border-[#1D7BD7] dark:focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
               </div>
@@ -114,7 +114,7 @@ const ModuleForm = ({
                     value={formData.startedAt}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] focus:border-[#1D7BD7] dark:focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
                 <div>
@@ -128,7 +128,7 @@ const ModuleForm = ({
                     value={formData.endedAt}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] focus:border-[#1D7BD7] dark:focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
                 <div>
@@ -140,7 +140,7 @@ const ModuleForm = ({
                     id="experienceLevel"
                     value={formData.experienceLevel}
                     onChange={handleInputChange}
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] focus:border-[#1D7BD7] dark:focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200"
                   >
                     {EXPERIENCE_LEVELS.map((lvl) => (
                       <option key={lvl.key} value={lvl.key}>
@@ -168,7 +168,7 @@ const ModuleForm = ({
                     value={formData.domains}
                     onChange={handleInputChange}
                     placeholder="AI, Web Development"
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] focus:border-[#1D7BD7] dark:focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
                 <div>
@@ -182,7 +182,7 @@ const ModuleForm = ({
                     value={formData.tags}
                     onChange={handleInputChange}
                     placeholder="javascript, react"
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] focus:border-[#1D7BD7] dark:focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
                 <div>
@@ -210,7 +210,7 @@ const ModuleForm = ({
                       value={formData.mentorLogins}
                       onChange={handleInputChange}
                       placeholder="johndoe, jane-doe"
-                      className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] focus:border-[#1D7BD7] dark:focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200"
                     />
                   </div>
                 )}
@@ -352,7 +352,7 @@ export const ProjectSelector = ({ value, defaultName, onProjectChange }: Project
         required
         onChange={handleInputChange}
         onBlur={handleBlur}
-        className="w-full max-w-md rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden sm:w-96 dark:bg-gray-800 dark:text-gray-200"
+        className="w-full max-w-md rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] focus:border-[#1D7BD7] dark:focus-visible:ring-[#1D7BD7] sm:w-96 dark:bg-gray-800 dark:text-gray-200"
       />
 
       {showSuggestions && suggestions.length > 0 && (

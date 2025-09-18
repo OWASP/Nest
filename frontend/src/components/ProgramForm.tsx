@@ -76,7 +76,7 @@ const ProgramForm = ({
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] focus:border-[#1D7BD7] dark:focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
 
@@ -91,7 +91,7 @@ const ProgramForm = ({
                     onChange={handleInputChange}
                     rows={4}
                     required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] focus:border-[#1D7BD7] dark:focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
               </div>
@@ -114,7 +114,7 @@ const ProgramForm = ({
                     value={formData.startedAt}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] focus:border-[#1D7BD7] dark:focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
                 <div>
@@ -128,7 +128,7 @@ const ProgramForm = ({
                     value={formData.endedAt}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] focus:border-[#1D7BD7] dark:focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
                 <div>
@@ -143,7 +143,7 @@ const ProgramForm = ({
                     onChange={handleInputChange}
                     min={1}
                     required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] focus:border-[#1D7BD7] dark:focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
               </div>
@@ -166,7 +166,7 @@ const ProgramForm = ({
                     value={formData.tags}
                     onChange={handleInputChange}
                     placeholder="javascript, react"
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] focus:border-[#1D7BD7] dark:focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
                 <div className="">
@@ -180,7 +180,7 @@ const ProgramForm = ({
                     value={formData.domains}
                     onChange={handleInputChange}
                     placeholder="AI, Web Development"
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] focus:border-[#1D7BD7] dark:focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200"
                   />
                 </div>
                 {isEdit && (
@@ -198,7 +198,7 @@ const ProgramForm = ({
                       value={formData.adminLogins}
                       onChange={handleInputChange}
                       placeholder="johndoe, jane-doe"
-                      className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] focus:border-[#1D7BD7] dark:focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200"
                     />
                   </div>
                 )}
