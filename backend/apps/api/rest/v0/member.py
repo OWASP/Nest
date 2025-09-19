@@ -1,4 +1,4 @@
-"""User API."""
+"""Member API."""
 
 from datetime import datetime
 from http import HTTPStatus
@@ -53,31 +53,9 @@ class MemberErrorResponse(Schema):
 
 
 @router.get(
-    "/",
-    description="Retrieve a paginated list of OWASP community members.",
-    operation_id="list_members",
-    response={HTTPStatus.OK: list[MemberSchema]},
-    summary="List members",
-    tags=["Community"],
-)
-@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
-@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
-def list_members(
-    request: HttpRequest,
-    filters: MemberFilterSchema = Query(...),
-    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
-        None,
-        description="Ordering field",
-    ),
-) -> list[MemberSchema]:
-    """Get all members."""
-    return filters.filter(User.objects.order_by(ordering or "-created_at"))
-
-
-@router.get(
     "/{str:member_id}",
     description="Retrieve member details.",
-    operation_id="get_member",
+    operation_id="get",
     response={
         HTTPStatus.NOT_FOUND: MemberErrorResponse,
         HTTPStatus.OK: MemberSchema,
@@ -94,3 +72,25 @@ def get_member(
         return user
 
     return Response({"message": "Member not found"}, status=HTTPStatus.NOT_FOUND)
+
+
+@router.get(
+    "/",
+    description="Retrieve a paginated list of OWASP community members.",
+    operation_id="list",
+    response={HTTPStatus.OK: list[MemberSchema]},
+    summary="List members",
+    tags=["Community"],
+)
+@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
+@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
+def list_members(
+    request: HttpRequest,
+    filters: MemberFilterSchema = Query(...),
+    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
+        None,
+        description="Ordering field",
+    ),
+) -> list[MemberSchema]:
+    """Get members."""
+    return filters.filter(User.objects.order_by(ordering or "-created_at"))

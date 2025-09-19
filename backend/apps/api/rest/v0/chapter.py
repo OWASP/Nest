@@ -41,31 +41,9 @@ class ChapterSchema(Schema):
 
 
 @router.get(
-    "/",
-    description="Retrieve a paginated list of OWASP chapters.",
-    operation_id="list_chapters",
-    response={200: list[ChapterSchema]},
-    summary="List chapters",
-    tags=["Chapters"],
-)
-@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
-@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
-def list_chapters(
-    request: HttpRequest,
-    filters: ChapterFilterSchema = Query(...),
-    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
-        None,
-        description="Ordering field",
-    ),
-) -> list[ChapterSchema]:
-    """Get chapters."""
-    return filters.filter(Chapter.active_chapters.order_by(ordering or "-created_at"))
-
-
-@router.get(
     "/{str:chapter_id}",
     description="Retrieve chapter details.",
-    operation_id="get_chapter",
+    operation_id="get",
     response={
         HTTPStatus.NOT_FOUND: ChapterErrorResponse,
         HTTPStatus.OK: ChapterSchema,
@@ -86,3 +64,25 @@ def get_chapter(
         return chapter
 
     return Response({"message": "Chapter not found"}, status=HTTPStatus.NOT_FOUND)
+
+
+@router.get(
+    "/",
+    description="Retrieve a paginated list of OWASP chapters.",
+    operation_id="list",
+    response={200: list[ChapterSchema]},
+    summary="List chapters",
+    tags=["Chapters"],
+)
+@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
+@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
+def list_chapters(
+    request: HttpRequest,
+    filters: ChapterFilterSchema = Query(...),
+    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
+        None,
+        description="Ordering field",
+    ),
+) -> list[ChapterSchema]:
+    """Get chapters."""
+    return filters.filter(Chapter.active_chapters.order_by(ordering or "-created_at"))

@@ -56,31 +56,9 @@ class SponsorSchema(Schema):
 
 
 @router.get(
-    "/",
-    description="Retrieve a paginated list of OWASP sponsors.",
-    operation_id="list_sponsors",
-    response={HTTPStatus.OK: list[SponsorSchema]},
-    summary="List sponsors",
-    tags=["Sponsors"],
-)
-@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
-@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
-def list_sponsors(
-    request: HttpRequest,
-    filters: SponsorFilterSchema = Query(...),
-    ordering: Literal["name", "-name"] | None = Query(
-        None,
-        description="Ordering field",
-    ),
-) -> list[SponsorSchema]:
-    """Get sponsors."""
-    return filters.filter(Sponsor.objects.order_by(ordering or "name"))
-
-
-@router.get(
     "/{str:sponsor_key}",
     description="Retrieve a sponsor details.",
-    operation_id="get_sponsor",
+    operation_id="get",
     response={
         HTTPStatus.NOT_FOUND: SponsorErrorResponse,
         HTTPStatus.OK: SponsorSchema,
@@ -97,3 +75,25 @@ def get_sponsor(
         return sponsor
 
     return Response({"message": "Sponsor not found"}, status=HTTPStatus.NOT_FOUND)
+
+
+@router.get(
+    "/",
+    description="Retrieve a paginated list of OWASP sponsors.",
+    operation_id="list",
+    response={HTTPStatus.OK: list[SponsorSchema]},
+    summary="List sponsors",
+    tags=["Sponsors"],
+)
+@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
+@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
+def list_sponsors(
+    request: HttpRequest,
+    filters: SponsorFilterSchema = Query(...),
+    ordering: Literal["name", "-name"] | None = Query(
+        None,
+        description="Ordering field",
+    ),
+) -> list[SponsorSchema]:
+    """Get sponsors."""
+    return filters.filter(Sponsor.objects.order_by(ordering or "name"))

@@ -44,32 +44,9 @@ class ProjectSchema(Schema):
 
 
 @router.get(
-    "/",
-    description="Retrieve a paginated list of OWASP projects.",
-    operation_id="list_projects",
-    response={200: list[ProjectSchema]},
-    summary="List projects",
-    tags=["Projects"],
-)
-@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
-@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
-def list_projects(
-    request: HttpRequest,
-    filters: ProjectFilterSchema = Query(...),
-    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
-        None,
-        description="Ordering field",
-        example="-created_at",
-    ),
-) -> list[ProjectSchema]:
-    """Get projects."""
-    return filters.filter(Project.active_projects.order_by(ordering or "-created_at"))
-
-
-@router.get(
     "/{str:project_id}",
     description="Retrieve project details.",
-    operation_id="get_project",
+    operation_id="get",
     response={
         HTTPStatus.NOT_FOUND: ProjectErrorResponse,
         HTTPStatus.OK: ProjectSchema,
@@ -90,3 +67,26 @@ def get_project(
         return project
 
     return Response({"message": "Project not found"}, status=HTTPStatus.NOT_FOUND)
+
+
+@router.get(
+    "/",
+    description="Retrieve a paginated list of OWASP projects.",
+    operation_id="list",
+    response={200: list[ProjectSchema]},
+    summary="List projects",
+    tags=["Projects"],
+)
+@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
+@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
+def list_projects(
+    request: HttpRequest,
+    filters: ProjectFilterSchema = Query(...),
+    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
+        None,
+        description="Ordering field",
+        example="-created_at",
+    ),
+) -> list[ProjectSchema]:
+    """Get projects."""
+    return filters.filter(Project.active_projects.order_by(ordering or "-created_at"))

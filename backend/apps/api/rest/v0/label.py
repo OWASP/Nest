@@ -35,7 +35,7 @@ class LabelSchema(Schema):
 @router.get(
     "/",
     description="Retrieve a paginated list of GitHub labels.",
-    operation_id="list_labels",
+    operation_id="list",
     response={200: list[LabelSchema]},
     summary="List labels",
     tags=["Labels"],
@@ -51,7 +51,7 @@ def list_label(
         description="Ordering field",
     ),
 ) -> list[LabelSchema]:
-    """Get all labels."""
+    """Get labels."""
     labels = filters.filter(Label.objects.all())
 
     if ordering:

@@ -27,7 +27,7 @@ class RepositorySchema(Schema):
 @router.get(
     "/",
     description="Retrieve a paginated list of GitHub repositories.",
-    operation_id="list_repositories",
+    operation_id="list",
     summary="List repositories",
     tags=["Repositories"],
     response={200: list[RepositorySchema]},
@@ -41,9 +41,10 @@ def list_repository(
         description="Ordering field",
     ),
 ) -> list[RepositorySchema]:
-    """Get all repositories."""
+    """Get repositories."""
     repositories = Repository.objects.all()
 
     if ordering:
         repositories = repositories.order_by(ordering)
+
     return repositories
