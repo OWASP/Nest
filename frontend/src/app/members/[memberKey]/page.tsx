@@ -195,26 +195,27 @@ const UserDetailsPage: React.FC = () => {
         alt={user?.name || user?.login || 'User Avatar'}
       />
       <div className="w-full text-center lg:text-left">
-        <Link href={user?.url || '#'} className="text-xl font-bold text-blue-400 hover:underline">
-          @{user?.login}
-        </Link>
+        <div className="flex gap-5 text-sm text-gray-500 dark:text-gray-400">
+          <Link href={user?.url || '#'} className="text-xl font-bold text-blue-400 hover:underline">
+            @{user?.login}
+          </Link>
+          {user?.badges && user.badges.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {user.badges
+                .slice()
+                .sort((a, b) => b.weight - a.weight)
+                .map((badge) => (
+                  <Badges
+                    key={badge.id}
+                    name={badge.name}
+                    cssClass={badge.cssClass || 'fa-medal'}
+                    showTooltip={true}
+                  />
+                ))}
+            </div>
+          )}
+        </div>
         <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
-        {user?.badges && user.badges.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            <span className="text-sm text-gray-500 dark:text-gray-400">Badges:</span>
-            {user.badges
-              .slice()
-              .sort((a, b) => b.weight - a.weight)
-              .map((badge) => (
-                <Badges
-                  key={badge.id}
-                  name={badge.name}
-                  cssClass={badge.cssClass || 'fa-medal'}
-                  showTooltip={true}
-                />
-              ))}
-          </div>
-        )}
         {!isPrivateContributor && (
           <div className="hidden w-full lg:block">
             <Heatmap />
