@@ -34,7 +34,7 @@ class ReleaseSchema(Schema):
 @router.get(
     "/",
     description="Retrieve a paginated list of GitHub releases.",
-    operation_id="list",
+    operation_id="list_releases",
     summary="List releases",
     tags=["Releases"],
     response={200: list[ReleaseSchema]},
@@ -49,9 +49,8 @@ def list_release(
         description="Ordering field",
     ),
 ) -> list[ReleaseSchema]:
-    """Get releases."""
+    """Get all releases."""
     releases = filters.filter(Release.objects.all())
     if ordering:
         releases = releases.order_by(ordering)
-
     return releases

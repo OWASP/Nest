@@ -33,9 +33,30 @@ class CommitteeSchema(Schema):
 
 
 @router.get(
+    "/",
+    description="Retrieve a paginated list of OWASP committees.",
+    operation_id="list_committees",
+    response={200: list[CommitteeSchema]},
+    summary="List committees",
+    tags=["Committees"],
+)
+@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
+@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
+def list_committees(
+    request: HttpRequest,
+    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
+        None,
+        description="Ordering field",
+    ),
+) -> list[CommitteeSchema]:
+    """Get committees."""
+    return Committee.active_committees.order_by(ordering or "-created_at")
+
+
+@router.get(
     "/{str:committee_id}",
     description="Retrieve committee details.",
-    operation_id="get",
+    operation_id="get_committee",
     response={
         HTTPStatus.NOT_FOUND: CommitteeErrorResponse,
         HTTPStatus.OK: CommitteeSchema,
@@ -59,24 +80,3 @@ def get_chapter(
         return committee
 
     return Response({"message": "Committee not found"}, status=HTTPStatus.NOT_FOUND)
-
-
-@router.get(
-    "/",
-    description="Retrieve a paginated list of OWASP committees.",
-    operation_id="list",
-    response={200: list[CommitteeSchema]},
-    summary="List committees",
-    tags=["Committees"],
-)
-@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
-@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
-def list_committees(
-    request: HttpRequest,
-    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
-        None,
-        description="Ordering field",
-    ),
-) -> list[CommitteeSchema]:
-    """Get committees."""
-    return Committee.active_committees.order_by(ordering or "-created_at")
