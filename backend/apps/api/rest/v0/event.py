@@ -28,7 +28,7 @@ class EventSchema(Schema):
 @router.get(
     "/",
     description="Retrieve a paginated list of OWASP events.",
-    operation_id="list",
+    operation_id="list_events",
     summary="List events",
     tags=["Events"],
     response={200: list[EventSchema]},
@@ -42,5 +42,5 @@ def list_events(
         description="Ordering field",
     ),
 ) -> list[EventSchema]:
-    """Get events."""
+    """Get all events."""
     return Event.objects.order_by(ordering or "-start_date")

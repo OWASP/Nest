@@ -56,31 +56,9 @@ class SponsorSchema(Schema):
 
 
 @router.get(
-    "/{str:sponsor_key}",
-    description="Retrieve a sponsor details.",
-    operation_id="get",
-    response={
-        HTTPStatus.NOT_FOUND: SponsorErrorResponse,
-        HTTPStatus.OK: SponsorSchema,
-    },
-    summary="Get sponsor",
-    tags=["Sponsors"],
-)
-def get_sponsor(
-    request: HttpRequest,
-    sponsor_key: str = Path(..., example="adobe"),
-) -> SponsorSchema | SponsorErrorResponse:
-    """Get sponsor."""
-    if sponsor := Sponsor.objects.filter(key__iexact=sponsor_key).first():
-        return sponsor
-
-    return Response({"message": "Sponsor not found"}, status=HTTPStatus.NOT_FOUND)
-
-
-@router.get(
     "/",
     description="Retrieve a paginated list of OWASP sponsors.",
-    operation_id="list",
+    operation_id="list_sponsors",
     response={HTTPStatus.OK: list[SponsorSchema]},
     summary="List sponsors",
     tags=["Sponsors"],
@@ -97,3 +75,25 @@ def list_sponsors(
 ) -> list[SponsorSchema]:
     """Get sponsors."""
     return filters.filter(Sponsor.objects.order_by(ordering or "name"))
+
+
+@router.get(
+    "/{str:sponsor_key}",
+    description="Retrieve a sponsor details.",
+    operation_id="get_sponsor",
+    response={
+        HTTPStatus.NOT_FOUND: SponsorErrorResponse,
+        HTTPStatus.OK: SponsorSchema,
+    },
+    summary="Get sponsor",
+    tags=["Sponsors"],
+)
+def get_sponsor(
+    request: HttpRequest,
+    sponsor_key: str = Path(..., example="adobe"),
+) -> SponsorSchema | SponsorErrorResponse:
+    """Get sponsor."""
+    if sponsor := Sponsor.objects.filter(key__iexact=sponsor_key).first():
+        return sponsor
+
+    return Response({"message": "Sponsor not found"}, status=HTTPStatus.NOT_FOUND)

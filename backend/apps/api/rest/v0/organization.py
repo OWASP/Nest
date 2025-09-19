@@ -47,7 +47,7 @@ class OrganizationSchema(Schema):
 @router.get(
     "/",
     description="Retrieve a paginated list of GitHub organizations.",
-    operation_id="list",
+    operation_id="list_organizations",
     response={200: list[OrganizationSchema]},
     summary="List organizations",
     tags=["Community"],
@@ -73,7 +73,7 @@ def list_organization(
 @router.get(
     "/{str:organization_id}",
     description="Retrieve project details.",
-    operation_id="get",
+    operation_id="get_organization",
     response={
         HTTPStatus.NOT_FOUND: OrganizationErrorResponse,
         HTTPStatus.OK: OrganizationSchema,
