@@ -39,7 +39,7 @@ class IssueSchema(Schema):
 @router.get(
     "/",
     description="Retrieve a paginated list of GitHub issues.",
-    operation_id="list_issues",
+    operation_id="list",
     response={200: list[IssueSchema]},
     summary="List issues",
     tags=["Issues"],
@@ -54,7 +54,7 @@ def list_issues(
         description="Ordering field",
     ),
 ) -> list[IssueSchema]:
-    """Get all issues."""
+    """Get issues."""
     issues = filters.filter(Issue.objects.all())
 
     if ordering:
