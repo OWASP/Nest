@@ -52,8 +52,8 @@ def get_events_blocks(slack_user_id: str, presentation, page: int = 1) -> list[d
         markdown(
             f"*Your upcoming calendar events from {min_time.strftime('%Y-%m-%d %H:%M')}"
             f" to {max_time.strftime('%Y-%m-%d %H:%M %Z')}*"
-            f"{NL}You can set a reminder for an event with `/set-reminder --channel [channel]"
-            " --event_number [event number] --minutes_before [minutes before]"
+            f"{NL}You can set a reminder for an event with `/nestbot reminder set "
+            "--channel [channel] --event_number [event number] --minutes_before [minutes before]"
             " --message [optional message] --recurrence [recurrence]`"
         )
     ]
@@ -88,7 +88,7 @@ def get_reminders_blocks(slack_user_id: str) -> list[dict]:
         reminder__member__slack_user_id=slack_user_id,
     ).order_by("scheduled_time")
     if not reminders_schedules:
-        return [markdown("*No reminders found. You can set one with `/set-reminder`*")]
+        return [markdown("*No reminders found. You can set one with `/nestbot reminder set`*")]
     blocks = [markdown("*Your upcoming reminders:*")]
     blocks.extend(
         markdown(

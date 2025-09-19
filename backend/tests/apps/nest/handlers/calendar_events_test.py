@@ -25,12 +25,14 @@ class TestCalendarEventsHandlers:
     @patch("apps.nest.handlers.calendar_events.Event.parse_google_calendar_event")
     @patch("apps.nest.handlers.calendar_events.Event.save")
     @patch("apps.nest.handlers.calendar_events.Member.objects.get")
-    @patch("apps.nest.handlers.calendar_events.Reminder.objects.create")
+    @patch("apps.nest.handlers.calendar_events.Reminder.objects.get_or_create")
     @patch("apps.nest.handlers.calendar_events.schedule_reminder")
+    @patch("apps.nest.handlers.calendar_events.transaction.atomic")
     def test_set_reminder_success(
         self,
+        mock_transaction_atomic,
         mock_schedule_reminder,
-        mock_reminder_create,
+        mock_reminder_get_or_create,
         mock_member_get,
         mock_event_save,
         mock_parse_event,
@@ -39,6 +41,8 @@ class TestCalendarEventsHandlers:
         mock_google_client,
     ):
         """Test setting a reminder successfully."""
+        mock_transaction_atomic.return_value.__enter__.return_value = None
+        mock_transaction_atomic.return_value.__exit__.return_value = None
         # Mock inputs
         channel = "C123456"
         event_number = "1"
@@ -72,7 +76,7 @@ class TestCalendarEventsHandlers:
             message=message,
             channel_id=channel,
         )
-        mock_reminder_create.return_value = mock_reminder
+        mock_reminder_get_or_create.return_value = (mock_reminder, False)
         mock_schedule_reminder.return_value = ReminderSchedule(
             reminder=mock_reminder,
             scheduled_time=mock_event.start_date - timezone.timedelta(minutes=minutes_before),
