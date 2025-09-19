@@ -90,7 +90,7 @@ class TestUserNode:
         (
             mock_badges_queryset.filter.return_value.values.return_value.distinct.return_value.count.return_value
         ) = 3
-        mock_user.badges = mock_badges_queryset
+        mock_user.user_badges = mock_badges_queryset
 
         result = UserNode.badge_count(mock_user)
         assert result == 3
@@ -105,7 +105,7 @@ class TestUserNode:
         (
             mock_badges_queryset.filter.return_value.select_related.return_value.order_by.return_value
         ) = []
-        mock_user.badges = mock_badges_queryset
+        mock_user.user_badges = mock_badges_queryset
 
         result = UserNode.badges(mock_user)
         assert result == []
@@ -121,7 +121,7 @@ class TestUserNode:
         (
             mock_badges_queryset.filter.return_value.select_related.return_value.order_by.return_value
         ) = [mock_user_badge]
-        mock_user.badges = mock_badges_queryset
+        mock_user.user_badges = mock_badges_queryset
 
         result = UserNode.badges(mock_user)
         assert result == [mock_badge]
@@ -170,7 +170,7 @@ class TestUserNode:
             mock_user_badge_low,  # weight 10
         ]
         mock_user = Mock()
-        mock_user.badges = mock_badges_queryset
+        mock_user.user_badges = mock_badges_queryset
 
         result = UserNode.badges(mock_user)
 
@@ -197,7 +197,7 @@ class TestUserNode:
         (
             mock_badges_queryset.filter.return_value.select_related.return_value.order_by.return_value
         ) = []
-        mock_user.badges = mock_badges_queryset
+        mock_user.user_badges = mock_badges_queryset
 
         UserNode.badges(mock_user)
 
