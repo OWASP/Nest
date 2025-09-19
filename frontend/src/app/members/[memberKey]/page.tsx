@@ -195,7 +195,7 @@ const UserDetailsPage: React.FC = () => {
         alt={user?.name || user?.login || 'User Avatar'}
       />
       <div className="w-full text-center lg:text-left">
-        <div className="flex gap-5 text-sm text-gray-500 dark:text-gray-400 text-center lg:text-left">
+        <div className="flex gap-5 text-center text-sm text-gray-500 lg:text-left dark:text-gray-400">
           <Link href={user?.url || '#'} className="text-xl font-bold text-blue-400 hover:underline">
             @{user?.login}
           </Link>
@@ -215,7 +215,7 @@ const UserDetailsPage: React.FC = () => {
             </div>
           )}
         </div>
-        <p className="text-gray-600 dark:text-gray-400 ">{formattedBio}</p>
+        <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
         {!isPrivateContributor && (
           <div className="hidden w-full lg:block">
             <Heatmap />
