@@ -104,6 +104,24 @@ class TestRepositoryBasedEntityModel:
                     "Bob": "bob@example.com",
                 },
             ),
+git             (
+                """- [Alice](alice@example.com)
+                    - [Bob](bob@example.com)""",
+                {
+                    "Alice": "alice@example.com",
+                    "Bob": "bob@example.com",
+                },
+            ),
+            (
+                """- [Alice](mailto:alice@example.com)
+                    - [Bob](bob@example.com)
+                    - [Charlie](charlie@example.com)""",
+                {
+                    "Alice": "alice@example.com",
+                    "Bob": "bob@example.com",
+                    "Charlie": "charlie@example.com",
+                },
+            ),
             (
                 '- <a href="mailto:exmaple@example.com">Leader1</a>',
                 {},
@@ -119,6 +137,16 @@ class TestRepositoryBasedEntityModel:
                 {"Eve": "eve@example.com"},
             ),
             (
+                """## Chapter Leaders
+                    Here are the leaders for this chapter:
+
+                    * [Eve](eve@example.com)
+                      - Frank
+                    Just some random text here.
+                    1. Not a leader list item""",
+                {"Eve": "eve@example.com"},
+            ),
+            (
                 "",
                 {},
             ),
@@ -128,6 +156,12 @@ class TestRepositoryBasedEntityModel:
             ),
             (
                 "* [  Spaced Leader  ](mailto:  spaced@owasp.org  )",
+                {
+                    "Spaced Leader": "spaced@owasp.org",
+                },
+            ),
+            (
+                "* [  Spaced Leader  ](  spaced@owasp.org  )",
                 {
                     "Spaced Leader": "spaced@owasp.org",
                 },
