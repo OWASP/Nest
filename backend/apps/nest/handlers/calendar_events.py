@@ -2,6 +2,7 @@
 
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.utils import timezone
 
 from apps.nest.clients.google_calendar import GoogleCalendarClient
@@ -69,18 +70,19 @@ def set_reminder(
         message = "Invalid recurrence value."
         raise ValidationError(message)
 
-    # Saving event to the database after validation
-    event.save()
+    with transaction.atomic():
+        # Saving event to the database after validation
+        event.save()
 
-    member = Member.objects.get(slack_user_id=user_id)
-    reminder = Reminder.objects.create(
-        channel_id=channel,
-        event=event,
-        member=member,
-        message=f"{event.name} - {message}" if message else event.name,
-    )
-    return schedule_reminder(
-        reminder=reminder,
-        scheduled_time=reminder_time,
-        recurrence=recurrence or ReminderSchedule.Recurrence.ONCE,
-    )
+        member = Member.objects.get(slack_user_id=user_id)
+        reminder, _ = Reminder.objects.get_or_create(
+            channel_id=channel,
+            event=event,
+            member=member,
+            defaults={"message": f"{event.name} - {message}" if message else event.name},
+        )
+        return schedule_reminder(
+            reminder=reminder,
+            scheduled_time=reminder_time,
+            recurrence=recurrence or ReminderSchedule.Recurrence.ONCE,
+        )

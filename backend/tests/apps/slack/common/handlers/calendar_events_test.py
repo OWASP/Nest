@@ -170,7 +170,7 @@ class TestCalendarEvents:
         blocks = get_reminders_blocks("test_slack_user_id")
         assert len(blocks) == 1
         assert (
-            "*No reminders found. You can set one with `/set-reminder`*"
+            "*No reminders found. You can set one with `/nestbot reminder set`*"
             in blocks[0]["text"]["text"]
         )
         mock_filter.assert_called_once_with(reminder__member__slack_user_id="test_slack_user_id")
