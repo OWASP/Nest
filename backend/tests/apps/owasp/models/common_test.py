@@ -104,7 +104,7 @@ class TestRepositoryBasedEntityModel:
                     "Bob": "bob@example.com",
                 },
             ),
-git             (
+            (
                 """- [Alice](alice@example.com)
                     - [Bob](bob@example.com)""",
                 {
