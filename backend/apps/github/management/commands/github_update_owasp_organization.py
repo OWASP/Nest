@@ -1,10 +1,8 @@
 """A command to update OWASP entities from GitHub data."""
 
 import logging
-import time
 
 from django.core.management.base import BaseCommand
-from github.GithubException import GithubException, UnknownObjectException
 
 from apps.core.utils import index
 from apps.github.auth import get_github_client
@@ -131,17 +129,3 @@ class Command(BaseCommand):
             for project in Project.objects.all():
                 if project.owasp_repository:
                     project.repositories.add(project.owasp_repository)
-
-    def _validate_github_repo(self, gh, entity) -> bool:
-        """Validate if GitHub repository exists for an entity."""
-        try:
-            gh.get_repo(f"{OWASP_ORGANIZATION_NAME}/{entity.key}")
-        except UnknownObjectException:
-            entity.deactivate()
-            return False
-        except GithubException as e:
-            logger.warning("GitHub API error for %s: %s", entity.key, e)
-            time.sleep(1)
-            return False
-        else:
-            return True

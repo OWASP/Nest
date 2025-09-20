@@ -21,34 +21,6 @@ class TestRepositoryBasedEntityModel:
         self.model.id = 1
 
     @pytest.mark.parametrize(
-        ("content", "expected_audience"),
-        [
-            (
-                """### Top Ten Card Game Information
-* [Incubator Project](#)
-* [Type of Project](#)
-* [Version 0.0.0](#)
-* [Builder](#)
-* [Breaker](#)""",
-                ["breaker", "builder"],
-            ),
-            ("This test contains no audience information.", []),
-            ("", []),
-            (None, []),
-        ],
-    )
-    def test_get_audience(self, content, expected_audience):
-        model = EntityModel()
-        repository = Repository()
-        repository.name = "www-project-example"
-        model.owasp_repository = repository
-
-        with patch("apps.owasp.models.common.get_repository_file_content", return_value=content):
-            audience = model.get_audience()
-
-        assert audience == expected_audience
-
-    @pytest.mark.parametrize(
         ("content", "expected_leaders"),
         [
             ("- [Leader1](https://example.com)", ["Leader1"]),

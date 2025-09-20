@@ -10,6 +10,34 @@ from apps.owasp.models.project import Project
 
 class TestProjectModel:
     @pytest.mark.parametrize(
+        ("content", "expected_audience"),
+        [
+            (
+                """### Top Ten Card Game Information
+* [Incubator Project](#)
+* [Type of Project](#)
+* [Version 0.0.0](#)
+* [Builder](#)
+* [Breaker](#)""",
+                ["breaker", "builder"],
+            ),
+            ("This test contains no audience information.", []),
+            ("", []),
+            (None, []),
+        ],
+    )
+    def test_get_audience(self, content, expected_audience):
+        project = Project()
+        repository = Repository()
+        repository.name = "www-project-example"
+        project.owasp_repository = repository
+
+        with patch("apps.owasp.models.project.get_repository_file_content", return_value=content):
+            audience = project.get_audience()
+
+        assert audience == expected_audience
+
+    @pytest.mark.parametrize(
         ("url", "expected_url"),
         [
             ("https://github.com/owasp/repository", "https://github.com/owasp/repository"),
@@ -95,8 +123,13 @@ class TestProjectModel:
         gh_repository_mock.name = "new_repo"
         repository_mock = Repository()
 
-        with patch.object(Project, "save", return_value=None) as mock_save:
-            project = Project.update_data(gh_repository_mock, repository_mock, save=True)
+        with (
+            patch.object(Project, "save", return_value=None) as mock_save,
+            patch("apps.github.auth.Github") as mock_github,
+        ):
+            project = Project.update_data(
+                gh_repository_mock, repository_mock, mock_github, save=True
+            )
             mock_save.assert_called_once()
             assert project.key == "new_repo"
             assert project.owasp_repository == repository_mock
@@ -112,11 +145,14 @@ class TestProjectModel:
         project = Project()
         project.owasp_repository = owasp_repository
 
-        with patch(
-            "apps.owasp.models.project.RepositoryBasedEntityModel.from_github"
-        ) as mock_from_github:
+        with (
+            patch(
+                "apps.owasp.models.project.RepositoryBasedEntityModel.from_github"
+            ) as mock_from_github,
+            patch("apps.github.auth.Github") as mock_github,
+        ):
             mock_from_github.return_value = {"level": 3, "type": "tool"}
-            project.from_github(owasp_repository)
+            project.from_github(owasp_repository, mock_github)
 
         mock_from_github.assert_called_once_with(
             project,
@@ -125,6 +161,7 @@ class TestProjectModel:
                 "name": "title",
                 "tags": "tags",
             },
+            mock_github,
         )
 
         assert project.created_at == owasp_repository.created_at
