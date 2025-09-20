@@ -1,4 +1,4 @@
-"""Syncs comments for issues relevant to active mentorship modules."""
+"""Sync comments for issues relevant to published mentorship modules."""
 
 import logging
 import re
@@ -10,7 +10,7 @@ from apps.common.utils import truncate
 from apps.github.auth import get_github_client
 from apps.github.common import sync_issue_comments
 from apps.github.models.issue import Issue
-from apps.mentorship.models import IssueUserInterest, Module, Program
+from apps.mentorship.models import IssueUserInterest, Module
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -26,25 +26,21 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options) -> None:
         """Handle the command execution."""
-        try:
-            self.process_mentorship_modules()
-        except Exception as e:
-            error_msg = f"Failed to process mentorship modules: {e}"
-            logger.exception(error_msg)
-            self.stderr.write(self.style.ERROR(error_msg))
-            raise
+        self.process_mentorship_modules()
 
     def process_mentorship_modules(self) -> None:
         """Process all active mentorship modules."""
-        active_modules = Module.objects.filter(program__status=Program.ProgramStatus.PUBLISHED)
+        published_modules = Module.published_modules.all()
 
-        if not active_modules.exists():
-            self.stdout.write(self.style.WARNING("No active mentorship modules found. Exiting."))
+        if not published_modules.exists():
+            self.stdout.write(
+                self.style.WARNING("No published mentorship modules found. Exiting.")
+            )
             return
 
         self.stdout.write(self.style.SUCCESS("Starting mentorship issue processing job..."))
 
-        for module in active_modules:
+        for module in published_modules:
             self.stdout.write(f"\nProcessing module: {module.name}...")
             self.process_module(module)
 
@@ -79,7 +75,7 @@ class Command(BaseCommand):
 
         for issue in relevant_issues:
             self.stdout.write(
-                f"Syncing comments for issue #{issue.number} '{truncate(issue.title, 20)}...'"
+                f"Syncing comments for issue #{issue.number} '{truncate(issue.title, 20)}'"
             )
             sync_issue_comments(gh, issue)
             self.process_issue_interests(issue, module)

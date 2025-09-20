@@ -12,7 +12,7 @@ class Comment(BulkSaveModel, TimestampedModel):
     """Represents a comment on a GitHub Issue."""
 
     class Meta:
-        db_table = "github_comment"
+        db_table = "github_comments"
         verbose_name = "Comment"
         verbose_name_plural = "Comments"
         ordering = ("-nest_created_at",)
