@@ -11,7 +11,6 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
-import ActionButton from 'components/ActionButton'
 import { TextInfoItem } from 'components/InfoItem'
 import SingleModuleCard from 'components/SingleModuleCard'
 import { TruncatedText } from 'components/TruncatedText'
@@ -76,9 +75,13 @@ const ModuleItem = ({ details }: { details: Module }) => {
 
   return (
     <div className="flex h-46 w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
-      <ActionButton onClick={handleClick}>
+      <button
+        type="button"
+        onClick={handleClick}
+        className="text-start font-semibold text-blue-400 hover:underline"
+      >
         <TruncatedText text={details?.name} />
-      </ActionButton>
+      </button>
       <TextInfoItem icon={faLevelUpAlt} label="Level" value={upperFirst(details.experienceLevel)} />
       <TextInfoItem icon={faCalendarAlt} label="Start" value={formatDate(details.startedAt)} />
       <TextInfoItem
