@@ -57,11 +57,13 @@ demojize
 dismissable
 dsn
 env
+excinfo
 facebookexternalhit
 gamesec
 geocoders
 geoloc
 geopy
+googleapiclient
 graphiql
 gunicorn
 heroui
@@ -106,8 +108,11 @@ pygoat
 pymdownx
 pypoetry
 pyyaml
+relativedelta
 repositorycontributor
 requirepass
+rqscheduler
+rqworker
 rsc
 saft
 sakanashi

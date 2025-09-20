@@ -95,6 +95,26 @@ def get_header() -> list[dict[str, Any]]:
                     "value": "sign_in_to_google",
                     "action_id": "sign_in_to_google_action",
                 },
+                {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Calendar Events",
+                        "emoji": True,
+                    },
+                    "value": "view_calendar_events",
+                    "action_id": "view_calendar_events_action",
+                },
+                {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Reminders",
+                        "emoji": True,
+                    },
+                    "value": "view_reminders",
+                    "action_id": "view_reminders_action",
+                },
             ],
         },
     ]
