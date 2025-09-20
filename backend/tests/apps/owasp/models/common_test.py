@@ -411,6 +411,49 @@ Release Notes: https://github.com/OWASP/www-project-machine-learning-security-to
 
         assert len(leaders_to_save) == 2  # Updated existing + new leader
 
+    @patch("apps.owasp.models.common.normalize_url")
+    def test__process_urls(self, mock_normalize_url):
+        """Test _process_urls method."""
+        mock_normalize_url.side_effect = lambda url, **_: url
+
+        with (
+            patch.object(
+                self.model,
+                "get_urls",
+                return_value=[
+                    "https://example.com/repo1",
+                    "https://example.com/repo2",
+                    "https://invalid.com/repo3",
+                ],
+            ),
+            patch.object(self.model, "_verify_url") as mock_verify_url,
+        ):
+            mock_verify_url.side_effect = lambda url: None if "invalid" in url else url
+
+            self.model._process_urls(Mock())
+
+            assert self.model.invalid_urls == ["https://invalid.com/repo3"]
+            assert self.model.related_urls == [
+                "https://example.com/repo1",
+                "https://example.com/repo2",
+            ]
+
+    @patch("apps.owasp.models.common.normalize_url")
+    def test__process_urls_filtered_url(self, mock_normalize_url, caplog):
+        """Test _process_urls with URL that gets filtered out."""
+        mock_normalize_url.side_effect = lambda url, **_: url
+
+        with (
+            patch.object(self.model, "get_urls", return_value=["https://example.com/test"]),
+            patch.object(self.model, "get_related_url", return_value=None),
+            patch.object(self.model, "_verify_url", return_value="https://example.com/test"),
+            caplog.at_level(logging.INFO),
+        ):
+            self.model._process_urls(Mock())
+
+            assert self.model.invalid_urls == []
+            assert self.model.related_urls == []
+
     @pytest.mark.parametrize(
         ("url", "expected"),
         [
@@ -420,17 +463,17 @@ Release Notes: https://github.com/OWASP/www-project-machine-learning-security-to
         ],
     )
     @patch("apps.owasp.models.common.requests.get")
-    def test_verify_url_allowed_domains_bypass_request(self, mock_get, url, expected):
+    def test__verify_url_allowed_domains_bypass_request(self, mock_get, url, expected):
         """Test that specifically allowed domains bypass network requests."""
         assert self.model._verify_url(url) == expected
         mock_get.assert_not_called()
 
-    def test_verify_url_invalid_url(self):
+    def test__verify_url_invalid_url(self):
         """Test that an invalidly formatted URL returns None."""
         assert self.model._verify_url("invalid-url") is None
 
     @patch("apps.owasp.models.common.requests.get")
-    def test_verify_url_logs_warning(self, mock_get, caplog):
+    def test__verify_url_logs_warning(self, mock_get, caplog):
         """Test that a warning is logged for an unverified URL."""
         response = Mock()
         response.status_code = HTTPStatus.FORBIDDEN  # 403
@@ -443,7 +486,7 @@ Release Notes: https://github.com/OWASP/www-project-machine-learning-security-to
         assert "Couldn't verify URL" in caplog.text
 
     @patch("apps.owasp.models.common.requests.get")
-    def test_verify_url_redirect_chain(self, mock_get):
+    def test__verify_url_redirect_chain(self, mock_get):
         """Test URL verification with a redirect chain."""
         redirect_response = Mock()
         redirect_response.status_code = HTTPStatus.MOVED_PERMANENTLY
@@ -467,7 +510,7 @@ Release Notes: https://github.com/OWASP/www-project-machine-learning-security-to
         ],
     )
     @patch("apps.owasp.models.common.requests.get")
-    def test_verify_url_redirect_status_codes(self, mock_get, status_code):
+    def test__verify_url_redirect_status_codes(self, mock_get, status_code):
         """Test URL verification with different redirect status codes."""
         redirect_response = Mock()
         redirect_response.status_code = status_code
@@ -480,7 +523,7 @@ Release Notes: https://github.com/OWASP/www-project-machine-learning-security-to
         assert self.model._verify_url("https://old-url.org") == "https://new-url.org"
 
     @patch("apps.owasp.models.common.requests.get")
-    def test_verify_url_unsupported_status_code(self, mock_get):
+    def test__verify_url_unsupported_status_code(self, mock_get):
         """Test that a non-200, non-redirect status code returns None."""
         response = Mock()
         response.status_code = HTTPStatus.IM_A_TEAPOT  # 418
