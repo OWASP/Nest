@@ -5,11 +5,11 @@ import { addToast } from '@heroui/toast'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
-import { ErrorDisplay } from 'app/global-error'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { CREATE_MODULE } from 'server/mutations/moduleMutations'
-import { GET_PROGRAM_ADMIN_DETAILS } from 'server/queries/programsQueries'
+import { GET_PROGRAM_ADMIN_DETAILS, GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
 import type { ExtendedSession } from 'types/auth'
-import { EXPERIENCE_LEVELS } from 'types/mentorship'
+import { EXPERIENCE_LEVELS, Module } from 'types/mentorship'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
@@ -94,7 +94,32 @@ const CreateModulePage = () => {
         mentorLogins: parseCommaSeparated(formData.mentorLogins),
       }
 
-      await createModule({ variables: { input } })
+      await createModule({
+        variables: { input },
+        update: (cache, { data: mutationData }) => {
+          const created = mutationData?.createModule
+          if (!created) return
+          try {
+            const existing = cache.readQuery({
+              query: GET_PROGRAM_AND_MODULES,
+              variables: { programKey },
+            }) as { getProgramModules: Module[] }
+            if (existing?.getProgramModules) {
+              cache.writeQuery({
+                query: GET_PROGRAM_AND_MODULES,
+                variables: { programKey },
+                data: {
+                  ...existing,
+                  getProgramModules: [created, ...existing.getProgramModules],
+                },
+              })
+            }
+          } catch (_err) {
+            handleAppError(_err)
+            return
+          }
+        },
+      })
 
       addToast({
         title: 'Module Created',
@@ -104,7 +129,7 @@ const CreateModulePage = () => {
         timeout: 3000,
       })
 
-      router.push(`/my/mentorship/programs/${programKey}?refresh=true`)
+      router.push(`/my/mentorship/programs/${programKey}`)
     } catch (err) {
       addToast({
         title: 'Creation Failed',

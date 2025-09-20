@@ -117,7 +117,7 @@ const EditModulePage = () => {
         variant: 'solid',
         timeout: 3000,
       })
-      router.push(`/my/mentorship/programs/${programKey}?refresh=true`)
+      router.push(`/my/mentorship/programs/${programKey}`)
     } catch (err) {
       handleAppError(err)
     }
