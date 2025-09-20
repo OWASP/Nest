@@ -191,7 +191,7 @@ describe('ProgramCard', () => {
       const longDescProgram = { ...baseMockProgram, description: longDescription }
 
       render(<ProgramCard program={longDescProgram} onView={mockOnView} accessLevel="user" />)
-      
+
       expect(screen.getByText(longDescription)).toBeInTheDocument()
       expect(screen.getByText(longDescription)).toBeInTheDocument()
       const descriptionElement = screen.getByText(longDescription)
@@ -205,7 +205,7 @@ describe('ProgramCard', () => {
       render(<ProgramCard program={shortDescProgram} onView={mockOnView} accessLevel="user" />)
 
       expect(screen.getByText('Short description')).toBeInTheDocument()
-      
+
       const descriptionElement = screen.getByText('Short description')
       expect(descriptionElement).toHaveClass('line-clamp-6')
     })
