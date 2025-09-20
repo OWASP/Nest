@@ -68,20 +68,21 @@ line-length = 99
 lint.select = [ "ALL" ]
 lint.extend-select = [ "I" ]
 lint.ignore = [
-  "ANN",     # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann/
-  "ARG002",  # https://docs.astral.sh/ruff/rules/unused-method-argument/
-  "C901",    # https://docs.astral.sh/ruff/rules/complex-structure/
-  "COM812",  # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
-  "D407",    # https://docs.astral.sh/ruff/rules/missing-dashed-underline-after-section/
-  "DJ012",   # https://docs.astral.sh/ruff/rules/django-unordered-body-content-in-model/
-  "FIX002",  # https://docs.astral.sh/ruff/rules/line-contains-todo/
-  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+  "ANN",    # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann/
+  "ARG002", # https://docs.astral.sh/ruff/rules/unused-method-argument/
+  "C901",   # https://docs.astral.sh/ruff/rules/complex-structure/
+  "COM812", # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
+  "D407",   # https://docs.astral.sh/ruff/rules/missing-dashed-underline-after-section/
+  "DJ012",  # https://docs.astral.sh/ruff/rules/django-unordered-body-content-in-model/
+  "FIX002", # https://docs.astral.sh/ruff/rules/line-contains-todo/
+
   "PLR0912", # https://docs.astral.sh/ruff/rules/too-many-branches/
   "PLR0913", # https://docs.astral.sh/ruff/rules/too-many-arguments/
   "PLR0915", # https://docs.astral.sh/ruff/rules/too-many-statements/
   "RUF012",  # https://docs.astral.sh/ruff/rules/mutable-class-default/
   "TD003",   # https://docs.astral.sh/ruff/rules/missing-todo-link/
 ]
+
 lint.per-file-ignores."**/__init__.py" = [
   "D104", # https://docs.astral.sh/ruff/rules/undocumented-public-package/
   "F401", # https://docs.astral.sh/ruff/rules/unused-import/
@@ -118,6 +119,92 @@ lint.per-file-ignores."**/tests/**/*.py" = [
   "RUF012",  # https://docs.astral.sh/ruff/rules/mutable-class-default/
   "S101",    # https://docs.astral.sh/ruff/rules/assert/
   "SLF001",  # https://docs.astral.sh/ruff/rules/private-member-access/
+]
+
+# specific files that need PLC0415 ignored
+lint.per-file-ignores."apps/ai/common/utils.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."apps/github/models/mixins/organization.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."apps/github/models/mixins/user.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."apps/mentorship/apps.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."apps/slack/apps.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."apps/slack/commands/events.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."apps/slack/commands/leaders.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."apps/slack/common/handlers/chapters.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."apps/slack/common/handlers/committees.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."apps/slack/common/handlers/contribute.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."apps/slack/common/handlers/projects.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."apps/slack/common/handlers/users.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."apps/slack/events/member_joined_channel/contribute.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."apps/slack/utils.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."tests/apps/ai/management/commands/ai_update_chapter_chunks_test.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."tests/apps/ai/management/commands/ai_update_chapter_context_test.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."tests/apps/ai/management/commands/ai_update_committee_chunks_test.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."tests/apps/ai/management/commands/ai_update_committee_context_test.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."tests/apps/ai/management/commands/ai_update_event_chunks_test.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."tests/apps/ai/management/commands/ai_update_event_context_test.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."tests/apps/ai/management/commands/ai_update_project_chunks_test.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."tests/apps/ai/management/commands/ai_update_project_context_test.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."tests/apps/ai/management/commands/ai_update_slack_message_chunks_test.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."tests/apps/ai/management/commands/ai_update_slack_message_context_test.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."tests/apps/ai/models/chunk_test.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."tests/apps/ai/models/context_test.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."tests/apps/github/management/commands/github_get_installation_id_test.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
+lint.per-file-ignores."tests/apps/slack/views_test.py" = [
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
 ]
 
 [tool.pytest.ini_options]
