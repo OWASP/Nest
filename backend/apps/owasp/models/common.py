@@ -5,8 +5,10 @@ from __future__ import annotations
 import itertools
 import logging
 import re
+from http import HTTPStatus
 from urllib.parse import urlparse
 
+import requests
 import yaml
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -19,9 +21,8 @@ from apps.github.constants import (
     GITHUB_USER_RE,
 )
 from apps.github.models.user import User
-from apps.github.utils import get_repository_file_content
+from apps.github.utils import get_repository_file_content, normalize_url
 from apps.owasp.models.entity_member import EntityMember
-from apps.owasp.models.enums.project import AudienceChoices
 
 logger = logging.getLogger(__name__)
 
@@ -149,7 +150,70 @@ class RepositoryBasedEntityModel(models.Model):
         self.is_active = False
         self.save(update_fields=("is_active",))
 
-    def from_github(self, field_mapping):
+    def _verify_url(self, url):
+        """Verify URL."""
+        location = urlparse(url).netloc.lower()
+        if not location:
+            return None
+
+        if location.endswith(("linkedin.com", "slack.com", "youtube.com")):
+            return url
+
+        try:
+            # Check for redirects.
+            response = requests.get(url, allow_redirects=False, timeout=(5, 10))
+        except requests.exceptions.RequestException:
+            logger.exception("Request failed", extra={"url": url})
+            return None
+
+        if response.status_code == HTTPStatus.OK:
+            return url
+
+        if response.status_code in {
+            HTTPStatus.MOVED_PERMANENTLY,  # 301
+            HTTPStatus.FOUND,  # 302
+            HTTPStatus.SEE_OTHER,  # 303
+            HTTPStatus.TEMPORARY_REDIRECT,  # 307
+            HTTPStatus.PERMANENT_REDIRECT,  # 308
+        }:
+            return self._verify_url(response.headers["Location"])
+
+        logger.warning("Couldn't verify URL %s", url)
+
+        return None
+
+    def _process_urls(self, _gh) -> None:
+        processed_urls = sorted(
+            {
+                repository_url
+                for url in set(self.get_urls())
+                if (
+                    related_url := self.get_related_url(
+                        url, exclude_domains=("github.com", "owasp.org")
+                    )
+                )
+                and (repository_url := normalize_url(related_url))
+                and repository_url not in {self.github_url, self.owasp_url}
+            }
+        )
+
+        invalid_urls = set()
+        related_urls = set()
+        for processed_url in processed_urls:
+            verified_url = self._verify_url(processed_url)
+            if not verified_url:
+                invalid_urls.add(processed_url)
+                continue
+
+            if verified_url := self.get_related_url(normalize_url(verified_url, check_path=True)):
+                related_urls.add(verified_url)
+            else:
+                logger.info("Skipped related URL %s", verified_url)
+
+        self.invalid_urls = sorted(invalid_urls)
+        self.related_urls = sorted(related_urls)
+
+    def from_github(self, field_mapping, gh):
         """Update instance based on GitHub repository data."""
         entity_metadata = self.get_metadata()
         for model_field, gh_field in field_mapping.items():
@@ -159,7 +223,10 @@ class RepositoryBasedEntityModel(models.Model):
 
         self.leaders_raw = self.get_leaders()
         self.is_leaders_policy_compliant = len(self.leaders_raw) > 1
+        if leaders_emails := self.get_leaders_emails():
+            self.sync_leaders(leaders_emails)
 
+        self._process_urls(gh)
         self.tags = self.parse_tags(entity_metadata.get("tags", None) or [])
 
         return entity_metadata
@@ -173,21 +240,6 @@ class RepositoryBasedEntityModel(models.Model):
         open_ai.set_input(get_repository_file_content(self.index_md_url))
         open_ai.set_max_tokens(max_tokens).set_prompt(prompt)
         self.summary = open_ai.complete() or ""
-
-    def get_audience(self):
-        """Get audience from info.md file on GitHub."""
-        content = get_repository_file_content(self.info_md_url)
-        if not content:
-            return []
-
-        found_keywords = set()
-
-        for line in content.split("\n"):
-            for lower_kw, original_kw in AudienceChoices.choices:
-                if original_kw in line:
-                    found_keywords.add(lower_kw)
-
-        return sorted(found_keywords)
 
     def get_leaders(self):
         """Get leaders from leaders.md file on GitHub."""
@@ -325,6 +377,10 @@ class RepositoryBasedEntityModel(models.Model):
             and values are their corresponding email addresses (or None if no email is provided).
 
         """
+        # Skip sync for unsaved entities
+        if self.id is None:
+            return
+
         content_type = ContentType.objects.get_for_model(self.__class__)
 
         leaders = []
