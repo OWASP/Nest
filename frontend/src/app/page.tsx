@@ -168,7 +168,7 @@ export default function Home() {
               <div key={`card-${event.name}`} className="overflow-hidden">
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <button
-                    className="mb-2 w-full text-left text-lg font-semibold text-blue-400 hover:underline"
+                    className="mb-2 w-full cursor-pointer text-left text-lg font-semibold text-blue-400 hover:underline"
                     onClick={() => setModalOpenIndex(index)}
                   >
                     <TruncatedText text={event.name} />

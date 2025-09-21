@@ -183,7 +183,6 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
                 "user__avatar_url",
                 "user__login",
                 "user__name",
-                "id",
             )
             .annotate(
                 total_contributions=Sum("contributions_count"),
@@ -195,7 +194,6 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
             {
                 "avatar_url": tc["user__avatar_url"],
                 "contributions_count": tc["total_contributions"],
-                "id": tc["id"],
                 "login": tc["user__login"],
                 "name": tc["user__name"],
             }

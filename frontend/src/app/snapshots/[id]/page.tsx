@@ -18,6 +18,7 @@ import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import Card from 'components/Card'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import LoadingSpinner from 'components/LoadingSpinner'
+import Release from 'components/Release'
 
 const SnapshotDetailsPage: React.FC = () => {
   const { id: snapshotKey } = useParams<{ id: string }>()
@@ -164,33 +165,17 @@ const SnapshotDetailsPage: React.FC = () => {
 
       {snapshot.newReleases && snapshot.newReleases.length > 0 && (
         <div className="mb-8">
-          <h2 className="mb-4 text-2xl font-semibold">New Releases</h2>
+          <h2 className="mb-4 text-2xl font-semibold text-gray-700 dark:text-gray-200">
+            New Releases
+          </h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {snapshot.newReleases.map((release, index) => (
-              <div
+              <Release
                 key={`${release.tagName}-${index}`}
-                className="overflow-hidden rounded-lg border-1 border-gray-200 bg-white shadow-xs transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
-              >
-                <div className="p-4">
-                  <div className="mb-3 flex items-center justify-between">
-                    <div className="truncate text-lg font-medium text-gray-700 dark:text-gray-200">
-                      {release.name}
-                    </div>
-                  </div>
-                  <div className="mb-3 flex items-center gap-2">
-                    <span className="truncate text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {release.projectName}
-                    </span>
-                    <span className="shrink-0 px-2.5 py-0.5 text-xs font-medium text-gray-500 dark:bg-transparent dark:text-blue-200">
-                      {release.tagName}
-                    </span>
-                  </div>
-                  <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-                    <FontAwesomeIcon icon={faCalendar} className="mr-1.5 h-3 w-3" />
-                    Released: {formatDate(release.publishedAt as string)}
-                  </div>
-                </div>
-              </div>
+                release={release}
+                showAvatar={true}
+                index={index}
+              />
             ))}
           </div>
         </div>
