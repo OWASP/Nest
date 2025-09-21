@@ -4,10 +4,8 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
-import {
-  GetChapterDataDocument,
-  GetChapterDataQuery,
-} from 'types/__generated__/chapterQueries.generated'
+import { GetChapterDataDocument } from 'types/__generated__/chapterQueries.generated'
+import { Chapter } from 'types/chapter'
 import type { Contributor } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
@@ -15,9 +13,7 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams<{ chapterKey: string }>()
-  const [chapter, setChapter] = useState<GetChapterDataQuery['chapter']>(
-    {} as GetChapterDataQuery['chapter']
-  )
+  const [chapter, setChapter] = useState<Chapter>({} as Chapter)
   const [topContributors, setTopContributors] = useState<Contributor[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
@@ -67,7 +63,7 @@ export default function ChapterDetailsPage() {
     <DetailsCard
       details={details}
       entityKey={chapter.key}
-      geolocationData={[chapter]} // TODO: change the type of component
+      geolocationData={[chapter]}
       isActive={chapter.isActive}
       socialLinks={chapter.relatedUrls}
       summary={chapter.summary}

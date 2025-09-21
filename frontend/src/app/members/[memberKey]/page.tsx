@@ -12,7 +12,13 @@ import { useParams } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import React, { useState, useEffect, useRef } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
-import { GetUserDataDocument, GetUserDataQuery } from 'types/__generated__/userQueries.generated'
+import { GetUserDataDocument } from 'types/__generated__/userQueries.generated'
+import type { Issue } from 'types/issue'
+import type { Milestone } from 'types/milestone'
+import type { RepositoryCardProps } from 'types/project'
+import type { PullRequest } from 'types/pullRequest'
+import type { Release } from 'types/release'
+import type { UserDetails } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
 import DetailsCard from 'components/CardDetailsPage'
@@ -20,14 +26,12 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams<{ memberKey: string }>()
-  const [user, setUser] = useState<GetUserDataQuery['user'] | null>()
-  const [issues, setIssues] = useState<GetUserDataQuery['recentIssues']>([])
-  const [topRepositories, setTopRepositories] = useState<
-    GetUserDataQuery['topContributedRepositories']
-  >([])
-  const [milestones, setMilestones] = useState<GetUserDataQuery['recentMilestones']>([])
-  const [pullRequests, setPullRequests] = useState<GetUserDataQuery['recentPullRequests']>([])
-  const [releases, setReleases] = useState<GetUserDataQuery['recentReleases']>([])
+  const [user, setUser] = useState<UserDetails | null>()
+  const [issues, setIssues] = useState<Issue[]>([])
+  const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
+  const [milestones, setMilestones] = useState<Milestone[]>([])
+  const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
+  const [releases, setReleases] = useState<Release[]>([])
   const [data, setData] = useState<HeatmapData>({} as HeatmapData)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [username, setUsername] = useState('')

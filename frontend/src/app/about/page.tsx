@@ -21,14 +21,14 @@ import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import {
   GetProjectMetadataDocument,
-  GetProjectMetadataQuery,
   GetTopContributorsDocument,
-  GetTopContributorsQuery,
 } from 'types/__generated__/projectQueries.generated'
 import {
   GetLeaderDataDocument,
   GetLeaderDataQuery,
 } from 'types/__generated__/userQueries.generated'
+import { Contributor } from 'types/contributor'
+import { Project } from 'types/project'
 import { aboutText, technologies } from 'utils/aboutData'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
@@ -65,12 +65,8 @@ const About = () => {
     }
   )
 
-  const [projectMetadata, setProjectMetadata] = useState<GetProjectMetadataQuery['project'] | null>(
-    null
-  )
-  const [topContributors, setTopContributors] = useState<
-    GetTopContributorsQuery['topContributors']
-  >([])
+  const [projectMetadata, setProjectMetadata] = useState<Project | null>(null)
+  const [topContributors, setTopContributors] = useState<Contributor[]>([])
 
   useEffect(() => {
     if (projectMetadataResponse?.project) {

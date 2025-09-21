@@ -34,7 +34,6 @@ import SponsorCard from 'components/SponsorCard'
 import ToggleableList from 'components/ToggleableList'
 import TopContributorsList from 'components/TopContributorsList'
 
-// TODO: update types
 const DetailsCard = ({
   description,
   details,

@@ -6,11 +6,9 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
 import { Ordering } from 'types/__generated__/graphql'
-import {
-  GetProjectHealthMetricsDocument,
-  GetProjectHealthMetricsQuery,
-} from 'types/__generated__/projectsHealthDashboardQueries.generated'
+import { GetProjectHealthMetricsDocument } from 'types/__generated__/projectsHealthDashboardQueries.generated'
 import { DropDownSectionProps } from 'types/DropDownSectionProps'
+import { HealthMetricsProps } from 'types/healthMetrics'
 import { getKeysLabels } from 'utils/getKeysLabels'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetricsCard from 'components/MetricsCard'
@@ -81,9 +79,8 @@ const MetricsPage: FC = () => {
     }
   }
 
-  const [metrics, setMetrics] = useState<GetProjectHealthMetricsQuery['projectHealthMetrics']>([])
-  const [metricsLength, setMetricsLength] =
-    useState<GetProjectHealthMetricsQuery['projectHealthMetricsDistinctLength']>(0)
+  const [metrics, setMetrics] = useState<HealthMetricsProps[]>([])
+  const [metricsLength, setMetricsLength] = useState<number>(0)
   const [pagination, setPagination] = useState({ offset: 0, limit: PAGINATION_LIMIT })
   const [filters, setFilters] = useState(currentFilters)
   const [ordering, setOrdering] = useState(
@@ -241,7 +238,7 @@ const MetricsPage: FC = () => {
                 No metrics found. Try adjusting your filters.
               </div>
             ) : (
-              metrics.map((metric) => <MetricsCard key={metric.id} metric={metric} />) //TODO: update types
+              metrics.map((metric) => <MetricsCard key={metric.id} metric={metric} />)
             )}
           </div>
           <div className="mt-4 flex items-center justify-center">

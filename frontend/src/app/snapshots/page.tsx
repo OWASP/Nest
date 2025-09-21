@@ -4,16 +4,13 @@ import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import {
-  GetCommunitySnapshotsDocument,
-  GetCommunitySnapshotsQuery,
-} from 'types/__generated__/snapshotQueries.generated'
+import { GetCommunitySnapshotsDocument } from 'types/__generated__/snapshotQueries.generated'
 import type { Snapshot } from 'types/snapshot'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SnapshotCard from 'components/SnapshotCard'
 
 const SnapshotsPage: React.FC = () => {
-  const [snapshots, setSnapshots] = useState<GetCommunitySnapshotsQuery['snapshots'] | null>(null)
+  const [snapshots, setSnapshots] = useState<Snapshot[] | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GetCommunitySnapshotsDocument)
@@ -71,11 +68,9 @@ const SnapshotsPage: React.FC = () => {
           {!snapshots?.length ? (
             <div className="col-span-full py-8 text-center">No Snapshots found</div>
           ) : (
-            snapshots.map(
-              (
-                snapshot: GetCommunitySnapshotsQuery['snapshots'][0] // TODO: update type
-              ) => <div key={snapshot.key}>{renderSnapshotCard(snapshot)}</div>
-            )
+            snapshots.map((snapshot: Snapshot) => (
+              <div key={snapshot.key}>{renderSnapshotCard(snapshot)}</div>
+            ))
           )}
         </div>
       </div>

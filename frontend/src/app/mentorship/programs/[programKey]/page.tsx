@@ -4,10 +4,8 @@ import upperFirst from 'lodash/upperFirst'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ErrorDisplay } from 'app/global-error'
-import {
-  GetProgramAndModulesDocument,
-  GetProgramAndModulesQuery,
-} from 'types/__generated__/programsQueries.generated'
+import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
+import { Program, Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -27,8 +25,8 @@ const ProgramDetailsPage = () => {
     notifyOnNetworkStatusChange: true,
   })
 
-  const [program, setProgram] = useState<GetProgramAndModulesQuery['getProgram'] | null>(null)
-  const [modules, setModules] = useState<GetProgramAndModulesQuery['getProgramModules']>([])
+  const [program, setProgram] = useState<Program | null>(null)
+  const [modules, setModules] = useState<Module[]>([])
   const [isRefetching, setIsRefetching] = useState(false)
 
   const isLoading = isQueryLoading || isRefetching

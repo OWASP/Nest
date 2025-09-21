@@ -7,12 +7,9 @@ import { useSession } from 'next-auth/react'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UPDATE_PROGRAM_STATUS_MUTATION } from 'server/mutations/programsMutations'
-import {
-  GetProgramAndModulesDocument,
-  GetProgramAndModulesQuery,
-} from 'types/__generated__/programsQueries.generated'
+import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
-import { ProgramStatusEnum } from 'types/mentorship'
+import { Program, ProgramStatusEnum, Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -26,11 +23,10 @@ const ProgramDetailsPage = () => {
   const { data: session } = useSession()
   const username = (session as ExtendedSession)?.user?.login
 
-  const [program, setProgram] = useState<GetProgramAndModulesQuery['getProgram'] | null>(null)
-  const [modules, setModules] = useState<GetProgramAndModulesQuery['getProgramModules']>([])
+  const [program, setProgram] = useState<Program | null>(null)
+  const [modules, setModules] = useState<Module[]>([])
   const [isRefetching, setIsRefetching] = useState(false)
 
-  // TODO: update type
   const [updateProgram] = useMutation(UPDATE_PROGRAM_STATUS_MUTATION, {
     onError: handleAppError,
   })

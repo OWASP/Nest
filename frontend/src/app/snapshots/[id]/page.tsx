@@ -6,12 +6,10 @@ import { useRouter, useParams } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
-import {
-  GetSnapshotDetailsDocument,
-  GetSnapshotDetailsQuery,
-} from 'types/__generated__/snapshotQueries.generated'
+import { GetSnapshotDetailsDocument } from 'types/__generated__/snapshotQueries.generated'
 import type { Chapter } from 'types/chapter'
 import type { Project } from 'types/project'
+import { SnapshotDetails } from 'types/snapshot'
 import { level } from 'utils/data'
 import { formatDate } from 'utils/dateFormatter'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
@@ -22,7 +20,7 @@ import Release from 'components/Release'
 
 const SnapshotDetailsPage: React.FC = () => {
   const { id: snapshotKey } = useParams<{ id: string }>()
-  const [snapshot, setSnapshot] = useState<GetSnapshotDetailsQuery['snapshot'] | null>(null)
+  const [snapshot, setSnapshot] = useState<SnapshotDetails | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const router = useRouter()
 
@@ -138,30 +136,28 @@ const SnapshotDetailsPage: React.FC = () => {
           </h2>
           <div className="mb-4">
             <ChapterMapWrapper
-              geoLocData={snapshot.newChapters} // TODO: update type
+              geoLocData={snapshot.newChapters}
               showLocal={false}
               style={{ height: '400px', width: '100%', zIndex: '0' }}
             />
           </div>
           <div className="flex flex-col gap-6">
             {' '}
-            // TODO: update type
             {snapshot.newChapters.filter((chapter) => chapter.isActive).map(renderChapterCard)}
           </div>
         </div>
       )}
 
-      {snapshot.newProjects &&
-        snapshot.newProjects.length > 0 && ( // TODO: update type
-          <div className="mb-8">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-700 dark:text-gray-200">
-              New Projects
-            </h2>
-            <div className="flex flex-col gap-6">
-              {snapshot.newProjects.filter((project) => project.isActive).map(renderProjectCard)}
-            </div>
+      {snapshot.newProjects && snapshot.newProjects.length > 0 && (
+        <div className="mb-8">
+          <h2 className="mb-4 text-2xl font-semibold text-gray-700 dark:text-gray-200">
+            New Projects
+          </h2>
+          <div className="flex flex-col gap-6">
+            {snapshot.newProjects.filter((project) => project.isActive).map(renderProjectCard)}
           </div>
-        )}
+        </div>
+      )}
 
       {snapshot.newReleases && snapshot.newReleases.length > 0 && (
         <div className="mb-8">

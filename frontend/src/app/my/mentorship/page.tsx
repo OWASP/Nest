@@ -8,12 +8,10 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useMemo, useState } from 'react'
 
-import {
-  GetMyProgramsDocument,
-  GetMyProgramsQuery,
-} from 'types/__generated__/programsQueries.generated'
+import { GetMyProgramsDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 
+import { Program } from 'types/mentorship'
 import ActionButton from 'components/ActionButton'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramCard from 'components/ProgramCard'
@@ -31,7 +29,7 @@ const MyMentorshipPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState(initialQuery)
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery)
   const [page, setPage] = useState(initialPage)
-  const [programs, setPrograms] = useState<GetMyProgramsQuery['myPrograms']['programs']>([])
+  const [programs, setPrograms] = useState<Program[]>([])
   const [totalPages, setTotalPages] = useState(1)
 
   const debounceSearch = useMemo(() => debounce((q) => setDebouncedQuery(q), 400), [])
@@ -140,7 +138,7 @@ const MyMentorshipPage: React.FC = () => {
               <ProgramCard
                 accessLevel="admin"
                 key={p.id}
-                program={p} // TODO: fix component type
+                program={p}
                 onEdit={handleEdit}
                 onView={handleView}
               />

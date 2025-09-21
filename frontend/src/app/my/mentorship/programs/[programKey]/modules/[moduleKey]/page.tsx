@@ -4,10 +4,8 @@ import upperFirst from 'lodash/upperFirst'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import {
-  GetProgramAdminsAndModulesDocument,
-  GetProgramAdminsAndModulesQuery,
-} from 'types/__generated__/moduleQueries.generated'
+import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -15,7 +13,7 @@ import { getSimpleDuration } from 'components/ModuleCard'
 
 const ModuleDetailsPage = () => {
   const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
-  const [module, setModule] = useState<GetProgramAdminsAndModulesQuery['getModule'] | null>(null)
+  const [module, setModule] = useState<Module | null>(null)
   const [admins, setAdmins] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
 

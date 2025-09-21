@@ -11,10 +11,8 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import {
-  GetCommitteeDataDocument,
-  GetCommitteeDataQuery,
-} from 'types/__generated__/committeeQueries.generated'
+import { GetCommitteeDataDocument } from 'types/__generated__/committeeQueries.generated'
+import { Committee } from 'types/committee'
 import type { Contributor } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
@@ -22,7 +20,7 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 export default function CommitteeDetailsPage() {
   const { committeeKey } = useParams<{ committeeKey: string }>()
-  const [committee, setCommittee] = useState<GetCommitteeDataQuery['committee'] | null>(null)
+  const [committee, setCommittee] = useState<Committee | null>(null)
   const [topContributors, setTopContributors] = useState<Contributor[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
 

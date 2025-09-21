@@ -20,9 +20,9 @@ import { useState } from 'react'
 import {
   CreateApiKeyDocument,
   GetApiKeysDocument,
-  GetApiKeysQuery,
   RevokeApiKeyDocument,
 } from 'types/__generated__/apiKeyQueries.generated'
+import { ApiKey } from 'types/apiKey'
 import SecondaryCard from 'components/SecondaryCard'
 import { ApiKeysSkeleton } from 'components/skeletons/ApiKeySkelton'
 
@@ -34,7 +34,7 @@ export default function Page() {
   const [newKeyExpiry, setNewKeyExpiry] = useState('')
   const [showNewKey, setShowNewKey] = useState(false)
   const [newlyCreatedKey, setNewlyCreatedKey] = useState<string | null>(null)
-  const [keyToRevoke, setKeyToRevoke] = useState<GetApiKeysQuery['apiKeys'][0] | null>(null)
+  const [keyToRevoke, setKeyToRevoke] = useState<ApiKey | null>(null)
 
   const { loading, error, data, refetch } = useQuery(GetApiKeysDocument, {
     notifyOnNetworkStatusChange: true,
@@ -239,7 +239,7 @@ export default function Page() {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.apiKeys.map((key: GetApiKeysQuery['apiKeys'][0]) => (
+                  {data.apiKeys.map((key: ApiKey) => (
                     <tr
                       key={key.uuid as string}
                       className="border-b border-b-gray-200 dark:border-b-gray-700"

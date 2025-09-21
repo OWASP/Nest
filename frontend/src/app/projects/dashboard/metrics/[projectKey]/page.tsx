@@ -14,10 +14,8 @@ import {
 import { useParams } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
-import {
-  GetProjectHealthMetricsDetailsDocument,
-  GetProjectHealthMetricsDetailsQuery,
-} from 'types/__generated__/projectsHealthDashboardQueries.generated'
+import { GetProjectHealthMetricsDetailsDocument } from 'types/__generated__/projectsHealthDashboardQueries.generated'
+import { HealthMetricsProps } from 'types/healthMetrics'
 import BarChart from 'components/BarChart'
 import GeneralCompliantComponent from 'components/GeneralCompliantComponent'
 import LineChart from 'components/LineChart'
@@ -27,10 +25,8 @@ import MetricsScoreCircle from 'components/MetricsScoreCircle'
 
 const ProjectHealthMetricsDetails: FC = () => {
   const { projectKey } = useParams<{ projectKey: string }>()
-  const [metricsList, setMetricsList] =
-    useState<GetProjectHealthMetricsDetailsQuery['project']['healthMetricsList']>()
-  const [metricsLatest, setMetricsLatest] =
-    useState<GetProjectHealthMetricsDetailsQuery['project']['healthMetricsLatest']>()
+  const [metricsList, setMetricsList] = useState<HealthMetricsProps[]>()
+  const [metricsLatest, setMetricsLatest] = useState<HealthMetricsProps>()
   const {
     loading,
     error: graphqlError,

@@ -12,15 +12,17 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GetProjectDocument, GetProjectQuery } from 'types/__generated__/projectQueries.generated'
+import { GetProjectDocument } from 'types/__generated__/projectQueries.generated'
+import { Contributor } from 'types/contributor'
+import { Project } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams<{ projectKey: string }>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [project, setProject] = useState<GetProjectQuery['project'] | null>(null)
-  const [topContributors, setTopContributors] = useState<GetProjectQuery['topContributors']>([])
+  const [project, setProject] = useState<Project | null>(null)
+  const [topContributors, setTopContributors] = useState<Contributor[]>([])
   const { data, error: graphQLRequestError } = useQuery(GetProjectDocument, {
     variables: { key: projectKey },
   })
