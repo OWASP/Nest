@@ -254,10 +254,8 @@ describe('ProgramCard', () => {
         />
       )
 
-      // Check that the full description is rendered (CSS handles the visual truncation)
       expect(screen.getByText(longDescription)).toBeInTheDocument()
-
-      // Check that the paragraph has the line-clamp-6 class
+      expect(screen.getByText(longDescription)).toBeInTheDocument()
       const descriptionElement = screen.getByText(longDescription)
       expect(descriptionElement).toHaveClass('line-clamp-6')
     })
@@ -277,7 +275,6 @@ describe('ProgramCard', () => {
 
       expect(screen.getByText('Short description')).toBeInTheDocument()
 
-      // Check that it still has line-clamp-6 class for consistency
       const descriptionElement = screen.getByText('Short description')
       expect(descriptionElement).toHaveClass('line-clamp-6')
     })

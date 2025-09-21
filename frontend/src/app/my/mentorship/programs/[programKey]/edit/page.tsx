@@ -113,7 +113,7 @@ const EditProgramPage = () => {
         timeout: 3000,
       })
 
-      router.push(`/my/mentorship/programs/${slugify(formData.name)}?refresh=true`)
+      router.push(`/my/mentorship/programs/${slugify(formData.name)}`)
     } catch (err) {
       addToast({
         title: 'Update Failed',
