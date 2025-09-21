@@ -23,12 +23,10 @@ import {
   GetProjectMetadataDocument,
   GetTopContributorsDocument,
 } from 'types/__generated__/projectQueries.generated'
-import {
-  GetLeaderDataDocument,
-  GetLeaderDataQuery,
-} from 'types/__generated__/userQueries.generated'
+import { GetLeaderDataDocument } from 'types/__generated__/userQueries.generated'
 import { Contributor } from 'types/contributor'
 import { Project } from 'types/project'
+import { User } from 'types/user'
 import { aboutText, technologies } from 'utils/aboutData'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
@@ -266,7 +264,7 @@ const LeaderData = ({ username }: { username: string }) => {
     return <p>No data available for {username}</p>
   }
 
-  const handleButtonClick = (user: GetLeaderDataQuery['user']) => {
+  const handleButtonClick = (user: User) => {
     router.push(`/members/${user.login}`)
   }
 
