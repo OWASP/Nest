@@ -72,7 +72,6 @@ const ModuleItem = ({ details }: { details: Module }) => {
     <div className="flex h-46 w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <Link
         href={`${window.location.pathname}/modules/${details.key}`}
-        type="button"
         className="text-start font-semibold text-blue-400 hover:underline"
       >
         <TruncatedText text={details?.name} />
