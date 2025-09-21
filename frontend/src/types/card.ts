@@ -1,7 +1,6 @@
 import type { IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import type { JSX } from 'react'
 import type { Button } from 'types/button'
-import type { Chapter } from 'types/chapter'
 import type { Contributor } from 'types/contributor'
 import type { HealthMetricsProps } from 'types/healthMetrics'
 import type { Icon } from 'types/icon'
@@ -12,6 +11,8 @@ import type { Milestone } from 'types/milestone'
 import type { RepositoryCardProps } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
+// eslint-disable-next-line no-restricted-imports
+import { ChapterMapFieldsFragment } from './__generated__/chapterFragments.generated'
 
 export type CardProps = {
   button: Button
@@ -39,13 +40,14 @@ type Stats = {
   unit?: string
   value: number
 }
+
 export interface DetailsCardProps {
   accessLevel?: string
   description?: string
   details?: { label: string; value: string | JSX.Element }[]
   domains?: string[]
   entityKey?: string
-  geolocationData?: Chapter[]
+  geolocationData?: ChapterMapFieldsFragment[]
   healthMetricsData?: HealthMetricsProps[]
   heatmap?: JSX.Element
   isActive?: boolean

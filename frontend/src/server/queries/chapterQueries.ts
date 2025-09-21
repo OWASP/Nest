@@ -1,38 +1,25 @@
 import { gql } from '@apollo/client'
+import { CHAPTER_FIELDS, CHAPTER_METADATA_FIELDS } from 'server/fragments/chapterFragments'
+import { CONTRIBUTOR_FIELDS } from 'server/fragments/projectFragments'
 
 export const GET_CHAPTER_DATA = gql`
+  ${CONTRIBUTOR_FIELDS}
+  ${CHAPTER_FIELDS}
   query GetChapterData($key: String!) {
     chapter(key: $key) {
-      id
-      geoLocation {
-        lat
-        lng
-      }
-      isActive
-      key
-      name
-      region
-      relatedUrls
-      suggestedLocation
-      summary
-      updatedAt
-      url
+      ...ChapterFields
     }
     topContributors(chapter: $key) {
-      id
-      avatarUrl
-      login
-      name
+      ...ContributorFields
     }
   }
 `
 
 export const GET_CHAPTER_METADATA = gql`
+  ${CHAPTER_METADATA_FIELDS}
   query GetChapterMetadata($key: String!) {
     chapter(key: $key) {
-      id
-      name
-      summary
+      ...ChapterMetadataFields
     }
   }
 `
