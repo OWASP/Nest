@@ -14,6 +14,7 @@ export const UPDATE_MODULE = gql`
       domains
       projectId
       mentors {
+        id
         login
         name
         avatarUrl
@@ -36,6 +37,7 @@ export const CREATE_MODULE = gql`
       tags
       projectId
       mentors {
+        id
         login
         name
         avatarUrl
