@@ -111,7 +111,7 @@ describe('CreateModulePage', () => {
 
     await waitFor(() => {
       expect(mockCreateModule).toHaveBeenCalled()
-      expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program?refresh=true')
+      expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program')
     })
   })
 })
