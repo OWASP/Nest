@@ -19,14 +19,14 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { ProjectMetadataFieldsFragment } from 'types/__generated__/projectFragments.generated'
 import {
   GetProjectMetadataDocument,
   GetTopContributorsDocument,
 } from 'types/__generated__/projectQueries.generated'
-import { LeaderFieldsFragment } from 'types/__generated__/userFragments.generated'
 import { GetLeaderDataDocument } from 'types/__generated__/userQueries.generated'
 import { Contributor } from 'types/contributor'
+import { Project } from 'types/project'
+import { User } from 'types/user'
 import { aboutText, technologies } from 'utils/aboutData'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
@@ -63,7 +63,7 @@ const About = () => {
     }
   )
 
-  const [projectMetadata, setProjectMetadata] = useState<ProjectMetadataFieldsFragment | null>(null)
+  const [projectMetadata, setProjectMetadata] = useState<Project | null>(null)
   const [topContributors, setTopContributors] = useState<Contributor[]>([])
 
   useEffect(() => {
@@ -264,7 +264,7 @@ const LeaderData = ({ username }: { username: string }) => {
     return <p>No data available for {username}</p>
   }
 
-  const handleButtonClick = (user: LeaderFieldsFragment) => {
+  const handleButtonClick = (user: User) => {
     router.push(`/members/${user.login}`)
   }
 

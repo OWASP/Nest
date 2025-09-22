@@ -1,8 +1,6 @@
 import { gql } from '@apollo/client'
-import { CONTRIBUTOR_FIELDS, PROJECT_METADATA_FIELDS } from 'server/fragments/projectFragments'
 
 export const GET_PROJECT_DATA = gql`
-  ${CONTRIBUTOR_FIELDS}
   query GetProject($key: String!) {
     project(key: $key) {
       id
@@ -109,22 +107,37 @@ export const GET_PROJECT_DATA = gql`
       }
     }
     topContributors(project: $key) {
-      ...ContributorFields
+      id
+      avatarUrl
+      login
+      name
     }
   }
 `
 
 export const GET_PROJECT_METADATA = gql`
-  ${PROJECT_METADATA_FIELDS}
   query GetProjectMetadata($key: String!) {
     project(key: $key) {
-      ...ProjectMetadataFields
+      id
+      contributorsCount
+      forksCount
+      issuesCount
+      name
+      starsCount
+      summary
+      recentMilestones(limit: 25) {
+        id
+        title
+        url
+        body
+        progress
+        state
+      }
     }
   }
 `
 
 export const GET_TOP_CONTRIBUTORS = gql`
-  ${CONTRIBUTOR_FIELDS}
   query GetTopContributors(
     $excludedUsernames: [String!]
     $hasFullName: Boolean = false
@@ -137,7 +150,10 @@ export const GET_TOP_CONTRIBUTORS = gql`
       limit: $limit
       project: $key
     ) {
-      ...ContributorFields
+      id
+      avatarUrl
+      login
+      name
     }
   }
 `

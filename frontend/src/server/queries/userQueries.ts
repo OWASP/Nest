@@ -1,11 +1,14 @@
 import { gql } from '@apollo/client'
-import { LEADER_FIELDS } from 'server/fragments/userFragments'
 
 export const GET_LEADER_DATA = gql`
-  ${LEADER_FIELDS}
   query GetLeaderData($key: String!) {
     user(login: $key) {
-      ...LeaderFields
+      id
+      avatarUrl
+      company
+      location
+      login
+      name
     }
   }
 `
