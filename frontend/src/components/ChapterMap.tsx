@@ -1,19 +1,19 @@
 'use client'
 import L, { MarkerClusterGroup } from 'leaflet'
 import React, { useEffect, useRef } from 'react'
+import type { Chapter } from 'types/chapter'
 import 'leaflet.markercluster'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
-import { ChapterMapFieldsFragment } from 'types/__generated__/chapterFragments.generated'
 
 const ChapterMap = ({
   geoLocData,
   showLocal,
   style,
 }: {
-  geoLocData: ChapterMapFieldsFragment[]
+  geoLocData: Chapter[]
   showLocal: boolean
   style: React.CSSProperties
 }) => {
@@ -59,11 +59,13 @@ const ChapterMap = ({
         shadowUrl: '/img/marker-shadow.png',
       })
 
-      // TODO: Location markers not visible
-      // TODO: add mapper to algolia
-      const marker = L.marker([chapter.geoLocation?.lat, chapter.geoLocation?.lng], {
-        icon: markerIcon,
-      })
+      const marker = L.marker(
+        [
+          chapter._geoloc?.lat || chapter.geoLocation?.lat,
+          chapter._geoloc?.lng || chapter.geoLocation?.lng,
+        ],
+        { icon: markerIcon }
+      )
       const popup = L.popup()
       const popupContent = document.createElement('div')
       popupContent.className = 'popup-content'
@@ -82,11 +84,20 @@ const ChapterMap = ({
       const maxNearestChapters = 5
       const localChapters = geoLocData.slice(0, maxNearestChapters - 1)
       const localBounds = L.latLngBounds(
-        localChapters.map((chapter) => [chapter.geoLocation?.lat, chapter.geoLocation?.lng])
+        localChapters.map((chapter) => [
+          chapter._geoloc?.lat || chapter.geoLocation?.lat,
+          chapter._geoloc?.lng || chapter.geoLocation?.lng,
+        ])
       )
       const maxZoom = 7
       const nearestChapter = geoLocData[0]
-      map.setView([nearestChapter.geoLocation?.lat, nearestChapter.geoLocation?.lng], maxZoom)
+      map.setView(
+        [
+          nearestChapter._geoloc?.lat || nearestChapter.geoLocation?.lat,
+          nearestChapter._geoloc?.lng || nearestChapter.geoLocation?.lng,
+        ],
+        maxZoom
+      )
       map.fitBounds(localBounds, { maxZoom: maxZoom })
     }
   }, [geoLocData, showLocal])

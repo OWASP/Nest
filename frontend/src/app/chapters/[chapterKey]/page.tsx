@@ -4,8 +4,8 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
-import { ChapterFieldsFragment } from 'types/__generated__/chapterFragments.generated'
 import { GetChapterDataDocument } from 'types/__generated__/chapterQueries.generated'
+import { Chapter } from 'types/chapter'
 import type { Contributor } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
@@ -13,7 +13,7 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams<{ chapterKey: string }>()
-  const [chapter, setChapter] = useState<ChapterFieldsFragment>({} as ChapterFieldsFragment)
+  const [chapter, setChapter] = useState<Chapter>({} as Chapter)
   const [topContributors, setTopContributors] = useState<Contributor[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
 

@@ -1,12 +1,11 @@
 import dynamic from 'next/dynamic'
 import React from 'react'
-import { ChapterMapFieldsFragment } from 'types/__generated__/chapterFragments.generated'
+import type { Chapter } from 'types/chapter'
 
 const ChapterMap = dynamic(() => import('./ChapterMap'), { ssr: false })
 
-// TODO: Location markers not visible
 const ChapterMapWrapper = (props: {
-  geoLocData: ChapterMapFieldsFragment[]
+  geoLocData: Chapter[]
   showLocal: boolean
   style: React.CSSProperties
 }) => {

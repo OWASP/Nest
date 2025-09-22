@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
-import { ChapterMapFieldsFragment } from 'types/__generated__/chapterFragments.generated'
 import type { AlgoliaResponse } from 'types/algolia'
 import type { Chapter } from 'types/chapter'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
@@ -13,7 +12,7 @@ import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 const ChaptersPage = () => {
-  const [geoLocData, setGeoLocData] = useState<ChapterMapFieldsFragment[]>([])
+  const [geoLocData, setGeoLocData] = useState<Chapter[]>([])
   const {
     items: chapters,
     isLoaded,
@@ -41,7 +40,7 @@ const ChaptersPage = () => {
         searchParams.currentPage,
         searchParams.hitsPerPage
       )
-      setGeoLocData(data.hits) // TODO: add mapper to algoila
+      setGeoLocData(data.hits)
     }
     fetchData()
   }, [currentPage])
