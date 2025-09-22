@@ -241,14 +241,14 @@ export default function Page() {
                 <tbody>
                   {data.apiKeys.map((key: ApiKey) => (
                     <tr
-                      key={key.uuid as string}
+                      key={key.uuid}
                       className="border-b border-b-gray-200 dark:border-b-gray-700"
                     >
                       <td className="py-3">{key.name}</td>
-                      <td className="py-3 font-mono text-sm">{key.uuid as string}</td>
-                      <td className="py-3">{format(new Date(key.createdAt as string), 'PP')}</td>
+                      <td className="py-3 font-mono text-sm">{key.uuid}</td>
+                      <td className="py-3">{format(new Date(key.createdAt), 'PP')}</td>
                       <td className="py-3">
-                        {key.expiresAt ? format(new Date(key.expiresAt as string), 'PP') : 'Never'}
+                        {key.expiresAt ? format(new Date(key.expiresAt), 'PP') : 'Never'}
                       </td>
                       <td className="py-3 text-right">
                         <Button

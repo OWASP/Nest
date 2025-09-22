@@ -70,8 +70,8 @@ const ProgramDetailsPage = () => {
 
   const programDetails = [
     { label: 'Status', value: upperFirst(program.status) },
-    { label: 'Start Date', value: formatDate(program.startedAt as string) },
-    { label: 'End Date', value: formatDate(program.endedAt as string) },
+    { label: 'Start Date', value: formatDate(program.startedAt) },
+    { label: 'End Date', value: formatDate(program.endedAt) },
     { label: 'Mentees Limit', value: String(program.menteesLimit) },
     {
       label: 'Experience Levels',

@@ -121,7 +121,7 @@ const SnapshotDetailsPage: React.FC = () => {
               <div className="flex items-center">
                 <FontAwesomeIcon icon={faCalendar} className="mr-1 h-4 w-4" />
                 <span>
-                  {formatDate(snapshot.startAt as string)} - {formatDate(snapshot.endAt as string)}
+                  {formatDate(snapshot.startAt)} - {formatDate(snapshot.endAt)}
                 </span>
               </div>
             </div>

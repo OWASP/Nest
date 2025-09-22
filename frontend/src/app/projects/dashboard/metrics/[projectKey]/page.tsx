@@ -53,7 +53,7 @@ const ProjectHealthMetricsDetails: FC = () => {
 
   const labels =
     metricsList?.map((m) =>
-      new Date(m.createdAt as string).toLocaleString('default', {
+      new Date(m.createdAt).toLocaleString('default', {
         month: 'short',
         day: 'numeric',
       })

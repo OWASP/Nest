@@ -74,8 +74,8 @@ const EditProgramPage = () => {
         name: program.name || '',
         description: program.description || '',
         menteesLimit: program.menteesLimit ?? 5,
-        startedAt: formatDateForInput(program.startedAt as string),
-        endedAt: formatDateForInput(program.endedAt as string),
+        startedAt: formatDateForInput(program.startedAt),
+        endedAt: formatDateForInput(program.endedAt),
         tags: (program.tags || []).join(', '),
         domains: (program.domains || []).join(', '),
         adminLogins: (program.admins || [])

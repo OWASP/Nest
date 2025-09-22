@@ -49,11 +49,11 @@ const ModuleDetailsPage = () => {
 
   const moduleDetails = [
     { label: 'Experience Level', value: upperFirst(module.experienceLevel) },
-    { label: 'Start Date', value: formatDate(module.startedAt as string) },
-    { label: 'End Date', value: formatDate(module.endedAt as string) },
+    { label: 'Start Date', value: formatDate(module.startedAt) },
+    { label: 'End Date', value: formatDate(module.endedAt) },
     {
       label: 'Duration',
-      value: getSimpleDuration(module.startedAt as string, module.endedAt as string),
+      value: getSimpleDuration(module.startedAt, module.endedAt),
     },
   ]
 
