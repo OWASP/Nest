@@ -18,6 +18,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onEdit, onView, acce
       month: 'short',
       day: 'numeric',
       year: 'numeric',
+      timeZone: 'UTC',
     })
 
   const roleClass = {

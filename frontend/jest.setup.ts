@@ -1,4 +1,16 @@
 import '@testing-library/jest-dom'
+import React from 'react'
+// Normalize environment for deterministic tests
+process.env.TZ = 'UTC'
+process.env.NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED = 'true'
+
+// Mock heavy UI libs that rely on dynamic imports (framer-motion) to avoid VM modules issues
+jest.mock('@heroui/button', () => {
+  return {
+    Button: ({ children, onClick, onPress, ...rest }: any) =>
+      React.createElement('button', { onClick: onClick ?? onPress, ...rest }, children),
+  }
+})
 import { TextEncoder } from 'util'
 import React from 'react'
 import 'core-js/actual/structured-clone'
