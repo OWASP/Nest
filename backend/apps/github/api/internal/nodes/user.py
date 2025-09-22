@@ -31,17 +31,15 @@ class UserNode:
     @strawberry.field
     def badges(self) -> list[BadgeNode]:
         """List badges assigned to the user sorted by weight and name."""
-        user_badges = (
-            self.user_badges.filter(is_active=True)
-            .select_related("badge")
-            .order_by("-badge__weight", "badge__name")
+        user_badges = self.user_badges.select_related("badge").order_by(
+            "-badge__weight", "badge__name"
         )
         return [user_badge.badge for user_badge in user_badges]
 
     @strawberry.field
     def badge_count(self) -> int:
         """Resolve badge count."""
-        return self.user_badges.filter(is_active=True).values("badge_id").distinct().count()
+        return self.user_badges.values("badge_id").distinct().count()
 
     @strawberry.field
     def created_at(self) -> float:

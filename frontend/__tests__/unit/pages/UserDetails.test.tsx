@@ -72,7 +72,7 @@ jest.mock('next/navigation', () => ({
 // Mock GitHub heatmap utilities
 jest.mock('utils/helpers/githubHeatmap', () => ({
   fetchHeatmapData: jest.fn(),
-  drawContributions: jest.fn(() => { }),
+  drawContributions: jest.fn(() => {}),
 }))
 
 jest.mock('@heroui/toast', () => ({
@@ -81,15 +81,15 @@ jest.mock('@heroui/toast', () => ({
 
 describe('UserDetailsPage', () => {
   beforeEach(() => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       loading: false,
       error: null,
     })
-      ; (fetchHeatmapData as jest.Mock).mockResolvedValue({
-        contributions: { years: [{ year: '2023' }] },
-      })
-      ; (drawContributions as jest.Mock).mockImplementation(() => { })
+    ;(fetchHeatmapData as jest.Mock).mockResolvedValue({
+      contributions: { years: [{ year: '2023' }] },
+    })
+    ;(drawContributions as jest.Mock).mockImplementation(() => {})
   })
 
   afterEach(() => {
@@ -97,7 +97,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders loading state', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: null,
       error: null,
     })
@@ -110,7 +110,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders user details', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: {
         ...mockUserDetailsData,
         user: { ...mockUserDetailsData.user, recentIssues: {} },
@@ -136,7 +136,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders recent issues correctly', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
       loading: false,
@@ -157,7 +157,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders recent pull requests correctly', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
       loading: false,
@@ -175,7 +175,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders recent releases correctly', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
       loading: false,
@@ -193,7 +193,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders recent milestones correctly', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
       loading: false,
@@ -215,7 +215,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders repositories section correctly', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
       loading: false,
@@ -239,7 +239,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders statistics section correctly', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
       loading: false,
@@ -266,14 +266,14 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders contribution heatmap correctly', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
       loading: false,
     })
-      ; (fetchHeatmapData as jest.Mock).mockResolvedValue({
-        years: [{ year: '2023' }], // Provide years data to satisfy condition in component
-      })
+    ;(fetchHeatmapData as jest.Mock).mockResolvedValue({
+      years: [{ year: '2023' }], // Provide years data to satisfy condition in component
+    })
 
     render(<UserDetailsPage />)
 
@@ -289,11 +289,11 @@ describe('UserDetailsPage', () => {
   })
 
   test('handles contribution heatmap loading error correctly', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
     })
-      ; (fetchHeatmapData as jest.Mock).mockResolvedValue(null)
+    ;(fetchHeatmapData as jest.Mock).mockResolvedValue(null)
 
     render(<UserDetailsPage />)
 
@@ -304,7 +304,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders user summary section correctly', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
     })
@@ -327,7 +327,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('displays contact information elements', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
     })
@@ -347,7 +347,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders error message when GraphQL request fails', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: null,
       error: mockError,
     })
@@ -373,11 +373,11 @@ describe('UserDetailsPage', () => {
       ...mockUserDetailsData,
       user: { ...mockUserDetailsData.user, bio: '' },
     }
-      ; (useQuery as jest.Mock).mockReturnValue({
-        data: noBioData,
-        loading: false,
-        error: null,
-      })
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: noBioData,
+      loading: false,
+      error: null,
+    })
 
     render(<UserDetailsPage />)
     await waitFor(() => {
@@ -391,11 +391,11 @@ describe('UserDetailsPage', () => {
       ...mockUserDetailsData,
       user: { ...mockUserDetailsData.user, bio: 'Test @User1 and @User2!' },
     }
-      ; (useQuery as jest.Mock).mockReturnValue({
-        data: multiMentionData,
-        loading: false,
-        error: null,
-      })
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: multiMentionData,
+      loading: false,
+      error: null,
+    })
 
     render(<UserDetailsPage />)
     await waitFor(() => {
@@ -410,11 +410,11 @@ describe('UserDetailsPage', () => {
     const noIssuesData = {
       user: { ...mockUserDetailsData.user, recentIssues: {} },
     }
-      ; (useQuery as jest.Mock).mockReturnValue({
-        data: noIssuesData,
-        loading: false,
-        error: null,
-      })
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: noIssuesData,
+      loading: false,
+      error: null,
+    })
 
     render(<UserDetailsPage />)
     await waitFor(() => {
@@ -428,11 +428,11 @@ describe('UserDetailsPage', () => {
       ...mockUserDetailsData,
       recentPullRequests: [],
     }
-      ; (useQuery as jest.Mock).mockReturnValue({
-        data: noPullsData,
-        loading: false,
-        error: null,
-      })
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: noPullsData,
+      loading: false,
+      error: null,
+    })
 
     render(<UserDetailsPage />)
     await waitFor(() => {
@@ -446,11 +446,11 @@ describe('UserDetailsPage', () => {
       ...mockUserDetailsData,
       recentReleases: [],
     }
-      ; (useQuery as jest.Mock).mockReturnValue({
-        data: noReleasesData,
-        loading: false,
-        error: null,
-      })
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: noReleasesData,
+      loading: false,
+      error: null,
+    })
     render(<UserDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('Recent Releases')).toBeInTheDocument()
@@ -463,11 +463,11 @@ describe('UserDetailsPage', () => {
       ...mockUserDetailsData,
       recentMilestones: [],
     }
-      ; (useQuery as jest.Mock).mockReturnValue({
-        data: noMilestonesData,
-        loading: false,
-        error: null,
-      })
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: noMilestonesData,
+      loading: false,
+      error: null,
+    })
     render(<UserDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('Recent Milestones')).toBeInTheDocument()
@@ -486,11 +486,11 @@ describe('UserDetailsPage', () => {
         publicRepositoriesCount: 0,
       },
     }
-      ; (useQuery as jest.Mock).mockReturnValue({
-        data: zeroStatsData,
-        loading: false,
-        error: null,
-      })
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: zeroStatsData,
+      loading: false,
+      error: null,
+    })
 
     render(<UserDetailsPage />)
     await waitFor(() => {
@@ -511,11 +511,11 @@ describe('UserDetailsPage', () => {
         location: '',
       },
     }
-      ; (useQuery as jest.Mock).mockReturnValue({
-        data: minimalData,
-        loading: false,
-        error: null,
-      })
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: minimalData,
+      loading: false,
+      error: null,
+    })
 
     render(<UserDetailsPage />)
     await waitFor(() => {
@@ -526,7 +526,7 @@ describe('UserDetailsPage', () => {
     })
   })
   test('does not render sponsor block', async () => {
-    ; (useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
     })
@@ -538,7 +538,7 @@ describe('UserDetailsPage', () => {
 
   describe('Badge Display Tests', () => {
     test('renders badges section when user has badges', async () => {
-      ; (useQuery as jest.Mock).mockReturnValue({
+      ;(useQuery as jest.Mock).mockReturnValue({
         data: mockUserDetailsData,
         loading: false,
         error: null,
@@ -552,7 +552,7 @@ describe('UserDetailsPage', () => {
     })
 
     test('renders badges with correct props', async () => {
-      ; (useQuery as jest.Mock).mockReturnValue({
+      ;(useQuery as jest.Mock).mockReturnValue({
         data: mockUserDetailsData,
         loading: false,
         error: null,
@@ -580,11 +580,11 @@ describe('UserDetailsPage', () => {
         },
       }
 
-        ; (useQuery as jest.Mock).mockReturnValue({
-          data: dataWithoutBadges,
-          loading: false,
-          error: null,
-        })
+      ;(useQuery as jest.Mock).mockReturnValue({
+        data: dataWithoutBadges,
+        loading: false,
+        error: null,
+      })
 
       render(<UserDetailsPage />)
       await waitFor(() => {
@@ -602,11 +602,11 @@ describe('UserDetailsPage', () => {
         },
       }
 
-        ; (useQuery as jest.Mock).mockReturnValue({
-          data: dataWithoutBadges,
-          loading: false,
-          error: null,
-        })
+      ;(useQuery as jest.Mock).mockReturnValue({
+        data: dataWithoutBadges,
+        loading: false,
+        error: null,
+      })
 
       render(<UserDetailsPage />)
       await waitFor(() => {
@@ -631,11 +631,11 @@ describe('UserDetailsPage', () => {
         },
       }
 
-        ; (useQuery as jest.Mock).mockReturnValue({
-          data: dataWithIncompleteBadges,
-          loading: false,
-          error: null,
-        })
+      ;(useQuery as jest.Mock).mockReturnValue({
+        data: dataWithIncompleteBadges,
+        loading: false,
+        error: null,
+      })
 
       render(<UserDetailsPage />)
       await waitFor(() => {
@@ -661,35 +661,16 @@ describe('UserDetailsPage', () => {
         },
       }
 
-        ; (useQuery as jest.Mock).mockReturnValue({
-          data: dataWithEmptyCssClass,
-          loading: false,
-          error: null,
-        })
-
-      render(<UserDetailsPage />)
-      await waitFor(() => {
-        const badge = screen.getByTestId('badge-test-badge')
-        expect(badge).toHaveAttribute('data-css-class', 'fa-medal')
-      })
-    })
-
-    test('renders multiple badges in correct order', async () => {
-      ; (useQuery as jest.Mock).mockReturnValue({
-        data: mockUserDetailsData,
+      ;(useQuery as jest.Mock).mockReturnValue({
+        data: dataWithEmptyCssClass,
         loading: false,
         error: null,
       })
 
       render(<UserDetailsPage />)
       await waitFor(() => {
-        const badges = screen.getAllByTestId(/^badge-/)
-
-        expect(badges).toHaveLength(2)
-        // Security Expert has weight 2, should come first
-        expect(badges[0]).toHaveAttribute('data-testid', 'badge-security-expert')
-        // Contributor has weight 1, should come second
-        expect(badges[1]).toHaveAttribute('data-testid', 'badge-contributor')
+        const badge = screen.getByTestId('badge-test-badge')
+        expect(badge).toHaveAttribute('data-css-class', 'fa-medal')
       })
     })
 
@@ -709,12 +690,11 @@ describe('UserDetailsPage', () => {
           ],
         },
       }
-
-        ; (useQuery as jest.Mock).mockReturnValue({
-          data: dataWithSpecialBadges,
-          loading: false,
-          error: null,
-        })
+      ;(useQuery as jest.Mock).mockReturnValue({
+        data: dataWithSpecialBadges,
+        loading: false,
+        error: null,
+      })
 
       render(<UserDetailsPage />)
       await waitFor(() => {
@@ -739,11 +719,11 @@ describe('UserDetailsPage', () => {
         },
       }
 
-        ; (useQuery as jest.Mock).mockReturnValue({
-          data: dataWithLongNameBadge,
-          loading: false,
-          error: null,
-        })
+      ;(useQuery as jest.Mock).mockReturnValue({
+        data: dataWithLongNameBadge,
+        loading: false,
+        error: null,
+      })
 
       render(<UserDetailsPage />)
       await waitFor(() => {

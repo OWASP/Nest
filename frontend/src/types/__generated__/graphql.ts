@@ -37,7 +37,7 @@ export type AuthUserNode = Node & {
   username: Scalars['String']['output'];
 };
 
-export type BadgeNode = {
+export type BadgeNode = Node & {
   __typename?: 'BadgeNode';
   cssClass: Scalars['String']['output'];
   description: Scalars['String']['output'];

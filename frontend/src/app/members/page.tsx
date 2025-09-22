@@ -34,7 +34,7 @@ const UsersPage = () => {
       onclick: () => handleButtonClick(user),
     }
 
-    const badgeCount = user.badges?.length || 0
+    const badgeCount = user.badgeCount || 0
 
     return (
       <UserCard
