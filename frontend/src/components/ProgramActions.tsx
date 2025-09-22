@@ -67,9 +67,11 @@ const ProgramActions: React.FC<ProgramActionsProps> = ({ programKey, status, set
         data-testid="program-actions-button"
         type="button"
         onClick={() => setDropdownOpen((prev) => !prev)}
-        className="rounded hover:bg-gray-200 dark:hover:bg-gray-700"
       >
-        <FontAwesomeIcon icon={faEllipsisV} />
+        <FontAwesomeIcon
+          icon={faEllipsisV}
+          className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-200"
+        />
       </button>
       {dropdownOpen && (
         <div className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
