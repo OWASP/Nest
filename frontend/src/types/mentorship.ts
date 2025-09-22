@@ -1,16 +1,6 @@
 import type { Contributor } from 'types/contributor'
-export enum ExperienceLevelEnum {
-  BEGINNER = 'beginner',
-  INTERMEDIATE = 'intermediate',
-  ADVANCED = 'advanced',
-  EXPERT = 'expert',
-}
-
-export enum ProgramStatusEnum {
-  DRAFT = 'draft',
-  PUBLISHED = 'published',
-  COMPLETED = 'completed',
-}
+// eslint-disable-next-line no-restricted-imports
+import { ExperienceLevelEnum, ProgramStatusEnum } from './__generated__/graphql'
 
 export const EXPERIENCE_LEVELS = {
   BEGINNER: 'BEGINNER',
@@ -24,7 +14,7 @@ export type Program = {
   key: string
   name: string
   description: string
-  status: ProgramStatusEnum
+  status?: ProgramStatusEnum
   experienceLevels?: ExperienceLevelEnum[]
   menteesLimit?: number
   startedAt: string
@@ -54,13 +44,13 @@ export type Module = {
   key: string
   name: string
   description: string
-  status: ProgramStatusEnum
+  status?: ProgramStatusEnum
   experienceLevel: ExperienceLevelEnum
   mentors: Contributor[]
   startedAt: string
   endedAt: string
-  domains: string[]
-  tags: string[]
+  domains?: string[]
+  tags?: string[]
 }
 
 export type ModuleFormData = {

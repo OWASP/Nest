@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UPDATE_MODULE } from 'server/mutations/moduleMutations'
-import { GET_PROGRAM_ADMINS_AND_MODULES } from 'server/queries/moduleQueries'
+import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import { EXPERIENCE_LEVELS, type ModuleFormData } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
@@ -22,13 +22,13 @@ const EditModulePage = () => {
   const [formData, setFormData] = useState<ModuleFormData | null>(null)
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
 
-  const [updateModule, { loading: mutationLoading }] = useMutation(UPDATE_MODULE)
+  const [updateModule, { loading: mutationLoading }] = useMutation(UPDATE_MODULE) // TODO: update
 
   const {
     data,
     loading: queryLoading,
     error: queryError,
-  } = useQuery(GET_PROGRAM_ADMINS_AND_MODULES, {
+  } = useQuery(GetProgramAdminsAndModulesDocument, {
     variables: { programKey, moduleKey },
     skip: !programKey || !moduleKey,
     fetchPolicy: 'network-only',

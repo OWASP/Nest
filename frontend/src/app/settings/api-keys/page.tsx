@@ -106,9 +106,9 @@ export default function Page() {
       addToast({ title: 'Error', description: 'Please select an expiration date', color: 'danger' })
       return
     }
-    const variables: { name: string; expiresAt: Date } = {
+    const variables: { name: string; expiresAt: string } = {
       name: newKeyName.trim(),
-      expiresAt: new Date(newKeyExpiry),
+      expiresAt: new Date(newKeyExpiry).toISOString(),
     }
     createApiKey({ variables })
   }

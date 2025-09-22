@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 import { ErrorDisplay } from 'app/global-error'
 import { CREATE_MODULE } from 'server/mutations/moduleMutations'
-import { GET_PROGRAM_ADMIN_DETAILS } from 'server/queries/programsQueries'
+import { GetProgramAdminDetailsDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import { EXPERIENCE_LEVELS } from 'types/mentorship'
 import { parseCommaSeparated } from 'utils/parser'
@@ -18,13 +18,13 @@ const CreateModulePage = () => {
   const { programKey } = useParams() as { programKey: string }
   const { data: sessionData, status: sessionStatus } = useSession()
 
-  const [createModule, { loading: mutationLoading }] = useMutation(CREATE_MODULE)
+  const [createModule, { loading: mutationLoading }] = useMutation(CREATE_MODULE) // TODO: update
 
   const {
     data: programData,
     loading: queryLoading,
     error: queryError,
-  } = useQuery(GET_PROGRAM_ADMIN_DETAILS, {
+  } = useQuery(GetProgramAdminDetailsDocument, {
     variables: { programKey },
     skip: !programKey,
     fetchPolicy: 'network-only',
