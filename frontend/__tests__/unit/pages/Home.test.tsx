@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockAlgoliaData, mockGraphQLData } from '@unit/data/mockHomeData'
@@ -8,8 +8,8 @@ import { render } from 'wrappers/testUtil'
 import Home from 'app/page'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
 }))
 
@@ -70,7 +70,7 @@ describe('Home', () => {
   let mockRouter: { push: jest.Mock }
 
   beforeEach(() => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockGraphQLData,
       loading: false,
       error: null,
@@ -85,7 +85,7 @@ describe('Home', () => {
   })
 
   test('renders loading state', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       loading: true,
       error: null,
@@ -110,7 +110,7 @@ describe('Home', () => {
   })
 
   test('renders error message when GraphQL request fails', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: { message: 'GraphQL error' },
     })
@@ -193,7 +193,7 @@ describe('Home', () => {
   })
 
   test('handles missing data gracefully', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockGraphQLData,
       error: null,
     })
@@ -245,7 +245,7 @@ describe('Home', () => {
     })
   })
   test('renders when no recent releases', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         ...mockGraphQLData,
         recentReleases: [],

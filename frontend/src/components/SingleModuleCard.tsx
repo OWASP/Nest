@@ -51,7 +51,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
   }
 
   const moduleDetails = [
-    { label: 'Experience Level', value: upperFirst(module.experienceLevel) },
+    { label: 'Experience Level', value: upperFirst(module.experienceLevel.toLowerCase()) },
     { label: 'Start Date', value: formatDate(module.startedAt) },
     { label: 'End Date', value: formatDate(module.endedAt) },
     { label: 'Duration', value: getSimpleDuration(module.startedAt, module.endedAt) },

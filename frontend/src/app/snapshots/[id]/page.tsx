@@ -1,15 +1,15 @@
 'use client'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { faCalendar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter, useParams } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
-import { GET_SNAPSHOT_DETAILS } from 'server/queries/snapshotQueries'
+import { GetSnapshotDetailsDocument } from 'types/__generated__/snapshotQueries.generated'
 import type { Chapter } from 'types/chapter'
 import type { Project } from 'types/project'
-import type { SnapshotDetails } from 'types/snapshot'
+import { SnapshotDetails } from 'types/snapshot'
 import { level } from 'utils/data'
 import { formatDate } from 'utils/dateFormatter'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
@@ -19,12 +19,12 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import Release from 'components/Release'
 
 const SnapshotDetailsPage: React.FC = () => {
-  const { id: snapshotKey } = useParams()
+  const { id: snapshotKey } = useParams<{ id: string }>()
   const [snapshot, setSnapshot] = useState<SnapshotDetails | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const router = useRouter()
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_SNAPSHOT_DETAILS, {
+  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetSnapshotDetailsDocument, {
     variables: { key: snapshotKey },
   })
 
@@ -142,6 +142,7 @@ const SnapshotDetailsPage: React.FC = () => {
             />
           </div>
           <div className="flex flex-col gap-6">
+            {' '}
             {snapshot.newChapters.filter((chapter) => chapter.isActive).map(renderChapterCard)}
           </div>
         </div>

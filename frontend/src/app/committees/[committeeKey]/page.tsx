@@ -1,5 +1,5 @@
 'use client'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import {
   faCode,
   faCodeFork,
@@ -11,8 +11,8 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GET_COMMITTEE_DATA } from 'server/queries/committeeQueries'
-import type { Committee } from 'types/committee'
+import { GetCommitteeDataDocument } from 'types/__generated__/committeeQueries.generated'
+import { Committee } from 'types/committee'
 import type { Contributor } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
@@ -24,7 +24,7 @@ export default function CommitteeDetailsPage() {
   const [topContributors, setTopContributors] = useState<Contributor[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const { data, error: graphQLRequestError } = useQuery(GET_COMMITTEE_DATA, {
+  const { data, error: graphQLRequestError } = useQuery(GetCommitteeDataDocument, {
     variables: { key: committeeKey },
   })
 

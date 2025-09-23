@@ -1,6 +1,5 @@
 'use client'
-
-import { useQuery, useMutation } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import upperFirst from 'lodash/upperFirst'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
@@ -8,10 +7,10 @@ import { useSession } from 'next-auth/react'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UPDATE_PROGRAM_STATUS_MUTATION } from 'server/mutations/programsMutations'
-import { GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
+import { ProgramStatusEnum } from 'types/__generated__/graphql'
+import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
-import type { Module, Program } from 'types/mentorship'
-import { ProgramStatusEnum } from 'types/mentorship'
+import { Program, Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -30,6 +29,7 @@ const ProgramDetailsPage = () => {
   const [isRefetching, setIsRefetching] = useState(false)
 
   const [updateProgram] = useMutation(UPDATE_PROGRAM_STATUS_MUTATION, {
+    // TODO: update
     onError: handleAppError,
   })
 
@@ -37,7 +37,7 @@ const ProgramDetailsPage = () => {
     data,
     refetch,
     loading: isQueryLoading,
-  } = useQuery(GET_PROGRAM_AND_MODULES, {
+  } = useQuery(GetProgramAndModulesDocument, {
     variables: { programKey },
     skip: !programKey,
     notifyOnNetworkStatusChange: true,
@@ -76,11 +76,11 @@ const ProgramDetailsPage = () => {
             status: newStatus,
           },
         },
-        refetchQueries: [{ query: GET_PROGRAM_AND_MODULES, variables: { programKey } }],
+        refetchQueries: [{ query: GetProgramAndModulesDocument, variables: { programKey } }],
       })
 
       addToast({
-        title: `Program status updated to ${upperFirst(newStatus)}`,
+        title: `Program status updated to ${upperFirst(newStatus.toLowerCase())}`,
         description: 'The status has been successfully updated.',
         variant: 'solid',
         color: 'success',
@@ -128,7 +128,7 @@ const ProgramDetailsPage = () => {
   }
 
   const programDetails = [
-    { label: 'Status', value: upperFirst(program.status) },
+    { label: 'Status', value: upperFirst(program.status.toLowerCase()) },
     { label: 'Start Date', value: formatDate(program.startedAt) },
     { label: 'End Date', value: formatDate(program.endedAt) },
     { label: 'Mentees Limit', value: String(program.menteesLimit) },

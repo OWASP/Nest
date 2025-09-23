@@ -1,12 +1,12 @@
 'use client'
-
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { faFilter } from '@fortawesome/free-solid-svg-icons'
 import { Pagination } from '@heroui/react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
-import { GET_PROJECT_HEALTH_METRICS_LIST } from 'server/queries/projectsHealthDashboardQueries'
+import { Ordering } from 'types/__generated__/graphql'
+import { GetProjectHealthMetricsDocument } from 'types/__generated__/projectsHealthDashboardQueries.generated'
 import { DropDownSectionProps } from 'types/DropDownSectionProps'
 import { HealthMetricsProps } from 'types/healthMetrics'
 import { getKeysLabels } from 'utils/getKeysLabels'
@@ -54,11 +54,11 @@ const MetricsPage: FC = () => {
 
   let currentFilters = {}
   let currentOrdering = {
-    score: 'DESC',
+    score: Ordering.Desc,
   }
   const healthFilter = searchParams.get('health')
   const levelFilter = searchParams.get('level')
-  const orderingParam = searchParams.get('order')
+  const orderingParam = searchParams.get('order') as Ordering
   const currentFilterKeys = []
   if (healthFilter) {
     currentFilters = {
@@ -75,7 +75,7 @@ const MetricsPage: FC = () => {
   }
   if (orderingParam) {
     currentOrdering = {
-      score: orderingParam.toUpperCase(),
+      score: orderingParam,
     }
   }
 
@@ -85,24 +85,27 @@ const MetricsPage: FC = () => {
   const [filters, setFilters] = useState(currentFilters)
   const [ordering, setOrdering] = useState(
     currentOrdering || {
-      score: 'DESC',
+      score: Ordering.Desc,
     }
   )
   const [activeFilters, setActiveFilters] = useState(currentFilterKeys)
-  const [activeOrdering, setActiveOrdering] = useState(orderingParam ? [orderingParam] : ['desc'])
+  const [activeOrdering, setActiveOrdering] = useState(
+    orderingParam ? [orderingParam] : [Ordering.Desc]
+  )
   const {
     data,
     error: graphQLRequestError,
     loading,
     fetchMore,
-  } = useQuery(GET_PROJECT_HEALTH_METRICS_LIST, {
+  } = useQuery(GetProjectHealthMetricsDocument, {
     variables: {
       filters,
       pagination: { offset: 0, limit: PAGINATION_LIMIT },
       ordering: [
         ordering,
         {
-          ['project_Name']: 'ASC',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          project_Name: Ordering.Asc,
         },
       ],
     },
@@ -203,13 +206,13 @@ const MetricsPage: FC = () => {
             selectionMode="single"
             selectedKeys={activeOrdering}
             selectedLabels={getKeysLabels(orderingSections, activeOrdering)}
-            onAction={(key: string) => {
+            onAction={(key: Ordering) => {
               // Reset pagination to the first page when changing ordering
               setPagination({ offset: 0, limit: PAGINATION_LIMIT })
               const newParams = new URLSearchParams(searchParams.toString())
               newParams.set('order', key)
               setOrdering({
-                score: key.toUpperCase(),
+                score: key,
               })
               setActiveOrdering([key])
               router.replace(`/projects/dashboard/metrics?${newParams.toString()}`)
@@ -254,7 +257,8 @@ const MetricsPage: FC = () => {
                     ordering: [
                       ordering,
                       {
-                        ['project_Name']: 'ASC',
+                        // eslint-disable-next-line @typescript-eslint/naming-convention
+                        project_Name: Ordering.Asc,
                       },
                     ],
                   },

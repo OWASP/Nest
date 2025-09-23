@@ -1,6 +1,5 @@
 'use client'
-
-import { useMutation } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
@@ -19,7 +18,7 @@ const CreateProgramPage = () => {
 
   const [redirected, setRedirected] = useState(false)
 
-  const [createProgram, { loading }] = useMutation(CREATE_PROGRAM)
+  const [createProgram, { loading }] = useMutation(CREATE_PROGRAM) // TODO: update
 
   const [formData, setFormData] = useState({
     name: '',

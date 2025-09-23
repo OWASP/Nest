@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { screen, waitFor, fireEvent } from '@testing-library/react'
 import { act } from 'react'
@@ -14,8 +14,8 @@ jest.mock('next/navigation', () => ({
   useRouter: jest.fn(() => mockRouter),
 }))
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
 }))
 
@@ -40,7 +40,7 @@ const mockSnapshots = [
 
 describe('SnapshotsPage', () => {
   beforeEach(() => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: { snapshots: mockSnapshots },
       error: null,
     })
@@ -51,7 +51,7 @@ describe('SnapshotsPage', () => {
   })
 
   it('renders loading spinner initially', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: null,
     })
@@ -74,7 +74,7 @@ describe('SnapshotsPage', () => {
   })
 
   it('renders "No Snapshots found" when no snapshots are available', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: { snapshots: [] },
       error: null,
     })
@@ -87,7 +87,7 @@ describe('SnapshotsPage', () => {
   })
 
   it('shows an error toaster when GraphQL request fails', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: new Error('GraphQL error'),
     })

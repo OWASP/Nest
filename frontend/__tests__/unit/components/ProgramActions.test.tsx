@@ -2,6 +2,7 @@ import { fireEvent, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { useSession as mockUseSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
+import { ProgramStatusEnum } from 'types/__generated__/graphql'
 import ProgramActions from 'components/ProgramActions'
 
 const mockPush = jest.fn()
@@ -65,7 +66,7 @@ describe('ProgramActions', () => {
     const button = screen.getByTestId('program-actions-button')
     fireEvent.click(button)
     fireEvent.click(screen.getByRole('menuitem', { name: /publish program/i }))
-    expect(setStatus).toHaveBeenCalledWith('PUBLISHED')
+    expect(setStatus).toHaveBeenCalledWith(ProgramStatusEnum.Published)
     expect(mockPush).not.toHaveBeenCalled()
   })
 
@@ -74,7 +75,7 @@ describe('ProgramActions', () => {
     const button = screen.getByTestId('program-actions-button')
     fireEvent.click(button)
     fireEvent.click(screen.getByRole('menuitem', { name: /move to draft/i }))
-    expect(setStatus).toHaveBeenCalledWith('DRAFT')
+    expect(setStatus).toHaveBeenCalledWith(ProgramStatusEnum.Draft)
   })
 
   test('handles Mark as Completed action', () => {
@@ -82,7 +83,7 @@ describe('ProgramActions', () => {
     const button = screen.getByTestId('program-actions-button')
     fireEvent.click(button)
     fireEvent.click(screen.getByRole('menuitem', { name: /mark as completed/i }))
-    expect(setStatus).toHaveBeenCalledWith('COMPLETED')
+    expect(setStatus).toHaveBeenCalledWith(ProgramStatusEnum.Completed)
   })
 
   test('dropdown closes on outside click', () => {

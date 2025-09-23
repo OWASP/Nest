@@ -1,12 +1,12 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { screen, waitFor } from '@testing-library/react'
 import mockProgramDetailsData from '@unit/data/mockProgramData'
 import { render } from 'wrappers/testUtil'
 import ProgramDetailsPage from 'app/my/mentorship/programs/[programKey]/page'
 import '@testing-library/jest-dom'
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
   useMutation: jest.fn(() => [jest.fn()]),
 }))
@@ -20,7 +20,7 @@ jest.mock('next/navigation', () => ({
 
 describe('ProgramDetailsPage', () => {
   beforeEach(() => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockProgramDetailsData,
       loading: false,
       refetch: jest.fn(),
@@ -32,7 +32,7 @@ describe('ProgramDetailsPage', () => {
   })
 
   test('renders loading spinner when loading', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: true,
       data: null,
     })
@@ -45,7 +45,7 @@ describe('ProgramDetailsPage', () => {
   })
 
   test('renders 404 if no program found', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: { program: null },
     })
