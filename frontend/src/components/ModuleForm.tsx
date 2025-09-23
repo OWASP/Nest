@@ -5,6 +5,7 @@ import debounce from 'lodash/debounce'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import { SearchProjectNamesDocument } from 'types/__generated__/projectQueries.generated'
 
 interface ModuleFormProps {
@@ -29,10 +30,10 @@ interface ModuleFormProps {
 }
 
 const EXPERIENCE_LEVELS = [
-  { key: 'BEGINNER', label: 'Beginner' },
-  { key: 'INTERMEDIATE', label: 'Intermediate' },
-  { key: 'ADVANCED', label: 'Advanced' },
-  { key: 'EXPERT', label: 'Expert' },
+  { key: ExperienceLevelEnum.Beginner, label: 'Beginner' },
+  { key: ExperienceLevelEnum.Intermediate, label: 'Intermediate' },
+  { key: ExperienceLevelEnum.Advanced, label: 'Advanced' },
+  { key: ExperienceLevelEnum.Expert, label: 'Expert' },
 ]
 
 const ModuleForm = ({

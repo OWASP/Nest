@@ -4,6 +4,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import EditModulePage from 'app/my/mentorship/programs/[programKey]/modules/[moduleKey]/edit/page'
+import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 
 // Mocks
 jest.mock('next-auth/react', () => ({
@@ -67,7 +68,7 @@ describe('EditModulePage', () => {
         getModule: {
           name: 'Existing Module',
           description: 'Old description',
-          experienceLevel: 'INTERMEDIATE',
+          experienceLevel: ExperienceLevelEnum.Intermediate,
           startedAt: '2025-07-01',
           endedAt: '2025-07-31',
           domains: ['AI'],

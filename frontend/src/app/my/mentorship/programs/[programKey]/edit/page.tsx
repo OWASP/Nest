@@ -7,6 +7,7 @@ import type React from 'react'
 import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UPDATE_PROGRAM } from 'server/mutations/programsMutations'
+import { ProgramStatusEnum } from 'types/__generated__/graphql'
 import { GetProgramDetailsDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import { formatDateForInput } from 'utils/dateFormatter'
@@ -37,7 +38,7 @@ const EditProgramPage = () => {
     tags: '',
     domains: '',
     adminLogins: '',
-    status: 'DRAFT',
+    status: ProgramStatusEnum.Draft,
   })
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
   useEffect(() => {
@@ -81,7 +82,7 @@ const EditProgramPage = () => {
         adminLogins: (program.admins || [])
           .map((admin: { login: string }) => admin.login)
           .join(', '),
-        status: program.status || 'DRAFT',
+        status: program.status || ProgramStatusEnum.Draft,
       })
     } else if (error) {
       handleAppError(error)

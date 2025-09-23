@@ -2,12 +2,6 @@ import type { Contributor } from 'types/contributor'
 // eslint-disable-next-line no-restricted-imports
 import { ExperienceLevelEnum, ProgramStatusEnum } from './__generated__/graphql'
 
-export const EXPERIENCE_LEVELS = {
-  BEGINNER: 'BEGINNER',
-  INTERMEDIATE: 'INTERMEDIATE',
-  ADVANCED: 'ADVANCED',
-}
-
 // Main Program type
 export type Program = {
   id: string

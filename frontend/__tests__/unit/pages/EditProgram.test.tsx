@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import EditProgramPage from 'app/my/mentorship/programs/[programKey]/edit/page'
+import { ProgramStatusEnum } from 'types/__generated__/graphql'
 
 jest.mock('next-auth/react', () => ({
   useSession: jest.fn(),
@@ -80,7 +81,7 @@ describe('EditProgramPage', () => {
           tags: ['react', 'js'],
           domains: ['web'],
           admins: [{ login: 'admin1' }],
-          status: 'DRAFT',
+          status: ProgramStatusEnum.Draft,
         },
       },
     })

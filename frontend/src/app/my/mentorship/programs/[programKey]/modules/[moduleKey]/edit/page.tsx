@@ -6,9 +6,10 @@ import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { UPDATE_MODULE } from 'server/mutations/moduleMutations'
+import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import type { ExtendedSession } from 'types/auth'
-import { EXPERIENCE_LEVELS, type ModuleFormData } from 'types/mentorship'
+import type { ModuleFormData } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -75,7 +76,7 @@ const EditModulePage = () => {
       setFormData({
         name: m.name || '',
         description: m.description || '',
-        experienceLevel: m.experienceLevel || EXPERIENCE_LEVELS.BEGINNER,
+        experienceLevel: m.experienceLevel || ExperienceLevelEnum.Beginner,
         startedAt: formatDateForInput(m.startedAt),
         endedAt: formatDateForInput(m.endedAt),
         domains: (m.domains || []).join(', '),

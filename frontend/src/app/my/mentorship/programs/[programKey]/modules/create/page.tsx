@@ -6,9 +6,9 @@ import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 import { ErrorDisplay } from 'app/global-error'
 import { CREATE_MODULE } from 'server/mutations/moduleMutations'
+import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import { GetProgramAdminDetailsDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
-import { EXPERIENCE_LEVELS } from 'types/mentorship'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
@@ -33,7 +33,7 @@ const CreateModulePage = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    experienceLevel: EXPERIENCE_LEVELS.BEGINNER,
+    experienceLevel: ExperienceLevelEnum.Beginner,
     startedAt: '',
     endedAt: '',
     domains: '',

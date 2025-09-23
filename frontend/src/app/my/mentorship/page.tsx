@@ -11,7 +11,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { GetMyProgramsDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 
-import { Program } from 'types/mentorship'
+import type { Program } from 'types/mentorship'
 import ActionButton from 'components/ActionButton'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramCard from 'components/ProgramCard'
