@@ -6,7 +6,10 @@ import { format, addDays } from 'date-fns'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
 import ApiKeysPage from 'app/settings/api-keys/page'
-import { CREATE_API_KEY, REVOKE_API_KEY } from 'server/queries/apiKeyQueries'
+import {
+  CreateApiKeyDocument,
+  RevokeApiKeyDocument,
+} from 'types/__generated__/apiKeyQueries.generated'
 
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
@@ -65,10 +68,10 @@ describe('ApiKeysPage Component', () => {
     })
 
     mockUseMutation.mockImplementation((mutation) => {
-      if (mutation === CREATE_API_KEY) {
+      if (mutation === CreateApiKeyDocument) {
         return [mockCreateMutation, { loading: false }]
       }
-      if (mutation === REVOKE_API_KEY) {
+      if (mutation === RevokeApiKeyDocument) {
         return [mockRevokeMutation, { loading: false }]
       }
       return [jest.fn(), { loading: false }]
@@ -169,7 +172,7 @@ describe('ApiKeysPage Component', () => {
       expect(mockCreateMutation).toHaveBeenCalledWith({
         variables: expect.objectContaining({
           name: expectedVariables.name,
-          expiresAt: expect.any(Date),
+          expiresAt: expect.any(String),
         }),
       })
     })
@@ -196,7 +199,7 @@ describe('ApiKeysPage Component', () => {
       expect(mockCreateMutation).toHaveBeenCalledWith({
         variables: {
           name: 'Test Key with Expiry',
-          expiresAt: new Date('2025-12-31'),
+          expiresAt: new Date('2025-12-31T00:00:00.000Z').toISOString(),
         },
       })
     })

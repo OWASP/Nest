@@ -6,8 +6,11 @@ import { useRouter } from 'next/navigation'
 import { act } from 'react'
 import { render } from 'wrappers/testUtil'
 import About from 'app/about/page'
-import { GET_PROJECT_METADATA, GET_TOP_CONTRIBUTORS } from 'server/queries/projectQueries'
-import { GET_LEADER_DATA } from 'server/queries/userQueries'
+import {
+  GetProjectMetadataDocument,
+  GetTopContributorsDocument,
+} from 'types/__generated__/projectQueries.generated'
+import { GetLeaderDataDocument } from 'types/__generated__/userQueries.generated'
 
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
@@ -116,15 +119,15 @@ describe('About Component', () => {
     ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
       const key = options?.variables?.key
 
-      if (query === GET_PROJECT_METADATA) {
+      if (query === GetProjectMetadataDocument) {
         if (key === 'nest') {
           return mockProjectData
         }
-      } else if (query === GET_TOP_CONTRIBUTORS) {
+      } else if (query === GetTopContributorsDocument) {
         if (key === 'nest') {
           return mockTopContributorsData
         }
-      } else if (query === GET_LEADER_DATA) {
+      } else if (query === GetLeaderDataDocument) {
         return mockUserData(key)
       }
 
@@ -530,7 +533,7 @@ describe('About Component', () => {
 
   test('triggers toaster error when GraphQL request fails for project', async () => {
     ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      if (query === GET_PROJECT_METADATA && options?.variables?.key === 'nest') {
+      if (query === GetProjectMetadataDocument && options?.variables?.key === 'nest') {
         return { loading: false, data: null, error: new Error('GraphQL error') }
       }
       return {
@@ -556,7 +559,7 @@ describe('About Component', () => {
 
   test('triggers toaster error when GraphQL request fails for topContributors', async () => {
     ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      if (query === GET_TOP_CONTRIBUTORS && options?.variables?.key === 'nest') {
+      if (query === GetTopContributorsDocument && options?.variables?.key === 'nest') {
         return { loading: false, data: null, error: new Error('GraphQL error') }
       }
       return {

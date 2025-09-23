@@ -26,8 +26,8 @@ describe('generateProfilePageStructuredData', () => {
     expect(result).toEqual({
       '@context': 'https://schema.org',
       '@type': 'ProfilePage',
-      dateCreated: '1970-01-01T00:33:40.000Z',
-      dateModified: '1970-01-01T00:33:41.000Z',
+      dateCreated: '2020-01-01T00:00:00.000Z',
+      dateModified: '2021-02-03T00:00:00.000Z',
       mainEntity: {
         '@type': 'Person',
         address: 'San Francisco, CA, USA',

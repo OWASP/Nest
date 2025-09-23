@@ -80,7 +80,7 @@ const ProgramDetailsPage = () => {
       })
 
       addToast({
-        title: `Program status updated to ${upperFirst(newStatus)}`,
+        title: `Program status updated to ${upperFirst(newStatus.toLowerCase())}`,
         description: 'The status has been successfully updated.',
         variant: 'solid',
         color: 'success',
@@ -128,9 +128,9 @@ const ProgramDetailsPage = () => {
   }
 
   const programDetails = [
-    { label: 'Status', value: upperFirst(program.status) },
-    { label: 'Start Date', value: formatDate(program.startedAt as string) },
-    { label: 'End Date', value: formatDate(program.endedAt as string) },
+    { label: 'Status', value: upperFirst(program.status.toLowerCase()) },
+    { label: 'Start Date', value: formatDate(program.startedAt) },
+    { label: 'End Date', value: formatDate(program.endedAt) },
     { label: 'Mentees Limit', value: String(program.menteesLimit) },
     {
       label: 'Experience Levels',

@@ -7,7 +7,7 @@ export const mockPrograms = [
     description: 'This is a summary of Program 1.',
     startedAt: '2025-01-01',
     endedAt: '2025-12-31',
-    status: 'published',
+    status: ProgramStatusEnum.Published,
     modules: ['Module A', 'Module B'],
   },
 ]
