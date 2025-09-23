@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { useQuery, useMutation } from '@apollo/client'
+import { useQuery, useMutation } from '@apollo/client/react'
 import { screen, waitFor, fireEvent, within } from '@testing-library/react'
 import { mockApiKeys, mockCreateApiKeyResult } from '@unit/data/mockApiKeysData'
 import { format, addDays } from 'date-fns'
@@ -8,8 +8,8 @@ import { render } from 'wrappers/testUtil'
 import ApiKeysPage from 'app/settings/api-keys/page'
 import { CREATE_API_KEY, REVOKE_API_KEY } from 'server/queries/apiKeyQueries'
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
   useMutation: jest.fn(),
 }))
@@ -48,8 +48,8 @@ jest.mock('next/navigation', () => ({
 }))
 
 describe('ApiKeysPage Component', () => {
-  const mockUseQuery = useQuery as jest.Mock
-  const mockUseMutation = useMutation as jest.Mock
+  const mockUseQuery = useQuery as unknown as jest.Mock
+  const mockUseMutation = useMutation as unknown as jest.Mock
   const mockRefetch = jest.fn()
   const mockCreateMutation = jest.fn().mockResolvedValue(mockCreateApiKeyResult)
   const mockRevokeMutation = jest

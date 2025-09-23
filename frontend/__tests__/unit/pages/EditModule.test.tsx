@@ -1,4 +1,5 @@
-import { useQuery, useMutation, useApolloClient } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
+import { useApolloClient } from '@apollo/client/react'
 import { screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
@@ -16,16 +17,16 @@ jest.mock('next/navigation', () => ({
   useParams: jest.fn(),
 }))
 
-jest.mock('@apollo/client', () => {
-  const actual = jest.requireActual('@apollo/client')
-  return {
-    ...actual,
-    useQuery: jest.fn(),
-    useMutation: jest.fn(),
-    useApolloClient: jest.fn(),
-    gql: actual.gql,
-  }
-})
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
+  useMutation: jest.fn(),
+  useQuery: jest.fn(),
+}))
+
+jest.mock('@apollo/client', () => ({
+  useApolloClient: jest.fn(),
+  gql: jest.requireActual('@apollo/client').gql,
+}))
 
 describe('EditModulePage', () => {
   const mockPush = jest.fn()
@@ -59,7 +60,7 @@ describe('EditModulePage', () => {
       data: { user: { login: 'admin-user' } },
       status: 'authenticated',
     })
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
         getProgram: {
@@ -79,7 +80,7 @@ describe('EditModulePage', () => {
         },
       },
     })
-    ;(useMutation as jest.Mock).mockReturnValue([
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([
       mockUpdateModule.mockResolvedValue({}),
       { loading: false },
     ])
@@ -123,7 +124,7 @@ describe('EditModulePage', () => {
       data: null,
       status: 'loading',
     })
-    ;(useQuery as jest.Mock).mockReturnValue({ loading: true })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({ loading: true })
 
     render(<EditModulePage />)
 

@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { render, screen, waitFor } from '@testing-library/react'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
@@ -11,8 +11,8 @@ jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
   useParams: jest.fn(),
 }))
-jest.mock('@apollo/client', () => {
-  const actual = jest.requireActual('@apollo/client')
+jest.mock('@apollo/client/react', () => {
+  const actual = jest.requireActual('@apollo/client/react')
   return {
     ...actual,
     useMutation: jest.fn(() => [jest.fn(), { loading: false }]),
@@ -35,7 +35,7 @@ describe('EditProgramPage', () => {
 
   test('shows loading spinner while checking access', () => {
     ;(useSession as jest.Mock).mockReturnValue({ status: 'loading' })
-    ;(useQuery as jest.Mock).mockReturnValue({ loading: true })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({ loading: true })
 
     render(<EditProgramPage />)
 
@@ -47,7 +47,7 @@ describe('EditProgramPage', () => {
       data: { user: { login: 'nonadmin' } },
       status: 'authenticated',
     })
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
         getProgram: {
@@ -68,7 +68,7 @@ describe('EditProgramPage', () => {
       data: { user: { login: 'admin1' } },
       status: 'authenticated',
     })
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
         getProgram: {

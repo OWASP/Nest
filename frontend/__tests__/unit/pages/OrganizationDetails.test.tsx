@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { screen, waitFor } from '@testing-library/react'
 import { mockOrganizationDetailsData } from '@unit/data/mockOrganizationData'
@@ -7,8 +7,8 @@ import OrganizationDetailsPage from 'app/organizations/[organizationKey]/page'
 import { formatDate } from 'utils/dateFormatter'
 import '@testing-library/jest-dom'
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
 }))
 
@@ -36,7 +36,7 @@ const mockError = {
 
 describe('OrganizationDetailsPage', () => {
   beforeEach(() => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockOrganizationDetailsData,
       loading: false,
       error: null,
@@ -48,7 +48,7 @@ describe('OrganizationDetailsPage', () => {
   })
 
   test('renders loading state', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: null,
     })
@@ -62,7 +62,7 @@ describe('OrganizationDetailsPage', () => {
   })
 
   test('renders organization details when data is available', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockOrganizationDetailsData,
       error: null,
     })
@@ -130,7 +130,7 @@ describe('OrganizationDetailsPage', () => {
       ...mockOrganizationDetailsData,
       recentReleases: [],
     }
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: noReleasesData,
       loading: false,
       error: null,
@@ -148,7 +148,7 @@ describe('OrganizationDetailsPage', () => {
       recentMilestones: [],
     }
 
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: noMilestones,
       loading: false,
       error: null,
@@ -181,7 +181,7 @@ describe('OrganizationDetailsPage', () => {
   })
 
   test('displays error message when there is a GraphQL error', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: undefined,
       error: mockError,
     })
@@ -201,7 +201,7 @@ describe('OrganizationDetailsPage', () => {
     })
   })
   test('does not render sponsor block', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockOrganizationDetailsData,
       error: null,
     })

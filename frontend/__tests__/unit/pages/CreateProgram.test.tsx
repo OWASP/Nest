@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { useRouter as mockUseRouter } from 'next/navigation'
@@ -6,8 +6,8 @@ import { useSession as mockUseSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import CreateProgramPage from 'app/my/mentorship/programs/create/page'
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useMutation: jest.fn(),
 }))
 
@@ -34,7 +34,7 @@ describe('CreateProgramPage (comprehensive tests)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(mockUseRouter as jest.Mock).mockReturnValue({ push: mockRouterPush })
-    ;(useMutation as jest.Mock).mockReturnValue([mockCreateProgram, { loading: false }])
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([mockCreateProgram, { loading: false }])
   })
 
   test('redirects if unauthenticated', async () => {

@@ -1,8 +1,8 @@
-import type { UserDetails } from 'types/user'
+import { User } from 'types/user'
 import { generateProfilePageStructuredData } from 'utils/structuredData'
 
 describe('generateProfilePageStructuredData', () => {
-  const mockUser: UserDetails = {
+  const mockUser: User = {
     avatarUrl: 'https://example.com/avatar.jpg',
     bio: 'Security researcher and OWASP contributor',
     company: 'Security Corp',
@@ -58,7 +58,7 @@ describe('generateProfilePageStructuredData', () => {
   })
 
   it('should handle user without optional fields', () => {
-    const minimalUser: UserDetails = {
+    const minimalUser: User = {
       avatarUrl: 'https://example.com/avatar.jpg',
       contributionsCount: 0,
       createdAt: '2020-01-01T00:00:00Z',
