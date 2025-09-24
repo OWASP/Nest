@@ -56,3 +56,15 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "enable_alb_access_logs" {
+  description = "Set to true to enable access logging for the Application Load Balancer."
+  type        = bool
+  default     = true
+}
+
+variable "alb_access_logs_bucket_name" {
+  description = "The name of the S3 bucket to store ALB access logs. Must be globally unique. If left empty, a name will be generated."
+  type        = string
+  default     = ""
+}

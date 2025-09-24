@@ -136,6 +136,50 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private.id
 }
 
+#  S3 Bucket for ALB Access Logs 
+
+resource "aws_s3_bucket" "alb_access_logs" {
+  # Only create this bucket if logging is enabled
+  count = var.enable_alb_access_logs ? 1 : 0
+
+  # If a specific name is provided, use it. Otherwise, generate a unique name.
+  bucket = var.alb_access_logs_bucket_name != "" ? var.alb_access_logs_bucket_name : "${var.project_prefix}-${var.environment}-alb-access-logs-${random_id.this.hex}"
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.project_prefix}-${var.environment}-alb-access-logs"
+    }
+  )
+}
+
+# This resource is needed to grant the ALB service permission to write to my S3 bucket.
+resource "aws_s3_bucket_policy" "alb_access_logs" {
+  count  = var.enable_alb_access_logs ? 1 : 0
+  bucket = aws_s3_bucket.alb_access_logs[0].id
+  policy = data.aws_iam_policy_document.alb_access_logs[0].json
+}
+
+# This data source constructs the required IAM policy document.
+data "aws_iam_policy_document" "alb_access_logs" {
+  count = var.enable_alb_access_logs ? 1 : 0
+
+  statement {
+    effect    = "Allow"
+    actions   = ["s3:PutObject"]
+    resources = ["${aws_s3_bucket.alb_access_logs[0].arn}/AWSLogs/AWS-ACCOUNT-ID/*"] # AWS-ACCOUNT-ID will be interpolated by AWS
+    principals {
+      type        = "AWS"
+      identifiers = ["elb-account-id.amazonaws.com"] # This is a placeholder for the regional ELB service account ID
+    }
+  }
+}
+
+# Need a random_id to ensure the S3 bucket name is unique if not provided
+resource "random_id" "this" {
+  byte_length = 4
+}
+
 #  Application Load Balancer 
 
 resource "aws_security_group" "alb" {
@@ -186,6 +230,12 @@ resource "aws_lb" "main" {
 
   # Deletion protection should be enabled via a variable for production.
   enable_deletion_protection = var.environment == "prod" ? true : false
+
+  access_logs {
+    bucket  = var.enable_alb_access_logs ? aws_s3_bucket.alb_access_logs[0].bucket : null
+    enabled = var.enable_alb_access_logs
+    prefix  = "alb"
+  }
 
   tags = merge(
     var.tags,
