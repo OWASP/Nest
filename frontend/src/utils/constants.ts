@@ -84,11 +84,11 @@ export const footerSections: Section[] = [
       { text: 'Google Summer of Code', href: 'https://owasp.org/gsoc' },
       {
         text: 'Start a Local Chapter',
-        href: 'https://owasporg.atlassian.net/servicedesk/customer/portal/8/group/20/create/90?src=-1419759666',
+        href: 'https://owasporg.atlassian.net/servicedesk/customer/portal/8/group/20/create/90',
       },
       {
         text: 'Start a New Project',
-        href: 'https://owasporg.atlassian.net/servicedesk/customer/portal/7/create/70?src=-1419759666',
+        href: 'https://owasporg.atlassian.net/servicedesk/customer/portal/43/group/55/create/209',
       },
     ],
   },
