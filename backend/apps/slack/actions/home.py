@@ -8,10 +8,20 @@ from slack_sdk.errors import SlackApiError
 
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import get_header, markdown
-from apps.slack.common.handlers import chapters, committees, contribute, google_sign_in, projects
+from apps.slack.common.handlers import (
+    calendar_events,
+    chapters,
+    committees,
+    contribute,
+    google_sign_in,
+    projects,
+)
 from apps.slack.common.presentation import EntityPresentation
 from apps.slack.constants import (
     SIGN_IN_TO_GOOGLE_ACTION,
+    VIEW_CALENDAR_EVENTS_ACTION,
+    VIEW_CALENDAR_EVENTS_ACTION_NEXT,
+    VIEW_CALENDAR_EVENTS_ACTION_PREV,
     VIEW_CHAPTERS_ACTION,
     VIEW_CHAPTERS_ACTION_NEXT,
     VIEW_CHAPTERS_ACTION_PREV,
@@ -24,6 +34,7 @@ from apps.slack.constants import (
     VIEW_PROJECTS_ACTION,
     VIEW_PROJECTS_ACTION_NEXT,
     VIEW_PROJECTS_ACTION_PREV,
+    VIEW_REMINDERS_ACTION,
 )
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -80,7 +91,16 @@ def handle_home_actions(ack, body, client: WebClient) -> None:
                 VIEW_CONTRIBUTE_ACTION_NEXT,
             }:
                 blocks = contribute.get_blocks(page=page, limit=10, presentation=home_presentation)
-
+            case action if action in {
+                VIEW_CALENDAR_EVENTS_ACTION,
+                VIEW_CALENDAR_EVENTS_ACTION_PREV,
+                VIEW_CALENDAR_EVENTS_ACTION_NEXT,
+            }:
+                blocks = calendar_events.get_events_blocks(
+                    slack_user_id=user_id,
+                    page=page,
+                    presentation=home_presentation,
+                )
             case action if action == SIGN_IN_TO_GOOGLE_ACTION:
                 try:
                     blocks = google_sign_in.get_blocks(slack_user_id=user_id)
@@ -88,6 +108,8 @@ def handle_home_actions(ack, body, client: WebClient) -> None:
                     blocks = [markdown("Error signing in with Google")]
                     logger.exception("Google authentication error for user {user_id}")
 
+            case action if action == VIEW_REMINDERS_ACTION:
+                blocks = calendar_events.get_reminders_blocks(slack_user_id=user_id)
             case _:
                 blocks = [markdown("Invalid action, please try again.")]
 
@@ -118,9 +140,13 @@ if SlackConfig.app:
         VIEW_CONTRIBUTE_ACTION_NEXT,
         VIEW_CONTRIBUTE_ACTION_PREV,
         VIEW_CONTRIBUTE_ACTION,
+        VIEW_CALENDAR_EVENTS_ACTION_NEXT,
+        VIEW_CALENDAR_EVENTS_ACTION_PREV,
+        VIEW_CALENDAR_EVENTS_ACTION,
         VIEW_PROJECTS_ACTION_NEXT,
         VIEW_PROJECTS_ACTION_PREV,
         VIEW_PROJECTS_ACTION,
+        VIEW_REMINDERS_ACTION,
     )
     for action in actions:
         SlackConfig.app.action(action)(handle_home_actions)

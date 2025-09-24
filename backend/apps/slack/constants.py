@@ -26,9 +26,15 @@ OWASP_WORKSPACE_ID = "T04T40NHX"
 
 SIGN_IN_TO_GOOGLE_ACTION = "sign_in_to_google_action"
 
+VIEW_CALENDAR_EVENTS_ACTION = "view_calendar_events_action"
+VIEW_CALENDAR_EVENTS_ACTION_NEXT = "view_calendar_events_action_next"
+VIEW_CALENDAR_EVENTS_ACTION_PREV = "view_calendar_events_action_prev"
+
 VIEW_PROJECTS_ACTION = "view_projects_action"
 VIEW_PROJECTS_ACTION_NEXT = "view_projects_action_next"
 VIEW_PROJECTS_ACTION_PREV = "view_projects_action_prev"
+
+VIEW_REMINDERS_ACTION = "view_reminders_action"
 
 VIEW_COMMITTEES_ACTION = "view_committees_action"
 VIEW_COMMITTEES_ACTION_NEXT = "view_committees_action_next"

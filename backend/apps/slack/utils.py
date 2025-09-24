@@ -12,6 +12,7 @@ from urllib.parse import urljoin
 if TYPE_CHECKING:  # pragma: no cover
     from django.db.models import QuerySet
 
+
 import requests
 import yaml
 from lxml import html

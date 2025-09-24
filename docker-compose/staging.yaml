@@ -16,6 +16,48 @@ services:
     volumes:
       - ./backend/data:/home/owasp/data
 
+  staging-nest-worker:
+    container_name: staging-nest-worker
+    image: owasp/nest:backend-staging
+    env_file: .env.backend
+    command: >
+      sh -c '
+        python manage.py rqworker
+      '
+    depends_on:
+      staging-nest-cache:
+        condition: service_healthy
+      staging-nest-db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - nest-app-network
+      - nest-cache-network
+      - nest-db-network
+    volumes:
+      - ./backend/data:/home/owasp/data
+
+  staging-nest-scheduler:
+    container_name: staging-nest-scheduler
+    image: owasp/nest:backend-staging
+    env_file: .env.backend
+    command: >
+      sh -c '
+        python manage.py rqscheduler
+      '
+    depends_on:
+      staging-nest-cache:
+        condition: service_healthy
+      staging-nest-db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - nest-app-network
+      - nest-cache-network
+      - nest-db-network
+    volumes:
+      - ./backend/data:/home/owasp/data
+
   staging-nest-cache:
     container_name: staging-nest-cache
     image: redis:7.2.7-alpine3.21

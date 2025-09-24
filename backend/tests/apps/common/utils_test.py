@@ -3,16 +3,19 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.conf import settings
+from django.utils import timezone
 
 from apps.common.utils import (
     clean_url,
     convert_to_camel_case,
+    convert_to_local,
     convert_to_snake_case,
     get_absolute_url,
     get_user_ip_address,
     join_values,
     natural_date,
     natural_number,
+    parse_date,
     round_down,
     validate_url,
 )
@@ -196,3 +199,34 @@ class TestUtils:
         """Test the validate_url function."""
         result = validate_url(url)
         assert result == expected
+
+    @pytest.mark.parametrize(
+        ("date_str", "expected"),
+        [
+            ("2025-05-26T09:00:00", timezone.datetime(2025, 5, 26, 9, 0, 0)),
+            ("2025-12-31T23:59:59", timezone.datetime(2025, 12, 31, 23, 59, 59)),
+            ("2025-01-01T00:00:00", timezone.datetime(2025, 1, 1, 0, 0, 0)),
+        ],
+    )
+    def test_parse_date(self, date_str, expected):
+        assert parse_date(date_str) == expected
+
+    @pytest.mark.parametrize(
+        ("date_obj", "expected"),
+        [
+            (
+                timezone.datetime(2025, 5, 26, 9, 0, 0),
+                timezone.datetime(2025, 5, 26, 9, 0, 0, tzinfo=UTC),
+            ),
+            (
+                timezone.datetime(2025, 12, 31, 23, 59, 59),
+                timezone.datetime(2025, 12, 31, 23, 59, 59, tzinfo=UTC),
+            ),
+            (
+                timezone.datetime(2025, 1, 1, 0, 0, 0),  # Naive datetime
+                timezone.datetime(2025, 1, 1, 0, 0, 0, tzinfo=UTC),
+            ),
+        ],
+    )
+    def test_convert_to_local(self, date_obj, expected):
+        assert convert_to_local(date_obj) == expected

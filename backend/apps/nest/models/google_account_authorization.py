@@ -156,11 +156,32 @@ class GoogleAccountAuthorization(models.Model):
         return get_google_auth_client()
 
     @property
+    def credentials(self):
+        """The Google API credentials."""
+        if not settings.IS_GOOGLE_AUTH_ENABLED:
+            raise ValueError(AUTH_ERROR_MESSAGE)
+        return Credentials(
+            token=self.access_token,
+            refresh_token=self.refresh_token,
+            scopes=self.scope,
+            # Google expects naive date in the request
+            expiry=self.naive_expires_at,
+            token_uri=settings.GOOGLE_AUTH_TOKEN_URI,
+            client_id=settings.GOOGLE_AUTH_CLIENT_ID,
+            client_secret=settings.GOOGLE_AUTH_CLIENT_SECRET,
+        )
+
+    @property
     def is_token_expired(self):
         """Check if the access token is expired."""
         return self.expires_at is None or self.expires_at <= timezone.now() + timezone.timedelta(
             seconds=60
         )
+
+    @property
+    def naive_expires_at(self):
+        """Get the naive datetime of token expiry."""
+        return timezone.make_naive(self.expires_at)
 
     @staticmethod
     def refresh_access_token(auth):

@@ -7,6 +7,12 @@ class ReminderSchedule(models.Model):
     """Model representing a reminder schedule."""
 
     class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["reminder", "scheduled_time"],
+                name="unique_reminder_schedule",
+            )
+        ]
         db_table = "nest_reminder_schedules"
         verbose_name = "Nest Reminder Schedule"
         verbose_name_plural = "Nest Reminder Schedules"
@@ -30,6 +36,30 @@ class ReminderSchedule(models.Model):
         choices=Recurrence.choices,
         default=Recurrence.ONCE,
     )
+
+    job_id = models.CharField(
+        verbose_name="Job ID",
+        max_length=255,
+        blank=True,
+        help_text="ID of the scheduled job in the task queue.",
+    )
+
+    @property
+    def cron_expression(self) -> str | None:
+        """Get cron expression for the scheduled time."""
+        time_str = f"{self.scheduled_time.minute} {self.scheduled_time.hour}"
+        match self.recurrence:
+            case self.Recurrence.DAILY:
+                return f"{time_str} * * *"
+            case self.Recurrence.WEEKLY:
+                # Mapping Python's weekday (0=Monday) to cron's (0=Sunday)
+                dow = (self.scheduled_time.weekday() + 1) % 7
+                return f"{time_str} * * {dow}"
+            case self.Recurrence.MONTHLY:
+                return f"{time_str} {self.scheduled_time.day} * *"
+            # For 'once' or any other case, return None
+            case _:
+                return None
 
     def __str__(self) -> str:
         """Reminder Schedule human readable representation."""

@@ -6,8 +6,10 @@ import re
 from datetime import UTC, datetime
 from urllib.parse import urlparse
 
+from dateutil import parser
 from django.conf import settings
 from django.template.defaultfilters import pluralize
+from django.utils import timezone
 from django.utils.text import Truncator
 from django.utils.text import slugify as django_slugify
 from humanize import intword, naturaltime
@@ -31,6 +33,42 @@ def convert_to_camel_case(text: str) -> str:
     segments.extend(word.capitalize() for word in parts[offset + 1 :])
 
     return "".join(segments)
+
+
+def parse_date(date_string: str | None) -> datetime | None:
+    """Parse a date string into a datetime object.
+
+    Args:
+        date_string (str | None): The date string to parse.
+
+    Returns:
+        datetime | None: The parsed datetime object, or None if input is None or invalid.
+
+    """
+    if not date_string:
+        return None
+    try:
+        return parser.parse(date_string)
+    except (ValueError, TypeError):
+        return None
+
+
+def convert_to_local(dt: datetime | None) -> datetime | None:
+    """Convert a datetime object to the local timezone.
+
+    Args:
+        dt (datetime | None): The datetime object to convert.
+
+    Returns:
+        datetime | None: The converted datetime object in the local timezone,
+        or None if the input is None.
+
+    """
+    if not dt:
+        return None
+    if timezone.is_naive(dt):
+        dt = timezone.make_aware(dt, timezone=UTC)
+    return timezone.localtime(dt)
 
 
 def convert_to_snake_case(text: str) -> str:
