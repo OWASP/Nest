@@ -73,8 +73,8 @@ resource "aws_eip" "nat" {
 }
 
 resource "aws_nat_gateway" "main" {
-  # Only one NAT Gateway, placed in the first public subnet for simplicity.
-  # As AWS automatically handles failover at the infrastructure level.
+# Cost-optimized: a single NAT Gateway in the first public subnet.
+# NOTE: This is a single-AZ SPOF for egress. A per-AZ NAT option could be added for higher availability.
   allocation_id = aws_eip.nat.id
   subnet_id     = aws_subnet.public[0].id
 
@@ -182,6 +182,7 @@ resource "aws_lb" "main" {
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]
   subnets            = aws_subnet.public[*].id
+  drop_invalid_header_fields = true
 
   # Deletion protection should be enabled via a variable for production.
   enable_deletion_protection = var.environment == "prod" ? true : false
@@ -213,7 +214,7 @@ resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.main.arn
   port              = 443
   protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
   certificate_arn   = var.acm_certificate_arn
 
   default_action {

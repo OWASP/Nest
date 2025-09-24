@@ -31,17 +31,17 @@ variable "public_subnet_cidrs" {
   description = "A list of CIDR blocks for the public subnets. The number of CIDRs must match the number of availability_zones."
   type        = list(string)
   validation {
-    condition     = length(var.public_subnet_cidrs) > 0
-    error_message = "At least one public subnet CIDR must be provided."
-  }
+  condition     = length(var.public_subnet_cidrs) > 0 && length(var.public_subnet_cidrs) == length(var.availability_zones)
+  error_message = "Provide at least one public subnet CIDR, and ensure its count matches availability_zones."
+}
 }
 
 variable "private_subnet_cidrs" {
   description = "A list of CIDR blocks for the private subnets. The number of CIDRs must match the number of availability_zones."
   type        = list(string)
   validation {
-    condition     = length(var.private_subnet_cidrs) > 0
-    error_message = "At least one private subnet CIDR must be provided."
+    condition     = length(var.private_subnet_cidrs) > 0 && length(var.private_subnet_cidrs) == length(var.availability_zones)
+    error_message = "Provide at least one private subnet CIDR, and ensure its count matches availability_zones."
   }
 }
 

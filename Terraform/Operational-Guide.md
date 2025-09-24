@@ -46,14 +46,27 @@ This infrastructure requires an S3 bucket and a DynamoDB table for managing Terr
 2.  **Create the S3 Bucket for Terraform State:**
     *This bucket will store the `.tfstate` file, which is Terraform's map of your infrastructure.*
     ```bash
-    aws s3api create-bucket \
-      --bucket ${TF_STATE_BUCKET} \
-      --region ${AWS_REGION} \
-      --create-bucket-configuration LocationConstraint=${AWS_REGION}
+    if [ "${AWS_REGION}" = "us-east-1" ]; then
+      aws s3api create-bucket --bucket "${TF_STATE_BUCKET}" --region "${AWS_REGION}"
+    else
+      aws s3api create-bucket \
+        --bucket "${TF_STATE_BUCKET}" \
+        --region "${AWS_REGION}" \
+        --create-bucket-configuration LocationConstraint=${AWS_REGION}
+    fi
 
     aws s3api put-bucket-versioning \
       --bucket ${TF_STATE_BUCKET} \
       --versioning-configuration Status=Enabled
+
+
+    aws s3api put-public-access-block \
+      --bucket "${TF_STATE_BUCKET}" \
+      --public-access-block-configuration 'BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true'
+
+    aws s3api put-bucket-encryption \
+      --bucket "${TF_STATE_BUCKET}" \
+      --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}'
     ```
 
 3.  **Create the DynamoDB Table for State Locking:**
@@ -108,7 +121,7 @@ To deploy an environment, navigate to its directory and run the standard Terrafo
 
 1.  **Navigate to the Environment Directory:**
     ```bash
-    cd terraform/environments/dev
+    cd Terraform/environments/Dev
     ```
 
 2.  **Create a `terraform.tfvars` file:**
