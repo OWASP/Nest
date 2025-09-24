@@ -61,6 +61,11 @@ features:
       url: https://nest.owasp.org/integrations/slack/commands/
       description: Check out available job opportunities
       should_escape: false
+    - command: /nestbot
+      url: https://nest.owasp.org/integrations/slack/commands/
+      description: NestBot root command
+      usage_hint: reminder set --channel <#channel> --minutes_before <minutes> --event_number <number>
+      should_escape: false
     - command: /sponsor
       url: https://nest.owasp.org/integrations/slack/commands/
       description: Coming soon
