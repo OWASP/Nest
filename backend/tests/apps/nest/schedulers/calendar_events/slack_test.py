@@ -21,6 +21,18 @@ class TestSlackScheduler:
         )
 
     @patch("apps.nest.schedulers.calendar_events.slack.SlackScheduler.send_message")
+    @patch("apps.nest.models.reminder_schedule.ReminderSchedule.objects.filter")
+    def test_send_and_delete(self, mock_filter, mock_send_message):
+        """Test sending a message and deleting it via Slack."""
+        mock_schedule = MagicMock()
+        mock_filter.return_value.first.return_value = mock_schedule
+        SlackScheduler.send_and_delete("Test Message", "C123456", 4)
+
+        mock_send_message.assert_called_once_with("Test Message", "C123456")
+        mock_filter.assert_called_once_with(pk=4)
+        mock_schedule.reminder.delete.assert_called_once()
+
+    @patch("apps.nest.schedulers.calendar_events.slack.SlackScheduler.send_message")
     @patch("apps.nest.schedulers.calendar_events.slack.update_reminder_schedule_date")
     def test_send_and_update(self, mock_update_reminder_schedule_date, mock_send_message):
         """Test sending a message and updating it via Slack."""
