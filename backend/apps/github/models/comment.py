@@ -18,6 +18,10 @@ class Comment(BulkSaveModel, TimestampedModel):
         ordering = ("-nest_created_at",)
 
     github_id = models.BigIntegerField(unique=True, verbose_name="Github ID")
+    created_at = models.DateTimeField(verbose_name="Created at", null=True, blank=True)
+    updated_at = models.DateTimeField(
+        verbose_name="Updated at", null=True, blank=True, db_index=True
+    )
     author = models.ForeignKey(
         "github.User", on_delete=models.SET_NULL, null=True, related_name="comments"
     )
@@ -35,6 +39,8 @@ class Comment(BulkSaveModel, TimestampedModel):
         """Populate fields from a GitHub API comment object."""
         field_mapping = {
             "body": "body",
+            "created_at": "created_at",
+            "updated_at": "updated_at",
         }
 
         for model_field, gh_field in field_mapping.items():

@@ -254,57 +254,30 @@ def sync_issue_comments(gh_client: Github, issue: Issue):
         gh_repository = gh_client.get_repo(repository.path)
         gh_issue = gh_repository.get_issue(number=issue.number)
 
-        since = issue.latest_comment.nest_created_at if issue.latest_comment else None
+        since = issue.comments.order_by("-updated_at").values_list(
+            "updated_at", flat=True
+        ).first() or getattr(issue, "updated_at", None)
 
-        existing_comments = {c.github_id: c for c in issue.comments.select_related("author").all()}
-        comments_to_save = []
-        comments_to_update = []
+        comments = []
 
-        # Since Used to tell GitHub to fetch comments created or updated after this time.
         gh_comments = gh_issue.get_comments(since=since) if since else gh_issue.get_comments()
 
         for gh_comment in gh_comments:
-            if existing_comment := existing_comments.get(gh_comment.id):
-                if author := User.update_data(gh_comment.user):
-                    existing_comment.from_github(gh_comment, author=author)
-                    comments_to_update.append(existing_comment)
-                    logger.info(
-                        "Prepared update for comment %s on issue #%s",
-                        gh_comment.id,
-                        issue.number,
-                    )
-                else:
-                    logger.warning("Could not sync author for comment update %s", gh_comment.id)
-            elif author := User.update_data(gh_comment.user):
-                comment = Comment.update_data(gh_comment, author=author, save=False)
-                comment.content_object = issue
-                comments_to_save.append(comment)
-                logger.info(
-                    "Prepared new comment %s for issue #%s",
-                    gh_comment.id,
-                    issue.number,
-                )
-            else:
+            author = User.update_data(gh_comment.user)
+            if not author:
                 logger.warning("Could not sync author for comment %s", gh_comment.id)
+                continue
 
-        if comments_to_save:
-            Comment.bulk_save(comments_to_save)
+            comment = Comment.update_data(gh_comment, author=author, save=False)
+            comment.content_object = issue
+            comments.append(comment)
+
+            Comment.bulk_save(comments)
             logger.info(
-                "Synced and associated %d new comments for issue #%s",
-                len(comments_to_save),
+                "%d comments for issue #%s",
+                len(comments),
                 issue.number,
             )
-
-        if comments_to_update:
-            Comment.bulk_save(comments_to_update)
-            logger.info(
-                "Updated %d existing comments for issue #%s",
-                len(comments_to_update),
-                issue.number,
-            )
-
-        if not comments_to_save and not comments_to_update:
-            logger.info("No new or updated comments found for issue #%s", issue.number)
 
     except UnknownObjectException as e:
         logger.warning(
