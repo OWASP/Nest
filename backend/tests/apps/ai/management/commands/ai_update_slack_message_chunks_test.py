@@ -4,6 +4,7 @@ import pytest
 from django.core.management.base import BaseCommand
 
 from apps.ai.management.commands.ai_update_slack_message_chunks import Command
+from apps.slack.models.message import Message
 
 
 @pytest.fixture
@@ -24,8 +25,6 @@ class TestAiCreateSlackMessageChunksCommand:
         assert isinstance(command, BaseCommand)
 
     def test_model_class_property(self, command):
-        from apps.slack.models.message import Message
-
         assert command.model_class == Message
 
     def test_entity_name_property(self, command):

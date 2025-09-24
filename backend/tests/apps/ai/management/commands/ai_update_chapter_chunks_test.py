@@ -4,6 +4,7 @@ import pytest
 from django.core.management.base import BaseCommand
 
 from apps.ai.management.commands.ai_update_chapter_chunks import Command
+from apps.owasp.models.chapter import Chapter
 
 
 @pytest.fixture
@@ -24,8 +25,6 @@ class TestAiCreateChapterChunksCommand:
         assert isinstance(command, BaseCommand)
 
     def test_model_class_property(self, command):
-        from apps.owasp.models.chapter import Chapter
-
         assert command.model_class == Chapter
 
     def test_entity_name_property(self, command):
