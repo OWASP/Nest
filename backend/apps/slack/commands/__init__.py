@@ -14,6 +14,7 @@ from . import (
     gsoc,
     jobs,
     leaders,
+    nestbot,
     news,
     owasp,
     policies,
