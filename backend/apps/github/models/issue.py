@@ -59,7 +59,7 @@ class Issue(GenericIssueModel):
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name="tasks",
+        related_name="issues",
         help_text="The difficulty level of this issue.",
     )
     milestone = models.ForeignKey(
