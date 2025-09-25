@@ -12,7 +12,6 @@ export const GET_LEADER_DATA = gql`
         name
         description
         cssClass
-        weight
       }
       badgeCount
     }
@@ -91,7 +90,6 @@ export const GET_USER_DATA = gql`
         description
         id
         name
-        weight
       }
       badgeCount
       publicRepositoriesCount

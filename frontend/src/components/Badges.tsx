@@ -23,19 +23,11 @@ const Badges = ({ name, cssClass, showTooltip = true }: BadgeProps) => {
     prefix: 'fas',
     iconName: cssClass.split(' ').pop().replace('fa-', '') as IconName,
   })
-  if (!iconDef) {
-    return (
-      <div className="inline-flex items-center">
-        <Tooltip content={name} isDisabled={!showTooltip}>
-          <FontAwesomeIconWrapper icon={'fa-question'} className="h-4 w-4" />
-        </Tooltip>
-      </div>
-    )
-  }
+
   return (
     <div className="inline-flex items-center">
       <Tooltip content={name} isDisabled={!showTooltip}>
-        <FontAwesomeIconWrapper icon={cssClass} className="h-4 w-4" />
+        <FontAwesomeIconWrapper icon={iconDef ? cssClass : 'fa-question'} className="h-4 w-4" />
       </Tooltip>
     </div>
   )

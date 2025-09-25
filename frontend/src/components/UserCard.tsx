@@ -13,8 +13,8 @@ import type { UserCardProps } from 'types/card'
 
 const UserCard = ({
   avatar,
-  button,
   badgeCount,
+  button,
   className,
   company,
   description,
