@@ -24,6 +24,19 @@ class TestCalendarEventsPermissions:
         mock_filter.assert_called_once_with(member=mock_member.user, role=EntityMember.Role.LEADER)
 
     @patch("apps.nest.auth.calendar_events.Member.objects.get")
+    @patch("apps.nest.auth.calendar_events.EntityMember.objects.filter")
+    def test_user_with_no_leader_role(self, mock_filter, mock_get):
+        """Test user with no leader role has no permission."""
+        mock_member = MagicMock()
+        mock_member.user = MagicMock()
+        mock_get.return_value = mock_member
+        mock_filter.return_value.exists.return_value = False
+
+        assert has_calendar_events_permission("U123456") is False
+        mock_get.assert_called_once_with(slack_user_id="U123456")
+        mock_filter.assert_called_once_with(member=mock_member.user, role=EntityMember.Role.LEADER)
+
+    @patch("apps.nest.auth.calendar_events.Member.objects.get")
     def test_user_not_found(self, mock_get):
         """Test user not found has no permission."""
         mock_get.side_effect = Member.DoesNotExist
