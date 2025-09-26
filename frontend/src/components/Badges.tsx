@@ -13,7 +13,7 @@ const Badges = ({ name, cssClass, showTooltip = true }: BadgeProps) => {
     return (
       <div className="inline-flex items-center">
         <Tooltip content={name} isDisabled={!showTooltip}>
-          <FontAwesomeIconWrapper icon={'fa-medal'} className="h-4 w-4" />
+          <FontAwesomeIconWrapper icon={'fa-solid fa-medal'} className="h-4 w-4" />
         </Tooltip>
       </div>
     )
@@ -28,12 +28,10 @@ const Badges = ({ name, cssClass, showTooltip = true }: BadgeProps) => {
     <div className="inline-flex items-center">
       <Tooltip content={name} isDisabled={!showTooltip}>
         <FontAwesomeIconWrapper
-          icon={iconDef ? `${prefix} fa-${iconName}` : 'fa-solid fa-question'}
+          icon={iconDef ? `fa-solid ${cssClass}` : 'fa-solid fa-question'}
           className="h-4 w-4"
         />
       </Tooltip>
-    </div>
-  )
     </div>
   )
 }
