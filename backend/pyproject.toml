@@ -19,6 +19,7 @@ django-configurations = "^2.5.1"
 django-cors-headers = "^4.7.0"
 django-ninja = "^1.4.3"
 django-redis = "^6.0.0"
+django-rq = "^3.1"
 django-storages = { extras = [ "s3" ], version = "^1.14.4" }
 emoji = "^2.14.1"
 geopy = "^2.4.1"
