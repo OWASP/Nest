@@ -138,12 +138,19 @@ resource "aws_route_table_association" "private" {
 
 #  S3 Bucket for ALB Access Logs 
 
+# This data source gets the AWS Account ID for the ELB service in the current region.
+data "aws_elb_service_account" "current" {}
+
+# This data source gets the current AWS Account ID for policy construction.
+data "aws_caller_identity" "current" {}
+
+# This is the primary bucket where the ALB will store its access logs.
 resource "aws_s3_bucket" "alb_access_logs" {
   # Only create this bucket if logging is enabled
   count = var.enable_alb_access_logs ? 1 : 0
 
   # If a specific name is provided, use it. Otherwise, generate a unique name.
-  bucket = var.alb_access_logs_bucket_name != "" ? var.alb_access_logs_bucket_name : "${var.project_prefix}-${var.environment}-alb-access-logs-${random_id.this.hex}"
+  bucket = var.alb_access_logs_bucket_name != "" ? var.alb_access_logs_bucket_name : "${var.project_prefix}-${var.environment}-alb-access-logs-${data.aws_caller_identity.current.account_id}"
 
   tags = merge(
     var.tags,
@@ -153,6 +160,75 @@ resource "aws_s3_bucket" "alb_access_logs" {
   )
 }
 
+resource "aws_s3_bucket_public_access_block" "alb_access_logs" {
+  count  = var.enable_alb_access_logs ? 1 : 0
+  bucket = aws_s3_bucket.alb_access_logs[0].id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# This is a SECOND bucket, used to store the access logs FOR the first bucket.
+resource "aws_s3_bucket" "s3_server_access_logs" {
+  count = var.enable_alb_access_logs ? 1 : 0
+
+  bucket = "${var.project_prefix}-${var.environment}-s3-access-logs-${data.aws_caller_identity.current.account_id}"
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.project_prefix}-${var.environment}-s3-server-access-logs"
+    }
+  )
+}
+resource "aws_s3_bucket_logging" "alb_access_logs" {
+  count = var.enable_alb_access_logs ? 1 : 0
+
+  bucket = aws_s3_bucket.alb_access_logs[0].id
+
+  target_bucket = aws_s3_bucket.s3_server_access_logs[0].id
+  target_prefix = "log/"
+}
+
+
+# This data source constructs the required IAM policy document for the ALB log bucket.
+data "aws_iam_policy_document" "alb_access_logs" {
+  count = var.enable_alb_access_logs ? 1 : 0
+
+  # This statement allows the ALB service to write logs to the bucket.
+  statement {
+    effect    = "AllowALBToWriteLogs"
+    actions   = ["s3:PutObject"]
+    resources = ["${aws_s3_bucket.alb_access_logs[0].arn}/*"]
+
+    principals {
+      type        = "AWS"
+      identifiers = [data.aws_elb_service_account.current.arn]
+    }
+  }
+
+  #  This statement denies any access to the bucket over insecure HTTP.
+  statement {
+    sid       = "DenyInsecureTransport"
+    effect    = "Deny"
+    actions   = ["s3:*"]
+    resources = ["${aws_s3_bucket.alb_access_logs[0].arn}/*"]
+
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["false"]
+    }
+  }
+}
+
 # This resource is needed to grant the ALB service permission to write to my S3 bucket.
 resource "aws_s3_bucket_policy" "alb_access_logs" {
   count  = var.enable_alb_access_logs ? 1 : 0
@@ -160,25 +236,6 @@ resource "aws_s3_bucket_policy" "alb_access_logs" {
   policy = data.aws_iam_policy_document.alb_access_logs[0].json
 }
 
-# This data source constructs the required IAM policy document.
-data "aws_iam_policy_document" "alb_access_logs" {
-  count = var.enable_alb_access_logs ? 1 : 0
-
-  statement {
-    effect    = "Allow"
-    actions   = ["s3:PutObject"]
-    resources = ["${aws_s3_bucket.alb_access_logs[0].arn}/AWSLogs/AWS-ACCOUNT-ID/*"] # AWS-ACCOUNT-ID will be interpolated by AWS
-    principals {
-      type        = "AWS"
-      identifiers = ["elb-account-id.amazonaws.com"] # This is a placeholder for the regional ELB service account ID
-    }
-  }
-}
-
-# Need a random_id to ensure the S3 bucket name is unique if not provided
-resource "random_id" "this" {
-  byte_length = 4
-}
 
 #  Application Load Balancer 
 
@@ -234,7 +291,7 @@ resource "aws_lb" "main" {
   access_logs {
     bucket  = var.enable_alb_access_logs ? aws_s3_bucket.alb_access_logs[0].bucket : null
     enabled = var.enable_alb_access_logs
-    prefix  = "alb"
+    prefix  = "alb-logs"
   }
 
   tags = merge(
