@@ -36,8 +36,8 @@ test.describe('About Page', () => {
 
   test('renders main sections correctly', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'About' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Project History', exact: true })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'History' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Project Timeline', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Our Story' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Leaders' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Roadmap' })).toBeVisible()
   })
@@ -65,7 +65,7 @@ test.describe('About Page', () => {
     ]
 
     for (const tech of technologies) {
-      await expect(page.getByText(tech)).toBeVisible()
+      await expect(page.getByRole('link', { name: tech })).toBeVisible()
     }
   })
 
@@ -95,11 +95,11 @@ test.describe('About Page', () => {
 
   test('renders key features section', async ({ page }) => {
     await expect(page.getByText('Key Features')).toBeVisible()
-    await expect(page.getByText('Advanced Search Capabilities')).toBeVisible()
+    await expect(page.getByText('Advanced Community Search')).toBeVisible()
   })
 
   test('renders project history timeline section', async ({ page }) => {
-    await expect(page.getByText('Project History')).toBeVisible()
+    await expect(page.getByText('Project Timeline')).toBeVisible()
     await expect(page.getByText('Project Inception')).toBeVisible()
   })
 })
