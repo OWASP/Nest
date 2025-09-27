@@ -8,13 +8,12 @@ import { useState, useRef, useEffect } from 'react'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
 
 interface ProgramActionsProps {
+  programKey: string
   status: string
-  setStatus: (
-    newStatus: ProgramStatusEnum.Draft | ProgramStatusEnum.Published | ProgramStatusEnum.Completed
-  ) => void
+  setStatus: (newStatus: string) => void
 }
 
-const ProgramActions: React.FC<ProgramActionsProps> = ({ status, setStatus }) => {
+const ProgramActions: React.FC<ProgramActionsProps> = ({ programKey, status, setStatus }) => {
   const router = useRouter()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -22,10 +21,10 @@ const ProgramActions: React.FC<ProgramActionsProps> = ({ status, setStatus }) =>
   const handleAction = (actionKey: string) => {
     switch (actionKey) {
       case 'edit Program':
-        router.push(`${globalThis.location.pathname}/edit`)
+        router.push(`/my/mentorship/programs/${programKey}/edit`)
         break
       case 'create_module':
-        router.push(`${globalThis.location.pathname}/modules/create`)
+        router.push(`/my/mentorship/programs/${programKey}/modules/create`)
         break
       case 'publish':
         setStatus(ProgramStatusEnum.Published)
@@ -76,7 +75,10 @@ const ProgramActions: React.FC<ProgramActionsProps> = ({ status, setStatus }) =>
         aria-expanded={dropdownOpen}
         aria-haspopup="true"
       >
-        <FontAwesomeIcon icon={faEllipsisV} />
+        <FontAwesomeIcon
+          icon={faEllipsisV}
+          className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-200"
+        />
       </button>
       {dropdownOpen && (
         <div className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">

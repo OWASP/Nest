@@ -60,6 +60,7 @@ export interface DetailsCardProps {
   mentors?: Contributor[]
   admins?: Contributor[]
   projectName?: string
+  programKey?: string
   pullRequests?: PullRequest[]
   recentIssues?: Issue[]
   recentMilestones?: Milestone[]

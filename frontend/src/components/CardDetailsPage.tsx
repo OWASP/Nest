@@ -55,6 +55,7 @@ const DetailsCard = ({
   isActive = true,
   isArchived = false,
   languages,
+  programKey,
   projectName,
   pullRequests,
   recentIssues,
@@ -91,7 +92,7 @@ const DetailsCard = ({
           <div className="flex w-full items-center justify-between">
             <h1 className="text-4xl font-bold">{title}</h1>
             {type === 'program' && accessLevel === 'admin' && canUpdateStatus && (
-              <ProgramActions status={status} setStatus={setStatus} />
+              <ProgramActions programKey={programKey} status={status} setStatus={setStatus} />
             )}
             {type === 'module' &&
               accessLevel === 'admin' &&

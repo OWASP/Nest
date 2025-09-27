@@ -1,25 +1,38 @@
 import { faEye } from '@fortawesome/free-regular-svg-icons'
-import { faEdit } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
+import { useUpdateProgramStatus } from 'hooks/useUpdateProgramStatus'
 import type React from 'react'
+import { GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
 import { Program } from 'types/mentorship'
 import ActionButton from 'components/ActionButton'
+import ProgramActions from 'components/ProgramActions'
 
 interface ProgramCardProps {
   program: Program
-  onEdit?: (key: string) => void
   onView: (key: string) => void
   accessLevel: 'admin' | 'user'
+  isAdmin: boolean
 }
 
-const ProgramCard: React.FC<ProgramCardProps> = ({ program, onEdit, onView, accessLevel }) => {
+const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel, isAdmin }) => {
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
     })
+  const { updateProgramStatus } = useUpdateProgramStatus({
+    programKey: program.key,
+    programName: program.name,
+    isAdmin,
+    refetchQueries: [
+      {
+        query: GET_PROGRAM_AND_MODULES,
+        variables: { programKey: program.key },
+      },
+    ],
+  })
 
   const roleClass = {
     admin: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
@@ -58,9 +71,27 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onEdit, onView, acce
                 {program.name}
               </h3>
             </Tooltip>
+            {accessLevel === 'admin' && isAdmin && (
+              <ProgramActions
+                programKey={program.key}
+                status={program.status}
+                setStatus={updateProgramStatus}
+              />
+            )}
+          </div>
+          <div className="mb-2 text-sm text-gray-600 dark:text-gray-400">
+            <span>
+              {program.startedAt && program.endedAt
+                ? `${formatDate(program.startedAt)} – ${formatDate(program.endedAt)}`
+                : program.startedAt
+                  ? `Started: ${formatDate(program.startedAt)}`
+                  : 'No dates set'}
+            </span>
             {accessLevel === 'admin' && (
               <span
-                className={`rounded-full px-2 py-1 text-xs font-medium capitalize ${roleClass[program.userRole] ?? roleClass.default}`}
+                className={`ml-2 rounded-full px-2 py-1 text-xs font-medium capitalize ${
+                  roleClass[program.userRole] ?? roleClass.default
+                }`}
               >
                 {program.userRole}
               </span>
@@ -71,23 +102,10 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onEdit, onView, acce
         </div>
 
         <div className="flex gap-2">
-          {accessLevel === 'admin' ? (
-            <>
-              <ActionButton onClick={() => onView(program.key)}>
-                <FontAwesomeIcon icon={faEye} className="mr-1" />
-                Preview
-              </ActionButton>
-              <ActionButton onClick={() => onEdit(program.key)}>
-                <FontAwesomeIcon icon={faEdit} className="mr-1" />
-                Edit
-              </ActionButton>
-            </>
-          ) : (
-            <ActionButton onClick={() => onView(program.key)}>
-              <FontAwesomeIcon icon={faEye} className="mr-1" />
-              View Details
-            </ActionButton>
-          )}
+          <ActionButton onClick={() => onView(program.key)}>
+            <FontAwesomeIcon icon={faEye} className="mr-1" />
+            {accessLevel === 'admin' ? 'Preview' : 'View Details'}
+          </ActionButton>
         </div>
       </div>
     </div>

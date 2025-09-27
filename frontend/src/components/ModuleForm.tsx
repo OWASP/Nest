@@ -1,6 +1,5 @@
 'use client'
 import { useApolloClient } from '@apollo/client/react'
-import clsx from 'clsx'
 import debounce from 'lodash/debounce'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
@@ -66,9 +65,9 @@ const ModuleForm = ({
               <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
                 Module Information
               </h2>
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
                 <div className="lg:col-span-2">
-                  <label htmlFor="module-name" className="mb-2 block text-sm font-medium">
+                  <label htmlFor="module-name" className="mb-2 block text-sm font-semibold">
                     Module Name *
                   </label>
                   <input
@@ -78,12 +77,12 @@ const ModuleForm = ({
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
                   />
                 </div>
 
                 <div className="lg:col-span-2">
-                  <label htmlFor="module-description" className="mb-2 block text-sm font-medium">
+                  <label htmlFor="module-description" className="mb-2 block text-sm font-semibold">
                     Description *
                   </label>
                   <textarea
@@ -93,7 +92,7 @@ const ModuleForm = ({
                     onChange={handleInputChange}
                     rows={4}
                     required
-                    className="w-full resize-none rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
                   />
                 </div>
               </div>
@@ -103,9 +102,9 @@ const ModuleForm = ({
               <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
                 Module Configuration
               </h2>
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-6 text-gray-600 md:grid-cols-2 lg:grid-cols-3 dark:text-gray-300">
                 <div>
-                  <label htmlFor="startedAt" className="mb-2 block text-sm font-medium">
+                  <label htmlFor="startedAt" className="mb-2 block text-sm font-semibold">
                     Start Date *
                   </label>
                   <input
@@ -115,11 +114,11 @@ const ModuleForm = ({
                     value={formData.startedAt}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
                   />
                 </div>
                 <div>
-                  <label htmlFor="endedAt" className="mb-2 block text-sm font-medium">
+                  <label htmlFor="endedAt" className="mb-2 block text-sm font-semibold">
                     End Date *
                   </label>
                   <input
@@ -129,11 +128,11 @@ const ModuleForm = ({
                     value={formData.endedAt}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
                   />
                 </div>
                 <div>
-                  <label htmlFor="experienceLevel" className="mb-2 block text-sm font-medium">
+                  <label htmlFor="experienceLevel" className="mb-2 block text-sm font-semibold">
                     Experience Level
                   </label>
                   <select
@@ -141,7 +140,7 @@ const ModuleForm = ({
                     id="experienceLevel"
                     value={formData.experienceLevel}
                     onChange={handleInputChange}
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
                   >
                     {EXPERIENCE_LEVELS.map((lvl) => (
                       <option key={lvl.key} value={lvl.key}>
@@ -157,9 +156,9 @@ const ModuleForm = ({
               <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
                 Additional Details
               </h2>
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
                 <div>
-                  <label htmlFor="domains" className="mb-2 block text-sm font-medium">
+                  <label htmlFor="domains" className="mb-2 block text-sm font-semibold">
                     Domains
                   </label>
                   <input
@@ -169,11 +168,11 @@ const ModuleForm = ({
                     value={formData.domains}
                     onChange={handleInputChange}
                     placeholder="AI, Web Development"
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
                   />
                 </div>
                 <div>
-                  <label htmlFor="tags" className="mb-2 block text-sm font-medium">
+                  <label htmlFor="tags" className="mb-2 block text-sm font-semibold">
                     Tags
                   </label>
                   <input
@@ -183,7 +182,7 @@ const ModuleForm = ({
                     value={formData.tags}
                     onChange={handleInputChange}
                     placeholder="javascript, react"
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
                   />
                 </div>
                 <div>
@@ -201,7 +200,7 @@ const ModuleForm = ({
                 </div>
                 {isEdit && (
                   <div className="lg:col-span-2">
-                    <label htmlFor="mentorLogins" className="mb-2 block text-sm font-medium">
+                    <label htmlFor="mentorLogins" className="mb-2 block text-sm font-semibold">
                       Mentor GitHub Usernames
                     </label>
                     <input
@@ -211,7 +210,7 @@ const ModuleForm = ({
                       value={formData.mentorLogins}
                       onChange={handleInputChange}
                       placeholder="johndoe, jane-doe"
-                      className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400"
+                      className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
                     />
                   </div>
                 )}
@@ -223,7 +222,7 @@ const ModuleForm = ({
                 <button
                   type="button"
                   onClick={() => router.back()}
-                  className="rounded-lg border border-gray-200 px-6 py-3 font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
+                  className="rounded-lg border border-gray-50 px-6 py-3 font-semibold text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
                 >
                   Cancel
                 </button>
@@ -342,7 +341,7 @@ export const ProjectSelector = ({ value, defaultName, onProjectChange }: Project
 
   return (
     <div className="relative">
-      <label htmlFor="projectSelector" className="mb-2 block text-sm font-medium">
+      <label htmlFor="projectSelector" className="mb-2 block text-sm font-semibold">
         Project Name *
       </label>
       <input
@@ -353,9 +352,7 @@ export const ProjectSelector = ({ value, defaultName, onProjectChange }: Project
         required
         onChange={handleInputChange}
         onBlur={handleBlur}
-        className={clsx(
-          'w-full max-w-md rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden sm:w-96 dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-400 dark:focus:ring-blue-400'
-        )}
+        className="w-full max-w-md rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] sm:w-96 dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
       />
 
       {showSuggestions && suggestions.length > 0 && (
