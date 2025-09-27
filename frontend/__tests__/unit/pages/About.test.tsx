@@ -44,9 +44,10 @@ jest.mock('utils/aboutData', () => ({
     ways: ['Way 1', 'Way 2'],
     callToAction: 'Test call to action',
   },
-  projectHistory: [
-    { year: '2023', title: 'Test Event 1', description: 'Test description 1' },
-    { year: '2024', title: 'Test Event 2', description: 'Test description 2' },
+  projectStory: ['Test story paragraph 1', 'Test story paragraph 2'],
+  projectTimeline: [
+    { title: 'Timeline Event 1', description: 'Timeline description 1', year: '2023' },
+    { title: 'Timeline Event 2', description: 'Timeline description 2', year: '2024' },
   ],
   technologies: [
     {
@@ -161,7 +162,6 @@ describe('About Component', () => {
 
     expect(screen.getByText('Feature 1')).toBeInTheDocument()
     expect(screen.getByText('Feature 2')).toBeInTheDocument()
-    expect(screen.getAllByTestId('feature-description')).toHaveLength(2)
     expect(screen.getByText('Feature 1 description')).toBeInTheDocument()
     expect(screen.getByText('Feature 2 description')).toBeInTheDocument()
   })
@@ -185,13 +185,13 @@ describe('About Component', () => {
       render(<About />)
     })
 
-    const projectHistorySection = screen.getByText('Project History').closest('div')
+    const projectHistorySection = screen.getByText('Our Story').closest('div')
     expect(projectHistorySection).toBeInTheDocument()
 
-    expect(screen.getByText('Test Event 1')).toBeInTheDocument()
-    expect(screen.getByText('Test Event 2')).toBeInTheDocument()
-    expect(screen.getByText('Test description 1')).toBeInTheDocument()
-    expect(screen.getByText('Test description 2')).toBeInTheDocument()
+    expect(screen.getByText('Timeline Event 1')).toBeInTheDocument()
+    expect(screen.getByText('Timeline Event 2')).toBeInTheDocument()
+    expect(screen.getByText('Timeline description 1')).toBeInTheDocument()
+    expect(screen.getByText('Timeline description 2')).toBeInTheDocument()
     expect(screen.getByText('2023')).toBeInTheDocument()
     expect(screen.getByText('2024')).toBeInTheDocument()
   })
@@ -627,7 +627,7 @@ describe('About Component', () => {
       render(<About />)
     })
 
-    const missionSection = screen.getByText('Mission').closest('div')
+    const missionSection = screen.getByText('Our Mission').closest('div')
     expect(missionSection).toBeInTheDocument()
     expect(screen.getByText('Test mission statement')).toBeInTheDocument()
 
@@ -640,7 +640,7 @@ describe('About Component', () => {
     await act(async () => {
       render(<About />)
     })
-    expect(screen.getByText('Mission')).toBeInTheDocument()
+    expect(screen.getByText('Our Mission')).toBeInTheDocument()
     expect(screen.getByText('Test mission statement')).toBeInTheDocument()
   })
 
@@ -678,10 +678,10 @@ describe('About Component', () => {
     await act(async () => {
       render(<About />)
     })
-    expect(screen.getByText('Project History')).toBeInTheDocument()
-    expect(screen.getByText('Test Event 1')).toBeInTheDocument()
-    expect(screen.getByText('Test Event 2')).toBeInTheDocument()
-    expect(screen.getByText('Test description 1')).toBeInTheDocument()
-    expect(screen.getByText('Test description 2')).toBeInTheDocument()
+    expect(screen.getByText('Project Timeline')).toBeInTheDocument()
+    expect(screen.getByText('Timeline Event 1')).toBeInTheDocument()
+    expect(screen.getByText('Timeline Event 2')).toBeInTheDocument()
+    expect(screen.getByText('Timeline description 1')).toBeInTheDocument()
+    expect(screen.getByText('Timeline description 2')).toBeInTheDocument()
   })
 })

@@ -1,11 +1,5 @@
 import type { KeyFeature, ProjectTimeline, GetInvolved, MissionContent } from 'types/about'
 
-export const aboutText = [
-  'OWASP Nest was originally created by Arkadii Yakovets (Ark) to simplify OWASP projects navigation. Built from scratch based on Ark’s vision and discussions with Starr Brown (Starr), the platform integrates structured system design into the OWASP ecosystem. The initial frontend, based on Vue.js, was introduced by Kateryna Golovanova (Kate), who later became the project co-leader due to her invaluable frontend and project management skills.',
-  'Over time, OWASP Nest has expanded to address broader community needs, such as Google Summer of Code (GSoC) student guidance and contribution opportunities discovery. The platform, alongside NestBot, has become a central hub for OWASP projects, chapters, users, and aggregated contribution opportunities.',
-  'The code is licensed under the MIT License, encouraging contributions while protecting the authors from legal claims. All OWASP Nest leaders are certified ISC2 professionals and OWASP members who adhere to the OWASP Code of Conduct.',
-]
-
 export const missionContent: MissionContent = {
   mission:
     'OWASP Nest is a comprehensive platform built to enhance collaboration and streamline contributions across the OWASP community. Acting as a central hub, it helps users discover chapter and projects, find contribution opportunities, and connect with like-minded individuals based on their interests and expertise.',
@@ -59,7 +53,11 @@ export const getInvolvedContent: GetInvolved = {
   callToAction:
     'To get started, visit the [OWASP Nest Repository](https://github.com/OWASP/Nest), explore the [Contributing Guidelines](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md), and review the [Code of Conduct](https://github.com/OWASP/Nest/blob/main/CODE_OF_CONDUCT.md).',
 }
-
+export const projectStory = [
+  'OWASP Nest was originally created by Arkadii Yakovets to simplify OWASP projects navigation. Built from scratch based on Ark’s vision and discussions with Starr Brown, the platform integrates structured system design into the OWASP ecosystem. The initial frontend, based on Vue.js, was introduced by Kate Golovanova, who later became the project co-leader due to her invaluable frontend and project management skills.',
+  'Over time, OWASP Nest has expanded to address broader community needs, such as Google Summer of Code (GSoC) student guidance and contribution opportunities discovery. The platform, alongside NestBot, has become a central hub for OWASP projects, chapters, users, and aggregated contribution opportunities.',
+  'The code is licensed under the MIT License, encouraging contributions while protecting the authors from legal claims. All OWASP Nest leaders are certified ISC2 professionals and OWASP members who adhere to the OWASP Code of Conduct.',
+]
 export const projectTimeline: ProjectTimeline[] = [
   {
     title: 'Project Inception',

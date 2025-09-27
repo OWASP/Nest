@@ -5,6 +5,7 @@ import {
   faClock,
   faUserGear,
   faMapSigns,
+  faScroll,
   faUsers,
   faTools,
   faPersonWalkingArrowRight,
@@ -32,6 +33,7 @@ import {
   keyFeatures,
   getInvolvedContent,
   projectTimeline,
+  projectStory,
 } from 'utils/aboutData'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
@@ -115,7 +117,7 @@ const About = () => {
     <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <h1 className="mt-4 mb-6 text-4xl font-bold">About</h1>
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-0 md:grid-cols-2 md:gap-6">
           <SecondaryCard icon={faBullseye} title={<AnchorTitle title="Our Mission" />}>
             <p className="text-gray-600 dark:text-gray-300">{missionContent.mission}</p>
           </SecondaryCard>
@@ -130,9 +132,7 @@ const About = () => {
             {keyFeatures.map((feature) => (
               <div key={feature.title} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                 <h3 className="mb-2 text-lg font-semibold text-blue-400">{feature.title}</h3>
-                <p data-testid="feature-description" className="text-gray-600 dark:text-gray-300">
-                  {feature.description}
-                </p>
+                <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -213,55 +213,60 @@ const About = () => {
                     className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700"
                   >
                     <div className="flex-1">
-                      <Link
-                        href={milestone.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block"
-                      >
-                        <h3 className="mb-2 text-xl font-semibold text-blue-400">
-                          {milestone.title}
-                          <Tooltip
-                            closeDelay={100}
-                            content={
-                              milestone.progress === 100
-                                ? 'Completed'
-                                : milestone.progress > 0
-                                  ? 'In Progress'
-                                  : 'Not Started'
-                            }
-                            id={`tooltip-state-${index}`}
-                            delay={100}
-                            placement="top"
-                            showArrow
-                          >
-                            <span className="ml-4 inline-block text-gray-400">
-                              <FontAwesomeIcon
-                                icon={
-                                  milestone.progress === 100
-                                    ? faCircleCheck
-                                    : milestone.progress > 0
-                                      ? faUserGear
-                                      : faClock
-                                }
-                              />
-                            </span>
-                          </Tooltip>
-                        </h3>
-                      </Link>
-                      <p
-                        data-testid="milestone-description"
-                        className="text-gray-600 dark:text-gray-300"
-                      >
-                        {milestone.body}
-                      </p>
+                      <div className="relative">
+                        <Link
+                          href={milestone.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block"
+                        >
+                          <h3 className="mb-2 pr-8 text-xl font-semibold text-blue-400">
+                            {milestone.title}
+                          </h3>
+                        </Link>
+                        <Tooltip
+                          closeDelay={100}
+                          content={
+                            milestone.progress === 100
+                              ? 'Completed'
+                              : milestone.progress > 0
+                                ? 'In Progress'
+                                : 'Not Started'
+                          }
+                          id={`tooltip-state-${index}`}
+                          delay={100}
+                          placement="top"
+                          showArrow
+                        >
+                          <span className="absolute top-0 right-0 text-xl text-gray-400">
+                            <FontAwesomeIcon
+                              icon={
+                                milestone.progress === 100
+                                  ? faCircleCheck
+                                  : milestone.progress > 0
+                                    ? faUserGear
+                                    : faClock
+                              }
+                            />
+                          </span>
+                        </Tooltip>
+                      </div>
+                      <p className="text-gray-600 dark:text-gray-300">{milestone.body}</p>
                     </div>
                   </div>
                 ))}
             </div>
           </SecondaryCard>
         )}
-
+        <SecondaryCard icon={faScroll} title={<AnchorTitle title="Our Story" />}>
+          {projectStory.map((text, index) => (
+            <div key={`story-${index}`} className="mb-4">
+              <div>
+                <Markdown content={text} />
+              </div>
+            </div>
+          ))}
+        </SecondaryCard>
         <SecondaryCard icon={faClock} title={<AnchorTitle title="Project Timeline" />}>
           <div className="space-y-6">
             {[...projectTimeline].reverse().map((milestone, index) => (
@@ -283,7 +288,7 @@ const About = () => {
           </div>
         </SecondaryCard>
 
-        <div className="grid gap-6 md:grid-cols-4">
+        <div className="grid gap-0 md:grid-cols-4 md:gap-6">
           {[
             { label: 'Forks', value: projectMetadata.forksCount },
             { label: 'Stars', value: projectMetadata.starsCount },
