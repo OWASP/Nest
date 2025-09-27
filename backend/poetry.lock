@@ -137,14 +137,14 @@ frozenlist = ">=1.1.0"
 
 [[package]]
 name = "algoliasearch"
-version = "4.27.0"
+version = "4.28.0"
 description = "A fully-featured and blazing-fast Python API client to interact with Algolia."
 optional = false
 python-versions = ">=3.8.1"
 groups = ["main"]
 files = [
-    {file = "algoliasearch-4.27.0-py3-none-any.whl", hash = "sha256:d7f73353c51299258a62f41779645d2ac52d93c320d882301d7955357c92fe1c"},
-    {file = "algoliasearch-4.27.0.tar.gz", hash = "sha256:dc292208fb06b34a3659bdba225773002ce644151b9fcd332f149038ad5823ed"},
+    {file = "algoliasearch-4.28.0-py3-none-any.whl", hash = "sha256:85728da9925307869f8e8554eb4fcd803dc2b1aa3dc65ef4147edc98c4f192d9"},
+    {file = "algoliasearch-4.28.0.tar.gz", hash = "sha256:fc7248bc44b73731c9e2436b64f57743085d8a03ed4e623f6557992b9fd80288"},
 ]
 
 [package.dependencies]
@@ -250,18 +250,18 @@ tests-mypy = ["mypy (>=1.11.1) ; platform_python_implementation == \"CPython\" a
 
 [[package]]
 name = "boto3"
-version = "1.40.39"
+version = "1.40.40"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "boto3-1.40.39-py3-none-any.whl", hash = "sha256:e2cab5606269fe9f428981892aa592b7e0c087a038774475fa4cd6c8b5fe0a99"},
-    {file = "boto3-1.40.39.tar.gz", hash = "sha256:27ca06d4d6f838b056b4935c9eceb92c8d125dbe0e895c5583bcf7130627dcd2"},
+    {file = "boto3-1.40.40-py3-none-any.whl", hash = "sha256:385904de68623e1c341bdc095d94a30006843032c912adeb1e0752a343632ec6"},
+    {file = "boto3-1.40.40.tar.gz", hash = "sha256:f384d3a0410d0f1a4d4ae7aa69c41d0549c6ca5a76667dc25fc97d50ad6db740"},
 ]
 
 [package.dependencies]
-botocore = ">=1.40.39,<1.41.0"
+botocore = ">=1.40.40,<1.41.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.14.0,<0.15.0"
 
@@ -270,14 +270,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.40.39"
+version = "1.40.40"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "botocore-1.40.39-py3-none-any.whl", hash = "sha256:144e0e887a9fc198c6772f660fc006028bd1a9ce5eea3caddd848db3e421bc79"},
-    {file = "botocore-1.40.39.tar.gz", hash = "sha256:c6efc55cac341811ba90c693d20097db6e2ce903451d94496bccd3f672b1709d"},
+    {file = "botocore-1.40.40-py3-none-any.whl", hash = "sha256:68506142b3cde93145ef3ee0268f2444f2b68ada225a151f714092bbd3d6516a"},
+    {file = "botocore-1.40.40.tar.gz", hash = "sha256:78eb121a16a6481ed0f6e1aebe53a4f23aa121f34466846c13a5ca48fa980e31"},
 ]
 
 [package.dependencies]
@@ -2356,14 +2356,14 @@ files = [
 
 [[package]]
 name = "owasp-schema"
-version = "0.1.21"
+version = "0.1.23"
 description = "A collection of OWASP schemas"
 optional = false
 python-versions = "<4.0,>=3.11"
 groups = ["main"]
 files = [
-    {file = "owasp_schema-0.1.21-py3-none-any.whl", hash = "sha256:c7eb702d8b70d0be9152a2c21282d49516fe3e5d00c845e595618639073ff1db"},
-    {file = "owasp_schema-0.1.21.tar.gz", hash = "sha256:a97c9e0561b23014dc5e9d57e071fc39cccc30964000460dc2a40a18d804723f"},
+    {file = "owasp_schema-0.1.23-py3-none-any.whl", hash = "sha256:369eafd7406bec0627134e887c0cbdb235321a03d60d86cba762a9ccc17ebff9"},
+    {file = "owasp_schema-0.1.23.tar.gz", hash = "sha256:23e9d794dd5ada58b3cd62030f67a9dd8abb1aba2ff90c26515d51a8b7194afa"},
 ]
 
 [package.dependencies]
