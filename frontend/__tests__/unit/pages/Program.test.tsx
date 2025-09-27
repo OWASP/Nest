@@ -12,6 +12,9 @@ jest.mock('server/fetchAlgoliaData', () => ({
 const mockRouter = {
   push: jest.fn(),
 }
+jest.mock('hooks/useUpdateProgramStatus', () => ({
+  useUpdateProgramStatus: () => ({ updateProgramStatus: jest.fn() }),
+}))
 jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(() => mockRouter),

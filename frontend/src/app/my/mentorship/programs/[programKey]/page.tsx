@@ -115,6 +115,7 @@ const ProgramDetailsPage = () => {
 
   return (
     <DetailsCard
+      programKey={program.key}
       modules={modules}
       status={program.status}
       setStatus={updateStatus}

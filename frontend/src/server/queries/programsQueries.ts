@@ -9,6 +9,7 @@ export const GET_MY_PROGRAMS = gql`
         id
         key
         name
+        status
         description
         startedAt
         endedAt
