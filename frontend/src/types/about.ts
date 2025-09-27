@@ -1,21 +1,21 @@
-export interface KeyFeature {
-  title: string
-  description: string
-}
-
-export interface ProjectHistory {
-  year: string
-  title: string
-  description: string
-}
-
-export interface GetInvolved {
+export type GetInvolved = {
+  callToAction: string
   description: string
   ways: string[]
-  callToAction: string
 }
 
-export interface MissionContent {
+export type KeyFeature = {
+  description: string
+  title: string
+}
+
+export type MissionContent = {
   mission: string
   whoItsFor: string
+}
+
+export type ProjectTimeline = {
+  description: string
+  title: string
+  year: string
 }

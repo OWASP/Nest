@@ -7,7 +7,10 @@ import {
   faMapSigns,
   faUsers,
   faTools,
-  faArrowUpRightFromSquare,
+  faPersonWalkingArrowRight,
+  faBullseye,
+  faUser,
+  faUsersGear,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
@@ -28,7 +31,7 @@ import {
   missionContent,
   keyFeatures,
   getInvolvedContent,
-  projectHistory,
+  projectTimeline,
 } from 'utils/aboutData'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
@@ -113,11 +116,11 @@ const About = () => {
       <div className="mx-auto max-w-6xl">
         <h1 className="mt-4 mb-6 text-4xl font-bold">About</h1>
         <div className="grid gap-6 md:grid-cols-2">
-          <SecondaryCard icon={faMapSigns} title={<AnchorTitle title="Mission" />}>
+          <SecondaryCard icon={faBullseye} title={<AnchorTitle title="Our Mission" />}>
             <p className="text-gray-600 dark:text-gray-300">{missionContent.mission}</p>
           </SecondaryCard>
 
-          <SecondaryCard icon={faUsers} title={<AnchorTitle title="Who It's For" />}>
+          <SecondaryCard icon={faUser} title={<AnchorTitle title="Who It's For" />}>
             <p className="text-gray-600 dark:text-gray-300">{missionContent.whoItsFor}</p>
           </SecondaryCard>
         </div>
@@ -135,7 +138,7 @@ const About = () => {
           </div>
         </SecondaryCard>
 
-        <SecondaryCard icon={faArrowUpRightFromSquare} title={<AnchorTitle title="Leaders" />}>
+        <SecondaryCard icon={faPersonWalkingArrowRight} title={<AnchorTitle title="Leaders" />}>
           <div className="flex w-full flex-col items-center justify-around overflow-hidden md:flex-row">
             {Object.keys(leaders).map((username) => (
               <div key={username}>
@@ -186,11 +189,11 @@ const About = () => {
           </div>
         </SecondaryCard>
 
-        <SecondaryCard icon={faUsers} title={<AnchorTitle title="Get Involved" />}>
-          <p className="mb-4 text-gray-600 dark:text-gray-300">{getInvolvedContent.description}</p>
-          <ul className="mb-6 list-inside list-disc space-y-2">
+        <SecondaryCard icon={faUsersGear} title={<AnchorTitle title="Get Involved" />}>
+          <p className="mb-2 text-gray-600 dark:text-gray-300">{getInvolvedContent.description}</p>
+          <ul className="mb-6 list-inside list-disc space-y-2 pl-4">
             {getInvolvedContent.ways.map((way) => (
-              <li key={way} className="text-gray-600 dark:text-gray-300">
+              <li key={way} className="pb-1 text-gray-600 dark:text-gray-300">
                 {way}
               </li>
             ))}
@@ -259,11 +262,11 @@ const About = () => {
           </SecondaryCard>
         )}
 
-        <SecondaryCard icon={faClock} title={<AnchorTitle title="Project History" />}>
+        <SecondaryCard icon={faClock} title={<AnchorTitle title="Project Timeline" />}>
           <div className="space-y-6">
-            {projectHistory.map((milestone, index) => (
+            {[...projectTimeline].reverse().map((milestone, index) => (
               <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
-                {index !== projectHistory.length - 1 && (
+                {index !== projectTimeline.length - 1 && (
                   <div className="absolute top-6 left-[7px] h-full w-0.5 bg-blue-400"></div>
                 )}
                 <div
@@ -271,8 +274,8 @@ const About = () => {
                   className="absolute top-2 left-0 h-4 w-4 rounded-full bg-blue-400"
                 ></div>
                 <div className="pt-1">
-                  <h3 className="text-lg font-semibold text-blue-400">{milestone.year}</h3>
-                  <h4 className="mb-1 font-medium">{milestone.title}</h4>
+                  <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
+                  <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
                   <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
                 </div>
               </div>
