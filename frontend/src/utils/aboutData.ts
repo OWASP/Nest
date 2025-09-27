@@ -110,7 +110,7 @@ export const projectTimeline: ProjectTimeline[] = [
   {
     title: 'OWASP Nest Sponsorship Program Launch',
     description:
-      'We started sponsoring some interesting projects that has not made it to the GSoC 2025.',
+      'We started sponsoring some interesting projects that have not made it to the GSoC 2025.',
     year: 'June 2025',
   },
 ]
