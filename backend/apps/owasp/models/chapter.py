@@ -87,11 +87,12 @@ class Chapter(
         """Return active chapters count."""
         return IndexBase.get_total_count("chapters", search_filters="idx_is_active:true")
 
-    def from_github(self, repository) -> None:
+    def from_github(self, repository, gh) -> None:
         """Update instance based on GitHub repository data.
 
         Args:
             repository (github.Repository): The GitHub repository instance.
+            gh (Github): The authenticated Github client instance.
 
         """
         self.owasp_repository = repository
@@ -108,6 +109,7 @@ class Chapter(
                 "region": "region",
                 "tags": "tags",
             },
+            gh,
         )
 
         self.created_at = repository.created_at
@@ -192,12 +194,13 @@ class Chapter(
         BulkSaveModel.bulk_save(Chapter, chapters, fields=fields)
 
     @staticmethod
-    def update_data(gh_repository, repository, *, save: bool = True) -> Chapter:
+    def update_data(gh_repository, repository, gh, *, save: bool = True) -> Chapter:
         """Update chapter data from GitHub repository.
 
         Args:
             gh_repository (github.Repository): The GitHub repository instance.
             repository (github.Repository): The repository data to update from.
+            gh (Github): The authenticated Github client instance.
             save (bool, optional): Whether to save the instance.
 
         Returns:
@@ -210,7 +213,7 @@ class Chapter(
         except Chapter.DoesNotExist:
             chapter = Chapter(key=key)
 
-        chapter.from_github(repository)
+        chapter.from_github(repository, gh)
         if save:
             chapter.save()
 
