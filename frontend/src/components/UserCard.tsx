@@ -1,4 +1,10 @@
-import { faChevronRight, faFolderOpen, faUser, faUsers } from '@fortawesome/free-solid-svg-icons'
+import {
+  faChevronRight,
+  faFolderOpen,
+  faMedal,
+  faUser,
+  faUsers,
+} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import millify from 'millify'
@@ -7,6 +13,7 @@ import type { UserCardProps } from 'types/card'
 
 const UserCard = ({
   avatar,
+  badgeCount,
   button,
   className,
   company,
@@ -60,6 +67,12 @@ const UserCard = ({
               <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 sm:text-base dark:text-gray-400">
                 <FontAwesomeIcon icon={faFolderOpen} className="mr-1 h-4 w-4" />
                 {millify(repositoriesCount, { precision: 1 })}
+              </p>
+            )}
+            {badgeCount > 0 && (
+              <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 sm:text-base dark:text-gray-400">
+                <FontAwesomeIcon icon={faMedal} className="mr-1 h-4 w-4" aria-label="badges" />
+                {millify(badgeCount, { precision: 1 })}{' '}
               </p>
             )}
           </div>
