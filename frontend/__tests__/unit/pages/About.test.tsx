@@ -31,9 +31,23 @@ jest.mock('@heroui/toast', () => ({
 }))
 
 jest.mock('utils/aboutData', () => ({
-  aboutText: [
-    'This is a test paragraph about the project.',
-    'This is another paragraph about the project history.',
+  missionContent: {
+    mission: 'Test mission statement',
+    whoItsFor: 'Test target audience description',
+  },
+  keyFeatures: [
+    { title: 'Feature 1', description: 'Feature 1 description' },
+    { title: 'Feature 2', description: 'Feature 2 description' },
+  ],
+  getInvolvedContent: {
+    description: 'Get involved description',
+    ways: ['Way 1', 'Way 2'],
+    callToAction: 'Test call to action',
+  },
+  projectStory: ['Test story paragraph 1', 'Test story paragraph 2'],
+  projectTimeline: [
+    { title: 'Timeline Event 1', description: 'Timeline description 1', year: '2023' },
+    { title: 'Timeline Event 2', description: 'Timeline description 2', year: '2024' },
   ],
   technologies: [
     {
@@ -138,20 +152,48 @@ describe('About Component', () => {
     jest.clearAllMocks()
   })
 
-  test('renders project history correctly', async () => {
+  test('renders key features section correctly', async () => {
     await act(async () => {
       render(<About />)
     })
 
-    const historySection = screen.getByText('History').closest('div')
-    expect(historySection).toBeInTheDocument()
+    const keyFeaturesSection = screen.getByText('Key Features').closest('div')
+    expect(keyFeaturesSection).toBeInTheDocument()
 
-    const markdownContents = await screen.findAllByTestId('markdown-content')
-    expect(markdownContents.length).toBe(2)
-    expect(markdownContents[0].textContent).toBe('This is a test paragraph about the project.')
-    expect(markdownContents[1].textContent).toBe(
-      'This is another paragraph about the project history.'
-    )
+    expect(screen.getByText('Feature 1')).toBeInTheDocument()
+    expect(screen.getByText('Feature 2')).toBeInTheDocument()
+    expect(screen.getByText('Feature 1 description')).toBeInTheDocument()
+    expect(screen.getByText('Feature 2 description')).toBeInTheDocument()
+  })
+
+  test('renders get involved section correctly', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+
+    const getInvolvedSection = screen.getByText('Get Involved').closest('div')
+    expect(getInvolvedSection).toBeInTheDocument()
+
+    expect(screen.getByText('Get involved description')).toBeInTheDocument()
+    expect(screen.getByText('Way 1')).toBeInTheDocument()
+    expect(screen.getByText('Way 2')).toBeInTheDocument()
+    expect(screen.getByText('Test call to action')).toBeInTheDocument()
+  })
+
+  test('renders project history timeline correctly', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+
+    const projectHistorySection = screen.getByText('Our Story').closest('div')
+    expect(projectHistorySection).toBeInTheDocument()
+
+    expect(screen.getByText('Timeline Event 1')).toBeInTheDocument()
+    expect(screen.getByText('Timeline Event 2')).toBeInTheDocument()
+    expect(screen.getByText('Timeline description 1')).toBeInTheDocument()
+    expect(screen.getByText('Timeline description 2')).toBeInTheDocument()
+    expect(screen.getByText('2023')).toBeInTheDocument()
+    expect(screen.getByText('2024')).toBeInTheDocument()
   })
 
   test('renders leaders section with three leaders', async () => {
@@ -578,5 +620,68 @@ describe('About Component', () => {
         variant: 'solid',
       })
     })
+  })
+
+  test('renders mission and who its for sections correctly', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+
+    const missionSection = screen.getByText('Our Mission').closest('div')
+    expect(missionSection).toBeInTheDocument()
+    expect(screen.getByText('Test mission statement')).toBeInTheDocument()
+
+    const whoItsForSection = screen.getByText("Who It's For").closest('div')
+    expect(whoItsForSection).toBeInTheDocument()
+    expect(screen.getByText('Test target audience description')).toBeInTheDocument()
+  })
+
+  test('renders mission section', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText('Our Mission')).toBeInTheDocument()
+    expect(screen.getByText('Test mission statement')).toBeInTheDocument()
+  })
+
+  test("renders 'Who It's For' section", async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText("Who It's For")).toBeInTheDocument()
+    expect(screen.getByText(/Test target audience description/)).toBeInTheDocument()
+  })
+
+  test('renders key features section', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText('Key Features')).toBeInTheDocument()
+    expect(screen.getByText('Feature 1')).toBeInTheDocument()
+    expect(screen.getByText('Feature 2')).toBeInTheDocument()
+    expect(screen.getByText('Feature 1 description')).toBeInTheDocument()
+    expect(screen.getByText('Feature 2 description')).toBeInTheDocument()
+  })
+
+  test('renders get involved section', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText('Get Involved')).toBeInTheDocument()
+    expect(screen.getByText('Get involved description')).toBeInTheDocument()
+    expect(screen.getByText('Way 1')).toBeInTheDocument()
+    expect(screen.getByText('Way 2')).toBeInTheDocument()
+    expect(screen.getByText('Test call to action')).toBeInTheDocument()
+  })
+
+  test('renders project history timeline section', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText('Project Timeline')).toBeInTheDocument()
+    expect(screen.getByText('Timeline Event 1')).toBeInTheDocument()
+    expect(screen.getByText('Timeline Event 2')).toBeInTheDocument()
+    expect(screen.getByText('Timeline description 1')).toBeInTheDocument()
+    expect(screen.getByText('Timeline description 2')).toBeInTheDocument()
   })
 })
