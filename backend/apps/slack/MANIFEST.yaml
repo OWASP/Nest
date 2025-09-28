@@ -95,6 +95,11 @@ features:
       description: OWASP users list
       usage_hint: <user>
       should_escape: false
+    - command: /ai
+      url: https://nest.owasp.org/integrations/slack/commands/
+      description: AI-powered OWASP Nest assistant
+      usage_hint: <your question>
+      should_escape: false
 oauth_config:
   scopes:
     user:
@@ -103,6 +108,7 @@ oauth_config:
       - mpim:read
       - users:read
     bot:
+      - app_mentions:read
       - channels:read
       - chat:write
       - commands
@@ -115,6 +121,7 @@ oauth_config:
       - users:read
       - groups:write
       - channels:manage
+      - channels:history
 settings:
   event_subscriptions:
     request_url: https://nest.owasp.org/integrations/slack/events/
@@ -123,7 +130,9 @@ settings:
       - team_join
     bot_events:
       - app_home_opened
+      - app_mention
       - member_joined_channel
+      - message.channels
       - team_join
   interactivity:
     is_enabled: true
