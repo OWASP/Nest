@@ -46,6 +46,7 @@ class Base(Configuration):
     THIRD_PARTY_APPS = (
         "algoliasearch_django",
         "corsheaders",
+        "django_rq",
         "ninja",
         "storages",
     )
@@ -141,6 +142,16 @@ class Base(Configuration):
                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
             },
             "TIMEOUT": 300,
+        }
+    }
+
+    RQ_QUEUES = {
+        "ai": {
+            "HOST": REDIS_HOST,
+            "PORT": 6379,
+            "PASSWORD": REDIS_PASSWORD,
+            "DB": 1,
+            "DEFAULT_TIMEOUT": 360,
         }
     }
 
