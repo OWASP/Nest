@@ -131,9 +131,10 @@ def extract_repository_content(repository) -> tuple[str, str]:
         if response and is_valid_json(response):
             items = json.loads(response)
             for item in items:
-                name = item.get("name", "")
-                if name.startswith("tab_") and name.endswith(".md"):
-                    tab_files.append(name)
+                if isinstance(item, dict):
+                    name = item.get("name", "")
+                    if name.startswith("tab_") and name.endswith(".md"):
+                        tab_files.append(name)
 
     all_markdown_files = markdown_files + tab_files
 
