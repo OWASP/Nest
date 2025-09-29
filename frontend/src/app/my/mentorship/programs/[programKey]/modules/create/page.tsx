@@ -6,12 +6,12 @@ import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 import { ErrorDisplay } from 'app/global-error'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
+import { CreateModuleDocument } from 'types/__generated__/moduleMutations.generated'
 import { GetProgramAdminDetailsDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
-import { CreateModuleDocument } from 'types/__generated__/moduleMutations.generated'
 
 const CreateModulePage = () => {
   const router = useRouter()
