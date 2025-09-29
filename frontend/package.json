@@ -76,7 +76,7 @@
     "@graphql-codegen/typescript-operations": "^5.0.0",
     "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.55.1",
-    "@swc/core": "^1.13.20",
+    "@swc/core": "1.13.19",
     "@swc/jest": "^0.2.39",
     "@tailwindcss/postcss": "^4.1.13",
     "@testing-library/jest-dom": "^6.8.0",
