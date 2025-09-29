@@ -1,6 +1,7 @@
 FROM mcr.microsoft.com/playwright:v1.55.1-jammy
 
 ENV FORCE_COLOR=1 \
+    NEXT_PUBLIC_ENVIRONMENT=local \
     NPM_CACHE="/app/.npm" \
     PNPM_HOME="/pnpm"
 

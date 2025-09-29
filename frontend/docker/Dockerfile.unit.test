@@ -1,6 +1,7 @@
 FROM node:22-alpine
 
 ENV FORCE_COLOR=1 \
+    NEXT_PUBLIC_ENVIRONMENT=local \
     NPM_CACHE="/app/.npm" \
     PNPM_HOME="/pnpm"
 
