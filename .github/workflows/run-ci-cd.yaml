@@ -205,7 +205,7 @@ jobs:
 
       - name: Run frontend unit tests
         run: |
-          docker run --env-file frontend/.env.example owasp/nest:test-frontend-unit-latest pnpm run test:unit --ci --no-cache --verbose
+          docker run --env-file frontend/.env.example owasp/nest:test-frontend-unit-latest sh -c "NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest --ci --no-cache --verbose --detectOpenHandles --forceExit"
 
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
