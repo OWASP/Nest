@@ -25,7 +25,8 @@ class Task(TimestampedModel):
         COMPLETED = "COMPLETED", "Completed"
 
     assigned_at = models.DateTimeField(
-        auto_now_add=True,
+        null=True,
+        blank=True,
         help_text="Timestamp when the task was assigned to the mentee.",
     )
 
@@ -61,15 +62,6 @@ class Task(TimestampedModel):
         on_delete=models.PROTECT,
         related_name="mentorship_tasks",
         help_text="The GitHub issue this task corresponds to.",
-    )
-
-    level = models.ForeignKey(
-        "mentorship.TaskLevel",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="tasks",
-        help_text="The difficulty level of this task.",
     )
 
     module = models.ForeignKey(
