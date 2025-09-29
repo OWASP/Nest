@@ -6,11 +6,11 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { UPDATE_PROGRAM_STATUS_MUTATION } from 'server/mutations/programsMutations'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
+import { UpdateProgramStatusDocument } from 'types/__generated__/programsMutations.generated'
 import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
-import { Program, Module } from 'types/mentorship'
+import type { Program, Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -28,8 +28,7 @@ const ProgramDetailsPage = () => {
   const [modules, setModules] = useState<Module[]>([])
   const [isRefetching, setIsRefetching] = useState(false)
 
-  const [updateProgram] = useMutation(UPDATE_PROGRAM_STATUS_MUTATION, {
-    // TODO: update
+  const [updateProgram] = useMutation(UpdateProgramStatusDocument, {
     onError: handleAppError,
   })
 

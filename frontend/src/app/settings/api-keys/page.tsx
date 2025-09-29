@@ -22,7 +22,7 @@ import {
   GetApiKeysDocument,
   RevokeApiKeyDocument,
 } from 'types/__generated__/apiKeyQueries.generated'
-import { ApiKey } from 'types/apiKey'
+import type { ApiKey } from 'types/apiKey'
 import SecondaryCard from 'components/SecondaryCard'
 import { ApiKeysSkeleton } from 'components/skeletons/ApiKeySkelton'
 

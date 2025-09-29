@@ -5,7 +5,7 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ErrorDisplay } from 'app/global-error'
 import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
-import { Program, Module } from 'types/mentorship'
+import type { Program, Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -69,7 +69,7 @@ const ProgramDetailsPage = () => {
   }
 
   const programDetails = [
-    { label: 'Status', value: upperFirst(program.status.toLowerCase()) },
+    { label: 'Status', value: upperFirst(program.status?.toLowerCase()) },
     { label: 'Start Date', value: formatDate(program.startedAt) },
     { label: 'End Date', value: formatDate(program.endedAt) },
     { label: 'Mentees Limit', value: String(program.menteesLimit) },

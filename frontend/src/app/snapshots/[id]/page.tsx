@@ -9,7 +9,7 @@ import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetSnapshotDetailsDocument } from 'types/__generated__/snapshotQueries.generated'
 import type { Chapter } from 'types/chapter'
 import type { Project } from 'types/project'
-import { SnapshotDetails } from 'types/snapshot'
+import type { SnapshotDetails } from 'types/snapshot'
 import { level } from 'utils/data'
 import { formatDate } from 'utils/dateFormatter'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
@@ -142,7 +142,6 @@ const SnapshotDetailsPage: React.FC = () => {
             />
           </div>
           <div className="flex flex-col gap-6">
-            {' '}
             {snapshot.newChapters.filter((chapter) => chapter.isActive).map(renderChapterCard)}
           </div>
         </div>

@@ -5,8 +5,8 @@ import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { UPDATE_MODULE } from 'server/mutations/moduleMutations'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
+import { UpdateModuleDocument } from 'types/__generated__/moduleMutations.generated'
 import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import type { ModuleFormData } from 'types/mentorship'
@@ -23,7 +23,7 @@ const EditModulePage = () => {
   const [formData, setFormData] = useState<ModuleFormData | null>(null)
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
 
-  const [updateModule, { loading: mutationLoading }] = useMutation(UPDATE_MODULE) // TODO: update
+  const [updateModule, { loading: mutationLoading }] = useMutation(UpdateModuleDocument)
 
   const {
     data,
@@ -98,7 +98,7 @@ const EditModulePage = () => {
         programKey: programKey,
         name: formData.name,
         description: formData.description,
-        experienceLevel: formData.experienceLevel,
+        experienceLevel: formData.experienceLevel as ExperienceLevelEnum,
         startedAt: formData.startedAt || null,
         endedAt: formData.endedAt || null,
         domains: parseCommaSeparated(formData.domains),

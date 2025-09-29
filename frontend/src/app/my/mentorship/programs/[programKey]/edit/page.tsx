@@ -6,8 +6,8 @@ import { useSession } from 'next-auth/react'
 import type React from 'react'
 import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { UPDATE_PROGRAM } from 'server/mutations/programsMutations'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
+import { UpdateProgramDocument } from 'types/__generated__/programsMutations.generated'
 import { GetProgramDetailsDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import { formatDateForInput } from 'utils/dateFormatter'
@@ -19,7 +19,7 @@ const EditProgramPage = () => {
   const router = useRouter()
   const { programKey } = useParams() as { programKey: string }
   const { data: session, status: sessionStatus } = useSession()
-  const [updateProgram, { loading: mutationLoading }] = useMutation(UPDATE_PROGRAM)
+  const [updateProgram, { loading: mutationLoading }] = useMutation(UpdateProgramDocument)
   const {
     data,
     error,
