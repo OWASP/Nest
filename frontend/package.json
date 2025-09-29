@@ -15,7 +15,7 @@
     "lint:check": "eslint . --config eslint.config.mjs --max-warnings=0",
     "start": "next start",
     "test:e2e": "npx playwright test",
-    "test:unit": "tsc --noEmit && NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest"
+    "test:unit": "tsc && NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest"
   },
   "dependencies": {
     "@apollo/client": "^3.14.0",
