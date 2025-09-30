@@ -4,6 +4,7 @@ from datetime import datetime
 
 import strawberry
 
+from apps.github.api.internal.nodes.issue import IssueNode
 from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum
 from apps.mentorship.api.internal.nodes.mentor import MentorNode
 from apps.mentorship.api.internal.nodes.program import ProgramNode
@@ -34,6 +35,11 @@ class ModuleNode:
     def project_name(self) -> str | None:
         """Get the project name for this module."""
         return self.project.name if self.project else None
+
+    @strawberry.field
+    def issues(self) -> list[IssueNode]:
+        """Return issues linked to this module."""
+        return list(self.issues.select_related("repository", "author").order_by("-created_at"))
 
 
 @strawberry.input

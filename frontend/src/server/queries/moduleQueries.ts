@@ -75,3 +75,33 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
     }
   }
 `
+
+export const GET_MODULE_ISSUES = gql`
+  query GetModuleIssues($programKey: String!, $moduleKey: String!) {
+    getModule(moduleKey: $moduleKey, programKey: $programKey) {
+      id
+      name
+      key
+      tags
+      issues {
+        id
+        createdAt
+        title
+        url
+        author {
+          id
+          avatarUrl
+          login
+          name
+        }
+        assignees {
+          id
+          avatarUrl
+          login
+          name
+        }
+        labels
+      }
+    }
+  }
+`
