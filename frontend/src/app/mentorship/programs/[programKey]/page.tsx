@@ -1,6 +1,6 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
-import upperFirst from 'lodash/upperFirst'
+import { capitalize } from 'lodash'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ErrorDisplay } from 'app/global-error'
@@ -69,7 +69,7 @@ const ProgramDetailsPage = () => {
   }
 
   const programDetails = [
-    { label: 'Status', value: upperFirst(program.status?.toLowerCase()) },
+    { label: 'Status', value: capitalize(program.status) },
     { label: 'Start Date', value: formatDate(program.startedAt) },
     { label: 'End Date', value: formatDate(program.endedAt) },
     { label: 'Mentees Limit', value: String(program.menteesLimit) },

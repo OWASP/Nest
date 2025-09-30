@@ -1,7 +1,7 @@
 'use client'
 import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
-import upperFirst from 'lodash/upperFirst'
+import { capitalize } from 'lodash'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useEffect, useMemo, useState } from 'react'
@@ -79,7 +79,7 @@ const ProgramDetailsPage = () => {
       })
 
       addToast({
-        title: `Program status updated to ${upperFirst(newStatus.toLowerCase())}`,
+        title: `Program status updated to ${capitalize(newStatus)}`,
         description: 'The status has been successfully updated.',
         variant: 'solid',
         color: 'success',
@@ -127,7 +127,7 @@ const ProgramDetailsPage = () => {
   }
 
   const programDetails = [
-    { label: 'Status', value: upperFirst(program.status.toLowerCase()) },
+    { label: 'Status', value: capitalize(program.status) },
     { label: 'Start Date', value: formatDate(program.startedAt) },
     { label: 'End Date', value: formatDate(program.endedAt) },
     { label: 'Mentees Limit', value: String(program.menteesLimit) },
