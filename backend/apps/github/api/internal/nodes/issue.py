@@ -37,3 +37,13 @@ class IssueNode(strawberry.relay.Node):
     def repository_name(self) -> str | None:
         """Resolve the repository name."""
         return self.repository.name if self.repository else None
+
+    @strawberry.field
+    def assignees(self) -> list[UserNode]:
+        """Resolve assignees list."""
+        return list(self.assignees.all())
+
+    @strawberry.field
+    def labels(self) -> list[str]:
+        """Resolve label names for the issue."""
+        return list(self.labels.values_list("name", flat=True))

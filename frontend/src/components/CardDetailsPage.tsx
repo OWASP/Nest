@@ -83,15 +83,26 @@ const DetailsCard = ({
               admins?.some(
                 (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
               ) && (
-                <button
-                  type="button"
-                  className="dark:hover:text-white' flex items-center justify-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-2 py-2 text-nowrap text-[#1D7BD7] hover:bg-[#1D7BD7] hover:text-white"
-                  onClick={() => {
-                    router.push(`${window.location.pathname}/edit`)
-                  }}
-                >
-                  Edit Module
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    className="dark:hover:text-white' flex items-center justify-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-2 py-2 text-nowrap text-[#1D7BD7] hover:bg-[#1D7BD7] hover:text-white"
+                    onClick={() => {
+                      router.push(`${window.location.pathname}/issues`)
+                    }}
+                  >
+                    View Issues
+                  </button>
+                  <button
+                    type="button"
+                    className="dark:hover:text-white' flex items-center justify-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-2 py-2 text-nowrap text-[#1D7BD7] hover:bg-[#1D7BD7] hover:text-white"
+                    onClick={() => {
+                      router.push(`${window.location.pathname}/edit`)
+                    }}
+                  >
+                    Edit Module
+                  </button>
+                </div>
               )}
             {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
               <MetricsScoreCircle
