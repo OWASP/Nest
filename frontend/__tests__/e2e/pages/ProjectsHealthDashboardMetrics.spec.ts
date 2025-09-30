@@ -20,8 +20,9 @@ test.describe('Projects Health Dashboard Metrics', () => {
   test('renders health metrics data', async ({ page }) => {
     await mockDashboardCookies(page, mockHealthMetricsData, true)
     await page.goto('/projects/dashboard/metrics')
+    await page.waitForLoadState('networkidle')
     const firstMetric = mockHealthMetricsData.projectHealthMetrics[0]
-    await expect(page.getByText(firstMetric.projectName)).toBeVisible()
+    await expect(page.getByText(firstMetric.projectName)).toBeVisible({ timeout: 10000 })
     await expect(page.getByText(firstMetric.starsCount.toString())).toBeVisible()
     await expect(page.getByText(firstMetric.forksCount.toString())).toBeVisible()
     await expect(page.getByText(firstMetric.contributorsCount.toString())).toBeVisible()

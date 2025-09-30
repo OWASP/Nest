@@ -114,7 +114,7 @@ sync-data: \
 
 test-backend:
 	@DOCKER_BUILDKIT=1 docker build \
-		--cache-from nest-test-backend \
+		$$(docker image inspect nest-test-backend >/dev/null 2>&1 && echo '--cache-from nest-test-backend') \
 		-f backend/docker/Dockerfile.test backend \
 		-t nest-test-backend
 	@docker run \

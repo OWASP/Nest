@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom'
-import React from 'react'
+import { TextEncoder } from 'util'
+import React, { type ReactNode, type MouseEventHandler, type ButtonHTMLAttributes } from 'react'
 // Normalize environment for deterministic tests
 process.env.TZ = 'UTC'
 process.env.NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED = 'true'
@@ -7,13 +8,17 @@ process.env.NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED = 'true'
 // Mock heavy UI libs that rely on dynamic imports (framer-motion) to avoid VM modules issues
 jest.mock('@heroui/button', () => {
   return {
-    Button: ({ children, onClick, onPress, ...rest }: any) =>
+    Button: ({ children, onClick, onPress, ...rest }: MockButtonProps) =>
       React.createElement('button', { onClick: onClick ?? onPress, ...rest }, children),
   }
 })
-import { TextEncoder } from 'util'
-import React from 'react'
 import 'core-js/actual/structured-clone'
+
+type MockButtonProps = {
+  children?: ReactNode
+  onClick?: MouseEventHandler<HTMLButtonElement>
+  onPress?: MouseEventHandler<HTMLButtonElement>
+} & ButtonHTMLAttributes<HTMLButtonElement>
 
 global.React = React
 global.TextEncoder = TextEncoder
@@ -81,6 +86,14 @@ beforeAll(() => {
 
 beforeEach(() => {
   jest.spyOn(console, 'error').mockImplementation((...args) => {
+    const message = args[0]
+    if (
+      typeof message === 'string' &&
+      message.includes('React does not recognize the `%s` prop on a DOM element')
+    ) {
+      // Ignore React 19 unknown prop warnings from UI libs (e.g., disableAnimation)
+      return
+    }
     throw new Error(`Console error: ${args.join(' ')}`)
   })
 

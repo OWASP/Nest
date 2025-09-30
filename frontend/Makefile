@@ -58,14 +58,15 @@ test-frontend: \
 
 test-frontend-e2e:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
-		--cache-from nest-test-frontend-e2e \
+		$$(docker image inspect nest-test-frontend-e2e >/dev/null 2>&1 && echo '--cache-from nest-test-frontend-e2e') \
 		-f frontend/docker/Dockerfile.e2e.test frontend \
 		-t nest-test-frontend-e2e
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-e2e pnpm run test:e2e
 
 test-frontend-unit:
+	@(cd frontend && pnpm run graphql-codegen >/dev/null 2>&1 || pnpm run graphql-codegen)
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
-		--cache-from nest-test-frontend-unit \
+		$$(docker image inspect nest-test-frontend-unit >/dev/null 2>&1 && echo '--cache-from nest-test-frontend-unit') \
 		-f frontend/docker/Dockerfile.unit.test frontend \
 		-t nest-test-frontend-unit
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-unit pnpm run test:unit

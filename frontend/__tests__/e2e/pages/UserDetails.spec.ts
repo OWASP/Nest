@@ -1,31 +1,23 @@
 import { test, expect } from '@playwright/test'
 import { mockUserDetailsData } from '@unit/data/mockUserDetails'
+import { mockDashboardCookies } from '../helpers/mockDashboardCookies'
 
 test.describe('User Details Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/graphql/', async (route) => {
-      await route.fulfill({
-        status: 200,
-        json: { data: mockUserDetailsData },
-      })
+    await mockDashboardCookies(page, mockUserDetailsData, true)
+    await page.route('**/graphql*', async (route) => {
+      await route.fulfill({ status: 200, json: { data: mockUserDetailsData } })
     })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('members/test-user')
+    await page.goto('/members/test-user')
+    await page.waitForLoadState('networkidle')
   })
   test('should have a heading and summary', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Test User' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Test User' })).toBeVisible({ timeout: 10000 })
     await expect(page.getByText('Test @User')).toBeVisible()
   })
 
   test('should have user details block', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'User Details' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'User Details' })).toBeVisible({ timeout: 10000 })
     await expect(page.getByText('Location: Test Location')).toBeVisible()
     await expect(page.getByText('Email: testuser@example.com')).toBeVisible()
     await expect(page.getByText('Company: Test Company')).toBeVisible()

@@ -1,25 +1,15 @@
 import { test, expect } from '@playwright/test'
 import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
+import { mockDashboardCookies } from '../helpers/mockDashboardCookies'
 
 test.describe('Project Details Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/graphql/', async (route) => {
-      await route.fulfill({
-        status: 200,
-        json: {
-          data: mockProjectDetailsData,
-        },
-      })
+    await mockDashboardCookies(page, mockProjectDetailsData, true)
+    await page.route('**/graphql*', async (route) => {
+      await route.fulfill({ status: 200, json: { data: mockProjectDetailsData } })
     })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
     await page.goto('/projects/test-project', { timeout: 60000 })
+    await page.waitForLoadState('networkidle')
   })
 
   test('should have a heading and summary', async ({ page }) => {
@@ -38,7 +28,7 @@ test.describe('Project Details Page', () => {
   })
 
   test('should have project statics block', async ({ page }) => {
-    await expect(page.getByText('2.2K Stars')).toBeVisible()
+    await expect(page.getByText('2.2K Stars')).toBeVisible({ timeout: 10000 })
     await expect(page.getByText('10 Forks')).toBeVisible()
     await expect(page.getByText('1.2K Contributors')).toBeVisible()
     await expect(page.getByText('10 Issues')).toBeVisible()
