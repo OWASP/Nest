@@ -38,7 +38,7 @@ class TestOwaspScrapeCommittees:
     @mock.patch.object(Committee, "bulk_save", autospec=True)
     def test_handle(self, mock_bulk_save, command, mock_committee, offset, committees):
         mock_scraper = mock.Mock(spec=OwaspScraper)
-        mock_scraper.get_urls.return_value = [
+        mock_committee.get_urls.return_value = [
             "https://example.com/repo1",
             "https://example.com/repo2",
             "https://invalid.com/repo3",

@@ -25,7 +25,6 @@ class Base(Configuration):
     IS_TEST_ENVIRONMENT = False
 
     RELEASE_VERSION = values.Value(environ_name="RELEASE_VERSION")
-    SENTRY_DSN = values.SecretValue(environ_name="SENTRY_DSN")
 
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_NAME = "nest.session-id"
@@ -53,6 +52,7 @@ class Base(Configuration):
 
     LOCAL_APPS = (
         "apps.ai",
+        "apps.api",
         "apps.common",
         "apps.core",
         "apps.github",

@@ -570,11 +570,7 @@ describe('NavDropdown Component', () => {
       await user.click(button)
 
       const submenuItem = screen.getByRole('link', { name: 'API Reference' })
-      expect(submenuItem).toHaveClass(
-        'text-slate-600',
-        'hover:bg-slate-100',
-        'hover:text-slate-900'
-      )
+      expect(submenuItem).toHaveClass('text-slate-600', 'hover:bg-gray-200', 'hover:text-slate-900')
     })
   })
 

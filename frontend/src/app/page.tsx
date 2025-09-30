@@ -136,12 +136,12 @@ export default function Home() {
   return (
     <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
-        <div className="pt-5 text-center sm:mb-20">
+        <div className="pt-5 text-center sm:mb-10">
           <div className="flex flex-col items-center py-10">
             <h1 className="text-3xl font-medium tracking-tighter sm:text-5xl md:text-6xl">
               Welcome to OWASP Nest
             </h1>
-            <p className="max-w-[700px] pt-6 text-muted-foreground md:text-xl">
+            <p className="text-muted-foreground max-w-[700px] pt-6 md:text-xl">
               Your gateway to OWASP. Discover, engage, and help shape the future!
             </p>
           </div>
@@ -168,7 +168,7 @@ export default function Home() {
               <div key={`card-${event.name}`} className="overflow-hidden">
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <button
-                    className="mb-2 w-full text-left text-lg font-semibold text-blue-400 hover:underline"
+                    className="mb-2 w-full cursor-pointer text-left text-lg font-semibold text-blue-400 hover:underline"
                     onClick={() => setModalOpenIndex(index)}
                   >
                     <TruncatedText text={event.name} />
@@ -209,7 +209,7 @@ export default function Home() {
             }
             className="overflow-hidden"
           >
-            <div className="space-y-4">
+            <div className="flex flex-col gap-4">
               {data.recentChapters?.map((chapter) => (
                 <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <h3 className="mb-2 text-lg font-semibold">
@@ -251,11 +251,11 @@ export default function Home() {
             }
             className="overflow-hidden"
           >
-            <div className="space-y-4">
+            <div className="flex flex-col gap-4">
               {data.recentProjects?.map((project) => (
                 <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <Link href={`/projects/${project.key}`} className="text-blue-400 hover:underline">
-                    <h3 className="mb-2 truncate text-wrap text-lg font-semibold md:text-nowrap">
+                    <h3 className="mb-2 truncate text-lg font-semibold text-wrap md:text-nowrap">
                       <TruncatedText text={project.name} />
                     </h3>
                   </Link>
@@ -369,7 +369,7 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="mb-20 mt-8">
+        <div className="mt-8 mb-20">
           <SecondaryCard className="text-center">
             <h3 className="mb-4 text-2xl font-semibold">Ready to Make a Difference?</h3>
             <p className="mb-6 text-gray-600 dark:text-gray-400">

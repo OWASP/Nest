@@ -8,6 +8,7 @@ CISSP
 Cañón
 DRF
 GBP
+GFKs
 GSOC
 GTM
 Héllo
@@ -71,6 +72,7 @@ jumpstart
 kasya
 lhci
 libexpat
+lighthouseci
 linkify
 lte
 lxml

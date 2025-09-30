@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client'
 
 export const GET_PROJECT_HEALTH_STATS = gql`
-  query {
+  query GetProjectHealthStats {
     projectHealthStats {
       averageScore
       monthlyOverallScores
@@ -25,10 +25,10 @@ export const GET_PROJECT_HEALTH_METRICS_LIST = gql`
     $ordering: [ProjectHealthMetricsOrder!]
   ) {
     projectHealthMetrics(filters: $filters, pagination: $pagination, ordering: $ordering) {
+      id
       createdAt
       contributorsCount
       forksCount
-      id
       projectKey
       projectName
       score
@@ -38,9 +38,11 @@ export const GET_PROJECT_HEALTH_METRICS_LIST = gql`
   }
 `
 export const GET_PROJECT_HEALTH_METRICS_DETAILS = gql`
-  query Project($projectKey: String!) {
+  query GetProjectHealthMetricsDetails($projectKey: String!) {
     project(key: $projectKey) {
+      id
       healthMetricsLatest {
+        id
         ageDays
         ageDaysRequirement
         isFundingRequirementsCompliant
@@ -57,6 +59,7 @@ export const GET_PROJECT_HEALTH_METRICS_DETAILS = gql`
         score
       }
       healthMetricsList(limit: 30) {
+        id
         contributorsCount
         createdAt
         forksCount

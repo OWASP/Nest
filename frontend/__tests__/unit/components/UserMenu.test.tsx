@@ -642,6 +642,7 @@ describe('UserMenu Component', () => {
       expect(signInButton).toHaveClass(
         'group',
         'relative',
+        'cursor-pointer',
         'flex',
         'h-10',
         'items-center',
@@ -691,7 +692,7 @@ describe('UserMenu Component', () => {
       expect(container).toHaveClass('relative', 'flex', 'items-center', 'justify-center')
 
       const avatarButton = screen.getByRole('button')
-      expect(avatarButton).toHaveClass('w-auto', 'focus:outline-none')
+      expect(avatarButton).toHaveClass('w-auto', 'focus:outline-hidden')
     })
 
     it('applies correct CSS classes to dropdown menu', async () => {

@@ -68,7 +68,7 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
   }) => <span data-testid={`icon-${icon.iconName}`} className={className} {...props} />,
 }))
 
-jest.mock('utils/credentials', () => ({
+jest.mock('utils/env.client', () => ({
   IS_PROJECT_HEALTH_ENABLED: true,
 }))
 
@@ -634,16 +634,8 @@ describe('CardDetailsPage', () => {
       const userSummary = <div>Custom user summary content</div>
       render(<CardDetailsPage {...defaultProps} userSummary={userSummary} />)
 
-      expect(screen.getByText('Summary')).toBeInTheDocument()
-      expect(screen.getByText('Custom user summary content')).toBeInTheDocument()
-    })
-
-    it('renders heatmap section when heatmap prop is provided', () => {
-      const heatmap = <div data-testid="custom-heatmap">Contribution heatmap</div>
-      render(<CardDetailsPage {...defaultProps} heatmap={heatmap} />)
-
-      expect(screen.getByText('Contribution Heatmap')).toBeInTheDocument()
-      expect(screen.getByTestId('custom-heatmap')).toBeInTheDocument()
+      const userSummaryContent = screen.getByText('Custom user summary content')
+      expect(userSummaryContent).toBeInTheDocument()
     })
 
     it('renders health metrics when type is project and health data is available', () => {
@@ -1272,12 +1264,6 @@ describe('CardDetailsPage', () => {
             </ul>
           </div>
         ),
-        heatmap: (
-          <div data-testid="complex-heatmap">
-            <canvas id="contribution-graph" />
-            <div>Legend</div>
-          </div>
-        ),
       }
 
       render(<CardDetailsPage {...complexProps} />)
@@ -1285,7 +1271,8 @@ describe('CardDetailsPage', () => {
       expect(screen.getByText('Nested')).toBeInTheDocument()
       expect(screen.getByText('Content')).toBeInTheDocument()
       expect(screen.getByText('Complex user summary')).toBeInTheDocument()
-      expect(screen.getByTestId('complex-heatmap')).toBeInTheDocument()
+      expect(screen.getByText('Item 1')).toBeInTheDocument()
+      expect(screen.getByText('Item 2')).toBeInTheDocument()
     })
 
     it('renders correctly with all optional sections enabled', () => {
@@ -1294,7 +1281,6 @@ describe('CardDetailsPage', () => {
         type: 'project',
         summary: 'Project summary text',
         userSummary: <div>User summary content</div>,
-        heatmap: <div data-testid="heatmap">Heatmap content</div>,
         socialLinks: ['https://github.com/test', 'https://twitter.com/test'],
         entityKey: 'test-entity',
         projectName: 'Test Project Name',
@@ -1312,7 +1298,6 @@ describe('CardDetailsPage', () => {
 
       expect(screen.getByText('Project summary text')).toBeInTheDocument()
       expect(screen.getByText('User summary content')).toBeInTheDocument()
-      expect(screen.getByTestId('heatmap')).toBeInTheDocument()
       expect(screen.getByTestId('health-metrics')).toBeInTheDocument()
       expect(screen.getByTestId('top-contributors-list')).toBeInTheDocument()
       expect(screen.getByTestId('repositories-card')).toBeInTheDocument()

@@ -158,7 +158,7 @@ To fetch GitHub OWASP data locally:
 1. **Create Super User**
 
     ```bash
-    make setup
+    make create-superuser
     ```
 
 2. **Configure GitHub Access**

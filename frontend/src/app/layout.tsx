@@ -3,7 +3,8 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import React from 'react'
 import { Providers } from 'wrappers/provider'
-import { GTM_ID, isGithubAuthEnabled } from 'utils/credentials'
+import { GTM_ID } from 'utils/env.client'
+import { IS_GITHUB_AUTH_ENABLED } from 'utils/env.server'
 import AutoScrollToTop from 'components/AutoScrollToTop'
 import BreadCrumbs from 'components/BreadCrumbs'
 import Footer from 'components/Footer'
@@ -11,6 +12,8 @@ import Header from 'components/Header'
 import ScrollToTop from 'components/ScrollToTop'
 
 import 'app/globals.css'
+
+export const dynamic = 'force-dynamic'
 
 const geistSans = Geist({
   subsets: ['latin'],
@@ -68,12 +71,14 @@ export default function RootLayout({
         style={{ minHeight: '100vh' }}
       >
         <Providers>
-          <AutoScrollToTop />
-          <Header isGitHubAuthEnabled={isGithubAuthEnabled()} />
-          <BreadCrumbs />
-          {children}
-          <Footer />
-          <ScrollToTop />
+          <div className="flex min-h-screen flex-col">
+            <AutoScrollToTop />
+            <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
+            <BreadCrumbs />
+            <main className="flex flex-1 flex-col justify-center">{children}</main>
+            <Footer />
+            <ScrollToTop />
+          </div>
         </Providers>
       </body>
       <GoogleAnalytics gaId={GTM_ID} />
