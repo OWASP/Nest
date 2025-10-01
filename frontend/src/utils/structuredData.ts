@@ -7,8 +7,8 @@ export const formatISODate = (input: number | string): string => {
       ? new Date(input * 1000) // Unix timestamp in seconds
       : new Date(input) // ISO date string
 
-  if (isNaN(date.getTime())) {
-    throw new Error('Invalid date')
+  if (Number.isNaN(date.getTime())) {
+    throw new TypeError('Invalid date')
   }
 
   return date.toISOString()
