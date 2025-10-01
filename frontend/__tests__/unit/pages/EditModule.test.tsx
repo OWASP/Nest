@@ -23,10 +23,6 @@ jest.mock('@apollo/client/react', () => ({
   useApolloClient: jest.fn(),
 }))
 
-jest.mock('@apollo/client', () => ({
-  gql: jest.requireActual('@apollo/client').gql,
-}))
-
 describe('EditModulePage', () => {
   const mockPush = jest.fn()
   const mockReplace = jest.fn()
