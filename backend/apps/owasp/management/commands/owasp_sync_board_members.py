@@ -40,7 +40,7 @@ class Command(BaseCommand):
 
         self.stdout.write("Fetching OWASP Board of Directors data...")
         try:
-            response = requests.get(BOARD_HISTORY_URL)
+            response = requests.get(BOARD_HISTORY_URL, timeout=15)
             response.raise_for_status()
             board_data = yaml.safe_load(response.text)
         except (requests.RequestException, yaml.YAMLError) as e:
@@ -111,7 +111,6 @@ class Command(BaseCommand):
             "entity_type": entity_type,
             "member_name": member_name,
             "role": EntityMember.Role.MEMBER,
-            "is_active": True,
         }
 
         matched_user = self._fuzzy_match_github_user(member_name)
@@ -120,6 +119,15 @@ class Command(BaseCommand):
 
         try:
             entity_member = EntityMember.update_data(data, save=True)
+            updates: list[str] = []
+            if not entity_member.is_active:
+                entity_member.is_active = True
+                updates.append("is_active")
+            if matched_user and entity_member.member_id != matched_user.id:
+                entity_member.member = matched_user
+                updates.append("member")
+            if updates:
+                entity_member.save(update_fields=updates)
             logger.info("Processed board member: %s", member_name)
         except Exception as e:
             logger.error("Failed to process board member %s: %s", member_name, str(e))

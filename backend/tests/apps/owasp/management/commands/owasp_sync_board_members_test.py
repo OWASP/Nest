@@ -70,7 +70,6 @@ class TestOwaspSyncBoardMembersCommand:
         mock_board_data,
     ):
         """Test successful board members sync for a specific year."""
-        # Setup mocks
         mock_response = mock.Mock()
         mock_response.text = yaml.dump(mock_board_data)
         mock_response.raise_for_status = mock.Mock()
@@ -83,24 +82,27 @@ class TestOwaspSyncBoardMembersCommand:
         mock_content_type = mock.Mock(spec=ContentType)
         mock_get_content_type.return_value = mock_content_type
 
-        mock_entity_member = mock.Mock(spec=EntityMember)
-        mock_update_data.return_value = mock_entity_member
+        mock_entity_members = []
+        for i in range(3):
+            mock_entity_member = mock.Mock(spec=EntityMember)
+            mock_entity_member.is_active = False  
+            mock_entity_member.member_id = None   
+            mock_entity_member.save = mock.Mock() 
+            mock_entity_members.append(mock_entity_member)
+        
+        mock_update_data.side_effect = mock_entity_members
 
-        # Mock the atomic context manager
         mock_atomic.return_value.__enter__ = mock.Mock()
         mock_atomic.return_value.__exit__ = mock.Mock(return_value=None)
 
-        # Execute command
         command.handle(year=2023)
 
-        # Assertions
-        mock_requests_get.assert_called_once_with(self.BOARD_HISTORY_URL)
+        mock_requests_get.assert_called_once_with(self.BOARD_HISTORY_URL, timeout=15)
         mock_get_or_create.assert_called_once_with(year=2023)
         mock_get_content_type.assert_called_once_with(BoardOfDirectors)
         
         assert mock_update_data.call_count == 3
 
-        # Verify update_data called with correct arguments
         expected_calls = [
             mock.call(
                 {
@@ -108,7 +110,6 @@ class TestOwaspSyncBoardMembersCommand:
                     "entity_type": mock_content_type,
                     "member_name": "John Doe",
                     "role": EntityMember.Role.MEMBER,
-                    "is_active": True,
                 },
                 save=True,
             ),
@@ -118,7 +119,6 @@ class TestOwaspSyncBoardMembersCommand:
                     "entity_type": mock_content_type,
                     "member_name": "Jane Smith",
                     "role": EntityMember.Role.MEMBER,
-                    "is_active": True,
                 },
                 save=True,
             ),
@@ -128,12 +128,18 @@ class TestOwaspSyncBoardMembersCommand:
                     "entity_type": mock_content_type,
                     "member_name": "Bob Johnson",
                     "role": EntityMember.Role.MEMBER,
-                    "is_active": True,
                 },
                 save=True,
             ),
         ]
         mock_update_data.assert_has_calls(expected_calls, any_order=True)
+        
+        for mock_entity_member in mock_entity_members:
+            mock_entity_member.save.assert_called_once()
+            call_args = mock_entity_member.save.call_args
+            args, kwargs = call_args
+            assert 'update_fields' in kwargs
+            assert 'is_active' in kwargs['update_fields']
 
     @mock.patch("apps.owasp.management.commands.owasp_sync_board_members.requests.get")
     def test_handle_requests_exception(self, mock_requests_get, command):
@@ -199,7 +205,6 @@ class TestOwaspSyncBoardMembersCommand:
 
         mock_board = mock.Mock(spec=BoardOfDirectors)
         mock_board.id = 1
-        # created=True indicates new board was created
         mock_get_or_create.return_value = (mock_board, True)
 
         mock_content_type = mock.Mock(spec=ContentType)
@@ -208,13 +213,11 @@ class TestOwaspSyncBoardMembersCommand:
         mock_entity_member = mock.Mock(spec=EntityMember)
         mock_update_data.return_value = mock_entity_member
 
-        # Mock the atomic context manager
         mock_atomic.return_value.__enter__ = mock.Mock()
         mock_atomic.return_value.__exit__ = mock.Mock(return_value=None)
 
         with mock.patch.object(command.stdout, "write") as mock_stdout:
             command.handle(year=2023)
-            # Should show message about creating new board
             stdout_calls = [str(call) for call in mock_stdout.call_args_list]
             created_message_found = any("Created new BoardOfDirectors for year 2023" in call for call in stdout_calls)
             assert created_message_found
@@ -256,7 +259,6 @@ class TestOwaspSyncBoardMembersCommand:
         mock_fuzzy_match.assert_called_once_with("John Doe")
         mock_update_data.assert_called_once()
 
-        # Verify the data passed to update_data includes the matched user
         call_args = mock_update_data.call_args
         assert call_args[0][0]["member"] == mock_github_user
         assert call_args[0][0]["member_name"] == "John Doe"
@@ -281,7 +283,6 @@ class TestOwaspSyncBoardMembersCommand:
         mock_fuzzy_match.assert_called_once_with("John Doe")
         mock_update_data.assert_called_once()
 
-        # Verify the data passed to update_data does not include member field
         call_args = mock_update_data.call_args
         assert "member" not in call_args[0][0]
 
@@ -291,11 +292,9 @@ class TestOwaspSyncBoardMembersCommand:
         mock_board = mock.Mock(spec=BoardOfDirectors)
         mock_content_type = mock.Mock(spec=ContentType)
 
-        # Test with empty name
         command._create_or_update_member({"name": ""}, mock_board, mock_content_type)
         mock_update_data.assert_not_called()
 
-        # Test with whitespace only name  
         command._create_or_update_member({"name": "  "}, mock_board, mock_content_type)
         mock_update_data.assert_not_called()
 
@@ -337,11 +336,9 @@ class TestOwaspSyncBoardMembersCommand:
     @mock.patch("apps.github.models.user.User.objects.filter")
     def test_fuzzy_match_github_user_no_match(self, mock_filter, command):
         """Test fuzzy matching with no match found."""
-        # Mock exact match returns None
         mock_exact_queryset = mock.Mock()
         mock_exact_queryset.first.return_value = None
 
-        # Mock candidate users query returns empty
         mock_candidate_queryset = mock.Mock()
         mock_candidate_queryset.count.return_value = 0
         mock_candidate_queryset.exclude.return_value = mock_candidate_queryset
@@ -364,15 +361,13 @@ class TestOwaspSyncBoardMembersCommand:
     @mock.patch("apps.github.models.user.User.objects.filter")
     def test_fuzzy_match_github_user_with_similarity(self, mock_filter, mock_fuzz, command):
         """Test fuzzy matching using similarity threshold."""
-        # Mock exact match returns None
         mock_exact_queryset = mock.Mock()
         mock_exact_queryset.first.return_value = None
 
-        # Mock candidate users
         user1 = mock.Mock(spec=User)
-        user1.name = "Jon Doe"  # Similar but not exact
+        user1.name = "Jon Doe"  
         user2 = mock.Mock(spec=User) 
-        user2.name = "John Doe Jr"  # Very similar
+        user2.name = "John Doe Jr"  
 
         mock_candidate_queryset = mock.Mock()
         mock_candidate_queryset.count.return_value = 2
@@ -381,12 +376,10 @@ class TestOwaspSyncBoardMembersCommand:
 
         mock_filter.side_effect = [mock_exact_queryset, mock_candidate_queryset]
 
-        # Mock fuzz.ratio to return high similarity for user2
-        mock_fuzz.ratio.side_effect = [75, 85]  # user1: 75%, user2: 85%
+        mock_fuzz.ratio.side_effect = [75, 85] 
 
         result = command._fuzzy_match_github_user("John Doe")
 
-        # Should return user2 as it has higher similarity
         assert result == user2
         assert mock_fuzz.ratio.call_count == 2
 
@@ -431,7 +424,6 @@ class TestOwaspSyncBoardMembersCommand:
         command,
     ):
         """Test progress reporting during sync."""
-        # Create board data with more than 10 members to test progress reporting
         board_data = [
             {
                 "year": 2023,
@@ -454,14 +446,12 @@ class TestOwaspSyncBoardMembersCommand:
         mock_entity_member = mock.Mock(spec=EntityMember)
         mock_update_data.return_value = mock_entity_member
 
-        # Mock the atomic context manager
         mock_atomic.return_value.__enter__ = mock.Mock()
         mock_atomic.return_value.__exit__ = mock.Mock(return_value=None)
 
         with mock.patch.object(command.stdout, "write") as mock_stdout:
             command.handle(year=2023)
 
-            # Should show progress at 10th member
             stdout_calls = [str(call) for call in mock_stdout.call_args_list]
             progress_message_found = any("Processed 10 of 15 members" in call for call in stdout_calls)
             assert progress_message_found
