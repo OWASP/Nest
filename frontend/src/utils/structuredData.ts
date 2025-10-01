@@ -2,6 +2,10 @@ import { ProfilePageStructuredData } from 'types/profilePageStructuredData'
 import type { User } from 'types/user'
 
 export const formatISODate = (input?: number | string): string => {
+  if (input == null) {
+    return undefined
+  }
+
   const date =
     typeof input === 'number'
       ? new Date(input * 1000) // Unix timestamp in seconds
@@ -30,8 +34,12 @@ export function generateProfilePageStructuredData(
   return {
     '@context': 'https://schema.org',
     '@type': 'ProfilePage',
-    dateCreated: formatISODate(user.createdAt),
-    dateModified: formatISODate(user.updatedAt),
+    ...(formatISODate(user.createdAt) && {
+      dateCreated: formatISODate(user.createdAt),
+    }),
+    ...(formatISODate(user.updatedAt) && {
+      dateModified: formatISODate(user.updatedAt),
+    }),
     mainEntity: {
       '@type': 'Person',
       ...(user.location && {
