@@ -12,8 +12,8 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  Date: { input: any; output: any; }
-  DateTime: { input: any; output: any; }
+  Date: { input: string | number; output: string | number; }
+  DateTime: { input: string | number; output: string | number; }
   JSON: { input: any; output: any; }
   UUID: { input: any; output: any; }
 };

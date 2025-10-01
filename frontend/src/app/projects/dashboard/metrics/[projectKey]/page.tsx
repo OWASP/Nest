@@ -1,6 +1,5 @@
 'use client'
-
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import {
   faPeopleGroup,
   faCodeFork,
@@ -15,7 +14,7 @@ import {
 import { useParams } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
-import { GET_PROJECT_HEALTH_METRICS_DETAILS } from 'server/queries/projectsHealthDashboardQueries'
+import { GetProjectHealthMetricsDetailsDocument } from 'types/__generated__/projectsHealthDashboardQueries.generated'
 import { HealthMetricsProps } from 'types/healthMetrics'
 import BarChart from 'components/BarChart'
 import GeneralCompliantComponent from 'components/GeneralCompliantComponent'
@@ -25,14 +24,14 @@ import MetricsPDFButton from 'components/MetricsPDFButton'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 
 const ProjectHealthMetricsDetails: FC = () => {
-  const { projectKey } = useParams()
+  const { projectKey } = useParams<{ projectKey: string }>()
   const [metricsList, setMetricsList] = useState<HealthMetricsProps[]>()
   const [metricsLatest, setMetricsLatest] = useState<HealthMetricsProps>()
   const {
     loading,
     error: graphqlError,
     data,
-  } = useQuery(GET_PROJECT_HEALTH_METRICS_DETAILS, {
+  } = useQuery(GetProjectHealthMetricsDetailsDocument, {
     variables: { projectKey },
   })
 

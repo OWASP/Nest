@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import React from 'react'
 import { apolloClient } from 'server/apolloClient'
-import { GET_COMMITTEE_METADATA } from 'server/queries/committeeQueries'
+import { GetCommitteeMetadataDocument } from 'types/__generated__/committeeQueries.generated'
 import { generateSeoMetadata } from 'utils/metaconfig'
 
 export async function generateMetadata({
@@ -11,7 +11,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { committeeKey } = await params
   const { data } = await apolloClient.query({
-    query: GET_COMMITTEE_METADATA,
+    query: GetCommitteeMetadataDocument,
     variables: {
       key: committeeKey,
     },

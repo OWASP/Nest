@@ -1,15 +1,15 @@
 'use client'
-
-import { useMutation, useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { UPDATE_MODULE } from 'server/mutations/moduleMutations'
-import { GET_PROGRAM_ADMINS_AND_MODULES } from 'server/queries/moduleQueries'
+import { ExperienceLevelEnum } from 'types/__generated__/graphql'
+import { UpdateModuleDocument } from 'types/__generated__/moduleMutations.generated'
+import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import type { ExtendedSession } from 'types/auth'
-import { EXPERIENCE_LEVELS, type ModuleFormData } from 'types/mentorship'
+import type { ModuleFormData } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -23,13 +23,13 @@ const EditModulePage = () => {
   const [formData, setFormData] = useState<ModuleFormData | null>(null)
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
 
-  const [updateModule, { loading: mutationLoading }] = useMutation(UPDATE_MODULE)
+  const [updateModule, { loading: mutationLoading }] = useMutation(UpdateModuleDocument)
 
   const {
     data,
     loading: queryLoading,
     error: queryError,
-  } = useQuery(GET_PROGRAM_ADMINS_AND_MODULES, {
+  } = useQuery(GetProgramAdminsAndModulesDocument, {
     variables: { programKey, moduleKey },
     skip: !programKey || !moduleKey,
     fetchPolicy: 'network-only',
@@ -76,7 +76,7 @@ const EditModulePage = () => {
       setFormData({
         name: m.name || '',
         description: m.description || '',
-        experienceLevel: m.experienceLevel || EXPERIENCE_LEVELS.BEGINNER,
+        experienceLevel: m.experienceLevel || ExperienceLevelEnum.Beginner,
         startedAt: formatDateForInput(m.startedAt),
         endedAt: formatDateForInput(m.endedAt),
         domains: (m.domains || []).join(', '),
@@ -98,7 +98,7 @@ const EditModulePage = () => {
         programKey: programKey,
         name: formData.name,
         description: formData.description,
-        experienceLevel: formData.experienceLevel,
+        experienceLevel: formData.experienceLevel as ExperienceLevelEnum,
         startedAt: formData.startedAt || null,
         endedAt: formData.endedAt || null,
         domains: parseCommaSeparated(formData.domains),

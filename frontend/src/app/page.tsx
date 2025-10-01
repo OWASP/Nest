@@ -1,5 +1,5 @@
 'use client'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import {
   faBook,
@@ -21,7 +21,7 @@ import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
-import { GET_MAIN_PAGE_DATA } from 'server/queries/homeQueries'
+import { GetMainPageDataDocument } from 'types/__generated__/homeQueries.generated'
 import type { AlgoliaResponse } from 'types/algolia'
 import type { Chapter } from 'types/chapter'
 import type { Event } from 'types/event'
@@ -47,7 +47,7 @@ import { TruncatedText } from 'components/TruncatedText'
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [data, setData] = useState<MainPageData>(null)
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_MAIN_PAGE_DATA, {
+  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetMainPageDataDocument, {
     variables: { distinct: true },
   })
 

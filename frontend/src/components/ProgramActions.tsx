@@ -5,10 +5,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState, useRef, useEffect } from 'react'
+import { ProgramStatusEnum } from 'types/__generated__/graphql'
 
 interface ProgramActionsProps {
   status: string
-  setStatus: (newStatus: 'DRAFT' | 'PUBLISHED' | 'COMPLETED') => void
+  setStatus: (
+    newStatus: ProgramStatusEnum.Draft | ProgramStatusEnum.Published | ProgramStatusEnum.Completed
+  ) => void
 }
 
 const ProgramActions: React.FC<ProgramActionsProps> = ({ status, setStatus }) => {
@@ -25,13 +28,13 @@ const ProgramActions: React.FC<ProgramActionsProps> = ({ status, setStatus }) =>
         router.push(`${window.location.pathname}/modules/create`)
         break
       case 'publish':
-        setStatus('PUBLISHED')
+        setStatus(ProgramStatusEnum.Published)
         break
       case 'draft':
-        setStatus('DRAFT')
+        setStatus(ProgramStatusEnum.Draft)
         break
       case 'completed':
-        setStatus('COMPLETED')
+        setStatus(ProgramStatusEnum.Completed)
         break
     }
     setDropdownOpen(false)
@@ -40,11 +43,13 @@ const ProgramActions: React.FC<ProgramActionsProps> = ({ status, setStatus }) =>
   const options = [
     { key: 'edit Program', label: 'Edit Program' },
     { key: 'create_module', label: 'Add Module' },
-    ...(status === 'DRAFT' ? [{ key: 'publish', label: 'Publish Program' }] : []),
-    ...(status === 'PUBLISHED' || status === 'COMPLETED'
+    ...(status === ProgramStatusEnum.Draft ? [{ key: 'publish', label: 'Publish Program' }] : []),
+    ...(status === ProgramStatusEnum.Published || status === ProgramStatusEnum.Completed
       ? [{ key: 'draft', label: 'Move to Draft' }]
       : []),
-    ...(status === 'PUBLISHED' ? [{ key: 'completed', label: 'Mark as Completed' }] : []),
+    ...(status === ProgramStatusEnum.Published
+      ? [{ key: 'completed', label: 'Mark as Completed' }]
+      : []),
   ]
 
   useEffect(() => {

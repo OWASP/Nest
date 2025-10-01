@@ -1,7 +1,7 @@
 import type { User } from 'types/user'
 
 export type PullRequest = {
-  author: User
+  author?: User
   createdAt: string
   organizationName: string
   repositoryName?: string

@@ -5,7 +5,7 @@ export type Committee = {
   createdAt: number
   forksCount?: number
   issuesCount?: number
-  key: string
+  key?: string
   leaders: string[]
   name: string
   objectID?: string
@@ -13,7 +13,7 @@ export type Committee = {
   repositoriesCount?: number
   starsCount?: number
   summary: string
-  topContributors: Contributor[]
+  topContributors?: Contributor[]
   updatedAt: number
   url: string
 }

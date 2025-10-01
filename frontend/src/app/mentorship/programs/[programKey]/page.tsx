@@ -1,12 +1,11 @@
 'use client'
-
-import { useQuery } from '@apollo/client'
-import upperFirst from 'lodash/upperFirst'
+import { useQuery } from '@apollo/client/react'
+import { capitalize } from 'lodash'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ErrorDisplay } from 'app/global-error'
-import { GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
-import type { Module, Program } from 'types/mentorship'
+import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
+import type { Program, Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -20,7 +19,7 @@ const ProgramDetailsPage = () => {
     data,
     refetch,
     loading: isQueryLoading,
-  } = useQuery(GET_PROGRAM_AND_MODULES, {
+  } = useQuery(GetProgramAndModulesDocument, {
     variables: { programKey },
     skip: !programKey,
     notifyOnNetworkStatusChange: true,
@@ -70,7 +69,7 @@ const ProgramDetailsPage = () => {
   }
 
   const programDetails = [
-    { label: 'Status', value: upperFirst(program.status) },
+    { label: 'Status', value: capitalize(program.status) },
     { label: 'Start Date', value: formatDate(program.startedAt) },
     { label: 'End Date', value: formatDate(program.endedAt) },
     { label: 'Mentees Limit', value: String(program.menteesLimit) },

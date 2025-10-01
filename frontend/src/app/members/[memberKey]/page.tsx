@@ -1,5 +1,5 @@
 'use client'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import {
   faCodeMerge,
   faFolderOpen,
@@ -12,21 +12,21 @@ import { useParams } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import React, { useState, useEffect, useRef } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
-import { GET_USER_DATA } from 'server/queries/userQueries'
+import { GetUserDataDocument } from 'types/__generated__/userQueries.generated'
 import type { Issue } from 'types/issue'
 import type { Milestone } from 'types/milestone'
 import type { RepositoryCardProps } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
-import type { UserDetails } from 'types/user'
+import type { User } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const UserDetailsPage: React.FC = () => {
-  const { memberKey } = useParams()
-  const [user, setUser] = useState<UserDetails | null>()
+  const { memberKey } = useParams<{ memberKey: string }>()
+  const [user, setUser] = useState<User | null>()
   const [issues, setIssues] = useState<Issue[]>([])
   const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
   const [milestones, setMilestones] = useState<Milestone[]>([])
@@ -37,7 +37,7 @@ const UserDetailsPage: React.FC = () => {
   const [username, setUsername] = useState('')
   const [isPrivateContributor, setIsPrivateContributor] = useState(false)
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_USER_DATA, {
+  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetUserDataDocument, {
     variables: { key: memberKey },
   })
 

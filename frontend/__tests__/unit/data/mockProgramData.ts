@@ -1,4 +1,5 @@
-import { ProgramStatusEnum } from 'types/mentorship'
+import { ProgramStatusEnum } from 'types/__generated__/graphql'
+
 export const mockPrograms = [
   {
     key: 'program_1',
@@ -6,7 +7,7 @@ export const mockPrograms = [
     description: 'This is a summary of Program 1.',
     startedAt: '2025-01-01',
     endedAt: '2025-12-31',
-    status: 'published',
+    status: ProgramStatusEnum.Published,
     modules: ['Module A', 'Module B'],
   },
 ]
@@ -16,7 +17,7 @@ export const mockProgramDetailsData = {
     key: 'test-program',
     name: 'Test Program',
     description: 'Sample summary',
-    status: ProgramStatusEnum.DRAFT,
+    status: ProgramStatusEnum.Draft,
     startedAt: '2025-01-01',
     endedAt: '2025-12-31',
     menteesLimit: 20,

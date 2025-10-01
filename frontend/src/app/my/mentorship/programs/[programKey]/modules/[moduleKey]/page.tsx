@@ -1,24 +1,23 @@
 'use client'
-
-import { useQuery } from '@apollo/client'
-import upperFirst from 'lodash/upperFirst'
+import { useQuery } from '@apollo/client/react'
+import { capitalize } from 'lodash'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GET_PROGRAM_ADMINS_AND_MODULES } from 'server/queries/moduleQueries'
-import type { Module } from 'types/mentorship'
+import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import { getSimpleDuration } from 'components/ModuleCard'
 
 const ModuleDetailsPage = () => {
-  const { programKey, moduleKey } = useParams()
+  const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
   const [module, setModule] = useState<Module | null>(null)
   const [admins, setAdmins] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  const { data, error } = useQuery(GET_PROGRAM_ADMINS_AND_MODULES, {
+  const { data, error } = useQuery(GetProgramAdminsAndModulesDocument, {
     variables: {
       programKey,
       moduleKey,
@@ -49,7 +48,7 @@ const ModuleDetailsPage = () => {
   }
 
   const moduleDetails = [
-    { label: 'Experience Level', value: upperFirst(module.experienceLevel) },
+    { label: 'Experience Level', value: capitalize(module.experienceLevel) },
     { label: 'Start Date', value: formatDate(module.startedAt) },
     { label: 'End Date', value: formatDate(module.endedAt) },
     {

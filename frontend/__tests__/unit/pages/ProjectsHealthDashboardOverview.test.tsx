@@ -1,11 +1,11 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { render, screen, waitFor } from '@testing-library/react'
 import { mockProjectsDashboardOverviewData } from '@unit/data/mockProjectsDashboardOverviewData'
 import millify from 'millify'
 import ProjectsDashboardPage from 'app/projects/dashboard/page'
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
 }))
 
@@ -38,7 +38,7 @@ const mockError = {
 
 describe('ProjectsDashboardOverviewPage', () => {
   beforeEach(() => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockProjectsDashboardOverviewData,
       loading: false,
       error: null,
@@ -49,7 +49,7 @@ describe('ProjectsDashboardOverviewPage', () => {
   })
 
   test('renders loading state', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       loading: true,
       error: null,
@@ -62,7 +62,7 @@ describe('ProjectsDashboardOverviewPage', () => {
   })
 
   test('renders error state', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       loading: false,
       error: mockError,

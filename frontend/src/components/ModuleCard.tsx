@@ -6,7 +6,7 @@ import {
   faHourglassHalf,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import upperFirst from 'lodash/upperFirst'
+import { capitalize } from 'lodash'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import type { Module } from 'types/mentorship'
@@ -82,7 +82,7 @@ const ModuleItem = ({ details }: { details: Module }) => {
       >
         <TruncatedText text={details?.name} />
       </button>
-      <TextInfoItem icon={faLevelUpAlt} label="Level" value={upperFirst(details.experienceLevel)} />
+      <TextInfoItem icon={faLevelUpAlt} label="Level" value={capitalize(details.experienceLevel)} />
       <TextInfoItem icon={faCalendarAlt} label="Start" value={formatDate(details.startedAt)} />
       <TextInfoItem
         icon={faHourglassHalf}

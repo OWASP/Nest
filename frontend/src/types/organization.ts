@@ -1,17 +1,17 @@
 export type Organization = {
-  avatarUrl: string
-  collaboratorsCount: number
+  avatarUrl?: string
+  collaboratorsCount?: number
   company?: string
-  createdAt: number
+  createdAt?: number
   description?: string
   email?: string
-  followersCount: number
-  key: string
+  followersCount?: number
+  key?: string
   location?: string
   login: string
-  name: string
-  objectID: string
-  publicRepositoriesCount: number
-  updatedAt: number
-  url: string
+  name?: string
+  objectID?: string
+  publicRepositoriesCount?: number
+  updatedAt?: number
+  url?: string
 }
