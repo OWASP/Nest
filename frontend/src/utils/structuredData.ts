@@ -1,7 +1,7 @@
 import { ProfilePageStructuredData } from 'types/profilePageStructuredData'
 import type { User } from 'types/user'
 
-export const formatISODate = (input: number | string): string => {
+export const formatISODate = (input?: number | string): string => {
   const date =
     typeof input === 'number'
       ? new Date(input * 1000) // Unix timestamp in seconds
