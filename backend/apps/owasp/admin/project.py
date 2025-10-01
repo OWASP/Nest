@@ -2,9 +2,12 @@
 
 from django.contrib import admin
 
+from apps.owasp.admin.mixins import (
+    EntityChannelInline,
+    EntityMemberInline,
+    GenericEntityAdminMixin,
+)
 from apps.owasp.models.project import Project
-
-from .mixins import EntityMemberInline, GenericEntityAdminMixin
 
 
 class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
@@ -20,7 +23,7 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
         "leaders",
         "suggested_leaders",
     )
-    inlines = (EntityMemberInline,)
+    inlines = (EntityMemberInline, EntityChannelInline)
     list_display = (
         "custom_field_name",
         "created_at",

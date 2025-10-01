@@ -4,7 +4,7 @@ from django.contrib import admin
 
 from apps.owasp.models.chapter import Chapter
 
-from .mixins import EntityMemberInline, GenericEntityAdminMixin
+from .mixins import EntityChannelInline, EntityMemberInline, GenericEntityAdminMixin
 
 
 class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
@@ -15,7 +15,7 @@ class ChapterAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
         "leaders",
         "suggested_leaders",
     )
-    inlines = (EntityMemberInline,)
+    inlines = (EntityMemberInline, EntityChannelInline)
     list_display = (
         "name",
         "created_at",

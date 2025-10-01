@@ -12,6 +12,7 @@ class EntityChannel(models.Model):
         SLACK = "slack", "Slack"
 
     class Meta:
+        db_table = "owasp_entity_channels"
         unique_together = (
             "channel_id",
             "channel_type",
@@ -20,6 +21,27 @@ class EntityChannel(models.Model):
         )
         verbose_name = "Entity channel"
         verbose_name_plural = "Entity channels"
+
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Indicates if this channel is active",
+    )
+    is_default = models.BooleanField(
+        default=False,
+        help_text="Indicates if this is the main channel for the entity",
+    )
+    is_reviewed = models.BooleanField(
+        default=False,
+        help_text="Indicates if the channel has been reviewed",
+    )
+    platform = models.CharField(
+        max_length=5,
+        default=Platform.SLACK,
+        choices=Platform.choices,
+        help_text="Platform of the channel (e.g., Slack)",
+    )
+
+    # GFKs.
 
     # Channel.
     channel = GenericForeignKey("channel_type", "channel_id")
@@ -37,21 +59,6 @@ class EntityChannel(models.Model):
         ContentType,
         on_delete=models.CASCADE,
         related_name="+",
-    )
-
-    is_default = models.BooleanField(
-        default=False,
-        help_text="Indicates if this is the main channel for the entity",
-    )
-    is_reviewed = models.BooleanField(
-        default=False,
-        help_text="Indicates if the channel has been reviewed",
-    )
-    platform = models.CharField(
-        max_length=32,
-        default=Platform.SLACK,
-        choices=Platform.choices,
-        help_text="Platform of the channel (e.g., Slack)",
     )
 
     def __str__(self):
