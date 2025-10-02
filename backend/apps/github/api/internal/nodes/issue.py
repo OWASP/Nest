@@ -5,13 +5,16 @@ import strawberry_django
 
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models.issue import Issue
+from apps.mentorship.models import IssueUserInterest  # add import
 
 
 @strawberry_django.type(
     Issue,
     fields=[
         "created_at",
+        "number",
         "state",
+        "summary",
         "title",
         "url",
     ],
@@ -47,3 +50,8 @@ class IssueNode(strawberry.relay.Node):
     def labels(self) -> list[str]:
         """Resolve label names for the issue."""
         return list(self.labels.values_list("name", flat=True))
+
+    @strawberry.field
+    def interested_users(self) -> list[UserNode]:
+        """Return all users who have expressed interest in this issue."""
+        return [interest.user for interest in IssueUserInterest.objects.filter(issue=self)]

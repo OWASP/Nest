@@ -14,6 +14,7 @@ from apps.mentorship.api.internal.nodes.module import (
     UpdateModuleInput,
 )
 from apps.mentorship.models import Mentor, Module, Program
+from apps.mentorship.models.issue_user_interest import IssueUserInterest
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.models import Project
 
@@ -111,6 +112,96 @@ class ModuleMutation:
         mentors_to_set = resolve_mentors_from_logins(input_data.mentor_logins or [])
         mentors_to_set.add(creator_as_mentor)
         module.mentors.set(list(mentors_to_set))
+
+        return module
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
+    def assign_issue_to_user(
+        self,
+        info: strawberry.Info,
+        *,
+        module_key: str,
+        program_key: str,
+        issue_id: int,
+        user_login: str,
+    ) -> ModuleNode:
+        """Assign an issue to a user by updating Issue.assignees within the module scope."""
+        user = info.context.request.user
+
+        module = (
+            Module.objects.select_related("program")
+            .filter(key=module_key, program__key=program_key)
+            .first()
+        )
+        if module is None:
+            msg = "Module not found."
+            raise ObjectDoesNotExist(msg)
+
+        mentor = Mentor.objects.filter(nest_user=user).first()
+        if mentor is None:
+            msg = "Only mentors can assign issues."
+            raise PermissionDenied(msg)
+        if not module.program.admins.filter(id=mentor.id).exists():
+            raise PermissionDenied
+
+        gh_user = GithubUser.objects.filter(login=user_login).first()
+        if gh_user is None:
+            msg = "Assignee not found."
+            raise ObjectDoesNotExist(msg)
+
+        issue = module.issues.filter(id=issue_id).first()
+        if issue is None:
+            msg = "Issue not found in this module."
+            raise ObjectDoesNotExist(msg)
+
+        issue.assignees.add(gh_user)
+
+        IssueUserInterest.objects.filter(module=module, issue_id=issue.id, user=gh_user).delete()
+
+        return module
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
+    def unassign_issue_from_user(
+        self,
+        info: strawberry.Info,
+        *,
+        module_key: str,
+        program_key: str,
+        issue_id: int,
+        user_login: str,
+    ) -> ModuleNode:
+        """Unassign an issue from a user by updating Issue.assignees within the module scope."""
+        user = info.context.request.user
+
+        module = (
+            Module.objects.select_related("program")
+            .filter(key=module_key, program__key=program_key)
+            .first()
+        )
+        if module is None:
+            msg = "Module not found."
+            raise ObjectDoesNotExist(msg)
+
+        mentor = Mentor.objects.filter(nest_user=user).first()
+        if mentor is None:
+            msg = "Only mentors can unassign issues."
+            raise PermissionDenied(msg)
+        if not module.program.admins.filter(id=mentor.id).exists():
+            raise PermissionDenied
+
+        gh_user = GithubUser.objects.filter(login=user_login).first()
+        if gh_user is None:
+            msg = "Assignee not found."
+            raise ObjectDoesNotExist(msg)
+
+        issue = module.issues.filter(id=issue_id).first()
+        if issue is None:
+            msg = f"Issue {issue_id} not found in this module."
+            raise ObjectDoesNotExist(msg)
+
+        issue.assignees.remove(gh_user)
 
         return module
 
