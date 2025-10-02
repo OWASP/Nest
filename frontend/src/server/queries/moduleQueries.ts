@@ -82,11 +82,12 @@ export const GET_MODULE_ISSUES = gql`
       id
       name
       key
-      tags
       issues {
         id
+        number
         createdAt
         title
+        summary
         url
         author {
           id

@@ -5,9 +5,11 @@ from datetime import datetime
 import strawberry
 
 from apps.github.api.internal.nodes.issue import IssueNode
+from apps.github.api.internal.nodes.user import UserNode
 from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum
 from apps.mentorship.api.internal.nodes.mentor import MentorNode
 from apps.mentorship.api.internal.nodes.program import ProgramNode
+from apps.mentorship.models.issue_user_interest import IssueUserInterest
 
 
 @strawberry.type
@@ -39,7 +41,34 @@ class ModuleNode:
     @strawberry.field
     def issues(self) -> list[IssueNode]:
         """Return issues linked to this module."""
-        return list(self.issues.select_related("repository", "author").order_by("-created_at"))
+        return list(
+            self.issues.select_related("repository", "author")
+            .prefetch_related("assignees", "labels")
+            .order_by("-created_at")
+        )
+
+    @strawberry.field
+    def issue_by_number(self, number: int) -> IssueNode | None:
+        """Return a single issue by its GitHub number within this module's linked issues."""
+        return (
+            self.issues.select_related("repository", "author")
+            .prefetch_related("assignees", "labels")
+            .filter(number=number)
+            .first()
+        )
+
+    @strawberry.field
+    def interested_users(self, issue_number: int) -> list[UserNode]:
+        """Return users interested in this module's issue identified by its number."""
+        issue_ids = list(self.issues.filter(number=issue_number).values_list("id", flat=True))
+        if not issue_ids:
+            return []
+        interests = (
+            IssueUserInterest.objects.select_related("user")
+            .filter(module=self, issue_id__in=issue_ids)
+            .order_by("user__login")
+        )
+        return [i.user for i in interests]
 
 
 @strawberry.input

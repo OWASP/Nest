@@ -36,7 +36,7 @@ const IssuesPage = () => {
       createdAt: i.createdAt,
       hint: '',
       labels: i.labels || [],
-      number: undefined,
+      number: i.number,
       organizationName: i.organizationName,
       projectName: moduleData?.projectName || '',
       projectUrl: '',
@@ -137,16 +137,19 @@ const IssuesPage = () => {
               {moduleIssues.map((issue) => (
                 <tr key={issue.objectID} className="hover:bg-gray-50 dark:hover:bg-[#2a2e33]">
                   <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-blue-600 dark:text-blue-400">
-                    <a
-                      href={issue.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="block max-w-xl hover:underline"
+                    <button
+                      type="button"
+                      onClick={() =>
+                        router.push(
+                          `/my/mentorship/programs/${programKey}/modules/${moduleKey}/issues/${issue.number}`
+                        )
+                      }
+                      className="block max-w-xl text-left hover:underline"
                     >
                       <TruncatedText
                         text={`${issue.title.slice(0, 50)}${issue.title.length > 50 ? '…' : ''}`}
                       />
-                    </a>
+                    </button>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-wrap gap-2">
@@ -159,13 +162,13 @@ const IssuesPage = () => {
                             {visible.map((label) => (
                               <span
                                 key={label}
-                                className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                                className="rounded-lg border border-gray-400 px-2 py-0.5 text-xs text-gray-700 hover:bg-gray-200 dark:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700"
                               >
                                 {label}
                               </span>
                             ))}
                             {remaining > 0 && (
-                              <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                              <span className="rounded-lg border border-gray-400 px-2 py-0.5 text-xs text-gray-700 hover:bg-gray-200 dark:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700">
                                 +{remaining} more
                               </span>
                             )}
@@ -175,21 +178,31 @@ const IssuesPage = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-700 dark:text-gray-300">
-                    {(data?.getModule?.issues || [])
-                      .find((i) => i.id === issue.objectID)
-                      ?.assignees?.slice(0, 1)
-                      .map((a) => (
-                        <div key={a.id} className="flex items-center gap-2">
-                          <Image
-                            height={24}
-                            width={24}
-                            src={a.avatarUrl}
-                            alt={a.login}
-                            className="rounded-full"
-                          />
-                          <span>{a.login || a.name}</span>
+                    {((assignees) =>
+                      assignees?.length ? (
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2">
+                            <Image
+                              height={24}
+                              width={24}
+                              src={assignees[0].avatarUrl}
+                              alt={assignees[0].login}
+                              className="rounded-full"
+                            />
+                            <span>{assignees[0].login || assignees[0].name}</span>
+                          </div>
+                          {assignees.length > 1 && (
+                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                              +{assignees.length - 1}
+                            </div>
+                          )}
                         </div>
-                      )) || <span className="text-gray-400">Unassigned</span>}
+                      ) : (
+                        <span className="text-gray-400">Unassigned</span>
+                      ))(
+                      (data?.getModule?.issues || []).find((i) => i.id === issue.objectID)
+                        ?.assignees
+                    )}
                   </td>
                 </tr>
               ))}
