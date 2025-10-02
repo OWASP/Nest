@@ -135,25 +135,21 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            msg = "Module not found."
-            raise ObjectDoesNotExist(msg)
+            raise ObjectDoesNotExist(msg="Module not found.")
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
-            msg = "Only mentors can assign issues."
-            raise PermissionDenied(msg)
+            raise PermissionDenied(msg="Only mentors can assign issues.")
         if not module.program.admins.filter(id=mentor.id).exists():
             raise PermissionDenied
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
-            msg = "Assignee not found."
-            raise ObjectDoesNotExist(msg)
+            raise ObjectDoesNotExist(msg="Assignee not found.")
 
         issue = module.issues.filter(id=issue_id).first()
         if issue is None:
-            msg = "Issue not found in this module."
-            raise ObjectDoesNotExist(msg)
+            raise ObjectDoesNotExist(msg="Issue not found in this module.")
 
         issue.assignees.add(gh_user)
 
@@ -181,25 +177,21 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            msg = "Module not found."
-            raise ObjectDoesNotExist(msg)
+            raise ObjectDoesNotExist
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
-            msg = "Only mentors can unassign issues."
-            raise PermissionDenied(msg)
+            raise PermissionDenied
         if not module.program.admins.filter(id=mentor.id).exists():
             raise PermissionDenied
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
-            msg = "Assignee not found."
-            raise ObjectDoesNotExist(msg)
+            raise ObjectDoesNotExist(msg="Assignee not found.")
 
         issue = module.issues.filter(id=issue_id).first()
         if issue is None:
-            msg = f"Issue {issue_id} not found in this module."
-            raise ObjectDoesNotExist(msg)
+            raise ObjectDoesNotExist(msg=f"Issue {issue_id} not found in this module.")
 
         issue.assignees.remove(gh_user)
 
@@ -216,19 +208,17 @@ class ModuleMutation:
                 key=input_data.key, program__key=input_data.program_key
             )
         except Module.DoesNotExist as e:
-            msg = "Module not found."
-            raise ObjectDoesNotExist(msg) from e
+            raise ObjectDoesNotExist(msg="Module not found.") from e
 
         try:
             creator_as_mentor = Mentor.objects.get(nest_user=user)
         except Mentor.DoesNotExist as err:
-            msg = "Only mentors can edit modules."
             logger.warning(
                 "User '%s' is not a mentor and cannot edit modules.",
                 user.username,
                 exc_info=True,
             )
-            raise PermissionDenied(msg) from err
+            raise PermissionDenied(msg="Only mentors can edit modules.") from err
 
         if not module.program.admins.filter(id=creator_as_mentor.id).exists():
             raise PermissionDenied
