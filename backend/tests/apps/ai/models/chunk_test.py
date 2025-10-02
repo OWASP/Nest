@@ -99,8 +99,7 @@ class TestChunkModel:
             )
 
             mock_chunk_class.objects.filter.assert_called_once_with(
-                context__entity_type=mock_context.entity_type,
-                context__entity_id=mock_context.entity_id,
+                context=mock_context,
                 text=text,
             )
             mock_chunk_class.assert_called_once_with(
@@ -124,8 +123,7 @@ class TestChunkModel:
             )
 
             mock_chunk_class.objects.filter.assert_called_once_with(
-                context__entity_type=mock_context.entity_type,
-                context__entity_id=mock_context.entity_id,
+                context=mock_context,
                 text=text,
             )
             mock_chunk_class.assert_called_once_with(
@@ -147,8 +145,7 @@ class TestChunkModel:
             )
 
             mock_chunk_class.objects.filter.assert_called_once_with(
-                context__entity_type=mock_context.entity_type,
-                context__entity_id=mock_context.entity_id,
+                context=mock_context,
                 text=text,
             )
 

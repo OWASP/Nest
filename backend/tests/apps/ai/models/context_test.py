@@ -160,10 +160,10 @@ class TestContextModel:
             mock_get.assert_called_once_with(
                 entity_type=mock_content_type,
                 entity_id=1,
+                source="src",
             )
             assert result == mock_context
             assert mock_context.content == content
-            assert mock_context.source == "src"
 
     def test_str_method_with_name_attribute(self):
         """Test __str__ method when entity has name attribute."""
@@ -326,13 +326,14 @@ class TestContextModel:
                 mock_get.assert_called_once_with(
                     entity_type=mock_content_type,
                     entity_id=1,
+                    source=source,
                 )
                 mock_init.assert_called_once_with(
                     entity_type=mock_content_type,
                     entity_id=1,
+                    source=source,
                 )
                 assert result.content == content
-                assert result.source == source
                 mock_save.assert_called_once()
 
     @patch("apps.ai.models.context.Context.objects.get")
@@ -366,11 +367,12 @@ class TestContextModel:
                 mock_get.assert_called_once_with(
                     entity_type=mock_content_type,
                     entity_id=1,
+                    source=source,
                 )
                 mock_init.assert_called_once_with(
                     entity_type=mock_content_type,
                     entity_id=1,
+                    source=source,
                 )
                 assert result.content == content
-                assert result.source == source
                 mock_save.assert_not_called()
