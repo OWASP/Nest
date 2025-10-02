@@ -61,11 +61,7 @@ class Chunk(TimestampedModel):
           Chunk: The created chunk instance.
 
         """
-        if Chunk.objects.filter(
-            context__entity_type=context.entity_type,
-            context__entity_id=context.entity_id,
-            text=text,
-        ).exists():
+        if Chunk.objects.filter(context=context, text=text).exists():
             return None
 
         chunk = Chunk(text=text, embedding=embedding, context=context)
