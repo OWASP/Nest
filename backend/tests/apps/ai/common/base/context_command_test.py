@@ -116,7 +116,7 @@ class TestBaseContextCommand:
                 entity=mock_entity,
                 source="owasp_test_entity",
             )
-            mock_write.assert_called_once_with("Created context for test-key-123")
+            mock_write.assert_called_once_with("Created/updated context for test-key-123")
 
     @patch("apps.ai.common.base.context_command.Context")
     def test_process_context_batch_creation_fails(self, mock_context_class, command, mock_entity):
@@ -130,7 +130,7 @@ class TestBaseContextCommand:
             mock_context_class.update_data.assert_called_once()
             mock_write.assert_called_once()
             call_args = mock_write.call_args[0][0]
-            assert "Failed to create context for test-key-123" in str(call_args)
+            assert "Failed to create/update context for test-key-123" in str(call_args)
 
     @patch("apps.ai.common.base.context_command.Context")
     def test_process_context_batch_multiple_entities(
@@ -184,9 +184,9 @@ class TestBaseContextCommand:
             assert mock_write.call_count == 3
 
             write_calls = mock_write.call_args_list
-            assert "Created context for test-key-1" in str(write_calls[0])
-            assert "Failed to create context for test-key-2" in str(write_calls[1])
-            assert "Created context for test-key-3" in str(write_calls[2])
+            assert "Created/updated context for test-key-1" in str(write_calls[0])
+            assert "Failed to create/update context for test-key-2" in str(write_calls[1])
+            assert "Created/updated context for test-key-3" in str(write_calls[2])
 
     def test_process_context_batch_content_combination(self, command, mock_entity, mock_context):
         """Test that metadata and prose content are properly combined."""
@@ -261,7 +261,7 @@ class TestBaseContextCommand:
             with patch.object(command.stdout, "write") as mock_write:
                 command.process_context_batch([entity])
 
-                mock_write.assert_called_once_with("Created context for custom-entity-key")
+                mock_write.assert_called_once_with("Created/updated context for custom-entity-key")
 
     def test_process_context_batch_empty_list(self, command):
         """Test process_context_batch with empty entity list."""
