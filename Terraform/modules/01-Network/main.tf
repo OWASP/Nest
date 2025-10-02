@@ -63,7 +63,6 @@ resource "aws_subnet" "private" {
 # resilient, cost-effective, and simpler to manage than a per-AZ NAT Gateway.
 
 resource "aws_eip" "nat" {
-  # Only one EIP is needed for the single NAT Gateway.
   tags = merge(
     var.tags,
     {
@@ -73,8 +72,6 @@ resource "aws_eip" "nat" {
 }
 
 resource "aws_nat_gateway" "main" {
-# Cost-optimized: a single NAT Gateway in the first public subnet.
-# NOTE: This is a single-AZ SPOF for egress. A per-AZ NAT option could be added for higher availability.
   allocation_id = aws_eip.nat.id
   subnet_id     = aws_subnet.public[0].id
 
@@ -145,11 +142,10 @@ data "aws_elb_service_account" "current" {}
 data "aws_caller_identity" "current" {}
 
 # This is the primary bucket where the ALB will store its access logs.
-resource "aws_s3_bucket" "alb_access_logs" {
-  # Only create this bucket if logging is enabled
-  count = var.enable_alb_access_logs ? 1 : 0
+# Only create this bucket if logging is enabled
 
-  # If a specific name is provided, use it. Otherwise, generate a unique name.
+resource "aws_s3_bucket" "alb_access_logs" {
+  count  = var.enable_alb_access_logs ? 1 : 0
   bucket = var.alb_access_logs_bucket_name != "" ? var.alb_access_logs_bucket_name : "${var.project_prefix}-${var.environment}-alb-access-logs-${data.aws_caller_identity.current.account_id}"
 
   tags = merge(
@@ -183,13 +179,133 @@ resource "aws_s3_bucket" "s3_server_access_logs" {
     }
   )
 }
+
+
+resource "aws_s3_bucket_public_access_block" "s3_server_access_logs" {
+  count  = var.enable_alb_access_logs ? 1 : 0
+  bucket = aws_s3_bucket.s3_server_access_logs[0].id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# Bucket Versioning
+resource "aws_s3_bucket_versioning" "alb_access_logs" {
+  count  = var.enable_alb_access_logs ? 1 : 0
+  bucket = aws_s3_bucket.alb_access_logs[0].id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_versioning" "s3_server_access_logs" {
+  count  = var.enable_alb_access_logs ? 1 : 0
+  bucket = aws_s3_bucket.s3_server_access_logs[0].id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+# Buckets Encryption
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "alb_access_logs" {
+  count  = var.enable_alb_access_logs ? 1 : 0
+  bucket = aws_s3_bucket.alb_access_logs[0].id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+    bucket_key_enabled = true
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "s3_server_access_logs" {
+  count  = var.enable_alb_access_logs ? 1 : 0
+  bucket = aws_s3_bucket.s3_server_access_logs[0].id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+    bucket_key_enabled = true
+  }
+}
+
+# BUCKETS LIFECYCLE POLICIES 
+resource "aws_s3_bucket_lifecycle_configuration" "alb_access_logs" {
+  count  = var.enable_alb_access_logs ? 1 : 0
+  bucket = aws_s3_bucket.alb_access_logs[0].id
+
+  rule {
+    id     = "expire-old-logs"
+    status = "Enabled"
+
+    transition {
+      days          = 30
+      storage_class = "STANDARD_IA"
+    }
+
+    transition {
+      days          = 90
+      storage_class = "GLACIER"
+    }
+
+    expiration {
+      days = 365
+    }
+
+    noncurrent_version_expiration {
+      noncurrent_days = 30
+    }
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "s3_server_access_logs" {
+  count  = var.enable_alb_access_logs ? 1 : 0
+  bucket = aws_s3_bucket.s3_server_access_logs[0].id
+
+  rule {
+    id     = "expire-old-logs"
+    status = "Enabled"
+
+    transition {
+      days          = 30
+      storage_class = "STANDARD_IA"
+    }
+
+    expiration {
+      days = 180
+    }
+
+    noncurrent_version_expiration {
+      noncurrent_days = 30
+    }
+  }
+}
+
+
+resource "aws_s3_bucket_logging" "s3_server_access_logs" {
+  count = var.enable_alb_access_logs ? 1 : 0
+
+  bucket = aws_s3_bucket.s3_server_access_logs[0].id
+
+  # S3 server access logs bucket logs to itself in a different prefix
+  target_bucket = aws_s3_bucket.s3_server_access_logs[0].id
+  target_prefix = "self-logs/"
+}
+
 resource "aws_s3_bucket_logging" "alb_access_logs" {
   count = var.enable_alb_access_logs ? 1 : 0
 
   bucket = aws_s3_bucket.alb_access_logs[0].id
 
   target_bucket = aws_s3_bucket.s3_server_access_logs[0].id
-  target_prefix = "log/"
+  target_prefix = "alb-bucket-logs/"
 }
 
 
@@ -199,9 +315,22 @@ data "aws_iam_policy_document" "alb_access_logs" {
 
   # This statement allows the ALB service to write logs to the bucket.
   statement {
-    effect    = "AllowALBToWriteLogs"
+    sid       = "AllowALBToWriteLogs"
+    effect    = "Allow"
     actions   = ["s3:PutObject"]
     resources = ["${aws_s3_bucket.alb_access_logs[0].arn}/*"]
+
+    principals {
+      type        = "AWS"
+      identifiers = [data.aws_elb_service_account.current.arn]
+    }
+  }
+
+  statement {
+    sid       = "AllowALBToGetBucketACL"
+    effect    = "Allow"
+    actions   = ["s3:GetBucketAcl"]
+    resources = [aws_s3_bucket.alb_access_logs[0].arn]
 
     principals {
       type        = "AWS"
@@ -214,7 +343,10 @@ data "aws_iam_policy_document" "alb_access_logs" {
     sid       = "DenyInsecureTransport"
     effect    = "Deny"
     actions   = ["s3:*"]
-    resources = ["${aws_s3_bucket.alb_access_logs[0].arn}/*"]
+    resources = [
+      aws_s3_bucket.alb_access_logs[0].arn,
+      "${aws_s3_bucket.alb_access_logs[0].arn}/*"
+    ]
 
     principals {
       type        = "*"
@@ -229,13 +361,73 @@ data "aws_iam_policy_document" "alb_access_logs" {
   }
 }
 
+#  Added bucket policy for S3 server access logs bucket to enforce HTTPS-only access
+
+data "aws_iam_policy_document" "s3_server_access_logs" {
+  count = var.enable_alb_access_logs ? 1 : 0
+
+  # Allow S3 logging service to write logs
+  statement {
+    sid    = "S3ServerAccessLogsPolicy"
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["logging.s3.amazonaws.com"]
+    }
+    actions = [
+      "s3:PutObject"
+    ]
+    resources = ["${aws_s3_bucket.s3_server_access_logs[0].arn}/*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
+    }
+  }
+
+  # Deny any access over insecure HTTP
+  statement {
+    sid    = "DenyInsecureTransport"
+    effect = "Deny"
+    actions = ["s3:*"]
+    resources = [
+      aws_s3_bucket.s3_server_access_logs[0].arn,
+      "${aws_s3_bucket.s3_server_access_logs[0].arn}/*"
+    ]
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["false"]
+    }
+  }
+}
+
 # This resource is needed to grant the ALB service permission to write to my S3 bucket.
 resource "aws_s3_bucket_policy" "alb_access_logs" {
   count  = var.enable_alb_access_logs ? 1 : 0
   bucket = aws_s3_bucket.alb_access_logs[0].id
   policy = data.aws_iam_policy_document.alb_access_logs[0].json
+
+  depends_on = [
+    aws_s3_bucket_public_access_block.alb_access_logs
+  ]
 }
 
+# Added bucket policy attachment for S3 server access logs bucket
+resource "aws_s3_bucket_policy" "s3_server_access_logs" {
+  count  = var.enable_alb_access_logs ? 1 : 0
+  bucket = aws_s3_bucket.s3_server_access_logs[0].id
+  policy = data.aws_iam_policy_document.s3_server_access_logs[0].json
+
+  depends_on = [
+    aws_s3_bucket_public_access_block.s3_server_access_logs
+  ]
+}
 
 #  Application Load Balancer 
 
@@ -288,10 +480,14 @@ resource "aws_lb" "main" {
   # Deletion protection should be enabled via a variable for production.
   enable_deletion_protection = var.environment == "prod" ? true : false
 
-  access_logs {
-    bucket  = var.enable_alb_access_logs ? aws_s3_bucket.alb_access_logs[0].bucket : null
-    enabled = var.enable_alb_access_logs
-    prefix  = "alb-logs"
+  # Proper conditional for access_logs block
+  dynamic "access_logs" {
+    for_each = var.enable_alb_access_logs ? [1] : []
+    content {
+      bucket  = aws_s3_bucket.alb_access_logs[0].bucket
+      enabled = true
+      prefix  = "alb-logs"
+    }
   }
 
   tags = merge(
@@ -300,6 +496,10 @@ resource "aws_lb" "main" {
       Name = "${var.project_prefix}-${var.environment}-alb"
     }
   )
+
+  depends_on = [
+    aws_s3_bucket_policy.alb_access_logs
+  ]
 }
 
 resource "aws_lb_listener" "http" {
