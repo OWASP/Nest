@@ -431,6 +431,46 @@ class TestBaseChunkCommand:
                 mock_split_text.assert_called_once_with("metadata\n\n")
                 mock_bulk_save.assert_called_once()
 
+    @patch("apps.ai.common.base.chunk_command.ContentType.objects.get_for_model")
+    @patch("apps.ai.common.base.chunk_command.Context.objects.filter")
+    @patch("apps.ai.models.chunk.Chunk.split_text")
+    @patch("apps.ai.common.base.chunk_command.create_chunks_and_embeddings")
+    @patch("apps.ai.models.chunk.Chunk.bulk_save")
+    def test_process_chunks_batch_with_duplicates(
+        self,
+        mock_bulk_save,
+        mock_create_chunks,
+        mock_split_text,
+        mock_context_filter,
+        mock_get_content_type,
+        command,
+        mock_entity,
+        mock_context,
+        mock_content_type,
+        mock_chunks,
+    ):
+        """Test that duplicate chunks are filtered out before bulk save."""
+        mock_get_content_type.return_value = mock_content_type
+        mock_context_filter.return_value.first.return_value = mock_context
+        mock_split_text.return_value = ["chunk1", "chunk2", "chunk3"]
+        mock_create_chunks.return_value = mock_chunks
+        command.openai_client = Mock()
+
+        with (
+            patch("apps.ai.models.chunk.Chunk.objects.filter") as mock_chunk_filter,
+            patch.object(command.stdout, "write"),
+        ):
+            mock_qs = Mock()
+            mock_qs.values_list.return_value = [(1, "Chunk text 1")]
+            mock_chunk_filter.return_value = mock_qs
+
+            result = command.process_chunks_batch([mock_entity])
+
+            assert result == 1
+            mock_bulk_save.assert_called_once()
+            bulk_save_args = mock_bulk_save.call_args[0][0]
+            assert len(bulk_save_args) == 2
+
     def test_process_chunks_batch_whitespace_only_content(
         self, command, mock_entity, mock_context, mock_content_type
     ):
