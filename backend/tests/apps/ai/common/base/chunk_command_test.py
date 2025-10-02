@@ -211,7 +211,13 @@ class TestBaseChunkCommand:
         mock_create_chunks.return_value = mock_chunks
         command.openai_client = Mock()
 
-        with patch.object(command.stdout, "write") as mock_write:
+        with (
+            patch("apps.ai.models.chunk.Chunk.objects.filter") as mock_chunk_filter,
+            patch.object(command.stdout, "write") as mock_write,
+        ):
+            mock_qs = Mock()
+            mock_qs.values_list.return_value = []
+            mock_chunk_filter.return_value = mock_qs
             result = command.process_chunks_batch([mock_entity])
 
             assert result == 1
@@ -261,14 +267,20 @@ class TestBaseChunkCommand:
         mock_create_chunks.return_value = mock_chunks[:2]
         command.openai_client = Mock()
 
-        with patch.object(command.stdout, "write"):
+        with (
+            patch("apps.ai.models.chunk.Chunk.objects.filter") as mock_chunk_filter,
+            patch.object(command.stdout, "write"),
+        ):
+            mock_qs = Mock()
+            mock_qs.values_list.return_value = []
+            mock_chunk_filter.return_value = mock_qs
             result = command.process_chunks_batch(entities)
 
             assert result == 3
             assert mock_create_chunks.call_count == 3
             mock_bulk_save.assert_called_once()
             bulk_save_args = mock_bulk_save.call_args[0][0]
-            assert len(bulk_save_args) == 6
+            assert len(bulk_save_args) == 2
 
     @patch("apps.ai.common.base.chunk_command.ContentType.objects.get_for_model")
     @patch("apps.ai.common.base.chunk_command.Context.objects.filter")
@@ -325,14 +337,22 @@ class TestBaseChunkCommand:
                 "extract_content",
                 return_value=("prose", "metadata"),
             ):
-                command.process_chunks_batch([mock_entity])
+                with patch("apps.ai.models.chunk.Chunk.objects.filter") as mock_chunk_filter:
+                    mock_qs = Mock()
+                    mock_qs.values_list.return_value = []
+                    mock_chunk_filter.return_value = mock_qs
+                    command.process_chunks_batch([mock_entity])
 
                 expected_content = "metadata\n\nprose"
                 mock_split_text.assert_called_once_with(expected_content)
 
             mock_split_text.reset_mock()
             with patch.object(command, "extract_content", return_value=("prose", "")):
-                command.process_chunks_batch([mock_entity])
+                with patch("apps.ai.models.chunk.Chunk.objects.filter") as mock_chunk_filter:
+                    mock_qs = Mock()
+                    mock_qs.values_list.return_value = []
+                    mock_chunk_filter.return_value = mock_qs
+                    command.process_chunks_batch([mock_entity])
 
                 mock_split_text.assert_called_with("prose")
 
@@ -402,7 +422,11 @@ class TestBaseChunkCommand:
                 "extract_content",
                 return_value=("", "metadata"),
             ):
-                command.process_chunks_batch([mock_entity])
+                with patch("apps.ai.models.chunk.Chunk.objects.filter") as mock_chunk_filter:
+                    mock_qs = Mock()
+                    mock_qs.values_list.return_value = []
+                    mock_chunk_filter.return_value = mock_qs
+                    command.process_chunks_batch([mock_entity])
 
                 mock_split_text.assert_called_once_with("metadata\n\n")
                 mock_bulk_save.assert_called_once()

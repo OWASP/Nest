@@ -169,7 +169,9 @@ class TestAiCreateCommitteeContextCommand:
                             entity=mock_committee,
                             source="owasp_committee",
                         )
-                        mock_write.assert_called_once_with("Created context for test-committee")
+                        mock_write.assert_called_once_with(
+                            "Created/updated context for test-committee"
+                        )
 
     def test_process_context_batch_empty_content(self, command, mock_committee):
         """Test context batch processing with empty content."""
@@ -206,7 +208,7 @@ class TestAiCreateCommitteeContextCommand:
 
                         assert result == 0
                         mock_error.assert_called_once_with(
-                            "Failed to create context for test-committee"
+                            "Failed to create/update context for test-committee"
                         )
                         mock_write.assert_called_once_with("ERROR: Failed")
 
