@@ -2,9 +2,12 @@
 
 from django.contrib import admin
 
+from apps.owasp.admin.mixins import (
+    EntityChannelInline,
+    EntityMemberInline,
+    GenericEntityAdminMixin,
+)
 from apps.owasp.models.committee import Committee
-
-from .mixins import EntityMemberInline, GenericEntityAdminMixin
 
 
 class CommitteeAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
@@ -15,7 +18,7 @@ class CommitteeAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
         "leaders",
         "suggested_leaders",
     )
-    inlines = (EntityMemberInline,)
+    inlines = (EntityMemberInline, EntityChannelInline)
     search_fields = ("name",)
 
 
