@@ -7,6 +7,13 @@ export const GET_LEADER_DATA = gql`
       avatarUrl
       login
       name
+      badges {
+        id
+        name
+        description
+        cssClass
+      }
+      badgeCount
     }
   }
 `
@@ -78,6 +85,13 @@ export const GET_USER_DATA = gql`
       location
       login
       name
+      badges {
+        cssClass
+        description
+        id
+        name
+      }
+      badgeCount
       publicRepositoriesCount
       releasesCount
       updatedAt
@@ -92,6 +106,7 @@ export const GET_USER_METADATA = gql`
       bio
       login
       name
+      badgeCount
     }
   }
 `
