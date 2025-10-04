@@ -1,3 +1,5 @@
+import logging
+from http import HTTPStatus
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
@@ -19,34 +21,6 @@ class TestRepositoryBasedEntityModel:
         self.content_type = Mock()
         self.model = EntityModel()
         self.model.id = 1
-
-    @pytest.mark.parametrize(
-        ("content", "expected_audience"),
-        [
-            (
-                """### Top Ten Card Game Information
-* [Incubator Project](#)
-* [Type of Project](#)
-* [Version 0.0.0](#)
-* [Builder](#)
-* [Breaker](#)""",
-                ["breaker", "builder"],
-            ),
-            ("This test contains no audience information.", []),
-            ("", []),
-            (None, []),
-        ],
-    )
-    def test_get_audience(self, content, expected_audience):
-        model = EntityModel()
-        repository = Repository()
-        repository.name = "www-project-example"
-        model.owasp_repository = repository
-
-        with patch("apps.owasp.models.common.get_repository_file_content", return_value=content):
-            audience = model.get_audience()
-
-        assert audience == expected_audience
 
     @pytest.mark.parametrize(
         ("content", "expected_leaders"),
@@ -436,3 +410,123 @@ Release Notes: https://github.com/OWASP/www-project-machine-learning-security-to
         leaders_to_save = call_args[0][1]
 
         assert len(leaders_to_save) == 2  # Updated existing + new leader
+
+    @patch("apps.owasp.models.common.normalize_url")
+    def test__process_urls(self, mock_normalize_url):
+        """Test _process_urls method."""
+        mock_normalize_url.side_effect = lambda url, **_: url
+
+        with (
+            patch.object(
+                self.model,
+                "get_urls",
+                return_value=[
+                    "https://example.com/repo1",
+                    "https://example.com/repo2",
+                    "https://invalid.com/repo3",
+                ],
+            ),
+            patch.object(self.model, "_verify_url") as mock_verify_url,
+        ):
+            mock_verify_url.side_effect = lambda url: None if "invalid" in url else url
+
+            self.model._process_urls(Mock())
+
+            assert self.model.invalid_urls == ["https://invalid.com/repo3"]
+            assert self.model.related_urls == [
+                "https://example.com/repo1",
+                "https://example.com/repo2",
+            ]
+
+    @patch("apps.owasp.models.common.normalize_url")
+    def test__process_urls_filtered_url(self, mock_normalize_url, caplog):
+        """Test _process_urls with URL that gets filtered out."""
+        mock_normalize_url.side_effect = lambda url, **_: url
+
+        with (
+            patch.object(self.model, "get_urls", return_value=["https://example.com/test"]),
+            patch.object(self.model, "get_related_url", return_value=None),
+            patch.object(self.model, "_verify_url", return_value="https://example.com/test"),
+            caplog.at_level(logging.INFO),
+        ):
+            self.model._process_urls(Mock())
+
+            assert self.model.invalid_urls == []
+            assert self.model.related_urls == []
+
+    @pytest.mark.parametrize(
+        ("url", "expected"),
+        [
+            ("https://www.linkedin.com/in/test", "https://www.linkedin.com/in/test"),
+            ("https://my-company.slack.com", "https://my-company.slack.com"),
+            ("youtube.com", None),
+        ],
+    )
+    @patch("apps.owasp.models.common.requests.get")
+    def test__verify_url_allowed_domains_bypass_request(self, mock_get, url, expected):
+        """Test that specifically allowed domains bypass network requests."""
+        assert self.model._verify_url(url) == expected
+        mock_get.assert_not_called()
+
+    def test__verify_url_invalid_url(self):
+        """Test that an invalidly formatted URL returns None."""
+        assert self.model._verify_url("invalid-url") is None
+
+    @patch("apps.owasp.models.common.requests.get")
+    def test__verify_url_logs_warning(self, mock_get, caplog):
+        """Test that a warning is logged for an unverified URL."""
+        response = Mock()
+        response.status_code = HTTPStatus.FORBIDDEN  # 403
+        mock_get.return_value = response
+
+        with caplog.at_level(logging.WARNING):
+            result = self.model._verify_url("https://test.org")
+
+        assert result is None
+        assert "Couldn't verify URL" in caplog.text
+
+    @patch("apps.owasp.models.common.requests.get")
+    def test__verify_url_redirect_chain(self, mock_get):
+        """Test URL verification with a redirect chain."""
+        redirect_response = Mock()
+        redirect_response.status_code = HTTPStatus.MOVED_PERMANENTLY
+        redirect_response.headers = {"Location": "https://new-url.org"}
+
+        final_response = Mock()
+        final_response.status_code = HTTPStatus.OK
+        mock_get.side_effect = [redirect_response, final_response]
+
+        assert self.model._verify_url("https://old-url.org") == "https://new-url.org"
+        assert mock_get.call_count == 2
+
+    @pytest.mark.parametrize(
+        "status_code",
+        [
+            HTTPStatus.MOVED_PERMANENTLY,  # 301
+            HTTPStatus.FOUND,  # 302
+            HTTPStatus.SEE_OTHER,  # 303
+            HTTPStatus.TEMPORARY_REDIRECT,  # 307
+            HTTPStatus.PERMANENT_REDIRECT,  # 308
+        ],
+    )
+    @patch("apps.owasp.models.common.requests.get")
+    def test__verify_url_redirect_status_codes(self, mock_get, status_code):
+        """Test URL verification with different redirect status codes."""
+        redirect_response = Mock()
+        redirect_response.status_code = status_code
+        redirect_response.headers = {"Location": "https://new-url.org"}
+
+        final_response = Mock()
+        final_response.status_code = HTTPStatus.OK
+        mock_get.side_effect = [redirect_response, final_response]
+
+        assert self.model._verify_url("https://old-url.org") == "https://new-url.org"
+
+    @patch("apps.owasp.models.common.requests.get")
+    def test__verify_url_unsupported_status_code(self, mock_get):
+        """Test that a non-200, non-redirect status code returns None."""
+        response = Mock()
+        response.status_code = HTTPStatus.IM_A_TEAPOT  # 418
+        mock_get.return_value = response
+
+        assert self.model._verify_url("https://test.org") is None

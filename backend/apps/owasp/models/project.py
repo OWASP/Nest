@@ -3,22 +3,27 @@
 from __future__ import annotations
 
 import datetime
+import logging
 from functools import lru_cache
 
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.utils import timezone
+from github.GithubException import UnknownObjectException
 
 from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import get_absolute_url
 from apps.core.models.prompt import Prompt
+from apps.github.constants import GITHUB_USER_RE
 from apps.github.models.issue import Issue
 from apps.github.models.milestone import Milestone
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
+from apps.github.utils import get_repository_file_content, normalize_url
 from apps.owasp.models.common import RepositoryBasedEntityModel
 from apps.owasp.models.enums.project import (
+    AudienceChoices,
     ProjectLevel,
     ProjectType,
     validate_audience,
@@ -26,6 +31,8 @@ from apps.owasp.models.enums.project import (
 from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins.project import ProjectIndexMixin
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
+
+logger = logging.getLogger(__name__)
 
 
 class Project(
@@ -280,11 +287,53 @@ class Project(
         self.is_active = False
         self.save(update_fields=("is_active",))
 
-    def from_github(self, repository) -> None:
+    def _process_urls(self, gh):
+        processed_urls = sorted(
+            {
+                repository_url
+                for url in set(self.get_urls(domain="github.com"))
+                if (related_url := self.get_related_url(url))
+                if (repository_url := normalize_url(related_url))
+                and repository_url not in {self.github_url, self.owasp_url}
+            }
+        )
+
+        invalid_urls: set[str] = set()
+        related_urls: set[str] = set()
+        for processed_url in processed_urls:
+            verified_url = self._verify_url(processed_url)
+            if not verified_url:
+                invalid_urls.add(processed_url)
+                continue
+
+            verified_url = self.get_related_url(normalize_url(verified_url))
+            if verified_url:
+                if GITHUB_USER_RE.match(verified_url):
+                    try:
+                        gh_organization = gh.get_organization(verified_url.split("/")[-1])
+                        related_urls.update(
+                            f"https://github.com/{gh_repository.full_name.lower()}"
+                            for gh_repository in gh_organization.get_repos()
+                        )
+                    except UnknownObjectException:
+                        logger.info(
+                            "Couldn't get GitHub organization repositories for %s",
+                            verified_url,
+                        )
+                else:
+                    related_urls.add(verified_url)
+            else:
+                logger.info("Skipped related URL %s", verified_url)
+
+        self.invalid_urls = sorted(invalid_urls)
+        self.related_urls = sorted(related_urls)
+
+    def from_github(self, repository, gh) -> None:
         """Update instance based on GitHub repository data.
 
         Args:
             repository (github.Repository): The GitHub repository instance.
+            gh (Github): The authenticated Github client instance.
 
         """
         self.owasp_repository = repository
@@ -296,6 +345,7 @@ class Project(
                 "name": "title",
                 "tags": "tags",
             },
+            gh,
         )
 
         # Level.
@@ -316,12 +366,28 @@ class Project(
             self.type = project_type if project_type in ProjectType.values else ProjectType.OTHER
             self.type_raw = project_type
 
+        self.audience = self.get_audience()
         self.created_at = repository.created_at
         self.updated_at = repository.updated_at
 
     def get_absolute_url(self):
         """Get absolute URL for project."""
         return f"/projects/{self.nest_key}"
+
+    def get_audience(self):
+        """Get audience from info.md file on GitHub."""
+        content = get_repository_file_content(self.info_md_url)
+        if not content:
+            return []
+
+        found_keywords = set()
+
+        for line in content.split("\n"):
+            for lower_kw, original_kw in AudienceChoices.choices:
+                if original_kw in line:
+                    found_keywords.add(lower_kw)
+
+        return sorted(found_keywords)
 
     def save(self, *args, **kwargs) -> None:
         """Save the project instance."""
@@ -348,12 +414,13 @@ class Project(
         BulkSaveModel.bulk_save(Project, projects, fields=fields)
 
     @staticmethod
-    def update_data(gh_repository, repository, *, save: bool = True) -> Project:
+    def update_data(gh_repository, repository, gh, *, save: bool = True) -> Project:
         """Update project data from GitHub repository.
 
         Args:
             gh_repository (github.Repository): The GitHub repository instance.
             repository (github.Repository): The repository data to update from.
+            gh (Github): The authenticated Github client instance.
             save (bool, optional): Whether to save the instance.
 
         Returns:
@@ -366,7 +433,7 @@ class Project(
         except Project.DoesNotExist:
             project = Project(key=key)
 
-        project.from_github(repository)
+        project.from_github(repository, gh)
         if save:
             project.save()
 

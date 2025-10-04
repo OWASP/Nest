@@ -35,7 +35,7 @@ class Committee(
         """Committee human readable representation."""
         return f"{self.name}"
 
-    def from_github(self, repository) -> None:
+    def from_github(self, repository, gh) -> None:
         """Update instance based on GitHub repository data."""
         self.owasp_repository = repository
 
@@ -46,6 +46,7 @@ class Committee(
                 "name": "title",
                 "tags": "tags",
             },
+            gh,
         )
 
         self.created_at = repository.created_at
@@ -75,7 +76,7 @@ class Committee(
         BulkSaveModel.bulk_save(Committee, committees, fields=fields)
 
     @staticmethod
-    def update_data(gh_repository, repository, *, save: bool = True) -> "Committee":
+    def update_data(gh_repository, repository, gh, *, save: bool = True) -> "Committee":
         """Update committee data."""
         key = gh_repository.name.lower()
         try:
@@ -83,7 +84,7 @@ class Committee(
         except Committee.DoesNotExist:
             committee = Committee(key=key)
 
-        committee.from_github(repository)
+        committee.from_github(repository, gh)
         if save:
             committee.save()
 
