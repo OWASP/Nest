@@ -1,10 +1,8 @@
 import '@testing-library/jest-dom'
-import { TextEncoder } from 'util'
 import React from 'react'
 import 'core-js/actual/structured-clone'
 
 global.React = React
-global.TextEncoder = TextEncoder
 
 // Add fetch polyfill for jsdom test environment
 // Node.js 18+ has native fetch, but jsdom doesn't include it
