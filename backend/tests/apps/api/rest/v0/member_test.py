@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from apps.api.rest.v0.member import MemberSchema
+from apps.api.rest.v0.member import MemberDetail
 
 
 class TestMemberSchema:
@@ -29,7 +29,7 @@ class TestMemberSchema:
         ],
     )
     def test_user_schema(self, member_data):
-        member = MemberSchema(**member_data)
+        member = MemberDetail(**member_data)
 
         assert member.name == member_data["name"]
         assert member.login == member_data["login"]

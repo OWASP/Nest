@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from apps.api.rest.v0.release import ReleaseSchema
+from apps.api.rest.v0.release import ReleaseDetail
 
 
 class TestReleaseSchema:
@@ -26,10 +26,10 @@ class TestReleaseSchema:
         ],
     )
     def test_release_schema(self, release_data):
-        schema = ReleaseSchema(**release_data)
-        assert schema.created_at == datetime.fromisoformat(release_data["created_at"])
-        assert schema.published_at == datetime.fromisoformat(release_data["published_at"])
+        schema = ReleaseDetail(**release_data)
 
-        assert schema.name == release_data["name"]
-        assert schema.tag_name == release_data["tag_name"]
+        assert schema.created_at == datetime.fromisoformat(release_data["created_at"])
         assert schema.description == release_data["description"]
+        assert schema.name == release_data["name"]
+        assert schema.published_at == datetime.fromisoformat(release_data["published_at"])
+        assert schema.tag_name == release_data["tag_name"]

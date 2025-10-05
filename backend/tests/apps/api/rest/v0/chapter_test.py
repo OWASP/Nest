@@ -2,13 +2,14 @@ from datetime import datetime
 
 import pytest
 
-from apps.api.rest.v0.chapter import ChapterSchema
+from apps.api.rest.v0.chapter import ChapterDetail
 
 
 @pytest.mark.parametrize(
     "chapter_data",
     [
         {
+            "key": "nagoya",
             "name": "OWASP Nagoya",
             "country": "America",
             "region": "Europe",
@@ -16,6 +17,7 @@ from apps.api.rest.v0.chapter import ChapterSchema
             "updated_at": "2024-07-02T00:00:00Z",
         },
         {
+            "key": "something",
             "name": "OWASP something",
             "country": "India",
             "region": "Asia",
@@ -25,7 +27,16 @@ from apps.api.rest.v0.chapter import ChapterSchema
     ],
 )
 def test_chapter_serializer_validation(chapter_data):
-    chapter = ChapterSchema(**chapter_data)
+    # Create a mock object with nest_key property
+    class MockChapter:
+        def __init__(self, data):
+            for key, value in data.items():
+                setattr(self, key, value)
+            self.nest_key = data["key"]
+
+    chapter = ChapterDetail.from_orm(MockChapter(chapter_data))
+
+    assert chapter.key == chapter_data["key"]
     assert chapter.name == chapter_data["name"]
     assert chapter.country == chapter_data["country"]
     assert chapter.region == chapter_data["region"]

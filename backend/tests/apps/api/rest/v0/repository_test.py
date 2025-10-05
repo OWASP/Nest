@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from apps.api.rest.v0.repository import RepositorySchema
+from apps.api.rest.v0.repository import RepositoryDetail
 
 
 class TestRepositorySchema:
@@ -24,7 +24,7 @@ class TestRepositorySchema:
         ],
     )
     def test_repository_schema(self, repository_data):
-        repository = RepositorySchema(**repository_data)
+        repository = RepositoryDetail(**repository_data)
 
         assert repository.name == repository_data["name"]
         assert repository.description == repository_data["description"]

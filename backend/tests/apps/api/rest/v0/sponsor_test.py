@@ -1,6 +1,6 @@
 import pytest
 
-from apps.api.rest.v0.sponsor import SponsorSchema
+from apps.api.rest.v0.sponsor import SponsorDetail
 
 
 class TestSponsorSchema:
@@ -33,7 +33,7 @@ class TestSponsorSchema:
     )
     def test_sponsor_schema_creation(self, sponsor_data):
         """Test schema creation with valid data."""
-        schema_instance = SponsorSchema(**sponsor_data)
+        schema_instance = SponsorDetail(**sponsor_data)
 
         assert schema_instance.description == sponsor_data["description"]
         assert schema_instance.image_url == sponsor_data["image_url"]
@@ -58,7 +58,7 @@ class TestSponsorSchema:
             "sponsor_type": "SILVER",
             "url": "",
         }
-        schema = SponsorSchema(**minimal_data)
+        schema = SponsorDetail(**minimal_data)
 
         assert schema.job_url == ""
         assert schema.key == "test-sponsor"

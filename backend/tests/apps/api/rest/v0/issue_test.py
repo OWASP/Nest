@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from apps.api.rest.v0.issue import IssueSchema
+from apps.api.rest.v0.issue import IssueDetail
 
 
 class TestIssueSchema:
@@ -28,7 +28,7 @@ class TestIssueSchema:
         ],
     )
     def test_issue_schema(self, issue_data):
-        schema = IssueSchema(**issue_data)
+        schema = IssueDetail(**issue_data)
 
         assert schema.title == issue_data["title"]
         assert schema.body == issue_data["body"]

@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from apps.api.rest.v0.organization import OrganizationSchema
+from apps.api.rest.v0.organization import OrganizationDetail
 
 
 class TestOrganizationSchema:
@@ -28,11 +28,11 @@ class TestOrganizationSchema:
         ],
     )
     def test_organization_schema(self, organization_data):
-        schema = OrganizationSchema(**organization_data)
-        assert schema.created_at == datetime.fromisoformat(organization_data["created_at"])
-        assert schema.updated_at == datetime.fromisoformat(organization_data["updated_at"])
+        schema = OrganizationDetail(**organization_data)
 
-        assert schema.name == organization_data["name"]
-        assert schema.login == organization_data["login"]
         assert schema.company == organization_data["company"]
+        assert schema.created_at == datetime.fromisoformat(organization_data["created_at"])
         assert schema.location == organization_data["location"]
+        assert schema.login == organization_data["login"]
+        assert schema.name == organization_data["name"]
+        assert schema.updated_at == datetime.fromisoformat(organization_data["updated_at"])
