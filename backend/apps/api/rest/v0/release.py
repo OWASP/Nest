@@ -22,7 +22,7 @@ class ReleaseBase(Schema):
 
     created_at: datetime
     name: str
-    published_at: datetime
+    published_at: datetime | None = None
     tag_name: str
 
 

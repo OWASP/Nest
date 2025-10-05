@@ -2,6 +2,7 @@
 
 from typing import Any
 
+from django.http import Http404
 from ninja import Field, Schema
 from ninja.pagination import PaginationBase
 
@@ -9,7 +10,6 @@ from ninja.pagination import PaginationBase
 class CustomPagination(PaginationBase):
     """Custom pagination with standardized output schema."""
 
-    # Override the default items attribute name
     items_attribute: str = "items"
 
     class Input(Schema):
@@ -33,12 +33,19 @@ class CustomPagination(PaginationBase):
         page = pagination.page
         page_size = pagination.page_size
 
-        # Calculate pagination
+        # Calculate pagination.
         total_count = queryset.count()
-        total_pages = (total_count + page_size - 1) // page_size  # Ceiling division
+        # Ensure total_pages is at least 1 for consistent metadata.
+        total_pages = max(1, (total_count + page_size - 1) // page_size)
+
+        # Validate that the requested page is within the valid range.
+        if page > total_pages:
+            message = f"Page {page} not found. Valid pages are 1 to {total_pages}."
+            raise Http404(message)
+
         offset = (page - 1) * page_size
 
-        # Get the page items
+        # Get the page items.
         items = list(queryset[offset : offset + page_size])
 
         return {

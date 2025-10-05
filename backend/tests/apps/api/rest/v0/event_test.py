@@ -27,14 +27,13 @@ from apps.api.rest.v0.event import EventDetail
     ],
 )
 def test_event_serializer_validation(event_data):
-    # Create a mock object with nest_key property
-    class MockEvent:
-        def __init__(self, data):
-            for key, value in data.items():
-                setattr(self, key, value)
-            self.nest_key = data["key"]
-
-    event = EventDetail.from_orm(MockEvent(event_data))
+    event = EventDetail(
+        **{
+            **event_data,
+            "end_date": datetime.fromisoformat(event_data["end_date"]),
+            "start_date": datetime.fromisoformat(event_data["start_date"]),
+        }
+    )
 
     assert event.description == event_data["description"]
     assert event.end_date == datetime.fromisoformat(event_data["end_date"])

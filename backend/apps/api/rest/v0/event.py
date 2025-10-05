@@ -20,11 +20,11 @@ router = RouterPaginated(tags=["Events"])
 class EventBase(Schema):
     """Base schema for Event (used in list endpoints)."""
 
-    end_date: datetime
+    end_date: datetime | None = None
     key: str
     name: str
     start_date: datetime
-    url: str
+    url: str | None = None
 
 
 class Event(EventBase):
@@ -34,7 +34,7 @@ class Event(EventBase):
 class EventDetail(EventBase):
     """Detail schema for Event (used in single item endpoints)."""
 
-    description: str
+    description: str | None = None
 
 
 class EventError(Schema):

@@ -32,7 +32,7 @@ class Repository(RepositoryBase):
 class RepositoryDetail(RepositoryBase):
     """Detail schema for Repository (used in single item endpoints)."""
 
-    description: str
+    description: str | None = None
 
 
 class RepositoryError(Schema):
