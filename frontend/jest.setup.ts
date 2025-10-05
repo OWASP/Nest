@@ -27,6 +27,15 @@ if (typeof global.fetch === 'undefined') {
   } as Response)
 }
 
+// Mock framer-motion due to how Jest 30 ESM resolution treats
+// motion-dom's internal .mjs imports as "outside test scope".
+jest.mock('framer-motion', () => {
+  return {
+    ...jest.requireActual('framer-motion'),
+    LazyMotion: ({ children }) => children,
+  }
+})
+
 jest.mock('next-auth/react', () => {
   return {
     ...jest.requireActual('next-auth/react'),
