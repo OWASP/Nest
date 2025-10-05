@@ -1,5 +1,5 @@
 'use client'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import {
   faCheck,
@@ -15,7 +15,7 @@ import {
 import millify from 'millify'
 import { useState, useEffect, FC } from 'react'
 import { handleAppError } from 'app/global-error'
-import { GET_PROJECT_HEALTH_STATS } from 'server/queries/projectsHealthDashboardQueries'
+import { GetProjectHealthStatsDocument } from 'types/__generated__/projectsHealthDashboardQueries.generated'
 import type { ProjectHealthStats } from 'types/projectHealthStats'
 import DashboardCard from 'components/DashboardCard'
 import DonutBarChart from 'components/DonutBarChart'
@@ -27,7 +27,7 @@ import ProjectTypeDashboardCard from 'components/ProjectTypeDashboardCard'
 const ProjectsDashboardPage: FC = () => {
   const [stats, setStats] = useState<ProjectHealthStats>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_HEALTH_STATS)
+  const { data, error: graphQLRequestError } = useQuery(GetProjectHealthStatsDocument)
 
   useEffect(() => {
     if (data) {

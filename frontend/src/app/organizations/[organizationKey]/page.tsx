@@ -1,5 +1,5 @@
 'use client'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import {
   faCodeFork,
   faExclamationCircle,
@@ -11,12 +11,12 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
-import { GET_ORGANIZATION_DATA } from 'server/queries/organizationQueries'
+import { GetOrganizationDataDocument } from 'types/__generated__/organizationQueries.generated'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 const OrganizationDetailsPage = () => {
-  const { organizationKey } = useParams()
+  const { organizationKey } = useParams<{ organizationKey: string }>()
   const [organization, setOrganization] = useState(null)
   const [issues, setIssues] = useState(null)
   const [milestones, setMilestones] = useState(null)
@@ -25,7 +25,7 @@ const OrganizationDetailsPage = () => {
   const [repositories, setRepositories] = useState(null)
   const [topContributors, setTopContributors] = useState(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_ORGANIZATION_DATA, {
+  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetOrganizationDataDocument, {
     variables: { login: organizationKey },
   })
 

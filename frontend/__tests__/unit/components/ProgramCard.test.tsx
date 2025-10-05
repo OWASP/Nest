@@ -2,8 +2,8 @@ import { faEye } from '@fortawesome/free-regular-svg-icons'
 import { faEdit } from '@fortawesome/free-solid-svg-icons'
 import { fireEvent, render, screen } from '@testing-library/react'
 import React from 'react'
+import { ProgramStatusEnum } from 'types/__generated__/graphql'
 import type { Program } from 'types/mentorship'
-import { ProgramStatusEnum } from 'types/mentorship'
 import ProgramCard from 'components/ProgramCard'
 
 jest.mock('@fortawesome/react-fontawesome', () => ({
@@ -33,7 +33,7 @@ describe('ProgramCard', () => {
     key: 'test-program',
     name: 'Test Program',
     description: 'This is a test program description',
-    status: ProgramStatusEnum.PUBLISHED,
+    status: ProgramStatusEnum.Published,
     startedAt: '2024-01-01T00:00:00Z',
     endedAt: '2024-12-31T23:59:59Z',
     userRole: 'admin',
@@ -295,7 +295,7 @@ describe('ProgramCard', () => {
         key: 'minimal',
         name: 'Minimal Program',
         description: '',
-        status: ProgramStatusEnum.DRAFT,
+        status: ProgramStatusEnum.Draft,
         startedAt: '',
         endedAt: '',
       }

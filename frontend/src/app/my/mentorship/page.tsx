@@ -1,6 +1,5 @@
 'use client'
-
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { faPlus, faGraduationCap } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToast } from '@heroui/toast'
@@ -9,10 +8,10 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useMemo, useState } from 'react'
 
-import { GET_MY_PROGRAMS } from 'server/queries/programsQueries'
+import { GetMyProgramsDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
-import type { Program } from 'types/mentorship'
 
+import type { Program } from 'types/mentorship'
 import ActionButton from 'components/ActionButton'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramCard from 'components/ProgramCard'
@@ -54,7 +53,7 @@ const MyMentorshipPage: React.FC = () => {
     data: programData,
     loading: loadingPrograms,
     error,
-  } = useQuery(GET_MY_PROGRAMS, {
+  } = useQuery(GetMyProgramsDocument, {
     variables: { search: debouncedQuery, page, limit: 24 },
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',

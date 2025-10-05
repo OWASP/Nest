@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import React from 'react'
 import { apolloClient } from 'server/apolloClient'
-import { GET_REPOSITORY_METADATA } from 'server/queries/repositoryQueries'
+import { GetRepositoryMetadataDocument } from 'types/__generated__/repositoryQueries.generated'
 import { generateSeoMetadata } from 'utils/metaconfig'
 
 export async function generateMetadata({
@@ -14,7 +14,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { repositoryKey, organizationKey } = await params
   const { data } = await apolloClient.query({
-    query: GET_REPOSITORY_METADATA,
+    query: GetRepositoryMetadataDocument,
     variables: { organizationKey: organizationKey, repositoryKey: repositoryKey },
   })
   const repository = data?.repository

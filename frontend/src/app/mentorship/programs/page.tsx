@@ -2,6 +2,7 @@
 
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
+import { ProgramStatusEnum } from 'types/__generated__/graphql'
 import { Program } from 'types/mentorship'
 import ProgramCard from 'components/ProgramCard'
 import SearchPageLayout from 'components/SearchPageLayout'
@@ -51,7 +52,7 @@ const ProgramsPage = () => {
       totalPages={totalPages}
     >
       <div className="mt-16 grid grid-cols-1 gap-x-4 gap-y-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-        {programs && programs.filter((p) => p.status === 'published').map(renderProgramCard)}
+        {programs?.filter((p) => p.status === ProgramStatusEnum.Published).map(renderProgramCard)}
       </div>
     </SearchPageLayout>
   )

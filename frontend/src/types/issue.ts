@@ -1,19 +1,19 @@
 import type { RepositoryDetails, User } from 'types/user'
 
 export type Issue = {
-  author: User
+  author?: User
   createdAt: number
-  hint: string
-  labels: string[]
+  hint?: string
+  labels?: string[]
   number?: string
   organizationName?: string
-  projectName: string
-  projectUrl: string
+  projectName?: string
+  projectUrl?: string
   repository?: RepositoryDetails
   repositoryLanguages?: string[]
-  summary: string
+  summary?: string
   title: string
-  updatedAt: number
+  updatedAt?: number
   url: string
-  objectID: string
+  objectID?: string
 }

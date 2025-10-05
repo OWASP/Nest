@@ -1,5 +1,5 @@
 'use client'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import {
   faCircleCheck,
   faClock,
@@ -22,8 +22,11 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GET_PROJECT_METADATA, GET_TOP_CONTRIBUTORS } from 'server/queries/projectQueries'
-import { GET_LEADER_DATA } from 'server/queries/userQueries'
+import {
+  GetProjectMetadataDocument,
+  GetTopContributorsDocument,
+} from 'types/__generated__/projectQueries.generated'
+import { GetLeaderDataDocument } from 'types/__generated__/userQueries.generated'
 import type { Contributor } from 'types/contributor'
 import type { Project } from 'types/project'
 import type { User } from 'types/user'
@@ -52,14 +55,14 @@ const projectKey = 'nest'
 
 const About = () => {
   const { data: projectMetadataResponse, error: projectMetadataRequestError } = useQuery(
-    GET_PROJECT_METADATA,
+    GetProjectMetadataDocument,
     {
       variables: { key: projectKey },
     }
   )
 
   const { data: topContributorsResponse, error: topContributorsRequestError } = useQuery(
-    GET_TOP_CONTRIBUTORS,
+    GetTopContributorsDocument,
     {
       variables: {
         excludedUsernames: Object.keys(leaders),
@@ -311,7 +314,7 @@ const About = () => {
 }
 
 const LeaderData = ({ username }: { username: string }) => {
-  const { data, loading, error } = useQuery(GET_LEADER_DATA, {
+  const { data, loading, error } = useQuery(GetLeaderDataDocument, {
     variables: { key: username },
   })
   const router = useRouter()
