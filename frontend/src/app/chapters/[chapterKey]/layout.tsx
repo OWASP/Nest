@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import React from 'react'
 import { apolloClient } from 'server/apolloClient'
-import { GET_CHAPTER_METADATA } from 'server/queries/chapterQueries'
+import { GetChapterMetadataDocument } from 'types/__generated__/chapterQueries.generated'
 import { generateSeoMetadata } from 'utils/metaconfig'
 
 export async function generateMetadata({
@@ -11,7 +11,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { chapterKey } = await params
   const { data } = await apolloClient.query({
-    query: GET_CHAPTER_METADATA,
+    query: GetChapterMetadataDocument,
     variables: {
       key: chapterKey,
     },

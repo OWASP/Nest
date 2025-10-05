@@ -1,12 +1,11 @@
 'use client'
-
-import { useMutation } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 
-import { CREATE_PROGRAM } from 'server/mutations/programsMutations'
+import { CreateProgramDocument } from 'types/__generated__/programsMutations.generated'
 import { ExtendedSession } from 'types/auth'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -19,7 +18,7 @@ const CreateProgramPage = () => {
 
   const [redirected, setRedirected] = useState(false)
 
-  const [createProgram, { loading }] = useMutation(CREATE_PROGRAM)
+  const [createProgram, { loading }] = useMutation(CreateProgramDocument)
 
   const [formData, setFormData] = useState({
     name: '',

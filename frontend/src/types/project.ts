@@ -16,27 +16,27 @@ export type ProjectStats = {
 
 export type Project = {
   createdAt?: string
-  contributorsCount: number
-  description: string
-  forksCount: number
+  contributorsCount?: number
+  description?: string
+  forksCount?: number
   healthMetricsList?: HealthMetricsProps[]
-  isActive: boolean
-  issuesCount: number
-  key: string
-  languages: string[]
-  leaders: string[]
-  level: string
+  isActive?: boolean
+  issuesCount?: number
+  key?: string
+  languages?: string[]
+  leaders?: string[]
+  level?: string
   name: string
   openIssuesCount?: number
-  organizations: string
-  repositoriesCount: number
-  starsCount: number
-  summary: string
-  topics: string[]
-  topContributors: Contributor[]
-  type: string
-  updatedAt: number
-  url: string
+  organizations?: string
+  repositoriesCount?: number
+  starsCount?: number
+  summary?: string
+  topics?: string[]
+  topContributors?: Contributor[]
+  type?: string
+  updatedAt?: number
+  url?: string
   recentIssues?: Issue[]
   recentPullRequests?: PullRequest[]
   recentReleases?: Release[]

@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { screen, waitFor } from '@testing-library/react'
 import { mockModuleData } from '@unit/data/mockModuleData'
 import { useParams } from 'next/navigation'
@@ -10,10 +10,9 @@ jest.mock('next/navigation', () => ({
   useParams: jest.fn(),
 }))
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
-  useMutation: jest.fn(),
 }))
 
 jest.mock('app/global-error', () => ({
@@ -32,7 +31,7 @@ jest.mock('components/CardDetailsPage', () => (props) => (
 
 describe('ModuleDetailsPage', () => {
   const mockUseParams = useParams as jest.Mock
-  const mockUseQuery = useQuery as jest.Mock
+  const mockUseQuery = useQuery as unknown as jest.Mock
 
   const admins = [{ login: 'admin1' }]
 

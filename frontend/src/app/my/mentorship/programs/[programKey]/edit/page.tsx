@@ -1,13 +1,14 @@
 'use client'
-import { useQuery, useMutation } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import type React from 'react'
 import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { UPDATE_PROGRAM } from 'server/mutations/programsMutations'
-import { GET_PROGRAM_DETAILS } from 'server/queries/programsQueries'
+import { ProgramStatusEnum } from 'types/__generated__/graphql'
+import { UpdateProgramDocument } from 'types/__generated__/programsMutations.generated'
+import { GetProgramDetailsDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
@@ -18,12 +19,12 @@ const EditProgramPage = () => {
   const router = useRouter()
   const { programKey } = useParams() as { programKey: string }
   const { data: session, status: sessionStatus } = useSession()
-  const [updateProgram, { loading: mutationLoading }] = useMutation(UPDATE_PROGRAM)
+  const [updateProgram, { loading: mutationLoading }] = useMutation(UpdateProgramDocument)
   const {
     data,
     error,
     loading: queryLoading,
-  } = useQuery(GET_PROGRAM_DETAILS, {
+  } = useQuery(GetProgramDetailsDocument, {
     variables: { programKey },
     skip: !programKey,
     fetchPolicy: 'network-only',
@@ -37,7 +38,7 @@ const EditProgramPage = () => {
     tags: '',
     domains: '',
     adminLogins: '',
-    status: 'DRAFT',
+    status: ProgramStatusEnum.Draft,
   })
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
   useEffect(() => {
@@ -81,7 +82,7 @@ const EditProgramPage = () => {
         adminLogins: (program.admins || [])
           .map((admin: { login: string }) => admin.login)
           .join(', '),
-        status: program.status || 'DRAFT',
+        status: program.status || ProgramStatusEnum.Draft,
       })
     } else if (error) {
       handleAppError(error)

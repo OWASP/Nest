@@ -1,7 +1,7 @@
-import { useMutation } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { signOut } from 'next-auth/react'
 import { useState } from 'react'
-import { LOGOUT_DJANGO_MUTATION } from 'server/queries/authQueries'
+import { LogoutDjangoDocument } from 'types/__generated__/authQueries.generated'
 
 // Handles logout:
 // 1) calls Django logout mutation (invalidates session cookie),
@@ -9,7 +9,7 @@ import { LOGOUT_DJANGO_MUTATION } from 'server/queries/authQueries'
 // 3) clears Apollo cache so no user data lingers in memory.
 
 export const useLogout = () => {
-  const [logoutUser, { loading, client }] = useMutation(LOGOUT_DJANGO_MUTATION)
+  const [logoutUser, { loading, client }] = useMutation(LogoutDjangoDocument)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const handleLogout = async () => {

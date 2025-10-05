@@ -1,5 +1,22 @@
 import { ProfilePageStructuredData } from 'types/profilePageStructuredData'
-import type { UserDetails } from 'types/user'
+import type { User } from 'types/user'
+
+export const formatISODate = (input?: number | string): string => {
+  if (input == null) {
+    return undefined
+  }
+
+  const date =
+    typeof input === 'number'
+      ? new Date(input * 1000) // Unix timestamp in seconds
+      : new Date(input) // ISO date string
+
+  if (Number.isNaN(date.getTime())) {
+    throw new TypeError('Invalid date')
+  }
+
+  return date.toISOString()
+}
 
 /**
  * JSON-LD structure data for ProfilePage
@@ -11,14 +28,18 @@ import type { UserDetails } from 'types/user'
  *
  */
 export function generateProfilePageStructuredData(
-  user: UserDetails,
+  user: User,
   baseUrl = 'https://nest.owasp.org'
 ): ProfilePageStructuredData {
   return {
     '@context': 'https://schema.org',
     '@type': 'ProfilePage',
-    dateCreated: new Date(parseInt(user.createdAt) * 1000).toISOString(),
-    dateModified: new Date(parseInt(user.updatedAt) * 1000).toISOString(),
+    ...(formatISODate(user.createdAt) && {
+      dateCreated: formatISODate(user.createdAt),
+    }),
+    ...(formatISODate(user.updatedAt) && {
+      dateModified: formatISODate(user.updatedAt),
+    }),
     mainEntity: {
       '@type': 'Person',
       ...(user.location && {

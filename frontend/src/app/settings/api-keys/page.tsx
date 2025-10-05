@@ -1,6 +1,5 @@
 'use client'
-
-import { useMutation, useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import {
   faSpinner,
   faKey,
@@ -18,7 +17,11 @@ import { Input } from '@heroui/react'
 import { addToast } from '@heroui/toast'
 import { format, addDays } from 'date-fns'
 import { useState } from 'react'
-import { CREATE_API_KEY, GET_API_KEYS, REVOKE_API_KEY } from 'server/queries/apiKeyQueries'
+import {
+  CreateApiKeyDocument,
+  GetApiKeysDocument,
+  RevokeApiKeyDocument,
+} from 'types/__generated__/apiKeyQueries.generated'
 import type { ApiKey } from 'types/apiKey'
 import SecondaryCard from 'components/SecondaryCard'
 import { ApiKeysSkeleton } from 'components/skeletons/ApiKeySkelton'
@@ -33,12 +36,12 @@ export default function Page() {
   const [newlyCreatedKey, setNewlyCreatedKey] = useState<string | null>(null)
   const [keyToRevoke, setKeyToRevoke] = useState<ApiKey | null>(null)
 
-  const { loading, error, data, refetch } = useQuery(GET_API_KEYS, {
+  const { loading, error, data, refetch } = useQuery(GetApiKeysDocument, {
     notifyOnNetworkStatusChange: true,
     errorPolicy: 'all',
   })
 
-  const [createApiKey, { loading: createLoading }] = useMutation(CREATE_API_KEY, {
+  const [createApiKey, { loading: createLoading }] = useMutation(CreateApiKeyDocument, {
     onCompleted: (data) => {
       const result = data.createApiKey
       if (!result?.ok) {
@@ -62,7 +65,7 @@ export default function Page() {
     },
   })
 
-  const [revokeApiKey] = useMutation(REVOKE_API_KEY, {
+  const [revokeApiKey] = useMutation(RevokeApiKeyDocument, {
     onCompleted: () => {
       addToast({ title: 'Success', description: 'API key revoked', color: 'success' })
       refetch()
@@ -103,9 +106,9 @@ export default function Page() {
       addToast({ title: 'Error', description: 'Please select an expiration date', color: 'danger' })
       return
     }
-    const variables: { name: string; expiresAt: Date } = {
+    const variables: { name: string; expiresAt: string } = {
       name: newKeyName.trim(),
-      expiresAt: new Date(newKeyExpiry),
+      expiresAt: new Date(newKeyExpiry).toISOString(),
     }
     createApiKey({ variables })
   }
