@@ -9,25 +9,24 @@ from apps.api.rest.v0.project import ProjectDetail
     "project_data",
     [
         {
-            "key": "another-project",
-            "name": "another project",
-            "description": "A test project by owasp",
-            "level": "other",
             "created_at": "2023-01-01T00:00:00Z",
+            "description": "A test project by owasp",
+            "key": "another-project",
+            "level": "other",
+            "name": "another project",
             "updated_at": "2023-01-02T00:00:00Z",
         },
         {
-            "key": "this-is-a-project",
-            "name": "this is a project",
-            "description": "this is not a project, this is just a file",
-            "level": "incubator",
             "created_at": "2023-01-01T00:00:00Z",
+            "description": "this is not a project, this is just a file",
+            "key": "this-is-a-project",
+            "level": "incubator",
+            "name": "this is a project",
             "updated_at": "2023-01-02T00:00:00Z",
         },
     ],
 )
 def test_project_serializer_validation(project_data):
-    # Create a mock object with nest_key property
     class MockProject:
         def __init__(self, data):
             for key, value in data.items():

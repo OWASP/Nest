@@ -9,23 +9,22 @@ from apps.api.rest.v0.committee import CommitteeDetail
     "committee_data",
     [
         {
+            "created_at": "2024-11-01T00:00:00Z",
+            "description": "A test committee",
             "key": "test-committee",
             "name": "Test Committee",
-            "description": "A test committee",
-            "created_at": "2024-11-01T00:00:00Z",
             "updated_at": "2024-07-02T00:00:00Z",
         },
         {
+            "created_at": "2023-12-01T00:00:00Z",
+            "description": "A committee without a name",
             "key": "this-is-a-committee",
             "name": "this is a committee",
-            "description": "A committee without a name",
-            "created_at": "2023-12-01T00:00:00Z",
             "updated_at": "2023-09-02T00:00:00Z",
         },
     ],
 )
 def test_committee_serializer_validation(committee_data):
-    # Create a mock object with nest_key property
     class MockCommittee:
         def __init__(self, data):
             for key, value in data.items():

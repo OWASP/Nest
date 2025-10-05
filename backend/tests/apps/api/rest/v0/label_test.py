@@ -22,6 +22,6 @@ class TestLabelSchema:
     def test_label_schema(self, label_data):
         label = LabelDetail(**label_data)
 
-        assert label.name == label_data["name"]
-        assert label.description == label_data["description"]
         assert label.color == label_data["color"]
+        assert label.description == label_data["description"]
+        assert label.name == label_data["name"]
