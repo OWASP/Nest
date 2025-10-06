@@ -61,6 +61,12 @@ class PullRequest(GenericIssueModel):
         related_name="pull_request_labels",
         blank=True,
     )
+    related_issues = models.ManyToManyField(
+        "github.Issue",
+        verbose_name="Issues",
+        related_name="pull_requests",
+        blank=True,
+    )
 
     def from_github(self, gh_pull_request, *, author=None, milestone=None, repository=None):
         """Update the instance based on GitHub pull request data.

@@ -17,3 +17,7 @@ github-update-related-organizations:
 github-update-users:
 	@echo "Updating GitHub users"
 	@CMD="python manage.py github_update_users" $(MAKE) exec-backend-command
+
+github-update-pull-requests:
+	@echo "Linking pull requests to issues using closing keywords"
+	@CMD="python manage.py github_update_pull_requests" $(MAKE) exec-backend-command
