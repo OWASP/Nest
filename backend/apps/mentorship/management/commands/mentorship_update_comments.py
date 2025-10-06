@@ -91,8 +91,10 @@ class Command(BaseCommand):
         existing_interests = IssueUserInterest.objects.filter(module=module, issue=issue)
         existing_user_ids = set(existing_interests.values_list("user_id", flat=True))
 
-        all_comments = issue.comments.select_related("author").order_by(
-            "author_id", "-nest_created_at"
+        all_comments = (
+            issue.comments.select_related("author")
+            .filter(author__isnull=False)
+            .order_by("author_id", "nest_created_at")
         )
 
         interests_to_create = []
@@ -103,8 +105,6 @@ class Command(BaseCommand):
         user_interest_status: dict[int, dict[str, Any]] = {}
 
         for comment in all_comments:
-            if not comment.author:
-                continue
             user_id = comment.author.id
             entry = user_interest_status.get(user_id)
             is_match = any(p.search(comment.body or "") for p in INTEREST_PATTERNS)

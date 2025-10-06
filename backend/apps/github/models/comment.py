@@ -56,12 +56,13 @@ class Comment(BulkSaveModel, TimestampedModel):
         BulkSaveModel.bulk_save(Comment, comments, fields=fields)
 
     @staticmethod
-    def update_data(gh_comment, *, author=None, save: bool = True):
+    def update_data(gh_comment, *, author=None, content_object=None, save: bool = True):
         """Update or create a Comment instance from a GitHub comment object.
 
         Args:
             gh_comment (github.IssueComment.IssueComment): GitHub comment object.
             author (User, optional): Comment author. Defaults to None.
+            content_object (GenericForeignKey, optional): Content object. Defaults to None.
             save (bool, optional): Whether to save the instance immediately. Defaults to True.
 
         Returns:
@@ -74,6 +75,9 @@ class Comment(BulkSaveModel, TimestampedModel):
             comment = Comment(github_id=gh_comment.id)
 
         comment.from_github(gh_comment, author=author)
+
+        if content_object is not None:
+            comment.content_object = content_object
 
         if save:
             comment.save()

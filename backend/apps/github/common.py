@@ -254,9 +254,11 @@ def sync_issue_comments(gh_client: Github, issue: Issue):
         gh_repository = gh_client.get_repo(repository.path)
         gh_issue = gh_repository.get_issue(number=issue.number)
 
-        since = issue.comments.order_by("-updated_at").values_list(
-            "updated_at", flat=True
-        ).first() or getattr(issue, "updated_at", None)
+        since = (
+            (issue.latest_comment.updated_at or issue.latest_comment.created_at)
+            if issue.latest_comment
+            else getattr(issue, "updated_at", None)
+        )
 
         comments = []
 
@@ -268,16 +270,21 @@ def sync_issue_comments(gh_client: Github, issue: Issue):
                 logger.warning("Could not sync author for comment %s", gh_comment.id)
                 continue
 
-            comment = Comment.update_data(gh_comment, author=author, save=False)
-            comment.content_object = issue
+            comment = Comment.update_data(
+                gh_comment,
+                author=author,
+                content_object=issue,
+                save=False,
+            )
             comments.append(comment)
 
+        if comments:
             Comment.bulk_save(comments)
-            logger.info(
-                "%d comments for issue #%s",
-                len(comments),
-                issue.number,
-            )
+        logger.info(
+            "%d comments synced for issue #%s",
+            len(comments),
+            issue.number,
+        )
 
     except UnknownObjectException as e:
         logger.warning(
