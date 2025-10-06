@@ -20,7 +20,7 @@ class BaseChunkCommand(BaseAICommand):
     def process_chunks_batch(self, entities: list[Model]) -> int:
         """Process a batch of entities to create or update chunks."""
         processed = 0
-        batch_chunks_to_create = {}
+        batch_chunks_to_create = []
         content_type = ContentType.objects.get_for_model(self.model_class)
 
         for entity in entities:
@@ -58,19 +58,19 @@ class BaseChunkCommand(BaseAICommand):
                     continue
 
                 chunk_texts = Chunk.split_text(full_content)
-                if not chunk_texts:
+                unique_chunk_texts = list(dict.fromkeys(chunk_texts))
+
+                if not unique_chunk_texts:
                     self.stdout.write(f"No chunks created for {self.entity_name} {entity_key}")
                     continue
 
                 if chunks := create_chunks_and_embeddings(
-                    chunk_texts=chunk_texts,
+                    chunk_texts=unique_chunk_texts,
                     context=context,
                     openai_client=self.openai_client,
                     save=False,
                 ):
-                    for chunk in chunks:
-                        key = (chunk.context_id, chunk.text)
-                        batch_chunks_to_create[key] = chunk
+                    batch_chunks_to_create.extend(chunks)
                     processed += 1
                     self.stdout.write(
                         self.style.SUCCESS(f"Created {len(chunks)} new chunks for {entity_key}")
@@ -79,21 +79,7 @@ class BaseChunkCommand(BaseAICommand):
                 self.stdout.write(f"Chunks for {entity_key} are already up to date.")
 
         if batch_chunks_to_create:
-            context_ids = {context_id for context_id, _ in batch_chunks_to_create}
-            candidate_chunk_texts = {text for _, text in batch_chunks_to_create}
-
-            existing_keys = set(
-                Chunk.objects.filter(
-                    context_id__in=context_ids, text__in=candidate_chunk_texts
-                ).values_list("context_id", "text")
-            )
-
-            chunks_to_insert = [
-                chunk for key, chunk in batch_chunks_to_create.items() if key not in existing_keys
-            ]
-
-            if chunks_to_insert:
-                Chunk.bulk_save(chunks_to_insert)
+            Chunk.bulk_save(batch_chunks_to_create)
 
         return processed
 
