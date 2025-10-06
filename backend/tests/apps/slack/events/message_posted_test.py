@@ -88,10 +88,16 @@ class TestMessagePosted:
         client = Mock()
 
         with patch("apps.slack.events.message_posted.Message") as mock_message:
-            mock_message.DoesNotExist = Exception
-            mock_message.objects.get.side_effect = Exception("Message not found")
+            mock_filter = Mock()
+            mock_message.objects.filter.return_value = mock_filter
 
             message_handler.handle_event(event, client)
+
+            mock_message.objects.filter.assert_called_once_with(
+                slack_message_id=event.get("thread_ts"),
+                conversation__slack_channel_id=event.get("channel"),
+            )
+            mock_filter.update.assert_called_once_with(has_replies=True)
 
         client.chat_postMessage.assert_not_called()
 
@@ -260,6 +266,7 @@ class TestMessagePosted:
             patch("apps.slack.events.message_posted.Conversation") as mock_conversation,
             patch("apps.slack.events.message_posted.Member") as mock_member,
             patch("apps.slack.events.message_posted.Message") as mock_message_model,
+            patch("apps.slack.events.message_posted.django_rq") as mock_django_rq,
         ):
             mock_conversation.objects.get.return_value = conversation_mock
 
@@ -273,19 +280,17 @@ class TestMessagePosted:
             mock_message.id = 1
             mock_message_model.update_data.return_value = mock_message
 
-            with (
-                patch.object(
-                    message_handler.question_detector,
-                    "is_owasp_question",
-                    return_value=True,
-                ),
-                patch("apps.slack.events.message_posted.django_rq") as mock_django_rq,
-            ):
-                mock_queue = Mock()
-                mock_django_rq.get_queue.return_value = mock_queue
+            mock_queue = Mock()
+            mock_django_rq.get_queue.return_value = mock_queue
 
+            with patch.object(
+                message_handler.question_detector,
+                "is_owasp_question",
+                return_value=True,
+            ):
                 message_handler.handle_event(event, client)
 
+                mock_member.update_data.assert_called_once()
                 mock_django_rq.get_queue.assert_called_once()
 
     def test_handle_event_empty_text(self, message_handler):

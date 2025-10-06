@@ -1,4 +1,4 @@
-"""Slack message event template."""
+"""Slack message event handler for OWASP NestBot."""
 
 import logging
 from datetime import timedelta
@@ -6,16 +6,17 @@ from datetime import timedelta
 import django_rq
 
 from apps.ai.common.constants import QUEUE_RESPONSE_TIME_MINUTES
+from apps.slack.common.handlers.ai import get_dm_blocks
 from apps.slack.common.question_detector import QuestionDetector
 from apps.slack.events.event import EventBase
-from apps.slack.models import Conversation, Member, Message
+from apps.slack.models import Conversation, Member, Message, Workspace
 from apps.slack.services.message_auto_reply import generate_ai_reply_if_unanswered
 
 logger = logging.getLogger(__name__)
 
 
 class MessagePosted(EventBase):
-    """Handles new messages posted in channels."""
+    """Handles new messages posted in channels or direct messages."""
 
     event_type = "message"
 
@@ -24,24 +25,29 @@ class MessagePosted(EventBase):
         self.question_detector = QuestionDetector()
 
     def handle_event(self, event, client):
-        """Handle an incoming message event."""
+        """Handle incoming Slack message events."""
         if event.get("subtype") or event.get("bot_id"):
-            logger.info("Ignored message due to subtype, bot_id, or thread_ts.")
+            logger.info("Ignored message due to subtype or bot_id.")
+            return
+
+        channel_id = event.get("channel")
+        user_id = event.get("user")
+        text = event.get("text", "")
+        channel_type = event.get("channel_type")
+
+        if channel_type == "im":
+            self.handle_dm(event, client, channel_id, user_id, text)
             return
 
         if event.get("thread_ts"):
             try:
                 Message.objects.filter(
                     slack_message_id=event.get("thread_ts"),
-                    conversation__slack_channel_id=event.get("channel"),
+                    conversation__slack_channel_id=channel_id,
                 ).update(has_replies=True)
             except Message.DoesNotExist:
                 logger.warning("Thread message not found.")
             return
-
-        channel_id = event.get("channel")
-        user_id = event.get("user")
-        text = event.get("text", "")
 
         try:
             conversation = Conversation.objects.get(
@@ -71,3 +77,50 @@ class MessagePosted(EventBase):
             generate_ai_reply_if_unanswered,
             message.id,
         )
+
+    def handle_dm(self, event, client, channel_id, user_id, text):
+        """Handle direct messages with NestBot (DMs)."""
+        workspace_id = event.get("team")
+
+        if not workspace_id:
+            try:
+                channel_info = client.conversations_info(channel=channel_id)
+                workspace_id = channel_info["channel"]["team"]
+            except Exception:
+                logger.exception("Failed to fetch workspace ID for DM.")
+                return
+
+        try:
+            Member.objects.get(slack_user_id=user_id, workspace__slack_workspace_id=workspace_id)
+        except Member.DoesNotExist:
+            try:
+                user_info = client.users_info(user=user_id)
+                workspace = Workspace.objects.get(slack_workspace_id=workspace_id)
+                Member.update_data(user_info["user"], workspace, save=True)
+                logger.info("Created new member for DM")
+            except Exception:
+                logger.exception("Failed to create member for DM.")
+                return
+
+        thread_ts = event.get("thread_ts")
+
+        try:
+            response_blocks = get_dm_blocks(text, user_id, workspace_id)
+            if response_blocks:
+                client.chat_postMessage(
+                    channel=channel_id,
+                    blocks=response_blocks,
+                    text=text,
+                    thread_ts=thread_ts,
+                )
+
+        except Exception:
+            logger.exception("Error processing DM")
+            client.chat_postMessage(
+                channel=channel_id,
+                text=(
+                    "I'm sorry, I'm having trouble processing your message right now. "
+                    "Please try again later."
+                ),
+                thread_ts=thread_ts,
+            )
