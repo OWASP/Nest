@@ -102,6 +102,18 @@ export const GET_MODULE_ISSUES = gql`
           name
         }
         labels
+        pullRequests {
+          id
+          title
+          url
+          createdAt
+          author {
+            id
+            login
+            name
+            avatarUrl
+          }
+        }
       }
     }
   }
