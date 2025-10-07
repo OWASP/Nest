@@ -123,7 +123,7 @@ class ModuleMutation:
         *,
         module_key: str,
         program_key: str,
-        issue_id: int,
+        issue_number: int,
         user_login: str,
     ) -> ModuleNode:
         """Assign an issue to a user by updating Issue.assignees within the module scope."""
@@ -147,7 +147,7 @@ class ModuleMutation:
         if gh_user is None:
             raise ObjectDoesNotExist(msg="Assignee not found.")
 
-        issue = module.issues.filter(id=issue_id).first()
+        issue = module.issues.filter(number=issue_number).first()
         if issue is None:
             raise ObjectDoesNotExist(msg="Issue not found in this module.")
 
@@ -165,7 +165,7 @@ class ModuleMutation:
         *,
         module_key: str,
         program_key: str,
-        issue_id: int,
+        issue_number: int,
         user_login: str,
     ) -> ModuleNode:
         """Unassign an issue from a user by updating Issue.assignees within the module scope."""
@@ -189,9 +189,9 @@ class ModuleMutation:
         if gh_user is None:
             raise ObjectDoesNotExist(msg="Assignee not found.")
 
-        issue = module.issues.filter(id=issue_id).first()
+        issue = module.issues.filter(number=issue_number).first()
         if issue is None:
-            raise ObjectDoesNotExist(msg=f"Issue {issue_id} not found in this module.")
+            raise ObjectDoesNotExist(msg=f"Issue {issue_number} not found in this module.")
 
         issue.assignees.remove(gh_user)
 
