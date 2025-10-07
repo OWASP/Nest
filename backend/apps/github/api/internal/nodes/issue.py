@@ -3,6 +3,7 @@
 import strawberry
 import strawberry_django
 
+from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models.issue import Issue
 from apps.mentorship.models import IssueUserInterest  # add import
@@ -55,3 +56,8 @@ class IssueNode(strawberry.relay.Node):
     def interested_users(self) -> list[UserNode]:
         """Return all users who have expressed interest in this issue."""
         return [interest.user for interest in IssueUserInterest.objects.filter(issue=self)]
+
+    @strawberry.field
+    def pull_requests(self) -> list[PullRequestNode]:
+        """Return all pull requests linked to this issue."""
+        return list(self.pull_requests.select_related("author", "repository").all())

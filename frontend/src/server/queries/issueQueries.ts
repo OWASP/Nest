@@ -27,6 +27,18 @@ export const GET_MODULE_ISSUE_VIEW = gql`
           avatarUrl
         }
         labels
+        pullRequests {
+          id
+          title
+          url
+          createdAt
+          author {
+            id
+            login
+            name
+            avatarUrl
+          }
+        }
       }
       interestedUsers(issueNumber: $number) {
         id

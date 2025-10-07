@@ -1,12 +1,18 @@
 'use client'
 
 import { useMutation, useQuery } from '@apollo/client'
-import { faLink, faPlus, faTags, faUsers, faXmark } from '@fortawesome/free-solid-svg-icons'
+import {
+  faCodeBranch,
+  faLink,
+  faPlus,
+  faTags,
+  faUsers,
+  faXmark,
+} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useMemo } from 'react'
 import { ErrorDisplay } from 'app/global-error'
 import {
   ASSIGN_ISSUE_TO_USER,
@@ -53,27 +59,28 @@ const ModuleIssueDetailsPage = () => {
     awaitRefetchQueries: true,
   })
 
-  const issue = useMemo(() => data?.getModule?.issueByNumber || null, [data])
-  const issueGlobalId = issue?.id as string | undefined
-  const issuePk = useMemo(() => {
-    if (!issueGlobalId) return null
-    try {
-      const decoded = atob(issueGlobalId)
-      const pk = parseInt(decoded.split(':').pop() || '', 10)
-      return Number.isNaN(pk) ? null : pk
-    } catch {
-      return null
-    }
-  }, [issueGlobalId])
+  const issue = data?.getModule?.issueByNumber
+
+  const issuePk = issue?.getModule?.id
 
   if (loading) return <LoadingSpinner />
   if (!issue)
     return <ErrorDisplay statusCode={404} title="Issue Not Found" message="Issue not found" />
 
   const assignees = issue.assignees || []
-  const labels: string[] = issue.labels || []
-  const visible = labels.slice(0, 5)
-  const remaining = labels.length - visible.length
+  const labels = issue.labels || []
+  const visibleLabels = labels.slice(0, 5)
+  const remainingLabels = labels.length - visibleLabels.length
+
+  const getButtonClassName = (disabled: boolean) =>
+    `inline-flex items-center justify-center rounded-md border p-1.5 text-sm ${
+      disabled
+        ? 'cursor-not-allowed border-gray-300 text-gray-400 dark:border-gray-600'
+        : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'
+    }`
+
+  const labelButtonClassName =
+    'rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700'
 
   return (
     <div className="min-h-screen bg-white p-8 text-gray-700 dark:bg-[#212529] dark:text-gray-300">
@@ -108,18 +115,13 @@ const ModuleIssueDetailsPage = () => {
             </div>
           </h2>
           <div className="flex flex-wrap gap-2">
-            {visible.map((l: string, index) => (
-              <button
-                key={index}
-                className="rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700"
-              >
-                {l}
+            {visibleLabels.map((label, index) => (
+              <button key={index} className={labelButtonClassName}>
+                {label}
               </button>
             ))}
-            {remaining > 0 && (
-              <button className="rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700">
-                +{remaining} more
-              </button>
+            {remainingLabels > 0 && (
+              <button className={labelButtonClassName}>+{remainingLabels} more</button>
             )}
           </div>
         </div>
@@ -162,7 +164,7 @@ const ModuleIssueDetailsPage = () => {
                       variables: { programKey, moduleKey, issueId: issuePk, userLogin: a.login },
                     })
                   }}
-                  className={`inline-flex items-center justify-center rounded-md border p-1.5 text-sm ${!issuePk ? 'cursor-not-allowed border-gray-300 text-gray-400 dark:border-gray-600' : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'}`}
+                  className={getButtonClassName(!issuePk || unassigning)}
                   title={unassigning ? 'Unassigning…' : `Unassign @${a.login}`}
                 >
                   <FontAwesomeIcon icon={faXmark} />
@@ -172,6 +174,46 @@ const ModuleIssueDetailsPage = () => {
             {assignees.length === 0 && <span className="text-sm text-gray-400">Unassigned</span>}
           </div>
         </div>
+
+        <SecondaryCard icon={faCodeBranch} title="Pull Requests">
+          <div className="grid grid-cols-1 gap-3">
+            {issue.pullRequests?.map((pr) => (
+              <div
+                key={pr.id}
+                className="flex items-center justify-between gap-3 rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+              >
+                <div className="flex items-center gap-3">
+                  <Image
+                    src={pr.author?.avatarUrl}
+                    alt={pr.author?.login || 'Unknown'}
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <Link
+                      href={pr.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="truncate font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                      title={pr.title}
+                    >
+                      {pr.title}
+                    </Link>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      by {pr.author?.login || 'Unknown'} •{' '}
+                      {new Date(pr.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+                <ActionButton url={pr.url} tooltipLabel="View PR">
+                  <FontAwesomeIcon icon={faLink} />
+                  <span>View PR</span>
+                </ActionButton>
+              </div>
+            )) || <span className="text-sm text-gray-400">No linked pull requests.</span>}
+          </div>
+        </SecondaryCard>
 
         <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
           <h2 className="mb-4 text-2xl font-semibold">
@@ -207,7 +249,7 @@ const ModuleIssueDetailsPage = () => {
                       variables: { programKey, moduleKey, issueId: issuePk, userLogin: u.login },
                     })
                   }}
-                  className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1 text-sm ${!issuePk ? 'cursor-not-allowed border-gray-300 text-gray-400 dark:border-gray-600' : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'}`}
+                  className={`${getButtonClassName(!issuePk || assigning)} px-3 py-1`}
                   title={
                     !issuePk ? 'Loading issue…' : assigning ? 'Assigning…' : 'Assign to this user'
                   }
