@@ -3,14 +3,13 @@
 from http import HTTPStatus
 from typing import Literal
 
-from django.conf import settings
 from django.http import HttpRequest
-from django.views.decorators.cache import cache_page
 from ninja import Field, FilterSchema, Path, Query, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
+from apps.api.decorators.api_cache import cache_api_response
 from apps.owasp.models.sponsor import Sponsor as SponsorModel
 
 router = RouterPaginated(tags=["Sponsors"])
@@ -71,7 +70,18 @@ class SponsorFilter(FilterSchema):
     response=list[Sponsor],
     summary="List sponsors",
 )
-@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
+@decorate_view(
+    cache_api_response(
+        allowed_params=(
+            "is_member",
+            "member_type",
+            "ordering",
+            "page",
+            "page_size",
+            "sponsor_type",
+        )
+    )
+)
 def list_sponsors(
     request: HttpRequest,
     filters: SponsorFilter = Query(...),

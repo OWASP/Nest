@@ -4,7 +4,6 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
 
-from django.conf import settings
 from django.http import HttpRequest
 from ninja import Field, FilterSchema, Path, Query, Schema
 from ninja.decorators import decorate_view
@@ -61,11 +60,7 @@ class ChapterFilter(FilterSchema):
     response=list[Chapter],
     summary="List chapters",
 )
-@decorate_view(
-    cache_api_response(
-        ttl=settings.API_CACHE_TIME_SECONDS, allowed_params=("country", "ordering", "page")
-    )
-)
+@decorate_view(cache_api_response(allowed_params=("country", "ordering", "page", "page_size")))
 def list_chapters(
     request: HttpRequest,
     filters: ChapterFilter = Query(...),
