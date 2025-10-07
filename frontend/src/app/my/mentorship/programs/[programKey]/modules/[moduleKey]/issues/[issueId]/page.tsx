@@ -61,8 +61,6 @@ const ModuleIssueDetailsPage = () => {
 
   const issue = data?.getModule?.issueByNumber
 
-  const issuePk = issue?.getModule?.id
-
   if (loading) return <LoadingSpinner />
   if (!issue)
     return <ErrorDisplay statusCode={404} title="Issue Not Found" message="Issue not found" />
@@ -102,6 +100,23 @@ const ModuleIssueDetailsPage = () => {
         <SecondaryCard title={<AnchorTitle title="Description" />}>
           <div className={`prose dark:prose-invert line-clamp-[15] max-w-none whitespace-pre-wrap`}>
             {issue.summary || 'No description.'}
+          </div>
+        </SecondaryCard>
+
+        <SecondaryCard title={<AnchorTitle title="Task Timeline" />}>
+          <div className="space-y-1 text-sm text-gray-700 dark:text-gray-300">
+            <div>
+              <span className="font-medium">Assigned:</span>{' '}
+              {data?.getModule?.taskAssignedAt
+                ? new Date(data.getModule.taskAssignedAt).toLocaleDateString()
+                : 'Not assigned'}
+            </div>
+            <div>
+              <span className="font-medium">Deadline:</span>{' '}
+              {data?.getModule?.taskDeadline
+                ? new Date(data.getModule.taskDeadline).toLocaleDateString()
+                : 'No deadline set'}
+            </div>
           </div>
         </SecondaryCard>
 
@@ -157,14 +172,19 @@ const ModuleIssueDetailsPage = () => {
                 <button
                   type="button"
                   aria-label={`Unassign @${a.login}`}
-                  disabled={!issuePk || unassigning}
+                  disabled={!issueId || unassigning}
                   onClick={async () => {
-                    if (!issuePk || unassigning) return
+                    if (!issueId || unassigning) return
                     await unassignIssue({
-                      variables: { programKey, moduleKey, issueId: issuePk, userLogin: a.login },
+                      variables: {
+                        programKey,
+                        moduleKey,
+                        issueNumber: Number(issueId),
+                        userLogin: a.login,
+                      },
                     })
                   }}
-                  className={getButtonClassName(!issuePk || unassigning)}
+                  className={getButtonClassName(!issueId || unassigning)}
                   title={unassigning ? 'Unassigning…' : `Unassign @${a.login}`}
                 >
                   <FontAwesomeIcon icon={faXmark} />
@@ -242,16 +262,21 @@ const ModuleIssueDetailsPage = () => {
                 </div>
                 <button
                   type="button"
-                  disabled={!issuePk || assigning}
+                  disabled={!issueId || assigning}
                   onClick={async () => {
-                    if (!issuePk || assigning) return
+                    if (!issueId || assigning) return
                     await assignIssue({
-                      variables: { programKey, moduleKey, issueId: issuePk, userLogin: u.login },
+                      variables: {
+                        programKey,
+                        moduleKey,
+                        issueNumber: Number(issueId),
+                        userLogin: u.login,
+                      },
                     })
                   }}
-                  className={`${getButtonClassName(!issuePk || assigning)} px-3 py-1`}
+                  className={`${getButtonClassName(!issueId || assigning)} px-3 py-1`}
                   title={
-                    !issuePk ? 'Loading issue…' : assigning ? 'Assigning…' : 'Assign to this user'
+                    !issueId ? 'Loading issue…' : assigning ? 'Assigning…' : 'Assign to this user'
                   }
                 >
                   <FontAwesomeIcon icon={faPlus} className="text-gray-500" />

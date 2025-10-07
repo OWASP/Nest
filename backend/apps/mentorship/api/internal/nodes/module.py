@@ -10,6 +10,7 @@ from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum
 from apps.mentorship.api.internal.nodes.mentor import MentorNode
 from apps.mentorship.api.internal.nodes.program import ProgramNode
 from apps.mentorship.models.issue_user_interest import IssueUserInterest
+from apps.mentorship.models.task import Task
 
 
 @strawberry.type
@@ -69,6 +70,28 @@ class ModuleNode:
             .order_by("user__login")
         )
         return [i.user for i in interests]
+
+    @strawberry.field
+    def task_deadline(self, issue_number: int) -> datetime | None:
+        """Return the earliest deadline for tasks linked to this module and issue number."""
+        return (
+            Task.objects.filter(issue__number=issue_number)
+            .order_by("deadline_at")
+            .values_list("deadline_at", flat=True)
+            .first()
+        )
+
+    @strawberry.field
+    def task_assigned_at(self, issue_number: int) -> datetime | None:
+        """Return the earliest assignment time for tasks linked to this module and issue number."""
+        return (
+            Task.objects.filter(
+                issue__number=issue_number,
+            )
+            .order_by("assigned_at")
+            .values_list("assigned_at", flat=True)
+            .first()
+        )
 
 
 @strawberry.input
