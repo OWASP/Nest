@@ -221,12 +221,11 @@ class TestBaseChunkCommand:
             result = command.process_chunks_batch([mock_entity])
 
             assert result == 1
-            mock_create_chunks.assert_called_once_with(
-                chunk_texts=["chunk1", "chunk2", "chunk3"],
-                context=mock_context,
-                openai_client=command.openai_client,
-                save=False,
-            )
+            _, kwargs = mock_create_chunks.call_args
+            assert set(kwargs["chunk_texts"]) == {"chunk1", "chunk2", "chunk3"}
+            assert kwargs["context"] == mock_context
+            assert kwargs["openai_client"] == command.openai_client
+            assert kwargs["save"] is False
             mock_bulk_save.assert_called_once_with(mock_chunks)
             mock_write.assert_has_calls(
                 [
@@ -461,12 +460,11 @@ class TestBaseChunkCommand:
 
             assert result == 1
             mock_split_text.assert_called_once()
-            mock_create_chunks.assert_called_once_with(
-                chunk_texts=["chunk1", "chunk2", "chunk3"],
-                context=mock_context,
-                openai_client=command.openai_client,
-                save=False,
-            )
+            _, kwargs = mock_create_chunks.call_args
+            assert set(kwargs["chunk_texts"]) == {"chunk1", "chunk2", "chunk3"}
+            assert kwargs["context"] == mock_context
+            assert kwargs["openai_client"] == command.openai_client
+            assert kwargs["save"] is False
             mock_bulk_save.assert_called_once_with(mock_chunks)
 
     def test_process_chunks_batch_whitespace_only_content(

@@ -58,7 +58,7 @@ class BaseChunkCommand(BaseAICommand):
                     continue
 
                 chunk_texts = Chunk.split_text(full_content)
-                unique_chunk_texts = list(dict.fromkeys(chunk_texts))
+                unique_chunk_texts = list(set(chunk_texts))
 
                 if not unique_chunk_texts:
                     self.stdout.write(f"No chunks created for {self.entity_name} {entity_key}")
