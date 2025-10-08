@@ -57,13 +57,12 @@ class BaseChunkCommand(BaseAICommand):
                     self.stdout.write(f"No content to chunk for {self.entity_name} {entity_key}")
                     continue
 
-                chunk_texts = Chunk.split_text(full_content)
-                if not chunk_texts:
+                if not (unique_chunk_texts := set(Chunk.split_text(full_content))):
                     self.stdout.write(f"No chunks created for {self.entity_name} {entity_key}")
                     continue
 
                 if chunks := create_chunks_and_embeddings(
-                    chunk_texts=chunk_texts,
+                    chunk_texts=list(unique_chunk_texts),
                     context=context,
                     openai_client=self.openai_client,
                     save=False,
