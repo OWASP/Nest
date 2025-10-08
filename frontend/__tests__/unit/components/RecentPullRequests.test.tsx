@@ -40,6 +40,7 @@ const mockUser = {
 
 const minimalData = [
   {
+    id: 'mock-pull-request',
     author: mockUser,
     createdAt: '2024-06-01T12:00:00Z',
     organizationName: 'test-org',
@@ -51,6 +52,7 @@ const minimalData = [
 
 const noRepoData = [
   {
+    id: 'mock-pull-request',
     author: mockUser,
     createdAt: '2024-06-01T12:00:00Z',
     organizationName: 'test-org',

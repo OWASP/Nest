@@ -8,14 +8,13 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import { TextInfoItem } from 'components/InfoItem'
-import { usePathname } from 'next/navigation'
 import SingleModuleCard from 'components/SingleModuleCard'
 import { TruncatedText } from 'components/TruncatedText'
-import { PathnameContext } from 'next/dist/shared/lib/hooks-client-context.shared-runtime'
 
 interface ModuleCardProps {
   modules: Module[]

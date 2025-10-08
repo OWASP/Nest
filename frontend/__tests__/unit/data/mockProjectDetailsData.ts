@@ -101,6 +101,7 @@ export const mockProjectDetailsData = {
     ],
     recentPullRequests: [
       {
+        id: 'mock-project-pr-1',
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/u/11111?v=4',
           login: 'user1',
@@ -110,6 +111,7 @@ export const mockProjectDetailsData = {
         url: 'https://github.com/test-org/test-repo-1/pull/1',
       },
       {
+        id: 'mock-project-pr-2',
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/u/22222?v=4',
           login: 'user2',

@@ -87,7 +87,7 @@ const DetailsCard = ({
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    className="dark:hover:text-white' flex items-center justify-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-2 py-2 text-nowrap text-[#1D7BD7] hover:bg-[#1D7BD7] hover:text-white"
+                    className="flex items-center justify-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-2 py-2 text-nowrap text-[#1D7BD7] hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white"
                     onClick={() => {
                       router.push(`${window.location.pathname}/issues`)
                     }}
@@ -96,7 +96,7 @@ const DetailsCard = ({
                   </button>
                   <button
                     type="button"
-                    className="dark:hover:text-white' flex items-center justify-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-2 py-2 text-nowrap text-[#1D7BD7] hover:bg-[#1D7BD7] hover:text-white"
+                    className="flex items-center justify-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-2 py-2 text-nowrap text-[#1D7BD7] hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white"
                     onClick={() => {
                       router.push(`${window.location.pathname}/edit`)
                     }}

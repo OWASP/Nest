@@ -160,13 +160,17 @@ const ModuleIssueDetailsPage = () => {
                   href={`/members/${a.login}`}
                   className="inline-flex items-center gap-2 text-blue-600 hover:underline dark:text-blue-400"
                 >
-                  <Image
-                    src={a.avatarUrl}
-                    alt={a.login}
-                    width={32}
-                    height={32}
-                    className="rounded-full"
-                  />
+                  {a.avatarUrl ? (
+                    <Image
+                      src={a.avatarUrl}
+                      alt={a.login}
+                      width={32}
+                      height={32}
+                      className="rounded-full"
+                    />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-gray-400" aria-hidden="true" />
+                  )}
                   <span className="text-sm font-medium">{a.login || a.name}</span>
                 </Link>
                 <button
@@ -204,13 +208,17 @@ const ModuleIssueDetailsPage = () => {
                   className="flex items-center justify-between gap-3 rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
                 >
                   <div className="flex items-center gap-3">
-                    <Image
-                      src={pr.author?.avatarUrl}
-                      alt={pr.author?.login || 'Unknown'}
-                      width={32}
-                      height={32}
-                      className="rounded-full"
-                    />
+                    {pr.author?.avatarUrl ? (
+                      <Image
+                        src={pr.author.avatarUrl}
+                        alt={pr.author?.login || 'Unknown'}
+                        width={32}
+                        height={32}
+                        className="rounded-full"
+                      />
+                    ) : (
+                      <div className="h-8 w-8 rounded-full bg-gray-400" aria-hidden="true" />
+                    )}
                     <div className="min-w-0 flex-1">
                       <Link
                         href={pr.url}
@@ -255,13 +263,17 @@ const ModuleIssueDetailsPage = () => {
                 className="flex items-center justify-between gap-2 rounded-lg bg-gray-200 p-3 dark:bg-gray-700"
               >
                 <div className="inline-flex items-center gap-2">
-                  <Image
-                    src={u.avatarUrl}
-                    alt={u.login}
-                    width={32}
-                    height={32}
-                    className="rounded-full"
-                  />
+                  {u.avatarUrl ? (
+                    <Image
+                      src={u.avatarUrl}
+                      alt={u.login}
+                      width={32}
+                      height={32}
+                      className="rounded-full"
+                    />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-gray-400" aria-hidden="true" />
+                  )}
                   <span className="text-sm font-medium">@{u.login}</span>
                 </div>
                 <button

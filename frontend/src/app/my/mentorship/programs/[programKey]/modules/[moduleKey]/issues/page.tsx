@@ -92,8 +92,11 @@ const IssuesPage = () => {
                 trigger: 'bg-gray-200 dark:bg-[#323232] pl-0 text-nowrap w-40',
                 popoverContent: 'text-md min-w-40 dark:bg-[#323232] rounded-none p-0',
               }}
-              selectedKeys={[selectedLabel]}
-              onChange={(e) => handleLabelChange((e.target as HTMLSelectElement).value)}
+              selectedKeys={new Set([selectedLabel])}
+              onSelectionChange={(keys) => {
+                const [key] = Array.from(keys as Set<string>)
+                if (key) handleLabelChange(key)
+              }}
             >
               {[LABEL_ALL, ...allLabels].map((l) => (
                 <SelectItem
