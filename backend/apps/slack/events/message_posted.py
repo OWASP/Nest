@@ -81,31 +81,27 @@ class MessagePosted(EventBase):
     def handle_dm(self, event, client, channel_id, user_id, text):
         """Handle direct messages with NestBot (DMs)."""
         workspace_id = event.get("team")
-
-        if not workspace_id:
-            try:
-                channel_info = client.conversations_info(channel=channel_id)
-                workspace_id = channel_info["channel"]["team"]
-            except Exception:
-                logger.exception("Failed to fetch workspace ID for DM.")
-                return
+        channel_info = client.conversations_info(channel=channel_id)
 
         try:
-            Member.objects.get(slack_user_id=user_id, workspace__slack_workspace_id=workspace_id)
+            workspace = Workspace.objects.get(slack_workspace_id=workspace_id)
+        except Workspace.DoesNotExist:
+            logger.exception("Workspace not found for DM.")
+            return
+
+        Conversation.update_data(channel_info["channel"], workspace)
+
+        try:
+            Member.objects.get(slack_user_id=user_id, workspace=workspace)
         except Member.DoesNotExist:
-            try:
-                user_info = client.users_info(user=user_id)
-                workspace = Workspace.objects.get(slack_workspace_id=workspace_id)
-                Member.update_data(user_info["user"], workspace, save=True)
-                logger.info("Created new member for DM")
-            except Exception:
-                logger.exception("Failed to create member for DM.")
-                return
+            user_info = client.users_info(user=user_id)
+            Member.update_data(user_info["user"], workspace, save=True)
+            logger.info("Created new member for DM")
 
         thread_ts = event.get("thread_ts")
 
         try:
-            response_blocks = get_dm_blocks(text, user_id, workspace_id)
+            response_blocks = get_dm_blocks(text, workspace_id, channel_id)
             if response_blocks:
                 client.chat_postMessage(
                     channel=channel_id,

@@ -137,3 +137,122 @@ class TestConversationModel:
 
         # Check __str__ returns the name
         assert str(conversation) == "test-workspace #test-channel"
+
+    def test_add_to_context_first_message(self, mocker):
+        """Test adding the first message to an empty conversation context."""
+        conversation = Conversation(slack_channel_id="C12345")
+        conversation.conversation_context = ""
+
+        save_mock = mocker.patch.object(Conversation, "save")
+        conversation.add_to_context("Hello, how are you?")
+
+        assert conversation.conversation_context == "User: Hello, how are you?\n"
+        save_mock.assert_called_once_with(update_fields=["conversation_context"])
+
+    def test_add_to_context_with_bot_response(self, mocker):
+        """Test adding a user message and bot response to context."""
+        conversation = Conversation(slack_channel_id="C12345")
+        conversation.conversation_context = "User: Hello\nBot: Hi there!\n"
+
+        save_mock = mocker.patch.object(Conversation, "save")
+
+        conversation.add_to_context(
+            "What is OWASP?", "OWASP stands for Open Web Application Security Project."
+        )
+
+        expected_context = (
+            "User: Hello\n"
+            "Bot: Hi there!\n"
+            "User: What is OWASP?\n"
+            "Bot: OWASP stands for Open Web Application Security Project.\n"
+        )
+        assert conversation.conversation_context == expected_context
+        save_mock.assert_called_once_with(update_fields=["conversation_context"])
+
+    def test_add_to_context_empty_initial_context(self, mocker):
+        """Test adding context when conversation_context is None."""
+        conversation = Conversation(slack_channel_id="C12345")
+        conversation.conversation_context = None
+
+        save_mock = mocker.patch.object(Conversation, "save")
+
+        conversation.add_to_context("First message", "First response")
+
+        expected_context = "User: First message\nBot: First response\n"
+        assert conversation.conversation_context == expected_context
+        save_mock.assert_called_once_with(update_fields=["conversation_context"])
+
+    def test_get_context_empty(self):
+        """Test getting context when conversation_context is empty."""
+        conversation = Conversation(slack_channel_id="C12345")
+        conversation.conversation_context = ""
+
+        result = conversation.get_context()
+
+        assert result == ""
+
+    def test_get_context_no_limit(self):
+        """Test getting full context without limit."""
+        conversation = Conversation(slack_channel_id="C12345")
+        conversation.conversation_context = (
+            "User: Message 1\n"
+            "Bot: Response 1\n"
+            "User: Message 2\n"
+            "Bot: Response 2\n"
+            "User: Message 3\n"
+            "Bot: Response 3\n"
+        )
+
+        result = conversation.get_context()
+
+        assert result == conversation.conversation_context
+
+    def test_get_context_with_limit_below_threshold(self):
+        """Test getting context with limit when total exchanges are below limit."""
+        conversation = Conversation(slack_channel_id="C12345")
+        conversation.conversation_context = (
+            "User: Message 1\nBot: Response 1\nUser: Message 2\nBot: Response 2\n"
+        )
+
+        result = conversation.get_context(conversation_context_limit=3)
+
+        assert result == conversation.conversation_context
+
+    def test_get_context_with_limit_above_threshold(self):
+        """Test getting context with limit when total exchanges exceed limit."""
+        conversation = Conversation(slack_channel_id="C12345")
+        conversation.conversation_context = (
+            "User: Message 1\n"
+            "Bot: Response 1\n"
+            "User: Message 2\n"
+            "Bot: Response 2\n"
+            "User: Message 3\n"
+            "Bot: Response 3\n"
+            "User: Message 4\n"
+            "Bot: Response 4\n"
+        )
+
+        result = conversation.get_context(conversation_context_limit=2)
+
+        expected = "User: Message 3\nBot: Response 3\nUser: Message 4\nBot: Response 4"
+        assert result == expected
+
+    def test_get_context_none_context(self):
+        """Test getting context when conversation_context is None."""
+        conversation = Conversation(slack_channel_id="C12345")
+        conversation.conversation_context = None
+
+        result = conversation.get_context()
+
+        assert result == ""
+
+    def test_get_context_with_limit_exact_threshold(self):
+        """Test getting context when exchanges exactly match the limit."""
+        conversation = Conversation(slack_channel_id="C12345")
+        conversation.conversation_context = (
+            "User: Message 1\nBot: Response 1\nUser: Message 2\nBot: Response 2\n"
+        )
+
+        result = conversation.get_context(conversation_context_limit=2)
+
+        assert result == conversation.conversation_context

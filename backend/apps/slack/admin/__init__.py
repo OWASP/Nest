@@ -1,6 +1,5 @@
 """Slack app admin."""
 
-from .chat import ChatAdmin
 from .conversation import ConversationAdmin
 from .event import EventAdmin
 from .member import MemberAdmin

@@ -6,7 +6,8 @@ import logging
 
 from apps.ai.agent.tools.rag.rag_tool import RagTool
 from apps.slack.blocks import markdown
-from apps.slack.models import Chat, Member, Workspace
+from apps.slack.constants import CONVERSATION_CONTEXT_LIMIT
+from apps.slack.models import Conversation, Workspace
 
 logger = logging.getLogger(__name__)
 
@@ -47,42 +48,41 @@ def process_ai_query(query: str) -> str | None:
     return rag_tool.query(question=query)
 
 
-def get_dm_blocks(query: str, user_id: str, workspace_id: str) -> list[dict]:
+def get_dm_blocks(query: str, workspace_id: str, channel_id: str) -> list[dict]:
     """Get AI response blocks for DM with conversation context.
 
     Args:
         query (str): The user's question.
-        user_id (str): Slack user ID.
         workspace_id (str): Slack workspace ID.
+        channel_id (str): Slack channel ID for the DM.
 
     Returns:
         list: A list of Slack blocks representing the AI response.
 
     """
-    ai_response = process_dm_ai_query(query.strip(), user_id, workspace_id)
+    ai_response = process_dm_ai_query(query.strip(), workspace_id, channel_id)
 
     if ai_response:
         return [markdown(ai_response)]
     return get_error_blocks()
 
 
-def process_dm_ai_query(query: str, user_id: str, workspace_id: str) -> str | None:
+def process_dm_ai_query(query: str, workspace_id: str, channel_id: str) -> str | None:
     """Process the AI query with DM conversation context.
 
     Args:
         query (str): The user's question.
-        user_id (str): Slack user ID.
         workspace_id (str): Slack workspace ID.
+        channel_id (str): Slack channel ID for the DM.
 
     Returns:
         str | None: The AI response or None if error occurred.
 
     """
-    user = Member.objects.get(slack_user_id=user_id)
     workspace = Workspace.objects.get(slack_workspace_id=workspace_id)
+    conversation = Conversation.objects.get(slack_channel_id=channel_id, workspace=workspace)
 
-    chat = Chat.update_data(user, workspace)
-    context = chat.get_context(limit_exchanges=20)
+    context = conversation.get_context(conversation_context_limit=CONVERSATION_CONTEXT_LIMIT)
 
     rag_tool = RagTool(
         chat_model="gpt-4o",
@@ -95,7 +95,7 @@ def process_dm_ai_query(query: str, user_id: str, workspace_id: str) -> str | No
         enhanced_query = query
 
     response = rag_tool.query(question=enhanced_query)
-    chat.add_to_context(query, response)
+    conversation.add_to_context(query, response)
 
     return response
 

@@ -2,6 +2,7 @@
 
 from apps.common.constants import NL
 
+CONVERSATION_CONTEXT_LIMIT = 20
 NEST_BOT_NAME = "NestBot"
 
 OWASP_APPSEC_CHANNEL_ID = "#C0F7D6DFH"
