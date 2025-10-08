@@ -8,12 +8,17 @@ from httplib2.error import ServerNotFoundError
 from apps.common.constants import NL
 from apps.slack.blocks import get_pagination_buttons, markdown
 
+PERMISSIONS_BLOCK = [markdown("*You do not have the permission to access calendar events.*")]
+
 
 def get_cancel_reminder_blocks(reminder_schedule_id: int, slack_user_id: str) -> list[dict]:
     """Get the blocks for canceling a reminder."""
+    from apps.nest.auth.calendar_events import has_calendar_events_permission
     from apps.nest.models.reminder_schedule import ReminderSchedule
     from apps.nest.schedulers.calendar_events.slack import SlackScheduler
 
+    if not has_calendar_events_permission(slack_user_id):
+        return PERMISSIONS_BLOCK
     try:
         reminder_schedule = ReminderSchedule.objects.get(pk=reminder_schedule_id)
     except ReminderSchedule.DoesNotExist:
@@ -31,18 +36,26 @@ def get_cancel_reminder_blocks(reminder_schedule_id: int, slack_user_id: str) ->
 
 def get_events_blocks(slack_user_id: str, presentation, page: int = 1) -> list[dict]:
     """Get Google Calendar events blocks for Slack home view."""
+    from apps.nest.auth.calendar_events import has_calendar_events_permission
     from apps.nest.clients.google_calendar import GoogleCalendarClient
     from apps.nest.models.google_account_authorization import GoogleAccountAuthorization
     from apps.owasp.models.event import Event
 
+    if not has_calendar_events_permission(slack_user_id):
+        return PERMISSIONS_BLOCK
+
+    # Authorize with Google
     auth = GoogleAccountAuthorization.authorize(slack_user_id)
+    # If not authorized, we will get a tuple with the authorization URL
     if not isinstance(auth, GoogleAccountAuthorization):
         return [markdown(f"*Please sign in with Google first through this <{auth[0]}|link>*")]
     try:
+        # Get a 24-hour window of events
         client = GoogleCalendarClient(auth)
         min_time = timezone.now() + timezone.timedelta(days=(page - 1))
         max_time = min_time + timezone.timedelta(days=1)
         events = client.get_events(min_time=min_time, max_time=max_time)
+    # Catch network errors
     except ServerNotFoundError:
         return [markdown("*Please check your internet connection.*")]
     parsed_events = Event.parse_google_calendar_events(events)
@@ -58,7 +71,11 @@ def get_events_blocks(slack_user_id: str, presentation, page: int = 1) -> list[d
         )
     ]
     for i, event in enumerate(parsed_events):
+        # We will need this number later to set reminders
+        # We are multiplying by 1000 to avoid collisions between pages
+        # as we don't get the length of events list from Google Calendar API.
         event_number = (i + 1) + 1000 * (page - 1)
+        # We will show the user the event number and cache the event ID for later use.
         cache.set(f"{slack_user_id}_{event_number}", event.google_calendar_id, timeout=3600)
         blocks.append(
             markdown(
@@ -82,7 +99,11 @@ def get_events_blocks(slack_user_id: str, presentation, page: int = 1) -> list[d
 
 def get_reminders_blocks(slack_user_id: str) -> list[dict]:
     """Get reminders blocks for Slack home view."""
+    from apps.nest.auth.calendar_events import has_calendar_events_permission
     from apps.nest.models.reminder_schedule import ReminderSchedule
+
+    if not has_calendar_events_permission(slack_user_id):
+        return PERMISSIONS_BLOCK
 
     reminders_schedules = ReminderSchedule.objects.filter(
         reminder__member__slack_user_id=slack_user_id,
@@ -106,8 +127,12 @@ def get_reminders_blocks(slack_user_id: str) -> list[dict]:
 
 def get_setting_reminder_blocks(args, slack_user_id: str) -> list[dict]:
     """Get the blocks for setting a reminder."""
+    from apps.nest.auth.calendar_events import has_calendar_events_permission
     from apps.nest.handlers.calendar_events import set_reminder
     from apps.nest.schedulers.calendar_events.slack import SlackScheduler
+
+    if not has_calendar_events_permission(slack_user_id):
+        return PERMISSIONS_BLOCK
 
     try:
         reminder_schedule = set_reminder(
