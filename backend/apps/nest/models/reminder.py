@@ -11,7 +11,13 @@ class Reminder(models.Model):
         verbose_name = "Nest Reminder"
         verbose_name_plural = "Nest Reminders"
 
-    channel_id = models.CharField(verbose_name="Channel ID", max_length=15, default="")
+    channel = models.ForeignKey(
+        "owasp.EntityChannel",
+        verbose_name="Channel",
+        on_delete=models.CASCADE,
+        related_name="reminders",
+        null=True,
+    )
     event = models.ForeignKey(
         "owasp.Event",
         verbose_name="Event",
@@ -30,4 +36,4 @@ class Reminder(models.Model):
 
     def __str__(self) -> str:
         """Reminder human readable representation."""
-        return f"Reminder for {self.member} in channel: {self.channel_id}: {self.message}"
+        return f"Reminder for {self.member} in channel: {self.channel}: {self.message}"
