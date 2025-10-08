@@ -75,7 +75,11 @@ class ModuleNode:
     def task_deadline(self, issue_number: int) -> datetime | None:
         """Return the earliest deadline for tasks linked to this module and issue number."""
         return (
-            Task.objects.filter(issue__number=issue_number)
+            Task.objects.filter(
+                module=self,
+                issue__number=issue_number,
+                deadline_at__isnull=False,
+            )
             .order_by("deadline_at")
             .values_list("deadline_at", flat=True)
             .first()
@@ -86,7 +90,9 @@ class ModuleNode:
         """Return the earliest assignment time for tasks linked to this module and issue number."""
         return (
             Task.objects.filter(
+                module=self,
                 issue__number=issue_number,
+                assigned_at__isnull=False,
             )
             .order_by("assigned_at")
             .values_list("assigned_at", flat=True)

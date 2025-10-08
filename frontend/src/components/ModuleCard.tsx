@@ -12,8 +12,10 @@ import { useState } from 'react'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import { TextInfoItem } from 'components/InfoItem'
+import { usePathname } from 'next/navigation'
 import SingleModuleCard from 'components/SingleModuleCard'
 import { TruncatedText } from 'components/TruncatedText'
+import { PathnameContext } from 'next/dist/shared/lib/hooks-client-context.shared-runtime'
 
 interface ModuleCardProps {
   modules: Module[]
@@ -68,10 +70,11 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
 }
 
 const ModuleItem = ({ details }: { details: Module }) => {
+  const pathname = usePathname()
   return (
     <div className="flex h-46 w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <Link
-        href={`${window.location.pathname}/modules/${details.key}`}
+        href={`${pathname}/modules/${details.key}`}
         className="text-start font-semibold text-blue-400 hover:underline"
       >
         <TruncatedText text={details?.name} />

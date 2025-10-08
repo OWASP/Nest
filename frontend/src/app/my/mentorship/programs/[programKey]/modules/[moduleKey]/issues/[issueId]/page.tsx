@@ -197,41 +197,45 @@ const ModuleIssueDetailsPage = () => {
 
         <SecondaryCard icon={faCodeBranch} title="Pull Requests">
           <div className="grid grid-cols-1 gap-3">
-            {issue.pullRequests?.map((pr) => (
-              <div
-                key={pr.id}
-                className="flex items-center justify-between gap-3 rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
-              >
-                <div className="flex items-center gap-3">
-                  <Image
-                    src={pr.author?.avatarUrl}
-                    alt={pr.author?.login || 'Unknown'}
-                    width={32}
-                    height={32}
-                    className="rounded-full"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <Link
-                      href={pr.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="truncate font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                      title={pr.title}
-                    >
-                      {pr.title}
-                    </Link>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      by {pr.author?.login || 'Unknown'} •{' '}
-                      {new Date(pr.createdAt).toLocaleDateString()}
+            {issue.pullRequests?.length ? (
+              issue.pullRequests.map((pr) => (
+                <div
+                  key={pr.id}
+                  className="flex items-center justify-between gap-3 rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+                >
+                  <div className="flex items-center gap-3">
+                    <Image
+                      src={pr.author?.avatarUrl}
+                      alt={pr.author?.login || 'Unknown'}
+                      width={32}
+                      height={32}
+                      className="rounded-full"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <Link
+                        href={pr.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="truncate font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                        title={pr.title}
+                      >
+                        {pr.title}
+                      </Link>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        by {pr.author?.login || 'Unknown'} •{' '}
+                        {new Date(pr.createdAt).toLocaleDateString()}
+                      </div>
                     </div>
                   </div>
+                  <ActionButton url={pr.url} tooltipLabel="View PR">
+                    <FontAwesomeIcon icon={faLink} />
+                    <span>View PR</span>
+                  </ActionButton>
                 </div>
-                <ActionButton url={pr.url} tooltipLabel="View PR">
-                  <FontAwesomeIcon icon={faLink} />
-                  <span>View PR</span>
-                </ActionButton>
-              </div>
-            )) || <span className="text-sm text-gray-400">No linked pull requests.</span>}
+              ))
+            ) : (
+              <span className="text-sm text-gray-400">No linked pull requests.</span>
+            )}
           </div>
         </SecondaryCard>
 
