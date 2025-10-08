@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from apps.common.index import IndexBase
@@ -62,6 +63,9 @@ class Issue(GenericIssueModel):
         related_name="issues",
         help_text="The difficulty level of this issue.",
     )
+
+    comments = GenericRelation("github.Comment", related_query_name="issue")
+
     milestone = models.ForeignKey(
         "github.Milestone",
         on_delete=models.CASCADE,
@@ -90,6 +94,16 @@ class Issue(GenericIssueModel):
         related_name="issue",
         blank=True,
     )
+
+    @property
+    def latest_comment(self):
+        """Get the latest comment for this issue.
+
+        Returns:
+            Comment | None: The most recently created comment, or None if no comments exist.
+
+        """
+        return self.comments.order_by("-nest_created_at").first()
 
     def from_github(self, gh_issue, *, author=None, milestone=None, repository=None):
         """Update the instance based on GitHub issue data.
