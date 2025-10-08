@@ -10,7 +10,7 @@ from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
-from apps.api.decorators.api_cache import cache_api_response
+from apps.api.decorators.cache import cache_response
 from apps.github.models.user import User as UserModel
 
 router = RouterPaginated(tags=["Community"])
@@ -67,7 +67,7 @@ class MemberFilter(FilterSchema):
     response=list[Member],
     summary="List members",
 )
-@decorate_view(cache_api_response())
+@decorate_view(cache_response())
 def list_members(
     request: HttpRequest,
     filters: MemberFilter = Query(...),
@@ -90,7 +90,7 @@ def list_members(
     },
     summary="Get member",
 )
-@decorate_view(cache_api_response())
+@decorate_view(cache_response())
 def get_member(
     request: HttpRequest,
     member_id: str = Path(example="OWASP"),

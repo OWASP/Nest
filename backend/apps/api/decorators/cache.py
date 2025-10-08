@@ -8,7 +8,7 @@ from django.core.cache import cache
 from django.http import HttpRequest
 
 
-def _generate_cache_key(
+def generate_key(
     request: HttpRequest,
     prefix: str,
 ):
@@ -16,7 +16,7 @@ def _generate_cache_key(
     return f"{prefix}:{request.get_full_path()}"
 
 
-def cache_api_response(
+def cache_response(
     ttl: int | None = None,
     prefix: str | None = None,
 ):
@@ -39,7 +39,7 @@ def cache_api_response(
             if request.method not in ("GET", "HEAD"):
                 return view_func(request, *args, **kwargs)
 
-            cache_key = _generate_cache_key(
+            cache_key = generate_key(
                 request=request,
                 prefix=prefix,
             )

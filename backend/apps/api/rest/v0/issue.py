@@ -10,7 +10,7 @@ from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
-from apps.api.decorators.api_cache import cache_api_response
+from apps.api.decorators.cache import cache_response
 from apps.github.models.generic_issue_model import GenericIssueModel
 from apps.github.models.issue import Issue as IssueModel
 
@@ -69,7 +69,7 @@ class IssueFilter(FilterSchema):
     response=list[Issue],
     summary="List issues",
 )
-@decorate_view(cache_api_response())
+@decorate_view(cache_response())
 def list_issues(
     request: HttpRequest,
     filters: IssueFilter = Query(...),
@@ -102,7 +102,7 @@ def list_issues(
     },
     summary="Get issue",
 )
-@decorate_view(cache_api_response())
+@decorate_view(cache_response())
 def get_issue(
     request: HttpRequest,
     organization_id: str = Path(example="OWASP"),

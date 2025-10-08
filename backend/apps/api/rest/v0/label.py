@@ -7,7 +7,7 @@ from ninja import Field, FilterSchema, Query, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 
-from apps.api.decorators.api_cache import cache_api_response
+from apps.api.decorators.cache import cache_response
 from apps.github.models.label import Label as LabelModel
 
 router = RouterPaginated(tags=["Labels"])
@@ -47,7 +47,7 @@ class LabelFilter(FilterSchema):
     response=list[Label],
     summary="List labels",
 )
-@decorate_view(cache_api_response())
+@decorate_view(cache_response())
 def list_label(
     request: HttpRequest,
     filters: LabelFilter = Query(...),

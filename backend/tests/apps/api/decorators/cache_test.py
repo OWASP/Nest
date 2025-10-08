@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import pytest
 from django.http import HttpRequest, HttpResponse
 
-from apps.api.decorators.api_cache import _generate_cache_key, cache_api_response
+from apps.api.decorators.cache import cache_response, generate_key
 
 
 @pytest.mark.parametrize(
@@ -20,17 +20,17 @@ from apps.api.decorators.api_cache import _generate_cache_key, cache_api_respons
     ],
 )
 def test_generate_cache_key(full_path, prefix, expected_key):
-    """Test cases for the _generate_cache_key function."""
+    """Test cases for the generate cache key function."""
     request = HttpRequest()
     parsed_url = urlparse(full_path)
     request.path = parsed_url.path
     request.META["QUERY_STRING"] = parsed_url.query
 
-    assert _generate_cache_key(request, prefix) == expected_key
+    assert generate_key(request, prefix) == expected_key
 
 
-class TestCacheApiResponse:
-    """Test cases for the cache_api_response decorator."""
+class TestCacheResponse:
+    """Test cases for the cache response decorator."""
 
     @pytest.fixture
     def mock_request(self):
@@ -41,12 +41,12 @@ class TestCacheApiResponse:
         request.GET = {}
         return request
 
-    @patch("apps.api.decorators.api_cache.cache")
+    @patch("apps.api.decorators.cache.cache")
     def test_get_request_caches_response(self, mock_cache, mock_request):
         """Test that a GET request caches the response."""
         mock_cache.get.return_value = None
         view_func = MagicMock(return_value=HttpResponse(status=HTTPStatus.OK))
-        decorated_view = cache_api_response(ttl=60)(view_func)
+        decorated_view = cache_response(ttl=60)(view_func)
 
         response = decorated_view(mock_request)
 
@@ -55,13 +55,13 @@ class TestCacheApiResponse:
         mock_cache.set.assert_called_once()
         view_func.assert_called_once_with(mock_request)
 
-    @patch("apps.api.decorators.api_cache.cache")
+    @patch("apps.api.decorators.cache.cache")
     def test_get_request_returns_cached_response(self, mock_cache, mock_request):
         """Test that a GET request returns a cached response if available."""
         cached_response = HttpResponse(status=HTTPStatus.OK, content=b"cached")
         mock_cache.get.return_value = cached_response
         view_func = MagicMock()
-        decorated_view = cache_api_response(ttl=60)(view_func)
+        decorated_view = cache_response(ttl=60)(view_func)
 
         response = decorated_view(mock_request)
 
@@ -71,12 +71,12 @@ class TestCacheApiResponse:
         view_func.assert_not_called()
 
     @pytest.mark.parametrize("method", ["POST", "PUT", "DELETE"])
-    @patch("apps.api.decorators.api_cache.cache")
+    @patch("apps.api.decorators.cache.cache")
     def test_non_get_head_requests_not_cached(self, mock_cache, method, mock_request):
         """Test that non-GET/HEAD requests are not cached."""
         mock_request.method = method
         view_func = MagicMock(return_value=HttpResponse())
-        decorated_view = cache_api_response(ttl=60)(view_func)
+        decorated_view = cache_response(ttl=60)(view_func)
 
         decorated_view(mock_request)
 
@@ -94,12 +94,12 @@ class TestCacheApiResponse:
             HTTPStatus.INTERNAL_SERVER_ERROR,
         ],
     )
-    @patch("apps.api.decorators.api_cache.cache")
+    @patch("apps.api.decorators.cache.cache")
     def test_non_200_responses_not_cached(self, mock_cache, status_code, mock_request):
         """Test that responses with non-200 status codes are not cached."""
         mock_cache.get.return_value = None
         view_func = MagicMock(return_value=HttpResponse(status=status_code))
-        decorated_view = cache_api_response(ttl=60)(view_func)
+        decorated_view = cache_response(ttl=60)(view_func)
 
         decorated_view(mock_request)
 

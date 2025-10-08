@@ -10,7 +10,7 @@ from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
-from apps.api.decorators.api_cache import cache_api_response
+from apps.api.decorators.cache import cache_response
 from apps.github.models.release import Release as ReleaseModel
 
 router = RouterPaginated(tags=["Releases"])
@@ -64,7 +64,7 @@ class ReleaseFilter(FilterSchema):
     summary="List releases",
     response=list[Release],
 )
-@decorate_view(cache_api_response())
+@decorate_view(cache_response())
 def list_release(
     request: HttpRequest,
     filters: ReleaseFilter = Query(...),
@@ -103,7 +103,7 @@ def list_release(
     },
     summary="Get release",
 )
-@decorate_view(cache_api_response())
+@decorate_view(cache_response())
 def get_release(
     request: HttpRequest,
     organization_id: str = Path(example="OWASP"),

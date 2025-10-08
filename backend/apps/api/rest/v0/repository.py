@@ -10,7 +10,7 @@ from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
-from apps.api.decorators.api_cache import cache_api_response
+from apps.api.decorators.cache import cache_response
 from apps.github.models.repository import Repository as RepositoryModel
 
 router = RouterPaginated(tags=["Repositories"])
@@ -57,7 +57,7 @@ class RepositoryFilter(FilterSchema):
     summary="List repositories",
     response=list[Repository],
 )
-@decorate_view(cache_api_response())
+@decorate_view(cache_response())
 def list_repository(
     request: HttpRequest,
     filters: RepositoryFilter = Query(...),
@@ -85,7 +85,7 @@ def list_repository(
     },
     summary="Get repository",
 )
-@decorate_view(cache_api_response())
+@decorate_view(cache_response())
 def get_repository(
     request: HttpRequest,
     organization_id: str = Path(example="OWASP"),

@@ -10,7 +10,7 @@ from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
-from apps.api.decorators.api_cache import cache_api_response
+from apps.api.decorators.cache import cache_response
 from apps.owasp.models.committee import Committee as CommitteeModel
 
 router = RouterPaginated(tags=["Committees"])
@@ -53,7 +53,7 @@ class CommitteeError(Schema):
     response=list[Committee],
     summary="List committees",
 )
-@decorate_view(cache_api_response())
+@decorate_view(cache_response())
 def list_committees(
     request: HttpRequest,
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
@@ -75,7 +75,7 @@ def list_committees(
     },
     summary="Get committee",
 )
-@decorate_view(cache_api_response())
+@decorate_view(cache_response())
 def get_chapter(
     request: HttpRequest,
     committee_id: str = Path(example="project"),

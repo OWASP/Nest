@@ -10,7 +10,7 @@ from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
-from apps.api.decorators.api_cache import cache_api_response
+from apps.api.decorators.cache import cache_response
 from apps.owasp.models.chapter import Chapter as ChapterModel
 
 router = RouterPaginated(tags=["Chapters"])
@@ -60,7 +60,7 @@ class ChapterFilter(FilterSchema):
     response=list[Chapter],
     summary="List chapters",
 )
-@decorate_view(cache_api_response())
+@decorate_view(cache_response())
 def list_chapters(
     request: HttpRequest,
     filters: ChapterFilter = Query(...),
@@ -83,7 +83,7 @@ def list_chapters(
     },
     summary="Get chapter",
 )
-@decorate_view(cache_api_response())
+@decorate_view(cache_response())
 def get_chapter(
     request: HttpRequest,
     chapter_id: str = Path(example="London"),

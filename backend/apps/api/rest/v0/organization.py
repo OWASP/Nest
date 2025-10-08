@@ -10,7 +10,7 @@ from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
-from apps.api.decorators.api_cache import cache_api_response
+from apps.api.decorators.cache import cache_response
 from apps.github.models.organization import Organization as OrganizationModel
 
 router = RouterPaginated(tags=["Community"])
@@ -59,7 +59,7 @@ class OrganizationFilter(FilterSchema):
     response=list[Organization],
     summary="List organizations",
 )
-@decorate_view(cache_api_response())
+@decorate_view(cache_response())
 def list_organization(
     request: HttpRequest,
     filters: OrganizationFilter = Query(...),
@@ -86,7 +86,7 @@ def list_organization(
     },
     summary="Get organization",
 )
-@decorate_view(cache_api_response())
+@decorate_view(cache_response())
 def get_organization(
     request: HttpRequest,
     organization_id: str = Path(example="OWASP"),

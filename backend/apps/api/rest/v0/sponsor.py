@@ -9,7 +9,7 @@ from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
-from apps.api.decorators.api_cache import cache_api_response
+from apps.api.decorators.cache import cache_response
 from apps.owasp.models.sponsor import Sponsor as SponsorModel
 
 router = RouterPaginated(tags=["Sponsors"])
@@ -70,7 +70,7 @@ class SponsorFilter(FilterSchema):
     response=list[Sponsor],
     summary="List sponsors",
 )
-@decorate_view(cache_api_response())
+@decorate_view(cache_response())
 def list_sponsors(
     request: HttpRequest,
     filters: SponsorFilter = Query(...),
@@ -93,7 +93,7 @@ def list_sponsors(
     },
     summary="Get sponsor",
 )
-@decorate_view(cache_api_response())
+@decorate_view(cache_response())
 def get_sponsor(
     request: HttpRequest,
     sponsor_id: str = Path(..., example="adobe"),

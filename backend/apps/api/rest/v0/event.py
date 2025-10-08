@@ -10,7 +10,7 @@ from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
-from apps.api.decorators.api_cache import cache_api_response
+from apps.api.decorators.cache import cache_response
 from apps.owasp.models.event import Event as EventModel
 
 router = RouterPaginated(tags=["Events"])
@@ -49,7 +49,7 @@ class EventError(Schema):
     summary="List events",
     response=list[Event],
 )
-@decorate_view(cache_api_response())
+@decorate_view(cache_response())
 def list_events(
     request: HttpRequest,
     ordering: Literal["start_date", "-start_date", "end_date", "-end_date"] | None = Query(
@@ -71,7 +71,7 @@ def list_events(
     },
     summary="Get event",
 )
-@decorate_view(cache_api_response())
+@decorate_view(cache_response())
 def get_event(
     request: HttpRequest,
     event_id: str = Path(..., example="owasp-global-appsec-usa-2025-washington-dc"),
