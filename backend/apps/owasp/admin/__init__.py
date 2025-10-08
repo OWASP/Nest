@@ -6,6 +6,7 @@ from apps.owasp.models.project_health_requirements import ProjectHealthRequireme
 
 from .chapter import ChapterAdmin
 from .committee import CommitteeAdmin
+from .entity_channel import EntityChannelAdmin
 from .entity_member import EntityMemberAdmin
 from .event import EventAdmin
 from .post import PostAdmin
