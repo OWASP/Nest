@@ -34,6 +34,7 @@ const ProgramsPage = () => {
         program={program}
         accessLevel="user"
         onView={handleButtonClick}
+        isAdmin={false}
       />
     )
   }
