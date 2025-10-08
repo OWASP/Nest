@@ -79,8 +79,12 @@ def process_dm_ai_query(query: str, workspace_id: str, channel_id: str) -> str |
         str | None: The AI response or None if error occurred.
 
     """
-    workspace = Workspace.objects.get(slack_workspace_id=workspace_id)
-    conversation = Conversation.objects.get(slack_channel_id=channel_id, workspace=workspace)
+    try:
+        workspace = Workspace.objects.get(slack_workspace_id=workspace_id)
+        conversation = Conversation.objects.get(slack_channel_id=channel_id, workspace=workspace)
+    except (Workspace.DoesNotExist, Conversation.DoesNotExist):
+        logger.exception("Workspace or conversation not found for DM processing")
+        return None
 
     context = conversation.get_context(conversation_context_limit=CONVERSATION_CONTEXT_LIMIT)
 
