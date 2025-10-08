@@ -341,9 +341,7 @@ const LeaderData = ({ username }: { username: string }) => {
         onclick: () => handleButtonClick(user),
       }}
       className="h-64 w-40 bg-inherit"
-      company={user.company}
       description={leaders[user.login]}
-      location={user.location}
       name={user.name || username}
     />
   )
