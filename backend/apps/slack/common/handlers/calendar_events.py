@@ -150,7 +150,7 @@ def get_setting_reminder_blocks(args, slack_user_id: str, workspace_id: str) -> 
             f"<@{reminder_schedule.reminder.member.slack_user_id}> set a reminder: "
             f"{reminder_schedule.reminder.message}"
             f" at {reminder_schedule.scheduled_time.strftime('%Y-%m-%d %H:%M %Z')}",
-            reminder_schedule.reminder.entity_channel.channel.pk,
+            reminder_schedule.reminder.entity_channel.pk,
         )
     except ValidationError as e:
         return_block = [markdown(f"*{e.message}*")]

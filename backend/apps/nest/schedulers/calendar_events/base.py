@@ -21,7 +21,7 @@ class BaseScheduler:
                 self.reminder_schedule.scheduled_time,
                 self.__class__.send_message,
                 message=self.reminder_schedule.reminder.message,
-                channel=self.reminder_schedule.reminder.entity_channel.pk,
+                channel_id=self.reminder_schedule.reminder.entity_channel.pk,
             ).get_id()
 
             # Schedule deletion of the reminder after sending the message
