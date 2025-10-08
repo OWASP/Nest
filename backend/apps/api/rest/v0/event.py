@@ -49,7 +49,7 @@ class EventError(Schema):
     summary="List events",
     response=list[Event],
 )
-@decorate_view(cache_api_response(allowed_params=("ordering", "page", "page_size")))
+@decorate_view(cache_api_response())
 def list_events(
     request: HttpRequest,
     ordering: Literal["start_date", "-start_date", "end_date", "-end_date"] | None = Query(
@@ -71,6 +71,7 @@ def list_events(
     },
     summary="Get event",
 )
+@decorate_view(cache_api_response())
 def get_event(
     request: HttpRequest,
     event_id: str = Path(..., example="owasp-global-appsec-usa-2025-washington-dc"),

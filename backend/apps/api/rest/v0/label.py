@@ -47,7 +47,7 @@ class LabelFilter(FilterSchema):
     response=list[Label],
     summary="List labels",
 )
-@decorate_view(cache_api_response(allowed_params=("color", "ordering", "page", "page_size")))
+@decorate_view(cache_api_response())
 def list_label(
     request: HttpRequest,
     filters: LabelFilter = Query(...),

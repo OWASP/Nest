@@ -57,9 +57,7 @@ class RepositoryFilter(FilterSchema):
     summary="List repositories",
     response=list[Repository],
 )
-@decorate_view(
-    cache_api_response(allowed_params=("ordering", "organization_id", "page", "page_size"))
-)
+@decorate_view(cache_api_response())
 def list_repository(
     request: HttpRequest,
     filters: RepositoryFilter = Query(...),
@@ -87,6 +85,7 @@ def list_repository(
     },
     summary="Get repository",
 )
+@decorate_view(cache_api_response())
 def get_repository(
     request: HttpRequest,
     organization_id: str = Path(example="OWASP"),

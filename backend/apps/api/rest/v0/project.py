@@ -64,7 +64,7 @@ class ProjectFilter(FilterSchema):
     response=list[Project],
     summary="List projects",
 )
-@decorate_view(cache_api_response(allowed_params=("level", "ordering", "page", "page_size")))
+@decorate_view(cache_api_response())
 def list_projects(
     request: HttpRequest,
     filters: ProjectFilter = Query(...),
@@ -88,6 +88,7 @@ def list_projects(
     },
     summary="Get project",
 )
+@decorate_view(cache_api_response())
 def get_project(
     request: HttpRequest,
     project_id: str = Path(example="Nest"),

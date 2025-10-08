@@ -53,7 +53,7 @@ class CommitteeError(Schema):
     response=list[Committee],
     summary="List committees",
 )
-@decorate_view(cache_api_response(allowed_params=("ordering", "page", "page_size")))
+@decorate_view(cache_api_response())
 def list_committees(
     request: HttpRequest,
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
@@ -75,6 +75,7 @@ def list_committees(
     },
     summary="Get committee",
 )
+@decorate_view(cache_api_response())
 def get_chapter(
     request: HttpRequest,
     committee_id: str = Path(example="project"),

@@ -67,9 +67,7 @@ class MemberFilter(FilterSchema):
     response=list[Member],
     summary="List members",
 )
-@decorate_view(
-    cache_api_response(allowed_params=("company", "location", "ordering", "page", "page_size"))
-)
+@decorate_view(cache_api_response())
 def list_members(
     request: HttpRequest,
     filters: MemberFilter = Query(...),
@@ -92,6 +90,7 @@ def list_members(
     },
     summary="Get member",
 )
+@decorate_view(cache_api_response())
 def get_member(
     request: HttpRequest,
     member_id: str = Path(example="OWASP"),

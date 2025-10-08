@@ -69,18 +69,7 @@ class IssueFilter(FilterSchema):
     response=list[Issue],
     summary="List issues",
 )
-@decorate_view(
-    cache_api_response(
-        allowed_params=(
-            "ordering",
-            "organization",
-            "page",
-            "page_size",
-            "repository",
-            "state",
-        )
-    )
-)
+@decorate_view(cache_api_response())
 def list_issues(
     request: HttpRequest,
     filters: IssueFilter = Query(...),
@@ -113,6 +102,7 @@ def list_issues(
     },
     summary="Get issue",
 )
+@decorate_view(cache_api_response())
 def get_issue(
     request: HttpRequest,
     organization_id: str = Path(example="OWASP"),

@@ -64,18 +64,7 @@ class ReleaseFilter(FilterSchema):
     summary="List releases",
     response=list[Release],
 )
-@decorate_view(
-    cache_api_response(
-        allowed_params=(
-            "ordering",
-            "organization",
-            "page",
-            "page_size",
-            "repository",
-            "tag_name",
-        )
-    )
-)
+@decorate_view(cache_api_response())
 def list_release(
     request: HttpRequest,
     filters: ReleaseFilter = Query(...),
@@ -114,6 +103,7 @@ def list_release(
     },
     summary="Get release",
 )
+@decorate_view(cache_api_response())
 def get_release(
     request: HttpRequest,
     organization_id: str = Path(example="OWASP"),

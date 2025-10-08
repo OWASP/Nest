@@ -70,18 +70,7 @@ class SponsorFilter(FilterSchema):
     response=list[Sponsor],
     summary="List sponsors",
 )
-@decorate_view(
-    cache_api_response(
-        allowed_params=(
-            "is_member",
-            "member_type",
-            "ordering",
-            "page",
-            "page_size",
-            "sponsor_type",
-        )
-    )
-)
+@decorate_view(cache_api_response())
 def list_sponsors(
     request: HttpRequest,
     filters: SponsorFilter = Query(...),
@@ -104,6 +93,7 @@ def list_sponsors(
     },
     summary="Get sponsor",
 )
+@decorate_view(cache_api_response())
 def get_sponsor(
     request: HttpRequest,
     sponsor_id: str = Path(..., example="adobe"),

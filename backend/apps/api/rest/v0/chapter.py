@@ -60,7 +60,7 @@ class ChapterFilter(FilterSchema):
     response=list[Chapter],
     summary="List chapters",
 )
-@decorate_view(cache_api_response(allowed_params=("country", "ordering", "page", "page_size")))
+@decorate_view(cache_api_response())
 def list_chapters(
     request: HttpRequest,
     filters: ChapterFilter = Query(...),
@@ -83,6 +83,7 @@ def list_chapters(
     },
     summary="Get chapter",
 )
+@decorate_view(cache_api_response())
 def get_chapter(
     request: HttpRequest,
     chapter_id: str = Path(example="London"),

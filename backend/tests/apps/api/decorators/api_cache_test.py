@@ -2,6 +2,7 @@
 
 from http import HTTPStatus
 from unittest.mock import MagicMock, patch
+from urllib.parse import urlparse
 
 import pytest
 from django.http import HttpRequest, HttpResponse
@@ -10,25 +11,22 @@ from apps.api.decorators.api_cache import _generate_cache_key, cache_api_respons
 
 
 @pytest.mark.parametrize(
-    ("path", "params", "allowed_params", "expected_suffix"),
+    ("full_path", "prefix", "expected_key"),
     [
-        ("/api/test", {}, None, "/api/test"),
-        ("/api/test", {}, ("a",), "/api/test"),
-        ("/api/test", {"a": "1"}, ("a",), "/api/test:a=1"),
-        ("/api/test", {"a": "1", "b": "2"}, ("a",), "/api/test:a=1"),
-        ("/api/test", {"a": "1", "b": "2"}, ("a", "b"), "/api/test:a=1&b=2"),
-        ("/api/test", {"b": "2", "a": "1"}, ("a", "b"), "/api/test:a=1&b=2"),
-        ("/api/test", {"c": "3"}, ("a", "b"), "/api/test"),
+        ("/api/test", "p1", "p1:/api/test"),
+        ("/api/test?a=1", "p2", "p2:/api/test?a=1"),
+        ("/api/test?a=1&b=2", "p3", "p3:/api/test?a=1&b=2"),
+        ("/api/test?b=2&a=1", "p4", "p4:/api/test?b=2&a=1"),
     ],
 )
-def test_generate_cache_key(path, params, allowed_params, expected_suffix):
+def test_generate_cache_key(full_path, prefix, expected_key):
     """Test cases for the _generate_cache_key function."""
     request = HttpRequest()
-    request.path = path
-    request.GET = params
-    prefix = "test_prefix"
-    expected_key = f"{prefix}:{expected_suffix}"
-    assert _generate_cache_key(request, allowed_params, prefix) == expected_key
+    parsed_url = urlparse(full_path)
+    request.path = parsed_url.path
+    request.META["QUERY_STRING"] = parsed_url.query
+
+    assert _generate_cache_key(request, prefix) == expected_key
 
 
 class TestCacheApiResponse:
@@ -89,15 +87,16 @@ class TestCacheApiResponse:
     @pytest.mark.parametrize(
         "status_code",
         [
-            HTTPStatus.MULTIPLE_CHOICES,
+            HTTPStatus.CREATED,
+            HTTPStatus.NO_CONTENT,
             HTTPStatus.BAD_REQUEST,
             HTTPStatus.NOT_FOUND,
             HTTPStatus.INTERNAL_SERVER_ERROR,
         ],
     )
     @patch("apps.api.decorators.api_cache.cache")
-    def test_non_2xx_responses_not_cached(self, mock_cache, status_code, mock_request):
-        """Test that responses with non-2xx status codes are not cached."""
+    def test_non_200_responses_not_cached(self, mock_cache, status_code, mock_request):
+        """Test that responses with non-200 status codes are not cached."""
         mock_cache.get.return_value = None
         view_func = MagicMock(return_value=HttpResponse(status=status_code))
         decorated_view = cache_api_response(ttl=60)(view_func)
@@ -107,17 +106,3 @@ class TestCacheApiResponse:
         mock_cache.get.assert_called_once()
         mock_cache.set.assert_not_called()
         view_func.assert_called_once_with(mock_request)
-
-    @patch("apps.api.decorators.api_cache.cache")
-    def test_cache_with_allowed_params(self, mock_cache, mock_request):
-        """Test that allowed_params affects the cache key."""
-        mock_cache.get.return_value = None
-        view_func = MagicMock(return_value=HttpResponse(status=HTTPStatus.OK))
-        decorated_view = cache_api_response(allowed_params=("param1",))(view_func)
-
-        mock_request.GET = {"param1": "value1", "param2": "value2"}
-        decorated_view(mock_request)
-
-        cache_key = mock_cache.set.call_args[0][0]
-        assert "param1=value1" in cache_key
-        assert "param2=value2" not in cache_key

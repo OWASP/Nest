@@ -59,7 +59,7 @@ class OrganizationFilter(FilterSchema):
     response=list[Organization],
     summary="List organizations",
 )
-@decorate_view(cache_api_response(allowed_params=("location", "ordering", "page", "page_size")))
+@decorate_view(cache_api_response())
 def list_organization(
     request: HttpRequest,
     filters: OrganizationFilter = Query(...),
@@ -86,6 +86,7 @@ def list_organization(
     },
     summary="Get organization",
 )
+@decorate_view(cache_api_response())
 def get_organization(
     request: HttpRequest,
     organization_id: str = Path(example="OWASP"),
