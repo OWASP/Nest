@@ -21,7 +21,7 @@ class BaseScheduler:
                 self.reminder_schedule.scheduled_time,
                 self.__class__.send_message,
                 message=self.reminder_schedule.reminder.message,
-                channel_id=self.reminder_schedule.reminder.channel_id,
+                channel=self.reminder_schedule.reminder.entity_channel.pk,
             ).get_id()
 
             # Schedule deletion of the reminder after sending the message
@@ -35,7 +35,7 @@ class BaseScheduler:
                 func=self.__class__.send_and_update,
                 args=(
                     self.reminder_schedule.reminder.message,
-                    self.reminder_schedule.reminder.channel_id,
+                    self.reminder_schedule.reminder.entity_channel.pk,
                     self.reminder_schedule.pk,
                 ),
                 queue_name="default",
@@ -52,13 +52,13 @@ class BaseScheduler:
             self.reminder_schedule.reminder.delete()
 
     @staticmethod
-    def send_message(message: str, channel_id: str):
+    def send_message(message: str, channel_id: int):
         """Send message to the specified channel. To be implemented by subclasses."""
         error_message = "Subclasses must implement this method."
         raise NotImplementedError(error_message)
 
     @staticmethod
-    def send_and_update(message: str, channel_id: str, reminder_schedule_id: int):
+    def send_and_update(message: str, channel_id: int, reminder_schedule_id: int):
         """Send message and update the reminder schedule."""
         error_message = "Subclasses must implement this method."
         raise NotImplementedError(error_message)

@@ -6,11 +6,20 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.nest.clients.google_calendar import GoogleCalendarClient
-from apps.nest.models.google_account_authorization import GoogleAccountAuthorization
 from apps.nest.models.reminder import Reminder
 from apps.nest.models.reminder_schedule import ReminderSchedule
+from apps.owasp.models.entity_channel import EntityChannel
 from apps.owasp.models.event import Event
-from apps.slack.models.member import Member
+
+
+def get_calendar_id(user_id: str, event_number: str) -> str:
+    """Get the Google Calendar ID for a user."""
+    if google_calendar_id := cache.get(f"{user_id}_{event_number}"):
+        return google_calendar_id
+    message = (
+        "Invalid or expired event number. Please get a new event number from the events list."
+    )
+    raise ValidationError(message)
 
 
 def schedule_reminder(
@@ -33,29 +42,19 @@ def schedule_reminder(
 
 
 def set_reminder(
-    channel: str,
-    event_number: str,
-    user_id: str,
+    channel: EntityChannel,
     minutes_before: int,
+    client: GoogleCalendarClient,
+    member,
     recurrence: str | None = None,
+    google_calendar_id: str = "",
     message: str = "",
 ) -> ReminderSchedule:
     """Set a reminder for a user."""
     if minutes_before <= 0:
         message = "Minutes before must be a positive integer."
         raise ValidationError(message)
-    auth = GoogleAccountAuthorization.authorize(user_id)
-    if not isinstance(auth, GoogleAccountAuthorization):
-        message = "User is not authorized with Google. Please sign in first."
-        raise ValidationError(message)
-    google_calendar_id = cache.get(f"{user_id}_{event_number}")
-    if not google_calendar_id:
-        message = (
-            "Invalid or expired event number. Please get a new event number from the events list."
-        )
-        raise ValidationError(message)
 
-    client = GoogleCalendarClient(auth)
     event = Event.parse_google_calendar_event(client.get_event(google_calendar_id))
     if not event:
         message = "Could not retrieve the event details. Please try again later."
@@ -74,9 +73,8 @@ def set_reminder(
         # Saving event to the database after validation
         event.save()
 
-        member = Member.objects.get(slack_user_id=user_id)
         reminder, _ = Reminder.objects.get_or_create(
-            channel_id=channel,
+            entity_channel=channel,
             event=event,
             member=member,
             defaults={"message": f"{event.name} - {message}" if message else event.name},

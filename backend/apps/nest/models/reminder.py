@@ -11,7 +11,7 @@ class Reminder(models.Model):
         verbose_name = "Nest Reminder"
         verbose_name_plural = "Nest Reminders"
 
-    channel = models.ForeignKey(
+    entity_channel = models.ForeignKey(
         "owasp.EntityChannel",
         verbose_name="Channel",
         on_delete=models.CASCADE,

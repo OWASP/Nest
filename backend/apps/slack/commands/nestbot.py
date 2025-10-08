@@ -30,6 +30,8 @@ class NestBot(CommandBase):
                     markdown("*Invalid command format. Please check your input and try again.*")
                 ]
             else:
-                return get_setting_reminder_blocks(args, self.get_user_id(command))
+                return get_setting_reminder_blocks(
+                    args, self.get_user_id(command), self.get_workspace_id(command)
+                )
         else:
             return get_cancel_reminder_blocks(int(args.number), self.get_user_id(command))

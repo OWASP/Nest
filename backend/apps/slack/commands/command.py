@@ -87,6 +87,18 @@ class CommandBase:
         """
         return command.get("user_id")
 
+    def get_workspace_id(self, command) -> str:
+        """Get the workspace ID from the command.
+
+        Args:
+            command (dict): The Slack event payload.
+
+        Returns:
+            str: The workspace ID.
+
+        """
+        return command.get("team_id")
+
     def render_blocks(self, command):
         """Get the rendered blocks.
 
