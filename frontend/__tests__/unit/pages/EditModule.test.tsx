@@ -1,9 +1,10 @@
-import { useQuery, useMutation, useApolloClient } from '@apollo/client'
+import { useMutation, useQuery, useApolloClient } from '@apollo/client/react'
 import { screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import EditModulePage from 'app/my/mentorship/programs/[programKey]/modules/[moduleKey]/edit/page'
+import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 
 // Mocks
 jest.mock('next-auth/react', () => ({
@@ -16,16 +17,11 @@ jest.mock('next/navigation', () => ({
   useParams: jest.fn(),
 }))
 
-jest.mock('@apollo/client', () => {
-  const actual = jest.requireActual('@apollo/client')
-  return {
-    ...actual,
-    useQuery: jest.fn(),
-    useMutation: jest.fn(),
-    useApolloClient: jest.fn(),
-    gql: actual.gql,
-  }
-})
+jest.mock('@apollo/client/react', () => ({
+  useMutation: jest.fn(),
+  useQuery: jest.fn(),
+  useApolloClient: jest.fn(),
+}))
 
 describe('EditModulePage', () => {
   const mockPush = jest.fn()
@@ -59,7 +55,7 @@ describe('EditModulePage', () => {
       data: { user: { login: 'admin-user' } },
       status: 'authenticated',
     })
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
         getProgram: {
@@ -68,7 +64,7 @@ describe('EditModulePage', () => {
         getModule: {
           name: 'Existing Module',
           description: 'Old description',
-          experienceLevel: 'INTERMEDIATE',
+          experienceLevel: ExperienceLevelEnum.Intermediate,
           startedAt: '2025-07-01',
           endedAt: '2025-07-31',
           domains: ['AI'],
@@ -79,7 +75,7 @@ describe('EditModulePage', () => {
         },
       },
     })
-    ;(useMutation as jest.Mock).mockReturnValue([
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([
       mockUpdateModule.mockResolvedValue({}),
       { loading: false },
     ])
@@ -123,7 +119,7 @@ describe('EditModulePage', () => {
       data: null,
       status: 'loading',
     })
-    ;(useQuery as jest.Mock).mockReturnValue({ loading: true })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({ loading: true })
 
     render(<EditModulePage />)
 

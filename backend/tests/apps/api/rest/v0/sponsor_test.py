@@ -1,6 +1,6 @@
 import pytest
 
-from apps.api.rest.v0.sponsor import SponsorSchema
+from apps.api.rest.v0.sponsor import SponsorDetail
 
 
 class TestSponsorSchema:
@@ -33,17 +33,17 @@ class TestSponsorSchema:
     )
     def test_sponsor_schema_creation(self, sponsor_data):
         """Test schema creation with valid data."""
-        schema_instance = SponsorSchema(**sponsor_data)
+        sponsor = SponsorDetail(**sponsor_data)
 
-        assert schema_instance.description == sponsor_data["description"]
-        assert schema_instance.image_url == sponsor_data["image_url"]
-        assert schema_instance.is_member == sponsor_data["is_member"]
-        assert schema_instance.job_url == sponsor_data["job_url"]
-        assert schema_instance.key == sponsor_data["key"]
-        assert schema_instance.member_type == sponsor_data["member_type"]
-        assert schema_instance.name == sponsor_data["name"]
-        assert schema_instance.sponsor_type == sponsor_data["sponsor_type"]
-        assert schema_instance.url == sponsor_data["url"]
+        assert sponsor.description == sponsor_data["description"]
+        assert sponsor.image_url == sponsor_data["image_url"]
+        assert sponsor.is_member == sponsor_data["is_member"]
+        assert sponsor.job_url == sponsor_data["job_url"]
+        assert sponsor.key == sponsor_data["key"]
+        assert sponsor.member_type == sponsor_data["member_type"]
+        assert sponsor.name == sponsor_data["name"]
+        assert sponsor.sponsor_type == sponsor_data["sponsor_type"]
+        assert sponsor.url == sponsor_data["url"]
 
     def test_sponsor_schema_with_minimal_data(self):
         """Test schema with minimal required fields."""
@@ -58,8 +58,8 @@ class TestSponsorSchema:
             "sponsor_type": "SILVER",
             "url": "",
         }
-        schema = SponsorSchema(**minimal_data)
+        sponsor = SponsorDetail(**minimal_data)
 
-        assert schema.job_url == ""
-        assert schema.key == "test-sponsor"
-        assert schema.name == "Test Sponsor"
+        assert sponsor.job_url == ""
+        assert sponsor.key == "test-sponsor"
+        assert sponsor.name == "Test Sponsor"

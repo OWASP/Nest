@@ -1,4 +1,4 @@
-import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client'
+import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { AppError, handleAppError } from 'app/global-error'
 import { GRAPHQL_URL } from 'utils/env.client'
@@ -10,7 +10,7 @@ const createApolloClient = () => {
     return null
   }
 
-  const httpLink = createHttpLink({
+  const httpLink = new HttpLink({
     credentials: 'include',
     uri: GRAPHQL_URL,
   })

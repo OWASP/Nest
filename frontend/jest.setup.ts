@@ -1,10 +1,8 @@
 import '@testing-library/jest-dom'
-import { TextEncoder } from 'util'
 import React from 'react'
 import 'core-js/actual/structured-clone'
 
 global.React = React
-global.TextEncoder = TextEncoder
 
 // Add fetch polyfill for jsdom test environment
 // Node.js 18+ has native fetch, but jsdom doesn't include it
@@ -28,6 +26,15 @@ if (typeof global.fetch === 'undefined') {
     bodyUsed: false,
   } as Response)
 }
+
+// Mock framer-motion due to how Jest 30 ESM resolution treats
+// motion-dom's internal .mjs imports as "outside test scope".
+jest.mock('framer-motion', () => {
+  return {
+    ...jest.requireActual('framer-motion'),
+    LazyMotion: ({ children }) => children,
+  }
+})
 
 jest.mock('next-auth/react', () => {
   return {

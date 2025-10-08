@@ -5,6 +5,8 @@ export const GET_LEADER_DATA = gql`
     user(login: $key) {
       id
       avatarUrl
+      company
+      location
       login
       name
       badges {
