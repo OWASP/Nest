@@ -57,7 +57,7 @@ const IssuesPage = () => {
     ;(moduleData?.issues || []).forEach((i) =>
       (i.labels || []).forEach((l: string) => labels.add(l))
     )
-    return Array.from(labels).sort()
+    return Array.from(labels).sort((a, b) => a.localeCompare(b))
   }, [moduleData])
 
   const handleLabelChange = (label: string) => {
