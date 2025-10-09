@@ -275,13 +275,13 @@ const About = () => {
             {[...projectTimeline].reverse().map((milestone, index) => (
               <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
                 {index !== projectTimeline.length - 1 && (
-                  <div className="absolute top-6 left-[7px] h-full w-0.5 bg-blue-400"></div>
+                  <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-400"></div>
                 )}
                 <div
                   aria-hidden="true"
-                  className="absolute top-2 left-0 h-4 w-4 rounded-full bg-blue-400"
+                  className="absolute top-[10px] left-0 h-3 w-3 rounded-full bg-gray-400"
                 ></div>
-                <div className="pt-1">
+                <div>
                   <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
                   <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
                   <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
