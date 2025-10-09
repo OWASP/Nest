@@ -1,8 +1,8 @@
 """Test cases for Reminder model."""
 
 from apps.nest.models.reminder import Reminder
-from apps.slack.models.member import Member
 from apps.owasp.models.entity_channel import EntityChannel
+from apps.slack.models.member import Member
 
 
 class TestReminderModel:
