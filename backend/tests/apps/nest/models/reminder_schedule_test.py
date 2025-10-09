@@ -5,6 +5,7 @@ from django.utils import timezone
 from apps.nest.models.reminder import Reminder
 from apps.nest.models.reminder_schedule import ReminderSchedule
 from apps.slack.models.member import Member
+from apps.owasp.models.entity_channel import EntityChannel
 
 
 class TestReminderScheduleModel:
@@ -13,9 +14,10 @@ class TestReminderScheduleModel:
     def test_str_representation(self):
         """Test string representation of the ReminderSchedule model."""
         member = Member(slack_user_id="U123456", username="Test User")
+        channel = EntityChannel(channel_id=5)
         reminder = Reminder(
             member=member,
-            channel_id="C123456",
+            entity_channel=channel,
             message="Test reminder",
         )
         schedule = ReminderSchedule(
@@ -31,9 +33,10 @@ class TestReminderScheduleModel:
     def test_verbose_names(self):
         """Test verbose names of the ReminderSchedule model."""
         member = Member(slack_user_id="U123456", username="Test User")
+        channel = EntityChannel(channel_id=5)
         reminder = Reminder(
             member=member,
-            channel_id="C123456",
+            entity_channel=channel,
             message="Test reminder",
         )
         schedule = ReminderSchedule(
@@ -51,9 +54,10 @@ class TestReminderScheduleModel:
     def test_cron_expression_property(self):
         """Test cron_expression property of the ReminderSchedule model."""
         member = Member(slack_user_id="U123456", username="Test User")
+        channel = EntityChannel(channel_id=5)
         reminder = Reminder(
             member=member,
-            channel_id="C123456",
+            entity_channel=channel,
             message="Test reminder",
         )
         date = timezone.make_aware(timezone.datetime(2023, 1, 1, 12, 0, 0))
