@@ -6,6 +6,8 @@ from typing import Any
 
 import openai
 
+from apps.core.models.prompt import Prompt
+
 logger = logging.getLogger(__name__)
 
 
@@ -13,23 +15,6 @@ class Generator:
     """Generates answers to user queries based on retrieved context."""
 
     MAX_TOKENS = 2000
-    SYSTEM_PROMPT = """
-You are a helpful and professional AI assistant for the OWASP Foundation.
-Your task is to answer user queries based ONLY on the provided context.
-Follow these rules strictly:
-1. Base your entire answer on the information given in the "CONTEXT" section. Do not use any
-external knowledge unless and until it is about OWASP.
-2. Do not mention or refer to the word "context", "based on context", "provided information",
-"Information given to me" or similar phrases in your responses.
-3. you will answer questions only related to OWASP and within the scope of OWASP.
-4. Be concise and directly answer the user's query.
-5. Provide the necessary link if the context contains a URL.
-6. If there is any query based on location, you need to look for latitude and longitude in the
-context and provide the nearest OWASP chapter based on that.
-7. You can ask for more information if the query is very personalized or user-centric.
-8. after trying all of the above, If the context does not contain the information or you think that
-it is out of scope for OWASP, you MUST state: "please ask question related to OWASP."
-"""
     TEMPERATURE = 0.4
 
     def __init__(self, chat_model: str = "gpt-4o"):
@@ -106,7 +91,7 @@ Answer:
             response = self.openai_client.chat.completions.create(
                 model=self.chat_model,
                 messages=[
-                    {"role": "system", "content": self.SYSTEM_PROMPT},
+                    {"role": "system", "content": Prompt.get_rag_system_prompt()},
                     {"role": "user", "content": user_prompt},
                 ],
                 temperature=self.TEMPERATURE,

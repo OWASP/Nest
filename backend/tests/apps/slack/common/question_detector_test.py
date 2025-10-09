@@ -206,8 +206,6 @@ class TestQuestionDetector:
         assert detector.MAX_TOKENS == 50
         assert detector.TEMPERATURE == 0.1
         assert detector.CHAT_MODEL == "gpt-4o"
-        assert "OWASP" in detector.SYSTEM_PROMPT
-        assert "{keywords}" in detector.SYSTEM_PROMPT
 
     def test_openai_client_initialization(self, detector):
         """Test that OpenAI client is properly initialized."""
