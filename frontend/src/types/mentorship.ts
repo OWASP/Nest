@@ -61,6 +61,7 @@ export type Module = {
   endedAt: string
   domains: string[]
   tags: string[]
+  labels: string[]
 }
 
 export type ModuleFormData = {
@@ -71,6 +72,7 @@ export type ModuleFormData = {
   endedAt: string
   domains: string
   tags: string
+  labels: string
   projectName: string
   projectId: string
   mentorLogins: string

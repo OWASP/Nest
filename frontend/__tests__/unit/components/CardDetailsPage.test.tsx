@@ -518,6 +518,7 @@ describe('CardDetailsPage', () => {
 
   const mockPullRequests = [
     {
+      id: 'mock-pull-request-1',
       author: mockUser,
       createdAt: new Date(Date.now() - 172800000).toISOString(),
       organizationName: 'test-org',

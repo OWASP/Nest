@@ -14,6 +14,7 @@ from apps.mentorship.api.internal.nodes.module import (
     UpdateModuleInput,
 )
 from apps.mentorship.models import Mentor, Module, Program
+from apps.mentorship.models.issue_user_interest import IssueUserInterest
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.models import Project
 
@@ -99,6 +100,7 @@ class ModuleMutation:
             started_at=started_at,
             ended_at=ended_at,
             domains=input_data.domains,
+            labels=input_data.labels,
             tags=input_data.tags,
             program=program,
             project=project,
@@ -116,6 +118,88 @@ class ModuleMutation:
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
+    def assign_issue_to_user(
+        self,
+        info: strawberry.Info,
+        *,
+        module_key: str,
+        program_key: str,
+        issue_number: int,
+        user_login: str,
+    ) -> ModuleNode:
+        """Assign an issue to a user by updating Issue.assignees within the module scope."""
+        user = info.context.request.user
+
+        module = (
+            Module.objects.select_related("program")
+            .filter(key=module_key, program__key=program_key)
+            .first()
+        )
+        if module is None:
+            raise ObjectDoesNotExist(msg="Module not found.")
+
+        mentor = Mentor.objects.filter(nest_user=user).first()
+        if mentor is None:
+            raise PermissionDenied(msg="Only mentors can assign issues.")
+        if not module.program.admins.filter(id=mentor.id).exists():
+            raise PermissionDenied
+
+        gh_user = GithubUser.objects.filter(login=user_login).first()
+        if gh_user is None:
+            raise ObjectDoesNotExist(msg="Assignee not found.")
+
+        issue = module.issues.filter(number=issue_number).first()
+        if issue is None:
+            raise ObjectDoesNotExist(msg="Issue not found in this module.")
+
+        issue.assignees.add(gh_user)
+
+        IssueUserInterest.objects.filter(module=module, issue_id=issue.id, user=gh_user).delete()
+
+        return module
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
+    def unassign_issue_from_user(
+        self,
+        info: strawberry.Info,
+        *,
+        module_key: str,
+        program_key: str,
+        issue_number: int,
+        user_login: str,
+    ) -> ModuleNode:
+        """Unassign an issue from a user by updating Issue.assignees within the module scope."""
+        user = info.context.request.user
+
+        module = (
+            Module.objects.select_related("program")
+            .filter(key=module_key, program__key=program_key)
+            .first()
+        )
+        if module is None:
+            raise ObjectDoesNotExist
+
+        mentor = Mentor.objects.filter(nest_user=user).first()
+        if mentor is None:
+            raise PermissionDenied
+        if not module.program.admins.filter(id=mentor.id).exists():
+            raise PermissionDenied
+
+        gh_user = GithubUser.objects.filter(login=user_login).first()
+        if gh_user is None:
+            raise ObjectDoesNotExist(msg="Assignee not found.")
+
+        issue = module.issues.filter(number=issue_number).first()
+        if issue is None:
+            raise ObjectDoesNotExist(msg=f"Issue {issue_number} not found in this module.")
+
+        issue.assignees.remove(gh_user)
+
+        return module
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
     def update_module(self, info: strawberry.Info, input_data: UpdateModuleInput) -> ModuleNode:
         """Update an existing mentorship module. User must be an admin of the program."""
         user = info.context.request.user
@@ -125,19 +209,17 @@ class ModuleMutation:
                 key=input_data.key, program__key=input_data.program_key
             )
         except Module.DoesNotExist as e:
-            msg = "Module not found."
-            raise ObjectDoesNotExist(msg) from e
+            raise ObjectDoesNotExist(msg="Module not found.") from e
 
         try:
             creator_as_mentor = Mentor.objects.get(nest_user=user)
         except Mentor.DoesNotExist as err:
-            msg = "Only mentors can edit modules."
             logger.warning(
                 "User '%s' is not a mentor and cannot edit modules.",
                 user.username,
                 exc_info=True,
             )
-            raise PermissionDenied(msg) from err
+            raise PermissionDenied(msg="Only mentors can edit modules.") from err
 
         if not module.program.admins.filter(id=creator_as_mentor.id).exists():
             raise PermissionDenied
@@ -158,6 +240,7 @@ class ModuleMutation:
             "started_at": started_at,
             "ended_at": ended_at,
             "domains": input_data.domains,
+            "labels": input_data.labels,
             "tags": input_data.tags,
         }
 
