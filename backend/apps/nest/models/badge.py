@@ -27,7 +27,7 @@ class Badge(BulkSaveModel, TimestampedModel):
         verbose_name="CSS Class",
         max_length=255,
         choices=BadgeCssClass.choices,
-        default=BadgeCssClass.MEDAL
+        default=BadgeCssClass.MEDAL,
     )
     description = models.CharField(
         verbose_name="Description",

@@ -1,4 +1,3 @@
-import { findIconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { Tooltip } from '@heroui/tooltip'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { BADGE_CLASS_MAP } from 'utils/data'
@@ -9,19 +8,19 @@ type BadgeProps = {
   showTooltip?: boolean
 }
 
-const DEFAULT = BADGE_CLASS_MAP['medal']
+const DEFAULT_ICON = BADGE_CLASS_MAP['medal']
+
+const resolveIcon = (cssClass: string) => {
+  return BADGE_CLASS_MAP[cssClass] ?? DEFAULT_ICON
+}
 
 const Badges = ({ name, cssClass, showTooltip = true }: BadgeProps) => {
-  const cls = typeof cssClass === 'string' ? BADGE_CLASS_MAP[cssClass] : undefined
-  const icon = cls ?? DEFAULT
-  const iconName = icon.split(' ').pop()?.replace('fa-', '') || 'medal'
-  const def = findIconDefinition({ prefix: 'fas', iconName: iconName as any })
-  const iconClass = def ? icon : DEFAULT
+  const icon = resolveIcon(cssClass)
 
   return (
     <div className="inline-flex items-center">
       <Tooltip content={name} isDisabled={!showTooltip}>
-        <FontAwesomeIconWrapper icon={iconClass} className="h-4 w-4" />
+        <FontAwesomeIconWrapper icon={icon} className="h-4 w-4" data-testid="badge-icon" />
       </Tooltip>
     </div>
   )
