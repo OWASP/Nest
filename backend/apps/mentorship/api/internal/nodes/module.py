@@ -24,6 +24,7 @@ class ModuleNode:
     domains: list[str] | None = None
     ended_at: datetime
     experience_level: ExperienceLevelEnum
+    labels: list[str] | None = None
     program: ProgramNode | None = None
     project_id: strawberry.ID | None = None
     started_at: datetime
@@ -109,6 +110,7 @@ class CreateModuleInput:
     domains: list[str] = strawberry.field(default_factory=list)
     ended_at: datetime
     experience_level: ExperienceLevelEnum
+    labels: list[str] = strawberry.field(default_factory=list)
     mentor_logins: list[str] | None = None
     program_key: str
     project_name: str
@@ -128,6 +130,7 @@ class UpdateModuleInput:
     domains: list[str] = strawberry.field(default_factory=list)
     ended_at: datetime
     experience_level: ExperienceLevelEnum
+    labels: list[str] = strawberry.field(default_factory=list)
     mentor_logins: list[str] | None = None
     project_id: strawberry.ID
     project_name: str

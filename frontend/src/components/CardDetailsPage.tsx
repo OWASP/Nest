@@ -43,6 +43,7 @@ const DetailsCard = ({
   canUpdateStatus,
   tags,
   domains,
+  labels,
   modules,
   mentors,
   admins,
@@ -211,26 +212,38 @@ const DetailsCard = ({
           </div>
         )}
         {(type === 'program' || type === 'module') && (
-          <div
-            className={`mb-8 grid grid-cols-1 gap-6 ${(tags?.length || 0) === 0 || (domains?.length || 0) === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
-          >
-            {tags?.length > 0 && (
-              <ToggleableList
-                items={tags}
-                icon={faTags}
-                label={<AnchorTitle title="Tags" />}
-                isDisabled={true}
-              />
+          <>
+            <div
+              className={`mb-8 grid grid-cols-1 gap-6 ${(tags?.length || 0) === 0 || (domains?.length || 0) === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
+            >
+              {tags?.length > 0 && (
+                <ToggleableList
+                  items={tags}
+                  icon={faTags}
+                  label={<AnchorTitle title="Tags" />}
+                  isDisabled={true}
+                />
+              )}
+              {domains?.length > 0 && (
+                <ToggleableList
+                  items={domains}
+                  icon={faChartPie}
+                  label={<AnchorTitle title="Domains" />}
+                  isDisabled={true}
+                />
+              )}
+            </div>
+            {labels?.length > 0 && (
+              <div className="mb-8">
+                <ToggleableList
+                  items={labels}
+                  icon={faTags}
+                  label={<AnchorTitle title="Labels" />}
+                  isDisabled={true}
+                />
+              </div>
             )}
-            {domains?.length > 0 && (
-              <ToggleableList
-                items={domains}
-                icon={faChartPie}
-                label={<AnchorTitle title="Domains" />}
-                isDisabled={true}
-              />
-            )}
-          </div>
+          </>
         )}
         {topContributors && (
           <TopContributorsList

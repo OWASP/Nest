@@ -13,6 +13,7 @@ import { useState } from 'react'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import { TextInfoItem } from 'components/InfoItem'
+import { LabelList } from 'components/LabelList'
 import SingleModuleCard from 'components/SingleModuleCard'
 import { TruncatedText } from 'components/TruncatedText'
 
@@ -85,6 +86,11 @@ const ModuleItem = ({ details }: { details: Module }) => {
         label="Duration"
         value={getSimpleDuration(details.startedAt, details.endedAt)}
       />
+      {details.labels && details.labels.length > 0 && (
+        <div className="mt-2">
+          <LabelList labels={details.labels} maxVisible={3} />
+        </div>
+      )}
     </div>
   )
 }

@@ -100,6 +100,7 @@ class ModuleMutation:
             started_at=started_at,
             ended_at=ended_at,
             domains=input_data.domains,
+            labels=input_data.labels,
             tags=input_data.tags,
             program=program,
             project=project,
@@ -239,6 +240,7 @@ class ModuleMutation:
             "started_at": started_at,
             "ended_at": ended_at,
             "domains": input_data.domains,
+            "labels": input_data.labels,
             "tags": input_data.tags,
         }
 

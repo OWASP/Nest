@@ -60,6 +60,7 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
       name
       description
       tags
+      labels
       projectId
       projectName
       domains
