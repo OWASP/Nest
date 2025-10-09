@@ -21,6 +21,16 @@ class SlackScheduler(BaseScheduler):
             )
 
     @staticmethod
+    def send_and_delete(message: str, channel_id: int, reminder_schedule_id: int):
+        """Send message to the specified channel and delete the reminder."""
+        # Import here to avoid circular import issues
+        from apps.nest.models.reminder_schedule import ReminderSchedule
+
+        SlackScheduler.send_message(message, channel_id)
+        if reminder_schedule := ReminderSchedule.objects.filter(pk=reminder_schedule_id).first():
+            reminder_schedule.reminder.delete()
+
+    @staticmethod
     def send_and_update(message: str, channel_id: int, reminder_schedule_id: int):
         """Send message and update the reminder schedule."""
         SlackScheduler.send_message(message, channel_id)

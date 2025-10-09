@@ -16,7 +16,6 @@ class Reminder(models.Model):
         verbose_name="Channel",
         on_delete=models.CASCADE,
         related_name="reminders",
-        null=True,
     )
     event = models.ForeignKey(
         "owasp.Event",
@@ -36,4 +35,4 @@ class Reminder(models.Model):
 
     def __str__(self) -> str:
         """Reminder human readable representation."""
-        return f"Reminder for {self.member} in channel: {self.channel}: {self.message}"
+        return f"Reminder for {self.member} in channel: {self.entity_channel}: {self.message}"

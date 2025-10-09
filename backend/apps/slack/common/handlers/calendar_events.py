@@ -24,7 +24,7 @@ def get_cancel_reminder_blocks(reminder_schedule_id: int, slack_user_id: str) ->
     return [
         markdown(
             f"*Canceled the reminder for event '{reminder_schedule.reminder.event.name}'*"
-            f" in {reminder_schedule.reminder.channel_id}"
+            f" in #{reminder_schedule.reminder.entity_channel.channel.name}"
         )
     ]
 
@@ -93,7 +93,7 @@ def get_reminders_blocks(slack_user_id: str) -> list[dict]:
     blocks.extend(
         markdown(
             f"{NL}- Reminder Number: {reminder_schedule.pk}"
-            f"{NL}- Channel: {reminder_schedule.reminder.channel_id}"
+            f"{NL}- Channel: #{reminder_schedule.reminder.entity_channel.channel.name}"
             f"{NL}- Scheduled Time: "
             f"{reminder_schedule.scheduled_time.strftime('%Y-%m-%d, %H:%M %Z')}"
             f"{NL}- Recurrence: {reminder_schedule.recurrence}"
