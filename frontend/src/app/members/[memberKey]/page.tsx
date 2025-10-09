@@ -13,6 +13,7 @@ import { useTheme } from 'next-themes'
 import React, { useState, useEffect, useRef } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 
+import { GetUserDataDocument } from 'types/__generated__/userQueries.generated'
 import { Badge } from 'types/badge'
 import type { Issue } from 'types/issue'
 import type { Milestone } from 'types/milestone'
@@ -25,7 +26,6 @@ import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/
 import Badges from 'components/Badges'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
-import { GetUserDataDocument } from 'types/__generated__/userQueries.generated'
 
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams<{ memberKey: string }>()

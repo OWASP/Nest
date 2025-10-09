@@ -80,7 +80,7 @@ export const BADGE_CLASS_MAP: Record<string, IconDefinition> = {
   ribbon: faRibbon,
   star: faStar,
   certificate: faCertificate,
-  bug_slash: faBug,
+  bugSlash: faBug,
 } as const
 
 export const ICONS = {
