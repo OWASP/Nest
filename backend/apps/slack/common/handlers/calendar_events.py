@@ -24,7 +24,7 @@ def get_cancel_reminder_blocks(reminder_schedule_id: int, slack_user_id: str) ->
     return [
         markdown(
             f"*Canceled the reminder for event '{reminder_schedule.reminder.event.name}'*"
-            f" in {reminder_schedule.reminder.channel_id}"
+            f" in #{reminder_schedule.reminder.entity_channel.channel.name}"
         )
     ]
 
@@ -93,7 +93,7 @@ def get_reminders_blocks(slack_user_id: str) -> list[dict]:
     blocks.extend(
         markdown(
             f"{NL}- Reminder Number: {reminder_schedule.pk}"
-            f"{NL}- Channel: {reminder_schedule.reminder.channel_id}"
+            f"{NL}- Channel: #{reminder_schedule.reminder.entity_channel.channel.name}"
             f"{NL}- Scheduled Time: "
             f"{reminder_schedule.scheduled_time.strftime('%Y-%m-%d, %H:%M %Z')}"
             f"{NL}- Recurrence: {reminder_schedule.recurrence}"
@@ -104,16 +104,43 @@ def get_reminders_blocks(slack_user_id: str) -> list[dict]:
     return blocks
 
 
-def get_setting_reminder_blocks(args, slack_user_id: str) -> list[dict]:
+def get_setting_reminder_blocks(args, slack_user_id: str, workspace_id: str) -> list[dict]:
     """Get the blocks for setting a reminder."""
-    from apps.nest.handlers.calendar_events import set_reminder
-    from apps.nest.schedulers.calendar_events.slack import SlackScheduler
+    from django.contrib.contenttypes.models import ContentType
 
+    from apps.nest.clients.google_calendar import GoogleCalendarClient
+    from apps.nest.handlers.calendar_events import get_calendar_id, set_reminder
+    from apps.nest.models.google_account_authorization import GoogleAccountAuthorization
+    from apps.nest.schedulers.calendar_events.slack import SlackScheduler
+    from apps.owasp.models.entity_channel import EntityChannel
+    from apps.slack.models.conversation import Conversation
+    from apps.slack.models.member import Member
+
+    return_block = None
     try:
+        auth = GoogleAccountAuthorization.authorize(slack_user_id)
+        if not isinstance(auth, GoogleAccountAuthorization):
+            return [markdown(f"*Please sign in with Google first through this <{auth[0]}|link>*")]
+        content_type_member = ContentType.objects.get_for_model(Member)
+        content_type_conversation = ContentType.objects.get_for_model(Conversation)
+        conversation = Conversation.objects.get(
+            name=args.channel.lstrip("#"),
+            workspace__slack_workspace_id=workspace_id,
+        )
+        member = Member.objects.get(slack_user_id=slack_user_id)
+        channel = EntityChannel.objects.get(
+            channel_id=conversation.pk,
+            channel_type=content_type_conversation,
+            entity_id=member.pk,
+            entity_type=content_type_member,
+        )
+        google_calendar_id = get_calendar_id(slack_user_id, args.event_number)
+        client = GoogleCalendarClient(auth)
         reminder_schedule = set_reminder(
-            channel=args.channel,
-            event_number=args.event_number,
-            user_id=slack_user_id,
+            channel=channel,
+            client=client,
+            member=member,
+            google_calendar_id=google_calendar_id,
             minutes_before=args.minutes_before,
             recurrence=args.recurrence,
             message=" ".join(args.message) if args.message else "",
@@ -123,22 +150,32 @@ def get_setting_reminder_blocks(args, slack_user_id: str) -> list[dict]:
             f"<@{reminder_schedule.reminder.member.slack_user_id}> set a reminder: "
             f"{reminder_schedule.reminder.message}"
             f" at {reminder_schedule.scheduled_time.strftime('%Y-%m-%d %H:%M %Z')}",
-            reminder_schedule.reminder.channel_id,
+            reminder_schedule.reminder.entity_channel.pk,
         )
     except ValidationError as e:
-        return [markdown(f"*{e.message}*")]
+        return_block = [markdown(f"*{e.message}*")]
     except ValueError as e:
-        return [markdown(f"*{e!s}*")]
+        return_block = [markdown(f"*{e!s}*")]
     except ServerNotFoundError:
-        return [markdown("*Please check your internet connection.*")]
-    return [
-        markdown(
-            f"*{args.minutes_before}-minute reminder set for event"
-            f" '{reminder_schedule.reminder.event.name}'*"
-            f" in {args.channel}"
-            f"{NL} Scheduled Time: "
-            f"{reminder_schedule.scheduled_time.strftime('%Y-%m-%d %H:%M %Z')}"
-            f"{NL} Recurrence: {reminder_schedule.recurrence}"
-            f"{NL} Message: {reminder_schedule.reminder.message}"
-        )
-    ]
+        return_block = [markdown("*Please check your internet connection.*")]
+    except Conversation.DoesNotExist:
+        return_block = [markdown(f"*Channel '{args.channel}' does not exist in this workspace.*")]
+    except Member.DoesNotExist:
+        return_block = [markdown("*Member does not exist.*")]
+    except EntityChannel.DoesNotExist:
+        return_block = [markdown(f"*{args.channel} is not linked to your account.*")]
+    return (
+        return_block
+        if return_block
+        else [
+            markdown(
+                f"*{args.minutes_before}-minute reminder set for event"
+                f" '{reminder_schedule.reminder.event.name}'*"
+                f" in {args.channel}"
+                f"{NL} Scheduled Time: "
+                f"{reminder_schedule.scheduled_time.strftime('%Y-%m-%d %H:%M %Z')}"
+                f"{NL} Recurrence: {reminder_schedule.recurrence}"
+                f"{NL} Message: {reminder_schedule.reminder.message}"
+            )
+        ]
+    )

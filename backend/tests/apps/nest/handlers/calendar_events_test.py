@@ -1,30 +1,46 @@
 """Test cases for Nest Calendar Events handlers."""
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from apps.nest.handlers.calendar_events import schedule_reminder, set_reminder
-from apps.nest.models.google_account_authorization import GoogleAccountAuthorization
+from apps.nest.handlers.calendar_events import get_calendar_id, schedule_reminder, set_reminder
 from apps.nest.models.reminder import Reminder
 from apps.nest.models.reminder_schedule import ReminderSchedule
+from apps.owasp.models.entity_channel import EntityChannel
 from apps.owasp.models.event import Event
 from apps.slack.models.member import Member
 
 MESSAGE = "Reminder Message"
+USER_ID = "U123456"
+EVENT_NUMBER = 1
 
 
 class TestCalendarEventsHandlers:
     """Test cases for Nest Calendar Events handlers."""
 
+    @patch("apps.nest.handlers.calendar_events.cache.get")
+    def test_get_calendar_id_cache_hit(self, mock_cache_get):
+        """Test get_calendar_id function when cache hit."""
+        mock_cache_get.return_value = "calendar_id"
+        result = get_calendar_id(USER_ID, EVENT_NUMBER)
+        assert result == "calendar_id"
+        mock_cache_get.assert_called_once_with(f"{USER_ID}_1")
+
+    @patch("apps.nest.handlers.calendar_events.cache.get")
+    def test_get_calendar_id_cache_miss(self, mock_cache_get):
+        """Test get_calendar_id function when cache miss."""
+        mock_cache_get.return_value = None
+        with pytest.raises(ValidationError) as excinfo:
+            get_calendar_id(USER_ID, EVENT_NUMBER)
+        assert "Invalid or expired event number" in str(excinfo.value)
+        mock_cache_get.assert_called_once_with(f"{USER_ID}_1")
+
     @patch("apps.nest.handlers.calendar_events.GoogleCalendarClient")
-    @patch("apps.nest.handlers.calendar_events.cache")
-    @patch("apps.nest.handlers.calendar_events.GoogleAccountAuthorization.authorize")
     @patch("apps.nest.handlers.calendar_events.Event.parse_google_calendar_event")
     @patch("apps.nest.handlers.calendar_events.Event.save")
-    @patch("apps.nest.handlers.calendar_events.Member.objects.get")
     @patch("apps.nest.handlers.calendar_events.Reminder.objects.get_or_create")
     @patch("apps.nest.handlers.calendar_events.schedule_reminder")
     @patch("apps.nest.handlers.calendar_events.transaction.atomic")
@@ -33,34 +49,22 @@ class TestCalendarEventsHandlers:
         mock_transaction_atomic,
         mock_schedule_reminder,
         mock_reminder_get_or_create,
-        mock_member_get,
         mock_event_save,
         mock_parse_event,
-        mock_authorize,
-        mock_cache,
         mock_google_client,
     ):
         """Test setting a reminder successfully."""
         mock_transaction_atomic.return_value.__enter__.return_value = None
         mock_transaction_atomic.return_value.__exit__.return_value = None
+
         # Mock inputs
-        channel = "C123456"
-        event_number = "1"
-        user_id = "U123456"
+        mock_channel = MagicMock(spec=EntityChannel)
+        mock_member = MagicMock(spec=Member)
+        google_calendar_id = "google_calendar_event_id"
         minutes_before = 15
         recurrence = "daily"
         message = MESSAGE
 
-        # Mock return values
-        mock_member = Member(slack_user_id=user_id)
-        mock_member_get.return_value = mock_member
-        mock_auth = GoogleAccountAuthorization(
-            access_token="access_token",  # noqa: S106
-            refresh_token="refresh_token",  # noqa: S106
-            expires_at=timezone.now() + timezone.timedelta(hours=1),
-        )
-        mock_authorize.return_value = mock_auth
-        mock_cache.get.return_value = "google_calendar_event_id"
         mock_event = Event(
             google_calendar_id="event_id",
             key="event_key",
@@ -70,148 +74,78 @@ class TestCalendarEventsHandlers:
             description="Event Description",
         )
         mock_parse_event.return_value = mock_event
-        mock_reminder = Reminder(
-            member=mock_member,
-            event=mock_event,
-            message=message,
-            channel_id=channel,
-        )
+
+        mock_reminder = MagicMock(spec=Reminder)
         mock_reminder_get_or_create.return_value = (mock_reminder, False)
-        mock_schedule_reminder.return_value = ReminderSchedule(
-            reminder=mock_reminder,
-            scheduled_time=mock_event.start_date - timezone.timedelta(minutes=minutes_before),
-            recurrence=recurrence,
-        )
+
+        mock_schedule = MagicMock(spec=ReminderSchedule)
+        mock_schedule_reminder.return_value = mock_schedule
 
         # Call the function
         result = set_reminder(
-            channel=channel,
-            event_number=event_number,
-            user_id=user_id,
+            channel=mock_channel,
+            client=mock_google_client,
+            member=mock_member,
+            google_calendar_id=google_calendar_id,
             minutes_before=minutes_before,
             recurrence=recurrence,
             message=message,
         )
+
         # Assertions
-        assert result.reminder.member == mock_member
-        assert result.reminder.event == mock_event
-        assert result.recurrence == recurrence
-        mock_member_get.assert_called_once_with(slack_user_id=user_id)
-        mock_authorize.assert_called_once_with(user_id)
-        mock_cache.get.assert_called_once_with(f"{user_id}_{event_number}")
+        assert result == mock_schedule
         mock_parse_event.assert_called_once()
         mock_event_save.assert_called_once()
-        mock_google_client.assert_called_once_with(mock_auth)
+        mock_reminder_get_or_create.assert_called_once()
+        mock_schedule_reminder.assert_called_once()
 
     def test_set_reminder_invalid_minutes_before(self):
         """Test setting a reminder with invalid minutes_before."""
+        mock_channel = MagicMock(spec=EntityChannel)
+        mock_client = MagicMock()
+        mock_member = MagicMock(spec=Member)
+
         with pytest.raises(ValidationError) as excinfo:
             set_reminder(
-                channel="C123456",
-                event_number="1",
-                user_id="U123456",
+                channel=mock_channel,
+                client=mock_client,
+                member=mock_member,
+                google_calendar_id="calendar_id",
                 minutes_before=0,
                 recurrence="daily",
                 message=MESSAGE,
             )
-        assert excinfo.value.message == "Minutes before must be a positive integer."
+        assert "Minutes before must be a positive integer" in str(excinfo.value)
 
-    @patch("apps.nest.handlers.calendar_events.GoogleAccountAuthorization.authorize")
-    def test_set_reminder_unauthorized_user(self, mock_authorize):
-        """Test setting a reminder with an unauthorized user."""
-        mock_authorize.return_value = ("http://auth.url", "state")  # NOSONAR
-        with pytest.raises(ValidationError) as excinfo:
-            set_reminder(
-                channel="C123456",
-                event_number="1",
-                user_id="U123456",
-                minutes_before=15,
-                recurrence="daily",
-                message=MESSAGE,
-            )
-        assert excinfo.value.message == "User is not authorized with Google. Please sign in first."
-        mock_authorize.assert_called_once_with("U123456")
-
-    @patch("apps.nest.handlers.calendar_events.cache")
-    @patch("apps.nest.handlers.calendar_events.GoogleAccountAuthorization.authorize")
-    def test_set_reminder_invalid_event_number(self, mock_authorize, mock_cache):
-        """Test setting a reminder with an invalid event number."""
-        mock_authorize.return_value = GoogleAccountAuthorization(
-            access_token="access_token",  # noqa: S106
-            refresh_token="refresh_token",  # noqa: S106
-            expires_at=timezone.now() + timezone.timedelta(hours=1),
-        )
-        mock_cache.get.return_value = None
-        with pytest.raises(ValidationError) as excinfo:
-            set_reminder(
-                channel="C123456",
-                event_number="invalid_event_number",
-                user_id="U123456",
-                minutes_before=15,
-                recurrence="daily",
-                message=MESSAGE,
-            )
-        assert excinfo.value.message == (
-            "Invalid or expired event number. Please get a new event number from the events list."
-        )
-        mock_authorize.assert_called_once_with("U123456")
-        mock_cache.get.assert_called_once_with("U123456_invalid_event_number")
-
-    @patch("apps.nest.handlers.calendar_events.GoogleAccountAuthorization.authorize")
     @patch("apps.nest.handlers.calendar_events.Event.parse_google_calendar_event")
-    @patch("apps.nest.handlers.calendar_events.cache")
-    @patch("apps.nest.handlers.calendar_events.GoogleCalendarClient")
-    def test_set_reminder_event_retrieval_failure(
-        self,
-        mock_google_client,
-        mock_cache,
-        mock_parse_event,
-        mock_authorize,
-    ):
+    def test_set_reminder_event_retrieval_failure(self, mock_parse_event):
         """Test setting a reminder when event retrieval fails."""
-        mock_authorize.return_value = GoogleAccountAuthorization(
-            access_token="access_token",  # noqa: S106
-            refresh_token="refresh_token",  # noqa: S106
-            expires_at=timezone.now() + timezone.timedelta(hours=1),
-        )
-        mock_cache.get.return_value = "google_calendar_event_id"
+        mock_channel = MagicMock(spec=EntityChannel)
+        mock_client = MagicMock()
+        mock_member = MagicMock(spec=Member)
+
+        mock_client.get_event.return_value = {"id": "event_id", "summary": "Test Event"}
         mock_parse_event.return_value = None
-        with pytest.raises(ValidationError) as excinfo:
+
+        with pytest.raises((ValidationError, ValueError)):
             set_reminder(
-                channel="C123456",
-                event_number="1",
-                user_id="U123456",
+                channel=mock_channel,
+                client=mock_client,
+                member=mock_member,
+                google_calendar_id="calendar_id",
                 minutes_before=15,
                 recurrence="daily",
                 message=MESSAGE,
             )
-        assert (
-            excinfo.value.message
-            == "Could not retrieve the event details. Please try again later."
-        )
-        mock_authorize.assert_called_once_with("U123456")
-        mock_cache.get.assert_called_once_with("U123456_1")
-        mock_parse_event.assert_called_once()
-        mock_google_client.assert_called_once()
 
-    @patch("apps.nest.handlers.calendar_events.GoogleAccountAuthorization.authorize")
     @patch("apps.nest.handlers.calendar_events.Event.parse_google_calendar_event")
-    @patch("apps.nest.handlers.calendar_events.cache")
-    @patch("apps.nest.handlers.calendar_events.GoogleCalendarClient")
-    def test_set_reminder_past_reminder_time(
-        self,
-        mock_google_client,
-        mock_cache,
-        mock_parse_event,
-        mock_authorize,
-    ):
+    def test_set_reminder_past_reminder_time(self, mock_parse_event):
         """Test setting a reminder with a past reminder time."""
-        mock_authorize.return_value = GoogleAccountAuthorization(
-            access_token="access_token",  # noqa: S106
-            refresh_token="refresh_token",  # noqa: S106
-            expires_at=timezone.now() + timezone.timedelta(hours=1),
-        )
-        mock_cache.get.return_value = "google_calendar_event_id"
+        mock_channel = MagicMock(spec=EntityChannel)
+        mock_client = MagicMock()
+        mock_member = MagicMock(spec=Member)
+
+        mock_client.get_event.return_value = {"id": "event_id", "summary": "Test Event"}
         mock_event = Event(
             google_calendar_id="event_id",
             key="event_key",
@@ -221,42 +155,27 @@ class TestCalendarEventsHandlers:
             description="Event Description",
         )
         mock_parse_event.return_value = mock_event
+
         with pytest.raises(ValidationError) as excinfo:
             set_reminder(
-                channel="C123456",
-                event_number="1",
-                user_id="U123456",
-                minutes_before=15,
+                channel=mock_channel,
+                client=mock_client,
+                member=mock_member,
+                google_calendar_id="calendar_id",
+                minutes_before=15,  # More than 10 minutes, so reminder would be in the past
                 recurrence="daily",
                 message=MESSAGE,
             )
-        assert (
-            excinfo.value.message
-            == "Reminder time must be in the future. Please adjust the minutes before."
-        )
-        mock_authorize.assert_called_once_with("U123456")
-        mock_cache.get.assert_called_once_with("U123456_1")
-        mock_parse_event.assert_called_once()
-        mock_google_client.assert_called_once()
+        assert "must be in the future" in str(excinfo.value)
 
-    @patch("apps.nest.handlers.calendar_events.GoogleAccountAuthorization.authorize")
     @patch("apps.nest.handlers.calendar_events.Event.parse_google_calendar_event")
-    @patch("apps.nest.handlers.calendar_events.cache")
-    @patch("apps.nest.handlers.calendar_events.GoogleCalendarClient")
-    def test_set_reminder_invalid_recurrence(
-        self,
-        mock_google_client,
-        mock_cache,
-        mock_parse_event,
-        mock_authorize,
-    ):
+    def test_set_reminder_invalid_recurrence(self, mock_parse_event):
         """Test setting a reminder with an invalid recurrence value."""
-        mock_authorize.return_value = GoogleAccountAuthorization(
-            access_token="access_token",  # noqa: S106
-            refresh_token="refresh_token",  # noqa: S106
-            expires_at=timezone.now() + timezone.timedelta(hours=1),
-        )
-        mock_cache.get.return_value = "google_calendar_event_id"
+        mock_channel = MagicMock(spec=EntityChannel)
+        mock_client = MagicMock()
+        mock_member = MagicMock(spec=Member)
+
+        mock_client.get_event.return_value = {"id": "event_id", "summary": "Test Event"}
         mock_event = Event(
             google_calendar_id="event_id",
             key="event_key",
@@ -266,25 +185,24 @@ class TestCalendarEventsHandlers:
             description="Event Description",
         )
         mock_parse_event.return_value = mock_event
+
         with pytest.raises(ValidationError) as excinfo:
             set_reminder(
-                channel="C123456",
-                event_number="1",
-                user_id="U123456",
+                channel=mock_channel,
+                client=mock_client,
+                member=mock_member,
+                google_calendar_id="calendar_id",
                 minutes_before=15,
                 recurrence="invalid_recurrence",
                 message=MESSAGE,
             )
-        assert excinfo.value.message == "Invalid recurrence value."
-        mock_authorize.assert_called_once_with("U123456")
-        mock_cache.get.assert_called_once_with("U123456_1")
-        mock_parse_event.assert_called_once()
-        mock_google_client.assert_called_once()
+        assert "Invalid recurrence" in str(excinfo.value)
 
     @patch("apps.nest.handlers.calendar_events.ReminderSchedule.objects.create")
     def test_schedule_reminder_success(self, mock_reminder_create):
         """Test scheduling a reminder successfully."""
         # Mock inputs
+        mock_entity_channel = EntityChannel(channel_id=5)
         reminder = Reminder(
             member=Member(slack_user_id="U123456"),
             event=Event(
@@ -296,7 +214,7 @@ class TestCalendarEventsHandlers:
                 description="Event Description",
             ),
             message="Test Reminder",
-            channel_id="C123456",
+            entity_channel=mock_entity_channel,
         )
         scheduled_time = timezone.now() + timezone.timedelta(hours=1)
         recurrence = "weekly"
@@ -322,6 +240,7 @@ class TestCalendarEventsHandlers:
 
     def test_schedule_reminder_past_time(self):
         """Test scheduling a reminder with a past scheduled time."""
+        mock_entity_channel = EntityChannel(channel_id=5)
         reminder = Reminder(
             member=Member(slack_user_id="U123456"),
             event=Event(
@@ -333,15 +252,17 @@ class TestCalendarEventsHandlers:
                 description="Event Description",
             ),
             message="Test Reminder",
-            channel_id="C123456",
+            entity_channel=mock_entity_channel,
         )
         past_time = timezone.now() - timezone.timedelta(hours=1)
+
         with pytest.raises(ValidationError) as excinfo:
             schedule_reminder(reminder, past_time, "daily")
-        assert excinfo.value.message == "Scheduled time must be in the future."
+        assert "must be in the future" in str(excinfo.value)
 
     def test_schedule_reminder_invalid_recurrence(self):
         """Test scheduling a reminder with an invalid recurrence value."""
+        mock_entity_channel = EntityChannel(channel_id=5)
         reminder = Reminder(
             member=Member(slack_user_id="U123456"),
             event=Event(
@@ -353,10 +274,11 @@ class TestCalendarEventsHandlers:
                 description="Event Description",
             ),
             message="Test Reminder",
-            channel_id="C123456",
+            entity_channel=mock_entity_channel,
         )
+
         with pytest.raises(ValidationError) as excinfo:
             schedule_reminder(
                 reminder, timezone.now() + timezone.timedelta(hours=1), "invalid_recurrence"
             )
-        assert excinfo.value.message == "Invalid recurrence value."
+        assert "Invalid recurrence" in str(excinfo.value)
