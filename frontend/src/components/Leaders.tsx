@@ -1,4 +1,4 @@
-import { faPersonWalkingArrowRight } from '@fortawesome/free-solid-svg-icons'
+import { faPersonWalkingArrowRight, faRightToBracket } from '@fortawesome/free-solid-svg-icons'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
@@ -30,7 +30,7 @@ const Leaders: React.FC<LeadersProps> = ({ users }) => {
             key={user.member?.login || user.memberName}
             avatar={user.member?.avatarUrl}
             button={{
-              icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
+              icon: <FontAwesomeIconWrapper icon={faRightToBracket} />,
               label: 'View Profile',
               onclick: () => handleButtonClick(user),
             }}
