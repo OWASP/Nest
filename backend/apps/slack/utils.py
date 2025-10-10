@@ -35,6 +35,23 @@ def escape(content) -> str:
     return escape_html(content, quote=False)
 
 
+def format_links_for_slack(text: str) -> str:
+    """Convert Markdown links to Slack markdown link format.
+
+    Args:
+        text (str): The input text that may include Markdown links.
+
+    Returns:
+        str: Text with Markdown links converted to Slack markdown links.
+
+    """
+    if not text:
+        return text
+
+    markdown_link_pattern = re.compile(r"\[([^\]]+)\]\((https?://[^\s)]+)\)")
+    return markdown_link_pattern.sub(r"<\2|\1>", text)
+
+
 @lru_cache
 def get_gsoc_projects(year: int) -> list:
     """Get GSoC projects.

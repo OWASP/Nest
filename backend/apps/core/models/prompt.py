@@ -139,3 +139,23 @@ class Prompt(TimestampedModel):
 
         """
         return Prompt.get_text("owasp-project-summary")
+
+    @staticmethod
+    def get_rag_system_prompt() -> str:
+        """Return RAG system prompt.
+
+        Returns
+            str: The RAG system prompt text.
+
+        """
+        return Prompt.get_text("rag-system-prompt")
+
+    @staticmethod
+    def get_slack_question_detector_prompt() -> str:
+        """Return Slack question detector prompt.
+
+        Returns
+            str: The Slack question detector prompt text.
+
+        """
+        return Prompt.get_text("slack-question-detector-system-prompt")

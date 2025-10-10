@@ -40,13 +40,13 @@ class TestAiRunRagToolCommand:
         parser.add_argument.assert_any_call(
             "--limit",
             type=int,
-            default=5,  # DEFAULT_CHUNKS_RETRIEVAL_LIMIT
+            default=8,  # DEFAULT_CHUNKS_RETRIEVAL_LIMIT
             help="Maximum number of results to retrieve",
         )
         parser.add_argument.assert_any_call(
             "--threshold",
             type=float,
-            default=0.4,  # DEFAULT_SIMILARITY_THRESHOLD
+            default=0.1,  # DEFAULT_SIMILARITY_THRESHOLD
             help="Similarity threshold (0.0 to 1.0)",
         )
         parser.add_argument.assert_any_call(
@@ -106,8 +106,8 @@ class TestAiRunRagToolCommand:
 
         command.handle(
             query="What is OWASP Foundation?",
-            limit=5,
-            threshold=0.5,
+            limit=8,
+            threshold=0.1,
             content_types=None,
             embedding_model="text-embedding-3-small",
             chat_model="gpt-4o",
@@ -124,8 +124,8 @@ class TestAiRunRagToolCommand:
 
         command.handle(
             query="What is OWASP Foundation?",
-            limit=5,
-            threshold=0.5,
+            limit=8,
+            threshold=0.1,
             content_types=None,
             embedding_model="text-embedding-3-small",
             chat_model="gpt-4o",
@@ -136,7 +136,7 @@ class TestAiRunRagToolCommand:
         )
         mock_rag_instance.query.assert_called_once_with(
             content_types=None,
-            limit=5,  # DEFAULT_CHUNKS_RETRIEVAL_LIMIT
+            limit=8,  # DEFAULT_CHUNKS_RETRIEVAL_LIMIT
             question="What is OWASP Foundation?",
-            similarity_threshold=0.5,  # DEFAULT_SIMILARITY_THRESHOLD
+            similarity_threshold=0.1,  # DEFAULT_SIMILARITY_THRESHOLD
         )
