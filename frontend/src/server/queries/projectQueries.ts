@@ -5,12 +5,6 @@ export const GET_PROJECT_DATA = gql`
     project(key: $key) {
       id
       contributorsCount
-      forksCount
-      issuesCount
-      isActive
-      key
-      languages
-      leaders
       entityLeaders {
         id
         description
@@ -22,6 +16,12 @@ export const GET_PROJECT_DATA = gql`
           avatarUrl
         }
       }
+      forksCount
+      issuesCount
+      isActive
+      key
+      languages
+      leaders
       level
       name
       healthMetricsList(limit: 30) {

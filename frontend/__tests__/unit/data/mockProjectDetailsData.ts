@@ -1,6 +1,18 @@
 export const mockProjectDetailsData = {
   project: {
     contributorsCount: 1200,
+    entityLeaders: [
+      {
+        description: 'Project Leader',
+        memberName: 'Alice',
+        member: {
+          id: '1',
+          login: 'alice',
+          name: 'Alice',
+          avatarUrl: 'https://avatars.githubusercontent.com/u/12345?v=4',
+        },
+      },
+    ],
     forksCount: 10,
     healthMetricsList: [
       {
@@ -20,18 +32,6 @@ export const mockProjectDetailsData = {
     key: 'example-project',
     languages: ['Python', 'GraphQL', 'JavaScript'],
     leaders: ['alice', 'bob'],
-    entityLeaders: [
-      {
-        description: 'Project Leader',
-        memberName: 'Alice',
-        member: {
-          id: '1',
-          login: 'alice',
-          name: 'Alice',
-          avatarUrl: 'https://avatars.githubusercontent.com/u/12345?v=4',
-        },
-      },
-    ],
     level: 'Lab',
     name: 'Test Project',
     recentIssues: [

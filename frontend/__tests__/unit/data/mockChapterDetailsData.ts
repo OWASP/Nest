@@ -19,8 +19,6 @@ export const mockChapterDetailsData = {
       lat: 23.2584857,
       lng: 77.401989,
     },
-    establishedYear: 2020,
-    key: 'test-chapter',
     entityLeaders: [
       {
         description: 'Chapter Leader',
@@ -33,6 +31,8 @@ export const mockChapterDetailsData = {
         },
       },
     ],
+    establishedYear: 2020,
+    key: 'test-chapter',
   },
   topContributors: Array.from({ length: 15 }, (_, i) => ({
     avatarUrl: `https://avatars.githubusercontent.com/avatar${i + 1}.jpg`,
