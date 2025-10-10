@@ -52,6 +52,7 @@ export interface DetailsCardProps {
   healthMetricsData?: HealthMetricsProps[]
   heatmap?: JSX.Element
   isActive?: boolean
+  isArchived?: boolean
   languages?: string[]
   status?: string
   setStatus?: (newStatus: string) => void
