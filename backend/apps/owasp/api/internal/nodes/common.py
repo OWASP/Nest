@@ -2,12 +2,20 @@
 
 import strawberry
 
-from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
+from apps.github.api.internal.nodes.repository_contributor import (
+    RepositoryContributorNode,
+)
+from apps.owasp.api.internal.nodes.entity_member import EntityMemberNode
 
 
 @strawberry.type
 class GenericEntityNode(strawberry.relay.Node):
     """Base node class for OWASP entities with common fields and resolvers."""
+
+    @strawberry.field
+    def entity_leaders(self) -> list[EntityMemberNode]:
+        """Resolve entity leaders."""
+        return self.entity_leaders
 
     @strawberry.field
     def leaders(self) -> list[str]:
