@@ -27,6 +27,7 @@ RECENT_RELEASES_LIMIT = 5
         "created_at",
         "description",
         "forks_count",
+        "is_archived",
         "key",
         "license",
         "name",
