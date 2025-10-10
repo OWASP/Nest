@@ -766,6 +766,7 @@ export type RepositoryNode = Node & {
   forksCount: Scalars['Int']['output'];
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
+  isArchived: Scalars['Boolean']['output'];
   issues: Array<IssueNode>;
   key: Scalars['String']['output'];
   languages: Array<Scalars['String']['output']>;
