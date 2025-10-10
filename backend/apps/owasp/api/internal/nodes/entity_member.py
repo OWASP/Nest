@@ -1,4 +1,4 @@
-"""OWASP app entity member node."""
+"""OWASP app entity member GraphQL node."""
 
 import strawberry
 import strawberry_django
