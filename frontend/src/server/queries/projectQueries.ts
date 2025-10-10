@@ -60,6 +60,7 @@ export const GET_PROJECT_DATA = gql`
         id
         contributorsCount
         forksCount
+        isArchived
         key
         name
         openIssuesCount
