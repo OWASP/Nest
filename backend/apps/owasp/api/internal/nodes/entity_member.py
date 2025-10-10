@@ -10,13 +10,13 @@ from apps.owasp.models.entity_member import EntityMember
 @strawberry_django.type(
     EntityMember,
     fields=[
-        "role",
-        "member_name",
-        "member_email",
         "description",
         "is_active",
         "is_reviewed",
+        "member_email",
+        "member_name",
         "order",
+        "role",
     ],
 )
 class EntityMemberNode(strawberry.relay.Node):
