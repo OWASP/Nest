@@ -55,6 +55,7 @@ export const GET_USER_DATA = gql`
       id
       contributorsCount
       forksCount
+      isArchived
       key
       name
       openIssuesCount
