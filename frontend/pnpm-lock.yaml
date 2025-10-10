@@ -81,8 +81,8 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       core-js:
-        specifier: ^3.45.1
-        version: 3.45.1
+        specifier: ^3.46.0
+        version: 3.46.0
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -4332,8 +4332,8 @@ packages:
     resolution: {integrity: sha512-9Kr/j4O16ISv8zBBhJoi4bXOYNTkFLOqSL3UDB0njXxCXNezjeyVrJyGOWtgfs/q2km1gwBcfH8q1yEGoMYunA==}
     engines: {node: '>=18'}
 
-  core-js@3.45.1:
-    resolution: {integrity: sha512-L4NPsJlCfZsPeXukyzHFlg/i7IIVwHSItR0wg0FLNqYClJ4MQYTYLbC7EkjKYRLZF2iof2MUgN0EGy7MdQFChg==}
+  core-js@3.46.0:
+    resolution: {integrity: sha512-vDMm9B0xnqqZ8uSBpZ8sNtRtOdmfShrvT6h2TuQGLs0Is+cR0DYbj/KWP6ALVNbWPpqA/qPLoOuppJN07humpA==}
 
   cosmiconfig@8.3.6:
     resolution: {integrity: sha512-kcZ6+W5QzcJ3P1Mt+83OUv/oHFqZHIx8DuxG6eZ5RGMERoLqp4BuGjhHLYGK+Kf5XVkQvqBSmAy/nGWN3qDgEA==}
@@ -13281,7 +13281,7 @@ snapshots:
 
   cookie@1.0.2: {}
 
-  core-js@3.45.1: {}
+  core-js@3.46.0: {}
 
   cosmiconfig@8.3.6(typescript@5.9.3):
     dependencies:
