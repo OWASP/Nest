@@ -7,6 +7,7 @@ import os
 import re
 
 import openai
+from django.core.exceptions import ObjectDoesNotExist
 
 from apps.core.models.prompt import Prompt
 from apps.slack.constants import OWASP_KEYWORDS
@@ -87,9 +88,12 @@ class QuestionDetector:
             - None: If the API call fails or the response is unexpected.
 
         """
-        system_prompt = Prompt.get_slack_question_detector_prompt().format(
-            keywords=", ".join(self.owasp_keywords)
-        )
+        prompt_template = Prompt.get_slack_question_detector_prompt()
+        if not prompt_template or not prompt_template.strip():
+            error_msg = "Prompt with key 'slack-question-detector-system-prompt' not found."
+            raise ObjectDoesNotExist(error_msg)
+
+        system_prompt = prompt_template.format(keywords=", ".join(self.owasp_keywords))
         user_prompt = f'Question: "{text}"'
 
         try:

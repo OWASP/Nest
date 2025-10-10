@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import openai
 import pytest
+from django.core.exceptions import ObjectDoesNotExist
 
 from apps.ai.agent.tools.rag.generator import Generator
 
@@ -223,6 +224,98 @@ class TestGenerator:
             assert call_args[1]["messages"][0]["role"] == "system"
             assert call_args[1]["messages"][0]["content"] == "OWASP Foundation system prompt"
             mock_prompt_getter.assert_called_once()
+
+    def test_generate_answer_missing_system_prompt(self):
+        """Test answer generation when system prompt is missing."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch("openai.OpenAI") as mock_openai,
+            patch(
+                "apps.core.models.prompt.Prompt.get_rag_system_prompt",
+                return_value=None,
+            ),
+        ):
+            mock_client = MagicMock()
+            mock_openai.return_value = mock_client
+
+            generator = Generator()
+
+            chunks = [{"source_name": "Test", "text": "Test content"}]
+
+            with pytest.raises(
+                ObjectDoesNotExist, match="Prompt with key 'rag-system-prompt' not found"
+            ):
+                generator.generate_answer("Test query", chunks)
+
+    def test_generate_answer_empty_system_prompt(self):
+        """Test answer generation when system prompt is empty."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch("openai.OpenAI") as mock_openai,
+            patch(
+                "apps.core.models.prompt.Prompt.get_rag_system_prompt",
+                return_value="   ",
+            ),
+        ):
+            mock_client = MagicMock()
+            mock_openai.return_value = mock_client
+
+            generator = Generator()
+
+            chunks = [{"source_name": "Test", "text": "Test content"}]
+
+            with pytest.raises(
+                ObjectDoesNotExist, match="Prompt with key 'rag-system-prompt' not found"
+            ):
+                generator.generate_answer("Test query", chunks)
+
+    def test_generate_answer_empty_openai_response(self):
+        """Test answer generation when OpenAI returns empty content."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch("openai.OpenAI") as mock_openai,
+            patch(
+                "apps.core.models.prompt.Prompt.get_rag_system_prompt",
+                return_value="System prompt",
+            ),
+        ):
+            mock_client = MagicMock()
+            mock_response = MagicMock()
+            mock_response.choices = [MagicMock()]
+            mock_response.choices[0].message.content = ""
+            mock_client.chat.completions.create.return_value = mock_response
+            mock_openai.return_value = mock_client
+
+            generator = Generator()
+
+            chunks = [{"source_name": "Test", "text": "Test content"}]
+            result = generator.generate_answer("Test query", chunks)
+
+            assert result == ""
+
+    def test_generate_answer_none_openai_response(self):
+        """Test answer generation when OpenAI returns None content."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch("openai.OpenAI") as mock_openai,
+            patch(
+                "apps.core.models.prompt.Prompt.get_rag_system_prompt",
+                return_value="System prompt",
+            ),
+        ):
+            mock_client = MagicMock()
+            mock_response = MagicMock()
+            mock_response.choices = [MagicMock()]
+            mock_response.choices[0].message.content = None
+            mock_client.chat.completions.create.return_value = mock_response
+            mock_openai.return_value = mock_client
+
+            generator = Generator()
+
+            chunks = [{"source_name": "Test", "text": "Test content"}]
+
+            with pytest.raises(AttributeError):
+                generator.generate_answer("Test query", chunks)
 
     def test_constants(self):
         """Test class constants have expected values."""

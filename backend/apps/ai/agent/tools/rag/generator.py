@@ -5,6 +5,7 @@ import os
 from typing import Any
 
 import openai
+from django.core.exceptions import ObjectDoesNotExist
 
 from apps.core.models.prompt import Prompt
 
@@ -88,10 +89,15 @@ Answer:
 """
 
         try:
+            system_prompt = Prompt.get_rag_system_prompt()
+            if not system_prompt or not system_prompt.strip():
+                error_msg = "Prompt with key 'rag-system-prompt' not found."
+                raise ObjectDoesNotExist(error_msg)
+
             response = self.openai_client.chat.completions.create(
                 model=self.chat_model,
                 messages=[
-                    {"role": "system", "content": Prompt.get_rag_system_prompt()},
+                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},
                 ],
                 temperature=self.TEMPERATURE,
