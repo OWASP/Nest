@@ -17,6 +17,7 @@ import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
 import { scrollToAnchor } from 'utils/scrollToAnchor'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
+import ArchivedBadge from 'components/ArchivedBadge'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
@@ -52,6 +53,7 @@ const DetailsCard = ({
   geolocationData = null,
   healthMetricsData,
   isActive = true,
+  isArchived = false,
   languages,
   projectName,
   pullRequests,
@@ -103,11 +105,14 @@ const DetailsCard = ({
               />
             )}
           </div>
-          {!isActive && (
-            <span className="ml-4 justify-center rounded bg-red-200 px-2 py-1 text-sm text-red-800">
-              Inactive
-            </span>
-          )}
+          <div className="ml-4 flex gap-2">
+            {!isActive && (
+              <span className="justify-center rounded bg-red-200 px-2 py-1 text-sm text-red-800">
+                Inactive
+              </span>
+            )}
+            {isArchived && type === 'repository' && <ArchivedBadge size="md" />}
+          </div>
         </div>
         <p className="mb-6 text-xl">{description}</p>
         {summary && (
