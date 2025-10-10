@@ -111,6 +111,7 @@ const RepositoryDetailsPage = () => {
     <DetailsCard
       details={repositoryDetails}
       entityKey={repository.project?.key}
+      isArchived={repository.isArchived}
       languages={repository.languages}
       projectName={repository.project?.name}
       pullRequests={recentPullRequests}
