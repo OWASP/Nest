@@ -17,6 +17,17 @@ export const GET_CHAPTER_DATA = gql`
       summary
       updatedAt
       url
+      entityLeaders {
+        id
+        description
+        memberName
+        member {
+          id
+          login
+          name
+          avatarUrl
+        }
+      }
     }
     topContributors(chapter: $key) {
       id

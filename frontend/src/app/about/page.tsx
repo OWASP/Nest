@@ -8,7 +8,6 @@ import {
   faScroll,
   faUsers,
   faTools,
-  faPersonWalkingArrowRight,
   faBullseye,
   faUser,
   faUsersGear,
@@ -18,9 +17,7 @@ import { Tooltip } from '@heroui/tooltip'
 import upperFirst from 'lodash/upperFirst'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import {
   GetProjectMetadataDocument,
@@ -29,7 +26,6 @@ import {
 import { GetLeaderDataDocument } from 'types/__generated__/userQueries.generated'
 import type { Contributor } from 'types/contributor'
 import type { Project } from 'types/project'
-import type { User } from 'types/user'
 import {
   technologies,
   missionContent,
@@ -40,17 +36,42 @@ import {
 } from 'utils/aboutData'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
+import Leaders from 'components/Leaders'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
 import TopContributorsList from 'components/TopContributorsList'
-import UserCard from 'components/UserCard'
 
 const leaders = {
   arkid15r: 'CCSP, CISSP, CSSLP',
   kasya: 'CC',
   mamicidal: 'CISSP',
 }
+
+const useLeadersData = () => {
+  const { data: leader1Data, loading: loading1 } = useQuery(GetLeaderDataDocument, {
+    variables: { key: 'arkid15r' },
+  })
+  const { data: leader2Data, loading: loading2 } = useQuery(GetLeaderDataDocument, {
+    variables: { key: 'kasya' },
+  })
+  const { data: leader3Data, loading: loading3 } = useQuery(GetLeaderDataDocument, {
+    variables: { key: 'mamicidal' },
+  })
+
+  const isLoading = loading1 || loading2 || loading3
+
+  const formattedLeaders = [leader1Data?.user, leader2Data?.user, leader3Data?.user]
+    .filter((user) => user)
+    .map((user) => ({
+      description: leaders[user.login],
+      memberName: user.name || user.login,
+      member: user,
+    }))
+
+  return { formattedLeaders, isLoading }
+}
+
 const projectKey = 'nest'
 
 const About = () => {
@@ -72,6 +93,8 @@ const About = () => {
       },
     }
   )
+
+  const { formattedLeaders, isLoading: leadersLoading } = useLeadersData()
 
   const [projectMetadata, setProjectMetadata] = useState<Project | null>(null)
   const [topContributors, setTopContributors] = useState<Contributor[]>([])
@@ -100,7 +123,8 @@ const About = () => {
     !projectMetadataResponse ||
     !topContributorsResponse ||
     (projectMetadataRequestError && !projectMetadata) ||
-    (topContributorsRequestError && !topContributors)
+    (topContributorsRequestError && !topContributors) ||
+    leadersLoading
 
   if (isLoading) {
     return <LoadingSpinner />
@@ -141,15 +165,7 @@ const About = () => {
           </div>
         </SecondaryCard>
 
-        <SecondaryCard icon={faPersonWalkingArrowRight} title={<AnchorTitle title="Leaders" />}>
-          <div className="flex w-full flex-col items-center justify-around overflow-hidden md:flex-row">
-            {Object.keys(leaders).map((username) => (
-              <div key={username}>
-                <LeaderData username={username} />
-              </div>
-            ))}
-          </div>
-        </SecondaryCard>
+        <Leaders users={formattedLeaders} />
 
         {topContributors && (
           <TopContributorsList
@@ -310,40 +326,6 @@ const About = () => {
         </div>
       </div>
     </div>
-  )
-}
-
-const LeaderData = ({ username }: { username: string }) => {
-  const { data, loading, error } = useQuery(GetLeaderDataDocument, {
-    variables: { key: username },
-  })
-  const router = useRouter()
-
-  if (loading) return <p>Loading {username}...</p>
-  if (error) return <p>Error loading {username}'s data</p>
-
-  const user = data?.user
-
-  if (!user) {
-    return <p>No data available for {username}</p>
-  }
-
-  const handleButtonClick = (user: User) => {
-    router.push(`/members/${user.login}`)
-  }
-
-  return (
-    <UserCard
-      avatar={user.avatarUrl}
-      button={{
-        icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
-        label: 'View Profile',
-        onclick: () => handleButtonClick(user),
-      }}
-      className="h-64 w-40 bg-inherit"
-      description={leaders[user.login]}
-      name={user.name || username}
-    />
   )
 }
 

@@ -11,6 +11,17 @@ export const GET_PROJECT_DATA = gql`
       key
       languages
       leaders
+      entityLeaders {
+        id
+        description
+        memberName
+        member {
+          id
+          login
+          name
+          avatarUrl
+        }
+      }
       level
       name
       healthMetricsList(limit: 30) {
