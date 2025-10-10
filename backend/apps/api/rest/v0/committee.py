@@ -4,14 +4,13 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
 
-from django.conf import settings
 from django.http import HttpRequest
-from django.views.decorators.cache import cache_page
 from ninja import Path, Query, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
+from apps.api.decorators.cache import cache_response
 from apps.owasp.models.committee import Committee as CommitteeModel
 
 router = RouterPaginated(tags=["Committees"])
@@ -54,7 +53,7 @@ class CommitteeError(Schema):
     response=list[Committee],
     summary="List committees",
 )
-@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
+@decorate_view(cache_response())
 def list_committees(
     request: HttpRequest,
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
@@ -76,6 +75,7 @@ def list_committees(
     },
     summary="Get committee",
 )
+@decorate_view(cache_response())
 def get_chapter(
     request: HttpRequest,
     committee_id: str = Path(example="project"),

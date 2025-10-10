@@ -4,14 +4,13 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
 
-from django.conf import settings
 from django.http import HttpRequest
-from django.views.decorators.cache import cache_page
 from ninja import Path, Query, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
+from apps.api.decorators.cache import cache_response
 from apps.owasp.models.event import Event as EventModel
 
 router = RouterPaginated(tags=["Events"])
@@ -50,7 +49,7 @@ class EventError(Schema):
     summary="List events",
     response=list[Event],
 )
-@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
+@decorate_view(cache_response())
 def list_events(
     request: HttpRequest,
     ordering: Literal["start_date", "-start_date", "end_date", "-end_date"] | None = Query(
@@ -72,6 +71,7 @@ def list_events(
     },
     summary="Get event",
 )
+@decorate_view(cache_response())
 def get_event(
     request: HttpRequest,
     event_id: str = Path(..., example="owasp-global-appsec-usa-2025-washington-dc"),

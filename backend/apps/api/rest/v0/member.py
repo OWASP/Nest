@@ -4,14 +4,13 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
 
-from django.conf import settings
 from django.http import HttpRequest
-from django.views.decorators.cache import cache_page
 from ninja import Field, FilterSchema, Path, Query, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
+from apps.api.decorators.cache import cache_response
 from apps.github.models.user import User as UserModel
 
 router = RouterPaginated(tags=["Community"])
@@ -68,7 +67,7 @@ class MemberFilter(FilterSchema):
     response=list[Member],
     summary="List members",
 )
-@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
+@decorate_view(cache_response())
 def list_members(
     request: HttpRequest,
     filters: MemberFilter = Query(...),
@@ -91,6 +90,7 @@ def list_members(
     },
     summary="Get member",
 )
+@decorate_view(cache_response())
 def get_member(
     request: HttpRequest,
     member_id: str = Path(example="OWASP"),
