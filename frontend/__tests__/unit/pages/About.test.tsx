@@ -553,4 +553,37 @@ describe('About Component', () => {
     expect(screen.getByText('Timeline description 1')).toBeInTheDocument()
     expect(screen.getByText('Timeline description 2')).toBeInTheDocument()
   })
+
+  test('triggers toaster error when GraphQL request fails for a leader', async () => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
+      if (query === GetLeaderDataDocument && options?.variables?.key === 'arkid15r') {
+        return { loading: false, data: null, error: new Error('GraphQL error for leader') }
+      }
+      if (query === GetProjectMetadataDocument) {
+        return mockProjectData
+      }
+      if (query === GetTopContributorsDocument) {
+        return mockTopContributorsData
+      }
+      if (query === GetLeaderDataDocument) {
+        return mockUserData(options?.variables?.key)
+      }
+      return { loading: true }
+    })
+
+    await act(async () => {
+      render(<About />)
+    })
+
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalledWith({
+        color: 'danger',
+        description: 'GraphQL error for leader',
+        shouldShowTimeoutProgress: true,
+        timeout: 5000,
+        title: 'Server Error',
+        variant: 'solid',
+      })
+    })
+  })
 })

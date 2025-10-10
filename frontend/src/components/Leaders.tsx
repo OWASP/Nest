@@ -34,7 +34,7 @@ const Leaders: React.FC<LeadersProps> = ({ users }) => {
               label: 'View Profile',
               onclick: () => handleButtonClick(user),
             }}
-            className="h-64 w-42 bg-inherit"
+            className="h-64 w-44 bg-inherit"
             description={user.description}
             name={user.member?.name || user.memberName}
           />

@@ -2,9 +2,7 @@
 
 import strawberry
 
-from apps.github.api.internal.nodes.repository_contributor import (
-    RepositoryContributorNode,
-)
+from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.owasp.api.internal.nodes.entity_member import EntityMemberNode
 
 

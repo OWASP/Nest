@@ -49,17 +49,35 @@ const leaders = {
 }
 
 const useLeadersData = () => {
-  const { data: leader1Data, loading: loading1 } = useQuery(GetLeaderDataDocument, {
+  const {
+    data: leader1Data,
+    loading: loading1,
+    error: error1,
+  } = useQuery(GetLeaderDataDocument, {
     variables: { key: 'arkid15r' },
   })
-  const { data: leader2Data, loading: loading2 } = useQuery(GetLeaderDataDocument, {
+  const {
+    data: leader2Data,
+    loading: loading2,
+    error: error2,
+  } = useQuery(GetLeaderDataDocument, {
     variables: { key: 'kasya' },
   })
-  const { data: leader3Data, loading: loading3 } = useQuery(GetLeaderDataDocument, {
+  const {
+    data: leader3Data,
+    loading: loading3,
+    error: error3,
+  } = useQuery(GetLeaderDataDocument, {
     variables: { key: 'mamicidal' },
   })
 
   const isLoading = loading1 || loading2 || loading3
+
+  useEffect(() => {
+    if (error1) handleAppError(error1)
+    if (error2) handleAppError(error2)
+    if (error3) handleAppError(error3)
+  }, [error1, error2, error3])
 
   const formattedLeaders = [leader1Data?.user, leader2Data?.user, leader3Data?.user]
     .filter(Boolean)
