@@ -21,6 +21,18 @@ export const mockChapterDetailsData = {
     },
     establishedYear: 2020,
     key: 'test-chapter',
+    entityLeaders: [
+      {
+        description: 'Chapter Leader',
+        memberName: 'Bob',
+        member: {
+          id: '2',
+          login: 'bob',
+          name: 'Bob',
+          avatarUrl: 'https://avatars.githubusercontent.com/u/67890?v=4',
+        },
+      },
+    ],
   },
   topContributors: Array.from({ length: 15 }, (_, i) => ({
     avatarUrl: `https://avatars.githubusercontent.com/avatar${i + 1}.jpg`,

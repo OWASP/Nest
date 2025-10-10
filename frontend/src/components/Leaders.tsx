@@ -25,9 +25,9 @@ const Leaders: React.FC<LeadersProps> = ({ users }) => {
   return (
     <SecondaryCard icon={faPersonWalkingArrowRight} title={<AnchorTitle title="Leaders" />}>
       <div className="flex w-full flex-col items-center justify-around overflow-hidden md:flex-row">
-        {users.map((user, index) => (
+        {users.map((user) => (
           <UserCard
-            key={index}
+            key={user.member?.login || user.memberName}
             avatar={user.member?.avatarUrl}
             button={{
               icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,

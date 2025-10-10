@@ -62,7 +62,7 @@ const useLeadersData = () => {
   const isLoading = loading1 || loading2 || loading3
 
   const formattedLeaders = [leader1Data?.user, leader2Data?.user, leader3Data?.user]
-    .filter((user) => user)
+    .filter(Boolean)
     .map((user) => ({
       description: leaders[user.login],
       memberName: user.name || user.login,
