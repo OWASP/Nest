@@ -57,7 +57,6 @@ ENV FORCE_COLOR=1 \
     PYTHONUNBUFFERED=1
 
 WORKDIR /home/owasp
-USER owasp
 
 # Copy built application from the builder stage
 COPY --from=builder --chmod=555 --chown=root:root /home/owasp /home/owasp
@@ -65,6 +64,7 @@ COPY --from=builder --chmod=555 --chown=root:root /home/owasp /home/owasp
 RUN touch /home/owasp/fuzz_tests.db && \
     chmod +x /home/owasp/fuzz_tests.db /home/owasp/entrypoint.sh
 
+USER owasp
 
 # Expose the running port
 EXPOSE 8000
