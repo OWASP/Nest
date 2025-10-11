@@ -71,24 +71,24 @@ jobs:
           file: frontend/docker/Dockerfile.e2e.test
           platforms: linux/amd64
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest
+          tags: owasp/nest:test-frontend-e2e:latest
 
       - name: Build and push fuzz-test-backend image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-fuzz-backend:cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-fuzz-backend:cache,mode=max
+          cache-from: type=registry,ref=owasp/nest:test-fuzz-backend-cache
+          cache-to: type=registry,ref=owasp/nest:test-fuzz-backend-cache,mode=max
           context: backend
           file: backend/docker/Dockerfile.fuzz_tests
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-fuzz-backend:latest
+          tags: owasp/nest:test-fuzz-backend:latest
 
       - name: Build and push fuzz-test-graphql image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
         with:
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-fuzz-graphql:cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-fuzz-graphql:cache,mode=max
+          cache-from: type=registry,ref=owasp/nest:test-fuzz-graphql-cache
+          cache-to: type=registry,ref=owasp/nest:test-fuzz-graphql-cache,mode=max
           context: backend
           file: backend/docker/Dockerfile.graphql_fuzz
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-fuzz-graphql:latest
+          tags: owasp/nest:test-fuzz-graphql:latest
