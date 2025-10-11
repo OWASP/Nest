@@ -1,3 +1,4 @@
+import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
   faDiscord,
@@ -31,12 +32,22 @@ import {
   faX,
   faPeopleGroup,
   faSun,
+  faAward,
+  faMedal,
+  faRibbon,
+  faCertificate,
+  faBug
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(
   faArrowsRotate,
   faCodeFork,
   faStar,
+  faMedal,
+  faAward,
+  faRibbon,
+  faCertificate,
+  faBug,
   faUser,
   faClock,
   faComment,
@@ -62,6 +73,15 @@ library.add(
   faXTwitter,
   faSun
 )
+
+export const BADGE_CLASS_MAP: Record<string, IconDefinition> = {
+  award: faAward,
+  medal: faMedal,
+  ribbon: faRibbon,
+  star: faStar,
+  certificate: faCertificate,
+  bugSlash: faBug,
+} as const
 
 export const ICONS = {
   starsCount: {
