@@ -1486,14 +1486,6 @@ describe('CardDetailsPage', () => {
     })
 
     it('archived badge renders with medium size', () => {
-      const archivedProps = {
-        ...defaultProps,
-        type: 'repository',
-        isArchived: true,
-      }
-
-      const { container } = render(<CardDetailsPage {...archivedProps} />)
-
       const badge = screen.getByText('Archived')
       expect(badge).toHaveClass('px-3', 'py-1', 'text-sm')
     })
@@ -1502,7 +1494,7 @@ describe('CardDetailsPage', () => {
       const nullArchivedProps = {
         ...defaultProps,
         type: 'repository',
-        isArchived: null as any,
+        isArchived: null,
       }
 
       render(<CardDetailsPage {...nullArchivedProps} />)

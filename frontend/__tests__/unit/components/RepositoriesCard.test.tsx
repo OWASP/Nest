@@ -225,25 +225,11 @@ describe('RepositoriesCard', () => {
     })
 
     it('archived badge has small size on cards', () => {
-      const archivedRepo: RepositoryCardProps = {
-        ...createMockRepository(0),
-        isArchived: true,
-      }
-
-      const { container } = render(<RepositoriesCard repositories={[archivedRepo]} />)
-
       const badge = screen.getByText('Archived')
       expect(badge).toHaveClass('px-2', 'py-1', 'text-xs')
     })
 
     it('archived badge does not show icon on cards', () => {
-      const archivedRepo: RepositoryCardProps = {
-        ...createMockRepository(0),
-        isArchived: true,
-      }
-
-      const { container } = render(<RepositoriesCard repositories={[archivedRepo]} />)
-
       const badge = screen.getByText('Archived')
       const icon = badge.querySelector('[data-testid="archive-icon"]')
       expect(icon).not.toBeInTheDocument()
@@ -278,7 +264,7 @@ describe('RepositoriesCard', () => {
     it('handles null isArchived gracefully', () => {
       const repo: RepositoryCardProps = {
         ...createMockRepository(0),
-        isArchived: null as any,
+        isArchived: null,
       }
 
       render(<RepositoriesCard repositories={[repo]} />)
