@@ -124,9 +124,9 @@ class TestRagTool:
             assert result == "Default answer"
             mock_retriever.retrieve.assert_called_once_with(
                 content_types=None,
-                limit=5,
+                limit=8,
                 query="Test question",
-                similarity_threshold=0.4,
+                similarity_threshold=0.1,
             )
 
     def test_query_empty_content_types(self):
@@ -152,9 +152,9 @@ class TestRagTool:
             assert result == "Answer"
             mock_retriever.retrieve.assert_called_once_with(
                 content_types=[],
-                limit=5,
+                limit=8,
                 query="Test question",
-                similarity_threshold=0.4,
+                similarity_threshold=0.1,
             )
 
     @patch("apps.ai.agent.tools.rag.rag_tool.logger")

@@ -1,8 +1,11 @@
 """Tests for question detector functionality."""
 
-from unittest.mock import patch
+import os
+from unittest.mock import MagicMock, patch
 
+import openai
 import pytest
+from django.core.exceptions import ObjectDoesNotExist
 
 from apps.slack.common.question_detector import QuestionDetector
 
@@ -13,14 +16,20 @@ class TestQuestionDetector:
     @pytest.fixture(autouse=True)
     def _mock_openai(self, monkeypatch):
         """Avoid real OpenAI calls by forcing fallback path."""
+        monkeypatch.setenv("DJANGO_OPEN_AI_SECRET_KEY", "test-key")
+
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.side_effect = openai.OpenAIError("Mocked OpenAI call")
+
+        monkeypatch.setattr("openai.OpenAI", MagicMock(return_value=mock_client))
+
         monkeypatch.setattr(
-            QuestionDetector,
-            "is_owasp_question_with_openai",
-            lambda *_args, **_kwargs: None,
+            "apps.slack.common.question_detector.Prompt.get_slack_question_detector_prompt",
+            lambda: "System prompt with {keywords}",
         )
 
     @pytest.fixture
-    def detector(self):
+    def detector(self, monkeypatch):
         """Fixture to provide QuestionDetector instance."""
         return QuestionDetector()
 
@@ -195,7 +204,12 @@ class TestQuestionDetector:
 
     def test_mocked_initialization(self):
         """Test with mocked QuestionDetector initialization."""
-        with patch("apps.slack.common.question_detector.OWASP_KEYWORDS", {"mocked", "keywords"}):
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch("openai.OpenAI") as mock_openai,
+            patch("apps.slack.common.question_detector.OWASP_KEYWORDS", {"mocked", "keywords"}),
+        ):
+            mock_openai.return_value = MagicMock()
             detector = QuestionDetector()
 
             assert detector.owasp_keywords == {"mocked", "keywords"}
@@ -206,10 +220,259 @@ class TestQuestionDetector:
         assert detector.MAX_TOKENS == 50
         assert detector.TEMPERATURE == 0.1
         assert detector.CHAT_MODEL == "gpt-4o"
-        assert "OWASP" in detector.SYSTEM_PROMPT
-        assert "{keywords}" in detector.SYSTEM_PROMPT
 
     def test_openai_client_initialization(self, detector):
         """Test that OpenAI client is properly initialized."""
         assert detector.openai_client is not None
         assert hasattr(detector.openai_client, "chat")
+
+    def test_is_owasp_question_with_openai_missing_prompt(self):
+        """Test OpenAI question detection when prompt is missing."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch(
+                "apps.slack.common.question_detector.Prompt.get_slack_question_detector_prompt",
+                return_value=None,
+            ),
+        ):
+            detector = QuestionDetector()
+
+            with pytest.raises(
+                ObjectDoesNotExist,
+                match="Prompt with key 'slack-question-detector-system-prompt' not found",
+            ):
+                detector.is_owasp_question_with_openai("What is OWASP?")
+
+    def test_is_owasp_question_with_openai_empty_prompt(self):
+        """Test OpenAI question detection when prompt is empty."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch(
+                "apps.slack.common.question_detector.Prompt.get_slack_question_detector_prompt",
+                return_value="   ",
+            ),
+        ):
+            detector = QuestionDetector()
+
+            with pytest.raises(
+                ObjectDoesNotExist,
+                match="Prompt with key 'slack-question-detector-system-prompt' not found",
+            ):
+                detector.is_owasp_question_with_openai("What is OWASP?")
+
+    def test_is_owasp_question_with_openai_success_yes(self):
+        """Test OpenAI question detection with YES response."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch(
+                "apps.slack.common.question_detector.Prompt.get_slack_question_detector_prompt",
+                return_value="System prompt with {keywords}",
+            ),
+            patch("openai.OpenAI") as mock_openai,
+        ):
+            mock_client = MagicMock()
+            mock_response = MagicMock()
+            mock_response.choices = [MagicMock()]
+            mock_response.choices[0].message.content = "YES"
+            mock_client.chat.completions.create.return_value = mock_response
+            mock_openai.return_value = mock_client
+
+            detector = QuestionDetector()
+            result = detector.is_owasp_question_with_openai("What is OWASP?")
+
+            assert result is True
+
+    def test_is_owasp_question_with_openai_success_no(self):
+        """Test OpenAI question detection with NO response."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch(
+                "apps.slack.common.question_detector.Prompt.get_slack_question_detector_prompt",
+                return_value="System prompt with {keywords}",
+            ),
+            patch("openai.OpenAI") as mock_openai,
+        ):
+            mock_client = MagicMock()
+            mock_response = MagicMock()
+            mock_response.choices = [MagicMock()]
+            mock_response.choices[0].message.content = "NO"
+            mock_client.chat.completions.create.return_value = mock_response
+            mock_openai.return_value = mock_client
+
+            detector = QuestionDetector()
+            result = detector.is_owasp_question_with_openai("What is Python?")
+
+            assert result is False
+
+    def test_is_owasp_question_with_openai_empty_response(self):
+        """Test OpenAI question detection with empty response."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch(
+                "apps.slack.common.question_detector.Prompt.get_slack_question_detector_prompt",
+                return_value="System prompt with {keywords}",
+            ),
+            patch("openai.OpenAI") as mock_openai,
+        ):
+            mock_client = MagicMock()
+            mock_response = MagicMock()
+            mock_response.choices = [MagicMock()]
+            mock_response.choices[0].message.content = ""
+            mock_client.chat.completions.create.return_value = mock_response
+            mock_openai.return_value = mock_client
+
+            detector = QuestionDetector()
+            result = detector.is_owasp_question_with_openai("What is OWASP?")
+
+            assert result is None
+
+    def test_is_owasp_question_with_openai_none_response(self):
+        """Test OpenAI question detection with None response."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch(
+                "apps.slack.common.question_detector.Prompt.get_slack_question_detector_prompt",
+                return_value="System prompt with {keywords}",
+            ),
+            patch("openai.OpenAI") as mock_openai,
+        ):
+            mock_client = MagicMock()
+            mock_response = MagicMock()
+            mock_response.choices = [MagicMock()]
+            mock_response.choices[0].message.content = None
+            mock_client.chat.completions.create.return_value = mock_response
+            mock_openai.return_value = mock_client
+
+            detector = QuestionDetector()
+            result = detector.is_owasp_question_with_openai("What is OWASP?")
+
+            assert result is None
+
+    def test_is_owasp_question_with_openai_unexpected_response(self):
+        """Test OpenAI question detection with unexpected response."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch(
+                "apps.slack.common.question_detector.Prompt.get_slack_question_detector_prompt",
+                return_value="System prompt with {keywords}",
+            ),
+            patch("openai.OpenAI") as mock_openai,
+        ):
+            mock_client = MagicMock()
+            mock_response = MagicMock()
+            mock_response.choices = [MagicMock()]
+            mock_response.choices[0].message.content = "MAYBE"
+            mock_client.chat.completions.create.return_value = mock_response
+            mock_openai.return_value = mock_client
+
+            detector = QuestionDetector()
+            result = detector.is_owasp_question_with_openai("What is OWASP?")
+
+            assert result is None
+
+    def test_is_owasp_question_with_openai_api_error(self):
+        """Test OpenAI question detection with API error."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch(
+                "apps.slack.common.question_detector.Prompt.get_slack_question_detector_prompt",
+                return_value="System prompt with {keywords}",
+            ),
+            patch("openai.OpenAI") as mock_openai,
+        ):
+            mock_client = MagicMock()
+            mock_client.chat.completions.create.side_effect = openai.OpenAIError("API Error")
+            mock_openai.return_value = mock_client
+
+            detector = QuestionDetector()
+            result = detector.is_owasp_question_with_openai("What is OWASP?")
+
+            assert result is None
+
+    def test_is_owasp_question_with_openai_case_insensitive(self):
+        """Test OpenAI question detection with case insensitive responses."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch(
+                "apps.slack.common.question_detector.Prompt.get_slack_question_detector_prompt",
+                return_value="System prompt with {keywords}",
+            ),
+            patch("openai.OpenAI") as mock_openai,
+        ):
+            mock_client = MagicMock()
+            mock_response = MagicMock()
+            mock_response.choices = [MagicMock()]
+            mock_response.choices[0].message.content = "yes, this is OWASP related"
+            mock_client.chat.completions.create.return_value = mock_response
+            mock_openai.return_value = mock_client
+
+            detector = QuestionDetector()
+            result = detector.is_owasp_question_with_openai("What is OWASP?")
+
+            assert result is True
+
+    def test_is_owasp_question_with_openai_no_in_response(self):
+        """Test OpenAI question detection with 'no' in response."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch(
+                "apps.slack.common.question_detector.Prompt.get_slack_question_detector_prompt",
+                return_value="System prompt with {keywords}",
+            ),
+            patch("openai.OpenAI") as mock_openai,
+        ):
+            mock_client = MagicMock()
+            mock_response = MagicMock()
+            mock_response.choices = [MagicMock()]
+            mock_response.choices[0].message.content = "no, this is not OWASP related"
+            mock_client.chat.completions.create.return_value = mock_response
+            mock_openai.return_value = mock_client
+
+            detector = QuestionDetector()
+            result = detector.is_owasp_question_with_openai("What is Python?")
+
+            assert result is False
+
+    def test_is_owasp_question_openai_override_with_keywords(self):
+        """Test that keyword detection overrides OpenAI NO response."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch(
+                "apps.slack.common.question_detector.Prompt.get_slack_question_detector_prompt",
+                return_value="System prompt with {keywords}",
+            ),
+            patch("openai.OpenAI") as mock_openai,
+            patch(
+                "apps.slack.common.question_detector.QuestionDetector.is_owasp_question_with_openai",
+                return_value=False,
+            ),
+        ):
+            mock_client = MagicMock()
+            mock_openai.return_value = mock_client
+
+            detector = QuestionDetector()
+            result = detector.is_owasp_question("What is OWASP security?")
+
+            assert result is True
+
+    def test_is_owasp_question_openai_override_without_keywords(self):
+        """Test that keyword detection does not override OpenAI NO response when no keywords."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch(
+                "apps.slack.common.question_detector.Prompt.get_slack_question_detector_prompt",
+                return_value="System prompt with {keywords}",
+            ),
+            patch("openai.OpenAI") as mock_openai,
+            patch(
+                "apps.slack.common.question_detector.QuestionDetector.is_owasp_question_with_openai",
+                return_value=False,
+            ),
+        ):
+            mock_client = MagicMock()
+            mock_openai.return_value = mock_client
+
+            detector = QuestionDetector()
+            result = detector.is_owasp_question("What is Python programming?")
+
+            assert result is False
