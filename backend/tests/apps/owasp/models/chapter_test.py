@@ -170,13 +170,16 @@ class TestChapterModel:
         chapter = Chapter()
         chapter.owasp_repository = owasp_repository
 
-        with patch(
-            "apps.owasp.models.chapter.RepositoryBasedEntityModel.from_github"
-        ) as mock_from_github:
-            mock_from_github.side_effect = lambda instance, _: setattr(
+        with (
+            patch(
+                "apps.owasp.models.chapter.RepositoryBasedEntityModel.from_github"
+            ) as mock_from_github,
+            patch("apps.github.auth.Github") as mock_github,
+        ):
+            mock_from_github.side_effect = lambda instance, _, __: setattr(
                 instance, "name", owasp_repository.title
             )
-            chapter.from_github(owasp_repository)
+            chapter.from_github(owasp_repository, mock_github)
 
         mock_from_github.assert_called_once_with(
             chapter,
@@ -190,6 +193,7 @@ class TestChapterModel:
                 "region": "region",
                 "tags": "tags",
             },
+            mock_github,
         )
 
         assert chapter.created_at == owasp_repository.created_at

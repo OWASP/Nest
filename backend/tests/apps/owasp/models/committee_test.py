@@ -79,13 +79,16 @@ class TestCommitteeModel:
         committee = Committee()
         committee.owasp_repository = owasp_repository
 
-        with patch(
-            "apps.owasp.models.committee.RepositoryBasedEntityModel.from_github"
-        ) as mock_from_github:
-            mock_from_github.side_effect = lambda instance, _: setattr(
+        with (
+            patch(
+                "apps.owasp.models.committee.RepositoryBasedEntityModel.from_github"
+            ) as mock_from_github,
+            patch("apps.github.auth.Github") as mock_github,
+        ):
+            mock_from_github.side_effect = lambda instance, _, __: setattr(
                 instance, "name", owasp_repository.title
             )
-            committee.from_github(owasp_repository)
+            committee.from_github(owasp_repository, mock_github)
 
         mock_from_github.assert_called_once_with(
             committee,
@@ -94,6 +97,7 @@ class TestCommitteeModel:
                 "name": "title",
                 "tags": "tags",
             },
+            mock_github,
         )
 
         assert committee.created_at == owasp_repository.created_at
