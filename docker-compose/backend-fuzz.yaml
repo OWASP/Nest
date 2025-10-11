@@ -16,7 +16,7 @@ services:
     ports:
       - 127.0.0.1:8000:8000
     healthcheck:
-      test: sh -c 'wget -O- http://127.0.0.1:8000/api/v1'
+      test: sh -c 'wget -O- http://127.0.0.1:8000/graphql'
       interval: 10s
       timeout: 5s
       retries: 20
