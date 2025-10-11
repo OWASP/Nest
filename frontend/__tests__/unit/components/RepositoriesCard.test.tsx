@@ -176,4 +176,147 @@ describe('RepositoriesCard', () => {
 
     expect(() => render(<RepositoriesCard repositories={[repository]} />)).not.toThrow()
   })
+
+  describe('Archived Badge on Repository Cards', () => {
+    it('displays archived badge for archived repository', () => {
+      const archivedRepo: RepositoryCardProps = {
+        ...createMockRepository(0),
+        isArchived: true,
+      }
+
+      render(<RepositoriesCard repositories={[archivedRepo]} />)
+
+      expect(screen.getByText('Archived')).toBeInTheDocument()
+    })
+
+    it('does not display archived badge for non-archived repository', () => {
+      const activeRepo: RepositoryCardProps = {
+        ...createMockRepository(0),
+        isArchived: false,
+      }
+
+      render(<RepositoriesCard repositories={[activeRepo]} />)
+
+      expect(screen.queryByText('Archived')).not.toBeInTheDocument()
+    })
+
+    it('does not display archived badge when isArchived is undefined', () => {
+      const repo: RepositoryCardProps = {
+        ...createMockRepository(0),
+      }
+
+      render(<RepositoriesCard repositories={[repo]} />)
+
+      expect(screen.queryByText('Archived')).not.toBeInTheDocument()
+    })
+
+    it('displays archived badge only for archived repos in mixed list', () => {
+      const repositories = [
+        { ...createMockRepository(0), isArchived: true },
+        { ...createMockRepository(1), isArchived: false },
+        { ...createMockRepository(2), isArchived: true },
+        { ...createMockRepository(3) },
+      ]
+
+      render(<RepositoriesCard repositories={repositories} />)
+
+      const badges = screen.getAllByText('Archived')
+      expect(badges).toHaveLength(2)
+    })
+
+    it('archived badge has small size on cards', () => {
+      const archivedRepo: RepositoryCardProps = {
+        ...createMockRepository(0),
+        isArchived: true,
+      }
+
+      const { container } = render(<RepositoriesCard repositories={[archivedRepo]} />)
+
+      const badge = screen.getByText('Archived')
+      expect(badge).toHaveClass('px-2', 'py-1', 'text-xs')
+    })
+
+    it('archived badge does not show icon on cards', () => {
+      const archivedRepo: RepositoryCardProps = {
+        ...createMockRepository(0),
+        isArchived: true,
+      }
+
+      const { container } = render(<RepositoriesCard repositories={[archivedRepo]} />)
+
+      const badge = screen.getByText('Archived')
+      const icon = badge.querySelector('[data-testid="archive-icon"]')
+      expect(icon).not.toBeInTheDocument()
+    })
+
+    it('archived badge does not break card layout', () => {
+      const archivedRepo: RepositoryCardProps = {
+        ...createMockRepository(0),
+        isArchived: true,
+      }
+
+      render(<RepositoriesCard repositories={[archivedRepo]} />)
+
+      expect(screen.getByText('Repository 0')).toBeInTheDocument()
+      expect(screen.getByTestId('info-item-Star')).toBeInTheDocument()
+      expect(screen.getByTestId('info-item-Fork')).toBeInTheDocument()
+      expect(screen.getByText('Archived')).toBeInTheDocument()
+    })
+
+    it('archived badge is positioned correctly with repository name', () => {
+      const archivedRepo: RepositoryCardProps = {
+        ...createMockRepository(0),
+        isArchived: true,
+      }
+
+      const { container } = render(<RepositoriesCard repositories={[archivedRepo]} />)
+
+      const headerContainer = container.querySelector('.flex.items-start.justify-between')
+      expect(headerContainer).toBeInTheDocument()
+    })
+
+    it('handles null isArchived gracefully', () => {
+      const repo: RepositoryCardProps = {
+        ...createMockRepository(0),
+        isArchived: null as any,
+      }
+
+      render(<RepositoriesCard repositories={[repo]} />)
+
+      expect(screen.queryByText('Archived')).not.toBeInTheDocument()
+    })
+
+    it('archived badge persists when toggling show more/less', () => {
+      const repositories = Array.from({ length: 6 }, (_, i) => ({
+        ...createMockRepository(i),
+        isArchived: i % 2 === 0,
+      }))
+
+      render(<RepositoriesCard repositories={repositories} />)
+
+      expect(screen.getAllByText('Archived')).toHaveLength(2)
+
+      fireEvent.click(screen.getByTestId('show-more-button'))
+
+      expect(screen.getAllByText('Archived')).toHaveLength(3)
+
+      fireEvent.click(screen.getByTestId('show-more-button'))
+
+      expect(screen.getAllByText('Archived')).toHaveLength(2)
+    })
+
+    it('clicking archived repository still navigates correctly', () => {
+      const archivedRepo: RepositoryCardProps = {
+        ...createMockRepository(0),
+        isArchived: true,
+      }
+
+      render(<RepositoriesCard repositories={[archivedRepo]} />)
+
+      const repositoryButton = screen.getByText('Repository 0')
+      fireEvent.click(repositoryButton)
+
+      expect(mockPush).toHaveBeenCalledWith('/organizations/org-0/repositories/repo-0')
+    })
+  })
 })
