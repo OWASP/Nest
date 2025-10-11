@@ -4,6 +4,17 @@ export const GET_CHAPTER_DATA = gql`
   query GetChapterData($key: String!) {
     chapter(key: $key) {
       id
+      entityLeaders {
+        id
+        description
+        memberName
+        member {
+          id
+          login
+          name
+          avatarUrl
+        }
+      }
       geoLocation {
         lat
         lng

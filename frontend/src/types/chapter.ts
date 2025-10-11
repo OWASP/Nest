@@ -1,8 +1,10 @@
 import type { Contributor } from 'types/contributor'
+import type { Leader } from 'types/leader'
 
 export type Chapter = {
   _geoloc?: GeoLocation
   createdAt?: number
+  entityLeaders?: Leader[]
   geoLocation?: GeoLocation
   isActive?: boolean
   key: string

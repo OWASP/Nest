@@ -19,6 +19,18 @@ export const mockChapterDetailsData = {
       lat: 23.2584857,
       lng: 77.401989,
     },
+    entityLeaders: [
+      {
+        description: 'Chapter Leader',
+        memberName: 'Bob',
+        member: {
+          id: '2',
+          login: 'bob',
+          name: 'Bob',
+          avatarUrl: 'https://avatars.githubusercontent.com/u/67890?v=4',
+        },
+      },
+    ],
     establishedYear: 2020,
     key: 'test-chapter',
   },

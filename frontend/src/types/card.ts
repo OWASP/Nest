@@ -6,6 +6,7 @@ import type { Contributor } from 'types/contributor'
 import type { HealthMetricsProps } from 'types/healthMetrics'
 import type { Icon } from 'types/icon'
 import type { Issue } from 'types/issue'
+import type { Leader } from 'types/leader'
 import type { Level } from 'types/level'
 import type { Module } from 'types/mentorship'
 import type { Milestone } from 'types/milestone'
@@ -44,6 +45,7 @@ export interface DetailsCardProps {
   description?: string
   details?: { label: string; value: string | JSX.Element }[]
   domains?: string[]
+  entityLeaders?: Leader[]
   entityKey?: string
   geolocationData?: Chapter[]
   healthMetricsData?: HealthMetricsProps[]

@@ -20,6 +20,7 @@ import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
+import Leaders from 'components/Leaders'
 import LeadersList from 'components/LeadersList'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import Milestones from 'components/Milestones'
@@ -43,6 +44,7 @@ const DetailsCard = ({
   canUpdateStatus,
   tags,
   domains,
+  entityLeaders,
   modules,
   mentors,
   admins,
@@ -220,6 +222,7 @@ const DetailsCard = ({
             )}
           </div>
         )}
+        {entityLeaders && entityLeaders.length > 0 && <Leaders users={entityLeaders} />}
         {topContributors && (
           <TopContributorsList
             contributors={topContributors}
