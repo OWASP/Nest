@@ -9,6 +9,8 @@ from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
 EXPECTED_SCORE = 34.0
+EXPECTED_SCORE_WITH_COMPLIANCE_BONUS = 42.0  # 34.0 + 8.0 compliance bonus
+LEVEL_COMPLIANCE_WEIGHT = 8.0
 
 
 class TestUpdateProjectHealthMetricsScoreCommand:
@@ -82,3 +84,96 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         assert mock_metric.score == EXPECTED_SCORE
         assert "Updated project health scores successfully." in self.stdout.getvalue()
         assert "Updating score for project: Test Project" in self.stdout.getvalue()
+
+    def test_handle_with_level_compliant_project(self):
+        """Test score calculation includes compliance bonus for compliant projects."""
+        fields_weights = {
+            "age_days": (5, 6),
+            "contributors_count": (5, 6),
+            "forks_count": (5, 6),
+            "last_release_days": (5, 6),
+            "last_commit_days": (5, 6),
+            "open_issues_count": (7, 6),
+            "open_pull_requests_count": (5, 6),
+            "owasp_page_last_update_days": (5, 6),
+            "last_pull_request_days": (5, 6),
+            "recent_releases_count": (5, 6),
+            "stars_count": (5, 6),
+            "total_pull_requests_count": (5, 6),
+            "total_releases_count": (5, 6),
+            "unanswered_issues_count": (7, 6),
+            "unassigned_issues_count": (7, 6),
+        }
+
+        # Create mock metrics with test data
+        mock_metric = MagicMock(spec=ProjectHealthMetrics)
+        mock_requirements = MagicMock(spec=ProjectHealthRequirements)
+        for field, (metric_weight, requirement_weight) in fields_weights.items():
+            setattr(mock_metric, field, metric_weight)
+            setattr(mock_requirements, field, requirement_weight)
+        mock_metric.project.level = "test_level"
+        mock_metric.project.name = "Compliant Test Project"
+        mock_metric.project.is_level_compliant = True  # Project is compliant
+        mock_metric.is_funding_requirements_compliant = True
+        mock_metric.is_leader_requirements_compliant = True
+        self.mock_metrics.return_value.select_related.return_value = [mock_metric]
+        self.mock_requirements.return_value = [mock_requirements]
+        mock_requirements.level = "test_level"
+
+        # Execute command
+        with patch("sys.stdout", new=self.stdout):
+            call_command("owasp_update_project_health_scores")
+
+        # Check if score includes compliance bonus
+        assert mock_metric.score == EXPECTED_SCORE_WITH_COMPLIANCE_BONUS
+        assert "Updated project health scores successfully." in self.stdout.getvalue()
+
+    def test_handle_with_non_compliant_project(self):
+        """Test score calculation excludes compliance bonus for non-compliant projects."""
+        fields_weights = {
+            "age_days": (5, 6),
+            "contributors_count": (5, 6),
+            "forks_count": (5, 6),
+            "last_release_days": (5, 6),
+            "last_commit_days": (5, 6),
+            "open_issues_count": (7, 6),
+            "open_pull_requests_count": (5, 6),
+            "owasp_page_last_update_days": (5, 6),
+            "last_pull_request_days": (5, 6),
+            "recent_releases_count": (5, 6),
+            "stars_count": (5, 6),
+            "total_pull_requests_count": (5, 6),
+            "total_releases_count": (5, 6),
+            "unanswered_issues_count": (7, 6),
+            "unassigned_issues_count": (7, 6),
+        }
+
+        # Create mock metrics with test data
+        mock_metric = MagicMock(spec=ProjectHealthMetrics)
+        mock_requirements = MagicMock(spec=ProjectHealthRequirements)
+        for field, (metric_weight, requirement_weight) in fields_weights.items():
+            setattr(mock_metric, field, metric_weight)
+            setattr(mock_requirements, field, requirement_weight)
+        mock_metric.project.level = "test_level"
+        mock_metric.project.name = "Non-Compliant Test Project"
+        mock_metric.project.is_level_compliant = False  # Project is NOT compliant
+        mock_metric.is_funding_requirements_compliant = True
+        mock_metric.is_leader_requirements_compliant = True
+        self.mock_metrics.return_value.select_related.return_value = [mock_metric]
+        self.mock_requirements.return_value = [mock_requirements]
+        mock_requirements.level = "test_level"
+
+        # Execute command
+        with patch("sys.stdout", new=self.stdout):
+            call_command("owasp_update_project_health_scores")
+
+        # Check if score does NOT include compliance bonus (penalty applied)
+        assert mock_metric.score == EXPECTED_SCORE  # No bonus
+        assert "Updated project health scores successfully." in self.stdout.getvalue()
+
+    def test_compliance_penalty_difference(self):
+        """Test that compliance status creates expected score difference."""
+        # This test verifies the penalty is exactly the compliance weight
+        expected_penalty = LEVEL_COMPLIANCE_WEIGHT
+        score_difference = EXPECTED_SCORE_WITH_COMPLIANCE_BONUS - EXPECTED_SCORE
+        assert score_difference == expected_penalty

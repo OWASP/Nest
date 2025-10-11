@@ -90,6 +90,11 @@ class Project(
 
     custom_tags = models.JSONField(verbose_name="Custom tags", default=list, blank=True)
     track_issues = models.BooleanField(verbose_name="Track issues", default=True)
+    is_level_compliant = models.BooleanField(
+        verbose_name="Is level compliant",
+        default=True,
+        help_text="Indicates if the project level matches the official OWASP project_levels.json",
+    )
 
     # GKs.
     members = GenericRelation("owasp.EntityMember")

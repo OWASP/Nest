@@ -31,6 +31,8 @@ class Command(BaseCommand):
             "unanswered_issues_count": 6.0,
             "unassigned_issues_count": 6.0,
         }
+        # Weight for level compliance penalty (deducted if non-compliant)
+        level_compliance_weight = 8.0
 
         project_health_metrics = []
         project_health_requirements = {
@@ -56,6 +58,11 @@ class Command(BaseCommand):
             for field, weight in backward_fields.items():
                 if int(getattr(metric, field)) <= int(getattr(requirements, field)):
                     score += weight
+
+            # Apply level compliance bonus or penalty
+            if metric.project.is_level_compliant:
+                score += level_compliance_weight
+            # Non-compliant projects don't get the compliance bonus (penalty)
 
             metric.score = score
             project_health_metrics.append(metric)

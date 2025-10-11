@@ -2,6 +2,10 @@ owasp-aggregate-projects:
 	@echo "Aggregating OWASP projects"
 	@CMD="python manage.py owasp_aggregate_projects" $(MAKE) exec-backend-command
 
+owasp-check-project-level-compliance:
+	@echo "Checking OWASP project level compliance"
+	@CMD="python manage.py owasp_check_project_level_compliance" $(MAKE) exec-backend-command
+
 owasp-create-project-metadata-file:
 	@echo "Generating metadata"
 	@CMD="python manage.py owasp_create_project_metadata_file $(entity_key)" $(MAKE) exec-backend-command
