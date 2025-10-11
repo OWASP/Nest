@@ -4,6 +4,7 @@ import pytest
 
 from apps.github.models.repository import Repository
 from apps.github.models.user import User
+from apps.owasp.models.enums.project import ProjectLevel, ProjectType
 from apps.owasp.models.project import Project
 
 
@@ -36,9 +37,9 @@ class TestProjectModel:
     @pytest.mark.parametrize(
         ("project_type", "expected_result"),
         [
-            (Project.ProjectType.CODE, True),
-            (Project.ProjectType.DOCUMENTATION, False),
-            (Project.ProjectType.TOOL, False),
+            (ProjectType.CODE, True),
+            (ProjectType.DOCUMENTATION, False),
+            (ProjectType.TOOL, False),
         ],
     )
     def test_is_code_type(self, project_type, expected_result):
@@ -48,9 +49,9 @@ class TestProjectModel:
     @pytest.mark.parametrize(
         ("project_type", "expected_result"),
         [
-            (Project.ProjectType.CODE, False),
-            (Project.ProjectType.DOCUMENTATION, True),
-            (Project.ProjectType.TOOL, False),
+            (ProjectType.CODE, False),
+            (ProjectType.DOCUMENTATION, True),
+            (ProjectType.TOOL, False),
         ],
     )
     def test_is_documentation_type(self, project_type, expected_result):
@@ -60,9 +61,9 @@ class TestProjectModel:
     @pytest.mark.parametrize(
         ("project_type", "expected_result"),
         [
-            (Project.ProjectType.CODE, False),
-            (Project.ProjectType.DOCUMENTATION, False),
-            (Project.ProjectType.TOOL, True),
+            (ProjectType.CODE, False),
+            (ProjectType.DOCUMENTATION, False),
+            (ProjectType.TOOL, True),
         ],
     )
     def test_is_tool_type(self, project_type, expected_result):
@@ -127,6 +128,6 @@ class TestProjectModel:
         )
 
         assert project.created_at == owasp_repository.created_at
-        assert project.level == Project.ProjectLevel.LAB
-        assert project.type == Project.ProjectType.TOOL
+        assert project.level == ProjectLevel.LAB
+        assert project.type == ProjectType.TOOL
         assert project.updated_at == owasp_repository.updated_at

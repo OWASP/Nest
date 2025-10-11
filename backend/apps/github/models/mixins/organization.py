@@ -9,7 +9,7 @@ class OrganizationIndexMixin:
     @property
     def is_indexable(self) -> bool:
         """Organizations to index."""
-        return bool(self.is_owasp_organization and self.name and self.login)
+        return bool(self.is_owasp_related_organization and self.name and self.login)
 
     @property
     def idx_avatar_url(self) -> str:

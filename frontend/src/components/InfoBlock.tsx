@@ -1,5 +1,6 @@
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
+import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Tooltip } from '@heroui/tooltip'
 import millify from 'millify'
 import { pluralize } from 'utils/pluralize'
 
@@ -20,18 +21,19 @@ const InfoBlock = ({
   unit?: string
   value: number
 }) => {
-  const name = pluralizedName
-    ? pluralize(value, unit || '', pluralizedName)
-    : pluralize(value, unit || '')
+  const name = pluralizedName ? pluralize(value, unit, pluralizedName) : pluralize(value, unit)
   const formattedValue = value ? `${millify(value, { precision })} ${name}` : `No ${name}`
+  const tooltipValue = value ? `${value.toLocaleString()} ${name}` : `No ${name}`
 
   return (
     <div className={`flex ${className}`}>
-      <FontAwesomeIcon icon={icon} className="mr-3 mt-1 w-5" />
+      <FontAwesomeIcon icon={icon} className="mt-1 mr-3 w-5" />
       <div>
         <div className="text-sm md:text-base">
           {label && <div className="text-sm font-medium">{label}</div>}
-          {formattedValue}
+          <Tooltip content={tooltipValue} delay={100} closeDelay={100} showArrow placement="top">
+            {formattedValue}
+          </Tooltip>
         </div>
       </div>
     </div>

@@ -1,20 +1,22 @@
-import { IconDefinition } from '@fortawesome/fontawesome-svg-core'
-import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
+import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Button } from '@heroui/button'
 import { useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import type React from 'react'
+import { useState } from 'react'
+import ShowMoreButton from 'components/ShowMoreButton'
 
 const ToggleableList = ({
   items,
   label,
   icon,
   limit = 10,
+  isDisabled = false,
 }: {
   items: string[]
   label: React.ReactNode
   limit?: number
   icon?: IconDefinition
+  isDisabled?: boolean
 }) => {
   const [showAll, setShowAll] = useState(false)
   const router = useRouter()
@@ -27,7 +29,7 @@ const ToggleableList = ({
     <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
       <h2 className="mb-4 text-2xl font-semibold">
         <div className="flex items-center">
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-row items-center gap-2">
             {icon && <FontAwesomeIcon icon={icon} className="mr-2 h-5 w-5" />}
           </div>
           <span>{label}</span>
@@ -37,30 +39,14 @@ const ToggleableList = ({
         {(showAll ? items : items.slice(0, limit)).map((item, index) => (
           <button
             key={index}
-            className="rounded-lg border border-gray-400 px-3 py-1 text-sm transition-all duration-200 ease-in-out hover:scale-105 hover:bg-gray-200 hover:underline dark:border-gray-300 dark:hover:bg-gray-700"
-            onClick={() => handleButtonClick({ item })}
+            className="rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700"
+            onClick={() => !isDisabled && handleButtonClick({ item })}
           >
             {item}
           </button>
         ))}
       </div>
-      {items.length > limit && (
-        <Button
-          disableAnimation
-          onPress={toggleShowAll}
-          className="mt-4 flex items-center bg-transparent text-blue-400 hover:underline"
-        >
-          {showAll ? (
-            <>
-              Show less <FontAwesomeIcon icon={faChevronUp} className="ml-1" />
-            </>
-          ) : (
-            <>
-              Show more <FontAwesomeIcon icon={faChevronDown} className="ml-1" />
-            </>
-          )}
-        </Button>
-      )}
+      {items.length > limit && <ShowMoreButton onToggle={toggleShowAll} />}
     </div>
   )
 }

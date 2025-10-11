@@ -10,6 +10,11 @@ scan:
     # Skip the PyJWT package metadata file to avoid false positives.
     - /home/owasp/.venv/lib/python3.13/site-packages/PyJWT-2.10.1.dist-info/METADATA
 
+severity:
+  - CRITICAL
+  - HIGH
+  - MEDIUM
+
 timeout: 10m
 
 vulnerability:
@@ -18,6 +23,3 @@ vulnerability:
     - config
     - secret
     - vuln
-  severity:
-    - CRITICAL
-    - HIGH

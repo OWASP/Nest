@@ -1,73 +1,91 @@
-import { IconDefinition } from '@fortawesome/free-solid-svg-icons'
-import { JSX } from 'react'
-import { ButtonType } from 'types/button'
-import { GeoLocDataGraphQL } from 'types/chapter'
-import { TopContributorsTypeAlgolia, TopContributorsTypeGraphql } from 'types/contributor'
-import { IconType } from 'types/icon'
-import { Level } from 'types/level'
-import {
-  ProjectIssuesType,
-  ProjectReleaseType,
-  RepositoryCardProps,
-  ProjectMilestonesType,
-} from 'types/project'
-import { ItemCardPullRequests } from 'types/user'
+import type { IconDefinition } from '@fortawesome/free-solid-svg-icons'
+import type { JSX } from 'react'
+import type { Button } from 'types/button'
+import type { Chapter } from 'types/chapter'
+import type { Contributor } from 'types/contributor'
+import type { HealthMetricsProps } from 'types/healthMetrics'
+import type { Icon } from 'types/icon'
+import type { Issue } from 'types/issue'
+import type { Level } from 'types/level'
+import type { Module } from 'types/mentorship'
+import type { Milestone } from 'types/milestone'
+import type { RepositoryCardProps } from 'types/project'
+import type { PullRequest } from 'types/pullRequest'
+import type { Release } from 'types/release'
 
-export interface CardProps {
-  button: ButtonType
-  icons?: IconType
+export type CardProps = {
+  button: Button
+  icons?: Icon
   isActive?: boolean
   level?: Level
   projectLink?: string
   projectName?: string
+  modules?: string[]
   social?: { title: string; icon: string; url: string }[]
   summary: string
   title: string
+  timeline?: {
+    start: string
+    end: string
+  }
   tooltipLabel?: string
-  topContributors?: TopContributorsTypeGraphql[] | TopContributorsTypeAlgolia[]
+  topContributors?: Contributor[]
   url: string
 }
 
-interface stats {
+type Stats = {
   icon: IconDefinition
   pluralizedName?: string
   unit?: string
   value: number
 }
 export interface DetailsCardProps {
+  accessLevel?: string
   description?: string
   details?: { label: string; value: string | JSX.Element }[]
-  geolocationData?: GeoLocDataGraphQL | null
+  domains?: string[]
+  entityKey?: string
+  geolocationData?: Chapter[]
+  healthMetricsData?: HealthMetricsProps[]
   heatmap?: JSX.Element
-  is_active?: boolean
+  isActive?: boolean
   languages?: string[]
-  pullRequests?: ItemCardPullRequests[]
-  recentIssues?: ProjectIssuesType[]
-  recentReleases?: ProjectReleaseType[]
-  recentMilestones?: ProjectMilestonesType[]
+  status?: string
+  setStatus?: (newStatus: string) => void
+  canUpdateStatus?: boolean
+  mentors?: Contributor[]
+  admins?: Contributor[]
+  projectName?: string
+  pullRequests?: PullRequest[]
+  recentIssues?: Issue[]
+  recentMilestones?: Milestone[]
+  recentReleases?: Release[]
   repositories?: RepositoryCardProps[]
-  socialLinks?: string[]
-  stats?: stats[]
-  summary?: string
+  modules?: Module[]
   showAvatar?: boolean
+  socialLinks?: string[]
+  stats?: Stats[]
+  summary?: string
   title?: string
-  topContributors?: TopContributorsTypeGraphql[]
+  topContributors?: Contributor[]
   topics?: string[]
+  tags?: string[]
   type: string
   userSummary?: JSX.Element
 }
 
 export interface UserCardProps {
   avatar: string
-  button: ButtonType
+  button: Button
   className?: string
   company?: string
   description?: string
   email?: string
-  followers_count?: number
+  followersCount?: number
   location?: string
+  login?: string
   name?: string
-  repositories_count?: number
+  repositoriesCount?: number
 }
 
 export interface SnapshotCardProps {
@@ -75,5 +93,5 @@ export interface SnapshotCardProps {
   startAt: string
   endAt: string
   title: string
-  button: ButtonType
+  button: Button
 }

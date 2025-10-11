@@ -2,7 +2,8 @@ include backend/Makefile
 include cspell/Makefile
 include docs/Makefile
 include frontend/Makefile
-include schema/Makefile
+
+MAKEFLAGS += --no-print-directory
 
 build:
 	@docker compose build
@@ -13,17 +14,17 @@ clean: \
 
 clean-dependencies: \
 	clean-backend-dependencies \
-	clean-frontend-dependencies \
-	clean-schema-dependencies
+	clean-frontend-dependencies
 
 clean-docker: \
 	clean-backend-docker \
+	clean-docs-docker \
 	clean-frontend-docker
 
 check: \
+	check-spelling \
 	check-backend \
-	check-frontend \
-	check-spelling
+	check-frontend
 
 check-backend: \
 	pre-commit
@@ -50,15 +51,14 @@ prune:
 
 run:
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
-	docker compose -f docker/docker-compose-local.yaml build && \
-	docker compose -f docker/docker-compose-local.yaml up --remove-orphans
+	docker compose -f docker-compose/local.yaml --project-name nest-local build && \
+	docker compose -f docker-compose/local.yaml --project-name nest-local up --remove-orphans
 
 fuzz-test-backend:
 	@COMPOSE_BAKE=true docker compose -f docker/docker-compose-fuzz.yaml up --build --abort-on-container-exit --remove-orphans
 
 test: \
-	test-nest-app \
-	test-schema
+	test-nest-app
 
 test-nest-app: \
 	test-backend \
@@ -68,8 +68,7 @@ update: \
 	clean-dependencies \
 	update-docs-dependencies \
 	update-nest-app-dependencies \
-	update-pre-commit \
-	update-schema-dependencies
+	update-pre-commit
 
 update-nest-app-dependencies: \
 	update-backend-dependencies \

@@ -1,42 +1,37 @@
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = [ "poetry-core" ]
+
 [tool.poetry]
 name = "OWASP Nest"
-version = "0.1.0"
+version = "0.0.0"
 description = "Your gateway to OWASP"
-authors = ["Arkadii Yakovets <arkadii.yakovets@owasp.org>"]
+authors = [ "Arkadii Yakovets <arkadii.yakovets@owasp.org>" ]
 readme = "README.md"
 
-packages = [{ include = "apps" }]
-
-[tool.coverage.run]
-branch = true
-omit = [
-    "__init__.py",
-    "**/admin.py",
-    "**/apps.py",
-    "**/migrations/*",
-    "manage.py",
-    "settings/*",
-    "tests/*",
-    "wsgi.py",
-]
+packages = [ { include = "apps" } ]
 
 [tool.poetry.dependencies]
 algoliasearch = "^4.13.2"
 algoliasearch-django = "^4.0.0"
-django = "^5.1"
+django = "^5.2"
 django-configurations = "^2.5.1"
 django-cors-headers = "^4.7.0"
-django-filter = "^25.1"
-django-redis = "^5.4.0"
-django-storages = { extras = ["s3"], version = "^1.14.4" }
-djangorestframework = "^3.15.2"
+django-ninja = "^1.4.3"
+django-redis = "^6.0.0"
+django-storages = { extras = [ "s3" ], version = "^1.14.4" }
+emoji = "^2.14.1"
 geopy = "^2.4.1"
 gunicorn = "^23.0.0"
 humanize = "^4.11.0"
 jinja2 = "^3.1.6"
-lxml = "^5.3.0"
+langchain = "^0.3.26"
+langchain-community = "^0.3.26"
+lxml = "^6.0.0"
 markdown = "^3.7"
-openai = "^1.60.1"
+openai = "^2.0.1"
+owasp-schema = "^0.1.10"
+pgvector = "^0.4.1"
 psycopg2-binary = "^2.9.9"
 pydantic = "^2.11.1"
 pydantic-core = "^2.33.0"
@@ -44,116 +39,147 @@ pygithub = "^2.5.0"
 python = "^3.13"
 python-dateutil = "^2.9.0.post0"
 pyyaml = "^6.0.2"
-requests = "^2.32.3"
-sentry-sdk = { extras = ["django"], version = "^2.20.0" }
+reportlab = "^4.4.2"
+requests = "^2.32.5"
+sentry-sdk = { extras = [ "django" ], version = "^2.20.0" }
 slack-bolt = "^1.22.0"
-slack-sdk = "^3.35.0"
-strawberry-graphql = {extras = ["django"], version = "^0.270.1"}
+slack-sdk = "^3.37.0"
+strawberry-graphql = { extras = [ "django" ], version = "^0.283.2" }
+strawberry-graphql-django = "^0.65.1"
 thefuzz = "^0.22.1"
-strawberry-graphql-django = "^0.59.1"
+pyparsing = "^3.2.3"
 
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.36.4"
 pre-commit = "^4.1.0"
-ruff = "^0.11.0"
 hypothesis = "^6.129.4"
+ruff = "^0.14.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"
-pytest-cov = "^6.0"
+pytest-cov = "^7.0"
 pytest-django = "^4.5"
 pytest-mock = "^3.0"
 pytest-xdist = "^3.0"
 python-dotenv = "^1.0.1"
+
+[tool.ruff]
+target-version = "py313"
+
+line-length = 99
+lint.select = [ "ALL" ]
+lint.extend-select = [ "I" ]
+lint.ignore = [
+  "ANN",     # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann/
+  "ARG002",  # https://docs.astral.sh/ruff/rules/unused-method-argument/
+  "C901",    # https://docs.astral.sh/ruff/rules/complex-structure/
+  "COM812",  # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
+  "D407",    # https://docs.astral.sh/ruff/rules/missing-dashed-underline-after-section/
+  "DJ012",   # https://docs.astral.sh/ruff/rules/django-unordered-body-content-in-model/
+  "FIX002",  # https://docs.astral.sh/ruff/rules/line-contains-todo/
+  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+  "PLR0912", # https://docs.astral.sh/ruff/rules/too-many-branches/
+  "PLR0913", # https://docs.astral.sh/ruff/rules/too-many-arguments/
+  "PLR0915", # https://docs.astral.sh/ruff/rules/too-many-statements/
+  "RUF012",  # https://docs.astral.sh/ruff/rules/mutable-class-default/
+  "TD003",   # https://docs.astral.sh/ruff/rules/missing-todo-link/
+]
+lint.per-file-ignores."**/__init__.py" = [
+  "D104", # https://docs.astral.sh/ruff/rules/undocumented-public-package/
+  "F401", # https://docs.astral.sh/ruff/rules/unused-import/
+]
+lint.per-file-ignores."**/management/commands/*.py" = [
+  "D101", # https://docs.astral.sh/ruff/rules/undocumented-public-class/
+  "D102", # https://docs.astral.sh/ruff/rules/undocumented-public-method/
+  "T201", # https://docs.astral.sh/ruff/rules/print/
+]
+lint.per-file-ignores."**/migrations/*.py" = [
+  "D100",   # https://docs.astral.sh/ruff/rules/undocumented-public-module/
+  "D101",   # https://docs.astral.sh/ruff/rules/undocumented-public-class/
+  "D104",   # https://docs.astral.sh/ruff/rules/undocumented-public-package/
+  "E501",   # https://docs.astral.sh/ruff/rules/line-too-long/
+  "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
+]
+lint.per-file-ignores."**/models/*.py" = [
+  "D106", # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
+]
+lint.per-file-ignores."**/settings/*.py" = [
+  "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
+]
+lint.per-file-ignores."**/tests/**/*.py" = [
+  "D100",    # https://docs.astral.sh/ruff/rules/undocumented-public-module/
+  "D101",    # https://docs.astral.sh/ruff/rules/undocumented-public-class/
+  "D102",    # https://docs.astral.sh/ruff/rules/undocumented-public-method/
+  "D103",    # https://docs.astral.sh/ruff/rules/undocumented-public-function/
+  "D107",    # https://docs.astral.sh/ruff/rules/undocumented-public-init/
+  "PLR2004", # https://docs.astral.sh/ruff/rules/magic-value-comparison/
+  "RUF012",  # https://docs.astral.sh/ruff/rules/mutable-class-default/
+  "S101",    # https://docs.astral.sh/ruff/rules/assert/
+  "SLF001",  # https://docs.astral.sh/ruff/rules/private-member-access/
+]
+
+lint.per-file-ignores."apps/api/rest/**/*.py" = [
+  "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
+  "B008",   # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
+]
+
+[tool.pytest.ini_options]
+DJANGO_CONFIGURATION = "Test"
+DJANGO_SETTINGS_MODULE = "settings.test"
+addopts = [
+  "--cov-config=pyproject.toml",
+  "--cov-fail-under=80",
+  "--cov-precision=2",
+  "--cov-report=term-missing",
+  "--cov=.",
+  "--dist=loadscope",
+  "--durations-min=1",
+  "--durations=5",
+  "--no-cov-on-fail",
+  "--numprocesses=auto",
+]
+filterwarnings = [
+  "ignore::DeprecationWarning:pytest_cov",
+  "ignore::DeprecationWarning:xdist",
+  "ignore::django.conf.RemovedInDjango60Warning:django",
+  "ignore::pydantic.warnings.PydanticDeprecatedSince20",
+]
+log_level = "INFO"
+
+[tool.coverage.run]
+branch = true
+omit = [
+  "__init__.py",
+  "**/admin.py",
+  "**/apps.py",
+  "**/migrations/*",
+  "**/mentorship/*", # TODO: work in progress
+  "manage.py",
+  "settings/*",
+  "tests/*",
+  "wsgi.py",
+]
+
+[tool.mypy]
+explicit_package_bases = true
+ignore_missing_imports = true
+mypy_path = "backend"
+plugins = [ "strawberry.ext.mypy_plugin" ]
+
+[[tool.mypy.overrides]]
+disable_error_code = [ "attr-defined" ]
+module = [ "apps.*.models.mixins.*", "apps.*.admin.*" ]
+
+[[tool.mypy.overrides]]
+disable_error_code = [ "var-annotated" ]
+module = [ "apps.*.migrations.*" ]
+
+[[tool.mypy.overrides]]
+disable_error_code = [ "return-value", "attr-defined", "misc" ]
+module = [ "apps.*.api.internal.queries.*", "apps.*.api.internal.nodes.*" ]
 
 [tool.djlint]
 format = true
 format_css = true
 format_js = true
 indent = 4
-
-[tool.pytest.ini_options]
-DJANGO_CONFIGURATION = "Test"
-DJANGO_SETTINGS_MODULE = "settings.test"
-addopts = [
-    "--cov-config=pyproject.toml",
-    "--cov-fail-under=75",
-    "--cov-precision=2",
-    "--cov-report=term-missing",
-    "--cov=.",
-    "--dist=loadscope",
-    "--durations-min=1",
-    "--durations=5",
-    "--no-cov-on-fail",
-    "--numprocesses=auto",
-]
-filterwarnings = [
-    "ignore::DeprecationWarning:pytest_cov",
-    "ignore::DeprecationWarning:xdist",
-    "ignore::django.conf.RemovedInDjango60Warning:django",
-]
-log_level = "INFO"
-
-[tool.mypy]
-explicit_package_bases = true
-ignore_missing_imports = true
-mypy_path = "backend"
-plugins = ["strawberry.ext.mypy_plugin"]
-
-[[tool.mypy.overrides]]
-disable_error_code = ["attr-defined"]
-module = ["apps.*.models.mixins.*", "apps.*.admin", "schema.tests.*"]
-
-[[tool.mypy.overrides]]
-disable_error_code = ["var-annotated"]
-module = ["apps.*.migrations.*"]
-
-[[tool.mypy.overrides]]
-disable_error_code = ["return-value", "attr-defined", "misc"]
-module = ["apps.*.graphql.queries.*", "apps.*.graphql.nodes.*"]
-
-[tool.ruff]
-line-length = 99
-target-version = "py313"
-
-[tool.ruff.lint]
-extend-select = ["I"]
-ignore = [
-    "ANN",  # TODO(arkid15r): remove when all annotations are added.
-    "ARG002",
-    "C901",
-    "COM812",
-    "D407",
-    "DJ012",
-    "ERA001",
-    "FBT002",
-    "FIX002",
-    "PD",
-    "PERF203",
-    "PLC0414",
-    "PLR0912",
-    "PLR0913",
-    "PLR0915",
-    "RUF012",
-    "SLF001",
-    "TD003",
-]
-select = ["ALL"]
-
-[tool.ruff.lint.per-file-ignores]
-"**/__init__.py" = ["D104", "F401"]
-"**/admin.py" = ["D100", "D101", "D104"]
-"**/api/*.py" = ["D106"]
-"**/apps.py" = ["D100", "D101", "D104"]
-"**/graphql/**/nodes.py" = ["D106"]
-"**/graphql/nodes/*.py" = ["D106"]
-"**/graphql/queries/*.py" = ["N805"]
-"**/management/commands/*.py" = ["D101", "D102", "T201"]
-"**/migrations/*.py" = ["D100", "D101", "D104"]
-"**/models.py" = ["D106"]
-"**/models/*.py" = ["D106"]
-"**/tests/**/*.py" = ["D100", "D101", "D102", "D103", "D107", "S101"]
-
-[build-system]
-build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core"]

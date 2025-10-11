@@ -108,7 +108,7 @@ def normalize_url(url: str, *, check_path: bool = False) -> str | None:
     if not parsed_url.netloc or (check_path and not parsed_url.path):
         return None
 
-    http_prefix = "http://"
+    http_prefix = "http://"  # NOSONAR
     https_prefix = "https://"
     if not parsed_url.scheme:
         url = f"{https_prefix}{url}"

@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import millify from 'millify'
 import Image from 'next/image'
-import { UserCardProps } from 'types/card'
+import type { UserCardProps } from 'types/card'
 
 const UserCard = ({
   avatar,
@@ -12,17 +12,18 @@ const UserCard = ({
   company,
   description,
   email,
-  followers_count,
+  followersCount,
   location,
+  login,
   name,
-  repositories_count,
+  repositoriesCount,
 }: UserCardProps) => {
   return (
     <Button
       onPress={button.onclick}
       className={`group flex flex-col items-center rounded-lg p-6 ${className}`}
     >
-      <div className="flex w-full flex-col items-center space-y-4">
+      <div className="flex w-full flex-col items-center gap-4">
         <div className="relative h-20 w-20 overflow-hidden rounded-full ring-2 ring-gray-100 group-hover:ring-blue-400 dark:ring-gray-700">
           {avatar ? (
             <Image fill src={`${avatar}&s=160`} alt={name || 'user'} objectFit="cover" />
@@ -37,28 +38,28 @@ const UserCard = ({
         </div>
 
         <div className="text-center">
-          <h3 className="max-w-[250px] truncate text-lg font-semibold text-gray-900 dark:text-white sm:text-xl">
+          <h3 className="max-w-[250px] truncate text-lg font-semibold text-gray-900 sm:text-xl dark:text-white">
             {name}
           </h3>
-          <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
-            {company || location || email}
+          <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 sm:text-base dark:text-gray-400">
+            {company || location || email || login}
           </p>
           {description && (
-            <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
+            <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 sm:text-base dark:text-gray-400">
               {description}
             </p>
           )}
           <div className="flex justify-center gap-3">
-            {followers_count > 0 && (
-              <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
+            {followersCount > 0 && (
+              <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 sm:text-base dark:text-gray-400">
                 <FontAwesomeIcon icon={faUsers} className="mr-1 h-4 w-4" />
-                {millify(followers_count, { precision: 1 })}
+                {millify(followersCount, { precision: 1 })}
               </p>
             )}
-            {repositories_count > 0 && (
-              <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 dark:text-gray-400 sm:text-base">
+            {repositoriesCount > 0 && (
+              <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 sm:text-base dark:text-gray-400">
                 <FontAwesomeIcon icon={faFolderOpen} className="mr-1 h-4 w-4" />
-                {millify(repositories_count, { precision: 1 })}
+                {millify(repositoriesCount, { precision: 1 })}
               </p>
             )}
           </div>

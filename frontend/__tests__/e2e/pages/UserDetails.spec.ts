@@ -35,7 +35,6 @@ test.describe('User Details Page', () => {
     await expect(page.getByText('10 Followers')).toBeVisible()
     await expect(page.getByText('5 Following')).toBeVisible()
     await expect(page.getByText('3 Repositories')).toBeVisible()
-    await expect(page.getByText('100 Contributions')).toBeVisible()
   })
 
   test('should have user issues', async ({ page }) => {

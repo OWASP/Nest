@@ -1,9 +1,8 @@
-import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client'
+import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { AppError, handleAppError } from 'app/global-error'
-import { GRAPHQL_URL } from 'utils/credentials'
+import { GRAPHQL_URL } from 'utils/env.client'
 import { getCsrfToken } from 'utils/utility'
-
 const createApolloClient = () => {
   if (!GRAPHQL_URL) {
     const error = new AppError(500, 'Missing GraphQL URL')
@@ -11,16 +10,18 @@ const createApolloClient = () => {
     return null
   }
 
-  const httpLink = createHttpLink({
+  const httpLink = new HttpLink({
     credentials: 'include',
     uri: GRAPHQL_URL,
   })
 
   const authLink = setContext(async (_, { headers }) => {
+    const csrfToken = await getCsrfToken()
+
     return {
       headers: {
         ...headers,
-        'X-CSRFToken': (await getCsrfToken()) || '',
+        'X-CSRFToken': csrfToken || '',
       },
     }
   })

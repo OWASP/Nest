@@ -1,9 +1,12 @@
 import { gql } from '@apollo/client'
 
 export const GET_LEADER_DATA = gql`
-  query GetUser($key: String!) {
+  query GetLeaderData($key: String!) {
     user(login: $key) {
+      id
       avatarUrl
+      company
+      location
       login
       name
     }
@@ -11,8 +14,9 @@ export const GET_LEADER_DATA = gql`
 `
 
 export const GET_USER_DATA = gql`
-  query GetUser($key: String!) {
+  query GetUserData($key: String!) {
     recentIssues(limit: 5, login: $key) {
+      id
       createdAt
       organizationName
       repositoryName
@@ -20,6 +24,7 @@ export const GET_USER_DATA = gql`
       url
     }
     recentMilestones(limit: 5, login: $key) {
+      id
       title
       openIssuesCount
       closedIssuesCount
@@ -29,6 +34,7 @@ export const GET_USER_DATA = gql`
       url
     }
     recentPullRequests(limit: 5, login: $key) {
+      id
       createdAt
       organizationName
       repositoryName
@@ -36,6 +42,7 @@ export const GET_USER_DATA = gql`
       url
     }
     recentReleases(limit: 5, login: $key) {
+      id
       isPreRelease
       name
       publishedAt
@@ -45,12 +52,14 @@ export const GET_USER_DATA = gql`
       url
     }
     topContributedRepositories(login: $key) {
+      id
       contributorsCount
       forksCount
       key
       name
       openIssuesCount
       organization {
+        id
         login
       }
       starsCount
@@ -58,6 +67,7 @@ export const GET_USER_DATA = gql`
       url
     }
     user(login: $key) {
+      id
       avatarUrl
       bio
       company
@@ -72,13 +82,15 @@ export const GET_USER_DATA = gql`
       name
       publicRepositoriesCount
       releasesCount
+      updatedAt
       url
     }
   }
 `
 export const GET_USER_METADATA = gql`
-  query GetUser($key: String!) {
+  query GetUserMetadata($key: String!) {
     user(login: $key) {
+      id
       bio
       login
       name

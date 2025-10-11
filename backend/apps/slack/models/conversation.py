@@ -1,11 +1,15 @@
-"""Slack app channel model."""
+"""Slack app conversation model."""
 
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.slack.models.workspace import Workspace
+
+if TYPE_CHECKING:  # pragma: no cover
+    from apps.slack.models.message import Message
 
 
 class Conversation(TimestampedModel):
@@ -15,6 +19,7 @@ class Conversation(TimestampedModel):
         db_table = "slack_conversations"
         verbose_name_plural = "Conversations"
 
+    # Slack conversation attributes.
     created_at = models.DateTimeField(verbose_name="Created at", blank=True, null=True)
     is_archived = models.BooleanField(verbose_name="Is archived", default=False)
     is_channel = models.BooleanField(verbose_name="Is channel", default=False)
@@ -24,17 +29,25 @@ class Conversation(TimestampedModel):
     is_mpim = models.BooleanField(verbose_name="Is MPIM", default=False)
     is_private = models.BooleanField(verbose_name="Is private", default=False)
     is_shared = models.BooleanField(verbose_name="Is shared", default=False)
-    member_count = models.PositiveIntegerField(verbose_name="Member count", default=0)
     name = models.CharField(verbose_name="Name", max_length=100, default="")
     purpose = models.TextField(verbose_name="Purpose", blank=True, default="")
     slack_channel_id = models.CharField(verbose_name="Channel ID", max_length=50, unique=True)
     slack_creator_id = models.CharField(verbose_name="Creator ID", max_length=255)
     topic = models.TextField(verbose_name="Topic", blank=True, default="")
+    total_members_count = models.PositiveIntegerField(verbose_name="Members count", default=0)
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name="channels")
+
+    # Additional attributes.
+    sync_messages = models.BooleanField(verbose_name="Sync messages", default=False)
 
     def __str__(self):
         """Channel human readable representation."""
-        return f"{self.name} - {self.workspace}"
+        return f"{self.workspace} #{self.name}"
+
+    @property
+    def latest_message(self) -> "Message | None":
+        """Get the latest message in the conversation."""
+        return self.messages.order_by("-created_at").first()
 
     def from_slack(self, conversation_data, workspace: Workspace) -> None:
         """Update instance based on Slack conversation data."""
@@ -56,6 +69,7 @@ class Conversation(TimestampedModel):
         self.purpose = conversation_data.get("purpose", {}).get("value", "")
         self.slack_creator_id = conversation_data.get("creator", "")
         self.topic = conversation_data.get("topic", {}).get("value", "")
+        self.total_members_count = conversation_data.get("num_members", 0)
 
         self.workspace = workspace
 

@@ -9,7 +9,7 @@ from apps.slack.common.presentation import EntityPresentation
 class Chapters(CommandBase):
     """Slack bot /chapters command."""
 
-    def get_render_blocks(self, command: dict):
+    def render_blocks(self, command: dict):
         """Get the rendered blocks.
 
         Args:
@@ -21,7 +21,7 @@ class Chapters(CommandBase):
         """
         command_text = command["text"].strip()
         if command_text in COMMAND_HELP:
-            return super().get_render_blocks(command)
+            return super().render_blocks(command)
 
         return get_blocks(
             search_query="" if command_text in COMMAND_START else command_text,

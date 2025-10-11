@@ -3,8 +3,10 @@ import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { JSX } from 'react'
-import { ProjectIssuesType, ProjectReleaseType, ProjectMilestonesType } from 'types/project'
-import { PullRequestsType } from 'types/user'
+import type { Issue } from 'types/issue'
+import type { Milestone } from 'types/milestone'
+import type { PullRequest } from 'types/pullRequest'
+import type { Release } from 'types/release'
 import SecondaryCard from 'components/SecondaryCard'
 import { TruncatedText } from 'components/TruncatedText'
 
@@ -17,7 +19,7 @@ const ItemCardList = ({
   showSingleColumn = true,
 }: {
   title: React.ReactNode
-  data: ProjectReleaseType[] | ProjectIssuesType[] | PullRequestsType[] | ProjectMilestonesType[]
+  data: Issue[] | Milestone[] | PullRequest[] | Release[]
   icon?: IconProp
   showAvatar?: boolean
   showSingleColumn?: boolean
@@ -56,7 +58,7 @@ const ItemCardList = ({
                     showArrow
                   >
                     <Link
-                      className="flex-shrink-0 text-blue-400 hover:underline"
+                      className="shrink-0 text-blue-400 hover:underline"
                       href={`/members/${item?.author?.login}`}
                     >
                       <Image
@@ -69,7 +71,7 @@ const ItemCardList = ({
                     </Link>
                   </Tooltip>
                 )}
-                <h3 className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold">
+                <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
                   <Link
                     className="text-blue-400 hover:underline"
                     href={item?.url || ''}

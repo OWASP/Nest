@@ -1,21 +1,20 @@
-import { TopContributorsTypeGraphql } from 'types/contributor'
-import { EventType } from 'types/event'
-import { ProjectIssuesType, ProjectReleaseType, ProjectMilestonesType } from 'types/project'
+import type { Chapter } from 'types/chapter'
+import type { Contributor } from 'types/contributor'
+import type { Event } from 'types/event'
+import type { Issue } from 'types/issue'
+import type { Milestone } from 'types/milestone'
+import type { Project } from 'types/project'
+import type { PullRequest } from 'types/pullRequest'
+import type { Release } from 'types/release'
 
 export type MainPageData = {
-  topContributors: TopContributorsTypeGraphql[]
-  recentIssues: ProjectIssuesType[]
-  recentReleases: ProjectReleaseType[]
-  upcomingEvents: EventType[]
-  recentPullRequests: PullRequestsType[]
-  recentMilestones: ProjectMilestonesType[]
-  recentChapters: {
-    createdAt: string
-    key: string
-    leaders: string[]
-    name: string
-    suggestedLocation: string
-  }[]
+  topContributors: Contributor[]
+  recentIssues: Issue[]
+  recentReleases: Release[]
+  upcomingEvents: Event[]
+  recentPullRequests: PullRequest[]
+  recentMilestones: Milestone[]
+  recentChapters: Chapter[]
   recentPosts: {
     authorName: string
     authorImageUrl: string
@@ -23,16 +22,8 @@ export type MainPageData = {
     title: string
     url: string
   }[]
-  recentProjects: {
-    createdAt: string
-    key: string
-    leaders: string[]
-    name: string
-    openIssuesCount: number
-    repositoriesCount: number
-    type: string
-  }[]
-  sponsors: SponsorType[]
+  recentProjects: Project[]
+  sponsors: Sponsor[]
   statsOverview: {
     activeChaptersStats: number
     activeProjectsStats: number
@@ -42,21 +33,9 @@ export type MainPageData = {
   }
 }
 
-export type SponsorType = {
+export type Sponsor = {
   imageUrl: string
   name: string
   sponsorType: string
-  url: string
-}
-
-export type PullRequestsType = {
-  author: {
-    avatarUrl: string
-    login: string
-    name: string
-  }
-  organizationName: string
-  createdAt: string
-  title: string
   url: string
 }

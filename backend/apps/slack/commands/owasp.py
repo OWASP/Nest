@@ -27,7 +27,7 @@ class Owasp(CommandBase):
 
         return super().handler(ack, command, client)
 
-    def get_template_context(self, command: dict):
+    def get_context(self, command: dict):
         """Get the template context.
 
         Args:
@@ -40,11 +40,11 @@ class Owasp(CommandBase):
         command_tokens = command["text"].split()
         if not command_tokens or command_tokens[0] in COMMAND_HELP:
             return {
-                "command": self.get_command_name(),
-                "help": True,
+                **super().get_context(command),
+                "HELP": True,
             }
         return {
-            "command": self.get_command_name(),
-            "handler": command_tokens[0].strip().lower(),
-            "help": False,
+            **super().get_context(command),
+            "HANDLER": command_tokens[0].strip().lower(),
+            "HELP": False,
         }

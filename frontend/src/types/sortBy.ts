@@ -1,4 +1,4 @@
-export interface SortByProps {
+export type SortByProps = {
   sortOptions: { key: string; label: string }[]
   selectedSortOption: string
   selectedOrder: string

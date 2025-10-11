@@ -27,9 +27,9 @@ class TestHomeActions:
     def _mock_external_calls(self):
         """Mock all external API calls."""
         with (
-            patch("apps.owasp.api.search.project.get_projects") as mock_projects,
-            patch("apps.owasp.api.search.chapter.get_chapters") as mock_chapters,
-            patch("apps.owasp.api.search.committee.get_committees") as mock_committees,
+            patch("apps.owasp.index.search.project.get_projects") as mock_projects,
+            patch("apps.owasp.index.search.chapter.get_chapters") as mock_chapters,
+            patch("apps.owasp.index.search.committee.get_committees") as mock_committees,
         ):
             mock_projects.return_value = {"hits": [], "nbPages": 1}
             mock_chapters.return_value = {"hits": [], "nbPages": 1}

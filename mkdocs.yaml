@@ -3,11 +3,6 @@ nav:
   - Home: index.md
   - Code of Conduct: code-of-conduct.md
   - Contributing: contributing.md
-  - Schema:
-      - Overview: schema/index.md
-      - Chapter: schema/chapter.md
-      - Committee: schema/committee.md
-      - Project: schema/project.md
 repo_url: https://github.com/OWASP/Nest
 theme:
   name: material

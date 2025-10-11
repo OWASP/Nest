@@ -5,7 +5,7 @@ from django.db import models
 from apps.common.models import TimestampedModel
 from apps.slack.commands.owasp import Owasp
 
-OWASP_COMMAND = Owasp().get_command_name()
+OWASP_COMMAND = Owasp().command_name
 
 
 class Event(TimestampedModel):

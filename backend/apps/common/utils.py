@@ -4,12 +4,33 @@ from __future__ import annotations
 
 import re
 from datetime import UTC, datetime
+from urllib.parse import urlparse
 
 from django.conf import settings
 from django.template.defaultfilters import pluralize
 from django.utils.text import Truncator
 from django.utils.text import slugify as django_slugify
 from humanize import intword, naturaltime
+
+
+def convert_to_camel_case(text: str) -> str:
+    """Convert a string to camelCase.
+
+    Args:
+        text (str): The input string.
+
+    Returns:
+        str: The converted string in camelCase.
+
+    """
+    parts = text.split("_")
+    offset = 1 if text.startswith("_") else 0
+    head = parts[offset : offset + 1] or [text]
+
+    segments = [f"_{head[0]}" if offset else head[0]]
+    segments.extend(word.capitalize() for word in parts[offset + 1 :])
+
+    return "".join(segments)
 
 
 def convert_to_snake_case(text: str) -> str:
@@ -25,6 +46,22 @@ def convert_to_snake_case(text: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "_", text).lower()
 
 
+def clean_url(url: str) -> str | None:
+    """Clean a URL by removing whitespace and trailing punctuation.
+
+    Args:
+        url (str): Raw URL string.
+
+    Returns:
+        str | None: Cleaned URL string or None if empty.
+
+    """
+    if not url:
+        return None
+
+    return url.strip().rstrip(".,;:!?") or None
+
+
 def get_absolute_url(path: str) -> str:
     """Return the absolute URL for a given path.
 
@@ -35,7 +72,7 @@ def get_absolute_url(path: str) -> str:
         str: The absolute URL.
 
     """
-    return f"{settings.SITE_URL}/{path}"
+    return f"{settings.SITE_URL}/{path.lstrip('/')}"
 
 
 def get_nest_user_agent() -> str:
@@ -58,7 +95,7 @@ def get_user_ip_address(request) -> str:
         str: The user's IP address.
 
     """
-    if settings.ENVIRONMENT == "Local":
+    if settings.IS_LOCAL_ENVIRONMENT:
         return settings.PUBLIC_IP_ADDRESS
 
     x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
@@ -154,3 +191,24 @@ def truncate(text: str, limit: int, truncate: str = "...") -> str:
 
     """
     return Truncator(text).chars(limit, truncate=truncate)
+
+
+def validate_url(url: str) -> bool:
+    """Validate that a URL has proper scheme and netloc.
+
+    Args:
+        url (str): URL string to validate.
+
+    Returns:
+        bool: True if URL is valid, False otherwise.
+
+    """
+    if not url:
+        return False
+
+    try:
+        parsed = urlparse(url)
+    except ValueError:
+        return False
+
+    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)

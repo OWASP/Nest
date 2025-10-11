@@ -1,6 +1,5 @@
 import {
   faCircleInfo,
-  faSquarePollVertical,
   faChartPie,
   faFolderOpen,
   faCode,
@@ -9,77 +8,124 @@ import {
   faRectangleList,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { DetailsCardProps } from 'types/card'
-import { capitalize } from 'utils/capitalize'
+import upperFirst from 'lodash/upperFirst'
+import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import type { ExtendedSession } from 'types/auth'
+import type { DetailsCardProps } from 'types/card'
+import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
+import { scrollToAnchor } from 'utils/scrollToAnchor'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
+import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
 import LeadersList from 'components/LeadersList'
+import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import Milestones from 'components/Milestones'
+import ModuleCard from 'components/ModuleCard'
+import ProgramActions from 'components/ProgramActions'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
 import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
+import SponsorCard from 'components/SponsorCard'
 import ToggleableList from 'components/ToggleableList'
-import TopContributors from 'components/TopContributors'
+import TopContributorsList from 'components/TopContributorsList'
 
 const DetailsCard = ({
-  title,
-  is_active = true,
-  summary,
   description,
-  heatmap,
-  stats,
   details,
-  socialLinks,
-  type,
-  topContributors,
-  languages,
-  pullRequests,
-  topics,
-  recentIssues,
-  recentReleases,
-  recentMilestones,
-  showAvatar = true,
-  userSummary,
+  accessLevel,
+  status,
+  setStatus,
+  canUpdateStatus,
+  tags,
+  domains,
+  modules,
+  mentors,
+  admins,
+  entityKey,
   geolocationData = null,
+  healthMetricsData,
+  isActive = true,
+  languages,
+  projectName,
+  pullRequests,
+  recentIssues,
+  recentMilestones,
+  recentReleases,
   repositories = [],
+  showAvatar = true,
+  socialLinks,
+  stats,
+  summary,
+  title,
+  topContributors,
+  topics,
+  type,
+  userSummary,
 }: DetailsCardProps) => {
+  const { data } = useSession()
+  const router = useRouter()
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
-        <h1 className="mb-6 mt-4 text-4xl font-bold">{title}</h1>
+        <div className="mt-4 flex flex-row items-center">
+          <div className="flex w-full items-center justify-between">
+            <h1 className="text-4xl font-bold">{title}</h1>
+            {type === 'program' && accessLevel === 'admin' && canUpdateStatus && (
+              <ProgramActions status={status} setStatus={setStatus} />
+            )}
+            {type === 'module' &&
+              accessLevel === 'admin' &&
+              admins?.some(
+                (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
+              ) && (
+                <button
+                  type="button"
+                  className="flex items-center justify-center gap-2 rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-nowrap text-[#0D6EFD] transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
+                  onClick={() => {
+                    router.push(`${window.location.pathname}/edit`)
+                  }}
+                >
+                  Edit Module
+                </button>
+              )}
+            {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
+              <MetricsScoreCircle
+                score={healthMetricsData[0].score}
+                clickable={true}
+                onClick={() => scrollToAnchor('issues-trend')}
+              />
+            )}
+          </div>
+          {!isActive && (
+            <span className="ml-4 justify-center rounded bg-red-200 px-2 py-1 text-sm text-red-800">
+              Inactive
+            </span>
+          )}
+        </div>
         <p className="mb-6 text-xl">{description}</p>
-        {!is_active && (
-          <span className="ml-2 rounded bg-red-200 px-2 py-1 text-sm text-red-800">Inactive</span>
-        )}
         {summary && (
           <SecondaryCard icon={faCircleInfo} title={<AnchorTitle title="Summary" />}>
             <p>{summary}</p>
           </SecondaryCard>
         )}
 
-        {userSummary && (
-          <SecondaryCard icon={faCircleInfo} title={<AnchorTitle title="Summary" />}>
-            {userSummary}
-          </SecondaryCard>
-        )}
-
-        {heatmap && (
-          <SecondaryCard
-            icon={faSquarePollVertical}
-            title={<AnchorTitle title="Contribution Heatmap" />}
-          >
-            {heatmap}
-          </SecondaryCard>
-        )}
+        {userSummary && <SecondaryCard>{userSummary}</SecondaryCard>}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
             icon={faRectangleList}
-            title={<AnchorTitle title={`${capitalize(type)} Details`} />}
-            className={`${type !== 'chapter' ? 'md:col-span-5' : 'md:col-span-3'} gap-2`}
+            title={<AnchorTitle title={`${upperFirst(type)} Details`} />}
+            className={
+              type === 'program' || type === 'module'
+                ? 'gap-2 md:col-span-7'
+                : type !== 'chapter'
+                  ? 'gap-2 md:col-span-5'
+                  : 'gap-2 md:col-span-3'
+            }
           >
             {details?.map((detail) =>
               detail?.label === 'Leaders' ? (
@@ -123,7 +169,7 @@ const DetailsCard = ({
           {type === 'chapter' && geolocationData && (
             <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
               <ChapterMapWrapper
-                geoLocData={geolocationData ? [geolocationData] : []}
+                geoLocData={geolocationData}
                 showLocal={true}
                 style={{
                   borderRadius: '0.5rem',
@@ -152,12 +198,49 @@ const DetailsCard = ({
             )}
           </div>
         )}
+        {(type === 'program' || type === 'module') && (
+          <div
+            className={`mb-8 grid grid-cols-1 gap-6 ${(tags?.length || 0) === 0 || (domains?.length || 0) === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
+          >
+            {tags?.length > 0 && (
+              <ToggleableList
+                items={tags}
+                icon={faTags}
+                label={<AnchorTitle title="Tags" />}
+                isDisabled={true}
+              />
+            )}
+            {domains?.length > 0 && (
+              <ToggleableList
+                items={domains}
+                icon={faChartPie}
+                label={<AnchorTitle title="Domains" />}
+                isDisabled={true}
+              />
+            )}
+          </div>
+        )}
         {topContributors && (
-          <TopContributors
-            icon={faUsers}
+          <TopContributorsList
             contributors={topContributors}
-            maxInitialDisplay={9}
-            type="contributor"
+            icon={faUsers}
+            maxInitialDisplay={12}
+          />
+        )}
+        {admins && admins.length > 0 && type === 'program' && (
+          <TopContributorsList
+            icon={faUsers}
+            contributors={admins}
+            maxInitialDisplay={6}
+            label="Admins"
+          />
+        )}
+        {mentors && mentors.length > 0 && (
+          <TopContributorsList
+            icon={faUsers}
+            contributors={mentors}
+            maxInitialDisplay={6}
+            label="Mentors"
           />
         )}
         {(type === 'project' ||
@@ -191,14 +274,28 @@ const DetailsCard = ({
         )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
-            <SecondaryCard
-              icon={faFolderOpen}
-              title={<AnchorTitle title="Repositories" />}
-              className="mt-6"
-            >
-              <RepositoriesCard repositories={repositories} />
+            <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
+              <RepositoriesCard maxInitialDisplay={4} repositories={repositories} />
             </SecondaryCard>
           )}
+        {type === 'program' && modules.length > 0 && (
+          <SecondaryCard
+            icon={faFolderOpen}
+            title={<AnchorTitle title={modules.length === 1 ? 'Module' : 'Modules'} />}
+          >
+            <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
+          </SecondaryCard>
+        )}
+        {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
+          <HealthMetrics data={healthMetricsData} />
+        )}
+        {entityKey && ['chapter', 'project', 'repository'].includes(type) && (
+          <SponsorCard
+            target={entityKey}
+            title={projectName || title}
+            type={type === 'chapter' ? 'chapter' : 'project'}
+          />
+        )}
       </div>
     </div>
   )
@@ -206,7 +303,7 @@ const DetailsCard = ({
 
 export default DetailsCard
 
-const SocialLinks = ({ urls }) => {
+export const SocialLinks = ({ urls }) => {
   if (!urls || urls.length === 0) return null
   return (
     <div>

@@ -1,6 +1,7 @@
 """Slack bot view for Slack events."""
 
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from slack_bolt.adapter.django import SlackRequestHandler
 
 from apps.slack.apps import SlackConfig
@@ -8,7 +9,8 @@ from apps.slack.apps import SlackConfig
 slack_handler = SlackRequestHandler(SlackConfig.app)
 
 
-@csrf_exempt
+@csrf_exempt  # NOSONAR
+@require_POST  # NOSONAR
 def slack_request_handler(request):
     """Handle Slack requests.
 

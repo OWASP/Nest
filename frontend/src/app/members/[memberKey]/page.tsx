@@ -1,5 +1,5 @@
 'use client'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import {
   faCodeMerge,
   faFolderOpen,
@@ -9,38 +9,35 @@ import {
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { useTheme } from 'next-themes'
 import React, { useState, useEffect, useRef } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
-import { GET_USER_DATA } from 'server/queries/userQueries'
-import type {
-  ProjectIssuesType,
-  ProjectMilestonesType,
-  ProjectReleaseType,
-  RepositoryCardProps,
-} from 'types/project'
-import type { ItemCardPullRequests, UserDetailsProps } from 'types/user'
+import { GetUserDataDocument } from 'types/__generated__/userQueries.generated'
+import type { Issue } from 'types/issue'
+import type { Milestone } from 'types/milestone'
+import type { RepositoryCardProps } from 'types/project'
+import type { PullRequest } from 'types/pullRequest'
+import type { Release } from 'types/release'
+import type { User } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const UserDetailsPage: React.FC = () => {
-  const { memberKey } = useParams()
-  const [user, setUser] = useState<UserDetailsProps | null>()
-  const [issues, setIssues] = useState<ProjectIssuesType[]>([])
+  const { memberKey } = useParams<{ memberKey: string }>()
+  const [user, setUser] = useState<User | null>()
+  const [issues, setIssues] = useState<Issue[]>([])
   const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
-  const [milestones, setMilestones] = useState<ProjectMilestonesType[]>([])
-  const [pullRequests, setPullRequests] = useState<ItemCardPullRequests[]>([])
-  const [releases, setReleases] = useState<ProjectReleaseType[]>([])
+  const [milestones, setMilestones] = useState<Milestone[]>([])
+  const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
+  const [releases, setReleases] = useState<Release[]>([])
   const [data, setData] = useState<HeatmapData>({} as HeatmapData)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [username, setUsername] = useState('')
-  const [imageLink, setImageLink] = useState('')
   const [isPrivateContributor, setIsPrivateContributor] = useState(false)
-  const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const theme = 'blue'
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_USER_DATA, {
+  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetUserDataDocument, {
     variables: { key: memberKey },
   })
 
@@ -74,14 +71,6 @@ const UserDetailsPage: React.FC = () => {
     }
     fetchData()
   }, [memberKey, user])
-
-  useEffect(() => {
-    if (canvasRef.current && data && data.years && data.years.length > 0) {
-      drawContributions(canvasRef.current, { data, username, theme })
-      const imageURL = canvasRef.current.toDataURL()
-      setImageLink(imageURL)
-    }
-  }, [username, data])
 
   const formattedBio = user?.bio?.split(' ').map((word, index) => {
     // Regex to match GitHub usernames, but if last character is not a word character or @, it's a punctuation
@@ -140,27 +129,50 @@ const UserDetailsPage: React.FC = () => {
     { icon: faCodeMerge, value: user?.contributionsCount || 0, unit: 'Contribution' },
   ]
 
-  const Heatmap = () => (
-    <div className="flex flex-col gap-4">
-      <div className="overflow-hidden rounded-lg bg-white shadow-xl dark:bg-gray-800">
+  const Heatmap = () => {
+    const canvasRef = useRef<HTMLCanvasElement | null>(null)
+    const [imgSrc, setImgSrc] = useState('')
+    const { resolvedTheme } = useTheme()
+    const isDarkMode = (resolvedTheme ?? 'light') === 'dark'
+
+    useEffect(() => {
+      if (canvasRef.current && data?.years?.length) {
+        drawContributions(canvasRef.current, {
+          data,
+          username,
+          themeName: isDarkMode ? 'dark' : 'light',
+        })
+        const imageURL = canvasRef.current.toDataURL()
+        setImgSrc(imageURL)
+      } else {
+        setImgSrc('')
+      }
+    }, [isDarkMode])
+
+    return (
+      <div className="overflow-hidden rounded-lg bg-white dark:bg-gray-800">
         <div className="relative">
           <canvas ref={canvasRef} style={{ display: 'none' }} aria-hidden="true"></canvas>
-          {imageLink ? (
-            <div className="h-40 bg-[#10151c]">
+          {imgSrc ? (
+            <div className="h-32">
               <Image
                 width={100}
                 height={100}
-                src={imageLink || '/placeholder.svg'}
+                src={imgSrc}
                 className="h-full w-full object-cover object-[54%_60%]"
                 alt="Contribution Heatmap"
               />
             </div>
           ) : (
-            <div className="relative h-40 items-center justify-center bg-[#10151c]">
+            <div className="relative h-32 items-center justify-center">
               <Image
                 height={100}
                 width={100}
-                src="/img/heatmapBackground.png"
+                src={
+                  isDarkMode
+                    ? '/img/heatmap-background-dark.png'
+                    : '/img/heatmap-background-light.png'
+                }
                 className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
                 alt="Heatmap Background"
               />
@@ -169,23 +181,33 @@ const UserDetailsPage: React.FC = () => {
           )}
         </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   const UserSummary = () => (
-    <div className="mt-4 flex items-center">
-      <Image
-        width={64}
-        height={64}
-        className="mr-4 h-16 w-16 rounded-full border-2 border-white bg-white object-cover shadow-md dark:border-gray-800 dark:bg-gray-600/60"
-        src={user?.avatarUrl || '/placeholder.svg'}
-        alt={user?.name || user?.login || 'User Avatar'}
-      />
-      <div className="w-full">
-        <Link href={user?.url || '#'} className="text-xl font-bold text-blue-400 hover:underline">
-          @{user?.login}
-        </Link>
-        <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
+    <div className="flex flex-col items-start lg:flex-row">
+      <div className="mb-4 flex-shrink-0 self-center lg:mr-6 lg:mb-0 lg:self-start">
+        <Image
+          width={200}
+          height={200}
+          className="h-[200px] w-[200px] rounded-full border-2 border-white bg-white object-cover shadow-md dark:border-gray-800 dark:bg-gray-600/60"
+          src={user?.avatarUrl || '/placeholder.svg'}
+          alt={user?.name || user?.login || 'User Avatar'}
+        />
+      </div>
+      <div className="flex w-full flex-1 flex-col">
+        <div className="mb-0 text-center lg:mb-4 lg:ml-[26px] lg:text-left">
+          <Link href={user?.url || '#'} className="text-xl font-bold text-blue-400 hover:underline">
+            @{user?.login}
+          </Link>
+          <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
+        </div>
+
+        {!isPrivateContributor && (
+          <div className="hidden w-full lg:block">
+            <Heatmap />
+          </div>
+        )}
       </div>
     </div>
   )
@@ -193,7 +215,6 @@ const UserDetailsPage: React.FC = () => {
   return (
     <DetailsCard
       details={userDetails}
-      heatmap={isPrivateContributor ? undefined : <Heatmap />}
       pullRequests={pullRequests}
       recentIssues={issues}
       recentMilestones={milestones}

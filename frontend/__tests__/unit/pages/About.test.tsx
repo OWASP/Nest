@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { mockAboutData } from '@unit/data/mockAboutData'
@@ -6,11 +6,14 @@ import { useRouter } from 'next/navigation'
 import { act } from 'react'
 import { render } from 'wrappers/testUtil'
 import About from 'app/about/page'
-import { GET_PROJECT_METADATA, GET_TOP_CONTRIBUTORS } from 'server/queries/projectQueries'
-import { GET_LEADER_DATA } from 'server/queries/userQueries'
+import {
+  GetProjectMetadataDocument,
+  GetTopContributorsDocument,
+} from 'types/__generated__/projectQueries.generated'
+import { GetLeaderDataDocument } from 'types/__generated__/userQueries.generated'
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
 }))
 
@@ -31,15 +34,29 @@ jest.mock('@heroui/toast', () => ({
 }))
 
 jest.mock('utils/aboutData', () => ({
-  aboutText: [
-    'This is a test paragraph about the project.',
-    'This is another paragraph about the project history.',
+  missionContent: {
+    mission: 'Test mission statement',
+    whoItsFor: 'Test target audience description',
+  },
+  keyFeatures: [
+    { title: 'Feature 1', description: 'Feature 1 description' },
+    { title: 'Feature 2', description: 'Feature 2 description' },
+  ],
+  getInvolvedContent: {
+    description: 'Get involved description',
+    ways: ['Way 1', 'Way 2'],
+    callToAction: 'Test call to action',
+  },
+  projectStory: ['Test story paragraph 1', 'Test story paragraph 2'],
+  projectTimeline: [
+    { title: 'Timeline Event 1', description: 'Timeline description 1', year: '2023' },
+    { title: 'Timeline Event 2', description: 'Timeline description 2', year: '2024' },
   ],
   technologies: [
     {
       section: 'Backend',
       tools: {
-        Python: {
+        python: {
           icon: '/images/icons/python.svg',
           url: 'https://www.python.org/',
         },
@@ -57,11 +74,11 @@ jest.mock('utils/aboutData', () => ({
     {
       section: 'Tests',
       tools: {
-        Jest: {
+        jest: {
           icon: '/images/icons/jest.svg',
           url: 'https://jestjs.io/',
         },
-        Pytest: {
+        pytest: {
           icon: '/images/icons/pytest.svg',
           url: 'https://docs.pytest.org/',
         },
@@ -70,11 +87,11 @@ jest.mock('utils/aboutData', () => ({
     {
       section: 'Tools',
       tools: {
-        Ansible: {
+        ansible: {
           icon: '/images/icons/ansible.svg',
           url: 'https://www.ansible.com/',
         },
-        GitHub: {
+        gitHub: {
           icon: '/images/icons/github.svg',
           url: 'https://www.github.com/',
         },
@@ -113,18 +130,18 @@ const mockError = {
 describe('About Component', () => {
   let mockRouter: { push: jest.Mock }
   beforeEach(() => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
       const key = options?.variables?.key
 
-      if (query === GET_PROJECT_METADATA) {
+      if (query === GetProjectMetadataDocument) {
         if (key === 'nest') {
           return mockProjectData
         }
-      } else if (query === GET_TOP_CONTRIBUTORS) {
+      } else if (query === GetTopContributorsDocument) {
         if (key === 'nest') {
           return mockTopContributorsData
         }
-      } else if (query === GET_LEADER_DATA) {
+      } else if (query === GetLeaderDataDocument) {
         return mockUserData(key)
       }
 
@@ -138,20 +155,48 @@ describe('About Component', () => {
     jest.clearAllMocks()
   })
 
-  test('renders project history correctly', async () => {
+  test('renders key features section correctly', async () => {
     await act(async () => {
       render(<About />)
     })
 
-    const historySection = screen.getByText('History').closest('div')
-    expect(historySection).toBeInTheDocument()
+    const keyFeaturesSection = screen.getByText('Key Features').closest('div')
+    expect(keyFeaturesSection).toBeInTheDocument()
 
-    const markdownContents = await screen.findAllByTestId('markdown-content')
-    expect(markdownContents.length).toBe(2)
-    expect(markdownContents[0].textContent).toBe('This is a test paragraph about the project.')
-    expect(markdownContents[1].textContent).toBe(
-      'This is another paragraph about the project history.'
-    )
+    expect(screen.getByText('Feature 1')).toBeInTheDocument()
+    expect(screen.getByText('Feature 2')).toBeInTheDocument()
+    expect(screen.getByText('Feature 1 description')).toBeInTheDocument()
+    expect(screen.getByText('Feature 2 description')).toBeInTheDocument()
+  })
+
+  test('renders get involved section correctly', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+
+    const getInvolvedSection = screen.getByText('Get Involved').closest('div')
+    expect(getInvolvedSection).toBeInTheDocument()
+
+    expect(screen.getByText('Get involved description')).toBeInTheDocument()
+    expect(screen.getByText('Way 1')).toBeInTheDocument()
+    expect(screen.getByText('Way 2')).toBeInTheDocument()
+    expect(screen.getByText('Test call to action')).toBeInTheDocument()
+  })
+
+  test('renders project history timeline correctly', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+
+    const projectHistorySection = screen.getByText('Our Story').closest('div')
+    expect(projectHistorySection).toBeInTheDocument()
+
+    expect(screen.getByText('Timeline Event 1')).toBeInTheDocument()
+    expect(screen.getByText('Timeline Event 2')).toBeInTheDocument()
+    expect(screen.getByText('Timeline description 1')).toBeInTheDocument()
+    expect(screen.getByText('Timeline description 2')).toBeInTheDocument()
+    expect(screen.getByText('2023')).toBeInTheDocument()
+    expect(screen.getByText('2024')).toBeInTheDocument()
   })
 
   test('renders leaders section with three leaders', async () => {
@@ -172,7 +217,7 @@ describe('About Component', () => {
   })
 
   test('handles leader data loading error gracefully', async () => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
       if (options?.variables?.key === 'nest') {
         return mockProjectData
       } else if (options?.variables?.key === 'arkid15r') {
@@ -203,7 +248,9 @@ describe('About Component', () => {
       expect(screen.getByText('Top Contributors')).toBeInTheDocument()
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
       expect(screen.getByText('Contributor 6')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
+      expect(screen.getByText('Contributor 10')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 12')).toBeInTheDocument()
+      expect(screen.queryByText('Contributor 13')).not.toBeInTheDocument()
     })
   })
 
@@ -212,23 +259,24 @@ describe('About Component', () => {
       render(<About />)
     })
     await waitFor(() => {
-      expect(screen.getByText('Contributor 6')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
+      expect(screen.getByText('Contributor 12')).toBeInTheDocument()
+      expect(screen.queryByText('Contributor 13')).not.toBeInTheDocument()
     })
 
     const showMoreButton = screen.getByRole('button', { name: /Show more/i })
     fireEvent.click(showMoreButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Contributor 7')).toBeInTheDocument()
-      expect(screen.getByText('Contributor 8')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 13')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 14')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 15')).toBeInTheDocument()
     })
 
     const showLessButton = screen.getByRole('button', { name: /Show less/i })
     fireEvent.click(showLessButton)
 
     await waitFor(() => {
-      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
+      expect(screen.queryByText('Contributor 13')).not.toBeInTheDocument()
     })
   })
 
@@ -302,7 +350,7 @@ describe('About Component', () => {
   })
 
   test('LeaderData component shows loading state correctly', async () => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
       if (options?.variables?.key === 'nest') {
         return mockProjectData
       } else if (options?.variables?.key === 'arkid15r') {
@@ -333,7 +381,7 @@ describe('About Component', () => {
   })
 
   test('LeaderData component handles null user data correctly', async () => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
       if (options?.variables?.key === 'nest') {
         return mockProjectData
       } else if (options?.variables?.key === 'arkid15r') {
@@ -364,7 +412,7 @@ describe('About Component', () => {
   })
 
   test('handles null project in data response gracefully', async () => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
       if (options?.variables?.key === 'nest') {
         return { data: { project: null }, loading: false, error: null }
       } else if (['arkid15r', 'kasya', 'mamicidal'].includes(options?.variables?.key)) {
@@ -386,7 +434,7 @@ describe('About Component', () => {
   })
 
   test('handles undefined user data in leader response', async () => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
       if (options?.variables?.key === 'nest') {
         return mockProjectData
       } else if (options?.variables?.key === 'arkid15r') {
@@ -436,7 +484,7 @@ describe('About Component', () => {
       error: null,
     }
 
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
       if (options?.variables?.key === 'nest') {
         return mockProjectData
       } else if (options?.variables?.key === 'arkid15r') {
@@ -459,7 +507,7 @@ describe('About Component', () => {
   })
 
   test('shows fallback when user data is missing', async () => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
       if (options?.variables?.key === 'nest') {
         return mockProjectData
       } else if (options?.variables?.key === 'arkid15r') {
@@ -482,7 +530,7 @@ describe('About Component', () => {
   })
 
   test('renders LoadingSpinner when project data is loading', async () => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
       if (options?.variables?.key === 'nest') {
         return { loading: true, data: null, error: null }
       }
@@ -504,7 +552,7 @@ describe('About Component', () => {
   })
 
   test('renders ErrorDisplay when project is null', async () => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
       if (options?.variables?.key === 'nest') {
         return { loading: false, data: { project: null }, error: null }
       }
@@ -526,8 +574,8 @@ describe('About Component', () => {
   })
 
   test('triggers toaster error when GraphQL request fails for project', async () => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
-      if (query === GET_PROJECT_METADATA && options?.variables?.key === 'nest') {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
+      if (query === GetProjectMetadataDocument && options?.variables?.key === 'nest') {
         return { loading: false, data: null, error: new Error('GraphQL error') }
       }
       return {
@@ -552,8 +600,8 @@ describe('About Component', () => {
   })
 
   test('triggers toaster error when GraphQL request fails for topContributors', async () => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
-      if (query === GET_TOP_CONTRIBUTORS && options?.variables?.key === 'nest') {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
+      if (query === GetTopContributorsDocument && options?.variables?.key === 'nest') {
         return { loading: false, data: null, error: new Error('GraphQL error') }
       }
       return {
@@ -575,5 +623,68 @@ describe('About Component', () => {
         variant: 'solid',
       })
     })
+  })
+
+  test('renders mission and who its for sections correctly', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+
+    const missionSection = screen.getByText('Our Mission').closest('div')
+    expect(missionSection).toBeInTheDocument()
+    expect(screen.getByText('Test mission statement')).toBeInTheDocument()
+
+    const whoItsForSection = screen.getByText("Who It's For").closest('div')
+    expect(whoItsForSection).toBeInTheDocument()
+    expect(screen.getByText('Test target audience description')).toBeInTheDocument()
+  })
+
+  test('renders mission section', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText('Our Mission')).toBeInTheDocument()
+    expect(screen.getByText('Test mission statement')).toBeInTheDocument()
+  })
+
+  test("renders 'Who It's For' section", async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText("Who It's For")).toBeInTheDocument()
+    expect(screen.getByText(/Test target audience description/)).toBeInTheDocument()
+  })
+
+  test('renders key features section', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText('Key Features')).toBeInTheDocument()
+    expect(screen.getByText('Feature 1')).toBeInTheDocument()
+    expect(screen.getByText('Feature 2')).toBeInTheDocument()
+    expect(screen.getByText('Feature 1 description')).toBeInTheDocument()
+    expect(screen.getByText('Feature 2 description')).toBeInTheDocument()
+  })
+
+  test('renders get involved section', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText('Get Involved')).toBeInTheDocument()
+    expect(screen.getByText('Get involved description')).toBeInTheDocument()
+    expect(screen.getByText('Way 1')).toBeInTheDocument()
+    expect(screen.getByText('Way 2')).toBeInTheDocument()
+    expect(screen.getByText('Test call to action')).toBeInTheDocument()
+  })
+
+  test('renders project history timeline section', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText('Project Timeline')).toBeInTheDocument()
+    expect(screen.getByText('Timeline Event 1')).toBeInTheDocument()
+    expect(screen.getByText('Timeline Event 2')).toBeInTheDocument()
+    expect(screen.getByText('Timeline description 1')).toBeInTheDocument()
+    expect(screen.getByText('Timeline description 2')).toBeInTheDocument()
   })
 })

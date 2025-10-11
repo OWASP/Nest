@@ -1,14 +1,17 @@
+import { faCalendar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
 import Link from 'next/link'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import { CardProps } from 'types/card'
-import { Icons } from 'utils/data'
+import type { CardProps } from 'types/card'
+import { ICONS } from 'utils/data'
+import { formatDateRange } from 'utils/dateFormatter'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import ActionButton from 'components/ActionButton'
 import ContributorAvatar from 'components/ContributorAvatar'
 import DisplayIcon from 'components/DisplayIcon'
 import Markdown from 'components/MarkdownWrapper'
+import ModuleList from 'components/ModuleList'
 
 const Card = ({
   title,
@@ -20,11 +23,13 @@ const Card = ({
   button,
   projectName,
   projectLink,
+  modules,
   social,
   tooltipLabel,
+  timeline,
 }: CardProps) => {
   return (
-    <div className="mx-auto mb-2 mt-4 flex w-full max-w-[95%] flex-col items-start rounded-md border border-border bg-white p-4 dark:bg-[#212529] md:max-w-6xl">
+    <div className="mx-auto mt-4 mb-2 flex w-full max-w-[95%] flex-col items-start rounded-md border-1 border-gray-200 bg-white p-4 md:max-w-6xl dark:border-gray-700 dark:bg-[#212529]">
       {/* Card Header with Badge and Title */}
       <div className="w-full">
         <div className="flex items-center gap-3">
@@ -49,7 +54,7 @@ const Card = ({
           {/* Project title and link */}
           <Link href={url} target="_blank" rel="noopener noreferrer" className="flex-1">
             <h1
-              className="max-w-full break-words text-base font-semibold text-blue-400 hover:text-blue-600 sm:break-normal sm:text-lg lg:text-2xl"
+              className="max-w-full text-base font-semibold break-words text-blue-400 hover:text-blue-600 sm:text-lg sm:break-normal lg:text-2xl"
               style={{
                 transition: 'color 0.3s ease',
               }}
@@ -60,9 +65,9 @@ const Card = ({
         </div>
 
         {/* Icons associated with the project */}
-        {icons && Object.keys(Icons).some((key) => icons[key]) && (
+        {icons && Object.keys(ICONS).some((key) => icons[key]) && (
           <div className="mt-3 flex flex-wrap">
-            {Object.keys(Icons).map((key, index) =>
+            {Object.keys(ICONS).map((key, index) =>
               icons[key] ? (
                 <DisplayIcon
                   key={`${key}-${index}`}
@@ -71,6 +76,14 @@ const Card = ({
                 />
               ) : null
             )}
+          </div>
+        )}
+
+        {/* Timeline Section (Optional) */}
+        {timeline?.start && timeline?.end && (
+          <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+            <span>{formatDateRange(timeline.start, timeline.end)}</span>
           </div>
         )}
       </div>
@@ -90,7 +103,8 @@ const Card = ({
       {/* Project summary */}
       <Markdown content={summary} className="mt-2 w-full text-gray-600 dark:text-gray-300" />
 
-      {/* Bottom section with social links, contributors and action button */}
+      {/* Modules section (if available) */}
+      <ModuleList modules={modules} />
       <div className="mt-4 w-full">
         {/* Social icons section */}
         {social && social.length > 0 && (
@@ -106,7 +120,7 @@ const Card = ({
                 >
                   <FontAwesomeIcon
                     icon={getSocialIcon(item.url)}
-                    className="h-5 w-5 text-blue-500 hover:text-gray-600 dark:hover:dark:text-gray-400"
+                    className="h-5 w-5 text-blue-500 hover:text-gray-600 dark:hover:text-gray-400"
                   />
                 </Link>
               ))}
@@ -115,7 +129,7 @@ const Card = ({
         )}
 
         {/* Flexible bottom row with contributors and action button */}
-        <div className="flex w-full flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
           {/* Contributors section */}
           <div className="flex flex-wrap items-center gap-2">
             {topContributors?.map((contributor, index) => (

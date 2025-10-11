@@ -31,7 +31,7 @@ class TestCommitteeHandler:
     @pytest.fixture(autouse=True)
     def setup_mocks(self):
         with (
-            patch("apps.owasp.api.search.committee.get_committees") as mock_get_committees,
+            patch("apps.owasp.index.search.committee.get_committees") as mock_get_committees,
             patch("apps.owasp.models.committee.Committee") as mock_committee_model,
         ):
             mock_committee_model.active_committees_count.return_value = 15

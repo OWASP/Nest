@@ -1,5 +1,5 @@
 'use client'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import {
   faBook,
@@ -17,15 +17,16 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToast } from '@heroui/toast'
+import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
-import { GET_MAIN_PAGE_DATA } from 'server/queries/homeQueries'
-import { AlgoliaResponseType } from 'types/algolia'
-import { ChapterTypeAlgolia } from 'types/chapter'
-import { EventType } from 'types/event'
-import { MainPageData } from 'types/home'
-import { capitalize } from 'utils/capitalize'
+import { GetMainPageDataDocument } from 'types/__generated__/homeQueries.generated'
+import type { AlgoliaResponse } from 'types/algolia'
+import type { Chapter } from 'types/chapter'
+import type { Event } from 'types/event'
+import type { MainPageData } from 'types/home'
+
 import { formatDate, formatDateRange } from 'utils/dateFormatter'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
@@ -40,17 +41,17 @@ import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
 import SecondaryCard from 'components/SecondaryCard'
-import TopContributors from 'components/TopContributors'
+import TopContributorsList from 'components/TopContributorsList'
 import { TruncatedText } from 'components/TruncatedText'
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [data, setData] = useState<MainPageData>(null)
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_MAIN_PAGE_DATA, {
+  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetMainPageDataDocument, {
     variables: { distinct: true },
   })
 
-  const [geoLocData, setGeoLocData] = useState<ChapterTypeAlgolia[]>([])
+  const [geoLocData, setGeoLocData] = useState<Chapter[]>([])
   const [modalOpenIndex, setModalOpenIndex] = useState<number | null>(null)
 
   useEffect(() => {
@@ -79,7 +80,7 @@ export default function Home() {
         currentPage: 1,
         hitsPerPage: 1000,
       }
-      const data: AlgoliaResponseType<ChapterTypeAlgolia> = await fetchAlgoliaData(
+      const data: AlgoliaResponse<Chapter> = await fetchAlgoliaData(
         searchParams.indexName,
         searchParams.query,
         searchParams.currentPage,
@@ -135,12 +136,12 @@ export default function Home() {
   return (
     <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
-        <div className="pt-5 text-center sm:mb-20">
+        <div className="pt-5 text-center sm:mb-10">
           <div className="flex flex-col items-center py-10">
             <h1 className="text-3xl font-medium tracking-tighter sm:text-5xl md:text-6xl">
               Welcome to OWASP Nest
             </h1>
-            <p className="max-w-[700px] pt-6 text-muted-foreground md:text-xl">
+            <p className="text-muted-foreground max-w-[700px] pt-6 md:text-xl">
               Your gateway to OWASP. Discover, engage, and help shape the future!
             </p>
           </div>
@@ -163,11 +164,11 @@ export default function Home() {
           className="overflow-hidden"
         >
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {data.upcomingEvents.map((event: EventType, index: number) => (
+            {data.upcomingEvents.map((event: Event, index: number) => (
               <div key={`card-${event.name}`} className="overflow-hidden">
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <button
-                    className="mb-2 w-full text-left text-lg font-semibold text-blue-400 hover:underline"
+                    className="mb-2 w-full cursor-pointer text-left text-lg font-semibold text-blue-400 hover:underline"
                     onClick={() => setModalOpenIndex(index)}
                   >
                     <TruncatedText text={event.name} />
@@ -208,7 +209,7 @@ export default function Home() {
             }
             className="overflow-hidden"
           >
-            <div className="space-y-4">
+            <div className="flex flex-col gap-4">
               {data.recentChapters?.map((chapter) => (
                 <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <h3 className="mb-2 text-lg font-semibold">
@@ -250,11 +251,11 @@ export default function Home() {
             }
             className="overflow-hidden"
           >
-            <div className="space-y-4">
+            <div className="flex flex-col gap-4">
               {data.recentProjects?.map((project) => (
                 <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <Link href={`/projects/${project.key}`} className="text-blue-400 hover:underline">
-                    <h3 className="mb-2 truncate text-wrap text-lg font-semibold md:text-nowrap">
+                    <h3 className="mb-2 truncate text-lg font-semibold text-wrap md:text-nowrap">
                       <TruncatedText text={project.name} />
                     </h3>
                   </Link>
@@ -268,7 +269,7 @@ export default function Home() {
                         icon={getProjectIcon(project.type) as IconProp}
                         className="mr-2 h-4 w-4"
                       />
-                      <TruncatedText text={capitalize(project.type)} />
+                      <TruncatedText text={upperFirst(project.type)} />
                     </div>
                   </div>
                   {project.leaders.length > 0 && (
@@ -303,11 +304,10 @@ export default function Home() {
             }}
           />
         </div>
-        <TopContributors
-          icon={faUsers}
+        <TopContributorsList
           contributors={data?.topContributors}
-          type="company"
-          maxInitialDisplay={9}
+          icon={faUsers}
+          maxInitialDisplay={20}
         />
         <div className="grid-cols-2 gap-4 lg:grid">
           <RecentIssues data={data?.recentIssues} />
@@ -369,7 +369,7 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="mb-20 mt-8">
+        <div className="mt-8 mb-20">
           <SecondaryCard className="text-center">
             <h3 className="mb-4 text-2xl font-semibold">Ready to Make a Difference?</h3>
             <p className="mb-6 text-gray-600 dark:text-gray-400">

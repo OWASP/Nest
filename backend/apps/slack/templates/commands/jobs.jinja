@@ -1,5 +1,10 @@
-Please join <{{ jobs_channel }}> channel
-This Slack channel shares community-driven job opportunities, networking, and career advice in cybersecurity and related fields.{{ SECTION_BREAK }}
-⚠️ *Disclaimer: This is not an official OWASP channel and its content is not endorsed, reviewed, or approved by OWASP*.{{ NL }}
+Please join <{{ JOBS_CHANNEL_ID }}> channel
+This Slack channel shares community-driven job opportunities, networking, and career advice in cybersecurity and related fields.
+
 {{ SECTION_BREAK }}
-{% include "commands/feedback.jinja" %}
+
+⚠️ *Disclaimer: This is not an official OWASP channel and its content is not endorsed, reviewed, or approved by OWASP*.
+
+{{ SECTION_BREAK }}
+
+{{ FEEDBACK_SHARING_INVITE | safe }}

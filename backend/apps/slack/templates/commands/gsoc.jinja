@@ -1,16 +1,19 @@
-{% if mode == "general" %}
+{% if MODE == "GENERAL" %}
 🚀 *Getting Started with OWASP GSoC*{{ NL }}
-  • Join the <{{ gsoc_channel }}> and <{{ contribute_channel }}> channels if you haven't done it yet for suggestions and tips on how to get started.{{ NL }}
-  • Explore previous years GSoC projects by using corresponding tags, (e.g. `gsoc{{ previous_year }}`, `gsoc{{ previous_year - 1 }}`) on <{{ projects_url }}?q=gsoc{{ previous_year }}|OWASP Nest> as they are more likely to participate in GSoC again.{{ NL }}
+  • Join the <{{ GSOC_CHANNEL_ID }}> and <{{ CONTRIBUTE_CHANNEL_ID }}> channels if you haven't done it yet for suggestions and tips on how to get started.{{ NL }}
+  • Explore previous years GSoC projects by using corresponding tags, (e.g. `gsoc{{ PREVIOUS_YEAR }}`, `gsoc{{ PREVIOUS_YEAR - 1 }}`) on <{{ PROJECTS_URL }}?q=gsoc{{ PREVIOUS_YEAR }}|OWASP Nest> as they are more likely to participate in GSoC again.{{ NL }}
   • Run `/contribute --start` to get more information on how to contribute to OWASP.
 {{ SECTION_BREAK }}
-{% include "commands/feedback.jinja" %}
-{% elif mode == "year" %}
-*GSoC {{ year }} projects:*{{ NL }}{{ NL }}{% for project in projects %}  • <{{ project.idx_url }}|{{ project.idx_name }}>{{ NL }}{% endfor %}
+{% elif MODE == "YEAR" %}
+*GSoC {{ YEAR }} projects:*{{ NL }}{{ NL }}{% for project in PROJECTS %}  • <{{ project.idx_url }}|{{ project.idx_name }}>{{ NL }}{% endfor %}
 {{ SECTION_BREAK }}
-Additional information:{{ NL }}{% if has_announcement %}  • <https://owasp.org/www-community/initiatives/gsoc/gsoc{{ year }}|GSoC {{ year }} announcement>{{ NL }}{% endif %}  • <https://owasp.org/www-community/initiatives/gsoc/gsoc{{ year }}ideas|GSoC {{ year }} ideas>
-{% elif mode == "unsupported_year" %}
-Year {{ year }} is not supported. Supported years: {{ supported_start }}-{{ supported_end }}, e.g. `{{ command }} {{ supported_end }}`
-{% elif mode == "invalid" %}
-*`{{ command }} {{ command_text }}` is not supported*{{ NL }}
+Additional information:{{ NL }}{% if HAS_ANNOUNCEMENT %}  • <https://owasp.org/www-community/initiatives/gsoc/gsoc{{ YEAR }}|GSoC {{ YEAR }} announcement>{{ NL }}{% endif %}  • <https://owasp.org/www-community/initiatives/gsoc/gsoc{{ YEAR }}ideas|GSoC {{ YEAR }} ideas>
+{% elif MODE == "UNSUPPORTED_YEAR" %}
+Year {{ YEAR }} is not supported. Supported years: {{ SUPPORTED_YEAR_START }}-{{ SUPPORTED_YEAR_END }}, e.g. `{{ COMMAND }} {{ SUPPORTED_YEAR_END }}`
+{% elif MODE == "INVALID" %}
+*`{{ COMMAND }} {{ COMMAND_TEXT }}` is not supported*
 {% endif %}
+
+{{ SECTION_BREAK }}
+
+{{ FEEDBACK_SHARING_INVITE | safe }}

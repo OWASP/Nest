@@ -1,12 +1,12 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockRepositoryData } from '@unit/data/mockRepositoryData'
 import { render } from 'wrappers/testUtil'
 import RepositoryDetailsPage from 'app/organizations/[organizationKey]/repositories/[repositoryKey]/page'
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
 }))
 
@@ -34,7 +34,7 @@ const mockError = {
 
 describe('RepositoryDetailsPage', () => {
   beforeEach(() => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockRepositoryData,
       loading: false,
       error: null,
@@ -46,7 +46,7 @@ describe('RepositoryDetailsPage', () => {
   })
 
   test('renders loading state', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: null,
     })
@@ -60,7 +60,7 @@ describe('RepositoryDetailsPage', () => {
   })
 
   test('renders repository details when data is available', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockRepositoryData,
       error: null,
     })
@@ -79,7 +79,7 @@ describe('RepositoryDetailsPage', () => {
   })
 
   test('renders error message when GraphQL request fails', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: { repository: null },
       error: mockError,
     })
@@ -101,23 +101,24 @@ describe('RepositoryDetailsPage', () => {
   test('toggles contributors list when show more/less is clicked', async () => {
     render(<RepositoryDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('Contributor 9')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
+      expect(screen.getByText('Contributor 12')).toBeInTheDocument()
+      expect(screen.queryByText('Contributor 13')).not.toBeInTheDocument()
     })
 
     const showMoreButton = screen.getByRole('button', { name: /Show more/i })
     fireEvent.click(showMoreButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Contributor 7')).toBeInTheDocument()
-      expect(screen.getByText('Contributor 8')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 13')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 14')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 15')).toBeInTheDocument()
     })
 
     const showLessButton = screen.getByRole('button', { name: /Show less/i })
     fireEvent.click(showLessButton)
 
     await waitFor(() => {
-      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
+      expect(screen.queryByText('Contributor 13')).not.toBeInTheDocument()
     })
   })
 
@@ -145,7 +146,7 @@ describe('RepositoryDetailsPage', () => {
   })
 
   test('Handles case when no data is available', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: { repository: null },
       error: null,
     })
@@ -195,7 +196,7 @@ describe('RepositoryDetailsPage', () => {
   })
 
   test('handles missing repository stats gracefully', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         repository: {
           ...mockRepositoryData.repository,
@@ -217,6 +218,17 @@ describe('RepositoryDetailsPage', () => {
       expect(screen.getByText('No Forks')).toBeInTheDocument()
       expect(screen.getByText('No Issues')).toBeInTheDocument()
       expect(screen.getByText('No Stars')).toBeInTheDocument()
+    })
+  })
+
+  test('renders repository sponsor block correctly', async () => {
+    render(<RepositoryDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText(`Want to become a sponsor?`)).toBeInTheDocument()
+      expect(
+        screen.getByText(`Sponsor ${mockRepositoryData.repository.project.name}`)
+      ).toBeInTheDocument()
     })
   })
 })

@@ -1,12 +1,25 @@
+include backend/apps/ai/Makefile
+include backend/apps/github/Makefile
+include backend/apps/nest/Makefile
+include backend/apps/owasp/Makefile
+include backend/apps/slack/Makefile
+
 clean-backend-dependencies:
 	@rm -rf backend/.cache
 	@rm -rf backend/.local
+	@rm -rf backend/.pytest_cache
+	@rm -rf backend/.ruff_cache
 	@rm -rf backend/.venv
 
 clean-backend-docker:
 	@docker container rm -f nest-backend >/dev/null 2>&1 || true
-	@docker image rm -f docker-backend >/dev/null 2>&1 || true
-	@docker volume rm -f docker_backend-venv >/dev/null 2>&1 || true
+	@docker container rm -f nest-cache >/dev/null 2>&1 || true
+	@docker container rm -f nest-db >/dev/null 2>&1 || true
+	@docker image rm -f nest-local-backend >/dev/null 2>&1 || true
+	@docker volume rm -f nest-local_backend-venv >/dev/null 2>&1 || true
+
+create-superuser:
+	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
 
 exec-backend-command:
 	@docker exec -i nest-backend $(CMD)
@@ -28,8 +41,17 @@ django-shell:
 
 dump-data:
 	@echo "Dumping Nest data"
-	@CMD="python manage.py dumpdata github owasp --indent=2" $(MAKE) exec-backend-command > backend/data/nest.json
-	@gzip backend/data/nest.json
+	@CMD="python manage.py dumpdata \
+		github \
+		owasp \
+		slack.Conversation \
+		slack.Member \
+		slack.Workspace \
+		--indent=4 \
+		--natural-foreign \
+		--natural-primary -o data/nest.json" $(MAKE) exec-backend-command
+	@CMD="sed -E -i 's/\"email\": *\"([^\"]|\\\")*\"/\"email\": \"\"/g' data/nest.json" $(MAKE) exec-backend-command
+	@CMD="gzip -f data/nest.json" $(MAKE) exec-backend-command
 
 enrich-data: \
 	github-enrich-issues \
@@ -40,25 +62,6 @@ enrich-data: \
 
 generate-sitemap:
 	@CMD="python manage.py generate_sitemap" $(MAKE) exec-backend-command
-
-github-enrich-issues:
-	@echo "Enriching GitHub issues"
-	@CMD="python manage.py github_enrich_issues" $(MAKE) exec-backend-command
-
-github-match-users:
-	@CMD="python manage.py github_match_users $(MATCH_MODEL)" $(MAKE) exec-backend-command
-
-github-update-owasp-organization:
-	@echo "Updating OWASP GitHub organization"
-	@CMD="python manage.py github_update_owasp_organization" $(MAKE) exec-backend-command
-
-github-update-project-related-repositories:
-	@echo "Updating OWASP project related GitHub repositories"
-	@CMD="python manage.py github_update_project_related_repositories" $(MAKE) exec-backend-command
-
-github-update-users:
-	@echo "Updating GitHub users"
-	@CMD="python manage.py github_update_users" $(MAKE) exec-backend-command
 
 index-data:
 	@echo "Indexing Nest data"
@@ -79,82 +82,30 @@ migrate:
 migrations:
 	@CMD="python manage.py makemigrations" $(MAKE) exec-backend-command
 
-owasp-aggregate-projects:
-	@echo "Aggregating OWASP projects"
-	@CMD="python manage.py owasp_aggregate_projects" $(MAKE) exec-backend-command
-
-owasp-enrich-chapters:
-	@echo "Enriching OWASP chapters"
-	@CMD="python manage.py owasp_enrich_chapters" $(MAKE) exec-backend-command
-
-owasp-enrich-committees:
-	@echo "Enriching OWASP committees"
-	@CMD="python manage.py owasp_enrich_committees" $(MAKE) exec-backend-command
-
-owasp-enrich-events:
-	@echo "Enriching OWASP events"
-	@CMD="python manage.py owasp_enrich_events" $(MAKE) exec-backend-command
-
-owasp-enrich-projects:
-	@echo "Enriching OWASP projects"
-	@CMD="python manage.py owasp_enrich_projects" $(MAKE) exec-backend-command
-
-owasp-process-snapshots:
-	@echo "Processing OWASP snapshots"
-	@CMD="python manage.py owasp_process_snapshots" $(MAKE) exec-backend-command
-
-owasp-update-project-health-metrics:
-	@echo "Updating OWASP project health requirements"
-	@CMD="python manage.py owasp_update_project_health_metrics" $(MAKE) exec-backend-command
-
-owasp-update-project-health-requirements:
-	@echo "Updating OWASP project health metrics"
-	@CMD="python manage.py owasp_update_project_health_requirements" $(MAKE) exec-backend-command
-
-owasp-scrape-chapters:
-	@echo "Scraping OWASP site chapters data"
-	@CMD="python manage.py owasp_scrape_chapters" $(MAKE) exec-backend-command
-
-owasp-scrape-committees:
-	@echo "Scraping OWASP site committees data"
-	@CMD="python manage.py owasp_scrape_committees" $(MAKE) exec-backend-command
-
-owasp-scrape-projects:
-	@echo "Scraping OWASP site projects data"
-	@CMD="python manage.py owasp_scrape_projects" $(MAKE) exec-backend-command
-
-owasp-sync-posts:
-	@CMD="python manage.py owasp_sync_posts" $(MAKE) exec-backend-command
-
-owasp-update-events:
-	@echo "Getting OWASP events data"
-	@CMD="python manage.py owasp_update_events" $(MAKE) exec-backend-command
-
-owasp-update-sponsors:
-	@echo "Getting OWASP sponsors data"
-	@CMD="python manage.py owasp_update_sponsors" $(MAKE) exec-backend-command
-
 purge-data:
 	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command
 
 recreate-schema:
+	@echo "Recreating Nest schema"
 	@CMD="psql -U nest_user_dev -d nest_db_dev -c \
 		'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nest_user_dev'" \
 	  	$(MAKE) exec-db-command-it 2>/dev/null
-	$(MAKE) migrate
+	@$(MAKE) migrate
 
-setup:
-	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
+restore-backup:
+	@echo "Restoring Nest backup"
+	@CMD="python manage.py restore_backup" $(MAKE) exec-backend-command
+
+save-backup:
+	@echo "Saving Nest backup"
+	@CMD="python manage.py dumpdata --natural-primary --natural-foreign --indent=2" $(MAKE) exec-backend-command > backend/data/backup.json
+	@gzip backend/data/backup.json
 
 shell-backend:
 	@CMD="/bin/sh" $(MAKE) exec-backend-command-it
 
 shell-db:
 	@CMD="/bin/sh" $(MAKE) exec-db-command-it
-
-slack-sync-data:
-	@echo "Syncing Slack data"
-	@CMD="python manage.py slack_sync_data" $(MAKE) exec-backend-command
 
 sync-data: \
 	update-data \
@@ -166,7 +117,10 @@ test-backend:
 		--cache-from nest-test-backend \
 		-f backend/docker/Dockerfile.test backend \
 		-t nest-test-backend
-	@docker run -e DJANGO_CONFIGURATION=Test --rm nest-test-backend pytest
+	@docker run \
+		-e DJANGO_SETTINGS_MODULE=settings.test \
+		--env-file backend/.env.example \
+		--rm nest-test-backend pytest
 
 
 update-backend-dependencies:
@@ -177,7 +131,8 @@ update-data: \
 	owasp-scrape-chapters \
 	owasp-scrape-committees \
 	owasp-scrape-projects \
-	github-update-project-related-repositories \
+	github-add-related-repositories \
+	github-update-related-organizations \
 	github-update-users \
 	owasp-aggregate-projects \
 	owasp-update-events \

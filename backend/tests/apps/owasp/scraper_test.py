@@ -1,10 +1,10 @@
 import logging
+from http import HTTPStatus
 from unittest.mock import Mock, patch
 
 import pytest
 import requests
 from lxml import etree
-from requests import codes
 
 from apps.owasp.scraper import OwaspScraper
 
@@ -39,14 +39,14 @@ class TestOwaspScraper:
     def mock_response(self, sample_html):
         """Fixture to provide a mock response."""
         response = Mock()
-        response.status_code = codes.ok
+        response.status_code = HTTPStatus.OK
         response.content = sample_html
         return response
 
     def test_initialization_parser_error(self, mock_session):
         """Test initialization with parser error."""
         response = Mock()
-        response.status_code = codes.ok
+        response.status_code = HTTPStatus.OK
         response.content = b"<completely invalid>> html"
         mock_session.get.return_value = response
         mock_parser = Mock(side_effect=etree.ParserError("Parser error"))
@@ -63,11 +63,11 @@ class TestOwaspScraper:
         mock_session.get.reset_mock()
 
         redirect_response = Mock()
-        redirect_response.status_code = codes.moved_permanently
+        redirect_response.status_code = HTTPStatus.MOVED_PERMANENTLY
         redirect_response.headers = {"Location": "https://new-url.org"}
 
         final_response = Mock()
-        final_response.status_code = codes.ok
+        final_response.status_code = HTTPStatus.OK
         mock_session.get.side_effect = [redirect_response, final_response]
 
         assert scraper.verify_url("https://old-url.org") == "https://new-url.org"
@@ -75,11 +75,11 @@ class TestOwaspScraper:
     @pytest.mark.parametrize(
         "status_code",
         [
-            codes.moved_permanently,  # 301
-            codes.found,  # 302
-            codes.see_other,  # 303
-            codes.temporary_redirect,  # 307
-            codes.permanent_redirect,  # 308
+            HTTPStatus.MOVED_PERMANENTLY,  # 301
+            HTTPStatus.FOUND,  # 302
+            HTTPStatus.SEE_OTHER,  # 303
+            HTTPStatus.TEMPORARY_REDIRECT,  # 307
+            HTTPStatus.PERMANENT_REDIRECT,  # 308
         ],
     )
     def test_verify_url_redirect_status_codes(self, mock_session, mock_response, status_code):
@@ -93,7 +93,7 @@ class TestOwaspScraper:
         redirect_response.headers = {"Location": "https://new-url.org"}
 
         final_response = Mock()
-        final_response.status_code = codes.ok
+        final_response.status_code = HTTPStatus.OK
         mock_session.get.side_effect = [redirect_response, final_response]
 
         assert scraper.verify_url("https://old-url.org") == "https://new-url.org"
@@ -101,7 +101,7 @@ class TestOwaspScraper:
 
     def test_initialization_not_found(self, mock_session):
         response = Mock()
-        response.status_code = codes.not_found
+        response.status_code = HTTPStatus.NOT_FOUND
         mock_session.get.return_value = response
 
         scraper = OwaspScraper("https://test.org")
@@ -110,7 +110,7 @@ class TestOwaspScraper:
 
     def test_verify_url_invalid_url(self, mock_session):
         response = Mock()
-        response.status_code = codes.ok
+        response.status_code = HTTPStatus.OK
         response.content = b"<html></html>"
         mock_session.get.return_value = response
 
@@ -120,7 +120,7 @@ class TestOwaspScraper:
 
     def test_verify_url_unsupported_status_code(self, mock_session):
         response = Mock()
-        response.status_code = codes.im_a_teapot
+        response.status_code = HTTPStatus.IM_A_TEAPOT
         response.content = b"<html></html>"
         mock_session.get.return_value = response
 
@@ -130,7 +130,7 @@ class TestOwaspScraper:
 
     def test_verify_url_logs_warning(self, mock_session, caplog):
         response = Mock()
-        response.status_code = codes.forbidden
+        response.status_code = HTTPStatus.FORBIDDEN
         response.content = b"<html></html>"
         mock_session.get.return_value = response
 
@@ -184,7 +184,7 @@ class TestOwaspScraper:
     def test_verify_url_supported_domain(self, mock_session):
         """Test verify_url with a supported domain."""
         response = Mock()
-        response.status_code = codes.ok
+        response.status_code = HTTPStatus.OK
         response.content = b"<html></html>"
         mock_session.get.return_value = response
 

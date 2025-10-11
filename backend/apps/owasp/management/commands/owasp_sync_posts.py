@@ -7,7 +7,7 @@ import yaml
 import yaml.scanner
 from django.core.management.base import BaseCommand
 
-from apps.common.constants import OWASP_BLOG_URL, OWASP_WEBSITE_URL
+from apps.common.constants import OWASP_BLOG_URL, OWASP_URL
 from apps.github.utils import get_repository_file_content
 from apps.owasp.models.post import Post
 
@@ -23,7 +23,7 @@ class Command(BaseCommand):
             str: The full URL of the author's image.
 
         """
-        return f"{OWASP_WEBSITE_URL}{author_image_url}" if author_image_url else ""
+        return f"{OWASP_URL}{author_image_url}" if author_image_url else ""
 
     def get_blog_url(self, path: str) -> str:
         """Return OWASP blog URL for a given path.

@@ -45,7 +45,8 @@
     "pnpm-lock.yaml"
   ],
   "ignoreRegExpList": [
-    "#\\w+"
+    "#\\w+",
+    "<@\\w+>"
   ],
   "import": [
     "@cspell/dict-aws/cspell-ext.json",

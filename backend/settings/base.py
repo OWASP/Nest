@@ -12,16 +12,25 @@ class Base(Configuration):
     BASE_DIR = Path(__file__).resolve().parent.parent
 
     ENVIRONMENT = os.environ.get("DJANGO_CONFIGURATION", "Local")
-    if ENVIRONMENT == "Test":
-        from dotenv import load_dotenv
-
-        load_dotenv(BASE_DIR / ".env.example")
 
     ALLOWED_HOSTS = values.ListValue()
+    AUTH_USER_MODEL = "nest.User"
     CORS_ALLOW_CREDENTIALS = True
     DEBUG = False
+    GITHUB_APP_ID = None
+    GITHUB_APP_INSTALLATION_ID = None
+    IS_LOCAL_ENVIRONMENT = False
+    IS_PRODUCTION_ENVIRONMENT = False
+    IS_STAGING_ENVIRONMENT = False
+    IS_TEST_ENVIRONMENT = False
+
     RELEASE_VERSION = values.Value(environ_name="RELEASE_VERSION")
-    SENTRY_DSN = values.SecretValue(environ_name="SENTRY_DSN")
+
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_NAME = "nest.session-id"
+    SESSION_COOKIE_SAMESITE = "Lax"
+    SESSION_COOKIE_SECURE = True
+
     SITE_NAME = "localhost"
     SITE_URL = "http://localhost:8000"
 
@@ -37,15 +46,20 @@ class Base(Configuration):
     THIRD_PARTY_APPS = (
         "algoliasearch_django",
         "corsheaders",
-        "rest_framework",
+        "ninja",
         "storages",
     )
 
     LOCAL_APPS = (
+        "apps.ai",
+        "apps.api",
         "apps.common",
         "apps.core",
         "apps.github",
+        "apps.mentorship",
+        "apps.nest",
         "apps.owasp",
+        "apps.sitemap",
         "apps.slack",
     )
 
@@ -79,16 +93,6 @@ class Base(Configuration):
         "django.contrib.messages.middleware.MessageMiddleware",
     ]
 
-    REST_FRAMEWORK = {
-        # Use Django's standard `django.contrib.auth` permissions,
-        # or allow read-only access for unauthenticated users.
-        "DEFAULT_PERMISSION_CLASSES": [
-            "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly"
-        ],
-        "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-        "PAGE_SIZE": 100,
-    }
-
     ROOT_URLCONF = "settings.urls"
 
     TEMPLATES = [
@@ -120,6 +124,12 @@ class Base(Configuration):
         "APPLICATION_ID": ALGOLIA_APPLICATION_ID,
         "INDEX_PREFIX": ENVIRONMENT.lower(),
     }
+
+    API_PAGE_SIZE = 100
+    API_CACHE_PREFIX = "api-response"
+    API_CACHE_TIME_SECONDS = 86400  # 24 hours.
+    NINJA_PAGINATION_CLASS = "apps.api.rest.v0.pagination.CustomPagination"
+    NINJA_PAGINATION_PER_PAGE = API_PAGE_SIZE
 
     REDIS_HOST = values.SecretValue(environ_name="REDIS_HOST")
     REDIS_PASSWORD = values.SecretValue(environ_name="REDIS_PASSWORD")

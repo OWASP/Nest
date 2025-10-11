@@ -2,7 +2,7 @@
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import { User } from 'types/user'
+import type { User } from 'types/user'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/UserCard'
 
@@ -28,7 +28,7 @@ const UsersPage = () => {
   }
 
   const renderUserCard = (user: User) => {
-    const SubmitButton = {
+    const submitButton = {
       label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
       onclick: () => handleButtonClick(user),
@@ -36,15 +36,16 @@ const UsersPage = () => {
 
     return (
       <UserCard
-        avatar={user.avatar_url}
-        button={SubmitButton}
+        avatar={user.avatarUrl}
+        button={submitButton}
+        className="h-64 w-80 bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
         company={user.company || ''}
         email={user.email || ''}
-        followers_count={user.followers_count}
+        followersCount={user.followersCount}
         location={user.location || ''}
+        login={user.login}
         name={user.name || `@${user.login}`}
-        repositories_count={user.public_repositories_count}
-        className="h-64 w-80 bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
+        repositoriesCount={user.publicRepositoriesCount}
       />
     )
   }

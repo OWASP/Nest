@@ -36,7 +36,7 @@ class TestChaptersHandler:
 
     @pytest.fixture(autouse=True)
     def mock_get_chapters(self):
-        with patch("apps.owasp.api.search.chapter.get_chapters") as mock:
+        with patch("apps.owasp.index.search.chapter.get_chapters") as mock:
             mock.return_value = {"hits": [], "nbPages": 1}
             yield mock
 

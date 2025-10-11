@@ -27,7 +27,16 @@ const eslintConfig = [
   ...compat.extends('next/typescript'),
   react.configs.flat['jsx-runtime'],
   {
-    ignores: ['node_modules', 'build', 'dist', '.cache', '.next', '.pnpm-store'],
+    ignores: [
+      '.cache',
+      '.next',
+      '.pnpm-store',
+      'node_modules',
+      'build',
+      'dist',
+      'next-env.d.ts',
+      'src/types/__generated__/**/*',
+    ],
   },
   js.configs.recommended,
   {
@@ -77,6 +86,34 @@ const eslintConfig = [
       '@typescript-eslint/no-inferrable-types': 'warn',
       '@typescript-eslint/no-unused-expressions': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/naming-convention': [
+        'error',
+        {
+          selector: 'property',
+          modifiers: ['requiresQuotes'],
+          format: null,
+        },
+        {
+          selector: 'property',
+          filter: {
+            regex: '^_{1,2}',
+            match: true,
+          },
+          format: null,
+        },
+        {
+          selector: 'property',
+          filter: {
+            regex: '^(NextResponse|Cookie)$',
+            match: true,
+          },
+          format: null,
+        },
+        {
+          selector: 'property',
+          format: ['camelCase', 'UPPER_CASE'],
+        },
+      ],
       'react-hooks/exhaustive-deps': 'warn',
       'react-hooks/rules-of-hooks': 'error',
       'react/prop-types': 'off',

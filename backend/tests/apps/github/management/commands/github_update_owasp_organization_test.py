@@ -72,19 +72,18 @@ def mock_gh_repo():
         (None, 1, {"project": 0, "chapter": 1, "committee": 1, "event": 1}),
     ],
 )
-@mock.patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"})
-@mock.patch("apps.github.management.commands.github_update_owasp_organization.github.Github")
+@mock.patch("apps.github.management.commands.github_update_owasp_organization.get_github_client")
 @mock.patch("apps.github.management.commands.github_update_owasp_organization.sync_repository")
 def test_handle(
     mock_sync_repository,
-    mock_github,
+    mock_get_github_client,
     command,
     repository_name,
     offset,
     expected_calls,
 ):
     mock_gh_client = mock.Mock()
-    mock_github.return_value = mock_gh_client
+    mock_get_github_client.return_value = mock_gh_client
     mock_org = mock.Mock()
     mock_gh_client.get_organization.return_value = mock_org
 
@@ -149,7 +148,7 @@ def test_handle(
 
         command.handle(repository=repository_name, offset=offset)
 
-        mock_github.assert_called_once_with("test-token", per_page=100)
+        mock_get_github_client.assert_called_once()
         mock_gh_client.get_organization.assert_called_once_with("OWASP")
 
         if repository_name:

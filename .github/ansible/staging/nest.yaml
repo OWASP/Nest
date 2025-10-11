@@ -3,83 +3,30 @@
     tasks:
       - name: Copy docker-compose.yaml
         ansible.builtin.copy:
-          src: '{{ github_workspace }}/docker/docker-compose-staging.yaml'
+          src: '{{ github_workspace }}/docker-compose/staging.yaml'
           dest: ~/docker-compose.yaml
           mode: '0644'
 
-      - name: Ensure backend directory exists
-        ansible.builtin.file:
-          path: ~/backend
-          state: directory
-          mode: '0755'
-
-      - name: Copy backend Makefile
-        ansible.builtin.copy:
-          src: '{{ github_workspace }}/backend/Makefile'
-          dest: ~/backend/Makefile
-          mode: '0644'
+      - name: Sync Makefile structure
+        ansible.builtin.synchronize:
+          src: '{{ github_workspace }}/'
+          dest: '~/'
+          recursive: yes
+          rsync_opts:
+            - '--include=*/'
+            - '--include=Makefile'
+            - '--include=*/Makefile'
+            - '--include=*/**/Makefile'
+            - '--include=*/**/**/Makefile'
+            - '--exclude=*'
 
       - name: Update backend makefile for the staging environment
         shell:
           cmd: sed -i 's/\bnest-backend\b/staging-nest-backend/' ~/backend/Makefile
 
-      - name: Ensure cspell directory exists
-        ansible.builtin.file:
-          path: ~/cspell
-          state: directory
-          mode: '0755'
-
-      - name: Copy cspell makefile
-        ansible.builtin.copy:
-          src: '{{ github_workspace }}/cspell/Makefile'
-          dest: ~/cspell/Makefile
-          mode: '0644'
-
-      - name: Ensure docs directory exists
-        ansible.builtin.file:
-          path: ~/docs
-          state: directory
-          mode: '0755'
-
-      - name: Copy docs makefile
-        ansible.builtin.copy:
-          src: '{{ github_workspace }}/docs/Makefile'
-          dest: ~/docs/Makefile
-          mode: '0644'
-
-      - name: Ensure frontend directory exists
-        ansible.builtin.file:
-          path: ~/frontend
-          state: directory
-          mode: '0755'
-
-      - name: Copy frontend makefile
-        ansible.builtin.copy:
-          src: '{{ github_workspace }}/frontend/Makefile'
-          dest: ~/frontend/Makefile
-          mode: '0644'
-
       - name: Update frontend makefile for the staging environment
         shell:
           cmd: sed -i 's/\bnest-frontend\b/staging-nest-frontend/' ~/frontend/Makefile
-
-      - name: Copy main makefile
-        ansible.builtin.copy:
-          src: '{{ github_workspace }}/Makefile'
-          dest: ~/Makefile
-          mode: '0644'
-
-      - name: Ensure schema directory exists
-        ansible.builtin.file:
-          path: ~/schema
-          state: directory
-          mode: '0755'
-
-      - name: Copy schema makefile
-        ansible.builtin.copy:
-          src: '{{ github_workspace }}/schema/Makefile'
-          dest: ~/schema/Makefile
-          mode: '0644'
 
       - name: Ensure data directory exists
         ansible.builtin.file:
@@ -87,29 +34,38 @@
           state: directory
           mode: '0755'
 
-      - name: Copy directory recursively
+      - name: Copy secrets
         copy:
-          src: '{{ github_workspace }}/backend/data'
-          dest: ~/backend/data
-          mode: '0755'
-
-      - name: Copy .env.backend
-        copy:
-          src: '{{ github_workspace }}/.env.backend'
+          src: '{{ github_workspace }}/{{ item }}'
           dest: ~/
           mode: '0400'
+        loop:
+          - .env.backend
+          - .env.cache
+          - .env.db
+          - .env.frontend
 
-      - name: Copy .env.cache
-        copy:
-          src: '{{ github_workspace }}/.env.cache'
-          dest: ~/
-          mode: '0400'
+      - name: Clean up secrets
+        delegate_to: localhost
+        file:
+          path: '{{ github_workspace }}/{{ item }}'
+          state: absent
+        loop:
+          - .env.backend
+          - .env.cache
+          - .env.db
+          - .env.frontend
+        run_once: true
 
-      - name: Copy .env.db
+      - name: Copy crontab
         copy:
-          src: '{{ github_workspace }}/.env.db'
-          dest: ~/
-          mode: '0400'
+          src: '{{ github_workspace }}/cron/staging'
+          dest: /tmp/staging_crontab
+          mode: '0600'
+
+      - name: Install crontab
+        ansible.builtin.command:
+          cmd: crontab /tmp/staging_crontab
 
       - name: Retart services
         shell:

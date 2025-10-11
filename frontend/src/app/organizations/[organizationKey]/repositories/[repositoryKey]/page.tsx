@@ -1,6 +1,5 @@
 'use client'
-
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import {
   faCodeCommit,
   faCodeFork,
@@ -12,19 +11,22 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
-import { GET_REPOSITORY_DATA } from 'server/queries/repositoryQueries'
-import { TopContributorsTypeGraphql } from 'types/contributor'
+import { GetRepositoryDataDocument } from 'types/__generated__/repositoryQueries.generated'
+import type { Contributor } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const RepositoryDetailsPage = () => {
-  const { repositoryKey, organizationKey } = useParams()
+  const { repositoryKey, organizationKey } = useParams<{
+    repositoryKey: string
+    organizationKey: string
+  }>()
   const [repository, setRepository] = useState(null)
-  const [topContributors, setTopContributors] = useState<TopContributorsTypeGraphql[]>([])
+  const [topContributors, setTopContributors] = useState<Contributor[]>([])
   const [recentPullRequests, setRecentPullRequests] = useState(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const { data, error: graphQLRequestError } = useQuery(GET_REPOSITORY_DATA, {
+  const { data, error: graphQLRequestError } = useQuery(GetRepositoryDataDocument, {
     variables: { repositoryKey: repositoryKey, organizationKey: organizationKey },
   })
   useEffect(() => {
@@ -108,16 +110,18 @@ const RepositoryDetailsPage = () => {
   return (
     <DetailsCard
       details={repositoryDetails}
+      entityKey={repository.project?.key}
       languages={repository.languages}
+      projectName={repository.project?.name}
       pullRequests={recentPullRequests}
       recentIssues={repository.issues}
+      recentMilestones={repository.recentMilestones}
       recentReleases={repository.releases}
       stats={RepositoryStats}
       summary={repository.description}
       title={repository.name}
       topContributors={topContributors}
       topics={repository.topics}
-      recentMilestones={repository.recentMilestones}
       type="repository"
     />
   )

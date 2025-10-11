@@ -2,9 +2,7 @@
 
 import logging
 
-from apps.common.constants import OWASP_NEST_URL
 from apps.slack.constants import (
-    FEEDBACK_CHANNEL_MESSAGE,
     OWASP_APPSEC_CHANNEL_ID,
     OWASP_ASKOWASP_CHANNEL_ID,
     OWASP_CHAPTER_LONDON_CHANNEL_ID,
@@ -42,24 +40,22 @@ class TeamJoin(EventBase):
 
         """
         return {
-            "appsec_channel": OWASP_APPSEC_CHANNEL_ID,
-            "ask_channel": OWASP_ASKOWASP_CHANNEL_ID,
-            "community_channel": OWASP_COMMUNITY_CHANNEL_ID,
-            "contribute_channel": OWASP_CONTRIBUTE_CHANNEL_ID,
-            "developers_channel": OWASP_DEVELOPERS_CHANNEL_ID,
-            "devsecops_channel": OWASP_DEVSECOPS_CHANNEL_ID,
-            "FEEDBACK_CHANNEL_MESSAGE": FEEDBACK_CHANNEL_MESSAGE,
-            "gsoc_channel": OWASP_GSOC_CHANNEL_ID,
-            "jobs_channel": OWASP_JOBS_CHANNEL_ID,
-            "juice_shop_channel": OWASP_PROJECT_JUICE_SHOP_CHANNEL_ID,
-            "leaders_channel": OWASP_LEADERS_CHANNEL_ID,
-            "london_channel": OWASP_CHAPTER_LONDON_CHANNEL_ID,
-            "mentors_channel": OWASP_MENTORS_CHANNEL_ID,
-            "nest_url": OWASP_NEST_URL,
-            "project_nest_channel": OWASP_PROJECT_NEST_CHANNEL_ID,
-            "sponsorship_channel": OWASP_SPONSORSHIP_CHANNEL_ID,
-            "threat_modeling_channel": OWASP_THREAT_MODELING_CHANNEL_ID,
-            "user_id": self.get_user_id(event),
+            **super().get_context(event),
+            "APPSEC_CHANNEL_ID": OWASP_APPSEC_CHANNEL_ID,
+            "ASKOWASP_CHANNEL_ID": OWASP_ASKOWASP_CHANNEL_ID,
+            "COMMUNITY_CHANNEL_ID": OWASP_COMMUNITY_CHANNEL_ID,
+            "CONTRIBUTE_CHANNEL_ID": OWASP_CONTRIBUTE_CHANNEL_ID,
+            "DEVELOPERS_CHANNEL_ID": OWASP_DEVELOPERS_CHANNEL_ID,
+            "DEVSECOPS_CHANNEL_ID": OWASP_DEVSECOPS_CHANNEL_ID,
+            "GSOC_CHANNEL_ID": OWASP_GSOC_CHANNEL_ID,
+            "JOBS_CHANNEL_ID": OWASP_JOBS_CHANNEL_ID,
+            "LEADERS_CHANNEL_ID": OWASP_LEADERS_CHANNEL_ID,
+            "LONDON_CHAPTER_CHANNEL_ID": OWASP_CHAPTER_LONDON_CHANNEL_ID,
+            "MENTORS_CHANNEL_ID": OWASP_MENTORS_CHANNEL_ID,
+            "PROJECT_JUICE_SHOP_CHANNEL_ID": OWASP_PROJECT_JUICE_SHOP_CHANNEL_ID,
+            "PROJECT_NEST_CHANNEL_ID": OWASP_PROJECT_NEST_CHANNEL_ID,
+            "SPONSORSHIP_CHANNEL_ID": OWASP_SPONSORSHIP_CHANNEL_ID,
+            "THREAT_MODELING_CHANNEL_ID": OWASP_THREAT_MODELING_CHANNEL_ID,
         }
 
     def get_user_id(self, event):

@@ -90,16 +90,27 @@ export const fetchHeatmapData = async (username: string): Promise<HeatmapRespons
 // The code below is a modified version of 'github-contributions-canvas'
 // https://www.npmjs.com/package/github-contributions-canvas?activeTab=code
 
+// Defined Light and Dark Themes
 const themes = {
-  blue: {
-    background: '#10151C',
-    text: '#FFFFFF',
-    meta: '#A6B1C1',
-    grade4: '#5F87A8',
-    grade3: '#46627B',
-    grade2: '#314257',
+  dark: {
+    background: '#1F2937',
+    grade0: '#2C3A4D',
     grade1: '#394d65',
-    grade0: '#202A37',
+    grade2: '#314257',
+    grade3: '#46627B',
+    grade4: '#5F87A8',
+    meta: '#A6B1C1',
+    text: '#FFFFFF',
+  },
+  light: {
+    background: '#F3F4F6', // lighter background for light mode
+    grade0: '#E7E7E6',
+    grade1: '#8BA7C0',
+    grade2: '#6C8EAB',
+    grade3: '#5C7BA2',
+    grade4: '#567498',
+    meta: '#666666',
+    text: '#333333',
   },
 }
 
@@ -174,9 +185,7 @@ const yearHeight = textHeight + (boxWidth + boxMargin) * 8 + canvasMargin
 const scaleFactor = getPixelRatio()
 
 function getTheme(opts: Options): Theme {
-  const { themeName } = opts
-  const name = themeName ?? 'blue'
-  return themes[name] ?? themes.blue
+  return themes[opts.themeName ?? 'dark']
 }
 
 function getDateInfo(data: DataStruct, date: string) {
@@ -277,7 +286,7 @@ function drawMetaData(ctx: CanvasRenderingContext2D, opts: DrawMetadataOptions) 
 }
 
 export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
-  const { data } = opts
+  const { data, themeName } = opts
   let headerOffset = 0
   if (!opts.skipHeader) {
     headerOffset = headerHeight
@@ -302,6 +311,7 @@ export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
       width,
       height,
       data,
+      themeName,
     })
   }
 
@@ -314,6 +324,7 @@ export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
       offsetX,
       offsetY,
       data,
+      themeName,
     })
   })
 }

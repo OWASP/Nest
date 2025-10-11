@@ -9,7 +9,7 @@ class TestEventModel:
         context = {"channel_id": "C111", "user_id": "U111"}
         payload = {
             "channel_name": "general",
-            "command": Owasp().get_command_name(),
+            "command": Owasp().command_name,
             "text": "/owasp help",
             "user_name": "Alice",
         }
@@ -54,7 +54,7 @@ class TestEventModel:
         context = {"channel_id": "C444", "user_id": "U444"}
         payload = {
             "channel_name": "dev",
-            "command": Owasp().get_command_name(),
+            "command": Owasp().command_name,
             "text": "/owasp info",
             "user_name": "Dana",
         }

@@ -8,7 +8,7 @@ from apps.slack.utils import get_news_data
 class News(CommandBase):
     """Slack bot /news command."""
 
-    def get_template_context(self, command):
+    def get_context(self, command):
         """Get the template context.
 
         Args:
@@ -19,7 +19,8 @@ class News(CommandBase):
 
         """
         return {
-            **super().get_template_context(command),
-            "news_items": get_news_data(),
-            "news_url": OWASP_NEWS_URL,
+            **super().get_context(command),
+            "NEWS_ITEMS": get_news_data(),
+            "NEWS_PAGE_NAME": "OWASP news",
+            "NEWS_PAGE_URL": OWASP_NEWS_URL,
         }

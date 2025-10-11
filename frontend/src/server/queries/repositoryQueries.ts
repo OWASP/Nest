@@ -1,8 +1,9 @@
 import { gql } from '@apollo/client'
 
 export const GET_REPOSITORY_DATA = gql`
-  query GetRepository($repositoryKey: String!, $organizationKey: String!) {
+  query GetRepositoryData($repositoryKey: String!, $organizationKey: String!) {
     repository(repositoryKey: $repositoryKey, organizationKey: $organizationKey) {
+      id
       commitsCount
       contributorsCount
       createdAt
@@ -10,7 +11,9 @@ export const GET_REPOSITORY_DATA = gql`
       forksCount
       key
       issues {
+        id
         author {
+          id
           avatarUrl
           login
           name
@@ -25,10 +28,18 @@ export const GET_REPOSITORY_DATA = gql`
       name
       openIssuesCount
       organization {
+        id
         login
       }
+      project {
+        id
+        key
+        name
+      }
       releases {
+        id
         author {
+          id
           avatarUrl
           name
           login
@@ -46,7 +57,9 @@ export const GET_REPOSITORY_DATA = gql`
       updatedAt
       url
       recentMilestones(limit: 5) {
+        id
         author {
+          id
           avatarUrl
           login
           name
@@ -61,13 +74,15 @@ export const GET_REPOSITORY_DATA = gql`
       }
     }
     topContributors(organization: $organizationKey, repository: $repositoryKey) {
+      id
       avatarUrl
-      contributionsCount
       login
       name
     }
     recentPullRequests(limit: 5, organization: $organizationKey, repository: $repositoryKey) {
+      id
       author {
+        id
         avatarUrl
         login
         name
@@ -82,8 +97,9 @@ export const GET_REPOSITORY_DATA = gql`
 `
 
 export const GET_REPOSITORY_METADATA = gql`
-  query GetRepository($repositoryKey: String!, $organizationKey: String!) {
+  query GetRepositoryMetadata($repositoryKey: String!, $organizationKey: String!) {
     repository(repositoryKey: $repositoryKey, organizationKey: $organizationKey) {
+      id
       description
       name
     }

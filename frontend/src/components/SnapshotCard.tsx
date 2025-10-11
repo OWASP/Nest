@@ -1,7 +1,7 @@
 import { faChevronRight, faCalendar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
-import { SnapshotCardProps } from 'types/card'
+import type { SnapshotCardProps } from 'types/card'
 import { formatDate } from 'utils/dateFormatter'
 
 const SnapshotCard = ({ title, button, startAt, endAt }: SnapshotCardProps) => {
@@ -11,7 +11,7 @@ const SnapshotCard = ({ title, button, startAt, endAt }: SnapshotCardProps) => {
       className="group flex h-40 w-full flex-col items-center rounded-lg bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
     >
       <div className="text-center">
-        <h3 className="max-w-[250px] text-balance text-lg font-semibold text-gray-900 group-hover:text-blue-400 dark:text-white sm:text-xl">
+        <h3 className="max-w-[250px] text-lg font-semibold text-balance text-gray-900 group-hover:text-blue-400 sm:text-xl dark:text-white">
           <p>{title}</p>
         </h3>
       </div>

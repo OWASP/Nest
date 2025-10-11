@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/nextjs'
-import { ENVIRONMENT, RELEASE_VERSION, SENTRY_DSN } from 'utils/credentials'
+import { ENVIRONMENT, RELEASE_VERSION, SENTRY_DSN } from 'utils/env.client'
 
 Sentry.init({
   debug: false,

@@ -2,7 +2,7 @@
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import { OrganizationTypeAlgolia } from 'types/organization'
+import type { Organization } from 'types/organization'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/UserCard'
 
@@ -15,7 +15,7 @@ const OrganizationPage = () => {
     searchQuery,
     handleSearch,
     handlePageChange,
-  } = useSearchPage<OrganizationTypeAlgolia>({
+  } = useSearchPage<Organization>({
     indexName: 'organizations',
     pageTitle: 'GitHub Organizations',
     hitsPerPage: 24,
@@ -23,12 +23,12 @@ const OrganizationPage = () => {
 
   const router = useRouter()
 
-  const renderOrganizationCard = (organization: OrganizationTypeAlgolia) => {
+  const renderOrganizationCard = (organization: Organization) => {
     const handleButtonClick = () => {
       router.push(`/organizations/${organization.login}`)
     }
 
-    const SubmitButton = {
+    const submitButton = {
       label: 'View Profile',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
       onclick: handleButtonClick,
@@ -36,16 +36,16 @@ const OrganizationPage = () => {
 
     return (
       <UserCard
-        avatar={organization.avatar_url}
-        button={SubmitButton}
+        avatar={organization.avatarUrl}
+        button={submitButton}
+        className="h-64 w-80 bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
         company={organization.company || ''}
         email={organization.email || ''}
-        followers_count={organization.followers_count}
+        followersCount={organization.followersCount}
         key={organization.objectID}
         location={organization.location || `@${organization.login}`}
         name={organization.name}
-        repositories_count={organization.public_repositories_count}
-        className="h-64 w-80 bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
+        repositoriesCount={organization.publicRepositoriesCount}
       />
     )
   }

@@ -6,4 +6,11 @@ from settings.base import Base
 class Test(Base):
     """Test configuration."""
 
-    DEBUG = False
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "test-cache",
+        },
+    }
+
+    IS_TEST_ENVIRONMENT = True

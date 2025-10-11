@@ -1,21 +1,21 @@
-{% if help %}
-• `{{ command }} board` -- OWASP Global Board information
-• `{{ command }} chapters` -- Explore OWASP chapters
-• `{{ command }} committees` -- Explore OWASP committees
-• `{{ command }} community` -- Explore OWASP community
-• `{{ command }} contact` -- Contact OWASP
-• `{{ command }} contribute` -- OWASP projects contribution opportunities
-• `{{ command }} donate` -- Support OWASP with a donation
-• `{{ command }} events` -- Browse OWASP events
-• `{{ command }} gsoc` -- Google Summer of Code participants information
-• `{{ command }} jobs` -- Check out available job opportunities
-• `{{ command }} leaders` -- Chapter and project leaders search
-• `{{ command }} news` -- OWASP news
-• `{{ command }} projects` -- Explore OWASP projects
-• `{{ command }} sponsor` -- Coming soon
-• `{{ command }} sponsors` -- Get a list of OWASP sponsors
-• `{{ command }} staff` -- OWASP corporate structure
-• `{{ command }} users` -- OWASP contributors
+{% if HELP %}
+• `{{ COMMAND }} board` -- OWASP Global Board information
+• `{{ COMMAND }} chapters` -- Explore OWASP chapters
+• `{{ COMMAND }} committees` -- Explore OWASP committees
+• `{{ COMMAND }} community` -- Explore OWASP community
+• `{{ COMMAND }} contact` -- Contact OWASP
+• `{{ COMMAND }} contribute` -- OWASP projects contribution opportunities
+• `{{ COMMAND }} donate` -- Support OWASP with a donation
+• `{{ COMMAND }} events` -- Browse OWASP events
+• `{{ COMMAND }} gsoc` -- Google Summer of Code participants information
+• `{{ COMMAND }} jobs` -- Check out available job opportunities
+• `{{ COMMAND }} leaders` -- Chapter and project leaders search
+• `{{ COMMAND }} news` -- OWASP news
+• `{{ COMMAND }} projects` -- Explore OWASP projects
+• `{{ COMMAND }} sponsor` -- Coming soon
+• `{{ COMMAND }} sponsors` -- Get a list of OWASP sponsors
+• `{{ COMMAND }} staff` -- OWASP corporate structure
+• `{{ COMMAND }} users` -- OWASP contributors
 {% else %}
-*`{{ command }} {{ handler }}` is not supported*
+*`{{ COMMAND }} {{ HANDLER }}` is not supported*
 {% endif %}

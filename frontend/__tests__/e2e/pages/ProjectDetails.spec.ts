@@ -6,7 +6,9 @@ test.describe('Project Details Page', () => {
     await page.route('**/graphql/', async (route) => {
       await route.fulfill({
         status: 200,
-        json: { data: mockProjectDetailsData },
+        json: {
+          data: mockProjectDetailsData,
+        },
       })
     })
     await page.context().addCookies([
@@ -59,12 +61,10 @@ test.describe('Project Details Page', () => {
 
   test('should have top contributors', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Contributor 1' })).toBeVisible()
-    await expect(page.getByText('Contributor 1')).toBeVisible()
-    await expect(page.getByText('30 Contributions')).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Contributor 2' })).toBeVisible()
-    await expect(page.getByText('Contributor 2')).toBeVisible()
-    await expect(page.getByText('29 Contributions')).toBeVisible()
+    await expect(page.getByRole('img', { name: 'Contributor 1', exact: true })).toBeVisible()
+    await expect(page.getByText('Contributor 1', { exact: true })).toBeVisible()
+    await expect(page.getByRole('img', { name: 'Contributor 2', exact: true })).toBeVisible()
+    await expect(page.getByText('Contributor 2', { exact: true })).toBeVisible()
   })
 
   test('toggle top contributors', async ({ page }) => {
@@ -116,5 +116,13 @@ test.describe('Project Details Page', () => {
 
     await page.getByText('Repo One').click()
     await expect(page).toHaveURL('organizations/OWASP/repositories/repo-1')
+  })
+
+  test('should display health metrics section', async ({ page }) => {
+    await expect(page.getByText('Issues Trend')).toBeVisible()
+    await expect(page.getByText('Pull Requests Trend')).toBeVisible()
+    await expect(page.getByText('Stars Trend')).toBeVisible()
+    await expect(page.getByText('Forks Trend')).toBeVisible()
+    await expect(page.getByText('Days Since Last Commit and Release')).toBeVisible()
   })
 })

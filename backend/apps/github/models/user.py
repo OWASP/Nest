@@ -5,7 +5,12 @@ from __future__ import annotations
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
-from apps.github.constants import GITHUB_GHOST_USER_LOGIN, OWASP_FOUNDATION_LOGIN
+from apps.common.utils import get_absolute_url
+from apps.github.constants import (
+    GITHUB_ACTIONS_USER_LOGIN,
+    GITHUB_GHOST_USER_LOGIN,
+    OWASP_FOUNDATION_LOGIN,
+)
 from apps.github.models.common import GenericUserModel, NodeModel
 from apps.github.models.mixins.user import UserIndexMixin
 from apps.github.models.organization import Organization
@@ -16,15 +21,25 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
     class Meta:
         db_table = "github_users"
+        indexes = [
+            models.Index(fields=["-created_at"], name="github_user_created_at_desc"),
+            models.Index(fields=["-updated_at"], name="github_user_updated_at_desc"),
+        ]
         verbose_name_plural = "Users"
 
-    bio = models.TextField(verbose_name="Bio", max_length=1000, default="")
+    bio = models.TextField(verbose_name="Bio", max_length=1000, blank=True, default="")
+    is_bot = models.BooleanField(verbose_name="Is bot", default=False)
     is_hireable = models.BooleanField(verbose_name="Is hireable", default=False)
     twitter_username = models.CharField(
         verbose_name="Twitter username", max_length=50, default="", blank=True
     )
 
-    is_bot = models.BooleanField(verbose_name="Is bot", default=False)
+    has_public_member_page = models.BooleanField(default=True)
+    is_owasp_staff = models.BooleanField(
+        default=False,
+        verbose_name="Is OWASP Staff",
+        help_text="Indicates if the user is OWASP Foundation staff.",
+    )
 
     contributions_count = models.PositiveIntegerField(
         verbose_name="Contributions count", default=0
@@ -48,6 +63,11 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
         """
         return self.created_issues.all()
+
+    @property
+    def nest_url(self) -> str:
+        """Get Nest URL for user."""
+        return get_absolute_url(f"/members/{self.nest_key}")
 
     @property
     def releases(self):
@@ -76,11 +96,15 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
         # Direct fields.
         for model_field, gh_field in field_mapping.items():
-            value = getattr(gh_user, gh_field)
+            value = getattr(gh_user, gh_field, None)
             if value is not None:
                 setattr(self, model_field, value)
 
         self.is_bot = gh_user.type == "Bot"
+
+    def get_absolute_url(self):
+        """Get absolute URL for the user."""
+        return f"/members/{self.nest_key}"
 
     @staticmethod
     def bulk_save(users, fields=None) -> None:
@@ -96,18 +120,20 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
         """
         return {
+            GITHUB_ACTIONS_USER_LOGIN,
             GITHUB_GHOST_USER_LOGIN,
             OWASP_FOUNDATION_LOGIN,
             *Organization.get_logins(),
         }
 
     @staticmethod
-    def update_data(gh_user, *, save: bool = True) -> User | None:
+    def update_data(gh_user, *, save: bool = True, **kwargs) -> User | None:
         """Update GitHub user data.
 
         Args:
             gh_user (github.NamedUser.NamedUser): The GitHub user object.
             save (bool, optional): Whether to save the instance.
+            **kwargs: optional extra attributes.
 
         Returns:
             User: The updated or created user instance.
@@ -123,6 +149,10 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
             user = User(node_id=user_node_id)
 
         user.from_github(gh_user)
+
+        for name, value in kwargs.items():
+            setattr(user, name, value)
+
         if save:
             user.save()
 

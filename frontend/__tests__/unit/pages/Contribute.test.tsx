@@ -135,7 +135,7 @@ describe('Contribute Component', () => {
   test('does not render pagination when there is only one page', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
-      total_pages: 1,
+      totalPages: 1,
     })
     render(<ContributePage />)
     await waitFor(() => {

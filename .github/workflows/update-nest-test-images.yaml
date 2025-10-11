@@ -6,7 +6,6 @@ on:
   workflow_dispatch:
 
 env:
-  DOCKERHUB_USERNAME: arkid15r
   FORCE_COLOR: 1
 
 permissions:
@@ -18,112 +17,61 @@ jobs:
     if: ${{ github.repository == 'OWASP/Nest' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-
-      - name: Restore buildx backend poetry cache
-        uses: actions/cache@v4
-        with:
-          path: /tmp/buildx-backend-poetry-cache
-          key: buildx-backend-poetry-cache-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
-          restore-keys: |
-            buildx-backend-poetry-cache-${{ runner.os }}-
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 
       - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
 
       - name: Login to Docker Hub
-        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
         with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Update backend test image
-        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           cache-from: |
-            type=local,src=/tmp/buildx-backend-poetry-cache
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache
+            type=gha
+            type=registry,ref=owasp/nest:test-backend-cache
           cache-to: |
-            type=local,dest=/tmp/buildx-backend-poetry-cache-new,mode=max
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:cache,mode=max
+            type=gha,compression=zstd
+            type=registry,ref=owasp/nest:test-backend-cache
           context: backend
           file: backend/docker/Dockerfile.test
           platforms: linux/amd64
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-backend:latest
-
-      - name: Update buildx backend poetry cache
-        run: |
-          rm -rf /tmp/buildx-backend-poetry-cache
-          mv /tmp/buildx-backend-poetry-cache-new /tmp/buildx-backend-poetry-cache
-
-      - name: Restore buildx frontend pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: /tmp/buildx-frontend-pnpm-cache
-          key: buildx-frontend-pnpm-cache-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
-          restore-keys: |
-            buildx-frontend-pnpm-cache-${{ runner.os }}-
+          tags: owasp/nest:test-backend-latest
 
       - name: Update frontend unit test image
-        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           cache-from: |
-            type=local,src=/tmp/buildx-frontend-pnpm-cache
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache
+            type=gha
+            type=registry,ref=owasp/nest:test-frontend-unit-cache
           cache-to: |
-            type=local,dest=/tmp/buildx-frontend-pnpm-cache-new,mode=max
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:cache,mode=max
+            type=gha,compression=zstd
+            type=registry,ref=owasp/nest:test-frontend-unit-cache
           context: frontend
           file: frontend/docker/Dockerfile.unit.test
           platforms: linux/amd64
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-unit:latest
-
-      - name: Update buildx frontend pnpm cache
-        run: |
-          rm -rf /tmp/buildx-frontend-pnpm-cache
-          mv /tmp/buildx-frontend-pnpm-cache-new /tmp/buildx-frontend-pnpm-cache
+          tags: owasp/nest:test-frontend-unit-latest
 
       - name: Update frontend end-to-end test image
-        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           cache-from: |
-            type=local,src=/tmp/buildx-frontend-pnpm-cache
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache
+            type=gha
+            type=registry,ref=owasp/nest:test-frontend-e2e-cache
           cache-to: |
-            type=local,dest=/tmp/buildx-frontend-pnpm-cache-new,mode=max
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:cache,mode=max
+            type=gha,compression=zstd
+            type=registry,ref=owasp/nest:test-frontend-e2e-cache
           context: frontend
           file: frontend/docker/Dockerfile.e2e.test
           platforms: linux/amd64
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-frontend-e2e:latest
-
-      - name: Update buildx frontend pnpm cache
-        run: |
-          rm -rf /tmp/buildx-frontend-pnpm-cache
-          mv /tmp/buildx-frontend-pnpm-cache-new /tmp/buildx-frontend-pnpm-cache
-
-      - name: Update schema test image
-        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0
-        with:
-          cache-from: |
-            type=local,src=/tmp/buildx-schema-poetry-cache
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:cache
-          cache-to: |
-            type=local,dest=/tmp/buildx-schema-poetry-cache-new,mode=max
-            type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:cache,mode=max
-          context: schema
-          file: schema/docker/Dockerfile.test
-          platforms: linux/amd64
-          push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/owasp-nest-test-schema:latest
-
-      - name: Update buildx schema poetry cache
-        run: |
-          rm -rf /tmp/buildx-schema-poetry-cache
-          mv /tmp/buildx-schema-poetry-cache-new /tmp/buildx-schema-poetry-cache
 
       - name: Build and push fuzz-test-backend image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4

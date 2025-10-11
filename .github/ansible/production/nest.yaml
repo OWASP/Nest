@@ -3,101 +3,65 @@
     tasks:
       - name: Copy docker-compose.yaml
         ansible.builtin.copy:
-          src: '{{ github_workspace }}/docker/docker-compose-production.yaml'
+          src: '{{ github_workspace }}/docker-compose/production.yaml'
           dest: ~/docker-compose.yaml
           mode: '0644'
 
-      - name: Ensure backend directory exists
-        ansible.builtin.file:
-          path: ~/backend
-          state: directory
-          mode: '0755'
-
-      - name: Copy backend makefile
-        ansible.builtin.copy:
-          src: '{{ github_workspace }}/backend/Makefile'
-          dest: ~/backend/Makefile
-          mode: '0644'
+      - name: Sync Makefile structure
+        ansible.builtin.synchronize:
+          src: '{{ github_workspace }}/'
+          dest: '~/'
+          recursive: yes
+          rsync_opts:
+            - '--include=*/'
+            - '--include=Makefile'
+            - '--include=*/Makefile'
+            - '--include=*/**/Makefile'
+            - '--include=*/**/**/Makefile'
+            - '--exclude=*'
 
       - name: Update backend makefile for the production environment
         shell:
           cmd: sed -i 's/\bnest-backend\b/production-nest-backend/' ~/backend/Makefile
 
-      - name: Ensure cspell directory exists
-        ansible.builtin.file:
-          path: ~/cspell
-          state: directory
-          mode: '0755'
-
-      - name: Copy cspell makefile
-        ansible.builtin.copy:
-          src: '{{ github_workspace }}/cspell/Makefile'
-          dest: ~/cspell/Makefile
-          mode: '0644'
-
-      - name: Ensure docs directory exists
-        ansible.builtin.file:
-          path: ~/docs
-          state: directory
-          mode: '0755'
-
-      - name: Copy docs makefile
-        ansible.builtin.copy:
-          src: '{{ github_workspace }}/docs/Makefile'
-          dest: ~/docs/Makefile
-          mode: '0644'
-
-      - name: Ensure frontend directory exists
-        ansible.builtin.file:
-          path: ~/frontend
-          state: directory
-          mode: '0755'
-
-      - name: Copy frontend makefile
-        ansible.builtin.copy:
-          src: '{{ github_workspace }}/frontend/Makefile'
-          dest: ~/frontend/Makefile
-          mode: '0644'
-
       - name: Update frontend makefile for the production environment
         shell:
           cmd: sed -i 's/\bnest-frontend\b/production-nest-frontend/' ~/frontend/Makefile
 
-      - name: Copy main makefile
-        ansible.builtin.copy:
-          src: '{{ github_workspace }}/Makefile'
-          dest: ~/Makefile
-          mode: '0644'
-
-      - name: Ensure schema directory exists
-        ansible.builtin.file:
-          path: ~/schema
-          state: directory
-          mode: '0755'
-
-      - name: Copy schema makefile
-        ansible.builtin.copy:
-          src: '{{ github_workspace }}/schema/Makefile'
-          dest: ~/schema/Makefile
-          mode: '0644'
-
-      - name: Copy .env.backend
+      - name: Copy secrets
         copy:
-          src: '{{ github_workspace }}/.env.backend'
+          src: '{{ github_workspace }}/{{ item }}'
           dest: ~/
           mode: '0400'
+        loop:
+          - .env.backend
+          - .env.cache
+          - .env.db
+          - .env.frontend
+          - .github.pem
 
-      - name: Copy .env.cache
-        copy:
-          src: '{{ github_workspace }}/.env.cache'
-          dest: ~/
-          mode: '0400'
+      - name: Clean up secrets
+        delegate_to: localhost
+        file:
+          path: '{{ github_workspace }}/{{ item }}'
+          state: absent
+        loop:
+          - .env.backend
+          - .env.cache
+          - .env.db
+          - .env.frontend
+          - .github.pem
+        run_once: true
 
-      - name: Copy .env.db
+      - name: Copy crontab
         copy:
-          src: '{{ github_workspace }}/.env.db'
-          dest: ~/
-          mode: '0400'
+          src: '{{ github_workspace }}/cron/production'
+          dest: /tmp/production_crontab
+          mode: '0600'
+
+      - name: Install crontab
+        ansible.builtin.command:
+          cmd: crontab /tmp/production_crontab
 
       - name: Retart services
         shell:

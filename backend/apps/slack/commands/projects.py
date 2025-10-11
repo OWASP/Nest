@@ -8,7 +8,7 @@ from apps.slack.common.presentation import EntityPresentation
 class Projects(CommandBase):
     """Slack bot /projects command."""
 
-    def get_render_blocks(self, command: dict):
+    def render_blocks(self, command: dict):
         """Get the rendered blocks.
 
         Args:

@@ -8,14 +8,14 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter } from 'next/navigation'
 import React from 'react'
-import { ProjectMilestonesType } from 'types/project'
+import type { Milestone } from 'types/milestone'
 import { formatDate } from 'utils/dateFormatter'
 import AnchorTitle from 'components/AnchorTitle'
 import ItemCardList from 'components/ItemCardList'
 import { TruncatedText } from 'components/TruncatedText'
 
 interface ProjectMilestonesProps {
-  data: ProjectMilestonesType[]
+  data: Milestone[]
   showAvatar?: boolean
   showSingleColumn?: boolean
 }
@@ -53,7 +53,7 @@ const Milestones: React.FC<ProjectMilestonesProps> = ({
             <span>{item.openIssuesCount} open</span>
           </div>
           {item?.repositoryName && (
-            <div className="flex flex-1 items-center">
+            <div className="flex flex-1 items-center overflow-hidden">
               <FontAwesomeIcon icon={faFolderOpen} className="mr-2 h-5 w-4" />
               <button
                 className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"

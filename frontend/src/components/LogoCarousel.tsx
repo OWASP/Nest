@@ -1,10 +1,10 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef } from 'react'
-import { SponsorType } from 'types/home'
+import type { Sponsor } from 'types/home'
 
 interface MovingLogosProps {
-  sponsors: SponsorType[]
+  sponsors: Sponsor[]
 }
 
 export default function MovingLogos({ sponsors }: MovingLogosProps) {
@@ -22,13 +22,13 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
       <div className="relative overflow-hidden py-2">
         <div
           ref={scrollerRef}
-          className="flex w-full animate-scroll gap-6"
+          className="animate-scroll flex w-full gap-6"
           style={{ animationDuration: `${sponsors.length * 2}s` }}
         >
           {sponsors.map((sponsor, index) => (
             <div
               key={`${sponsor.name}-${index}`}
-              className="flex min-w-[220px] flex-shrink-0 flex-col items-center rounded-lg p-5"
+              className="flex min-w-[220px] shrink-0 flex-col items-center rounded-lg p-5"
             >
               <Link
                 href={sponsor.url}
@@ -53,13 +53,13 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
           ))}
         </div>
       </div>
-      <div className="mt-4 flex w-full flex-col items-center justify-center text-center text-sm text-muted-foreground">
+      <div className="text-muted-foreground mt-4 flex w-full flex-col items-center justify-center text-center text-sm">
         <p>
           These logos represent the corporate supporters, whose contributions fuel OWASP Foundation
           security initiatives. Visit{' '}
           <Link
             href="https://owasp.org/supporters/"
-            className="font-medium text-primary hover:underline"
+            className="text-primary font-medium hover:underline"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -71,7 +71,7 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
           If you're interested in sponsoring the OWASP Nest project ❤️{' '}
           <Link
             href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
-            className="font-medium text-primary hover:underline"
+            className="text-primary font-medium hover:underline"
             target="_blank"
             rel="noopener noreferrer"
           >

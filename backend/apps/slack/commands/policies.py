@@ -6,7 +6,7 @@ from apps.slack.commands.command import CommandBase
 class Policies(CommandBase):
     """Slack bot /policies command."""
 
-    def get_template_context(self, command):
+    def get_context(self, command):
         """Get the template context.
 
         Args:
@@ -24,6 +24,7 @@ class Policies(CommandBase):
                 "Conflict Resolution Policy",
                 "https://owasp.org/www-policy/operational/conflict-resolution",
             ),
+            ("Copyright Policy", "https://owasp.org/www-policy/operational/copyright"),
             (
                 "Conflict of Interest Policy",
                 "https://owasp.org/www-policy/operational/conflict-of-interest",
@@ -35,13 +36,14 @@ class Policies(CommandBase):
             ("Grant Policy", "https://owasp.org/www-policy/operational/grants"),
             ("Membership Policy", "https://owasp.org/www-policy/operational/membership"),
             ("Project Policy", "https://owasp.org/www-policy/operational/projects"),
+            ("Privacy Policy", "https://owasp.org/www-policy/operational/privacy"),
             (
-                "Whistleblower & Anti-Retaliation Policy",
+                "Whistleblower Policy",
                 "https://owasp.org/www-policy/operational/whistleblower",
             ),
         )
 
         return {
-            **super().get_template_context(command),
-            "policies": policies,
+            **super().get_context(command),
+            "POLICIES": policies,
         }

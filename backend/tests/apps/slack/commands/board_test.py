@@ -39,7 +39,9 @@ class TestBoardHandler:
             mock_client.conversations_open.assert_called_once_with(users="U123456")
             blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
             block_text = blocks[0]["text"]["text"]
-            expected_text = f"Please visit <https://owasp.org/www-board/|Global board> page{NL}"
+            expected_text = (
+                f"Please visit <https://owasp.org/www-board/|Global board> page.{NL}{NL}"
+            )
             assert block_text == expected_text
             assert mock_client.chat_postMessage.call_args[1]["channel"] == "C123456"
 
@@ -51,7 +53,10 @@ class TestBoardHandler:
         ack.assert_called_once()
 
         blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
-        assert len(blocks) == 1
+        assert len(blocks) == 2
         assert blocks[0]["type"] == "section"
         assert blocks[0]["text"]["type"] == "mrkdwn"
         assert "https://owasp.org/www-board/" in blocks[0]["text"]["text"]
+        assert blocks[1]["type"] == "section"
+        assert blocks[1]["text"]["type"] == "mrkdwn"
+        assert "💬 You can share feedback" in blocks[1]["text"]["text"]

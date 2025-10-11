@@ -14,6 +14,7 @@ class ActiveChapterManager(models.Manager):
             .get_queryset()
             .select_related("owasp_repository")
             .filter(
+                is_active=True,
                 owasp_repository__is_empty=False,
             )
         )

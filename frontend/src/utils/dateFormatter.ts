@@ -59,3 +59,12 @@ export const formatDateRange = (startDate: number | string, endDate: number | st
     return `${formatDate(startDate)} — ${formatDate(endDate)}`
   }
 }
+
+export const formatDateForInput = (dateStr: string) => {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) {
+    throw new Error('Invalid date')
+  }
+  return date.toISOString().slice(0, 10)
+}

@@ -30,6 +30,9 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
             models.UniqueConstraint(fields=("key", "owner"), name="unique_key_owner"),
         ]
         db_table = "github_repositories"
+        indexes = [
+            models.Index(fields=["name"], name="repository_name_idx"),
+        ]
         verbose_name_plural = "Repositories"
 
     name = models.CharField(verbose_name="Name", max_length=100)
@@ -88,6 +91,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     organization = models.ForeignKey(
         "github.Organization",
         verbose_name="Organization",
+        related_name="repositories",
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
@@ -294,7 +298,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
                 if not is_funding_policy_compliant:
                     break
             self.is_funding_policy_compliant = is_funding_policy_compliant
-        except GithubException:
+        except (AttributeError, GithubException):
             self.has_funding_yml = False
             self.is_funding_policy_compliant = True
 

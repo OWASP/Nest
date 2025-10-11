@@ -1,6 +1,6 @@
-{%- if sponsors %}
+{%- if SPONSORS %}
   *OWASP Sponsors:*{{ NL }}{{ NL }}{{ SECTION_BREAK }}
-{% for sponsor in sponsors -%}
+{% for sponsor in SPONSORS -%}
   {%- if sponsor.url -%}
     *{{ loop.index }}. <{{ sponsor.url }}|{{ sponsor.name }}>*{{ NL }}
   {%- else -%}
@@ -10,8 +10,9 @@
 {{ sponsor.description }}{{ NL }}{{ NL }}{{ SECTION_BREAK }}
 {%- endfor -%}
 {{ SECTION_BREAK }}{{ DIVIDER }}{{ SECTION_BREAK }}
-* Please visit the <{{ website_url }}/supporters|OWASP supporters> for more information about the sponsors*
-{% include "commands/feedback.jinja" %}
+* Please visit the <{{ SPONSORS_PAGE_URL }}|{{ SPONSORS_PAGE_NAME }}> for more information about the sponsors*
+{{ SECTION_BREAK }}
+{{ FEEDBACK_SHARING_INVITE | safe }}
 {%- else -%}
 Failed to get OWASP sponsor data.
 {%- endif -%}

@@ -1,12 +1,12 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
 import { render } from 'wrappers/testUtil'
 import ProjectDetailsPage from 'app/projects/[projectKey]/page'
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
 }))
 
@@ -17,6 +17,15 @@ jest.mock('@heroui/toast', () => ({
 jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: () => <span data-testid="mock-icon" />,
 }))
+
+jest.mock('react-apexcharts', () => {
+  return {
+    __esModule: true,
+    default: () => {
+      return <div data-testid="mock-apexcharts">Mock ApexChart</div>
+    },
+  }
+})
 
 const mockRouter = {
   push: jest.fn(),
@@ -34,7 +43,7 @@ const mockError = {
 
 describe('ProjectDetailsPage', () => {
   beforeEach(() => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockProjectDetailsData,
       loading: false,
       error: null,
@@ -46,7 +55,7 @@ describe('ProjectDetailsPage', () => {
   })
 
   test('renders loading state', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: null,
     })
@@ -60,7 +69,7 @@ describe('ProjectDetailsPage', () => {
   })
 
   test('renders project details when data is available', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockProjectDetailsData,
       error: null,
     })
@@ -77,7 +86,7 @@ describe('ProjectDetailsPage', () => {
   })
 
   test('renders error message when GraphQL request fails', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: { repository: null },
       error: mockError,
     })
@@ -99,23 +108,24 @@ describe('ProjectDetailsPage', () => {
   test('toggles contributors list when show more/less is clicked', async () => {
     render(<ProjectDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('Contributor 9')).toBeInTheDocument()
-      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
+      expect(screen.getByText('Contributor 12')).toBeInTheDocument()
+      expect(screen.queryByText('Contributor 13')).not.toBeInTheDocument()
     })
 
     const showMoreButton = screen.getByRole('button', { name: /Show more/i })
     fireEvent.click(showMoreButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Contributor 7')).toBeInTheDocument()
-      expect(screen.getByText('Contributor 8')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 13')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 14')).toBeInTheDocument()
+      expect(screen.getByText('Contributor 15')).toBeInTheDocument()
     })
 
     const showLessButton = screen.getByRole('button', { name: /Show less/i })
     fireEvent.click(showLessButton)
 
     await waitFor(() => {
-      expect(screen.queryByText('Contributor 10')).not.toBeInTheDocument()
+      expect(screen.queryByText('Contributor 13')).not.toBeInTheDocument()
     })
   })
 
@@ -142,8 +152,23 @@ describe('ProjectDetailsPage', () => {
     })
   })
 
+  test('Displays health metrics section', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: mockProjectDetailsData,
+      error: null,
+    })
+    render(<ProjectDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Issues Trend')).toBeInTheDocument()
+      expect(screen.getByText('Pull Requests Trend')).toBeInTheDocument()
+      expect(screen.getByText('Stars Trend')).toBeInTheDocument()
+      expect(screen.getByText('Forks Trend')).toBeInTheDocument()
+      expect(screen.getByText('Days Since Last Commit and Release')).toBeInTheDocument()
+    })
+  })
+
   test('Handles case when no data is available', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: { repository: null },
       error: null,
     })
@@ -169,7 +194,7 @@ describe('ProjectDetailsPage', () => {
   })
 
   test('renders project details with correct capitalization', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockProjectDetailsData,
       error: null,
     })
@@ -190,7 +215,7 @@ describe('ProjectDetailsPage', () => {
   })
 
   test('handles missing project stats gracefully', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         project: {
           ...mockProjectDetailsData.project,
@@ -236,7 +261,7 @@ describe('ProjectDetailsPage', () => {
     })
   })
   test('renders project stats correctly', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockProjectDetailsData,
       error: null,
     })
@@ -249,6 +274,19 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText(`1.2K Contributors`)).toBeInTheDocument()
       expect(screen.getByText(`3 Repositories`)).toBeInTheDocument()
       expect(screen.getByText(`10 Issues`)).toBeInTheDocument()
+    })
+  })
+  test('renders project sponsor block correctly', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: mockProjectDetailsData,
+      error: null,
+    })
+
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText(`Want to become a sponsor?`)).toBeInTheDocument()
+      expect(screen.getByText(`Sponsor ${mockProjectDetailsData.project.name}`)).toBeInTheDocument()
     })
   })
 })

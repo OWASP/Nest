@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 from django.db import models
-from django.db.models import F, Sum, Window
-from django.db.models.functions import Rank
+from django.db.models import Sum
 from django.template.defaultfilters import pluralize
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.github.models.managers.repository_contributor import RepositoryContributorManager
+
+# Matches a full name starting with at least two Unicode letters (no digits or underscores),
+# followed by one or more space-separated parts that are either a single letter with a period or
+# another sequence of at least two letters.
+CONTRIBUTOR_FULL_NAME_REGEX = r"[^\W\d_]{2,}(\s+([^\W\d_]\.|[^\W\d_]{2,}))+"
 
 
 class RepositoryContributor(BulkSaveModel, TimestampedModel):
@@ -114,10 +118,12 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
     @classmethod
     def get_top_contributors(
         cls,
-        limit=15,
+        *,
         chapter=None,
         committee=None,
         excluded_usernames: list[str] | None = None,
+        has_full_name=False,
+        limit=15,
         organization=None,
         project=None,
         repository=None,
@@ -125,10 +131,11 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
         """Get top contributors across repositories, organization, or project.
 
         Args:
-            limit (int, optional): Maximum number of contributors to return.
             chapter (str, optional): Chapter key to filter by.
             committee (str, optional): Committee key to filter by.
             excluded_usernames (list[str], optional): Usernames to exclude from the results.
+            has_full_name (bool, optional): Filter contributors with likely full names.
+            limit (int, optional): Maximum number of contributors to return.
             organization (str, optional): Organization login to filter by.
             project (str, optional): Project key to filter by.
             repository (str, optional): Repository key to filter by.
@@ -145,6 +152,9 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
 
         if excluded_usernames:
             queryset = queryset.exclude(user__login__in=excluded_usernames)
+
+        if has_full_name:
+            queryset = queryset.filter(user__name__regex=CONTRIBUTOR_FULL_NAME_REGEX)
 
         if project:
             queryset = queryset.filter(repository__project__key__iexact=f"www-project-{project}")
@@ -165,17 +175,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
 
         # Project contributors only for main/project/organization pages.
         if not (chapter or committee or repository):
-            queryset = (
-                queryset.filter(repository__project__isnull=False)
-                .annotate(
-                    rank=Window(
-                        expression=Rank(),
-                        order_by=F("contributions_count").desc(),
-                        partition_by=F("user__login"),
-                    )
-                )
-                .filter(rank=1)
-            )
+            queryset = queryset.filter(repository__project__isnull=False)
 
         # Aggregate total contributions for users.
         top_contributors = (
@@ -185,8 +185,6 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
                 "user__name",
             )
             .annotate(
-                project_name=F("repository__project__name"),
-                project_key=F("repository__project__key"),
                 total_contributions=Sum("contributions_count"),
             )
             .order_by("-total_contributions")[:limit]
@@ -198,10 +196,6 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
                 "contributions_count": tc["total_contributions"],
                 "login": tc["user__login"],
                 "name": tc["user__name"],
-                "project_key": tc["project_key"].replace("www-project-", "")
-                if tc.get("project_key")
-                else None,
-                "project_name": tc.get("project_name"),
             }
             for tc in top_contributors
         ]

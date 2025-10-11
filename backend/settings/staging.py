@@ -10,7 +10,7 @@ class Staging(Base):
     """Staging configuration."""
 
     sentry_sdk.init(
-        dsn=Base.SENTRY_DSN,
+        dsn=values.SecretValue(environ_name="SENTRY_DSN"),
         environment=Base.ENVIRONMENT.lower(),
         profiles_sample_rate=0.5,
         release=Base.RELEASE_VERSION,
@@ -46,6 +46,8 @@ class Staging(Base):
     ALLOWED_ORIGINS = (SITE_URL,)
     CORS_ALLOWED_ORIGINS = ALLOWED_ORIGINS
     CSRF_TRUSTED_ORIGINS = ALLOWED_ORIGINS
+
+    IS_STAGING_ENVIRONMENT = True
 
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True

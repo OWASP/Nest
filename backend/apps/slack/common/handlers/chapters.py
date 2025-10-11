@@ -10,7 +10,7 @@ from apps.common.utils import get_absolute_url
 from apps.slack.blocks import get_pagination_buttons, markdown
 from apps.slack.common.constants import TRUNCATION_INDICATOR
 from apps.slack.common.presentation import EntityPresentation
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
+from apps.slack.constants import FEEDBACK_SHARING_INVITE
 from apps.slack.utils import escape
 
 
@@ -32,7 +32,7 @@ def get_blocks(
         list: A list of Slack blocks representing the chapters.
 
     """
-    from apps.owasp.api.search.chapter import get_chapters
+    from apps.owasp.index.search.chapter import get_chapters
     from apps.owasp.models.chapter import Chapter
 
     presentation = presentation or EntityPresentation()
@@ -100,9 +100,9 @@ def get_blocks(
         blocks.append(
             markdown(
                 f"⚠️ *Extended search over {Chapter.active_chapters_count()} OWASP chapters "
-                f"is available at <{get_absolute_url('chapters')}"
+                f"is available at <{get_absolute_url('/chapters')}"
                 f"?q={search_query}|{settings.SITE_NAME}>*{NL}"
-                f"{FEEDBACK_CHANNEL_MESSAGE}"
+                f"{FEEDBACK_SHARING_INVITE}"
             )
         )
 

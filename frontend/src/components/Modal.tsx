@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal'
 import React from 'react'
-import { ModalProps } from 'types/modal'
+import type { ModalProps } from 'types/modal'
 import ActionButton from 'components/ActionButton'
 import Markdown from 'components/MarkdownWrapper'
 
@@ -20,10 +20,10 @@ const DialogComp: React.FC<ModalProps> = ({
   return (
     <Modal isOpen={isOpen} size="4xl" scrollBehavior="inside" onClose={onClose}>
       <ModalContent
-        className="animate-scaleIn relative z-50 my-9 w-full transform rounded-lg bg-white p-7 shadow-xl backdrop-blur-sm transition-all duration-300 ease-in-out dark:border dark:border-gray-800 dark:bg-[#212529]"
+        className="animate-scaleIn relative z-50 my-9 w-full transform rounded-lg bg-white p-7 shadow-xl backdrop-blur-xs transition-all duration-300 ease-in-out dark:border-1 dark:border-gray-800 dark:bg-[#212529]"
         aria-labelledby="modal-title"
       >
-        <ModalHeader className="mb-1 flex-col border-b border-gray-200 text-2xl font-bold text-gray-900 dark:border-gray-700 dark:text-white">
+        <ModalHeader className="mb-1 flex-col border-b-1 border-b-gray-200 text-2xl font-bold text-gray-900 dark:border-b-gray-700 dark:text-white">
           {title}
           <p className="text-xs text-gray-700 dark:text-gray-300/60">{description}</p>
         </ModalHeader>
@@ -32,7 +32,7 @@ const DialogComp: React.FC<ModalProps> = ({
           <Markdown className="text-base text-gray-600 dark:text-gray-300" content={summary} />
           {hint && (
             <div className="rounded-md p-2">
-              <p className="space-x-2 text-xl font-semibold">
+              <p className="flex flex-row gap-2 text-xl font-semibold">
                 <FontAwesomeIcon icon={faBolt} size="xs" /> How to tackle it
               </p>
               <Markdown
@@ -54,7 +54,7 @@ const DialogComp: React.FC<ModalProps> = ({
             variant="ghost"
             onPress={onClose}
             aria-label="close-modal"
-            className="rounded-md bg-gray-600 px-4 py-1 text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+            className="rounded-md bg-gray-600 px-4 py-1 text-sm font-medium text-white hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-none dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-600"
           >
             Close
           </Button>

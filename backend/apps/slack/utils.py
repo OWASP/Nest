@@ -14,7 +14,6 @@ if TYPE_CHECKING:  # pragma: no cover
 
 import requests
 import yaml
-from django.utils import timezone
 from lxml import html
 from requests.exceptions import RequestException
 
@@ -47,7 +46,7 @@ def get_gsoc_projects(year: int) -> list:
         list: A list of GSoC projects with their attributes.
 
     """
-    from apps.owasp.api.search.project import get_projects
+    from apps.owasp.index.search.project import get_projects
 
     return get_projects(
         attributes=["idx_name", "idx_url"],
@@ -122,22 +121,6 @@ def get_staff_data(timeout: float | None = 30) -> list | None:
     except (RequestException, yaml.scanner.ScannerError):
         logger.exception("Unable to parse OWASP staff data file", extra={"file_path": file_path})
         return None
-
-
-def get_events_data(limit=9) -> QuerySet:
-    """Get events data.
-
-    Returns
-        QuerySet or None: A queryset of upcoming events.
-
-    """
-    from apps.owasp.models.event import Event
-
-    return Event.objects.filter(
-        start_date__gte=timezone.now(),
-    ).order_by(
-        "start_date",
-    )[:limit]
 
 
 def get_sponsors_data(limit: int = 10) -> QuerySet | None:

@@ -2,6 +2,7 @@
 
 from functools import lru_cache
 
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from apps.common.index import IndexBase
@@ -26,6 +27,9 @@ class Committee(
     class Meta:
         db_table = "owasp_committees"
         verbose_name_plural = "Committees"
+
+    # GRs.
+    members = GenericRelation("owasp.EntityMember")
 
     def __str__(self) -> str:
         """Committee human readable representation."""

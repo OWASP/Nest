@@ -63,27 +63,7 @@ library.add(
   faSun
 )
 
-export const Icons = {
-  stars_count: {
-    label: 'GitHub stars',
-    icon: 'fa-regular fa-star',
-  },
-  forks_count: {
-    label: 'GitHub forks',
-    icon: 'fa-solid fa-code-fork',
-  },
-  contributors_count: {
-    label: 'GitHub contributors',
-    icon: 'fa-regular fa-user',
-  },
-  created_at: {
-    label: 'Creation date',
-    icon: 'fa-regular fa-clock',
-  },
-  comments_count: {
-    label: 'Comments count',
-    icon: 'fa-regular fa-comment',
-  },
+export const ICONS = {
   starsCount: {
     label: 'GitHub stars',
     icon: 'fa-regular fa-star',
@@ -106,7 +86,7 @@ export const Icons = {
   },
 } as const
 
-export type IconKeys = keyof typeof Icons
+export type IconKeys = keyof typeof ICONS
 
 export const level = {
   incubator: {

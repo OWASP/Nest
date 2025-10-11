@@ -1,5 +1,5 @@
 'use client'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import {
   faCodeFork,
   faExclamationCircle,
@@ -7,26 +7,25 @@ import {
   faStar,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
+import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
-import { TopContributorsTypeGraphql } from 'types/contributor'
-import { ProjectTypeGraphql } from 'types/project'
-import { capitalize } from 'utils/capitalize'
+import { GetProjectDocument } from 'types/__generated__/projectQueries.generated'
+import type { Contributor } from 'types/contributor'
+import type { Project } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 const ProjectDetailsPage = () => {
-  const { projectKey } = useParams()
+  const { projectKey } = useParams<{ projectKey: string }>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [project, setProject] = useState<ProjectTypeGraphql | null>(null)
-  const [topContributors, setTopContributors] = useState<TopContributorsTypeGraphql[]>([])
-  const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_DATA, {
+  const [project, setProject] = useState<Project | null>(null)
+  const [topContributors, setTopContributors] = useState<Contributor[]>([])
+  const { data, error: graphQLRequestError } = useQuery(GetProjectDocument, {
     variables: { key: projectKey },
   })
-
   useEffect(() => {
     if (data) {
       setProject(data.project)
@@ -56,9 +55,9 @@ const ProjectDetailsPage = () => {
     { label: 'Leaders', value: project.leaders.join(', ') },
     {
       label: 'Level',
-      value: capitalize(project.level),
+      value: upperFirst(project.level),
     },
-    { label: 'Type', value: capitalize(project.type) },
+    { label: 'Type', value: upperFirst(project.type) },
     {
       label: 'URL',
       value: (
@@ -88,19 +87,22 @@ const ProjectDetailsPage = () => {
       pluralizedName: 'Repositories',
     },
   ]
+
   return (
     <DetailsCard
       details={projectDetails}
-      is_active={project.isActive}
+      entityKey={project.key}
+      healthMetricsData={project.healthMetricsList}
+      isActive={project.isActive}
       languages={project.languages}
       pullRequests={project.recentPullRequests}
       recentIssues={project.recentIssues}
+      recentMilestones={project.recentMilestones}
       recentReleases={project.recentReleases}
       repositories={project.repositories}
       stats={projectStats}
       summary={project.summary}
       title={project.name}
-      recentMilestones={project.recentMilestones}
       topContributors={topContributors}
       topics={project.topics}
       type="project"

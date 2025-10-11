@@ -1,13 +1,13 @@
 """Slack bot donate command."""
 
-from apps.common.constants import OWASP_WEBSITE_URL
+from apps.common.constants import OWASP_URL
 from apps.slack.commands.command import CommandBase
 
 
 class Donate(CommandBase):
     """Slack bot /donate command."""
 
-    def get_template_context(self, command: dict):
+    def get_context(self, command: dict):
         """Get the template context.
 
         Args:
@@ -18,6 +18,9 @@ class Donate(CommandBase):
 
         """
         return {
-            **super().get_template_context(command),
-            "website_url": OWASP_WEBSITE_URL,
+            **super().get_context(command),
+            "DONATION_PAGE_NAME": "OWASP Foundation",
+            "DONATION_PAGE_URL": f"{OWASP_URL}/donate/",
+            "DONATION_POLICY_PAGE_NAME": "OWASP Donations Policy",
+            "DONATION_POLICY_PAGE_URL": f"{OWASP_URL}/www-policy/operational/donations",
         }

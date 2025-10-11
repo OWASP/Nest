@@ -10,7 +10,7 @@ from apps.common.utils import get_absolute_url
 from apps.slack.blocks import get_pagination_buttons, markdown
 from apps.slack.common.constants import TRUNCATION_INDICATOR
 from apps.slack.common.presentation import EntityPresentation
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
+from apps.slack.constants import FEEDBACK_SHARING_INVITE
 from apps.slack.utils import escape
 
 
@@ -33,7 +33,7 @@ def get_blocks(
 
     """
     from apps.github.models.issue import Issue
-    from apps.owasp.api.search.issue import get_issues
+    from apps.owasp.index.search.issue import get_issues
 
     presentation = presentation or EntityPresentation()
     search_query_escaped = escape(search_query)
@@ -83,9 +83,9 @@ def get_blocks(
         blocks.append(
             markdown(
                 f"⚠️ *Extended search over {Issue.open_issues_count()} open issues "
-                f"is available at <{get_absolute_url('contribute')}"
+                f"is available at <{get_absolute_url('/contribute')}"
                 f"?q={search_query}|{settings.SITE_NAME}>*{NL}"
-                f"{FEEDBACK_CHANNEL_MESSAGE}"
+                f"{FEEDBACK_SHARING_INVITE}"
             ),
         )
     if presentation.include_pagination and (

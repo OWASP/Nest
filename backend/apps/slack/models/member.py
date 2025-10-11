@@ -49,7 +49,7 @@ class Member(TimestampedModel):
 
     def from_slack(self, member_data, workspace: Workspace) -> None:
         """Update instance based on Slack member data."""
-        self.email = member_data["profile"].get("email", "")
+        self.email = member_data.get("profile", {}).get("email", "")
         self.is_bot = member_data["is_bot"]
         self.real_name = member_data.get("real_name", "")
         self.slack_user_id = member_data["id"]

@@ -10,7 +10,7 @@ from apps.common.utils import get_absolute_url
 from apps.slack.blocks import get_pagination_buttons, markdown
 from apps.slack.common.constants import TRUNCATION_INDICATOR
 from apps.slack.common.presentation import EntityPresentation
-from apps.slack.constants import FEEDBACK_CHANNEL_MESSAGE
+from apps.slack.constants import FEEDBACK_SHARING_INVITE
 from apps.slack.utils import escape
 
 
@@ -32,7 +32,7 @@ def get_blocks(
         list: A list of Slack blocks representing the committees.
 
     """
-    from apps.owasp.api.search.committee import get_committees
+    from apps.owasp.index.search.committee import get_committees
     from apps.owasp.models.committee import Committee
 
     presentation = presentation or EntityPresentation()
@@ -94,9 +94,9 @@ def get_blocks(
         blocks.append(
             markdown(
                 f"⚠️ *Extended search over {Committee.active_committees_count()} OWASP committees "
-                f"is available at <{get_absolute_url('committees')}"
+                f"is available at <{get_absolute_url('/committees')}"
                 f"?q={search_query}|{settings.SITE_NAME}>*{NL}"
-                f"{FEEDBACK_CHANNEL_MESSAGE}"
+                f"{FEEDBACK_SHARING_INVITE}"
             )
         )
     if presentation.include_pagination and (

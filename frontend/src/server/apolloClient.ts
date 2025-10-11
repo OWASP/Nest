@@ -1,4 +1,4 @@
-import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client'
+import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { cookies } from 'next/headers'
 import { fetchCsrfTokenServer } from 'server/fetchCsrfTokenServer'
@@ -16,8 +16,7 @@ async function createApolloClient() {
       },
     }
   })
-
-  const httpLink = createHttpLink({
+  const httpLink = new HttpLink({
     credentials: 'same-origin',
     uri: process.env.NEXT_SERVER_GRAPHQL_URL,
   })
@@ -30,8 +29,10 @@ async function createApolloClient() {
 }
 
 // This is a no-op Apollo client for end-to-end tests.
-const noopApolloClient = { query: async () => ({ data: null }) }
-
+const noopApolloClient = {
+  mutate: async () => ({ data: null }),
+  query: async () => ({ data: null }),
+}
 export const apolloClient =
   process.env.NEXT_SERVER_DISABLE_SSR === 'true' ? noopApolloClient : await createApolloClient()
 

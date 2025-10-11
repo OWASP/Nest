@@ -55,9 +55,9 @@ Before contributing, ensure you have the following installed:
 
 ### Support the Project
 
-- [![GitHub stars](https://img.shields.io/github/stars/OWASP/Nest?style=social)](https://github.com/OWASP/Nest)
+* [![GitHub stars](https://img.shields.io/github/stars/OWASP/Nest?style=social)](https://github.com/OWASP/Nest)
 
-- [![GitHub forks](https://img.shields.io/github/forks/OWASP/Nest?style=social)](https://github.com/OWASP/Nest/fork)
+* [![GitHub forks](https://img.shields.io/github/forks/OWASP/Nest?style=social)](https://github.com/OWASP/Nest/fork)
 
 ### Initial Setup
 
@@ -96,6 +96,7 @@ Before contributing, ensure you have the following installed:
 3. **Configure Environment**
 
     Update `backend/.env`:
+
     ```plaintext
     DJANGO_CONFIGURATION=Local
     ```
@@ -128,9 +129,9 @@ Before contributing, ensure you have the following installed:
     ```
 
     !!! note
-        * Run this from the project root directory
+        *Run this from the project root directory
         * Keep this terminal session running
-        * Wait for [Nest local](http://localhost:8000/api/v1) to respond
+        *Wait for [Nest local](http://localhost:8000/api/v1) to respond
         * Use separate terminal sessions for other commands
 
 6. **Initialize Data**
@@ -155,18 +156,21 @@ Before contributing, ensure you have the following installed:
 To fetch GitHub OWASP data locally:
 
 1. **Create Super User**
+
     ```bash
-    make setup
+    make create-superuser
     ```
 
 2. **Configure GitHub Access**
     1. Create a [GitHub personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
     2. Add to `backend/.env`:
+
         ```plaintext
         GITHUB_TOKEN=<your-github-token>
         ```
 
 3. **Sync Data**
+
     ```bash
     make sync-data
     ```
@@ -183,9 +187,11 @@ To fetch GitHub OWASP data locally:
     2. Follow [installation instructions](https://ngrok.com/docs/getting-started/#step-1-install)
     3. Create static domain at [ngrok domains](https://dashboard.ngrok.com/domains)
     4. Configure ngrok:
+
         ```bash
         ngrok config edit
         ```
+
         ```yaml
         agent:
             authtoken: <your-auth-token>
@@ -195,7 +201,9 @@ To fetch GitHub OWASP data locally:
               proto: http
               hostname: <your-static-domain>
         ```
+
     5. Start ngrok:
+
         ```bash
         ngrok start NestBot
         ```
@@ -203,6 +211,7 @@ To fetch GitHub OWASP data locally:
 2. **Update NestBot Configuration**
 
     Add to `backend/.env`:
+
     ```plaintext
     DJANGO_SLACK_BOT_TOKEN=<your-slack-bot-token>
     DJANGO_SLACK_SIGNING_SECRET=<your-slack-signing-secret>
@@ -245,47 +254,59 @@ make test
     - Ensure your changes do not drop the overall test coverage percentage.
     - If you are adding new functionality, include relevant test cases.
 
-
 ## Contributing Process
 
 ### 1. Find an Issue
+
 * Browse [issues](https://github.com/owasp/nest/issues)
 * If you want to work on something specific, create a new issue or comment on an existing one to let others know
 
 ### 2. Branch Creation
+
 ```bash
 git checkout -b feature/my-feature-name
 #Always create a feature branch for your work
 ```
 
 ### 3. Make Changes and Commit
+
 * Check that your commits include only related and intended changes. Do not include unrelated files.
 * Follow best practices for code style and testing.
+
 - **Add tests** for any new functionality or changes to ensure proper coverage.
-    - **Run the code quality checks**:
+  * **Run the code quality checks**:
+
       ```bash
       make check
       ```
-    - **Run tests to ensure everything works correctly**:
+
+  * **Run tests to ensure everything works correctly**:
+
       ```bash
       make test
       ```
-    - **Write meaningful commit messages**:
+
+  * **Write meaningful commit messages**:
+
       ```bash
       git commit -m "Add feature: short description"
       ```
 
 ### 4. Push Changes
+
 - **Push your branch to the repository**:
+
     ```bash
     git push origin feature/my-feature-name
     ```
 
 ### 5. Pull Request
+
 * Submit a **Pull Request** (PR) to the `main` branch
 * Your PR will trigger CI/CD pipelines that run automated checks and tests
 
 ### 6. Review Process
+
 * Address feedback from maintainers during code review.
 * Once approved, your PR will be merged into the main branch.
 
@@ -299,13 +320,15 @@ This error is usually caused by incorrect encoding of `.env` files. To resolve t
 
 1. **Open the `.env` file in a text editor** (e.g., Visual Studio Code).
 2. **Check and change the encoding**:
-   - Click on the encoding information in the bottom-right corner of the VS Code window.
-   - Select **"Save with Encoding"**.
-   - Choose **"UTF-8"** from the list (ensure it's not "UTF-8 with BOM").
+   * Click on the encoding information in the bottom-right corner of the VS Code window.
+   * Select **"Save with Encoding"**.
+   * Choose **"UTF-8"** from the list (ensure it's not "UTF-8 with BOM").
 3. **Save the file** with the correct encoding.
 4. **Restart the application** using the command
    **`make run`**.
+
 ## Code of Conduct
+
 Please follow our [Code of Conduct](code-of-conduct.md) when interacting with other contributors.
 !!! success "Thank You"
     Thank you for contributing to Nest! Your contributions help make this project better for everyone.

@@ -1,0 +1,64 @@
+services:
+  staging-nest-backend:
+    container_name: staging-nest-backend
+    image: owasp/nest:backend-staging
+    env_file: .env.backend
+    depends_on:
+      staging-nest-cache:
+        condition: service_healthy
+      staging-nest-db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - nest-app-network
+      - nest-cache-network
+      - nest-db-network
+    volumes:
+      - ./backend/data:/home/owasp/data
+
+  staging-nest-cache:
+    container_name: staging-nest-cache
+    image: redis:7.2.7-alpine3.21
+    command: >
+      sh -c '
+        redis-server --requirepass $$REDIS_PASSWORD --maxmemory 25mb --maxmemory-policy allkeys-lru
+      '
+    env_file: .env.cache
+    healthcheck:
+      interval: 5s
+      retries: 5
+      test: [CMD, redis-cli, -a, $$REDIS_PASSWORD, ping]
+      timeout: 5s
+    restart: unless-stopped
+    volumes:
+      - ./volumes/cache:/data
+    networks:
+      - nest-cache-network
+
+  staging-nest-db:
+    container_name: staging-nest-db
+    image: pgvector/pgvector:pg16
+    env_file: .env.db
+    healthcheck:
+      interval: 5s
+      retries: 5
+      test: [CMD, pg_isready, -U, nest_user_staging, -d, nest_db_staging]
+      timeout: 5s
+    restart: unless-stopped
+    volumes:
+      - ./volumes/db:/var/lib/postgresql/data
+    networks:
+      - nest-db-network
+
+  staging-nest-frontend:
+    container_name: staging-nest-frontend
+    env_file: .env.frontend
+    image: owasp/nest:frontend-staging
+    restart: unless-stopped
+    networks:
+      - nest-app-network
+
+networks:
+  nest-app-network:
+  nest-cache-network:
+  nest-db-network:

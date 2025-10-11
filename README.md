@@ -7,17 +7,17 @@
 
 # [OWASP Nest](https://nest.owasp.org/)
 
-[![OWASP](https://img.shields.io/badge/OWASP-Incubator-blue?style=for-the-badge)](https://owasp.org/www-project-nest/) ![OWASP](https://img.shields.io/badge/OWASP-Code-blue?style=for-the-badge) [![Project-Nest](https://img.shields.io/badge/OWASP-%23project--nest-blue?logo=slack&logoColor=white&style=for-the-badge)](https://owasp.slack.com/messages/project-nest)
+[![OWASP](https://img.shields.io/badge/Lab-blue?&label=owasp%20level&style=for-the-badge)](https://owasp.org/www-project-nest/) [![OWASP](https://img.shields.io/badge/Code-blue?label=OWASP%20Type&style=for-the-badge)](https://owasp.org/www-project-nest/) [![project-nest](https://img.shields.io/badge/%23project--nest-blue?label=OWASP%20Slack&logoColor=white&style=for-the-badge)](https://owasp.slack.com/messages/project-nest)
 
-[![CI/CD](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-ci-cd.yaml?branch=main&label=Build&style=for-the-badge)](https://github.com/owasp/nest/actions/workflows/run-ci-cd.yaml?query=branch%3Amain) [![CodeQL](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-code-ql.yaml?branch=main&label=CodeQL&style=for-the-badge)](https://github.com/owasp/nest/actions/workflows/run-code-ql.yaml?query=branch%3Amain) [![Sonarqube](https://img.shields.io/sonar/quality_gate/OWASP_Nest?server=https://sonarcloud.io&style=for-the-badge&label=Sonarqube)](https://sonarcloud.io/project/information?id=OWASP_Nest)
+[![License](https://img.shields.io/github/license/owasp/nest?color=blue&label=License&style=for-the-badge)](https://github.com/OWASP/Nest/blob/main/LICENSE) [![Last Commit](https://img.shields.io/github/last-commit/owasp/nest/main?color=blue&style=for-the-badge&label=Last%20commit)](https://github.com/OWASP/Nest/commits/main/) [![Contributors](https://img.shields.io/github/contributors/owasp/nest?style=for-the-badge&label=Contributors&color=blue)](https://github.com/OWASP/Nest/graphs/contributors)
 
-![License](https://img.shields.io/github/license/owasp/nest?color=41BE4A&label=License&style=for-the-badge) ![Last Commit](https://img.shields.io/github/last-commit/owasp/nest/main?style=for-the-badge&label=Last%20commit) ![Contributors](https://img.shields.io/github/contributors/owasp/nest?style=for-the-badge&label=Contributors)
+[![CI/CD](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-ci-cd.yaml?branch=main&color=blue&label=Build&style=for-the-badge)](https://github.com/owasp/nest/actions/workflows/run-ci-cd.yaml?query=branch%3Amain) [![CodeQL](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-code-ql.yaml?branch=main&color=blue&label=CodeQL&style=for-the-badge)](https://github.com/owasp/nest/actions/workflows/run-code-ql.yaml?query=branch%3Amain) [![Sonarqube](https://img.shields.io/sonar/quality_gate/OWASP_Nest?color=blue&server=https://sonarcloud.io&style=for-the-badge&label=Sonarqube)](https://sonarcloud.io/summary/new_code?id=OWASP_Nest&branch=main)
 
-![Issues](https://img.shields.io/github/issues/owasp/nest?color=blue&style=for-the-badge&label=Issues) ![Pull Requests](https://img.shields.io/github/issues-pr/owasp/nest?color=blue&style=for-the-badge&label=Pull%20Requests)
+[![Issues](https://img.shields.io/github/issues/owasp/nest?color=blue&style=for-the-badge&label=Issues)](https://github.com/OWASP/Nest/issues) [![Pull Requests](https://img.shields.io/github/issues-pr/owasp/nest?color=blue&style=for-the-badge&label=Pull%20Requests)](https://github.com/OWASP/Nest/pulls)
 
 [![OpenSSF](https://img.shields.io/badge/OpenSSF-84%25-blue?style=for-the-badge)](https://www.bestpractices.dev/projects/10174) [![Snyk Security](https://img.shields.io/badge/Snyk-Scanned-blue?style=for-the-badge)](https://snyk.io)
 
-![Forks](https://img.shields.io/github/forks/owasp/nest?style=for-the-badge&label=Forks) ![Stars](https://img.shields.io/github/stars/owasp/nest?style=for-the-badge&label=Stars)
+[![Forks](https://img.shields.io/github/forks/owasp/nest?style=for-the-badge&label=Forks)](https://github.com/OWASP/Nest/network/members) [![Stars](https://img.shields.io/github/stars/owasp/nest?style=for-the-badge&label=Stars)](https://github.com/OWASP/Nest/stargazers)
 
 [![CREATED](https://img.shields.io/badge/created-aug,%202024-blue?style=for-the-badge)](https://github.com/OWASP/Nest/commit/2a213c2efcfc2f8889c2f1d330da0d2e6f649fc1)
 

@@ -1,24 +1,23 @@
-import {
-  faCodeFork,
-  faStar,
-  faUsers,
-  faExclamationCircle,
-  faChevronDown,
-  faChevronUp,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCodeFork, faStar, faUsers, faExclamationCircle } from '@fortawesome/free-solid-svg-icons'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState } from 'react'
-import { RepositoriesCardProps, RepositoryCardProps } from 'types/project'
+import type { RepositoriesCardProps, RepositoryCardProps } from 'types/project'
 import InfoItem from 'components/InfoItem'
+import ShowMoreButton from 'components/ShowMoreButton'
 import { TruncatedText } from 'components/TruncatedText'
 
-const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => {
+const RepositoriesCard: React.FC<RepositoriesCardProps> = ({
+  maxInitialDisplay = 4,
+  repositories,
+}) => {
   const [showAllRepositories, setShowAllRepositories] = useState(false)
 
-  const displayedRepositories = showAllRepositories ? repositories : repositories.slice(0, 4)
+  const toggleRepositories = () => setShowAllRepositories(!showAllRepositories)
 
+  const displayedRepositories = showAllRepositories
+    ? repositories
+    : repositories.slice(0, maxInitialDisplay)
   return (
     <div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -26,24 +25,7 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({ repositories }) => 
           return <RepositoryItem key={index} details={repository} />
         })}
       </div>
-      {repositories.length > 4 && (
-        <div className="mt-6 flex items-center justify-center text-center">
-          <button
-            onClick={() => setShowAllRepositories(!showAllRepositories)}
-            className="mt-4 flex items-center justify-center text-blue-400 hover:underline"
-          >
-            {showAllRepositories ? (
-              <>
-                Show less <FontAwesomeIcon icon={faChevronUp} className="ml-1" />
-              </>
-            ) : (
-              <>
-                Show more <FontAwesomeIcon icon={faChevronDown} className="ml-1" />
-              </>
-            )}
-          </button>
-        </div>
-      )}
+      {repositories.length > maxInitialDisplay && <ShowMoreButton onToggle={toggleRepositories} />}
     </div>
   )
 }
@@ -55,7 +37,7 @@ const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
   }
 
   return (
-    <div className="h-46 flex w-full flex-col gap-3 rounded-lg border p-4 shadow-sm ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+    <div className="flex h-46 w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <button
         onClick={handleClick}
         className="text-start font-semibold text-blue-400 hover:underline"
@@ -63,24 +45,19 @@ const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
         <TruncatedText text={details?.name} />
       </button>
 
-      <div className="space-y-2 text-sm">
-        <InfoItem icon={faStar} pluralizedName="Stars" unit="Stars" value={details.starsCount} />
-        <InfoItem
-          icon={faCodeFork}
-          pluralizedName="Forks"
-          unit="Forks"
-          value={details.forksCount}
-        />
+      <div className="flex flex-col gap-2 text-sm">
+        <InfoItem icon={faStar} pluralizedName="Stars" unit="Star" value={details.starsCount} />
+        <InfoItem icon={faCodeFork} pluralizedName="Forks" unit="Fork" value={details.forksCount} />
         <InfoItem
           icon={faUsers}
           pluralizedName="Contributors"
-          unit="Contributors"
+          unit="Contributor"
           value={details.contributorsCount}
         />
         <InfoItem
           icon={faExclamationCircle}
           pluralizedName="Issues"
-          unit="Issues"
+          unit="Issue"
           value={details.openIssuesCount}
         />
       </div>

@@ -4,6 +4,7 @@ __pycache__
 .cache
 .dockerignore
 .env
+.env.*
 .envs
 .git
 .gitignore
@@ -15,6 +16,7 @@ __pycache__
 .venv
 .vscode
 *.log
+*.pem
 backend/data
 backend/staticfiles
 build

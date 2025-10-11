@@ -157,7 +157,7 @@ def test_get_gsoc_projects_(monkeypatch):
     mock_get_projects = Mock()
     mock_get_projects.return_value = {"hits": MOCK_GSOC_PROJECTS["2023"]}
 
-    monkeypatch.setattr("apps.owasp.api.search.project.get_projects", mock_get_projects)
+    monkeypatch.setattr("apps.owasp.index.search.project.get_projects", mock_get_projects)
 
     result = get_gsoc_projects("2023")
     length = 2

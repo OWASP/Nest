@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import datetime
 from functools import lru_cache
 
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
+from django.utils import timezone
 
 from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -15,8 +18,14 @@ from apps.github.models.milestone import Milestone
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
 from apps.owasp.models.common import RepositoryBasedEntityModel
+from apps.owasp.models.enums.project import (
+    ProjectLevel,
+    ProjectType,
+    validate_audience,
+)
 from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins.project import ProjectIndexMixin
+from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 
 class Project(
@@ -34,34 +43,16 @@ class Project(
         db_table = "owasp_projects"
         indexes = [
             models.Index(fields=["-created_at"], name="project_created_at_desc_idx"),
+            models.Index(fields=["-updated_at"], name="project_updated_at_desc_idx"),
         ]
         verbose_name_plural = "Projects"
 
-    class ProjectLevel(models.TextChoices):
-        OTHER = "other", "Other"
-        INCUBATOR = "incubator", "Incubator"
-        LAB = "lab", "Lab"
-        PRODUCTION = "production", "Production"
-        FLAGSHIP = "flagship", "Flagship"
-
-    class ProjectType(models.TextChoices):
-        # These projects provide tools, libraries, and frameworks that can be leveraged by
-        # developers to enhance the security of their applications.
-        CODE = "code", "Code"
-
-        # These projects seek to communicate information or raise awareness about a topic in
-        # application security. Note that documentation projects should focus on an online-first
-        # deliverable, where appropriate, but can take any media form.
-        DOCUMENTATION = "documentation", "Documentation"
-
-        # Some projects fall outside the above categories. Most are created to offer OWASP
-        # operational support.
-        OTHER = "other", "Other"
-
-        # These are typically software or utilities that help developers and security
-        # professionals test, secure, or monitor applications.
-        TOOL = "tool", "Tool"
-
+    audience = models.JSONField(
+        verbose_name="Audience",
+        default=list,
+        blank=True,
+        validators=[validate_audience],
+    )
     level = models.CharField(
         verbose_name="Level",
         max_length=20,
@@ -100,6 +91,9 @@ class Project(
     custom_tags = models.JSONField(verbose_name="Custom tags", default=list, blank=True)
     track_issues = models.BooleanField(verbose_name="Track issues", default=True)
 
+    # GKs.
+    members = GenericRelation("owasp.EntityMember")
+
     # FKs.
     owasp_repository = models.ForeignKey(
         "github.Repository",
@@ -131,19 +125,36 @@ class Project(
         return f"{self.name or self.key}"
 
     @property
+    def health_score(self) -> float | None:
+        """Return project health score."""
+        return self.last_health_metrics.score if self.last_health_metrics else None
+
+    @property
     def is_code_type(self) -> bool:
         """Indicate whether project has CODE type."""
-        return self.type == self.ProjectType.CODE
+        return self.type == ProjectType.CODE
 
     @property
     def is_documentation_type(self) -> bool:
         """Indicate whether project has DOCUMENTATION type."""
-        return self.type == self.ProjectType.DOCUMENTATION
+        return self.type == ProjectType.DOCUMENTATION
+
+    @property
+    def is_funding_requirements_compliant(self) -> bool:
+        """Indicate whether project is compliant with funding requirements."""
+        return not self.repositories.filter(is_funding_policy_compliant=False).exists()
+
+    @property
+    def is_leader_requirements_compliant(self) -> bool:
+        """Indicate whether project is compliant with project leaders requirements."""
+        # https://owasp.org/www-committee-project/#div-practice
+        # Have multiple Project Leaders who are not all employed by the same company.
+        return self.leaders_count > 1
 
     @property
     def is_tool_type(self) -> bool:
         """Indicate whether project has TOOL type."""
-        return self.type == self.ProjectType.TOOL
+        return self.type == ProjectType.TOOL
 
     @property
     def issues(self):
@@ -155,6 +166,23 @@ class Project(
         )
 
     @property
+    def issues_count(self) -> int:
+        """Return count of issues."""
+        return self.issues.count()
+
+    @property
+    def last_health_metrics(self) -> ProjectHealthMetrics | None:
+        """Return last health metrics for the project."""
+        return (
+            ProjectHealthMetrics.objects.filter(project=self).order_by("-nest_created_at").first()
+        )
+
+    @property
+    def leaders_count(self) -> int:
+        """Return the count of leaders."""
+        return len(self.leaders_raw)
+
+    @property
     def nest_key(self) -> str:
         """Get Nest key."""
         return self.key.replace("www-project-", "")
@@ -162,7 +190,7 @@ class Project(
     @property
     def nest_url(self) -> str:
         """Get Nest URL for project."""
-        return get_absolute_url(f"projects/{self.nest_key}")
+        return get_absolute_url(f"/projects/{self.nest_key}")
 
     @property
     def open_issues(self):
@@ -174,6 +202,16 @@ class Project(
         )
 
     @property
+    def open_pull_requests_count(self) -> int:
+        """Return count of open pull requests."""
+        return self.pull_requests.filter(state="open").count()
+
+    @property
+    def owasp_page_last_updated_at(self) -> datetime.datetime | None:
+        """Return the last updated date of the OWASP page."""
+        return self.owasp_repository.updated_at if self.owasp_repository else None
+
+    @property
     def pull_requests(self):
         """Return pull requests."""
         return PullRequest.objects.filter(
@@ -181,6 +219,18 @@ class Project(
         ).select_related(
             "repository",
         )
+
+    @property
+    def pull_requests_count(self) -> int:
+        """Return count of pull requests."""
+        return self.pull_requests.count()
+
+    @property
+    def pull_request_last_created_at(self) -> datetime.datetime | None:
+        """Return last created pull request."""
+        return self.pull_requests.aggregate(
+            models.Max("created_at"),
+        )["created_at__max"]
 
     @property
     def published_releases(self):
@@ -201,6 +251,29 @@ class Project(
         ).select_related(
             "repository",
         )
+
+    @property
+    def recent_releases_count(self) -> int:
+        """Return count of recent releases per a specific period."""
+        recent_period = timezone.now() - datetime.timedelta(days=60)
+        return self.published_releases.filter(
+            published_at__gte=recent_period,
+        ).count()
+
+    @property
+    def repositories_count(self) -> int:
+        """Return count of repositories."""
+        return self.repositories.count()
+
+    @property
+    def unanswered_issues_count(self) -> int:
+        """Return count of unanswered issues."""
+        return self.issues.filter(comments_count=0).count()
+
+    @property
+    def unassigned_issues_count(self) -> int:
+        """Return count of unassigned issues."""
+        return self.issues.filter(assignees__isnull=True).count()
 
     def deactivate(self) -> None:
         """Deactivate project."""
@@ -229,24 +302,26 @@ class Project(
         project_level = project_metadata.get("level")
         if project_level:
             level_mapping = {
-                2: self.ProjectLevel.INCUBATOR,
-                3: self.ProjectLevel.LAB,
-                3.5: self.ProjectLevel.PRODUCTION,
-                4: self.ProjectLevel.FLAGSHIP,
+                2: ProjectLevel.INCUBATOR,
+                3: ProjectLevel.LAB,
+                3.5: ProjectLevel.PRODUCTION,
+                4: ProjectLevel.FLAGSHIP,
             }
-            self.level = level_mapping.get(project_level) or self.ProjectLevel.OTHER
+            self.level = level_mapping.get(project_level) or ProjectLevel.OTHER
             self.level_raw = project_level
 
         # Type.
         project_type = project_metadata.get("type")
         if project_type:
-            self.type = (
-                project_type if project_type in self.ProjectType.values else self.ProjectType.OTHER
-            )
+            self.type = project_type if project_type in ProjectType.values else ProjectType.OTHER
             self.type_raw = project_type
 
         self.created_at = repository.created_at
         self.updated_at = repository.updated_at
+
+    def get_absolute_url(self):
+        """Get absolute URL for project."""
+        return f"/projects/{self.nest_key}"
 
     def save(self, *args, **kwargs) -> None:
         """Save the project instance."""

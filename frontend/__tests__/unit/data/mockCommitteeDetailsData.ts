@@ -10,13 +10,11 @@ export const mockCommitteeDetailsData = {
   topContributors: [
     {
       avatarUrl: 'https://avatars.githubusercontent.com/u/7319658?v=4',
-      contributionsCount: 2157,
       login: 'contributor1',
       name: 'Contributor 1',
     },
     {
       avatarUrl: 'https://avatars.githubusercontent.com/u/321605?v=4',
-      contributionsCount: 309,
       login: 'contributor2',
       name: 'Contributor 2',
     },

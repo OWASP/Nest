@@ -5,6 +5,8 @@ import pytest
 from django.conf import settings
 
 from apps.common.utils import (
+    clean_url,
+    convert_to_camel_case,
     convert_to_snake_case,
     get_absolute_url,
     get_user_ip_address,
@@ -12,10 +14,28 @@ from apps.common.utils import (
     natural_date,
     natural_number,
     round_down,
+    validate_url,
 )
 
 
 class TestUtils:
+    @pytest.mark.parametrize(
+        ("input_text", "expected_output"),
+        [
+            ("simple", "simple"),
+            ("my_variable", "myVariable"),
+            ("long_variable_name", "longVariableName"),
+            ("top_contributor_project", "topContributorProject"),
+            ("_leading_underscore", "_leadingUnderscore"),
+            ("trailing_underscore_", "trailingUnderscore"),
+            ("multiple__underscores", "multipleUnderscores"),
+            ("multiple__under___scores", "multipleUnderScores"),
+            ("alreadyCamelCase", "alreadyCamelCase"),
+        ],
+    )
+    def test_convert_to_camel_case(self, input_text, expected_output):
+        assert convert_to_camel_case(input_text) == expected_output
+
     @pytest.mark.parametrize(
         ("text", "expected"),
         [
@@ -82,8 +102,8 @@ class TestUtils:
     @pytest.mark.parametrize(
         ("mock_request", "expected"),
         [
-            ({"HTTP_X_FORWARDED_FOR": "8.8.8.8"}, "8.8.8.8"),
-            ({"REMOTE_ADDR": "192.168.1.2"}, "192.168.1.2"),
+            ({"HTTP_X_FORWARDED_FOR": "172.16.1.100"}, "172.16.1.100"),  # NOSONAR
+            ({"REMOTE_ADDR": "192.168.1.200"}, "192.168.1.200"),  # NOSONAR
         ],
     )
     def test_get_user_ip_address(self, mock_request, expected):
@@ -95,10 +115,13 @@ class TestUtils:
         request = MagicMock()
         request.META = {}
 
-        mocker.patch.object(settings, "ENVIRONMENT", "Local")
-        mocker.patch.dict(settings._wrapped.__dict__, {"PUBLIC_IP_ADDRESS": "1.1.1.1"})
+        mocker.patch.object(settings, "IS_LOCAL_ENVIRONMENT", return_value=True)
+        mocker.patch.dict(
+            settings._wrapped.__dict__,
+            {"PUBLIC_IP_ADDRESS": "10.0.0.100"},  # NOSONAR
+        )
 
-        assert get_user_ip_address(request) == "1.1.1.1"
+        assert get_user_ip_address(request) == "10.0.0.100"  # NOSONAR
 
     @pytest.mark.parametrize(
         ("value", "base", "expected"),
@@ -118,3 +141,58 @@ class TestUtils:
     )
     def test_round_down(self, value, base, expected):
         assert round_down(value, base) == expected
+
+    @pytest.mark.parametrize(
+        ("url", "expected"),
+        [
+            ("https://example.com", "https://example.com"),
+            ("https://example.com.", "https://example.com"),
+            ("https://example.com,", "https://example.com"),
+            ("https://example.com!", "https://example.com"),
+            ("https://example.com?", "https://example.com"),
+            ("https://example.com;", "https://example.com"),
+            ("https://example.com:", "https://example.com"),
+            ("  https://example.com  ", "https://example.com"),
+            ("https://example.com/path", "https://example.com/path"),
+            ("https://example.com/path?", "https://example.com/path"),
+            ("https://example.com/path!", "https://example.com/path"),
+            ("", None),
+            (None, None),
+            ("   ", None),
+            ("https://", "https://"),
+            ("not-a-url", "not-a-url"),
+        ],
+    )
+    def test_clean_url(self, url, expected):
+        """Test the clean_url function."""
+        assert clean_url(url) == expected
+
+    @pytest.mark.parametrize(
+        ("url", "expected"),
+        [
+            ("https://example.com", True),
+            ("http://example.com", True),
+            ("https://example.com/path", True),
+            ("https://example.com/path?query=1", True),
+            ("https://example.com/path#fragment", True),
+            ("https://subdomain.example.com", True),
+            ("https://example.com:8080", True),
+            ("https://example.com:8080/path", True),
+            ("", False),
+            (None, False),
+            ("not-a-url", False),
+            ("ftp://example.com", False),
+            ("https://", False),
+            ("http://", False),
+            ("https://example", True),  # Valid single label domain
+            ("https://example.", True),  # Valid with trailing dot
+            ("https://example.com.", True),  # Valid with trailing dot
+            ("https://192.168.1.1", True),  # Valid IP address
+            ("https://[::1]", True),  # Valid IPv6 address
+            ("https://example.com:99999", True),  # Valid port (urlparse accepts it)
+        ],
+    )
+    def test_validate_url(self, url, expected):
+        """Test the validate_url function."""
+        result = validate_url(url)
+        assert result == expected

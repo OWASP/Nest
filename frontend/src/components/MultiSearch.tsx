@@ -1,3 +1,4 @@
+import { faAlgolia } from '@fortawesome/free-brands-svg-icons'
 import {
   faSearch,
   faTimes,
@@ -14,12 +15,12 @@ import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
-import { ChapterTypeAlgolia } from 'types/chapter'
-import { EventType } from 'types/event'
-import { OrganizationTypeAlgolia } from 'types/organization'
-import { ProjectTypeAlgolia } from 'types/project'
-import { MultiSearchBarProps, Suggestion } from 'types/search'
-import { User } from 'types/user'
+import type { Chapter } from 'types/chapter'
+import type { Event } from 'types/event'
+import type { Organization } from 'types/organization'
+import type { Project } from 'types/project'
+import type { MultiSearchBarProps, Suggestion } from 'types/search'
+import type { User } from 'types/user'
 
 const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   isLoaded,
@@ -57,12 +58,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
               const data = await fetchAlgoliaData(index, query, pageCount, suggestionCount)
               return {
                 indexName: index,
-                hits: data.hits as
-                  | ChapterTypeAlgolia[]
-                  | EventType[]
-                  | OrganizationTypeAlgolia[]
-                  | ProjectTypeAlgolia[]
-                  | User[],
+                hits: data.hits as Chapter[] | Event[] | Organization[] | Project[] | User[],
                 totalPages: data.totalPages || 0,
               }
             })
@@ -74,11 +70,11 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           if (filteredEvents.length > 0) {
             results.push({
               indexName: 'events',
-              hits: filteredEvents.slice(0, suggestionCount),
+              hits: filteredEvents.slice(0, suggestionCount) as Event[],
               totalPages: 1,
             })
           }
-          setSuggestions(results.filter((result) => result.hits.length > 0))
+          setSuggestions(results.filter((result) => result.hits.length > 0) as Suggestion[])
           setShowSuggestions(true)
         } else {
           setSuggestions([])
@@ -95,15 +91,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   }, [debouncedSearch])
 
   const handleSuggestionClick = useCallback(
-    (
-      suggestion:
-        | ChapterTypeAlgolia
-        | ProjectTypeAlgolia
-        | User
-        | EventType
-        | OrganizationTypeAlgolia,
-      indexName: string
-    ) => {
+    (suggestion: Chapter | Project | User | Event | Organization, indexName: string) => {
       setSearchQuery(suggestion.name ?? '')
       setShowSuggestions(false)
 
@@ -112,7 +100,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           router.push(`/chapters/${suggestion.key}`)
           break
         case 'events':
-          window.open((suggestion as EventType).url, '_blank')
+          window.open((suggestion as Event).url, '_blank')
           break
         case 'organizations':
           // Use type guard to safely access login property
@@ -140,12 +128,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         const { index, subIndex } = highlightedIndex
         const suggestion = suggestions[index].hits[subIndex]
         handleSuggestionClick(
-          suggestion as
-            | ChapterTypeAlgolia
-            | OrganizationTypeAlgolia
-            | ProjectTypeAlgolia
-            | User
-            | EventType,
+          suggestion as Chapter | Organization | Project | User | Event,
           suggestions[index].indexName
         )
       } else if (event.key === 'ArrowDown') {
@@ -245,7 +228,8 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           <>
             <FontAwesomeIcon
               icon={faSearch}
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+              className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
+              aria-hidden="true"
             />
             <input
               type="text"
@@ -254,26 +238,28 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
               onChange={handleSearchChange}
               onFocus={handleFocusSearch}
               placeholder={placeholder}
-              className="h-12 w-full rounded-lg border border-gray-300 pl-10 pr-10 text-lg text-black focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300"
+              className="h-12 w-full rounded-lg border-1 border-gray-300 pr-10 pl-10 text-lg text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300"
             />
             {searchQuery && (
               <button
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:text-gray-600"
+                type="button"
+                className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:text-gray-600"
                 onClick={handleClearSearch}
+                aria-label="Clear search"
               >
                 <FontAwesomeIcon icon={faTimes} />
               </button>
             )}
           </>
         ) : (
-          <div className="animate-pulse h-12 w-full rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+          <div className="h-12 w-full animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
         )}
         {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-md border bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+          <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-md border-1 border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
             {suggestions.map((suggestion, index) => (
               <div
                 key={suggestion.indexName}
-                className="border-b text-gray-600 last:border-b-0 dark:border-gray-700 dark:text-gray-300"
+                className="border-b-1 border-b-gray-200 text-gray-600 last:border-b-0 dark:border-b-gray-700 dark:text-gray-300"
               >
                 <ul>
                   {suggestion.hits.map((hit, subIndex) => (
@@ -293,7 +279,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                       >
                         <FontAwesomeIcon
                           icon={getIconForIndex(suggestion.indexName)}
-                          className="mr-2 flex-shrink-0 text-gray-400"
+                          className="mr-2 shrink-0 text-gray-400"
                         />
                         <span className="block max-w-full truncate">{hit.name || hit.login}</span>
                       </button>
@@ -302,6 +288,16 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                 </ul>
               </div>
             ))}
+            <a
+              aria-label="Search by Algolia (opens in a new tab)"
+              className="flex items-center justify-center gap-2 bg-white py-2 text-gray-500 hover:text-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+              href="https://www.algolia.com"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <FontAwesomeIcon icon={faAlgolia} className="h-3 w-3" aria-hidden="true" />
+              <span className="text-xs">Search by Algolia</span>
+            </a>
           </div>
         )}
       </div>

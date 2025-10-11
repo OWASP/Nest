@@ -16,8 +16,8 @@ class TestUpdateSynonymsCommand:
         """Set up test environment."""
         self.stdout = StringIO()
         with (
-            patch("apps.github.index.issue.IssueIndex.update_synonyms") as issue_patch,
-            patch("apps.owasp.index.project.ProjectIndex.update_synonyms") as project_patch,
+            patch("apps.github.index.IssueIndex.update_synonyms") as issue_patch,
+            patch("apps.owasp.index.ProjectIndex.update_synonyms") as project_patch,
         ):
             self.mock_issue_update = issue_patch
             self.mock_project_update = project_patch
