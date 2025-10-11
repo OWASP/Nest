@@ -42,11 +42,15 @@ const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
       <div className="flex items-start justify-between gap-2">
         <button
           onClick={handleClick}
-          className="text-start font-semibold text-blue-400 hover:underline"
+          className="min-w-0 flex-1 text-start font-semibold text-blue-400 hover:underline"
         >
           <TruncatedText text={details?.name} />
         </button>
-        {details.isArchived && <ArchivedBadge size="sm" showIcon={false} />}
+        {details.isArchived && (
+          <div className="flex-shrink-0">
+            <ArchivedBadge size="sm" showIcon={false} />
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-2 text-sm">
