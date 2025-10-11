@@ -3,6 +3,7 @@
 from datetime import UTC, datetime
 
 from django.db import models
+from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -35,7 +36,14 @@ class Post(BulkSaveModel, TimestampedModel):
 
     @staticmethod
     def recent_posts():
-        """Get recent posts."""
+        """Get recent posts (published only)."""
+        return Post.objects.filter(published_at__lte=timezone.now()).order_by("-published_at")
+
+    @staticmethod
+    def all_recent_posts():
+        """Get all recent posts (including future-dated ones).
+        For admin/preview use. Use recent_posts() for public display.
+        """
         return Post.objects.order_by("-published_at")
 
     @staticmethod
@@ -78,3 +86,4 @@ class Post(BulkSaveModel, TimestampedModel):
 
         for key, value in fields.items():
             setattr(self, key, value)
+            
