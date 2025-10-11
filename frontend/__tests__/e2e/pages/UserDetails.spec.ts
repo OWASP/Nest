@@ -5,9 +5,6 @@ import { mockDashboardCookies } from '../helpers/mockDashboardCookies'
 test.describe('User Details Page', () => {
   test.beforeEach(async ({ page }) => {
     await mockDashboardCookies(page, mockUserDetailsData, true)
-    await page.route('**/graphql*', async (route) => {
-      await route.fulfill({ status: 200, json: { data: mockUserDetailsData } })
-    })
     await page.goto('/members/test-user')
     await page.waitForLoadState('networkidle')
   })

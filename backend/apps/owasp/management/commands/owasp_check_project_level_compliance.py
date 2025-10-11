@@ -42,6 +42,14 @@ class Command(BaseCommand):
                 import json
 
                 data = json.loads(response.read().decode("utf-8"))
+                if not data:
+                    self.stdout.write(
+                        self.style.ERROR("✗ Official project levels are unexpectedly empty")
+                    )
+                    logger.error(
+                        "Official project levels returned empty data from %s", PROJECT_LEVELS_URL
+                    )
+                    return {}
                 self.stdout.write(
                     self.style.SUCCESS(
                         f"✓ Fetched {len(data)} project levels from official source"

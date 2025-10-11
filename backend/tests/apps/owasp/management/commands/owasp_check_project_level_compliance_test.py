@@ -13,17 +13,14 @@ from apps.owasp.models.enums.project import ProjectLevel
 from apps.owasp.models.project import Project
 
 
-@pytest.fixture
-def command():
-    """Return a command instance."""
-    return Command()
-
-
 class TestCheckProjectLevelComplianceCommand(TestCase):
     """Test suite for the owasp_check_project_level_compliance command."""
 
     def setUp(self):
         """Set up test fixtures."""
+        # Initialize command instance
+        self.command = Command()
+
         # Create test projects with different compliance statuses
         self.compliant_project = Project.objects.create(
             key="www-project-compliant-test",
@@ -49,7 +46,7 @@ class TestCheckProjectLevelComplianceCommand(TestCase):
             is_active=True,
         )
 
-    def test_fetch_official_project_levels_success(self, command):
+    def test_fetch_official_project_levels_success(self):
         """Test successfully fetching and parsing project levels JSON."""
         mock_json_data = {
             "compliant-test": "lab",
@@ -65,20 +62,20 @@ class TestCheckProjectLevelComplianceCommand(TestCase):
             mock_response.__enter__.return_value = mock_response
             mock_urlopen.return_value = mock_response
 
-            result = command.fetch_official_project_levels()
+            result = self.command.fetch_official_project_levels()
 
         assert result == mock_json_data
         assert len(result) == 3
         assert result["compliant-test"] == "lab"
 
-    def test_fetch_official_project_levels_failure(self, command):
+    def test_fetch_official_project_levels_failure(self):
         """Test handling of fetch failures."""
         with patch(
             "apps.owasp.management.commands.owasp_check_project_level_compliance.urlopen"
         ) as mock_urlopen:
             mock_urlopen.side_effect = Exception("Network error")
 
-            result = command.fetch_official_project_levels()
+            result = self.command.fetch_official_project_levels()
 
         assert result == {}
 
@@ -95,9 +92,9 @@ class TestCheckProjectLevelComplianceCommand(TestCase):
             ("", "other"),  # Empty string
         ],
     )
-    def test_normalize_level(self, command, input_level, expected_level):
+    def test_normalize_level(self, input_level, expected_level):
         """Test level normalization with various inputs."""
-        result = command.normalize_level(input_level)
+        result = self.command.normalize_level(input_level)
         assert result == expected_level
 
     def test_handle_compliant_project(self):
