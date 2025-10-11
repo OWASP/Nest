@@ -32,7 +32,7 @@ def csrf_decorator(view_func):
     """
     environment = settings.ENVIRONMENT
     if environment == "Fuzz":
-        return csrf_exempt(view_func)
+        return csrf_exempt(view_func)  # NOSONAR
     return csrf_protect(view_func)
 
 

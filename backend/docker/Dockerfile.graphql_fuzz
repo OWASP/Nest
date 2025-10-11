@@ -1,6 +1,6 @@
 FROM python:3.12-alpine
 
-ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
+ENV APK_CACHE_DIR="/home/owasp/.cache/apk-graphql" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
     OWASP_GID=1000 \
     OWASP_UID=1000 \

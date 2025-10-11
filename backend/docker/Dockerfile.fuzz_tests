@@ -1,8 +1,8 @@
-FROM python:3.13-alpine AS builder
+FROM python:3.13.7-alpine AS builder
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
+ENV APK_CACHE_DIR="/home/owasp/.cache/apk-backend-builder" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
     OWASP_GID=1000 \
     OWASP_UID=1000 \
@@ -42,7 +42,7 @@ COPY data data
 COPY fuzz_tests/.env .env
 COPY docker/entrypoint_fuzz.sh entrypoint.sh
 
-FROM python:3.13-alpine
+FROM python:3.13.7-alpine
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
@@ -60,7 +60,7 @@ WORKDIR /home/owasp
 USER owasp
 
 # Copy built application from the builder stage
-COPY --from=builder --chmod=555 --chown=owasp:owasp /home/owasp /home/owasp
+COPY --from=builder --chmod=555 --chown=root:root /home/owasp /home/owasp
 
 RUN touch /home/owasp/fuzz_tests.db && \
     chmod +x /home/owasp/fuzz_tests.db /home/owasp/entrypoint.sh
