@@ -2,7 +2,11 @@ services:
   graphql:
     container_name: nest-fuzz-test-graphql
     image: omar2535/graphqler:latest
-    command: ["--url", "http://backend:8000/graphql/", "--mode", "run"]
+    command:
+      - --url
+      - http://backend:8000/graphql/
+      - --mode
+      - run
     depends_on:
       backend:
         condition: service_healthy
@@ -19,4 +23,4 @@ services:
       interval: 10s
       timeout: 5s
       retries: 20
-      start_period: 400s
+      start_period: 200s
