@@ -13,7 +13,7 @@ class GenericEntityNode(strawberry.relay.Node):
     @strawberry.field
     def entity_leaders(self) -> list[EntityMemberNode]:
         """Resolve entity leaders."""
-        return list(self.entity_leaders.all())
+        return self.entity_leaders
 
     @strawberry.field
     def leaders(self) -> list[str]:

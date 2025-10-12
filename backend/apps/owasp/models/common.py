@@ -90,6 +90,17 @@ class RepositoryBasedEntityModel(models.Model):
     )
 
     @property
+    def entity_leaders(self) -> models.QuerySet[EntityMember]:
+        """Return entity's leaders."""
+        return EntityMember.objects.filter(
+            entity_id=self.id,
+            entity_type=ContentType.objects.get_for_model(self.__class__),
+            is_active=True,
+            is_reviewed=True,
+            role=EntityMember.Role.LEADER,
+        ).order_by("order")
+
+    @property
     def github_url(self) -> str:
         """Get GitHub URL."""
         return f"https://github.com/owasp/{self.key}"
@@ -112,15 +123,6 @@ class RepositoryBasedEntityModel(models.Model):
             f"{self.owasp_repository.key}/{self.owasp_repository.default_branch}/info.md"
             if self.owasp_repository
             else None
-        )
-
-    @property
-    def entity_leaders(self) -> models.QuerySet[EntityMember]:
-        """Return entity's leaders."""
-        return EntityMember.objects.filter(
-            entity_type=ContentType.objects.get_for_model(self.__class__),
-            entity_id=self.pk,
-            role=EntityMember.Role.LEADER,
         )
 
     @property
