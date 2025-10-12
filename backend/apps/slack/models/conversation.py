@@ -42,6 +42,7 @@ class Conversation(TimestampedModel):
 
     # Additional attributes.
     sync_messages = models.BooleanField(verbose_name="Sync messages", default=False)
+    conversation_context = models.TextField(blank=True, verbose_name="Conversation context")
 
     def __str__(self):
         """Channel human readable representation."""
@@ -105,3 +106,43 @@ class Conversation(TimestampedModel):
             conversation.save()
 
         return conversation
+
+    def add_to_context(self, user_message: str, bot_response: str | None = None) -> None:
+        """Add messages to the conversation context.
+
+        Args:
+            user_message: The user's message to add to context.
+            bot_response: The bot's response to add to context.
+
+        """
+        if not self.conversation_context:
+            self.conversation_context = ""
+
+        self.conversation_context = f"{self.conversation_context}{f'User: {user_message}\n'}"
+
+        if bot_response:
+            self.conversation_context = f"{self.conversation_context}{f'Bot: {bot_response}\n'}"
+
+        self.save(update_fields=["conversation_context"])
+
+    def get_context(self, conversation_context_limit: int | None = None) -> str:
+        """Get the conversation context.
+
+        Args:
+            conversation_context_limit: Optional limit on number of exchanges to return.
+
+        Returns:
+            The conversation context, potentially limited to recent exchanges.
+
+        """
+        if not self.conversation_context:
+            return ""
+
+        if conversation_context_limit is None:
+            return self.conversation_context
+
+        lines = self.conversation_context.strip().split("\n")
+        if len(lines) <= conversation_context_limit * 2:
+            return self.conversation_context
+
+        return "\n".join(lines[-(conversation_context_limit * 2) :])

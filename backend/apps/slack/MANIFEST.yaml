@@ -133,6 +133,7 @@ settings:
       - app_mention
       - member_joined_channel
       - message.channels
+      - message.im
       - team_join
   interactivity:
     is_enabled: true
