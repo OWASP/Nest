@@ -614,7 +614,8 @@ describe('CardDetailsPage', () => {
       render(<CardDetailsPage {...defaultProps} isActive={false} />)
 
       expect(screen.getByText('Inactive')).toBeInTheDocument()
-      expect(screen.getByText('Inactive')).toHaveClass('bg-red-200', 'text-red-800')
+      // Updated classes for consistent badge styling
+      expect(screen.getByText('Inactive')).toHaveClass('bg-red-50', 'text-red-800')
     })
 
     it('does not render inactive badge when isActive is true', () => {
@@ -1481,7 +1482,8 @@ describe('CardDetailsPage', () => {
 
       const { container } = render(<CardDetailsPage {...archivedProps} />)
 
-      const badgeContainer = container.querySelector('.ml-4.flex.gap-2')
+      // New structure: badges are in a flex container with items-center and gap-3
+      const badgeContainer = container.querySelector('.flex.items-center.gap-3')
       expect(badgeContainer).toBeInTheDocument()
     })
 
