@@ -76,7 +76,7 @@ class Command(BaseCommand):
                 print(f"{prefix:<12} {repository_url}")
 
                 try:
-                    owasp_organization, repository = sync_repository(
+                    owasp_organization, synced_repository = sync_repository(
                         gh_repository,
                         organization=owasp_organization,
                         user=owasp_user,
@@ -84,16 +84,20 @@ class Command(BaseCommand):
 
                     # OWASP chapters.
                     if entity_key.startswith("www-chapter-"):
-                        chapters.append(Chapter.update_data(gh_repository, repository, save=False))
+                        chapters.append(
+                            Chapter.update_data(gh_repository, synced_repository, gh, save=False)
+                        )
 
                     # OWASP projects.
                     elif entity_key.startswith("www-project-"):
-                        projects.append(Project.update_data(gh_repository, repository, save=False))
+                        projects.append(
+                            Project.update_data(gh_repository, synced_repository, gh, save=False)
+                        )
 
                     # OWASP committees.
                     elif entity_key.startswith("www-committee-"):
                         committees.append(
-                            Committee.update_data(gh_repository, repository, save=False)
+                            Committee.update_data(gh_repository, synced_repository, gh, save=False)
                         )
                 except Exception:
                     logger.exception("Error syncing repository %s", repository_url)

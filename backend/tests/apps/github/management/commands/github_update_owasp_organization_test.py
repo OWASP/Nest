@@ -37,14 +37,6 @@ def command():
     return Command()
 
 
-@pytest.fixture
-def mock_gh_repo():
-    repo = mock.Mock(spec=Repository)
-    repo.name = "test-repo"
-    repo.html_url = "https://github.com/OWASP/test-repo"
-    return repo
-
-
 @pytest.mark.parametrize(
     ("repository_name", "offset", "expected_calls"),
     [
