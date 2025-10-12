@@ -211,13 +211,11 @@ class TestRepositoryNode:
             "is_archived field should be exposed in RepositoryNode"
         )
 
-    def test_is_archived_field_returns_true(self):
-        """Test is_archived field returns True for archived repositories."""
-        mock_repository = Mock()
-        mock_repository.is_archived = True
-
-        # Since is_archived is a direct field mapping, we just verify the mock
-        assert mock_repository.is_archived is True
+    def test_resolve_is_archived(self):
+        """Test is_archived field type."""
+        field = self._get_field_by_name("is_archived")
+        assert field is not None
+        assert field.type is bool
 
     def test_is_archived_field_returns_false(self):
         """Test is_archived field returns False for non-archived repositories."""
