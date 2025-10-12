@@ -25,8 +25,6 @@ class EntityChannelAdmin(admin.ModelAdmin):
         "entity_type",
         "entity_id",
         "channel_type",
-        "search_button",
-        "channel_search",
         "channel_id",
         "platform",
         "is_default",
