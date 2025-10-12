@@ -17,8 +17,10 @@ class TestPullRequestNode:
             "_id",
             "author",
             "created_at",
+            "merged_at",
             "organization_name",
             "repository_name",
+            "state",
             "title",
             "url",
         }
