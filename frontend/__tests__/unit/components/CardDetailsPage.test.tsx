@@ -524,6 +524,7 @@ describe('CardDetailsPage', () => {
       organizationName: 'test-org',
       title: 'Add new feature',
       url: 'https://github.com/test/project/pull/456',
+      state: 'open',
     },
   ]
 

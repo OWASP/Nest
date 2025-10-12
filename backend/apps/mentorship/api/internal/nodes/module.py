@@ -6,6 +6,7 @@ import strawberry
 
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.user import UserNode
+from apps.github.models import Label
 from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum
 from apps.mentorship.api.internal.nodes.mentor import MentorNode
 from apps.mentorship.api.internal.nodes.program import ProgramNode
@@ -41,13 +42,39 @@ class ModuleNode:
         return self.project.name if self.project else None
 
     @strawberry.field
-    def issues(self) -> list[IssueNode]:
-        """Return issues linked to this module."""
-        return list(
-            self.issues.select_related("repository", "author")
-            .prefetch_related("assignees", "labels")
-            .order_by("-created_at")
+    def issues(
+        self, limit: int = 20, offset: int = 0, label: str | None = None
+    ) -> list[IssueNode]:
+        """Return paginated issues linked to this module, optionally filtered by label."""
+        queryset = self.issues.select_related("repository", "author").prefetch_related(
+            "assignees", "labels"
         )
+
+        if label and label != "all":
+            queryset = queryset.filter(labels__name=label)
+
+        return list(queryset.order_by("-updated_at")[offset : offset + limit])
+
+    @strawberry.field
+    def issues_count(self, label: str | None = None) -> int:
+        """Return total count of issues linked to this module, optionally filtered by label."""
+        queryset = self.issues
+
+        if label and label != "all":
+            queryset = queryset.filter(labels__name=label)
+
+        return queryset.count()
+
+    @strawberry.field
+    def available_labels(self) -> list[str]:
+        """Return all unique labels from issues linked to this module."""
+        label_names = (
+            Label.objects.filter(issue__mentorship_modules=self)
+            .values_list("name", flat=True)
+            .distinct()
+        )
+
+        return sorted(label_names)
 
     @strawberry.field
     def issue_by_number(self, number: int) -> IssueNode | None:
@@ -74,28 +101,28 @@ class ModuleNode:
 
     @strawberry.field
     def task_deadline(self, issue_number: int) -> datetime | None:
-        """Return the earliest deadline for tasks linked to this module and issue number."""
+        """Return the deadline for the latest assigned task linked to this module and issue."""
         return (
             Task.objects.filter(
                 module=self,
                 issue__number=issue_number,
                 deadline_at__isnull=False,
             )
-            .order_by("deadline_at")
+            .order_by("-assigned_at")
             .values_list("deadline_at", flat=True)
             .first()
         )
 
     @strawberry.field
     def task_assigned_at(self, issue_number: int) -> datetime | None:
-        """Return the earliest assignment time for tasks linked to this module and issue number."""
+        """Return the latest assignment time for tasks linked to this module and issue number."""
         return (
             Task.objects.filter(
                 module=self,
                 issue__number=issue_number,
                 assigned_at__isnull=False,
             )
-            .order_by("assigned_at")
+            .order_by("-assigned_at")
             .values_list("assigned_at", flat=True)
             .first()
         )

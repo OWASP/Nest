@@ -143,8 +143,7 @@ class Command(BaseCommand):
                     if task.status != status:
                         updates["status"] = status
 
-                    # Only fetch assigned_at when needed.
-                    if (created or task.assigned_at is None) and issue.repository:
+                    if issue.repository:
                         repo_full_name = self._extract_repo_full_name(issue.repository)
                         if repo_full_name:
                             if repo_full_name not in repo_cache:
@@ -166,6 +165,9 @@ class Command(BaseCommand):
                                 )
                                 if assigned_date:
                                     updates["assigned_at"] = assigned_date
+                                    self.stdout.write(
+                                        f"Updated assignment date for issue #{issue.number}"
+                                    )
 
                     if created:
                         num_tasks_created += 1

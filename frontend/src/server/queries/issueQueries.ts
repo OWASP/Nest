@@ -33,7 +33,9 @@ export const GET_MODULE_ISSUE_VIEW = gql`
           id
           title
           url
+          state
           createdAt
+          mergedAt
           author {
             id
             login

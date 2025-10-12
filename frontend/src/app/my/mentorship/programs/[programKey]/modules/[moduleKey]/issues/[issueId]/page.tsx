@@ -22,6 +22,7 @@ import {
 import ActionButton from 'components/ActionButton'
 import AnchorTitle from 'components/AnchorTitle'
 import LoadingSpinner from 'components/LoadingSpinner'
+import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
 import { TruncatedText } from 'components/TruncatedText'
 
@@ -83,10 +84,10 @@ const ModuleIssueDetailsPage = () => {
   return (
     <div className="min-h-screen bg-white p-8 text-gray-700 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-5xl">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="flex items-center gap-2 text-3xl font-bold">
-              <TruncatedText text={issue.title} />
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl font-bold sm:text-3xl">
+              <span className="break-words">{issue.title}</span>
             </h1>
             <div className="mt-1 text-sm text-gray-500">
               {issue.organizationName}/{issue.repositoryName} • #{issue.number}
@@ -98,8 +99,8 @@ const ModuleIssueDetailsPage = () => {
         </div>
 
         <SecondaryCard title={<AnchorTitle title="Description" />}>
-          <div className={`prose dark:prose-invert line-clamp-[15] max-w-none whitespace-pre-wrap`}>
-            {issue.summary || 'No description.'}
+          <div className="prose dark:prose-invert line-clamp-[15] max-w-none">
+            <Markdown content={issue.summary || 'No description.'} />
           </div>
         </SecondaryCard>
 
@@ -141,63 +142,64 @@ const ModuleIssueDetailsPage = () => {
           </div>
         </div>
 
-        <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
-          <h2 className="mb-4 text-2xl font-semibold">
-            <div className="flex items-center">
-              <div className="flex flex-row items-center gap-2">
-                <FontAwesomeIcon icon={faUsers} className="mr-2 h-5 w-5" />
+        {assignees.length > 0 && (
+          <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
+            <h2 className="mb-4 text-2xl font-semibold">
+              <div className="flex items-center">
+                <div className="flex flex-row items-center gap-2">
+                  <FontAwesomeIcon icon={faUsers} className="mr-2 h-5 w-5" />
+                </div>
+                <span>Assignees</span>
               </div>
-              <span>Assignees</span>
+            </h2>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {assignees.map((a) => (
+                <div
+                  key={a.id}
+                  className="flex items-center justify-between gap-2 rounded-lg bg-gray-200 p-3 dark:bg-gray-700"
+                >
+                  <Link
+                    href={`/members/${a.login}`}
+                    className="inline-flex items-center gap-2 text-blue-600 hover:underline dark:text-blue-400"
+                  >
+                    {a.avatarUrl ? (
+                      <Image
+                        src={a.avatarUrl}
+                        alt={a.login}
+                        width={32}
+                        height={32}
+                        className="rounded-full"
+                      />
+                    ) : (
+                      <div className="h-8 w-8 rounded-full bg-gray-400" aria-hidden="true" />
+                    )}
+                    <span className="text-sm font-medium">{a.login || a.name}</span>
+                  </Link>
+                  <button
+                    type="button"
+                    aria-label={`Unassign @${a.login}`}
+                    disabled={!issueId || unassigning}
+                    onClick={async () => {
+                      if (!issueId || unassigning) return
+                      await unassignIssue({
+                        variables: {
+                          programKey,
+                          moduleKey,
+                          issueNumber: Number(issueId),
+                          userLogin: a.login,
+                        },
+                      })
+                    }}
+                    className={getButtonClassName(!issueId || unassigning)}
+                    title={unassigning ? 'Unassigning…' : `Unassign @${a.login}`}
+                  >
+                    <FontAwesomeIcon icon={faXmark} />
+                  </button>
+                </div>
+              ))}
             </div>
-          </h2>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {assignees.map((a) => (
-              <div
-                key={a.id}
-                className="flex items-center justify-between gap-2 rounded-lg bg-gray-200 p-3 dark:bg-gray-700"
-              >
-                <Link
-                  href={`/members/${a.login}`}
-                  className="inline-flex items-center gap-2 text-blue-600 hover:underline dark:text-blue-400"
-                >
-                  {a.avatarUrl ? (
-                    <Image
-                      src={a.avatarUrl}
-                      alt={a.login}
-                      width={32}
-                      height={32}
-                      className="rounded-full"
-                    />
-                  ) : (
-                    <div className="h-8 w-8 rounded-full bg-gray-400" aria-hidden="true" />
-                  )}
-                  <span className="text-sm font-medium">{a.login || a.name}</span>
-                </Link>
-                <button
-                  type="button"
-                  aria-label={`Unassign @${a.login}`}
-                  disabled={!issueId || unassigning}
-                  onClick={async () => {
-                    if (!issueId || unassigning) return
-                    await unassignIssue({
-                      variables: {
-                        programKey,
-                        moduleKey,
-                        issueNumber: Number(issueId),
-                        userLogin: a.login,
-                      },
-                    })
-                  }}
-                  className={getButtonClassName(!issueId || unassigning)}
-                  title={unassigning ? 'Unassigning…' : `Unassign @${a.login}`}
-                >
-                  <FontAwesomeIcon icon={faXmark} />
-                </button>
-              </div>
-            ))}
-            {assignees.length === 0 && <span className="text-sm text-gray-400">Unassigned</span>}
           </div>
-        </div>
+        )}
 
         <SecondaryCard icon={faCodeBranch} title="Pull Requests">
           <div className="grid grid-cols-1 gap-3">
@@ -207,27 +209,29 @@ const ModuleIssueDetailsPage = () => {
                   key={pr.id}
                   className="flex items-center justify-between gap-3 rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
                     {pr.author?.avatarUrl ? (
                       <Image
                         src={pr.author.avatarUrl}
                         alt={pr.author?.login || 'Unknown'}
                         width={32}
                         height={32}
-                        className="rounded-full"
+                        className="flex-shrink-0 rounded-full"
                       />
                     ) : (
-                      <div className="h-8 w-8 rounded-full bg-gray-400" aria-hidden="true" />
+                      <div
+                        className="h-8 w-8 flex-shrink-0 rounded-full bg-gray-400"
+                        aria-hidden="true"
+                      />
                     )}
                     <div className="min-w-0 flex-1">
                       <Link
                         href={pr.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="truncate font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                        title={pr.title}
+                        className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                       >
-                        {pr.title}
+                        <TruncatedText text={pr.title} />
                       </Link>
                       <div className="text-sm text-gray-500 dark:text-gray-400">
                         by {pr.author?.login || 'Unknown'} •{' '}
@@ -235,10 +239,25 @@ const ModuleIssueDetailsPage = () => {
                       </div>
                     </div>
                   </div>
-                  <ActionButton url={pr.url} tooltipLabel="View PR">
-                    <FontAwesomeIcon icon={faLink} />
-                    <span>View PR</span>
-                  </ActionButton>
+                  <div className="flex items-center gap-2">
+                    {pr.state === 'closed' && pr.mergedAt ? (
+                      <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200">
+                        Merged
+                      </span>
+                    ) : pr.state === 'closed' ? (
+                      <span className="rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-800 dark:bg-red-900 dark:text-red-200">
+                        Closed
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                        Open
+                      </span>
+                    )}
+                    <ActionButton url={pr.url} tooltipLabel="View PR">
+                      <FontAwesomeIcon icon={faLink} />
+                      <span className="hidden sm:inline">View PR</span>
+                    </ActionButton>
+                  </div>
                 </div>
               ))
             ) : (

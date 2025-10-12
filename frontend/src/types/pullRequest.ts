@@ -8,4 +8,6 @@ export type PullRequest = {
   repositoryName?: string
   title: string
   url: string
+  state: string
+  mergedAt?: string
 }

@@ -47,6 +47,7 @@ const minimalData = [
     repositoryName: 'test-repo',
     title: 'Test Pull Request',
     url: 'https://github.com/test-org/test-repo/pull/1',
+    state: 'open',
   },
 ]
 
@@ -59,6 +60,7 @@ const noRepoData = [
     repositoryName: undefined,
     title: 'Test Pull Request',
     url: 'https://github.com/test-org/test-repo/pull/2',
+    state: 'open',
   },
 ]
 

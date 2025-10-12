@@ -162,6 +162,7 @@ const mockPullRequest: PullRequest = {
   repositoryName: 'test-repo',
   title: 'Add new feature',
   url: 'https://github.com/test-org/test-repo/pull/456',
+  state: 'open',
 }
 
 const mockRelease: Release = {

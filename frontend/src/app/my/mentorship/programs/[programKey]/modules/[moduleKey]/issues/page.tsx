@@ -9,18 +9,28 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_MODULE_ISSUES } from 'server/queries/moduleQueries'
 import type { Issue } from 'types/issue'
 import LoadingSpinner from 'components/LoadingSpinner'
+import Pagination from 'components/Pagination'
 import { TruncatedText } from 'components/TruncatedText'
 
 const LABEL_ALL = 'all'
+const ITEMS_PER_PAGE = 20
+const MAX_VISIBLE_LABELS = 5
 
 const IssuesPage = () => {
   const { programKey, moduleKey } = useParams() as { programKey: string; moduleKey: string }
   const router = useRouter()
   const searchParams = useSearchParams()
   const [selectedLabel, setSelectedLabel] = useState<string>(searchParams.get('label') || LABEL_ALL)
+  const [currentPage, setCurrentPage] = useState(1)
 
   const { data, loading, error } = useQuery(GET_MODULE_ISSUES, {
-    variables: { programKey, moduleKey },
+    variables: {
+      programKey,
+      moduleKey,
+      limit: ITEMS_PER_PAGE,
+      offset: (currentPage - 1) * ITEMS_PER_PAGE,
+      label: selectedLabel === LABEL_ALL ? null : selectedLabel,
+    },
     skip: !programKey || !moduleKey,
     fetchPolicy: 'cache-and-network',
   })
@@ -31,7 +41,7 @@ const IssuesPage = () => {
 
   const moduleData = data?.getModule
   const moduleIssues: Issue[] = useMemo(() => {
-    const issues = (moduleData?.issues || []).map((i) => ({
+    return (moduleData?.issues || []).map((i) => ({
       author: i.author,
       createdAt: i.createdAt,
       hint: '',
@@ -48,11 +58,16 @@ const IssuesPage = () => {
       url: i.url,
       objectID: i.id,
     }))
-    if (selectedLabel === LABEL_ALL) return issues
-    return issues.filter((iss) => (iss.labels || []).includes(selectedLabel))
-  }, [moduleData, selectedLabel])
+  }, [moduleData])
+
+  const totalPages = Math.ceil((moduleData?.issuesCount || 0) / ITEMS_PER_PAGE)
 
   const allLabels: string[] = useMemo(() => {
+    const serverLabels = moduleData?.availableLabels
+    if (serverLabels && serverLabels.length > 0) {
+      return serverLabels
+    }
+
     const labels = new Set<string>()
     ;(moduleData?.issues || []).forEach((i) =>
       (i.labels || []).forEach((l: string) => labels.add(l))
@@ -62,6 +77,7 @@ const IssuesPage = () => {
 
   const handleLabelChange = (label: string) => {
     setSelectedLabel(label)
+    setCurrentPage(1)
     const params = new URLSearchParams(searchParams.toString())
     if (label === LABEL_ALL) {
       params.delete('label')
@@ -69,6 +85,14 @@ const IssuesPage = () => {
       params.set('label', label)
     }
     router.replace(`?${params.toString()}`)
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  const handleIssueClick = (issueNumber: number) => {
+    router.push(`/my/mentorship/programs/${programKey}/modules/${moduleKey}/issues/${issueNumber}`)
   }
 
   if (loading) return <LoadingSpinner />
@@ -142,12 +166,8 @@ const IssuesPage = () => {
                   <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-blue-600 dark:text-blue-400">
                     <button
                       type="button"
-                      onClick={() =>
-                        router.push(
-                          `/my/mentorship/programs/${programKey}/modules/${moduleKey}/issues/${issue.number}`
-                        )
-                      }
-                      className="block max-w-xl text-left hover:underline"
+                      onClick={() => handleIssueClick(Number(issue.number))}
+                      className="block max-w-xl cursor-pointer text-left hover:underline"
                     >
                       <TruncatedText
                         text={`${issue.title.slice(0, 50)}${issue.title.length > 50 ? '…' : ''}`}
@@ -158,7 +178,7 @@ const IssuesPage = () => {
                     <div className="flex flex-wrap gap-2">
                       {(() => {
                         const labels = issue.labels || []
-                        const visible = labels.slice(0, 5)
+                        const visible = labels.slice(0, MAX_VISIBLE_LABELS)
                         const remaining = labels.length - visible.length
                         return (
                           <>
@@ -222,6 +242,14 @@ const IssuesPage = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          isLoaded={!loading}
+        />
       </div>
     </div>
   )

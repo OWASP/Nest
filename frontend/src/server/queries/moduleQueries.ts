@@ -78,12 +78,20 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
 `
 
 export const GET_MODULE_ISSUES = gql`
-  query GetModuleIssues($programKey: String!, $moduleKey: String!) {
+  query GetModuleIssues(
+    $programKey: String!
+    $moduleKey: String!
+    $limit: Int = 20
+    $offset: Int = 0
+    $label: String
+  ) {
     getModule(moduleKey: $moduleKey, programKey: $programKey) {
       id
       name
       key
-      issues {
+      issuesCount(label: $label)
+      availableLabels
+      issues(limit: $limit, offset: $offset, label: $label) {
         id
         number
         createdAt
