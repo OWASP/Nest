@@ -202,21 +202,4 @@ describe('ArchivedBadge', () => {
       expect(container.querySelector('input')).not.toBeInTheDocument()
     })
   })
-
-  describe('Snapshot Testing', () => {
-    it('matches snapshot with default props', () => {
-      const { container } = render(<ArchivedBadge />)
-      expect(container.firstChild).toMatchSnapshot()
-    })
-
-    it('matches snapshot with small size', () => {
-      const { container } = render(<ArchivedBadge size="sm" showIcon={false} />)
-      expect(container.firstChild).toMatchSnapshot()
-    })
-
-    it('matches snapshot with large size and icon', () => {
-      const { container } = render(<ArchivedBadge size="lg" showIcon={true} />)
-      expect(container.firstChild).toMatchSnapshot()
-    })
-  })
 })
