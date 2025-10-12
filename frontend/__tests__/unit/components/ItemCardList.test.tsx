@@ -163,6 +163,7 @@ const mockPullRequest: PullRequest = {
   title: 'Add new feature',
   url: 'https://github.com/test-org/test-repo/pull/456',
   state: 'open',
+  mergedAt: '2022-01-02T00:00:00Z',
 }
 
 const mockRelease: Release = {

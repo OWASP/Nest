@@ -48,6 +48,7 @@ const minimalData = [
     title: 'Test Pull Request',
     url: 'https://github.com/test-org/test-repo/pull/1',
     state: 'open',
+    mergedAt: '2024-06-02T12:00:00Z',
   },
 ]
 
@@ -61,6 +62,7 @@ const noRepoData = [
     title: 'Test Pull Request',
     url: 'https://github.com/test-org/test-repo/pull/2',
     state: 'open',
+    mergedAt: '2024-06-02T12:00:00Z',
   },
 ]
 

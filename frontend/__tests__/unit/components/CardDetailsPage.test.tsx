@@ -525,6 +525,7 @@ describe('CardDetailsPage', () => {
       title: 'Add new feature',
       url: 'https://github.com/test/project/pull/456',
       state: 'open',
+      mergedAt: new Date(Date.now() - 86400000).toISOString(),
     },
   ]
 
