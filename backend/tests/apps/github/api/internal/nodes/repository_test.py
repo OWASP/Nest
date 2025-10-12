@@ -217,10 +217,3 @@ class TestRepositoryNode:
         assert field is not None
         assert field.type is bool
 
-    def test_is_archived_field_returns_false(self):
-        """Test is_archived field returns False for non-archived repositories."""
-        mock_repository = Mock()
-        mock_repository.is_archived = False
-
-        # Since is_archived is a direct field mapping, we just verify the mock
-        assert mock_repository.is_archived is False
