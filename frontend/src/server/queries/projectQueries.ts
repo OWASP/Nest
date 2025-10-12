@@ -5,6 +5,17 @@ export const GET_PROJECT_DATA = gql`
     project(key: $key) {
       id
       contributorsCount
+      entityLeaders {
+        id
+        description
+        memberName
+        member {
+          id
+          login
+          name
+          avatarUrl
+        }
+      }
       forksCount
       issuesCount
       isActive

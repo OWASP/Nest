@@ -18,7 +18,6 @@ from apps.github.constants import (
     GITHUB_REPOSITORY_RE,
     GITHUB_USER_RE,
 )
-from apps.github.models.user import User
 from apps.github.utils import get_repository_file_content
 from apps.owasp.models.entity_member import EntityMember
 from apps.owasp.models.enums.project import AudienceChoices
@@ -91,6 +90,17 @@ class RepositoryBasedEntityModel(models.Model):
     )
 
     @property
+    def entity_leaders(self) -> models.QuerySet[EntityMember]:
+        """Return entity's leaders."""
+        return EntityMember.objects.filter(
+            entity_id=self.id,
+            entity_type=ContentType.objects.get_for_model(self.__class__),
+            is_active=True,
+            is_reviewed=True,
+            role=EntityMember.Role.LEADER,
+        ).order_by("order")
+
+    @property
     def github_url(self) -> str:
         """Get GitHub URL."""
         return f"https://github.com/owasp/{self.key}"
@@ -113,15 +123,6 @@ class RepositoryBasedEntityModel(models.Model):
             f"{self.owasp_repository.key}/{self.owasp_repository.default_branch}/info.md"
             if self.owasp_repository
             else None
-        )
-
-    @property
-    def entity_leaders(self) -> models.QuerySet[User]:
-        """Return entity's leaders."""
-        return User.objects.filter(
-            pk__in=self.members.filter(role=EntityMember.Role.LEADER).values_list(
-                "member_id", flat=True
-            )
         )
 
     @property

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime
 from functools import lru_cache
+from typing import TYPE_CHECKING
 
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
@@ -26,6 +27,11 @@ from apps.owasp.models.enums.project import (
 from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins.project import ProjectIndexMixin
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
+
+if TYPE_CHECKING:
+    from apps.owasp.models.entity_member import EntityMember
+
+MAX_LEADERS_COUNT = 5
 
 
 class Project(
@@ -123,6 +129,11 @@ class Project(
     def __str__(self) -> str:
         """Project human readable representation."""
         return f"{self.name or self.key}"
+
+    @property
+    def entity_leaders(self) -> models.QuerySet[EntityMember]:
+        """Return project leaders."""
+        return super().entity_leaders[:MAX_LEADERS_COUNT]
 
     @property
     def health_score(self) -> float | None:
