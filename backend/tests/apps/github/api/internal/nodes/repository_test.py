@@ -216,4 +216,3 @@ class TestRepositoryNode:
         field = self._get_field_by_name("is_archived")
         assert field is not None
         assert field.type is bool
-
