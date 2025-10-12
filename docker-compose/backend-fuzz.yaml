@@ -1,9 +1,8 @@
 services:
   graphql:
-    container_name: nest-graphqler-test
-    build:
-      context: ../backend
-      dockerfile: docker/Dockerfile.graphql_fuzz
+    container_name: nest-fuzz-test-graphql
+    image: omar2535/graphqler:latest
+    command: ["--url", "http://backend:8000/graphql/", "--mode", "run"]
     depends_on:
       backend:
         condition: service_healthy
