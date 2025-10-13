@@ -32,7 +32,7 @@ class UserNode:
     def badges(self) -> list[BadgeNode]:
         """List badges assigned to the user sorted by weight and name."""
         user_badges = self.user_badges.select_related("badge").order_by(
-            "-badge__weight", "badge__name"
+            "badge__weight", "badge__name"
         )
         return [user_badge.badge for user_badge in user_badges]
 

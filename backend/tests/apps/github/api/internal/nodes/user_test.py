@@ -107,7 +107,7 @@ class TestUserNode:
         assert result == []
         mock_badges_queryset.select_related.assert_called_once_with("badge")
         mock_badges_queryset.select_related.return_value.order_by.assert_called_once_with(
-            "-badge__weight", "badge__name"
+            "badge__weight", "badge__name"
         )
 
     def test_badges_field_single_badge(self):
@@ -125,7 +125,7 @@ class TestUserNode:
         assert result == [mock_badge]
         mock_badges_queryset.select_related.assert_called_once_with("badge")
         mock_badges_queryset.select_related.return_value.order_by.assert_called_once_with(
-            "-badge__weight", "badge__name"
+            "badge__weight", "badge__name"
         )
 
     def test_badges_field_sorted_by_weight_and_name(self):
@@ -161,13 +161,13 @@ class TestUserNode:
         mock_user_badge_low.badge = mock_badge_low_weight
 
         # Set up the mock queryset to return badges in the expected sorted order
-        # (highest weight first, then by name for same weight)
+        # (lowest weight first, then by name for same weight)
         mock_badges_queryset = Mock()
         mock_badges_queryset.select_related.return_value.order_by.return_value = [
-            mock_user_badge_high,  # weight 100
+            mock_user_badge_low,  # weight 10
             mock_user_badge_medium_a,  # weight 50, name "Medium Weight A"
             mock_user_badge_medium_b,  # weight 50, name "Medium Weight B"
-            mock_user_badge_low,  # weight 10
+            mock_user_badge_high,  # weight 100
         ]
         mock_user = Mock()
         mock_user.user_badges = mock_badges_queryset
@@ -176,15 +176,15 @@ class TestUserNode:
 
         # Verify the badges are returned in the correct order
         expected_badges = [
-            mock_badge_high_weight,
+            mock_badge_low_weight,
             mock_badge_medium_weight_a,
             mock_badge_medium_weight_b,
-            mock_badge_low_weight,
+            mock_badge_high_weight,
         ]
         assert result == expected_badges
 
         # Verify the queryset was called with correct ordering
         mock_badges_queryset.select_related.assert_called_once_with("badge")
         mock_badges_queryset.select_related.return_value.order_by.assert_called_once_with(
-            "-badge__weight", "badge__name"
+            "badge__weight", "badge__name"
         )

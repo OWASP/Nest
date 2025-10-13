@@ -732,5 +732,78 @@ describe('UserDetailsPage', () => {
         ).toBeInTheDocument()
       })
     })
+
+    test('renders badges in correct order as returned by backend (weight ASC then name ASC)', async () => {
+      // Backend returns badges sorted by weight ASC, then name ASC
+      // This test verifies the frontend preserves the backend ordering
+      const dataWithOrderedBadges = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          badges: [
+            // Backend returns badges in this order: weight ASC, then name ASC
+            {
+              id: '3',
+              name: 'Alpha Badge',
+              cssClass: 'fa-star',
+              description: 'Alpha badge with weight 1',
+              weight: 1,
+            },
+            {
+              id: '4',
+              name: 'Beta Badge',
+              cssClass: 'fa-trophy',
+              description: 'Beta badge with weight 1',
+              weight: 1,
+            },
+            {
+              id: '1',
+              name: 'Contributor',
+              cssClass: 'fa-medal',
+              description: 'Active contributor',
+              weight: 1,
+            },
+            {
+              id: '2',
+              name: 'Security Expert',
+              cssClass: 'fa-shield-alt',
+              description: 'Security expertise',
+              weight: 2,
+            },
+            {
+              id: '5',
+              name: 'Top Contributor',
+              cssClass: 'fa-crown',
+              description: 'Highest weight badge',
+              weight: 3,
+            },
+          ],
+          badgeCount: 5,
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithOrderedBadges,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+      await waitFor(() => {
+        const badgeElements = screen.getAllByTestId(/^badge-/)
+        const badgeTestIds = badgeElements.map((element) => element.getAttribute('data-testid'))
+
+        // Expected order matches backend contract: weight ASC (1, 1, 1, 2, 3), then name ASC for equal weights
+        const expectedOrder = [
+          'badge-alpha-badge', // weight 1, name ASC
+          'badge-beta-badge', // weight 1, name ASC
+          'badge-contributor', // weight 1, name ASC
+          'badge-security-expert', // weight 2
+          'badge-top-contributor', // weight 3
+        ]
+
+        expect(badgeTestIds).toEqual(expectedOrder)
+      })
+    })
   })
 })
