@@ -4,18 +4,22 @@ import { BADGE_CLASS_MAP } from 'utils/data'
 
 type BadgeProps = {
   name: string
-  cssClass: string
+  cssClass: string | undefined
   showTooltip?: boolean
 }
 
 const DEFAULT_ICON = BADGE_CLASS_MAP['medal']
 
-const normalizeCssClass = (cssClass: string) => {
+const normalizeCssClass = (cssClass: string | undefined) => {
+  if (!cssClass || cssClass.trim() === '') {
+    return ''
+  }
+
   // Convert backend snake_case format to frontend camelCase format
-  return cssClass.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
+  return cssClass.trim().replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
 }
 
-const resolveIcon = (cssClass: string) => {
+const resolveIcon = (cssClass: string | undefined) => {
   const normalizedClass = normalizeCssClass(cssClass)
   return BADGE_CLASS_MAP[normalizedClass] ?? DEFAULT_ICON
 }
