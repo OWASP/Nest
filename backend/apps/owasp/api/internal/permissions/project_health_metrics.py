@@ -1,5 +1,6 @@
 """Strawberry Permission Classes for Project Health Metrics."""
 
+from django.conf import settings
 from strawberry.permission import BasePermission
 
 
@@ -10,6 +11,8 @@ class HasDashboardAccess(BasePermission):
 
     def has_permission(self, source, info, **kwargs) -> bool:
         """Check if the user has dashboard access."""
+        if settings.DISABLE_PERMISSIONS:
+            return True
         return (
             (user := info.context.request.user)
             and user.is_authenticated

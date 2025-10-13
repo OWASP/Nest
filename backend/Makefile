@@ -122,6 +122,7 @@ test-backend:
 		--env-file backend/.env.example \
 		--rm nest-test-backend pytest
 
+
 update-backend-dependencies:
 	@cd backend && poetry update
 
