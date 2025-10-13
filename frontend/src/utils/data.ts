@@ -72,7 +72,7 @@ library.add(
   faSlack,
   faPeopleGroup,
   faXTwitter,
-  faSun,
+  faSun
 )
 
 export const BADGE_CLASS_MAP: Record<string, IconDefinition> = {
