@@ -782,6 +782,25 @@ describe('CardDetailsPage', () => {
       expect(screen.getByTestId('leaders-list')).toBeInTheDocument()
     })
 
+    it('renders Leaders component when entityLeaders are provided', () => {
+      const entityLeaders = [
+        {
+          description: 'Project Leader',
+          memberName: 'Alice',
+          member: {
+            id: '1',
+            login: 'alice',
+            name: 'Alice',
+            avatarUrl: 'https://avatars.githubusercontent.com/u/12345?v=4',
+          },
+        },
+      ]
+      render(<CardDetailsPage {...defaultProps} entityLeaders={entityLeaders} />)
+      expect(screen.getByText('Leaders')).toBeInTheDocument()
+      expect(screen.getByText('Alice')).toBeInTheDocument()
+      expect(screen.getByText('Project Leader')).toBeInTheDocument()
+    })
+
     it('capitalizes entity type in details title', () => {
       render(<CardDetailsPage {...defaultProps} type="project" />)
 

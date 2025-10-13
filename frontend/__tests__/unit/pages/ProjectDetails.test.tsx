@@ -289,4 +289,13 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText(`Sponsor ${mockProjectDetailsData.project.name}`)).toBeInTheDocument()
     })
   })
+
+  test('renders leaders block from entityLeaders', async () => {
+    render(<ProjectDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Leaders')).toBeInTheDocument()
+      expect(screen.getByText('Alice')).toBeInTheDocument()
+      expect(screen.getByText('Project Leader')).toBeInTheDocument()
+    })
+  })
 })

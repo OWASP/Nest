@@ -4,14 +4,13 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
 
-from django.conf import settings
 from django.http import HttpRequest
-from django.views.decorators.cache import cache_page
 from ninja import Field, FilterSchema, Path, Query, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
+from apps.api.decorators.cache import cache_response
 from apps.github.models.repository import Repository as RepositoryModel
 
 router = RouterPaginated(tags=["Repositories"])
@@ -58,7 +57,7 @@ class RepositoryFilter(FilterSchema):
     summary="List repositories",
     response=list[Repository],
 )
-@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
+@decorate_view(cache_response())
 def list_repository(
     request: HttpRequest,
     filters: RepositoryFilter = Query(...),
@@ -86,6 +85,7 @@ def list_repository(
     },
     summary="Get repository",
 )
+@decorate_view(cache_response())
 def get_repository(
     request: HttpRequest,
     organization_id: str = Path(example="OWASP"),

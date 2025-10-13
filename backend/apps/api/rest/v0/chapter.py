@@ -4,14 +4,13 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
 
-from django.conf import settings
 from django.http import HttpRequest
-from django.views.decorators.cache import cache_page
 from ninja import Field, FilterSchema, Path, Query, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
+from apps.api.decorators.cache import cache_response
 from apps.owasp.models.chapter import Chapter as ChapterModel
 
 router = RouterPaginated(tags=["Chapters"])
@@ -61,7 +60,7 @@ class ChapterFilter(FilterSchema):
     response=list[Chapter],
     summary="List chapters",
 )
-@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
+@decorate_view(cache_response())
 def list_chapters(
     request: HttpRequest,
     filters: ChapterFilter = Query(...),
@@ -84,6 +83,7 @@ def list_chapters(
     },
     summary="Get chapter",
 )
+@decorate_view(cache_response())
 def get_chapter(
     request: HttpRequest,
     chapter_id: str = Path(example="London"),

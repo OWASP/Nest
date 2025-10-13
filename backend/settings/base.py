@@ -126,6 +126,7 @@ class Base(Configuration):
     }
 
     API_PAGE_SIZE = 100
+    API_CACHE_PREFIX = "api-response"
     API_CACHE_TIME_SECONDS = 86400  # 24 hours.
     NINJA_PAGINATION_CLASS = "apps.api.rest.v0.pagination.CustomPagination"
     NINJA_PAGINATION_PER_PAGE = API_PAGE_SIZE
