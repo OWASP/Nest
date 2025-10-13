@@ -2,23 +2,10 @@ import { render, screen } from '@testing-library/react'
 import React from 'react'
 import Badges from 'components/Badges'
 
-jest.mock('@fortawesome/fontawesome-svg-core', () => {
-  const { BADGE_CLASS_MAP } = jest.requireActual('utils/data')
-  const registered = new Set(
-    Object.values(BADGE_CLASS_MAP).map((s: string) => s.split(' ').pop()?.replace('fa-', ''))
-  )
-
-  return {
-    findIconDefinition: jest.fn(({ iconName }: { iconName: string }) => {
-      return registered.has(iconName) ? { iconName } : null
-    }),
-  }
-})
-
 jest.mock('wrappers/FontAwesomeIconWrapper', () => {
   const RealWrapper = jest.requireActual('wrappers/FontAwesomeIconWrapper').default
 
-  const getName = (icon: any) => {
+  const getName = (icon) => {
     if (!icon) return 'medal'
     if (typeof icon === 'string') {
       const m = icon.match(/fa-([a-z0-9-]+)$/i)
@@ -31,7 +18,7 @@ jest.mock('wrappers/FontAwesomeIconWrapper', () => {
     return 'medal'
   }
 
-  return function MockFontAwesomeIconWrapper(props: any) {
+  return function MockFontAwesomeIconWrapper(props) {
     const name = getName(props.icon)
     return (
       <div data-testid={`icon-${name}`}>
@@ -110,17 +97,25 @@ describe('Badges Component', () => {
       { cssClass: 'ribbon', expectedIcon: 'ribbon' },
       { cssClass: 'star', expectedIcon: 'star' },
       { cssClass: 'certificate', expectedIcon: 'certificate' },
-      { cssClass: 'bug-slash', expectedIcon: 'bug' },
+      { cssClass: 'bug_slash', expectedIcon: 'bug' }, // Backend snake_case input
     ]
 
     backendIcons.forEach(({ cssClass, expectedIcon }) => {
-      it(`renders ${cssClass} icon correctly`, () => {
+      it(`renders ${cssClass} icon correctly (transforms snake_case to camelCase)`, () => {
         render(<Badges name={`${cssClass} Badge`} cssClass={cssClass} />)
 
         const icon = screen.getByTestId('badge-icon')
         expect(icon).toBeInTheDocument()
         expect(icon).toHaveAttribute('data-icon', expectedIcon)
       })
+    })
+
+    it('handles camelCase input directly', () => {
+      render(<Badges name="Bug Slash Badge" cssClass="bugSlash" />)
+
+      const icon = screen.getByTestId('badge-icon')
+      expect(icon).toBeInTheDocument()
+      expect(icon).toHaveAttribute('data-icon', 'bug')
     })
   })
 })

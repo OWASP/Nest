@@ -182,3 +182,8 @@ class UserIndexMixin:
     def idx_url(self) -> str:
         """Return GitHub profile URL for indexing."""
         return self.url
+
+    @property
+    def idx_badge_count(self) -> int:
+        """Return badge count for indexing."""
+        return self.user_badges.filter(is_active=True).count()

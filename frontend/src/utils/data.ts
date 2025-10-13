@@ -36,7 +36,8 @@ import {
   faMedal,
   faRibbon,
   faCertificate,
-  faBug
+  faBug,
+  faStar as fasStar,
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(
@@ -71,14 +72,14 @@ library.add(
   faSlack,
   faPeopleGroup,
   faXTwitter,
-  faSun
+  faSun,
 )
 
 export const BADGE_CLASS_MAP: Record<string, IconDefinition> = {
   award: faAward,
   medal: faMedal,
   ribbon: faRibbon,
-  star: faStar,
+  star: fasStar,
   certificate: faCertificate,
   bugSlash: faBug,
 } as const

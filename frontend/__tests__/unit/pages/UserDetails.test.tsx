@@ -538,7 +538,7 @@ describe('UserDetailsPage', () => {
 
   describe('Badge Display Tests', () => {
     test('renders badges section when user has badges', async () => {
-      ;(useQuery as jest.Mock).mockReturnValue({
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
         data: mockUserDetailsData,
         loading: false,
         error: null,
@@ -552,7 +552,7 @@ describe('UserDetailsPage', () => {
     })
 
     test('renders badges with correct props', async () => {
-      ;(useQuery as jest.Mock).mockReturnValue({
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
         data: mockUserDetailsData,
         loading: false,
         error: null,
@@ -580,7 +580,7 @@ describe('UserDetailsPage', () => {
         },
       }
 
-      ;(useQuery as jest.Mock).mockReturnValue({
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
         data: dataWithoutBadges,
         loading: false,
         error: null,
@@ -602,7 +602,7 @@ describe('UserDetailsPage', () => {
         },
       }
 
-      ;(useQuery as jest.Mock).mockReturnValue({
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
         data: dataWithoutBadges,
         loading: false,
         error: null,
@@ -631,7 +631,7 @@ describe('UserDetailsPage', () => {
         },
       }
 
-      ;(useQuery as jest.Mock).mockReturnValue({
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
         data: dataWithIncompleteBadges,
         loading: false,
         error: null,
@@ -661,7 +661,7 @@ describe('UserDetailsPage', () => {
         },
       }
 
-      ;(useQuery as jest.Mock).mockReturnValue({
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
         data: dataWithEmptyCssClass,
         loading: false,
         error: null,
@@ -690,7 +690,7 @@ describe('UserDetailsPage', () => {
           ],
         },
       }
-      ;(useQuery as jest.Mock).mockReturnValue({
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
         data: dataWithSpecialBadges,
         loading: false,
         error: null,
@@ -719,7 +719,7 @@ describe('UserDetailsPage', () => {
         },
       }
 
-      ;(useQuery as jest.Mock).mockReturnValue({
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
         data: dataWithLongNameBadge,
         loading: false,
         error: null,

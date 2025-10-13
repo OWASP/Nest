@@ -22,7 +22,6 @@ const UsersPage = () => {
   })
 
   const router = useRouter()
-
   const handleButtonClick = (user: User) => {
     router.push(`/members/${user.key}`)
   }
@@ -35,7 +34,6 @@ const UsersPage = () => {
     }
 
     const badgeCount = user.badgeCount || 0
-
     return (
       <UserCard
         avatar={user.avatarUrl}

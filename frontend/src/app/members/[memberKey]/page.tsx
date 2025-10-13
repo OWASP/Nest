@@ -197,25 +197,30 @@ const UserDetailsPage: React.FC = () => {
         alt={user?.name || user?.login || 'User Avatar'}
       />
       <div className="w-full text-center lg:text-left">
-        <div className="flex gap-5 text-center text-sm text-gray-500 lg:text-left dark:text-gray-400">
-          <Link href={user?.url || '#'} className="text-xl font-bold text-blue-400 hover:underline">
-            @{user?.login}
-          </Link>
-          {user?.badges && user.badges.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-2">
-              {user.badges.slice().map((badge: Badge) => (
-                <React.Fragment key={badge.id}>
-                  <Badges
-                    name={badge.name}
-                    cssClass={badge.cssClass || 'fa-medal'}
-                    showTooltip={true}
-                  />
-                </React.Fragment>
-              ))}
-            </div>
-          )}
+        <div className="pl-0 lg:pl-4">
+          <div className="flex items-center justify-center gap-3 text-center text-sm text-gray-500 lg:justify-start lg:text-left dark:text-gray-400">
+            <Link
+              href={user?.url || '#'}
+              className="text-xl font-bold text-blue-400 hover:underline"
+            >
+              @{user?.login}
+            </Link>
+            {user?.badges && user.badges.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {user.badges.slice().map((badge: Badge) => (
+                  <React.Fragment key={badge.id}>
+                    <Badges
+                      name={badge.name}
+                      cssClass={badge.cssClass || 'fa-medal'}
+                      showTooltip={true}
+                    />
+                  </React.Fragment>
+                ))}
+              </div>
+            )}
+          </div>
+          <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
         </div>
-        <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
         {!isPrivateContributor && (
           <div className="hidden w-full lg:block">
             <Heatmap />
