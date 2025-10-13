@@ -10,9 +10,9 @@ export type RepositoryDetails = {
 
 export type User = {
   avatarUrl: string
-  bio?: string
-  badges?: Badge[]
   badgeCount?: number
+  badges?: Badge[]
+  bio?: string
   company?: string
   contributionsCount?: number
   createdAt?: number | string

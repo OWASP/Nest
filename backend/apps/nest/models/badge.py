@@ -12,11 +12,11 @@ class Badge(BulkSaveModel, TimestampedModel):
 
     class BadgeCssClass(models.TextChoices):
         AWARD = "award", "Award"
+        BUG_SLASH = "bug_slash", "Bug Slash"
+        CERTIFICATE = "certificate", "Certificate"
         MEDAL = "medal", "Medal"
         RIBBON = "ribbon", "Ribbon"
         STAR = "star", "Star"
-        CERTIFICATE = "certificate", "Certificate"
-        BUG_SLASH = "bug_slash", "Bug Slash"
 
     class Meta:
         db_table = "nest_badges"

@@ -87,28 +87,28 @@ class TestUserNode:
         """Test badge_count field resolution."""
         mock_user = Mock()
         mock_badges_queryset = Mock()
-        mock_badges_queryset.values.return_value.distinct.return_value.count.return_value = 3
+        mock_badges_queryset.filter.return_value.count.return_value = 3
         mock_user.user_badges = mock_badges_queryset
 
         result = UserNode.badge_count(mock_user)
         assert result == 3
-        mock_badges_queryset.values.assert_called_once_with("badge_id")
-        mock_badges_queryset.values.return_value.distinct.assert_called_once()
-        mock_badges_queryset.values.return_value.distinct.return_value.count.assert_called_once()
+        mock_badges_queryset.filter.assert_called_once_with(is_active=True)
+        mock_badges_queryset.filter.return_value.count.assert_called_once()
 
     def test_badges_field_empty(self):
         """Test badges field resolution with no badges."""
         mock_user = Mock()
         mock_badges_queryset = Mock()
-        mock_badges_queryset.select_related.return_value.order_by.return_value = []
+        mock_filter = mock_badges_queryset.filter.return_value
+        mock_select_related = mock_filter.select_related.return_value
+        mock_select_related.order_by.return_value = []
         mock_user.user_badges = mock_badges_queryset
 
         result = UserNode.badges(mock_user)
         assert result == []
-        mock_badges_queryset.select_related.assert_called_once_with("badge")
-        mock_badges_queryset.select_related.return_value.order_by.assert_called_once_with(
-            "badge__weight", "badge__name"
-        )
+        mock_badges_queryset.filter.assert_called_once_with(is_active=True)
+        mock_filter.select_related.assert_called_once_with("badge")
+        mock_select_related.order_by.assert_called_once_with("badge__weight", "badge__name")
 
     def test_badges_field_single_badge(self):
         """Test badges field resolution with single badge."""
@@ -118,15 +118,16 @@ class TestUserNode:
         mock_user_badge.badge = mock_badge
 
         mock_badges_queryset = Mock()
-        mock_badges_queryset.select_related.return_value.order_by.return_value = [mock_user_badge]
+        mock_filter = mock_badges_queryset.filter.return_value
+        mock_select_related = mock_filter.select_related.return_value
+        mock_select_related.order_by.return_value = [mock_user_badge]
         mock_user.user_badges = mock_badges_queryset
 
         result = UserNode.badges(mock_user)
         assert result == [mock_badge]
-        mock_badges_queryset.select_related.assert_called_once_with("badge")
-        mock_badges_queryset.select_related.return_value.order_by.assert_called_once_with(
-            "badge__weight", "badge__name"
-        )
+        mock_badges_queryset.filter.assert_called_once_with(is_active=True)
+        mock_filter.select_related.assert_called_once_with("badge")
+        mock_select_related.order_by.assert_called_once_with("badge__weight", "badge__name")
 
     def test_badges_field_sorted_by_weight_and_name(self):
         """Test badges field resolution with multiple badges sorted by weight and name."""
@@ -163,7 +164,9 @@ class TestUserNode:
         # Set up the mock queryset to return badges in the expected sorted order
         # (lowest weight first, then by name for same weight)
         mock_badges_queryset = Mock()
-        mock_badges_queryset.select_related.return_value.order_by.return_value = [
+        mock_filter = mock_badges_queryset.filter.return_value
+        mock_select_related = mock_filter.select_related.return_value
+        mock_select_related.order_by.return_value = [
             mock_user_badge_low,  # weight 10
             mock_user_badge_medium_a,  # weight 50, name "Medium Weight A"
             mock_user_badge_medium_b,  # weight 50, name "Medium Weight B"
@@ -184,7 +187,6 @@ class TestUserNode:
         assert result == expected_badges
 
         # Verify the queryset was called with correct ordering
-        mock_badges_queryset.select_related.assert_called_once_with("badge")
-        mock_badges_queryset.select_related.return_value.order_by.assert_called_once_with(
-            "badge__weight", "badge__name"
-        )
+        mock_badges_queryset.filter.assert_called_once_with(is_active=True)
+        mock_filter.select_related.assert_called_once_with("badge")
+        mock_select_related.order_by.assert_called_once_with("badge__weight", "badge__name")

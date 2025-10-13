@@ -37,10 +37,10 @@ const UsersPage = () => {
     return (
       <UserCard
         avatar={user.avatarUrl}
+        badgeCount={badgeCount}
+        badges={user.badges ?? []}
         button={submitButton}
         className="h-64 w-80 bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
-        badges={user.badges ?? []}
-        badgeCount={badgeCount}
         company={user.company || ''}
         email={user.email || ''}
         followersCount={user.followersCount}

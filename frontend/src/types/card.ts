@@ -79,8 +79,8 @@ export interface DetailsCardProps {
 
 export interface UserCardProps {
   avatar: string
-  badges?: Badge[]
   badgeCount?: number
+  badges?: Badge[]
   button: Button
   className?: string
   company?: string

@@ -56,13 +56,7 @@ demojize
 dismissable
 dsn
 env
-fa-brands
-fa-regular
-fa-solid
-fab
 facebookexternalhit
-far
-fas
 gamesec
 geocoders
 geoloc
