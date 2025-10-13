@@ -1,3 +1,4 @@
+import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
   faDiscord,
@@ -6,8 +7,8 @@ import {
   faLinkedin,
   faMeetup,
   faSlack,
-  faYoutube,
   faXTwitter,
+  faYoutube,
 } from '@fortawesome/free-brands-svg-icons'
 import {
   faClock,
@@ -18,6 +19,9 @@ import {
 } from '@fortawesome/free-regular-svg-icons'
 import {
   faArrowsRotate,
+  faAward,
+  faBug,
+  faCertificate,
   faCity,
   faCode,
   faCodeFork,
@@ -25,43 +29,60 @@ import {
   faFlag,
   faFlask,
   faGlobe,
+  faMedal,
   faMoon,
+  faPeopleGroup,
+  faRibbon,
   faRightToBracket,
+  faStar as faSolidStar,
+  faSun,
   faWandMagicSparkles,
   faX,
-  faPeopleGroup,
-  faSun,
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(
   faArrowsRotate,
-  faCodeFork,
-  faStar,
-  faUser,
-  faClock,
-  faComment,
-  faEgg,
-  faFlask,
+  faAward,
+  faBug,
+  faCertificate,
   faCity,
-  faFlag,
+  faClock,
   faCode,
-  faMoon,
-  faLightbulb,
-  faWandMagicSparkles,
-  faGlobe,
-  faRightToBracket,
-  faYoutube,
-  faX,
-  faGoogle,
-  faMeetup,
-  faLinkedin,
-  faFacebook,
+  faCodeFork,
+  faComment,
   faDiscord,
-  faSlack,
+  faEgg,
+  faFacebook,
+  faFlag,
+  faFlask,
+  faGlobe,
+  faGoogle,
+  faLightbulb,
+  faLinkedin,
+  faMedal,
+  faMeetup,
+  faMoon,
   faPeopleGroup,
+  faRibbon,
+  faRightToBracket,
+  faSlack,
+  faStar,
+  faSun,
+  faUser,
+  faWandMagicSparkles,
+  faX,
   faXTwitter,
-  faSun
+  faYoutube
 )
+
+export const BADGE_CLASS_MAP: Record<string, IconDefinition> = {
+  award: faAward,
+  bugSlash: faBug,
+  certificate: faCertificate,
+  medal: faMedal,
+  ribbon: faRibbon,
+  star: faSolidStar,
+} as const
 
 export const ICONS = {
   starsCount: {

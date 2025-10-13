@@ -7,6 +7,14 @@ export const GET_LEADER_DATA = gql`
       avatarUrl
       login
       name
+      badgeCount
+      badges {
+        cssClass
+        description
+        id
+        name
+        weight
+      }
     }
   }
 `
@@ -65,8 +73,15 @@ export const GET_USER_DATA = gql`
       url
     }
     user(login: $key) {
-      id
       avatarUrl
+      badgeCount
+      badges {
+        cssClass
+        description
+        id
+        name
+        weight
+      }
       bio
       company
       contributionsCount
@@ -74,6 +89,7 @@ export const GET_USER_DATA = gql`
       email
       followersCount
       followingCount
+      id
       issuesCount
       location
       login
@@ -88,8 +104,9 @@ export const GET_USER_DATA = gql`
 export const GET_USER_METADATA = gql`
   query GetUserMetadata($key: String!) {
     user(login: $key) {
-      id
+      badgeCount
       bio
+      id
       login
       name
     }
