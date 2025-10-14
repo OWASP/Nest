@@ -232,18 +232,14 @@ const ModuleIssueDetailsPage = () => {
                     disabled={!issueId || unassigning}
                     onClick={async () => {
                       if (!issueId || unassigning) return
-                      try {
-                        await unassignIssue({
-                          variables: {
-                            programKey,
-                            moduleKey,
-                            issueNumber: Number(issueId),
-                            userLogin: a.login,
-                          },
-                        })
-                      } catch (error) {
-                        throw new Error('Failed to unassign user', error as Error)
-                      }
+                      await unassignIssue({
+                        variables: {
+                          programKey,
+                          moduleKey,
+                          issueNumber: Number(issueId),
+                          userLogin: a.login,
+                        },
+                      })
                     }}
                     className={getButtonClassName(!issueId || unassigning)}
                     title={unassigning ? 'Unassigning…' : `Unassign @${a.login}`}
@@ -351,18 +347,14 @@ const ModuleIssueDetailsPage = () => {
                   disabled={!issueId || assigning}
                   onClick={async () => {
                     if (!issueId || assigning) return
-                    try {
-                      await assignIssue({
-                        variables: {
-                          programKey,
-                          moduleKey,
-                          issueNumber: Number(issueId),
-                          userLogin: u.login,
-                        },
-                      })
-                    } catch (error) {
-                      throw new Error('Failed to assign user', error as Error)
-                    }
+                    await assignIssue({
+                      variables: {
+                        programKey,
+                        moduleKey,
+                        issueNumber: Number(issueId),
+                        userLogin: u.login,
+                      },
+                    })
                   }}
                   className={`${getButtonClassName(!issueId || assigning)} px-3 py-1`}
                   title={
