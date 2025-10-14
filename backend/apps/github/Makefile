@@ -5,7 +5,7 @@ github-add-related-repositories:
 github-enrich-issues:
 	@echo "Enriching GitHub issues"
 	@CMD="python manage.py github_enrich_issues" $(MAKE) exec-backend-command
-
+	
 github-update-owasp-organization:
 	@echo "Updating OWASP GitHub organization"
 	@CMD="python manage.py github_update_owasp_organization" $(MAKE) exec-backend-command

@@ -13,7 +13,7 @@ export type Issue = {
   pullRequests?: PullRequest[]
   repository?: RepositoryDetails
   repositoryLanguages?: string[]
-  summary: string
+  body: string
   title: string
   updatedAt: number
   url: string

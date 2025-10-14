@@ -494,7 +494,7 @@ describe('CardDetailsPage', () => {
       organizationName: 'test-org',
       projectName: 'Test Project',
       projectUrl: 'https://github.com/test/project',
-      summary: 'Issue summary',
+      body: 'Issue summary',
       title: 'Test Issue',
       updatedAt: Date.now(),
       url: 'https://github.com/test/project/issues/123',
@@ -524,7 +524,7 @@ describe('CardDetailsPage', () => {
       organizationName: 'test-org',
       title: 'Add new feature',
       url: 'https://github.com/test/project/pull/456',
-      state: 'open',
+      state: 'merged',
       mergedAt: new Date(Date.now() - 86400000).toISOString(),
     },
   ]

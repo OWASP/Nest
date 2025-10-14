@@ -89,8 +89,19 @@ const ModuleIssueDetailsPage = () => {
             <h1 className="text-2xl font-bold sm:text-3xl">
               <span className="break-words">{issue.title}</span>
             </h1>
-            <div className="mt-1 text-sm text-gray-500">
-              {issue.organizationName}/{issue.repositoryName} • #{issue.number}
+            <div className="mt-1 flex items-center gap-2 text-sm text-gray-500">
+              <span>
+                {issue.organizationName}/{issue.repositoryName} • #{issue.number}
+              </span>
+              <span
+                className={`rounded-full px-2 py-1 text-xs font-medium ${
+                  issue.state === 'open'
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                }`}
+              >
+                {issue.state === 'open' ? 'Open' : 'Closed'}
+              </span>
             </div>
           </div>
           <ActionButton url={issue.url} tooltipLabel="View on GitHub">
@@ -100,7 +111,7 @@ const ModuleIssueDetailsPage = () => {
 
         <SecondaryCard title={<AnchorTitle title="Description" />}>
           <div className="prose dark:prose-invert line-clamp-[15] max-w-none">
-            <Markdown content={issue.summary || 'No description.'} />
+            <Markdown content={issue.body || 'No description.'} />
           </div>
         </SecondaryCard>
 
@@ -241,7 +252,7 @@ const ModuleIssueDetailsPage = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {pr.state === 'closed' && pr.mergedAt ? (
-                      <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200">
+                      <span className="rounded-full bg-purple-100 px-2 py-1 text-xs font-medium text-purple-800 dark:bg-purple-900 dark:text-purple-200">
                         Merged
                       </span>
                     ) : pr.state === 'closed' ? (
@@ -249,14 +260,10 @@ const ModuleIssueDetailsPage = () => {
                         Closed
                       </span>
                     ) : (
-                      <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                      <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200">
                         Open
                       </span>
                     )}
-                    <ActionButton url={pr.url} tooltipLabel="View PR">
-                      <FontAwesomeIcon icon={faLink} />
-                      <span className="hidden sm:inline">View PR</span>
-                    </ActionButton>
                   </div>
                 </div>
               ))

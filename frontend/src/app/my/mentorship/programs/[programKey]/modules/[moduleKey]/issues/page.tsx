@@ -2,6 +2,7 @@
 
 import { useQuery } from '@apollo/client'
 import { Select, SelectItem } from '@heroui/select'
+import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
@@ -10,7 +11,6 @@ import { GET_MODULE_ISSUES } from 'server/queries/moduleQueries'
 import type { Issue } from 'types/issue'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Pagination from 'components/Pagination'
-import { TruncatedText } from 'components/TruncatedText'
 
 const LABEL_ALL = 'all'
 const ITEMS_PER_PAGE = 20
@@ -52,8 +52,9 @@ const IssuesPage = () => {
       projectUrl: '',
       repository: undefined,
       repositoryLanguages: [],
-      summary: '',
+      body: i.body || '',
       title: i.title,
+      state: i.state,
       updatedAt: i.createdAt,
       url: i.url,
       objectID: i.id,
@@ -150,6 +151,12 @@ const IssuesPage = () => {
                   scope="col"
                   className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
                 >
+                  Status
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                >
                   Labels
                 </th>
                 <th
@@ -164,15 +171,33 @@ const IssuesPage = () => {
               {moduleIssues.map((issue) => (
                 <tr key={issue.objectID} className="hover:bg-gray-50 dark:hover:bg-[#2a2e33]">
                   <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-blue-600 dark:text-blue-400">
-                    <button
-                      type="button"
-                      onClick={() => handleIssueClick(Number(issue.number))}
-                      className="block max-w-xl cursor-pointer text-left hover:underline"
+                    <Tooltip
+                      closeDelay={100}
+                      delay={100}
+                      showArrow
+                      content={issue.title}
+                      placement="bottom"
+                      isDisabled={issue.title.length > 50 ? false : true}
                     >
-                      <TruncatedText
-                        text={`${issue.title.slice(0, 50)}${issue.title.length > 50 ? '…' : ''}`}
-                      />
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => handleIssueClick(Number(issue.number))}
+                        className="block max-w-md cursor-pointer truncate text-left hover:underline"
+                      >
+                        {issue.title}
+                      </button>
+                    </Tooltip>
+                  </td>
+                  <td className="px-6 py-4 text-sm whitespace-nowrap">
+                    <span
+                      className={`rounded px-2 py-1 text-xs font-medium ${
+                        issue.state === 'open'
+                          ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                          : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                      }`}
+                    >
+                      {issue.state === 'open' ? 'Open' : 'Closed'}
+                    </span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-wrap gap-2">
@@ -220,9 +245,7 @@ const IssuesPage = () => {
                             </div>
                           )}
                         </div>
-                      ) : (
-                        <span className="text-gray-400">Unassigned</span>
-                      ))(
+                      ) : null)(
                       (data?.getModule?.issues || []).find((i) => i.id === issue.objectID)
                         ?.assignees
                     )}
@@ -232,7 +255,7 @@ const IssuesPage = () => {
               {moduleIssues.length === 0 && (
                 <tr>
                   <td
-                    colSpan={3}
+                    colSpan={4}
                     className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400"
                   >
                     No issues found for the selected filter.

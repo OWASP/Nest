@@ -15,7 +15,7 @@ from apps.mentorship.models import IssueUserInterest  # add import
         "created_at",
         "number",
         "state",
-        "summary",
+        "body",
         "title",
         "url",
     ],

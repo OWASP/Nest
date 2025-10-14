@@ -86,42 +86,19 @@ export const GET_MODULE_ISSUES = gql`
     $label: String
   ) {
     getModule(moduleKey: $moduleKey, programKey: $programKey) {
-      id
       name
-      key
       issuesCount(label: $label)
       availableLabels
       issues(limit: $limit, offset: $offset, label: $label) {
         id
         number
-        createdAt
         title
-        summary
-        url
-        author {
-          id
-          avatarUrl
-          login
-          name
-        }
-        assignees {
-          id
-          avatarUrl
-          login
-          name
-        }
+        state
         labels
-        pullRequests {
-          id
-          title
-          url
-          createdAt
-          author {
-            id
-            login
-            name
-            avatarUrl
-          }
+        assignees {
+          avatarUrl
+          login
+          name
         }
       }
     }

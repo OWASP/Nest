@@ -10,18 +10,11 @@ export const GET_MODULE_ISSUE_VIEW = gql`
         id
         number
         title
-        summary
+        body
         url
         state
-        createdAt
         organizationName
         repositoryName
-        author {
-          id
-          login
-          name
-          avatarUrl
-        }
         assignees {
           id
           login
