@@ -5,7 +5,10 @@
 import os
 import sys
 
+from dotenv import load_dotenv
+
 if __name__ == "__main__":
+    load_dotenv()
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.local")
     os.environ.setdefault("DJANGO_CONFIGURATION", "Local")
 

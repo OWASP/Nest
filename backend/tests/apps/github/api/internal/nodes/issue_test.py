@@ -18,7 +18,7 @@ class TestIssueNode:
             "created_at",
             "number",
             "state",
-            "summary",
+            "body",
             "title",
             "url",
             "author",
