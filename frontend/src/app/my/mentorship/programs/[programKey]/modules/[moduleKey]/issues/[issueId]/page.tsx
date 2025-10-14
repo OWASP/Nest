@@ -10,6 +10,7 @@ import {
   faXmark,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { addToast } from '@heroui/toast'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -34,7 +35,7 @@ const ModuleIssueDetailsPage = () => {
     moduleKey: string
     issueId: string
   }
-  const { data, loading } = useQuery(GET_MODULE_ISSUE_VIEW, {
+  const { data, loading, error } = useQuery(GET_MODULE_ISSUE_VIEW, {
     variables: { programKey, moduleKey, number: Number(issueId) },
     skip: !issueId,
     fetchPolicy: 'cache-first',
@@ -49,6 +50,24 @@ const ModuleIssueDetailsPage = () => {
       },
     ],
     awaitRefetchQueries: true,
+    onCompleted: () => {
+      addToast({
+        title: 'Issue assigned successfully',
+        variant: 'solid',
+        color: 'success',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+      })
+    },
+    onError: (error) => {
+      addToast({
+        title: 'Failed to assign issue: ' + error.message,
+        variant: 'solid',
+        color: 'danger',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+      })
+    },
   })
   const [unassignIssue, { loading: unassigning }] = useMutation(UNASSIGN_ISSUE_FROM_USER, {
     refetchQueries: [
@@ -58,10 +77,31 @@ const ModuleIssueDetailsPage = () => {
       },
     ],
     awaitRefetchQueries: true,
+    onCompleted: () => {
+      addToast({
+        title: 'Issue unassigned successfully',
+        variant: 'solid',
+        color: 'success',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+      })
+    },
+    onError: (error) => {
+      addToast({
+        title: 'Failed to unassign issue: ' + error.message,
+        variant: 'solid',
+        color: 'danger',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+      })
+    },
   })
 
   const issue = data?.getModule?.issueByNumber
 
+  if (error) {
+    return <ErrorDisplay statusCode={500} title="Error Loading Issue" message={error.message} />
+  }
   if (loading) return <LoadingSpinner />
   if (!issue)
     return <ErrorDisplay statusCode={404} title="Issue Not Found" message="Issue not found" />
@@ -192,14 +232,18 @@ const ModuleIssueDetailsPage = () => {
                     disabled={!issueId || unassigning}
                     onClick={async () => {
                       if (!issueId || unassigning) return
-                      await unassignIssue({
-                        variables: {
-                          programKey,
-                          moduleKey,
-                          issueNumber: Number(issueId),
-                          userLogin: a.login,
-                        },
-                      })
+                      try {
+                        await unassignIssue({
+                          variables: {
+                            programKey,
+                            moduleKey,
+                            issueNumber: Number(issueId),
+                            userLogin: a.login,
+                          },
+                        })
+                      } catch (error) {
+                        throw new Error('Failed to unassign user', error as Error)
+                      }
                     }}
                     className={getButtonClassName(!issueId || unassigning)}
                     title={unassigning ? 'Unassigning…' : `Unassign @${a.login}`}
@@ -307,14 +351,18 @@ const ModuleIssueDetailsPage = () => {
                   disabled={!issueId || assigning}
                   onClick={async () => {
                     if (!issueId || assigning) return
-                    await assignIssue({
-                      variables: {
-                        programKey,
-                        moduleKey,
-                        issueNumber: Number(issueId),
-                        userLogin: u.login,
-                      },
-                    })
+                    try {
+                      await assignIssue({
+                        variables: {
+                          programKey,
+                          moduleKey,
+                          issueNumber: Number(issueId),
+                          userLogin: u.login,
+                        },
+                      })
+                    } catch (error) {
+                      throw new Error('Failed to assign user', error as Error)
+                    }
                   }}
                   className={`${getButtonClassName(!issueId || assigning)} px-3 py-1`}
                   title={
