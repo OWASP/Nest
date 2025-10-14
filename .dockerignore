@@ -1,4 +1,3 @@
-__pycache__
 .ash_history
 .bash_history
 .cache
@@ -17,6 +16,7 @@ __pycache__
 .vscode
 *.log
 *.pem
+**/__pycache__
 backend/data
 backend/staticfiles
 build
