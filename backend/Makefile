@@ -60,6 +60,10 @@ dump-data:
 	@CMD="sed -E -i 's/\"email\": *\"([^\"]|\\\")*\"/\"email\": \"\"/g' data/nest.json" $(MAKE) exec-backend-command
 	@CMD="gzip -f data/nest.json" $(MAKE) exec-backend-command
 
+dump-db-data-e2e:
+	@echo "Extracting Nest e2e data"
+	@CMD="pg_dumpall -U nest_user_e2e --clean | gzip -9 > backend/data/nest-e2e-data.sql.gz" $(MAKE) exec-db-e2e-command
+
 enrich-data: \
 	github-enrich-issues \
 	owasp-enrich-chapters \
@@ -67,9 +71,6 @@ enrich-data: \
 	owasp-enrich-events \
 	owasp-enrich-projects
 
-dump-db-data-e2e:
-	@echo "Extracting Nest e2e data"
-	@CMD="pg_dumpall -U nest_user_e2e --clean | gzip -9 > backend/data/nest-e2e-data.sql.gz" $(MAKE) exec-db-e2e-command
 
 generate-sitemap:
 	@CMD="python manage.py generate_sitemap" $(MAKE) exec-backend-command
