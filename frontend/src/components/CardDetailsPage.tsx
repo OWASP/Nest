@@ -17,6 +17,7 @@ import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
 import { scrollToAnchor } from 'utils/scrollToAnchor'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
+import ArchivedBadge from 'components/ArchivedBadge'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
@@ -52,6 +53,7 @@ const DetailsCard = ({
   geolocationData = null,
   healthMetricsData,
   isActive = true,
+  isArchived = false,
   languages,
   projectName,
   pullRequests,
@@ -95,19 +97,22 @@ const DetailsCard = ({
                   Edit Module
                 </button>
               )}
-            {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
-              <MetricsScoreCircle
-                score={healthMetricsData[0].score}
-                clickable={true}
-                onClick={() => scrollToAnchor('issues-trend')}
-              />
-            )}
+            <div className="flex items-center gap-3">
+              {!isActive && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-red-600 bg-red-50 px-3 py-1 text-sm font-medium text-red-800 dark:border-red-500 dark:bg-red-900/30 dark:text-red-400">
+                  Inactive
+                </span>
+              )}
+              {isArchived && type === 'repository' && <ArchivedBadge size="md" />}
+              {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
+                <MetricsScoreCircle
+                  score={healthMetricsData[0].score}
+                  clickable={true}
+                  onClick={() => scrollToAnchor('issues-trend')}
+                />
+              )}
+            </div>
           </div>
-          {!isActive && (
-            <span className="ml-4 justify-center rounded bg-red-200 px-2 py-1 text-sm text-red-800">
-              Inactive
-            </span>
-          )}
         </div>
         <p className="mb-6 text-xl">{description}</p>
         {summary && (

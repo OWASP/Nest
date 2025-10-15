@@ -614,7 +614,8 @@ describe('CardDetailsPage', () => {
       render(<CardDetailsPage {...defaultProps} isActive={false} />)
 
       expect(screen.getByText('Inactive')).toBeInTheDocument()
-      expect(screen.getByText('Inactive')).toHaveClass('bg-red-200', 'text-red-800')
+      // Updated classes for consistent badge styling
+      expect(screen.getByText('Inactive')).toHaveClass('bg-red-50', 'text-red-800')
     })
 
     it('does not render inactive badge when isActive is true', () => {
@@ -1393,6 +1394,122 @@ describe('CardDetailsPage', () => {
       expect(
         screen.getByText('Description with symbols 🚀 and special characters')
       ).toBeInTheDocument()
+    })
+  })
+
+  describe('Archived Badge Functionality', () => {
+    it('displays archived badge for archived repository', () => {
+      const archivedProps = {
+        ...defaultProps,
+        type: 'repository',
+        isArchived: true,
+      }
+
+      render(<CardDetailsPage {...archivedProps} />)
+
+      expect(screen.getByText('Archived')).toBeInTheDocument()
+    })
+
+    it('does not display archived badge for non-archived repository', () => {
+      const activeProps = {
+        ...defaultProps,
+        type: 'repository',
+        isArchived: false,
+      }
+
+      render(<CardDetailsPage {...activeProps} />)
+
+      expect(screen.queryByText('Archived')).not.toBeInTheDocument()
+    })
+
+    it('does not display archived badge when isArchived is undefined', () => {
+      const undefinedProps = {
+        ...defaultProps,
+        type: 'repository',
+      }
+
+      render(<CardDetailsPage {...undefinedProps} />)
+
+      expect(screen.queryByText('Archived')).not.toBeInTheDocument()
+    })
+
+    it('does not display archived badge for non-repository types', () => {
+      const projectProps = {
+        ...defaultProps,
+        type: 'project',
+        isArchived: true,
+      }
+
+      render(<CardDetailsPage {...projectProps} />)
+
+      expect(screen.queryByText('Archived')).not.toBeInTheDocument()
+    })
+
+    it('displays archived badge alongside inactive badge', () => {
+      const bothBadgesProps = {
+        ...defaultProps,
+        type: 'repository',
+        isArchived: true,
+        isActive: false,
+      }
+
+      render(<CardDetailsPage {...bothBadgesProps} />)
+
+      expect(screen.getByText('Archived')).toBeInTheDocument()
+      expect(screen.getByText('Inactive')).toBeInTheDocument()
+    })
+
+    it('displays archived badge independently of active status', () => {
+      const archivedAndActiveProps = {
+        ...defaultProps,
+        type: 'repository',
+        isArchived: true,
+        isActive: true,
+      }
+
+      render(<CardDetailsPage {...archivedAndActiveProps} />)
+
+      expect(screen.getByText('Archived')).toBeInTheDocument()
+      expect(screen.queryByText('Inactive')).not.toBeInTheDocument()
+    })
+
+    it('archived badge has correct positioning with flex container', () => {
+      const archivedProps = {
+        ...defaultProps,
+        type: 'repository',
+        isArchived: true,
+      }
+
+      const { container } = render(<CardDetailsPage {...archivedProps} />)
+
+      // New structure: badges are in a flex container with items-center and gap-3
+      const badgeContainer = container.querySelector('.flex.items-center.gap-3')
+      expect(badgeContainer).toBeInTheDocument()
+    })
+
+    it('archived badge renders with medium size', () => {
+      const archivedProps = {
+        ...defaultProps,
+        type: 'repository',
+        isArchived: true,
+      }
+
+      render(<CardDetailsPage {...archivedProps} />)
+
+      const badge = screen.getByText('Archived')
+      expect(badge).toHaveClass('px-3', 'py-1', 'text-sm')
+    })
+
+    it('handles null isArchived gracefully', () => {
+      const nullArchivedProps = {
+        ...defaultProps,
+        type: 'repository',
+        isArchived: null,
+      }
+
+      render(<CardDetailsPage {...nullArchivedProps} />)
+
+      expect(screen.queryByText('Archived')).not.toBeInTheDocument()
     })
   })
 })
