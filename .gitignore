@@ -24,8 +24,11 @@ __pycache__
 *.log
 *.pdf
 *.pem
+backend/*nest-backend-staging*.zip
+backend/*nest-backend-staging*.tar.gz
 backend/data/backup*
 backend/staticfiles
+backend/zappa_settings.json
 frontend/blob-report/
 frontend/coverage
 frontend/dist
