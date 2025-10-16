@@ -29,6 +29,7 @@ class Command(BaseCommand):
             return
 
         result = agent.run(query=options["query"])
+        answer = result.get("answer", "")
 
         self.stdout.write(self.style.SUCCESS("Agentic RAG workflow completed"))
-        self.stdout.write(f"\nAnswer:\n{result.answer}")
+        self.stdout.write(f"\nAnswer:\n{answer}")

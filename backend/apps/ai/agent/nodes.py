@@ -17,6 +17,7 @@ from apps.ai.common.constants import (
     DEFAULT_REASONING_MODEL,
     DEFAULT_SIMILARITY_THRESHOLD,
 )
+from apps.ai.common.utils import extract_json_from_markdown
 from apps.core.models.prompt import Prompt
 
 
@@ -55,7 +56,7 @@ class AgentNodes:
             content_types=metadata.get("entity_types"),
         )
 
-        filtered_chunks = self.filter_chunks_by_metadata(chunks, metadata)
+        filtered_chunks = self.filter_chunks_by_metadata(chunks, metadata, limit)
 
         state["context_chunks"] = filtered_chunks[:limit]
         return state
@@ -115,7 +116,7 @@ class AgentNodes:
                 content_types=metadata.get("entity_types"),
             )
 
-            filtered_chunks = self.filter_chunks_by_metadata(new_chunks, metadata)
+            filtered_chunks = self.filter_chunks_by_metadata(new_chunks, metadata, limit)
             state["context_chunks"] = filtered_chunks[:limit]
 
             state["feedback"] = "Expand and refine answer using newly retrieved context."
@@ -137,6 +138,7 @@ class AgentNodes:
         self,
         retrieved_chunks: list[dict[str, Any]],
         query_metadata: dict[str, Any],
+        limit: int,
     ) -> list[dict[str, Any]]:
         """Rank and filter retrieved chunks using metadata and simple heuristics."""
         if not retrieved_chunks:
@@ -187,7 +189,7 @@ class AgentNodes:
             key=lambda entry: (entry[1], entry[0].get("similarity", 0)), reverse=True
         )
 
-        return [chunk for chunk, _ in ranked_chunks[:DEFAULT_CHUNKS_RETRIEVAL_LIMIT]]
+        return [chunk for chunk, _ in ranked_chunks[:limit]]
 
     def extract_query_metadata(self, query: str) -> dict[str, Any]:
         """Extract metadata from the user's query using an LLM."""
@@ -208,15 +210,10 @@ class AgentNodes:
                 temperature=0.7,
             )
             content = response.choices[0].message.content.strip()
-
-            if "```json" in content:
-                content = content.split("```json")[1].split("```")[0].strip()
-            elif "```" in content:
-                content = content.split("```")[1].split("```")[0].strip()
-
+            content = extract_json_from_markdown(content)
             return json.loads(content)
 
-        except (openai.OpenAIError, json.JSONDecodeError, ValueError):
+        except openai.OpenAIError:
             return {
                 "requested_fields": [],
                 "entity_types": [],
@@ -253,15 +250,10 @@ class AgentNodes:
                 temperature=0.7,
             )
             content = response.choices[0].message.content.strip()
-
-            if "```json" in content:
-                content = content.split("```json")[1].split("```")[0].strip()
-            elif "```" in content:
-                content = content.split("```")[1].split("```")[0].strip()
-
+            content = extract_json_from_markdown(content)
             return json.loads(content)
 
-        except (openai.OpenAIError, json.JSONDecodeError, ValueError):
+        except openai.OpenAIError:
             return {
                 "complete": False,
                 "feedback": "Evaluator error or invalid response.",
