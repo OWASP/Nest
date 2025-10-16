@@ -66,9 +66,7 @@ class AgentNodes:
         iteration = state.get("iteration", 0) + 1
         feedback = state.get("feedback")
         query = state["query"]
-        augmented_query = (
-            query if not feedback else f"{query}\\n\\nRevise per feedback:\\n{feedback}"
-        )
+        augmented_query = query if not feedback else f"{query}\n\nRevise per feedback:\n{feedback}"
 
         answer = self.generator.generate_answer(
             query=augmented_query,
@@ -103,8 +101,8 @@ class AgentNodes:
         if history:
             history[-1]["evaluation"] = evaluation
 
-        if "missing context" in evaluation.get("justification", "").lower():
-            limit = state.get("limit", DEFAULT_CHUNKS_RETRIEVAL_LIMIT) * 2
+        if evaluation.get("requires_more_context", False):
+            limit = min(state.get("limit", DEFAULT_CHUNKS_RETRIEVAL_LIMIT) * 2, 64)
             threshold = state.get("similarity_threshold", DEFAULT_SIMILARITY_THRESHOLD) * 0.95
 
             metadata = state.get("extracted_metadata", {})
@@ -227,9 +225,9 @@ class AgentNodes:
         """Call the evaluator LLM to assess the quality of the generated answer."""
         formatted_context = self.generator.prepare_context(context_chunks)
         evaluation_prompt = (
-            f"User Query:\\n{query}\\n\\n"
-            f"Candidate Answer:\\n{answer}\\n\\n"
-            f"Context Provided:\\n{formatted_context}\\n\\n"
+            f"User Query:\n{query}\n\n"
+            f"Candidate Answer:\n{answer}\n\n"
+            f"Context Provided:\n{formatted_context}\n\n"
             "Respond with the mandated JSON object."
         )
 
@@ -258,4 +256,5 @@ class AgentNodes:
                 "complete": False,
                 "feedback": "Evaluator error or invalid response.",
                 "justification": "Evaluator error or invalid response.",
+                "requires_more_context": False,
             }
