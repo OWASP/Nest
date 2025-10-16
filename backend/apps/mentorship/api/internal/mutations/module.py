@@ -14,6 +14,8 @@ from apps.mentorship.api.internal.nodes.module import (
     UpdateModuleInput,
 )
 from apps.mentorship.models import Mentor, Module, Program
+import datetime as dt
+from apps.mentorship.models.task import Task
 from apps.mentorship.models.issue_user_interest import IssueUserInterest
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.models import Project
@@ -195,6 +197,67 @@ class ModuleMutation:
             raise ObjectDoesNotExist(msg=f"Issue {issue_number} not found in this module.")
 
         issue.assignees.remove(gh_user)
+
+        return module
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
+    def set_task_deadline(
+        self,
+        info: strawberry.Info,
+        *,
+        module_key: str,
+        program_key: str,
+        issue_number: int,
+        deadline_at: dt.datetime,
+    ) -> ModuleNode:
+        user = info.context.request.user
+
+        module = (
+            Module.objects.select_related("program")
+            .filter(key=module_key, program__key=program_key)
+            .first()
+        )
+        if module is None:
+            raise ObjectDoesNotExist(msg="Module not found.")
+
+        mentor = Mentor.objects.filter(nest_user=user).first()
+        if mentor is None:
+            raise PermissionDenied(msg="Only mentors can set deadlines.")
+        if not module.program.admins.filter(id=mentor.id).exists():
+            raise PermissionDenied
+
+        issue = (
+            module.issues.select_related("repository").prefetch_related("assignees")
+            .filter(number=issue_number)
+            .first()
+        )
+        if issue is None:
+            raise ObjectDoesNotExist(msg="Issue not found in this module.")
+
+        assignees = issue.assignees.all()
+        if not assignees.exists():
+            raise ValidationError(message="Cannot set deadline: issue has no assignees.")
+
+        normalized_deadline = deadline_at
+        if timezone.is_naive(normalized_deadline):
+            normalized_deadline = timezone.make_aware(normalized_deadline)
+
+        if normalized_deadline.date() < timezone.now().date():
+            raise ValidationError(message="Deadline cannot be in the past.")
+
+        now = timezone.now()
+        tasks_to_update: list[Task] = []
+        for assignee in assignees:
+            task, _created = Task.objects.get_or_create(
+                module=module, issue=issue, assignee=assignee
+            )
+            if task.assigned_at is None:
+                task.assigned_at = now
+            task.deadline_at = normalized_deadline
+            tasks_to_update.append(task)
+
+        Task.objects.bulk_update(tasks_to_update, ["assigned_at", "deadline_at"])
 
         return module
 

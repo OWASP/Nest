@@ -14,11 +14,13 @@ import { addToast } from '@heroui/toast'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { useState } from 'react'
 import { ErrorDisplay } from 'app/global-error'
 import {
   ASSIGN_ISSUE_TO_USER,
   GET_MODULE_ISSUE_VIEW,
   UNASSIGN_ISSUE_FROM_USER,
+  SET_TASK_DEADLINE,
 } from 'server/queries/issueQueries'
 import ActionButton from 'components/ActionButton'
 import AnchorTitle from 'components/AnchorTitle'
@@ -28,13 +30,8 @@ import SecondaryCard from 'components/SecondaryCard'
 import { TruncatedText } from 'components/TruncatedText'
 
 const ModuleIssueDetailsPage = () => {
-  const { issueId } = useParams() as { issueId: string }
-
-  const { programKey, moduleKey } = useParams() as {
-    programKey: string
-    moduleKey: string
-    issueId: string
-  }
+  const params = useParams() as { programKey: string; moduleKey: string; issueId: string }
+  const { programKey, moduleKey, issueId } = params
   const { data, loading, error } = useQuery(GET_MODULE_ISSUE_VIEW, {
     variables: { programKey, moduleKey, number: Number(issueId) },
     skip: !issueId,
@@ -98,6 +95,50 @@ const ModuleIssueDetailsPage = () => {
   })
 
   const issue = data?.getModule?.issueByNumber
+  const taskDeadline = data?.getModule?.taskDeadline as string | undefined
+  const [isEditingDeadline, setIsEditingDeadline] = useState(false)
+  const [deadlineInput, setDeadlineInput] = useState<string>(
+    taskDeadline ? new Date(taskDeadline).toISOString().slice(0, 10) : ''
+  )
+
+  const getButtonClassName = (disabled: boolean) =>
+    `inline-flex items-center justify-center rounded-md border p-1.5 text-sm ${
+      disabled
+        ? 'cursor-not-allowed border-gray-300 text-gray-400 dark:border-gray-600'
+        : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'
+    }`
+
+  const labelButtonClassName =
+    'rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700'
+
+  const [setTaskDeadlineMutation, { loading: settingDeadline }] = useMutation(SET_TASK_DEADLINE, {
+    refetchQueries: [
+      {
+        query: GET_MODULE_ISSUE_VIEW,
+        variables: { programKey, moduleKey, number: Number(issueId) },
+      },
+    ],
+    awaitRefetchQueries: true,
+    onCompleted: () => {
+      addToast({
+        title: 'Deadline updated',
+        variant: 'solid',
+        color: 'success',
+        timeout: 2500,
+        shouldShowTimeoutProgress: true,
+      })
+      setIsEditingDeadline(false)
+    },
+    onError: (err) => {
+      addToast({
+        title: 'Failed to update deadline: ' + err.message,
+        variant: 'solid',
+        color: 'danger',
+        timeout: 3500,
+        shouldShowTimeoutProgress: true,
+      })
+    },
+  })
 
   if (error) {
     return <ErrorDisplay statusCode={500} title="Error Loading Issue" message={error.message} />
@@ -110,16 +151,7 @@ const ModuleIssueDetailsPage = () => {
   const labels = issue.labels || []
   const visibleLabels = labels.slice(0, 5)
   const remainingLabels = labels.length - visibleLabels.length
-
-  const getButtonClassName = (disabled: boolean) =>
-    `inline-flex items-center justify-center rounded-md border p-1.5 text-sm ${
-      disabled
-        ? 'cursor-not-allowed border-gray-300 text-gray-400 dark:border-gray-600'
-        : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'
-    }`
-
-  const labelButtonClassName =
-    'rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700'
+  const canEditDeadline = assignees.length > 0
 
   return (
     <div className="min-h-screen bg-white p-8 text-gray-700 dark:bg-[#212529] dark:text-gray-300">
@@ -156,18 +188,100 @@ const ModuleIssueDetailsPage = () => {
         </SecondaryCard>
 
         <SecondaryCard title={<AnchorTitle title="Task Timeline" />}>
-          <div className="space-y-1 text-sm text-gray-700 dark:text-gray-300">
+          <div className="space-y-4 text-sm text-gray-700 dark:text-gray-300">
             <div>
               <span className="font-medium">Assigned:</span>{' '}
               {data?.getModule?.taskAssignedAt
                 ? new Date(data.getModule.taskAssignedAt).toLocaleDateString()
                 : 'Not assigned'}
             </div>
-            <div>
-              <span className="font-medium">Deadline:</span>{' '}
-              {data?.getModule?.taskDeadline
-                ? new Date(data.getModule.taskDeadline).toLocaleDateString()
-                : 'No deadline set'}
+
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-medium">Deadline:</span>
+                {isEditingDeadline && canEditDeadline ? (
+                  <span className="inline-flex items-center gap-2">
+                    <input
+                      type="date"
+                      value={deadlineInput}
+                      onChange={(e) => setDeadlineInput(e.target.value)}
+                      min={new Date().toISOString().slice(0, 10)}
+                      className="h-8 rounded border border-gray-300 px-2 text-xs dark:border-gray-600"
+                    />
+                    <button
+                      type="button"
+                      disabled={!deadlineInput || settingDeadline}
+                      onClick={async () => {
+                        if (!deadlineInput || settingDeadline || !issueId) return
+                        const iso = new Date(deadlineInput + 'T23:59:59').toISOString()
+                        await setTaskDeadlineMutation({
+                          variables: {
+                            programKey,
+                            moduleKey,
+                            issueNumber: Number(issueId),
+                            deadlineAt: iso,
+                          },
+                        })
+                      }}
+                      className="flex items-center justify-center rounded-md border border-[#1D7BD7] px-3 py-1 text-xs font-medium text-[#1D7BD7] transition-all hover:bg-[#1D7BD7] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {settingDeadline ? 'Saving…' : 'Save'}
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Cancel deadline edit"
+                      title="Cancel"
+                      onClick={() => {
+                        setDeadlineInput(
+                          taskDeadline ? new Date(taskDeadline).toISOString().slice(0, 10) : ''
+                        )
+                        setIsEditingDeadline(false)
+                      }}
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-md text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                    >
+                      <FontAwesomeIcon icon={faXmark} className="h-3.5 w-3.5" />
+                    </button>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-2">
+                    {(() => {
+                      if (!taskDeadline) {
+                        return (
+                          <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                            No deadline set
+                          </span>
+                        )
+                      }
+                      const d = new Date(taskDeadline)
+                      const today = new Date()
+                      const isPast = d.setHours(0, 0, 0, 0) < today.setHours(0, 0, 0, 0)
+                      const diffDays = Math.ceil(
+                        (d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+                      )
+                      const textClass = 'text-red-700 dark:text-red-300'
+                      return (
+                        <span className={`text-xs font-medium ${textClass}`}>
+                          {d.toLocaleDateString()}{' '}
+                          {isPast
+                            ? '(overdue)'
+                            : diffDays > 0
+                              ? `(in ${diffDays} days)`
+                              : '(today)'}
+                        </span>
+                      )
+                    })()}
+                    {canEditDeadline && (
+                      <button
+                        type="button"
+                        className="ml-2 text-xs text-blue-600 hover:underline dark:text-blue-400"
+                        onClick={() => setIsEditingDeadline(true)}
+                      >
+                        Edit
+                      </button>
+                    )}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </SecondaryCard>

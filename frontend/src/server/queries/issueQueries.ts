@@ -82,3 +82,21 @@ export const UNASSIGN_ISSUE_FROM_USER = gql`
     }
   }
 `
+
+export const SET_TASK_DEADLINE = gql`
+  mutation SetTaskDeadline(
+    $programKey: String!
+    $moduleKey: String!
+    $issueNumber: Int!
+    $deadlineAt: DateTime!
+  ) {
+    setTaskDeadline(
+      programKey: $programKey
+      moduleKey: $moduleKey
+      issueNumber: $issueNumber
+      deadlineAt: $deadlineAt
+    ) {
+      id
+    }
+  }
+`
