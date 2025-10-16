@@ -8,7 +8,6 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_MODULE_ISSUES } from 'server/queries/moduleQueries'
-import type { Issue } from 'types/issue'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Pagination from 'components/Pagination'
 
@@ -40,24 +39,21 @@ const IssuesPage = () => {
   }, [error])
 
   const moduleData = data?.getModule
-  const moduleIssues: Issue[] = useMemo(() => {
-    return (moduleData?.issues || []).map((i) => ({
-      author: i.author,
-      createdAt: i.createdAt,
-      hint: '',
-      labels: i.labels || [],
+  type ModuleIssueRow = {
+    objectID: string
+    number: number
+    title: string
+    state: string
+    labels: string[]
+  }
+
+  const moduleIssues: ModuleIssueRow[] = useMemo(() => {
+    return (moduleData?.issues || []).map((i: any) => ({
+      objectID: i.id,
       number: i.number,
-      organizationName: i.organizationName,
-      projectName: moduleData?.projectName || '',
-      projectUrl: '',
-      repository: undefined,
-      repositoryLanguages: [],
-      body: i.body || '',
       title: i.title,
       state: i.state,
-      updatedAt: i.createdAt,
-      url: i.url,
-      objectID: i.id,
+      labels: i.labels || [],
     }))
   }, [moduleData])
 
