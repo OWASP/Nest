@@ -190,10 +190,10 @@ const IssuesPage = () => {
                   </td>
                   <td className="px-6 py-4 text-sm whitespace-nowrap">
                     <span
-                      className={`rounded px-2 py-1 text-xs font-medium ${
+                      className={`inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium ${
                         issue.state === 'open'
-                          ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                          : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                          ? 'bg-[#2cbe4e] text-white'
+                          : 'bg-[#cb2431] text-white'
                       }`}
                     >
                       {issue.state === 'open' ? 'Open' : 'Closed'}

@@ -166,10 +166,8 @@ const ModuleIssueDetailsPage = () => {
                 {issue.organizationName}/{issue.repositoryName} • #{issue.number}
               </span>
               <span
-                className={`rounded-full px-2 py-1 text-xs font-medium ${
-                  issue.state === 'open'
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                className={`inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium ${
+                  issue.state === 'open' ? 'bg-[#2cbe4e] text-white' : 'bg-[#cb2431] text-white'
                 }`}
               >
                 {issue.state === 'open' ? 'Open' : 'Closed'}
@@ -213,7 +211,8 @@ const ModuleIssueDetailsPage = () => {
                       disabled={!deadlineInput || settingDeadline}
                       onClick={async () => {
                         if (!deadlineInput || settingDeadline || !issueId) return
-                        const iso = new Date(deadlineInput + 'T23:59:59').toISOString()
+                        const localDate = new Date(deadlineInput + 'T23:59:59')
+                        const iso = localDate.toISOString()
                         await setTaskDeadlineMutation({
                           variables: {
                             programKey,
@@ -297,12 +296,12 @@ const ModuleIssueDetailsPage = () => {
           </h2>
           <div className="flex flex-wrap gap-2">
             {visibleLabels.map((label, index) => (
-              <button key={index} className={labelButtonClassName}>
+              <span key={index} className={labelButtonClassName}>
                 {label}
-              </button>
+              </span>
             ))}
             {remainingLabels > 0 && (
-              <button className={labelButtonClassName}>+{remainingLabels} more</button>
+              <span className={labelButtonClassName}>+{remainingLabels} more</span>
             )}
           </div>
         </div>
@@ -406,15 +405,24 @@ const ModuleIssueDetailsPage = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {pr.state === 'closed' && pr.mergedAt ? (
-                      <span className="rounded-full bg-purple-100 px-2 py-1 text-xs font-medium text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                      <span
+                        className="inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium text-white"
+                        style={{ backgroundColor: '#6f42c1' }}
+                      >
                         Merged
                       </span>
                     ) : pr.state === 'closed' ? (
-                      <span className="rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-800 dark:bg-red-900 dark:text-red-200">
+                      <span
+                        className="inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium text-white"
+                        style={{ backgroundColor: '#cb2431' }}
+                      >
                         Closed
                       </span>
                     ) : (
-                      <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200">
+                      <span
+                        className="inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium text-white"
+                        style={{ backgroundColor: '#2cbe4e' }}
+                      >
                         Open
                       </span>
                     )}

@@ -1,5 +1,6 @@
 """GraphQL mutations for mentorship modules in the mentorship app."""
 
+import datetime as dt
 import logging
 
 import strawberry
@@ -14,9 +15,8 @@ from apps.mentorship.api.internal.nodes.module import (
     UpdateModuleInput,
 )
 from apps.mentorship.models import Mentor, Module, Program
-import datetime as dt
-from apps.mentorship.models.task import Task
 from apps.mentorship.models.issue_user_interest import IssueUserInterest
+from apps.mentorship.models.task import Task
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.models import Project
 
@@ -211,6 +211,7 @@ class ModuleMutation:
         issue_number: int,
         deadline_at: dt.datetime,
     ) -> ModuleNode:
+        """Set a deadline for a task. User must be a mentor and an admin of the program."""
         user = info.context.request.user
 
         module = (
@@ -228,7 +229,8 @@ class ModuleMutation:
             raise PermissionDenied
 
         issue = (
-            module.issues.select_related("repository").prefetch_related("assignees")
+            module.issues.select_related("repository")
+            .prefetch_related("assignees")
             .filter(number=issue_number)
             .first()
         )
