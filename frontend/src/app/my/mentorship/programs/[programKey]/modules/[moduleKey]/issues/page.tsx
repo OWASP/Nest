@@ -48,7 +48,7 @@ const IssuesPage = () => {
   }
 
   const moduleIssues: ModuleIssueRow[] = useMemo(() => {
-    return (moduleData?.issues || []).map((i: any) => ({
+    return (moduleData?.issues || []).map((i) => ({
       objectID: i.id,
       number: i.number,
       title: i.title,
