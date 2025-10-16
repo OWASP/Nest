@@ -45,6 +45,7 @@ const IssuesPage = () => {
     title: string
     state: string
     labels: string[]
+    assignees: Array<{ avatarUrl: string; login: string; name: string }>
   }
 
   const moduleIssues: ModuleIssueRow[] = useMemo(() => {
@@ -54,6 +55,7 @@ const IssuesPage = () => {
       title: i.title,
       state: i.state,
       labels: i.labels || [],
+      assignees: i.assignees || [],
     }))
   }, [moduleData])
 
@@ -222,29 +224,25 @@ const IssuesPage = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-700 dark:text-gray-300">
-                    {((assignees) =>
-                      assignees?.length ? (
+                    {issue.assignees?.length ? (
+                      <div className="flex items-center gap-2">
                         <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-2">
-                            <Image
-                              height={24}
-                              width={24}
-                              src={assignees[0].avatarUrl}
-                              alt={assignees[0].login}
-                              className="rounded-full"
-                            />
-                            <span>{assignees[0].login || assignees[0].name}</span>
-                          </div>
-                          {assignees.length > 1 && (
-                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-                              +{assignees.length - 1}
-                            </div>
-                          )}
+                          <Image
+                            height={24}
+                            width={24}
+                            src={issue.assignees[0].avatarUrl}
+                            alt={issue.assignees[0].login}
+                            className="rounded-full"
+                          />
+                          <span>{issue.assignees[0].login || issue.assignees[0].name}</span>
                         </div>
-                      ) : null)(
-                      (data?.getModule?.issues || []).find((i) => i.id === issue.objectID)
-                        ?.assignees
-                    )}
+                        {issue.assignees.length > 1 && (
+                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                            +{issue.assignees.length - 1}
+                          </div>
+                        )}
+                      </div>
+                    ) : null}
                   </td>
                 </tr>
               ))}
