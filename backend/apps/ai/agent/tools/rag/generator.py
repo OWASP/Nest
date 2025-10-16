@@ -16,7 +16,7 @@ class Generator:
     """Generates answers to user queries based on retrieved context."""
 
     MAX_TOKENS = 2000
-    TEMPERATURE = 0.4
+    TEMPERATURE = 0.8
 
     def __init__(self, chat_model: str = "gpt-4o"):
         """Initialize the Generator.
@@ -73,16 +73,6 @@ class Generator:
         formatted_context = self.prepare_context(context_chunks)
 
         user_prompt = f"""
-- You are an assistant for question-answering tasks related to OWASP.
-- Use the following pieces of retrieved context to answer the question.
-- If the question is related to OWASP then you can try to answer based on your knowledge, if you
-don't know the answer, just say that you don't know.
-- Try to give answer and keep the answer concise, but you really think that the response will be
-longer and better you will provide more information.
-- Ask for the current location if the query is related to location.
-- Ask for the information you need if the query is very personalized or user-centric.
-- Do not mention or refer to the word "context", "based on context", "provided information",
-"Information given to me" or similar phrases in your responses.
 Question: {query}
 Context: {formatted_context}
 Answer:

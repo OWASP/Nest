@@ -320,4 +320,4 @@ class TestGenerator:
     def test_constants(self):
         """Test class constants have expected values."""
         assert Generator.MAX_TOKENS == 2000
-        assert Generator.TEMPERATURE == 0.4
+        assert Generator.TEMPERATURE == 0.8

@@ -1,6 +1,6 @@
-ai-run-rag-tool:
-	@echo "Running RAG tool"
-	@CMD="python manage.py ai_run_rag_tool" $(MAKE) exec-backend-command
+ai-run-agentic-rag:
+	@echo "Running agentic RAG"
+	@CMD="python manage.py ai_run_agentic_rag" $(MAKE) exec-backend-command
 
 ai-update-chapter-chunks:
 	@echo "Updating chapter chunks"
