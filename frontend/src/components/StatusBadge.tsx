@@ -1,9 +1,9 @@
+import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { faArchive, faBan } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import type React from 'react'
 
-export type StatusType = 'archived' | 'inactive';
+export type StatusType = 'archived' | 'inactive'
 
 interface StatusConfig {
   text: string

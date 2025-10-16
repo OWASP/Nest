@@ -19,11 +19,6 @@ describe('StatusBadge', () => {
       expect(screen.getByText('Inactive')).toBeInTheDocument()
     })
 
-    it('renders successfully with active status', () => {
-      render(<StatusBadge status="active" />)
-      expect(screen.getByText('Active')).toBeInTheDocument()
-    })
-
     it('displays the status text', () => {
       render(<StatusBadge status="archived" />)
       const badge = screen.getByText('Archived')
@@ -35,10 +30,7 @@ describe('StatusBadge', () => {
     it('has the correct tooltip for archived status', () => {
       render(<StatusBadge status="archived" />)
       const badge = screen.getByText('Archived')
-      expect(badge).toHaveAttribute(
-        'title',
-        'This repository has been archived and is read-only'
-      )
+      expect(badge).toHaveAttribute('title', 'This repository has been archived and is read-only')
     })
 
     it('has correct light mode color classes for archived', () => {
@@ -75,30 +67,6 @@ describe('StatusBadge', () => {
       render(<StatusBadge status="inactive" />)
       const badge = screen.getByText('Inactive')
       expect(badge).toHaveClass('dark:border-red-500', 'dark:bg-red-900/30', 'dark:text-red-400')
-    })
-  })
-
-  describe('Status Types - Active', () => {
-    it('has the correct tooltip for active status', () => {
-      render(<StatusBadge status="active" />)
-      const badge = screen.getByText('Active')
-      expect(badge).toHaveAttribute('title', 'This entity is active')
-    })
-
-    it('has correct light mode color classes for active', () => {
-      render(<StatusBadge status="active" />)
-      const badge = screen.getByText('Active')
-      expect(badge).toHaveClass('border-green-600', 'bg-green-50', 'text-green-800')
-    })
-
-    it('has correct dark mode color classes for active', () => {
-      render(<StatusBadge status="active" />)
-      const badge = screen.getByText('Active')
-      expect(badge).toHaveClass(
-        'dark:border-green-500',
-        'dark:bg-green-900/30',
-        'dark:text-green-400'
-      )
     })
   })
 
@@ -207,10 +175,6 @@ describe('StatusBadge', () => {
       rerender(<StatusBadge status="inactive" />)
       const inactiveBadge = screen.getByText('Inactive')
       baseClasses.forEach((cls) => expect(inactiveBadge).toHaveClass(cls))
-
-      rerender(<StatusBadge status="active" />)
-      const activeBadge = screen.getByText('Active')
-      baseClasses.forEach((cls) => expect(activeBadge).toHaveClass(cls))
     })
   })
 
@@ -327,10 +291,6 @@ describe('StatusBadge', () => {
       rerender(<StatusBadge status="inactive" />)
       expect(screen.getByText('Inactive')).toBeInTheDocument()
       expect(screen.queryByText('Archived')).not.toBeInTheDocument()
-
-      rerender(<StatusBadge status="active" />)
-      expect(screen.getByText('Active')).toBeInTheDocument()
-      expect(screen.queryByText('Inactive')).not.toBeInTheDocument()
     })
 
     it('combines small size with custom text and no icon', () => {
@@ -347,7 +307,6 @@ describe('StatusBadge', () => {
         <div>
           <StatusBadge status="archived" />
           <StatusBadge status="inactive" />
-          <StatusBadge status="active" />
         </div>
       )
       expect(screen.getByText('Archived')).toBeInTheDocument()
@@ -365,7 +324,7 @@ describe('StatusBadge', () => {
       )
       const archivedBadge = screen.getByText('Archived')
       const inactiveBadge = screen.getByText('Inactive')
-      
+
       expect(archivedBadge).toHaveClass('bg-yellow-50')
       expect(inactiveBadge).toHaveClass('bg-red-50')
     })
