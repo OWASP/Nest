@@ -71,11 +71,14 @@ def list_projects(
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None,
         description="Ordering field",
-        example="-created_at",
     ),
 ) -> list[Project]:
     """Get projects."""
-    return filters.filter(ProjectModel.active_projects.order_by(ordering or "-created_at"))
+    return filters.filter(
+        ProjectModel.active_projects.order_by(
+            ordering or "-level_raw", "-stars_count", "-forks_count"
+        )
+    )
 
 
 @router.get(
