@@ -1,11 +1,11 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { screen, waitFor } from '@testing-library/react'
 import { mockChapterDetailsData } from '@unit/data/mockChapterDetailsData'
 import { render } from 'wrappers/testUtil'
 import ChapterDetailsPage from 'app/chapters/[chapterKey]/page'
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
 }))
 
@@ -32,7 +32,7 @@ jest.mock('next/navigation', () => ({
 
 describe('chapterDetailsPage Component', () => {
   beforeEach(() => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockChapterDetailsData,
       error: null,
     })
@@ -43,7 +43,7 @@ describe('chapterDetailsPage Component', () => {
   })
 
   test('renders loading spinner initially', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: null,
     })
@@ -55,7 +55,7 @@ describe('chapterDetailsPage Component', () => {
   })
 
   test('renders chapter data correctly', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockChapterDetailsData,
       error: null,
     })
@@ -69,7 +69,7 @@ describe('chapterDetailsPage Component', () => {
   })
 
   test('displays "No chapters found" when there are no chapters', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: { chapter: null },
       error: true,
     })
@@ -109,7 +109,7 @@ describe('chapterDetailsPage Component', () => {
         },
       ],
     }
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: chapterDataWithIncompleteContributors,
       error: null,
     })
@@ -120,7 +120,7 @@ describe('chapterDetailsPage Component', () => {
     })
   })
   test('renders chapter sponsor block correctly', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockChapterDetailsData,
       error: null,
     })
@@ -128,6 +128,15 @@ describe('chapterDetailsPage Component', () => {
     await waitFor(() => {
       expect(screen.getByText(`Want to become a sponsor?`)).toBeInTheDocument()
       expect(screen.getByText(`Sponsor ${mockChapterDetailsData.chapter.name}`)).toBeInTheDocument()
+    })
+  })
+
+  test('renders leaders block from entityLeaders', async () => {
+    render(<ChapterDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Leaders')).toBeInTheDocument()
+      expect(screen.getByText('Bob')).toBeInTheDocument()
+      expect(screen.getByText('Chapter Leader')).toBeInTheDocument()
     })
   })
 })

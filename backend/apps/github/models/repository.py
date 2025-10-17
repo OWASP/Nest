@@ -30,6 +30,9 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
             models.UniqueConstraint(fields=("key", "owner"), name="unique_key_owner"),
         ]
         db_table = "github_repositories"
+        indexes = [
+            models.Index(fields=["name"], name="repository_name_idx"),
+        ]
         verbose_name_plural = "Repositories"
 
     name = models.CharField(verbose_name="Name", max_length=100)

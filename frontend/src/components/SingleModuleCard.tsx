@@ -1,6 +1,6 @@
 import { faUsers, faEllipsisV } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import upperFirst from 'lodash/upperFirst'
+import { capitalize } from 'lodash'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
@@ -51,7 +51,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
   }
 
   const moduleDetails = [
-    { label: 'Experience Level', value: upperFirst(module.experienceLevel) },
+    { label: 'Experience Level', value: capitalize(module.experienceLevel) },
     { label: 'Start Date', value: formatDate(module.startedAt) },
     { label: 'End Date', value: formatDate(module.endedAt) },
     { label: 'Duration', value: getSimpleDuration(module.startedAt, module.endedAt) },

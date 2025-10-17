@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { screen, waitFor } from '@testing-library/react'
 import { mockUserDetailsData } from '@unit/data/mockUserDetails'
@@ -8,15 +8,52 @@ import UserDetailsPage from 'app/members/[memberKey]/page'
 import { drawContributions, fetchHeatmapData } from 'utils/helpers/githubHeatmap'
 
 // Mock Apollo Client
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
 }))
 
 // Mock FontAwesome
 jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
+  FontAwesomeIcon: ({
+    icon,
+    className,
+    ...props
+  }: {
+    icon: string[] | { iconName: string }
+    className?: string
+    [key: string]: unknown
+  }) => {
+    const iconName = Array.isArray(icon) ? icon[1] : icon.iconName
+    return <span data-testid={`icon-${iconName}`} className={className} {...props} />
+  },
 }))
+
+// Mock Badges component
+jest.mock('components/Badges', () => {
+  const MockBadges = ({
+    name,
+    cssClass,
+    showTooltip,
+  }: {
+    name: string
+    cssClass: string
+    showTooltip?: boolean
+  }) => (
+    <div
+      data-testid={`badge-${name.toLowerCase().replace(/\s+/g, '-')}`}
+      data-css-class={cssClass}
+      data-show-tooltip={showTooltip}
+    >
+      <span data-testid={`icon-${cssClass.replace('fa-', '')}`} />
+    </div>
+  )
+  MockBadges.displayName = 'MockBadges'
+  return {
+    __esModule: true,
+    default: MockBadges,
+  }
+})
 
 const mockRouter = {
   push: jest.fn(),
@@ -29,7 +66,7 @@ const mockError = {
 jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(() => mockRouter),
-  useParams: () => ({ userKey: 'test-user' }),
+  useParams: () => ({ memberKey: 'test-user' }),
 }))
 
 // Mock GitHub heatmap utilities
@@ -44,7 +81,7 @@ jest.mock('@heroui/toast', () => ({
 
 describe('UserDetailsPage', () => {
   beforeEach(() => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       loading: false,
       error: null,
@@ -60,7 +97,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders loading state', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: null,
     })
@@ -73,7 +110,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders user details', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         ...mockUserDetailsData,
         user: { ...mockUserDetailsData.user, recentIssues: {} },
@@ -99,7 +136,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders recent issues correctly', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
       loading: false,
@@ -120,7 +157,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders recent pull requests correctly', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
       loading: false,
@@ -138,7 +175,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders recent releases correctly', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
       loading: false,
@@ -156,7 +193,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders recent milestones correctly', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
       loading: false,
@@ -178,7 +215,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders repositories section correctly', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
       loading: false,
@@ -202,7 +239,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders statistics section correctly', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
       loading: false,
@@ -229,7 +266,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders contribution heatmap correctly', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
       loading: false,
@@ -252,7 +289,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('handles contribution heatmap loading error correctly', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
     })
@@ -267,7 +304,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders user summary section correctly', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
     })
@@ -290,7 +327,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('displays contact information elements', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
     })
@@ -310,7 +347,7 @@ describe('UserDetailsPage', () => {
   })
 
   test('renders error message when GraphQL request fails', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: mockError,
     })
@@ -336,7 +373,7 @@ describe('UserDetailsPage', () => {
       ...mockUserDetailsData,
       user: { ...mockUserDetailsData.user, bio: '' },
     }
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: noBioData,
       loading: false,
       error: null,
@@ -354,7 +391,7 @@ describe('UserDetailsPage', () => {
       ...mockUserDetailsData,
       user: { ...mockUserDetailsData.user, bio: 'Test @User1 and @User2!' },
     }
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: multiMentionData,
       loading: false,
       error: null,
@@ -373,7 +410,7 @@ describe('UserDetailsPage', () => {
     const noIssuesData = {
       user: { ...mockUserDetailsData.user, recentIssues: {} },
     }
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: noIssuesData,
       loading: false,
       error: null,
@@ -391,7 +428,7 @@ describe('UserDetailsPage', () => {
       ...mockUserDetailsData,
       recentPullRequests: [],
     }
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: noPullsData,
       loading: false,
       error: null,
@@ -409,7 +446,7 @@ describe('UserDetailsPage', () => {
       ...mockUserDetailsData,
       recentReleases: [],
     }
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: noReleasesData,
       loading: false,
       error: null,
@@ -426,7 +463,7 @@ describe('UserDetailsPage', () => {
       ...mockUserDetailsData,
       recentMilestones: [],
     }
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: noMilestonesData,
       loading: false,
       error: null,
@@ -449,7 +486,7 @@ describe('UserDetailsPage', () => {
         publicRepositoriesCount: 0,
       },
     }
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: zeroStatsData,
       loading: false,
       error: null,
@@ -474,7 +511,7 @@ describe('UserDetailsPage', () => {
         location: '',
       },
     }
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: minimalData,
       loading: false,
       error: null,
@@ -489,13 +526,284 @@ describe('UserDetailsPage', () => {
     })
   })
   test('does not render sponsor block', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
     })
     render(<UserDetailsPage />)
     await waitFor(() => {
       expect(screen.queryByText(`Want to become a sponsor?`)).toBeNull()
+    })
+  })
+
+  describe('Badge Display Tests', () => {
+    test('renders badges section when user has badges', async () => {
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockUserDetailsData,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+      await waitFor(() => {
+        expect(screen.getByTestId('badge-contributor')).toBeInTheDocument()
+        expect(screen.getByTestId('badge-security-expert')).toBeInTheDocument()
+      })
+    })
+
+    test('renders badges with correct props', async () => {
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockUserDetailsData,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+      await waitFor(() => {
+        const contributorBadge = screen.getByTestId('badge-contributor')
+        expect(contributorBadge).toHaveAttribute('data-css-class', 'fa-medal')
+        expect(contributorBadge).toHaveAttribute('data-show-tooltip', 'true')
+
+        const securityBadge = screen.getByTestId('badge-security-expert')
+        expect(securityBadge).toHaveAttribute('data-css-class', 'fa-shield-alt')
+        expect(securityBadge).toHaveAttribute('data-show-tooltip', 'true')
+      })
+    })
+
+    test('does not render badges section when user has no badges', async () => {
+      const dataWithoutBadges = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          badges: [],
+          badgeCount: 0,
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithoutBadges,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+      await waitFor(() => {
+        expect(screen.queryByTestId(/^badge-/)).not.toBeInTheDocument()
+      })
+    })
+
+    test('does not render badges section when badges is undefined', async () => {
+      const dataWithoutBadges = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          badges: undefined,
+          badgeCount: 0,
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithoutBadges,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+      await waitFor(() => {
+        expect(screen.queryByTestId(/^badge-/)).not.toBeInTheDocument()
+      })
+    })
+
+    test('renders badges with fallback cssClass when not provided', async () => {
+      const dataWithIncompleteBadges = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          badges: [
+            {
+              id: '1',
+              name: 'Test Badge',
+              cssClass: undefined,
+              description: 'Test description',
+              weight: 1,
+            },
+          ],
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithIncompleteBadges,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+      await waitFor(() => {
+        const badge = screen.getByTestId('badge-test-badge')
+        expect(badge).toHaveAttribute('data-css-class', 'fa-medal')
+      })
+    })
+
+    test('renders badges with empty cssClass fallback', async () => {
+      const dataWithEmptyCssClass = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          badges: [
+            {
+              id: '1',
+              name: 'Test Badge',
+              cssClass: '',
+              description: 'Test description',
+              weight: 1,
+            },
+          ],
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithEmptyCssClass,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+      await waitFor(() => {
+        const badge = screen.getByTestId('badge-test-badge')
+        expect(badge).toHaveAttribute('data-css-class', 'fa-medal')
+      })
+    })
+
+    test('handles badges with special characters in names', async () => {
+      const dataWithSpecialBadges = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          badges: [
+            {
+              id: '1',
+              name: 'Badge & More!',
+              cssClass: 'fa-star',
+              description: 'Special badge',
+              weight: 1,
+            },
+          ],
+        },
+      }
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithSpecialBadges,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+      await waitFor(() => {
+        expect(screen.getByTestId('badge-badge-&-more!')).toBeInTheDocument()
+      })
+    })
+
+    test('handles badges with long names', async () => {
+      const dataWithLongNameBadge = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          badges: [
+            {
+              id: '1',
+              name: 'Very Long Badge Name That Exceeds Normal Length',
+              cssClass: 'fa-trophy',
+              description: 'Long name badge',
+              weight: 1,
+            },
+          ],
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithLongNameBadge,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+      await waitFor(() => {
+        expect(
+          screen.getByTestId('badge-very-long-badge-name-that-exceeds-normal-length')
+        ).toBeInTheDocument()
+      })
+    })
+
+    test('renders badges in correct order as returned by backend (weight ASC then name ASC)', async () => {
+      // Backend returns badges sorted by weight ASC, then name ASC
+      // This test verifies the frontend preserves the backend ordering
+      const dataWithOrderedBadges = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          badges: [
+            // Backend returns badges in this order: weight ASC, then name ASC
+            {
+              id: '3',
+              name: 'Alpha Badge',
+              cssClass: 'fa-star',
+              description: 'Alpha badge with weight 1',
+              weight: 1,
+            },
+            {
+              id: '4',
+              name: 'Beta Badge',
+              cssClass: 'fa-trophy',
+              description: 'Beta badge with weight 1',
+              weight: 1,
+            },
+            {
+              id: '1',
+              name: 'Contributor',
+              cssClass: 'fa-medal',
+              description: 'Active contributor',
+              weight: 1,
+            },
+            {
+              id: '2',
+              name: 'Security Expert',
+              cssClass: 'fa-shield-alt',
+              description: 'Security expertise',
+              weight: 2,
+            },
+            {
+              id: '5',
+              name: 'Top Contributor',
+              cssClass: 'fa-crown',
+              description: 'Highest weight badge',
+              weight: 3,
+            },
+          ],
+          badgeCount: 5,
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithOrderedBadges,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+      await waitFor(() => {
+        const badgeElements = screen.getAllByTestId(/^badge-/)
+        const badgeTestIds = badgeElements.map((element) => element.getAttribute('data-testid'))
+
+        // Expected order matches backend contract: weight ASC (1, 1, 1, 2, 3), then name ASC for equal weights
+        const expectedOrder = [
+          'badge-alpha-badge', // weight 1, name ASC
+          'badge-beta-badge', // weight 1, name ASC
+          'badge-contributor', // weight 1, name ASC
+          'badge-security-expert', // weight 2
+          'badge-top-contributor', // weight 3
+        ]
+
+        expect(badgeTestIds).toEqual(expectedOrder)
+      })
     })
   })
 })

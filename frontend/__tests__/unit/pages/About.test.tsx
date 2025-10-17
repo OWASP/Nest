@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { mockAboutData } from '@unit/data/mockAboutData'
@@ -6,11 +6,14 @@ import { useRouter } from 'next/navigation'
 import { act } from 'react'
 import { render } from 'wrappers/testUtil'
 import About from 'app/about/page'
-import { GET_PROJECT_METADATA, GET_TOP_CONTRIBUTORS } from 'server/queries/projectQueries'
-import { GET_LEADER_DATA } from 'server/queries/userQueries'
+import {
+  GetProjectMetadataDocument,
+  GetTopContributorsDocument,
+} from 'types/__generated__/projectQueries.generated'
+import { GetLeaderDataDocument } from 'types/__generated__/userQueries.generated'
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
 }))
 
@@ -120,25 +123,21 @@ const mockTopContributorsData = {
   error: null,
 }
 
-const mockError = {
-  error: new Error('GraphQL error'),
-}
-
 describe('About Component', () => {
   let mockRouter: { push: jest.Mock }
   beforeEach(() => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
       const key = options?.variables?.key
 
-      if (query === GET_PROJECT_METADATA) {
+      if (query === GetProjectMetadataDocument) {
         if (key === 'nest') {
           return mockProjectData
         }
-      } else if (query === GET_TOP_CONTRIBUTORS) {
+      } else if (query === GetTopContributorsDocument) {
         if (key === 'nest') {
           return mockTopContributorsData
         }
-      } else if (query === GET_LEADER_DATA) {
+      } else if (query === GetLeaderDataDocument) {
         return mockUserData(key)
       }
 
@@ -210,29 +209,6 @@ describe('About Component', () => {
       expect(screen.getByText('Kate Golovanova')).toBeInTheDocument()
       expect(screen.getByText('CC')).toBeInTheDocument()
       expect(screen.getByText('CISSP')).toBeInTheDocument()
-    })
-  })
-
-  test('handles leader data loading error gracefully', async () => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
-      if (options?.variables?.key === 'nest') {
-        return mockProjectData
-      } else if (options?.variables?.key === 'arkid15r') {
-        return { data: null, loading: false, error: mockError }
-      } else if (options?.variables?.key === 'kasya' || options?.variables?.key === 'mamicidal') {
-        return mockUserData(options?.variables?.key)
-      }
-      return { loading: true }
-    })
-
-    await act(async () => {
-      render(<About />)
-    })
-
-    await waitFor(() => {
-      expect(screen.getByText("Error loading arkid15r's data")).toBeInTheDocument()
-      expect(screen.getByText('Kate Golovanova')).toBeInTheDocument()
-      expect(screen.getByText('Starr Brown')).toBeInTheDocument()
     })
   })
 
@@ -346,70 +322,8 @@ describe('About Component', () => {
     })
   })
 
-  test('LeaderData component shows loading state correctly', async () => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
-      if (options?.variables?.key === 'nest') {
-        return mockProjectData
-      } else if (options?.variables?.key === 'arkid15r') {
-        return { data: null, loading: true, error: null }
-      } else if (options?.variables?.key === 'kasya') {
-        return mockUserData('kasya')
-      } else if (options?.variables?.key === 'mamicidal') {
-        return mockUserData('mamicidal')
-      }
-      return { loading: true }
-    })
-
-    await act(async () => {
-      render(<About />)
-    })
-
-    await waitFor(() => {
-      expect(screen.getByText('Loading arkid15r...')).toBeInTheDocument()
-    })
-
-    await waitFor(() => {
-      expect(screen.getByText('Kate Golovanova')).toBeInTheDocument()
-      expect(screen.getByText('Starr Brown')).toBeInTheDocument()
-    })
-
-    const loadingMessages = screen.getAllByText(/Loading .+\.\.\./)
-    expect(loadingMessages).toHaveLength(1)
-  })
-
-  test('LeaderData component handles null user data correctly', async () => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
-      if (options?.variables?.key === 'nest') {
-        return mockProjectData
-      } else if (options?.variables?.key === 'arkid15r') {
-        return { data: { user: null }, loading: false, error: null }
-      } else if (options?.variables?.key === 'kasya') {
-        return mockUserData('kasya')
-      } else if (options?.variables?.key === 'mamicidal') {
-        return mockUserData('mamicidal')
-      }
-      return { loading: true }
-    })
-
-    await act(async () => {
-      render(<About />)
-    })
-
-    await waitFor(() => {
-      expect(screen.getByText('No data available for arkid15r')).toBeInTheDocument()
-    })
-
-    await waitFor(() => {
-      expect(screen.getByText('Kate Golovanova')).toBeInTheDocument()
-      expect(screen.getByText('Starr Brown')).toBeInTheDocument()
-    })
-
-    const noDataMessages = screen.getAllByText(/No data available for .+/)
-    expect(noDataMessages).toHaveLength(1)
-  })
-
   test('handles null project in data response gracefully', async () => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
       if (options?.variables?.key === 'nest') {
         return { data: { project: null }, loading: false, error: null }
       } else if (['arkid15r', 'kasya', 'mamicidal'].includes(options?.variables?.key)) {
@@ -427,29 +341,6 @@ describe('About Component', () => {
       expect(
         screen.getByText("Sorry, the page you're looking for doesn't exist")
       ).toBeInTheDocument()
-    })
-  })
-
-  test('handles undefined user data in leader response', async () => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
-      if (options?.variables?.key === 'nest') {
-        return mockProjectData
-      } else if (options?.variables?.key === 'arkid15r') {
-        return { data: undefined, loading: false, error: null }
-      } else if (options?.variables?.key === 'kasya' || options?.variables?.key === 'mamicidal') {
-        return mockUserData(options?.variables?.key)
-      }
-      return { loading: true }
-    })
-
-    await act(async () => {
-      render(<About />)
-    })
-
-    await waitFor(() => {
-      expect(screen.getByText('No data available for arkid15r')).toBeInTheDocument()
-      expect(screen.getByText('Kate Golovanova')).toBeInTheDocument()
-      expect(screen.getByText('Starr Brown')).toBeInTheDocument()
     })
   })
 
@@ -474,6 +365,7 @@ describe('About Component', () => {
           avatarUrl: 'https://avatars.githubusercontent.com/u/2201626?v=4',
           company: 'OWASP',
           // name is missing
+          login: 'arkid15r',
           url: '/members/arkid15r',
         },
       },
@@ -481,7 +373,7 @@ describe('About Component', () => {
       error: null,
     }
 
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
       if (options?.variables?.key === 'nest') {
         return mockProjectData
       } else if (options?.variables?.key === 'arkid15r') {
@@ -503,31 +395,8 @@ describe('About Component', () => {
     })
   })
 
-  test('shows fallback when user data is missing', async () => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
-      if (options?.variables?.key === 'nest') {
-        return mockProjectData
-      } else if (options?.variables?.key === 'arkid15r') {
-        return { data: null, loading: false, error: false }
-      } else if (options?.variables?.key === 'kasya') {
-        return mockUserData('kasya')
-      } else if (options?.variables?.key === 'mamicidal') {
-        return mockUserData('mamicidal')
-      }
-      return { loading: true }
-    })
-
-    await act(async () => {
-      render(<About />)
-    })
-
-    await waitFor(() => {
-      expect(screen.getByText(/No data available for arkid15r/i)).toBeInTheDocument()
-    })
-  })
-
   test('renders LoadingSpinner when project data is loading', async () => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
       if (options?.variables?.key === 'nest') {
         return { loading: true, data: null, error: null }
       }
@@ -549,7 +418,7 @@ describe('About Component', () => {
   })
 
   test('renders ErrorDisplay when project is null', async () => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
       if (options?.variables?.key === 'nest') {
         return { loading: false, data: { project: null }, error: null }
       }
@@ -571,8 +440,8 @@ describe('About Component', () => {
   })
 
   test('triggers toaster error when GraphQL request fails for project', async () => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
-      if (query === GET_PROJECT_METADATA && options?.variables?.key === 'nest') {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
+      if (query === GetProjectMetadataDocument && options?.variables?.key === 'nest') {
         return { loading: false, data: null, error: new Error('GraphQL error') }
       }
       return {
@@ -597,8 +466,8 @@ describe('About Component', () => {
   })
 
   test('triggers toaster error when GraphQL request fails for topContributors', async () => {
-    ;(useQuery as jest.Mock).mockImplementation((query, options) => {
-      if (query === GET_TOP_CONTRIBUTORS && options?.variables?.key === 'nest') {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
+      if (query === GetTopContributorsDocument && options?.variables?.key === 'nest') {
         return { loading: false, data: null, error: new Error('GraphQL error') }
       }
       return {
@@ -683,5 +552,38 @@ describe('About Component', () => {
     expect(screen.getByText('Timeline Event 2')).toBeInTheDocument()
     expect(screen.getByText('Timeline description 1')).toBeInTheDocument()
     expect(screen.getByText('Timeline description 2')).toBeInTheDocument()
+  })
+
+  test('triggers toaster error when GraphQL request fails for a leader', async () => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
+      if (query === GetLeaderDataDocument && options?.variables?.key === 'arkid15r') {
+        return { loading: false, data: null, error: new Error('GraphQL error for leader') }
+      }
+      if (query === GetProjectMetadataDocument) {
+        return mockProjectData
+      }
+      if (query === GetTopContributorsDocument) {
+        return mockTopContributorsData
+      }
+      if (query === GetLeaderDataDocument) {
+        return mockUserData(options?.variables?.key)
+      }
+      return { loading: true }
+    })
+
+    await act(async () => {
+      render(<About />)
+    })
+
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalledWith({
+        color: 'danger',
+        description: 'GraphQL error for leader',
+        shouldShowTimeoutProgress: true,
+        timeout: 5000,
+        title: 'Server Error',
+        variant: 'solid',
+      })
+    })
   })
 })

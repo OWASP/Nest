@@ -1,10 +1,10 @@
 'use client'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
-import { GET_COMMUNITY_SNAPSHOTS } from 'server/queries/snapshotQueries'
+import { GetCommunitySnapshotsDocument } from 'types/__generated__/snapshotQueries.generated'
 import type { Snapshot } from 'types/snapshot'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SnapshotCard from 'components/SnapshotCard'
@@ -13,7 +13,7 @@ const SnapshotsPage: React.FC = () => {
   const [snapshots, setSnapshots] = useState<Snapshot[] | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_COMMUNITY_SNAPSHOTS)
+  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetCommunitySnapshotsDocument)
 
   useEffect(() => {
     if (graphQLData) {

@@ -63,45 +63,43 @@ export const projectTimeline: ProjectTimeline[] = [
     title: 'Project Inception',
     description:
       'Initial brainstorming and vision by Arkadii Yakovets & Starr Brown to solve OWASP project navigation challenges.',
-    year: 'Aug 2024',
+    year: 'August 2024',
   },
   {
     title: 'Backend Minimum Viable Product',
     description:
       'Backend foundations built by Arkadii Yakovets using Django and Docker. GitHub sync implemented for automated data updates.',
-    year: 'Aug 2024',
+    year: 'August 2024',
   },
   {
     title: 'NestBot for Slack Community Integration',
     description:
       'A key feature allowing users to browse and search all OWASP projects effectively.',
-    year: 'Sep 2024',
+    year: 'September 2024',
   },
   {
     title: 'Initial Frontend Development',
     description: 'Frontend initially developed by Kate Golovanova using Vue.js and Bootstrap.',
-    year: 'Sep 2024',
+    year: 'September 2024',
   },
   {
     title: 'New React-based Frontend',
     description:
       'Started transitioning the frontend from Vue.js to React for better performance and scalability.',
-    year: 'Nov 2024',
+    year: 'November 2024',
   },
   {
     title: 'NestBot Commands and Event Handlers Expansion',
     description:
       'Enhanced NestBot with advanced command processing and intelligent event handlers to improve user interaction efficiency.',
-    year: 'Jan 2025',
+    year: 'January 2025',
   },
-
   {
     title: 'First Official Release and Production Launch',
     description:
       'We officially launched OWASP Nest to the public, inviting the community to explore and contribute.',
-    year: 'Feb 2025',
+    year: 'February 2025',
   },
-
   {
     title: 'GSoC 2025 Participation',
     description: 'OWASP Nest accepted for Google Summer of Code 2025 as part of OWASP.',
@@ -112,6 +110,18 @@ export const projectTimeline: ProjectTimeline[] = [
     description:
       'We started sponsoring some interesting projects that have not made it to the GSoC 2025.',
     year: 'June 2025',
+  },
+  {
+    title: 'OWASP Nest Sponsorship Program Expansion',
+    description:
+      'OWASP Nest expanded its Sponsorship Program to support ongoing project maintenance and new initiatives.',
+    year: 'October 2025',
+  },
+  {
+    title: 'Lab Level Promotion',
+    description:
+      "OWASP Nest promoted to Lab level, marking a significant milestone in the project's growth and maturity within the OWASP ecosystem",
+    year: 'October 2025',
   },
 ]
 

@@ -23,6 +23,7 @@ class TestRepositoryNode:
             "created_at",
             "description",
             "forks_count",
+            "is_archived",
             "issues",
             "key",
             "languages",
@@ -202,3 +203,16 @@ class TestRepositoryNode:
 
         result = RepositoryNode.url(mock_repository)
         assert result == "https://github.com/test-org/test-repo"
+
+    def test_is_archived_field_exists(self):
+        """Test that is_archived field is exposed in the GraphQL schema."""
+        field_names = {field.name for field in RepositoryNode.__strawberry_definition__.fields}
+        assert "is_archived" in field_names, (
+            "is_archived field should be exposed in RepositoryNode"
+        )
+
+    def test_resolve_is_archived(self):
+        """Test is_archived field type."""
+        field = self._get_field_by_name("is_archived")
+        assert field is not None
+        assert field.type is bool

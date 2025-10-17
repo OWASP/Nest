@@ -1,5 +1,5 @@
 'use client'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import {
   faCodeMerge,
   faFolderOpen,
@@ -12,21 +12,24 @@ import { useParams } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import React, { useState, useEffect, useRef } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
-import { GET_USER_DATA } from 'server/queries/userQueries'
+
+import { GetUserDataDocument } from 'types/__generated__/userQueries.generated'
+import { Badge } from 'types/badge'
 import type { Issue } from 'types/issue'
 import type { Milestone } from 'types/milestone'
 import type { RepositoryCardProps } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
-import type { UserDetails } from 'types/user'
+import type { User } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
+import Badges from 'components/Badges'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const UserDetailsPage: React.FC = () => {
-  const { memberKey } = useParams()
-  const [user, setUser] = useState<UserDetails | null>()
+  const { memberKey } = useParams<{ memberKey: string }>()
+  const [user, setUser] = useState<User | null>()
   const [issues, setIssues] = useState<Issue[]>([])
   const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
   const [milestones, setMilestones] = useState<Milestone[]>([])
@@ -37,7 +40,7 @@ const UserDetailsPage: React.FC = () => {
   const [username, setUsername] = useState('')
   const [isPrivateContributor, setIsPrivateContributor] = useState(false)
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_USER_DATA, {
+  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetUserDataDocument, {
     variables: { key: memberKey },
   })
 
@@ -185,24 +188,39 @@ const UserDetailsPage: React.FC = () => {
   }
 
   const UserSummary = () => (
-    <div className="flex flex-col items-start lg:flex-row">
-      <div className="mb-4 flex-shrink-0 self-center lg:mr-6 lg:mb-0 lg:self-start">
-        <Image
-          width={200}
-          height={200}
-          className="h-[200px] w-[200px] rounded-full border-2 border-white bg-white object-cover shadow-md dark:border-gray-800 dark:bg-gray-600/60"
-          src={user?.avatarUrl || '/placeholder.svg'}
-          alt={user?.name || user?.login || 'User Avatar'}
-        />
-      </div>
-      <div className="flex w-full flex-1 flex-col">
-        <div className="mb-0 text-center lg:mb-4 lg:ml-[26px] lg:text-left">
-          <Link href={user?.url || '#'} className="text-xl font-bold text-blue-400 hover:underline">
-            @{user?.login}
-          </Link>
+    <div className="mt-4 flex flex-col items-center lg:flex-row">
+      <Image
+        width={200}
+        height={200}
+        className="mr-4 h-[200px] w-[200px] rounded-full border-2 border-white bg-white object-cover shadow-md dark:border-gray-800 dark:bg-gray-600/60"
+        src={user?.avatarUrl || '/placeholder.svg'}
+        alt={user?.name || user?.login || 'User Avatar'}
+      />
+      <div className="w-full text-center lg:text-left">
+        <div className="pl-0 lg:pl-4">
+          <div className="flex items-center justify-center gap-3 text-center text-sm text-gray-500 lg:justify-start lg:text-left dark:text-gray-400">
+            <Link
+              href={user?.url || '#'}
+              className="text-xl font-bold text-blue-400 hover:underline"
+            >
+              @{user?.login}
+            </Link>
+            {user?.badges && user.badges.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {user.badges.slice().map((badge: Badge) => (
+                  <React.Fragment key={badge.id}>
+                    <Badges
+                      name={badge.name}
+                      cssClass={badge.cssClass || 'fa-medal'}
+                      showTooltip={true}
+                    />
+                  </React.Fragment>
+                ))}
+              </div>
+            )}
+          </div>
           <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
         </div>
-
         {!isPrivateContributor && (
           <div className="hidden w-full lg:block">
             <Heatmap />

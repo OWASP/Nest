@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState } from 'react'
 import type { RepositoriesCardProps, RepositoryCardProps } from 'types/project'
+import ArchivedBadge from 'components/ArchivedBadge'
 import InfoItem from 'components/InfoItem'
 import ShowMoreButton from 'components/ShowMoreButton'
 import { TruncatedText } from 'components/TruncatedText'
@@ -38,12 +39,19 @@ const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
 
   return (
     <div className="flex h-46 w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
-      <button
-        onClick={handleClick}
-        className="text-start font-semibold text-blue-400 hover:underline"
-      >
-        <TruncatedText text={details?.name} />
-      </button>
+      <div className="flex items-start justify-between gap-2">
+        <button
+          onClick={handleClick}
+          className="min-w-0 flex-1 text-start font-semibold text-blue-400 hover:underline"
+        >
+          <TruncatedText text={details?.name} />
+        </button>
+        {details.isArchived && (
+          <div className="flex-shrink-0">
+            <ArchivedBadge size="sm" showIcon={false} />
+          </div>
+        )}
+      </div>
 
       <div className="flex flex-col gap-2 text-sm">
         <InfoItem icon={faStar} pluralizedName="Stars" unit="Star" value={details.starsCount} />

@@ -1,10 +1,10 @@
 'use client'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
-import { GET_CHAPTER_DATA } from 'server/queries/chapterQueries'
+import { GetChapterDataDocument } from 'types/__generated__/chapterQueries.generated'
 import type { Chapter } from 'types/chapter'
 import type { Contributor } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
@@ -12,12 +12,12 @@ import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 export default function ChapterDetailsPage() {
-  const { chapterKey } = useParams()
+  const { chapterKey } = useParams<{ chapterKey: string }>()
   const [chapter, setChapter] = useState<Chapter>({} as Chapter)
   const [topContributors, setTopContributors] = useState<Contributor[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const { data, error: graphQLRequestError } = useQuery(GET_CHAPTER_DATA, {
+  const { data, error: graphQLRequestError } = useQuery(GetChapterDataDocument, {
     variables: { key: chapterKey },
   })
 
@@ -63,6 +63,7 @@ export default function ChapterDetailsPage() {
     <DetailsCard
       details={details}
       entityKey={chapter.key}
+      entityLeaders={chapter.entityLeaders}
       geolocationData={[chapter]}
       isActive={chapter.isActive}
       socialLinks={chapter.relatedUrls}

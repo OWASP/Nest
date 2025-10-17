@@ -12,8 +12,8 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  Date: { input: any; output: any; }
-  DateTime: { input: any; output: any; }
+  Date: { input: string | number; output: string | number; }
+  DateTime: { input: string | number; output: string | number; }
   JSON: { input: any; output: any; }
   UUID: { input: any; output: any; }
 };
@@ -50,6 +50,7 @@ export type ChapterNode = Node & {
   __typename?: 'ChapterNode';
   country: Scalars['String']['output'];
   createdAt: Scalars['Float']['output'];
+  entityLeaders: Array<EntityMemberNode>;
   geoLocation?: Maybe<GeoLocationType>;
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
@@ -73,6 +74,7 @@ export type CommitteeNode = Node & {
   __typename?: 'CommitteeNode';
   contributorsCount: Scalars['Int']['output'];
   createdAt: Scalars['Float']['output'];
+  entityLeaders: Array<EntityMemberNode>;
   forksCount: Scalars['Int']['output'];
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
@@ -119,6 +121,20 @@ export type CreateProgramInput = {
   name: Scalars['String']['input'];
   startedAt: Scalars['DateTime']['input'];
   tags?: Array<Scalars['String']['input']>;
+};
+
+export type EntityMemberNode = Node & {
+  __typename?: 'EntityMemberNode';
+  description: Scalars['String']['output'];
+  /** The Globally Unique ID of this object */
+  id: Scalars['ID']['output'];
+  isActive: Scalars['Boolean']['output'];
+  isReviewed: Scalars['Boolean']['output'];
+  member?: Maybe<UserNode>;
+  memberEmail: Scalars['String']['output'];
+  memberName: Scalars['String']['output'];
+  order: Scalars['Int']['output'];
+  role: Scalars['String']['output'];
 };
 
 export type EventNode = Node & {
@@ -451,6 +467,7 @@ export type ProjectNode = Node & {
   __typename?: 'ProjectNode';
   contributorsCount: Scalars['Int']['output'];
   createdAt?: Maybe<Scalars['DateTime']['output']>;
+  entityLeaders: Array<EntityMemberNode>;
   forksCount: Scalars['Int']['output'];
   healthMetricsLatest?: Maybe<ProjectHealthMetricsNode>;
   healthMetricsList: Array<ProjectHealthMetricsNode>;
@@ -749,6 +766,7 @@ export type RepositoryNode = Node & {
   forksCount: Scalars['Int']['output'];
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
+  isArchived: Scalars['Boolean']['output'];
   issues: Array<IssueNode>;
   key: Scalars['String']['output'];
   languages: Array<Scalars['String']['output']>;
@@ -786,6 +804,7 @@ export type SnapshotNode = Node & {
   __typename?: 'SnapshotNode';
   createdAt: Scalars['DateTime']['output'];
   endAt: Scalars['DateTime']['output'];
+  entityLeaders: Array<EntityMemberNode>;
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
   key: Scalars['String']['output'];
@@ -859,6 +878,7 @@ export type UpdateProgramStatusInput = {
 export type UserNode = {
   __typename?: 'UserNode';
   avatarUrl: Scalars['String']['output'];
+  badgeCount: Scalars['Int']['output'];
   badges: Array<BadgeNode>;
   bio: Scalars['String']['output'];
   company: Scalars['String']['output'];

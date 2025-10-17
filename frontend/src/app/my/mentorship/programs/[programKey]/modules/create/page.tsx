@@ -1,15 +1,14 @@
 'use client'
-
-import { useMutation, useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 import { ErrorDisplay } from 'app/global-error'
-import { CREATE_MODULE } from 'server/mutations/moduleMutations'
-import { GET_PROGRAM_ADMIN_DETAILS } from 'server/queries/programsQueries'
+import { ExperienceLevelEnum } from 'types/__generated__/graphql'
+import { CreateModuleDocument } from 'types/__generated__/moduleMutations.generated'
+import { GetProgramAdminDetailsDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
-import { EXPERIENCE_LEVELS } from 'types/mentorship'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
@@ -19,13 +18,13 @@ const CreateModulePage = () => {
   const { programKey } = useParams() as { programKey: string }
   const { data: sessionData, status: sessionStatus } = useSession()
 
-  const [createModule, { loading: mutationLoading }] = useMutation(CREATE_MODULE)
+  const [createModule, { loading: mutationLoading }] = useMutation(CreateModuleDocument)
 
   const {
     data: programData,
     loading: queryLoading,
     error: queryError,
-  } = useQuery(GET_PROGRAM_ADMIN_DETAILS, {
+  } = useQuery(GetProgramAdminDetailsDocument, {
     variables: { programKey },
     skip: !programKey,
     fetchPolicy: 'network-only',
@@ -34,7 +33,7 @@ const CreateModulePage = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    experienceLevel: EXPERIENCE_LEVELS.BEGINNER,
+    experienceLevel: ExperienceLevelEnum.Beginner,
     startedAt: '',
     endedAt: '',
     domains: '',

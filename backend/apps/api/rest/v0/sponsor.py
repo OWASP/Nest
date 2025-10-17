@@ -3,33 +3,55 @@
 from http import HTTPStatus
 from typing import Literal
 
-from django.conf import settings
 from django.http import HttpRequest
-from django.views.decorators.cache import cache_page
-from ninja import Field, FilterSchema, Path, Query, Router, Schema
+from ninja import Field, FilterSchema, Path, Query, Schema
 from ninja.decorators import decorate_view
-from ninja.pagination import PageNumberPagination, paginate
+from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
-from apps.owasp.models.sponsor import Sponsor
+from apps.api.decorators.cache import cache_response
+from apps.owasp.models.sponsor import Sponsor as SponsorModel
 
-router = Router()
+router = RouterPaginated(tags=["Sponsors"])
 
 
-class SponsorErrorResponse(Schema):
-    """Sponsor error response schema."""
+class SponsorBase(Schema):
+    """Base schema for Sponsor (used in list endpoints)."""
+
+    image_url: str
+    key: str
+    name: str
+    sponsor_type: str
+    url: str
+
+
+class Sponsor(SponsorBase):
+    """Schema for Sponsor (minimal fields for list display)."""
+
+
+class SponsorDetail(SponsorBase):
+    """Detail schema for Sponsor (used in single item endpoints)."""
+
+    description: str
+    is_member: bool
+    job_url: str
+    member_type: str
+
+
+class SponsorError(Schema):
+    """Sponsor error schema."""
 
     message: str
 
 
-class SponsorFilterSchema(FilterSchema):
-    """Filter schema for Sponsor."""
+class SponsorFilter(FilterSchema):
+    """Filter for Sponsor."""
 
     is_member: bool | None = Field(
         None,
         description="Member status of the sponsor",
     )
-    member_type: Sponsor.MemberType | None = Field(
+    member_type: SponsorModel.MemberType | None = Field(
         None,
         description="Member type of the sponsor",
     )
@@ -41,59 +63,43 @@ class SponsorFilterSchema(FilterSchema):
     )
 
 
-class SponsorSchema(Schema):
-    """Schema for Sponsor."""
-
-    description: str
-    image_url: str
-    is_member: bool
-    job_url: str
-    key: str
-    member_type: str
-    name: str
-    sponsor_type: str
-    url: str
-
-
 @router.get(
     "/",
     description="Retrieve a paginated list of OWASP sponsors.",
     operation_id="list_sponsors",
-    response={HTTPStatus.OK: list[SponsorSchema]},
+    response=list[Sponsor],
     summary="List sponsors",
-    tags=["Sponsors"],
 )
-@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
-@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
+@decorate_view(cache_response())
 def list_sponsors(
     request: HttpRequest,
-    filters: SponsorFilterSchema = Query(...),
+    filters: SponsorFilter = Query(...),
     ordering: Literal["name", "-name"] | None = Query(
         None,
         description="Ordering field",
     ),
-) -> list[SponsorSchema]:
+) -> list[Sponsor]:
     """Get sponsors."""
-    return filters.filter(Sponsor.objects.order_by(ordering or "name"))
+    return filters.filter(SponsorModel.objects.order_by(ordering or "name"))
 
 
 @router.get(
-    "/{str:sponsor_key}",
+    "/{str:sponsor_id}",
     description="Retrieve a sponsor details.",
     operation_id="get_sponsor",
     response={
-        HTTPStatus.NOT_FOUND: SponsorErrorResponse,
-        HTTPStatus.OK: SponsorSchema,
+        HTTPStatus.NOT_FOUND: SponsorError,
+        HTTPStatus.OK: SponsorDetail,
     },
     summary="Get sponsor",
-    tags=["Sponsors"],
 )
+@decorate_view(cache_response())
 def get_sponsor(
     request: HttpRequest,
-    sponsor_key: str = Path(..., example="adobe"),
-) -> SponsorSchema | SponsorErrorResponse:
+    sponsor_id: str = Path(..., example="adobe"),
+) -> SponsorDetail | SponsorError:
     """Get sponsor."""
-    if sponsor := Sponsor.objects.filter(key__iexact=sponsor_key).first():
+    if sponsor := SponsorModel.objects.filter(key__iexact=sponsor_id).first():
         return sponsor
 
     return Response({"message": "Sponsor not found"}, status=HTTPStatus.NOT_FOUND)

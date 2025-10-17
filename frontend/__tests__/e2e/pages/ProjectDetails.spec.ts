@@ -125,4 +125,11 @@ test.describe('Project Details Page', () => {
     await expect(page.getByText('Forks Trend')).toBeVisible()
     await expect(page.getByText('Days Since Last Commit and Release')).toBeVisible()
   })
+
+  test('should have leaders block', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Leaders' })).toBeVisible()
+    const userCard = page.getByRole('button', { name: /Alice/ })
+    await expect(userCard.locator('h3')).toHaveText('Alice')
+    await expect(userCard.getByText('Project Leader')).toBeVisible()
+  })
 })
