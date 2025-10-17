@@ -17,6 +17,9 @@ __pycache__
 .python_history
 .python-version
 .ruff_cache
+**/.terraform/
+*.tfstate
+*.tfstate.*
 .venv/
 .vscode
 *.code-workspace
@@ -39,6 +42,7 @@ frontend/pnpm-debug.log*
 frontend/test-results/
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
+infrastructure/terraform.tfvars
 logs
 node_modules/
 TODO
