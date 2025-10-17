@@ -38,7 +38,7 @@ test.describe('Footer - Desktop (Chrome)', () => {
 })
 
 // Mobile tests (iPhone 13)
-test.use({
+test.use({  
   ...devices['iPhone 13'],
   isMobile: true,
 })

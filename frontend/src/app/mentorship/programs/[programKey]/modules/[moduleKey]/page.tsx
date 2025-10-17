@@ -10,7 +10,7 @@ import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import { getSimpleDuration } from 'components/ModuleCard'
-
+                                                                                                                                                                        
 const ModuleDetailsPage = () => {
   const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
   const [module, setModule] = useState<Module | null>(null)
