@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.56.0-jammy
+FROM mcr.microsoft.com/playwright:v1.56.1-jammy
 
 ENV FORCE_COLOR=1 \
     NPM_CACHE="/app/.npm" \
