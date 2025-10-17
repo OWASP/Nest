@@ -20,7 +20,7 @@ class Prompt(TimestampedModel):
 
     name = models.CharField(verbose_name="Name", max_length=100)
     key = models.CharField(verbose_name="Key", max_length=100, unique=True, blank=True)
-    text = models.TextField(verbose_name="Text", max_length=2000, default="", blank=True)
+    text = models.TextField(verbose_name="Text", max_length=3000, default="", blank=True)
 
     def __str__(self):
         """Prompt human readable representation."""
