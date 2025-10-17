@@ -16,7 +16,7 @@ class Generator:
     """Generates answers to user queries based on retrieved context."""
 
     MAX_TOKENS = 2000
-    TEMPERATURE = 0.4
+    TEMPERATURE = 0.5
 
     def __init__(self, chat_model: str = "gpt-4o"):
         """Initialize the Generator.
@@ -53,8 +53,16 @@ class Generator:
         for i, chunk in enumerate(context_chunks):
             source_name = chunk.get("source_name", f"Unknown Source {i + 1}")
             text = chunk.get("text", "")
+            additional_context = chunk.get("additional_context", {})
 
-            context_block = f"Source Name: {source_name}\nContent: {text}"
+            if additional_context:
+                context_block = (
+                    f"Source Name: {source_name}\nContent: {text}\n"
+                    f"Additional Context: {additional_context}"
+                )
+            else:
+                context_block = f"Source Name: {source_name}\nContent: {text}"
+
             formatted_context.append(context_block)
 
         return "\n\n---\n\n".join(formatted_context)

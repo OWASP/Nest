@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-from apps.ai.agent.tools.rag.rag_tool import RagTool
+from apps.ai.agent.agent import AgenticRAGAgent
 from apps.slack.blocks import markdown
 
 logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ def get_blocks(query: str) -> list[dict]:
 
 
 def process_ai_query(query: str) -> str | None:
-    """Process the AI query using the RAG tool.
+    """Process the AI query using the agentic RAG agent.
 
     Args:
         query (str): The user's question.
@@ -38,12 +38,9 @@ def process_ai_query(query: str) -> str | None:
         str | None: The AI response or None if error occurred.
 
     """
-    rag_tool = RagTool(
-        chat_model="gpt-4o",
-        embedding_model="text-embedding-3-small",
-    )
-
-    return rag_tool.query(question=query)
+    agent = AgenticRAGAgent()
+    result = agent.run(query=query)
+    return result["answer"]
 
 
 def get_error_blocks() -> list[dict]:
