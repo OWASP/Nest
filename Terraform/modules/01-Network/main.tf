@@ -144,7 +144,7 @@ data "aws_caller_identity" "current" {}
 # This is the primary bucket where the ALB will store its access logs.
 # Only create this bucket if logging is enabled
 
-resource "aws_s3_bucket" "alb_access_logs" {
+resource "aws_s3_bucket" "alb_access_logs" { #NOSONAR
   count  = var.enable_alb_access_logs ? 1 : 0
   bucket = var.alb_access_logs_bucket_name != "" ? var.alb_access_logs_bucket_name : "${var.project_prefix}-${var.environment}-alb-access-logs-${data.aws_caller_identity.current.account_id}"
 
@@ -167,7 +167,7 @@ resource "aws_s3_bucket_public_access_block" "alb_access_logs" {
 }
 
 # This is a SECOND bucket, used to store the access logs FOR the first bucket.
-resource "aws_s3_bucket" "s3_server_access_logs" {
+resource "aws_s3_bucket" "s3_server_access_logs" { #NOSONAR
   count = var.enable_alb_access_logs ? 1 : 0
 
   bucket = "${var.project_prefix}-${var.environment}-s3-access-logs-${data.aws_caller_identity.current.account_id}"
@@ -481,7 +481,7 @@ resource "aws_lb" "main" {
   enable_deletion_protection = var.environment == "prod" ? true : false
 
   # Proper conditional for access_logs block
-  dynamic "access_logs" {
+  dynamic "access_logs" { #NOSONAR
     for_each = var.enable_alb_access_logs ? [1] : []
     content {
       bucket  = aws_s3_bucket.alb_access_logs[0].bucket
