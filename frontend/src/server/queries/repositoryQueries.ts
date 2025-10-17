@@ -9,6 +9,7 @@ export const GET_REPOSITORY_DATA = gql`
       createdAt
       description
       forksCount
+      isArchived
       key
       issues {
         id
