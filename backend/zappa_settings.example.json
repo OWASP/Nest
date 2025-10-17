@@ -24,7 +24,7 @@
     },
     "manage_roles": false,
     "project_name": "nest-backend",
-    "role_arn": "${ZAPPA_ROLE_ARM}",
+    "role_arn": "${ZAPPA_ROLE_ARN}",
     "runtime": "python3.13",
     "s3_bucket": "${ZAPPA_S3_BUCKET}",
     "slim_handler": true,
