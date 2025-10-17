@@ -59,8 +59,9 @@ resource "aws_subnet" "private" {
 
 #  Routing and NAT Gateway for Private Subnets 
 
-#  We create a SINGLE NAT Gateway and a SINGLE private route table. This is more
-# resilient, cost-effective, and simpler to manage than a per-AZ NAT Gateway.
+#  We create a SINGLE NAT Gateway and a SINGLE private route table. This is a cost
+# optimization but introduces a single-AZ egress SPOF compared to per-AZ NAT gateways.
+# Scale to one NAT per AZ if higher availability is required.
 
 resource "aws_eip" "nat" {
   tags = merge(
@@ -220,7 +221,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "alb_access_logs" 
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
     }
-    bucket_key_enabled = true
+    
   }
 }
 
@@ -232,7 +233,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "s3_server_access_
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
     }
-    bucket_key_enabled = true
+    
   }
 }
 
