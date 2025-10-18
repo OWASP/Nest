@@ -223,17 +223,6 @@ jobs:
           platforms: linux/amd64
           tags: owasp/nest:test-backend-e2e-latest
 
-      - name: Run migrations
-        run: |
-          docker run --network host \
-          -e DJANGO_DB_HOST=localhost \
-          -e DJANGO_DB_NAME=nest_db_e2e \
-          -e DJANGO_DB_PASSWORD=nest_user_e2e_password \
-          -e DJANGO_DB_PORT=5432 \
-          -e DJANGO_DB_USER=nest_user_e2e \
-          -e DJANGO_SETTINGS_MODULE=settings.test \
-          --env-file backend/.env.example owasp/nest:test-backend-e2e-latest python manage.py migrate
-
       - name: Load Postgres data
         env:
           PGPASSWORD: nest_user_e2e_password
