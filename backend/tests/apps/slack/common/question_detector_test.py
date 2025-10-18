@@ -205,7 +205,7 @@ class TestQuestionDetector:
                 ObjectDoesNotExist,
                 match="Prompt with key 'slack-question-detector-system-prompt' not found",
             ):
-                detector.is_owasp_question_with_openai("What is OWASP?")
+                detector.is_owasp_question_with_openai("What is OWASP?", [])
 
     def test_is_owasp_question_with_openai_empty_prompt(self):
         """Test OpenAI question detection when prompt is empty."""
@@ -222,7 +222,7 @@ class TestQuestionDetector:
                 ObjectDoesNotExist,
                 match="Prompt with key 'slack-question-detector-system-prompt' not found",
             ):
-                detector.is_owasp_question_with_openai("What is OWASP?")
+                detector.is_owasp_question_with_openai("What is OWASP?", [])
 
     def test_is_owasp_question_with_openai_success_yes(self, sample_context_chunks):
         """Test OpenAI question detection with YES response."""
