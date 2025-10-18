@@ -54,6 +54,7 @@ export type RepositoriesCardProps = {
 export type RepositoryCardProps = {
   contributorsCount: number
   forksCount: number
+  isArchived?: boolean
   key?: string
   name: string
   openIssuesCount: number
