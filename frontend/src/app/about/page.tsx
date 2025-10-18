@@ -51,24 +51,26 @@ const leaders = {
 const projectKey = 'nest'
 
 const About = () => {
-  const { data: projectMetadataResponse, error: projectMetadataRequestError } = useQuery(
-    GetProjectMetadataDocument,
-    {
-      variables: { key: projectKey },
-    }
-  )
+  const {
+    data: projectMetadataResponse,
+    error: projectMetadataRequestError,
+    loading: projectMetadataLoading,
+  } = useQuery(GetProjectMetadataDocument, {
+    variables: { key: projectKey },
+  })
 
-  const { data: topContributorsResponse, error: topContributorsRequestError } = useQuery(
-    GetTopContributorsDocument,
-    {
-      variables: {
-        excludedUsernames: Object.keys(leaders),
-        hasFullName: true,
-        key: projectKey,
-        limit: 24,
-      },
-    }
-  )
+  const {
+    data: topContributorsResponse,
+    error: topContributorsRequestError,
+    loading: topContributorsLoading,
+  } = useQuery(GetTopContributorsDocument, {
+    variables: {
+      excludedUsernames: Object.keys(leaders),
+      hasFullName: true,
+      key: projectKey,
+      limit: 24,
+    },
+  })
 
   const { leadersData, isLoading: leadersLoading } = useLeadersData()
 
@@ -95,12 +97,7 @@ const About = () => {
     }
   }, [topContributorsResponse, topContributorsRequestError])
 
-  const isLoading =
-    !projectMetadataResponse ||
-    !topContributorsResponse ||
-    (projectMetadataRequestError && !projectMetadata) ||
-    (topContributorsRequestError && !topContributors) ||
-    leadersLoading
+  const isLoading = projectMetadataLoading || topContributorsLoading || leadersLoading
 
   if (isLoading) {
     return <LoadingSpinner />
