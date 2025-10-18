@@ -18,24 +18,15 @@ from apps.api.rest.v0.repository import router as repository_router
 from apps.api.rest.v0.sponsor import router as sponsor_router
 
 ROUTERS = {
-    # Chapters.
     "/chapters": chapter_router,
-    # Committees.
     "/committees": committee_router,
-    # Community.
+    "/events": event_router,
+    "/issues": issue_router,
     "/members": member_router,
     "/organizations": organization_router,
-    # Events.
-    "/events": event_router,
-    # Issues.
-    "/issues": issue_router,
-    # Projects.
     "/projects": project_router,
-    # Releases.
     "/releases": release_router,
-    # Repositories.
     "/repositories": repository_router,
-    # Sponsors.
     "/sponsors": sponsor_router,
 }
 
@@ -47,7 +38,7 @@ api_settings = {
     "docs": Swagger(settings={"persistAuthorization": True}),
     "throttle": [AuthRateThrottle("10/s")],
     "title": "OWASP Nest",
-    "version": "0.2.4",
+    "version": "0.2.5",
 }
 
 api_settings_customization = {}
