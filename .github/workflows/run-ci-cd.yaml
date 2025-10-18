@@ -176,6 +176,70 @@ jobs:
         run: |
           docker run -e DJANGO_SETTINGS_MODULE=settings.test --env-file backend/.env.example owasp/nest:test-backend-latest pytest
 
+  run-backend-e2e:
+    name: Run backend end-to-end tests
+    needs:
+      - scan-code
+      - scan-ci-dependencies
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: pgvector/pgvector:pg16
+        environment:
+          POSTGRES_DB: ${DJANGO_DB_NAME:-nest_db_e2e}
+          POSTGRES_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_e2e_password}
+          POSTGRES_USER: ${DJANGO_DB_USER:-nest_user_e2e}
+        options: >-
+          --health-cmd="pg_isready -U ${DJANGO_DB_USER:-nest_user_e2e} -d ${DJANGO_DB_NAME:-nest_db_e2e} -h localhost -p 5432"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=5
+        ports:
+          - 5432:5432
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
+
+      - name: Wait for database to be ready
+        run: |
+          until docker exec ${{ job.services.db.id }} pg_isready -U ${DJANGO_DB_USER:-nest_user_e2e} -d ${DJANGO_DB_NAME:-nest_db_e2e}; do
+            echo "Waiting for database..."
+            sleep 5
+          done
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get install -y postgresql-client
+
+      - name: Build backend e2e test image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        with:
+          cache-from: |
+            type=gha
+          cache-to: |
+            type=gha,compression=zstd
+          context: backend
+          file: backend/docker/Dockerfile
+          load: true
+          platforms: linux/amd64
+          tags: owasp/nest:test-backend-e2e-latest
+
+      - name: Run migrations
+        run: |
+          docker run -e --env-file backend/.env.example owasp/nest:test-backend-e2e-latest python manage.py migrate
+
+      - name: Load Postgres data
+        env:
+          PGPASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_e2e_password}
+        run: |
+          gunzip -c backend/data/nest-e2e-data.sql.gz | psql -h localhost -U ${DJANGO_DB_USER:-nest_user_e2e} -d ${DJANGO_DB_NAME:-nest_db_e2e}
+
+      - name: Run backend end-to-end tests
+        run: |
+          docker run -e DJANGO_SETTINGS_MODULE=settings.test --env-file backend/.env.example owasp/nest:test-backend-e2e-latest pytest
+
   run-frontend-unit-tests:
     name: Run frontend unit tests
     needs:
