@@ -81,7 +81,9 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
       title={displayTooltip}
       aria-label={config.ariaLabel}
     >
-      {showIcon && <FontAwesomeIcon icon={displayIcon} className="h-3 w-3" />}
+      {showIcon && (
+        <FontAwesomeIcon icon={displayIcon} className="h-3 w-3" data-testid="status-icon" />
+      )}
       {displayText}
     </span>
   )

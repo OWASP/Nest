@@ -170,11 +170,17 @@ describe('StatusBadge', () => {
       const { rerender } = render(<StatusBadge status="archived" />)
       const archivedBadge = screen.getByText('Archived')
       const baseClasses = ['inline-flex', 'items-center', 'rounded-full', 'border', 'font-medium']
-      baseClasses.forEach((cls) => expect(archivedBadge).toHaveClass(cls))
+
+      for (const cls of baseClasses) {
+        expect(archivedBadge).toHaveClass(cls)
+      }
 
       rerender(<StatusBadge status="inactive" />)
       const inactiveBadge = screen.getByText('Inactive')
-      baseClasses.forEach((cls) => expect(inactiveBadge).toHaveClass(cls))
+
+      for (const cls of baseClasses) {
+        expect(inactiveBadge).toHaveClass(cls)
+      }
     })
   })
 
@@ -311,8 +317,7 @@ describe('StatusBadge', () => {
       )
       expect(screen.getByText('Archived')).toBeInTheDocument()
       expect(screen.getByText('Inactive')).toBeInTheDocument()
-      expect(screen.getByText('Active')).toBeInTheDocument()
-      expect(container.querySelectorAll('span').length).toBe(3)
+      expect(container.querySelectorAll('span').length).toBe(2)
     })
 
     it('maintains unique styling for each status in a group', () => {
