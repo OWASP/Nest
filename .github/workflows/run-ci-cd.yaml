@@ -225,7 +225,7 @@ jobs:
 
       - name: Run migrations
         run: |
-          docker run --env-file backend/.env.example owasp/nest:test-backend-e2e-latest python manage.py migrate
+          docker run --network host -e DJANGO_SETTINGS_MODULE=settings.test --env-file backend/.env.example owasp/nest:test-backend-e2e-latest python manage.py migrate
 
       - name: Load Postgres data
         env:
