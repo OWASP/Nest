@@ -38,8 +38,16 @@ const ModuleIssueDetailsPage = () => {
 
     const deadlineDate = new Date(deadline)
     const today = new Date()
-    const isOverdue = deadlineDate < today
-    const daysLeft = Math.ceil((deadlineDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+
+    const deadlineUTC = new Date(
+      deadlineDate.getUTCFullYear(),
+      deadlineDate.getUTCMonth(),
+      deadlineDate.getUTCDate()
+    )
+    const todayUTC = new Date(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
+
+    const isOverdue = deadlineUTC < todayUTC
+    const daysLeft = Math.ceil((deadlineUTC.getTime() - todayUTC.getTime()) / (1000 * 60 * 60 * 24))
 
     const statusText = isOverdue
       ? '(overdue)'
@@ -47,9 +55,15 @@ const ModuleIssueDetailsPage = () => {
         ? '(today)'
         : `(${daysLeft} days left)`
 
+    const displayDate = deadlineDate.toLocaleDateString()
+
     return {
-      text: `${deadlineDate.toLocaleDateString()} ${statusText}`,
-      color: 'text-[#DA3633]',
+      text: `${displayDate} ${statusText}`,
+      color: isOverdue
+        ? 'text-[#DA3633]'
+        : daysLeft <= 3
+          ? 'text-[#F59E0B]'
+          : 'text-gray-600 dark:text-gray-300',
     }
   }
   const { data, loading, error } = useQuery(GET_MODULE_ISSUE_VIEW, {
@@ -230,8 +244,12 @@ const ModuleIssueDetailsPage = () => {
                       setDeadlineInput(newValue)
 
                       if (newValue && !settingDeadline && issueId) {
-                        const localDate = new Date(newValue + 'T23:59:59')
-                        const iso = localDate.toISOString()
+                        const [year, month, day] = newValue.split('-').map(Number)
+                        const utcEndOfDay = new Date(
+                          Date.UTC(year, month - 1, day, 23, 59, 59, 999)
+                        )
+                        const iso = utcEndOfDay.toISOString()
+
                         await setTaskDeadlineMutation({
                           variables: {
                             programKey,
