@@ -184,7 +184,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       db:
-        image: pgvector/pgvector:pg16
+        image: postgres:16
         env:
           POSTGRES_DB: ${DJANGO_DB_NAME:-nest_db_e2e}
           POSTGRES_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_e2e_password}
