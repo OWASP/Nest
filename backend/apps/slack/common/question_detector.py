@@ -4,13 +4,15 @@ from __future__ import annotations
 
 import logging
 import os
-import re
 
 import openai
 from django.core.exceptions import ObjectDoesNotExist
 
+from apps.ai.agent.tools.rag.retriever import Retriever
+from apps.ai.common.constants import (
+    DEFAULT_SIMILARITY_THRESHOLD,
+)
 from apps.core.models.prompt import Prompt
-from apps.slack.constants import OWASP_KEYWORDS
 
 logger = logging.getLogger(__name__)
 
@@ -18,9 +20,10 @@ logger = logging.getLogger(__name__)
 class QuestionDetector:
     """Utility class for detecting OWASP-related questions."""
 
-    MAX_TOKENS = 50
+    MAX_TOKENS = 10
     TEMPERATURE = 0.1
-    CHAT_MODEL = "gpt-4o"
+    CHAT_MODEL = "gpt-4o-mini"
+    CHUNKS_RETRIEVAL_LIMIT = 10
 
     def __init__(self):
         """Initialize the question detector.
@@ -33,54 +36,48 @@ class QuestionDetector:
             error_msg = "DJANGO_OPEN_AI_SECRET_KEY environment variable not set"
             raise ValueError(error_msg)
 
-        self.owasp_keywords = OWASP_KEYWORDS
         self.openai_client = openai.OpenAI(api_key=openai_api_key)
-
-        question_patterns = [
-            r"\?",
-            r"^(what|how|why|when|where|which|who|can|could|would|should|is|are|does|do|did)",
-            r"(help|explain|tell me|show me|guide|tutorial|example)",
-            r"(recommend|suggest|advice|opinion)",
-        ]
-
-        self.compiled_patterns = [
-            re.compile(pattern, re.IGNORECASE) for pattern in question_patterns
-        ]
+        self.retriever = Retriever()
 
     def is_owasp_question(self, text: str) -> bool:
         """Check if the input text is an OWASP-related question.
 
         This is the main public method that orchestrates the detection logic.
+
+        Args:
+            text: The input text to check.
+            context_chunks: Retrieved context chunks from the user's query.
+
         """
         if not text or not text.strip():
             return False
 
-        if not self.is_question(text):
-            return False
+        context_chunks: list[dict] = []
+        if not context_chunks:
+            context_chunks = self.retriever.retrieve(
+                query=text,
+                limit=self.CHUNKS_RETRIEVAL_LIMIT,
+                similarity_threshold=DEFAULT_SIMILARITY_THRESHOLD,
+            )
 
-        openai_result = self.is_owasp_question_with_openai(text)
+        openai_result = self.is_owasp_question_with_openai(text, context_chunks)
 
         if openai_result is None:
             logger.warning(
-                "OpenAI detection failed. Falling back to keyword matching",
+                "OpenAI detection failed.",
             )
-            return self.contains_owasp_keywords(text)
+            return False
 
-        if openai_result:
-            return True
-        if self.contains_owasp_keywords(text):
-            logger.info(
-                "OpenAI classified as non-OWASP, but keywords were detected. Overriding to TRUE."
-            )
-            return True
-        return False
+        return openai_result
 
-    def is_question(self, text: str) -> bool:
-        """Check if text appears to be a question."""
-        return any(pattern.search(text) for pattern in self.compiled_patterns)
+    def is_owasp_question_with_openai(
+        self, text: str, context_chunks: list[dict] | None = None
+    ) -> bool | None:
+        """Determine if the text is an OWASP-related question using retrieved context chunks.
 
-    def is_owasp_question_with_openai(self, text: str) -> bool | None:
-        """Determine if the text is an OWASP-related question.
+        Args:
+            text: The question text to analyze.
+            context_chunks: Retrieved context chunks from the user's query.
 
         Returns:
             - True: If the model responds with "YES".
@@ -88,13 +85,19 @@ class QuestionDetector:
             - None: If the API call fails or the response is unexpected.
 
         """
-        prompt_template = Prompt.get_slack_question_detector_prompt()
-        if not prompt_template or not prompt_template.strip():
+        prompt = Prompt.get_slack_question_detector_prompt()
+
+        if not prompt or not prompt.strip():
             error_msg = "Prompt with key 'slack-question-detector-system-prompt' not found."
             raise ObjectDoesNotExist(error_msg)
 
-        system_prompt = prompt_template.format(keywords=", ".join(self.owasp_keywords))
-        user_prompt = f'Question: "{text}"'
+        formatted_context = (
+            self.format_context_chunks(context_chunks)
+            if context_chunks
+            else "No context available"
+        )
+        system_prompt = prompt
+        user_prompt = f'Question: "{text}"\n\n Context: {formatted_context}'
 
         try:
             response = self.openai_client.chat.completions.create(
@@ -124,13 +127,33 @@ class QuestionDetector:
             logger.warning("Unexpected OpenAI response")
             return None
 
-    def contains_owasp_keywords(self, text: str) -> bool:
-        """Check if text contains OWASP-related keywords."""
-        words = re.findall(r"\b\w+\b", text)
-        text_words = set(words)
+    def format_context_chunks(self, context_chunks: list[dict]) -> str:
+        """Format the list of retrieved context chunks into a single string for analysis.
 
-        intersection = self.owasp_keywords.intersection(text_words)
-        if intersection:
-            return True
+        Args:
+            context_chunks: A list of chunk dictionaries from the retriever.
 
-        return any(" " in keyword and keyword in text for keyword in self.owasp_keywords)
+        Returns:
+            A formatted string containing the context.
+
+        """
+        if not context_chunks:
+            return "No context provided"
+
+        formatted_context = []
+        for i, chunk in enumerate(context_chunks):
+            source_name = chunk.get("source_name", f"Unknown Source {i + 1}")
+            text = chunk.get("text", "")
+            additional_context = chunk.get("additional_context", {})
+
+            if additional_context:
+                context_block = (
+                    f"Source Name: {source_name}\nContent: {text}\n"
+                    f"Additional Context: {additional_context}"
+                )
+            else:
+                context_block = f"Source Name: {source_name}\nContent: {text}"
+
+            formatted_context.append(context_block)
+
+        return "\n\n---\n\n".join(formatted_context)
