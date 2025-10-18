@@ -12,6 +12,7 @@ export const UPDATE_MODULE = gql`
       endedAt
       tags
       domains
+      labels
       projectId
       mentors {
         id
@@ -35,6 +36,7 @@ export const CREATE_MODULE = gql`
       endedAt
       domains
       tags
+      labels
       projectId
       mentors {
         id

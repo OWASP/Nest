@@ -11,10 +11,14 @@ from apps.mentorship.models.common import (
     MatchingAttributes,
     StartEndRange,
 )
+from apps.mentorship.models.managers import PublishedModuleManager
 
 
 class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedModel):
     """Module model representing a program unit."""
+
+    objects = models.Manager()
+    published_modules = PublishedModuleManager()
 
     class Meta:
         db_table = "mentorship_modules"
@@ -65,6 +69,14 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
     )
 
     # M2Ms.
+    issues = models.ManyToManyField(
+        "github.Issue",
+        verbose_name="Linked Issues",
+        related_name="mentorship_modules",
+        blank=True,
+        help_text="Issues linked to this module via label matching.",
+    )
+
     mentors = models.ManyToManyField(
         "mentorship.Mentor",
         verbose_name="Mentors",
