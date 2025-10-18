@@ -178,9 +178,6 @@ jobs:
 
   run-backend-e2e:
     name: Run backend end-to-end tests
-    needs:
-      - scan-code
-      - scan-ci-dependencies
     runs-on: ubuntu-latest
     services:
       db:
