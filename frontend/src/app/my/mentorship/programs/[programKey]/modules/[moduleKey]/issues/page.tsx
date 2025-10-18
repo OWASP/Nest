@@ -274,7 +274,7 @@ const IssuesPage = () => {
           {moduleIssues.map((issue) => (
             <div
               key={issue.objectID}
-              className="rounded-lg border border-gray-200 bg-white p-4 mt-4 shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-[#1f2327]"
+              className="mt-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-[#1f2327]"
             >
               <div className="mb-3 flex items-start justify-between gap-3">
                 <button

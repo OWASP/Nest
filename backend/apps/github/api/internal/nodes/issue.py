@@ -70,4 +70,3 @@ class IssueNode(strawberry.relay.Node):
     def pull_requests(self) -> list[PullRequestNode]:
         """Return all pull requests linked to this issue."""
         return list(self.pull_requests.select_related("author", "repository").all())
-

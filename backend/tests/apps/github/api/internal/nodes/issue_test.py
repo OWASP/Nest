@@ -26,6 +26,7 @@ class TestIssueNode:
             "repository_name",
             "assignees",
             "labels",
+            "is_merged",
             "interested_users",
             "pull_requests",
         }
