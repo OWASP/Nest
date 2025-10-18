@@ -52,13 +52,11 @@ class QuestionDetector:
         if not text or not text.strip():
             return False
 
-        context_chunks: list[dict] = []
-        if not context_chunks:
-            context_chunks = self.retriever.retrieve(
-                query=text,
-                limit=self.CHUNKS_RETRIEVAL_LIMIT,
-                similarity_threshold=DEFAULT_SIMILARITY_THRESHOLD,
-            )
+        context_chunks = self.retriever.retrieve(
+            query=text,
+            limit=self.CHUNKS_RETRIEVAL_LIMIT,
+            similarity_threshold=DEFAULT_SIMILARITY_THRESHOLD,
+        )
 
         openai_result = self.is_owasp_question_with_openai(text, context_chunks)
 
@@ -70,9 +68,7 @@ class QuestionDetector:
 
         return openai_result
 
-    def is_owasp_question_with_openai(
-        self, text: str, context_chunks: list[dict] | None = None
-    ) -> bool | None:
+    def is_owasp_question_with_openai(self, text: str, context_chunks: list[dict]) -> bool | None:
         """Determine if the text is an OWASP-related question using retrieved context chunks.
 
         Args:
