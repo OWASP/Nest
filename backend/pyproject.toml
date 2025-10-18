@@ -87,6 +87,11 @@ lint.per-file-ignores."**/__init__.py" = [
   "D104", # https://docs.astral.sh/ruff/rules/undocumented-public-package/
   "F401", # https://docs.astral.sh/ruff/rules/unused-import/
 ]
+lint.per-file-ignores."**/apps/api/rest/**/*.py" = [
+  "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
+  "B008",   # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
+]
+
 lint.per-file-ignores."**/management/commands/*.py" = [
   "D101", # https://docs.astral.sh/ruff/rules/undocumented-public-class/
   "D102", # https://docs.astral.sh/ruff/rules/undocumented-public-method/
@@ -117,10 +122,9 @@ lint.per-file-ignores."**/tests/**/*.py" = [
   "SLF001",  # https://docs.astral.sh/ruff/rules/private-member-access/
 ]
 
-lint.per-file-ignores."apps/api/rest/**/*.py" = [
-  "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
-  "B008",   # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
-]
+lint.isort.known-first-party = [ "apps", "settings" ]
+lint.isort.known-third-party = [ "django" ]
+lint.isort.section-order = [ "future", "standard-library", "third-party", "first-party", "local-folder" ]
 
 [tool.pytest.ini_options]
 DJANGO_CONFIGURATION = "Test"
