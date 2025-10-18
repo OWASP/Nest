@@ -22,9 +22,8 @@
       "DJANGO_SLACK_BOT_TOKEN": "${DJANGO_SLACK_BOT_TOKEN}",
       "DJANGO_SLACK_SIGNING_SECRET": "${DJANGO_SLACK_SIGNING_SECRET}"
     },
-    "manage_roles": false,
+    "manage_roles": true,
     "project_name": "nest-backend",
-    "role_arn": "${ZAPPA_ROLE_ARN}",
     "runtime": "python3.13",
     "s3_bucket": "${ZAPPA_S3_BUCKET}",
     "slim_handler": true,

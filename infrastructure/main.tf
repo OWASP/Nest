@@ -27,13 +27,7 @@ module "storage" {
   environment     = var.environment
 }
 
-module "iam" {
-  source = "./modules/iam"
 
-  s3_bucket_arn = module.storage.zappa_s3_bucket_arn
-  project_name  = var.project_name
-  environment   = var.environment
-}
 
 module "database" {
   source = "./modules/database"
