@@ -1,14 +1,11 @@
 name: Check PR linked issue and assignee
 
 on:
-  pull_request:
-    types:
-      - opened
-      - synchronize
+  - pull_request_target
 
 permissions:
   contents: read
-  issues: write
+  issues: read
   pull-requests: write
 
 jobs:
@@ -16,8 +13,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v5
-
       - name: Check PR linked issue and assignee
         uses: arkid15r/check-pr-issue-action@a3635191c798f111aae577759b579dc37bb13e02
         with:
