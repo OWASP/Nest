@@ -44,6 +44,7 @@ const IssuesPage = () => {
     number: number
     title: string
     state: string
+    isMerged: boolean
     labels: string[]
     assignees: Array<{ avatarUrl: string; login: string; name: string }>
   }
@@ -54,6 +55,7 @@ const IssuesPage = () => {
       number: i.number,
       title: i.title,
       state: i.state,
+      isMerged: i.isMerged,
       labels: i.labels || [],
       assignees: i.assignees || [],
     }))
@@ -135,7 +137,8 @@ const IssuesPage = () => {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+        {/* Desktop Table - unchanged */}
+        <div className="hidden overflow-hidden rounded-lg border border-gray-200 lg:block dark:border-gray-700">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-[#2a2e33]">
               <tr>
@@ -186,16 +189,20 @@ const IssuesPage = () => {
                       </button>
                     </Tooltip>
                   </td>
-                  <td className="px-6 py-4 text-sm whitespace-nowrap">
-                    <span
-                      className={`inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium ${
-                        issue.state === 'open'
-                          ? 'bg-[#2cbe4e] text-white'
-                          : 'bg-[#cb2431] text-white'
-                      }`}
-                    >
-                      {issue.state === 'open' ? 'Open' : 'Closed'}
-                    </span>
+                  <td className="px-6 py-4 text-center text-sm whitespace-nowrap">
+                    <div className="flex justify-center">
+                      <span
+                        className={`inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium ${
+                          issue.state === 'open'
+                            ? 'bg-[#238636] text-white'
+                            : issue.isMerged
+                              ? 'bg-[#8657E5] text-white'
+                              : 'bg-[#DA3633] text-white'
+                        }`}
+                      >
+                        {issue.state === 'open' ? 'Open' : issue.isMerged ? 'Merged' : 'Closed'}
+                      </span>
+                    </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-wrap gap-2">
@@ -234,7 +241,9 @@ const IssuesPage = () => {
                             alt={issue.assignees[0].login}
                             className="rounded-full"
                           />
-                          <span>{issue.assignees[0].login || issue.assignees[0].name}</span>
+                          <span className="max-w-[80px] truncate sm:max-w-[100px] md:max-w-[120px] lg:max-w-[150px]">
+                            {issue.assignees[0].login || issue.assignees[0].name}
+                          </span>
                         </div>
                         {issue.assignees.length > 1 && (
                           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">
@@ -258,6 +267,79 @@ const IssuesPage = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile & Tablet Cards */}
+        <div className="space-y-6 lg:hidden">
+          {moduleIssues.map((issue) => (
+            <div
+              key={issue.objectID}
+              className="rounded-lg border border-gray-200 bg-white p-4 mt-4 shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-[#1f2327]"
+            >
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleIssueClick(Number(issue.number))}
+                  className="flex-1 text-left text-sm font-medium text-gray-900 hover:text-blue-600 dark:text-gray-100 dark:hover:text-blue-400"
+                >
+                  {issue.title}
+                </button>
+                <span
+                  className={`inline-flex flex-shrink-0 items-center rounded-full px-2 py-1 text-xs font-medium ${
+                    issue.state === 'open'
+                      ? 'bg-[#238636] text-white'
+                      : issue.isMerged
+                        ? 'bg-[#8657E5] text-white'
+                        : 'bg-[#DA3633] text-white'
+                  }`}
+                >
+                  {issue.state === 'open' ? 'Open' : issue.isMerged ? 'Merged' : 'Closed'}
+                </span>
+              </div>
+
+              {issue.labels?.length > 0 && (
+                <div className="mb-3 flex flex-wrap gap-1">
+                  {issue.labels.slice(0, 3).map((label) => (
+                    <span
+                      key={label}
+                      className="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                    >
+                      {label}
+                    </span>
+                  ))}
+                  {issue.labels.length > 3 && (
+                    <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                      +{issue.labels.length - 3}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {issue.assignees?.length > 0 && (
+                <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                  <Image
+                    height={18}
+                    width={18}
+                    src={issue.assignees[0].avatarUrl}
+                    alt={issue.assignees[0].login}
+                    className="rounded-full"
+                  />
+                  <span className="truncate">
+                    {issue.assignees[0].login || issue.assignees[0].name}
+                    {issue.assignees.length > 1 && ` +${issue.assignees.length - 1}`}
+                  </span>
+                </div>
+              )}
+            </div>
+          ))}
+
+          {moduleIssues.length === 0 && (
+            <div className="rounded-lg border border-gray-200 bg-white p-6 text-center dark:border-gray-700 dark:bg-[#1f2327]">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                No issues found for the selected filter.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Pagination Controls */}

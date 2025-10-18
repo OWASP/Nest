@@ -32,6 +32,26 @@ import { TruncatedText } from 'components/TruncatedText'
 const ModuleIssueDetailsPage = () => {
   const params = useParams() as { programKey: string; moduleKey: string; issueId: string }
   const { programKey, moduleKey, issueId } = params
+
+  const formatDeadline = (deadline: string | null) => {
+    if (!deadline) return { text: 'No deadline set', color: 'text-gray-600 dark:text-gray-300' }
+
+    const deadlineDate = new Date(deadline)
+    const today = new Date()
+    const isOverdue = deadlineDate < today
+    const daysLeft = Math.ceil((deadlineDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+
+    const statusText = isOverdue
+      ? '(overdue)'
+      : daysLeft === 0
+        ? '(today)'
+        : `(${daysLeft} days left)`
+
+    return {
+      text: `${deadlineDate.toLocaleDateString()} ${statusText}`,
+      color: 'text-[#DA3633]',
+    }
+  }
   const { data, loading, error } = useQuery(GET_MODULE_ISSUE_VIEW, {
     variables: { programKey, moduleKey, number: Number(issueId) },
     skip: !issueId,
@@ -167,10 +187,14 @@ const ModuleIssueDetailsPage = () => {
               </span>
               <span
                 className={`inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium ${
-                  issue.state === 'open' ? 'bg-[#2cbe4e] text-white' : 'bg-[#cb2431] text-white'
+                  issue.state === 'open'
+                    ? 'bg-[#238636] text-white'
+                    : issue.isMerged
+                      ? 'bg-[#8657E5] text-white'
+                      : 'bg-[#DA3633] text-white'
                 }`}
               >
-                {issue.state === 'open' ? 'Open' : 'Closed'}
+                {issue.state === 'open' ? 'Open' : issue.isMerged ? 'Merged' : 'Closed'}
               </span>
             </div>
           </div>
@@ -195,23 +219,18 @@ const ModuleIssueDetailsPage = () => {
             </div>
 
             <div className="flex flex-col gap-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="font-medium">Deadline:</span>
+              <div className="flex flex-wrap items-center">
+                <span className="font-medium">Deadline: </span>
                 {isEditingDeadline && canEditDeadline ? (
-                  <span className="inline-flex items-center gap-2">
-                    <input
-                      type="date"
-                      value={deadlineInput}
-                      onChange={(e) => setDeadlineInput(e.target.value)}
-                      min={new Date().toISOString().slice(0, 10)}
-                      className="h-8 rounded border border-gray-300 px-2 text-xs dark:border-gray-600"
-                    />
-                    <button
-                      type="button"
-                      disabled={!deadlineInput || settingDeadline}
-                      onClick={async () => {
-                        if (!deadlineInput || settingDeadline || !issueId) return
-                        const localDate = new Date(deadlineInput + 'T23:59:59')
+                  <input
+                    type="date"
+                    value={deadlineInput}
+                    onChange={async (e) => {
+                      const newValue = e.target.value
+                      setDeadlineInput(newValue)
+
+                      if (newValue && !settingDeadline && issueId) {
+                        const localDate = new Date(newValue + 'T23:59:59')
                         const iso = localDate.toISOString()
                         await setTaskDeadlineMutation({
                           variables: {
@@ -221,64 +240,35 @@ const ModuleIssueDetailsPage = () => {
                             deadlineAt: iso,
                           },
                         })
-                      }}
-                      className="flex items-center justify-center rounded-md border border-[#1D7BD7] px-3 py-1 text-xs font-medium text-[#1D7BD7] transition-all hover:bg-[#1D7BD7] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {settingDeadline ? 'Saving…' : 'Save'}
-                    </button>
-                    <button
-                      type="button"
-                      aria-label="Cancel deadline edit"
-                      title="Cancel"
-                      onClick={() => {
+                        setIsEditingDeadline(false)
+                      }
+                    }}
+                    min={new Date().toISOString().slice(0, 10)}
+                    className="h-8 rounded border border-gray-300 px-2 text-xs dark:border-gray-600"
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    disabled={!canEditDeadline}
+                    onClick={() => {
+                      if (canEditDeadline) {
                         setDeadlineInput(
                           taskDeadline ? new Date(taskDeadline).toISOString().slice(0, 10) : ''
                         )
-                        setIsEditingDeadline(false)
-                      }}
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-md text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-                    >
-                      <FontAwesomeIcon icon={faXmark} className="h-3.5 w-3.5" />
-                    </button>
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-2">
-                    {(() => {
-                      if (!taskDeadline) {
-                        return (
-                          <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
-                            No deadline set
-                          </span>
-                        )
+                        setIsEditingDeadline(true)
                       }
-                      const d = new Date(taskDeadline)
-                      const today = new Date()
-                      const isPast = d.setHours(0, 0, 0, 0) < today.setHours(0, 0, 0, 0)
-                      const diffDays = Math.ceil(
-                        (d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-                      )
-                      const textClass = 'text-red-700 dark:text-red-300'
-                      return (
-                        <span className={`text-xs font-medium ${textClass}`}>
-                          {d.toLocaleDateString()}{' '}
-                          {isPast
-                            ? '(overdue)'
-                            : diffDays > 0
-                              ? `(in ${diffDays} days)`
-                              : '(today)'}
-                        </span>
-                      )
+                    }}
+                    className={`inline-flex items-center gap-2 rounded px-2 py-1 text-left transition-colors ${
+                      canEditDeadline
+                        ? 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                        : 'cursor-not-allowed'
+                    }`}
+                  >
+                    {(() => {
+                      const { text, color } = formatDeadline(taskDeadline)
+                      return <span className={`text-xs font-medium ${color}`}>{text}</span>
                     })()}
-                    {canEditDeadline && (
-                      <button
-                        type="button"
-                        className="ml-2 text-xs text-blue-600 hover:underline dark:text-blue-400"
-                        onClick={() => setIsEditingDeadline(true)}
-                      >
-                        Edit
-                      </button>
-                    )}
-                  </span>
+                  </button>
                 )}
               </div>
             </div>
@@ -407,21 +397,21 @@ const ModuleIssueDetailsPage = () => {
                     {pr.state === 'closed' && pr.mergedAt ? (
                       <span
                         className="inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium text-white"
-                        style={{ backgroundColor: '#6f42c1' }}
+                        style={{ backgroundColor: '#8657E5' }}
                       >
                         Merged
                       </span>
                     ) : pr.state === 'closed' ? (
                       <span
                         className="inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium text-white"
-                        style={{ backgroundColor: '#cb2431' }}
+                        style={{ backgroundColor: '#DA3633' }}
                       >
                         Closed
                       </span>
                     ) : (
                       <span
                         className="inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium text-white"
-                        style={{ backgroundColor: '#2cbe4e' }}
+                        style={{ backgroundColor: '#238636' }}
                       >
                         Open
                       </span>

@@ -52,6 +52,11 @@ class IssueNode(strawberry.relay.Node):
         return list(self.labels.values_list("name", flat=True))
 
     @strawberry.field
+    def is_merged(self) -> bool:
+        """Return True if this issue has at least one merged pull request."""
+        return self.pull_requests.filter(state="closed", merged_at__isnull=False).exists()
+
+    @strawberry.field
     def interested_users(self) -> list[UserNode]:
         """Return all users who have expressed interest in this issue."""
         return [
@@ -65,3 +70,4 @@ class IssueNode(strawberry.relay.Node):
     def pull_requests(self) -> list[PullRequestNode]:
         """Return all pull requests linked to this issue."""
         return list(self.pull_requests.select_related("author", "repository").all())
+

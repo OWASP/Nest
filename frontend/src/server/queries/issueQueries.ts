@@ -13,6 +13,7 @@ export const GET_MODULE_ISSUE_VIEW = gql`
         body
         url
         state
+        isMerged
         organizationName
         repositoryName
         assignees {

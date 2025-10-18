@@ -94,6 +94,7 @@ export const GET_MODULE_ISSUES = gql`
         number
         title
         state
+        isMerged
         labels
         assignees {
           avatarUrl
