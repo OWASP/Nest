@@ -18,6 +18,7 @@ import { useState } from 'react'
 import { ErrorDisplay } from 'app/global-error'
 import {
   ASSIGN_ISSUE_TO_USER,
+  CLEAR_TASK_DEADLINE,
   GET_MODULE_ISSUE_VIEW,
   UNASSIGN_ISSUE_FROM_USER,
   SET_TASK_DEADLINE,
@@ -128,23 +129,6 @@ const ModuleIssueDetailsPage = () => {
     },
   })
 
-  const issue = data?.getModule?.issueByNumber
-  const taskDeadline = data?.getModule?.taskDeadline as string | undefined
-  const [isEditingDeadline, setIsEditingDeadline] = useState(false)
-  const [deadlineInput, setDeadlineInput] = useState<string>(
-    taskDeadline ? new Date(taskDeadline).toISOString().slice(0, 10) : ''
-  )
-
-  const getButtonClassName = (disabled: boolean) =>
-    `inline-flex items-center justify-center rounded-md border p-1.5 text-sm ${
-      disabled
-        ? 'cursor-not-allowed border-gray-300 text-gray-400 dark:border-gray-600'
-        : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'
-    }`
-
-  const labelButtonClassName =
-    'rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700'
-
   const [setTaskDeadlineMutation, { loading: settingDeadline }] = useMutation(SET_TASK_DEADLINE, {
     refetchQueries: [
       {
@@ -173,6 +157,55 @@ const ModuleIssueDetailsPage = () => {
       })
     },
   })
+
+  const [clearTaskDeadlineMutation, { loading: clearingDeadline }] = useMutation(
+    CLEAR_TASK_DEADLINE,
+    {
+      refetchQueries: [
+        {
+          query: GET_MODULE_ISSUE_VIEW,
+          variables: { programKey, moduleKey, number: Number(issueId) },
+        },
+      ],
+      awaitRefetchQueries: true,
+      onCompleted: () => {
+        addToast({
+          title: 'Deadline cleared',
+          variant: 'solid',
+          color: 'success',
+          timeout: 2500,
+          shouldShowTimeoutProgress: true,
+        })
+        setIsEditingDeadline(false)
+      },
+      onError: (err) => {
+        addToast({
+          title: 'Failed to clear deadline: ' + err.message,
+          variant: 'solid',
+          color: 'danger',
+          timeout: 3500,
+          shouldShowTimeoutProgress: true,
+        })
+      },
+    }
+  )
+
+  const issue = data?.getModule?.issueByNumber
+  const taskDeadline = data?.getModule?.taskDeadline as string | undefined
+  const [isEditingDeadline, setIsEditingDeadline] = useState(false)
+  const [deadlineInput, setDeadlineInput] = useState<string>(
+    taskDeadline ? new Date(taskDeadline).toISOString().slice(0, 10) : ''
+  )
+
+  const getButtonClassName = (disabled: boolean) =>
+    `inline-flex items-center justify-center rounded-md border p-1.5 text-sm ${
+      disabled
+        ? 'cursor-not-allowed border-gray-300 text-gray-400 dark:border-gray-600'
+        : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'
+    }`
+
+  const labelButtonClassName =
+    'rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700'
 
   if (error) {
     return <ErrorDisplay statusCode={500} title="Error Loading Issue" message={error.message} />
@@ -227,43 +260,76 @@ const ModuleIssueDetailsPage = () => {
           <div className="space-y-4 text-sm text-gray-700 dark:text-gray-300">
             <div>
               <span className="font-medium">Assigned:</span>{' '}
-              {data?.getModule?.taskAssignedAt
-                ? new Date(data.getModule.taskAssignedAt).toLocaleDateString()
-                : 'Not assigned'}
+              <span>
+                {data?.getModule?.taskAssignedAt
+                  ? new Date(data.getModule.taskAssignedAt).toLocaleDateString()
+                  : 'Not assigned'}
+              </span>
             </div>
 
             <div className="flex flex-col gap-2">
               <div className="flex flex-wrap items-center">
                 <span className="font-medium">Deadline: </span>
                 {isEditingDeadline && canEditDeadline ? (
-                  <input
-                    type="date"
-                    value={deadlineInput}
-                    onChange={async (e) => {
-                      const newValue = e.target.value
-                      setDeadlineInput(newValue)
+                  <div className="inline-flex items-center gap-2">
+                    <input
+                      type="date"
+                      value={deadlineInput}
+                      onChange={async (e) => {
+                        const newValue = e.target.value
+                        setDeadlineInput(newValue)
 
-                      if (newValue && !settingDeadline && issueId) {
-                        const [year, month, day] = newValue.split('-').map(Number)
-                        const utcEndOfDay = new Date(
-                          Date.UTC(year, month - 1, day, 23, 59, 59, 999)
-                        )
-                        const iso = utcEndOfDay.toISOString()
+                        if (!settingDeadline && !clearingDeadline && issueId) {
+                          if (newValue) {
+                            const [year, month, day] = newValue.split('-').map(Number)
+                            const utcEndOfDay = new Date(
+                              Date.UTC(year, month - 1, day, 23, 59, 59, 999)
+                            )
+                            const iso = utcEndOfDay.toISOString()
 
-                        await setTaskDeadlineMutation({
-                          variables: {
-                            programKey,
-                            moduleKey,
-                            issueNumber: Number(issueId),
-                            deadlineAt: iso,
-                          },
-                        })
-                        setIsEditingDeadline(false)
-                      }
-                    }}
-                    min={new Date().toISOString().slice(0, 10)}
-                    className="h-8 rounded border border-gray-300 px-2 text-xs dark:border-gray-600"
-                  />
+                            await setTaskDeadlineMutation({
+                              variables: {
+                                programKey,
+                                moduleKey,
+                                issueNumber: Number(issueId),
+                                deadlineAt: iso,
+                              },
+                            })
+                          } else {
+                            // Clear deadline
+                            await clearTaskDeadlineMutation({
+                              variables: {
+                                programKey,
+                                moduleKey,
+                                issueNumber: Number(issueId),
+                              },
+                            })
+                          }
+                        }
+                      }}
+                      min={new Date().toISOString().slice(0, 10)}
+                      className="h-8 rounded border border-gray-300 px-2 dark:border-gray-600"
+                    />
+                    <button
+                      type="button"
+                      disabled={clearingDeadline}
+                      onClick={async () => {
+                        if (!clearingDeadline && issueId) {
+                          await clearTaskDeadlineMutation({
+                            variables: {
+                              programKey,
+                              moduleKey,
+                              issueNumber: Number(issueId),
+                            },
+                          })
+                        }
+                      }}
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-md text-gray-600 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:text-gray-300 dark:hover:bg-gray-800"
+                      title="Clear deadline"
+                    >
+                      <FontAwesomeIcon icon={faXmark} className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 ) : (
                   <button
                     type="button"
@@ -278,13 +344,13 @@ const ModuleIssueDetailsPage = () => {
                     }}
                     className={`inline-flex items-center gap-2 rounded px-2 py-1 text-left transition-colors ${
                       canEditDeadline
-                        ? 'hover:bg-gray-100 dark:hover:bg-gray-800'
-                        : 'cursor-not-allowed'
+                        ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800'
+                        : 'cursor-not-allowed font-medium'
                     }`}
                   >
                     {(() => {
                       const { text, color } = formatDeadline(taskDeadline)
-                      return <span className={`text-xs font-medium ${color}`}>{text}</span>
+                      return <span className={`font-normal ${color}`}>{text}</span>
                     })()}
                   </button>
                 )}

@@ -265,6 +265,60 @@ class ModuleMutation:
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
+    def clear_task_deadline(
+        self,
+        info: strawberry.Info,
+        *,
+        module_key: str,
+        program_key: str,
+        issue_number: int,
+    ) -> ModuleNode:
+        """Clear the deadline for a task. User must be a mentor and an admin of the program."""
+        user = info.context.request.user
+
+        module = (
+            Module.objects.select_related("program")
+            .filter(key=module_key, program__key=program_key)
+            .first()
+        )
+        if module is None:
+            raise ObjectDoesNotExist(msg="Module not found.")
+
+        mentor = Mentor.objects.filter(nest_user=user).first()
+        if mentor is None:
+            raise PermissionDenied(msg="Only mentors can clear deadlines.")
+        if not module.program.admins.filter(id=mentor.id).exists():
+            raise PermissionDenied
+
+        issue = (
+            module.issues.select_related("repository")
+            .prefetch_related("assignees")
+            .filter(number=issue_number)
+            .first()
+        )
+        if issue is None:
+            raise ObjectDoesNotExist(msg="Issue not found in this module.")
+
+        assignees = issue.assignees.all()
+        if not assignees.exists():
+            raise ValidationError(message="Cannot clear deadline: issue has no assignees.")
+
+        tasks_to_update: list[Task] = []
+        for assignee in assignees:
+            task = Task.objects.filter(module=module, issue=issue, assignee=assignee).first()
+            if task and task.deadline_at is not None:
+                task.deadline_at = None
+                tasks_to_update.append(task)
+
+        if len(tasks_to_update) == 1:
+            tasks_to_update[0].save(update_fields=["deadline_at"])
+        elif len(tasks_to_update) > 1:
+            Task.objects.bulk_update(tasks_to_update, ["deadline_at"])
+
+        return module
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
     def update_module(self, info: strawberry.Info, input_data: UpdateModuleInput) -> ModuleNode:
         """Update an existing mentorship module. User must be an admin of the program."""
         user = info.context.request.user

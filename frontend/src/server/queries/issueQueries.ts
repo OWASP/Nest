@@ -101,3 +101,11 @@ export const SET_TASK_DEADLINE = gql`
     }
   }
 `
+
+export const CLEAR_TASK_DEADLINE = gql`
+  mutation ClearTaskDeadline($programKey: String!, $moduleKey: String!, $issueNumber: Int!) {
+    clearTaskDeadline(programKey: $programKey, moduleKey: $moduleKey, issueNumber: $issueNumber) {
+      id
+    }
+  }
+`
