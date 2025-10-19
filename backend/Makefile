@@ -110,6 +110,7 @@ shell-db:
 sync-data: \
 	update-data \
 	enrich-data \
+	nest-update-badges \
 	index-data
 
 test-backend:
@@ -137,4 +138,5 @@ update-data: \
 	owasp-update-events \
 	owasp-sync-posts \
 	owasp-update-sponsors \
+	owasp-sync-awards \
 	slack-sync-data

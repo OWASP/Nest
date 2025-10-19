@@ -4,6 +4,7 @@ from django.contrib import admin
 
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
+from .award import AwardAdmin
 from .chapter import ChapterAdmin
 from .committee import CommitteeAdmin
 from .entity_channel import EntityChannelAdmin
