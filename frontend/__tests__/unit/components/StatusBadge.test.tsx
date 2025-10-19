@@ -30,7 +30,7 @@ describe('StatusBadge', () => {
     it('has the correct tooltip for archived status', () => {
       render(<StatusBadge status="archived" />)
       const badge = screen.getByText('Archived')
-      expect(badge).toHaveAttribute('title', 'This repository has been archived and is read-only')
+      expect(badge).toHaveAttribute('title', 'This entity has been archived and is read-only')
     })
 
     it('has correct light mode color classes for archived', () => {
@@ -231,7 +231,7 @@ describe('StatusBadge', () => {
       const badge = screen.getByText('Archived')
       expect(badge).toHaveAttribute(
         'aria-label',
-        'This repository has been archived and is read-only'
+        'This entity has been archived and is read-only'
       )
     })
 

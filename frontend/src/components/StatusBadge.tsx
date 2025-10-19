@@ -38,8 +38,8 @@ const statusConfig: Record<StatusType, StatusConfig> = {
     darkBgColor: 'dark:bg-yellow-900/30',
     darkTextColor: 'dark:text-yellow-400',
     darkBorderColor: 'dark:border-yellow-500',
-    tooltip: 'This repository has been archived and is read-only',
-    ariaLabel: 'This repository has been archived and is read-only',
+    tooltip: 'This entity has been archived and is read-only',
+    ariaLabel: 'This entity has been archived and is read-only',
   },
   inactive: {
     text: 'Inactive',
