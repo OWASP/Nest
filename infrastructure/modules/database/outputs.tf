@@ -1,6 +1,6 @@
-output "db_instance_endpoint" {
-  description = "The endpoint of the RDS instance"
-  value       = aws_db_instance.main.endpoint
+output "db_proxy_endpoint" {
+  description = "The endpoint of the RDS proxy"
+  value       = aws_db_proxy.main.endpoint
 }
 
 output "db_password" {

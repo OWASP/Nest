@@ -1,3 +1,18 @@
+terraform {
+  required_version = ">= 1.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
+  }
+}
+
 # S3 Bucket for Zappa Deployments
 resource "aws_s3_bucket" "zappa" {
   bucket = var.zappa_s3_bucket
@@ -5,6 +20,7 @@ resource "aws_s3_bucket" "zappa" {
   tags = {
     Name = "${var.project_name}-${var.environment}-zappa-deployments"
   }
+  force_destroy = true
 }
 
 # Block public access

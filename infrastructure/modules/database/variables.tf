@@ -49,3 +49,20 @@ variable "security_group_ids" {
   description = "A list of security group IDs to associate with the RDS database"
   type        = list(string)
 }
+
+variable "db_storage_type" {
+  description = "The storage type for the RDS database"
+  type        = string
+  default     = "gp3"
+}
+
+variable "db_backup_retention_period" {
+  description = "The number of days to retain backups for"
+  type        = number
+  default     = 7
+}
+
+variable "proxy_security_group_ids" {
+  description = "A list of security group IDs to associate with the RDS proxy"
+  type        = list(string)
+}

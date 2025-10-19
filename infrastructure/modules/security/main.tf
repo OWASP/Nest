@@ -1,3 +1,18 @@
+terraform {
+  required_version = ">= 1.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
+  }
+}
+
 # Lambda Security Group
 resource "aws_security_group" "lambda" {
   name        = "${var.project_name}-${var.environment}-lambda-sg"
@@ -17,10 +32,10 @@ resource "aws_security_group" "lambda" {
   }
 }
 
-# RDS Security Group
-resource "aws_security_group" "rds" {
-  name        = "${var.project_name}-${var.environment}-rds-sg"
-  description = "Security group for RDS PostgreSQL"
+# RDS Proxy Security Group
+resource "aws_security_group" "rds_proxy" {
+  name        = "${var.project_name}-${var.environment}-rds-proxy-sg"
+  description = "Security group for RDS Proxy"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -29,6 +44,33 @@ resource "aws_security_group" "rds" {
     to_port         = var.db_port
     protocol        = "tcp"
     security_groups = [aws_security_group.lambda.id]
+  }
+
+  egress {
+    description = "Allow all outbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-rds-proxy-sg"
+  }
+}
+
+# RDS Security Group
+resource "aws_security_group" "rds" {
+  name        = "${var.project_name}-${var.environment}-rds-sg"
+  description = "Security group for RDS PostgreSQL"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    description     = "PostgreSQL from RDS Proxy"
+    from_port       = var.db_port
+    to_port         = var.db_port
+    protocol        = "tcp"
+    security_groups = [aws_security_group.rds_proxy.id]
   }
 
   egress {

@@ -1,3 +1,9 @@
+variable "aws_region" {
+  description = "The AWS region to deploy resources in."
+  type        = string
+  default     = "us-east-1"
+}
+
 variable "availability_zones" {
   description = "A list of availability zones for the VPC"
   type        = list(string)
@@ -51,6 +57,10 @@ variable "environment" {
   description = "The environment (e.g., staging, production)"
   type        = string
   default     = "staging"
+  validation {
+    condition     = contains(["staging", "production"], var.environment)
+    error_message = "Environment must be either 'staging' or 'production'."
+  }
 }
 
 variable "private_subnet_cidrs" {
@@ -112,4 +122,16 @@ variable "zappa_s3_bucket" {
   description = "The name of the S3 bucket for Zappa deployments"
   type        = string
   default     = "nest-zappa-deployments"
+}
+
+variable "db_storage_type" {
+  description = "The storage type for the RDS database"
+  type        = string
+  default     = "gp3"
+}
+
+variable "db_backup_retention_period" {
+  description = "The number of days to retain backups for"
+  type        = number
+  default     = 7
 }
