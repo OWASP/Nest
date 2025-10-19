@@ -1,6 +1,6 @@
 'use client'
 
-import { useMutation, useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client'
 import {
   faCodeBranch,
   faLink,
@@ -10,19 +10,12 @@ import {
   faXmark,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { addToast } from '@heroui/toast'
+import { useIssueMutations } from 'hooks/useIssueMutations'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useState } from 'react'
 import { ErrorDisplay } from 'app/global-error'
-import {
-  ASSIGN_ISSUE_TO_USER,
-  CLEAR_TASK_DEADLINE,
-  GET_MODULE_ISSUE_VIEW,
-  UNASSIGN_ISSUE_FROM_USER,
-  SET_TASK_DEADLINE,
-} from 'server/queries/issueQueries'
+import { GET_MODULE_ISSUE_VIEW } from 'server/queries/issueQueries'
 import ActionButton from 'components/ActionButton'
 import AnchorTitle from 'components/AnchorTitle'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -74,128 +67,23 @@ const ModuleIssueDetailsPage = () => {
     nextFetchPolicy: 'cache-and-network',
   })
 
-  const [assignIssue, { loading: assigning }] = useMutation(ASSIGN_ISSUE_TO_USER, {
-    refetchQueries: [
-      {
-        query: GET_MODULE_ISSUE_VIEW,
-        variables: { programKey, moduleKey, number: Number(issueId) },
-      },
-    ],
-    awaitRefetchQueries: true,
-    onCompleted: () => {
-      addToast({
-        title: 'Issue assigned successfully',
-        variant: 'solid',
-        color: 'success',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-      })
-    },
-    onError: (error) => {
-      addToast({
-        title: 'Failed to assign issue: ' + error.message,
-        variant: 'solid',
-        color: 'danger',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-      })
-    },
-  })
-  const [unassignIssue, { loading: unassigning }] = useMutation(UNASSIGN_ISSUE_FROM_USER, {
-    refetchQueries: [
-      {
-        query: GET_MODULE_ISSUE_VIEW,
-        variables: { programKey, moduleKey, number: Number(issueId) },
-      },
-    ],
-    awaitRefetchQueries: true,
-    onCompleted: () => {
-      addToast({
-        title: 'Issue unassigned successfully',
-        variant: 'solid',
-        color: 'success',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-      })
-    },
-    onError: (error) => {
-      addToast({
-        title: 'Failed to unassign issue: ' + error.message,
-        variant: 'solid',
-        color: 'danger',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-      })
-    },
-  })
-
-  const [setTaskDeadlineMutation, { loading: settingDeadline }] = useMutation(SET_TASK_DEADLINE, {
-    refetchQueries: [
-      {
-        query: GET_MODULE_ISSUE_VIEW,
-        variables: { programKey, moduleKey, number: Number(issueId) },
-      },
-    ],
-    awaitRefetchQueries: true,
-    onCompleted: () => {
-      addToast({
-        title: 'Deadline updated',
-        variant: 'solid',
-        color: 'success',
-        timeout: 2500,
-        shouldShowTimeoutProgress: true,
-      })
-      setIsEditingDeadline(false)
-    },
-    onError: (err) => {
-      addToast({
-        title: 'Failed to update deadline: ' + err.message,
-        variant: 'solid',
-        color: 'danger',
-        timeout: 3500,
-        shouldShowTimeoutProgress: true,
-      })
-    },
-  })
-
-  const [clearTaskDeadlineMutation, { loading: clearingDeadline }] = useMutation(
-    CLEAR_TASK_DEADLINE,
-    {
-      refetchQueries: [
-        {
-          query: GET_MODULE_ISSUE_VIEW,
-          variables: { programKey, moduleKey, number: Number(issueId) },
-        },
-      ],
-      awaitRefetchQueries: true,
-      onCompleted: () => {
-        addToast({
-          title: 'Deadline cleared',
-          variant: 'solid',
-          color: 'success',
-          timeout: 2500,
-          shouldShowTimeoutProgress: true,
-        })
-        setIsEditingDeadline(false)
-      },
-      onError: (err) => {
-        addToast({
-          title: 'Failed to clear deadline: ' + err.message,
-          variant: 'solid',
-          color: 'danger',
-          timeout: 3500,
-          shouldShowTimeoutProgress: true,
-        })
-      },
-    }
-  )
+  const {
+    assignIssue,
+    unassignIssue,
+    setTaskDeadlineMutation,
+    clearTaskDeadlineMutation,
+    assigning,
+    unassigning,
+    settingDeadline,
+    clearingDeadline,
+    isEditingDeadline,
+    setIsEditingDeadline,
+    deadlineInput,
+    setDeadlineInput,
+  } = useIssueMutations({ programKey, moduleKey, issueId })
 
   const issue = data?.getModule?.issueByNumber
   const taskDeadline = data?.getModule?.taskDeadline as string | undefined
-  const [isEditingDeadline, setIsEditingDeadline] = useState(false)
-  const [deadlineInput, setDeadlineInput] = useState<string>(
-    taskDeadline ? new Date(taskDeadline).toISOString().slice(0, 10) : ''
-  )
 
   const getButtonClassName = (disabled: boolean) =>
     `inline-flex items-center justify-center rounded-md border p-1.5 text-sm ${
