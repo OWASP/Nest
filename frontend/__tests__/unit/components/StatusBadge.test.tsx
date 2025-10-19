@@ -3,7 +3,7 @@ import StatusBadge from 'components/StatusBadge'
 
 jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: ({ className }: { className: string }) => (
-    <i data-testid="status-icon" className={className} />
+    <svg className={className} aria-hidden="true" />
   ),
 }))
 
@@ -98,32 +98,32 @@ describe('StatusBadge', () => {
 
   describe('Icon Display', () => {
     it('shows icon by default', () => {
-      render(<StatusBadge status="archived" />)
-      const icon = screen.getByTestId('status-icon')
+      const { container } = render(<StatusBadge status="archived" />)
+      const icon = container.querySelector('svg')
       expect(icon).toBeInTheDocument()
     })
 
     it('shows icon when showIcon is true', () => {
-      render(<StatusBadge status="archived" showIcon={true} />)
-      const icon = screen.getByTestId('status-icon')
+      const { container } = render(<StatusBadge status="archived" showIcon={true} />)
+      const icon = container.querySelector('svg')
       expect(icon).toBeInTheDocument()
     })
 
     it('hides icon when showIcon is false', () => {
-      render(<StatusBadge status="archived" showIcon={false} />)
-      const icon = screen.queryByTestId('status-icon')
+      const { container } = render(<StatusBadge status="archived" showIcon={false} />)
+      const icon = container.querySelector('svg')
       expect(icon).not.toBeInTheDocument()
     })
 
     it('applies correct icon class', () => {
-      render(<StatusBadge status="archived" />)
-      const icon = screen.getByTestId('status-icon')
+      const { container } = render(<StatusBadge status="archived" />)
+      const icon = container.querySelector('svg')
       expect(icon).toHaveClass('h-3', 'w-3')
     })
 
     it('hides icon for inactive status when showIcon is false', () => {
-      render(<StatusBadge status="inactive" showIcon={false} />)
-      const icon = screen.queryByTestId('status-icon')
+      const { container } = render(<StatusBadge status="inactive" showIcon={false} />)
+      const icon = container.querySelector('svg')
       expect(icon).not.toBeInTheDocument()
     })
   })
@@ -229,10 +229,7 @@ describe('StatusBadge', () => {
     it('has appropriate aria-label', () => {
       render(<StatusBadge status="archived" />)
       const badge = screen.getByText('Archived')
-      expect(badge).toHaveAttribute(
-        'aria-label',
-        'This entity has been archived and is read-only'
-      )
+      expect(badge).toHaveAttribute('aria-label', 'This entity has been archived and is read-only')
     })
 
     it('has appropriate aria-label for inactive status', () => {
@@ -257,7 +254,7 @@ describe('StatusBadge', () => {
 
   describe('Edge Cases', () => {
     it('handles all props together', () => {
-      render(
+      const { container } = render(
         <StatusBadge
           status="archived"
           size="lg"
@@ -271,7 +268,7 @@ describe('StatusBadge', () => {
       expect(badge).toBeInTheDocument()
       expect(badge).toHaveClass('px-4', 'py-2', 'text-base', 'extra-margin')
       expect(badge).toHaveAttribute('title', 'Custom tip')
-      expect(screen.queryByTestId('status-icon')).not.toBeInTheDocument()
+      expect(container.querySelector('svg')).not.toBeInTheDocument()
     })
 
     it('renders consistently across multiple instances', () => {
@@ -300,10 +297,12 @@ describe('StatusBadge', () => {
     })
 
     it('combines small size with custom text and no icon', () => {
-      render(<StatusBadge status="inactive" size="sm" customText="N/A" showIcon={false} />)
+      const { container } = render(
+        <StatusBadge status="inactive" size="sm" customText="N/A" showIcon={false} />
+      )
       const badge = screen.getByText('N/A')
       expect(badge).toHaveClass('px-2', 'py-1', 'text-xs')
-      expect(screen.queryByTestId('status-icon')).not.toBeInTheDocument()
+      expect(container.querySelector('svg')).not.toBeInTheDocument()
     })
   })
 

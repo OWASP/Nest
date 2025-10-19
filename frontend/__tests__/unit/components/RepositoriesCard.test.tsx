@@ -245,7 +245,7 @@ describe('RepositoriesCard', () => {
       render(<RepositoriesCard repositories={[archivedRepo]} />)
 
       const badge = screen.getByText('Archived')
-      const icon = badge.querySelector('[data-testid="status-icon"]')
+      const icon = badge.querySelector('svg')
       expect(icon).not.toBeInTheDocument()
     })
 
