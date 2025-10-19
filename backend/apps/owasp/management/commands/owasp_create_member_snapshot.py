@@ -67,6 +67,34 @@ class Command(BaseCommand):
             self.stderr.write(self.style.ERROR(error_msg))
             raise
 
+    def generate_heatmap_data(self, commits, pull_requests, issues) -> dict:
+        """Generate heatmap data from contributions.
+
+        Args:
+            commits: Queryset or iterable of Commit objects.
+            pull_requests: Queryset or iterable of PullRequest objects.
+            issues: Queryset or iterable of Issue objects.
+
+        Returns:
+            dict: Mapping of date strings (YYYY-MM-DD) to contribution counts.
+
+        """
+        heatmap_data: dict[str, int] = defaultdict(int)
+
+        for commit in commits:
+            date_key = commit.created_at.date().isoformat()
+            heatmap_data[date_key] += 1
+
+        for pr in pull_requests:
+            date_key = pr.created_at.date().isoformat()
+            heatmap_data[date_key] += 1
+
+        for issue in issues:
+            date_key = issue.created_at.date().isoformat()
+            heatmap_data[date_key] += 1
+
+        return dict(heatmap_data)
+
     def handle(self, *args, **options):
         """Handle command execution.
 
@@ -170,21 +198,8 @@ class Command(BaseCommand):
             logger.info("Linked %s issues to snapshot", issues_count)
 
         # Generate heatmap data
-        heatmap_data = defaultdict(int)
-
-        for commit in commits:
-            date_key = commit.created_at.date().isoformat()
-            heatmap_data[date_key] += 1
-
-        for pr in pull_requests:
-            date_key = pr.created_at.date().isoformat()
-            heatmap_data[date_key] += 1
-
-        for issue in issues:
-            date_key = issue.created_at.date().isoformat()
-            heatmap_data[date_key] += 1
-
-        snapshot.contribution_heatmap_data = dict(heatmap_data)
+        heatmap_data = self.generate_heatmap_data(commits, pull_requests, issues)
+        snapshot.contribution_heatmap_data = heatmap_data
         snapshot.save()
 
         if heatmap_data:

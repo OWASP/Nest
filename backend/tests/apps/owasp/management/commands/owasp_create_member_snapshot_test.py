@@ -34,8 +34,6 @@ class TestOwaspCreateMemberSnapshotCommand:
         assert "Invalid date format" in error_output
 
     def test_generate_heatmap_data(self, command):
-        from collections import defaultdict
-
         # Mock contributions with different dates
         mock_commit_1 = mock.Mock()
         mock_commit_1.created_at.date.return_value.isoformat.return_value = "2025-01-15"
@@ -49,16 +47,30 @@ class TestOwaspCreateMemberSnapshotCommand:
         mock_issue = mock.Mock()
         mock_issue.created_at.date.return_value.isoformat.return_value = "2025-01-15"
 
-        heatmap_data = defaultdict(int)
-
-        for item in [mock_commit_1, mock_commit_2, mock_issue]:
-            date_key = item.created_at.date().isoformat()
-            heatmap_data[date_key] += 1
-
-        for item in [mock_pr]:
-            date_key = item.created_at.date().isoformat()
-            heatmap_data[date_key] += 1
-
-        result = dict(heatmap_data)
+        # Call the actual method
+        result = command.generate_heatmap_data(
+            [mock_commit_1, mock_commit_2],
+            [mock_pr],
+            [mock_issue],
+        )
 
         assert result == {"2025-01-15": 3, "2025-01-16": 1}
+
+    def test_generate_heatmap_data_empty_contributions(self, command):
+        result = command.generate_heatmap_data([], [], [])
+
+        assert result == {}
+
+    def test_generate_heatmap_data_single_date(self, command):
+        mock_commit = mock.Mock()
+        mock_commit.created_at.date.return_value.isoformat.return_value = "2025-01-10"
+
+        mock_pr = mock.Mock()
+        mock_pr.created_at.date.return_value.isoformat.return_value = "2025-01-10"
+
+        mock_issue = mock.Mock()
+        mock_issue.created_at.date.return_value.isoformat.return_value = "2025-01-10"
+
+        result = command.generate_heatmap_data([mock_commit], [mock_pr], [mock_issue])
+
+        assert result == {"2025-01-10": 3}

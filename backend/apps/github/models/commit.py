@@ -91,12 +91,11 @@ class Commit(BulkSaveModel, NodeModel, TimestampedModel):
             Commit: The updated or created commit instance.
 
         """
-        node_id = gh_commit.raw_data.get("node_id", f"C_{gh_commit.sha}")
-
+        commit_node_id = Commit.get_node_id(gh_commit)
         try:
-            commit = Commit.objects.get(node_id=node_id)
+            commit = Commit.objects.get(node_id=commit_node_id)
         except Commit.DoesNotExist:
-            commit = Commit(node_id=node_id)
+            commit = Commit(node_id=commit_node_id)
 
         commit.sha = gh_commit.sha
         commit.message = gh_commit.commit.message
