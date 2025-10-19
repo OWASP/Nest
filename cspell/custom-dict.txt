@@ -105,6 +105,7 @@ pygoat
 pymdownx
 pypoetry
 pyyaml
+relativedelta
 repositorycontributor
 requirepass
 rsc
