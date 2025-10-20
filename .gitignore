@@ -17,6 +17,12 @@ __pycache__
 .python_history
 .python-version
 .ruff_cache
+**/.terraform/
+**/.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+*.tfvars
+!*.tfvars.example
 .venv/
 .vscode
 *.code-workspace

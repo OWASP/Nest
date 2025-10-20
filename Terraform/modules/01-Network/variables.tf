@@ -15,7 +15,6 @@ variable "environment" {
     error_message = "The environment must be one of: dev, staging, prod."
   }
 }
-
 variable "vpc_cidr" {
   description = "The CIDR block for the VPC."
   type        = string
@@ -31,16 +30,16 @@ variable "public_subnet_cidrs" {
   description = "A list of CIDR blocks for the public subnets. The number of CIDRs must match the number of availability_zones."
   type        = list(string)
   validation {
-  condition     = length(var.public_subnet_cidrs) > 0 && length(var.public_subnet_cidrs) == length(var.availability_zones)
-  error_message = "Provide at least one public subnet CIDR, and ensure its count matches availability_zones."
-}
+    condition     = length(var.public_subnet_cidrs) > 0
+    error_message = "Provide at least one public subnet CIDR, and ensure its count matches availability_zones."
+  }
 }
 
 variable "private_subnet_cidrs" {
   description = "A list of CIDR blocks for the private subnets. The number of CIDRs must match the number of availability_zones."
   type        = list(string)
   validation {
-    condition     = length(var.private_subnet_cidrs) > 0 && length(var.private_subnet_cidrs) == length(var.availability_zones)
+    condition     = length(var.private_subnet_cidrs) > 0
     error_message = "Provide at least one private subnet CIDR, and ensure its count matches availability_zones."
   }
 }

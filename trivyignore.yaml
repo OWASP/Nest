@@ -7,3 +7,8 @@ vulnerabilities:
   - id: CVE-2025-27113  # libxml2 null dereference
   - id: CVE-2025-31115  # xz heap use-after-free
   - id: CVE-2025-6965   # sqlite integer truncation
+misconfigurations:
+  - id: AVD-AWS-0053  # AVD-AWS-0053: Ignoring because the ALB is intentionally public-facing.
+  - id: AVD-AWS-0132  # AVD-AWS-0132: Ignoring because AWS-managed keys (AES256) are acceptable for this PoC.
+  - id: AVD-AWS-0164  # AVD-AWS-0164: Ignoring because public subnets are required for the ALB and NAT Gateway.
+  - id: AVD-AWS-0017  # AVD-AWS-0017: Ignoring because default CloudWatch encryption is acceptable for this PoC.

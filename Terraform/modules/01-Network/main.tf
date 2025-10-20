@@ -1,4 +1,4 @@
-#  VPC and Core Networking 
+#  VPC and Core Networking
 
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
@@ -11,6 +11,13 @@ resource "aws_vpc" "main" {
       Name = "${var.project_prefix}-${var.environment}-vpc"
     }
   )
+
+  lifecycle {
+    precondition {
+      condition     = length(var.availability_zones) == length(var.public_subnet_cidrs) && length(var.availability_zones) == length(var.private_subnet_cidrs)
+      error_message = "The number of items in availability_zones, public_subnet_cidrs, and private_subnet_cidrs lists must be equal."
+    }
+  }
 }
 
 resource "aws_internet_gateway" "main" {
@@ -24,7 +31,7 @@ resource "aws_internet_gateway" "main" {
   )
 }
 
-#  Subnets 
+#  Subnets
 
 # Deploys a public and private subnet into each specified Availability Zone.
 
@@ -57,7 +64,7 @@ resource "aws_subnet" "private" {
   )
 }
 
-#  Routing and NAT Gateway for Private Subnets 
+#  Routing and NAT Gateway for Private Subnets
 
 #  We create a SINGLE NAT Gateway and a SINGLE private route table. This is a cost
 # optimization but introduces a single-AZ egress SPOF compared to per-AZ NAT gateways.
@@ -126,7 +133,6 @@ resource "aws_route_table" "private" {
     }
   )
 }
-
 # Associate the single private route table with all private subnets.
 resource "aws_route_table_association" "private" {
   count          = length(aws_subnet.private)
@@ -134,7 +140,51 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private.id
 }
 
-#  S3 Bucket for ALB Access Logs 
+# --- VPC Flow Logs ---
+# Added VPC Flow Logs to address the Trivy finding.
+
+resource "aws_cloudwatch_log_group" "vpc_flow_logs" {
+  name              = "/aws/vpc-flow-logs/${var.project_prefix}-${var.environment}"
+  retention_in_days = 30 # Or a configurable variable
+
+  tags = merge(var.tags, { Name = "${var.project_prefix}-${var.environment}-vpc-flow-logs-lg" })
+}
+
+resource "aws_iam_role" "vpc_flow_logs" {
+  name = "${var.project_prefix}-${var.environment}-vpc-flow-logs-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "vpc-flow-logs.amazonaws.com"
+        }
+      },
+    ]
+  })
+  tags = merge(var.tags, { Name = "${var.project_prefix}-${var.environment}-vpc-flow-logs-role" })
+}
+
+resource "aws_iam_role_policy_attachment" "vpc_flow_logs" {
+  role       = aws_iam_role.vpc_flow_logs.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess" # Scoped down for production if needed
+}
+
+resource "aws_flow_log" "main" {
+  iam_role_arn    = aws_iam_role.vpc_flow_logs.arn
+  log_destination = aws_cloudwatch_log_group.vpc_flow_logs.arn
+  traffic_type    = "ALL"
+  vpc_id          = aws_vpc.main.id
+
+  tags = merge(var.tags, { Name = "${var.project_prefix}-${var.environment}-vpc-flow-log" })
+
+  depends_on = [aws_iam_role_policy_attachment.vpc_flow_logs]
+}
+
+
+#  S3 Bucket for ALB Access Logs
 
 # This data source gets the AWS Account ID for the ELB service in the current region.
 data "aws_elb_service_account" "current" {}
@@ -221,7 +271,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "alb_access_logs" 
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
     }
-    
+
   }
 }
 
@@ -233,11 +283,11 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "s3_server_access_
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
     }
-    
+
   }
 }
 
-# BUCKETS LIFECYCLE POLICIES 
+# BUCKETS LIFECYCLE POLICIES
 resource "aws_s3_bucket_lifecycle_configuration" "alb_access_logs" {
   count  = var.enable_alb_access_logs ? 1 : 0
   bucket = aws_s3_bucket.alb_access_logs[0].id
@@ -341,9 +391,9 @@ data "aws_iam_policy_document" "alb_access_logs" {
 
   #  This statement denies any access to the bucket over insecure HTTP.
   statement {
-    sid       = "DenyInsecureTransport"
-    effect    = "Deny"
-    actions   = ["s3:*"]
+    sid     = "DenyInsecureTransport"
+    effect  = "Deny"
+    actions = ["s3:*"]
     resources = [
       aws_s3_bucket.alb_access_logs[0].arn,
       "${aws_s3_bucket.alb_access_logs[0].arn}/*"
@@ -389,8 +439,8 @@ data "aws_iam_policy_document" "s3_server_access_logs" {
 
   # Deny any access over insecure HTTP
   statement {
-    sid    = "DenyInsecureTransport"
-    effect = "Deny"
+    sid     = "DenyInsecureTransport"
+    effect  = "Deny"
     actions = ["s3:*"]
     resources = [
       aws_s3_bucket.s3_server_access_logs[0].arn,
@@ -430,7 +480,7 @@ resource "aws_s3_bucket_policy" "s3_server_access_logs" {
   ]
 }
 
-#  Application Load Balancer 
+#  Application Load Balancer
 
 resource "aws_security_group" "alb" {
   name        = "${var.project_prefix}-${var.environment}-alb-sg"
@@ -454,11 +504,12 @@ resource "aws_security_group" "alb" {
     description = "Allow HTTPS traffic from anywhere"
   }
 
+  # Restrict egress to within the VPC. The ALB now only talk to internal targets (like ECS), not the entire internet.
   egress {
     protocol    = "-1"
     from_port   = 0
     to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.vpc_cidr]
     description = "Allow all outbound traffic"
   }
 
@@ -471,11 +522,11 @@ resource "aws_security_group" "alb" {
 }
 
 resource "aws_lb" "main" {
-  name               = "${var.project_prefix}-${var.environment}-alb"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb.id]
-  subnets            = aws_subnet.public[*].id
+  name                       = "${var.project_prefix}-${var.environment}-alb"
+  internal                   = false
+  load_balancer_type         = "application"
+  security_groups            = [aws_security_group.alb.id]
+  subnets                    = aws_subnet.public[*].id
   drop_invalid_header_fields = true
 
   # Deletion protection should be enabled via a variable for production.
