@@ -4,13 +4,17 @@ import logging
 from collections import defaultdict
 from datetime import UTC, datetime
 
+from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
 from apps.github.models.commit import Commit
 from apps.github.models.issue import Issue
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.user import User
+from apps.owasp.models.chapter import Chapter
+from apps.owasp.models.entity_member import EntityMember
 from apps.owasp.models.member_snapshot import MemberSnapshot
+from apps.owasp.models.project import Project
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +98,89 @@ class Command(BaseCommand):
             heatmap_data[date_key] += 1
 
         return dict(heatmap_data)
+
+    def generate_entity_contributions(
+        self, user, commits, pull_requests, issues, entity_type: str
+    ) -> dict:
+        """Generate contribution counts per chapter or project led by the user.
+
+        Args:
+            user: User instance to get led entities for.
+            commits: Queryset or iterable of Commit objects.
+            pull_requests: Queryset or iterable of PullRequest objects.
+            issues: Queryset or iterable of Issue objects.
+            entity_type: Either "chapter" or "project".
+
+        Returns:
+            dict: Mapping of entity keys to contribution counts.
+
+        """
+        entity_contributions: dict[str, int] = defaultdict(int)
+
+        # Get entities where the user is a leader
+        entity_model = Project if entity_type == "project" else Chapter
+        content_type = ContentType.objects.get_for_model(entity_model)
+        led_entity_ids = EntityMember.objects.filter(
+            member=user,
+            entity_type=content_type,
+            role=EntityMember.Role.LEADER,
+            is_active=True,
+            is_reviewed=True,
+        ).values_list("entity_id", flat=True)
+
+        # Get all unique repository IDs from contributions
+        repository_ids = set()
+        for commit in commits.select_related("repository"):
+            repository_ids.add(commit.repository_id)
+        for pr in pull_requests.select_related("repository"):
+            repository_ids.add(pr.repository_id)
+        for issue in issues.select_related("repository"):
+            repository_ids.add(issue.repository_id)
+
+        # Build a mapping of repository_id -> entity key (only for led entities)
+        # Use nest_key (without www- prefix) to match GraphQL API format
+        repo_to_entity: dict[int, str] = {}
+        if entity_type == "project":
+            # Projects have a M2M 'repositories' field
+            projects = Project.objects.filter(
+                id__in=led_entity_ids,
+                repositories__id__in=repository_ids,
+                is_active=True,
+            ).prefetch_related("repositories")
+            for project in projects:
+                for repo in project.repositories.all():
+                    if repo.id in repository_ids:
+                        repo_to_entity[repo.id] = project.nest_key
+        else:  # chapter
+            # Chapters have a single FK 'owasp_repository' field
+            chapters = Chapter.objects.filter(
+                id__in=led_entity_ids,
+                owasp_repository_id__in=repository_ids,
+                is_active=True,
+            ).select_related("owasp_repository")
+            for chapter in chapters:
+                if chapter.owasp_repository_id in repository_ids:
+                    repo_to_entity[chapter.owasp_repository_id] = chapter.nest_key
+
+        # Count commits
+        for commit in commits:
+            entity_key = repo_to_entity.get(commit.repository_id)
+            if entity_key:
+                entity_contributions[entity_key] += 1
+
+        # Count pull requests
+        for pr in pull_requests:
+            entity_key = repo_to_entity.get(pr.repository_id)
+            if entity_key:
+                entity_contributions[entity_key] += 1
+
+        # Count issues
+        for issue in issues:
+            entity_key = repo_to_entity.get(issue.repository_id)
+            if entity_key:
+                entity_contributions[entity_key] += 1
+
+        return dict(entity_contributions)
 
     def handle(self, *args, **options):
         """Handle command execution.
@@ -200,11 +287,36 @@ class Command(BaseCommand):
         # Generate heatmap data
         heatmap_data = self.generate_heatmap_data(commits, pull_requests, issues)
         snapshot.contribution_heatmap_data = heatmap_data
+
+        # Generate chapter contributions (only for chapters led by the user)
+        chapter_contributions = self.generate_entity_contributions(
+            user, commits, pull_requests, issues, "chapter"
+        )
+        snapshot.chapter_contributions = chapter_contributions
+
+        # Generate project contributions (only for projects led by the user)
+        project_contributions = self.generate_entity_contributions(
+            user, commits, pull_requests, issues, "project"
+        )
+        snapshot.project_contributions = project_contributions
+
         snapshot.save()
 
         if heatmap_data:
             self.stdout.write(f"  Generated heatmap data for {len(heatmap_data)} day(s)")
             logger.info("Generated heatmap data for %s days", len(heatmap_data))
+
+        if chapter_contributions:
+            self.stdout.write(
+                f"  Generated chapter contributions for {len(chapter_contributions)} chapter(s)"
+            )
+            logger.info("Generated contributions for %s chapters", len(chapter_contributions))
+
+        if project_contributions:
+            self.stdout.write(
+                f"  Generated project contributions for {len(project_contributions)} project(s)"
+            )
+            logger.info("Generated contributions for %s projects", len(project_contributions))
 
         # Summary
         total = snapshot.total_contributions

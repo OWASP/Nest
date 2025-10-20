@@ -14,6 +14,7 @@ from apps.github.models.pull_request import PullRequest
 from apps.github.models.repository import Repository
 from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
+from apps.owasp.models.member_profile import MemberProfile
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +46,11 @@ class Command(BaseCommand):
             type=str,
             help="End date (YYYY-MM-DD). Defaults to October 1st of current year.",
         )
+        parser.add_argument(
+            "--skip-sync",
+            action="store_true",
+            help="Skip syncing; only populate first_contribution_at if null",
+        )
 
     def parse_date(self, date_str: str | None, default: datetime) -> datetime:
         """Parse date string or return default.
@@ -70,6 +76,106 @@ class Command(BaseCommand):
             self.stderr.write(self.style.ERROR(error_msg))
             raise
 
+    def populate_first_contribution_only(self, username: str, user: User, gh):
+        """Populate only the first_contribution_at field using GitHub API.
+
+        Args:
+            username (str): GitHub username
+            user (User): User model instance
+            gh: GitHub client instance
+
+        """
+        profile, _created = MemberProfile.objects.get_or_create(github_user=user)
+
+        if profile.first_contribution_at is not None:
+            self.stdout.write(
+                self.style.WARNING(
+                    f"First contribution date already set to "
+                    f"{profile.first_contribution_at.strftime('%Y-%m-%d')}. Skipping."
+                )
+            )
+            return
+
+        # Get OWASP organizations
+        organizations = Organization.objects.filter(is_owasp_related_organization=True)
+        if not organizations.exists():
+            self.stderr.write(self.style.ERROR("No OWASP organizations found"))
+            return
+
+        org_names = [org.login for org in organizations]
+        self.stdout.write(f"Searching across {len(org_names)} OWASP organizations...")
+
+        earliest_dates = []
+
+        # Search for earliest commit
+        for org in org_names:
+            commit_query = f"author:{username} org:{org} sort:author-date-asc"
+            try:
+                commits = gh.search_commits(query=commit_query, sort="author-date", order="asc")
+                if commits.totalCount > 0:
+                    first_commit = next(iter(commits))
+                    earliest_dates.append(
+                        (first_commit.commit.author.date, "commit", first_commit.repository.name)
+                    )
+                    self.stdout.write(f"  Found earliest commit in {org}")
+                    break  # We only need the first one
+            except GithubException as e:
+                logger.warning("Error searching commits in %s: %s", org, e)
+
+        # Search for earliest PR
+        pr_query = f"author:{username} type:pr " + " ".join(f"org:{org}" for org in org_names)
+        pr_query += " sort:created-asc"
+        try:
+            prs = gh.search_issues(query=pr_query, sort="created", order="asc")
+            if prs.totalCount > 0:
+                first_pr = next(iter(prs))
+                earliest_dates.append((first_pr.created_at, "PR", first_pr.repository.name))
+                self.stdout.write(f"  Found earliest PR: {first_pr.created_at}")
+        except GithubException as e:
+            logger.warning("Error searching PRs: %s", e)
+
+        # Search for earliest issue
+        issue_query = f"author:{username} type:issue " + " ".join(
+            f"org:{org}" for org in org_names
+        )
+        issue_query += " sort:created-asc"
+        try:
+            issues = gh.search_issues(query=issue_query, sort="created", order="asc")
+            if issues.totalCount > 0:
+                first_issue = next(iter(issues))
+                earliest_dates.append(
+                    (first_issue.created_at, "issue", first_issue.repository.name)
+                )
+                self.stdout.write(f"  Found earliest issue: {first_issue.created_at}")
+        except GithubException as e:
+            logger.warning("Error searching issues: %s", e)
+
+        if earliest_dates:
+            # Find the minimum date
+            first_contribution_date, contrib_type, repo_name = min(
+                earliest_dates, key=lambda x: x[0]
+            )
+            profile.first_contribution_at = first_contribution_date
+            profile.save()
+
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"\nSet first OWASP contribution: {contrib_type} in {repo_name} "
+                    f"on {first_contribution_date.strftime('%Y-%m-%d')}"
+                )
+            )
+            logger.info(
+                "Set first OWASP contribution for %s: %s (%s in %s)",
+                username,
+                first_contribution_date,
+                contrib_type,
+                repo_name,
+            )
+        else:
+            self.stdout.write(
+                self.style.WARNING(f"No contributions found for {username} in OWASP organizations")
+            )
+
     def handle(self, *args, **options):
         """Handle command execution.
 
@@ -79,14 +185,7 @@ class Command(BaseCommand):
 
         """
         username = options["username"]
-
-        # Default to current year: Jan 1 to Oct 1
-        current_year = datetime.now(UTC).year
-        default_start = datetime(current_year, 1, 1, tzinfo=UTC)
-        default_end = datetime(current_year, 10, 1, tzinfo=UTC)
-
-        end_at = self.parse_date(options.get("end_at"), default_end)
-        start_at = self.parse_date(options.get("start_at"), default_start)
+        skip_sync = options.get("skip_sync", False)
 
         gh = get_github_client()
 
@@ -96,6 +195,20 @@ class Command(BaseCommand):
         except GithubException as e:
             self.stderr.write(self.style.ERROR(f"Could not fetch user {username}: {e}"))
             return
+
+        # If skipping sync, populate first contribution if needed and exit
+        if skip_sync:
+            self.stdout.write("Skipping data sync...")
+            self.populate_first_contribution_only(username, user, gh)
+            return
+
+        # Default to current year: Jan 1 to Oct 1
+        current_year = datetime.now(UTC).year
+        default_start = datetime(current_year, 1, 1, tzinfo=UTC)
+        default_end = datetime(current_year, 10, 1, tzinfo=UTC)
+
+        end_at = self.parse_date(options.get("end_at"), default_end)
+        start_at = self.parse_date(options.get("start_at"), default_start)
 
         contributed_repos = RepositoryContributor.objects.filter(user=user).select_related(
             "repository__organization"
@@ -298,9 +411,16 @@ class Command(BaseCommand):
         total_synced = 0
 
         if committers_data:
-            logger.info("Bulk saving %s committers", len(committers_data))
-            User.bulk_save(committers_data)
-            self.stdout.write(f"\nSaved {len(committers_data)} committer(s)")
+            # Deduplicate committers by node_id
+            unique_committers = {}
+            for committer in committers_data:
+                if committer.node_id not in unique_committers:
+                    unique_committers[committer.node_id] = committer
+
+            committers_list = list(unique_committers.values())
+            logger.info("Bulk saving %s unique committers", len(committers_list))
+            User.bulk_save(committers_list)
+            self.stdout.write(f"\nSaved {len(committers_list)} unique committer(s)")
 
         if commits_data:
             logger.info("Bulk saving %s commits", len(commits_data))
@@ -339,6 +459,9 @@ class Command(BaseCommand):
                     f"{len(commits_data)} commits for {username}"
                 )
             )
+
+            # Always populate first contribution date if not already set
+            self.populate_first_contribution_only(username, user, gh)
         else:
             self.stdout.write(
                 self.style.WARNING(f"No PRs, issues, or commits found for {username}")

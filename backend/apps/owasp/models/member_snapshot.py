@@ -19,11 +19,21 @@ class MemberSnapshot(TimestampedModel):
         verbose_name_plural = "Member Snapshots"
         unique_together = ("github_user", "start_at", "end_at")
 
+    chapter_contributions = models.JSONField(
+        verbose_name="Chapter Contributions",
+        default=dict,
+        blank=True,
+        help_text="Contribution counts per chapter (chapter_key -> count mapping)",
+    )
     contribution_heatmap_data = models.JSONField(
         verbose_name="Contribution Heatmap Data",
         default=dict,
         blank=True,
         help_text="Daily contribution counts (YYYY-MM-DD -> count mapping)",
+    )
+    project_contributions = models.JSONField(
+        blank=True,
+        help_text="Contribution counts per project (project_key -> count mapping)",
     )
     github_user = models.ForeignKey(
         User,

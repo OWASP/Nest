@@ -1,10 +1,16 @@
 """GitHub user GraphQL node."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Annotated
+
 import strawberry
 import strawberry_django
 
 from apps.github.models.user import User
-from apps.nest.api.internal.nodes.badge import BadgeNode
+
+if TYPE_CHECKING:
+    from apps.nest.api.internal.nodes.badge import BadgeNode
 
 
 @strawberry_django.type(
@@ -34,7 +40,9 @@ class UserNode:
         return self.user_badges.filter(is_active=True).count()
 
     @strawberry.field
-    def badges(self) -> list[BadgeNode]:
+    def badges(
+        self,
+    ) -> list[Annotated[BadgeNode, strawberry.lazy("apps.nest.api.internal.nodes.badge")]]:
         """Return user badges."""
         user_badges = (
             self.user_badges.filter(
@@ -54,6 +62,13 @@ class UserNode:
     def created_at(self) -> float:
         """Resolve created at."""
         return self.idx_created_at
+
+    @strawberry.field
+    def first_owasp_contribution_at(self) -> float | None:
+        """Resolve first OWASP contribution date."""
+        if hasattr(self, "owasp_profile") and self.owasp_profile.first_contribution_at:
+            return self.owasp_profile.first_contribution_at.timestamp()
+        return None
 
     @strawberry.field
     def issues_count(self) -> int:

@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -14,6 +17,12 @@ from apps.github.constants import (
 from apps.github.models.common import GenericUserModel, NodeModel
 from apps.github.models.mixins.user import UserIndexMixin
 from apps.github.models.organization import Organization
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
+
+    from apps.owasp.models.chapter import Chapter
+    from apps.owasp.models.project import Project
 
 
 class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
@@ -78,6 +87,50 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
         """
         return self.created_releases.all()
+
+    @property
+    def chapters(self) -> QuerySet[Chapter]:
+        """Get chapters where user is listed as a leader.
+
+        Returns:
+            QuerySet[Chapter]: Chapters where this user is an active, reviewed leader.
+
+        """
+        from apps.owasp.models.chapter import Chapter
+        from apps.owasp.models.entity_member import EntityMember
+
+        content_type = ContentType.objects.get_for_model(Chapter)
+        leader_memberships = EntityMember.objects.filter(
+            member=self,
+            entity_type=content_type,
+            role=EntityMember.Role.LEADER,
+            is_active=True,
+            is_reviewed=True,
+        ).values_list("entity_id", flat=True)
+
+        return Chapter.objects.filter(id__in=leader_memberships, is_active=True).order_by("name")
+
+    @property
+    def projects(self) -> QuerySet[Project]:
+        """Get projects where user is listed as a leader.
+
+        Returns:
+            QuerySet[Project]: Projects where this user is an active, reviewed leader.
+
+        """
+        from apps.owasp.models.entity_member import EntityMember
+        from apps.owasp.models.project import Project
+
+        content_type = ContentType.objects.get_for_model(Project)
+        leader_memberships = EntityMember.objects.filter(
+            member=self,
+            entity_type=content_type,
+            role=EntityMember.Role.LEADER,
+            is_active=True,
+            is_reviewed=True,
+        ).values_list("entity_id", flat=True)
+
+        return Project.objects.filter(id__in=leader_memberships, is_active=True).order_by("name")
 
     def from_github(self, gh_user) -> None:
         """Update the user instance based on GitHub user data.
