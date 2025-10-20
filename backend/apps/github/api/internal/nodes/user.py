@@ -1,16 +1,10 @@
 """GitHub user GraphQL node."""
 
-from __future__ import annotations
-
-from typing import TYPE_CHECKING, Annotated
-
 import strawberry
 import strawberry_django
 
 from apps.github.models.user import User
-
-if TYPE_CHECKING:
-    from apps.nest.api.internal.nodes.badge import BadgeNode
+from apps.nest.api.internal.nodes.badge import BadgeNode
 
 
 @strawberry_django.type(
@@ -40,9 +34,7 @@ class UserNode:
         return self.user_badges.filter(is_active=True).count()
 
     @strawberry.field
-    def badges(
-        self,
-    ) -> list[Annotated[BadgeNode, strawberry.lazy("apps.nest.api.internal.nodes.badge")]]:
+    def badges(self) -> list[BadgeNode]:
         """Return user badges."""
         user_badges = (
             self.user_badges.filter(

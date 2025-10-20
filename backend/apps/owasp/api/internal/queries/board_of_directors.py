@@ -28,13 +28,13 @@ class BoardOfDirectorsQuery:
 
     @strawberry.field
     def boards_of_directors(self, limit: int = 10) -> list[BoardOfDirectorsNode]:
-        """Resolve list of Board of Directors.
+        """Resolve multiple Board of Directors instances.
 
         Args:
-            limit: Maximum number of boards to return (default: 10)
+            limit: Maximum number of boards to return.
 
         Returns:
-            List of BoardOfDirectorsNode objects ordered by most recent year
+            List of BoardOfDirectorsNode objects.
 
         """
         return BoardOfDirectors.objects.order_by("-year")[:limit]

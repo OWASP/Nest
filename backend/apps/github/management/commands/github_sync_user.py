@@ -107,20 +107,22 @@ class Command(BaseCommand):
 
         earliest_dates = []
 
-        # Search for earliest commit
-        for org in org_names:
-            commit_query = f"author:{username} org:{org} sort:author-date-asc"
-            try:
-                commits = gh.search_commits(query=commit_query, sort="author-date", order="asc")
-                if commits.totalCount > 0:
-                    first_commit = next(iter(commits))
-                    earliest_dates.append(
-                        (first_commit.commit.author.date, "commit", first_commit.repository.name)
-                    )
-                    self.stdout.write(f"  Found earliest commit in {org}")
-                    break  # We only need the first one
-            except GithubException as e:
-                logger.warning("Error searching commits in %s: %s", org, e)
+        # Search for earliest commit across all organizations
+        commit_query = f"author:{username} " + " ".join(f"org:{org}" for org in org_names)
+        commit_query += " sort:author-date-asc"
+        try:
+            commits = gh.search_commits(query=commit_query, sort="author-date", order="asc")
+            if commits.totalCount > 0:
+                first_commit = next(iter(commits))
+                earliest_dates.append(
+                    (first_commit.commit.author.date, "commit", first_commit.repository.name)
+                )
+                self.stdout.write(
+                    f"  Found earliest commit: {first_commit.commit.author.date} "
+                    f"in {first_commit.repository.full_name}"
+                )
+        except GithubException as e:
+            logger.warning("Error searching commits: %s", e)
 
         # Search for earliest PR
         pr_query = f"author:{username} type:pr " + " ".join(f"org:{org}" for org in org_names)

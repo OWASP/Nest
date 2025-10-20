@@ -38,7 +38,7 @@ class BoardOfDirectors(models.Model):
         """
         return f"https://board.owasp.org/elections/{self.year}_elections"
 
-    def candidates(self) -> QuerySet[EntityMember]:
+    def get_candidates(self) -> QuerySet[EntityMember]:
         """Return all candidates for this board election."""
         return EntityMember.objects.filter(
             entity_type=ContentType.objects.get_for_model(self.__class__),
@@ -48,7 +48,7 @@ class BoardOfDirectors(models.Model):
             is_reviewed=True,
         ).order_by("member_name")
 
-    def members(self) -> QuerySet[EntityMember]:
+    def get_members(self) -> QuerySet[EntityMember]:
         """Return all members of this board."""
         return EntityMember.objects.filter(
             entity_type=ContentType.objects.get_for_model(self.__class__),

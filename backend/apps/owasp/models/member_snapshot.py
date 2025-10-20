@@ -32,6 +32,8 @@ class MemberSnapshot(TimestampedModel):
         help_text="Daily contribution counts (YYYY-MM-DD -> count mapping)",
     )
     project_contributions = models.JSONField(
+        verbose_name="Project Contributions",
+        default=dict,
         blank=True,
         help_text="Contribution counts per project (project_key -> count mapping)",
     )

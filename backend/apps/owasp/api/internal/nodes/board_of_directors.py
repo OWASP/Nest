@@ -19,16 +19,16 @@ class BoardOfDirectorsNode(strawberry.relay.Node):
     """Board of Directors node."""
 
     @strawberry.field
-    def owasp_url(self) -> str:
-        """Resolve OWASP board election URL."""
-        return self.owasp_url
-
-    @strawberry.field
     def candidates(self) -> list[EntityMemberNode]:
         """Resolve board election candidates."""
-        return self.candidates()  # type: ignore[call-arg]
+        return self.get_candidates()  # type: ignore[call-arg]
 
     @strawberry.field
     def members(self) -> list[EntityMemberNode]:
         """Resolve board members."""
-        return self.members()  # type: ignore[call-arg]
+        return self.get_members()  # type: ignore[call-arg]
+
+    @strawberry.field
+    def owasp_url(self) -> str:
+        """Resolve OWASP board election URL."""
+        return self.owasp_url

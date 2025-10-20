@@ -29,7 +29,7 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 dayjs.extend(relativeTime)
 
-interface Candidate {
+type Candidate = {
   id: string
   memberName: string
   memberEmail: string
@@ -45,7 +45,7 @@ interface Candidate {
   }
 }
 
-interface MemberSnapshot {
+type MemberSnapshot = {
   id: string
   startAt: string
   endAt: string
@@ -61,14 +61,14 @@ interface MemberSnapshot {
   }
 }
 
-interface Chapter {
+type Chapter = {
   id: string
   key: string
   name: string
   url: string
 }
 
-interface Project {
+type Project = {
   id: string
   key: string
   name: string
@@ -77,7 +77,7 @@ interface Project {
   url: string
 }
 
-interface CandidateWithSnapshot extends Candidate {
+type CandidateWithSnapshot = Candidate & {
   snapshot?: MemberSnapshot
 }
 
@@ -89,7 +89,7 @@ const BoardCandidatesPage = () => {
   const [boardUrl, setBoardUrl] = useState<string>('')
 
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GetBoardCandidatesDocument, {
-    variables: { year: parseInt(year) },
+    variables: { year: Number.parseInt(year) },
   })
 
   useEffect(() => {
@@ -264,9 +264,13 @@ const BoardCandidatesPage = () => {
             </h4>
             <div className="flex flex-wrap gap-2">
               {ledChapters.map((chapter) => {
+                // Strip prefix if present to get bare key
+                const bareKey = chapter.key.startsWith('www-chapter-')
+                  ? chapter.key.replace('www-chapter-', '')
+                  : chapter.key
                 // Check both key formats for compatibility
-                const directKey = snapshot?.chapterContributions?.[chapter.key]
-                const withPrefix = snapshot?.chapterContributions?.[`www-chapter-${chapter.key}`]
+                const directKey = snapshot?.chapterContributions?.[bareKey]
+                const withPrefix = snapshot?.chapterContributions?.[`www-chapter-${bareKey}`]
                 const contributionCount = directKey || withPrefix || 0
 
                 return (
@@ -279,15 +283,20 @@ const BoardCandidatesPage = () => {
                     <span>{chapter.name}</span>
                     <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-800 dark:bg-green-800/40 dark:text-green-300">
                       {contributionCount === 0
-                        ? 'no contributions in 2025'
-                        : `${contributionCount} contributions in 2025`}
+                        ? `no contributions in ${year}`
+                        : `${contributionCount} contributions in ${year}`}
                     </span>
                   </Link>
                 )
               })}
               {ledProjects.map((project) => {
-                const directKey = snapshot?.projectContributions?.[project.key]
-                const withPrefix = snapshot?.projectContributions?.[`www-project-${project.key}`]
+                // Strip prefix if present to get bare key
+                const bareKey = project.key.startsWith('www-project-')
+                  ? project.key.replace('www-project-', '')
+                  : project.key
+                // Check both key formats for compatibility
+                const directKey = snapshot?.projectContributions?.[bareKey]
+                const withPrefix = snapshot?.projectContributions?.[`www-project-${bareKey}`]
                 const contributionCount = directKey || withPrefix || 0
                 return (
                   <Link
@@ -299,8 +308,8 @@ const BoardCandidatesPage = () => {
                     <span>{project.name}</span>
                     <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-800 dark:bg-blue-800/40 dark:text-blue-300">
                       {contributionCount === 0
-                        ? 'no contributions in 2025'
-                        : `${contributionCount} contributions in 2025`}
+                        ? `no contributions in ${year}`
+                        : `${contributionCount} contributions in ${year}`}
                     </span>
                   </Link>
                 )

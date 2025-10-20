@@ -3,9 +3,6 @@ import { gql } from '@apollo/client'
 export const GET_BOARD_CANDIDATES = gql`
   query GetBoardCandidates($year: Int!) {
     boardOfDirectors(year: $year) {
-      id
-      year
-      owaspUrl
       candidates {
         id
         memberName
@@ -21,6 +18,9 @@ export const GET_BOARD_CANDIDATES = gql`
           firstOwaspContributionAt
         }
       }
+      id
+      owaspUrl
+      year
     }
   }
 `
@@ -28,19 +28,19 @@ export const GET_BOARD_CANDIDATES = gql`
 export const GET_MEMBER_SNAPSHOT = gql`
   query GetMemberSnapshot($userLogin: String!) {
     memberSnapshot(userLogin: $userLogin) {
-      id
-      startAt
-      endAt
-      commitsCount
-      pullRequestsCount
-      issuesCount
-      totalContributions
-      contributionHeatmapData
       chapterContributions
-      projectContributions
+      commitsCount
+      contributionHeatmapData
+      endAt
       githubUser {
         login
       }
+      id
+      issuesCount
+      projectContributions
+      pullRequestsCount
+      startAt
+      totalContributions
     }
   }
 `
@@ -61,8 +61,8 @@ export const GET_PROJECT_BY_KEY = gql`
     project(key: $key) {
       id
       key
-      name
       level
+      name
       type
       url
     }
