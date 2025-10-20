@@ -4214,14 +4214,14 @@ doc = ["sphinx"]
 
 [[package]]
 name = "strawberry-graphql"
-version = "0.283.3"
+version = "0.284.1"
 description = "A library for creating GraphQL APIs"
 optional = false
-python-versions = "<4.0,>=3.9"
+python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "strawberry_graphql-0.283.3-py3-none-any.whl", hash = "sha256:3751d86a219d81a16a13f335bb7d2fa3f57a85fab83d7d284b8ea88e2261d68b"},
-    {file = "strawberry_graphql-0.283.3.tar.gz", hash = "sha256:375e545856b7587debd4e0f1e2a6fca19d09cc126238a07b9e5164e5eb09342a"},
+    {file = "strawberry_graphql-0.284.1-py3-none-any.whl", hash = "sha256:8881c5a87d77f7eb1f84fe7603ec8da3219fd84590caa73fcbdb9a63781ac7af"},
+    {file = "strawberry_graphql-0.284.1.tar.gz", hash = "sha256:1359b8110d37d0a46caacc09f28dec4816ebbcbedd36b798fb85d61d3f3fad64"},
 ]
 
 [package.dependencies]
@@ -4695,4 +4695,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "8a0ea6daafbb9ad2fb910d5e2677c3fdd70d3da098d626c7afd6d8cd79243402"
+content-hash = "0b6454d39d794d0c5b5c31a3eb4b51c76b7c0f7edb5c731fe032db08cdcc4270"
