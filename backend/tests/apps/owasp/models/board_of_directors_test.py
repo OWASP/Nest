@@ -23,14 +23,14 @@ class TestBoardOfDirectorsModel:
     def test_has_candidates_method(self):
         board = BoardOfDirectors(year=2025)
 
-        assert hasattr(board, "candidates")
-        assert callable(board.candidates)
+        assert hasattr(board, "get_candidates")
+        assert callable(board.get_candidates)
 
     def test_has_members_method(self):
         board = BoardOfDirectors(year=2025)
 
-        assert hasattr(board, "members")
-        assert callable(board.members)
+        assert hasattr(board, "get_members")
+        assert callable(board.get_members)
 
     def test_owasp_url_property(self):
         board = BoardOfDirectors(year=2025)

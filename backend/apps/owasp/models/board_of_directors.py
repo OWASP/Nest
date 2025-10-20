@@ -1,7 +1,14 @@
 """OWASP app Board of Directors models."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
 
 from apps.owasp.models.entity_member import EntityMember
 
@@ -31,20 +38,22 @@ class BoardOfDirectors(models.Model):
         """
         return f"https://board.owasp.org/elections/{self.year}_elections"
 
-    def candidates(self):
+    def get_candidates(self) -> QuerySet[EntityMember]:
         """Return all candidates for this board election."""
-        content_type = ContentType.objects.get_for_model(self.__class__)
         return EntityMember.objects.filter(
-            entity_type=content_type,
+            entity_type=ContentType.objects.get_for_model(self.__class__),
             entity_id=self.id,
             role=EntityMember.Role.CANDIDATE,
-        )
+            is_active=True,
+            is_reviewed=True,
+        ).order_by("member_name")
 
-    def members(self):
+    def get_members(self) -> QuerySet[EntityMember]:
         """Return all members of this board."""
-        content_type = ContentType.objects.get_for_model(self.__class__)
         return EntityMember.objects.filter(
-            entity_type=content_type,
+            entity_type=ContentType.objects.get_for_model(self.__class__),
             entity_id=self.id,
             role=EntityMember.Role.MEMBER,
-        )
+            is_active=True,
+            is_reviewed=True,
+        ).order_by("member_name")

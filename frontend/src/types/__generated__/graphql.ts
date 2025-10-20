@@ -46,6 +46,18 @@ export type BadgeNode = Node & {
   weight: Scalars['Int']['output'];
 };
 
+export type BoardOfDirectorsNode = Node & {
+  __typename?: 'BoardOfDirectorsNode';
+  candidates: Array<EntityMemberNode>;
+  createdAt: Scalars['DateTime']['output'];
+  /** The Globally Unique ID of this object */
+  id: Scalars['ID']['output'];
+  members: Array<EntityMemberNode>;
+  owaspUrl: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  year: Scalars['Int']['output'];
+};
+
 export type ChapterNode = Node & {
   __typename?: 'ChapterNode';
   country: Scalars['String']['output'];
@@ -214,6 +226,22 @@ export type LogoutResult = {
   code?: Maybe<Scalars['String']['output']>;
   message?: Maybe<Scalars['String']['output']>;
   ok: Scalars['Boolean']['output'];
+};
+
+export type MemberSnapshotNode = Node & {
+  __typename?: 'MemberSnapshotNode';
+  chapterContributions: Scalars['JSON']['output'];
+  commitsCount: Scalars['Int']['output'];
+  contributionHeatmapData: Scalars['JSON']['output'];
+  endAt: Scalars['DateTime']['output'];
+  githubUser: UserNode;
+  /** The Globally Unique ID of this object */
+  id: Scalars['ID']['output'];
+  issuesCount: Scalars['Int']['output'];
+  projectContributions: Scalars['JSON']['output'];
+  pullRequestsCount: Scalars['Int']['output'];
+  startAt: Scalars['DateTime']['output'];
+  totalContributions: Scalars['Int']['output'];
 };
 
 export type MentorNode = {
@@ -522,6 +550,8 @@ export type Query = {
   __typename?: 'Query';
   activeApiKeyCount: Scalars['Int']['output'];
   apiKeys: Array<ApiKeyNode>;
+  boardOfDirectors?: Maybe<BoardOfDirectorsNode>;
+  boardsOfDirectors: Array<BoardOfDirectorsNode>;
   chapter?: Maybe<ChapterNode>;
   committee?: Maybe<CommitteeNode>;
   getModule: ModuleNode;
@@ -530,6 +560,8 @@ export type Query = {
   getProjectModules: Array<ModuleNode>;
   isMentor: Scalars['Boolean']['output'];
   isProjectLeader: Scalars['Boolean']['output'];
+  memberSnapshot?: Maybe<MemberSnapshotNode>;
+  memberSnapshots: Array<MemberSnapshotNode>;
   myPrograms: PaginatedPrograms;
   organization?: Maybe<OrganizationNode>;
   project?: Maybe<ProjectNode>;
@@ -555,6 +587,16 @@ export type Query = {
   topContributors: Array<RepositoryContributorNode>;
   upcomingEvents: Array<EventNode>;
   user?: Maybe<UserNode>;
+};
+
+
+export type QueryBoardOfDirectorsArgs = {
+  year: Scalars['Int']['input'];
+};
+
+
+export type QueryBoardsOfDirectorsArgs = {
+  limit?: Scalars['Int']['input'];
 };
 
 
@@ -596,6 +638,18 @@ export type QueryIsMentorArgs = {
 
 export type QueryIsProjectLeaderArgs = {
   login: Scalars['String']['input'];
+};
+
+
+export type QueryMemberSnapshotArgs = {
+  startYear?: InputMaybe<Scalars['Int']['input']>;
+  userLogin: Scalars['String']['input'];
+};
+
+
+export type QueryMemberSnapshotsArgs = {
+  limit?: Scalars['Int']['input'];
+  userLogin?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -885,6 +939,7 @@ export type UserNode = {
   contributionsCount: Scalars['Int']['output'];
   createdAt: Scalars['Float']['output'];
   email: Scalars['String']['output'];
+  firstOwaspContributionAt?: Maybe<Scalars['Float']['output']>;
   followersCount: Scalars['Int']['output'];
   followingCount: Scalars['Int']['output'];
   id: Scalars['ID']['output'];

@@ -56,6 +56,13 @@ class UserNode:
         return self.idx_created_at
 
     @strawberry.field
+    def first_owasp_contribution_at(self) -> float | None:
+        """Resolve first OWASP contribution date."""
+        if hasattr(self, "owasp_profile") and self.owasp_profile.first_contribution_at:
+            return self.owasp_profile.first_contribution_at.timestamp()
+        return None
+
+    @strawberry.field
     def issues_count(self) -> int:
         """Resolve issues count."""
         return self.idx_issues_count

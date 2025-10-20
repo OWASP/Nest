@@ -31,6 +31,12 @@ class MemberProfile(TimestampedModel):
         verbose_name="OWASP Slack ID",
         help_text="Member's Slack user ID in OWASP workspace",
     )
+    first_contribution_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name="First OWASP Contribution",
+        help_text="Date of the member's first contribution to OWASP repositories",
+    )
 
     def __str__(self) -> str:
         """Return human-readable representation."""

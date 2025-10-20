@@ -53,6 +53,8 @@ class TestMemberSnapshotAdmin:
             "issues_count",
             "total_contributions",
             "contribution_heatmap_data",
+            "chapter_contributions",
+            "project_contributions",
             "nest_created_at",
             "nest_updated_at",
         )
