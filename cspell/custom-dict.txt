@@ -1,3 +1,4 @@
+AVD
 Agsoc
 Aichi
 Aissue
@@ -7,6 +8,7 @@ CCSP
 CISSP
 Cañón
 DRF
+ELB
 GBP
 GFKs
 GSOC
@@ -23,6 +25,7 @@ PYTHONUNBUFFERED
 RUF
 SEO
 SLF
+SPOF
 Sivagangai
 Sonarqube
 Stegen
@@ -55,6 +58,7 @@ cva
 demojize
 dismissable
 dsn
+elb
 env
 facebookexternalhit
 gamesec
@@ -66,6 +70,7 @@ gunicorn
 heroui
 hsl
 igoat
+igw
 inlinehilite
 isanori
 jumpstart
@@ -117,6 +122,8 @@ slackbot
 slideshare
 speakerdeck
 superfences
+tfstate
+tfvars
 tiktok
 tsc
 turbopack
