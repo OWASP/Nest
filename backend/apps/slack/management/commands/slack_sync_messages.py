@@ -5,7 +5,6 @@ import os
 import time
 from datetime import UTC, datetime
 
-from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.template.defaultfilters import pluralize
 from slack_sdk import WebClient
