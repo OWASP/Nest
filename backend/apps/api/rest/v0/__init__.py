@@ -5,7 +5,7 @@ from ninja import NinjaAPI, Swagger
 from ninja.pagination import RouterPaginated
 from ninja.throttling import AuthRateThrottle
 
-from apps.api.rest.auth.api_key import ApiKey as ApiKey
+from apps.api.rest.auth.api_key import ApiKey
 from apps.api.rest.v0.chapter import router as chapter_router
 from apps.api.rest.v0.committee import router as committee_router
 from apps.api.rest.v0.event import router as event_router
