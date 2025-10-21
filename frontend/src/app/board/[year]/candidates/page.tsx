@@ -194,6 +194,9 @@ const BoardCandidatesPage = () => {
       window.open(candidateUrl, '_blank', 'noopener,noreferrer')
     }
 
+    // Check if candidate leads any flagship level projects
+    const leadsFlagshipProject = ledProjects.some((project) => project.level === 'flagship')
+
     return (
       <Button
         onPress={handleCardClick}
@@ -390,6 +393,8 @@ const BoardCandidatesPage = () => {
                       <Link
                         key={chapter.id}
                         href={`/chapters/${chapter.key.replace('www-chapter-', '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
                           contributionCount === 0
                             ? 'bg-orange-50 text-orange-700 ring-orange-700/10 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30 dark:hover:bg-orange-900/30'
@@ -425,6 +430,8 @@ const BoardCandidatesPage = () => {
                       <Link
                         key={project.id}
                         href={`/projects/${project.key.replace('www-project-', '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
                           contributionCount === 0
                             ? 'bg-orange-50 text-orange-700 ring-orange-700/10 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30 dark:hover:bg-orange-900/30'
@@ -536,7 +543,7 @@ const BoardCandidatesPage = () => {
                     Top 5 Active Channels
                   </h4>
                   <div className="inline-flex items-center gap-1.5 rounded-md bg-orange-50 px-2 py-1 text-xs font-medium text-orange-700 ring-1 ring-orange-700/10 ring-inset dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30">
-                    No messages
+                    No Engagement
                   </div>
                 </div>
               )
@@ -600,28 +607,42 @@ const BoardCandidatesPage = () => {
         {/* Additional Information */}
         {(candidate.member?.isOwaspBoardMember ||
           candidate.member?.isFormerOwaspStaff ||
-          candidate.member?.isGsocMentor) && (
+          candidate.member?.isGsocMentor ||
+          leadsFlagshipProject) && (
           <div className="mt-4 w-full border-t border-gray-200 pt-4 dark:border-gray-700">
             <h4 className="mb-2 text-sm text-gray-700 dark:text-gray-300">
               <span className="font-semibold">Additional Information</span>
             </h4>
             <div className="flex flex-wrap gap-2">
-              {candidate.member.isOwaspBoardMember && (
+              {candidate.member?.isOwaspBoardMember && (
                 <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-400/30">
                   OWASP Board of Directors Member
                 </span>
               )}
-              {candidate.member.isFormerOwaspStaff && (
+              {candidate.member?.isFormerOwaspStaff && (
                 <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-400/30">
                   Former OWASP Staff Member
                 </span>
               )}
-              {candidate.member.isGsocMentor && (
+              {candidate.member?.isGsocMentor && (
                 <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-400/30">
                   Google Summer of Code Mentor
                 </span>
               )}
             </div>
+            {leadsFlagshipProject && (
+              <div
+                className="mt-3 text-xs text-gray-600 dark:text-gray-400"
+                style={{
+                  wordWrap: 'break-word',
+                  overflowWrap: 'break-word',
+                  whiteSpace: 'normal',
+                }}
+              >
+                This candidate may have additional community engagement in other Slack workspaces
+                based on the flagship level project(s) they are leading.
+              </div>
+            )}
           </div>
         )}
       </Button>
@@ -667,8 +688,11 @@ const BoardCandidatesPage = () => {
           )}
         </p>
         <p className="mt-3 text-sm text-gray-500 italic dark:text-gray-500">
-          This page is built using publicly available data from the OWASP GitHub organization and
-          OWASP Slack workspace (January 1 to October 1, {year}). The code is open source and
+          This page represents all verifiable OWASP GitHub organization contributions and only OWASP
+          Slack workspace engagements (January 1 to October 1, {year}). Some projects (especially
+          Flagship level ones) may have their own Slack workspaces -- their data is not presented
+          here. Additionally, certain project workflows based on platforms other than GitHub (e.g.,
+          Google Docs or similar) are not included in this data. The code is open source and
           available as part of{' '}
           <Link
             href="https://github.com/OWASP/Nest"

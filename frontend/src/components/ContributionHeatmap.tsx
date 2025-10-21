@@ -184,7 +184,6 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
           weekday: 'short',
           month: 'short',
           day: 'numeric',
-          year: 'numeric',
           timeZone: 'UTC',
         })
 
