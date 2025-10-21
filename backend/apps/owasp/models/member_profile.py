@@ -37,6 +37,21 @@ class MemberProfile(TimestampedModel):
         verbose_name="First OWASP Contribution",
         help_text="Date of the member's first contribution to OWASP repositories",
     )
+    is_owasp_board_member = models.BooleanField(
+        default=False,
+        verbose_name="Is OWASP Board Member",
+        help_text="Whether the member is currently serving on the OWASP Board of Directors",
+    )
+    is_former_owasp_staff = models.BooleanField(
+        default=False,
+        verbose_name="Is Former OWASP Staff",
+        help_text="Whether the member is a former OWASP staff member",
+    )
+    is_gsoc_mentor = models.BooleanField(
+        default=False,
+        verbose_name="Is GSoC Mentor",
+        help_text="Whether the member is a Google Summer of Code mentor",
+    )
 
     def __str__(self) -> str:
         """Return human-readable representation."""

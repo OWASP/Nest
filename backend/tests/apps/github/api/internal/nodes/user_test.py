@@ -190,3 +190,85 @@ class TestUserNode:
         mock_badges_queryset.filter.assert_called_once_with(is_active=True)
         mock_filter.select_related.assert_called_once_with("badge")
         mock_select_related.order_by.assert_called_once_with("badge__weight", "badge__name")
+
+    def test_first_owasp_contribution_at_with_profile(self):
+        """Test first_owasp_contribution_at returns timestamp when profile exists."""
+        from datetime import UTC, datetime
+
+        mock_profile = Mock()
+        mock_profile.first_contribution_at = datetime(2025, 1, 15, tzinfo=UTC)
+
+        mock_user = Mock()
+        mock_user.owasp_profile = mock_profile
+
+        result = UserNode.first_owasp_contribution_at(mock_user)
+
+        assert result == mock_profile.first_contribution_at.timestamp()
+
+    def test_first_owasp_contribution_at_without_profile(self):
+        """Test first_owasp_contribution_at returns None when no profile."""
+        mock_user = Mock(spec=[])
+
+        result = UserNode.first_owasp_contribution_at(mock_user)
+
+        assert result is None
+
+    def test_is_owasp_board_member_true(self):
+        """Test is_owasp_board_member returns True when flag is set."""
+        mock_profile = Mock()
+        mock_profile.is_owasp_board_member = True
+
+        mock_user = Mock()
+        mock_user.owasp_profile = mock_profile
+
+        result = UserNode.is_owasp_board_member(mock_user)
+
+        assert result is True
+
+    def test_is_owasp_board_member_without_profile(self):
+        """Test is_owasp_board_member returns False when no profile."""
+        mock_user = Mock(spec=[])
+
+        result = UserNode.is_owasp_board_member(mock_user)
+
+        assert result is False
+
+    def test_is_former_owasp_staff_true(self):
+        """Test is_former_owasp_staff returns True when flag is set."""
+        mock_profile = Mock()
+        mock_profile.is_former_owasp_staff = True
+
+        mock_user = Mock()
+        mock_user.owasp_profile = mock_profile
+
+        result = UserNode.is_former_owasp_staff(mock_user)
+
+        assert result is True
+
+    def test_is_former_owasp_staff_without_profile(self):
+        """Test is_former_owasp_staff returns False when no profile."""
+        mock_user = Mock(spec=[])
+
+        result = UserNode.is_former_owasp_staff(mock_user)
+
+        assert result is False
+
+    def test_is_gsoc_mentor_true(self):
+        """Test is_gsoc_mentor returns True when flag is set."""
+        mock_profile = Mock()
+        mock_profile.is_gsoc_mentor = True
+
+        mock_user = Mock()
+        mock_user.owasp_profile = mock_profile
+
+        result = UserNode.is_gsoc_mentor(mock_user)
+
+        assert result is True
+
+    def test_is_gsoc_mentor_without_profile(self):
+        """Test is_gsoc_mentor returns False when no profile."""
+        mock_user = Mock(spec=[])
+
+        result = UserNode.is_gsoc_mentor(mock_user)
+
+        assert result is False

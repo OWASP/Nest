@@ -16,6 +16,9 @@ export const GET_BOARD_CANDIDATES = gql`
           bio
           createdAt
           firstOwaspContributionAt
+          isOwaspBoardMember
+          isFormerOwaspStaff
+          isGsocMentor
         }
       }
       id
@@ -28,8 +31,10 @@ export const GET_BOARD_CANDIDATES = gql`
 export const GET_MEMBER_SNAPSHOT = gql`
   query GetMemberSnapshot($userLogin: String!) {
     memberSnapshot(userLogin: $userLogin) {
+      channelCommunications
       chapterContributions
       commitsCount
+      communicationHeatmapData
       contributionHeatmapData
       endAt
       githubUser {
@@ -37,8 +42,10 @@ export const GET_MEMBER_SNAPSHOT = gql`
       }
       id
       issuesCount
+      messagesCount
       projectContributions
       pullRequestsCount
+      repositoryContributions
       startAt
       totalContributions
     }

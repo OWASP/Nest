@@ -13,6 +13,7 @@ class MemberSnapshotAdmin(admin.ModelAdmin):
         "commits",
         "pull_requests",
         "issues",
+        "messages",
     )
     list_display = (
         "github_user",
@@ -21,6 +22,7 @@ class MemberSnapshotAdmin(admin.ModelAdmin):
         "commits_count",
         "pull_requests_count",
         "issues_count",
+        "messages_count",
         "total_contributions",
         "nest_created_at",
     )
@@ -37,10 +39,14 @@ class MemberSnapshotAdmin(admin.ModelAdmin):
         "commits_count",
         "pull_requests_count",
         "issues_count",
+        "messages_count",
         "total_contributions",
         "contribution_heatmap_data",
+        "communication_heatmap_data",
         "chapter_contributions",
         "project_contributions",
+        "repository_contributions",
+        "channel_communications",
         "nest_created_at",
         "nest_updated_at",
     )
@@ -58,7 +64,7 @@ class MemberSnapshotAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Contributions",
+            "GitHub Contributions",
             {
                 "fields": (
                     "commits",
@@ -68,16 +74,24 @@ class MemberSnapshotAdmin(admin.ModelAdmin):
             },
         ),
         (
+            "Slack Communications",
+            {"fields": ("messages",)},
+        ),
+        (
             "Statistics",
             {
                 "fields": (
                     "commits_count",
                     "pull_requests_count",
                     "issues_count",
+                    "messages_count",
                     "total_contributions",
                     "contribution_heatmap_data",
+                    "communication_heatmap_data",
                     "chapter_contributions",
                     "project_contributions",
+                    "repository_contributions",
+                    "channel_communications",
                 )
             },
         ),
