@@ -24,7 +24,7 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
   const { theme } = useTheme()
   const isDarkMode = theme === 'dark'
 
-  const heatmapSeries = useMemo(() => {
+  const { heatmapSeries } = useMemo(() => {
     const start = new Date(startDate)
     const end = new Date(endDate)
     const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -73,8 +73,12 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
       }
     }
 
+    // Calculate height based on number of weeks and maintain square cells
+    const cellSize = 16
+    const height = dayNames.length * cellSize + 20 // 7 days * cellSize + padding
+
     // Reverse the series so Monday is at the top and Sunday at the bottom
-    return series.reverse()
+    return { heatmapSeries: series.reverse(), chartHeight: height }
   }, [contributionData, startDate, endDate])
 
   const options = {
@@ -105,25 +109,25 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
             {
               from: 1,
               to: 4,
-              color: isDarkMode ? '#394d65' : '#8BA7C0',
+              color: isDarkMode ? '#4A5F7A' : '#7BA3C0',
               name: 'Low',
             },
             {
               from: 5,
               to: 8,
-              color: isDarkMode ? '#314257' : '#6C8EAB',
+              color: isDarkMode ? '#5A6F8A' : '#6C8EAB',
               name: 'Medium',
             },
             {
               from: 9,
               to: 12,
-              color: isDarkMode ? '#46627B' : '#5C7BA2',
+              color: isDarkMode ? '#6A7F9A' : '#5C7BA2',
               name: 'High',
             },
             {
               from: 13,
               to: 1000,
-              color: isDarkMode ? '#5F87A8' : '#567498',
+              color: isDarkMode ? '#7A8FAA' : '#567498',
               name: 'Very High',
             },
           ],
@@ -242,7 +246,7 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
           <span className="font-semibold">{title}</span>
         </h4>
       )}
-      <div className="w-full overflow-x-auto" style={{ minWidth: '560px' }}>
+      <div className="w-full">
         <style>
           {`
             .apexcharts-tooltip {
@@ -253,9 +257,36 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
             .apexcharts-tooltip * {
               border: none !important;
             }
+            .heatmap-container {
+              aspect-ratio: 4 / 1;
+              min-height: 132px;
+              max-width: 100%;
+              width: min(100%, 800px);
+            }
+            @media (max-width: 768px) {
+              .heatmap-container {
+                width: min(100%, 600px);
+              }
+            }
+            @media (max-width: 480px) {
+              .heatmap-container {
+                width: min(100%, 400px);
+              }
+            }
+            .heatmap-container .apexcharts-canvas {
+              height: 100% !important;
+            }
           `}
         </style>
-        <Chart options={options} series={heatmapSeries} type="heatmap" height={150} />
+        <div className="heatmap-container">
+          <Chart
+            options={options}
+            series={heatmapSeries}
+            type="heatmap"
+            height="100%"
+            width="100%"
+          />
+        </div>
       </div>
     </div>
   )

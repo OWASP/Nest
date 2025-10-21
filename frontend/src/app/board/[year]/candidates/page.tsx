@@ -197,7 +197,7 @@ const BoardCandidatesPage = () => {
     return (
       <Button
         onPress={handleCardClick}
-        className="group flex h-auto min-h-[280px] w-full flex-col items-start rounded-lg bg-white p-6 text-left shadow-lg transition-transform duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
+        className="group flex h-full w-full flex-col items-start justify-start rounded-lg bg-white p-6 text-left shadow-lg transition-transform duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
       >
         <div className="flex w-full items-start gap-4">
           {candidate.member?.avatarUrl && (
@@ -210,8 +210,8 @@ const BoardCandidatesPage = () => {
               />
             </div>
           )}
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+          <div className="min-w-0 flex-1">
+            <h3 className="truncate text-xl font-bold text-gray-900 dark:text-white">
               {candidate.memberName}
             </h3>
             {candidate.member?.login && (
@@ -219,16 +219,16 @@ const BoardCandidatesPage = () => {
                 href={`https://github.com/${candidate.member.login}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-blue-400 hover:underline"
+                className="truncate text-sm text-blue-400 hover:underline"
                 onClick={(e) => e.stopPropagation()}
               >
                 @{candidate.member.login}
               </Link>
             )}
             {candidate.member?.createdAt && (
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              <p className="mt-1 truncate text-sm text-gray-600 dark:text-gray-400">
                 GitHub account created{' '}
-                <span className="underline">
+                <span className="font-semibold text-gray-800 dark:text-gray-300">
                   {dayjs(
                     typeof candidate.member.createdAt === 'number'
                       ? candidate.member.createdAt * 1000
@@ -239,9 +239,9 @@ const BoardCandidatesPage = () => {
               </p>
             )}
             {candidate.member?.firstOwaspContributionAt && (
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="truncate text-sm text-gray-600 dark:text-gray-400">
                 First OWASP contribution made nearly{' '}
-                <span className="underline">
+                <span className="font-semibold text-gray-800 dark:text-gray-300">
                   {dayjs(candidate.member.firstOwaspContributionAt * 1000).fromNow()}
                 </span>{' '}
                 - {formatDate(candidate.member.firstOwaspContributionAt)}
@@ -250,12 +250,31 @@ const BoardCandidatesPage = () => {
           </div>
         </div>
 
-        <div className="mt-4">
-          <p className="text-sm break-words whitespace-pre-wrap text-gray-700 dark:text-gray-300">
-            {candidate.member?.bio || (
-              <span className="text-gray-500 dark:text-gray-400">No profile description</span>
-            )}
-          </p>
+        <div className="mt-4" style={{ width: '100%', minWidth: 0, minHeight: '3.75rem' }}>
+          {candidate.member?.bio && (
+            <div
+              style={
+                {
+                  fontSize: '0.875rem',
+                  lineHeight: '1.25rem',
+                  color: 'inherit',
+                  display: '-webkit-box',
+                  // eslint-disable-next-line @typescript-eslint/naming-convention
+                  WebkitLineClamp: 3,
+                  // eslint-disable-next-line @typescript-eslint/naming-convention
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  wordWrap: 'break-word',
+                  overflowWrap: 'break-word',
+                  whiteSpace: 'normal',
+                } as const
+              }
+              className="text-gray-700 dark:text-gray-300"
+            >
+              {candidate.member.bio.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim()}
+            </div>
+          )}
         </div>
 
         {candidate.description && (
@@ -352,7 +371,7 @@ const BoardCandidatesPage = () => {
                 )}
               </h4>
               {ledChapters.length === 0 && ledProjects.length === 0 ? (
-                <div className="inline-flex items-center gap-1.5 rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-600/10 ring-inset dark:bg-gray-800/50 dark:text-gray-400 dark:ring-gray-400/30">
+                <div className="inline-flex items-center gap-1.5 rounded-md bg-orange-50 px-2 py-1 text-xs font-medium text-orange-700 ring-1 ring-orange-700/10 ring-inset dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30">
                   No chapters or projects are lead by this candidate
                 </div>
               ) : (
@@ -371,11 +390,21 @@ const BoardCandidatesPage = () => {
                       <Link
                         key={chapter.id}
                         href={`/chapters/${chapter.key.replace('www-chapter-', '')}`}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30"
+                        className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
+                          contributionCount === 0
+                            ? 'bg-orange-50 text-orange-700 ring-orange-700/10 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30 dark:hover:bg-orange-900/30'
+                            : 'bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30'
+                        }`}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <span>{chapter.name}</span>
-                        <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-800 dark:bg-blue-800/40 dark:text-blue-300">
+                        <span
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
+                            contributionCount === 0
+                              ? 'bg-orange-100 text-orange-800 dark:bg-orange-800/40 dark:text-orange-300'
+                              : 'bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300'
+                          }`}
+                        >
                           {contributionCount === 0
                             ? 'no contributions'
                             : `${contributionCount} contributions`}
@@ -396,11 +425,21 @@ const BoardCandidatesPage = () => {
                       <Link
                         key={project.id}
                         href={`/projects/${project.key.replace('www-project-', '')}`}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30"
+                        className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
+                          contributionCount === 0
+                            ? 'bg-orange-50 text-orange-700 ring-orange-700/10 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30 dark:hover:bg-orange-900/30'
+                            : 'bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30'
+                        }`}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <span>{project.name}</span>
-                        <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-800 dark:bg-blue-800/40 dark:text-blue-300">
+                        <span
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
+                            contributionCount === 0
+                              ? 'bg-orange-100 text-orange-800 dark:bg-orange-800/40 dark:text-orange-300'
+                              : 'bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300'
+                          }`}
+                        >
                           {contributionCount === 0
                             ? 'no contributions'
                             : `${contributionCount} contributions`}
@@ -424,7 +463,7 @@ const BoardCandidatesPage = () => {
                   <div className="mt-4 w-full">
                     <div className="mb-3">
                       <h4 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                        Most Active Repositories
+                        Top 5 Active Repositories
                       </h4>
                       <a
                         href={`https://github.com/${topRepoName}/commits?author=${candidate.member?.login}`}
@@ -477,67 +516,85 @@ const BoardCandidatesPage = () => {
                 contributionData={snapshot.communicationHeatmapData}
                 startDate={snapshot.startAt}
                 endDate={snapshot.endAt}
-                title="OWASP Community Communication"
+                title="OWASP Community Engagement"
                 unit="message"
               />
             </div>
           )}
 
-        {/* Most Active Channels */}
-        {snapshot?.channelCommunications &&
-          Object.keys(snapshot.channelCommunications).length > 0 &&
+        {/* Top 5 Active Channels */}
+        {snapshot &&
           (() => {
-            const sortedChannels = Object.entries(snapshot.channelCommunications).sort(
-              ([, a], [, b]) => (Number(b) || 0) - (Number(a) || 0)
-            )
+            const hasChannels =
+              snapshot.channelCommunications &&
+              Object.keys(snapshot.channelCommunications).length > 0
 
-            if (sortedChannels.length === 0) return null
-
-            const topChannel = sortedChannels[0]
-            const [topChannelName, topChannelCount] = topChannel
-
-            return (
-              <div className="mt-4 w-full">
-                <div className="mb-3">
+            if (!hasChannels) {
+              return (
+                <div className="mt-4 w-full">
                   <h4 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Most Active Channels
+                    Top 5 Active Channels
                   </h4>
-                  <a
-                    href={`https://owasp.slack.com/archives/${topChannelName}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-700/10 ring-inset hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-400/30 dark:hover:bg-green-900/30"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <span>#{topChannelName}</span>
-                    <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-800 dark:bg-green-800/40 dark:text-green-300">
-                      {Number(topChannelCount)} messages
-                    </span>
-                  </a>
-                </div>
-                {sortedChannels.length > 1 && (
-                  <div>
-                    <div className="flex flex-wrap gap-2">
-                      {sortedChannels.slice(1).map(([channelName, messageCount]) => (
-                        <a
-                          key={channelName}
-                          href={`https://owasp.slack.com/archives/${channelName}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <span>#{channelName}</span>
-                          <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-800 dark:bg-blue-800/40 dark:text-blue-300">
-                            {Number(messageCount)} messages
-                          </span>
-                        </a>
-                      ))}
-                    </div>
+                  <div className="inline-flex items-center gap-1.5 rounded-md bg-orange-50 px-2 py-1 text-xs font-medium text-orange-700 ring-1 ring-orange-700/10 ring-inset dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30">
+                    No messages
                   </div>
-                )}
-              </div>
-            )
+                </div>
+              )
+            }
+
+            return (() => {
+              const sortedChannels = Object.entries(snapshot.channelCommunications).sort(
+                ([, a], [, b]) => (Number(b) || 0) - (Number(a) || 0)
+              )
+
+              if (sortedChannels.length === 0) return null
+
+              const topChannel = sortedChannels[0]
+              const [topChannelName, topChannelCount] = topChannel
+
+              return (
+                <div className="mt-4 w-full">
+                  <div className="mb-3">
+                    <h4 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      Top 5 Active Channels
+                    </h4>
+                    <a
+                      href={`https://owasp.slack.com/archives/${topChannelName}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-700/10 ring-inset hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-400/30 dark:hover:bg-green-900/30"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <span>#{topChannelName}</span>
+                      <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-800 dark:bg-green-800/40 dark:text-green-300">
+                        {Number(topChannelCount)} messages
+                      </span>
+                    </a>
+                  </div>
+                  {sortedChannels.length > 1 && (
+                    <div>
+                      <div className="flex flex-wrap gap-2">
+                        {sortedChannels.slice(1).map(([channelName, messageCount]) => (
+                          <a
+                            key={channelName}
+                            href={`https://owasp.slack.com/archives/${channelName}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <span>#{channelName}</span>
+                            <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-800 dark:bg-blue-800/40 dark:text-blue-300">
+                              {Number(messageCount)} messages
+                            </span>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })()
           })()}
 
         {/* Additional Information */}
@@ -551,7 +608,7 @@ const BoardCandidatesPage = () => {
             <div className="flex flex-wrap gap-2">
               {candidate.member.isOwaspBoardMember && (
                 <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-400/30">
-                  Current OWASP Board of Directors Member
+                  OWASP Board of Directors Member
                 </span>
               )}
               {candidate.member.isFormerOwaspStaff && (
@@ -611,7 +668,8 @@ const BoardCandidatesPage = () => {
         </p>
         <p className="mt-3 text-sm text-gray-500 italic dark:text-gray-500">
           This page is built using publicly available data from the OWASP GitHub organization and
-          OWASP Slack workspace. The code is open source and available as part of{' '}
+          OWASP Slack workspace (January 1 to October 1, {year}). The code is open source and
+          available as part of{' '}
           <Link
             href="https://github.com/OWASP/Nest"
             target="_blank"
