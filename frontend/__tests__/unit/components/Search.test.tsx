@@ -109,6 +109,23 @@ describe('SearchBar Component', () => {
     })
   })
 
+  describe('Auto-focus functionality', () => {
+    it('should auto-focus on initial render', () => {
+      render(<SearchBar {...defaultProps} isLoaded={false} />)
+      const input = screen.getByPlaceholderText('Search projects...')
+      expect(input).toHaveFocus()
+    })
+
+    it('should not lose focus on re-renders', () => {
+      const { rerender } = render(<SearchBar {...defaultProps} isLoaded={false} />)
+      const input = screen.getByPlaceholderText('Search projects...')
+      expect(input).toHaveFocus()
+      
+      rerender(<SearchBar {...defaultProps} isLoaded={false} placeholder="New placeholder" />)
+      expect(input).toHaveFocus()
+    })
+  })
+
   describe('Event handling – simulate user actions and verify callbacks', () => {
     it('calls onSearch with debounced input value', async () => {
       render(<SearchBar {...defaultProps} isLoaded={false} />)

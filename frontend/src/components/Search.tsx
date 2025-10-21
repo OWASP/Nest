@@ -76,6 +76,7 @@ const SearchBar: React.FC<SearchProps> = ({
               ref={inputRef}
               type="text"
               value={searchQuery}
+              autoFocus
               onChange={handleSearchChange}
               placeholder={placeholder}
               className="h-12 w-full rounded-lg border-1 border-gray-300 pr-10 pl-10 text-lg text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300"
