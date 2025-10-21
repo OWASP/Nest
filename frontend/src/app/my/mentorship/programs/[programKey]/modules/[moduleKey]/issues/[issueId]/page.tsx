@@ -198,25 +198,6 @@ const ModuleIssueDetailsPage = () => {
                       min={new Date().toISOString().slice(0, 10)}
                       className="h-8 rounded border border-gray-300 px-2 dark:border-gray-600"
                     />
-                    <button
-                      type="button"
-                      disabled={clearingDeadline}
-                      onClick={async () => {
-                        if (!clearingDeadline && issueId) {
-                          await clearTaskDeadlineMutation({
-                            variables: {
-                              programKey,
-                              moduleKey,
-                              issueNumber: Number(issueId),
-                            },
-                          })
-                        }
-                      }}
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-md text-gray-600 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:text-gray-300 dark:hover:bg-gray-800"
-                      title="Clear deadline"
-                    >
-                      <FontAwesomeIcon icon={faXmark} className="h-3.5 w-3.5" />
-                    </button>
                   </div>
                 ) : (
                   <button
