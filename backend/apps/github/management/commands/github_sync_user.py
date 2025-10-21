@@ -470,11 +470,11 @@ class Command(BaseCommand):
                     f"{len(commits_data)} commits for {username}"
                 )
             )
-
-            # Always populate first contribution date if not already set
-            self.populate_first_contribution_only(username, user, gh)
         else:
             self.stdout.write(
                 self.style.WARNING(f"No PRs, issues, or commits found for {username}")
             )
             logger.warning("No PRs, issues, or commits found for %s", username)
+
+        # Always populate first contribution date if not already set
+        self.populate_first_contribution_only(username, user, gh)

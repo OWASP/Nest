@@ -17,6 +17,7 @@ class TestMemberSnapshotAdmin:
             "commits_count",
             "pull_requests_count",
             "issues_count",
+            "messages_count",
             "total_contributions",
             "nest_created_at",
         )
@@ -51,10 +52,14 @@ class TestMemberSnapshotAdmin:
             "commits_count",
             "pull_requests_count",
             "issues_count",
+            "messages_count",
             "total_contributions",
             "contribution_heatmap_data",
+            "communication_heatmap_data",
             "chapter_contributions",
             "project_contributions",
+            "repository_contributions",
+            "channel_communications",
             "nest_created_at",
             "nest_updated_at",
         )
@@ -69,6 +74,7 @@ class TestMemberSnapshotAdmin:
             "commits",
             "pull_requests",
             "issues",
+            "messages",
         )
 
         assert admin.autocomplete_fields == expected_autocomplete
@@ -82,9 +88,10 @@ class TestMemberSnapshotAdmin:
         admin = MemberSnapshotAdmin(MemberSnapshot, AdminSite())
 
         assert admin.fieldsets is not None
-        assert len(admin.fieldsets) == 4
+        assert len(admin.fieldsets) == 5
 
         assert admin.fieldsets[0][0] == "Snapshot Information"
-        assert admin.fieldsets[1][0] == "Contributions"
-        assert admin.fieldsets[2][0] == "Statistics"
-        assert admin.fieldsets[3][0] == "Timestamps"
+        assert admin.fieldsets[1][0] == "GitHub Contributions"
+        assert admin.fieldsets[2][0] == "Slack Communications"
+        assert admin.fieldsets[3][0] == "Statistics"
+        assert admin.fieldsets[4][0] == "Timestamps"

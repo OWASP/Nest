@@ -48,12 +48,29 @@ class TestMemberSnapshotModel:
         assert hasattr(MemberSnapshot, "commits")
         assert hasattr(MemberSnapshot, "pull_requests")
         assert hasattr(MemberSnapshot, "issues")
+        assert hasattr(MemberSnapshot, "messages")
 
     def test_has_count_properties(self):
         assert hasattr(MemberSnapshot, "commits_count")
         assert hasattr(MemberSnapshot, "pull_requests_count")
         assert hasattr(MemberSnapshot, "issues_count")
+        assert hasattr(MemberSnapshot, "messages_count")
         assert hasattr(MemberSnapshot, "total_contributions")
+
+    def test_total_contributions_excludes_messages(self):
+        """Test that total_contributions only includes GitHub contributions."""
+        user = User(login="testuser")
+        snapshot = MemberSnapshot(
+            github_user=user,
+            start_at=datetime(2025, 1, 1, tzinfo=UTC),
+            end_at=datetime(2025, 1, 31, tzinfo=UTC),
+        )
+        snapshot.id = 1
+
+        # The property should only sum commits + PRs + issues (not messages)
+        assert "messages_count" not in str(
+            MemberSnapshot.total_contributions.fget.__code__.co_names
+        )
 
     def test_m2m_field_configuration(self):
         commits_field = MemberSnapshot._meta.get_field("commits")
@@ -67,3 +84,42 @@ class TestMemberSnapshotModel:
         issues_field = MemberSnapshot._meta.get_field("issues")
         assert issues_field.remote_field.related_name == "member_snapshots"
         assert issues_field.blank is True
+
+        messages_field = MemberSnapshot._meta.get_field("messages")
+        assert messages_field.remote_field.related_name == "member_snapshots"
+        assert messages_field.blank is True
+
+    def test_has_communication_heatmap_data_field(self):
+        field = MemberSnapshot._meta.get_field("communication_heatmap_data")
+
+        assert field.get_internal_type() == "JSONField"
+        assert field.blank is True
+        assert callable(field.default)
+
+    def test_has_channel_communications_field(self):
+        field = MemberSnapshot._meta.get_field("channel_communications")
+
+        assert field.get_internal_type() == "JSONField"
+        assert field.blank is True
+        assert callable(field.default)
+
+    def test_has_chapter_contributions_field(self):
+        field = MemberSnapshot._meta.get_field("chapter_contributions")
+
+        assert field.get_internal_type() == "JSONField"
+        assert field.blank is True
+        assert callable(field.default)
+
+    def test_has_project_contributions_field(self):
+        field = MemberSnapshot._meta.get_field("project_contributions")
+
+        assert field.get_internal_type() == "JSONField"
+        assert field.blank is True
+        assert callable(field.default)
+
+    def test_has_repository_contributions_field(self):
+        field = MemberSnapshot._meta.get_field("repository_contributions")
+
+        assert field.get_internal_type() == "JSONField"
+        assert field.blank is True
+        assert callable(field.default)

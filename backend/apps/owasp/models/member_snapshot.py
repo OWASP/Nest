@@ -37,6 +37,24 @@ class MemberSnapshot(TimestampedModel):
         blank=True,
         help_text="Contribution counts per project (project_key -> count mapping)",
     )
+    repository_contributions = models.JSONField(
+        verbose_name="Repository Contributions",
+        default=dict,
+        blank=True,
+        help_text="Top 5 repositories by commit count (repo_name -> count mapping)",
+    )
+    communication_heatmap_data = models.JSONField(
+        verbose_name="Communication Heatmap Data",
+        default=dict,
+        blank=True,
+        help_text="Daily Slack message counts (YYYY-MM-DD -> count mapping)",
+    )
+    channel_communications = models.JSONField(
+        verbose_name="Channel Communications",
+        default=dict,
+        blank=True,
+        help_text="Top 5 Slack channels by message count (channel_name -> message_count)",
+    )
     github_user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -74,6 +92,13 @@ class MemberSnapshot(TimestampedModel):
         blank=True,
         help_text="Pull requests created by the user during this period",
     )
+    messages = models.ManyToManyField(
+        "slack.Message",
+        verbose_name="Slack Messages",
+        related_name="member_snapshots",
+        blank=True,
+        help_text="Slack messages sent by the user during this period",
+    )
 
     def __str__(self) -> str:
         """Return human-readable representation."""
@@ -97,6 +122,11 @@ class MemberSnapshot(TimestampedModel):
         return self.issues.count()
 
     @property
+    def messages_count(self) -> int:
+        """Return the number of Slack messages in this snapshot."""
+        return self.messages.count()
+
+    @property
     def total_contributions(self) -> int:
-        """Return the total number of contributions in this snapshot."""
+        """Return the total number of GitHub contributions in this snapshot."""
         return self.commits_count + self.pull_requests_count + self.issues_count

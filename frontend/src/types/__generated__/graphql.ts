@@ -230,16 +230,20 @@ export type LogoutResult = {
 
 export type MemberSnapshotNode = Node & {
   __typename?: 'MemberSnapshotNode';
+  channelCommunications: Scalars['JSON']['output'];
   chapterContributions: Scalars['JSON']['output'];
   commitsCount: Scalars['Int']['output'];
+  communicationHeatmapData: Scalars['JSON']['output'];
   contributionHeatmapData: Scalars['JSON']['output'];
   endAt: Scalars['DateTime']['output'];
   githubUser: UserNode;
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
   issuesCount: Scalars['Int']['output'];
+  messagesCount: Scalars['Int']['output'];
   projectContributions: Scalars['JSON']['output'];
   pullRequestsCount: Scalars['Int']['output'];
+  repositoryContributions: Scalars['JSON']['output'];
   startAt: Scalars['DateTime']['output'];
   totalContributions: Scalars['Int']['output'];
 };
@@ -943,6 +947,9 @@ export type UserNode = {
   followersCount: Scalars['Int']['output'];
   followingCount: Scalars['Int']['output'];
   id: Scalars['ID']['output'];
+  isFormerOwaspStaff: Scalars['Boolean']['output'];
+  isGsocMentor: Scalars['Boolean']['output'];
+  isOwaspBoardMember: Scalars['Boolean']['output'];
   isOwaspStaff: Scalars['Boolean']['output'];
   issuesCount: Scalars['Int']['output'];
   location: Scalars['String']['output'];

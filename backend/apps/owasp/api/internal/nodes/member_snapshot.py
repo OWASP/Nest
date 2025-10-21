@@ -13,8 +13,11 @@ from apps.owasp.models.member_snapshot import MemberSnapshot
         "start_at",
         "end_at",
         "contribution_heatmap_data",
+        "communication_heatmap_data",
         "chapter_contributions",
         "project_contributions",
+        "repository_contributions",
+        "channel_communications",
     ],
 )
 class MemberSnapshotNode(strawberry.relay.Node):
@@ -39,6 +42,11 @@ class MemberSnapshotNode(strawberry.relay.Node):
     def pull_requests_count(self) -> int:
         """Resolve pull requests count."""
         return self.pull_requests_count
+
+    @strawberry.field
+    def messages_count(self) -> int:
+        """Resolve Slack messages count."""
+        return self.messages_count
 
     @strawberry.field
     def total_contributions(self) -> int:

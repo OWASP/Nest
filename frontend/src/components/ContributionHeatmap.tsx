@@ -10,12 +10,16 @@ interface ContributionHeatmapProps {
   contributionData: Record<string, number>
   startDate: string
   endDate: string
+  title?: string
+  unit?: string
 }
 
 const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
   contributionData,
   startDate,
   endDate,
+  title,
+  unit = 'contribution',
 }) => {
   const { theme } = useTheme()
   const isDarkMode = theme === 'dark'
@@ -43,7 +47,11 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
       const dayOfWeek = currentDate.getDay()
       // Convert Sunday=0 to Sunday=6, Monday=1 to Monday=0, etc.
       const adjustedDayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1
-      const dateStr = currentDate.toISOString().split('T')[0]
+      // Format date in local time to avoid timezone shift
+      const year = currentDate.getFullYear()
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0')
+      const day = String(currentDate.getDate()).padStart(2, '0')
+      const dateStr = `${year}-${month}-${day}`
       const weekLabel = `W${weekNumber}`
 
       // Only count contributions within the actual range
@@ -167,16 +175,20 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
 
         const count = data.y
         const date = data.date
-        const formattedDate = new Date(date).toLocaleDateString('en-US', {
+        // Parse date as UTC to match data format
+        const formattedDate = new Date(date + 'T00:00:00Z').toLocaleDateString('en-US', {
           weekday: 'short',
           month: 'short',
           day: 'numeric',
           year: 'numeric',
+          timeZone: 'UTC',
         })
 
         const bgColor = isDarkMode ? '#1F2937' : '#FFFFFF'
         const textColor = isDarkMode ? '#F3F4F6' : '#111827'
         const secondaryColor = isDarkMode ? '#9CA3AF' : '#6B7280'
+
+        const unitLabel = count !== 1 ? `${unit}s` : unit
 
         return `
           <div style="
@@ -187,7 +199,7 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.2) !important;
           ">
             <div style="color: ${textColor} !important; font-weight: 600; margin-bottom: 4px; font-size: 14px;">${formattedDate}</div>
-            <div style="color: ${secondaryColor} !important; font-size: 12px;">${count} contribution${count !== 1 ? 's' : ''}</div>
+            <div style="color: ${secondaryColor} !important; font-size: 12px;">${count} ${unitLabel}</div>
           </div>
         `
       },
@@ -224,20 +236,27 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
   }
 
   return (
-    <div className="w-full">
-      <style>
-        {`
-          .apexcharts-tooltip {
-            background: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
-            border: 1px solid ${isDarkMode ? '#374151' : '#E5E7EB'} !important;
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.2) !important;
-          }
-          .apexcharts-tooltip * {
-            border: none !important;
-          }
-        `}
-      </style>
-      <Chart options={options} series={heatmapSeries} type="heatmap" height={150} />
+    <div>
+      {title && (
+        <h4 className="mb-1 text-sm text-gray-700 dark:text-gray-300">
+          <span className="font-semibold">{title}</span>
+        </h4>
+      )}
+      <div className="w-full overflow-x-auto" style={{ minWidth: '560px' }}>
+        <style>
+          {`
+            .apexcharts-tooltip {
+              background: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
+              border: 1px solid ${isDarkMode ? '#374151' : '#E5E7EB'} !important;
+              box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.2) !important;
+            }
+            .apexcharts-tooltip * {
+              border: none !important;
+            }
+          `}
+        </style>
+        <Chart options={options} series={heatmapSeries} type="heatmap" height={150} />
+      </div>
     </div>
   )
 }

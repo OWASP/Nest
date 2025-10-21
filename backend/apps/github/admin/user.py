@@ -12,7 +12,13 @@ class MemberProfileInline(admin.StackedInline):
     model = MemberProfile
     can_delete = False
     verbose_name_plural = "OWASP Member Profile"
-    fields = ("owasp_slack_id", "first_contribution_at")
+    fields = (
+        "owasp_slack_id",
+        "first_contribution_at",
+        "is_owasp_board_member",
+        "is_former_owasp_staff",
+        "is_gsoc_mentor",
+    )
     readonly_fields = ("first_contribution_at",)
 
 
