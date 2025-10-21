@@ -487,11 +487,10 @@ class TestSlackSyncMessagesCommand:
         command.stdout = stdout
 
         with (
-            patch("apps.slack.management.commands.slack_sync_messages.settings") as mock_settings,
+            patch.dict("os.environ", {"DJANGO_SLACK_SEARCH_TOKEN": "slack-test-token"}),
             patch.object(Workspace.objects, "all") as mock_all,
             patch("apps.slack.management.commands.slack_sync_messages.WebClient"),
         ):
-            mock_settings.SLACK_SEARCH_TOKEN = "slack-test-token"  # noqa: S105
             mock_all.return_value.exists.return_value = False
             command._sync_user_messages(
                 user_id="U12345",
@@ -518,7 +517,7 @@ class TestSlackSyncMessagesCommand:
         mock_conversation.slack_channel_id = TEST_CHANNEL_ID
 
         with (
-            patch("apps.slack.management.commands.slack_sync_messages.settings") as mock_settings,
+            patch.dict("os.environ", {"DJANGO_SLACK_SEARCH_TOKEN": "slack-test-token"}),
             patch.object(Workspace.objects, "all") as mock_workspaces,
             patch.object(Conversation.objects, "get_or_create") as mock_get_or_create,
             patch(
@@ -526,7 +525,6 @@ class TestSlackSyncMessagesCommand:
             ) as mock_client_class,
             patch.object(Message, "bulk_save"),
         ):
-            mock_settings.SLACK_SEARCH_TOKEN = "slack-test-token"  # noqa: S105  # noqa:S105
             mock_queryset = MagicMock()
             mock_queryset.exists.return_value = True
             mock_queryset.__iter__ = lambda _: iter([mock_workspace])
