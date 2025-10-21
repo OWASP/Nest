@@ -1,6 +1,7 @@
 """A command to populate Slack messages data for all conversations."""
 
 import logging
+import os
 import time
 from datetime import UTC, datetime
 
@@ -206,13 +207,11 @@ class Command(BaseCommand):
         )
 
         # Use user search token for search.messages API
-        search_token = settings.SLACK_SEARCH_TOKEN
-        if search_token == "None" or not search_token:  # noqa: S105
+        if not (search_token := os.environ.get("DJANGO_SLACK_SEARCH_TOKEN", "")):
             self.stderr.write(
                 self.style.ERROR(
                     "DJANGO_SLACK_SEARCH_TOKEN environment variable is not set.\n"
-                    "This is a user token with search:read scope.\n"
-                    "Run: python manage.py slack_generate_auth_url to obtain one."
+                    "This should be a user token with search:read scope.\n"
                 )
             )
             return
