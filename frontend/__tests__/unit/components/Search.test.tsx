@@ -120,7 +120,7 @@ describe('SearchBar Component', () => {
       const { rerender } = render(<SearchBar {...defaultProps} isLoaded={false} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toHaveFocus()
-      
+
       rerender(<SearchBar {...defaultProps} isLoaded={false} placeholder="New placeholder" />)
       expect(input).toHaveFocus()
     })
