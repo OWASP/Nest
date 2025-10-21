@@ -1,5 +1,6 @@
 """GraphQL mutations for mentorship modules in the mentorship app."""
 
+import datetime as dt
 import logging
 
 import strawberry
@@ -14,6 +15,8 @@ from apps.mentorship.api.internal.nodes.module import (
     UpdateModuleInput,
 )
 from apps.mentorship.models import Mentor, Module, Program
+from apps.mentorship.models.issue_user_interest import IssueUserInterest
+from apps.mentorship.models.task import Task
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.models import Project
 
@@ -99,6 +102,7 @@ class ModuleMutation:
             started_at=started_at,
             ended_at=ended_at,
             domains=input_data.domains,
+            labels=input_data.labels,
             tags=input_data.tags,
             program=program,
             project=project,
@@ -116,6 +120,205 @@ class ModuleMutation:
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
+    def assign_issue_to_user(
+        self,
+        info: strawberry.Info,
+        *,
+        module_key: str,
+        program_key: str,
+        issue_number: int,
+        user_login: str,
+    ) -> ModuleNode:
+        """Assign an issue to a user by updating Issue.assignees within the module scope."""
+        user = info.context.request.user
+
+        module = (
+            Module.objects.select_related("program")
+            .filter(key=module_key, program__key=program_key)
+            .first()
+        )
+        if module is None:
+            raise ObjectDoesNotExist(msg="Module not found.")
+
+        mentor = Mentor.objects.filter(nest_user=user).first()
+        if mentor is None:
+            raise PermissionDenied(msg="Only mentors can assign issues.")
+        if not module.program.admins.filter(id=mentor.id).exists():
+            raise PermissionDenied
+
+        gh_user = GithubUser.objects.filter(login=user_login).first()
+        if gh_user is None:
+            raise ObjectDoesNotExist(msg="Assignee not found.")
+
+        issue = module.issues.filter(number=issue_number).first()
+        if issue is None:
+            raise ObjectDoesNotExist(msg="Issue not found in this module.")
+
+        issue.assignees.add(gh_user)
+
+        IssueUserInterest.objects.filter(module=module, issue_id=issue.id, user=gh_user).delete()
+
+        return module
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
+    def unassign_issue_from_user(
+        self,
+        info: strawberry.Info,
+        *,
+        module_key: str,
+        program_key: str,
+        issue_number: int,
+        user_login: str,
+    ) -> ModuleNode:
+        """Unassign an issue from a user by updating Issue.assignees within the module scope."""
+        user = info.context.request.user
+
+        module = (
+            Module.objects.select_related("program")
+            .filter(key=module_key, program__key=program_key)
+            .first()
+        )
+        if module is None:
+            raise ObjectDoesNotExist
+
+        mentor = Mentor.objects.filter(nest_user=user).first()
+        if mentor is None:
+            raise PermissionDenied
+        if not module.program.admins.filter(id=mentor.id).exists():
+            raise PermissionDenied
+
+        gh_user = GithubUser.objects.filter(login=user_login).first()
+        if gh_user is None:
+            raise ObjectDoesNotExist(msg="Assignee not found.")
+
+        issue = module.issues.filter(number=issue_number).first()
+        if issue is None:
+            raise ObjectDoesNotExist(msg=f"Issue {issue_number} not found in this module.")
+
+        issue.assignees.remove(gh_user)
+
+        return module
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
+    def set_task_deadline(
+        self,
+        info: strawberry.Info,
+        *,
+        module_key: str,
+        program_key: str,
+        issue_number: int,
+        deadline_at: dt.datetime,
+    ) -> ModuleNode:
+        """Set a deadline for a task. User must be a mentor and an admin of the program."""
+        user = info.context.request.user
+
+        module = (
+            Module.objects.select_related("program")
+            .filter(key=module_key, program__key=program_key)
+            .first()
+        )
+        if module is None:
+            raise ObjectDoesNotExist(msg="Module not found.")
+
+        mentor = Mentor.objects.filter(nest_user=user).first()
+        if mentor is None:
+            raise PermissionDenied(msg="Only mentors can set deadlines.")
+        if not module.program.admins.filter(id=mentor.id).exists():
+            raise PermissionDenied
+
+        issue = (
+            module.issues.select_related("repository")
+            .prefetch_related("assignees")
+            .filter(number=issue_number)
+            .first()
+        )
+        if issue is None:
+            raise ObjectDoesNotExist(msg="Issue not found in this module.")
+
+        assignees = issue.assignees.all()
+        if not assignees.exists():
+            raise ValidationError(message="Cannot set deadline: issue has no assignees.")
+
+        normalized_deadline = deadline_at
+        if timezone.is_naive(normalized_deadline):
+            normalized_deadline = timezone.make_aware(normalized_deadline)
+
+        if normalized_deadline.date() < timezone.now().date():
+            raise ValidationError(message="Deadline cannot be in the past.")
+
+        now = timezone.now()
+        tasks_to_update: list[Task] = []
+        for assignee in assignees:
+            task, _created = Task.objects.get_or_create(
+                module=module, issue=issue, assignee=assignee
+            )
+            if task.assigned_at is None:
+                task.assigned_at = now
+            task.deadline_at = normalized_deadline
+            tasks_to_update.append(task)
+
+        Task.objects.bulk_update(tasks_to_update, ["assigned_at", "deadline_at"])
+
+        return module
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
+    def clear_task_deadline(
+        self,
+        info: strawberry.Info,
+        *,
+        module_key: str,
+        program_key: str,
+        issue_number: int,
+    ) -> ModuleNode:
+        """Clear the deadline for a task. User must be a mentor and an admin of the program."""
+        user = info.context.request.user
+
+        module = (
+            Module.objects.select_related("program")
+            .filter(key=module_key, program__key=program_key)
+            .first()
+        )
+        if module is None:
+            raise ObjectDoesNotExist(msg="Module not found.")
+
+        mentor = Mentor.objects.filter(nest_user=user).first()
+        if mentor is None:
+            raise PermissionDenied(msg="Only mentors can clear deadlines.")
+        if not module.program.admins.filter(id=mentor.id).exists():
+            raise PermissionDenied
+
+        issue = (
+            module.issues.select_related("repository")
+            .prefetch_related("assignees")
+            .filter(number=issue_number)
+            .first()
+        )
+        if issue is None:
+            raise ObjectDoesNotExist(msg="Issue not found in this module.")
+
+        assignees = issue.assignees.all()
+        if not assignees.exists():
+            raise ValidationError(message="Cannot clear deadline: issue has no assignees.")
+
+        tasks_to_update: list[Task] = []
+        for assignee in assignees:
+            task = Task.objects.filter(module=module, issue=issue, assignee=assignee).first()
+            if task and task.deadline_at is not None:
+                task.deadline_at = None
+                tasks_to_update.append(task)
+
+        if len(tasks_to_update) == 1:
+            tasks_to_update[0].save(update_fields=["deadline_at"])
+        elif len(tasks_to_update) > 1:
+            Task.objects.bulk_update(tasks_to_update, ["deadline_at"])
+
+        return module
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
     def update_module(self, info: strawberry.Info, input_data: UpdateModuleInput) -> ModuleNode:
         """Update an existing mentorship module. User must be an admin of the program."""
         user = info.context.request.user
@@ -125,19 +328,17 @@ class ModuleMutation:
                 key=input_data.key, program__key=input_data.program_key
             )
         except Module.DoesNotExist as e:
-            msg = "Module not found."
-            raise ObjectDoesNotExist(msg) from e
+            raise ObjectDoesNotExist(msg="Module not found.") from e
 
         try:
             creator_as_mentor = Mentor.objects.get(nest_user=user)
         except Mentor.DoesNotExist as err:
-            msg = "Only mentors can edit modules."
             logger.warning(
                 "User '%s' is not a mentor and cannot edit modules.",
                 user.username,
                 exc_info=True,
             )
-            raise PermissionDenied(msg) from err
+            raise PermissionDenied(msg="Only mentors can edit modules.") from err
 
         if not module.program.admins.filter(id=creator_as_mentor.id).exists():
             raise PermissionDenied
@@ -158,6 +359,7 @@ class ModuleMutation:
             "started_at": started_at,
             "ended_at": ended_at,
             "domains": input_data.domains,
+            "labels": input_data.labels,
             "tags": input_data.tags,
         }
 

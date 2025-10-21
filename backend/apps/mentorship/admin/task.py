@@ -25,5 +25,7 @@ class TaskAdmin(admin.ModelAdmin):
 
     list_filter = ("status", "module")
 
+    ordering = ["-assigned_at"]
+
 
 admin.site.register(Task, TaskAdmin)

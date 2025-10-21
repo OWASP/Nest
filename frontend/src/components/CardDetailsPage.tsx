@@ -43,6 +43,7 @@ const DetailsCard = ({
   canUpdateStatus,
   tags,
   domains,
+  labels,
   modules,
   mentors,
   admins,
@@ -84,15 +85,26 @@ const DetailsCard = ({
               admins?.some(
                 (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
               ) && (
-                <button
-                  type="button"
-                  className="dark:hover:text-white' flex items-center justify-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-2 py-2 text-nowrap text-[#1D7BD7] hover:bg-[#1D7BD7] hover:text-white"
-                  onClick={() => {
-                    router.push(`${window.location.pathname}/edit`)
-                  }}
-                >
-                  Edit Module
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    className="flex items-center justify-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-2 py-2 text-nowrap text-[#1D7BD7] hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white"
+                    onClick={() => {
+                      router.push(`${window.location.pathname}/issues`)
+                    }}
+                  >
+                    View Issues
+                  </button>
+                  <button
+                    type="button"
+                    className="flex items-center justify-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-2 py-2 text-nowrap text-[#1D7BD7] hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white"
+                    onClick={() => {
+                      router.push(`${window.location.pathname}/edit`)
+                    }}
+                  >
+                    Edit Module
+                  </button>
+                </div>
               )}
             {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
               <MetricsScoreCircle
@@ -200,26 +212,38 @@ const DetailsCard = ({
           </div>
         )}
         {(type === 'program' || type === 'module') && (
-          <div
-            className={`mb-8 grid grid-cols-1 gap-6 ${(tags?.length || 0) === 0 || (domains?.length || 0) === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
-          >
-            {tags?.length > 0 && (
-              <ToggleableList
-                items={tags}
-                icon={faTags}
-                label={<AnchorTitle title="Tags" />}
-                isDisabled={true}
-              />
+          <>
+            <div
+              className={`mb-8 grid grid-cols-1 gap-6 ${(tags?.length || 0) === 0 || (domains?.length || 0) === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
+            >
+              {tags?.length > 0 && (
+                <ToggleableList
+                  items={tags}
+                  icon={faTags}
+                  label={<AnchorTitle title="Tags" />}
+                  isDisabled={true}
+                />
+              )}
+              {domains?.length > 0 && (
+                <ToggleableList
+                  items={domains}
+                  icon={faChartPie}
+                  label={<AnchorTitle title="Domains" />}
+                  isDisabled={true}
+                />
+              )}
+            </div>
+            {labels?.length > 0 && (
+              <div className="mb-8">
+                <ToggleableList
+                  items={labels}
+                  icon={faTags}
+                  label={<AnchorTitle title="Labels" />}
+                  isDisabled={true}
+                />
+              </div>
             )}
-            {domains?.length > 0 && (
-              <ToggleableList
-                items={domains}
-                icon={faChartPie}
-                label={<AnchorTitle title="Domains" />}
-                isDisabled={true}
-              />
-            )}
-          </div>
+          </>
         )}
         {topContributors && (
           <TopContributorsList

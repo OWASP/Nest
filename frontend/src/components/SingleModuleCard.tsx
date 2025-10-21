@@ -45,6 +45,11 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
     router.push(`${window.location.pathname}/modules/create`)
   }
 
+  const handleIssue = () => {
+    setDropdownOpen(false)
+    router.push(`${window.location.pathname}/modules/${module.key}/issues`)
+  }
+
   const moduleDetails = [
     { label: 'Experience Level', value: upperFirst(module.experienceLevel) },
     { label: 'Start Date', value: formatDate(module.startedAt) },
@@ -109,6 +114,14 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
                     className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     Create Module
+                  </button>
+                )}
+                {isAdmin && (
+                  <button
+                    onClick={handleIssue}
+                    className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    View Issues
                   </button>
                 )}
               </div>
