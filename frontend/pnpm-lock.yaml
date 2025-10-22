@@ -151,8 +151,8 @@ importers:
         version: 1.0.7(tailwindcss@4.1.15)
     devDependencies:
       '@axe-core/react':
-        specifier: ^4.10.2
-        version: 4.10.2
+        specifier: ^4.11.0
+        version: 4.11.0
       '@eslint/eslintrc':
         specifier: ^3.3.1
         version: 3.3.1
@@ -353,8 +353,8 @@ packages:
   '@asamuzakjp/css-color@3.2.0':
     resolution: {integrity: sha512-K1A6z8tS3XsmCMM86xoWdn7Fkdn9m6RSVtocUrJYIwZnFVkng/PvkEoWtOWmP+Scc6saYWHWZYbndEEXxl24jw==}
 
-  '@axe-core/react@4.10.2':
-    resolution: {integrity: sha512-BIHQ+kMtOpPTmtMrJDGQMkXQT8C3YX5GIUmqXQ6tCAUaK7ZwhfbyNBaYlG0h0IdC7mHL0uxTXYxOI6r4Lgnw6w==}
+  '@axe-core/react@4.11.0':
+    resolution: {integrity: sha512-ko5hYRmdLzbsxagsb0u3GD8IqtZa+vUJZ4K4+z8qjsHGrHBNBps5Sy0EIfSL8whzyIKBQ3xYa1reK1QenIAkyw==}
 
   '@babel/code-frame@7.27.1':
     resolution: {integrity: sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg==}
@@ -3965,10 +3965,6 @@ packages:
 
   axe-core@4.10.2:
     resolution: {integrity: sha512-RE3mdQ7P3FRSe7eqCWoeQ/Z9QXrtniSjp1wUjt5nRC3WIpz5rSCve6o3fsZ2aCpJtrZjSZgjwXAoTO5k4tEI0w==}
-    engines: {node: '>=4'}
-
-  axe-core@4.10.3:
-    resolution: {integrity: sha512-Xm7bpRXnDSX2YE2YFfBk2FnF0ep6tmG7xPh8iHee8MIcrgq762Nkce856dYtJYLkuIoYZvGfTs/PbZhideTcEg==}
     engines: {node: '>=4'}
 
   axe-core@4.11.0:
@@ -7923,9 +7919,9 @@ snapshots:
       '@csstools/css-tokenizer': 3.0.4
       lru-cache: 10.4.3
 
-  '@axe-core/react@4.10.2':
+  '@axe-core/react@4.11.0':
     dependencies:
-      axe-core: 4.10.3
+      axe-core: 4.11.0
       requestidlecallback: 0.3.0
 
   '@babel/code-frame@7.27.1':
@@ -12818,8 +12814,6 @@ snapshots:
       possible-typed-array-names: 1.1.0
 
   axe-core@4.10.2: {}
-
-  axe-core@4.10.3: {}
 
   axe-core@4.11.0: {}
 
