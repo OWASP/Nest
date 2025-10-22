@@ -94,12 +94,14 @@ class TestPostModel:
         mock_post.save.assert_called_once()
         assert result == mock_post
 
-    @patch("apps.owasp.models.post.Post.objects.order_by")
-    def test_recent_posts_ordering(self, mock_order_by):
-        """Test recent_posts uses correct ordering."""
+    @patch("apps.owasp.models.post.Post.objects.filter")
+    def test_recent_posts_ordering(self, mock_filter):
+        """Test recent_posts uses correct ordering and filters future posts."""
         mock_queryset = Mock()
-        mock_order_by.return_value = mock_queryset
-
+        mock_filter.return_value.order_by.return_value = mock_queryset
         result = Post.recent_posts()
-        mock_order_by.assert_called_once_with("-published_at")
+        mock_filter.assert_called_once()
+        _, kwargs = mock_filter.call_args
+        assert "published_at__lte" in kwargs
+        mock_filter.return_value.order_by.assert_called_once_with("-published_at")
         assert result == mock_queryset
