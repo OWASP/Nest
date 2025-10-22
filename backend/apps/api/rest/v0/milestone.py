@@ -82,7 +82,9 @@ def list_milestones(
     milestones = MilestoneModel.objects.select_related("repository", "repository__organization")
 
     if filters.organization:
-        milestones = milestones.filter(repository__organization__login__iexact=filters.organization)
+        milestones = milestones.filter(
+            repository__organization__login__iexact=filters.organization
+        )
 
     if filters.repository:
         milestones = milestones.filter(repository__name__iexact=filters.repository)
@@ -94,7 +96,9 @@ def list_milestones(
 
 @router.get(
     "/{str:organization_id}/{str:repository_id}/{int:milestone_id}",
-    description="Retrieve a specific GitHub milestone by organization, repository, and milestone number.",
+    description=(
+        "Retrieve a specific GitHub milestone by organization, repository, and milestone number."
+    ),
     operation_id="get_milestone",
     response={
         HTTPStatus.NOT_FOUND: MilestoneError,
