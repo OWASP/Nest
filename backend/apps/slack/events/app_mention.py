@@ -2,6 +2,7 @@
 
 import logging
 
+from apps.slack.blocks import markdown
 from apps.slack.common.handlers.ai import get_blocks
 from apps.slack.events.event import EventBase
 
@@ -34,10 +35,19 @@ class AppMention(EventBase):
 
         logger.info("Handling app mention")
 
-        reply_blocks = get_blocks(query=query)
-        client.chat_postMessage(
+        thread_ts = event.get("thread_ts") or event.get("ts")
+
+        placeholder = client.chat_postMessage(
             channel=channel_id,
+            blocks=[markdown("⏳ Thinking…")],
+            text="Thinking…",
+            thread_ts=thread_ts,
+        )
+
+        reply_blocks = get_blocks(query=query)
+        client.chat_update(
+            channel=channel_id,
+            ts=placeholder["ts"],
             blocks=reply_blocks,
             text=query,
-            thread_ts=event.get("thread_ts") or event.get("ts"),
         )
