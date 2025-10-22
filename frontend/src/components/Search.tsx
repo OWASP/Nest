@@ -28,8 +28,10 @@ const SearchBar: React.FC<SearchProps> = ({
   }, [initialValue])
 
   useEffect(() => {
-    inputRef.current?.focus()
-  }, [pathname])
+    if (!isLoaded && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [pathname, isLoaded])
 
   const debouncedSearch = useMemo(
     () =>
