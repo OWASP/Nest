@@ -59,19 +59,26 @@ class TestOwaspCreateMemberSnapshotCommand:
             end_at,
         )
 
-        assert result == {"2025-01-15": 3, "2025-01-16": 1}
+        # All dates should be initialized
+        assert "2025-01-15" in result
+        assert result["2025-01-15"] == 3
+        assert "2025-01-16" in result
+        assert result["2025-01-16"] == 1
+        # Check a date without contributions is 0
+        assert result["2025-01-01"] == 0
 
     def test_generate_heatmap_data_empty_contributions(self, command):
         start_at = datetime(2025, 1, 1, tzinfo=UTC)
-        end_at = datetime(2025, 10, 1, tzinfo=UTC)
+        end_at = datetime(2025, 1, 3, tzinfo=UTC)
 
         result = command.generate_heatmap_data([], [], [], start_at, end_at)
 
-        assert result == {}
+        # All dates should be initialized to 0
+        assert result == {"2025-01-01": 0, "2025-01-02": 0, "2025-01-03": 0}
 
     def test_generate_heatmap_data_single_date(self, command):
         start_at = datetime(2025, 1, 1, tzinfo=UTC)
-        end_at = datetime(2025, 10, 1, tzinfo=UTC)
+        end_at = datetime(2025, 1, 10, tzinfo=UTC)
 
         mock_commit = mock.Mock()
         mock_commit.created_at = datetime(2025, 1, 10, tzinfo=UTC)
@@ -86,37 +93,40 @@ class TestOwaspCreateMemberSnapshotCommand:
             [mock_commit], [mock_pr], [mock_issue], start_at, end_at
         )
 
-        assert result == {"2025-01-10": 3}
+        # Should have all dates in range
+        assert result["2025-01-10"] == 3
+        assert result["2025-01-01"] == 0
+        assert len(result) == 10  # 10 days from Jan 1 to Jan 10
 
     def test_generate_heatmap_data_filters_by_date_range(self, command):
         start_at = datetime(2025, 1, 1, tzinfo=UTC)
-        end_at = datetime(2025, 10, 1, tzinfo=UTC)
+        end_at = datetime(2025, 1, 5, tzinfo=UTC)
 
-        # Create contributions: one before, two within, one after range
+        # Create contributions: one before, one within, one after range
         mock_commit_before = mock.Mock()
         mock_commit_before.created_at = datetime(2024, 12, 31, tzinfo=UTC)
 
         mock_commit_in_range = mock.Mock()
-        mock_commit_in_range.created_at = datetime(2025, 1, 15, tzinfo=UTC)
+        mock_commit_in_range.created_at = datetime(2025, 1, 3, tzinfo=UTC)
 
         mock_pr_after = mock.Mock()
-        mock_pr_after.created_at = datetime(2025, 10, 2, tzinfo=UTC)
-
-        mock_issue_in_range = mock.Mock()
-        mock_issue_in_range.created_at = datetime(2025, 5, 1, tzinfo=UTC)
+        mock_pr_after.created_at = datetime(2025, 1, 10, tzinfo=UTC)
 
         result = command.generate_heatmap_data(
             [mock_commit_before, mock_commit_in_range],
             [mock_pr_after],
-            [mock_issue_in_range],
+            [],
             start_at,
             end_at,
         )
 
-        # Only dates within range should be included
-        assert result == {"2025-01-15": 1, "2025-05-01": 1}
+        # Should have all dates in range initialized
+        assert result["2025-01-03"] == 1
+        assert result["2025-01-01"] == 0
+        assert result["2025-01-02"] == 0
+        # Dates outside range should not be included
         assert "2024-12-31" not in result
-        assert "2025-10-02" not in result
+        assert "2025-01-10" not in result
 
     def test_generate_entity_contributions_filters_by_date_range(self, command):
         start_at = datetime(2025, 1, 1, tzinfo=UTC)
@@ -188,9 +198,13 @@ class TestOwaspCreateMemberSnapshotCommand:
             mock_project.nest_key = "test-project"
             mock_project.repositories.all.return_value = [mock_repo]
 
-            mock_project_model.objects.filter.return_value.prefetch_related.return_value = [
-                mock_project
-            ]
+            # Mock the first filter call (for initializing all led entities)
+            # and the second call (for building repo_to_entity mapping)
+            mock_filter = mock.Mock()
+            mock_filter.prefetch_related.return_value = [mock_project]
+            # Make the filter mock iterable for the initialization loop
+            mock_filter.__iter__ = lambda _: iter([mock_project])
+            mock_project_model.objects.filter.return_value = mock_filter
 
             result = command.generate_entity_contributions(
                 mock_user,
@@ -273,7 +287,7 @@ class TestOwaspCreateMemberSnapshotCommand:
 
     def test_generate_communication_heatmap_data(self, command):
         start_at = datetime(2025, 1, 1, tzinfo=UTC)
-        end_at = datetime(2025, 10, 1, tzinfo=UTC)
+        end_at = datetime(2025, 1, 16, tzinfo=UTC)
 
         # Mock public channel conversation
         mock_conversation = mock.Mock()
@@ -299,11 +313,14 @@ class TestOwaspCreateMemberSnapshotCommand:
             end_at,
         )
 
-        assert result == {"2025-01-15": 2, "2025-01-16": 1}
+        # Should have all dates initialized
+        assert result["2025-01-15"] == 2
+        assert result["2025-01-16"] == 1
+        assert result["2025-01-01"] == 0
 
     def test_generate_communication_heatmap_data_filters_private(self, command):
         start_at = datetime(2025, 1, 1, tzinfo=UTC)
-        end_at = datetime(2025, 10, 1, tzinfo=UTC)
+        end_at = datetime(2025, 1, 15, tzinfo=UTC)
 
         # Mock private channel
         mock_private_conversation = mock.Mock()
@@ -330,8 +347,9 @@ class TestOwaspCreateMemberSnapshotCommand:
             end_at,
         )
 
-        # Only public channel message should be counted
-        assert result == {"2025-01-15": 1}
+        # Only public channel message should be counted, but all dates initialized
+        assert result["2025-01-15"] == 1
+        assert result["2025-01-01"] == 0
 
     def test_generate_channel_communications(self, command):
         start_at = datetime(2025, 1, 1, tzinfo=UTC)
@@ -388,7 +406,7 @@ class TestOwaspCreateMemberSnapshotCommand:
 
     def test_generate_communication_heatmap_data_filters_out_of_range(self, command):
         start_at = datetime(2025, 1, 1, tzinfo=UTC)
-        end_at = datetime(2025, 10, 1, tzinfo=UTC)
+        end_at = datetime(2025, 1, 15, tzinfo=UTC)
 
         # Mock public channel
         mock_conversation = mock.Mock()
@@ -401,7 +419,7 @@ class TestOwaspCreateMemberSnapshotCommand:
         mock_msg_before.conversation = mock_conversation
 
         mock_msg_after = mock.Mock()
-        mock_msg_after.created_at = datetime(2025, 10, 2, tzinfo=UTC)
+        mock_msg_after.created_at = datetime(2025, 1, 20, tzinfo=UTC)
         mock_msg_after.conversation = mock_conversation
 
         # Create message in range
@@ -415,10 +433,12 @@ class TestOwaspCreateMemberSnapshotCommand:
             end_at,
         )
 
-        # Only message in range should be counted
-        assert result == {"2025-01-15": 1}
+        # Only message in range should be counted, all dates initialized
+        assert result["2025-01-15"] == 1
+        assert result["2025-01-01"] == 0
+        # Dates outside range should not be included
         assert "2024-12-31" not in result
-        assert "2025-10-02" not in result
+        assert "2025-01-20" not in result
 
     def test_generate_channel_communications_filters_out_of_range(self, command):
         start_at = datetime(2025, 1, 1, tzinfo=UTC)

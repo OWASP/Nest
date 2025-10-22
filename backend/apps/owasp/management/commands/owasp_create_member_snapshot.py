@@ -87,8 +87,17 @@ class Command(BaseCommand):
             dict: Mapping of date strings (YYYY-MM-DD) to contribution counts.
 
         """
-        heatmap_data: dict[str, int] = defaultdict(int)
+        from datetime import timedelta
 
+        # Initialize all dates in range with 0
+        heatmap_data: dict[str, int] = {}
+        current_date = start_at.date()
+        end_date = end_at.date()
+        while current_date <= end_date:
+            heatmap_data[current_date.isoformat()] = 0
+            current_date += timedelta(days=1)
+
+        # Count contributions
         for commit in commits:
             if start_at <= commit.created_at <= end_at:
                 date_key = commit.created_at.date().isoformat()
@@ -104,7 +113,7 @@ class Command(BaseCommand):
                 date_key = issue.created_at.date().isoformat()
                 heatmap_data[date_key] += 1
 
-        return dict(heatmap_data)
+        return heatmap_data
 
     def generate_entity_contributions(
         self, user, commits, pull_requests, issues, entity_type: str, start_at, end_at
@@ -121,11 +130,9 @@ class Command(BaseCommand):
             end_at: End date of the snapshot period.
 
         Returns:
-            dict: Mapping of entity keys to contribution counts.
+            dict: Mapping of entity keys to contribution counts (including 0 for no contributions).
 
         """
-        entity_contributions: dict[str, int] = defaultdict(int)
-
         # Get entities where the user is a leader
         entity_model = Project if entity_type == "project" else Chapter
         content_type = ContentType.objects.get_for_model(entity_model)
@@ -136,6 +143,17 @@ class Command(BaseCommand):
             is_active=True,
             is_reviewed=True,
         ).values_list("entity_id", flat=True)
+
+        # Initialize all led entities with 0 contributions
+        entity_contributions: dict[str, int] = {}
+        if entity_type == "project":
+            led_projects = Project.objects.filter(id__in=led_entity_ids, is_active=True)
+            for project in led_projects:
+                entity_contributions[project.nest_key] = 0
+        else:  # chapter
+            led_chapters = Chapter.objects.filter(id__in=led_entity_ids, is_active=True)
+            for chapter in led_chapters:
+                entity_contributions[chapter.nest_key] = 0
 
         # Get all unique repository IDs from contributions
         repository_ids = set()
@@ -153,22 +171,19 @@ class Command(BaseCommand):
             # Projects have a M2M 'repositories' field
             projects = Project.objects.filter(
                 id__in=led_entity_ids,
-                repositories__id__in=repository_ids,
                 is_active=True,
             ).prefetch_related("repositories")
             for project in projects:
                 for repo in project.repositories.all():
-                    if repo.id in repository_ids:
-                        repo_to_entity[repo.id] = project.nest_key
+                    repo_to_entity[repo.id] = project.nest_key
         else:  # chapter
             # Chapters have a single FK 'owasp_repository' field
             chapters = Chapter.objects.filter(
                 id__in=led_entity_ids,
-                owasp_repository_id__in=repository_ids,
                 is_active=True,
             ).select_related("owasp_repository")
             for chapter in chapters:
-                if chapter.owasp_repository_id in repository_ids:
+                if chapter.owasp_repository_id:
                     repo_to_entity[chapter.owasp_repository_id] = chapter.nest_key
 
         # Count commits (only within date range)
@@ -232,11 +247,20 @@ class Command(BaseCommand):
             end_at: End date of the snapshot period.
 
         Returns:
-            dict: Mapping of date strings (YYYY-MM-DD) to message counts.
+            dict: Mapping of date strings (YYYY-MM-DD) to message counts (all dates initialized).
 
         """
-        heatmap_data: dict[str, int] = defaultdict(int)
+        from datetime import timedelta
 
+        # Initialize all dates in range with 0
+        heatmap_data: dict[str, int] = {}
+        current_date = start_at.date()
+        end_date = end_at.date()
+        while current_date <= end_date:
+            heatmap_data[current_date.isoformat()] = 0
+            current_date += timedelta(days=1)
+
+        # Count messages
         for message in messages:
             if (
                 message.created_at
@@ -248,7 +272,7 @@ class Command(BaseCommand):
                 date_key = message.created_at.date().isoformat()
                 heatmap_data[date_key] += 1
 
-        return dict(heatmap_data)
+        return heatmap_data
 
     def generate_channel_communications(self, messages, start_at, end_at) -> dict:
         """Generate top 5 public channels by message count within date range.
@@ -437,13 +461,14 @@ class Command(BaseCommand):
         )
         snapshot.repository_contributions = repository_contributions
 
-        # Generate communication heatmap and top channels (if messages exist)
-        if messages_count > 0:
-            communication_heatmap = self.generate_communication_heatmap_data(
-                messages, start_at, end_at
-            )
-            snapshot.communication_heatmap_data = communication_heatmap
+        # Generate communication heatmap (always, even if no messages to show all dates with 0)
+        communication_heatmap = self.generate_communication_heatmap_data(
+            messages, start_at, end_at
+        )
+        snapshot.communication_heatmap_data = communication_heatmap
 
+        # Generate top channels (only if messages exist)
+        if messages_count > 0:
             channel_communications = self.generate_channel_communications(
                 messages, start_at, end_at
             )
@@ -474,20 +499,15 @@ class Command(BaseCommand):
             )
             logger.info("Generated contributions for %s repositories", repo_count)
 
-        if messages_count > 0:
-            if communication_heatmap:
-                heatmap_days = len(communication_heatmap)
-                self.stdout.write(
-                    f"  Generated communication heatmap data for {heatmap_days} day(s)"
-                )
-                logger.info("Generated communication heatmap for %s days", heatmap_days)
+        if communication_heatmap:
+            heatmap_days = len(communication_heatmap)
+            self.stdout.write(f"  Generated communication heatmap data for {heatmap_days} day(s)")
+            logger.info("Generated communication heatmap for %s days", heatmap_days)
 
-            if channel_communications:
-                channel_count = len(channel_communications)
-                self.stdout.write(
-                    f"  Generated channel communications for {channel_count} channel(s)"
-                )
-                logger.info("Generated channel communications for %s channels", channel_count)
+        if messages_count and channel_communications:
+            channel_count = len(channel_communications)
+            self.stdout.write(f"  Generated channel communications for {channel_count} channel(s)")
+            logger.info("Generated channel communications for %s channels", channel_count)
 
         # Summary
         total = snapshot.total_contributions
