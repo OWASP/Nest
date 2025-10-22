@@ -62,53 +62,50 @@ class TestAiHandler:
         mock_get_error_blocks.assert_called_once()
         assert result == error_blocks
 
-    @patch("apps.slack.common.handlers.ai.RagTool")
-    def test_process_ai_query_success(self, mock_rag_tool):
-        """Test successful AI query processing."""
+    @patch("apps.slack.common.handlers.ai.AgenticRAGAgent")
+    def test_process_ai_query_success(self, mock_agent_class):
+        """Test successful AI query processing with AgenticRAGAgent."""
         query = "What is OWASP?"
         expected_response = "OWASP is a security organization..."
 
-        mock_rag_instance = Mock()
-        mock_rag_instance.query.return_value = expected_response
-        mock_rag_tool.return_value = mock_rag_instance
+        mock_agent = Mock()
+        mock_agent.run.return_value = {"answer": expected_response}
+        mock_agent_class.return_value = mock_agent
 
         result = process_ai_query(query)
 
-        mock_rag_tool.assert_called_once_with(
-            chat_model="gpt-4o",
-            embedding_model="text-embedding-3-small",
-        )
-        mock_rag_instance.query.assert_called_once_with(question=query)
+        mock_agent_class.assert_called_once()
+        mock_agent.run.assert_called_once_with(query=query)
         assert result == expected_response
 
-    @patch("apps.slack.common.handlers.ai.RagTool")
-    def test_process_ai_query_failure(self, mock_rag_tool):
-        """Test AI query processing failure."""
+    @patch("apps.slack.common.handlers.ai.AgenticRAGAgent")
+    def test_process_ai_query_failure(self, mock_agent_class):
+        """Test AI query processing failure raises exception."""
         query = "What is OWASP?"
 
-        mock_rag_instance = Mock()
-        mock_rag_instance.query.side_effect = Exception("AI service error")
-        mock_rag_tool.return_value = mock_rag_instance
+        mock_agent = Mock()
+        mock_agent.run.side_effect = Exception("AI service error")
+        mock_agent_class.return_value = mock_agent
 
         with pytest.raises(Exception, match="AI service error"):
             process_ai_query(query)
 
-    @patch("apps.slack.common.handlers.ai.RagTool")
-    def test_process_ai_query_returns_none(self, mock_rag_tool):
-        """Test AI query processing when RAG tool returns None."""
+        mock_agent_class.assert_called_once()
+        mock_agent.run.assert_called_once_with(query=query)
+
+    @patch("apps.slack.common.handlers.ai.AgenticRAGAgent")
+    def test_process_ai_query_returns_none(self, mock_agent_class):
+        """Test AI query processing when agent returns no answer."""
         query = "What is OWASP?"
 
-        mock_rag_instance = Mock()
-        mock_rag_instance.query.return_value = None
-        mock_rag_tool.return_value = mock_rag_instance
+        mock_agent = Mock()
+        mock_agent.run.return_value = {"answer": None}
+        mock_agent_class.return_value = mock_agent
 
         result = process_ai_query(query)
 
-        mock_rag_tool.assert_called_once_with(
-            chat_model="gpt-4o",
-            embedding_model="text-embedding-3-small",
-        )
-        mock_rag_instance.query.assert_called_once_with(question=query)
+        mock_agent_class.assert_called_once()
+        mock_agent.run.assert_called_once_with(query=query)
         assert result is None
 
     @patch("apps.slack.common.handlers.ai.markdown")
