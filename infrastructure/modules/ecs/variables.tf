@@ -21,6 +21,16 @@ variable "environment" {
   type        = string
 }
 
+variable "fixtures_read_only_policy_arn" {
+  description = "The ARN of the fixtures read-only IAM policy"
+  type        = string
+}
+
+variable "fixtures_s3_bucket" {
+  description = "The name of the S3 bucket for fixtures"
+  type        = string
+}
+
 variable "index_data_task_cpu" {
   description = "The CPU for the index-data task"
   type        = string

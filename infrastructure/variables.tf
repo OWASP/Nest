@@ -7,13 +7,19 @@ variable "aws_region" {
 variable "availability_zones" {
   description = "A list of availability zones for the VPC"
   type        = list(string)
-  default     = ["us-east-1a", "us-east-1b"]
+  default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
 }
 
 variable "db_allocated_storage" {
   description = "The allocated storage for the RDS database in GB"
   type        = number
   default     = 20
+}
+
+variable "db_backup_retention_period" {
+  description = "The number of days to retain backups for"
+  type        = number
+  default     = 7
 }
 
 variable "db_engine_version" {
@@ -31,7 +37,7 @@ variable "db_instance_class" {
 variable "db_name" {
   description = "The name of the RDS database"
   type        = string
-  default     = "nestdb"
+  default     = "owasp_nest"
 }
 
 variable "db_password" {
@@ -47,10 +53,134 @@ variable "db_port" {
   default     = 5432
 }
 
+variable "db_storage_type" {
+  description = "The storage type for the RDS database"
+  type        = string
+  default     = "gp3"
+}
+
 variable "db_username" {
   description = "The username for the RDS database"
   type        = string
-  default     = "nestuser"
+  default     = "owasp_nest_user"
+}
+
+variable "django_algolia_application_id" {
+  type        = string
+  description = "Algolia application ID."
+  default     = null
+}
+
+variable "django_algolia_write_api_key" {
+  type        = string
+  description = "Algolia write API key."
+  sensitive   = true
+  default     = null
+}
+
+variable "django_allowed_hosts" {
+  type        = string
+  description = "Comma-separated list of allowed hosts for Django."
+  default     = null
+}
+
+variable "django_aws_access_key_id" {
+  type        = string
+  description = "AWS access key for Django."
+  sensitive   = true
+  default     = null
+}
+
+variable "django_aws_secret_access_key" {
+  type        = string
+  description = "AWS secret access key for Django."
+  sensitive   = true
+  default     = null
+}
+
+variable "django_configuration" {
+  type        = string
+  description = "Django Configuration"
+  default     = null
+}
+
+variable "django_db_host" {
+  type        = string
+  description = "Database host URL."
+  default     = null
+}
+
+variable "django_db_name" {
+  type        = string
+  description = "Database name."
+  default     = null
+}
+
+variable "django_db_password" {
+  type        = string
+  description = "Database password."
+  sensitive   = true
+  default     = null
+}
+
+variable "django_db_port" {
+  type        = string
+  description = "Database port."
+  default     = null
+}
+
+variable "django_db_user" {
+  type        = string
+  description = "Database user."
+  default     = null
+}
+
+variable "django_open_ai_secret_key" {
+  type        = string
+  description = "OpenAI secret key."
+  sensitive   = true
+  default     = null
+}
+
+variable "django_redis_host" {
+  type        = string
+  description = "Redis host URL."
+  default     = null
+}
+
+variable "django_redis_password" {
+  type        = string
+  description = "Redis password."
+  sensitive   = true
+  default     = null
+}
+
+variable "django_secret_key" {
+  type        = string
+  description = "Django secret key."
+  sensitive   = true
+  default     = null
+}
+
+variable "django_sentry_dsn" {
+  type        = string
+  description = "Sentry DSN for error tracking."
+  sensitive   = true
+  default     = null
+}
+
+variable "django_slack_bot_token" {
+  type        = string
+  description = "Slack bot token."
+  sensitive   = true
+  default     = null
+}
+
+variable "django_slack_signing_secret" {
+  type        = string
+  description = "Slack signing secret."
+  sensitive   = true
+  default     = null
 }
 
 variable "environment" {
@@ -63,10 +193,22 @@ variable "environment" {
   }
 }
 
+variable "force_destroy_bucket" {
+  description = "If true, deletes all objects from the bucket when the bucket is destroyed."
+  type        = bool
+  default     = false
+}
+
+variable "fixtures_s3_bucket" {
+  description = "The name of the S3 bucket for fixtures"
+  type        = string
+  default     = "nest-fixtures"
+}
+
 variable "private_subnet_cidrs" {
   description = "A list of CIDR blocks for the private subnets"
   type        = list(string)
-  default     = ["10.0.3.0/24", "10.0.4.0/24"]
+  default     = ["10.0.11.0/24", "10.0.12.0/24", "10.0.13.0/24"]
 }
 
 variable "project_name" {
@@ -78,7 +220,7 @@ variable "project_name" {
 variable "public_subnet_cidrs" {
   description = "A list of CIDR blocks for the public subnets"
   type        = list(string)
-  default     = ["10.0.1.0/24", "10.0.2.0/24"]
+  default     = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
 }
 
 variable "redis_auth_token" {
@@ -121,140 +263,5 @@ variable "vpc_cidr" {
 variable "zappa_s3_bucket" {
   description = "The name of the S3 bucket for Zappa deployments"
   type        = string
-  default     = "nest-zappa-deployments"
-}
-
-variable "db_storage_type" {
-  description = "The storage type for the RDS database"
-  type        = string
-  default     = "gp3"
-}
-
-variable "db_backup_retention_period" {
-  description = "The number of days to retain backups for"
-  type        = number
-  default     = 7
-}
-
-variable "force_destroy_bucket" {
-  description = "If true, deletes all objects from the bucket when the bucket is destroyed."
-  type        = bool
-  default     = false
-}
-variable "django_algolia_application_id" {
-  type        = string
-  description = "Algolia application ID."
-  default     = null
-}
-
-variable "django_allowed_hosts" {
-  type        = string
-  description = "Comma-separated list of allowed hosts for Django."
-  default     = null
-}
-
-variable "django_db_host" {
-  type        = string
-  description = "Database host URL."
-  default     = null
-}
-
-variable "django_db_name" {
-  type        = string
-  description = "Database name."
-  default     = null
-}
-
-variable "django_db_user" {
-  type        = string
-  description = "Database user."
-  default     = null
-}
-
-variable "django_db_port" {
-  type        = string
-  description = "Database port."
-  default     = null
-}
-
-variable "django_redis_host" {
-  type        = string
-  description = "Redis host URL."
-  default     = null
-}
-
-variable "django_algolia_write_api_key" {
-  type        = string
-  description = "Algolia write API key."
-  sensitive   = true
-  default     = null
-}
-
-variable "django_aws_access_key_id" {
-  type        = string
-  description = "AWS access key for Django."
-  sensitive   = true
-  default     = null
-}
-
-variable "django_aws_secret_access_key" {
-  type        = string
-  description = "AWS secret access key for Django."
-  sensitive   = true
-  default     = null
-}
-
-variable "django_configuration" {
-  type        = string
-  description = "Django Configuration"
-  default     = null
-}
-
-variable "django_db_password" {
-  type        = string
-  description = "Database password."
-  sensitive   = true
-  default     = null
-}
-
-variable "django_open_ai_secret_key" {
-  type        = string
-  description = "OpenAI secret key."
-  sensitive   = true
-  default     = null
-}
-
-variable "django_redis_password" {
-  type        = string
-  description = "Redis password."
-  sensitive   = true
-  default     = null
-}
-
-variable "django_secret_key" {
-  type        = string
-  description = "Django secret key."
-  sensitive   = true
-  default     = null
-}
-
-variable "django_sentry_dsn" {
-  type        = string
-  description = "Sentry DSN for error tracking."
-  sensitive   = true
-  default     = null
-}
-
-variable "django_slack_bot_token" {
-  type        = string
-  description = "Slack bot token."
-  sensitive   = true
-  default     = null
-}
-
-variable "django_slack_signing_secret" {
-  type        = string
-  description = "Slack signing secret."
-  sensitive   = true
-  default     = null
+  default     = "owasp-nest-zappa-deployments"
 }

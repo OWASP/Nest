@@ -41,6 +41,54 @@ locals {
   }
 }
 
+module "cache" {
+  source = "./modules/cache"
+
+  common_tags           = local.common_tags
+  environment           = var.environment
+  project_name          = var.project_name
+  redis_auth_token      = var.redis_auth_token
+  redis_engine_version  = var.redis_engine_version
+  redis_node_type       = var.redis_node_type
+  redis_num_cache_nodes = var.redis_num_cache_nodes
+  redis_port            = var.redis_port
+  security_group_ids    = [module.security.redis_sg_id]
+  subnet_ids            = module.networking.private_subnet_ids
+}
+
+module "database" {
+  source = "./modules/database"
+
+  common_tags                = local.common_tags
+  db_allocated_storage       = var.db_allocated_storage
+  db_backup_retention_period = var.db_backup_retention_period
+  db_engine_version          = var.db_engine_version
+  db_instance_class          = var.db_instance_class
+  db_name                    = var.db_name
+  db_password                = var.db_password
+  db_storage_type            = var.db_storage_type
+  db_subnet_ids              = module.networking.private_subnet_ids
+  db_username                = var.db_username
+  environment                = var.environment
+  project_name               = var.project_name
+  proxy_security_group_ids   = [module.security.rds_proxy_sg_id]
+  security_group_ids         = [module.security.rds_sg_id]
+}
+
+module "ecs" {
+  source = "./modules/ecs"
+
+  aws_region                    = var.aws_region
+  common_tags                   = local.common_tags
+  django_environment_variables  = local.django_environment_variables
+  environment                   = var.environment
+  fixtures_read_only_policy_arn = module.storage.fixtures_read_only_policy_arn
+  fixtures_s3_bucket            = var.fixtures_s3_bucket
+  lambda_sg_id                  = module.security.lambda_sg_id
+  private_subnet_ids            = module.networking.private_subnet_ids
+  project_name                  = var.project_name
+}
+
 module "networking" {
   source = "./modules/networking"
 
@@ -69,53 +117,8 @@ module "storage" {
 
   common_tags          = local.common_tags
   environment          = var.environment
+  fixtures_s3_bucket   = var.fixtures_s3_bucket
   force_destroy_bucket = var.force_destroy_bucket
   project_name         = var.project_name
   zappa_s3_bucket      = var.zappa_s3_bucket
-}
-
-module "database" {
-  source = "./modules/database"
-
-  common_tags                = local.common_tags
-  db_allocated_storage       = var.db_allocated_storage
-  db_backup_retention_period = var.db_backup_retention_period
-  db_engine_version          = var.db_engine_version
-  db_instance_class          = var.db_instance_class
-  db_name                    = var.db_name
-  db_password                = var.db_password
-  db_storage_type            = var.db_storage_type
-  db_subnet_ids              = module.networking.private_subnet_ids
-  db_username                = var.db_username
-  environment                = var.environment
-  project_name               = var.project_name
-  proxy_security_group_ids   = [module.security.rds_proxy_sg_id]
-  security_group_ids         = [module.security.rds_sg_id]
-}
-
-module "cache" {
-  source = "./modules/cache"
-
-  common_tags           = local.common_tags
-  environment           = var.environment
-  project_name          = var.project_name
-  redis_auth_token      = var.redis_auth_token
-  redis_engine_version  = var.redis_engine_version
-  redis_node_type       = var.redis_node_type
-  redis_num_cache_nodes = var.redis_num_cache_nodes
-  redis_port            = var.redis_port
-  security_group_ids    = [module.security.redis_sg_id]
-  subnet_ids            = module.networking.private_subnet_ids
-}
-
-module "ecs" {
-  source = "./modules/ecs"
-
-  aws_region                   = var.aws_region
-  common_tags                  = local.common_tags
-  django_environment_variables = local.django_environment_variables
-  environment                  = var.environment
-  lambda_sg_id                 = module.security.lambda_sg_id
-  private_subnet_ids           = module.networking.private_subnet_ids
-  project_name                 = var.project_name
 }

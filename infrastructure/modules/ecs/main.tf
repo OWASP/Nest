@@ -42,6 +42,11 @@ resource "aws_iam_role_policy_attachment" "ecs_tasks_execution_role_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+resource "aws_iam_role_policy_attachment" "ecs_tasks_fixtures_s3_access" {
+  role       = aws_iam_role.ecs_tasks_execution_role.name
+  policy_arn = var.fixtures_read_only_policy_arn
+}
+
 resource "aws_iam_role" "event_bridge_role" {
   name = "${var.project_name}-${var.environment}-event-bridge-role"
   tags = var.common_tags
@@ -151,7 +156,7 @@ module "load_data_task" {
   source = "./modules/task"
 
   aws_region                   = var.aws_region
-  command                      = ["python", "manage.py", "load_data"]
+  command                      = ["/bin/sh", "-c", "aws s3 cp s3://${var.fixtures_s3_bucket}/nest.json.gz /data/nest.json.gz && python manage.py load_data --file /data/nest.json.gz"]
   common_tags                  = var.common_tags
   container_environment        = var.django_environment_variables
   cpu                          = var.load_data_task_cpu
