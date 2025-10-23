@@ -51,6 +51,12 @@ variable "image_url" {
   type        = string
 }
 
+variable "log_retention_in_days" {
+  description = "The number of days to retain log events."
+  type        = number
+  default     = 30
+}
+
 variable "memory" {
   description = "The memory (in MiB) to allocate for the task."
   type        = string

@@ -10,7 +10,8 @@ terraform {
 }
 
 resource "aws_cloudwatch_log_group" "task" {
-  name = "/ecs/${var.project_name}-${var.environment}-${var.task_name}"
+  name              = "/ecs/${var.project_name}-${var.environment}-${var.task_name}"
+  retention_in_days = var.log_retention_in_days
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-${var.task_name}-logs"
   })
