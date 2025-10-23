@@ -56,11 +56,12 @@ module "networking" {
 module "security" {
   source = "./modules/security"
 
-  vpc_id       = module.networking.vpc_id
+  common_tags  = local.common_tags
   db_port      = var.db_port
-  redis_port   = var.redis_port
-  project_name = var.project_name
   environment  = var.environment
+  project_name = var.project_name
+  redis_port   = var.redis_port
+  vpc_id       = module.networking.vpc_id
 }
 
 module "storage" {

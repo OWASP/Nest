@@ -1,6 +1,18 @@
+variable "common_tags" {
+  description = "A map of common tags to apply to all resources."
+  type        = map(string)
+  default     = {}
+}
+
 variable "db_port" {
   description = "The port for the RDS database"
   type        = number
+}
+
+variable "default_egress_cidr_blocks" {
+  description = "A list of CIDR blocks to allow for default egress traffic."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
 }
 
 variable "environment" {

@@ -13,102 +13,94 @@ terraform {
   }
 }
 
-# Lambda Security Group
 resource "aws_security_group" "lambda" {
-  name        = "${var.project_name}-${var.environment}-lambda-sg"
   description = "Security group for Lambda functions (Zappa)"
-  vpc_id      = var.vpc_id
+  name        = "${var.project_name}-${var.environment}-lambda-sg"
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-${var.environment}-lambda-sg"
+  })
+  vpc_id = var.vpc_id
 
   egress {
+    cidr_blocks = var.default_egress_cidr_blocks
     description = "Allow all outbound traffic"
     from_port   = 0
-    to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "${var.project_name}-${var.environment}-lambda-sg"
+    to_port     = 0
   }
 }
 
-# RDS Proxy Security Group
 resource "aws_security_group" "rds_proxy" {
-  name        = "${var.project_name}-${var.environment}-rds-proxy-sg"
   description = "Security group for RDS Proxy"
-  vpc_id      = var.vpc_id
+  name        = "${var.project_name}-${var.environment}-rds-proxy-sg"
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-${var.environment}-rds-proxy-sg"
+  })
+  vpc_id = var.vpc_id
+
+  egress {
+    cidr_blocks = var.default_egress_cidr_blocks
+    description = "Allow all outbound traffic"
+    from_port   = 0
+    protocol    = "-1"
+    to_port     = 0
+  }
 
   ingress {
     description     = "PostgreSQL from Lambda"
     from_port       = var.db_port
-    to_port         = var.db_port
     protocol        = "tcp"
     security_groups = [aws_security_group.lambda.id]
-  }
-
-  egress {
-    description = "Allow all outbound traffic"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "${var.project_name}-${var.environment}-rds-proxy-sg"
+    to_port         = var.db_port
   }
 }
 
-# RDS Security Group
 resource "aws_security_group" "rds" {
-  name        = "${var.project_name}-${var.environment}-rds-sg"
   description = "Security group for RDS PostgreSQL"
-  vpc_id      = var.vpc_id
+  name        = "${var.project_name}-${var.environment}-rds-sg"
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-${var.environment}-rds-sg"
+  })
+  vpc_id = var.vpc_id
+
+  egress {
+    cidr_blocks = var.default_egress_cidr_blocks
+    description = "Allow all outbound traffic"
+    from_port   = 0
+    protocol    = "-1"
+    to_port     = 0
+  }
 
   ingress {
     description     = "PostgreSQL from RDS Proxy"
     from_port       = var.db_port
-    to_port         = var.db_port
     protocol        = "tcp"
     security_groups = [aws_security_group.rds_proxy.id]
-  }
-
-  egress {
-    description = "Allow all outbound traffic"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "${var.project_name}-${var.environment}-rds-sg"
+    to_port         = var.db_port
   }
 }
 
-# ElastiCache Security Group
 resource "aws_security_group" "redis" {
-  name        = "${var.project_name}-${var.environment}-redis-sg"
   description = "Security group for ElastiCache Redis"
-  vpc_id      = var.vpc_id
+  name        = "${var.project_name}-${var.environment}-redis-sg"
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-${var.environment}-redis-sg"
+  })
+  vpc_id = var.vpc_id
+
+  egress {
+    cidr_blocks = var.default_egress_cidr_blocks
+    description = "Allow all outbound traffic"
+    from_port   = 0
+    protocol    = "-1"
+    to_port     = 0
+  }
 
   ingress {
     description     = "Redis from Lambda"
     from_port       = var.redis_port
-    to_port         = var.redis_port
     protocol        = "tcp"
     security_groups = [aws_security_group.lambda.id]
-  }
-
-  egress {
-    description = "Allow all outbound traffic"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "${var.project_name}-${var.environment}-redis-sg"
+    to_port         = var.redis_port
   }
 }
