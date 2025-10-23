@@ -13,27 +13,22 @@ terraform {
   }
 }
 
-# S3 Bucket for Zappa Deployments
 resource "aws_s3_bucket" "zappa" { # NOSONAR
-  bucket = var.zappa_s3_bucket
-
-  tags = {
+  bucket        = var.zappa_s3_bucket
+  force_destroy = var.force_destroy_bucket
+  tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-zappa-deployments"
-  }
-  force_destroy = true
+  })
 }
 
-# Block public access
 resource "aws_s3_bucket_public_access_block" "zappa" {
-  bucket = aws_s3_bucket.zappa.id
-
   block_public_acls       = true
   block_public_policy     = true
+  bucket                  = aws_s3_bucket.zappa.id
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
 
-# Enable versioning
 resource "aws_s3_bucket_versioning" "zappa" {
   bucket = aws_s3_bucket.zappa.id
 
@@ -42,7 +37,6 @@ resource "aws_s3_bucket_versioning" "zappa" {
   }
 }
 
-# Server-side encryption
 resource "aws_s3_bucket_server_side_encryption_configuration" "zappa" {
   bucket = aws_s3_bucket.zappa.id
 
@@ -53,43 +47,39 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "zappa" {
   }
 }
 
-# Lifecycle rule to clean up old versions
 resource "aws_s3_bucket_lifecycle_configuration" "zappa" {
   bucket = aws_s3_bucket.zappa.id
 
   rule {
-    id     = "delete-old-versions"
-    status = "Enabled"
-
-    noncurrent_version_expiration {
-      noncurrent_days = 30
-    }
-
     abort_incomplete_multipart_upload {
-      days_after_initiation = 7
+      days_after_initiation = var.abort_incomplete_multipart_upload_days
     }
+    id = "delete-old-versions"
+    noncurrent_version_expiration {
+      noncurrent_days = var.noncurrent_version_expiration_days
+    }
+    status = "Enabled"
   }
 }
 
-# Enforce HTTPS-only access
 data "aws_iam_policy_document" "zappa" {
   statement {
-    sid    = "EnforceTls"
-    effect = "Deny"
-    principals {
-      type        = "*"
-      identifiers = ["*"]
-    }
     actions = ["s3:*"]
-    resources = [
-      aws_s3_bucket.zappa.arn,
-      "${aws_s3_bucket.zappa.arn}/*",
-    ]
     condition {
       test     = "Bool"
       variable = "aws:SecureTransport"
       values   = ["false"]
     }
+    effect = "Deny"
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+    resources = [
+      aws_s3_bucket.zappa.arn,
+      "${aws_s3_bucket.zappa.arn}/*",
+    ]
+    sid = "EnforceTls"
   }
 }
 

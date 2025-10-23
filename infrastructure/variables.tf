@@ -136,7 +136,11 @@ variable "db_backup_retention_period" {
   default     = 7
 }
 
-# Environment Variables (temporary)
+variable "force_destroy_bucket" {
+  description = "If true, deletes all objects from the bucket when the bucket is destroyed."
+  type        = bool
+  default     = false
+}
 variable "django_algolia_application_id" {
   type        = string
   description = "Algolia application ID."

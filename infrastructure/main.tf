@@ -67,9 +67,11 @@ module "security" {
 module "storage" {
   source = "./modules/storage"
 
-  zappa_s3_bucket = var.zappa_s3_bucket
-  project_name    = var.project_name
-  environment     = var.environment
+  common_tags          = local.common_tags
+  environment          = var.environment
+  force_destroy_bucket = var.force_destroy_bucket
+  project_name         = var.project_name
+  zappa_s3_bucket      = var.zappa_s3_bucket
 }
 
 module "database" {
