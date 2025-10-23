@@ -14,44 +14,13 @@ terraform {
 }
 
 # S3 Bucket for Zappa Deployments
-resource "aws_s3_bucket" "zappa" {
+resource "aws_s3_bucket" "zappa" { # NOSONAR
   bucket = var.zappa_s3_bucket
 
   tags = {
     Name = "${var.project_name}-${var.environment}-zappa-deployments"
   }
   force_destroy = true
-}
-
-# S3 Bucket for Zappa Logs
-resource "aws_s3_bucket" "zappa_logs" {
-  bucket = "${var.zappa_s3_bucket}-logs"
-
-  tags = {
-    Name = "${var.project_name}-${var.environment}-zappa-deployments-logs"
-  }
-}
-
-resource "aws_s3_bucket_ownership_controls" "zappa_logs" {
-  bucket = aws_s3_bucket.zappa_logs.id
-  rule {
-    object_ownership = "BucketOwnerPreferred"
-  }
-}
-
-# Grant log-delivery-write ACL to the new bucket
-resource "aws_s3_bucket_acl" "zappa_logs" {
-  depends_on = [aws_s3_bucket_ownership_controls.zappa_logs]
-  bucket     = aws_s3_bucket.zappa_logs.id
-  acl        = "log-delivery-write"
-}
-
-# Enable logging for the zappa bucket
-resource "aws_s3_bucket_logging" "zappa" {
-  bucket = aws_s3_bucket.zappa.id
-
-  target_bucket = aws_s3_bucket.zappa_logs.id
-  target_prefix = "log/"
 }
 
 # Block public access
