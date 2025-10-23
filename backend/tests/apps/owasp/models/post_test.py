@@ -96,12 +96,37 @@ class TestPostModel:
 
     @patch("apps.owasp.models.post.Post.objects.filter")
     def test_recent_posts_ordering(self, mock_filter):
-        """Test recent_posts uses correct ordering and filters future posts."""
+        """Test recent_posts uses correct ordering."""
         mock_queryset = Mock()
-        mock_filter.return_value.order_by.return_value = mock_queryset
+        mock_filtered = Mock()
+        mock_filtered.order_by.return_value = mock_queryset
+        mock_filter.return_value = mock_filtered
+
         result = Post.recent_posts()
-        mock_filter.assert_called_once()
-        _, kwargs = mock_filter.call_args
-        assert "published_at__lte" in kwargs
-        mock_filter.return_value.order_by.assert_called_once_with("-published_at")
+        mock_filtered.order_by.assert_called_once_with("-published_at")
+
         assert result == mock_queryset
+
+    @patch("apps.owasp.models.post.timezone.now")
+    @patch("apps.owasp.models.post.Post.objects.filter")
+    def test_recent_posts_filters_by_published_date(self, mock_filter, mock_now):
+        """Test recent_posts returns only posts published before current time."""
+        current_time = datetime(2025, 6, 15, 12, 0, 0, tzinfo=UTC)
+        mock_now.return_value = current_time
+
+        past_post = Mock(
+            title="Past Post",
+            url="https://example.com/past",
+            published_at=datetime(2025, 6, 10, 12, 0, 0, tzinfo=UTC),
+        )
+
+        mock_queryset = Mock()
+        mock_queryset.order_by.return_value = [past_post]
+        mock_filter.return_value = mock_queryset
+
+        result = Post.recent_posts()
+
+        mock_filter.assert_called_once_with(published_at__lte=current_time)
+        mock_queryset.order_by.assert_called_once_with("-published_at")
+
+        assert result == [past_post]
