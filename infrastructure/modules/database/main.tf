@@ -13,80 +13,70 @@ terraform {
   }
 }
 
-# DB Subnet Group
+locals {
+  db_password          = local.generate_db_password ? random_password.db_password[0].result : var.db_password
+  generate_db_password = var.db_password == null || var.db_password == ""
+}
+
 resource "aws_db_subnet_group" "main" {
   name       = "${var.project_name}-${var.environment}-db-subnet-group"
   subnet_ids = var.db_subnet_ids
-
-  tags = {
+  tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-db-subnet-group"
-  }
+  })
 }
 
-# Random password for RDS (if not provided)
 resource "random_password" "db_password" {
-  count = var.db_password == null || var.db_password == "" ? 1 : 0
-
-  length  = 32
-  special = true
+  count  = local.generate_db_password ? 1 : 0
+  length = 32
   # Avoid special characters that might cause issues
   override_special = "!#$%&*()-_=+[]{}<>:?"
+  special          = true
 }
 
-# RDS PostgreSQL Instance
 resource "aws_db_instance" "main" {
-  identifier        = lower("${var.project_name}-${var.environment}-db")
-  engine            = "postgres"
-  engine_version    = var.db_engine_version
-  instance_class    = var.db_instance_class
-  allocated_storage = var.db_allocated_storage
-  storage_type      = var.db_storage_type
-  storage_encrypted = true
-
-  db_name  = var.db_name
-  username = var.db_username
-  password = var.db_password != null && var.db_password != "" ? var.db_password : random_password.db_password[0].result
-
-  db_subnet_group_name   = aws_db_subnet_group.main.name
-  vpc_security_group_ids = var.security_group_ids
-  publicly_accessible    = false
-
-  backup_retention_period = var.db_backup_retention_period
-  backup_window           = "03:00-04:00"
-  maintenance_window      = "mon:04:00-mon:05:00"
-
-  # Enable automated backups
-  skip_final_snapshot   = true
-  copy_tags_to_snapshot = true
-
-  # Performance Insights
-  enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
-
-  tags = {
+  allocated_storage               = var.db_allocated_storage
+  backup_retention_period         = var.db_backup_retention_period
+  backup_window                   = var.db_backup_window
+  copy_tags_to_snapshot           = var.db_copy_tags_to_snapshot
+  db_name                         = var.db_name
+  db_subnet_group_name            = aws_db_subnet_group.main.name
+  enabled_cloudwatch_logs_exports = var.db_enabled_cloudwatch_logs_exports
+  engine                          = "postgres"
+  engine_version                  = var.db_engine_version
+  identifier                      = lower("${var.project_name}-${var.environment}-db")
+  instance_class                  = var.db_instance_class
+  maintenance_window              = var.db_maintenance_window
+  password                        = local.db_password
+  publicly_accessible             = false
+  skip_final_snapshot             = var.db_skip_final_snapshot
+  storage_encrypted               = true
+  storage_type                    = var.db_storage_type
+  tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-postgres"
-  }
+  })
+  username               = var.db_username
+  vpc_security_group_ids = var.security_group_ids
 }
 
-# Secrets Manager Secret for DB Credentials
 resource "aws_secretsmanager_secret" "db_credentials" {
-  name = "${var.project_name}-${var.environment}-db-credentials"
-  tags = {
+  description             = "Stores the credentials for the RDS database."
+  name                    = "${var.project_name}-${var.environment}-db-credentials"
+  recovery_window_in_days = var.secret_recovery_window_in_days
+  tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-db-credentials"
-  }
-  recovery_window_in_days = 0
+  })
 }
 
 resource "aws_secretsmanager_secret_version" "db_credentials" {
   secret_id = aws_secretsmanager_secret.db_credentials.id
   secret_string = jsonencode({
     username = var.db_username
-    password = var.db_password != null && var.db_password != "" ? var.db_password : random_password.db_password[0].result
+    password = local.db_password
   })
 }
 
-# IAM Role for RDS Proxy
 resource "aws_iam_role" "rds_proxy" {
-  name = "${var.project_name}-${var.environment}-rds-proxy-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -99,14 +89,14 @@ resource "aws_iam_role" "rds_proxy" {
       }
     ]
   })
-  tags = {
+  name = "${var.project_name}-${var.environment}-rds-proxy-role"
+  tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-rds-proxy-role"
-  }
+  })
 }
 
 resource "aws_iam_role_policy" "rds_proxy" {
   name = "${var.project_name}-${var.environment}-rds-proxy-policy"
-  role = aws_iam_role.rds_proxy.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -119,43 +109,38 @@ resource "aws_iam_role_policy" "rds_proxy" {
       }
     ]
   })
+  role = aws_iam_role.rds_proxy.id
 }
 
-# RDS Proxy
 resource "aws_db_proxy" "main" {
-  name                   = "${var.project_name}-${var.environment}-proxy"
-  debug_logging          = false
-  engine_family          = "POSTGRESQL"
-  idle_client_timeout    = 1800
-  require_tls            = true
-  role_arn               = aws_iam_role.rds_proxy.arn
-  vpc_security_group_ids = var.proxy_security_group_ids
-  vpc_subnet_ids         = var.db_subnet_ids
-
   auth {
     auth_scheme = "SECRETS"
     description = "Database credentials"
     iam_auth    = "DISABLED"
     secret_arn  = aws_secretsmanager_secret.db_credentials.arn
   }
-
-  tags = {
+  debug_logging       = false
+  engine_family       = "POSTGRESQL"
+  idle_client_timeout = 1800
+  name                = "${var.project_name}-${var.environment}-proxy"
+  require_tls         = true
+  role_arn            = aws_iam_role.rds_proxy.arn
+  tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-rds-proxy"
-  }
+  })
+  vpc_security_group_ids = var.proxy_security_group_ids
+  vpc_subnet_ids         = var.db_subnet_ids
 }
 
-# RDS Proxy Default Target Group
 resource "aws_db_proxy_default_target_group" "main" {
-  db_proxy_name = aws_db_proxy.main.name
-
   connection_pool_config {
     connection_borrow_timeout    = 120
     max_connections_percent      = 100
     max_idle_connections_percent = 50
   }
+  db_proxy_name = aws_db_proxy.main.name
 }
 
-# RDS Proxy Target
 resource "aws_db_proxy_target" "main" {
   db_instance_identifier = aws_db_instance.main.identifier
   db_proxy_name          = aws_db_proxy.main.name
