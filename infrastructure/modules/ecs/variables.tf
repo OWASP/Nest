@@ -61,13 +61,13 @@ variable "load_data_task_memory" {
 }
 
 variable "migrate_task_cpu" {
-  description = "The CPU for the load-data task"
+  description = "The CPU for the migrate task"
   type        = string
   default     = "256"
 }
 
 variable "migrate_task_memory" {
-  description = "The memory for the load-data task"
+  description = "The memory for the migrate task"
   type        = string
   default     = "2048"
 }
@@ -91,7 +91,7 @@ variable "sync_data_task_cpu" {
 variable "sync_data_task_memory" {
   description = "The memory for the sync-data task"
   type        = string
-  default     = "512"
+  default     = "2048"
 }
 
 variable "update_project_health_metrics_task_cpu" {
@@ -103,7 +103,7 @@ variable "update_project_health_metrics_task_cpu" {
 variable "update_project_health_metrics_task_memory" {
   description = "The memory for the update-project-health-metrics task"
   type        = string
-  default     = "512"
+  default     = "2048"
 }
 
 variable "update_project_health_scores_task_cpu" {
@@ -115,5 +115,5 @@ variable "update_project_health_scores_task_cpu" {
 variable "update_project_health_scores_task_memory" {
   description = "The memory for the update-project-health-scores task"
   type        = string
-  default     = "512"
+  default     = "2048"
 }
