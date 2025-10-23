@@ -13,118 +13,92 @@ terraform {
   }
 }
 
-# VPC
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
   enable_dns_support   = true
-
-  tags = {
+  tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-vpc"
-  }
+  })
 }
 
-# Internet Gateway
 resource "aws_internet_gateway" "main" {
-  vpc_id = aws_vpc.main.id
-
-  tags = {
+  tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-igw"
-  }
+  })
+  vpc_id = aws_vpc.main.id
 }
 
-# Public Subnets
 resource "aws_subnet" "public" {
-  count = length(var.public_subnet_cidrs)
-
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = var.public_subnet_cidrs[count.index]
   availability_zone       = var.availability_zones[count.index]
+  cidr_block              = var.public_subnet_cidrs[count.index]
+  count                   = length(var.public_subnet_cidrs)
   map_public_ip_on_launch = true
-
-  tags = {
+  tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-public-${var.availability_zones[count.index]}"
     Type = "Public"
-  }
+  })
+  vpc_id = aws_vpc.main.id
 }
 
-# Private Subnets
 resource "aws_subnet" "private" {
-  count = length(var.private_subnet_cidrs)
-
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = var.private_subnet_cidrs[count.index]
   availability_zone = var.availability_zones[count.index]
-
-  tags = {
+  cidr_block        = var.private_subnet_cidrs[count.index]
+  count             = length(var.private_subnet_cidrs)
+  tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-private-${var.availability_zones[count.index]}"
     Type = "Private"
-  }
+  })
+  vpc_id = aws_vpc.main.id
 }
 
-# Elastic IP for NAT Gateway
 resource "aws_eip" "nat" {
-  domain = "vpc"
-
-  tags = {
-    Name = "${var.project_name}-${var.environment}-nat-eip"
-  }
-
   depends_on = [aws_internet_gateway.main]
+  domain     = "vpc"
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-${var.environment}-nat-eip"
+  })
 }
 
-# NAT Gateway (in first public subnet)
 resource "aws_nat_gateway" "main" {
   allocation_id = aws_eip.nat.id
+  depends_on    = [aws_internet_gateway.main]
   subnet_id     = aws_subnet.public[0].id
-
-  tags = {
+  tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-nat"
-  }
-
-  depends_on = [aws_internet_gateway.main]
+  })
 }
 
-# Public Route Table
 resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.main.id
-
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.main.id
   }
-
-  tags = {
+  tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-public-rt"
-  }
+  })
+  vpc_id = aws_vpc.main.id
 }
 
-# Private Route Table
 resource "aws_route_table" "private" {
-  vpc_id = aws_vpc.main.id
-
   route {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.main.id
   }
-
-  tags = {
+  tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-private-rt"
-  }
+  })
+  vpc_id = aws_vpc.main.id
 }
 
-# Associate public subnets with public route table
 resource "aws_route_table_association" "public" {
-  count = length(aws_subnet.public)
-
-  subnet_id      = aws_subnet.public[count.index].id
+  count          = length(aws_subnet.public)
   route_table_id = aws_route_table.public.id
+  subnet_id      = aws_subnet.public[count.index].id
 }
 
-# Associate private subnets with private route table
 resource "aws_route_table_association" "private" {
-  count = length(aws_subnet.private)
-
-  subnet_id      = aws_subnet.private[count.index].id
+  count          = length(aws_subnet.private)
   route_table_id = aws_route_table.private.id
+  subnet_id      = aws_subnet.private[count.index].id
 }

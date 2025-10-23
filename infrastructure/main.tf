@@ -44,12 +44,13 @@ locals {
 module "networking" {
   source = "./modules/networking"
 
-  vpc_cidr             = var.vpc_cidr
-  public_subnet_cidrs  = var.public_subnet_cidrs
-  private_subnet_cidrs = var.private_subnet_cidrs
   availability_zones   = var.availability_zones
-  project_name         = var.project_name
+  common_tags          = local.common_tags
   environment          = var.environment
+  private_subnet_cidrs = var.private_subnet_cidrs
+  project_name         = var.project_name
+  public_subnet_cidrs  = var.public_subnet_cidrs
+  vpc_cidr             = var.vpc_cidr
 }
 
 module "security" {

@@ -3,6 +3,12 @@ variable "availability_zones" {
   type        = list(string)
 }
 
+variable "common_tags" {
+  description = "A map of common tags to apply to all resources."
+  type        = map(string)
+  default     = {}
+}
+
 variable "environment" {
   description = "The environment (e.g., staging, production)"
   type        = string
