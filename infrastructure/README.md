@@ -1,57 +1,35 @@
 # Infrastructure
 
-This document provides instructions on how to manage the infrastructure for this project using Terraform and Zappa.
+This document provides instructions on how to setup the infrastructure for this project.
 
-## Terraform
+## Prerequisites
+Ensure you have the following setup/installed:
 
-### Prerequisites
-
-- Terraform
+- Setup Project: [CONTRIBUTING.md](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md)
+- Terraform: [Terraform Documentation](https://developer.hashicorp.com/terraform/docs)
 - An AWS account with credentials configured locally.
 
-### Usage
+## Setting up the infrastructure
+Follow these steps to set up the infrastructure:
 
-1.  **Initialize Terraform:**
+1. **Change the Directory**:
 
-    ```bash
-    terraform init
-    ```
+   - Change the directory using the following command:
 
-2.  **Plan the changes:**
+     ```bash
+     cd infrastructure/
+     ```
 
-    ```bash
-    terraform plan
-    ```
-
-3.  **Apply the changes:**
-
-    ```bash
-    terraform apply
-    ```
-
-### Variables
+*Note*: The following steps assume the current working directory is `infrastructure/`
 
 You can override the default values by creating a `terraform.tfvars` file in the `infrastructure/` directory.
 
 # TODO: Provide an example terraform.tfvars with important vars
 
 
-### Outputs
+## Setting up Zappa Deployment
 
-Get the output values using the `terraform output` command. These outputs will be used for Zappa configuration.
-
-
-```bash
-terraform output
-```
-
-```bash
-terraform output -raw db_password redis_auth_token
-```
-
-## Zappa Deployment
-
-The Django backend deployment is managed by Zappa, this also includes the API Gateway, IAM roles, and Lambda Function provision.
+The Django backend deployment is managed by Zappa. This includes the API Gateway, IAM roles, and Lambda Function provision.
 
 ### Install poetry dependencies
 
