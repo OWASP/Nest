@@ -3,9 +3,9 @@ import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState } from 'react'
 import type { RepositoriesCardProps, RepositoryCardProps } from 'types/project'
-import ArchivedBadge from 'components/ArchivedBadge'
 import InfoItem from 'components/InfoItem'
 import ShowMoreButton from 'components/ShowMoreButton'
+import StatusBadge from 'components/StatusBadge'
 import { TruncatedText } from 'components/TruncatedText'
 
 const RepositoriesCard: React.FC<RepositoriesCardProps> = ({
@@ -48,7 +48,7 @@ const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
         </button>
         {details.isArchived && (
           <div className="flex-shrink-0">
-            <ArchivedBadge size="sm" showIcon={false} />
+            <StatusBadge status="archived" size="sm" showIcon={false} />
           </div>
         )}
       </div>

@@ -56,6 +56,34 @@ class UserNode:
         return self.idx_created_at
 
     @strawberry.field
+    def first_owasp_contribution_at(self) -> float | None:
+        """Resolve first OWASP contribution date."""
+        if hasattr(self, "owasp_profile") and self.owasp_profile.first_contribution_at:
+            return self.owasp_profile.first_contribution_at.timestamp()
+        return None
+
+    @strawberry.field
+    def is_owasp_board_member(self) -> bool:
+        """Resolve if member is currently on OWASP Board of Directors."""
+        if hasattr(self, "owasp_profile"):
+            return self.owasp_profile.is_owasp_board_member
+        return False
+
+    @strawberry.field
+    def is_former_owasp_staff(self) -> bool:
+        """Resolve if member is a former OWASP staff member."""
+        if hasattr(self, "owasp_profile"):
+            return self.owasp_profile.is_former_owasp_staff
+        return False
+
+    @strawberry.field
+    def is_gsoc_mentor(self) -> bool:
+        """Resolve if member is a Google Summer of Code mentor."""
+        if hasattr(self, "owasp_profile"):
+            return self.owasp_profile.is_gsoc_mentor
+        return False
+
+    @strawberry.field
     def issues_count(self) -> int:
         """Resolve issues count."""
         return self.idx_issues_count
