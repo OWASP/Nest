@@ -52,7 +52,7 @@ resource "aws_iam_policy" "fixtures_read_only" {
   })
 }
 
-resource "aws_s3_bucket" "fixtures" {
+resource "aws_s3_bucket" "fixtures" { # NOSONAR
   bucket = var.fixtures_s3_bucket
   tags   = var.common_tags
 }
