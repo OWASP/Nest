@@ -122,12 +122,12 @@ The Django backend deployment is managed by Zappa. This includes the API Gateway
      cat zappa.settings.example.json > zappa.settings.json
      ```
 
-3.  **Populate Settings File**:
+4.  **Populate Settings File**:
 
    - Replace all `${...}` variables in `zappa_settings.json` with appropriate output variables.
 
 
-4.  **Deploy**:
+5.  **Deploy**:
 
     ```bash
     zappa deploy staging
@@ -191,20 +191,21 @@ Migrate and load data into the new database.
 
 ## Cleaning Up
 
-   - To delete the deployment use the following command:
+- To delete the deployment use the following command:
 
-     ```bash
-     zappa undeploy staging
-     ```
+  ```bash
+  zappa undeploy staging
+  ```
 
-   - To destroy Terraform infrastructure:
+- To destroy Terraform infrastructure:
 
-     ```bash
-     terraform destroy
-     ```
+  ```bash
+  terraform destroy
+  ```
 
 ## Helpful Commands
-To update a Zappa `staging` deployment run:
-```bash
-zappa update staging
-```
+- To update a Zappa `staging` deployment run:
+
+  ```bash
+  zappa update staging
+  ```
