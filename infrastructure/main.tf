@@ -19,6 +19,26 @@ locals {
     ManagedBy   = "Terraform"
     Project     = var.project_name
   }
+  django_environment_variables = {
+    DJANGO_ALGOLIA_APPLICATION_ID = var.django_algolia_application_id
+    DJANGO_ALGOLIA_WRITE_API_KEY  = var.django_algolia_write_api_key
+    DJANGO_ALLOWED_HOSTS          = var.django_allowed_hosts
+    DJANGO_AWS_ACCESS_KEY_ID      = var.django_aws_access_key_id
+    DJANGO_AWS_SECRET_ACCESS_KEY  = var.django_aws_secret_access_key
+    DJANGO_CONFIGURATION          = var.django_configuration
+    DJANGO_DB_HOST                = var.django_db_host
+    DJANGO_DB_NAME                = var.django_db_name
+    DJANGO_DB_USER                = var.django_db_user
+    DJANGO_DB_PORT                = var.django_db_port
+    DJANGO_DB_PASSWORD            = var.django_db_password
+    DJANGO_OPEN_AI_SECRET_KEY     = var.django_open_ai_secret_key
+    DJANGO_REDIS_HOST             = var.django_redis_host
+    DJANGO_REDIS_PASSWORD         = var.django_redis_password
+    DJANGO_SECRET_KEY             = var.django_secret_key
+    DJANGO_SENTRY_DSN             = var.django_sentry_dsn
+    DJANGO_SLACK_BOT_TOKEN        = var.django_slack_bot_token
+    DJANGO_SLACK_SIGNING_SECRET   = var.django_slack_signing_secret
+  }
 }
 
 module "networking" {
@@ -51,6 +71,8 @@ module "storage" {
 }
 
 module "database" {
+  source = "./modules/database"
+
   common_tags                = local.common_tags
   db_allocated_storage       = var.db_allocated_storage
   db_backup_retention_period = var.db_backup_retention_period
@@ -65,7 +87,6 @@ module "database" {
   project_name               = var.project_name
   proxy_security_group_ids   = [module.security.rds_proxy_sg_id]
   security_group_ids         = [module.security.rds_sg_id]
-  source                     = "./modules/database"
 }
 
 module "cache" {
@@ -86,27 +107,11 @@ module "cache" {
 module "ecs" {
   source = "./modules/ecs"
 
-  project_name                  = var.project_name
-  environment                   = var.environment
-  aws_region                    = var.aws_region
-  private_subnet_ids            = module.networking.private_subnet_ids
-  lambda_sg_id                  = module.security.lambda_sg_id
-  django_algolia_application_id = var.django_algolia_application_id
-  django_algolia_write_api_key  = var.django_algolia_write_api_key
-  django_allowed_hosts          = var.django_allowed_hosts
-  django_aws_access_key_id      = var.django_aws_access_key_id
-  django_aws_secret_access_key  = var.django_aws_secret_access_key
-  django_configuration          = var.django_configuration
-  django_db_host                = var.django_db_host
-  django_db_name                = var.django_db_name
-  django_db_user                = var.django_db_user
-  django_db_port                = var.django_db_port
-  django_db_password            = var.django_db_password
-  django_open_ai_secret_key     = var.django_open_ai_secret_key
-  django_redis_host             = var.django_redis_host
-  django_redis_password         = var.django_redis_password
-  django_secret_key             = var.django_secret_key
-  django_sentry_dsn             = var.django_sentry_dsn
-  django_slack_bot_token        = var.django_slack_bot_token
-  django_slack_signing_secret   = var.django_slack_signing_secret
+  aws_region                   = var.aws_region
+  common_tags                  = local.common_tags
+  django_environment_variables = local.django_environment_variables
+  environment                  = var.environment
+  lambda_sg_id                 = module.security.lambda_sg_id
+  private_subnet_ids           = module.networking.private_subnet_ids
+  project_name                 = var.project_name
 }
