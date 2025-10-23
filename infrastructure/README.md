@@ -66,7 +66,7 @@ Follow these steps to set up the infrastructure:
           "subnet-22222222222222222",
      ]
      redis_auth_token = <sensitive>
-     redis_endpoint = "master.owasp-nest-staging-cache.aaaaaa.aps1.cache.amazonaws.com"
+     redis_endpoint = "master.owasp-nest-staging-cache.aaaaaa.region1.cache.amazonaws.com"
      zappa_s3_bucket = "owasp-nest-zappa-deployments"
      ```
      ```bash

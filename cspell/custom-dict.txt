@@ -54,6 +54,7 @@ csrftoken
 cva
 demojize
 dismissable
+dkr
 dsn
 env
 facebookexternalhit
