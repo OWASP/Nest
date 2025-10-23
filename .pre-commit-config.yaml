@@ -14,6 +14,8 @@ repos:
     hooks:
       - id: terraform_fmt
         files: ^infrastructure/.*\.tf$
+      - id: terraform_validate
+        files: ^infrastructure/.*\.tf$
       - id: terraform_tflint
         files: ^infrastructure/.*\.tf$
 
