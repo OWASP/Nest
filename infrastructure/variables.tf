@@ -62,7 +62,7 @@ variable "db_storage_type" {
 variable "db_username" {
   description = "The username for the RDS database"
   type        = string
-  default     = "owasp_nest_user"
+  default     = "owasp_nest_db_user"
 }
 
 variable "django_algolia_application_id" {

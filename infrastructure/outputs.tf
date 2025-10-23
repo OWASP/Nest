@@ -34,3 +34,8 @@ output "ecr_repository_url" {
   description = "The URL of the ECR repository"
   value       = module.ecs.ecr_repository_url
 }
+
+output "zappa_s3_bucket" {
+  description = "The name of the S3 bucket for Zappa deployments"
+  value       = module.storage.zappa_s3_bucket.bucket
+}

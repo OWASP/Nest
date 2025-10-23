@@ -28,11 +28,11 @@
     "s3_bucket": "${ZAPPA_S3_BUCKET}",
     "slim_handler": true,
     "vpc_config": {
-      "SecurityGroupIds": ["${AWS_VPC_SECURITY_GROUP}"],
+      "SecurityGroupIds": ["${AWS_LAMBDA_VPC_SECURITY_GROUP_ID}"],
       "SubnetIds": [
-        "${AWS_VPC_SUBNET_A}",
-        "${AWS_VPC_SUBNET_B}",
-        "${AWS_VPC_SUBNET_C}"
+        "${AWS_PRIVATE_SUBNET_A}",
+        "${AWS_PRIVATE_SUBNET_B}",
+        "${AWS_PRIVATE_SUBNET_C}"
       ]
     }
   }
