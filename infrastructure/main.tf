@@ -75,3 +75,31 @@ module "cache" {
   project_name          = var.project_name
   environment           = var.environment
 }
+
+module "ecs" {
+  source = "./modules/ecs"
+
+  project_name                  = var.project_name
+  environment                   = var.environment
+  aws_region                    = var.aws_region
+  private_subnet_ids            = module.networking.private_subnet_ids
+  lambda_sg_id                  = module.security.lambda_sg_id
+  django_algolia_application_id = var.django_algolia_application_id
+  django_algolia_write_api_key  = var.django_algolia_write_api_key
+  django_allowed_hosts          = var.django_allowed_hosts
+  django_aws_access_key_id      = var.django_aws_access_key_id
+  django_aws_secret_access_key  = var.django_aws_secret_access_key
+  django_configuration          = var.django_configuration
+  django_db_host                = var.django_db_host
+  django_db_name                = var.django_db_name
+  django_db_user                = var.django_db_user
+  django_db_port                = var.django_db_port
+  django_db_password            = var.django_db_password
+  django_open_ai_secret_key     = var.django_open_ai_secret_key
+  django_redis_host             = var.django_redis_host
+  django_redis_password         = var.django_redis_password
+  django_secret_key             = var.django_secret_key
+  django_sentry_dsn             = var.django_sentry_dsn
+  django_slack_bot_token        = var.django_slack_bot_token
+  django_slack_signing_secret   = var.django_slack_signing_secret
+}
