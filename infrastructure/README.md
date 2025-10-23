@@ -194,7 +194,7 @@ Migrate and load data into the new database.
    - To delete the deployment use the following command:
 
      ```bash
-     zappa undeploy local
+     zappa undeploy staging
      ```
 
    - To destroy Terraform infrastructure:
