@@ -21,6 +21,7 @@ class MilestoneBase(Schema):
     """Base schema for Milestone (used in list endpoints)."""
 
     created_at: datetime
+    number: int
     state: GenericIssueModel.State
     title: str
     updated_at: datetime
@@ -85,7 +86,6 @@ def list_milestones(
         milestones = milestones.filter(
             repository__organization__login__iexact=filters.organization
         )
-
     if filters.repository:
         milestones = milestones.filter(repository__name__iexact=filters.repository)
     if filters.state:
