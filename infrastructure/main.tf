@@ -13,6 +13,14 @@ terraform {
   }
 }
 
+locals {
+  common_tags = {
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+    Project     = var.project_name
+  }
+}
+
 module "networking" {
   source = "./modules/networking"
 
@@ -42,8 +50,6 @@ module "storage" {
   environment     = var.environment
 }
 
-
-
 module "database" {
   source = "./modules/database"
 
@@ -65,15 +71,16 @@ module "database" {
 module "cache" {
   source = "./modules/cache"
 
+  common_tags           = local.common_tags
+  environment           = var.environment
+  project_name          = var.project_name
+  redis_auth_token      = var.redis_auth_token
   redis_engine_version  = var.redis_engine_version
   redis_node_type       = var.redis_node_type
   redis_num_cache_nodes = var.redis_num_cache_nodes
   redis_port            = var.redis_port
-  redis_auth_token      = var.redis_auth_token
-  subnet_ids            = module.networking.private_subnet_ids
   security_group_ids    = [module.security.redis_sg_id]
-  project_name          = var.project_name
-  environment           = var.environment
+  subnet_ids            = module.networking.private_subnet_ids
 }
 
 module "ecs" {

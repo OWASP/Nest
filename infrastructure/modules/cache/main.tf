@@ -13,61 +13,49 @@ terraform {
   }
 }
 
-# ElastiCache Subnet Group
+locals {
+  generate_redis_auth_token = var.redis_auth_token == null || var.redis_auth_token == ""
+  parameter_group_name      = "default.redis${local.redis_major_version}"
+  redis_auth_token          = local.generate_redis_auth_token ? random_password.redis_auth_token[0].result : var.redis_auth_token
+  redis_major_version       = split(".", var.redis_engine_version)[0]
+}
+
 resource "aws_elasticache_subnet_group" "main" {
   name       = "${var.project_name}-${var.environment}-cache-subnet-group"
   subnet_ids = var.subnet_ids
-
-  tags = {
+  tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-cache-subnet-group"
-  }
+  })
 }
 
-# Random auth token for Redis (if not provided)
 resource "random_password" "redis_auth_token" {
-  count = var.redis_auth_token == null || var.redis_auth_token == "" ? 1 : 0
-
-  length  = 32
-  special = true
-  # Redis auth token has specific requirements
+  count  = local.generate_redis_auth_token ? 1 : 0
+  length = 32
+  # Redis auth token has specific requirements for special characters.
   override_special = "!&#$^<>-"
+  special          = true
 }
 
-# ElastiCache Redis Replication Group
 resource "aws_elasticache_replication_group" "main" {
-  replication_group_id = "${var.project_name}-${var.environment}-cache"
-  description          = "${var.project_name} ${var.environment} Redis cache"
-
-  engine               = "redis"
-  engine_version       = var.redis_engine_version
-  node_type            = var.redis_node_type
-  port                 = var.redis_port
-  parameter_group_name = "default.redis${split(".", var.redis_engine_version)[0]}"
-
-  # Cluster configuration
-  num_cache_clusters = var.redis_num_cache_nodes
-
-  # Network configuration
-  subnet_group_name  = aws_elasticache_subnet_group.main.name
-  security_group_ids = var.security_group_ids
-
-  # Security
   at_rest_encryption_enabled = true
-  transit_encryption_enabled = true
-  auth_token                 = var.redis_auth_token != null && var.redis_auth_token != "" ? var.redis_auth_token : random_password.redis_auth_token[0].result
-
-  # Maintenance and backups
-  snapshot_retention_limit = 5
-  snapshot_window          = "03:00-05:00"
-  maintenance_window       = "mon:05:00-mon:07:00"
-
-  # Automatic failover (requires at least 2 nodes)
+  auth_token                 = local.redis_auth_token
+  auto_minor_version_upgrade = var.auto_minor_version_upgrade
   automatic_failover_enabled = var.redis_num_cache_nodes > 1
-
-  # Enable automatic minor version upgrades
-  auto_minor_version_upgrade = true
-
-  tags = {
+  description                = "${var.project_name} ${var.environment} Redis cache"
+  engine                     = "redis"
+  engine_version             = var.redis_engine_version
+  maintenance_window         = var.maintenance_window
+  node_type                  = var.redis_node_type
+  num_cache_clusters         = var.redis_num_cache_nodes
+  parameter_group_name       = local.parameter_group_name
+  port                       = var.redis_port
+  replication_group_id       = "${var.project_name}-${var.environment}-cache"
+  security_group_ids         = var.security_group_ids
+  snapshot_retention_limit   = var.snapshot_retention_limit
+  snapshot_window            = var.snapshot_window
+  subnet_group_name          = aws_elasticache_subnet_group.main.name
+  tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-redis"
-  }
+  })
+  transit_encryption_enabled = true
 }
