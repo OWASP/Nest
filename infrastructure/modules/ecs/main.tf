@@ -159,8 +159,17 @@ module "migrate_task" {
 module "load_data_task" {
   source = "./modules/task"
 
-  aws_region                   = var.aws_region
-  command                      = ["/bin/sh", "-c", "aws s3 cp s3://${var.fixtures_s3_bucket}/nest.json.gz /data/nest.json.gz && python manage.py load_data --file /data/nest.json.gz"]
+  aws_region = var.aws_region
+  command = [
+    "/bin/sh",
+    "-c",
+    <<-EOT
+    set -e
+    pip install --quiet awscli
+    aws s3 cp s3://${var.fixtures_s3_bucket}/nest.json.gz /tmp/nest.json.gz
+    python manage.py load_data --file /tmp/nest.json.gz
+    EOT
+  ]
   common_tags                  = var.common_tags
   container_environment        = var.django_environment_variables
   cpu                          = var.load_data_task_cpu
