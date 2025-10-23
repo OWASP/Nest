@@ -194,6 +194,15 @@
   .md-wrapper ol {
     list-style: decimal;
   }
+
+  .md-wrapper code  {
+    background-color: #2d2d2d;
+    color: #e6e6e6;
+    padding: 0.2em 0.4em;
+    margin: 0 0.2em;
+    border-radius: 3px;
+    font-family: 'Courier New', Courier, monospace 
+  }
 }
 
 @layer base {
