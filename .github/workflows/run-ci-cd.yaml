@@ -56,7 +56,7 @@ jobs:
             pre-commit-${{ runner.os }}-
 
       - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@v4
+        uses: terraform-linters/setup-tflint@dfcb455ed8d56b55edf6447a37379108181a6707
         with:
           tflint_version: v0.59.1
 
