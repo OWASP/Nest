@@ -19,8 +19,7 @@ resource "aws_ecr_repository" "main" {
   image_scanning_configuration {
     scan_on_push = true
   }
-  image_tag_mutability = "IMMUTABLE"
-  tags                 = var.common_tags
+  tags = var.common_tags
 }
 
 resource "aws_iam_role" "ecs_tasks_execution_role" {
