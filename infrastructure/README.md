@@ -1,6 +1,5 @@
 # Infrastructure
 
-
 This document provides instructions on how to setup the infrastructure for this project.
 
 ## Prerequisites
@@ -143,7 +142,8 @@ Migrate and load data into the new database.
    - Login to the Elastic Container Registry using the following command:
 
      *Note*: replace `ap-south-1` with configured region and `000000000000` with AWS Account ID.
-     *TODO*: Add warning to configure a credential helper instead of using following command.
+
+     *Warning*: Configure a credential helper instead of using following command to login.
 
      ```bash
      aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 000000000000.dkr.ecr.ap-south-1.amazonaws.com
