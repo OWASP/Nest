@@ -112,13 +112,13 @@ The Django backend deployment is managed by Zappa. This includes the API Gateway
    - Create a local Zappa settings file in the `backend` directory:
 
      ```bash
-     touch zappa.settings.json
+     touch zappa_settings.json
      ```
 
    - Copy the contents from the template file into your new local environment file:
 
      ```bash
-     cat zappa.settings.example.json > zappa.settings.json
+     cat zappa_settings.example.json > zappa_settings.json
      ```
 
 4.  **Populate Settings File**:
