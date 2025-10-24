@@ -211,6 +211,7 @@ module "index_data_task" {
     "/bin/sh",
     "-c",
     <<-EOT
+    set -e
     python manage.py algolia_reindex
     python manage.py algolia_update_replicas
     python manage.py algolia_update_synonyms
