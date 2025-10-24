@@ -7,6 +7,7 @@ Ensure you have the following setup/installed:
 
 - Setup Project: [CONTRIBUTING.md](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md)
 - Terraform: [Terraform Documentation](https://developer.hashicorp.com/terraform/docs)
+- AWS CLI: [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 - An AWS account with credentials configured locally.
 
 ## Setting up the infrastructure
