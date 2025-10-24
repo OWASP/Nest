@@ -92,7 +92,6 @@ const BoardCandidatesPage = () => {
   const { year } = useParams<{ year: string }>()
   const [candidates, setCandidates] = useState<CandidateWithSnapshot[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [boardUrl, setBoardUrl] = useState<string>('')
 
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GetBoardCandidatesDocument, {
     variables: { year: Number.parseInt(year) },
@@ -101,7 +100,6 @@ const BoardCandidatesPage = () => {
   useEffect(() => {
     if (graphQLData?.boardOfDirectors) {
       setCandidates(graphQLData.boardOfDirectors.candidates || [])
-      setBoardUrl(graphQLData.boardOfDirectors.owaspUrl || '')
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -670,30 +668,36 @@ const BoardCandidatesPage = () => {
           {year} Board of Directors Candidates
         </h1>
         <p className="mt-2 text-gray-600 dark:text-gray-400">
-          Meet the candidates running for the OWASP Board of Directors
-          {boardUrl && (
-            <>
-              {' '}
-              (
-              <Link
-                href={boardUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline dark:text-blue-400"
-              >
-                view election details
-              </Link>
-              )
-            </>
-          )}
+          Meet the candidates running for the OWASP Board of Directors. For official election
+          information, visit the{' '}
+          <Link
+            href={`https://board.owasp.org/elections/${year}_elections`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline dark:text-blue-400"
+          >
+            OWASP Board Elections page
+          </Link>{' '}
+          and the{' '}
+          <Link
+            href="https://owasp.org/www-board-candidates/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline dark:text-blue-400"
+          >
+            official candidate pages
+          </Link>
+          .
         </p>
         <p className="mt-3 text-sm text-gray-500 italic dark:text-gray-500">
-          This page represents all verifiable OWASP GitHub organization contributions and only OWASP
-          Slack workspace engagements (January 1 to October 1, {year}). Some projects (especially
-          Flagship level ones) may have their own Slack workspaces -- their data is not presented
-          here. Additionally, certain project workflows based on platforms other than GitHub (e.g.,
-          Google Docs or similar) are not included in this data. The code is open source and
-          available as part of{' '}
+          This page represents all verifiable OWASP GitHub organization related contributions and
+          only OWASP Slack workspace engagement data (January 1 to October 1, {year}). Some projects
+          (especially Flagship level ones) may have their own Slack workspaces -- their data is not
+          presented here. Some forms of community engagement are not publicly visible and cannot be
+          fully tracked without access to private communications, so this overview may not capture
+          all contributions. Additionally, certain project workflows based on platforms other than
+          GitHub (e.g., Google Docs or similar) are not included in this data. The code is open
+          source and available as part of{' '}
           <Link
             href="https://github.com/OWASP/Nest"
             target="_blank"
