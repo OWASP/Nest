@@ -87,3 +87,9 @@ variable "task_name" {
   description = "The unique name of the task."
   type        = string
 }
+
+variable "task_role_arn" {
+  description = "The ARN of the IAM role for the task."
+  type        = string
+  default     = null
+}

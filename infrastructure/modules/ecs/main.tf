@@ -45,8 +45,26 @@ resource "aws_iam_role_policy_attachment" "ecs_tasks_execution_role_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_tasks_fixtures_s3_access" {
-  role       = aws_iam_role.ecs_tasks_execution_role.name
+resource "aws_iam_role" "ecs_task_role" {
+  name = "${var.project_name}-${var.environment}-ecs-task-role"
+  tags = var.common_tags
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task_role_fixtures_s3_access" {
+  role       = aws_iam_role.ecs_task_role.name
   policy_arn = var.fixtures_read_only_policy_arn
 }
 
@@ -164,9 +182,10 @@ module "load_data_task" {
     "-c",
     <<-EOT
     set -e
-    pip install --quiet awscli
-    aws s3 cp s3://${var.fixtures_s3_bucket}/nest.json.gz /tmp/nest.json.gz
-    python manage.py load_data --file /tmp/nest.json.gz
+    pip install --target=/tmp/awscli-packages awscli
+    export PYTHONPATH="/tmp/awscli-packages:$PYTHONPATH"
+    python /tmp/awscli-packages/bin/aws s3 cp s3://${var.fixtures_s3_bucket}/nest.json.gz /tmp/nest.json.gz
+    python manage.py loaddata /tmp/nest.json.gz -v 3
     EOT
   ]
   common_tags                  = var.common_tags
@@ -181,6 +200,7 @@ module "load_data_task" {
   project_name                 = var.project_name
   security_group_ids           = [var.lambda_sg_id]
   task_name                    = "load-data"
+  task_role_arn                = aws_iam_role.ecs_task_role.arn
 }
 
 module "index_data_task" {

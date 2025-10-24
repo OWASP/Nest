@@ -24,6 +24,7 @@ resource "aws_ecs_task_definition" "task" {
   cpu                      = var.cpu
   memory                   = var.memory
   execution_role_arn       = var.ecs_tasks_execution_role_arn
+  task_role_arn            = var.task_role_arn
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-${var.task_name}-task-def"
   })
