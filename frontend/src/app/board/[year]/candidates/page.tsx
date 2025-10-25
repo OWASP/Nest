@@ -1,5 +1,6 @@
 'use client'
 import { useQuery, useApolloClient } from '@apollo/client/react'
+import { faLinkedin } from '@fortawesome/free-brands-svg-icons'
 import {
   faCode,
   faCodeBranch,
@@ -35,16 +36,17 @@ type Candidate = {
   memberEmail: string
   description: string
   member?: {
-    id: string
-    login: string
-    name: string
     avatarUrl: string
     bio?: string
     createdAt?: number
     firstOwaspContributionAt?: number
-    isOwaspBoardMember?: boolean
+    id: string
     isFormerOwaspStaff?: boolean
     isGsocMentor?: boolean
+    isOwaspBoardMember?: boolean
+    linkedinPageId?: string
+    login: string
+    name: string
   }
 }
 
@@ -212,8 +214,28 @@ const BoardCandidatesPage = () => {
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <h3 className="truncate text-xl font-bold text-gray-900 dark:text-white">
+            <h3 className="flex items-center gap-2 truncate text-xl font-bold text-gray-900 dark:text-white">
               {candidate.memberName}
+              {candidate.member?.linkedinPageId && (
+                <a
+                  href={`https://linkedin.com/in/${candidate.member.linkedinPageId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    e.preventDefault()
+                    window.open(
+                      `https://linkedin.com/in/${candidate.member.linkedinPageId}`,
+                      '_blank',
+                      'noopener,noreferrer'
+                    )
+                  }}
+                  className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                  aria-label={`${candidate.memberName}'s LinkedIn profile`}
+                >
+                  <FontAwesomeIcon icon={faLinkedin} className="h-5 w-5" />
+                </a>
+              )}
             </h3>
             {candidate.member?.login && (
               <Link

@@ -14,6 +14,7 @@ class MemberProfileInline(admin.StackedInline):
     verbose_name_plural = "OWASP Member Profile"
     fields = (
         "owasp_slack_id",
+        "linkedin_page_id",
         "first_contribution_at",
         "is_owasp_board_member",
         "is_former_owasp_staff",
