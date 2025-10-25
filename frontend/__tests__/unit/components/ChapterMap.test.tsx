@@ -163,6 +163,42 @@ describe('ChapterMap', () => {
       expect(L.marker).toHaveBeenCalledWith([51.5074, -0.1278], { icon: mockIcon })
     })
 
+    it('filters out virtual chapters when latitude longitude undefined', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const L = require('leaflet')
+      const virtualChapterData: Chapter[] = [
+        mockChapterData[0],
+        {
+          // A virtual chapter with no location data
+          ...mockChapterData[1],
+          _geoloc: undefined,
+          geoLocation: undefined,
+        },
+      ]
+
+      render(<ChapterMap {...defaultProps} geoLocData={virtualChapterData} />)
+      expect(L.marker).toHaveBeenCalledTimes(1)
+      expect(L.marker).not.toHaveBeenCalledWith([undefined, undefined], { icon: mockIcon })
+    })
+
+    it('filters out virtual chapters when latitude longitude null', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const L = require('leaflet')
+      const virtualChapterData: Chapter[] = [
+        mockChapterData[0],
+        {
+          // A virtual chapter with no location data
+          ...mockChapterData[1],
+          _geoloc: null,
+          geoLocation: null,
+        },
+      ]
+
+      render(<ChapterMap {...defaultProps} geoLocData={virtualChapterData} />)
+      expect(L.marker).toHaveBeenCalledTimes(1)
+      expect(L.marker).not.toHaveBeenCalledWith([null, null], { icon: mockIcon })
+    })
+
     it('creates marker icons with correct configuration', () => {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const L = require('leaflet')
@@ -197,6 +233,22 @@ describe('ChapterMap', () => {
 
       render(<ChapterMap {...defaultProps} geoLocData={chapterWithoutGeoloc} />)
       expect(L.marker).toHaveBeenCalledWith([35.6762, 139.6503], { icon: mockIcon })
+    })
+
+    it('handles chapters with 0 coordinates correctly', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const L = require('leaflet')
+      const chapterWithZeroCoords: Chapter[] = [
+        {
+          ...mockChapterData[0],
+          _geoloc: { lat: 0, lng: 0 },
+          geoLocation: { lat: 0, lng: 0 },
+        },
+      ]
+
+      render(<ChapterMap {...defaultProps} geoLocData={chapterWithZeroCoords} />)
+      expect(L.marker).toHaveBeenCalledTimes(1)
+      expect(L.marker).toHaveBeenCalledWith([0, 0], { icon: mockIcon })
     })
   })
 
