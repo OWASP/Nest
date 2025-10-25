@@ -57,34 +57,74 @@ class OwaspScraper:
         if self.page_tree is None:
             return []
 
-        flexible_xpath = "//div[@class='sidebar'] | //*[@role='complementary']"
-        containers = self.page_tree.xpath(flexible_xpath)
-
+        containers = self._get_audience_containers()
         found_keywords = set()
-        audience_choices = AudienceChoices.choices
-
+        
         for container in containers:
-            text_components = container.xpath(".//li | .//p")
-            for component in text_components:
-                item_text = component.text_content()
-                if not item_text:
-                    continue
-
-                for lower_kw, original_kw in audience_choices:
-                    if original_kw in item_text:
-                        found_keywords.add(lower_kw)
-
-            image_components = container.xpath(".//img")
-            for image in image_components:
-                alt_text = image.get("alt")
-                if not alt_text:
-                    continue
-
-                for lower_kw, original_kw in audience_choices:
-                    if original_kw in alt_text:
-                        found_keywords.add(lower_kw)
+            container_keywords = self._extract_keywords_from_container(container)
+            found_keywords.update(container_keywords)
 
         return sorted(found_keywords)
+
+    def _get_audience_containers(self):
+        """Get containers that might contain audience information."""
+        flexible_xpath = "//div[@class='sidebar'] | //*[@role='complementary']"
+        return self.page_tree.xpath(flexible_xpath)
+
+    def _extract_keywords_from_container(self, container) -> set[str]:
+        """Extract audience keywords from a single container."""
+        found_keywords = set()
+        
+        # Process text components
+        text_keywords = self._process_text_components(container)
+        found_keywords.update(text_keywords)
+        
+        # Process image components  
+        image_keywords = self._process_image_components(container)
+        found_keywords.update(image_keywords)
+        
+        return found_keywords
+
+    def _process_text_components(self, container) -> set[str]:
+        """Process text components (li, p elements) for audience keywords."""
+        found_keywords = set()
+        text_components = container.xpath(".//li | .//p")
+        
+        for component in text_components:
+            item_text = component.text_content()
+            if not item_text:
+                continue
+                
+            keywords = self._find_audience_keywords_in_text(item_text)
+            found_keywords.update(keywords)
+            
+        return found_keywords
+
+    def _process_image_components(self, container) -> set[str]:
+        """Process image components for audience keywords in alt text."""
+        found_keywords = set()
+        image_components = container.xpath(".//img")
+        
+        for image in image_components:
+            alt_text = image.get("alt")
+            if not alt_text:
+                continue
+                
+            keywords = self._find_audience_keywords_in_text(alt_text)
+            found_keywords.update(keywords)
+            
+        return found_keywords
+
+    def _find_audience_keywords_in_text(self, text: str) -> set[str]:
+        """Find audience keywords in the given text."""
+        found_keywords = set()
+        audience_choices = AudienceChoices.choices
+        
+        for lower_kw, original_kw in audience_choices:
+            if original_kw in text:
+                found_keywords.add(lower_kw)
+                
+        return found_keywords
 
     def get_urls(self, domain=None):
         """Return scraped URLs."""

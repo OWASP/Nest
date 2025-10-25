@@ -267,51 +267,9 @@ class Command(BaseCommand):
             )
 
             # Fetch commits
-            commit_query = f"author:{username} org:{org.login} committer-date:{date_range}"
-            try:
-                gh_commits = gh.search_commits(query=commit_query)
-
-                self.stdout.write(f"  Found {gh_commits.totalCount} commits")
-                logger.info("Found %s commits in %s", gh_commits.totalCount, org.login)
-
-                processed_commits = 0
-                for gh_commit in gh_commits:
-                    processed_commits += 1
-                    repo_full_name = gh_commit.repository.full_name
-                    cache_key = repo_full_name.lower()
-
-                    repo = repositories_cache.get(cache_key)
-                    if not repo:
-                        logger.warning(
-                            "Repository %s not in database, skipping commit", repo_full_name
-                        )
-                        continue
-
-                    commit_committer = None
-                    if gh_commit.committer:
-                        commit_committer = User.update_data(gh_commit.committer, save=False)
-                        committers_data.append(commit_committer)
-
-                    commit = Commit.update_data(
-                        gh_commit,
-                        repository=repo,
-                        author=user,
-                        committer=commit_committer,
-                        save=False,
-                    )
-
-                    commits_data.append(commit)
-                    logger.info(
-                        "Processed commit %s/%s: %s in %s",
-                        processed_commits,
-                        gh_commits.totalCount,
-                        gh_commit.sha[:7],
-                        repo.name,
-                    )
-
-            except GithubException as e:
-                error_msg = f"  Error searching commits in {org.login}: {e}"
-                self.stderr.write(self.style.WARNING(error_msg))
+            self._sync_commits_for_org(
+                org, username, date_range, gh, user, repositories_cache, commits_data, committers_data
+            )
 
             # Fetch pull requests
             pr_query = f"author:{username} org:{org.login} type:pr created:{date_range}"
@@ -478,3 +436,111 @@ class Command(BaseCommand):
 
         # Always populate first contribution date if not already set
         self.populate_first_contribution_only(username, user, gh)
+
+    def _sync_commits_for_org(
+        self,
+        org,
+        username: str,
+        date_range: str,
+        gh,
+        user: User,
+        repositories_cache: dict,
+        commits_data: list,
+        committers_data: list,
+    ):
+        """Sync commits for a single organization with reduced nesting."""
+        commit_query = f"author:{username} org:{org.login} committer-date:{date_range}"
+        
+        try:
+            gh_commits = gh.search_commits(query=commit_query)
+            self._process_commit_search_results(
+                gh_commits, org, user, repositories_cache, commits_data, committers_data
+            )
+        except GithubException as e:
+            self._handle_commit_search_error(e, org)
+
+    def _process_commit_search_results(
+        self,
+        gh_commits,
+        org,
+        user: User,
+        repositories_cache: dict,
+        commits_data: list,
+        committers_data: list,
+    ):
+        """Process the results from commit search."""
+        self.stdout.write(f"  Found {gh_commits.totalCount} commits")
+        logger.info("Found %s commits in %s", gh_commits.totalCount, org.login)
+
+        processed_commits = 0
+        for gh_commit in gh_commits:
+            processed_commits += 1
+            
+            if not self._should_process_commit(gh_commit, repositories_cache):
+                continue
+                
+            commit = self._create_commit_data(
+                gh_commit, user, repositories_cache, committers_data
+            )
+            
+            if commit:
+                commits_data.append(commit)
+                self._log_commit_progress(processed_commits, gh_commits.totalCount, gh_commit)
+
+    def _should_process_commit(self, gh_commit, repositories_cache: dict) -> bool:
+        """Check if commit should be processed based on repository cache."""
+        repo_full_name = gh_commit.repository.full_name
+        cache_key = repo_full_name.lower()
+        
+        repo = repositories_cache.get(cache_key)
+        if not repo:
+            logger.warning(
+                "Repository %s not in database, skipping commit", repo_full_name
+            )
+            return False
+        return True
+
+    def _create_commit_data(
+        self, gh_commit, user: User, repositories_cache: dict, committers_data: list
+    ) -> Commit | None:
+        """Create commit data with committer processing."""
+        repo_full_name = gh_commit.repository.full_name
+        cache_key = repo_full_name.lower()
+        repo = repositories_cache.get(cache_key)
+        
+        if not repo:
+            return None
+
+        commit_committer = self._process_commit_committer(gh_commit, committers_data)
+        
+        return Commit.update_data(
+            gh_commit,
+            repository=repo,
+            author=user,
+            committer=commit_committer,
+            save=False,
+        )
+
+    def _process_commit_committer(self, gh_commit, committers_data: list) -> User | None:
+        """Process and cache commit committer if exists."""
+        if not gh_commit.committer:
+            return None
+            
+        commit_committer = User.update_data(gh_commit.committer, save=False)
+        committers_data.append(commit_committer)
+        return commit_committer
+
+    def _log_commit_progress(self, processed_commits: int, total_commits: int, gh_commit):
+        """Log progress for commit processing."""
+        logger.info(
+            "Processed commit %s/%s: %s in %s",
+            processed_commits,
+            total_commits,
+            gh_commit.sha[:7],
+            gh_commit.repository.name,
+        )
+
+    def _handle_commit_search_error(self, error: GithubException, org):
+        """Handle errors during commit search."""
+        error_msg = f"  Error searching commits in {org.login}: {error}"
+        self.stderr.write(self.style.WARNING(error_msg))
