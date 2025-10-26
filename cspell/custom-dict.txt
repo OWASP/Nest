@@ -44,6 +44,7 @@ Nominatim
 Oleksiuk
 PGPASSWORD
 PLR
+PYTHONPATH
 PYTHONUNBUFFERED
 RUF
 SEO
@@ -93,6 +94,7 @@ cyclonedx
 defectdojo
 demojize
 dismissable
+dkr
 dockerhub
 dsn
 elevenlabs
@@ -112,6 +114,7 @@ heroui
 hsl
 ics
 igoat
+igw
 inlinehilite
 isanori
 isready
