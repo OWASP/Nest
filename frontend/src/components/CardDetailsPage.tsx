@@ -17,7 +17,6 @@ import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
 import { scrollToAnchor } from 'utils/scrollToAnchor'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
-import ArchivedBadge from 'components/ArchivedBadge'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
@@ -33,6 +32,7 @@ import RecentReleases from 'components/RecentReleases'
 import RepositoriesCard from 'components/RepositoriesCard'
 import SecondaryCard from 'components/SecondaryCard'
 import SponsorCard from 'components/SponsorCard'
+import StatusBadge from 'components/StatusBadge'
 import ToggleableList from 'components/ToggleableList'
 import TopContributorsList from 'components/TopContributorsList'
 
@@ -98,12 +98,8 @@ const DetailsCard = ({
                 </button>
               )}
             <div className="flex items-center gap-3">
-              {!isActive && (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-red-600 bg-red-50 px-3 py-1 text-sm font-medium text-red-800 dark:border-red-500 dark:bg-red-900/30 dark:text-red-400">
-                  Inactive
-                </span>
-              )}
-              {isArchived && type === 'repository' && <ArchivedBadge size="md" />}
+              {!isActive && <StatusBadge status="inactive" size="md" />}
+              {isArchived && type === 'repository' && <StatusBadge status="archived" size="md" />}
               {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
                 <MetricsScoreCircle
                   score={healthMetricsData[0].score}

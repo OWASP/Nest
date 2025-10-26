@@ -21,3 +21,4 @@ jobs:
           no_assignee_message: 'Test: The linked issue must be assigned to the PR author.'
           no_issue_message: 'Test: This PR must be linked to an issue.'
           require_assignee: 'true'
+          skip_users: 'arkid15r,kasya'
