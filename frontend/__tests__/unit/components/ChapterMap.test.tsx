@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react'
 import { Chapter } from 'types/chapter'
 import ChapterMap from 'components/ChapterMap'
+import * as L from 'leaflet'
 
 const mockMap = {
   setView: jest.fn().mockReturnThis(),
@@ -113,8 +114,6 @@ describe('ChapterMap', () => {
 
   describe('Map initialization', () => {
     it('initializes leaflet map with correct configuration', () => {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const L = require('leaflet')
       render(<ChapterMap {...defaultProps} />)
       expect(L.map).toHaveBeenCalledWith('chapter-map', {
         worldCopyJump: false,
@@ -128,9 +127,6 @@ describe('ChapterMap', () => {
     })
 
     it('adds tile layer to the map', () => {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const L = require('leaflet')
-
       render(<ChapterMap {...defaultProps} />)
       expect(L.tileLayer).toHaveBeenCalledWith(
         'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -143,9 +139,6 @@ describe('ChapterMap', () => {
     })
 
     it('creates and adds marker cluster group', () => {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const L = require('leaflet')
-
       render(<ChapterMap {...defaultProps} />)
       expect(L.markerClusterGroup).toHaveBeenCalled()
       expect(mockMap.addLayer).toHaveBeenCalledWith(mockMarkerClusterGroup)
@@ -154,9 +147,6 @@ describe('ChapterMap', () => {
 
   describe('Markers', () => {
     it('creates markers for each chapter', () => {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const L = require('leaflet')
-
       render(<ChapterMap {...defaultProps} />)
       expect(L.marker).toHaveBeenCalledTimes(2)
       expect(L.marker).toHaveBeenCalledWith([40.7128, -74.006], { icon: mockIcon })
@@ -164,8 +154,6 @@ describe('ChapterMap', () => {
     })
 
     it('filters out virtual chapters when latitude longitude undefined', () => {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const L = require('leaflet')
       const virtualChapterData: Chapter[] = [
         mockChapterData[0],
         {
@@ -182,8 +170,6 @@ describe('ChapterMap', () => {
     })
 
     it('filters out virtual chapters when latitude longitude null', () => {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const L = require('leaflet')
       const virtualChapterData: Chapter[] = [
         mockChapterData[0],
         {
@@ -200,9 +186,6 @@ describe('ChapterMap', () => {
     })
 
     it('creates marker icons with correct configuration', () => {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const L = require('leaflet')
-
       render(<ChapterMap {...defaultProps} />)
       expect(L.Icon).toHaveBeenCalledWith({
         iconAnchor: [12, 41],
@@ -221,8 +204,6 @@ describe('ChapterMap', () => {
     })
 
     it('handles chapters with missing _geoloc but present geolocation', () => {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const L = require('leaflet')
       const chapterWithoutGeoloc: Chapter[] = [
         {
           ...mockChapterData[0],
@@ -236,8 +217,6 @@ describe('ChapterMap', () => {
     })
 
     it('handles chapters with 0 coordinates correctly', () => {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const L = require('leaflet')
       const chapterWithZeroCoords: Chapter[] = [
         {
           ...mockChapterData[0],
@@ -254,9 +233,6 @@ describe('ChapterMap', () => {
 
   describe('Popups', () => {
     it('creates popups for each marker', () => {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const L = require('leaflet')
-
       render(<ChapterMap {...defaultProps} />)
       expect(L.popup).toHaveBeenCalledTimes(2)
       expect(mockMarker.bindPopup).toHaveBeenCalledTimes(2)
@@ -275,8 +251,6 @@ describe('ChapterMap', () => {
 
   describe('Local View', () => {
     it('sets local view when showLocal is true', () => {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const L = require('leaflet')
       render(<ChapterMap {...defaultProps} showLocal={true} />)
 
       expect(mockMap.setView).toHaveBeenCalledWith([40.7128, -74.006], 7)
