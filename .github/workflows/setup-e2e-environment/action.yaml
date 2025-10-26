@@ -2,6 +2,7 @@ name: Set up E2E environment
 description: "Sets up the environment for end-to-end testing."
 
 runs:
+    using: "composite"
     steps:
       - name: Wait for database to be ready
         run: |
