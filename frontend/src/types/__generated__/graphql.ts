@@ -475,8 +475,12 @@ export type ProjectHealthMetricsNode = Node & {
 };
 
 export type ProjectHealthMetricsOrder = {
+  contributorsCount?: InputMaybe<Ordering>;
+  createdAt?: InputMaybe<Ordering>;
+  forksCount?: InputMaybe<Ordering>;
   project_Name?: InputMaybe<Ordering>;
   score?: InputMaybe<Ordering>;
+  starsCount?: InputMaybe<Ordering>;
 };
 
 export type ProjectHealthStatsNode = {

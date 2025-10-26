@@ -1,6 +1,7 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
-import { faFilter } from '@fortawesome/free-solid-svg-icons'
+import { faFilter, faSort, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Pagination } from '@heroui/react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
@@ -15,6 +16,90 @@ import MetricsCard from 'components/MetricsCard'
 import ProjectsDashboardDropDown from 'components/ProjectsDashboardDropDown'
 
 const PAGINATION_LIMIT = 10
+
+const FIELD_MAPPING = {
+  score: 'score',
+  stars: 'starsCount',
+  forks: 'forksCount',
+  contributors: 'contributorsCount',
+  createdAt: 'createdAt',
+} as const
+
+type OrderKey = keyof typeof FIELD_MAPPING
+
+const parseOrderParam = (orderParam: string | null) => {
+  if (!orderParam) {
+    return { field: 'score', direction: Ordering.Desc, urlKey: '-score' }
+  }
+
+  const isDescending = orderParam.startsWith('-')
+  const fieldKey = isDescending ? orderParam.slice(1) : orderParam
+  const isValidKey = fieldKey in FIELD_MAPPING
+  const normalizedKey = isValidKey ? fieldKey : 'score'
+  const graphqlField = FIELD_MAPPING[normalizedKey as OrderKey]
+  const direction = isDescending ? Ordering.Desc : Ordering.Asc
+  const normalizedUrlKey = direction === Ordering.Desc ? `-${normalizedKey}` : normalizedKey
+
+  return { field: graphqlField, direction, urlKey: normalizedUrlKey }
+}
+
+const buildGraphQLOrdering = (field: string, direction: Ordering) => {
+  return {
+    [field]: direction,
+  }
+}
+
+const buildOrderingWithTieBreaker = (primaryOrdering: Record<string, Ordering>) => [
+  primaryOrdering,
+  {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    project_Name: Ordering.Asc,
+  },
+]
+const SortableColumnHeader: FC<{
+  label: string
+  fieldKey: OrderKey
+  currentOrderKey: string
+  onSort: (orderKey: string | null) => void
+  align?: 'left' | 'center' | 'right'
+}> = ({ label, fieldKey, currentOrderKey, onSort, align = 'left' }) => {
+  const isActiveSortDesc = currentOrderKey === `-${fieldKey}`
+  const isActiveSortAsc = currentOrderKey === fieldKey
+  const isActive = isActiveSortDesc || isActiveSortAsc
+
+  const handleClick = () => {
+    if (!isActive) {
+      onSort(`-${fieldKey}`)
+    } else if (isActiveSortDesc) {
+      onSort(fieldKey)
+    } else {
+      onSort(null)
+    }
+  }
+
+  const alignmentClass =
+    align === 'center' ? 'justify-center' : align === 'right' ? 'justify-end' : 'justify-start'
+  const textAlignClass =
+    align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left'
+
+  return (
+    <div className={`flex items-center gap-1 ${alignmentClass}`}>
+      <button
+        onClick={handleClick}
+        className={`flex items-center gap-1 font-semibold transition-colors hover:text-blue-600 ${textAlignClass}`}
+        title={`Sort by ${label}`}
+        aria-label={`Sort by ${label}`}
+        aria-pressed={isActive}
+      >
+        <span className="truncate">{label}</span>
+        <FontAwesomeIcon
+          icon={isActiveSortDesc ? faSortDown : isActiveSortAsc ? faSortUp : faSort}
+          className={`h-3 w-3 ${isActive ? 'text-blue-600' : 'text-gray-400'}`}
+        />
+      </button>
+    </div>
+  )
+}
 
 const MetricsPage: FC = () => {
   const searchParams = useSearchParams()
@@ -53,12 +138,12 @@ const MetricsPage: FC = () => {
   }
 
   let currentFilters = {}
-  let currentOrdering = {
-    score: Ordering.Desc,
-  }
+  const orderingParam = searchParams.get('order')
+  const { field, direction, urlKey } = parseOrderParam(orderingParam)
+  const currentOrdering = buildGraphQLOrdering(field, direction)
+
   const healthFilter = searchParams.get('health')
   const levelFilter = searchParams.get('level')
-  const orderingParam = searchParams.get('order') as Ordering
   const currentFilterKeys = []
   if (healthFilter) {
     currentFilters = {
@@ -73,25 +158,13 @@ const MetricsPage: FC = () => {
     }
     currentFilterKeys.push(levelFilter)
   }
-  if (orderingParam) {
-    currentOrdering = {
-      score: orderingParam,
-    }
-  }
 
   const [metrics, setMetrics] = useState<HealthMetricsProps[]>([])
   const [metricsLength, setMetricsLength] = useState<number>(0)
   const [pagination, setPagination] = useState({ offset: 0, limit: PAGINATION_LIMIT })
   const [filters, setFilters] = useState(currentFilters)
-  const [ordering, setOrdering] = useState(
-    currentOrdering || {
-      score: Ordering.Desc,
-    }
-  )
+  const [ordering, setOrdering] = useState(currentOrdering)
   const [activeFilters, setActiveFilters] = useState(currentFilterKeys)
-  const [activeOrdering, setActiveOrdering] = useState(
-    orderingParam ? [orderingParam] : [Ordering.Desc]
-  )
   const {
     data,
     error: graphQLRequestError,
@@ -101,15 +174,18 @@ const MetricsPage: FC = () => {
     variables: {
       filters,
       pagination: { offset: 0, limit: PAGINATION_LIMIT },
-      ordering: [
-        ordering,
-        {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          project_Name: Ordering.Asc,
-        },
-      ],
+      ordering: buildOrderingWithTieBreaker(ordering),
     },
   })
+
+  useEffect(() => {
+    const { field: f, direction: d } = parseOrderParam(searchParams.get('order'))
+    const nextOrdering = buildGraphQLOrdering(f, d)
+    if (JSON.stringify(nextOrdering) !== JSON.stringify(ordering)) {
+      setOrdering(nextOrdering)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   useEffect(() => {
     if (data) {
@@ -121,15 +197,6 @@ const MetricsPage: FC = () => {
     }
   }, [data, graphQLRequestError])
 
-  const orderingSections: DropDownSectionProps[] = [
-    {
-      title: '',
-      items: [
-        { label: 'Descending', key: 'desc' },
-        { label: 'Ascending', key: 'asc' },
-      ],
-    },
-  ]
   const filteringSections: DropDownSectionProps[] = [
     {
       title: 'Project Level',
@@ -156,6 +223,24 @@ const MetricsPage: FC = () => {
 
   const getCurrentPage = () => {
     return Math.floor(pagination.offset / PAGINATION_LIMIT) + 1
+  }
+
+  const handleSort = (orderKey: string | null) => {
+    setPagination({ offset: 0, limit: PAGINATION_LIMIT })
+    const newParams = new URLSearchParams(searchParams.toString())
+
+    if (orderKey === null) {
+      newParams.delete('order')
+      const defaultOrdering = buildGraphQLOrdering('score', Ordering.Desc)
+      setOrdering(defaultOrdering)
+    } else {
+      newParams.set('order', orderKey)
+      const { field: newField, direction: newDirection } = parseOrderParam(orderKey)
+      const newOrdering = buildGraphQLOrdering(newField, newDirection)
+      setOrdering(newOrdering)
+    }
+
+    router.replace(`/projects/dashboard/metrics?${newParams.toString()}`)
   }
 
   return (
@@ -198,35 +283,45 @@ const MetricsPage: FC = () => {
               router.replace(`/projects/dashboard/metrics?${newParams.toString()}`)
             }}
           />
-
-          <ProjectsDashboardDropDown
-            buttonDisplayName="Score"
-            isOrdering
-            sections={orderingSections}
-            selectionMode="single"
-            selectedKeys={activeOrdering}
-            selectedLabels={getKeysLabels(orderingSections, activeOrdering)}
-            onAction={(key: Ordering) => {
-              // Reset pagination to the first page when changing ordering
-              setPagination({ offset: 0, limit: PAGINATION_LIMIT })
-              const newParams = new URLSearchParams(searchParams.toString())
-              newParams.set('order', key)
-              setOrdering({
-                score: key,
-              })
-              setActiveOrdering([key])
-              router.replace(`/projects/dashboard/metrics?${newParams.toString()}`)
-            }}
-          />
         </div>
       </div>
-      <div className="grid grid-cols-[4fr_1fr_1fr_1fr_1.5fr_1fr] p-4">
+      <div className="grid grid-cols-[4fr_1fr_1fr_1fr_1.5fr_1fr] gap-2 border-b border-gray-200 p-4 dark:border-gray-700">
         <div className="truncate font-semibold">Project Name</div>
-        <div className="truncate text-center font-semibold">Stars</div>
-        <div className="truncate text-center font-semibold">Forks</div>
-        <div className="truncate text-center font-semibold">Contributors</div>
-        <div className="truncate text-center font-semibold">Health Checked At</div>
-        <div className="truncate text-center font-semibold">Score</div>
+        <SortableColumnHeader
+          label="Stars"
+          fieldKey="stars"
+          currentOrderKey={urlKey}
+          onSort={handleSort}
+          align="center"
+        />
+        <SortableColumnHeader
+          label="Forks"
+          fieldKey="forks"
+          currentOrderKey={urlKey}
+          onSort={handleSort}
+          align="center"
+        />
+        <SortableColumnHeader
+          label="Contributors"
+          fieldKey="contributors"
+          currentOrderKey={urlKey}
+          onSort={handleSort}
+          align="center"
+        />
+        <SortableColumnHeader
+          label="Health Checked At"
+          fieldKey="createdAt"
+          currentOrderKey={urlKey}
+          onSort={handleSort}
+          align="center"
+        />
+        <SortableColumnHeader
+          label="Score"
+          fieldKey="score"
+          currentOrderKey={urlKey}
+          onSort={handleSort}
+          align="center"
+        />
       </div>
       {loading ? (
         <LoadingSpinner />
@@ -254,13 +349,7 @@ const MetricsPage: FC = () => {
                   variables: {
                     filters,
                     pagination: newPagination,
-                    ordering: [
-                      ordering,
-                      {
-                        // eslint-disable-next-line @typescript-eslint/naming-convention
-                        project_Name: Ordering.Asc,
-                      },
-                    ],
+                    ordering: buildOrderingWithTieBreaker(ordering),
                   },
                   updateQuery: (prev, { fetchMoreResult }) => {
                     if (!fetchMoreResult) return prev

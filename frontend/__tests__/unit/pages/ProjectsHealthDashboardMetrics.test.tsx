@@ -114,7 +114,7 @@ describe('MetricsPage', () => {
       })
     })
   })
-  test('renders filter and sort dropdowns', async () => {
+  test('renders filter dropdown and sortable column headers', async () => {
     render(<MetricsPage />)
     const filterOptions = [
       'Incubator',
@@ -127,7 +127,7 @@ describe('MetricsPage', () => {
       'Reset All Filters',
     ]
     const filterSectionsLabels = ['Project Level', 'Project Health', 'Reset Filters']
-    const sortOptions = ['Ascending', 'Descending']
+    const sortableColumns = ['Stars', 'Forks', 'Contributors', 'Health Checked At', 'Score']
 
     await waitFor(() => {
       filterSectionsLabels.forEach((label) => {
@@ -139,12 +139,58 @@ describe('MetricsPage', () => {
         fireEvent.click(button)
         expect(button).toBeInTheDocument()
       })
-      sortOptions.forEach((option) => {
-        expect(screen.getAllByText(option).length).toBeGreaterThan(0)
-        const button = screen.getByRole('button', { name: option })
-        fireEvent.click(button)
-        expect(button).toBeInTheDocument()
+
+      sortableColumns.forEach((column) => {
+        const sortButton = screen.getByTitle(`Sort by ${column}`)
+        expect(sortButton).toBeInTheDocument()
       })
+    })
+  })
+
+  test('handles sorting state and URL updates', async () => {
+    const mockReplace = jest.fn()
+    const { useRouter, useSearchParams } = jest.requireMock('next/navigation')
+    ;(useRouter as jest.Mock).mockReturnValue({
+      push: jest.fn(),
+      replace: mockReplace,
+    })
+
+    // Test unsorted -> descending
+    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams())
+    const { rerender } = render(<MetricsPage />)
+
+    const sortButton = screen.getByTitle('Sort by Stars')
+    fireEvent.click(sortButton)
+
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=-stars'))
+    })
+
+    // Test descending -> ascending
+    mockReplace.mockClear()
+    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('order=-stars'))
+    rerender(<MetricsPage />)
+
+    const sortButtonDesc = screen.getByTitle('Sort by Stars')
+    fireEvent.click(sortButtonDesc)
+
+    await waitFor(() => {
+      const lastCall = mockReplace.mock.calls[mockReplace.mock.calls.length - 1][0]
+      expect(lastCall).toContain('order=stars')
+      expect(lastCall).not.toContain('order=-stars')
+    })
+
+    // Test ascending -> unsorted (removes order param, defaults to -score)
+    mockReplace.mockClear()
+    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('order=stars'))
+    rerender(<MetricsPage />)
+
+    const sortButtonAsc = screen.getByTitle('Sort by Stars')
+    fireEvent.click(sortButtonAsc)
+
+    await waitFor(() => {
+      const lastCall = mockReplace.mock.calls[mockReplace.mock.calls.length - 1][0]
+      expect(lastCall).not.toContain('order=')
     })
   })
   test('render health metrics data', async () => {
