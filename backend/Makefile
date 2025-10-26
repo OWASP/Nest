@@ -114,7 +114,7 @@ restore-backup:
 
 run-backend-e2e:
 	@DOCKER_BUILDKIT=1 \
-	docker compose --project-name nest-e2e -f docker-compose/backend.e2e.yaml up --build --remove-orphans
+	docker compose --project-name nest-e2e -f docker-compose/e2e.yaml up --build --remove-orphans --abort-on-container-exit
 
 save-backup:
 	@echo "Saving Nest backup"
