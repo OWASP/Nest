@@ -193,6 +193,28 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         """Return repository URL."""
         return f"https://github.com/{self.path}"
 
+    def _check_all_funding_targets_compliant(self, funding_data: dict) -> bool:
+        """Check if all funding targets comply with the funding policy.
+
+        Args:
+            funding_data (dict): Dictionary of funding platforms and targets.
+
+        Returns:
+            bool: True if all funding targets are compliant, False otherwise.
+
+        """
+        for platform, targets in funding_data.items():
+            target_list = targets if isinstance(targets, list) else [targets]
+
+            for target in target_list:
+                if not target:
+                    continue
+
+                if not check_funding_policy_compliance(platform, target):
+                    return False
+
+        return True
+
     def from_github(
         self,
         gh_repository,
@@ -282,22 +304,9 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
             self.has_funding_yml = True
 
             # Set funding policy compliance flag.
-            is_funding_policy_compliant = True
-            for platform, targets in self.funding_yml.items():
-                for target in targets if isinstance(targets, list) else [targets]:
-                    if not target:
-                        continue
-                    is_funding_policy_compliant = check_funding_policy_compliance(
-                        platform,
-                        target,
-                    )
-
-                    if not is_funding_policy_compliant:
-                        break
-
-                if not is_funding_policy_compliant:
-                    break
-            self.is_funding_policy_compliant = is_funding_policy_compliant
+            self.is_funding_policy_compliant = self._check_all_funding_targets_compliant(
+                self.funding_yml
+            )
         except (AttributeError, GithubException):
             self.has_funding_yml = False
             self.is_funding_policy_compliant = True

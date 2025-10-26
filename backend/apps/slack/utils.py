@@ -162,6 +162,79 @@ def get_posts_data(limit: int = 5) -> QuerySet | None:
         return None
 
 
+def _process_section_block(block: dict) -> str | None:
+    """Process a section block and extract text content.
+
+    Args:
+        block (dict): A Slack section block.
+
+    Returns:
+        str or None: The extracted text content, or None if no text found.
+
+    """
+    if "text" in block and block["text"].get("type") == "mrkdwn":
+        return strip_markdown(block["text"]["text"])
+
+    if "fields" in block:
+        return NL.join(
+            strip_markdown(field["text"])
+            for field in block["fields"]
+            if field.get("type") == "mrkdwn"
+        )
+
+    return None
+
+
+def _process_context_block(block: dict) -> str:
+    """Process a context block and extract text content.
+
+    Args:
+        block (dict): A Slack context block.
+
+    Returns:
+        str: The extracted text content from all markdown elements.
+
+    """
+    return NL.join(
+        strip_markdown(element["text"])
+        for element in block["elements"]
+        if element.get("type") == "mrkdwn"
+    )
+
+
+def _process_actions_block(block: dict) -> str:
+    """Process an actions block and extract button text.
+
+    Args:
+        block (dict): A Slack actions block.
+
+    Returns:
+        str: The extracted text content from all button elements.
+
+    """
+    return NL.join(
+        strip_markdown(element["text"]["text"])
+        for element in block["elements"]
+        if element.get("type") == "button"
+    )
+
+
+def _process_header_block(block: dict) -> str | None:
+    """Process a header block and extract text content.
+
+    Args:
+        block (dict): A Slack header block.
+
+    Returns:
+        str or None: The extracted text content, or None if no text found.
+
+    """
+    if "text" in block and block["text"].get("type") == "plain_text":
+        return block["text"]["text"]
+
+    return None
+
+
 def get_text(blocks: tuple) -> str:
     """Convert blocks to plain text.
 
@@ -177,40 +250,20 @@ def get_text(blocks: tuple) -> str:
     for block in blocks:
         match block.get("type"):
             case "section":
-                if "text" in block and block["text"].get("type") == "mrkdwn":
-                    text.append(strip_markdown(block["text"]["text"]))
-                elif "fields" in block:
-                    text.append(
-                        NL.join(
-                            strip_markdown(field["text"])
-                            for field in block["fields"]
-                            if field.get("type") == "mrkdwn"
-                        )
-                    )
+                if section_text := _process_section_block(block):
+                    text.append(section_text)
             case "divider":
                 text.append("---")
             case "context":
-                text.append(
-                    NL.join(
-                        strip_markdown(element["text"])
-                        for element in block["elements"]
-                        if element.get("type") == "mrkdwn"
-                    )
-                )
+                text.append(_process_context_block(block))
             case "actions":
-                text.append(
-                    NL.join(
-                        strip_markdown(element["text"]["text"])
-                        for element in block["elements"]
-                        if element.get("type") == "button"
-                    )
-                )
+                text.append(_process_actions_block(block))
             # TODO(arkid15r): consider removing this.
             case "image":
                 text.append(f"Image: {block.get('image_url', '')}")
             case "header":
-                if "text" in block and block["text"].get("type") == "plain_text":
-                    text.append(block["text"]["text"])
+                if header_text := _process_header_block(block):
+                    text.append(header_text)
 
     return NL.join(text).strip()
 
