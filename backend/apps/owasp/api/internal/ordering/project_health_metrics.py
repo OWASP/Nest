@@ -11,8 +11,12 @@ class ProjectHealthMetricsOrder:
     """Ordering for Project Health Metrics."""
 
     score: strawberry.auto
+    stars_count: strawberry.auto
+    forks_count: strawberry.auto
+    contributors_count: strawberry.auto
+    created_at: strawberry.auto
 
-    # We need to order by another field in case of equal scores
+    # We need to order by another field in case of equal values
     # to ensure unique metrics in pagination.
     # The ORM returns random ordered query set if no order is specified.
     # We don't do ordering in the model since we order already in the query.

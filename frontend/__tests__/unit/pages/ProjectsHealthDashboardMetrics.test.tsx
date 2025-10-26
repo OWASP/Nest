@@ -114,7 +114,7 @@ describe('MetricsPage', () => {
       })
     })
   })
-  test('renders filter and sort dropdowns', async () => {
+  test('renders filter dropdown and sortable column headers', async () => {
     render(<MetricsPage />)
     const filterOptions = [
       'Incubator',
@@ -127,7 +127,7 @@ describe('MetricsPage', () => {
       'Reset All Filters',
     ]
     const filterSectionsLabels = ['Project Level', 'Project Health', 'Reset Filters']
-    const sortOptions = ['Ascending', 'Descending']
+    const sortableColumns = ['Stars', 'Forks', 'Contributors', 'Health Checked At', 'Score']
 
     await waitFor(() => {
       filterSectionsLabels.forEach((label) => {
@@ -139,11 +139,11 @@ describe('MetricsPage', () => {
         fireEvent.click(button)
         expect(button).toBeInTheDocument()
       })
-      sortOptions.forEach((option) => {
-        expect(screen.getAllByText(option).length).toBeGreaterThan(0)
-        const button = screen.getByRole('button', { name: option })
-        fireEvent.click(button)
-        expect(button).toBeInTheDocument()
+
+      sortableColumns.forEach((column) => {
+        const sortButton = screen.getByTitle(`Sort by ${column}`)
+        expect(sortButton).toBeInTheDocument()
+        fireEvent.click(sortButton)
       })
     })
   })
