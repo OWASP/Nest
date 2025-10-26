@@ -17,13 +17,15 @@ import ProjectsDashboardDropDown from 'components/ProjectsDashboardDropDown'
 
 const PAGINATION_LIMIT = 10
 
-const FIELD_MAPPING: Record<string, string> = {
+const FIELD_MAPPING = {
   score: 'score',
   stars: 'starsCount',
   forks: 'forksCount',
   contributors: 'contributorsCount',
   createdAt: 'createdAt',
-}
+} as const
+
+type OrderKey = keyof typeof FIELD_MAPPING
 
 const parseOrderParam = (orderParam: string | null) => {
   if (!orderParam) {
@@ -32,10 +34,13 @@ const parseOrderParam = (orderParam: string | null) => {
 
   const isDescending = orderParam.startsWith('-')
   const fieldKey = isDescending ? orderParam.slice(1) : orderParam
-  const graphqlField = FIELD_MAPPING[fieldKey] || 'score'
+  const isValidKey = fieldKey in FIELD_MAPPING
+  const normalizedKey = isValidKey ? fieldKey : 'score'
+  const graphqlField = FIELD_MAPPING[normalizedKey as OrderKey]
   const direction = isDescending ? Ordering.Desc : Ordering.Asc
+  const normalizedUrlKey = direction === Ordering.Desc ? `-${normalizedKey}` : normalizedKey
 
-  return { field: graphqlField, direction, urlKey: orderParam }
+  return { field: graphqlField, direction, urlKey: normalizedUrlKey }
 }
 
 const buildGraphQLOrdering = (field: string, direction: Ordering) => {
@@ -53,7 +58,7 @@ const buildOrderingWithTieBreaker = (primaryOrdering: Record<string, Ordering>) 
 ]
 const SortableColumnHeader: FC<{
   label: string
-  fieldKey: string
+  fieldKey: OrderKey
   currentOrderKey: string
   onSort: (orderKey: string | null) => void
   align?: 'left' | 'center' | 'right'
@@ -83,6 +88,8 @@ const SortableColumnHeader: FC<{
         onClick={handleClick}
         className={`flex items-center gap-1 font-semibold transition-colors hover:text-blue-600 ${textAlignClass}`}
         title={`Sort by ${label}`}
+        aria-label={`Sort by ${label}`}
+        aria-pressed={isActive}
       >
         <span className="truncate">{label}</span>
         <FontAwesomeIcon
@@ -170,6 +177,15 @@ const MetricsPage: FC = () => {
       ordering: buildOrderingWithTieBreaker(ordering),
     },
   })
+
+  useEffect(() => {
+    const { field: f, direction: d } = parseOrderParam(searchParams.get('order'))
+    const nextOrdering = buildGraphQLOrdering(f, d)
+    if (JSON.stringify(nextOrdering) !== JSON.stringify(ordering)) {
+      setOrdering(nextOrdering)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   useEffect(() => {
     if (data) {
