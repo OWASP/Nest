@@ -203,22 +203,6 @@ jobs:
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
 
-      - name: Wait for database to be ready
-        run: |
-          until docker exec ${{ job.services.db.id }} pg_isready -U nest_user_e2e -d nest_db_e2e; do
-            echo "Waiting for database..."
-            sleep 5
-          done
-
-      - name: Install PostgreSQL client
-        run: sudo apt-get install -y postgresql-client
-
-      - name: Load Postgres data
-        env:
-          PGPASSWORD: nest_user_e2e_password
-        run: |
-          gunzip -c backend/data/nest-e2e.sql.gz | psql -h localhost -U nest_user_e2e -d nest_db_e2e
-
       - name: Build backend e2e image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
@@ -266,15 +250,49 @@ jobs:
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
     needs:
-      - scan-code
-      - scan-ci-dependencies
+      - build-backend-e2e-instance
     runs-on: ubuntu-latest
+    services:
+      backend:
+        image: owasp/nest:test-backend-e2e-latest
+        env:
+          DJANGO_DB_HOST: db
+          DJANGO_DB_NAME: nest_db_e2e
+          DJANGO_DB_PASSWORD: nest_user_e2e_password
+          DJANGO_DB_USER: nest_user_e2e
+        options: >-
+          --health-cmd="wget --spider --timeout=1 http://localhost:8000/graphql/ || exit 1"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=5
+        ports:
+          - 8000:8000
+        command: >
+          sh -c '
+            python manage.py runserver 0.0.0.0:8000
+          '
+      db:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: nest_db_e2e
+          POSTGRES_PASSWORD: nest_user_e2e_password
+          POSTGRES_USER: nest_user_e2e
+        options: >-
+          --health-cmd="pg_isready -U nest_user_e2e -d nest_db_e2e -h localhost -p 5432"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=5
+        ports:
+          - 5433:5432
     steps:
       - name: Check out repository
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
+
+      - name: Setup E2E environment
+        uses: ./.github/workflows/setup-e2e-environment
 
       - name: Build frontend end-to-end testing image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83

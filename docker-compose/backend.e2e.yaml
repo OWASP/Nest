@@ -23,6 +23,14 @@ services:
       - nest-network
     ports:
       - 8000:8000
+    healthcheck:
+      interval: 5s
+      retries: 5
+      test: >
+        sh -c '
+          wget --spider --timeout=1 http://localhost:8000/graphql/ || exit 1
+        '
+      timeout: 5s
   db:
     container_name: nest-db-e2e
     image: pgvector/pgvector:pg16
@@ -42,6 +50,21 @@ services:
     ports:
       - 5433:5432
 
+  frontend:
+    container_name: nest-frontend-e2e
+    build:
+      context: ../frontend
+      dockerfile: docker/Dockerfile.e2e.test
+    command: >
+      sh -c '
+        pnpm run test:e2e
+      '
+    depends_on:
+      backend:
+        condition: service_healthy
+    env_file: ../frontend/.env
+    networks:
+      - nest-network
 
 volumes:
   db-e2e-data:
