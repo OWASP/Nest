@@ -10,15 +10,18 @@ runs:
             echo "Waiting for database..."
             sleep 5
           done
+        shell: bash
 
       - name: Install PostgreSQL client
         run: sudo apt-get install -y postgresql-client
+        shell: bash
 
       - name: Load Postgres data
         env:
           PGPASSWORD: nest_user_e2e_password
         run: |
           gunzip -c backend/data/nest-e2e.sql.gz | psql -h localhost -U nest_user_e2e -d nest_db_e2e
+        shell: bash
 
       - name: Build backend e2e image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
@@ -46,6 +49,7 @@ runs:
             sh -c '
               python manage.py runserver 0.0.0.0:8000
           '
+        shell: bash
 
       - name: Waiting for the backend to be ready
         run: |
@@ -54,3 +58,4 @@ runs:
             sleep 3
           done
           echo "Backend is up!"
+        shell: bash
