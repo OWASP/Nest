@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from django.core.validators import RegexValidator
 from django.db import models
 
 from apps.common.models import TimestampedModel
@@ -51,6 +52,23 @@ class MemberProfile(TimestampedModel):
         default=False,
         verbose_name="Is GSoC Mentor",
         help_text="Whether the member is a Google Summer of Code mentor",
+    )
+    linkedin_page_id = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        validators=[
+            RegexValidator(
+                regex=r"^[a-zA-Z0-9\-]{3,100}$",
+                message=(
+                    "LinkedIn ID must be 3-100 characters and contain only "
+                    "letters, numbers, and hyphens"
+                ),
+                code="invalid_linkedin_id",
+            ),
+        ],
+        verbose_name="LinkedIn Page ID",
+        help_text="LinkedIn username or custom URL ID (e.g., 'john-doe-123')",
     )
 
     def __str__(self) -> str:

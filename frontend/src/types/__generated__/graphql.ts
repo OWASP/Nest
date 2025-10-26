@@ -952,6 +952,7 @@ export type UserNode = {
   isOwaspBoardMember: Scalars['Boolean']['output'];
   isOwaspStaff: Scalars['Boolean']['output'];
   issuesCount: Scalars['Int']['output'];
+  linkedinPageId: Scalars['String']['output'];
   location: Scalars['String']['output'];
   login: Scalars['String']['output'];
   name: Scalars['String']['output'];

@@ -27,11 +27,16 @@ class TestUserNode:
             "contributions_count",
             "created_at",
             "email",
+            "first_owasp_contribution_at",
             "followers_count",
             "following_count",
             "id",
+            "is_former_owasp_staff",
+            "is_gsoc_mentor",
+            "is_owasp_board_member",
             "is_owasp_staff",
             "issues_count",
+            "linkedin_page_id",
             "location",
             "login",
             "name",
@@ -272,3 +277,35 @@ class TestUserNode:
         result = UserNode.is_gsoc_mentor(mock_user)
 
         assert result is False
+
+    def test_linkedin_page_id_with_profile_and_value(self):
+        """Test linkedin_page_id returns ID when profile exists with value."""
+        mock_profile = Mock()
+        mock_profile.linkedin_page_id = "john-doe-123"
+
+        mock_user = Mock()
+        mock_user.owasp_profile = mock_profile
+
+        result = UserNode.linkedin_page_id(mock_user)
+
+        assert result == "john-doe-123"
+
+    def test_linkedin_page_id_with_profile_empty_value(self):
+        """Test linkedin_page_id returns empty string when profile has empty value."""
+        mock_profile = Mock()
+        mock_profile.linkedin_page_id = ""
+
+        mock_user = Mock()
+        mock_user.owasp_profile = mock_profile
+
+        result = UserNode.linkedin_page_id(mock_user)
+
+        assert result == ""
+
+    def test_linkedin_page_id_without_profile(self):
+        """Test linkedin_page_id returns empty string when no profile."""
+        mock_user = Mock(spec=[])
+
+        result = UserNode.linkedin_page_id(mock_user)
+
+        assert result == ""

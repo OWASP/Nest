@@ -40,6 +40,7 @@ class MemberProfileAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "github_user",
+                    "linkedin_page_id",
                     "owasp_slack_id",
                 )
             },
