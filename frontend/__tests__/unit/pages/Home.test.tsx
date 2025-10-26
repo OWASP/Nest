@@ -212,10 +212,10 @@ describe('Home', () => {
     render(<Home />)
     await waitFor(() => {
       expect(screen.getByText('Upcoming Events')).toBeInTheDocument()
-      mockGraphQLData.upcomingEvents.forEach((event) => {
+      for (const event of mockGraphQLData.upcomingEvents) {
         expect(screen.getByText(event.name)).toBeInTheDocument()
         expect(screen.getByText('Feb 27 — 28, 2025')).toBeInTheDocument()
-      })
+      }
     })
   })
 
@@ -224,10 +224,11 @@ describe('Home', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Recent Pull Requests')).toBeInTheDocument()
-      mockGraphQLData.recentPullRequests.forEach((pullRequest) => {
+
+      for (const pullRequest of mockGraphQLData.recentPullRequests) {
         expect(screen.getByText(pullRequest.title)).toBeInTheDocument()
         expect(screen.getByText(pullRequest.repositoryName)).toBeInTheDocument()
-      })
+      }
     })
   })
 
@@ -236,12 +237,13 @@ describe('Home', () => {
     await waitFor(() => {
       const recentMilestones = mockGraphQLData.recentMilestones
 
-      recentMilestones.forEach((milestone) => {
+      for (const milestone of recentMilestones) {
         expect(screen.getByText(milestone.title)).toBeInTheDocument()
         expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
         expect(screen.getByText(`${milestone.openIssuesCount} open`)).toBeInTheDocument()
         expect(screen.getByText(`${milestone.closedIssuesCount} closed`)).toBeInTheDocument()
-      })
+      }
+
     })
   })
   test('renders when no recent releases', async () => {
@@ -271,12 +273,15 @@ describe('Home', () => {
     const stats = mockGraphQLData.statsOverview
 
     await waitFor(() => {
-      headers.forEach((header) => expect(screen.getByText(header)).toBeInTheDocument())
+
+      for (const header of headers) {
+        expect(screen.getByText(header)).toBeInTheDocument()
+      }
       // Wait for 2 seconds
       setTimeout(() => {
-        Object.values(stats).forEach((value) =>
+        for (const value of Object.values(stats)) {
           expect(screen.getByText(`${millify(value)}+`)).toBeInTheDocument()
-        )
+        }
       }, 2000)
     })
   })

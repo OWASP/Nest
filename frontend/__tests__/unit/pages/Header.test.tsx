@@ -248,11 +248,11 @@ describe('Header Component', () => {
       const logoImages = screen.getAllByRole('img', { name: /owasp logo/i })
       expect(logoImages.length).toBe(4) // 2 in desktop header + 2 in mobile menu
 
-      logoImages.forEach((logo) => {
+      for (const logo of logoImages) {
         expect(logo).toHaveAttribute('width', '64')
         expect(logo).toHaveAttribute('height', '64')
         expect(logo).toHaveAttribute('src')
-      })
+      }
     })
 
     it('renders Nest text branding', () => {
@@ -274,9 +274,10 @@ describe('Header Component', () => {
           (link) => link.getAttribute('href') === '/' && link.querySelector('img[alt="OWASP Logo"]')
         )
       expect(homeLinks.length).toBe(2) // Desktop and mobile
-      homeLinks.forEach((link) => {
+      
+      for (const link of homeLinks) {
         expect(link).toHaveAttribute('href', '/')
-      })
+      }
     })
   })
 

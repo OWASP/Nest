@@ -547,10 +547,10 @@ describe('ProjectsDashboardDropDown Component', () => {
       )
 
       const items = screen.getAllByTestId('dropdown-item')
-      items.forEach((item) => {
+      for (const item of items) {
         expect(item).toHaveAttribute('role', 'menuitem')
         expect(item).toHaveAttribute('tabIndex', '0')
-      })
+      }
     })
   })
 

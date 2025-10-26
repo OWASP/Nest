@@ -139,13 +139,13 @@ describe('AnchorTitle Component', () => {
 
       const titleRegex = /^#[a-z0-9-]+$/
 
-      titles.forEach((title) => {
-        const { unmount } = render(<AnchorTitle title={title} />)
+      for (const title of titles) {
+         const { unmount } = render(<AnchorTitle title={title} />)
         const link = screen.getByRole('link')
         const href = link.getAttribute('href')
         expect(href).toMatch(titleRegex)
         unmount()
-      })
+      }
     })
   })
 

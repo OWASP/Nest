@@ -130,9 +130,9 @@ describe('Footer', () => {
     test('renders all footer sections with correct titles', () => {
       renderFooter()
 
-      mockFooterSections.forEach((section) => {
+      for (const section of mockFooterSections) {
         expect(screen.getByText(section.title)).toBeInTheDocument()
-      })
+      }
     })
 
     test('renders all section links correctly', () => {
@@ -150,31 +150,31 @@ describe('Footer', () => {
           }
         }
       }
-      regularLinks.forEach((link) => {
+      for (const link of regularLinks) {
         const linkElement = screen.getByRole('link', { name: link.text })
         expect(linkElement).toBeInTheDocument()
         expect(linkElement).toHaveAttribute('href', link.href)
         expect(linkElement).toHaveAttribute('target', '_blank')
-      })
+      }
 
-      spanElements.forEach((link) => {
+      for (const link of spanElements) {
         expect(screen.getByText(link.text)).toBeInTheDocument()
-      })
+      }
     })
 
     test('renders social media icons with correct attributes', () => {
       renderFooter()
 
-      mockFooterIcons.forEach((icon) => {
+      for (const icon of mockFooterIcons) {
         const link = screen.getByLabelText(`OWASP Nest ${icon.label}`)
         expect(link).toBeInTheDocument()
         expect(link).toHaveAttribute('href', icon.href)
         expect(link).toHaveAttribute('target', '_blank')
         expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-
+  
         const iconElement = link.querySelector('[data-testid="font-awesome-icon"]')
         expect(iconElement).toBeInTheDocument()
-      })
+      }
     })
 
     test('renders copyright information with current year', () => {
@@ -271,20 +271,22 @@ describe('Footer', () => {
       renderFooter()
 
       const buttons = screen.getAllByRole('button')
-      buttons.forEach((button, index) => {
-        const sectionTitle = mockFooterSections[index].title
-        expect(button).toHaveAttribute('aria-controls', `footer-section-${sectionTitle}`)
-        expect(button).toHaveAttribute('aria-expanded')
-      })
+      
+      for (const buttonInfo of buttons) {
+        const sectionTitle = mockFooterSections[buttonInfo.index].title
+        expect(buttonInfo.button).toHaveAttribute('aria-controls', `footer-section-${sectionTitle}`)
+        expect(buttonInfo.button).toHaveAttribute('aria-expanded')
+        
+      }
     })
 
     test('has correct section IDs matching aria-controls', () => {
       renderFooter()
 
-      mockFooterSections.forEach((section) => {
+      for (const section of mockFooterSections) {
         const sectionElement = document.getElementById(`footer-section-${section.title}`)
         expect(sectionElement).toBeInTheDocument()
-      })
+      }
     })
 
     test('has proper semantic structure', () => {
@@ -292,19 +294,18 @@ describe('Footer', () => {
 
       expect(screen.getByRole('contentinfo')).toBeInTheDocument()
 
-      mockFooterSections.forEach((section) => {
+      for (const section of mockFooterSections) {
         const heading = screen.getByRole('heading', { name: section.title, level: 3 })
         expect(heading).toBeInTheDocument()
-      })
+      }
     })
 
     test('has proper aria-labels for social media links', () => {
       renderFooter()
-
-      mockFooterIcons.forEach((icon) => {
+      for (const icon of mockFooterIcons) {
         const link = screen.getByLabelText(`OWASP Nest ${icon.label}`)
         expect(link).toBeInTheDocument()
-      })
+      }
     })
   })
 
@@ -335,10 +336,10 @@ describe('Footer', () => {
       renderFooter()
 
       const buttons = screen.getAllByRole('button')
-      buttons.forEach((button) => {
+      for (const button of buttons) {
         expect(button).toHaveClass('flex', 'w-full', 'items-center', 'justify-between')
         expect(button).toHaveAttribute('data-disable-animation', 'true')
-      })
+      }
     })
 
     test('applies correct section content classes for collapsed/expanded states', () => {
@@ -381,9 +382,9 @@ describe('Footer', () => {
 
       const buttons = screen.getAllByRole('button')
       expect(buttons.length).toBeGreaterThan(0)
-      buttons.forEach((button) => {
+      for (const button of buttons) {
         expect(button).toHaveAttribute('data-disable-animation', 'true')
-      })
+      }
     })
   })
 })

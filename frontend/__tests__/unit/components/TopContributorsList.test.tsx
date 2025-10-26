@@ -565,15 +565,17 @@ describe('TopContributorsList Component', () => {
       const contributorItems = screen
         .getAllByTestId('contributor-avatar')
         .map((avatar) => avatar.parentElement?.parentElement)
-      contributorItems.forEach((item) => {
-        expect(item).toHaveClass(
-          'overflow-hidden',
-          'rounded-lg',
-          'bg-gray-200',
-          'p-4',
-          'dark:bg-gray-700'
-        )
-      })
+      
+        for (const item of contributorItems) {
+          expect(item).toHaveClass(
+            'overflow-hidden',
+            'rounded-lg',
+            'bg-gray-200',
+            'p-4',
+            'dark:bg-gray-700'
+          )
+          
+        }
     })
 
     it('renders proper grid structure', () => {
@@ -592,18 +594,19 @@ describe('TopContributorsList Component', () => {
       render(<TopContributorsList {...defaultProps} />)
 
       const avatars = screen.getAllByTestId('contributor-avatar')
-      avatars.forEach((avatar) => {
+      for (const avatar of avatars) {
         expect(avatar).toHaveAttribute('width', '24')
         expect(avatar).toHaveAttribute('height', '24')
         expect(avatar).toHaveClass('rounded-full')
-      })
+      }
     })
 
     it('renders contributor links with proper styling', () => {
       render(<TopContributorsList {...defaultProps} />)
 
       const links = screen.getAllByTestId('contributor-link')
-      links.forEach((link) => {
+      
+      for (const link of links) {
         expect(link).toHaveClass(
           'cursor-pointer',
           'overflow-hidden',
@@ -613,7 +616,7 @@ describe('TopContributorsList Component', () => {
           'text-blue-400',
           'hover:underline'
         )
-      })
+      }
     })
   })
 })

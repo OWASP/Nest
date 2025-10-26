@@ -185,10 +185,10 @@ describe('UserDetailsPage', () => {
       const releasesTitle = screen.getByText('Recent Releases')
       expect(releasesTitle).toBeInTheDocument()
       const releases = mockUserDetailsData.recentReleases
-      releases.forEach((release) => {
+      for (const release of releases) {
         expect(screen.getByText(release.name)).toBeInTheDocument()
         expect(screen.getByText(release.repositoryName)).toBeInTheDocument()
-      })
+      }
     })
   })
 
@@ -205,12 +205,12 @@ describe('UserDetailsPage', () => {
       const milestonesTitle = screen.getByText('Recent Milestones')
       expect(milestonesTitle).toBeInTheDocument()
       const milestones = mockUserDetailsData.recentMilestones
-      milestones.forEach((milestone) => {
+      for (const milestone of milestones) {
         expect(screen.getByText(milestone.title)).toBeInTheDocument()
         expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
         expect(screen.getByText(`${milestone.openIssuesCount} open`)).toBeInTheDocument()
         expect(screen.getByText(`${milestone.closedIssuesCount} closed`)).toBeInTheDocument()
-      })
+      }
     })
   })
 

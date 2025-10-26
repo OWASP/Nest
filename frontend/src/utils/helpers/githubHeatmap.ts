@@ -315,8 +315,11 @@ export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
     })
   }
 
-  data.years.forEach((year, i) => {
-    const offsetY = yearHeight * i + canvasMargin + headerOffset + 10
+ let index = 0 
+
+for (const year of data.years) {
+
+    const offsetY = yearHeight * index + canvasMargin + headerOffset + 10
     const offsetX = canvasMargin
     drawYear(ctx, {
       ...opts,
@@ -326,5 +329,19 @@ export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
       data,
       themeName,
     })
-  })
+
+    index++
+}
+  // data.years.forEach((year, i) => {
+  //   const offsetY = yearHeight * i + canvasMargin + headerOffset + 10
+  //   const offsetX = canvasMargin
+  //   drawYear(ctx, {
+  //     ...opts,
+  //     year,
+  //     offsetX,
+  //     offsetY,
+  //     data,
+  //     themeName,
+  //   })
+  // })
 }
