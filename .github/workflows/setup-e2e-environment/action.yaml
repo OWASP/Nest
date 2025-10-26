@@ -39,6 +39,7 @@ runs:
       - name: Start Backend in the background
         run: |
           nohup docker run --rm --name nest-backend-e2e-runner \
+            --env-file backend/.env.example \
             -e DJANGO_DB_HOST=db \
             -e DJANGO_DB_NAME=nest_db_e2e \
             -e DJANGO_DB_USER=nest_user_e2e \
