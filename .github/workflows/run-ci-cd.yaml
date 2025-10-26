@@ -168,7 +168,7 @@ jobs:
             type=gha,compression=zstd
           context: backend
           file: backend/docker/Dockerfile.test
-          push: true
+          load: true
           platforms: linux/amd64
           tags: owasp/nest:test-backend-latest
 
