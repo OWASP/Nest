@@ -38,7 +38,7 @@ runs:
 
       - name: Start Backend in the background
         run: |
-          docker run -d --rm --name nest-backend-e2e-runner \
+          docker run --rm --name nest-backend-e2e-runner \
             --env-file backend/.env.example \
             -e DJANGO_SETTINGS_MODULE=settings.test \
             -e DJANGO_DB_HOST=localhost \
