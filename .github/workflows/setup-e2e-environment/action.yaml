@@ -18,6 +18,19 @@
         run: |
           gunzip -c backend/data/nest-e2e.sql.gz | psql -h localhost -U nest_user_e2e -d nest_db_e2e
 
+      - name: Build backend e2e image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        with:
+          cache-from: |
+            type=gha
+          cache-to: |
+            type=gha,compression=zstd
+          context: backend
+          file: backend/docker/Dockerfile
+          load: true
+          platforms: linux/amd64
+          tags: owasp/nest:test-backend-e2e-latest
+
       - name: Start Backend in the background
         run: |
           nohup docker run --rm --name nest-backend-e2e-runner \
