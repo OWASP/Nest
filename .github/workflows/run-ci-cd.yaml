@@ -209,6 +209,9 @@ jobs:
 
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
+    needs:
+      - scan-code
+      - scan-ci-dependencies
     runs-on: ubuntu-latest
     services:
       db:
