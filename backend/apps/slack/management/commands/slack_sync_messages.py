@@ -316,10 +316,10 @@ class Command(BaseCommand):
                 page=page,
             )
             self._handle_slack_response(response, "search_messages")
-            return response
-            
         except SlackApiError as e:
             return self._handle_search_error(e, retry_count, max_retries, delay)
+        else:
+            return response
 
     def _handle_search_error(self, error: SlackApiError, retry_count: int, max_retries: int, delay: float):
         """Handle search API errors with appropriate retry logic."""
