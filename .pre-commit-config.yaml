@@ -9,6 +9,14 @@ repos:
           - --strict
         exclude: (.github|pnpm-lock.yaml)
 
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.104.0
+    hooks:
+      - id: terraform_fmt
+        files: ^infrastructure/.*\.tf$
+      - id: terraform_tflint
+        files: ^infrastructure/.*\.tf$
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.6
     hooks:

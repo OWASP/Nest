@@ -1,0 +1,39 @@
+{
+  "staging": {
+    "app_function": "wsgi.application",
+    "django_settings": "settings.staging",
+    "environment_variables": {
+      "DJANGO_ALGOLIA_APPLICATION_ID": "${DJANGO_ALGOLIA_APPLICATION_ID}",
+      "DJANGO_ALGOLIA_WRITE_API_KEY": "${DJANGO_ALGOLIA_WRITE_API_KEY}",
+      "DJANGO_ALLOWED_HOSTS": "${DJANGO_ALLOWED_HOSTS}",
+      "DJANGO_AWS_ACCESS_KEY_ID": "${DJANGO_AWS_ACCESS_KEY_ID}",
+      "DJANGO_AWS_SECRET_ACCESS_KEY": "${DJANGO_AWS_SECRET_ACCESS_KEY}",
+      "DJANGO_CONFIGURATION": "Staging",
+      "DJANGO_DB_HOST": "${DJANGO_DB_HOST}",
+      "DJANGO_DB_NAME": "${DJANGO_DB_NAME}",
+      "DJANGO_DB_USER": "${DJANGO_DB_USER}",
+      "DJANGO_DB_PORT": "${DJANGO_DB_PORT}",
+      "DJANGO_DB_PASSWORD": "${DJANGO_DB_PASSWORD}",
+      "DJANGO_OPEN_AI_SECRET_KEY": "${DJANGO_OPEN_AI_SECRET_KEY}",
+      "DJANGO_REDIS_HOST": "${DJANGO_REDIS_HOST}",
+      "DJANGO_REDIS_PASSWORD": "${DJANGO_REDIS_PASSWORD}",
+      "DJANGO_SECRET_KEY": "${DJANGO_SECRET_KEY}",
+      "DJANGO_SENTRY_DSN": "${DJANGO_SENTRY_DSN}",
+      "DJANGO_SLACK_BOT_TOKEN": "${DJANGO_SLACK_BOT_TOKEN}",
+      "DJANGO_SLACK_SIGNING_SECRET": "${DJANGO_SLACK_SIGNING_SECRET}"
+    },
+    "manage_roles": true,
+    "project_name": "nest-backend",
+    "runtime": "python3.13",
+    "s3_bucket": "${ZAPPA_S3_BUCKET}",
+    "slim_handler": true,
+    "vpc_config": {
+      "SecurityGroupIds": ["${AWS_LAMBDA_VPC_SECURITY_GROUP_ID}"],
+      "SubnetIds": [
+        "${AWS_PRIVATE_SUBNET_A}",
+        "${AWS_PRIVATE_SUBNET_B}",
+        "${AWS_PRIVATE_SUBNET_C}"
+      ]
+    }
+  }
+}

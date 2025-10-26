@@ -20,6 +20,7 @@ NOSONAR
 Nadu
 Nominatim
 PLR
+PYTHONPATH
 PYTHONUNBUFFERED
 RUF
 SEO
@@ -57,6 +58,7 @@ cva
 defectdojo
 demojize
 dismissable
+dkr
 dsn
 env
 facebookexternalhit
@@ -69,6 +71,7 @@ gunicorn
 heroui
 hsl
 igoat
+igw
 inlinehilite
 isanori
 jumpstart
