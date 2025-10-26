@@ -3,6 +3,7 @@
 This document provides instructions on how to setup the infrastructure for this project.
 
 ## Prerequisites
+
 Ensure you have the following setup/installed:
 
 - Setup Project: [CONTRIBUTING.md](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md)
@@ -11,6 +12,7 @@ Ensure you have the following setup/installed:
 - An AWS account with credentials configured locally.
 
 ## Setting up the infrastructure
+
 Follow these steps to set up the infrastructure:
 
 1. **Change the Directory**:
@@ -20,6 +22,7 @@ Follow these steps to set up the infrastructure:
      ```bash
      cd infrastructure/
      ```
+
     *Note*: The following steps assume the current working directory is `infrastructure/`
 
 2. **Create Variables File**:
@@ -35,9 +38,16 @@ Follow these steps to set up the infrastructure:
      ```bash
      cat terraform.tfvars.example > terraform.tfvars
      ```
+
    - Update the default `django_` prefixed variables. (database/redis credentials will be added later)
 
 3. **Apply Changes**:
+
+   - Init terraform if needed:
+
+     ```bash
+     terraform init
+     ```
 
    - Apply the changes and create the infrastructure using the following command:
 
@@ -54,11 +64,13 @@ Follow these steps to set up the infrastructure:
      ```bash
      terraform output
      ```
+
      Example Output:
+
      ```bash
-     database_endpoint = "owasp-nest-staging-proxy.proxy-000000000000.ap-south-1.rds.amazonaws.com"
+     database_endpoint = "owasp-nest-staging-proxy.proxy-000000000000.us-east-2.rds.amazonaws.com"
      db_password = <sensitive>
-     ecr_repository_url = "000000000000.dkr.ecr.ap-south-1.amazonaws.com/owasp-nest-staging-backend"
+     ecr_repository_url = "000000000000.dkr.ecr.us-east-2.amazonaws.com/owasp-nest-staging-backend"
      lambda_security_group_id = "sg-00000000000000000"
      private_subnet_ids = [
           "subnet-00000000000000000",
@@ -69,9 +81,11 @@ Follow these steps to set up the infrastructure:
      redis_endpoint = "master.owasp-nest-staging-cache.aaaaaa.region1.cache.amazonaws.com"
      zappa_s3_bucket = "owasp-nest-zappa-deployments"
      ```
+
      ```bash
      terraform output -raw db_password
      ```
+
      ```bash
      terraform output -raw redis_auth_token
      ```
@@ -83,6 +97,7 @@ Follow these steps to set up the infrastructure:
      ```bash
      terraform apply
      ```
+
 *Note*: Step 4 and 5 ensure that ECS/Fargate tasks have proper environment variables.
 These two steps will be removed when AWS Secrets Manager is integrated.
 
@@ -97,6 +112,7 @@ The Django backend deployment is managed by Zappa. This includes the API Gateway
      ```bash
      cd ../backend/
      ```
+
     *Note*: The following steps assume the current working directory is `backend/`
 
 2. **Setup Dependencies**:
@@ -104,30 +120,30 @@ The Django backend deployment is managed by Zappa. This includes the API Gateway
    - This step may differ for different operating systems.
    - The goal is to install dependencies listed in `pyproject.toml`.
    - Steps for Linux:
+
      ```bash
      poetry install && eval $(poetry env activate)
      ```
 
-3.  **Create Zappa Settings File**:
+3. **Create Zappa Settings File**:
 
-   - Create a local Zappa settings file in the `backend` directory:
+- Create a local Zappa settings file in the `backend` directory:
 
      ```bash
      touch zappa_settings.json
      ```
 
-   - Copy the contents from the template file into your new local environment file:
+- Copy the contents from the template file into your new local environment file:
 
      ```bash
      cat zappa_settings.example.json > zappa_settings.json
      ```
 
-4.  **Populate Settings File**:
+4. **Populate Settings File**:
 
-   - Replace all `${...}` variables in `zappa_settings.json` with appropriate output variables.
+- Replace all `${...}` variables in `zappa_settings.json` with appropriate output variables.
 
-
-5.  **Deploy**:
+5. **Deploy**:
 
     ```bash
     zappa deploy staging
@@ -142,12 +158,12 @@ Migrate and load data into the new database.
 1. **Setup ECR Image**:
    - Login to the Elastic Container Registry using the following command:
 
-     *Note*: replace `ap-south-1` with configured region and `000000000000` with AWS Account ID.
+     *Note*: replace `us-east-2` with configured region and `000000000000` with AWS Account ID.
 
      *Warning*: Configure a credential helper instead of using following command to login.
 
      ```bash
-     aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 000000000000.dkr.ecr.ap-south-1.amazonaws.com
+     aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 000000000000.dkr.ecr.us-east-2.amazonaws.com
      ```
 
    - Build the backend image using the following command:
@@ -157,15 +173,17 @@ Migrate and load data into the new database.
      ```
 
    - Tag the image:
-     *Note*: replace `ap-south-1` with configured region and `000000000000` with AWS Account ID.
+     *Note*: replace `us-east-2` with configured region and `000000000000` with AWS Account ID.
+
      ```bash
-      docker tag owasp-nest-staging-backend:latest 000000000000.dkr.ecr.ap-south-1.amazonaws.com/owasp-nest-staging-backend:latest
+      docker tag owasp-nest-staging-backend:latest 000000000000.dkr.ecr.us-east-2.amazonaws.com/owasp-nest-staging-backend:latest
      ```
 
    - Push the image:
-     *Note*: replace `ap-south-1` with configured region and `000000000000` with AWS Account ID.
+     *Note*: replace `us-east-2` with configured region and `000000000000` with AWS Account ID.
+
      ```bash
-      docker push 000000000000.dkr.ecr.ap-south-1.amazonaws.com/owasp-nest-staging-backend:latest
+      docker push 000000000000.dkr.ecr.us-east-2.amazonaws.com/owasp-nest-staging-backend:latest
      ```
 
 2. **Upload Fixture to S3**:
@@ -205,6 +223,7 @@ Migrate and load data into the new database.
   ```
 
 ## Helpful Commands
+
 - To update a Zappa `staging` deployment run:
 
   ```bash

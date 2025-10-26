@@ -17,9 +17,6 @@ __pycache__
 .python_history
 .python-version
 .ruff_cache
-**/.terraform/
-*.tfstate
-*.tfstate.*
 .venv/
 .vscode
 *.code-workspace
@@ -27,10 +24,13 @@ __pycache__
 *.log
 *.pdf
 *.pem
-backend/*nest-backend-dev*.zip
+*.tfstate
+*.tfstate.*
+**/.terraform/
 backend/*nest-backend-dev*.tar.gz
-backend/*nest-backend-staging*.zip
+backend/*nest-backend-dev*.zip
 backend/*nest-backend-staging*.tar.gz
+backend/*nest-backend-staging*.zip
 backend/data/backup*
 backend/staticfiles
 backend/zappa_settings.json
