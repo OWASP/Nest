@@ -73,8 +73,8 @@ const getContributionCount = (snapshot: MemberSnapshot | null, key: string, type
   const bareKey = key.startsWith(`www-${type}-`) ? key.replace(`www-${type}-`, '') : key
   const directKey = contributions[bareKey]
   const withPrefix = contributions[`www-${type}-${bareKey}`]
-  
-  return directKey || withPrefix || 0
+
+  return (directKey ?? withPrefix) ?? 0;
 }
 
 const createSlackUrl = (channelName: string) => `https://owasp.slack.com/archives/${channelName}`
@@ -633,7 +633,7 @@ const BoardCandidatesPage = () => {
                     {sortedRepos.length > 1 && (
                       <div>
                         <div className="flex flex-wrap gap-2">
-                          {sortedRepos.slice(1).map(([repoName, count]) => (
+                          {sortedRepos.slice(1, 5).map(([repoName, count]) => (
                             <RepositoryBadge
                               key={repoName}
                               repoName={repoName}
