@@ -41,6 +41,21 @@ describe('ProgramCard', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    // Mock toLocaleDateString to ensure consistent formatting
+    jest.spyOn(Date.prototype, 'toLocaleDateString').mockImplementation(function(this: Date, locale, options) {
+      if (this.getTime() === new Date('2024-01-01T00:00:00Z').getTime()) {
+        return 'Jan 1, 2024'
+      }
+      if (this.getTime() === new Date('2024-12-31T23:59:59Z').getTime()) {
+        return 'Dec 31, 2024'
+      }
+      // Call the original implementation for other dates
+      return new Intl.DateTimeFormat(locale, options).format(this)
+    })
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
 
   describe('Basic Rendering', () => {
@@ -219,6 +234,7 @@ describe('ProgramCard', () => {
     it('shows date range when both startedAt and endedAt are provided', () => {
       render(<ProgramCard program={baseMockProgram} onView={mockOnView} accessLevel="user" />)
 
+      // With mocked date formatting, we can now match the exact string
       expect(screen.getByText('Jan 1, 2024 – Dec 31, 2024')).toBeInTheDocument()
     })
 

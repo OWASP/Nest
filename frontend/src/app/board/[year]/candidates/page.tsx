@@ -1,5 +1,6 @@
 'use client'
 import { useQuery, useApolloClient } from '@apollo/client/react'
+import { ApolloClient } from '@apollo/client';
 import { faLinkedin } from '@fortawesome/free-brands-svg-icons'
 import {
   faCode,
@@ -15,6 +16,7 @@ import millify from 'millify'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import React from 'react'
 import { useEffect, useState } from 'react'
 
 import { handleAppError, ErrorDisplay } from 'app/global-error'
@@ -29,6 +31,209 @@ import ContributionHeatmap from 'components/ContributionHeatmap'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 dayjs.extend(relativeTime)
+
+// Utility functions for data processing
+const fetchChapterData = async (client: ApolloClient<any>, key: string) => {
+  try {
+    const { data } = await client.query({
+      query: GetChapterByKeyDocument,
+      variables: { key: key.replace('www-chapter-', '') },
+    })
+    return data?.chapter || null
+  } catch {
+    return null
+  }
+}
+
+const fetchProjectData = async (client: ApolloClient<any>, key: string) => {
+  try {
+    const { data } = await client.query({
+      query: GetProjectByKeyDocument,
+      variables: { key: key.replace('www-project-', '') },
+    })
+    return data?.project || null
+  } catch {
+    return null
+  }
+}
+
+const sortItemsByName = <T extends { name: string }>(items: T[]): T[] => {
+  return items.sort((a, b) => a.name.localeCompare(b.name))
+}
+
+const getContributionCount = (snapshot: MemberSnapshot | null, key: string, type: 'chapter' | 'project') => {
+  if (!snapshot) return 0
+  
+  const contributions = type === 'chapter' 
+    ? snapshot.chapterContributions 
+    : snapshot.projectContributions
+    
+  if (!contributions) return 0
+  
+  const bareKey = key.startsWith(`www-${type}-`) ? key.replace(`www-${type}-`, '') : key
+  const directKey = contributions[bareKey]
+  const withPrefix = contributions[`www-${type}-${bareKey}`]
+  
+  return directKey || withPrefix || 0
+}
+
+const createSlackUrl = (channelName: string) => `https://owasp.slack.com/archives/${channelName}`
+
+const createGitHubCommitsUrl = (repoName: string, userLogin: string) => 
+  `https://github.com/${repoName}/commits?author=${userLogin}`
+
+// Component helper functions
+const ChapterBadge = ({ 
+  chapter, 
+  snapshot, 
+  onStopPropagation 
+}: { 
+  chapter: Chapter
+  snapshot: MemberSnapshot | null
+  onStopPropagation: (e: React.MouseEvent) => void 
+}) => {
+  const contributionCount = getContributionCount(snapshot, chapter.key, 'chapter')
+  const isActive = contributionCount > 0
+  
+  return (
+    <Link
+      key={chapter.id}
+      href={`/chapters/${chapter.key.replace('www-chapter-', '')}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
+        isActive
+          ? 'bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30'
+          : 'bg-orange-50 text-orange-700 ring-orange-700/10 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30 dark:hover:bg-orange-900/30'
+      }`}
+      onClick={onStopPropagation}
+    >
+      <span>{chapter.name}</span>
+      <span
+        className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
+          isActive
+            ? 'bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300'
+            : 'bg-orange-100 text-orange-800 dark:bg-orange-800/40 dark:text-orange-300'
+        }`}
+      >
+        {isActive ? `${contributionCount} contributions` : 'no contributions'}
+      </span>
+    </Link>
+  )
+}
+
+const ProjectBadge = ({ 
+  project, 
+  snapshot, 
+  onStopPropagation 
+}: { 
+  project: Project
+  snapshot: MemberSnapshot | null
+  onStopPropagation: (e: React.MouseEvent) => void 
+}) => {
+  const contributionCount = getContributionCount(snapshot, project.key, 'project')
+  const isActive = contributionCount > 0
+  
+  return (
+    <Link
+      key={project.id}
+      href={`/projects/${project.key.replace('www-project-', '')}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
+        isActive
+          ? 'bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30'
+          : 'bg-orange-50 text-orange-700 ring-orange-700/10 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30 dark:hover:bg-orange-900/30'
+      }`}
+      onClick={onStopPropagation}
+    >
+      <span>{project.name}</span>
+      <span
+        className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
+          isActive
+            ? 'bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300'
+            : 'bg-orange-100 text-orange-800 dark:bg-orange-800/40 dark:text-orange-300'
+        }`}
+      >
+        {isActive ? `${contributionCount} contributions` : 'no contributions'}
+      </span>
+    </Link>
+  )
+}
+
+const RepositoryBadge = ({ 
+  repoName, 
+  count, 
+  userLogin, 
+  isTop = false, 
+  onStopPropagation 
+}: { 
+  repoName: string
+  count: number
+  userLogin: string
+  isTop?: boolean
+  onStopPropagation: (e: React.MouseEvent) => void 
+}) => {
+  const baseClasses = "inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
+  const colorClasses = isTop
+    ? "bg-green-50 text-green-700 ring-green-700/10 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-400/30 dark:hover:bg-green-900/30"
+    : "bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30"
+  
+  const badgeClasses = isTop
+    ? "bg-green-100 text-green-800 dark:bg-green-800/40 dark:text-green-300"
+    : "bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300"
+
+  return (
+    <a
+      href={createGitHubCommitsUrl(repoName, userLogin)}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${baseClasses} ${colorClasses}`}
+      onClick={onStopPropagation}
+    >
+      <span>{repoName}</span>
+      <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${badgeClasses}`}>
+        {count} commits
+      </span>
+    </a>
+  )
+}
+
+const ChannelBadge = ({ 
+  channelName, 
+  messageCount, 
+  isTop = false, 
+  onStopPropagation 
+}: { 
+  channelName: string
+  messageCount: number
+  isTop?: boolean
+  onStopPropagation: (e: React.MouseEvent) => void 
+}) => {
+  const baseClasses = "inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
+  const colorClasses = isTop
+    ? "bg-green-50 text-green-700 ring-green-700/10 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-400/30 dark:hover:bg-green-900/30"
+    : "bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30"
+  
+  const badgeClasses = isTop
+    ? "bg-green-100 text-green-800 dark:bg-green-800/40 dark:text-green-300"
+    : "bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300"
+
+  return (
+    <a
+      href={createSlackUrl(channelName)}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${baseClasses} ${colorClasses}`}
+      onClick={onStopPropagation}
+    >
+      <span>#{channelName}</span>
+      <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${badgeClasses}`}>
+        {messageCount} messages
+      </span>
+    </a>
+  )
+}
 
 type Candidate = {
   id: string
@@ -138,21 +343,13 @@ const BoardCandidatesPage = () => {
         const chapters: Chapter[] = []
 
         for (const key of chapterKeys) {
-          try {
-            const { data } = await client.query({
-              query: GetChapterByKeyDocument,
-              variables: { key: key.replace('www-chapter-', '') },
-            })
-
-            if (data?.chapter) {
-              chapters.push(data.chapter)
-            }
-          } catch {
-            // Silently skip chapters that fail to fetch
+          const chapter = await fetchChapterData(client, key)
+          if (chapter) {
+            chapters.push(chapter)
           }
         }
 
-        setLedChapters(chapters.sort((a, b) => a.name.localeCompare(b.name)))
+        setLedChapters(sortItemsByName(chapters))
       }
 
       fetchChapters()
@@ -167,21 +364,13 @@ const BoardCandidatesPage = () => {
         const projects: Project[] = []
 
         for (const key of projectKeys) {
-          try {
-            const { data } = await client.query({
-              query: GetProjectByKeyDocument,
-              variables: { key: key.replace('www-project-', '') },
-            })
-
-            if (data?.project) {
-              projects.push(data.project)
-            }
-          } catch {
-            // Silently skip projects that fail to fetch
+          const project = await fetchProjectData(client, key)
+          if (project) {
+            projects.push(project)
           }
         }
 
-        setLedProjects(projects.sort((a, b) => a.name.localeCompare(b.name)))
+        setLedProjects(sortItemsByName(projects))
       }
 
       fetchProjects()
@@ -399,81 +588,22 @@ const BoardCandidatesPage = () => {
                 </div>
               ) : (
                 <div className="flex flex-wrap gap-2">
-                  {ledChapters.map((chapter) => {
-                    // Strip prefix if present to get bare key
-                    const bareKey = chapter.key.startsWith('www-chapter-')
-                      ? chapter.key.replace('www-chapter-', '')
-                      : chapter.key
-                    // Check both key formats for compatibility
-                    const directKey = snapshot?.chapterContributions?.[bareKey]
-                    const withPrefix = snapshot?.chapterContributions?.[`www-chapter-${bareKey}`]
-                    const contributionCount = directKey || withPrefix || 0
-
-                    return (
-                      <Link
-                        key={chapter.id}
-                        href={`/chapters/${chapter.key.replace('www-chapter-', '')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
-                          contributionCount === 0
-                            ? 'bg-orange-50 text-orange-700 ring-orange-700/10 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30 dark:hover:bg-orange-900/30'
-                            : 'bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30'
-                        }`}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <span>{chapter.name}</span>
-                        <span
-                          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
-                            contributionCount === 0
-                              ? 'bg-orange-100 text-orange-800 dark:bg-orange-800/40 dark:text-orange-300'
-                              : 'bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300'
-                          }`}
-                        >
-                          {contributionCount === 0
-                            ? 'no contributions'
-                            : `${contributionCount} contributions`}
-                        </span>
-                      </Link>
-                    )
-                  })}
-                  {ledProjects.map((project) => {
-                    // Strip prefix if present to get bare key
-                    const bareKey = project.key.startsWith('www-project-')
-                      ? project.key.replace('www-project-', '')
-                      : project.key
-                    // Check both key formats for compatibility
-                    const directKey = snapshot?.projectContributions?.[bareKey]
-                    const withPrefix = snapshot?.projectContributions?.[`www-project-${bareKey}`]
-                    const contributionCount = directKey || withPrefix || 0
-                    return (
-                      <Link
-                        key={project.id}
-                        href={`/projects/${project.key.replace('www-project-', '')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
-                          contributionCount === 0
-                            ? 'bg-orange-50 text-orange-700 ring-orange-700/10 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30 dark:hover:bg-orange-900/30'
-                            : 'bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30'
-                        }`}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <span>{project.name}</span>
-                        <span
-                          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
-                            contributionCount === 0
-                              ? 'bg-orange-100 text-orange-800 dark:bg-orange-800/40 dark:text-orange-300'
-                              : 'bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300'
-                          }`}
-                        >
-                          {contributionCount === 0
-                            ? 'no contributions'
-                            : `${contributionCount} contributions`}
-                        </span>
-                      </Link>
-                    )
-                  })}
+                  {ledChapters.map((chapter) => (
+                    <ChapterBadge
+                      key={chapter.id}
+                      chapter={chapter}
+                      snapshot={snapshot}
+                      onStopPropagation={(e) => e.stopPropagation()}
+                    />
+                  ))}
+                  {ledProjects.map((project) => (
+                    <ProjectBadge
+                      key={project.id}
+                      project={project}
+                      snapshot={snapshot}
+                      onStopPropagation={(e) => e.stopPropagation()}
+                    />
+                  ))}
                 </div>
               )}
             </div>
@@ -492,40 +622,26 @@ const BoardCandidatesPage = () => {
                       <h4 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
                         Top 5 Active Repositories
                       </h4>
-                      <a
-                        href={`https://github.com/${topRepoName}/commits?author=${candidate.member?.login}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-700/10 ring-inset hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-400/30 dark:hover:bg-green-900/30"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <span>{topRepoName}</span>
-                        <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-800 dark:bg-green-800/40 dark:text-green-300">
-                          {Number(topRepoCount)} commits
-                        </span>
-                      </a>
+                      <RepositoryBadge
+                        repoName={topRepoName}
+                        count={Number(topRepoCount)}
+                        userLogin={candidate.member?.login || ''}
+                        isTop={true}
+                        onStopPropagation={(e) => e.stopPropagation()}
+                      />
                     </div>
                     {sortedRepos.length > 1 && (
                       <div>
                         <div className="flex flex-wrap gap-2">
-                          {sortedRepos.slice(1).map(([repoName, count]) => {
-                            const commitCount = Number(count)
-                            return (
-                              <a
-                                key={repoName}
-                                href={`https://github.com/${repoName}/commits?author=${candidate.member?.login}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <span>{repoName}</span>
-                                <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-800 dark:bg-blue-800/40 dark:text-blue-300">
-                                  {commitCount} commits
-                                </span>
-                              </a>
-                            )
-                          })}
+                          {sortedRepos.slice(1).map(([repoName, count]) => (
+                            <RepositoryBadge
+                              key={repoName}
+                              repoName={repoName}
+                              count={Number(count)}
+                              userLogin={candidate.member?.login || ''}
+                              onStopPropagation={(e) => e.stopPropagation()}
+                            />
+                          ))}
                         </div>
                       </div>
                     )}
@@ -585,36 +701,23 @@ const BoardCandidatesPage = () => {
                     <h4 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
                       Top 5 Active Channels
                     </h4>
-                    <a
-                      href={`https://owasp.slack.com/archives/${topChannelName}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-700/10 ring-inset hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-400/30 dark:hover:bg-green-900/30"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <span>#{topChannelName}</span>
-                      <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-800 dark:bg-green-800/40 dark:text-green-300">
-                        {Number(topChannelCount)} messages
-                      </span>
-                    </a>
+                    <ChannelBadge
+                      channelName={topChannelName}
+                      messageCount={Number(topChannelCount)}
+                      isTop={true}
+                      onStopPropagation={(e) => e.stopPropagation()}
+                    />
                   </div>
                   {sortedChannels.length > 1 && (
                     <div>
                       <div className="flex flex-wrap gap-2">
                         {sortedChannels.slice(1).map(([channelName, messageCount]) => (
-                          <a
+                          <ChannelBadge
                             key={channelName}
-                            href={`https://owasp.slack.com/archives/${channelName}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <span>#{channelName}</span>
-                            <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-800 dark:bg-blue-800/40 dark:text-blue-300">
-                              {Number(messageCount)} messages
-                            </span>
-                          </a>
+                            channelName={channelName}
+                            messageCount={Number(messageCount)}
+                            onStopPropagation={(e) => e.stopPropagation()}
+                          />
                         ))}
                       </div>
                     </div>

@@ -16,19 +16,24 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: () => <span data-testid="mock-icon" />,
 }))
 
+// Test utility component for dropdown sections
+const MockDropdownSection = ({ section, onAction }) => (
+  <div key={section.title}>
+    <h3>{section.title}</h3>
+    {section.items.map((item) => (
+      <button key={item.key} onClick={() => onAction(item.key)}>
+        {item.label}
+      </button>
+    ))}
+  </div>
+)
+
 jest.mock('components/ProjectsDashboardDropDown', () => ({
   __esModule: true,
   default: ({ onAction, sections }) => (
     <div>
       {sections.map((section) => (
-        <div key={section.title}>
-          <h3>{section.title}</h3>
-          {section.items.map((item) => (
-            <button key={item.key} onClick={() => onAction(item.key)}>
-              {item.label}
-            </button>
-          ))}
-        </div>
+        <MockDropdownSection key={section.title} section={section} onAction={onAction} />
       ))}
     </div>
   ),

@@ -79,6 +79,10 @@ jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))
 
+// Test utility function to extract badge test IDs
+const extractBadgeTestIds = (badgeElements: HTMLElement[]) => 
+  badgeElements.map((element) => element.getAttribute('data-testid'))
+
 describe('UserDetailsPage', () => {
   beforeEach(() => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
@@ -791,7 +795,7 @@ describe('UserDetailsPage', () => {
       render(<UserDetailsPage />)
       await waitFor(() => {
         const badgeElements = screen.getAllByTestId(/^badge-/)
-        const badgeTestIds = badgeElements.map((element) => element.getAttribute('data-testid'))
+        const badgeTestIds = extractBadgeTestIds(badgeElements)
 
         // Expected order matches backend contract: weight ASC (1, 1, 1, 2, 3), then name ASC for equal weights
         const expectedOrder = [

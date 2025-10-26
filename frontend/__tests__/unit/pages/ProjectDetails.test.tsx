@@ -27,6 +27,28 @@ jest.mock('react-apexcharts', () => {
   }
 })
 
+jest.mock('components/LineChart', () => {
+  return ({ title, series, labels }: { title: string; series: any[]; labels: string[] }) => (
+    <div data-testid="mock-line-chart">
+      <h3>{title}</h3>
+      <div>Mock Line Chart</div>
+    </div>
+  )
+})
+
+jest.mock('components/BarChart', () => {
+  return ({ title, series, labels }: { title: string; series: any[]; labels: string[] }) => (
+    <div data-testid="mock-bar-chart">
+      <h3>{title}</h3>
+      <div>Mock Bar Chart</div>
+    </div>
+  )
+})
+
+jest.mock('utils/env.client', () => ({
+  IS_PROJECT_HEALTH_ENABLED: true,
+}))
+
 const mockRouter = {
   push: jest.fn(),
 }

@@ -25,6 +25,7 @@ export const mockProjectDetailsData = {
         lastCommitDays: 5,
         lastReleaseDays: 10,
         score: 85,
+        createdAt: '2024-01-01T00:00:00Z',
       },
     ],
     isActive: true,

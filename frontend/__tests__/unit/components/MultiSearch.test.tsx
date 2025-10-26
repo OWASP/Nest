@@ -83,6 +83,45 @@ const defaultProps = {
   eventData: [],
 }
 
+// Test utility functions
+const createUserWithSetup = () => userEvent.setup()
+
+const renderMultiSearchWithDefaults = (overrideProps = {}) => {
+  const props = { ...defaultProps, ...overrideProps }
+  return render(<MultiSearchBar {...props} />)
+}
+
+const expectSuggestionsVisible = async (text: string) => {
+  return waitFor(() => {
+    const suggestions = screen.getAllByText(text)
+    expect(suggestions.length).toBeGreaterThan(0)
+    expect(suggestions[0]).toBeInTheDocument()
+  })
+}
+
+const expectListItemHighlighted = async (index: number) => {
+  return waitFor(() => {
+    const listItems = screen.getAllByRole('listitem')
+    expect(listItems[index]).toHaveClass('bg-gray-100')
+  })
+}
+
+const getInputElement = () => screen.getByPlaceholderText('Search...')
+
+const expectNoSuggestions = async () => {
+  return waitFor(() => {
+    expect(screen.queryAllByRole('listitem')).toHaveLength(0)
+  })
+}
+
+const expectSuggestionsForEach = async (text: string, expectationCallback: (suggestion: HTMLElement) => void) => {
+  return waitFor(() => {
+    const suggestions = screen.getAllByText(text)
+    expect(suggestions.length).toBeGreaterThan(0)
+    suggestions.forEach(expectationCallback)
+  })
+}
+
 beforeEach(() => {
   mockUseRouter.mockReturnValue({
     push: mockPush,
@@ -105,15 +144,13 @@ afterEach(() => {
 
 describe('Rendering', () => {
   it('renders successfully with minimal required props', () => {
-    render(<MultiSearchBar {...defaultProps} />)
-
+    renderMultiSearchWithDefaults()
     expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument()
     expect(screen.getByTestId('font-awesome-icon')).toBeInTheDocument()
   })
 
   it('renders loading state when not loaded', () => {
-    render(<MultiSearchBar {...defaultProps} isLoaded={false} />)
-
+    renderMultiSearchWithDefaults({ isLoaded: false })
     const loadingSkeleton = document.querySelector(
       '.animate-pulse.h-12.w-full.rounded-lg.bg-gray-200'
     )
@@ -128,20 +165,18 @@ describe('Rendering', () => {
   })
 
   it('renders with initial value', () => {
-    render(<MultiSearchBar {...defaultProps} initialValue={'initial search'} />)
-
+    renderMultiSearchWithDefaults({ initialValue: 'initial search' })
     expect(screen.getByDisplayValue('initial search')).toBeInTheDocument()
   })
 
   it('renders custom placeholder', () => {
-    render(<MultiSearchBar {...defaultProps} placeholder={'Custom Placeholder'} />)
-
+    renderMultiSearchWithDefaults({ placeholder: 'Custom Placeholder' })
     expect(screen.getByPlaceholderText('Custom Placeholder')).toBeInTheDocument()
   })
 
   it('applies correct css classes for input', () => {
-    render(<MultiSearchBar {...defaultProps} />)
-    const input = screen.getByPlaceholderText('Search...')
+    renderMultiSearchWithDefaults()
+    const input = getInputElement()
     expect(input).toHaveClass(
       'h-12',
       'w-full',
@@ -308,22 +343,16 @@ describe('Rendering', () => {
     })
 
     it('hides suggestions when clicking outside', async () => {
-      const user = userEvent.setup()
-      render(<MultiSearchBar {...defaultProps} />)
-
-      const input = screen.getByPlaceholderText('Search...')
+      const user = createUserWithSetup()
+      renderMultiSearchWithDefaults()
+      const input = getInputElement()
+      
       await user.type(input, 'test')
-
-      await waitFor(() => {
-        const suggestions = screen.getAllByText('Test Chapter')
-        expect(suggestions.length).toBeGreaterThan(0)
-        suggestions.forEach((suggestion) => {
-          expect(suggestion).toBeInTheDocument()
-        })
+      await expectSuggestionsForEach('Test Chapter', (suggestion) => {
+        expect(suggestion).toBeInTheDocument()
       })
-
+      
       await user.click(document.body)
-
       await waitFor(() => {
         expect(screen.queryAllByText('Test Chapter')).toHaveLength(0)
       })
@@ -347,102 +376,79 @@ describe('Rendering', () => {
       })
 
       it('highlights first suggestion on arrow down', async () => {
-        const user = userEvent.setup()
-        render(<MultiSearchBar {...defaultProps} />)
-
-        const input = screen.getByPlaceholderText('Search...')
+        const user = createUserWithSetup()
+        renderMultiSearchWithDefaults()
+        const input = getInputElement()
+        
         await user.type(input, 'test')
         await waitFor(() => {
           const suggestionButtons = screen.getAllByRole('button')
           expect(suggestionButtons.length).toBeGreaterThan(0)
         })
+        
         await user.keyboard('{ArrowDown}')
-        await waitFor(() => {
-          const listItems = screen.getAllByRole('listitem')
-          expect(listItems[0]).toHaveClass('bg-gray-100')
-        })
+        await expectListItemHighlighted(0)
       })
 
+      // eslint-disable-next-line jest/expect-expect
       it('moves highlight down on subsequent arrow down presses', async () => {
-        const user = userEvent.setup()
-        render(<MultiSearchBar {...defaultProps} />)
-
-        const input = screen.getByPlaceholderText('Search...')
+        const user = createUserWithSetup()
+        renderMultiSearchWithDefaults()
+        const input = getInputElement()
+        
         await user.type(input, 'test')
-        await waitFor(() => {
-          const testChapters = screen.getAllByText('Test Chapter')
-          expect(testChapters.length).toBeGreaterThan(0)
-        })
+        await expectSuggestionsVisible('Test Chapter')
+        
         await user.keyboard('{ArrowDown}')
         await user.keyboard('{ArrowDown}')
-        await waitFor(() => {
-          const listItems = screen.getAllByRole('listitem')
-          expect(listItems[1]).toHaveClass('bg-gray-100')
-        })
+        await expectListItemHighlighted(1)
       })
 
       it('moves highlight up on arrow up', async () => {
-        const user = userEvent.setup()
-        render(<MultiSearchBar {...defaultProps} />)
-
-        const input = screen.getByPlaceholderText('Search...')
+        const user = createUserWithSetup()
+        renderMultiSearchWithDefaults()
+        const input = getInputElement()
+        
         await user.type(input, 'test')
-
-        await waitFor(() => {
-          const testChapters = screen.getAllByText('Test Chapter')
-          expect(testChapters.length).toBeGreaterThan(0)
-        })
+        await expectSuggestionsVisible('Test Chapter')
+        
         await user.keyboard('{ArrowDown}')
         await user.keyboard('{ArrowDown}')
-        await waitFor(() => {
-          const listItems = screen.getAllByRole('listitem')
-          expect(listItems[1]).toHaveClass('bg-gray-100')
-        })
+        await expectListItemHighlighted(1)
+        
         await user.keyboard('{ArrowUp}')
-
-        await waitFor(() => {
-          const listItems = screen.getAllByRole('listitem')
-          expect(listItems[0]).toHaveClass('bg-gray-100')
-        })
+        await expectListItemHighlighted(0)
       })
 
+      // eslint-disable-next-line jest/expect-expect
       it('closes suggestions on Escape key', async () => {
-        const user = userEvent.setup()
-        render(<MultiSearchBar {...defaultProps} />)
-
-        const input = screen.getByPlaceholderText('Search...')
+        const user = createUserWithSetup()
+        renderMultiSearchWithDefaults()
+        const input = getInputElement()
+        
         await user.type(input, 'test')
-
-        // Wait for suggestion list items to appear
         await waitFor(() => {
           const listItems = screen.getAllByRole('listitem')
           expect(listItems.length).toBeGreaterThan(0)
         })
-
+        
         await user.keyboard('{Escape}')
-
-        // Check that no list items remain
-        await waitFor(() => {
-          const listItems = screen.queryAllByRole('listitem')
-          expect(listItems).toHaveLength(0)
-        })
+        await expectNoSuggestions()
       })
 
       it('selects highlighted suggestion on Enter', async () => {
-        const user = userEvent.setup()
-        render(<MultiSearchBar {...defaultProps} />)
-
-        const input = screen.getByPlaceholderText('Search...')
+        const user = createUserWithSetup()
+        renderMultiSearchWithDefaults()
+        const input = getInputElement()
+        
         await user.type(input, 'test')
-
         await waitFor(() => {
           const listItems = screen.getAllByRole('listitem')
           expect(listItems.length).toBeGreaterThan(0)
         })
-
+        
         await user.keyboard('{ArrowDown}')
         await user.keyboard('{Enter}')
-
         expect(mockPush).toHaveBeenCalledWith('/chapters/test-chapter')
       })
     })

@@ -361,9 +361,7 @@ describe('ProjectTypeDashboardCard', () => {
       ]
 
       const testTypeValue = (type: 'healthy' | 'needsAttention' | 'unhealthy') => {
-        expect(() => {
-          render(<ProjectTypeDashboardCard type={type} count={10} icon={faHeartPulse} />)
-        }).not.toThrow()
+        expect(() => render(<ProjectTypeDashboardCard type={type} count={10} icon={faHeartPulse} />)).not.toThrow()
       }
 
       validTypes.forEach(testTypeValue)
