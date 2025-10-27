@@ -404,7 +404,7 @@ describe('ProjectTypeDashboardCard', () => {
         'unhealthy',
       ]
 
-      for (const [type,index] of types) {
+      for (const [index,type] of types.entries()) {
         rerender(<ProjectTypeDashboardCard type={type} count={index} icon={faHeartPulse} />)
         expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
       }

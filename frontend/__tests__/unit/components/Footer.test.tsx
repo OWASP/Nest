@@ -272,10 +272,10 @@ describe('Footer', () => {
 
       const buttons = screen.getAllByRole('button')
       
-      for (const buttonInfo of buttons) {
-        const sectionTitle = mockFooterSections[buttonInfo.index].title
-        expect(buttonInfo.button).toHaveAttribute('aria-controls', `footer-section-${sectionTitle}`)
-        expect(buttonInfo.button).toHaveAttribute('aria-expanded')
+      for (const [index,button] of buttons.entries()) {
+        const sectionTitle = mockFooterSections[index].title
+        expect(button).toHaveAttribute('aria-controls', `footer-section-${sectionTitle}`)
+        expect(button).toHaveAttribute('aria-expanded')
         
       }
     })

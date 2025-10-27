@@ -332,16 +332,5 @@ for (const year of data.years) {
 
     index++
 }
-  // data.years.forEach((year, i) => {
-  //   const offsetY = yearHeight * i + canvasMargin + headerOffset + 10
-  //   const offsetX = canvasMargin
-  //   drawYear(ctx, {
-  //     ...opts,
-  //     year,
-  //     offsetX,
-  //     offsetY,
-  //     data,
-  //     themeName,
-  //   })
-  // })
+
 }

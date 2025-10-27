@@ -234,15 +234,15 @@ describe('<BarChart />', () => {
     expect(series[0].name).toBe('Actual')
     expect(series[0].data).toHaveLength(3)
 
-    for (const seriesData of series[0].data) {
-       expect(seriesData.dataPoint.x).toBe(mockProps.labels[seriesData.index])
-        expect(seriesData.dataPoint.y).toBe(mockProps.days[seriesData.index])
-        expect(seriesData.dataPoint.goals).toHaveLength(1)
-        expect(seriesData.dataPoint.goals[0].name).toBe('Requirement')
-        expect(seriesData.dataPoint.goals[0].value).toBe(mockProps.requirements[seriesData.index])
-        expect(seriesData.dataPoint.goals[0].strokeWidth).toBe(5)
-        expect(seriesData.dataPoint.goals[0].strokeHeight).toBe(15)
-        expect(seriesData.dataPoint.goals[0].strokeLineCap).toBe('round')
+  for (const [index, dataPoint] of series[0].data.entries()) {
+      expect(dataPoint.x).toBe(mockProps.labels[index])
+      expect(dataPoint.y).toBe(mockProps.days[index])
+      expect(dataPoint.goals).toHaveLength(1)
+      expect(dataPoint.goals[0].name).toBe('Requirement')
+      expect(dataPoint.goals[0].value).toBe(mockProps.requirements[index])
+      expect(dataPoint.goals[0].strokeWidth).toBe(5)
+      expect(dataPoint.goals[0].strokeHeight).toBe(15)
+      expect(dataPoint.goals[0].strokeLineCap).toBe('round')
     }
 
   })
