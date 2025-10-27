@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react'
+import * as L from 'leaflet'
 import { Chapter } from 'types/chapter'
 import ChapterMap from 'components/ChapterMap'
-import * as L from 'leaflet'
 
 const mockMap = {
   setView: jest.fn().mockReturnThis(),
