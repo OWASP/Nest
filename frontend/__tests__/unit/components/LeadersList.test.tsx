@@ -268,9 +268,9 @@ describe('LeadersList Component', () => {
 
       // Check that leader links are inside TruncatedText
       const links = screen.getAllByTestId('leader-link')
-      links.forEach((link) => {
+      for (const link of links) {
         expect(truncatedText).toContainElement(link)
-      })
+      }
     })
 
     it('generates unique keys for each leader span', () => {

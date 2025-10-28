@@ -145,10 +145,10 @@ describe('ProjectDetailsPage', () => {
     await waitFor(() => {
       const issues = mockProjectDetailsData.project.recentIssues
 
-      issues.forEach((issue) => {
+      for (const issue of issues) {
         expect(screen.getByText(issue.title)).toBeInTheDocument()
         expect(screen.getByText(issue.repositoryName)).toBeInTheDocument()
-      })
+      }
     })
   })
 
@@ -252,12 +252,12 @@ describe('ProjectDetailsPage', () => {
     await waitFor(() => {
       const recentMilestones = mockProjectDetailsData.project.recentMilestones
 
-      recentMilestones.forEach((milestone) => {
+      for (const milestone of recentMilestones) {
         expect(screen.getByText(milestone.title)).toBeInTheDocument()
         expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
         expect(screen.getByText(`${milestone.openIssuesCount} open`)).toBeInTheDocument()
         expect(screen.getByText(`${milestone.closedIssuesCount} closed`)).toBeInTheDocument()
-      })
+      }
     })
   })
   test('renders project stats correctly', async () => {

@@ -109,9 +109,9 @@ describe('MetricsPage', () => {
     const headers = ['Project Name', 'Stars', 'Forks', 'Contributors', 'Health Checked At', 'Score']
     render(<MetricsPage />)
     await waitFor(() => {
-      headers.forEach((header) => {
+      for (const header of headers) {
         expect(screen.getAllByText(header).length).toBeGreaterThan(0)
-      })
+      }
     })
   })
   test('renders filter dropdown and sortable column headers', async () => {
@@ -130,20 +130,21 @@ describe('MetricsPage', () => {
     const sortableColumns = ['Stars', 'Forks', 'Contributors', 'Health Checked At', 'Score']
 
     await waitFor(() => {
-      filterSectionsLabels.forEach((label) => {
+      for (const label of filterSectionsLabels) {
         expect(screen.getAllByText(label).length).toBeGreaterThan(0)
-      })
-      filterOptions.forEach((option) => {
+      }
+
+      for (const option of filterOptions) {
         expect(screen.getAllByText(option).length).toBeGreaterThan(0)
         const button = screen.getByRole('button', { name: option })
         fireEvent.click(button)
         expect(button).toBeInTheDocument()
-      })
+      }
 
-      sortableColumns.forEach((column) => {
+      for (const column of sortableColumns) {
         const sortButton = screen.getByTitle(`Sort by ${column}`)
         expect(sortButton).toBeInTheDocument()
-      })
+      }
     })
   })
 
@@ -199,7 +200,7 @@ describe('MetricsPage', () => {
     await waitFor(() => {
       expect(metrics.length).toBeGreaterThan(0)
 
-      metrics.forEach((metric) => {
+      for (const metric of metrics) {
         expect(screen.getByText(metric.projectName)).toBeInTheDocument()
         expect(screen.getByText(metric.starsCount.toString())).toBeInTheDocument()
         expect(screen.getByText(metric.forksCount.toString())).toBeInTheDocument()
@@ -214,7 +215,7 @@ describe('MetricsPage', () => {
           )
         ).toBeInTheDocument()
         expect(screen.getByText(metric.score.toString())).toBeInTheDocument()
-      })
+      }
     })
   })
   test('handles pagination', async () => {
