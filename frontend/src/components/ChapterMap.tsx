@@ -71,7 +71,7 @@ const ChapterMap = ({
       popupContent.className = 'popup-content'
       popupContent.textContent = chapter.name
       popupContent.addEventListener('click', () => {
-        window.location.href = `/chapters/${chapter.key}`
+        globalThis.location.href = `/chapters/${chapter.key}`
       })
       popup.setContent(popupContent)
       marker.bindPopup(popup)

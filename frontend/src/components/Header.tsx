@@ -46,11 +46,11 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
     }
 
     window.addEventListener('resize', handleResize)
-    window.addEventListener('click', handleOutsideClick)
+    globalThis.addEventListener('click', handleOutsideClick)
 
     return () => {
       window.removeEventListener('resize', handleResize)
-      window.removeEventListener('click', handleOutsideClick)
+      globalThis.removeEventListener('click', handleOutsideClick)
     }
   }, [mobileMenuOpen])
 

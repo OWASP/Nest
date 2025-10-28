@@ -48,7 +48,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         if (query && query.trim() !== '') {
           sendGAEvent({
             event: 'homepageSearch',
-            path: window.location.pathname,
+            path: globalThis.location.pathname,
             value: query,
           })
         }

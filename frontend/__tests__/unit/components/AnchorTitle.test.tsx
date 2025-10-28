@@ -72,7 +72,7 @@ const setupAnimationFrameForHash = (cb: (time: number) => void) => {
 describe('AnchorTitle Component', () => {
   afterEach(() => {
     jest.restoreAllMocks()
-    window.history.replaceState(null, '', window.location.pathname)
+    globalThis.history.replaceState(null, '', globalThis.location.pathname)
   })
 
   describe('Basic Rendering', () => {
@@ -157,10 +157,10 @@ describe('AnchorTitle Component', () => {
     let mockRequestAnimationFrame: jest.SpyInstance
 
     const setupMocks = () => {
-      mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
-      mockPushState = jest.spyOn(window.history, 'pushState').mockImplementation()
+      mockScrollTo = jest.spyOn(globalThis, 'scrollTo').mockImplementation()
+      mockPushState = jest.spyOn(globalThis.history, 'pushState').mockImplementation()
       mockRequestAnimationFrame = jest
-        .spyOn(window, 'requestAnimationFrame')
+        .spyOn(globalThis, 'requestAnimationFrame')
         .mockImplementation(setupMockAnimationFrame)
 
       mockGetBoundingClientRect = jest.fn(createMockBoundingClientRect)
@@ -232,9 +232,9 @@ describe('AnchorTitle Component', () => {
     let mockRequestAnimationFrame: jest.SpyInstance
 
     const setupUseEffectMocks = () => {
-      mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
+      mockScrollTo = jest.spyOn(globalThis, 'scrollTo').mockImplementation()
       mockRequestAnimationFrame = jest
-        .spyOn(window, 'requestAnimationFrame')
+        .spyOn(globalThis, 'requestAnimationFrame')
         .mockImplementation(setupAnimationFrameForUseEffect)
 
       const mockElement = createMockElementForUseEffect()
@@ -253,7 +253,7 @@ describe('AnchorTitle Component', () => {
     afterEach(cleanupUseEffectMocks)
 
     it('scrolls to element on mount when hash matches', async () => {
-      window.location.hash = '#test-scroll'
+      globalThis.location.hash = '#test-scroll'
 
       render(<AnchorTitle title="Test Scroll" />)
 
@@ -267,7 +267,7 @@ describe('AnchorTitle Component', () => {
     })
 
     it('does not scroll when hash does not match', () => {
-      window.location.hash = '#different-hash'
+      globalThis.location.hash = '#different-hash'
 
       render(<AnchorTitle title="Test Scroll" />)
 
@@ -276,10 +276,10 @@ describe('AnchorTitle Component', () => {
     it('handles popstate events correctly', async () => {
       render(<AnchorTitle title="Popstate Test" />)
 
-      window.location.hash = '#popstate-test'
+      globalThis.location.hash = '#popstate-test'
 
       const popstateEvent = new PopStateEvent('popstate')
-      fireEvent(window, popstateEvent)
+      fireEvent(globalThis as unknown as Window, popstateEvent)
 
       await waitFor(() => {
         expect(mockRequestAnimationFrame).toHaveBeenCalled()
@@ -288,7 +288,7 @@ describe('AnchorTitle Component', () => {
     })
 
     it('removes popstate event listener on unmount', () => {
-      const mockRemoveEventListener = jest.spyOn(window, 'removeEventListener')
+      const mockRemoveEventListener = jest.spyOn(globalThis, 'removeEventListener')
 
       const { unmount } = render(<AnchorTitle title="Cleanup Test" />)
       unmount()
@@ -347,7 +347,7 @@ describe('AnchorTitle Component', () => {
       const mockGetElementById = jest
         .spyOn(document, 'getElementById')
         .mockReturnValue(mockElement as unknown as HTMLElement)
-      const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
+      const mockScrollTo = jest.spyOn(globalThis, 'scrollTo').mockImplementation()
 
       render(<AnchorTitle title="No Anchor" />)
       const link = screen.getByRole('link')
@@ -381,8 +381,8 @@ describe('AnchorTitle Component', () => {
     })
 
     it('maintains focus management on interaction', () => {
-      const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
-      const mockPushState = jest.spyOn(window.history, 'pushState').mockImplementation()
+      const mockScrollTo = jest.spyOn(globalThis, 'scrollTo').mockImplementation()
+      const mockPushState = jest.spyOn(globalThis.history, 'pushState').mockImplementation()
 
       render(<AnchorTitle title="Focus Test" />)
 
@@ -418,8 +418,8 @@ describe('AnchorTitle Component', () => {
     })
 
     it('handles rapid successive clicks', () => {
-      const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
-      const mockPushState = jest.spyOn(window.history, 'pushState').mockImplementation()
+      const mockScrollTo = jest.spyOn(globalThis, 'scrollTo').mockImplementation()
+      const mockPushState = jest.spyOn(globalThis.history, 'pushState').mockImplementation()
 
       render(<AnchorTitle title="Rapid Click" />)
       const link = screen.getByRole('link')
@@ -450,10 +450,10 @@ describe('AnchorTitle Component', () => {
 
   describe('Browser API Interactions', () => {
     it('handles window.pageYOffset correctly', () => {
-      const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
+      const mockScrollTo = jest.spyOn(globalThis, 'scrollTo').mockImplementation()
       const originalPageYOffset = window.pageYOffset
 
-      Object.defineProperty(window, 'pageYOffset', {
+      Object.defineProperty(globalThis, 'pageYOffset', {
         value: 500,
         configurable: true,
       })
@@ -473,7 +473,7 @@ describe('AnchorTitle Component', () => {
         behavior: 'smooth',
       })
 
-      Object.defineProperty(window, 'pageYOffset', {
+      Object.defineProperty(globalThis, 'pageYOffset', {
         value: originalPageYOffset,
         configurable: true,
       })
@@ -483,17 +483,17 @@ describe('AnchorTitle Component', () => {
     })
 
     it('handles hash changes in the URL correctly', async () => {
-      const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
+      const mockScrollTo = jest.spyOn(globalThis, 'scrollTo').mockImplementation()
       const mockRequestAnimationFrame = jest
-        .spyOn(window, 'requestAnimationFrame')
+        .spyOn(globalThis, 'requestAnimationFrame')
         .mockImplementation(setupAnimationFrameForHash)
 
-      window.location.hash = ''
+      globalThis.location.hash = ''
       render(<AnchorTitle title="Hash Test" />)
 
-      window.location.hash = '#hash-test'
+      globalThis.location.hash = '#hash-test'
       const popstateEvent = new PopStateEvent('popstate')
-      fireEvent(window, popstateEvent)
+      fireEvent(globalThis as unknown as Window, popstateEvent)
 
       await waitFor(() => {
         expect(mockScrollTo).toHaveBeenCalled()
@@ -506,7 +506,7 @@ describe('AnchorTitle Component', () => {
 
   describe('Performance and Optimization', () => {
     it('uses useCallback for scrollToElement function', () => {
-      const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
+      const mockScrollTo = jest.spyOn(globalThis, 'scrollTo').mockImplementation()
 
       const { rerender } = render(<AnchorTitle title="Callback Test" />)
       const link1 = screen.getByRole('link')
@@ -523,8 +523,8 @@ describe('AnchorTitle Component', () => {
     })
 
     it('cleans up event listeners properly', () => {
-      const mockAddEventListener = jest.spyOn(window, 'addEventListener')
-      const mockRemoveEventListener = jest.spyOn(window, 'removeEventListener')
+      const mockAddEventListener = jest.spyOn(globalThis, 'addEventListener')
+      const mockRemoveEventListener = jest.spyOn(globalThis, 'removeEventListener')
 
       const { unmount } = render(<AnchorTitle title="Cleanup Test" />)
 
@@ -541,7 +541,7 @@ describe('AnchorTitle Component', () => {
 
   describe('State Changes and Internal Logic', () => {
     it('recalculates scroll position when element dimensions change', () => {
-      const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
+      const mockScrollTo = jest.spyOn(globalThis, 'scrollTo').mockImplementation()
 
       const offsetHeights = { current: 30 }
       const mockElement = {
@@ -570,8 +570,8 @@ describe('AnchorTitle Component', () => {
     })
 
     it('handles component rerender with different IDs', () => {
-      const mockAddEventListener = jest.spyOn(window, 'addEventListener')
-      const mockRemoveEventListener = jest.spyOn(window, 'removeEventListener')
+      const mockAddEventListener = jest.spyOn(globalThis, 'addEventListener')
+      const mockRemoveEventListener = jest.spyOn(globalThis, 'removeEventListener')
 
       const { rerender } = render(<AnchorTitle title="Original" />)
       const originalAddCalls = mockAddEventListener.mock.calls.length
@@ -657,8 +657,8 @@ describe('AnchorTitle Component', () => {
           .replace(/(^-{1,10}|-{1,10}$)/g, '')
       )
 
-      const mockScrollTo = jest.spyOn(window, 'scrollTo').mockImplementation()
-      const mockPushState = jest.spyOn(window.history, 'pushState').mockImplementation()
+      const mockScrollTo = jest.spyOn(globalThis, 'scrollTo').mockImplementation()
+      const mockPushState = jest.spyOn(globalThis.history, 'pushState').mockImplementation()
 
       render(<AnchorTitle title="User Journey" />)
 

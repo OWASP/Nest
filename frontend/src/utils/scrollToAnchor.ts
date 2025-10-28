@@ -26,7 +26,7 @@ export const scrollToAnchorWithHistory = (targetId: string, updateHistory = true
   if (updateHistory) {
     try {
       const href = `#${targetId}`
-      window.history.pushState(null, '', href)
+      globalThis.history.pushState(null, '', href)
     } catch {
       // Silently handle history update errors
     }

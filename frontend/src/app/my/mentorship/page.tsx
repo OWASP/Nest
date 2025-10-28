@@ -43,8 +43,8 @@ const MyMentorshipPage: React.FC = () => {
     const params = new URLSearchParams()
     if (searchQuery) params.set('q', searchQuery)
     if (page > 1) params.set('page', String(page))
-    const nextUrl = params.toString() ? `?${params}` : window.location.pathname
-    if (window.location.search !== `?${params}`) {
+    const nextUrl = params.toString() ? `?${params}` : globalThis.location.pathname
+    if (globalThis.location.search !== `?${params}`) {
       router.push(nextUrl, { scroll: false })
     }
   }, [searchQuery, page, router])
