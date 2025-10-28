@@ -348,8 +348,14 @@ describe('Rendering', () => {
       const input = getInputElement()
 
       await user.type(input, 'test')
-      await expectSuggestionsForEach('Test Chapter', (suggestion) => {
-        expect(suggestion).toBeInTheDocument()
+
+      await waitFor(() => {
+        const suggestions = screen.getAllByText('Test Chapter')
+        expect(suggestions.length).toBeGreaterThan(0)
+
+        for (const suggestion of suggestions) {
+          expect(suggestion).toBeInTheDocument()
+        }
       })
 
       await user.click(document.body)

@@ -114,9 +114,9 @@ describe('MetricsPage', () => {
     const headers = ['Project Name', 'Stars', 'Forks', 'Contributors', 'Health Checked At', 'Score']
     render(<MetricsPage />)
     await waitFor(() => {
-      headers.forEach((header) => {
+      for (const header of headers) {
         expect(screen.getAllByText(header).length).toBeGreaterThan(0)
-      })
+      }
     })
   })
   test('renders filter and sort dropdowns', async () => {
@@ -135,21 +135,23 @@ describe('MetricsPage', () => {
     const sortOptions = ['Ascending', 'Descending']
 
     await waitFor(() => {
-      filterSectionsLabels.forEach((label) => {
+      for (const label of filterSectionsLabels) {
         expect(screen.getAllByText(label).length).toBeGreaterThan(0)
-      })
-      filterOptions.forEach((option) => {
+      }
+
+      for (const option of filterOptions) {
         expect(screen.getAllByText(option).length).toBeGreaterThan(0)
         const button = screen.getByRole('button', { name: option })
         fireEvent.click(button)
         expect(button).toBeInTheDocument()
-      })
-      sortOptions.forEach((option) => {
+      }
+
+      for (const option of sortOptions) {
         expect(screen.getAllByText(option).length).toBeGreaterThan(0)
         const button = screen.getByRole('button', { name: option })
         fireEvent.click(button)
         expect(button).toBeInTheDocument()
-      })
+      }
     })
   })
   test('render health metrics data', async () => {
@@ -158,7 +160,7 @@ describe('MetricsPage', () => {
     await waitFor(() => {
       expect(metrics.length).toBeGreaterThan(0)
 
-      metrics.forEach((metric) => {
+      for (const metric of metrics) {
         expect(screen.getByText(metric.projectName)).toBeInTheDocument()
         expect(screen.getByText(metric.starsCount.toString())).toBeInTheDocument()
         expect(screen.getByText(metric.forksCount.toString())).toBeInTheDocument()
@@ -173,7 +175,7 @@ describe('MetricsPage', () => {
           )
         ).toBeInTheDocument()
         expect(screen.getByText(metric.score.toString())).toBeInTheDocument()
-      })
+      }
     })
   })
   test('handles pagination', async () => {

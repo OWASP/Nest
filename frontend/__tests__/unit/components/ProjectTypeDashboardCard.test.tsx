@@ -209,13 +209,13 @@ describe('ProjectTypeDashboardCard', () => {
     it('renders correctly with all type variants', () => {
       const types: Array<ProjectHealthType> = ['healthy', 'needsAttention', 'unhealthy']
 
-      types.forEach((type) => {
+      for (const type of types) {
         const { unmount } = render(
           <ProjectTypeDashboardCard type={type} count={10} icon={faHeartPulse} />
         )
         expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
         unmount()
-      })
+      }
     })
   })
 
@@ -364,19 +364,21 @@ describe('ProjectTypeDashboardCard', () => {
         expect(() => render(<ProjectTypeDashboardCard type={type} count={10} icon={faHeartPulse} />)).not.toThrow()
       }
 
-      validTypes.forEach(testTypeValue)
+      for (const type of validTypes) {
+        testTypeValue(type)
+      }
     })
 
     it('handles different icon types correctly', () => {
       const icons = [faHeartPulse, faExclamationTriangle, faSkull]
 
-      icons.forEach((icon) => {
+      for (const icon of icons) {
         const { unmount } = render(
           <ProjectTypeDashboardCard type="healthy" count={10} icon={icon} />
         )
         expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
         unmount()
-      })
+      }
     })
   })
 
@@ -400,10 +402,10 @@ describe('ProjectTypeDashboardCard', () => {
         'unhealthy',
       ]
 
-      types.forEach((type, index) => {
+      for (const [index, type] of types.entries()) {
         rerender(<ProjectTypeDashboardCard type={type} count={index} icon={faHeartPulse} />)
         expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
-      })
+      }
     })
   })
 })

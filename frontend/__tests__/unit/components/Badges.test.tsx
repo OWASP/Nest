@@ -100,15 +100,15 @@ describe('Badges Component', () => {
       { cssClass: 'bug_slash', expectedIcon: 'bug' }, // Backend snake_case input
     ]
 
-    backendIcons.forEach(({ cssClass, expectedIcon }) => {
-      it(`renders ${cssClass} icon correctly (transforms snake_case to camelCase)`, () => {
-        render(<Badges name={`${cssClass} Badge`} cssClass={cssClass} />)
+    for (const backendIcon of backendIcons) {
+      it(`renders ${backendIcon.cssClass} icon correctly (transforms snake_case to camelCase)`, () => {
+        render(<Badges name={`${backendIcon.cssClass} Badge`} cssClass={backendIcon.cssClass} />)
 
         const icon = screen.getByTestId('badge-icon')
         expect(icon).toBeInTheDocument()
-        expect(icon).toHaveAttribute('data-icon', expectedIcon)
+        expect(icon).toHaveAttribute('data-icon', backendIcon.expectedIcon)
       })
-    })
+    }
 
     it('handles camelCase input directly', () => {
       render(<Badges name="Bug Slash Badge" cssClass="bugSlash" />)

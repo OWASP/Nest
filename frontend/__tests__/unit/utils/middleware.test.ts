@@ -36,11 +36,11 @@ describe('Authentication Middleware', () => {
       { description: 'with query params', url: 'http://localhost/dashboard?page=1' },
     ]
 
-    testCases.forEach(({ description, url }) => {
-      it(`should redirect to login from ${description}`, async () => {
+    for (const testCaseInfo of testCases) {
+      it(`should redirect to login from ${testCaseInfo.description}`, async () => {
         ;(getToken as jest.Mock).mockResolvedValue(null)
-        const request = mockRequest(url)
-        const expectedRedirectUrl = new URL('/auth/login', url)
+        const request = mockRequest(testCaseInfo.url)
+        const expectedRedirectUrl = new URL('/auth/login', testCaseInfo.url)
 
         const result = await authenticationMiddleware(request)
 
@@ -53,7 +53,7 @@ describe('Authentication Middleware', () => {
           url: expectedRedirectUrl,
         })
       })
-    })
+    }
   })
 
   describe('When authentication token exists', () => {
