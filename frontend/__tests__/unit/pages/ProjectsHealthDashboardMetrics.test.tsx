@@ -171,7 +171,6 @@ describe('MetricsPage', () => {
         ).toBeInTheDocument()
         expect(screen.getByText(metric.score.toString())).toBeInTheDocument()
       }
-
     })
   })
   test('handles pagination', async () => {

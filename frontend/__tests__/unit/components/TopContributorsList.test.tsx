@@ -565,17 +565,16 @@ describe('TopContributorsList Component', () => {
       const contributorItems = screen
         .getAllByTestId('contributor-avatar')
         .map((avatar) => avatar.parentElement?.parentElement)
-      
-        for (const item of contributorItems) {
-          expect(item).toHaveClass(
-            'overflow-hidden',
-            'rounded-lg',
-            'bg-gray-200',
-            'p-4',
-            'dark:bg-gray-700'
-          )
-          
-        }
+
+      for (const item of contributorItems) {
+        expect(item).toHaveClass(
+          'overflow-hidden',
+          'rounded-lg',
+          'bg-gray-200',
+          'p-4',
+          'dark:bg-gray-700'
+        )
+      }
     })
 
     it('renders proper grid structure', () => {
@@ -605,7 +604,7 @@ describe('TopContributorsList Component', () => {
       render(<TopContributorsList {...defaultProps} />)
 
       const links = screen.getAllByTestId('contributor-link')
-      
+
       for (const link of links) {
         expect(link).toHaveClass(
           'cursor-pointer',

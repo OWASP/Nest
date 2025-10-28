@@ -139,7 +139,7 @@ describe('ChaptersPage Component', () => {
       const detailLinks = screen.getAllByText('View Details')
       expect(detailLinks.length).toBeGreaterThan(0)
 
-      for (const [index,link] of detailLinks.entries()) {
+      for (const [index, link] of detailLinks.entries()) {
         fireEvent.click(link)
         expect(mockRouter.push).toHaveBeenCalledWith(`/chapters/chapter_${index + 1}`)
       }

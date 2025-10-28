@@ -237,12 +237,12 @@ describe('SkeletonBase', () => {
   describe('Default Values and Fallbacks', () => {
     it('falls back to LoadingSpinner for unhandled indexName values', () => {
       const unhandledValues = ['random', 'test', 'invalid', '123', 'null']
-      
+
       for (const value of unhandledValues) {
         const { container } = render(
           <SkeletonBase indexName={value} loadingImageUrl="fallback.jpg" />
         )
-  
+
         expect(screen.getByTestId('loading-spinner')).toBeInTheDocument()
         container.remove()
       }
@@ -325,7 +325,7 @@ describe('SkeletonBase', () => {
 
       for (const name of specialNames) {
         const { container } = render(<SkeletonBase indexName={name} loadingImageUrl="test.jpg" />)
-  
+
         expect(screen.getByTestId('loading-spinner')).toBeInTheDocument()
         container.remove()
       }
@@ -426,10 +426,10 @@ describe('SkeletonBase', () => {
 
       for (const type of skeletonTypes) {
         const { container } = render(<SkeletonBase indexName={type} loadingImageUrl="test.jpg" />)
-  
+
         const mainContainer = container.querySelector('div')
         expect(mainContainer).toHaveClass('flex', 'w-full', 'flex-col')
-  
+
         container.remove()
       }
     })

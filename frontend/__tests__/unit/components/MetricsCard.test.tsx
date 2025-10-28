@@ -65,13 +65,12 @@ describe('MetricsCard component', () => {
       [30, 'text-red-900'],
     ]
 
-    for (const [score,expectedClass] of cases) {
+    for (const [score, expectedClass] of cases) {
       const metric = makeMetric({ score })
       render(<MetricsCard metric={metric} />)
       const scoreEl = screen.getByText(score.toString()).closest('div')
       expect(scoreEl).toHaveClass(expectedClass)
     }
-
   })
 
   it('updates displayed values and link when metric props change via rerender', () => {

@@ -140,7 +140,7 @@ describe('AnchorTitle Component', () => {
       const titleRegex = /^#[a-z0-9-]+$/
 
       for (const title of titles) {
-         const { unmount } = render(<AnchorTitle title={title} />)
+        const { unmount } = render(<AnchorTitle title={title} />)
         const link = screen.getByRole('link')
         const href = link.getAttribute('href')
         expect(href).toMatch(titleRegex)

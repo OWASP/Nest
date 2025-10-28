@@ -315,10 +315,9 @@ export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
     })
   }
 
- let index = 0 
+  let index = 0
 
-for (const year of data.years) {
-
+  for (const year of data.years) {
     const offsetY = yearHeight * index + canvasMargin + headerOffset + 10
     const offsetX = canvasMargin
     drawYear(ctx, {
@@ -331,6 +330,5 @@ for (const year of data.years) {
     })
 
     index++
-}
-
+  }
 }

@@ -214,7 +214,7 @@ describe('ProjectTypeDashboardCard', () => {
           <ProjectTypeDashboardCard type={type} count={10} icon={faHeartPulse} />
         )
         expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
-        unmount()  
+        unmount()
       }
     })
   })
@@ -373,13 +373,13 @@ describe('ProjectTypeDashboardCard', () => {
 
     it('handles different icon types correctly', () => {
       const icons = [faHeartPulse, faExclamationTriangle, faSkull]
-      
+
       for (const icon of icons) {
         const { unmount } = render(
           <ProjectTypeDashboardCard type="healthy" count={10} icon={icon} />
         )
         expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
-        unmount() 
+        unmount()
       }
     })
   })
@@ -404,7 +404,7 @@ describe('ProjectTypeDashboardCard', () => {
         'unhealthy',
       ]
 
-      for (const [index,type] of types.entries()) {
+      for (const [index, type] of types.entries()) {
         rerender(<ProjectTypeDashboardCard type={type} count={index} icon={faHeartPulse} />)
         expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
       }

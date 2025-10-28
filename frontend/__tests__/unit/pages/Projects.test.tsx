@@ -149,11 +149,10 @@ describe('ProjectPage Component', () => {
       const detailLinks = screen.getAllByRole('button', { name: /View Details/i })
       expect(detailLinks.length).toBeGreaterThan(0)
 
-      for (const [index,link] of detailLinks.entries()) {
+      for (const [index, link] of detailLinks.entries()) {
         fireEvent.click(link)
         expect(mockRouter.push).toHaveBeenCalledWith(`/projects/project_${index + 1}`)
       }
-      
     })
 
     jest.restoreAllMocks()

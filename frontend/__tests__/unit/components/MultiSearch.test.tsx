@@ -317,7 +317,7 @@ describe('Rendering', () => {
       await waitFor(() => {
         const suggestions = screen.getAllByText('Test Chapter')
         expect(suggestions.length).toBeGreaterThan(0)
-        
+
         for (const suggestion of suggestions) {
           expect(suggestion).toBeInTheDocument()
         }

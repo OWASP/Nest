@@ -41,12 +41,12 @@ describe('Authentication Middleware', () => {
         ;(getToken as jest.Mock).mockResolvedValue(null)
         const request = mockRequest(testCaseInfo.url)
         const expectedRedirectUrl = new URL('/auth/login', testCaseInfo.url)
-  
+
         const result = await authenticationMiddleware(request)
-  
+
         expect(getToken).toHaveBeenCalledWith({ req: request })
         expect(NextResponse.redirect).toHaveBeenCalledWith(expectedRedirectUrl)
-  
+
         expect(result.url.toString()).toBe(expectedRedirectUrl.toString())
         expect(result).toEqual({
           type: 'redirect',
@@ -54,7 +54,6 @@ describe('Authentication Middleware', () => {
         })
       })
     }
-
   })
 
   describe('When authentication token exists', () => {

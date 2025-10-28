@@ -101,7 +101,7 @@ describe('Badges Component', () => {
     ]
 
     for (const backendIcon of backendIcons) {
-       it(`renders ${backendIcon.cssClass} icon correctly (transforms snake_case to camelCase)`, () => {
+      it(`renders ${backendIcon.cssClass} icon correctly (transforms snake_case to camelCase)`, () => {
         render(<Badges name={`${backendIcon.cssClass} Badge`} cssClass={backendIcon.cssClass} />)
 
         const icon = screen.getByTestId('badge-icon')
@@ -109,7 +109,7 @@ describe('Badges Component', () => {
         expect(icon).toHaveAttribute('data-icon', backendIcon.expectedIcon)
       })
     }
- 
+
     it('handles camelCase input directly', () => {
       render(<Badges name="Bug Slash Badge" cssClass="bugSlash" />)
 

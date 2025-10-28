@@ -274,7 +274,7 @@ describe('Header Component', () => {
           (link) => link.getAttribute('href') === '/' && link.querySelector('img[alt="OWASP Logo"]')
         )
       expect(homeLinks.length).toBe(2) // Desktop and mobile
-      
+
       for (const link of homeLinks) {
         expect(link).toHaveAttribute('href', '/')
       }

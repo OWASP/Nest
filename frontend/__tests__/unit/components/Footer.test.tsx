@@ -171,7 +171,7 @@ describe('Footer', () => {
         expect(link).toHaveAttribute('href', icon.href)
         expect(link).toHaveAttribute('target', '_blank')
         expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-  
+
         const iconElement = link.querySelector('[data-testid="font-awesome-icon"]')
         expect(iconElement).toBeInTheDocument()
       }
@@ -271,12 +271,11 @@ describe('Footer', () => {
       renderFooter()
 
       const buttons = screen.getAllByRole('button')
-      
-      for (const [index,button] of buttons.entries()) {
+
+      for (const [index, button] of buttons.entries()) {
         const sectionTitle = mockFooterSections[index].title
         expect(button).toHaveAttribute('aria-controls', `footer-section-${sectionTitle}`)
         expect(button).toHaveAttribute('aria-expanded')
-        
       }
     })
 

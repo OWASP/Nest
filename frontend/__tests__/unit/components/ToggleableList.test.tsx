@@ -42,7 +42,7 @@ describe('ToggleableList', () => {
     render(<ToggleableList items={mockItems} label="test-label" />)
 
     // First 10 items should be visible
-    for (const item of mockItems.slice(0,10)) {
+    for (const item of mockItems.slice(0, 10)) {
       expect(screen.getByText(item)).toBeInTheDocument()
     }
 

@@ -243,7 +243,6 @@ describe('Home', () => {
         expect(screen.getByText(`${milestone.openIssuesCount} open`)).toBeInTheDocument()
         expect(screen.getByText(`${milestone.closedIssuesCount} closed`)).toBeInTheDocument()
       }
-
     })
   })
   test('renders when no recent releases', async () => {
@@ -273,7 +272,6 @@ describe('Home', () => {
     const stats = mockGraphQLData.statsOverview
 
     await waitFor(() => {
-
       for (const header of headers) {
         expect(screen.getByText(header)).toBeInTheDocument()
       }

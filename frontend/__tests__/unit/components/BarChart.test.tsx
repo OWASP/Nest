@@ -234,7 +234,7 @@ describe('<BarChart />', () => {
     expect(series[0].name).toBe('Actual')
     expect(series[0].data).toHaveLength(3)
 
-  for (const [index, dataPoint] of series[0].data.entries()) {
+    for (const [index, dataPoint] of series[0].data.entries()) {
       expect(dataPoint.x).toBe(mockProps.labels[index])
       expect(dataPoint.y).toBe(mockProps.days[index])
       expect(dataPoint.goals).toHaveLength(1)
@@ -244,7 +244,6 @@ describe('<BarChart />', () => {
       expect(dataPoint.goals[0].strokeHeight).toBe(15)
       expect(dataPoint.goals[0].strokeLineCap).toBe('round')
     }
-
   })
 
   it('configures colors array correctly', () => {

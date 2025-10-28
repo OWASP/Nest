@@ -304,7 +304,6 @@ describe('DonutBarChart Component Test Suite', () => {
       const iconTypes = ['chart-pie', 'chart-bar', 'analytics', 'dashboard', 'heart']
 
       for (const iconType of iconTypes) {
-        
         const { unmount } = render(
           <DonutBarChart
             icon={iconProp(iconType)}
@@ -312,7 +311,7 @@ describe('DonutBarChart Component Test Suite', () => {
             series={[50, 30, 20]}
           />
         )
-  
+
         expect(screen.getByTestId('secondary-card')).toHaveAttribute('data-icon', iconType)
         unmount()
       }
@@ -331,7 +330,7 @@ describe('DonutBarChart Component Test Suite', () => {
         const { unmount } = render(
           <DonutBarChart icon="chart-pie" title={title} series={[33, 33, 34]} />
         )
-  
+
         expect(screen.getByTestId('anchor-title')).toHaveTextContent(title)
         unmount()
       }
