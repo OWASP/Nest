@@ -4,7 +4,7 @@ import React from 'react'
 import { render } from 'wrappers/testUtil'
 import type { Organization } from 'types/organization'
 import type { RepositoryCardProps } from 'types/project'
-import RepositoriesCard from 'components/RepositoriesCard'
+import RepositoryCard from 'components/RepositoryCard'
 
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
@@ -40,7 +40,7 @@ jest.mock('components/InfoItem', () => {
 const mockPush = jest.fn()
 const mockUseRouter = useRouter as jest.Mock
 
-describe('RepositoriesCard', () => {
+describe('RepositoryCard', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseRouter.mockReturnValue({
@@ -74,14 +74,14 @@ describe('RepositoriesCard', () => {
   })
 
   it('renders without crashing with empty repositories', () => {
-    render(<RepositoriesCard repositories={[]} />)
+    render(<RepositoryCard repositories={[]} />)
     expect(screen.queryByTestId('show-more-button')).not.toBeInTheDocument()
   })
 
   it('shows first 4 repositories initially when there are more than 4', () => {
     const repositories = Array.from({ length: 6 }, (_, i) => createMockRepository(i))
 
-    render(<RepositoriesCard repositories={repositories} />)
+    render(<RepositoryCard repositories={repositories} />)
 
     expect(screen.getByText('Repository 0')).toBeInTheDocument()
     expect(screen.getByText('Repository 3')).toBeInTheDocument()
@@ -92,7 +92,7 @@ describe('RepositoriesCard', () => {
   it('shows all repositories when there are 4 or fewer', () => {
     const repositories = Array.from({ length: 3 }, (_, i) => createMockRepository(i))
 
-    render(<RepositoriesCard repositories={repositories} />)
+    render(<RepositoryCard repositories={repositories} />)
 
     expect(screen.getByText('Repository 0')).toBeInTheDocument()
     expect(screen.getByText('Repository 1')).toBeInTheDocument()
@@ -102,7 +102,7 @@ describe('RepositoriesCard', () => {
   it('displays ShowMoreButton when there are more than 4 repositories', () => {
     const repositories = Array.from({ length: 6 }, (_, i) => createMockRepository(i))
 
-    render(<RepositoriesCard repositories={repositories} />)
+    render(<RepositoryCard repositories={repositories} />)
 
     expect(screen.getByTestId('show-more-button')).toBeInTheDocument()
   })
@@ -110,7 +110,7 @@ describe('RepositoriesCard', () => {
   it('does not display ShowMoreButton when there are 4 or fewer repositories', () => {
     const repositories = Array.from({ length: 4 }, (_, i) => createMockRepository(i))
 
-    render(<RepositoriesCard repositories={repositories} />)
+    render(<RepositoryCard repositories={repositories} />)
 
     expect(screen.queryByTestId('show-more-button')).not.toBeInTheDocument()
   })
@@ -118,7 +118,7 @@ describe('RepositoriesCard', () => {
   it('toggles between showing 4 and all repositories when clicked', () => {
     const repositories = Array.from({ length: 6 }, (_, i) => createMockRepository(i))
 
-    render(<RepositoriesCard repositories={repositories} />)
+    render(<RepositoryCard repositories={repositories} />)
 
     // Initially shows first 4
     expect(screen.getByText('Repository 0')).toBeInTheDocument()
@@ -142,7 +142,7 @@ describe('RepositoriesCard', () => {
   it('renders repository items with correct information', () => {
     const repositories = [createMockRepository(0)]
 
-    render(<RepositoriesCard repositories={repositories} />)
+    render(<RepositoryCard repositories={repositories} />)
 
     expect(screen.getByText('Repository 0')).toBeInTheDocument()
     expect(screen.getByTestId('info-item-Star')).toBeInTheDocument()
@@ -154,7 +154,7 @@ describe('RepositoriesCard', () => {
   it('navigates to correct URL when repository item is clicked', () => {
     const repositories = [createMockRepository(0)]
 
-    render(<RepositoriesCard repositories={repositories} />)
+    render(<RepositoryCard repositories={repositories} />)
 
     const repositoryButton = screen.getByText('Repository 0')
     fireEvent.click(repositoryButton)
@@ -174,7 +174,27 @@ describe('RepositoriesCard', () => {
       url: 'https://github.com/test/repo',
     }
 
-    expect(() => render(<RepositoriesCard repositories={[repository]} />)).not.toThrow()
+    expect(() => render(<RepositoryCard repositories={[repository]} />)).not.toThrow()
+  })
+
+  it('repository title button has cursor-pointer class', () => {
+    const repositories = [createMockRepository(0)]
+
+    const { container } = render(<RepositoryCard repositories={repositories} />)
+
+    const button = container.querySelector('button.cursor-pointer')
+    expect(button).toBeInTheDocument()
+    expect(button).toHaveClass('cursor-pointer')
+  })
+
+  it('repository title is rendered as a button element', () => {
+    const repositories = [createMockRepository(0)]
+
+    render(<RepositoryCard repositories={repositories} />)
+
+    const repositoryButton = screen.getByText('Repository 0').closest('button')
+    expect(repositoryButton).toBeInTheDocument()
+    expect(repositoryButton?.tagName).toBe('BUTTON')
   })
 
   describe('Archived Badge on Repository Cards', () => {
@@ -184,7 +204,7 @@ describe('RepositoriesCard', () => {
         isArchived: true,
       }
 
-      render(<RepositoriesCard repositories={[archivedRepo]} />)
+      render(<RepositoryCard repositories={[archivedRepo]} />)
 
       expect(screen.getByText('Archived')).toBeInTheDocument()
     })
@@ -195,7 +215,7 @@ describe('RepositoriesCard', () => {
         isArchived: false,
       }
 
-      render(<RepositoriesCard repositories={[activeRepo]} />)
+      render(<RepositoryCard repositories={[activeRepo]} />)
 
       expect(screen.queryByText('Archived')).not.toBeInTheDocument()
     })
@@ -205,7 +225,7 @@ describe('RepositoriesCard', () => {
         ...createMockRepository(0),
       }
 
-      render(<RepositoriesCard repositories={[repo]} />)
+      render(<RepositoryCard repositories={[repo]} />)
 
       expect(screen.queryByText('Archived')).not.toBeInTheDocument()
     })
@@ -218,7 +238,7 @@ describe('RepositoriesCard', () => {
         { ...createMockRepository(3) },
       ]
 
-      render(<RepositoriesCard repositories={repositories} />)
+      render(<RepositoryCard repositories={repositories} />)
 
       const badges = screen.getAllByText('Archived')
       expect(badges).toHaveLength(2)
@@ -230,7 +250,7 @@ describe('RepositoriesCard', () => {
         isArchived: true,
       }
 
-      render(<RepositoriesCard repositories={[archivedRepo]} />)
+      render(<RepositoryCard repositories={[archivedRepo]} />)
 
       const badge = screen.getByText('Archived')
       expect(badge).toHaveClass('px-2', 'py-1', 'text-xs')
@@ -242,7 +262,7 @@ describe('RepositoriesCard', () => {
         isArchived: true,
       }
 
-      render(<RepositoriesCard repositories={[archivedRepo]} />)
+      render(<RepositoryCard repositories={[archivedRepo]} />)
 
       const badge = screen.getByText('Archived')
       const icon = badge.querySelector('svg')
@@ -255,7 +275,7 @@ describe('RepositoriesCard', () => {
         isArchived: true,
       }
 
-      render(<RepositoriesCard repositories={[archivedRepo]} />)
+      render(<RepositoryCard repositories={[archivedRepo]} />)
 
       expect(screen.getByText('Repository 0')).toBeInTheDocument()
       expect(screen.getByTestId('info-item-Star')).toBeInTheDocument()
@@ -269,7 +289,7 @@ describe('RepositoriesCard', () => {
         isArchived: true,
       }
 
-      const { container } = render(<RepositoriesCard repositories={[archivedRepo]} />)
+      const { container } = render(<RepositoryCard repositories={[archivedRepo]} />)
 
       const headerContainer = container.querySelector('.flex.items-start.justify-between')
       expect(headerContainer).toBeInTheDocument()
@@ -281,7 +301,7 @@ describe('RepositoriesCard', () => {
         isArchived: null,
       }
 
-      render(<RepositoriesCard repositories={[repo]} />)
+      render(<RepositoryCard repositories={[repo]} />)
 
       expect(screen.queryByText('Archived')).not.toBeInTheDocument()
     })
@@ -292,7 +312,7 @@ describe('RepositoriesCard', () => {
         isArchived: i % 2 === 0,
       }))
 
-      render(<RepositoriesCard repositories={repositories} />)
+      render(<RepositoryCard repositories={repositories} />)
 
       expect(screen.getAllByText('Archived')).toHaveLength(2)
 
@@ -311,7 +331,7 @@ describe('RepositoriesCard', () => {
         isArchived: true,
       }
 
-      render(<RepositoriesCard repositories={[archivedRepo]} />)
+      render(<RepositoryCard repositories={[archivedRepo]} />)
 
       const repositoryButton = screen.getByText('Repository 0')
       fireEvent.click(repositoryButton)

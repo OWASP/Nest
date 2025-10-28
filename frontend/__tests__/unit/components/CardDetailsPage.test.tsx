@@ -252,7 +252,7 @@ jest.mock('components/RecentReleases', () => ({
   ),
 }))
 
-jest.mock('components/RepositoriesCard', () => ({
+jest.mock('components/RepositoryCard', () => ({
   __esModule: true,
   default: ({
     repositories,
