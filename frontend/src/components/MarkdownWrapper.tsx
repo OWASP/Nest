@@ -8,7 +8,7 @@ export default function Markdown({ content, className }: { content: string; clas
     linkify: true,
     typographer: true,
     breaks: true,
-  }).use(taskLists, { enabled: true })
+  }).use(taskLists)
 
   return (
     <div

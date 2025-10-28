@@ -196,17 +196,17 @@
   }
 
   .md-wrapper code {
-    background-color: #f9fafb;
-    color: #374151;
+    background-color: #e5e5e5;
+    color: oklch(58.8% 0.158 241.966);
     padding: 0.2em 0.4em;
     margin: 0 0.2em;
-    border-radius: 3px;
+    border-radius: 5px;
     font-family: 'Courier New', Courier, monospace;
   }
 
   .dark .md-wrapper code {
-    background-color: #0f172a;
-    color: #e2e8f0;
+    color: oklch(74.6% 0.16 232.661);
+    background-color: #333539;
   }
 }
 
