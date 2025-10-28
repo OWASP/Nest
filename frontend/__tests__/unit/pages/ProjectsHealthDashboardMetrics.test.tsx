@@ -164,7 +164,9 @@ describe('MetricsPage', () => {
     fireEvent.click(sortButton)
 
     await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=-stars'))
+      const lastCall = mockReplace.mock.calls[mockReplace.mock.calls.length - 1][0]
+      const url = new URL(lastCall, 'http://localhost')
+      expect(url.searchParams.get('order')).toBe('-stars')
     })
 
     // Test descending -> ascending
@@ -177,8 +179,8 @@ describe('MetricsPage', () => {
 
     await waitFor(() => {
       const lastCall = mockReplace.mock.calls[mockReplace.mock.calls.length - 1][0]
-      expect(lastCall).toContain('order=stars')
-      expect(lastCall).not.toContain('order=-stars')
+      const url = new URL(lastCall, 'http://localhost')
+      expect(url.searchParams.get('order')).toBe('stars')
     })
 
     // Test ascending -> unsorted (removes order param, defaults to -score)
@@ -191,7 +193,8 @@ describe('MetricsPage', () => {
 
     await waitFor(() => {
       const lastCall = mockReplace.mock.calls[mockReplace.mock.calls.length - 1][0]
-      expect(lastCall).not.toContain('order=')
+      const url = new URL(lastCall, 'http://localhost')
+      expect(url.searchParams.get('order')).toBeNull()
     })
   })
   test('render health metrics data', async () => {
