@@ -30,7 +30,7 @@ const ChapterMap = ({
           [90, 180],
         ],
         maxBoundsViscosity: 1.0,
-        scrollWheelZoom: false, // Disable scroll wheel zoom by default
+        scrollWheelZoom: false,
       }).setView([20, 0], 2)
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -38,14 +38,16 @@ const ChapterMap = ({
         className: 'map-tiles',
       }).addTo(mapRef.current)
 
-      // Enable scroll wheel zoom when user clicks on the map
       mapRef.current.on('click', () => {
         mapRef.current?.scrollWheelZoom.enable()
         setIsMapActive(true)
       })
 
-      // Disable scroll wheel zoom when mouse leaves the map
-      mapRef.current.on('mouseout', () => {
+      mapRef.current.on('mouseout', (e: L.LeafletMouseEvent) => {
+        const relatedTarget = (e.originalEvent as MouseEvent).relatedTarget as Node | null
+        const popupPane = mapRef.current?.getPanes().popupPane
+        if (relatedTarget && popupPane?.contains(relatedTarget)) return
+    
         mapRef.current?.scrollWheelZoom.disable()
         setIsMapActive(false)
       })
