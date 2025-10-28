@@ -1,6 +1,6 @@
 'use client'
-import { useQuery, useApolloClient } from '@apollo/client/react'
 import { ApolloClient } from '@apollo/client';
+import { useQuery, useApolloClient } from '@apollo/client/react'
 import { faLinkedin } from '@fortawesome/free-brands-svg-icons'
 import {
   faCode,
@@ -33,7 +33,7 @@ import LoadingSpinner from 'components/LoadingSpinner'
 dayjs.extend(relativeTime)
 
 // Utility functions for data processing
-const fetchChapterData = async (client: ApolloClient<any>, key: string) => {
+const fetchChapterData = async (client: ApolloClient, key: string) => {
   try {
     const { data } = await client.query({
       query: GetChapterByKeyDocument,
@@ -45,7 +45,7 @@ const fetchChapterData = async (client: ApolloClient<any>, key: string) => {
   }
 }
 
-const fetchProjectData = async (client: ApolloClient<any>, key: string) => {
+const fetchProjectData = async (client: ApolloClient, key: string) => {
   try {
     const { data } = await client.query({
       query: GetProjectByKeyDocument,
@@ -63,13 +63,13 @@ const sortItemsByName = <T extends { name: string }>(items: T[]): T[] => {
 
 const getContributionCount = (snapshot: MemberSnapshot | null, key: string, type: 'chapter' | 'project') => {
   if (!snapshot) return 0
-  
-  const contributions = type === 'chapter' 
-    ? snapshot.chapterContributions 
+
+  const contributions = type === 'chapter'
+    ? snapshot.chapterContributions
     : snapshot.projectContributions
-    
+
   if (!contributions) return 0
-  
+
   const bareKey = key.startsWith(`www-${type}-`) ? key.replace(`www-${type}-`, '') : key
   const directKey = contributions[bareKey]
   const withPrefix = contributions[`www-${type}-${bareKey}`]
@@ -79,22 +79,22 @@ const getContributionCount = (snapshot: MemberSnapshot | null, key: string, type
 
 const createSlackUrl = (channelName: string) => `https://owasp.slack.com/archives/${channelName}`
 
-const createGitHubCommitsUrl = (repoName: string, userLogin: string) => 
+const createGitHubCommitsUrl = (repoName: string, userLogin: string) =>
   `https://github.com/${repoName}/commits?author=${userLogin}`
 
 // Component helper functions
-const ChapterBadge = ({ 
-  chapter, 
-  snapshot, 
-  onStopPropagation 
-}: { 
+const ChapterBadge = ({
+  chapter,
+  snapshot,
+  onStopPropagation
+}: {
   chapter: Chapter
   snapshot: MemberSnapshot | null
-  onStopPropagation: (e: React.MouseEvent) => void 
+  onStopPropagation: (e: React.MouseEvent) => void
 }) => {
   const contributionCount = getContributionCount(snapshot, chapter.key, 'chapter')
   const isActive = contributionCount > 0
-  
+
   return (
     <Link
       key={chapter.id}
@@ -122,18 +122,18 @@ const ChapterBadge = ({
   )
 }
 
-const ProjectBadge = ({ 
-  project, 
-  snapshot, 
-  onStopPropagation 
-}: { 
+const ProjectBadge = ({
+  project,
+  snapshot,
+  onStopPropagation
+}: {
   project: Project
   snapshot: MemberSnapshot | null
-  onStopPropagation: (e: React.MouseEvent) => void 
+  onStopPropagation: (e: React.MouseEvent) => void
 }) => {
   const contributionCount = getContributionCount(snapshot, project.key, 'project')
   const isActive = contributionCount > 0
-  
+
   return (
     <Link
       key={project.id}
@@ -161,24 +161,24 @@ const ProjectBadge = ({
   )
 }
 
-const RepositoryBadge = ({ 
-  repoName, 
-  count, 
-  userLogin, 
-  isTop = false, 
-  onStopPropagation 
-}: { 
+const RepositoryBadge = ({
+  repoName,
+  count,
+  userLogin,
+  isTop = false,
+  onStopPropagation
+}: {
   repoName: string
   count: number
   userLogin: string
   isTop?: boolean
-  onStopPropagation: (e: React.MouseEvent) => void 
+  onStopPropagation: (e: React.MouseEvent) => void
 }) => {
   const baseClasses = "inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
   const colorClasses = isTop
     ? "bg-green-50 text-green-700 ring-green-700/10 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-400/30 dark:hover:bg-green-900/30"
     : "bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30"
-  
+
   const badgeClasses = isTop
     ? "bg-green-100 text-green-800 dark:bg-green-800/40 dark:text-green-300"
     : "bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300"
@@ -199,22 +199,22 @@ const RepositoryBadge = ({
   )
 }
 
-const ChannelBadge = ({ 
-  channelName, 
-  messageCount, 
-  isTop = false, 
-  onStopPropagation 
-}: { 
+const ChannelBadge = ({
+  channelName,
+  messageCount,
+  isTop = false,
+  onStopPropagation
+}: {
   channelName: string
   messageCount: number
   isTop?: boolean
-  onStopPropagation: (e: React.MouseEvent) => void 
+  onStopPropagation: (e: React.MouseEvent) => void
 }) => {
   const baseClasses = "inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
   const colorClasses = isTop
     ? "bg-green-50 text-green-700 ring-green-700/10 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-400/30 dark:hover:bg-green-900/30"
     : "bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30"
-  
+
   const badgeClasses = isTop
     ? "bg-green-100 text-green-800 dark:bg-green-800/40 dark:text-green-300"
     : "bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300"

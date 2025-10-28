@@ -28,7 +28,7 @@ jest.mock('react-apexcharts', () => {
 })
 
 jest.mock('components/LineChart', () => {
-  return ({ title, series, labels }: { title: string; series: any[]; labels: string[] }) => (
+  return ({ title }: { title: string }) => (
     <div data-testid="mock-line-chart">
       <h3>{title}</h3>
       <div>Mock Line Chart</div>
@@ -37,7 +37,7 @@ jest.mock('components/LineChart', () => {
 })
 
 jest.mock('components/BarChart', () => {
-  return ({ title, series, labels }: { title: string; series: any[]; labels: string[] }) => (
+  return ({ title }: { title: string }) => (
     <div data-testid="mock-bar-chart">
       <h3>{title}</h3>
       <div>Mock Bar Chart</div>

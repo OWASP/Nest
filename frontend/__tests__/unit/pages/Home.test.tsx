@@ -2,10 +2,10 @@ import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockAlgoliaData, mockGraphQLData } from '@unit/data/mockHomeData'
+import millify from 'millify'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import Home from 'app/page'
-import millify from 'millify'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 
 jest.mock('@apollo/client/react', () => ({
@@ -41,14 +41,14 @@ jest.mock('components/AnimatedCounter', () => {
     if (count === undefined || count === null) {
       return <span>0{suffix || ''}</span>
     }
-    
+
     // Simple number formatting that mimics millify for common test values
     const formatNumber = (num: number) => {
       if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M'
       if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k'
       return num.toString()
     }
-    
+
     return <span>{formatNumber(count)}{suffix || ''}</span>
   }
 })
@@ -301,7 +301,7 @@ describe('Home', () => {
     await waitFor(() => {
       headers.forEach((header) => expect(screen.getByText(header)).toBeInTheDocument())
     })
-    
+
     // Check that AnimatedCounter components are rendered (they should show some numeric values)
     await waitFor(() => {
       // Look for any numeric content that indicates the counters are working

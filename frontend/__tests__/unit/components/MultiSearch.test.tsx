@@ -346,12 +346,12 @@ describe('Rendering', () => {
       const user = createUserWithSetup()
       renderMultiSearchWithDefaults()
       const input = getInputElement()
-      
+
       await user.type(input, 'test')
       await expectSuggestionsForEach('Test Chapter', (suggestion) => {
         expect(suggestion).toBeInTheDocument()
       })
-      
+
       await user.click(document.body)
       await waitFor(() => {
         expect(screen.queryAllByText('Test Chapter')).toHaveLength(0)
@@ -379,13 +379,13 @@ describe('Rendering', () => {
         const user = createUserWithSetup()
         renderMultiSearchWithDefaults()
         const input = getInputElement()
-        
+
         await user.type(input, 'test')
         await waitFor(() => {
           const suggestionButtons = screen.getAllByRole('button')
           expect(suggestionButtons.length).toBeGreaterThan(0)
         })
-        
+
         await user.keyboard('{ArrowDown}')
         await expectListItemHighlighted(0)
       })
@@ -395,43 +395,43 @@ describe('Rendering', () => {
         const user = createUserWithSetup()
         renderMultiSearchWithDefaults()
         const input = getInputElement()
-        
+
         await user.type(input, 'test')
         await expectSuggestionsVisible('Test Chapter')
-        
+
         await user.keyboard('{ArrowDown}')
         await user.keyboard('{ArrowDown}')
         await expectListItemHighlighted(1)
       })
 
+      // eslint-disable-next-line jest/expect-expect
       it('moves highlight up on arrow up', async () => {
         const user = createUserWithSetup()
         renderMultiSearchWithDefaults()
         const input = getInputElement()
-        
+
         await user.type(input, 'test')
         await expectSuggestionsVisible('Test Chapter')
-        
+
         await user.keyboard('{ArrowDown}')
         await user.keyboard('{ArrowDown}')
         await expectListItemHighlighted(1)
-        
+
         await user.keyboard('{ArrowUp}')
         await expectListItemHighlighted(0)
       })
 
-      // eslint-disable-next-line jest/expect-expect
       it('closes suggestions on Escape key', async () => {
         const user = createUserWithSetup()
         renderMultiSearchWithDefaults()
         const input = getInputElement()
-        
+
         await user.type(input, 'test')
         await waitFor(() => {
           const listItems = screen.getAllByRole('listitem')
           expect(listItems.length).toBeGreaterThan(0)
         })
-        
+
         await user.keyboard('{Escape}')
         await expectNoSuggestions()
       })
@@ -440,13 +440,13 @@ describe('Rendering', () => {
         const user = createUserWithSetup()
         renderMultiSearchWithDefaults()
         const input = getInputElement()
-        
+
         await user.type(input, 'test')
         await waitFor(() => {
           const listItems = screen.getAllByRole('listitem')
           expect(listItems.length).toBeGreaterThan(0)
         })
-        
+
         await user.keyboard('{ArrowDown}')
         await user.keyboard('{Enter}')
         expect(mockPush).toHaveBeenCalledWith('/chapters/test-chapter')
