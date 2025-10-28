@@ -107,7 +107,7 @@ describe('DonutBarChart Component Test Suite', () => {
       render(<DonutBarChart icon={iconProp('chart-pie')} title="Balanced Data" series={series} />)
 
       const chart = screen.getByTestId('apex-chart')
-      const chartSeries = JSON.parse(chart.getAttribute('data-series') || '[]')
+      const chartSeries = JSON.parse(chart.dataset.series || '[]')
 
       // Should be rounded to 1 decimal place
       expect(chartSeries).toEqual([33.3, 33.3, 33.3])
@@ -119,7 +119,7 @@ describe('DonutBarChart Component Test Suite', () => {
       render(<DonutBarChart icon="chart-pie" title="Integer Data" series={series} />)
 
       const chart = screen.getByTestId('apex-chart')
-      const chartSeries = JSON.parse(chart.getAttribute('data-series') || '[]')
+      const chartSeries = JSON.parse(chart.dataset.series || '[]')
 
       expect(chartSeries).toEqual([50, 30, 20])
     })
@@ -130,7 +130,7 @@ describe('DonutBarChart Component Test Suite', () => {
       render(<DonutBarChart icon="chart-pie" title="Decimal Data" series={series} />)
 
       const chart = screen.getByTestId('apex-chart')
-      const chartSeries = JSON.parse(chart.getAttribute('data-series') || '[]')
+      const chartSeries = JSON.parse(chart.dataset.series || '[]')
 
       // Rounded to 1 decimal place
       expect(chartSeries).toEqual([25.6, 30.8, 43.7])
@@ -142,7 +142,7 @@ describe('DonutBarChart Component Test Suite', () => {
       render(<DonutBarChart icon="chart-pie" title="With Zeros" series={series} />)
 
       const chart = screen.getByTestId('apex-chart')
-      const chartSeries = JSON.parse(chart.getAttribute('data-series') || '[]')
+      const chartSeries = JSON.parse(chart.dataset.series || '[]')
 
       expect(chartSeries).toEqual([0, 50, 0])
     })
@@ -153,7 +153,7 @@ describe('DonutBarChart Component Test Suite', () => {
       render(<DonutBarChart icon="chart-pie" title="Single Value" series={series} />)
 
       const chart = screen.getByTestId('apex-chart')
-      const chartSeries = JSON.parse(chart.getAttribute('data-series') || '[]')
+      const chartSeries = JSON.parse(chart.dataset.series || '[]')
 
       expect(chartSeries).toEqual([100])
     })
@@ -164,7 +164,7 @@ describe('DonutBarChart Component Test Suite', () => {
       render(<DonutBarChart icon="chart-pie" title="Empty Data" series={series} />)
 
       const chart = screen.getByTestId('apex-chart')
-      const chartSeries = JSON.parse(chart.getAttribute('data-series') || '[]')
+      const chartSeries = JSON.parse(chart.dataset.series || '[]')
 
       expect(chartSeries).toEqual([])
     })
@@ -175,7 +175,7 @@ describe('DonutBarChart Component Test Suite', () => {
       render(<DonutBarChart icon="chart-pie" title="Configuration Test" series={[40, 35, 25]} />)
 
       const chart = screen.getByTestId('apex-chart')
-      const options = JSON.parse(chart.getAttribute('data-options') || '{}')
+      const options = JSON.parse(chart.dataset.options || '{}')
 
       expect(options.chart.animations.enabled).toBe(true)
       expect(options.chart.animations.speed).toBe(1000)
@@ -191,15 +191,15 @@ describe('DonutBarChart Component Test Suite', () => {
 
       const chart = screen.getByTestId('apex-chart')
 
-      expect(chart.getAttribute('data-type')).toBe('donut')
-      expect(chart.getAttribute('data-height')).toBe('250')
+      expect(chart.dataset.type).toBe('donut')
+      expect(chart.dataset.height).toBe('250')
     })
 
     it('uses fixed color scheme', () => {
       render(<DonutBarChart icon="chart-pie" title="Color Test" series={[33, 33, 34]} />)
 
       const chart = screen.getByTestId('apex-chart')
-      const options = JSON.parse(chart.getAttribute('data-options') || '{}')
+      const options = JSON.parse(chart.dataset.options || '{}')
 
       expect(options.colors).toEqual([
         '#0ef94e', // green
@@ -212,7 +212,7 @@ describe('DonutBarChart Component Test Suite', () => {
       render(<DonutBarChart icon="chart-pie" title="Labels Test" series={[70, 20, 10]} />)
 
       const chart = screen.getByTestId('apex-chart')
-      const options = JSON.parse(chart.getAttribute('data-options') || '{}')
+      const options = JSON.parse(chart.dataset.options || '{}')
 
       expect(options.labels).toEqual(['Healthy', 'Need Attention', 'Unhealthy'])
     })
@@ -231,7 +231,7 @@ describe('DonutBarChart Component Test Suite', () => {
       render(<DonutBarChart icon="chart-pie" title="Light Theme" series={[50, 30, 20]} />)
 
       const chart = screen.getByTestId('apex-chart')
-      const options = JSON.parse(chart.getAttribute('data-options') || '{}')
+      const options = JSON.parse(chart.dataset.options || '{}')
 
       expect(options.legend.labels.colors).toBe('#1E1E2C')
     })
@@ -248,7 +248,7 @@ describe('DonutBarChart Component Test Suite', () => {
       render(<DonutBarChart icon="chart-pie" title="Dark Theme" series={[45, 35, 20]} />)
 
       const chart = screen.getByTestId('apex-chart')
-      const options = JSON.parse(chart.getAttribute('data-options') || '{}')
+      const options = JSON.parse(chart.dataset.options || '{}')
 
       expect(options.legend.labels.colors).toBe('#ececec')
     })
@@ -267,7 +267,7 @@ describe('DonutBarChart Component Test Suite', () => {
       const chart = screen.getByTestId('apex-chart')
       // The key should be applied but we can't directly test it in our mock
       // We verify the theme is being used in legend colors instead
-      const options = JSON.parse(chart.getAttribute('data-options') || '{}')
+      const options = JSON.parse(chart.dataset.options || '{}')
       expect(options.legend.labels.colors).toBe('#ececec')
     })
   })
@@ -342,7 +342,7 @@ describe('DonutBarChart Component Test Suite', () => {
       render(<DonutBarChart icon="chart-pie" title="Large Values" series={largeSeries} />)
 
       const chart = screen.getByTestId('apex-chart')
-      const chartSeries = JSON.parse(chart.getAttribute('data-series') || '[]')
+      const chartSeries = JSON.parse(chart.dataset.series || '[]')
 
       // Should be rounded to 1 decimal place
       expect(chartSeries).toEqual([1000000.0, 1000000.0, 2000000.5])
@@ -354,7 +354,7 @@ describe('DonutBarChart Component Test Suite', () => {
       render(<DonutBarChart icon="chart-pie" title="Negative Values" series={negativeSeries} />)
 
       const chart = screen.getByTestId('apex-chart')
-      const chartSeries = JSON.parse(chart.getAttribute('data-series') || '[]')
+      const chartSeries = JSON.parse(chart.dataset.series || '[]')
 
       expect(chartSeries).toEqual([-10.5, 50.7, -20.3])
     })
@@ -367,13 +367,13 @@ describe('DonutBarChart Component Test Suite', () => {
       )
 
       let chart = screen.getByTestId('apex-chart')
-      let chartSeries = JSON.parse(chart.getAttribute('data-series') || '[]')
+      let chartSeries = JSON.parse(chart.dataset.series || '[]')
       expect(chartSeries).toEqual([50, 30, 20])
 
       rerender(<DonutBarChart icon="chart-pie" title="Update Test" series={[70, 20, 10]} />)
 
       chart = screen.getByTestId('apex-chart')
-      chartSeries = JSON.parse(chart.getAttribute('data-series') || '[]')
+      chartSeries = JSON.parse(chart.dataset.series || '[]')
       expect(chartSeries).toEqual([70, 20, 10])
     })
 
@@ -407,7 +407,7 @@ describe('DonutBarChart Component Test Suite', () => {
       )
 
       let chart = screen.getByTestId('apex-chart')
-      let options = JSON.parse(chart.getAttribute('data-options') || '{}')
+      let options = JSON.parse(chart.dataset.options || '{}')
       expect(options.legend.labels.colors).toBe('#1E1E2C') // light theme
 
       mockUseTheme.mockReturnValue({
@@ -421,7 +421,7 @@ describe('DonutBarChart Component Test Suite', () => {
       rerender(<DonutBarChart icon="chart-pie" title="Theme Change Test" series={[45, 35, 20]} />)
 
       chart = screen.getByTestId('apex-chart')
-      options = JSON.parse(chart.getAttribute('data-options') || '{}')
+      options = JSON.parse(chart.dataset.options || '{}')
       expect(options.legend.labels.colors).toBe('#ececec') // dark theme
     })
   })
