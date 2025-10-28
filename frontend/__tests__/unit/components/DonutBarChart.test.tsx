@@ -303,7 +303,7 @@ describe('DonutBarChart Component Test Suite', () => {
     it('handles different icon types', () => {
       const iconTypes = ['chart-pie', 'chart-bar', 'analytics', 'dashboard', 'heart']
 
-      iconTypes.forEach((iconType) => {
+      for (const iconType of iconTypes) {
         const { unmount } = render(
           <DonutBarChart
             icon={iconProp(iconType)}
@@ -314,7 +314,7 @@ describe('DonutBarChart Component Test Suite', () => {
 
         expect(screen.getByTestId('secondary-card')).toHaveAttribute('data-icon', iconType)
         unmount()
-      })
+      }
     })
 
     it('handles various title formats', () => {
@@ -326,14 +326,14 @@ describe('DonutBarChart Component Test Suite', () => {
         '',
       ]
 
-      titles.forEach((title) => {
+      for (const title of titles) {
         const { unmount } = render(
           <DonutBarChart icon="chart-pie" title={title} series={[33, 33, 34]} />
         )
 
         expect(screen.getByTestId('anchor-title')).toHaveTextContent(title)
         unmount()
-      })
+      }
     })
 
     it('handles large series values', () => {
