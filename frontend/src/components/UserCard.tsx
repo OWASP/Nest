@@ -46,18 +46,18 @@ const UserCard = ({
 
         <div className="w-full text-center">
           <h3
-            className="px-3 text-base leading-tight font-semibold wrap-break-word whitespace-normal text-gray-900 sm:text-lg dark:text-white"
+            className="px-3 text-base leading-tight font-semibold break-words whitespace-normal text-gray-900 sm:text-lg dark:text-white"
             title={name}
           >
             {name}
           </h3>
           {(company || location || email || login) && (
-            <p className="mt-1.5 px-3 text-xs wrap-break-word whitespace-normal text-gray-600 sm:text-sm dark:text-gray-400">
-              {company || location || email || login}
+            <p className="mt-1.5 px-3 text-xs break-words whitespace-normal text-gray-600 sm:text-sm dark:text-gray-400">
+              {[company, location, email, login].filter(Boolean).join(' • ')}
             </p>
           )}
           {description && (
-            <p className="mt-1.5 px-3 text-xs wrap-break-word whitespace-normal text-gray-600 sm:text-sm dark:text-gray-400">
+            <p className="mt-1.5 px-3 text-xs break-words whitespace-normal text-gray-600 sm:text-sm dark:text-gray-400">
               {description}
             </p>
           )}
