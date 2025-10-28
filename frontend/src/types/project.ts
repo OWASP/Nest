@@ -46,7 +46,7 @@ export type Project = {
   recentMilestones?: Milestone[]
 }
 
-export type RepositoriesCardProps = {
+export type RepositoryCardListProps = {
   maxInitialDisplay?: number
   repositories?: RepositoryCardProps[]
 }
