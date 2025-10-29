@@ -1,8 +1,7 @@
 """Tests for common GraphQL nodes."""
 
+import math
 from unittest.mock import Mock
-
-import pytest
 
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
 
@@ -45,7 +44,7 @@ class TestGenericEntityNode:
 
         result = GenericEntityNode.updated_at(mock_entity)
 
-        assert result == pytest.approx(1234567890.0)
+        assert math.isclose(result, 1234567890.0)
 
     def test_url_resolver(self):
         """Test url returns indexed URL."""

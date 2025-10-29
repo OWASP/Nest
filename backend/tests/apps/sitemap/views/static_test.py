@@ -1,3 +1,4 @@
+import math
 from unittest.mock import patch
 
 import pytest
@@ -58,4 +59,4 @@ class TestStaticSitemap:
 
     def test_priority(self, sitemap):
         for item in sitemap.STATIC_ROUTES:
-            assert pytest.approx(sitemap.priority(item)) == item["priority"]
+            assert math.isclose(sitemap.priority(item), item["priority"])

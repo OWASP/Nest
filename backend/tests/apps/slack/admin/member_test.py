@@ -30,7 +30,7 @@ class TestMemberAdmin:
         assert mock_member.user == mock_suggested_user
         mock_member.save.assert_called_once()
         admin_instance.message_user.assert_called_with(
-            request, pytest.approx(f" assigned user for {mock_member}."), messages.SUCCESS
+            request, f" assigned user for {mock_member}.", messages.SUCCESS
         )
 
     def test_approve_suggested_users_multiple_error(self, admin_instance):

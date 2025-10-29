@@ -1,6 +1,6 @@
+import math
 from unittest.mock import MagicMock, patch
 
-import pytest
 from django.utils import timezone
 
 from apps.sitemap.views.base import BaseSitemap
@@ -48,4 +48,4 @@ class TestCommitteeSitemap:
     def test_priority(self):
         sitemap = CommitteeSitemap()
 
-        assert pytest.approx(sitemap.priority(MagicMock())) == 0.8
+        assert math.isclose(sitemap.priority(MagicMock()), 0.8)

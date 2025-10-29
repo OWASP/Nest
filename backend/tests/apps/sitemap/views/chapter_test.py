@@ -1,6 +1,6 @@
+import math
 from unittest.mock import MagicMock, patch
 
-import pytest
 from django.utils import timezone
 
 from apps.sitemap.views.base import BaseSitemap
@@ -51,4 +51,4 @@ class TestChapterSitemap:
         obj = MagicMock()
         sitemap = ChapterSitemap()
 
-        assert pytest.approx(sitemap.priority(obj)) == 0.8
+        assert math.isclose(sitemap.priority(obj), 0.8)
