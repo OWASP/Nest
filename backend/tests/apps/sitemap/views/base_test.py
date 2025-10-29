@@ -1,4 +1,3 @@
-import math
 from unittest.mock import MagicMock
 
 import pytest
@@ -22,11 +21,11 @@ class TestBaseSitemap:
         assert sitemap.get_protocol() == "https"
 
     def test_get_static_priority_for_known_path(self, sitemap):
-        assert math.isclose(sitemap.get_static_priority("/projects"), 0.9)
-        assert math.isclose(sitemap.get_static_priority("/chapters"), 0.8)
+        assert pytest.approx(sitemap.get_static_priority("/projects")) == 0.9
+        assert pytest.approx(sitemap.get_static_priority("/chapters")) == 0.8
 
     def test_get_static_priority_for_unknown_path(self, sitemap):
-        assert math.isclose(sitemap.get_static_priority("/unknown"), 0.7)
+        assert pytest.approx(sitemap.get_static_priority("/unknown")) == 0.7
 
     def test_lastmod_with_created_at(self, sitemap):
         dt = timezone.now()
@@ -51,4 +50,4 @@ class TestBaseSitemap:
     def test_priority(self, sitemap):
         obj = MagicMock()
 
-        assert math.isclose(sitemap.priority(obj), 0.7)
+        assert pytest.approx(sitemap.priority(obj)) == 0.7

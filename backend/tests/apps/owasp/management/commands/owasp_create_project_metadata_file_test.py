@@ -1,4 +1,3 @@
-import math
 from unittest.mock import MagicMock
 
 import pytest
@@ -49,7 +48,7 @@ class TestProjectMetadataCommand:
         assert metadata["pitch"] == "A detailed pitch for an awesome test project."
         assert metadata["audience"] == ["builder", "defender"]
         assert metadata["type"] == "tool"
-        assert math.isclose(metadata["level"], 3.5)
+        assert pytest.approx(metadata["level"]) == 3.5
         assert metadata["website"] == "https://owasp.org/www-project-awesome/"
 
         assert len(metadata["leaders"]) == 1
