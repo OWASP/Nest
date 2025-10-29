@@ -246,7 +246,7 @@ describe('ChapterMap', () => {
     it('removes overlay when clicked', () => {
       const { getByText, queryByText } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Click to interact with map').closest('div[role="button"]')
+      const overlay = getByText('Click to interact with map').closest('button')
       fireEvent.click(overlay!)
 
       expect(queryByText('Click to interact with map')).not.toBeInTheDocument()
@@ -255,7 +255,7 @@ describe('ChapterMap', () => {
     it('enables scroll wheel zoom when overlay is clicked', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Click to interact with map').closest('div[role="button"]')
+      const overlay = getByText('Click to interact with map').closest('button')
       fireEvent.click(overlay!)
 
       expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
@@ -264,7 +264,7 @@ describe('ChapterMap', () => {
     it('handles keyboard interaction with Enter key', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Click to interact with map').closest('div[role="button"]')
+      const overlay = getByText('Click to interact with map').closest('button')
       fireEvent.keyDown(overlay!, { key: 'Enter' })
 
       expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
@@ -273,7 +273,7 @@ describe('ChapterMap', () => {
     it('handles keyboard interaction with Space key', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Click to interact with map').closest('div[role="button"]')
+      const overlay = getByText('Click to interact with map').closest('button')
       fireEvent.keyDown(overlay!, { key: ' ' })
 
       expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
@@ -282,8 +282,7 @@ describe('ChapterMap', () => {
     it('has proper accessibility attributes', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Click to interact with map').closest('div[role="button"]')
-      expect(overlay).toHaveAttribute('role', 'button')
+      const overlay = getByText('Click to interact with map').closest('button')
       expect(overlay).toHaveAttribute('tabIndex', '0')
       expect(overlay).toHaveAttribute('aria-label', 'Click to interact with map')
     })

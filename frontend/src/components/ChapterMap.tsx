@@ -47,7 +47,7 @@ const ChapterMap = ({
         const relatedTarget = (e.originalEvent as MouseEvent).relatedTarget as Node | null
         const popupPane = mapRef.current?.getPanes().popupPane
         if (relatedTarget && popupPane?.contains(relatedTarget)) return
-    
+
         mapRef.current?.scrollWheelZoom.disable()
         setIsMapActive(false)
       })
@@ -122,8 +122,8 @@ const ChapterMap = ({
     <div className="relative" style={style}>
       <div id="chapter-map" className="h-full w-full" />
       {!isMapActive && (
-        <div
-          role="button"
+        <button
+          type="button"
           tabIndex={0}
           className="absolute inset-0 z-[1000] flex cursor-pointer items-center justify-center rounded-[inherit] bg-black/10"
           onClick={() => {
@@ -139,10 +139,10 @@ const ChapterMap = ({
           }}
           aria-label="Click to interact with map"
         >
-          <div className="rounded-lg bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg">
+          <p className="rounded-lg bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg">
             Click to interact with map
-          </div>
-        </div>
+          </p>
+        </button>
       )}
     </div>
   )
