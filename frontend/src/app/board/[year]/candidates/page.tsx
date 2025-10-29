@@ -248,7 +248,7 @@ const BoardCandidatesPage = () => {
                 @{candidate.member.login}
               </Link>
             )}
-            {candidate.member?.createdAt && (
+            {candidate.member?.createdAt != null && (
               <p className="mt-1 truncate text-sm text-gray-600 dark:text-gray-400">
                 GitHub account created{' '}
                 <span className="font-semibold text-gray-800 dark:text-gray-300">
@@ -261,7 +261,7 @@ const BoardCandidatesPage = () => {
                 - {formatDate(candidate.member.createdAt)}
               </p>
             )}
-            {candidate.member?.firstOwaspContributionAt && (
+            {candidate.member?.firstOwaspContributionAt != null && (
               <p className="truncate text-sm text-gray-600 dark:text-gray-400">
                 First OWASP contribution made nearly{' '}
                 <span className="font-semibold text-gray-800 dark:text-gray-300">
@@ -415,20 +415,18 @@ const BoardCandidatesPage = () => {
                         href={`/chapters/${chapter.key.replace('www-chapter-', '')}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
-                          contributionCount === 0
-                            ? 'bg-orange-50 text-orange-700 ring-orange-700/10 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30 dark:hover:bg-orange-900/30'
-                            : 'bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30'
-                        }`}
+                        className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${contributionCount === 0
+                          ? 'bg-orange-50 text-orange-700 ring-orange-700/10 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30 dark:hover:bg-orange-900/30'
+                          : 'bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30'
+                          }`}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <span>{chapter.name}</span>
                         <span
-                          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
-                            contributionCount === 0
-                              ? 'bg-orange-100 text-orange-800 dark:bg-orange-800/40 dark:text-orange-300'
-                              : 'bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300'
-                          }`}
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${contributionCount === 0
+                            ? 'bg-orange-100 text-orange-800 dark:bg-orange-800/40 dark:text-orange-300'
+                            : 'bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300'
+                            }`}
                         >
                           {contributionCount === 0
                             ? 'no contributions'
@@ -452,20 +450,18 @@ const BoardCandidatesPage = () => {
                         href={`/projects/${project.key.replace('www-project-', '')}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
-                          contributionCount === 0
-                            ? 'bg-orange-50 text-orange-700 ring-orange-700/10 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30 dark:hover:bg-orange-900/30'
-                            : 'bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30'
-                        }`}
+                        className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${contributionCount === 0
+                          ? 'bg-orange-50 text-orange-700 ring-orange-700/10 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30 dark:hover:bg-orange-900/30'
+                          : 'bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30'
+                          }`}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <span>{project.name}</span>
                         <span
-                          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
-                            contributionCount === 0
-                              ? 'bg-orange-100 text-orange-800 dark:bg-orange-800/40 dark:text-orange-300'
-                              : 'bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300'
-                          }`}
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${contributionCount === 0
+                            ? 'bg-orange-100 text-orange-800 dark:bg-orange-800/40 dark:text-orange-300'
+                            : 'bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300'
+                            }`}
                         >
                           {contributionCount === 0
                             ? 'no contributions'
@@ -629,42 +625,42 @@ const BoardCandidatesPage = () => {
           candidate.member?.isFormerOwaspStaff ||
           candidate.member?.isGsocMentor ||
           leadsFlagshipProject) && (
-          <div className="mt-4 w-full border-t border-gray-200 pt-4 dark:border-gray-700">
-            <h4 className="mb-2 text-sm text-gray-700 dark:text-gray-300">
-              <span className="font-semibold">Additional Information</span>
-            </h4>
-            <div className="flex flex-wrap gap-2">
-              {candidate.member?.isOwaspBoardMember && (
-                <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-400/30">
-                  OWASP Board of Directors Member
-                </span>
-              )}
-              {candidate.member?.isFormerOwaspStaff && (
-                <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-400/30">
-                  Former OWASP Staff Member
-                </span>
-              )}
-              {candidate.member?.isGsocMentor && (
-                <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-400/30">
-                  Google Summer of Code Mentor
-                </span>
+            <div className="mt-4 w-full border-t border-gray-200 pt-4 dark:border-gray-700">
+              <h4 className="mb-2 text-sm text-gray-700 dark:text-gray-300">
+                <span className="font-semibold">Additional Information</span>
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {candidate.member?.isOwaspBoardMember && (
+                  <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-400/30">
+                    OWASP Board of Directors Member
+                  </span>
+                )}
+                {candidate.member?.isFormerOwaspStaff && (
+                  <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-400/30">
+                    Former OWASP Staff Member
+                  </span>
+                )}
+                {candidate.member?.isGsocMentor && (
+                  <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-400/30">
+                    Google Summer of Code Mentor
+                  </span>
+                )}
+              </div>
+              {leadsFlagshipProject && (
+                <div
+                  className="mt-3 text-xs text-gray-600 dark:text-gray-400"
+                  style={{
+                    wordWrap: 'break-word',
+                    overflowWrap: 'break-word',
+                    whiteSpace: 'normal',
+                  }}
+                >
+                  This candidate may have additional community engagement in other Slack workspaces
+                  based on the flagship level project(s) they are leading.
+                </div>
               )}
             </div>
-            {leadsFlagshipProject && (
-              <div
-                className="mt-3 text-xs text-gray-600 dark:text-gray-400"
-                style={{
-                  wordWrap: 'break-word',
-                  overflowWrap: 'break-word',
-                  whiteSpace: 'normal',
-                }}
-              >
-                This candidate may have additional community engagement in other Slack workspaces
-                based on the flagship level project(s) they are leading.
-              </div>
-            )}
-          </div>
-        )}
+          )}
       </Button>
     )
   }
