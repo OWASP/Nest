@@ -2,6 +2,8 @@
 
 from unittest.mock import Mock
 
+import pytest
+
 from apps.owasp.api.internal.nodes.committee import CommitteeNode
 
 
@@ -25,7 +27,7 @@ class TestCommitteeNode:
 
         result = CommitteeNode.created_at(mock_committee)
 
-        assert result == 1234567890.0
+        assert result == pytest.approx(1234567890.0)
 
     def test_forks_count_resolver(self):
         """Test forks_count returns count from repository."""
