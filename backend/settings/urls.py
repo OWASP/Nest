@@ -11,19 +11,19 @@ from django.urls import include, path
 from django.views.decorators.csrf import csrf_protect
 from strawberry.django.views import GraphQLView
 
+from apps.api.rest.v0 import api as api_v0
 from apps.core.api.internal.algolia import algolia_search
 from apps.core.api.internal.csrf import get_csrf_token
 from apps.core.api.internal.status import get_status
 from apps.owasp.api.internal.views.urls import urlpatterns as owasp_urls
 from apps.slack.apps import SlackConfig
-from settings.api.v1 import api as api_v1
 from settings.graphql import schema
 
 urlpatterns = [
     path("csrf/", get_csrf_token),
     path("idx/", csrf_protect(algolia_search)),
     path("graphql/", csrf_protect(GraphQLView.as_view(schema=schema, graphiql=settings.DEBUG))),
-    path("api/v1/", api_v1.urls),
+    path("api/v0/", api_v0.urls),
     path("a/", admin.site.urls),
     path("owasp/", include(owasp_urls)),
     path("status/", get_status),

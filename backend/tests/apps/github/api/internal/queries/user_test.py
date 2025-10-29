@@ -14,25 +14,51 @@ class TestUserQuery:
         """User mock fixture."""
         return Mock(spec=User)
 
-    def test_resolve_user_existing(self, mock_user):
-        """Test resolving an existing user."""
-        with patch("apps.github.models.user.User.objects.get") as mock_get:
-            mock_get.return_value = mock_user
+    def test_resolve_user_existing_with_public_member_page(self, mock_user):
+        """Test resolving an existing user with has_public_member_page=True."""
+        with patch("apps.github.models.user.User.objects.filter") as mock_filter:
+            mock_queryset = mock_filter.return_value
+            mock_queryset.first.return_value = mock_user
 
             result = UserQuery().user(login="test-user")
 
             assert result == mock_user
-            mock_get.assert_called_once_with(login="test-user")
+            mock_filter.assert_called_once_with(has_public_member_page=True, login="test-user")
+            mock_queryset.first.assert_called_once()
+
+    def test_resolve_user_not_found_when_has_public_member_page_false(self):
+        """Test resolving a user with has_public_member_page=False returns None."""
+        with patch("apps.github.models.user.User.objects.filter") as mock_filter:
+            mock_queryset = mock_filter.return_value
+            mock_queryset.first.return_value = None
+
+            result = UserQuery().user(login="test-user")
+
+            assert result is None
+            mock_filter.assert_called_once_with(has_public_member_page=True, login="test-user")
+            mock_queryset.first.assert_called_once()
 
     def test_resolve_user_not_found(self):
         """Test resolving a non-existent user."""
-        with patch("apps.github.models.user.User.objects.get") as mock_get:
-            mock_get.side_effect = User.DoesNotExist
+        with patch("apps.github.models.user.User.objects.filter") as mock_filter:
+            mock_queryset = mock_filter.return_value
+            mock_queryset.first.return_value = None
 
             result = UserQuery().user(login="non-existent")
 
             assert result is None
-            mock_get.assert_called_once_with(login="non-existent")
+            mock_filter.assert_called_once_with(has_public_member_page=True, login="non-existent")
+            mock_queryset.first.assert_called_once()
+
+    def test_resolve_user_filters_by_public_member_page_and_login(self):
+        """Test that user query filters by both has_public_member_page and login."""
+        with patch("apps.github.models.user.User.objects.filter") as mock_filter:
+            mock_queryset = mock_filter.return_value
+            mock_queryset.first.return_value = None
+
+            UserQuery().user(login="test-user")
+
+            mock_filter.assert_called_once_with(has_public_member_page=True, login="test-user")
 
     def test_top_contributed_repositories(self):
         """Test resolving top contributed repositories."""

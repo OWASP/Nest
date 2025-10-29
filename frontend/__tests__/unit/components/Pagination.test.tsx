@@ -82,18 +82,18 @@ describe('<Pagination />', () => {
     renderComponent({ currentPage: 10, totalPages: 20 })
 
     // Should show first 3 pages
-    ;[1, 2, 3].forEach((n) => {
+    for (const n of [1, 2, 3]) {
       expect(screen.getByRole('button', { name: String(n) })).toBeInTheDocument()
-    })
+    }
 
     // Should show exactly two “More pages” indicators
     const ellipses = screen.getAllByLabelText('More pages')
     expect(ellipses).toHaveLength(2)
 
     // Should show pages around currentPage: 9, 10, 11
-    ;[9, 10, 11].forEach((n) =>
+    for (const n of [9, 10, 11]) {
       expect(screen.getByRole('button', { name: String(n) })).toBeInTheDocument()
-    )
+    }
 
     // Last page
     expect(screen.getByRole('button', { name: '20' })).toBeInTheDocument()
@@ -122,9 +122,10 @@ describe('<Pagination />', () => {
   it('shows correct pages when currentPage = 4 of 10', () => {
     renderComponent({ currentPage: 4, totalPages: 10 })
     // Should show 1,2,3,4,5 then ellipsis and 10
-    ;[1, 2, 3, 4, 5].forEach((n) =>
+    for (const n of [1, 2, 3, 4, 5]) {
       expect(screen.getByRole('button', { name: String(n) })).toBeInTheDocument()
-    )
+    }
+
     expect(screen.getByRole('button', { name: '10' })).toBeInTheDocument()
   })
 

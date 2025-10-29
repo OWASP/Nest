@@ -1,4 +1,4 @@
-"""A command to perform fuzzy and exact matching of leaders/slack members with User model."""
+"""A command to match existing EntityMember leaders with GitHub Users."""
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
@@ -14,7 +14,9 @@ ID_MIN_LENGTH = 2
 
 
 class Command(BaseCommand):
-    help = "Matches entity leader names with GitHub Users and creates EntityMember records."
+    help = (
+        "Matches existing EntityMember leaders with GitHub Users and updates their member field."
+    )
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -46,84 +48,121 @@ class Command(BaseCommand):
             )
             return
 
-        models_to_process = model_map[model_name]
+        model_class = model_map[model_name]
 
-        all_users = list(User.objects.values("id", "login", "name"))
+        all_users = list(User.objects.values("id", "login", "name", "email"))
         valid_users = [u for u in all_users if self.is_valid_user(u["login"], u["name"])]
 
-        self.process_entities(models_to_process, valid_users, threshold)
+        self.process_entity_members(model_class, valid_users, threshold)
 
-    def process_entities(self, model_class, users_list, threshold):
-        """Process entries."""
+    def process_entity_members(self, model_class, users_list, threshold):
+        """Process existing EntityMember records for the given model."""
         model_label = model_class.__name__.capitalize()
-        self.stdout.write(f"Processing {model_label}s")
-
-        new_members_to_create = []
+        self.stdout.write(f"Processing {model_label} EntityMember leaders")
 
         entity_type = ContentType.objects.get_for_model(model_class)
+        unmatched_members = EntityMember.objects.filter(
+            entity_type=entity_type, role=EntityMember.Role.LEADER, member__isnull=True
+        ).select_related("entity_type")
 
-        for entity in model_class.objects.filter(is_active=True, has_active_repositories=True):
-            if not entity.leaders_raw or not entity.is_indexable:
-                continue
+        total_members = unmatched_members.count()
+        if total_members == 0:
+            self.stdout.write(self.style.NOTICE(f"No unmatched {model_label} leaders found."))
+            return
 
-            for index, leader_name in enumerate(entity.leaders_raw):
-                matched_users = self.find_all_user_matches(leader_name, users_list, threshold)
+        self.stdout.write(f"Found {total_members} unmatched {model_label} leaders")
 
-                if not matched_users:
-                    continue
+        matched_count = 0
+        unmatched_count = 0
 
-                new_members_to_create.extend(
-                    EntityMember(
-                        entity_id=entity.pk,
-                        entity_type=entity_type,
-                        is_reviewed=False,
-                        member_id=user["id"],
-                        order=((index + 1) * 10),
-                        role=EntityMember.Role.LEADER,
-                    )
-                    for user in matched_users
+        for entity_member in unmatched_members:
+            best_match = self.find_best_user_match(
+                entity_member.member_name, entity_member.member_email, users_list, threshold
+            )
+
+            if best_match:
+                entity_member.member_id = best_match["id"]
+                entity_member.save(update_fields=["member"])
+                matched_count += 1
+                self.stdout.write(
+                    f"  ✓ Matched '{entity_member.member_name}' -> {best_match['login']}"
+                )
+            else:
+                unmatched_count += 1
+                self.stdout.write(
+                    self.style.WARNING(f"  ✗ No match found for '{entity_member.member_name}'")
                 )
 
-        if new_members_to_create:
-            created_records = EntityMember.objects.bulk_create(
-                new_members_to_create,
-                ignore_conflicts=True,
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Matched {matched_count} out of {total_members} {model_label} leaders"
             )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Found {len(created_records)} member record(s) for {model_label}."
-                )
-            )
-        else:
-            self.stdout.write(
-                self.style.NOTICE(f"  -> No member records found for {model_label}.")
-            )
+        )
+        if unmatched_count > 0:
+            self.stdout.write(self.style.WARNING(f"{unmatched_count} leaders remain unmatched"))
 
     def is_valid_user(self, login, name):
         """Check if GitHub user meets minimum requirements."""
         return len(login) >= ID_MIN_LENGTH and len(name or "") >= ID_MIN_LENGTH
 
-    def find_all_user_matches(self, leader_name, users_list, threshold):
-        """Find user matches for a list of raw leader names."""
-        if not leader_name:
-            return []
+    def find_best_user_match(self, member_name, member_email, users_list, threshold):
+        """Find the best matching GitHub user for an EntityMember."""
+        if not member_name:
+            return None
 
-        leader_lower = leader_name.lower()
+        member_name_lower = member_name.lower()
+        member_email_lower = (member_email or "").lower()
 
-        matches = [
-            user
-            for user in users_list
-            if user["login"].lower() == leader_lower
-            or (user["name"] and user["name"].lower() == leader_lower)
-        ]
+        exact_matches = []
 
-        if not matches:
-            for user in users_list:
-                score = fuzz.token_sort_ratio(leader_lower, user["login"].lower())
-                if user["name"]:
-                    score = max(score, fuzz.token_sort_ratio(leader_lower, user["name"].lower()))
+        for user in users_list:
+            user_login_lower = user["login"].lower()
+            user_name_lower = (user["name"] or "").lower()
+            user_email_lower = (user["email"] or "").lower()
 
-                if score >= threshold:
-                    matches.append(user)
+            if user_login_lower == member_name_lower:
+                exact_matches.append((user, 100, "login"))
+            elif user_name_lower and user_name_lower == member_name_lower:
+                exact_matches.append((user, 100, "name"))
+            elif (
+                member_email_lower and user_email_lower and user_email_lower == member_email_lower
+            ):
+                exact_matches.append((user, 100, "email"))
 
-        return list({user["id"]: user for user in matches}.values())
+        if exact_matches:
+            priority_order = {"login": 0, "name": 1, "email": 2}
+            exact_matches.sort(key=lambda x: priority_order.get(x[2], 3))
+            return exact_matches[0][0]
+
+        fuzzy_matches = []
+
+        for user in users_list:
+            user_login_lower = user["login"].lower()
+            user_name_lower = (user["name"] or "").lower()
+            user_email_lower = (user["email"] or "").lower()
+
+            login_score = fuzz.token_sort_ratio(member_name_lower, user_login_lower)
+            name_score = 0
+            if user_name_lower:
+                name_score = fuzz.token_sort_ratio(member_name_lower, user_name_lower)
+            email_score = 0
+            if member_email_lower and user_email_lower:
+                email_score = fuzz.token_sort_ratio(member_email_lower, user_email_lower)
+
+            best_score = max(login_score, name_score, email_score)
+
+            if best_score >= threshold:
+                if login_score == best_score:
+                    match_type = "login"
+                elif name_score == best_score:
+                    match_type = "name"
+                else:
+                    match_type = "email"
+                fuzzy_matches.append((user, best_score, match_type))
+
+        if fuzzy_matches:
+            priority_order = {"login": 0, "name": 1, "email": 2}
+            fuzzy_matches.sort(key=lambda x: (-x[1], priority_order.get(x[2], 3)))
+            return fuzzy_matches[0][0]
+
+        return None

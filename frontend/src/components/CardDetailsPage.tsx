@@ -1,6 +1,5 @@
 import {
   faCircleInfo,
-  faSquarePollVertical,
   faChartPie,
   faFolderOpen,
   faCode,
@@ -21,6 +20,7 @@ import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
+import Leaders from 'components/Leaders'
 import LeadersList from 'components/LeadersList'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import Milestones from 'components/Milestones'
@@ -29,9 +29,10 @@ import ProgramActions from 'components/ProgramActions'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
-import RepositoriesCard from 'components/RepositoriesCard'
+import RepositoryCard from 'components/RepositoryCard'
 import SecondaryCard from 'components/SecondaryCard'
 import SponsorCard from 'components/SponsorCard'
+import StatusBadge from 'components/StatusBadge'
 import ToggleableList from 'components/ToggleableList'
 import TopContributorsList from 'components/TopContributorsList'
 
@@ -44,14 +45,15 @@ const DetailsCard = ({
   canUpdateStatus,
   tags,
   domains,
+  entityLeaders,
   modules,
   mentors,
   admins,
   entityKey,
   geolocationData = null,
   healthMetricsData,
-  heatmap,
   isActive = true,
+  isArchived = false,
   languages,
   projectName,
   pullRequests,
@@ -95,19 +97,18 @@ const DetailsCard = ({
                   Edit Module
                 </button>
               )}
-            {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
-              <MetricsScoreCircle
-                score={healthMetricsData[0].score}
-                clickable={true}
-                onClick={() => scrollToAnchor('issues-trend')}
-              />
-            )}
+            <div className="flex items-center gap-3">
+              {!isActive && <StatusBadge status="inactive" size="md" />}
+              {isArchived && type === 'repository' && <StatusBadge status="archived" size="md" />}
+              {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
+                <MetricsScoreCircle
+                  score={healthMetricsData[0].score}
+                  clickable={true}
+                  onClick={() => scrollToAnchor('issues-trend')}
+                />
+              )}
+            </div>
           </div>
-          {!isActive && (
-            <span className="ml-4 justify-center rounded bg-red-200 px-2 py-1 text-sm text-red-800">
-              Inactive
-            </span>
-          )}
         </div>
         <p className="mb-6 text-xl">{description}</p>
         {summary && (
@@ -116,20 +117,7 @@ const DetailsCard = ({
           </SecondaryCard>
         )}
 
-        {userSummary && (
-          <SecondaryCard icon={faCircleInfo} title={<AnchorTitle title="Summary" />}>
-            {userSummary}
-          </SecondaryCard>
-        )}
-
-        {heatmap && (
-          <SecondaryCard
-            icon={faSquarePollVertical}
-            title={<AnchorTitle title="Contribution Heatmap" />}
-          >
-            {heatmap}
-          </SecondaryCard>
-        )}
+        {userSummary && <SecondaryCard>{userSummary}</SecondaryCard>}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
             icon={faRectangleList}
@@ -235,6 +223,7 @@ const DetailsCard = ({
             )}
           </div>
         )}
+        {entityLeaders && entityLeaders.length > 0 && <Leaders users={entityLeaders} />}
         {topContributors && (
           <TopContributorsList
             contributors={topContributors}
@@ -290,7 +279,7 @@ const DetailsCard = ({
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
             <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
-              <RepositoriesCard maxInitialDisplay={4} repositories={repositories} />
+              <RepositoryCard maxInitialDisplay={4} repositories={repositories} />
             </SecondaryCard>
           )}
         {type === 'program' && modules.length > 0 && (

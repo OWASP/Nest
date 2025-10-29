@@ -42,6 +42,7 @@
     "backend/**/migrations/*.py",
     "backend/data/project-custom-tags/*.json",
     "backend/static/**",
+    "design/**",
     "pnpm-lock.yaml"
   ],
   "ignoreRegExpList": [

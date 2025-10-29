@@ -1,11 +1,13 @@
 import type { IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import type { JSX } from 'react'
+import type { Badge } from 'types/badge'
 import type { Button } from 'types/button'
 import type { Chapter } from 'types/chapter'
 import type { Contributor } from 'types/contributor'
 import type { HealthMetricsProps } from 'types/healthMetrics'
 import type { Icon } from 'types/icon'
 import type { Issue } from 'types/issue'
+import type { Leader } from 'types/leader'
 import type { Level } from 'types/level'
 import type { Module } from 'types/mentorship'
 import type { Milestone } from 'types/milestone'
@@ -44,11 +46,13 @@ export interface DetailsCardProps {
   description?: string
   details?: { label: string; value: string | JSX.Element }[]
   domains?: string[]
+  entityLeaders?: Leader[]
   entityKey?: string
   geolocationData?: Chapter[]
   healthMetricsData?: HealthMetricsProps[]
   heatmap?: JSX.Element
   isActive?: boolean
+  isArchived?: boolean
   languages?: string[]
   status?: string
   setStatus?: (newStatus: string) => void
@@ -76,6 +80,8 @@ export interface DetailsCardProps {
 
 export interface UserCardProps {
   avatar: string
+  badgeCount?: number
+  badges?: Badge[]
   button: Button
   className?: string
   company?: string

@@ -194,6 +194,20 @@
   .md-wrapper ol {
     list-style: decimal;
   }
+
+  .md-wrapper code {
+    background-color: #e5e5e5;
+    color: oklch(58.8% 0.158 241.966);
+    padding: 0.2em 0.4em;
+    margin: 0 0.2em;
+    border-radius: 5px;
+    font-family: 'Courier New', Courier, monospace;
+  }
+
+  .dark .md-wrapper code {
+    color: oklch(74.6% 0.16 232.661);
+    background-color: #333539;
+  }
 }
 
 @layer base {
@@ -215,8 +229,8 @@
   }
 
   .dark .leaflet-popup-content-wrapper {
-    background-color: #2c3e50;
-    color: white;
+    background-color: #2c3e50 !important;
+    color: white !important;
   }
 
   .dark .leaflet-popup-close-button span {
@@ -283,7 +297,7 @@
   }
 
   .dark .leaflet-popup-tip {
-    background-color: #2c3e50;
+    background-color: #2c3e50 !important;
   }
 
   .leaflet-marker-icon {

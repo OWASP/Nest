@@ -1,10 +1,14 @@
 """OWASP admin mixins for common functionality."""
 
 from django.contrib.contenttypes.admin import GenericTabularInline
+from django.contrib.contenttypes.models import ContentType
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
+from apps.owasp.admin.widgets import ChannelIdWidget
+from apps.owasp.models.entity_channel import EntityChannel
 from apps.owasp.models.entity_member import EntityMember
+from apps.slack.models.conversation import Conversation
 
 
 class BaseOwaspAdminMixin:
@@ -41,6 +45,8 @@ class EntityMemberInline(GenericTabularInline):
     ct_fk_field = "entity_id"
     extra = 1
     fields = (
+        "member_name",
+        "member_email",
         "member",
         "role",
         "description",
@@ -54,6 +60,36 @@ class EntityMemberInline(GenericTabularInline):
         "member__login",
     )
     raw_id_fields = ("member",)
+
+
+class EntityChannelInline(GenericTabularInline):
+    """EntityChannel inline for admin."""
+
+    ct_field = "entity_type"
+    ct_fk_field = "entity_id"
+    extra = 1
+    fields = (
+        "channel_type",
+        "channel_id",
+        "platform",
+        "is_default",
+        "is_active",
+        "is_reviewed",
+    )
+    model = EntityChannel
+    ordering = ("platform", "channel_id")
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        """Override to add custom widget for channel_id field and limit channel_type options."""
+        if db_field.name == "channel_id":
+            kwargs["widget"] = ChannelIdWidget()
+        elif db_field.name == "channel_type":
+            # Limit channel_type to only Conversation (Slack channels)
+            conversation_ct = ContentType.objects.get_for_model(Conversation)
+            kwargs["queryset"] = ContentType.objects.filter(id=conversation_ct.id)
+            kwargs["initial"] = conversation_ct
+
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
 
 class GenericEntityAdminMixin(BaseOwaspAdminMixin):

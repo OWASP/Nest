@@ -4,9 +4,9 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
+import { ExperienceLevelEnum, ProgramStatusEnum } from 'types/__generated__/graphql'
 import type { ExtendedSession } from 'types/auth'
 import type { Module } from 'types/mentorship'
-import { ExperienceLevelEnum, ProgramStatusEnum } from 'types/mentorship'
 import SingleModuleCard from 'components/SingleModuleCard'
 
 // Mock dependencies
@@ -89,8 +89,8 @@ const mockModule: Module = {
   key: 'test-module',
   name: 'Test Module',
   description: 'This is a test module description',
-  status: ProgramStatusEnum.PUBLISHED,
-  experienceLevel: ExperienceLevelEnum.INTERMEDIATE,
+  status: ProgramStatusEnum.Published,
+  experienceLevel: ExperienceLevelEnum.Intermediate,
   mentors: [
     {
       name: 'user1',

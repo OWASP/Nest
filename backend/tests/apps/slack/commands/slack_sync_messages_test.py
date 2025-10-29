@@ -10,6 +10,8 @@ from apps.slack.management.commands.slack_sync_messages import Command
 from apps.slack.models import Conversation, Member, Message, Workspace
 
 CONSTANT_4 = 4
+CONSTANT_7 = 7
+CONSTANT_8 = 8
 CONSTANT_5 = 5
 TEST_TOKEN = "xoxb-test-token"  # noqa: S105
 TEST_TOKEN_1 = "xoxb-token-1"  # noqa: S105
@@ -156,7 +158,16 @@ class TestSlackSyncMessagesCommand:
         with patch.object(Workspace.objects, "all") as mock_all:
             mock_all.return_value.exists.return_value = False
             command.stdout = stdout
-            command.handle(batch_size=200, delay=0.5, channel_id=None, max_retries=5)
+            command.handle(
+                batch_size=200,
+                delay=0.5,
+                channel_id=None,
+                max_retries=5,
+                slack_user_id=None,
+                github_user_id=None,
+                start_at=None,
+                end_at=None,
+            )
 
         output = stdout.getvalue()
         assert "No workspaces found in the database" in output
@@ -170,7 +181,16 @@ class TestSlackSyncMessagesCommand:
         stdout = StringIO()
         with patch.object(Workspace.objects, "all", return_value=mock_workspaces):
             command.stdout = stdout
-            command.handle(batch_size=200, delay=0.5, channel_id=None, max_retries=5)
+            command.handle(
+                batch_size=200,
+                delay=0.5,
+                channel_id=None,
+                max_retries=5,
+                slack_user_id=None,
+                github_user_id=None,
+                start_at=None,
+                end_at=None,
+            )
 
         output = stdout.getvalue()
         assert "No bot token found for Workspace No Token" in output
@@ -222,7 +242,16 @@ class TestSlackSyncMessagesCommand:
         ):
             mock_message_filter.return_value.order_by.return_value.first.return_value = None
             command.stdout = stdout
-            command.handle(batch_size=200, delay=0.5, channel_id=None, max_retries=5)
+            command.handle(
+                batch_size=200,
+                delay=0.5,
+                channel_id=None,
+                max_retries=5,
+                slack_user_id=None,
+                github_user_id=None,
+                start_at=None,
+                end_at=None,
+            )
 
         mock_bulk_save.assert_called()
 
@@ -388,7 +417,7 @@ class TestSlackSyncMessagesCommand:
         parser = MagicMock()
         command.add_arguments(parser)
 
-        assert parser.add_argument.call_count == CONSTANT_4
+        assert parser.add_argument.call_count == CONSTANT_8
 
         parser.add_argument.assert_any_call(
             "--batch-size",
@@ -417,6 +446,30 @@ class TestSlackSyncMessagesCommand:
             help="Maximum retries for rate-limited requests",
         )
 
+        parser.add_argument.assert_any_call(
+            "--slack-user-id",
+            type=str,
+            help="Slack user ID to sync messages for",
+        )
+
+        parser.add_argument.assert_any_call(
+            "--github-user-id",
+            type=str,
+            help="GitHub user login to sync messages for (looks up Slack ID from profile)",
+        )
+
+        parser.add_argument.assert_any_call(
+            "--start-at",
+            type=str,
+            help="Start date for message range (YYYY-MM-DD, defaults to Jan 1 of current year)",
+        )
+
+        parser.add_argument.assert_any_call(
+            "--end-at",
+            type=str,
+            help="End date for message range (YYYY-MM-DD, defaults to today)",
+        )
+
     def test_management_command_via_call_command(self):
         """Test running the command via Django's call_command."""
         stdout = StringIO()
@@ -427,3 +480,83 @@ class TestSlackSyncMessagesCommand:
 
         output = stdout.getvalue()
         assert "No workspaces found in the database" in output
+
+    def test_sync_user_messages_no_workspaces(self, command):
+        """Test _sync_user_messages with no workspaces."""
+        stdout = StringIO()
+        command.stdout = stdout
+
+        with (
+            patch.dict("os.environ", {"DJANGO_SLACK_SEARCH_TOKEN": "slack-test-token"}),
+            patch.object(Workspace.objects, "all") as mock_all,
+            patch("apps.slack.management.commands.slack_sync_messages.WebClient"),
+        ):
+            mock_all.return_value.exists.return_value = False
+            command._sync_user_messages(
+                user_id="U12345",
+                start_at="2025-01-01",
+                end_at="2025-10-01",
+                delay=1.0,
+                max_retries=3,
+            )
+
+        output = stdout.getvalue()
+        assert "Syncing messages for user U12345" in output
+        assert "No workspaces found" in output
+
+    def test_sync_user_messages_with_defaults(self, command):
+        """Test _sync_user_messages with default dates."""
+        stdout = StringIO()
+        command.stdout = stdout
+
+        mock_workspace = MagicMock()
+        mock_workspace.name = "Test Workspace"
+        mock_workspace.bot_token = TEST_TOKEN
+
+        mock_conversation = MagicMock()
+        mock_conversation.slack_channel_id = TEST_CHANNEL_ID
+
+        with (
+            patch.dict("os.environ", {"DJANGO_SLACK_SEARCH_TOKEN": "slack-test-token"}),
+            patch.object(Workspace.objects, "all") as mock_workspaces,
+            patch.object(Conversation.objects, "get_or_create") as mock_get_or_create,
+            patch(
+                "apps.slack.management.commands.slack_sync_messages.WebClient"
+            ) as mock_client_class,
+            patch.object(Message, "bulk_save"),
+        ):
+            mock_queryset = MagicMock()
+            mock_queryset.exists.return_value = True
+            mock_queryset.__iter__ = lambda _: iter([mock_workspace])
+            mock_workspaces.return_value = mock_queryset
+            mock_get_or_create.return_value = (mock_conversation, True)
+
+            mock_client = MagicMock()
+            mock_client_class.return_value = mock_client
+
+            # Mock search_messages response with old message to trigger stop
+            mock_client.search_messages.return_value = {
+                "ok": True,
+                "messages": {
+                    "matches": [
+                        {
+                            "ts": "1609459200.000000",  # Jan 1, 2021 (old message)
+                            "user": "U12345",
+                            "text": "Test message",
+                            "channel": {"id": TEST_CHANNEL_ID, "name": "general"},
+                        }
+                    ]
+                },
+            }
+
+            command._sync_user_messages(
+                user_id="U12345",
+                start_at=None,
+                end_at=None,
+                delay=0.1,
+                max_retries=3,
+            )
+
+        output = stdout.getvalue()
+        assert "Syncing messages for user U12345" in output
+        assert "Reached messages older than" in output

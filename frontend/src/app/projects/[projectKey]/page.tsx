@@ -1,5 +1,5 @@
 'use client'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import {
   faCodeFork,
   faExclamationCircle,
@@ -12,18 +12,18 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
+import { GetProjectDocument } from 'types/__generated__/projectQueries.generated'
 import type { Contributor } from 'types/contributor'
 import type { Project } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 const ProjectDetailsPage = () => {
-  const { projectKey } = useParams()
+  const { projectKey } = useParams<{ projectKey: string }>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [project, setProject] = useState<Project | null>(null)
   const [topContributors, setTopContributors] = useState<Contributor[]>([])
-  const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_DATA, {
+  const { data, error: graphQLRequestError } = useQuery(GetProjectDocument, {
     variables: { key: projectKey },
   })
   useEffect(() => {
@@ -92,6 +92,7 @@ const ProjectDetailsPage = () => {
     <DetailsCard
       details={projectDetails}
       entityKey={project.key}
+      entityLeaders={project.entityLeaders}
       healthMetricsData={project.healthMetricsList}
       isActive={project.isActive}
       languages={project.languages}
