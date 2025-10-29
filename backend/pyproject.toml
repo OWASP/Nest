@@ -164,6 +164,7 @@ lint.per-file-ignores."tests/apps/ai/models/context_test.py" = [
 ]
 lint.per-file-ignores."tests/apps/slack/views_test.py" = [
   "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+]
 lint.per-file-ignores."apps/api/rest/**/*.py" = [
   "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
   "B008",   # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
