@@ -33,7 +33,7 @@ describe('ScrollToTop component test', () => {
     })
   })
 
-  test('Clicking the button should call window.scrollTo with smooth behavior', async () => {
+  test('Clicking the button should call globalThis.scrollTo with smooth behavior', async () => {
     const { getByLabelText } = render(<ScrollToTop />)
     const button = getByLabelText(/scroll to top/i)
 
