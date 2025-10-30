@@ -171,7 +171,7 @@ function getPixelRatio() {
   if (typeof globalThis === 'undefined') {
     return 1
   }
-  return window.devicePixelRatio || 1
+  return globalThis.devicePixelRatio || 1
 }
 
 const DATE_FORMAT = 'yyyy-MM-dd'

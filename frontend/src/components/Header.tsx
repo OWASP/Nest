@@ -26,7 +26,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= desktopViewMinWidth) {
+      if (globalThis.innerWidth >= desktopViewMinWidth) {
         setMobileMenuOpen(false)
       }
     }
@@ -45,11 +45,11 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
       }
     }
 
-    window.addEventListener('resize', handleResize)
+    globalThis.addEventListener('resize', handleResize)
     globalThis.addEventListener('click', handleOutsideClick)
 
     return () => {
-      window.removeEventListener('resize', handleResize)
+      globalThis.removeEventListener('resize', handleResize)
       globalThis.removeEventListener('click', handleOutsideClick)
     }
   }, [mobileMenuOpen])

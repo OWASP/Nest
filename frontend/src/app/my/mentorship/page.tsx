@@ -118,7 +118,7 @@ const MyMentorshipPage: React.FC = () => {
         currentPage={page}
         onPageChange={(p) => {
           setPage(p)
-          window.scrollTo({ top: 0, behavior: 'smooth' })
+          globalThis.scrollTo({ top: 0, behavior: 'smooth' })
         }}
         onSearch={(q) => {
           setSearchQuery(q)

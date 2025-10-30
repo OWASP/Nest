@@ -100,7 +100,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           router.push(`/chapters/${suggestion.key}`)
           break
         case 'events':
-          window.open((suggestion as Event).url, '_blank')
+          globalThis.open((suggestion as Event).url, '_blank')
           break
         case 'organizations':
           // Use type guard to safely access login property

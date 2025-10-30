@@ -10,8 +10,8 @@ export function scrollToAnchor(targetId: string, additionalOffset = 80): void {
     const yOffset = -headingHeight - additionalOffset
 
     // Use modern window.scrollY instead of deprecated pageYOffset
-    const y = element.getBoundingClientRect().top + window.scrollY + yOffset
-    window.scrollTo({
+    const y = element.getBoundingClientRect().top + globalThis.scrollY + yOffset
+    globalThis.scrollTo({
       top: y,
       behavior: 'smooth',
     })

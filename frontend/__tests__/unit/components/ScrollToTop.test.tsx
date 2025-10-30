@@ -3,7 +3,7 @@ import ScrollToTop from 'components/ScrollToTop'
 
 describe('ScrollToTop component test', () => {
   beforeEach(() => {
-    window.scrollTo = jest.fn()
+    globalThis.scrollTo = jest.fn()
     Object.defineProperty(globalThis, 'scrollY', { value: 0, writable: true })
     Object.defineProperty(globalThis, 'innerHeight', { value: 1000, writable: true })
   })
@@ -45,6 +45,6 @@ describe('ScrollToTop component test', () => {
     })
 
     fireEvent.click(button)
-    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' })
+    expect(globalThis.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' })
   })
 })
