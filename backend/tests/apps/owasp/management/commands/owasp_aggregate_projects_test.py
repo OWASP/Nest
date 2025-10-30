@@ -16,7 +16,11 @@ class TestOwaspAggregateProjects:
         project.owasp_url = "https://owasp.org/www-project-test"
         project.related_urls = {"https://github.com/OWASP/test-repo"}
         project.invalid_urls = set()
+
         project.repositories.all.return_value = []
+        project.owasp_repository = mock.Mock()
+        project.owasp_repository.is_archived = False
+        project.owasp_repository.created_at = "2024-01-01T00:00:00Z"
         return project
 
     @pytest.mark.parametrize(
@@ -52,6 +56,12 @@ class TestOwaspAggregateProjects:
         mock_repository.topics = ["security", "owasp"]
 
         mock_project.repositories.all.return_value = [mock_repository]
+
+        class QS(list):
+            def exists(self):
+                return bool(self)
+
+        mock_project.repositories.filter.return_value = QS([mock_repository])
         mock_projects_list = [mock_project] * projects
         mock_active_projects = mock.MagicMock()
         mock_active_projects.__iter__.return_value = iter(mock_projects_list)
