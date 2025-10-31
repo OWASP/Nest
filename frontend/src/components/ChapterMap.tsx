@@ -44,9 +44,10 @@ const ChapterMap = ({
       })
 
       mapRef.current.on('mouseout', (e: L.LeafletMouseEvent) => {
-        const relatedTarget = (e.originalEvent as MouseEvent).relatedTarget as Node | null
-        const popupPane = mapRef.current?.getPanes().popupPane
-        if (relatedTarget && popupPane?.contains(relatedTarget)) return
+        const originalEvent = e.originalEvent as MouseEvent
+        const relatedTarget = originalEvent.relatedTarget as Node | null
+        const container = mapRef.current?.getContainer()
+        if (relatedTarget && container?.contains(relatedTarget)) return
 
         mapRef.current?.scrollWheelZoom.disable()
         setIsMapActive(false)
