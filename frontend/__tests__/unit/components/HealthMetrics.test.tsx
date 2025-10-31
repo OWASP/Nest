@@ -79,7 +79,7 @@ describe('HealthMetrics', () => {
     it('renders correct icon and labels for BarChart', () => {
       render(<HealthMetrics data={getMockHealthMetric()} />)
       const barChart = screen.getByTestId('BarChart')
-      const props = JSON.parse(barChart.getAttribute('data-props') || '{}')
+      const props = JSON.parse(barChart.dataset.props || '{}')
       expect(props.icon).toEqual(faCodeCommit)
       expect(props.labels).toEqual(['Days Since Last Commit', 'Days Since Last Release'])
       expect(props.days).toEqual([1, 7])
@@ -89,7 +89,7 @@ describe('HealthMetrics', () => {
     it('renders formatted date labels correctly', () => {
       render(<HealthMetrics data={getMockHealthMetric()} />)
       const lineCharts = screen.getAllByTestId('LineChart')
-      const labels = JSON.parse(lineCharts[0].getAttribute('data-props') || '{}').labels
+      const labels = JSON.parse(lineCharts[0].dataset.props || '{}').labels
       expect(typeof labels[0]).toBe('string')
       expect(labels[0]).toBeTruthy()
     })
@@ -97,7 +97,7 @@ describe('HealthMetrics', () => {
     it('includes all required series in LineChart', () => {
       render(<HealthMetrics data={getMockHealthMetric()} />)
       const issuesTrend = screen.getByText('Issues Trend')
-      const props = JSON.parse(issuesTrend.getAttribute('data-props') || '{}')
+      const props = JSON.parse(issuesTrend.dataset.props || '{}')
       const seriesNames = props.series.map((s: { name: string }) => s.name)
       expect(seriesNames).toEqual(['Open Issues', 'Unassigned Issues', 'Unanswered Issues'])
     })
@@ -126,7 +126,7 @@ describe('HealthMetrics', () => {
     it('handles missing last data point fields with fallback values', () => {
       render(<HealthMetrics data={getMockIncompleteHealthMetric()} />)
       const barChart = screen.getByTestId('BarChart')
-      const props = JSON.parse(barChart.getAttribute('data-props') || '{}')
+      const props = JSON.parse(barChart.dataset.props || '{}')
       expect(props.days).toEqual([0, 0])
       expect(props.requirements).toEqual([0, 0])
     })

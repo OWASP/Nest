@@ -76,9 +76,9 @@ describe('ModuleList', () => {
       const modules = ['Module 1', 'Module 2', 'Module 3', 'Module 4', 'Module 5']
       render(<ModuleList modules={modules} />)
 
-      modules.forEach((module) => {
-        expect(screen.getByText(module)).toBeInTheDocument()
-      })
+      for (const myModule of modules) {
+        expect(screen.getByText(myModule)).toBeInTheDocument()
+      }
 
       // Should not show "Show more" button
       expect(screen.queryByText('Show more')).not.toBeInTheDocument()

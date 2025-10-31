@@ -89,6 +89,13 @@ class UserNode:
         return self.idx_issues_count
 
     @strawberry.field
+    def linkedin_page_id(self) -> str:
+        """Resolve LinkedIn page ID."""
+        if hasattr(self, "owasp_profile") and self.owasp_profile.linkedin_page_id:
+            return self.owasp_profile.linkedin_page_id
+        return ""
+
+    @strawberry.field
     def releases_count(self) -> int:
         """Resolve releases count."""
         return self.idx_releases_count

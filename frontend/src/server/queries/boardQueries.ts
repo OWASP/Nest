@@ -19,6 +19,7 @@ export const GET_BOARD_CANDIDATES = gql`
           isOwaspBoardMember
           isFormerOwaspStaff
           isGsocMentor
+          linkedinPageId
         }
       }
       id

@@ -29,7 +29,7 @@ import ProgramActions from 'components/ProgramActions'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
-import RepositoriesCard from 'components/RepositoriesCard'
+import RepositoryCard from 'components/RepositoryCard'
 import SecondaryCard from 'components/SecondaryCard'
 import SponsorCard from 'components/SponsorCard'
 import StatusBadge from 'components/StatusBadge'
@@ -279,7 +279,7 @@ const DetailsCard = ({
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
             <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
-              <RepositoriesCard maxInitialDisplay={4} repositories={repositories} />
+              <RepositoryCard maxInitialDisplay={4} repositories={repositories} />
             </SecondaryCard>
           )}
         {type === 'program' && modules.length > 0 && (

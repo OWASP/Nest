@@ -126,48 +126,48 @@ describe('SkeletonBase', () => {
       expect(screen.getByTestId('hero-skeleton')).toHaveClass('mb-2', 'h-96', 'w-full', 'max-w-6xl')
 
       const cardSkeletons = screen.getAllByTestId('card-skeleton')
-      cardSkeletons.forEach((skeleton) => {
+      for (const skeleton of cardSkeletons) {
         expect(skeleton).toHaveAttribute('data-show-level', 'false')
         expect(skeleton).toHaveAttribute('data-show-icons', 'false')
         expect(skeleton).toHaveAttribute('data-show-link', 'false')
-      })
+      }
     })
 
     it('configures issues skeleton correctly', () => {
       render(<SkeletonBase indexName="issues" loadingImageUrl="test.jpg" />)
 
       const cardSkeletons = screen.getAllByTestId('card-skeleton')
-      cardSkeletons.forEach((skeleton) => {
+      for (const skeleton of cardSkeletons) {
         expect(skeleton).toHaveAttribute('data-show-level', 'false')
         expect(skeleton).toHaveAttribute('data-show-icons', 'true')
         expect(skeleton).toHaveAttribute('data-num-icons', '2')
         expect(skeleton).toHaveAttribute('data-show-contributors', 'false')
         expect(skeleton).toHaveAttribute('data-show-social', 'false')
-      })
+      }
     })
 
     it('configures projects skeleton correctly', () => {
       render(<SkeletonBase indexName="projects" loadingImageUrl="test.jpg" />)
 
       const cardSkeletons = screen.getAllByTestId('card-skeleton')
-      cardSkeletons.forEach((skeleton) => {
+      for (const skeleton of cardSkeletons) {
         expect(skeleton).toHaveAttribute('data-show-link', 'false')
         expect(skeleton).toHaveAttribute('data-show-social', 'false')
         expect(skeleton).toHaveAttribute('data-show-icons', 'true')
         expect(skeleton).toHaveAttribute('data-num-icons', '3')
-      })
+      }
     })
 
     it('configures committees skeleton correctly', () => {
       render(<SkeletonBase indexName="committees" loadingImageUrl="test.jpg" />)
 
       const cardSkeletons = screen.getAllByTestId('card-skeleton')
-      cardSkeletons.forEach((skeleton) => {
+      for (const skeleton of cardSkeletons) {
         expect(skeleton).toHaveAttribute('data-show-link', 'false')
         expect(skeleton).toHaveAttribute('data-show-level', 'false')
         expect(skeleton).toHaveAttribute('data-show-icons', 'true')
         expect(skeleton).toHaveAttribute('data-num-icons', '1')
-      })
+      }
     })
 
     it('passes loadingImageUrl to LoadingSpinner correctly', () => {
@@ -238,14 +238,14 @@ describe('SkeletonBase', () => {
     it('falls back to LoadingSpinner for unhandled indexName values', () => {
       const unhandledValues = ['random', 'test', 'invalid', '123', 'null']
 
-      unhandledValues.forEach((value) => {
+      for (const value of unhandledValues) {
         const { container } = render(
           <SkeletonBase indexName={value} loadingImageUrl="fallback.jpg" />
         )
 
         expect(screen.getByTestId('loading-spinner')).toBeInTheDocument()
         container.remove()
-      })
+      }
     })
 
     it('handles case-sensitive indexName correctly', () => {
@@ -261,10 +261,10 @@ describe('SkeletonBase', () => {
       render(<SkeletonBase indexName="projects" loadingImageUrl="test.jpg" />)
 
       const cardSkeletons = screen.getAllByTestId('card-skeleton')
-      cardSkeletons.forEach((skeleton) => {
+      for (const skeleton of cardSkeletons) {
         expect(skeleton).toHaveAttribute('data-show-level', 'true')
         expect(skeleton).toHaveAttribute('data-show-contributors', 'true')
-      })
+      }
     })
   })
 
@@ -323,12 +323,12 @@ describe('SkeletonBase', () => {
     it('handles special characters in indexName', () => {
       const specialNames = ['test-name', 'test_name', 'test.name', 'test name', '!@#$%']
 
-      specialNames.forEach((name) => {
+      for (const name of specialNames) {
         const { container } = render(<SkeletonBase indexName={name} loadingImageUrl="test.jpg" />)
 
         expect(screen.getByTestId('loading-spinner')).toBeInTheDocument()
         container.remove()
-      })
+      }
     })
 
     it('handles very long indexName strings', () => {
@@ -378,9 +378,9 @@ describe('SkeletonBase', () => {
       const cardSkeletons = screen.getAllByTestId('card-skeleton')
 
       expect(heroSkeleton.parentElement).toHaveClass('flex', 'w-full', 'flex-col')
-      cardSkeletons.forEach((skeleton) => {
+      for (const skeleton of cardSkeletons) {
         expect(skeleton.parentElement).toHaveClass('flex', 'w-full', 'flex-col')
-      })
+      }
     })
   })
 
@@ -424,14 +424,14 @@ describe('SkeletonBase', () => {
     it('maintains consistent DOM structure across different skeleton types', () => {
       const skeletonTypes = ['chapters', 'issues', 'projects', 'committees']
 
-      skeletonTypes.forEach((type) => {
+      for (const type of skeletonTypes) {
         const { container } = render(<SkeletonBase indexName={type} loadingImageUrl="test.jpg" />)
 
         const mainContainer = container.querySelector('div')
         expect(mainContainer).toHaveClass('flex', 'w-full', 'flex-col')
 
         container.remove()
-      })
+      }
     })
   })
 
@@ -450,10 +450,10 @@ describe('SkeletonBase', () => {
       const cardSkeletons = screen.getAllByTestId('card-skeleton')
       expect(cardSkeletons).toHaveLength(4)
 
-      cardSkeletons.forEach((skeleton) => {
+      for (const skeleton of cardSkeletons) {
         expect(skeleton).toHaveAttribute('data-show-link', 'false')
         expect(skeleton).toHaveAttribute('data-show-social', 'false')
-      })
+      }
     })
 
     it('properly integrates with mocked UserCardSkeleton component', () => {

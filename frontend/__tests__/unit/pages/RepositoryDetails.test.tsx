@@ -138,10 +138,10 @@ describe('RepositoryDetailsPage', () => {
     await waitFor(() => {
       const issues = mockRepositoryData.repository.issues
 
-      issues.forEach((issue) => {
+      for (const issue of issues) {
         expect(screen.getByText(issue.title)).toBeInTheDocument()
         expect(screen.getByText(issue.repositoryName)).toBeInTheDocument()
-      })
+      }
     })
   })
 
@@ -186,12 +186,13 @@ describe('RepositoryDetailsPage', () => {
       const recentMilestones = mockRepositoryData.repository.recentMilestones
 
       expect(screen.getByText('Recent Milestones')).toBeInTheDocument()
-      recentMilestones.forEach((milestone) => {
+
+      for (const milestone of recentMilestones) {
         expect(screen.getByText(milestone.title)).toBeInTheDocument()
         expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
         expect(screen.getByText(`${milestone.openIssuesCount} open`)).toBeInTheDocument()
         expect(screen.getByText(`${milestone.closedIssuesCount} closed`)).toBeInTheDocument()
-      })
+      }
     })
   })
 
