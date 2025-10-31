@@ -11,9 +11,9 @@ jest.mock('utils/slugify', () => ({
   default: jest.fn((str: string) =>
     str
       .toLowerCase()
-      .replace(/[^a-z0-9]/g, '-')
-      .replace(/-{2,10}/g, '-')
-      .replace(/(^-{1,10}|-{1,10}$)/g, '')
+      .replaceAll(/[^a-z0-9]/g, '-')
+      .replaceAll(/-{2,10}/g, '-')
+      .replaceAll(/(^-{1,10}|-{1,10}$)/g, '')
   ),
 }))
 
@@ -652,9 +652,9 @@ describe('AnchorTitle Component', () => {
       mockFn.mockImplementation((str: string) =>
         str
           .toLowerCase()
-          .replace(/[^a-z0-9]/g, '-')
-          .replace(/-{2,10}/g, '-')
-          .replace(/(^-{1,10}|-{1,10}$)/g, '')
+          .replaceAll(/[^a-z0-9]/g, '-')
+          .replaceAll(/-{2,10}/g, '-')
+          .replaceAll(/(^-{1,10}|-{1,10}$)/g, '')
       )
 
       const mockScrollTo = jest.spyOn(globalThis, 'scrollTo').mockImplementation()

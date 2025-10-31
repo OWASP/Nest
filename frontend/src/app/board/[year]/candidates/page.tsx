@@ -189,7 +189,7 @@ const BoardCandidatesPage = () => {
 
     const handleCardClick = () => {
       // Convert name to slug format.
-      const nameSlug = candidate.memberName.toLowerCase().replace(/\s+/g, '_')
+      const nameSlug = candidate.memberName.toLowerCase().replaceAll(/\s+/g, '_')
       const candidateUrl = `https://owasp.org/www-board-candidates/${year}/${nameSlug}.html`
       window.open(candidateUrl, '_blank', 'noopener,noreferrer')
     }
@@ -295,7 +295,7 @@ const BoardCandidatesPage = () => {
               }
               className="text-gray-700 dark:text-gray-300"
             >
-              {candidate.member.bio.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim()}
+              {candidate.member.bio.replaceAll(/\n+/g, ' ').replaceAll(/\s+/g, ' ').trim()}
             </div>
           )}
         </div>
