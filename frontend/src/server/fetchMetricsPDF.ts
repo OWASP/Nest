@@ -21,14 +21,14 @@ export const fetchMetricsPDF = async (path: string, fileName: string): Promise<v
       handleAppError(new Error('No data received from the server'))
       return
     }
-    const url = window.URL.createObjectURL(blob)
+    const url = globalThis.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
     link.setAttribute('download', `${fileName}-${new Date().toISOString().split('T')[0]}.pdf`)
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
-    window.URL.revokeObjectURL(url)
+    globalThis.URL.revokeObjectURL(url)
   } catch (error) {
     handleAppError(error)
   }

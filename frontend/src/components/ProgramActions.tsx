@@ -22,10 +22,10 @@ const ProgramActions: React.FC<ProgramActionsProps> = ({ status, setStatus }) =>
   const handleAction = (actionKey: string) => {
     switch (actionKey) {
       case 'edit Program':
-        router.push(`${window.location.pathname}/edit`)
+        router.push(`${globalThis.location.pathname}/edit`)
         break
       case 'create_module':
-        router.push(`${window.location.pathname}/modules/create`)
+        router.push(`${globalThis.location.pathname}/modules/create`)
         break
       case 'publish':
         setStatus(ProgramStatusEnum.Published)

@@ -70,7 +70,7 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
 const ModuleItem = ({ details }: { details: Module }) => {
   const router = useRouter()
   const handleClick = () => {
-    router.push(`${window.location.pathname}/modules/${details.key}`)
+    router.push(`${globalThis.location.pathname}/modules/${details.key}`)
   }
 
   return (

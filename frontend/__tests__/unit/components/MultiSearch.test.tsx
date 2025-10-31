@@ -39,7 +39,7 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
 
 // Mock window.open globally
 const mockWindowOpen = jest.fn()
-Object.defineProperty(window, 'open', {
+Object.defineProperty(globalThis, 'open', {
   value: mockWindowOpen,
   writable: true,
 })
