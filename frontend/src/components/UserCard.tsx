@@ -45,7 +45,10 @@ const UserCard = ({
         </div>
 
         <div className="text-center">
-          <h3 className="max-w-[250px] truncate text-lg font-semibold text-gray-900 sm:text-xl dark:text-white">
+          <h3
+            className="max-w-[250px] text-lg font-semibold wrap-break-word whitespace-normal text-gray-900 sm:text-xl dark:text-white"
+            title={name}
+          >
             {name}
           </h3>
           <p className="mt-1 max-w-[250px] truncate text-sm text-gray-600 sm:text-base dark:text-gray-400">
@@ -80,7 +83,7 @@ const UserCard = ({
       </div>
 
       <div className="inline-flex items-center text-sm font-medium text-blue-400">
-        View Profile
+        {button.label}
         <FontAwesomeIcon
           icon={faChevronRight}
           className="ml-2 h-4 w-4 transform transition-transform group-hover:translate-x-1"
