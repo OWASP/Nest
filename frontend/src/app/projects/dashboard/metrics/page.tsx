@@ -18,11 +18,11 @@ import ProjectsDashboardDropDown from 'components/ProjectsDashboardDropDown'
 const PAGINATION_LIMIT = 10
 
 const FIELD_MAPPING = {
-  score: 'score',
-  stars: 'starsCount',
-  forks: 'forksCount',
   contributors: 'contributorsCount',
   createdAt: 'createdAt',
+  forks: 'forksCount',
+  score: 'score',
+  stars: 'starsCount',
 } as const
 
 type OrderKey = keyof typeof FIELD_MAPPING
