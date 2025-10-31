@@ -1,8 +1,7 @@
 """Test cases for UserNode."""
 
+import math
 from unittest.mock import Mock
-
-import pytest
 
 from apps.github.api.internal.nodes.user import UserNode
 from apps.nest.api.internal.nodes.badge import BadgeNode
@@ -54,7 +53,7 @@ class TestUserNode:
         mock_user.idx_created_at = 1234567890.0
 
         result = UserNode.created_at(mock_user)
-        assert result == pytest.approx(1234567890.0)
+        assert math.isclose(result, 1234567890.0)
 
     def test_issues_count_field(self):
         """Test issues_count field resolution."""
@@ -78,7 +77,7 @@ class TestUserNode:
         mock_user.idx_updated_at = 1234567890.0
 
         result = UserNode.updated_at(mock_user)
-        assert result == pytest.approx(1234567890.0)
+        assert math.isclose(result, 1234567890.0)
 
     def test_url_field(self):
         """Test url field resolution."""
