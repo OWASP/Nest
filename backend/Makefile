@@ -46,11 +46,12 @@ dump-data:
 		owasp \
 		slack.Conversation \
 		slack.Member \
+		slack.Message \
 		slack.Workspace \
 		--indent=4 \
 		--natural-foreign \
 		--natural-primary -o data/nest.json" $(MAKE) exec-backend-command
-	@CMD="sed -E -i 's/\"email\": *\"([^\"]|\\\")*\"/\"email\": \"\"/g' data/nest.json" $(MAKE) exec-backend-command
+	@CMD="sed -E -i 's/(\"[^\"]*email\"): *\"([^\"]|\\\")*\"/\1: \"\"/g' data/nest.json" $(MAKE) exec-backend-command
 	@CMD="gzip -f data/nest.json" $(MAKE) exec-backend-command
 
 enrich-data: \

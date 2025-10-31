@@ -791,7 +791,7 @@ describe('UserDetailsPage', () => {
       render(<UserDetailsPage />)
       await waitFor(() => {
         const badgeElements = screen.getAllByTestId(/^badge-/)
-        const badgeTestIds = badgeElements.map((element) => element.getAttribute('data-testid'))
+        const badgeTestIds = badgeElements.map((element) => element.dataset.testid)
 
         // Expected order matches backend contract: weight ASC (1, 1, 1, 2, 3), then name ASC for equal weights
         const expectedOrder = [

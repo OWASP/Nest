@@ -39,7 +39,7 @@ jest.mock('@heroui/react', () => ({
       data-selected-keys={selectedKeys?.join(',')}
       onClick={(e) => {
         const target = e.target as HTMLElement
-        const key = target.getAttribute('data-key')
+        const key = target.dataset.key
         if (key && onAction) {
           onAction(key)
         }
@@ -47,7 +47,7 @@ jest.mock('@heroui/react', () => ({
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           const target = e.target as HTMLElement
-          const key = target.getAttribute('data-key')
+          const key = target.dataset.key
           if (key && onAction) {
             onAction(key)
           }

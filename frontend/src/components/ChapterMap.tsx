@@ -48,7 +48,13 @@ const ChapterMap = ({
 
     const markerClusterGroup = markerClusterRef.current
 
-    const markers = geoLocData.map((chapter) => {
+    const validGeoLocData = geoLocData.filter((chapter) => {
+      const lat = chapter._geoloc?.lat ?? chapter.geoLocation?.lat
+      const lng = chapter._geoloc?.lng ?? chapter.geoLocation?.lng
+      return typeof lat === 'number' && typeof lng === 'number'
+    })
+
+    const markers = validGeoLocData.map((chapter) => {
       const markerIcon = new L.Icon({
         iconAnchor: [12, 41],
         iconRetinaUrl: '/img/marker-icon-2x.png',
@@ -61,8 +67,8 @@ const ChapterMap = ({
 
       const marker = L.marker(
         [
-          chapter._geoloc?.lat || chapter.geoLocation?.lat,
-          chapter._geoloc?.lng || chapter.geoLocation?.lng,
+          chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
+          chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
         ],
         { icon: markerIcon }
       )
@@ -71,7 +77,7 @@ const ChapterMap = ({
       popupContent.className = 'popup-content'
       popupContent.textContent = chapter.name
       popupContent.addEventListener('click', () => {
-        window.location.href = `/chapters/${chapter.key}`
+        globalThis.location.href = `/chapters/${chapter.key}`
       })
       popup.setContent(popupContent)
       marker.bindPopup(popup)
@@ -80,21 +86,21 @@ const ChapterMap = ({
 
     markerClusterGroup.addLayers(markers)
 
-    if (showLocal && geoLocData.length > 0) {
+    if (showLocal && validGeoLocData.length > 0) {
       const maxNearestChapters = 5
-      const localChapters = geoLocData.slice(0, maxNearestChapters - 1)
+      const localChapters = validGeoLocData.slice(0, maxNearestChapters - 1)
       const localBounds = L.latLngBounds(
         localChapters.map((chapter) => [
-          chapter._geoloc?.lat || chapter.geoLocation?.lat,
-          chapter._geoloc?.lng || chapter.geoLocation?.lng,
+          chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
+          chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
         ])
       )
       const maxZoom = 7
-      const nearestChapter = geoLocData[0]
+      const nearestChapter = validGeoLocData[0]
       map.setView(
         [
-          nearestChapter._geoloc?.lat || nearestChapter.geoLocation?.lat,
-          nearestChapter._geoloc?.lng || nearestChapter.geoLocation?.lng,
+          nearestChapter._geoloc?.lat ?? nearestChapter.geoLocation?.lat,
+          nearestChapter._geoloc?.lng ?? nearestChapter.geoLocation?.lng,
         ],
         maxZoom
       )
