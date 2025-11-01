@@ -419,19 +419,21 @@ This command runs tests and checks that coverage threshold requirements are sati
 
 Follow these steps to setup your e2e testing environment:
 
-1. Run the e2e backend instance with the following command:
+1. Make sure you have `gzip` installed on your machine.
+
+2. Run the e2e backend instance with the following command:
 
    ```bash
    make run-backend-e2e
    ```
 
-2. Load the data into the e2e db with the following command (in another terminal session):
+3. Load the data into the e2e db with the following command (in another terminal session):
 
    ```bash
    make load-data-e2e
    ```
 
-3. Now, you can stop the backend instance, and run the frontend e2e tests with the following command:
+4. Now, you can stop the backend instance, and run the frontend e2e tests with the following command:
 
    ```bash
    make test-frontend-e2e
