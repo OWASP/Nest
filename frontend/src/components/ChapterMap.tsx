@@ -1,6 +1,6 @@
 'use client'
 import L, { MarkerClusterGroup } from 'leaflet'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import type { Chapter } from 'types/chapter'
 import 'leaflet.markercluster'
 import 'leaflet/dist/leaflet.css'
@@ -19,6 +19,7 @@ const ChapterMap = ({
 }) => {
   const mapRef = useRef<L.Map | null>(null)
   const markerClusterRef = useRef<MarkerClusterGroup | null>(null)
+  const [isMapActive, setIsMapActive] = useState(false)
 
   useEffect(() => {
     if (!mapRef.current) {
@@ -29,12 +30,28 @@ const ChapterMap = ({
           [90, 180],
         ],
         maxBoundsViscosity: 1.0,
+        scrollWheelZoom: false,
       }).setView([20, 0], 2)
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
         className: 'map-tiles',
       }).addTo(mapRef.current)
+
+      mapRef.current.on('click', () => {
+        mapRef.current?.scrollWheelZoom.enable()
+        setIsMapActive(true)
+      })
+
+      mapRef.current.on('mouseout', (e: L.LeafletMouseEvent) => {
+        const originalEvent = e.originalEvent as MouseEvent
+        const relatedTarget = originalEvent.relatedTarget as Node | null
+        const container = mapRef.current?.getContainer()
+        if (relatedTarget && container?.contains(relatedTarget)) return
+
+        mapRef.current?.scrollWheelZoom.disable()
+        setIsMapActive(false)
+      })
     }
 
     const map = mapRef.current
@@ -108,7 +125,34 @@ const ChapterMap = ({
     }
   }, [geoLocData, showLocal])
 
-  return <div id="chapter-map" style={style} />
+  return (
+    <div className="relative" style={style}>
+      <div id="chapter-map" className="h-full w-full" />
+      {!isMapActive && (
+        <button
+          type="button"
+          tabIndex={0}
+          className="absolute inset-0 z-[1000] flex cursor-pointer items-center justify-center rounded-[inherit] bg-black/10"
+          onClick={() => {
+            mapRef.current?.scrollWheelZoom.enable()
+            setIsMapActive(true)
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              mapRef.current?.scrollWheelZoom.enable()
+              setIsMapActive(true)
+            }
+          }}
+          aria-label="Click to interact with map"
+        >
+          <p className="rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg dark:bg-gray-700 dark:text-white">
+            Click to interact with map
+          </p>
+        </button>
+      )}
+    </div>
+  )
 }
 
 export default ChapterMap

@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { render, fireEvent } from '@testing-library/react'
 import * as L from 'leaflet'
 import { Chapter } from 'types/chapter'
 import ChapterMap from 'components/ChapterMap'
@@ -7,6 +7,11 @@ const mockMap = {
   setView: jest.fn().mockReturnThis(),
   addLayer: jest.fn().mockReturnThis(),
   fitBounds: jest.fn().mockReturnThis(),
+  on: jest.fn().mockReturnThis(),
+  scrollWheelZoom: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
 }
 
 const mockMarker = {
@@ -96,12 +101,16 @@ describe('ChapterMap', () => {
 
   describe('rendering', () => {
     it('renders the map container with correct id and style', () => {
-      render(<ChapterMap {...defaultProps} />)
+      const { container } = render(<ChapterMap {...defaultProps} />)
 
       const mapContainer = document.getElementById('chapter-map')
       expect(mapContainer).toBeInTheDocument()
       expect(mapContainer).toHaveAttribute('id', 'chapter-map')
-      expect(mapContainer).toHaveStyle('width: 100%; height: 400px;')
+      expect(mapContainer).toHaveClass('h-full', 'w-full')
+
+      // Check that the parent container has the correct styles applied
+      const parentContainer = container.firstChild as HTMLElement
+      expect(parentContainer).toHaveClass('relative')
     })
 
     it('renders with empty data without crashing', () => {
@@ -122,6 +131,7 @@ describe('ChapterMap', () => {
           [90, 180],
         ],
         maxBoundsViscosity: 1.0,
+        scrollWheelZoom: false,
       })
       expect(mockMap.setView).toHaveBeenCalledWith([20, 0], 2)
     })
@@ -142,6 +152,12 @@ describe('ChapterMap', () => {
       render(<ChapterMap {...defaultProps} />)
       expect(L.markerClusterGroup).toHaveBeenCalled()
       expect(mockMap.addLayer).toHaveBeenCalledWith(mockMarkerClusterGroup)
+    })
+
+    it('sets up event listeners for map interaction', () => {
+      render(<ChapterMap {...defaultProps} />)
+      expect(mockMap.on).toHaveBeenCalledWith('click', expect.any(Function))
+      expect(mockMap.on).toHaveBeenCalledWith('mouseout', expect.any(Function))
     })
   })
 
@@ -249,6 +265,57 @@ describe('ChapterMap', () => {
     })
   })
 
+  describe('Interactive Overlay', () => {
+    it('displays overlay with "Click to interact with map" message initially', () => {
+      const { getByText } = render(<ChapterMap {...defaultProps} />)
+      expect(getByText('Click to interact with map')).toBeInTheDocument()
+    })
+
+    it('removes overlay when clicked', () => {
+      const { getByText, queryByText } = render(<ChapterMap {...defaultProps} />)
+
+      const overlay = getByText('Click to interact with map').closest('button')
+      fireEvent.click(overlay!)
+
+      expect(queryByText('Click to interact with map')).not.toBeInTheDocument()
+    })
+
+    it('enables scroll wheel zoom when overlay is clicked', () => {
+      const { getByText } = render(<ChapterMap {...defaultProps} />)
+
+      const overlay = getByText('Click to interact with map').closest('button')
+      fireEvent.click(overlay!)
+
+      expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
+    })
+
+    it('handles keyboard interaction with Enter key', () => {
+      const { getByText } = render(<ChapterMap {...defaultProps} />)
+
+      const overlay = getByText('Click to interact with map').closest('button')
+      fireEvent.keyDown(overlay!, { key: 'Enter' })
+
+      expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
+    })
+
+    it('handles keyboard interaction with Space key', () => {
+      const { getByText } = render(<ChapterMap {...defaultProps} />)
+
+      const overlay = getByText('Click to interact with map').closest('button')
+      fireEvent.keyDown(overlay!, { key: ' ' })
+
+      expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
+    })
+
+    it('has proper accessibility attributes', () => {
+      const { getByText } = render(<ChapterMap {...defaultProps} />)
+
+      const overlay = getByText('Click to interact with map').closest('button')
+      expect(overlay).toHaveAttribute('tabIndex', '0')
+      expect(overlay).toHaveAttribute('aria-label', 'Click to interact with map')
+    })
+  })
+
   describe('Local View', () => {
     it('sets local view when showLocal is true', () => {
       render(<ChapterMap {...defaultProps} showLocal={true} />)
@@ -307,10 +374,15 @@ describe('ChapterMap', () => {
     it('applies custom styles correctly', () => {
       const customStyle = { width: '800px', height: '600px', border: '1px solid red' }
 
-      render(<ChapterMap {...defaultProps} style={customStyle} />)
+      const { container } = render(<ChapterMap {...defaultProps} style={customStyle} />)
 
+      // Custom styles should be applied to the parent container
+      const parentContainer = container.firstChild as HTMLElement
+      expect(parentContainer).toHaveStyle('width: 800px; height: 600px; border: 1px solid red;')
+
+      // Map container should have Tailwind classes
       const mapContainer = document.getElementById('chapter-map')
-      expect(mapContainer).toHaveStyle('width: 800px; height: 600px; border: 1px solid red;')
+      expect(mapContainer).toHaveClass('h-full', 'w-full')
     })
   })
 
