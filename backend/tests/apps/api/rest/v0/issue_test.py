@@ -62,8 +62,12 @@ class TestListIssues:
 
         result = list_issues(mock_request, filters=mock_filters, ordering=None)
 
-        mock_objects.select_related.assert_called_once_with("repository", "repository__organization")
-        mock_select_related.filter.assert_called_once_with(repository__organization__login__iexact="OWASP")
+        mock_objects.select_related.assert_called_once_with(
+            "repository", "repository__organization"
+        )
+        mock_select_related.filter.assert_called_once_with(
+            repository__organization__login__iexact="OWASP"
+        )
         mock_filtered.order_by.assert_called_once_with("-created_at", "-updated_at")
         assert result == mock_ordered
 
@@ -86,7 +90,9 @@ class TestListIssues:
 
         result = list_issues(mock_request, filters=mock_filters, ordering=None)
 
-        mock_objects.select_related.assert_called_once_with("repository", "repository__organization")
+        mock_objects.select_related.assert_called_once_with(
+            "repository", "repository__organization"
+        )
         mock_select_related.filter.assert_called_once_with(repository__name__iexact="Nest")
         mock_filtered.order_by.assert_called_once_with("-created_at", "-updated_at")
         assert result == mock_ordered
@@ -110,7 +116,9 @@ class TestListIssues:
 
         result = list_issues(mock_request, filters=mock_filters, ordering=None)
 
-        mock_objects.select_related.assert_called_once_with("repository", "repository__organization")
+        mock_objects.select_related.assert_called_once_with(
+            "repository", "repository__organization"
+        )
         mock_select_related.filter.assert_called_once_with(state="open")
         mock_filtered.order_by.assert_called_once_with("-created_at", "-updated_at")
         assert result == mock_ordered
@@ -132,7 +140,9 @@ class TestListIssues:
 
         result = list_issues(mock_request, filters=mock_filters, ordering="created_at")
 
-        mock_objects.select_related.assert_called_once_with("repository", "repository__organization")
+        mock_objects.select_related.assert_called_once_with(
+            "repository", "repository__organization"
+        )
         mock_select_related.order_by.assert_called_once_with("created_at", "-updated_at")
         assert result == mock_ordered
 
@@ -148,7 +158,9 @@ class TestGetIssue:
 
         mock_objects.get.return_value = mock_issue
 
-        result = get_issue(mock_request, organization_id="OWASP", repository_id="Nest", issue_id=1234)
+        result = get_issue(
+            mock_request, organization_id="OWASP", repository_id="Nest", issue_id=1234
+        )
 
         mock_objects.get.assert_called_once_with(
             repository__organization__login__iexact="OWASP",
@@ -166,7 +178,9 @@ class TestGetIssue:
 
         mock_objects.get.side_effect = IssueModel.DoesNotExist
 
-        result = get_issue(mock_request, organization_id="OWASP", repository_id="Nest", issue_id=9999)
+        result = get_issue(
+            mock_request, organization_id="OWASP", repository_id="Nest", issue_id=9999
+        )
 
         mock_objects.get.assert_called_once_with(
             repository__organization__login__iexact="OWASP",
