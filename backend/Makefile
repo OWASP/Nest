@@ -28,14 +28,14 @@ exec-backend-command-it:
 	@docker exec -it nest-backend $(CMD) 2>/dev/null
 
 exec-backend-e2e-command:
-	@docker exec -it nest-backend-e2e $(CMD)
+	@docker exec -it e2e-nest-backend $(CMD)
 
 
 exec-db-command-it:
 	@docker exec -it nest-db $(CMD)
 
 exec-db-e2e-command:
-	@docker exec -it nest-db-e2e $(CMD)
+	@docker exec -it e2e-nest-db $(CMD)
 
 clear-cache:
 	@CMD="python manage.py clear_cache" $(MAKE) exec-backend-command
@@ -84,7 +84,7 @@ index-data:
 
 load-data-e2e:
 	@echo "Loading Nest e2e data"
-	@CMD="python manage.py load_data" $(MAKE) exec-backend-e2e-command
+	@gunzip -c backend/data/nest-e2e.sql.gz | docker exec -i e2e-nest-db psql -U nest_user_e2e -d nest_db_e2e
 
 load-data:
 	@echo "Loading Nest data"
