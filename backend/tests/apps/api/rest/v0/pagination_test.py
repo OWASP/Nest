@@ -193,6 +193,8 @@ class TestCustomPagination:
         assert result["total_pages"] == 3
         assert result["has_next"] is False
         assert result["has_previous"] is True
+        assert result["items"] == ["item21", "item22", "item23", "item24", "item25",
+                                     "item26", "item27", "item28", "item29", "item30"]
         mock_queryset.__getitem__.assert_called_once_with(slice(20, 30))
 
     def test_paginate_offset_calculation(self):

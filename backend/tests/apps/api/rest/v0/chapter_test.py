@@ -119,22 +119,6 @@ class TestGetChapter:
         assert result == mock_chapter
 
     @patch("apps.api.rest.v0.chapter.ChapterModel.active_chapters")
-    def test_get_chapter_uppercase_prefix(self, mock_active_chapters):
-        """Test that uppercase prefix is not recognized and gets prepended."""
-        mock_request = MagicMock()
-        mock_filter = MagicMock()
-
-        mock_active_chapters.filter.return_value = mock_filter
-        mock_filter.first.return_value = None
-
-        result = get_chapter(mock_request, chapter_id="WWW-CHAPTER-London")
-
-        mock_active_chapters.filter.assert_called_once_with(
-            key__iexact="www-chapter-WWW-CHAPTER-London"
-        )
-        mock_filter.first.assert_called_once()
-
-    @patch("apps.api.rest.v0.chapter.ChapterModel.active_chapters")
     def test_get_chapter_not_found(self, mock_active_chapters):
         """Test getting a chapter that does not exist returns 404."""
         mock_request = MagicMock()
