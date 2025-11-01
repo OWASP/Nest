@@ -146,7 +146,7 @@ const ChapterMap = ({
           }}
           aria-label="Click to interact with map"
         >
-          <p className="px-5 py-3 text-sm font-medium text-gray-700 rounded-md shadow-lg bg-white/90 dark:bg-slate-900 dark:text-white">
+          <p className="px-5 py-3 text-sm font-medium text-gray-700 rounded-md shadow-lg bg-white/90 dark:bg-gray-700 dark:text-white">
             Click to interact with map
           </p>
         </button>
