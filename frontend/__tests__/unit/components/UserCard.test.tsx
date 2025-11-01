@@ -65,6 +65,14 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
   }) => <span data-testid={`icon-${icon.iconName}`} className={className} {...props} />,
 }))
 
+jest.mock('@heroui/tooltip', () => ({
+  Tooltip: ({ children, content }: { children: React.ReactNode; content: string }) => (
+    <div data-testid="tooltip" data-tooltip-content={content}>
+      {children}
+    </div>
+  ),
+}))
+
 jest.mock('millify', () => ({
   __esModule: true,
   default: (value: number) => {
@@ -131,7 +139,7 @@ describe('UserCard', () => {
       render(<UserCard {...fullProps} />)
 
       expect(screen.getByText('John Doe')).toBeInTheDocument()
-      expect(screen.getByText('Tech Corp')).toBeInTheDocument()
+      expect(screen.getByText(/Tech Corp/)).toBeInTheDocument()
       expect(screen.getByText('Software Developer')).toBeInTheDocument()
       expect(screen.getByTestId('user-avatar')).toHaveAttribute(
         'src',
@@ -162,7 +170,7 @@ describe('UserCard', () => {
     it('renders company information when provided', () => {
       render(<UserCard {...defaultProps} company="Tech Corp" />)
 
-      expect(screen.getByText('Tech Corp')).toBeInTheDocument()
+      expect(screen.getByText(/Tech Corp/)).toBeInTheDocument()
     })
 
     it('renders location when company is not provided', () => {
@@ -340,7 +348,15 @@ describe('UserCard', () => {
       render(<UserCard {...defaultProps} />)
 
       const button = screen.getByRole('button')
-      expect(button).toHaveClass('group', 'flex', 'flex-col', 'items-center', 'rounded-lg', 'p-6')
+      expect(button).toHaveClass(
+        'group',
+        'flex',
+        'flex-col',
+        'items-center',
+        'rounded-lg',
+        'px-6',
+        'py-6'
+      )
     })
   })
 
