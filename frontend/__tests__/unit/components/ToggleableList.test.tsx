@@ -42,14 +42,14 @@ describe('ToggleableList', () => {
     render(<ToggleableList items={mockItems} label="test-label" />)
 
     // First 10 items should be visible
-    mockItems.slice(0, 10).forEach((item) => {
+    for (const item of mockItems.slice(0, 10)) {
       expect(screen.getByText(item)).toBeInTheDocument()
-    })
+    }
 
     // Remaining items should be hidden
-    mockItems.slice(10).forEach((item) => {
+    for (const item of mockItems.slice(10)) {
       expect(screen.queryByText(item)).not.toBeInTheDocument()
-    })
+    }
   })
 
   it('renders with an icon', () => {
@@ -143,9 +143,9 @@ describe('ToggleableList', () => {
     render(<ToggleableList items={mockItems} label="test-label" limit={0} />)
     // Should show ShowMoreButton since limit is exceeded
     expect(screen.getByTestId('show-more-button')).toBeInTheDocument()
-    mockItems.forEach((item) => {
+    for (const item of mockItems) {
       expect(screen.queryByText(item)).not.toBeInTheDocument()
-    })
+    }
   })
 
   it('properly encodes special character in item names', () => {

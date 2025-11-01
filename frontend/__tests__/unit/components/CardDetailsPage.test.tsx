@@ -252,7 +252,7 @@ jest.mock('components/RecentReleases', () => ({
   ),
 }))
 
-jest.mock('components/RepositoriesCard', () => ({
+jest.mock('components/RepositoryCard', () => ({
   __esModule: true,
   default: ({
     repositories,
@@ -746,10 +746,10 @@ describe('CardDetailsPage', () => {
       render(<CardDetailsPage {...defaultProps} type="chapter" socialLinks={socialLinks} />)
 
       const links = screen.getAllByRole('link')
-      links.forEach((link) => {
+      for (const link of links) {
         expect(link).toHaveAttribute('target', '_blank')
         expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-      })
+      }
     })
   })
 
@@ -1030,10 +1030,10 @@ describe('CardDetailsPage', () => {
       const links = screen.getAllByRole('link')
       const externalLinks = links.filter((link) => link.getAttribute('href')?.startsWith('http'))
 
-      externalLinks.forEach((link) => {
+      for (const link of externalLinks) {
         expect(link).toHaveAttribute('target', '_blank')
         expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-      })
+      }
     })
 
     it('renders with proper document structure', () => {

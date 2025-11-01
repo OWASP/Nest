@@ -1,8 +1,7 @@
 """Test cases for MilestoneNode."""
 
+import math
 from unittest.mock import Mock
-
-import pytest
 
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 
@@ -77,7 +76,7 @@ class TestMilestoneNode:
         mock_milestone.open_issues_count = 3
 
         result = MilestoneNode.progress(mock_milestone)
-        assert result == pytest.approx(70.0)
+        assert math.isclose(result, 70.0)
 
     def test_progress_without_issues(self):
         """Test progress calculation without issues."""
@@ -86,7 +85,7 @@ class TestMilestoneNode:
         mock_milestone.open_issues_count = 0
 
         result = MilestoneNode.progress(mock_milestone)
-        assert result == pytest.approx(0.0)
+        assert math.isclose(result, 0.0)
 
     def test_repository_name_with_repository(self):
         """Test repository_name field when repository exists."""

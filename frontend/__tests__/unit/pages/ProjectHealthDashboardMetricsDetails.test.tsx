@@ -89,9 +89,9 @@ describe('ProjectHealthMetricsDetails', () => {
     const metrics = mockProjectsDashboardMetricsDetailsData.project.healthMetricsLatest
     render(<ProjectHealthMetricsDetails />)
     await waitFor(() => {
-      headers.forEach((header) => {
+      for (const header of headers) {
         expect(screen.getByText(header)).toBeInTheDocument()
-      })
+      }
       expect(screen.getByText(metrics.projectName)).toBeInTheDocument()
       expect(screen.getByText(metrics.score.toString())).toBeInTheDocument()
     })

@@ -259,12 +259,12 @@ describe('DisplayIcon', () => {
         { item: 'contributionCount', value: 30 },
       ]
 
-      testCases.forEach(({ item, value }) => {
-        const iconsWithItem: Icon = { [item]: value }
-        const { container } = render(<DisplayIcon item={item} icons={iconsWithItem} />)
+      for (const testCase of testCases) {
+        const iconsWithItem: Icon = { [testCase.item]: testCase.value }
+        const { container } = render(<DisplayIcon item={testCase.item} icons={iconsWithItem} />)
         const containerDiv = container.querySelector('div[class*="flip-container"]')
         expect(containerDiv).toBeInTheDocument()
-      })
+      }
     })
 
     it('applies correct icon classes', () => {

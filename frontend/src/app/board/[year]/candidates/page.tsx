@@ -248,7 +248,7 @@ const BoardCandidatesPage = () => {
                 @{candidate.member.login}
               </Link>
             )}
-            {candidate.member?.createdAt && (
+            {candidate.member?.createdAt != null && (
               <p className="mt-1 truncate text-sm text-gray-600 dark:text-gray-400">
                 GitHub account created{' '}
                 <span className="font-semibold text-gray-800 dark:text-gray-300">
@@ -261,7 +261,7 @@ const BoardCandidatesPage = () => {
                 - {formatDate(candidate.member.createdAt)}
               </p>
             )}
-            {candidate.member?.firstOwaspContributionAt && (
+            {candidate.member?.firstOwaspContributionAt != null && (
               <p className="truncate text-sm text-gray-600 dark:text-gray-400">
                 First OWASP contribution made nearly{' '}
                 <span className="font-semibold text-gray-800 dark:text-gray-300">

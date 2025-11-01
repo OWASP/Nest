@@ -1,5 +1,6 @@
 """Tests for Committee GraphQL node."""
 
+import math
 from unittest.mock import Mock
 
 from apps.owasp.api.internal.nodes.committee import CommitteeNode
@@ -25,7 +26,7 @@ class TestCommitteeNode:
 
         result = CommitteeNode.created_at(mock_committee)
 
-        assert result == 1234567890.0
+        assert math.isclose(result, 1234567890.0)
 
     def test_forks_count_resolver(self):
         """Test forks_count returns count from repository."""

@@ -406,20 +406,20 @@ describe('MovingLogos (LogoCarousel)', () => {
       render(<MovingLogos sponsors={mockSponsors} />)
 
       const links = screen.getAllByTestId('sponsor-link')
-      links.forEach((link) => {
+      for (const link of links) {
         expect(link).toHaveAttribute('target', '_blank')
         expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-      })
+      }
     })
 
     it('maintains semantic structure for screen readers', () => {
       render(<MovingLogos sponsors={mockSponsors} />)
 
       const sponsorLinks = screen.getAllByTestId('sponsor-link')
-      sponsorLinks.forEach((link) => {
+      for (const link of sponsorLinks) {
         expect(link).toBeInTheDocument()
         expect(link.tagName).toBe('A')
-      })
+      }
     })
 
     it('provides descriptive text for external links', () => {
@@ -454,10 +454,10 @@ describe('MovingLogos (LogoCarousel)', () => {
       render(<MovingLogos sponsors={mockSponsors} />)
 
       const images = screen.getAllByTestId('sponsor-image')
-      images.forEach((image) => {
+      for (const image of images) {
         expect(image).toHaveAttribute('style', 'object-fit: contain;')
         expect(image).toHaveAttribute('data-fill', 'true')
-      })
+      }
     })
 
     it('maintains proper DOM hierarchy', () => {
@@ -514,9 +514,9 @@ describe('MovingLogos (LogoCarousel)', () => {
       const sponsorContainers = document.querySelectorAll('[class*="min-w-[220px]"]')
       expect(sponsorContainers).toHaveLength(6)
 
-      sponsorContainers.forEach((container) => {
+      for (const container of sponsorContainers) {
         expect(container).toHaveClass('min-w-[220px]')
-      })
+      }
     })
   })
 })
