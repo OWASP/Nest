@@ -45,9 +45,9 @@ const UserCard = ({
           )}
         </div>
 
-        <div className="text-center">
+        <div className="max-w-[250px] text-center">
           <Tooltip content={name} delay={100} closeDelay={100} showArrow placement="top">
-            <h3 className="max-w-[250px] truncate text-lg font-semibold text-gray-900 sm:text-xl dark:text-white">
+            <h3 className="truncate text-lg font-semibold text-gray-900 sm:text-xl dark:text-white">
               {name}
             </h3>
           </Tooltip>
