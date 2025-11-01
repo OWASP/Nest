@@ -11,7 +11,7 @@ class E2E(Base):
     APP_NAME = "OWASP Nest E2E Testing"
 
     ALLOWED_ORIGINS = (
-        "http://frontend:3000",
+        "http://frontend:3000",  # NOSONAR
         "http://localhost:3000",
     )
     CORS_ALLOWED_ORIGINS = ALLOWED_ORIGINS
