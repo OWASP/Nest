@@ -7,6 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
+import { Tooltip } from '@heroui/tooltip'
 import millify from 'millify'
 import Image from 'next/image'
 import type { UserCardProps } from 'types/card'
@@ -28,9 +29,9 @@ const UserCard = ({
   return (
     <Button
       onPress={button.onclick}
-      className={`group flex h-full min-h-80 flex-col items-center rounded-lg p-6 ${className}`}
+      className={`group flex flex-col items-center rounded-lg px-6 py-6 ${className}`}
     >
-      <div className="flex w-full flex-1 flex-col items-center gap-3">
+      <div className="flex w-full flex-col items-center gap-3">
         <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full ring-2 ring-gray-100 transition-all group-hover:ring-blue-400 dark:ring-gray-700">
           {avatar ? (
             <Image fill src={`${avatar}&s=160`} alt={name || 'user'} objectFit="cover" />
@@ -45,19 +46,18 @@ const UserCard = ({
         </div>
 
         <div className="text-center">
-          <h3
-            className="max-w-[250px] text-lg font-semibold wrap-break-word whitespace-normal text-gray-900 sm:text-xl dark:text-white"
-            title={name}
-          >
-            {name}
-          </h3>
+          <Tooltip content={name} delay={100} closeDelay={100} showArrow placement="top">
+            <h3 className="max-w-[250px] truncate text-lg font-semibold text-gray-900 sm:text-xl dark:text-white">
+              {name}
+            </h3>
+          </Tooltip>
           {(company || location || email || login) && (
-            <p className="wrap-break-word mt-1.5 whitespace-normal px-3 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
+            <p className="mt-1.5 px-3 text-xs wrap-break-word whitespace-normal text-gray-600 sm:text-sm dark:text-gray-400">
               {[company, location, email, login].filter(Boolean).join(' • ')}
             </p>
           )}
           {description && (
-            <p className="wrap-break-word mt-1.5 whitespace-normal px-3 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
+            <p className="mt-1.5 px-3 text-xs wrap-break-word whitespace-normal text-gray-600 sm:text-sm dark:text-gray-400">
               {description}
             </p>
           )}
@@ -87,7 +87,7 @@ const UserCard = ({
         )}
       </div>
 
-      <div className="inline-flex items-center text-sm font-medium text-blue-400">
+      <div className="flex items-center justify-center text-sm font-medium text-blue-400">
         {button.label}
         <FontAwesomeIcon
           icon={faChevronRight}
@@ -99,3 +99,4 @@ const UserCard = ({
 }
 
 export default UserCard
+
