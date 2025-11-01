@@ -127,7 +127,7 @@ const ChapterMap = ({
 
   return (
     <div className="relative" style={style}>
-      <div id="chapter-map" className="w-full h-full" />
+      <div id="chapter-map" className="h-full w-full" />
       {!isMapActive && (
         <button
           type="button"
@@ -146,7 +146,7 @@ const ChapterMap = ({
           }}
           aria-label="Click to interact with map"
         >
-          <p className="px-5 py-3 text-sm font-medium text-gray-700 rounded-md shadow-lg bg-white/90 dark:bg-gray-700 dark:text-white">
+          <p className="rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg dark:bg-gray-700 dark:text-white">
             Click to interact with map
           </p>
         </button>
