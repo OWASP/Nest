@@ -43,7 +43,7 @@ export default function BreadCrumbs() {
 
           {segments.map((segment, index) => {
             const href = homeRoute + segments.slice(0, index + 1).join(homeRoute)
-            const label = upperFirst(segment).replaceAll(/-/g, ' ')
+            const label = upperFirst(segment).replaceAll('-', ' ')
             const isLast = index === segments.length - 1
 
             return (
