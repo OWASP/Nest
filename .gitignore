@@ -6,6 +6,7 @@ __pycache__
 .DS_Store
 .env*
 !.env.example
+!.env.e2e.example
 .idea
 .lighthouseci/
 .local

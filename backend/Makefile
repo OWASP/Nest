@@ -27,8 +27,15 @@ exec-backend-command:
 exec-backend-command-it:
 	@docker exec -it nest-backend $(CMD) 2>/dev/null
 
+exec-backend-e2e-command:
+	@docker exec -it e2e-nest-backend $(CMD)
+
+
 exec-db-command-it:
 	@docker exec -it nest-db $(CMD)
+
+exec-db-e2e-command:
+	@docker exec -it e2e-nest-db $(CMD)
 
 clear-cache:
 	@CMD="python manage.py clear_cache" $(MAKE) exec-backend-command
@@ -54,12 +61,17 @@ dump-data:
 	@CMD="sed -E -i 's/(\"[^\"]*email\"): *\"([^\"]|\\\")*\"/\1: \"\"/g' data/nest.json" $(MAKE) exec-backend-command
 	@CMD="gzip -f data/nest.json" $(MAKE) exec-backend-command
 
+dump-data-e2e:
+	@echo "Dumping Nest e2e data"
+	@CMD="pg_dumpall -U nest_user_e2e --clean | gzip -9 > backend/data/nest-e2e.sql.gz" $(MAKE) exec-db-e2e-command
+
 enrich-data: \
 	github-enrich-issues \
 	owasp-enrich-chapters \
 	owasp-enrich-committees \
 	owasp-enrich-events \
 	owasp-enrich-projects
+
 
 generate-sitemap:
 	@CMD="python manage.py generate_sitemap" $(MAKE) exec-backend-command
@@ -69,6 +81,10 @@ index-data:
 	@CMD="python manage.py algolia_reindex" $(MAKE) exec-backend-command
 	@CMD="python manage.py algolia_update_replicas" $(MAKE) exec-backend-command
 	@CMD="python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
+
+load-data-e2e:
+	@echo "Loading Nest e2e data"
+	@gunzip -c backend/data/nest-e2e.sql.gz | docker exec -i e2e-nest-db psql -U nest_user_e2e -d nest_db_e2e
 
 load-data:
 	@echo "Loading Nest data"
@@ -96,6 +112,10 @@ recreate-schema:
 restore-backup:
 	@echo "Restoring Nest backup"
 	@CMD="python manage.py restore_backup" $(MAKE) exec-backend-command
+
+run-backend-e2e:
+	@DOCKER_BUILDKIT=1 \
+	docker compose --project-name nest-e2e -f docker-compose/e2e.yaml up --build --remove-orphans --abort-on-container-exit backend db
 
 save-backup:
 	@echo "Saving Nest backup"

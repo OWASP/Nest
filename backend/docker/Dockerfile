@@ -64,4 +64,4 @@ RUN rm -rf /home/owasp/.cache && \
 
 USER owasp
 
-CMD ["/home/owasp/entrypoint.sh"]
+EXPOSE 8000

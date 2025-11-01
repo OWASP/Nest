@@ -19,6 +19,7 @@ class Base(Configuration):
     DEBUG = False
     GITHUB_APP_ID = None
     GITHUB_APP_INSTALLATION_ID = None
+    IS_E2E_ENVIRONMENT = False
     IS_LOCAL_ENVIRONMENT = False
     IS_PRODUCTION_ENVIRONMENT = False
     IS_STAGING_ENVIRONMENT = False
