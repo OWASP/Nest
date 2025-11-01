@@ -91,7 +91,7 @@ const DetailsCard = ({
                   type="button"
                   className="flex items-center justify-center gap-2 rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-nowrap text-[#0D6EFD] transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
                   onClick={() => {
-                    router.push(`${window.location.pathname}/edit`)
+                    router.push(`${globalThis.location.pathname}/edit`)
                   }}
                 >
                   Edit Module

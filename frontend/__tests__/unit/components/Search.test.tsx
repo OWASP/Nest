@@ -185,7 +185,7 @@ describe('SearchBar Component', () => {
 
       expect(sendGTMEvent).toHaveBeenCalledWith({
         event: 'search',
-        path: window.location.pathname,
+        path: globalThis.location.pathname,
         value: 'test',
       })
     })
@@ -203,7 +203,7 @@ describe('SearchBar Component', () => {
       expect(mockOnSearch).toHaveBeenCalledWith('new query')
       expect(sendGTMEvent).toHaveBeenCalledWith({
         event: 'search',
-        path: window.location.pathname,
+        path: globalThis.location.pathname,
         value: 'new query',
       })
 
@@ -214,7 +214,7 @@ describe('SearchBar Component', () => {
       expect(mockOnSearch).toHaveBeenCalledWith('change query')
       expect(sendGTMEvent).toHaveBeenCalledWith({
         event: 'search',
-        path: window.location.pathname,
+        path: globalThis.location.pathname,
         value: 'change query',
       })
     })

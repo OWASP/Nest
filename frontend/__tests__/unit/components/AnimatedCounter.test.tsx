@@ -173,7 +173,7 @@ describe('AnimatedCounter', () => {
 
   describe('Animation behavior', () => {
     it('calls requestAnimationFrame during animation', () => {
-      const requestAnimationFrameSpy = jest.spyOn(window, 'requestAnimationFrame')
+      const requestAnimationFrameSpy = jest.spyOn(globalThis, 'requestAnimationFrame')
       render(<AnimatedCounter end={100} duration={1} />)
 
       expect(requestAnimationFrameSpy).toHaveBeenCalled()

@@ -44,9 +44,9 @@ const UserCard = ({
           )}
         </div>
 
-        <div className="w-full flex-1 text-center">
+        <div className="text-center">
           <h3
-            className="wrap-break-word whitespace-normal px-3 text-base font-semibold leading-tight text-gray-900 sm:text-lg dark:text-white"
+            className="max-w-[250px] text-lg font-semibold wrap-break-word whitespace-normal text-gray-900 sm:text-xl dark:text-white"
             title={name}
           >
             {name}
@@ -87,7 +87,7 @@ const UserCard = ({
         )}
       </div>
 
-      <div className="mt-4 inline-flex items-center text-sm font-medium text-blue-400">
+      <div className="inline-flex items-center text-sm font-medium text-blue-400">
         {button.label}
         <FontAwesomeIcon
           icon={faChevronRight}

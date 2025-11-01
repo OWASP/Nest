@@ -16,7 +16,7 @@ const normalizeCssClass = (cssClass: string | undefined) => {
   }
 
   // Convert backend snake_case format to frontend camelCase format
-  return cssClass.trim().replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
+  return cssClass.trim().replaceAll(/_([a-z])/g, (_, letter) => letter.toUpperCase())
 }
 
 const resolveIcon = (cssClass: string | undefined) => {
