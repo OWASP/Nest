@@ -21,7 +21,7 @@ services:
     networks:
       - nest-network
     ports:
-      - 8000:8000
+      - 8001:8000
     healthcheck:
       interval: 10s
       retries: 10
