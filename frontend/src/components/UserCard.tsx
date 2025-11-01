@@ -52,12 +52,12 @@ const UserCard = ({
             </h3>
           </Tooltip>
           {(company || location || email || login) && (
-            <p className="mt-1.5 px-3 text-xs wrap-break-word whitespace-normal text-gray-600 sm:text-sm dark:text-gray-400">
-              {[company, location, email, login].filter(Boolean).join(' • ')}
+            <p className="mt-1.5 truncate px-3 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
+              {company || location || email || login}
             </p>
           )}
           {description && (
-            <p className="mt-1.5 px-3 text-xs wrap-break-word whitespace-normal text-gray-600 sm:text-sm dark:text-gray-400">
+            <p className="mt-1.5 truncate px-3 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
               {description}
             </p>
           )}
