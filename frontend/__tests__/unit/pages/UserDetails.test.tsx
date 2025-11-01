@@ -41,7 +41,7 @@ jest.mock('components/Badges', () => {
     showTooltip?: boolean
   }) => (
     <div
-      data-testid={`badge-${name.toLowerCase().replace(/\s+/g, '-')}`}
+      data-testid={`badge-${name.toLowerCase().replaceAll(/\s+/g, '-')}`}
       data-css-class={cssClass}
       data-show-tooltip={showTooltip}
     >

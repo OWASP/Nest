@@ -40,7 +40,7 @@ const SearchBar: React.FC<SearchProps> = ({
         if (query && query.trim() !== '') {
           sendGTMEvent({
             event: 'search',
-            path: window.location.pathname,
+            path: globalThis.location.pathname,
             value: query,
           })
         }

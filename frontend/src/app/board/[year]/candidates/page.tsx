@@ -378,7 +378,7 @@ const BoardCandidatesPage = () => {
 
     const handleCardClick = () => {
       // Convert name to slug format.
-      const nameSlug = candidate.memberName.toLowerCase().replace(/\s+/g, '_')
+      const nameSlug = candidate.memberName.toLowerCase().replaceAll(/\s+/g, '_')
       const candidateUrl = `https://owasp.org/www-board-candidates/${year}/${nameSlug}.html`
       window.open(candidateUrl, '_blank', 'noopener,noreferrer')
     }
@@ -437,7 +437,7 @@ const BoardCandidatesPage = () => {
                 @{candidate.member.login}
               </Link>
             )}
-            {candidate.member?.createdAt && (
+            {candidate.member?.createdAt != null && (
               <p className="mt-1 truncate text-sm text-gray-600 dark:text-gray-400">
                 GitHub account created{' '}
                 <span className="font-semibold text-gray-800 dark:text-gray-300">
@@ -450,7 +450,7 @@ const BoardCandidatesPage = () => {
                 - {formatDate(candidate.member.createdAt)}
               </p>
             )}
-            {candidate.member?.firstOwaspContributionAt && (
+            {candidate.member?.firstOwaspContributionAt != null && (
               <p className="truncate text-sm text-gray-600 dark:text-gray-400">
                 First OWASP contribution made nearly{' '}
                 <span className="font-semibold text-gray-800 dark:text-gray-300">
@@ -484,7 +484,7 @@ const BoardCandidatesPage = () => {
               }
               className="text-gray-700 dark:text-gray-300"
             >
-              {candidate.member.bio.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim()}
+              {candidate.member.bio.replaceAll(/\n+/g, ' ').replaceAll(/\s+/g, ' ').trim()}
             </div>
           )}
         </div>
