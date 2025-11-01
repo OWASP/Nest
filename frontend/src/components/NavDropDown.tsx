@@ -70,7 +70,7 @@ export default function NavDropdown({ link, pathname }: NavDropDownProps) {
         >
           {link.submenu.map((submenu, idx) => (
             <Link
-              key={idx}
+              key={`${submenu.href}-${idx}`}
               href={submenu.href || '/'}
               className={cn(
                 'block w-full px-4 py-2 text-left text-sm transition-colors',

@@ -91,9 +91,9 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                 }
                 return true
               })
-              .map((link, i) => {
+              .map((link) => {
                 return link.submenu ? (
-                  <NavDropdown link={link} pathname={pathname} key={i} />
+                  <NavDropdown link={link} pathname={pathname} key={`${link.text}-${link.href}`} />
                 ) : (
                   <Link
                     key={link.text}
@@ -193,9 +193,9 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                       {link.text}
                     </div>
                     <div className="ml-4">
-                      {link.submenu.map((sub, i) => (
+                      {link.submenu.map((sub) => (
                         <Link
-                          key={i}
+                          key={`${sub.text}-${sub.href}`}
                           href={sub.href || '/'}
                           className={cn(
                             'block w-full px-4 py-3 text-left text-sm text-slate-700 transition duration-150 ease-in-out first:rounded-t-md last:rounded-b-md hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
