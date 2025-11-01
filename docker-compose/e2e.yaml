@@ -1,10 +1,9 @@
 services:
   backend:
-    container_name: nest-backend-e2e
+    container_name: e2e-nest-backend
     command: >
       sh -c '
-        python manage.py migrate &&
-        python manage.py runserver 0.0.0.0:8000
+        gunicorn wsgi:application --bind 0.0.0.0:8000
       '
     build:
       context: ../backend
@@ -12,7 +11,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    env_file: ../backend/.env
+    env_file: ../backend/.env.e2e
     environment:
       DJANGO_DB_HOST: ${DJANGO_DB_HOST:-db}
       DJANGO_DB_NAME: ${DJANGO_DB_NAME:-nest_db_e2e}
@@ -28,12 +27,12 @@ services:
       retries: 10
       test: >
         sh -c '
-          wget --spider http://backend:8000/graphql
+          wget --spider http://backend:8000/a
         '
       timeout: 10s
-      start_period: 10s
+      start_period: 5s
   db:
-    container_name: nest-db-e2e
+    container_name: e2e-nest-db
     image: pgvector/pgvector:pg16
     environment:
       POSTGRES_DB: ${DJANGO_DB_NAME:-nest_db_e2e}
@@ -52,7 +51,7 @@ services:
       - 5433:5432
 
   frontend:
-    container_name: nest-frontend-e2e
+    container_name: e2e-nest-frontend
     build:
       context: ../frontend
       dockerfile: docker/Dockerfile.e2e.test
@@ -63,7 +62,7 @@ services:
     depends_on:
       backend:
         condition: service_healthy
-    env_file: ../frontend/.env
+    env_file: ../frontend/.env.e2e
     networks:
       - nest-network
 
