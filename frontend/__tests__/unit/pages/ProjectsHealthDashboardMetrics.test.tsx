@@ -248,6 +248,4 @@ describe('MetricsPage', () => {
     expect(nextPageButton).toBeInTheDocument()
     fireEvent.click(nextPageButton)
   })
-
-  //test for helper functions
 })
