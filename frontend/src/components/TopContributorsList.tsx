@@ -44,7 +44,7 @@ const TopContributorsList = ({
       <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4">
         {displayContributors.map((item) => (
           <div
-            key={item.login || item.name || item.avatarUrl}
+            key={item.login}
             className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
           >
             <div className="flex w-full items-center gap-2">
