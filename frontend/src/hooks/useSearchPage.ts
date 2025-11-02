@@ -26,6 +26,27 @@ interface UseSearchPageReturn<T> {
   handleOrderChange: (order: string) => void
 }
 
+/**
+ * Provides search state, synchronizes that state with the URL, and fetches paginated results from Algolia.
+ *
+ * @param indexName - Base Algolia index name used to fetch results; a computed variant may be used when sorting/order are applied
+ * @param pageTitle - Page title used as a dependency for data refreshes
+ * @param defaultSortBy - Optional default sort key applied when no `sortBy` parameter is present
+ * @param defaultOrder - Optional default order ('asc' or 'desc') applied when no `order` parameter is present
+ * @param hitsPerPage - Optional number of results to fetch per page
+ * @returns An object containing:
+ *  - `items`: the current page of results of type `T[]`
+ *  - `isLoaded`: `true` when a fetch has completed, `false` while loading
+ *  - `currentPage`: the active page number
+ *  - `totalPages`: total number of available pages
+ *  - `searchQuery`: current query string
+ *  - `sortBy`: current sort key
+ *  - `order`: current sort order
+ *  - `handleSearch(query: string)`: updates the search query
+ *  - `handlePageChange(page: number)`: updates the current page and scrolls to top
+ *  - `handleSortChange(sort: string)`: updates the sort key
+ *  - `handleOrderChange(order: string)`: updates the sort order
+ */
 export function useSearchPage<T>({
   indexName,
   pageTitle,
@@ -82,10 +103,17 @@ export function useSearchPage<T>({
 
     const fetchData = async () => {
       try {
+        let computedIndexName = indexName
+
+        const hasValidSort = sortBy && sortBy !== 'default' && sortBy[0] !== 'default'
+
+        if (hasValidSort) {
+          const orderSuffix = order && order !== '' ? `_${order}` : ''
+          computedIndexName = `${indexName}_${sortBy}${orderSuffix}`
+        }
+
         const response = await fetchAlgoliaData<T>(
-          sortBy && sortBy !== 'default' && sortBy[0] !== 'default'
-            ? `${indexName}_${sortBy}${order && order !== '' ? `_${order}` : ''}`
-            : indexName,
+          computedIndexName,
           searchQuery,
           currentPage,
           hitsPerPage
