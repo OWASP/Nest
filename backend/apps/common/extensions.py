@@ -4,6 +4,7 @@ import json
 
 from django.conf import settings
 from django.core.cache import cache
+from django.core.serializers.json import DjangoJSONEncoder
 from strawberry.extensions.field_extension import FieldExtension
 
 
@@ -32,17 +33,16 @@ class CacheFieldExtension(FieldExtension):
             str: The unique cache key.
 
         """
-        args_str = json.dumps(kwargs, sort_keys=True)
+        args_str = json.dumps(kwargs, sort_keys=True, cls=DjangoJSONEncoder)
 
         return f"{self.prefix}:{info.path.typename}:{info.path.key}:{args_str}"
 
     def resolve(self, next_, source, info, **kwargs):
         """Wrap the resolver to provide caching."""
         cache_key = self.generate_key(info, kwargs)
-        if cached_result := cache.get(cache_key):
-            return cached_result
 
-        if result := next_(source, info, **kwargs):
-            cache.set(cache_key, result, self.cache_timeout)
-
-        return result
+        return cache.get_or_set(
+            cache_key,
+            lambda: next_(source, info, **kwargs),
+            timeout=self.cache_timeout,
+        )
