@@ -86,6 +86,8 @@ const eslintConfig = [
       '@typescript-eslint/no-inferrable-types': 'warn',
       '@typescript-eslint/no-unused-expressions': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      'no-array-constructor': 'off',
+      '@typescript-eslint/no-array-constructor': 'error',
       '@typescript-eslint/naming-convention': [
         'error',
         {
