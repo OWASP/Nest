@@ -84,10 +84,17 @@ export function useSearchPage<T>({
 
     const fetchData = async () => {
       try {
+        let computedIndexName = indexName
+
+        const hasValidSort = sortBy && sortBy !== 'default' && sortBy[0] !== 'default'
+
+        if (hasValidSort) {
+          const orderSuffix = order && order !== '' ? `_${order}` : ''
+          computedIndexName = `${indexName}_${sortBy}${orderSuffix}`
+        }
+
         const response = await fetchAlgoliaData<T>(
-          sortBy && sortBy !== 'default' && sortBy[0] !== 'default'
-            ? `${indexName}_${sortBy}${order && order !== '' ? `_${order}` : ''}`
-            : indexName,
+          computedIndexName,
           searchQuery,
           currentPage,
           hitsPerPage

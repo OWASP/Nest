@@ -31,6 +31,16 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onEdit, onView, acce
       ? `${program.description.slice(0, 100)}...`
       : program.description || 'No description available.'
 
+  const dateInfo = (() => {
+    if (program.startedAt && program.endedAt) {
+      return `${formatDate(program.startedAt)} – ${formatDate(program.endedAt)}`
+    } else if (program.startedAt) {
+      return `Started: ${formatDate(program.startedAt)}`
+    } else {
+      return 'No dates set'
+    }
+  })()
+
   return (
     <div className="h-64 w-80 rounded-[5px] border border-gray-400 bg-white p-6 text-left transition-transform duration-300 hover:scale-[1.02] hover:brightness-105 dark:border-gray-600 dark:bg-gray-800">
       <div className="flex h-full flex-col justify-between">
@@ -47,13 +57,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onEdit, onView, acce
               </span>
             )}
           </div>
-          <div className="mb-2 text-xs text-gray-600 dark:text-gray-400">
-            {program.startedAt && program.endedAt
-              ? `${formatDate(program.startedAt)} – ${formatDate(program.endedAt)}`
-              : program.startedAt
-                ? `Started: ${formatDate(program.startedAt)}`
-                : 'No dates set'}
-          </div>
+          <div className="mb-2 text-xs text-gray-600 dark:text-gray-400">{dateInfo}</div>
           <p className="mb-4 text-sm text-gray-700 dark:text-gray-300">{description}</p>
         </div>
 
