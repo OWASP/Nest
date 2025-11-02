@@ -29,6 +29,7 @@ from apps.nest.api.internal.nodes.badge import BadgeNode
 class UserNode:
     """GitHub user node."""
 
+    @strawberry.field
     def badge_count(self) -> int:
         """Resolve badge count."""
         return self.user_badges.filter(is_active=True).count()
