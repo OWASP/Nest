@@ -4,11 +4,15 @@ from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.github.models.common import NodeModel
+from apps.github.models.managers.release import ActiveReleaseManager
 from apps.github.models.mixins.release import ReleaseIndexMixin
 
 
 class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
     """Release model."""
+
+    objects = models.Manager()
+    active_releases = ActiveReleaseManager()
 
     class Meta:
         db_table = "github_releases"
