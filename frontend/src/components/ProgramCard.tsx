@@ -31,6 +31,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onEdit, onView, acce
       ? `${program.description.slice(0, 100)}...`
       : program.description || 'No description available.'
 
+  // computes a formatted date string for the program based on its start and end dates.
   const dateInfo = (() => {
     if (program.startedAt && program.endedAt) {
       return `${formatDate(program.startedAt)} – ${formatDate(program.endedAt)}`

@@ -1,5 +1,6 @@
 import { faCircleCheck, faClock, faUserGear } from '@fortawesome/free-solid-svg-icons'
 
+// helper functions used in about/page.tsx
 export const getMilestoneProgressText = (progress: number): string => {
   if (progress === 100) {
     return 'Completed'

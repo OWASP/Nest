@@ -74,6 +74,7 @@ const DetailsCard = ({
   const { data } = useSession()
   const router = useRouter()
 
+  // compute styles based on type prop
   const secondaryCardStyles = (() => {
     if (type === 'program' || type === 'module') {
       return 'gap-2 md:col-span-7'
