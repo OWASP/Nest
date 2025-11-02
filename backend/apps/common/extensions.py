@@ -55,10 +55,8 @@ class CacheFieldExtension(FieldExtension):
 
     def resolve(self, next_: Any, source: Any, info: Info, **kwargs: Any) -> Any:
         """Wrap the resolver to provide caching."""
-        cache_key = self.generate_key(source, info, kwargs)
-
         return cache.get_or_set(
-            cache_key,
+            self.generate_key(source, info, kwargs),
             lambda: next_(source, info, **kwargs),
             timeout=self.cache_timeout,
         )
