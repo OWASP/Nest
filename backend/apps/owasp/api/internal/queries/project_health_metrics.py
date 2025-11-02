@@ -3,6 +3,7 @@
 import strawberry
 import strawberry_django
 
+from apps.common.extensions import CacheFieldExtension
 from apps.owasp.api.internal.filters.project_health_metrics import ProjectHealthMetricsFilter
 from apps.owasp.api.internal.nodes.project_health_metrics import ProjectHealthMetricsNode
 from apps.owasp.api.internal.nodes.project_health_stats import ProjectHealthStatsNode
@@ -21,6 +22,7 @@ class ProjectHealthMetricsQuery:
         pagination=True,
         ordering=ProjectHealthMetricsOrder,
         permission_classes=[HasDashboardAccess],
+        extensions=[CacheFieldExtension()],
     )
     def project_health_metrics(
         self,
@@ -43,6 +45,7 @@ class ProjectHealthMetricsQuery:
 
     @strawberry.field(
         permission_classes=[HasDashboardAccess],
+        extensions=[CacheFieldExtension()],
     )
     def project_health_stats(self) -> ProjectHealthStatsNode:
         """Resolve overall project health stats.
@@ -55,6 +58,7 @@ class ProjectHealthMetricsQuery:
 
     @strawberry.field(
         permission_classes=[HasDashboardAccess],
+        extensions=[CacheFieldExtension()],
     )
     def project_health_metrics_distinct_length(
         self,

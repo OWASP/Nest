@@ -2,6 +2,7 @@
 
 import strawberry
 
+from apps.common.extensions import CacheFieldExtension
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.github.models.repository import Repository
 
@@ -10,7 +11,7 @@ from apps.github.models.repository import Repository
 class RepositoryQuery:
     """Repository queries."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def repository(
         self,
         organization_key: str,
@@ -34,7 +35,7 @@ class RepositoryQuery:
         except Repository.DoesNotExist:
             return None
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def repositories(
         self,
         organization: str,

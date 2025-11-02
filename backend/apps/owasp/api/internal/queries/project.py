@@ -3,6 +3,7 @@
 import strawberry
 from django.db.models import Q
 
+from apps.common.extensions import CacheFieldExtension
 from apps.github.models.user import User as GithubUser
 from apps.owasp.api.internal.nodes.project import ProjectNode
 from apps.owasp.models.project import Project
@@ -12,7 +13,7 @@ from apps.owasp.models.project import Project
 class ProjectQuery:
     """Project queries."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def project(self, key: str) -> ProjectNode | None:
         """Resolve project.
 
@@ -28,7 +29,7 @@ class ProjectQuery:
         except Project.DoesNotExist:
             return None
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def recent_projects(self, limit: int = 8) -> list[ProjectNode]:
         """Resolve recent projects.
 
@@ -41,7 +42,7 @@ class ProjectQuery:
         """
         return Project.objects.filter(is_active=True).order_by("-created_at")[:limit]
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def search_projects(self, query: str) -> list[ProjectNode]:
         """Search active projects by name (case-insensitive, partial match)."""
         if not query.strip():
@@ -52,7 +53,7 @@ class ProjectQuery:
             name__icontains=query.strip(),
         ).order_by("name")[:3]
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def is_project_leader(self, info: strawberry.Info, login: str) -> bool:
         """Check if a GitHub login or name is listed as a project leader."""
         try:

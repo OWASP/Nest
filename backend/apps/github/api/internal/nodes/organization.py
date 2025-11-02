@@ -4,6 +4,7 @@ import strawberry
 import strawberry_django
 from django.db import models
 
+from apps.common.extensions import CacheFieldExtension
 from apps.github.models.organization import Organization
 from apps.github.models.repository import Repository
 from apps.github.models.repository_contributor import RepositoryContributor
@@ -39,7 +40,7 @@ class OrganizationStatsNode:
 class OrganizationNode(strawberry.relay.Node):
     """GitHub organization node."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def stats(self) -> OrganizationStatsNode:
         """Resolve organization stats."""
         repositories = Repository.objects.filter(organization=self)

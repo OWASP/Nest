@@ -4,6 +4,7 @@ from datetime import datetime
 
 import strawberry
 
+from apps.common.extensions import CacheFieldExtension
 from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum
 from apps.mentorship.api.internal.nodes.mentor import MentorNode
 from apps.mentorship.api.internal.nodes.program import ProgramNode
@@ -25,7 +26,7 @@ class ModuleNode:
     started_at: datetime
     tags: list[str] | None = None
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def mentors(self) -> list[MentorNode]:
         """Get the list of mentors for this module."""
         return self.mentors.all()

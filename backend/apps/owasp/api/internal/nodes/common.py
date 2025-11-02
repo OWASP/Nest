@@ -2,6 +2,7 @@
 
 import strawberry
 
+from apps.common.extensions import CacheFieldExtension
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.owasp.api.internal.nodes.entity_member import EntityMemberNode
 
@@ -10,7 +11,7 @@ from apps.owasp.api.internal.nodes.entity_member import EntityMemberNode
 class GenericEntityNode(strawberry.relay.Node):
     """Base node class for OWASP entities with common fields and resolvers."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def entity_leaders(self) -> list[EntityMemberNode]:
         """Resolve entity leaders."""
         return self.entity_leaders
@@ -25,7 +26,7 @@ class GenericEntityNode(strawberry.relay.Node):
         """Resolve related URLs."""
         return self.idx_related_urls
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def top_contributors(self) -> list[RepositoryContributorNode]:
         """Resolve top contributors."""
         return [RepositoryContributorNode(**tc) for tc in self.idx_top_contributors]

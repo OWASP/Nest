@@ -3,6 +3,7 @@
 import strawberry
 import strawberry_django
 
+from apps.common.extensions import CacheFieldExtension
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models.release import Release
 from apps.owasp.constants import OWASP_ORGANIZATION_NAME
@@ -20,7 +21,7 @@ from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 class ReleaseNode(strawberry.relay.Node):
     """GitHub release node."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def author(self) -> UserNode | None:
         """Resolve author."""
         return self.author

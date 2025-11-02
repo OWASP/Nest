@@ -2,6 +2,7 @@
 
 import strawberry
 
+from apps.common.extensions import CacheFieldExtension
 from apps.owasp.api.internal.nodes.snapshot import SnapshotNode
 from apps.owasp.models.snapshot import Snapshot
 
@@ -10,7 +11,7 @@ from apps.owasp.models.snapshot import Snapshot
 class SnapshotQuery:
     """Snapshot queries."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def snapshot(self, key: str) -> SnapshotNode | None:
         """Resolve snapshot by key."""
         try:
@@ -21,7 +22,7 @@ class SnapshotQuery:
         except Snapshot.DoesNotExist:
             return None
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def snapshots(self, limit: int = 12) -> list[SnapshotNode]:
         """Resolve snapshots."""
         return Snapshot.objects.filter(

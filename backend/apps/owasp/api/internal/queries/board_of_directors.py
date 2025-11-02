@@ -2,6 +2,7 @@
 
 import strawberry
 
+from apps.common.extensions import CacheFieldExtension
 from apps.owasp.api.internal.nodes.board_of_directors import BoardOfDirectorsNode
 from apps.owasp.models.board_of_directors import BoardOfDirectors
 
@@ -10,7 +11,7 @@ from apps.owasp.models.board_of_directors import BoardOfDirectors
 class BoardOfDirectorsQuery:
     """GraphQL queries for Board of Directors model."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def board_of_directors(self, year: int) -> BoardOfDirectorsNode | None:
         """Resolve Board of Directors by year.
 
@@ -26,7 +27,7 @@ class BoardOfDirectorsQuery:
         except BoardOfDirectors.DoesNotExist:
             return None
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def boards_of_directors(self, limit: int = 10) -> list[BoardOfDirectorsNode]:
         """Resolve multiple Board of Directors instances.
 

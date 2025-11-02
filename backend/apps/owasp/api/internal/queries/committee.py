@@ -2,6 +2,7 @@
 
 import strawberry
 
+from apps.common.extensions import CacheFieldExtension
 from apps.owasp.api.internal.nodes.committee import CommitteeNode
 from apps.owasp.models.committee import Committee
 
@@ -10,7 +11,7 @@ from apps.owasp.models.committee import Committee
 class CommitteeQuery:
     """Committee queries."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def committee(self, key: str) -> CommitteeNode | None:
         """Resolve committee by key.
 

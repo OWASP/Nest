@@ -3,6 +3,7 @@
 import strawberry
 import strawberry_django
 
+from apps.common.extensions import CacheFieldExtension
 from apps.github.models.user import User
 from apps.nest.api.internal.nodes.badge import BadgeNode
 
@@ -28,12 +29,11 @@ from apps.nest.api.internal.nodes.badge import BadgeNode
 class UserNode:
     """GitHub user node."""
 
-    @strawberry.field
     def badge_count(self) -> int:
         """Resolve badge count."""
         return self.user_badges.filter(is_active=True).count()
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def badges(self) -> list[BadgeNode]:
         """Return user badges."""
         user_badges = (

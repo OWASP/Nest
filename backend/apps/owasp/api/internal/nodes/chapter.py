@@ -3,6 +3,7 @@
 import strawberry
 import strawberry_django
 
+from apps.common.extensions import CacheFieldExtension
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
 from apps.owasp.models.chapter import Chapter
 
@@ -36,7 +37,7 @@ class ChapterNode(GenericEntityNode):
         """Resolve created at."""
         return self.idx_created_at
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def geo_location(self) -> GeoLocationType | None:
         """Resolve geographic location."""
         return (
