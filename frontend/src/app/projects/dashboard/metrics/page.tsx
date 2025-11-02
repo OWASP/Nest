@@ -77,10 +77,35 @@ const SortableColumnHeader: FC<{
     }
   }
 
-  const alignmentClass =
-    align === 'center' ? 'justify-center' : align === 'right' ? 'justify-end' : 'justify-start'
-  const textAlignClass =
-    align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left'
+  const alignmentClass = (() => {
+    if (align === 'center') {
+      return 'justify-center'
+    } else if (align === 'right') {
+      return 'justify-end'
+    } else {
+      return 'justify-start'
+    }
+  })()
+
+  const textAlignClass = (() => {
+    if (align === 'center') {
+      return 'text-center'
+    } else if (align === 'right') {
+      return 'text-right'
+    } else {
+      return 'text-left'
+    }
+  })()
+
+  const fontAwesomeIconType = (() => {
+    if (isActiveSortDesc) {
+      return faSortDown
+    } else if (isActiveSortAsc) {
+      return faSortUp
+    } else {
+      return faSort
+    }
+  })()
 
   return (
     <div className={`flex items-center gap-1 ${alignmentClass}`}>
@@ -93,7 +118,7 @@ const SortableColumnHeader: FC<{
       >
         <span className="truncate">{label}</span>
         <FontAwesomeIcon
-          icon={isActiveSortDesc ? faSortDown : isActiveSortAsc ? faSortUp : faSort}
+          icon={fontAwesomeIconType}
           className={`h-3 w-3 ${isActive ? 'text-blue-600' : 'text-gray-400'}`}
         />
       </button>

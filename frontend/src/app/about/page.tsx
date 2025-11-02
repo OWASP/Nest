@@ -3,7 +3,6 @@ import { useQuery } from '@apollo/client/react'
 import {
   faCircleCheck,
   faClock,
-  faUserGear,
   faMapSigns,
   faScroll,
   faUsers,
@@ -34,6 +33,7 @@ import {
   projectTimeline,
   projectStory,
 } from 'utils/aboutData'
+import { getMilestoneProgressIcon, getMilestoneProgressText } from 'utils/milestoneProgress'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
 import Leaders from 'components/Leaders'
@@ -218,28 +218,14 @@ const About = () => {
                         </Link>
                         <Tooltip
                           closeDelay={100}
-                          content={
-                            milestone.progress === 100
-                              ? 'Completed'
-                              : milestone.progress > 0
-                                ? 'In Progress'
-                                : 'Not Started'
-                          }
+                          content={getMilestoneProgressText(milestone.progress)}
                           id={`tooltip-state-${index}`}
                           delay={100}
                           placement="top"
                           showArrow
                         >
                           <span className="absolute top-0 right-0 text-xl text-gray-400">
-                            <FontAwesomeIcon
-                              icon={
-                                milestone.progress === 100
-                                  ? faCircleCheck
-                                  : milestone.progress > 0
-                                    ? faUserGear
-                                    : faClock
-                              }
-                            />
+                            <FontAwesomeIcon icon={getMilestoneProgressIcon(milestone.progress)} />
                           </span>
                         </Tooltip>
                       </div>
