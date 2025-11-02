@@ -64,7 +64,7 @@ class TestListRelease:
         mock_exclude.select_related.assert_called_once_with(
             "repository", "repository__organization"
         )
-        mock_select.order_by.assert_called_once_with("created_at", "-created_at")
+        mock_select.order_by.assert_called_once_with("created_at", "id")
         assert result == mock_ordered
 
     @patch("apps.api.rest.v0.release.ReleaseModel.objects")
@@ -90,7 +90,7 @@ class TestListRelease:
         mock_exclude.select_related.assert_called_once_with(
             "repository", "repository__organization"
         )
-        mock_select.order_by.assert_called_once_with("-published_at", "-created_at")
+        mock_select.order_by.assert_called_once_with("-published_at", "-created_at", "id")
         assert result == mock_ordered
 
     @patch("apps.api.rest.v0.release.ReleaseModel.objects")
@@ -119,7 +119,7 @@ class TestListRelease:
             "repository", "repository__organization"
         )
         mock_select.filter.assert_called_once_with(repository__organization__login__iexact="OWASP")
-        mock_filter_org.order_by.assert_called_once_with("-published_at", "-created_at")
+        mock_filter_org.order_by.assert_called_once_with("-published_at", "-created_at", "id")
         assert result == mock_ordered
 
     @patch("apps.api.rest.v0.release.ReleaseModel.objects")
@@ -148,7 +148,7 @@ class TestListRelease:
             "repository", "repository__organization"
         )
         mock_select.filter.assert_called_once_with(repository__name__iexact="Nest")
-        mock_filter_repo.order_by.assert_called_once_with("-published_at", "-created_at")
+        mock_filter_repo.order_by.assert_called_once_with("-published_at", "-created_at", "id")
         assert result == mock_ordered
 
     @patch("apps.api.rest.v0.release.ReleaseModel.objects")
@@ -177,7 +177,7 @@ class TestListRelease:
             "repository", "repository__organization"
         )
         mock_select.filter.assert_called_once_with(tag_name="v1.0.0")
-        mock_filter_tag.order_by.assert_called_once_with("-published_at", "-created_at")
+        mock_filter_tag.order_by.assert_called_once_with("-published_at", "-created_at", "id")
         assert result == mock_ordered
 
 

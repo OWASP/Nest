@@ -72,7 +72,9 @@ def list_repository(
     if filters.organization_id:
         repositories = repositories.filter(organization__login__iexact=filters.organization_id)
 
-    return repositories.order_by(ordering or "-created_at", "-updated_at")
+    if ordering and ordering.lstrip("-") == "updated_at":
+        return repositories.order_by(ordering, "id")
+    return repositories.order_by(ordering or "-created_at", "-updated_at", "id")
 
 
 @router.get(

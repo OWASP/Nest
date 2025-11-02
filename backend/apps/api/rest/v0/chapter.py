@@ -91,7 +91,9 @@ def get_chapter(
     """Get chapter."""
     if chapter := ChapterModel.active_chapters.filter(
         key__iexact=(
-            chapter_id if chapter_id.startswith("www-chapter-") else f"www-chapter-{chapter_id}"
+            chapter_id
+            if chapter_id.lower().startswith("www-chapter-")
+            else f"www-chapter-{chapter_id}"
         )
     ).first():
         return chapter

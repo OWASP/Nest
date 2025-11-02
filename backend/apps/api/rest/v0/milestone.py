@@ -77,7 +77,10 @@ class MilestoneFilter(FilterSchema):
 def list_milestones(
     request: HttpRequest,
     filters: MilestoneFilter = Query(...),
-    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = None,
+    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
+        None,
+        description="Ordering field",
+    ),
 ) -> list[Milestone]:
     """Get all milestones."""
     milestones = MilestoneModel.objects.select_related("repository", "repository__organization")
@@ -91,7 +94,9 @@ def list_milestones(
     if filters.state:
         milestones = milestones.filter(state=filters.state)
 
-    return milestones.order_by(ordering or "-created_at", "-updated_at")
+    if ordering and ordering.lstrip("-") == "updated_at":
+        return milestones.order_by(ordering, "id")
+    return milestones.order_by(ordering or "-created_at", "-updated_at", "id")
 
 
 @router.get(

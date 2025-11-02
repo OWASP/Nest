@@ -115,7 +115,30 @@ class TestListMilestones:
         mock_objects.select_related.assert_called_once_with(
             "repository", "repository__organization"
         )
-        mock_select_related.order_by.assert_called_once_with("created_at", "-updated_at")
+        mock_select_related.order_by.assert_called_once_with("created_at", "-updated_at", "id")
+        assert result == mock_ordered
+
+    @patch("apps.api.rest.v0.milestone.MilestoneModel.objects")
+    def test_list_milestones_ordering_by_updated_at(self, mock_objects):
+        """Test listing milestones with ordering by updated_at avoids double ordering."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_filters.organization = None
+        mock_filters.repository = None
+        mock_filters.state = None
+
+        mock_select_related = MagicMock()
+        mock_ordered = MagicMock()
+
+        mock_objects.select_related.return_value = mock_select_related
+        mock_select_related.order_by.return_value = mock_ordered
+
+        result = list_milestones(mock_request, filters=mock_filters, ordering="-updated_at")
+
+        mock_objects.select_related.assert_called_once_with(
+            "repository", "repository__organization"
+        )
+        mock_select_related.order_by.assert_called_once_with("-updated_at", "id")
         assert result == mock_ordered
 
     @patch("apps.api.rest.v0.milestone.MilestoneModel.objects")
@@ -140,7 +163,7 @@ class TestListMilestones:
         mock_select_related.filter.assert_called_once_with(
             repository__organization__login__iexact="OWASP"
         )
-        mock_filter_org.order_by.assert_called_once_with("-created_at", "-updated_at")
+        mock_filter_org.order_by.assert_called_once_with("-created_at", "-updated_at", "id")
         assert result == mock_ordered
 
     @patch("apps.api.rest.v0.milestone.MilestoneModel.objects")
@@ -163,7 +186,7 @@ class TestListMilestones:
         result = list_milestones(mock_request, filters=mock_filters, ordering=None)
 
         mock_select_related.filter.assert_called_once_with(repository__name__iexact="Nest")
-        mock_filter_repo.order_by.assert_called_once_with("-created_at", "-updated_at")
+        mock_filter_repo.order_by.assert_called_once_with("-created_at", "-updated_at", "id")
         assert result == mock_ordered
 
     @patch("apps.api.rest.v0.milestone.MilestoneModel.objects")
@@ -186,7 +209,7 @@ class TestListMilestones:
         result = list_milestones(mock_request, filters=mock_filters, ordering=None)
 
         mock_select_related.filter.assert_called_once_with(state="closed")
-        mock_filter_state.order_by.assert_called_once_with("-created_at", "-updated_at")
+        mock_filter_state.order_by.assert_called_once_with("-created_at", "-updated_at", "id")
         assert result == mock_ordered
 
 

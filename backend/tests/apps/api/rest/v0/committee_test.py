@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from apps.api.rest.v0.committee import CommitteeDetail, get_chapter, list_committees
+from apps.api.rest.v0.committee import CommitteeDetail, get_committee, list_committees
 
 
 @pytest.mark.parametrize(
@@ -85,7 +85,7 @@ class TestGetCommittee:
         mock_active_committees.filter.return_value = mock_filter
         mock_filter.first.return_value = mock_committee
 
-        result = get_chapter(mock_request, committee_id="www-committee-project")
+        result = get_committee(mock_request, committee_id="www-committee-project")
 
         mock_active_committees.filter.assert_called_once_with(
             is_active=True, key__iexact="www-committee-project"
@@ -103,7 +103,7 @@ class TestGetCommittee:
         mock_active_committees.filter.return_value = mock_filter
         mock_filter.first.return_value = mock_committee
 
-        result = get_chapter(mock_request, committee_id="project")
+        result = get_committee(mock_request, committee_id="project")
 
         mock_active_committees.filter.assert_called_once_with(
             is_active=True, key__iexact="www-committee-project"
@@ -120,7 +120,7 @@ class TestGetCommittee:
         mock_active_committees.filter.return_value = mock_filter
         mock_filter.first.return_value = None
 
-        result = get_chapter(mock_request, committee_id="nonexistent")
+        result = get_committee(mock_request, committee_id="nonexistent")
 
         mock_active_committees.filter.assert_called_once_with(
             is_active=True, key__iexact="www-committee-nonexistent"
@@ -131,17 +131,18 @@ class TestGetCommittee:
 
     @patch("apps.api.rest.v0.committee.CommitteeModel.active_committees")
     def test_get_committee_uppercase_prefix(self, mock_active_committees):
-        """Test that uppercase prefix is not detected and gets added again."""
+        """Test that uppercase prefix is detected case-insensitively."""
         mock_request = MagicMock()
         mock_filter = MagicMock()
+        mock_committee = MagicMock()
 
         mock_active_committees.filter.return_value = mock_filter
-        mock_filter.first.return_value = None
+        mock_filter.first.return_value = mock_committee
 
-        result = get_chapter(mock_request, committee_id="WWW-COMMITTEE-Project")
+        result = get_committee(mock_request, committee_id="WWW-COMMITTEE-Project")
 
         mock_active_committees.filter.assert_called_once_with(
-            is_active=True, key__iexact="www-committee-WWW-COMMITTEE-Project"
+            is_active=True, key__iexact="WWW-COMMITTEE-Project"
         )
         mock_filter.first.assert_called_once()
-        assert result.status_code == HTTPStatus.NOT_FOUND
+        assert result == mock_committee

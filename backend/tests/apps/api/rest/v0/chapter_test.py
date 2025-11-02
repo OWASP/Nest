@@ -136,17 +136,17 @@ class TestGetChapter:
 
     @patch("apps.api.rest.v0.chapter.ChapterModel.active_chapters")
     def test_get_chapter_uppercase_prefix(self, mock_active_chapters):
-        """Test that uppercase prefix is not detected and gets added again."""
+        """Test that uppercase prefix is detected case-insensitively."""
         mock_request = MagicMock()
         mock_filter = MagicMock()
+        mock_chapter = MagicMock()
 
         mock_active_chapters.filter.return_value = mock_filter
-        mock_filter.first.return_value = None
+        mock_filter.first.return_value = mock_chapter
 
         result = get_chapter(mock_request, chapter_id="WWW-CHAPTER-London")
 
-        mock_active_chapters.filter.assert_called_once_with(
-            key__iexact="www-chapter-WWW-CHAPTER-London"
-        )
+        # Prefix should be detected case-insensitively, no double prefix
+        mock_active_chapters.filter.assert_called_once_with(key__iexact="WWW-CHAPTER-London")
         mock_filter.first.assert_called_once()
-        assert result.status_code == HTTPStatus.NOT_FOUND
+        assert result == mock_chapter

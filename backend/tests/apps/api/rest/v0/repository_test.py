@@ -54,7 +54,26 @@ class TestListRepository:
         result = list_repository(mock_request, filters=mock_filters, ordering="created_at")
 
         mock_objects.select_related.assert_called_once_with("organization")
-        mock_select.order_by.assert_called_once_with("created_at", "-updated_at")
+        mock_select.order_by.assert_called_once_with("created_at", "-updated_at", "id")
+        assert result == mock_ordered
+
+    @patch("apps.api.rest.v0.repository.RepositoryModel.objects")
+    def test_list_repository_ordering_by_updated_at(self, mock_objects):
+        """Test listing repositories with ordering by updated_at avoids double ordering."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_filters.organization_id = None
+
+        mock_select = MagicMock()
+        mock_ordered = MagicMock()
+
+        mock_objects.select_related.return_value = mock_select
+        mock_select.order_by.return_value = mock_ordered
+
+        result = list_repository(mock_request, filters=mock_filters, ordering="updated_at")
+
+        mock_objects.select_related.assert_called_once_with("organization")
+        mock_select.order_by.assert_called_once_with("updated_at", "id")
         assert result == mock_ordered
 
     @patch("apps.api.rest.v0.repository.RepositoryModel.objects")
@@ -73,7 +92,7 @@ class TestListRepository:
         result = list_repository(mock_request, filters=mock_filters, ordering=None)
 
         mock_objects.select_related.assert_called_once_with("organization")
-        mock_select.order_by.assert_called_once_with("-created_at", "-updated_at")
+        mock_select.order_by.assert_called_once_with("-created_at", "-updated_at", "id")
         assert result == mock_ordered
 
     @patch("apps.api.rest.v0.repository.RepositoryModel.objects")
@@ -95,7 +114,7 @@ class TestListRepository:
 
         mock_objects.select_related.assert_called_once_with("organization")
         mock_select.filter.assert_called_once_with(organization__login__iexact="OWASP")
-        mock_filter.order_by.assert_called_once_with("-created_at", "-updated_at")
+        mock_filter.order_by.assert_called_once_with("-created_at", "-updated_at", "id")
         assert result == mock_ordered
 
     @patch("apps.api.rest.v0.repository.RepositoryModel.objects")
@@ -116,7 +135,7 @@ class TestListRepository:
         mock_objects.select_related.assert_called_once_with("organization")
         # Filter should not be called when organization_id is None
         mock_select.filter.assert_not_called()
-        mock_select.order_by.assert_called_once_with("-created_at", "-updated_at")
+        mock_select.order_by.assert_called_once_with("-created_at", "-updated_at", "id")
         assert result == mock_ordered
 
 

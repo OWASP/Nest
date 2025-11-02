@@ -58,7 +58,10 @@ def list_events(
     ),
 ) -> list[Event]:
     """Get all events."""
-    return EventModel.objects.order_by(ordering or "-start_date", "-end_date")
+    if ordering and ordering.lstrip("-") == "end_date":
+        secondary = "-start_date" if ordering.startswith("-") else "start_date"
+        return EventModel.objects.order_by(ordering, secondary, "id")
+    return EventModel.objects.order_by(ordering or "-start_date", "-end_date", "id")
 
 
 @router.get(

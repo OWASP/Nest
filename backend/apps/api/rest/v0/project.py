@@ -99,7 +99,9 @@ def get_project(
     """Get project."""
     if project := ProjectModel.active_projects.filter(
         key__iexact=(
-            project_id if project_id.startswith("www-project-") else f"www-project-{project_id}"
+            project_id
+            if project_id.lower().startswith("www-project-")
+            else f"www-project-{project_id}"
         )
     ).first():
         return project

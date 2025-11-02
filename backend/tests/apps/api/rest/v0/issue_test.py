@@ -68,7 +68,7 @@ class TestListIssues:
         mock_select_related.filter.assert_called_once_with(
             repository__organization__login__iexact="OWASP"
         )
-        mock_filtered.order_by.assert_called_once_with("-created_at", "-updated_at")
+        mock_filtered.order_by.assert_called_once_with("-created_at", "-updated_at", "id")
         assert result == mock_ordered
 
     @patch("apps.api.rest.v0.issue.IssueModel.objects")
@@ -94,7 +94,7 @@ class TestListIssues:
             "repository", "repository__organization"
         )
         mock_select_related.filter.assert_called_once_with(repository__name__iexact="Nest")
-        mock_filtered.order_by.assert_called_once_with("-created_at", "-updated_at")
+        mock_filtered.order_by.assert_called_once_with("-created_at", "-updated_at", "id")
         assert result == mock_ordered
 
     @patch("apps.api.rest.v0.issue.IssueModel.objects")
@@ -120,7 +120,7 @@ class TestListIssues:
             "repository", "repository__organization"
         )
         mock_select_related.filter.assert_called_once_with(state="open")
-        mock_filtered.order_by.assert_called_once_with("-created_at", "-updated_at")
+        mock_filtered.order_by.assert_called_once_with("-created_at", "-updated_at", "id")
         assert result == mock_ordered
 
     @patch("apps.api.rest.v0.issue.IssueModel.objects")
@@ -143,7 +143,30 @@ class TestListIssues:
         mock_objects.select_related.assert_called_once_with(
             "repository", "repository__organization"
         )
-        mock_select_related.order_by.assert_called_once_with("created_at", "-updated_at")
+        mock_select_related.order_by.assert_called_once_with("created_at", "-updated_at", "id")
+        assert result == mock_ordered
+
+    @patch("apps.api.rest.v0.issue.IssueModel.objects")
+    def test_list_issues_ordering_by_updated_at(self, mock_objects):
+        """Test listing issues with ordering by updated_at avoids double ordering."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_filters.organization = None
+        mock_filters.repository = None
+        mock_filters.state = None
+
+        mock_select_related = MagicMock()
+        mock_ordered = MagicMock()
+
+        mock_objects.select_related.return_value = mock_select_related
+        mock_select_related.order_by.return_value = mock_ordered
+
+        result = list_issues(mock_request, filters=mock_filters, ordering="-updated_at")
+
+        mock_objects.select_related.assert_called_once_with(
+            "repository", "repository__organization"
+        )
+        mock_select_related.order_by.assert_called_once_with("-updated_at", "id")
         assert result == mock_ordered
 
 

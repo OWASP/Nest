@@ -123,6 +123,22 @@ class TestGetProject:
         assert result == mock_project
 
     @patch("apps.api.rest.v0.project.ProjectModel.active_projects")
+    def test_get_project_uppercase_prefix(self, mock_active_projects):
+        """Test getting a project with uppercase prefix (case-insensitive detection)."""
+        mock_request = MagicMock()
+        mock_filter = MagicMock()
+        mock_project = MagicMock()
+
+        mock_active_projects.filter.return_value = mock_filter
+        mock_filter.first.return_value = mock_project
+
+        result = get_project(mock_request, project_id="WWW-PROJECT-Nest")
+
+        mock_active_projects.filter.assert_called_once_with(key__iexact="WWW-PROJECT-Nest")
+        mock_filter.first.assert_called_once()
+        assert result == mock_project
+
+    @patch("apps.api.rest.v0.project.ProjectModel.active_projects")
     def test_get_project_not_found(self, mock_active_projects):
         """Test getting a project that does not exist returns 404."""
         mock_request = MagicMock()

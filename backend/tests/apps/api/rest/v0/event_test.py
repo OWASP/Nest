@@ -52,7 +52,7 @@ class TestListEvents:
 
         result = list_events(mock_request, ordering="start_date")
 
-        mock_objects.order_by.assert_called_once_with("start_date", "-end_date")
+        mock_objects.order_by.assert_called_once_with("start_date", "-end_date", "id")
         assert result == mock_queryset
 
     @patch("apps.api.rest.v0.event.EventModel.objects")
@@ -65,7 +65,33 @@ class TestListEvents:
 
         result = list_events(mock_request, ordering=None)
 
-        mock_objects.order_by.assert_called_once_with("-start_date", "-end_date")
+        mock_objects.order_by.assert_called_once_with("-start_date", "-end_date", "id")
+        assert result == mock_queryset
+
+    @patch("apps.api.rest.v0.event.EventModel.objects")
+    def test_list_events_ordering_by_end_date(self, mock_objects):
+        """Test listing events with ordering by end_date uses start_date as secondary."""
+        mock_request = MagicMock()
+        mock_queryset = MagicMock()
+
+        mock_objects.order_by.return_value = mock_queryset
+
+        result = list_events(mock_request, ordering="end_date")
+
+        mock_objects.order_by.assert_called_once_with("end_date", "start_date", "id")
+        assert result == mock_queryset
+
+    @patch("apps.api.rest.v0.event.EventModel.objects")
+    def test_list_events_ordering_by_negative_end_date(self, mock_objects):
+        """Test listing events with ordering by -end_date uses -start_date as secondary."""
+        mock_request = MagicMock()
+        mock_queryset = MagicMock()
+
+        mock_objects.order_by.return_value = mock_queryset
+
+        result = list_events(mock_request, ordering="-end_date")
+
+        mock_objects.order_by.assert_called_once_with("-end_date", "-start_date", "id")
         assert result == mock_queryset
 
 
