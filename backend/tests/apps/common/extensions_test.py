@@ -6,41 +6,93 @@ from strawberry.types.info import Info
 from apps.common.extensions import CacheFieldExtension
 
 
+class MockPath:
+    def __init__(self, key, typename, prev=None):
+        self.key = key
+        self.prev = prev
+        self.typename = typename
+
+
+class MockSource:
+    def __init__(self, id=None):  # noqa: A002
+        self.id = id
+
+
 @pytest.mark.parametrize(
-    ("typename", "key", "kwargs", "prefix", "expected_key"),
+    ("source", "path", "kwargs", "prefix", "expected_key"),
     [
-        ("UserNode", "name", {}, "p1", "p1:UserNode:name:{}"),
         (
-            "RepositoryNode",
-            "issues",
-            {"limit": 10},
+            None,
+            MockPath(key="repository", typename="Query"),
+            {"organization_key": "OWASP", "repository_key": "nest"},
+            "p1",
+            'p1:repository:{"organization_key": "OWASP", "repository_key": "nest"}',
+        ),
+        (
+            MockSource(id=123),
+            MockPath(
+                key="organization",
+                typename="RepositoryNode",
+                prev=MockPath(key="repository", typename="Query"),
+            ),
+            {},
             "p2",
-            """p2:RepositoryNode:issues:{"limit": 10}""",
+            'p2:repository.organization:{"__source_id__": "123"}',
         ),
         (
-            "RepositoryNode",
-            "issues",
-            {"limit": 10, "state": "open"},
+            MockSource(id=0),
+            MockPath(
+                key="organization",
+                typename="RepositoryNode",
+                prev=MockPath(key="repository", typename="Query"),
+            ),
+            {},
             "p3",
-            """p3:RepositoryNode:issues:{"limit": 10, "state": "open"}""",
+            'p3:repository.organization:{"__source_id__": "0"}',
         ),
         (
-            "RepositoryNode",
-            "issues",
-            {"state": "open", "limit": 10},
+            MockSource(),
+            MockPath(
+                key="organization",
+                typename="RepositoryNode",
+                prev=MockPath(key="repository", typename="Query"),
+            ),
+            {},
             "p4",
-            """p4:RepositoryNode:issues:{"limit": 10, "state": "open"}""",
+            "p4:repository.organization:{}",
+        ),
+        (
+            None,
+            MockPath(
+                key="badgeCount",
+                typename="UserNode",
+                prev=MockPath(
+                    key="author",
+                    typename="IssueNode",
+                    prev=MockPath(
+                        key=0,
+                        typename=None,
+                        prev=MockPath(
+                            key="issues",
+                            typename="RepositoryNode",
+                            prev=MockPath(key="repository", typename="Query"),
+                        ),
+                    ),
+                ),
+            ),
+            {},
+            "graphql-resolver",
+            "graphql-resolver:repository.issues.0.author.badgeCount:{}",
         ),
     ],
 )
-def test_generate_key(typename, key, kwargs, prefix, expected_key):
+def test_generate_key(source, path, kwargs, prefix, expected_key):
     """Test cases for the generate_key method."""
     mock_info = MagicMock(spec=Info)
-    mock_info.path.typename = typename
-    mock_info.path.key = key
+    mock_info.path = path
 
     extension = CacheFieldExtension(prefix=prefix)
-    assert extension.generate_key(mock_info, kwargs) == expected_key
+    assert extension.generate_key(source, mock_info, kwargs) == expected_key
 
 
 class TestCacheFieldExtensionResolve:
@@ -50,8 +102,7 @@ class TestCacheFieldExtensionResolve:
     def mock_info(self):
         """Return a mock Strawberry Info object."""
         mock_info = MagicMock(spec=Info)
-        mock_info.path.typename = "TestType"
-        mock_info.path.key = "testField"
+        mock_info.path = MockPath(key="testField", typename="TestType", prev=None)
         return mock_info
 
     @patch("apps.common.extensions.cache")
