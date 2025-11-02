@@ -190,13 +190,11 @@ describe('TopContributorsList Component', () => {
       expect(screen.queryByRole('button')).not.toBeInTheDocument()
 
       // Test with many contributors (should show button)
-      const manyContributors = Array(15)
-        .fill(null)
-        .map((_, index) => ({
-          ...mockContributors[0],
-          login: `user${index}`,
-          name: `User ${index}`,
-        }))
+      const manyContributors = new Array(15).fill(null).map((_, index) => ({
+        ...mockContributors[0],
+        login: `user${index}`,
+        name: `User ${index}`,
+      }))
 
       rerender(<TopContributorsList contributors={manyContributors} maxInitialDisplay={12} />)
       expect(screen.getByRole('button')).toBeInTheDocument()
@@ -204,13 +202,11 @@ describe('TopContributorsList Component', () => {
     })
 
     it('displays correct number of contributors based on maxInitialDisplay', () => {
-      const manyContributors = Array(15)
-        .fill(null)
-        .map((_, index) => ({
-          ...mockContributors[0],
-          login: `user${index}`,
-          name: `User ${index}`,
-        }))
+      const manyContributors = new Array(15).fill(null).map((_, index) => ({
+        ...mockContributors[0],
+        login: `user${index}`,
+        name: `User ${index}`,
+      }))
 
       render(<TopContributorsList contributors={manyContributors} maxInitialDisplay={5} />)
 
@@ -257,13 +253,11 @@ describe('TopContributorsList Component', () => {
     })
 
     it('respects custom maxInitialDisplay prop', () => {
-      const manyContributors = Array(10)
-        .fill(null)
-        .map((_, index) => ({
-          ...mockContributors[0],
-          login: `user${index}`,
-          name: `User ${index}`,
-        }))
+      const manyContributors = new Array(10).fill(null).map((_, index) => ({
+        ...mockContributors[0],
+        login: `user${index}`,
+        name: `User ${index}`,
+      }))
 
       render(<TopContributorsList contributors={manyContributors} maxInitialDisplay={3} />)
 
@@ -286,13 +280,11 @@ describe('TopContributorsList Component', () => {
 
   describe('Event handling', () => {
     it('toggles contributors display when show more/less button is clicked', () => {
-      const manyContributors = Array(15)
-        .fill(null)
-        .map((_, index) => ({
-          ...mockContributors[0],
-          login: `user${index}`,
-          name: `User ${index}`,
-        }))
+      const manyContributors = new Array(15).fill(null).map((_, index) => ({
+        ...mockContributors[0],
+        login: `user${index}`,
+        name: `User ${index}`,
+      }))
 
       render(<TopContributorsList contributors={manyContributors} maxInitialDisplay={5} />)
 
@@ -319,13 +311,11 @@ describe('TopContributorsList Component', () => {
     })
 
     it('calls toggle function correctly on multiple clicks', () => {
-      const manyContributors = Array(10)
-        .fill(null)
-        .map((_, index) => ({
-          ...mockContributors[0],
-          login: `user${index}`,
-          name: `User ${index}`,
-        }))
+      const manyContributors = new Array(10).fill(null).map((_, index) => ({
+        ...mockContributors[0],
+        login: `user${index}`,
+        name: `User ${index}`,
+      }))
 
       render(<TopContributorsList contributors={manyContributors} maxInitialDisplay={3} />)
 
@@ -345,13 +335,11 @@ describe('TopContributorsList Component', () => {
 
   describe('State changes / internal logic', () => {
     it('manages showAllContributors state correctly', () => {
-      const manyContributors = Array(10)
-        .fill(null)
-        .map((_, index) => ({
-          ...mockContributors[0],
-          login: `user${index}`,
-          name: `User ${index}`,
-        }))
+      const manyContributors = new Array(10).fill(null).map((_, index) => ({
+        ...mockContributors[0],
+        login: `user${index}`,
+        name: `User ${index}`,
+      }))
 
       render(<TopContributorsList contributors={manyContributors} maxInitialDisplay={5} />)
 
@@ -368,13 +356,11 @@ describe('TopContributorsList Component', () => {
     })
 
     it('correctly slices contributors array based on state', () => {
-      const contributors = Array(8)
-        .fill(null)
-        .map((_, index) => ({
-          ...mockContributors[0],
-          login: `user${index}`,
-          name: `User ${index}`,
-        }))
+      const contributors = new Array(8).fill(null).map((_, index) => ({
+        ...mockContributors[0],
+        login: `user${index}`,
+        name: `User ${index}`,
+      }))
 
       render(<TopContributorsList contributors={contributors} maxInitialDisplay={3} />)
 
@@ -388,13 +374,11 @@ describe('TopContributorsList Component', () => {
 
   describe('Default values and fallbacks', () => {
     it('uses default maxInitialDisplay value when not provided', () => {
-      const contributors = Array(15)
-        .fill(null)
-        .map((_, index) => ({
-          ...mockContributors[0],
-          login: `user${index}`,
-          name: `User ${index}`,
-        }))
+      const contributors = new Array(15).fill(null).map((_, index) => ({
+        ...mockContributors[0],
+        login: `user${index}`,
+        name: `User ${index}`,
+      }))
 
       render(<TopContributorsList contributors={contributors} />)
 
@@ -445,13 +429,11 @@ describe('TopContributorsList Component', () => {
     })
 
     it('renders correct button text based on state', () => {
-      const manyContributors = Array(15)
-        .fill(null)
-        .map((_, index) => ({
-          ...mockContributors[0],
-          login: `user${index}`,
-          name: `User ${index}`,
-        }))
+      const manyContributors = new Array(15).fill(null).map((_, index) => ({
+        ...mockContributors[0],
+        login: `user${index}`,
+        name: `User ${index}`,
+      }))
 
       render(<TopContributorsList contributors={manyContributors} maxInitialDisplay={5} />)
 
@@ -542,13 +524,11 @@ describe('TopContributorsList Component', () => {
     })
 
     it('renders button with proper role', () => {
-      const manyContributors = Array(15)
-        .fill(null)
-        .map((_, index) => ({
-          ...mockContributors[0],
-          login: `user${index}`,
-          name: `User ${index}`,
-        }))
+      const manyContributors = new Array(15).fill(null).map((_, index) => ({
+        ...mockContributors[0],
+        login: `user${index}`,
+        name: `User ${index}`,
+      }))
 
       render(<TopContributorsList contributors={manyContributors} maxInitialDisplay={5} />)
 
