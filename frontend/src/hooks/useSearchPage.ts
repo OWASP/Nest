@@ -37,7 +37,9 @@ export function useSearchPage<T>({
   const searchParams = useSearchParams()
 
   const [items, setItems] = useState<T[]>([])
-  const [currentPage, setCurrentPage] = useState<number>(parseInt(searchParams.get('page') || '1'))
+  const [currentPage, setCurrentPage] = useState<number>(
+    Number.parseInt(searchParams.get('page') || '1')
+  )
   const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('q') || '')
   const [sortBy, setSortBy] = useState<string>(searchParams.get('sortBy') || defaultSortBy)
   const [order, setOrder] = useState<string>(searchParams.get('order') || defaultOrder)
