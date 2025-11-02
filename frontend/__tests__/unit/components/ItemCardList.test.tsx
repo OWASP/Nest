@@ -650,13 +650,11 @@ describe('ItemCardList Component', () => {
     })
 
     it('handles large datasets', () => {
-      const largeDataset = Array(100)
-        .fill(null)
-        .map((_, index) => ({
-          ...mockIssue,
-          title: `Issue ${index}`,
-          objectID: `issue-${index}`,
-        }))
+      const largeDataset = new Array(100).fill(null).map((_, index) => ({
+        ...mockIssue,
+        title: `Issue ${index}`,
+        objectID: `issue-${index}`,
+      }))
 
       render(
         <ItemCardList
