@@ -89,9 +89,9 @@ def list_issues(
     if filters.state:
         issues = issues.filter(state=filters.state)
 
-    if ordering and ordering.lstrip("-") == "updated_at":
+    if ordering:
         return issues.order_by(ordering, "id")
-    return issues.order_by(ordering or "-created_at", "-updated_at", "id")
+    return issues.order_by("-created_at", "-updated_at", "id")
 
 
 @router.get(

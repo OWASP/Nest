@@ -90,9 +90,9 @@ def list_release(
     if filters.tag_name:
         releases = releases.filter(tag_name=filters.tag_name)
 
-    if ordering and ordering.lstrip("-") == "created_at":
+    if ordering:
         return releases.order_by(ordering, "id")
-    return releases.order_by(ordering or "-published_at", "-created_at", "id")
+    return releases.order_by("-published_at", "-created_at", "id")
 
 
 @router.get(

@@ -115,7 +115,7 @@ class TestListMilestones:
         mock_objects.select_related.assert_called_once_with(
             "repository", "repository__organization"
         )
-        mock_select_related.order_by.assert_called_once_with("created_at", "-updated_at", "id")
+        mock_select_related.order_by.assert_called_once_with("created_at", "id")
         assert result == mock_ordered
 
     @patch("apps.api.rest.v0.milestone.MilestoneModel.objects")

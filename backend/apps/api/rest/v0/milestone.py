@@ -94,9 +94,9 @@ def list_milestones(
     if filters.state:
         milestones = milestones.filter(state=filters.state)
 
-    if ordering and ordering.lstrip("-") == "updated_at":
+    if ordering:
         return milestones.order_by(ordering, "id")
-    return milestones.order_by(ordering or "-created_at", "-updated_at", "id")
+    return milestones.order_by("-created_at", "-updated_at", "id")
 
 
 @router.get(

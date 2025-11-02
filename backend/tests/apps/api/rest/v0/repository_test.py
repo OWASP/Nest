@@ -54,7 +54,7 @@ class TestListRepository:
         result = list_repository(mock_request, filters=mock_filters, ordering="created_at")
 
         mock_objects.select_related.assert_called_once_with("organization")
-        mock_select.order_by.assert_called_once_with("created_at", "-updated_at", "id")
+        mock_select.order_by.assert_called_once_with("created_at", "id")
         assert result == mock_ordered
 
     @patch("apps.api.rest.v0.repository.RepositoryModel.objects")
