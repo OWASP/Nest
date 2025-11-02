@@ -75,7 +75,7 @@ const DetailsCard = ({
   const router = useRouter()
 
   const secondaryCardStyles = (() => {
-    if (type === 'program' || type == 'module') {
+    if (type === 'program' || type === 'module') {
       return 'gap-2 md:col-span-7'
     } else if (type !== 'chapter') {
       return 'gap-2 md:col-span-5'
