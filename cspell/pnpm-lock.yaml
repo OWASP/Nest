@@ -15,8 +15,8 @@ importers:
         specifier: ^2.0.11
         version: 2.0.11
       '@cspell/dict-en_us':
-        specifier: ^4.4.23
-        version: 4.4.23
+        specifier: ^4.4.24
+        version: 4.4.24
       '@cspell/dict-fullstack':
         specifier: ^3.2.7
         version: 3.2.7
@@ -110,14 +110,14 @@ packages:
   '@cspell/dict-elixir@4.0.8':
     resolution: {integrity: sha512-CyfphrbMyl4Ms55Vzuj+mNmd693HjBFr9hvU+B2YbFEZprE5AG+EXLYTMRWrXbpds4AuZcvN3deM2XVB80BN/Q==}
 
-  '@cspell/dict-en-common-misspellings@2.1.7':
-    resolution: {integrity: sha512-HAWSOoQ+lxdzLaTALhPofKNJdxZ7HAcTZWQNwb7cvGBiKEy182cb96U35602yBPrBsKY/vLxVs6f0E1JTeQjRQ==}
+  '@cspell/dict-en-common-misspellings@2.1.8':
+    resolution: {integrity: sha512-vDsjRFPQGuAADAiitf82z9Mz3DcqKZi6V5hPAEIFkLLKjFVBcjUsSq59SfL59ElIFb76MtBO0BLifdEbBj+DoQ==}
 
   '@cspell/dict-en-gb@1.1.33':
     resolution: {integrity: sha512-tKSSUf9BJEV+GJQAYGw5e+ouhEe2ZXE620S7BLKe3ZmpnjlNG9JqlnaBhkIMxKnNFkLY2BP/EARzw31AZnOv4g==}
 
-  '@cspell/dict-en_us@4.4.23':
-    resolution: {integrity: sha512-9GsWPl651GNfZyfIQgrb29XRDlSiwvvwrbdi8WFPI5HoxqCKfi0sQ1YAAyOSHDWG/3As6nmkRU1ZEyrjJJ7KFA==}
+  '@cspell/dict-en_us@4.4.24':
+    resolution: {integrity: sha512-JE+/H2YicHJTneRmgH4GSI21rS+1yGZVl1jfOQgl8iHLC+yTTMtCvueNDMK94CgJACzYAoCsQB70MqiFJJfjLQ==}
 
   '@cspell/dict-filetypes@3.0.14':
     resolution: {integrity: sha512-KSXaSMYYNMLLdHEnju1DyRRH3eQWPRYRnOXpuHUdOh2jC44VgQoxyMU7oB3NAhDhZKBPCihabzECsAGFbdKfEA==}
@@ -462,9 +462,9 @@ snapshots:
       '@cspell/dict-docker': 1.1.16
       '@cspell/dict-dotnet': 5.0.10
       '@cspell/dict-elixir': 4.0.8
-      '@cspell/dict-en-common-misspellings': 2.1.7
+      '@cspell/dict-en-common-misspellings': 2.1.8
       '@cspell/dict-en-gb': 1.1.33
-      '@cspell/dict-en_us': 4.4.23
+      '@cspell/dict-en_us': 4.4.24
       '@cspell/dict-filetypes': 3.0.14
       '@cspell/dict-flutter': 1.1.1
       '@cspell/dict-fonts': 4.0.5
@@ -552,11 +552,11 @@ snapshots:
 
   '@cspell/dict-elixir@4.0.8': {}
 
-  '@cspell/dict-en-common-misspellings@2.1.7': {}
+  '@cspell/dict-en-common-misspellings@2.1.8': {}
 
   '@cspell/dict-en-gb@1.1.33': {}
 
-  '@cspell/dict-en_us@4.4.23': {}
+  '@cspell/dict-en_us@4.4.24': {}
 
   '@cspell/dict-filetypes@3.0.14': {}
 

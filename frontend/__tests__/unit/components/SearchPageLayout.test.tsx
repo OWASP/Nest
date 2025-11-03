@@ -251,7 +251,7 @@ describe('<SearchPageLayout />', () => {
       <SearchPageLayout
         isLoaded={true}
         totalPages={3}
-        currentPage={NaN}
+        currentPage={Number.NaN}
         onSearch={() => {}}
         onPageChange={handlePageChange}
         searchQuery=""
@@ -346,7 +346,7 @@ describe('<SearchPageLayout />', () => {
     render(
       <SearchPageLayout
         isLoaded={true}
-        totalPages={NaN}
+        totalPages={Number.NaN}
         currentPage={1}
         onSearch={() => {}}
         onPageChange={() => {}}

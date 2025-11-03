@@ -24,7 +24,7 @@ const Leaders: React.FC<LeadersProps> = ({ users }) => {
 
   return (
     <SecondaryCard icon={faPersonWalkingArrowRight} title={<AnchorTitle title="Leaders" />}>
-      <div className="flex w-full flex-col items-center justify-around overflow-hidden md:flex-row">
+      <div className="flex w-full flex-wrap items-stretch justify-center gap-4 p-2">
         {users.map((user) => (
           <UserCard
             key={user.member?.login || user.memberName}
@@ -34,7 +34,7 @@ const Leaders: React.FC<LeadersProps> = ({ users }) => {
               label: 'View Profile',
               onclick: () => handleButtonClick(user),
             }}
-            className="h-64 w-44 bg-inherit"
+            className="h-auto w-full max-w-[280px] bg-inherit"
             description={user.description}
             name={user.member?.name || user.memberName}
           />
