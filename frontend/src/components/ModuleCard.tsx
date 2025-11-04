@@ -98,7 +98,7 @@ export default ModuleCard
 export const getSimpleDuration = (start: string, end: string): string => {
   const startDate = new Date(start)
   const endDate = new Date(end)
-  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
     return 'Invalid duration'
   }
 
