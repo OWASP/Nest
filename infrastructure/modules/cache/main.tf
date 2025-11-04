@@ -14,10 +14,9 @@ terraform {
 }
 
 locals {
-  generate_redis_auth_token = var.redis_auth_token == null || var.redis_auth_token == ""
-  parameter_group_name      = "default.redis${local.redis_major_version}"
-  redis_auth_token          = local.generate_redis_auth_token ? random_password.redis_auth_token[0].result : var.redis_auth_token
-  redis_major_version       = split(".", var.redis_engine_version)[0]
+  parameter_group_name = "default.redis${local.redis_major_version}"
+  redis_auth_token     = random_password.redis_auth_token[0].result
+  redis_major_version  = split(".", var.redis_engine_version)[0]
 }
 
 resource "aws_elasticache_subnet_group" "main" {
@@ -29,7 +28,7 @@ resource "aws_elasticache_subnet_group" "main" {
 }
 
 resource "random_password" "redis_auth_token" {
-  count  = local.generate_redis_auth_token ? 1 : 0
+  count  = 1
   length = 32
   # Redis auth token has specific requirements for special characters.
   override_special = "!&#$^<>-"

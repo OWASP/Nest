@@ -55,7 +55,7 @@ resource "aws_db_instance" "main" {
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-postgres"
   })
-  username               = var.db_username
+  username               = var.db_user
   vpc_security_group_ids = var.security_group_ids
 }
 
@@ -71,7 +71,7 @@ resource "aws_secretsmanager_secret" "db_credentials" {
 resource "aws_secretsmanager_secret_version" "db_credentials" {
   secret_id = aws_secretsmanager_secret.db_credentials.id
   secret_string = jsonencode({
-    username = var.db_username
+    username = var.db_user
     password = local.db_password
   })
 }

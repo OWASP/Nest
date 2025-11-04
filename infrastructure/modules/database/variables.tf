@@ -78,7 +78,7 @@ variable "db_subnet_ids" {
   type        = list(string)
 }
 
-variable "db_username" {
+variable "db_user" {
   description = "The username for the RDS database"
   type        = string
 }
