@@ -45,3 +45,28 @@ class Snapshot(models.Model):
             self.key = now().strftime("%Y-%m")
 
         super().save(*args, **kwargs)
+
+    @property
+    def new_chapters_count(self) -> int:
+        """Return the count of new chapters."""
+        return self.new_chapters.count()
+
+    @property
+    def new_issues_count(self) -> int:
+        """Return the count of new issues."""
+        return self.new_issues.count()
+
+    @property
+    def new_projects_count(self) -> int:
+        """Return the count of new projects."""
+        return self.new_projects.count()
+
+    @property
+    def new_releases_count(self) -> int:
+        """Return the count of new releases."""
+        return self.new_releases.count()
+
+    @property
+    def new_users_count(self) -> int:
+        """Return the count of new users."""
+        return self.new_users.count()
