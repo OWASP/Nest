@@ -78,7 +78,6 @@ class TestSnapshotAPI:
         self.snapshot.status = SnapshotModel.Status.COMPLETED
         self.snapshot.start_at = "2025-02-01T00:00:00Z"
         self.snapshot.end_at = "2025-02-28T23:59:59Z"
-
         self.chapter = MagicMock(spec=Chapter)
         self.chapter.name = "Test Chapter"
         self.issue = MagicMock(spec=Issue)
@@ -89,7 +88,6 @@ class TestSnapshotAPI:
         self.release.version = "v1.0.0"
         self.user = MagicMock(spec=User)
         self.user.username = "testuser"
-
         self.snapshot.new_chapters.order_by.return_value = [self.chapter]
         self.snapshot.new_issues.order_by.return_value = [self.issue]
         self.snapshot.new_projects.order_by.return_value = [self.project]
@@ -104,6 +102,9 @@ class TestSnapshotAPI:
         response = get_snapshot(request, snapshot_key=self.snapshot.key)
 
         assert response.key == self.snapshot.key
+        assert response.title == self.snapshot.title
+        assert response.start_at == self.snapshot.start_at
+        assert response.end_at == self.snapshot.end_at
 
     @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
     def test_list_snapshot_chapters_success(self, mock_filter):
@@ -113,6 +114,8 @@ class TestSnapshotAPI:
         response = list_snapshot_chapters(request, snapshot_key=self.snapshot.key)
 
         assert len(response) == 1
+        assert response[0] == self.chapter
+        assert response[0].name == self.chapter.name
 
     @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
     def test_list_snapshot_issues_success(self, mock_filter):
@@ -122,6 +125,8 @@ class TestSnapshotAPI:
         response = list_snapshot_issues(request, snapshot_key=self.snapshot.key)
 
         assert len(response) == 1
+        assert response[0] == self.issue
+        assert response[0].title == self.issue.title
 
     @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
     def test_list_snapshot_projects_success(self, mock_filter):
@@ -131,6 +136,8 @@ class TestSnapshotAPI:
         response = list_snapshot_projects(request, snapshot_key=self.snapshot.key)
 
         assert len(response) == 1
+        assert response[0] == self.project
+        assert response[0].name == self.project.name
 
     @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
     def test_list_snapshot_releases_success(self, mock_filter):
@@ -140,6 +147,8 @@ class TestSnapshotAPI:
         response = list_snapshot_releases(request, snapshot_key=self.snapshot.key)
 
         assert len(response) == 1
+        assert response[0] == self.release
+        assert response[0].version == self.release.version
 
     @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
     def test_list_snapshot_users_success(self, mock_filter):
@@ -149,3 +158,5 @@ class TestSnapshotAPI:
         response = list_snapshot_users(request, snapshot_key=self.snapshot.key)
 
         assert len(response) == 1
+        assert response[0] == self.user
+        assert response[0].username == self.user.username
