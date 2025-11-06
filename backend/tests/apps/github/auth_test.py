@@ -51,6 +51,28 @@ class TestGitHubAppAuth:
             with pytest.raises(ValueError, match="GitHub App configuration is incomplete"):
                 GitHubAppAuth()
 
+    @pytest.mark.parametrize(
+        "app_id, private_key, installation_id, expected",
+        [
+            ("1", "key", "1", True),
+            (None, "key", "1", False),
+            ("1", None, "1", False),
+            ("1", "key", None, False),
+            (None, None, "1", False),
+            ("1", None, None, False),
+            (None, "key", None, False),
+            (None, None, None, False),
+        ],
+    )
+    def test_is_app_configured(self, app_id, private_key, installation_id, expected):
+        """Test the _is_app_configured method with various inputs."""
+        with mock.patch("apps.github.auth.settings") as mock_settings:
+            mock_settings.GITHUB_APP_ID = app_id
+            mock_settings.GITHUB_APP_INSTALLATION_ID = installation_id
+            with mock.patch.object(GitHubAppAuth, "_load_private_key", return_value=private_key):
+                auth = GitHubAppAuth()
+                assert auth._is_app_configured() is expected
+
     def test_load_private_key_success(self):
         """Test successful private key loading from file."""
         with (
