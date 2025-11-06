@@ -90,7 +90,7 @@ export function useSearchPage<T>({
         const hasValidSort = sortBy && sortBy !== 'default' && sortBy[0] !== 'default'
 
         if (hasValidSort) {
-        // if sorting is active then  appends the sort field and order to the base index name.
+          // if sorting is active then  appends the sort field and order to the base index name.
           const orderSuffix = order && order !== '' ? `_${order}` : ''
           computedIndexName = `${indexName}_${sortBy}${orderSuffix}`
         }

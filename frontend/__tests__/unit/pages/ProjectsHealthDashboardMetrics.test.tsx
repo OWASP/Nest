@@ -150,13 +150,9 @@ describe('MetricsPage', () => {
 
   test('SortableColumnHeader applies correct alignment classes', async () => {
     render(<MetricsPage />)
-
-    // Find the "Stars" sort button
     const sortButton = await screen.findByTitle('Sort by Stars')
     const wrapperDiv = sortButton.closest('div')
     expect(wrapperDiv).not.toBeNull()
-    
-    // "Stars" uses align="center" in the MetricsPage
     expect(wrapperDiv).toHaveClass('justify-center')
     expect(sortButton).toHaveClass('text-center')
   })
