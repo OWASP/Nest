@@ -120,42 +120,84 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   )
 
   useEffect(() => {
+    const closeSuggestions = () => {
+      setShowSuggestions(false)
+      inputRef.current?.blur()
+    }
+
+    const selectHighlightedSuggestion = () => {
+      if (highlightedIndex === null) return
+      const { index, subIndex } = highlightedIndex
+      const suggestionGroup = suggestions[index]
+      if (!suggestionGroup) return
+      const suggestion = suggestionGroup.hits[subIndex]
+      if (!suggestion) return
+
+      handleSuggestionClick(
+        suggestion as Chapter | Organization | Project | User | Event,
+        suggestionGroup.indexName
+      )
+    }
+
+    const moveHighlightDown = () => {
+      if (suggestions.length === 0) return
+      if (highlightedIndex === null) {
+        setHighlightedIndex({ index: 0, subIndex: 0 })
+        return
+      }
+
+      const { index, subIndex } = highlightedIndex
+      const currentGroup = suggestions[index]
+      const hits = currentGroup?.hits ?? []
+      if (hits.length === 0) return
+
+      if (subIndex < hits.length - 1) {
+        setHighlightedIndex({ index, subIndex: subIndex + 1 })
+        return
+      }
+
+      if (index >= suggestions.length - 1) return
+      setHighlightedIndex({ index: index + 1, subIndex: 0 })
+    }
+
+    const moveHighlightUp = () => {
+      if (highlightedIndex === null) return
+
+      const { index, subIndex } = highlightedIndex
+      if (subIndex > 0) {
+        setHighlightedIndex({ index, subIndex: subIndex - 1 })
+        return
+      }
+
+      if (index <= 0) return
+      const previousGroup = suggestions[index - 1]
+      const hits = previousGroup?.hits ?? []
+      if (hits.length === 0) return
+
+      setHighlightedIndex({
+        index: index - 1,
+        subIndex: hits.length - 1,
+      })
+    }
+
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setShowSuggestions(false)
-        inputRef.current?.blur()
-      } else if (event.key === 'Enter' && highlightedIndex !== null) {
-        const { index, subIndex } = highlightedIndex
-        const suggestion = suggestions[index].hits[subIndex]
-        handleSuggestionClick(
-          suggestion as Chapter | Organization | Project | User | Event,
-          suggestions[index].indexName
-        )
-      } else if (event.key === 'ArrowDown') {
-        event.preventDefault()
-        if (highlightedIndex === null) {
-          setHighlightedIndex({ index: 0, subIndex: 0 })
-        } else {
-          const { index, subIndex } = highlightedIndex
-          if (subIndex < suggestions[index].hits.length - 1) {
-            setHighlightedIndex({ index, subIndex: subIndex + 1 })
-          } else if (index < suggestions.length - 1) {
-            setHighlightedIndex({ index: index + 1, subIndex: 0 })
-          }
-        }
-      } else if (event.key === 'ArrowUp') {
-        event.preventDefault()
-        if (highlightedIndex !== null) {
-          const { index, subIndex } = highlightedIndex
-          if (subIndex > 0) {
-            setHighlightedIndex({ index, subIndex: subIndex - 1 })
-          } else if (index > 0) {
-            setHighlightedIndex({
-              index: index - 1,
-              subIndex: suggestions[index - 1].hits.length - 1,
-            })
-          }
-        }
+      switch (event.key) {
+        case 'Escape':
+          closeSuggestions()
+          return
+        case 'Enter':
+          selectHighlightedSuggestion()
+          return
+        case 'ArrowDown':
+          event.preventDefault()
+          moveHighlightDown()
+          return
+        case 'ArrowUp':
+          event.preventDefault()
+          moveHighlightUp()
+          return
+        default:
+          return
       }
     }
 
@@ -164,7 +206,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [searchQuery, suggestions, highlightedIndex, handleSuggestionClick])
+  }, [suggestions, highlightedIndex, handleSuggestionClick])
 
   useEffect(() => {
     inputRef.current?.focus()
