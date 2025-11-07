@@ -83,6 +83,7 @@ mastg
 mcr
 mdfile
 mentee
+menteemodule_set
 mentees
 mern
 millify

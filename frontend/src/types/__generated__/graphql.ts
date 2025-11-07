@@ -190,6 +190,7 @@ export type IssueNode = Node & {
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
   interestedUsers: Array<UserNode>;
+  isMerged: Scalars['Boolean']['output'];
   labels: Array<Scalars['String']['output']>;
   number: Scalars['Int']['output'];
   organizationName?: Maybe<Scalars['String']['output']>;
@@ -205,6 +206,18 @@ export type LogoutResult = {
   code?: Maybe<Scalars['String']['output']>;
   message?: Maybe<Scalars['String']['output']>;
   ok: Scalars['Boolean']['output'];
+};
+
+export type MenteeNode = {
+  __typename?: 'MenteeNode';
+  avatarUrl: Scalars['String']['output'];
+  bio?: Maybe<Scalars['String']['output']>;
+  domains?: Maybe<Array<Scalars['String']['output']>>;
+  experienceLevel: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  login: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  tags?: Maybe<Array<Scalars['String']['output']>>;
 };
 
 export type MentorNode = {
@@ -242,10 +255,12 @@ export type ModuleNode = {
   id: Scalars['ID']['output'];
   interestedUsers: Array<UserNode>;
   issueByNumber?: Maybe<IssueNode>;
+  issueMentees: Array<UserNode>;
   issues: Array<IssueNode>;
   issuesCount: Scalars['Int']['output'];
   key: Scalars['String']['output'];
   labels?: Maybe<Array<Scalars['String']['output']>>;
+  mentees: Array<UserNode>;
   mentors: Array<MentorNode>;
   name: Scalars['String']['output'];
   program?: Maybe<ProgramNode>;
@@ -265,6 +280,11 @@ export type ModuleNodeInterestedUsersArgs = {
 
 export type ModuleNodeIssueByNumberArgs = {
   number: Scalars['Int']['input'];
+};
+
+
+export type ModuleNodeIssueMenteesArgs = {
+  issueNumber: Scalars['Int']['input'];
 };
 
 
@@ -292,12 +312,14 @@ export type ModuleNodeTaskDeadlineArgs = {
 export type Mutation = {
   __typename?: 'Mutation';
   assignIssueToUser: ModuleNode;
+  clearTaskDeadline: ModuleNode;
   createApiKey: CreateApiKeyResult;
   createModule: ModuleNode;
   createProgram: ProgramNode;
   githubAuth: GitHubAuthResult;
   logoutUser: LogoutResult;
   revokeApiKey: RevokeApiKeyResult;
+  setTaskDeadline: ModuleNode;
   unassignIssueFromUser: ModuleNode;
   updateModule: ModuleNode;
   updateProgram: ProgramNode;
@@ -310,6 +332,13 @@ export type MutationAssignIssueToUserArgs = {
   moduleKey: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
   userLogin: Scalars['String']['input'];
+};
+
+
+export type MutationClearTaskDeadlineArgs = {
+  issueNumber: Scalars['Int']['input'];
+  moduleKey: Scalars['String']['input'];
+  programKey: Scalars['String']['input'];
 };
 
 
@@ -336,6 +365,14 @@ export type MutationGithubAuthArgs = {
 
 export type MutationRevokeApiKeyArgs = {
   uuid: Scalars['UUID']['input'];
+};
+
+
+export type MutationSetTaskDeadlineArgs = {
+  deadlineAt: Scalars['DateTime']['input'];
+  issueNumber: Scalars['Int']['input'];
+  moduleKey: Scalars['String']['input'];
+  programKey: Scalars['String']['input'];
 };
 
 
@@ -574,6 +611,8 @@ export type Query = {
   apiKeys: Array<ApiKeyNode>;
   chapter?: Maybe<ChapterNode>;
   committee?: Maybe<CommitteeNode>;
+  getMenteeDetails: MenteeNode;
+  getMenteeModuleIssues: Array<IssueNode>;
   getModule: ModuleNode;
   getProgram: ProgramNode;
   getProgramModules: Array<ModuleNode>;
@@ -615,6 +654,22 @@ export type QueryChapterArgs = {
 
 export type QueryCommitteeArgs = {
   key: Scalars['String']['input'];
+};
+
+
+export type QueryGetMenteeDetailsArgs = {
+  menteeHandle: Scalars['String']['input'];
+  moduleKey: Scalars['String']['input'];
+  programKey: Scalars['String']['input'];
+};
+
+
+export type QueryGetMenteeModuleIssuesArgs = {
+  limit?: Scalars['Int']['input'];
+  menteeHandle: Scalars['String']['input'];
+  moduleKey: Scalars['String']['input'];
+  offset?: Scalars['Int']['input'];
+  programKey: Scalars['String']['input'];
 };
 
 

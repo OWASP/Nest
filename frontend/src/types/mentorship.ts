@@ -57,6 +57,7 @@ export type Module = {
   status: ProgramStatusEnum
   experienceLevel: ExperienceLevelEnum
   mentors: Contributor[]
+  mentees?: Contributor[]
   startedAt: string
   endedAt: string
   domains: string[]
@@ -76,4 +77,47 @@ export type ModuleFormData = {
   projectName: string
   projectId: string
   mentorLogins: string
+}
+
+import type { Issue } from 'types/issue'
+
+export type CompletedLevel = {
+  id: string
+  name: string
+  level: number
+  completedAt: string
+  stack: string
+  description: string
+}
+
+export type Achievement = {
+  id: string
+  name: string
+  description: string
+  earnedAt: string
+  type: string
+  points: number
+}
+
+export type Penalty = {
+  id: string
+  reason: string
+  points: number
+  createdAt: string
+  status: string
+  description: string
+}
+
+export type MenteeDetails = {
+  id: string
+  login: string
+  name: string
+  avatarUrl: string
+  email?: string
+  bio?: string
+  completedLevels: CompletedLevel[]
+  achievements: Achievement[]
+  penalties: Penalty[]
+  openIssues: Issue[]
+  closedIssues: Issue[]
 }
