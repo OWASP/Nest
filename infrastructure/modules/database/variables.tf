@@ -7,7 +7,7 @@ variable "common_tags" {
 variable "create_rds_proxy" {
   description = "Whether to create an RDS proxy"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "db_allocated_storage" {
