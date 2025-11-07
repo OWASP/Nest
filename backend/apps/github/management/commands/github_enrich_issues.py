@@ -71,5 +71,10 @@ class Command(BaseCommand):
 
             if not len(issues) % 1000:
                 Issue.bulk_save(issues, fields=update_fields)
+                issues = []
+                # I think we want batch processing of a maximum of 1000 items at a time, and
+                #  the previous implementation was incorrect because the issues array was not
+                #  being cleared after processing.
 
-        Issue.bulk_save(issues, fields=update_fields)
+        if len(issues) > 0:
+            Issue.bulk_save(issues, fields=update_fields)
