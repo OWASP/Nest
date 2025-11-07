@@ -16,12 +16,19 @@ class TestIssueNode:
         expected_field_names = {
             "_id",
             "created_at",
+            "number",
             "state",
+            "body",
             "title",
             "url",
             "author",
             "organization_name",
             "repository_name",
+            "assignees",
+            "labels",
+            "is_merged",
+            "interested_users",
+            "pull_requests",
         }
         assert field_names == expected_field_names
 

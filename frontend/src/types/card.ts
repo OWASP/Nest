@@ -49,11 +49,13 @@ export interface DetailsCardProps {
   healthMetricsData?: HealthMetricsProps[]
   heatmap?: JSX.Element
   isActive?: boolean
+  labels?: string[]
   languages?: string[]
   status?: string
   setStatus?: (newStatus: string) => void
   canUpdateStatus?: boolean
   mentors?: Contributor[]
+  mentees?: Contributor[]
   admins?: Contributor[]
   projectName?: string
   programKey?: string
