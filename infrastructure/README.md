@@ -55,51 +55,11 @@ Follow these steps to set up the infrastructure:
      terraform apply
      ```
 
-4. **Copy Outputs**:
+4. **Populate Secrets**:
 
-   - Run the following command to view all outputs. Use the `-raw` flag for sensitive outputs.
-   - Copy required outputs (i.e. `database_endpoint`, `db_password`, `redis_auth_token`, and `redis_endpoint`)
-     to the previously created `terraform.tfvars`:
+   - Visit the AWS Console > Systems Manager > Parameter Store
+   - Populate all `DJANGO_*` secrets that have `to-be-set-in-aws-console` value.
 
-     ```bash
-     terraform output
-     ```
-
-     Example Output:
-
-     ```bash
-     database_endpoint = "owasp-nest-staging-proxy.proxy-000000000000.us-east-2.rds.amazonaws.com"
-     db_password = <sensitive>
-     ecr_repository_url = "000000000000.dkr.ecr.us-east-2.amazonaws.com/owasp-nest-staging-backend"
-     lambda_security_group_id = "sg-00000000000000000"
-     private_subnet_ids = [
-          "subnet-00000000000000000",
-          "subnet-11111111111111111",
-          "subnet-22222222222222222",
-     ]
-     redis_auth_token = <sensitive>
-     redis_endpoint = "master.owasp-nest-staging-cache.aaaaaa.region1.cache.amazonaws.com"
-     zappa_s3_bucket = "owasp-nest-zappa-deployments"
-     ```
-
-     ```bash
-     terraform output -raw db_password
-     ```
-
-     ```bash
-     terraform output -raw redis_auth_token
-     ```
-
-5. **Apply The Changes Again**:
-
-   - Apply the changes again using the following command:
-
-     ```bash
-     terraform apply
-     ```
-
-*Note*: Step 4 and 5 ensure that ECS/Fargate tasks have proper environment variables.
-These two steps will be removed when AWS Secrets Manager is integrated.
 
 ## Setting up Zappa
 
