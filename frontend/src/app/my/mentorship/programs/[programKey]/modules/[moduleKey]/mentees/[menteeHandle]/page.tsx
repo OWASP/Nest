@@ -6,6 +6,8 @@ import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GET_MODULE_MENTEE_DETAILS } from 'server/queries/menteeQueries'
+import { Issue } from 'types/issue'
+import { MenteeDetails } from 'types/mentorship'
 import { LabelList } from 'components/LabelList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
@@ -17,8 +19,9 @@ const MenteeProfilePage = () => {
     menteeHandle: string
   }
 
-  const [menteeDetails, setMenteeDetails] = useState(null)
-  const [menteeIssues, setMenteeIssues] = useState([])
+  const [menteeDetails, setMenteeDetails] = useState<MenteeDetails | null>(null)
+  const [menteeIssues, setMenteeIssues] = useState<Issue[]>([])
+
   const [isLoading, setIsLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
@@ -33,12 +36,14 @@ const MenteeProfilePage = () => {
   })
 
   useEffect(() => {
-    if (data?.getMenteeDetails) {
-      setMenteeDetails(data.getMenteeDetails)
-      setMenteeIssues(data.getMenteeModuleIssues || [])
-      setIsLoading(false)
-    } else if (error) {
+    if (data) {
+      setMenteeDetails(data.getMenteeDetails ?? null)
+      setMenteeIssues(data.getMenteeModuleIssues ?? [])
+    }
+    if (error) {
       handleAppError(error)
+    }
+    if (data || error) {
       setIsLoading(false)
     }
   }, [data, error])
@@ -169,7 +174,7 @@ const MenteeProfilePage = () => {
               <div className="space-y-4">
                 {filteredIssues.map((issue) => (
                   <div
-                    key={issue.id}
+                    key={issue.number}
                     className="rounded-lg border border-gray-200 p-4 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
                   >
                     <div className="flex items-center pb-4">

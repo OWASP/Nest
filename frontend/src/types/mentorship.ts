@@ -115,6 +115,8 @@ export type MenteeDetails = {
   avatarUrl: string
   email?: string
   bio?: string
+  domains?: string[]
+  tags?: string[]
   completedLevels: CompletedLevel[]
   achievements: Achievement[]
   penalties: Penalty[]
