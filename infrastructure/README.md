@@ -197,3 +197,9 @@ Migrate and load data into the new database.
   ```bash
   zappa update staging
   ```
+
+- To view logs for a `staging` deployment run:
+
+  ```bash
+  zappa tail staging
+  ```
