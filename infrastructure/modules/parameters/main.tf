@@ -49,30 +49,6 @@ resource "aws_ssm_parameter" "django_allowed_hosts" {
   }
 }
 
-resource "aws_ssm_parameter" "django_aws_access_key_id" {
-  description = "Static AWS Access Key ID. Please remove in future iterations."
-  name        = "/${var.project_name}/${var.environment}/DJANGO_AWS_ACCESS_KEY_ID"
-  tags        = var.common_tags
-  type        = "SecureString"
-  value       = "to-be-set-in-aws-console"
-
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
-
-resource "aws_ssm_parameter" "django_aws_secret_access_key" {
-  description = "Static AWS Secret Access Key. Please remove in future iterations."
-  name        = "/${var.project_name}/${var.environment}/DJANGO_AWS_SECRET_ACCESS_KEY"
-  tags        = var.common_tags
-  type        = "SecureString"
-  value       = "to-be-set-in-aws-console"
-
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
-
 resource "aws_ssm_parameter" "django_configuration" {
   description = "The name of the Django configuration to use (e.g., Staging, Production)."
   name        = "/${var.project_name}/${var.environment}/DJANGO_CONFIGURATION"

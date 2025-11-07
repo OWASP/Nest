@@ -4,6 +4,12 @@ variable "common_tags" {
   default     = {}
 }
 
+variable "create_rds_proxy" {
+  description = "Whether to create an RDS proxy"
+  type        = bool
+  default     = true
+}
+
 variable "db_allocated_storage" {
   description = "The allocated storage for the RDS database in GB"
   type        = number

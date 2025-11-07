@@ -39,6 +39,7 @@ module "database" {
   source = "./modules/database"
 
   common_tags                = local.common_tags
+  create_rds_proxy           = var.create_rds_proxy
   db_allocated_storage       = var.db_allocated_storage
   db_backup_retention_period = var.db_backup_retention_period
   db_engine_version          = var.db_engine_version
@@ -98,12 +99,13 @@ module "parameters" {
 module "security" {
   source = "./modules/security"
 
-  common_tags  = local.common_tags
-  db_port      = var.db_port
-  environment  = var.environment
-  project_name = var.project_name
-  redis_port   = var.redis_port
-  vpc_id       = module.networking.vpc_id
+  common_tags      = local.common_tags
+  create_rds_proxy = var.create_rds_proxy
+  db_port          = var.db_port
+  environment      = var.environment
+  project_name     = var.project_name
+  redis_port       = var.redis_port
+  vpc_id           = module.networking.vpc_id
 }
 
 module "storage" {

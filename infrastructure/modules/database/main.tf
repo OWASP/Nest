@@ -77,6 +77,8 @@ resource "aws_secretsmanager_secret_version" "db_credentials" {
 }
 
 resource "aws_iam_role" "rds_proxy" {
+  count = var.create_rds_proxy ? 1 : 0
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -96,35 +98,39 @@ resource "aws_iam_role" "rds_proxy" {
 }
 
 resource "aws_iam_role_policy" "rds_proxy" {
+  count = var.create_rds_proxy ? 1 : 0
+
   name = "${var.project_name}-${var.environment}-rds-proxy-policy"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Action = [
-          "secretsmanager:GetSecretValue"
-        ]
+        Action   = ["secretsmanager:GetSecretValue"]
         Effect   = "Allow"
         Resource = aws_secretsmanager_secret.db_credentials.arn
       }
     ]
   })
-  role = aws_iam_role.rds_proxy.id
+  role = aws_iam_role.rds_proxy[0].id
 }
 
 resource "aws_db_proxy" "main" {
+  count = var.create_rds_proxy ? 1 : 0
+
   auth {
     auth_scheme = "SECRETS"
     description = "Database credentials"
     iam_auth    = "DISABLED"
     secret_arn  = aws_secretsmanager_secret.db_credentials.arn
   }
+
   debug_logging       = false
   engine_family       = "POSTGRESQL"
   idle_client_timeout = 1800
   name                = "${var.project_name}-${var.environment}-proxy"
   require_tls         = true
-  role_arn            = aws_iam_role.rds_proxy.arn
+  role_arn            = aws_iam_role.rds_proxy[0].arn
+
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-rds-proxy"
   })
@@ -133,16 +139,20 @@ resource "aws_db_proxy" "main" {
 }
 
 resource "aws_db_proxy_default_target_group" "main" {
+  count = var.create_rds_proxy ? 1 : 0
+
   connection_pool_config {
     connection_borrow_timeout    = 120
     max_connections_percent      = 100
     max_idle_connections_percent = 50
   }
-  db_proxy_name = aws_db_proxy.main.name
+
+  db_proxy_name = aws_db_proxy.main[0].name
 }
 
 resource "aws_db_proxy_target" "main" {
+  count                  = var.create_rds_proxy ? 1 : 0
   db_instance_identifier = aws_db_instance.main.identifier
-  db_proxy_name          = aws_db_proxy.main.name
-  target_group_name      = aws_db_proxy_default_target_group.main.name
+  db_proxy_name          = aws_db_proxy.main[0].name
+  target_group_name      = aws_db_proxy_default_target_group.main[0].name
 }

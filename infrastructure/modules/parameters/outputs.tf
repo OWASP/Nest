@@ -4,8 +4,6 @@ output "ssm_parameter_arns" {
     "DJANGO_ALGOLIA_APPLICATION_ID" = aws_ssm_parameter.django_algolia_application_id.arn
     "DJANGO_ALGOLIA_WRITE_API_KEY"  = aws_ssm_parameter.django_algolia_write_api_key.arn
     "DJANGO_ALLOWED_HOSTS"          = aws_ssm_parameter.django_allowed_hosts.arn
-    "DJANGO_AWS_ACCESS_KEY_ID"      = aws_ssm_parameter.django_aws_access_key_id.arn
-    "DJANGO_AWS_SECRET_ACCESS_KEY"  = aws_ssm_parameter.django_aws_secret_access_key.arn
     "DJANGO_CONFIGURATION"          = aws_ssm_parameter.django_configuration.arn
     "DJANGO_DB_HOST"                = aws_ssm_parameter.django_db_host.arn
     "DJANGO_DB_NAME"                = aws_ssm_parameter.django_db_name.arn

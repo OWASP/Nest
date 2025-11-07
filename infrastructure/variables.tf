@@ -10,6 +10,12 @@ variable "availability_zones" {
   default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
 }
 
+variable "create_rds_proxy" {
+  description = "Whether to create an RDS proxy"
+  type        = bool
+  default     = false
+}
+
 variable "db_allocated_storage" {
   description = "The allocated storage for the RDS database in GB"
   type        = number
