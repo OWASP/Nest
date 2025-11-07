@@ -105,6 +105,9 @@ The Django backend deployment is managed by Zappa. This includes the API Gateway
 
 5. **Deploy**:
 
+    - *Note*: Make sure to populate all `DJANGO_*` secrets that have `to-be-set-in-aws-console` in Parameter Store.
+      The deployment will fail with no logs if secrets like `DJANGO_SLACK_BOT_TOKEN` are invalid.
+
     ```bash
     zappa deploy staging
     ```
@@ -188,4 +191,10 @@ Migrate and load data into the new database.
 
   ```bash
   zappa update staging
+  ```
+
+- To view logs for a `staging` deployment run:
+
+  ```bash
+  zappa tail staging
   ```
