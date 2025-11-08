@@ -34,6 +34,8 @@ class EventDetail(EventBase):
     """Detail schema for Event (used in single item endpoints)."""
 
     description: str | None = None
+    longitude: float
+    latitude: float
 
 
 class EventError(Schema):

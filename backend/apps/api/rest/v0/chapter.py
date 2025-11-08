@@ -38,6 +38,8 @@ class ChapterDetail(ChapterBase):
     """Detail schema for Chapter (used in single item endpoints)."""
 
     country: str
+    longitude: float
+    latitude: float
     region: str
 
 
