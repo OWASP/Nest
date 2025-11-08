@@ -7,6 +7,7 @@ import {
   faStar,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
+import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -16,6 +17,7 @@ import type { Contributor } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import PageLayout from 'components/PageLayout'
 
 const RepositoryDetailsPage = () => {
   const { repositoryKey, organizationKey } = useParams<{
@@ -108,23 +110,38 @@ const RepositoryDetailsPage = () => {
     },
   ]
   return (
-    <DetailsCard
-      details={repositoryDetails}
-      entityKey={repository.project?.key}
-      isArchived={repository.isArchived}
-      languages={repository.languages}
-      projectName={repository.project?.name}
-      pullRequests={recentPullRequests}
-      recentIssues={repository.issues}
-      recentMilestones={repository.recentMilestones}
-      recentReleases={repository.releases}
-      stats={RepositoryStats}
-      summary={repository.description}
-      title={repository.name}
-      topContributors={topContributors}
-      topics={repository.topics}
-      type="repository"
-    />
+    <PageLayout
+      breadcrumbData={{
+        orgName:
+          repository.organization?.name ||
+          repository.organization?.login ||
+          upperFirst(organizationKey).replaceAll('-', ' '),
+        repoName: repository.name
+          ? repository.name
+              .split('-')
+              .map((word) => upperFirst(word))
+              .join(' ')
+          : upperFirst(repositoryKey).replaceAll('-', ' '),
+      }}
+    >
+      <DetailsCard
+        details={repositoryDetails}
+        entityKey={repository.project?.key}
+        isArchived={repository.isArchived}
+        languages={repository.languages}
+        projectName={repository.project?.name}
+        pullRequests={recentPullRequests}
+        recentIssues={repository.issues}
+        recentMilestones={repository.recentMilestones}
+        recentReleases={repository.releases}
+        stats={RepositoryStats}
+        summary={repository.description}
+        title={repository.name}
+        topContributors={topContributors}
+        topics={repository.topics}
+        type="repository"
+      />
+    </PageLayout>
   )
 }
 export default RepositoryDetailsPage
