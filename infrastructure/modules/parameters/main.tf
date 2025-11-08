@@ -42,7 +42,7 @@ resource "aws_ssm_parameter" "django_allowed_hosts" {
   name        = "/${var.project_name}/${var.environment}/DJANGO_ALLOWED_HOSTS"
   tags        = var.common_tags
   type        = "String"
-  value       = "to-be-set-in-aws-console"
+  value       = var.allowed_hosts
 
   lifecycle {
     ignore_changes = [value]
@@ -54,7 +54,7 @@ resource "aws_ssm_parameter" "django_configuration" {
   name        = "/${var.project_name}/${var.environment}/DJANGO_CONFIGURATION"
   tags        = var.common_tags
   type        = "String"
-  value       = "to-be-set-in-aws-console"
+  value       = var.configuration
 
   lifecycle {
     ignore_changes = [value]
@@ -142,7 +142,7 @@ resource "aws_ssm_parameter" "django_settings_module" {
   name        = "/${var.project_name}/${var.environment}/DJANGO_SETTINGS_MODULE"
   tags        = var.common_tags
   type        = "String"
-  value       = "to-be-set-in-aws-console"
+  value       = var.settings_module
 
   lifecycle {
     ignore_changes = [value]
