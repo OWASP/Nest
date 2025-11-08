@@ -39,8 +39,6 @@ Follow these steps to set up the infrastructure:
      cat terraform.tfvars.example > terraform.tfvars
      ```
 
-   - Update the default `django_` prefixed variables. (database/redis credentials will be added later)
-
 3. **Apply Changes**:
 
    - Init terraform if needed:
@@ -57,7 +55,7 @@ Follow these steps to set up the infrastructure:
 
 4. **Populate Secrets**:
 
-   - Visit the AWS Console > Systems Manager > Parameter Store
+   - Visit the AWS Console > Systems Manager > Parameter Store.
    - Populate all `DJANGO_*` secrets that have `to-be-set-in-aws-console` value.
 
 
@@ -105,14 +103,15 @@ The Django backend deployment is managed by Zappa. This includes the API Gateway
 
 5. **Deploy**:
 
-    - *Note*: Make sure to populate all `DJANGO_*` secrets that have `to-be-set-in-aws-console` in Parameter Store.
-      The deployment will fail with no logs if secrets like `DJANGO_SLACK_BOT_TOKEN` are invalid.
+    - *Note*: Make sure to populate all `DJANGO_*` secrets that are set as `to-be-set-in-aws-console`
+      in the Parameter Store. The deployment might fail with no logs if secrets such as
+      `DJANGO_SLACK_BOT_TOKEN` are invalid.
 
     ```bash
     zappa deploy staging
     ```
 
-Once deployed, Zappa will provide you with a URL. You can use this URL to test the API.
+Once deployed, use the URL provided by Zappa to test the API.
 
 ## Setup Database
 
@@ -187,14 +186,14 @@ Migrate and load data into the new database.
 
 ## Helpful Commands
 
-- To update a Zappa `staging` deployment run:
-
-  ```bash
-  zappa update staging
-  ```
-
 - To view logs for a `staging` deployment run:
 
   ```bash
   zappa tail staging
+  ```
+
+- To update a Zappa `staging` deployment run:
+
+  ```bash
+  zappa update staging
   ```
