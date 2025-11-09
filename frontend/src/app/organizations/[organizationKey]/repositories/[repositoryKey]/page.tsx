@@ -112,16 +112,8 @@ const RepositoryDetailsPage = () => {
   return (
     <PageLayout
       breadcrumbData={{
-        orgName:
-          repository.organization?.name ||
-          repository.organization?.login ||
-          upperFirst(organizationKey).replaceAll('-', ' '),
-        repoName: repository.name
-          ? repository.name
-              .split('-')
-              .map((word) => upperFirst(word))
-              .join(' ')
-          : upperFirst(repositoryKey).replaceAll('-', ' '),
+        orgName: repository.organization?.name || repository.organization?.login || upperFirst(organizationKey).replaceAll('-', ' '),
+        repoName: repository.name ? repository.name.split('-').map(word => upperFirst(word)).join(' ') : repositoryKey.split('-').map(word => upperFirst(word)).join(' '),
       }}
     >
       <DetailsCard
