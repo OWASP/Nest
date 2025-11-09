@@ -115,6 +115,7 @@
     "require-in-the-middle": "^8.0.1",
     "tailwindcss": "^4.1.16",
     "ts-jest": "^29.4.5",
+    "ts-morph": "^27.0.2",
     "ts-node": "^10.9.2",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.3",
