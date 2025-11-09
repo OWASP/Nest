@@ -31,7 +31,7 @@ export default function BreadCrumbRenderer({ items }: BreadCrumbRendererProps) {
             const isLast = index === items.length - 1
 
             return (
-              <HeroUIBreadcrumbItem key={item.path} isDisabled={isLast}>
+              <HeroUIBreadcrumbItem key={item.path}>
                 {isLast ? (
                   <span 
                     className="cursor-default font-semibold text-gray-600 dark:text-gray-300"
