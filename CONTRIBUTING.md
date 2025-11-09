@@ -223,28 +223,36 @@ Follow these steps to set up the OWASP Nest application:
 
 1. **Create Environment Files**:
 
-   - Create a local environment file in the `backend` directory:
+   - Copy the template file to create a local environment file in the `backend` directory:
 
      ```bash
-     touch backend/.env
+     # For bash/zsh/fish shells:
+     cp backend/.env.example backend/.env
+     
+     # For nushell:
+     cp backend/.env.example backend/.env
+     
+     # For Windows Command Prompt:
+     copy backend\.env.example backend\.env
+     
+     # For PowerShell:
+     Copy-Item backend\.env.example backend\.env
      ```
 
-   - Copy the contents from the template file into your new local environment file:
+   - Copy the template file to create a local environment file in the `frontend` directory:
 
      ```bash
-     cat backend/.env.example > backend/.env
-     ```
-
-   - Create a local environment file in the `frontend` directory:
-
-     ```bash
-     touch frontend/.env
-     ```
-
-   - Copy the contents from the template file into your new local environment file:
-
-     ```bash
-     cat frontend/.env.example > frontend/.env
+     # For bash/zsh/fish shells:
+     cp frontend/.env.example frontend/.env
+     
+     # For nushell:
+     cp frontend/.env.example frontend/.env
+     
+     # For Windows Command Prompt:
+     copy frontend\.env.example frontend\.env
+     
+     # For PowerShell:
+     Copy-Item frontend\.env.example frontend\.env
      ```
 
 Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order Mark)**. This is crucial to prevent "Unexpected character" errors during application execution or Docker image building.
@@ -262,15 +270,16 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 1. **Set Up Algolia**:
 
    - Go to [Algolia](https://www.algolia.com/) and create a free account.
-   - After creating an account, create an Algolia app.
-   - Update your `backend/.env` file with the following keys from your Algolia app (use **write** API key for backend):
+   - During the signup process, Algolia will automatically create an app for you. You can skip the import wizard that appears after signup.
+   - Navigate to your app dashboard and go to **Settings** → **API Keys**.
+   - Update your `backend/.env` file with the following keys from your Algolia app:
 
    ```plaintext
    DJANGO_ALGOLIA_APPLICATION_ID=<your-algolia-application-id>
-   DJANGO_ALGOLIA_WRITE_API_KEY=<your-algolia-write-api-key>
+   DJANGO_ALGOLIA_WRITE_API_KEY=<your-algolia-admin-api-key>
    ```
 
-   - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
+   - Use the **Admin API Key** (not "write API key") from the API Keys section, as it has the necessary index write permissions.
    - If you encounter any issues, you can refer directly to Algolia's [documentation](https://www.algolia.com/doc/guides/getting-started/quick-start/)
 
 1. **Run the Application**:
