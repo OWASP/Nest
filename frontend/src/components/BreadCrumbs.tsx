@@ -33,7 +33,10 @@ export default function BreadCrumbRenderer({ items }: BreadCrumbRendererProps) {
             return (
               <HeroUIBreadcrumbItem key={item.path} isDisabled={isLast}>
                 {isLast ? (
-                  <span className="cursor-default font-semibold text-gray-600 dark:text-gray-300">
+                  <span 
+                    className="cursor-default font-semibold text-gray-600 dark:text-gray-300"
+                    aria-current="page"
+                  >
                     {item.title}
                   </span>
                 ) : (
