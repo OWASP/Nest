@@ -5,4 +5,5 @@ export const sortOptionsProject = [
   { label: 'Last Updated', key: 'updated_at' },
   { label: 'Name', key: 'name' },
   { label: 'Stars', key: 'stars_count' },
+  { label: 'Level', key: 'level_raw' },
 ]
