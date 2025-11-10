@@ -63,25 +63,18 @@ def list_events(
         None,
         description="Ordering field",
     ),
+    *,
+    upcoming: bool | None = Query(
+        None,
+        description="Filter for upcoming events",
+    ),
 ) -> list[Event]:
-    """Get all events."""
+    """Get list of events."""
+    if upcoming:
+        return filters.filter(
+            EventModel.upcoming_events().order_by(ordering or "start_date", "end_date")
+        )
     return filters.filter(EventModel.objects.order_by(ordering or "-start_date", "-end_date"))
-
-
-@router.get(
-    "/upcoming",
-    description="Retrieve a paginated list of upcoming OWASP events.",
-    operation_id="list_upcoming_events",
-    summary="List upcoming events",
-    response=list[Event],
-)
-@decorate_view(cache_response())
-def list_upcoming_events(
-    request: HttpRequest,
-    filters: LocationFilter = Query(...),
-) -> list[Event]:
-    """Get upcoming events."""
-    return filters.filter(EventModel.upcoming_events())
 
 
 @router.get(
