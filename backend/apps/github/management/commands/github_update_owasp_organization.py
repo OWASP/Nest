@@ -56,10 +56,10 @@ class Command(BaseCommand):
             projects = []
 
             offset = options["offset"]
-            repository = options["repository"]
+            repository_synced = options["repository"]
 
-            if repository:
-                gh_repositories = [gh_owasp_organization.get_repo(repository)]
+            if repository_synced:
+                gh_repositories = [gh_owasp_organization.get_repo(repository_synced)]
                 gh_repositories_count = 1
             else:
                 gh_repositories = gh_owasp_organization.get_repos(
@@ -103,7 +103,7 @@ class Command(BaseCommand):
             Committee.bulk_save(committees)
             Project.bulk_save(projects)
 
-            if repository is None:  # The entire organization is being synced.
+            if repository_synced is None:  # The entire organization is being synced.
                 # Check repository counts.
                 local_owasp_repositories_count = Repository.objects.filter(
                     is_owasp_repository=True,

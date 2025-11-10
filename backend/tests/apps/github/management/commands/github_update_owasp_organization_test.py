@@ -171,3 +171,83 @@ def test_handle(
         mock_project_bulk_save.assert_called_once()
         mock_chapter_bulk_save.assert_called_once()
         mock_committee_bulk_save.assert_called_once()
+
+@mock.patch("apps.github.management.commands.github_update_owasp_organization.get_github_client")
+@mock.patch("apps.github.management.commands.github_update_owasp_organization.sync_repository")
+@mock.patch("apps.github.management.commands.github_update_owasp_organization.logger")
+def test_handle_full_sync_with_errors_and_repo_linking(
+    mock_logger,
+    mock_sync_repository,
+    mock_get_github_client,
+    command,
+):
+    """
+    Tests the full organization sync
+    """
+    mock_gh_client = mock.Mock()
+    mock_get_github_client.return_value = mock_gh_client
+    mock_org = mock.Mock()
+    mock_org.public_repos = 3
+    mock_gh_client.get_organization.return_value = mock_org
+
+    def create_mock_repo(name):
+        mock_repo = mock.Mock()
+        mock_repo.name = name
+        mock_repo.html_url = f"https://github.com/OWASP/{name}"
+        return mock_repo
+
+    class PaginatedListMock(list):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.totalCount = len(self)
+
+        def __getitem__(self, index):
+            if isinstance(index, slice):
+                result = super().__getitem__(index)
+                new_list = PaginatedListMock(result)
+                new_list.totalCount = self.totalCount
+                return new_list
+            return super().__getitem__(index)
+
+    repos = [
+        create_mock_repo("www-project-test"),
+        create_mock_repo("www-chapter-error"),
+        create_mock_repo("www-committee-test"),
+    ]
+    mock_repos = PaginatedListMock(repos)
+    mock_org.get_repos.return_value = mock_repos
+    mock_repos.totalCount = 3
+    mock_sync_repository.side_effect = [
+        (mock.Mock(), mock.Mock()),
+        Exception("Sync failed"),
+        (mock.Mock(), mock.Mock()),
+    ]
+
+    with (
+        mock.patch.object(Project, "bulk_save"),
+        mock.patch.object(Chapter, "bulk_save"),
+        mock.patch.object(Committee, "bulk_save"),
+        mock.patch.object(Project, "update_data"),
+        mock.patch.object(Chapter, "update_data"),
+        mock.patch.object(Committee, "update_data"),
+        mock.patch.object(Project, "objects") as mock_project_objects,
+        mock.patch.object(Repository, "objects") as mock_repository_objects,
+        mock.patch("builtins.print") as mock_print,
+    ):
+        
+        mock_project = mock.Mock()
+        mock_project.owasp_repository = mock.Mock()
+        mock_project_objects.all.return_value = [mock_project]
+        mock_repository_objects.filter.return_value.count.return_value = 2
+        command.handle(repository=None, offset=0)
+        assert mock_sync_repository.call_count == 3
+        mock_logger.exception.assert_called_once_with(
+            "Error syncing repository %s", "https://github.com/OWASP/www-chapter-error"
+        )
+        mock_print.assert_any_call(
+            "\n"
+            "OWASP GitHub repositories count != synced repositories count: "
+            "3 != 2"
+        )
+        mock_project_objects.all.assert_called_once()
+        mock_project.repositories.add.assert_called_once_with(mock_project.owasp_repository)
