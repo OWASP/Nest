@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+from requests.exceptions import RequestException
 
 from apps.github.utils import (
     check_funding_policy_compliance,
@@ -61,6 +62,25 @@ class TestUtils:
         mocker.patch("requests.get", return_value=response)
         result = get_repository_file_content(url)
         assert result == content
+
+    def test_get_repository_file_content_exception(self, mocker):
+        url = "https://example.com/file.txt"
+        mocker.patch("requests.get", side_effect=RequestException("Test exception"))
+        result = get_repository_file_content(url)
+        assert result == ""
+
+    @pytest.mark.parametrize(
+        ("url", "expected"),
+        [
+            ("example.com", None),
+            ("http://example.com", "https://example.com"),
+            ("https://example.com/path/", "https://example.com/path"),
+            ("https://example.com/path#fragment", "https://example.com/path"),
+        ],
+    )
+    def test_normalize_url(self, url, expected):
+        result = normalize_url(url)
+        assert result == expected
 
     def test_normalize_url_with_invalid_url(self):
         result = normalize_url("invalid-url")
