@@ -6,6 +6,8 @@ from unittest import mock
 import pytest
 from django.test import SimpleTestCase
 
+from apps.github.management.commands.github_get_installation_id import Command
+
 
 class TestGitHubGetInstallationId(SimpleTestCase):
     """Test the GitHub get installation ID management command."""
@@ -22,8 +24,6 @@ class TestGitHubGetInstallationId(SimpleTestCase):
     @mock.patch("apps.github.management.commands.github_get_installation_id.Auth.AppAuth")
     def test_get_installation_id_success(self, mock_app_auth, mock_github_integration):
         """Test successful retrieval of installation ID."""
-        from apps.github.management.commands.github_get_installation_id import Command
-
         # Mock the installation
         mock_installation = mock.MagicMock()
         mock_installation.id = 12345
@@ -57,8 +57,6 @@ class TestGitHubGetInstallationId(SimpleTestCase):
     @mock.patch("apps.github.management.commands.github_get_installation_id.Auth.AppAuth")
     def test_get_installation_id_no_installations(self, mock_app_auth, mock_github_integration):
         """Test when no installations are found."""
-        from apps.github.management.commands.github_get_installation_id import Command
-
         # Mock empty installations
         mock_gi_instance = mock.MagicMock()
         mock_gi_instance.get_installations.return_value = []
@@ -78,16 +76,12 @@ class TestGitHubGetInstallationId(SimpleTestCase):
 
     def test_get_installation_id_no_app_id(self):
         """Test when no app ID is provided."""
-        from apps.github.management.commands.github_get_installation_id import Command
-
         command = Command()
         with pytest.raises(SystemExit):
             command.handle()
 
     def test_get_installation_id_private_key_file_not_found(self):
         """Test when private key file is not found."""
-        from apps.github.management.commands.github_get_installation_id import Command
-
         command = Command()
         with (
             mock.patch("pathlib.Path.exists", return_value=False),
@@ -97,8 +91,6 @@ class TestGitHubGetInstallationId(SimpleTestCase):
 
     def test_get_installation_id_empty_private_key_file(self):
         """Test when private key file is empty."""
-        from apps.github.management.commands.github_get_installation_id import Command
-
         command = Command()
         with (
             mock.patch("pathlib.Path.open", mock.mock_open(read_data="")),
@@ -109,8 +101,6 @@ class TestGitHubGetInstallationId(SimpleTestCase):
 
     def test_get_installation_id_with_custom_private_key_file(self):
         """Test with custom private key file path."""
-        from apps.github.management.commands.github_get_installation_id import Command
-
         custom_key_path = "/custom/path/key.pem"
 
         command = Command()
@@ -130,8 +120,6 @@ class TestGitHubGetInstallationId(SimpleTestCase):
         self, mock_app_auth, mock_github_integration
     ):
         """Test using app ID from environment variable."""
-        from apps.github.management.commands.github_get_installation_id import Command
-
         mock_gi_instance = mock.MagicMock()
         mock_gi_instance.get_installations.return_value = []
         mock_github_integration.return_value = mock_gi_instance
