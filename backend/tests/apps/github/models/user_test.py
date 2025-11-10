@@ -3,6 +3,8 @@ from unittest.mock import Mock, patch
 import pytest
 
 from apps.github.models.user import User
+from apps.owasp.models.chapter import Chapter
+from apps.owasp.models.project import Project
 
 
 class TestUserModel:
@@ -12,6 +14,7 @@ class TestUserModel:
             ("John Doe", "john-doe", "John Doe (john-doe)"),
             ("", "jane-doe", "jane-doe"),
             (None, "ghost", "ghost"),
+            ("user", "user", "user"),
         ],
     )
     def test_str_representation(self, name, login, expected_str):
@@ -65,3 +68,171 @@ class TestUserModel:
 
         mock_get.assert_called_once_with(node_id="67890")
         assert updated_user.node_id == "67890"
+
+    @pytest.mark.parametrize(
+        "property_name, setup_mocks, expected_value",
+        [
+            (
+                "issues",
+                lambda: patch.object(
+                    User, "created_issues", all=Mock(return_value=["issue1"])
+                ),
+                ["issue1"],
+            ),
+            ("get_absolute_url", None, "/members/test-user"),
+            (
+                "nest_url",
+                lambda: patch(
+                    "apps.github.models.user.get_absolute_url",
+                    Mock(return_value="http://test.com/members/test-user"),
+                ),
+                "http://test.com/members/test-user",
+            ),
+        ],
+    )
+    def test_user_properties(self, property_name, setup_mocks, expected_value):
+        """Test various properties on the User model."""
+        user = User(login="test-user")
+        if setup_mocks:
+            with setup_mocks():
+                if property_name == "get_absolute_url":
+                    assert user.get_absolute_url() == expected_value
+                else:
+                    assert getattr(user, property_name) == expected_value
+        else:
+            if property_name == "get_absolute_url":
+                assert user.get_absolute_url() == expected_value
+            else:
+                assert getattr(user, property_name) == expected_value
+
+    @pytest.mark.parametrize(
+        "user_type, expected_is_bot",
+        [
+            ("User", False),
+            ("Bot", True),
+        ],
+    )
+    def test_from_github_scenarios(self, user_type, expected_is_bot):
+        """Test from_github with different user types."""
+        gh_user_mock = Mock(
+            type=user_type,
+            bio=None,
+            hireable=None,
+            twitter_username=None,
+        )
+        gh_user_mock.login = "test-user"
+        gh_user_mock.name = "Test User"
+
+        user = User()
+        user.from_github(gh_user_mock)
+
+        assert user.is_bot is expected_is_bot
+        assert user.login == "test-user"
+        assert user.name == "Test User"
+
+    @pytest.mark.parametrize(
+        "scenario, get_node_id_return, update_kwargs, expect_save",
+        [
+            ("no_node_id", None, {}, False),
+            ("with_kwargs", "12345", {"is_staff": True}, True),
+            ("no_save", "12345", {"save": False}, False),
+        ],
+    )
+    @patch("apps.github.models.user.User.get_node_id")
+    @patch("apps.github.models.user.User.objects.get")
+    @patch("apps.github.models.user.User.save")
+    def test_update_data_scenarios(
+        self,
+        mock_save,
+        mock_get,
+        mock_get_node_id,
+        scenario,
+        get_node_id_return,
+        update_kwargs,
+        expect_save,
+    ):
+        """Test various scenarios for the update_data method."""
+        gh_user_mock = Mock()
+        mock_get_node_id.return_value = get_node_id_return
+        mock_user_instance = Mock(spec=User)
+        mock_user_instance.save = mock_save  
+        mock_get.return_value = mock_user_instance
+
+        result = User.update_data(gh_user_mock, **update_kwargs)
+
+        if scenario == "no_node_id":
+            assert result is None
+            mock_save.assert_not_called()
+        else:
+            if "is_staff" in update_kwargs:
+                assert result.is_staff is True
+            if expect_save:
+                mock_save.assert_called_once()
+            else:
+                mock_save.assert_not_called()
+
+
+    @pytest.mark.parametrize(
+        ("entity_model", "entity_path", "property_name"),
+        [
+            (Chapter, "apps.owasp.models.chapter.Chapter", "chapters"),
+            (Project, "apps.owasp.models.project.Project", "projects"),
+        ],
+    )
+    @patch("apps.github.models.user.ContentType.objects.get_for_model")
+    def test_led_entities_properties(
+        self, mock_get_for_model, entity_model, entity_path, property_name
+    ):
+        """Test the chapters and projects properties in a DRY way."""
+        from apps.owasp.models.entity_member import EntityMember
+
+        user = User()
+        entity_ids = [1, 2]
+        expected_entities = f"mocked_{property_name}"
+
+        with patch(f"{entity_path}.objects.filter") as mock_entity_filter:
+            with patch(
+                "apps.owasp.models.entity_member.EntityMember.objects.filter"
+            ) as mock_em_filter:
+                mock_queryset = Mock()
+                mock_queryset.order_by.return_value = expected_entities
+                mock_entity_filter.return_value = mock_queryset
+                mock_em_filter.return_value.values_list.return_value = entity_ids
+
+
+                result = getattr(user, property_name)
+
+                assert result == expected_entities
+                mock_get_for_model.assert_called_with(entity_model)
+                mock_em_filter.assert_called_once_with(
+                    member=user,
+                    entity_type=mock_get_for_model.return_value,
+                    role=EntityMember.Role.LEADER,
+                    is_active=True,
+                    is_reviewed=True,
+                )
+                mock_entity_filter.assert_called_once_with(
+                    id__in=entity_ids, is_active=True
+                )
+                mock_queryset.order_by.assert_called_once_with("name")
+
+    @patch("apps.github.models.user.BulkSaveModel.bulk_save")
+    def test_bulk_save(self, mock_bulk_save):
+        """Test the bulk_save method."""
+        users = [Mock(spec=User), Mock(spec=User)]
+        fields = ["name", "login"]
+        User.bulk_save(users, fields=fields)
+        mock_bulk_save.assert_called_once_with(User, users, fields=fields)
+
+    @patch("apps.github.models.user.Organization.get_logins")
+    def test_get_non_indexable_logins(self, mock_get_logins):
+        """Test the get_non_indexable_logins method."""
+        mock_get_logins.return_value = {"org1", "org2"}
+        expected_logins = {
+            "actions-user",
+            "ghost",
+            "OWASPFoundation",
+            "org1",
+            "org2",
+        }
+        assert User.get_non_indexable_logins() == expected_logins
