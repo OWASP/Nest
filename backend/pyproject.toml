@@ -12,7 +12,7 @@ readme = "README.md"
 packages = [ { include = "apps" } ]
 
 [tool.poetry.dependencies]
-algoliasearch = "^4.13.2"
+algoliasearch = "^4.32.0"
 algoliasearch-django = "^4.0.0"
 django = "^5.2"
 django-configurations = "^2.5.1"
