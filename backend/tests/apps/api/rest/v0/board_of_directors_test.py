@@ -288,14 +288,29 @@ class TestEntityMemberSchema:
 
         assert "order" in str(exc_info.value)
 
-    def test_entity_member_schema_invalid_is_active_type_fails(self):
-        """Test that invalid is_active type fails validation."""
+    def test_entity_member_schema_with_boolean_coercion(self):
+        """Test that boolean fields accept truthy/falsy values (Pydantic coercion)."""
         member_data = {
             "member_name": "Test Member",
             "member_email": "test@example.com",
             "role": "member",
             "order": 1,
-            "is_active": "yes",
+            "is_active": 1,  # Will be coerced to True
+            "is_reviewed": 0,  # Will be coerced to False
+        }
+
+        schema = EntityMemberSchema(**member_data)
+
+        assert schema.is_active is True
+        assert schema.is_reviewed is False
+
+    def test_entity_member_schema_missing_is_active_fails(self):
+        """Test that missing is_active field fails validation."""
+        member_data = {
+            "member_name": "Test Member",
+            "member_email": "test@example.com",
+            "role": "member",
+            "order": 1,
             "is_reviewed": True,
         }
 
