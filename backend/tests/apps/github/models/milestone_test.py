@@ -21,7 +21,7 @@ def gh_milestone_mock():
     mock.state = "open"
     mock.title = "Milestone Title"
     mock.updated_at = "2023-01-01T00:00:00Z"
-    mock.html_url = "http://example.com/milestone/1"
+    mock.html_url = "https://example.com/milestone/1"
     mock.raw_data = {"node_id": "milestone_node_id_1"}
     return mock
 
@@ -40,7 +40,7 @@ class TestMilestoneModel:
         assert milestone.open_issues_count == 10
         assert milestone.number == 1
         assert milestone.title == "Milestone Title"
-        assert milestone.url == "http://example.com/milestone/1"
+        assert milestone.url == "https://example.com/milestone/1"
         assert milestone.author == author
         assert milestone.repository == repository
 
