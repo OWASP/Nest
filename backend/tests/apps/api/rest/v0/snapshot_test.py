@@ -1,4 +1,5 @@
 from datetime import datetime
+from http import HTTPStatus
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -85,14 +86,25 @@ class TestSnapshotAPI:
         self.project = MagicMock(spec=Project)
         self.project.name = "Test Project"
         self.release = MagicMock(spec=Release)
-        self.release.version = "v1.0.0"
+        self.release.tag_name = "v1.0.0"
         self.user = MagicMock(spec=User)
         self.user.username = "testuser"
         self.snapshot.new_chapters.order_by.return_value = [self.chapter]
-        self.snapshot.new_issues.order_by.return_value = [self.issue]
+        self.snapshot.new_issues.select_related.return_value.order_by.return_value = [self.issue]
         self.snapshot.new_projects.order_by.return_value = [self.project]
-        self.snapshot.new_releases.order_by.return_value = [self.release]
+        self.snapshot.new_releases.select_related.return_value.order_by.return_value = [
+            self.release
+        ]
         self.snapshot.new_users.order_by.return_value = [self.user]
+
+    @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
+    def test_get_snapshot_not_found(self, mock_filter):
+        mock_filter.return_value.first.return_value = None
+        request = self.factory.get("")
+
+        response = get_snapshot(request, snapshot_key="non-existent")
+
+        assert response.status_code == HTTPStatus.NOT_FOUND
 
     @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
     def test_get_snapshot_success(self, mock_filter):
@@ -107,6 +119,15 @@ class TestSnapshotAPI:
         assert response.end_at == self.snapshot.end_at
 
     @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
+    def test_list_snapshot_chapters_not_found(self, mock_filter):
+        mock_filter.return_value.first.return_value = None
+        request = self.factory.get("")
+
+        response = list_snapshot_chapters(request, snapshot_key="non-existent")
+
+        assert len(response) == 0
+
+    @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
     def test_list_snapshot_chapters_success(self, mock_filter):
         mock_filter.return_value.first.return_value = self.snapshot
         request = self.factory.get("")
@@ -116,6 +137,26 @@ class TestSnapshotAPI:
         assert len(response) == 1
         assert response[0] == self.chapter
         assert response[0].name == self.chapter.name
+
+    @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
+    def test_list_snapshot_issues_no_repository(self, mock_filter):
+        self.issue.repository = None
+        mock_filter.return_value.first.return_value = self.snapshot
+        request = self.factory.get("")
+
+        response = list_snapshot_issues(request, snapshot_key=self.snapshot.key)
+
+        assert len(response) == 1
+        assert response[0] == self.issue
+
+    @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
+    def test_list_snapshot_issues_not_found(self, mock_filter):
+        mock_filter.return_value.first.return_value = None
+        request = self.factory.get("")
+
+        response = list_snapshot_issues(request, snapshot_key="non-existent")
+
+        assert len(response) == 0
 
     @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
     def test_list_snapshot_issues_success(self, mock_filter):
@@ -129,6 +170,15 @@ class TestSnapshotAPI:
         assert response[0].title == self.issue.title
 
     @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
+    def test_list_snapshot_members_not_found(self, mock_filter):
+        mock_filter.return_value.first.return_value = None
+        request = self.factory.get("")
+
+        response = list_snapshot_members(request, snapshot_key="non-existent")
+
+        assert len(response) == 0
+
+    @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
     def test_list_snapshot_members_success(self, mock_filter):
         mock_filter.return_value.first.return_value = self.snapshot
         request = self.factory.get("")
@@ -138,6 +188,15 @@ class TestSnapshotAPI:
         assert len(response) == 1
         assert response[0] == self.user
         assert response[0].username == self.user.username
+
+    @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
+    def test_list_snapshot_projects_not_found(self, mock_filter):
+        mock_filter.return_value.first.return_value = None
+        request = self.factory.get("")
+
+        response = list_snapshot_projects(request, snapshot_key="non-existent")
+
+        assert len(response) == 0
 
     @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
     def test_list_snapshot_projects_success(self, mock_filter):
@@ -151,6 +210,26 @@ class TestSnapshotAPI:
         assert response[0].name == self.project.name
 
     @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
+    def test_list_snapshot_releases_no_repository(self, mock_filter):
+        self.release.repository = None
+        mock_filter.return_value.first.return_value = self.snapshot
+        request = self.factory.get("")
+
+        response = list_snapshot_releases(request, snapshot_key=self.snapshot.key)
+
+        assert len(response) == 1
+        assert response[0] == self.release
+
+    @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
+    def test_list_snapshot_releases_not_found(self, mock_filter):
+        mock_filter.return_value.first.return_value = None
+        request = self.factory.get("")
+
+        response = list_snapshot_releases(request, snapshot_key="non-existent")
+
+        assert len(response) == 0
+
+    @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
     def test_list_snapshot_releases_success(self, mock_filter):
         mock_filter.return_value.first.return_value = self.snapshot
         request = self.factory.get("")
@@ -159,4 +238,26 @@ class TestSnapshotAPI:
 
         assert len(response) == 1
         assert response[0] == self.release
-        assert response[0].version == self.release.version
+        assert response[0].tag_name == self.release.tag_name
+
+    def test_snapshot_issue_resolver_no_organization(self):
+        from apps.api.rest.v0.snapshot import SnapshotIssue
+
+        issue = MagicMock(spec=Issue)
+        issue.repository = MagicMock()
+        issue.repository.organization = None
+        issue.repository.name = "test-repo"
+
+        assert SnapshotIssue.resolve_organization_login(issue) is None
+        assert SnapshotIssue.resolve_repository_name(issue) == "test-repo"
+
+    def test_snapshot_release_resolver_no_organization(self):
+        from apps.api.rest.v0.snapshot import SnapshotRelease
+
+        release = MagicMock(spec=Release)
+        release.repository = MagicMock()
+        release.repository.organization = None
+        release.repository.name = "test-repo"
+
+        assert SnapshotRelease.resolve_organization_login(release) is None
+        assert SnapshotRelease.resolve_repository_name(release) == "test-repo"

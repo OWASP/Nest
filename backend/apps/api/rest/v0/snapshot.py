@@ -51,6 +51,48 @@ class SnapshotDetail(SnapshotBase):
     new_users_count: int
 
 
+class SnapshotIssue(Issue):
+    """Schema for Snapshot Issue (used in list endpoints)."""
+
+    organization_login: str | None
+    repository_name: str | None
+
+    @staticmethod
+    def resolve_organization_login(obj: IssueModel) -> str | None:
+        """Resolve organization login from issue model."""
+        if obj.repository and obj.repository.organization:
+            return obj.repository.organization.login
+        return None
+
+    @staticmethod
+    def resolve_repository_name(obj: IssueModel) -> str | None:
+        """Resolve repository name from issue model."""
+        if obj.repository:
+            return obj.repository.name
+        return None
+
+
+class SnapshotRelease(Release):
+    """Schema for Snapshot Release (used in list endpoints)."""
+
+    organization_login: str | None
+    repository_name: str | None
+
+    @staticmethod
+    def resolve_organization_login(obj: ReleaseModel) -> str | None:
+        """Resolve organization_login."""
+        if obj.repository and obj.repository.organization:
+            return obj.repository.organization.login
+        return None
+
+    @staticmethod
+    def resolve_repository_name(obj: ReleaseModel) -> str | None:
+        """Resolve repository_name."""
+        if obj.repository:
+            return obj.repository.name
+        return None
+
+
 class SnapshotError(Schema):
     """Snapshot error schema."""
 
@@ -134,7 +176,7 @@ def list_snapshot_chapters(
     "/{str:snapshot_key}/issues/",
     description="Retrieve a paginated list of new issues in a snapshot.",
     operation_id="list_snapshot_issues",
-    response=list[Issue],
+    response=list[SnapshotIssue],
     summary="List new issues in snapshot",
 )
 @decorate_view(cache_response())
@@ -145,12 +187,14 @@ def list_snapshot_issues(
         None,
         description="Ordering field",
     ),
-) -> list[Issue]:
+) -> list[SnapshotIssue]:
     """Get new issues in snapshot."""
     if snapshot := SnapshotModel.objects.filter(
         key__iexact=snapshot_key, status=SnapshotModel.Status.COMPLETED
     ).first():
-        return snapshot.new_issues.order_by(ordering or "-created_at")
+        return snapshot.new_issues.select_related("repository__organization").order_by(
+            ordering or "-created_at"
+        )
     return IssueModel.objects.none()
 
 
@@ -206,7 +250,7 @@ def list_snapshot_projects(
     "/{str:snapshot_key}/releases/",
     description="Retrieve a paginated list of new releases in a snapshot.",
     operation_id="list_snapshot_releases",
-    response=list[Release],
+    response=list[SnapshotRelease],
     summary="List new releases in snapshot",
 )
 @decorate_view(cache_response())
@@ -217,10 +261,12 @@ def list_snapshot_releases(
         None,
         description="Ordering field",
     ),
-) -> list[Release]:
+) -> list[SnapshotRelease]:
     """Get new releases in snapshot."""
     if snapshot := SnapshotModel.objects.filter(
         key__iexact=snapshot_key, status=SnapshotModel.Status.COMPLETED
     ).first():
-        return snapshot.new_releases.order_by(ordering or "-created_at")
+        return snapshot.new_releases.select_related("repository__organization").order_by(
+            ordering or "-created_at"
+        )
     return ReleaseModel.objects.none()
