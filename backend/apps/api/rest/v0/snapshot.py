@@ -267,6 +267,6 @@ def list_snapshot_releases(
         key__iexact=snapshot_key, status=SnapshotModel.Status.COMPLETED
     ).first():
         return snapshot.new_releases.select_related("repository__organization").order_by(
-            ordering or "-created_at"
+            ordering or "-published_at"
         )
     return ReleaseModel.objects.none()
