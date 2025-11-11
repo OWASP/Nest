@@ -32,14 +32,14 @@ def test_chapter_serializer_validation(chapter_data):
             for key, value in data.items():
                 setattr(self, key, value)
             self.nest_key = data["key"]
-            self.leaders_raw = []
+            self.leaders_raw = ["Alice", "Bob"]
 
     chapter = ChapterDetail.from_orm(MockChapter(chapter_data))
 
     assert chapter.country == chapter_data["country"]
     assert chapter.created_at == datetime.fromisoformat(chapter_data["created_at"])
     assert chapter.key == chapter_data["key"]
-    assert chapter.leaders == []
+    assert chapter.leaders == ["Alice", "Bob"]
     assert chapter.name == chapter_data["name"]
     assert chapter.region == chapter_data["region"]
     assert chapter.updated_at == datetime.fromisoformat(chapter_data["updated_at"])
