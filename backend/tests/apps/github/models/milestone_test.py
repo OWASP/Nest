@@ -1,4 +1,3 @@
-
 from unittest.mock import Mock, patch
 
 import pytest
@@ -34,9 +33,7 @@ class TestMilestoneModel:
         author = Mock(spec=User, _state=Mock(db=None))
         repository = Mock(spec=Repository, _state=Mock(db=None))
 
-        milestone.from_github(
-            gh_milestone_mock, author=author, repository=repository
-        )
+        milestone.from_github(gh_milestone_mock, author=author, repository=repository)
 
         assert milestone.body == "Milestone description"
         assert milestone.closed_issues_count == 0
@@ -52,15 +49,11 @@ class TestMilestoneModel:
         """Test that bulk_save calls the parent method correctly."""
         milestones = [Mock(spec=Milestone), Mock(spec=Milestone)]
         Milestone.bulk_save(milestones, fields=["title"])
-        mock_bulk_save.assert_called_once_with(
-            Milestone, milestones, fields=["title"]
-        )
+        mock_bulk_save.assert_called_once_with(Milestone, milestones, fields=["title"])
 
     @patch("apps.github.models.milestone.Milestone.get_node_id")
     @patch("apps.github.models.milestone.Milestone.objects.get")
-    def test_update_data_existing_milestone(
-        self, mock_get, mock_get_node_id, gh_milestone_mock
-    ):
+    def test_update_data_existing_milestone(self, mock_get, mock_get_node_id, gh_milestone_mock):
         """Test updating an existing milestone."""
         mock_get_node_id.return_value = "milestone_node_id_1"
         mock_milestone = Mock(spec=Milestone)
@@ -69,14 +62,10 @@ class TestMilestoneModel:
         author = Mock(spec=User, _state=Mock(db=None))
         repository = Mock(spec=Repository, _state=Mock(db=None))
 
-        milestone = Milestone.update_data(
-            gh_milestone_mock, author=author, repository=repository
-        )
+        milestone = Milestone.update_data(gh_milestone_mock, author=author, repository=repository)
 
         mock_get.assert_called_once_with(node_id="milestone_node_id_1")
-        mock_milestone.from_github.assert_called_once_with(
-            gh_milestone_mock, author, repository
-        )
+        mock_milestone.from_github.assert_called_once_with(gh_milestone_mock, author, repository)
         mock_milestone.save.assert_called_once()
         assert milestone == mock_milestone
 
@@ -99,8 +88,6 @@ class TestMilestoneModel:
             )
 
         mock_get.assert_called_once_with(node_id="milestone_node_id_1")
-        mock_from_github.assert_called_once_with(
-            gh_milestone_mock, author, repository
-        )
+        mock_from_github.assert_called_once_with(gh_milestone_mock, author, repository)
         mock_save.assert_called_once()
         assert milestone.node_id == "milestone_node_id_1"

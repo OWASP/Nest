@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+
 import pytest
 
 from apps.github.models.organization import Organization
@@ -8,7 +9,7 @@ EXPECTED_CONTRIBUTOR_COUNT = 5
 
 @pytest.fixture
 def organization_instance():
-    """Provides a test instance of the Organization model."""
+    """Provide a test instance of the Organization model."""
     return Organization(
         name="Test Organization",
         login="test-org",
@@ -81,7 +82,9 @@ class TestOrganizationIndexMixin:
     )
     def test_is_indexable_owasp_related(self, is_owasp_related, expected_indexable):
         """Tests the is_indexable property based on is_owasp_related_organization."""
-        organization = Organization(name="Organization Name", login="login", is_owasp_related_organization=is_owasp_related)
+        organization = Organization(
+            name="Organization Name", login="login", is_owasp_related_organization=is_owasp_related
+        )
         assert organization.is_indexable == expected_indexable
 
     def test_idx_description_with_value(self):

@@ -92,8 +92,8 @@ class TestGenericUserModelFromGithub:
         user.from_github(mock_data)
 
         assert user.login == "testuser"
-        assert user.name == ""  
-        assert user.email == "" 
+        assert user.name == ""
+        assert user.email == ""
 
 
 class TestNodeModel(NodeModel):

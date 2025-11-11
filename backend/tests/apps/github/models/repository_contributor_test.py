@@ -45,11 +45,11 @@ class TestRepositoryContributor(TestCase):
         user = MagicMock(spec=User, _state=Mock(db=None))
         user.__str__.return_value = "testuser"
         repository = MagicMock(spec=Repository, _state=Mock(db=None))
-        repository.__str__.return_value = "testrepo"
+        repository.__str__.return_value = "test_repository"
         contributor = RepositoryContributor(
             user=user, repository=repository, contributions_count=10
         )
-        expected_str = "testuser has made 10 contributions to testrepo"
+        expected_str = "testuser has made 10 contributions to test_repository"
         assert str(contributor) == expected_str
 
     def test_str_zero_contributions(self):
@@ -57,11 +57,11 @@ class TestRepositoryContributor(TestCase):
         user = MagicMock(spec=User, _state=Mock(db=None))
         user.__str__.return_value = "testuser"
         repository = MagicMock(spec=Repository, _state=Mock(db=None))
-        repository.__str__.return_value = "testrepo"
+        repository.__str__.return_value = "test_repository"
         contributor = RepositoryContributor(
             user=user, repository=repository, contributions_count=0
         )
-        expected_str = "testuser has made 0 contributions to testrepo"
+        expected_str = "testuser has made 0 contributions to test_repository"
         assert str(contributor) == expected_str
 
     def test_update_data_existing(self):
@@ -79,12 +79,8 @@ class TestRepositoryContributor(TestCase):
                 gh_contributor_mock, repository_mock, user_mock
             )
 
-            mock_get.assert_called_once_with(
-                repository=repository_mock, user=user_mock
-            )
-            existing_contributor.from_github.assert_called_once_with(
-                gh_contributor_mock
-            )
+            mock_get.assert_called_once_with(repository=repository_mock, user=user_mock)
+            existing_contributor.from_github.assert_called_once_with(gh_contributor_mock)
             existing_contributor.save.assert_called_once()
             assert contributor == existing_contributor
 
@@ -94,19 +90,20 @@ class TestRepositoryContributor(TestCase):
         repository_mock = Mock(spec=Repository, _state=Mock(db=None))
         user_mock = Mock(spec=User, _state=Mock(db=None))
 
-        with patch(
-            "apps.github.models.repository_contributor.RepositoryContributor.objects.get",
-            side_effect=RepositoryContributor.DoesNotExist,
-        ) as mock_get, patch(
-            "apps.github.models.repository_contributor.RepositoryContributor.save",
-        ) as mock_save:
+        with (
+            patch(
+                "apps.github.models.repository_contributor.RepositoryContributor.objects.get",
+                side_effect=RepositoryContributor.DoesNotExist,
+            ) as mock_get,
+            patch(
+                "apps.github.models.repository_contributor.RepositoryContributor.save",
+            ) as mock_save,
+        ):
             contributor = RepositoryContributor.update_data(
                 gh_contributor_mock, repository_mock, user_mock
             )
 
-            mock_get.assert_called_once_with(
-                repository=repository_mock, user=user_mock
-            )
+            mock_get.assert_called_once_with(repository=repository_mock, user=user_mock)
             assert contributor.repository == repository_mock
             assert contributor.user == user_mock
             assert contributor.contributions_count == 15
@@ -117,11 +114,11 @@ class TestRepositoryContributor(TestCase):
         user = MagicMock(spec=User, _state=Mock(db=None))
         user.__str__.return_value = "testuser"
         repository = MagicMock(spec=Repository, _state=Mock(db=None))
-        repository.__str__.return_value = "testrepo"
+        repository.__str__.return_value = "test_repository"
         contributor = RepositoryContributor(
             user=user, repository=repository, contributions_count=1
         )
-        expected_str = "testuser has made 1 contribution to testrepo"
+        expected_str = "testuser has made 1 contribution to test_repository"
         assert str(contributor) == expected_str
 
     def test_update_data_no_save(self):
@@ -138,12 +135,8 @@ class TestRepositoryContributor(TestCase):
             RepositoryContributor.update_data(
                 gh_contributor_mock, repository_mock, user_mock, save=False
             )
-            mock_get.assert_called_once_with(
-                repository=repository_mock, user=user_mock
-            )
-            existing_contributor.from_github.assert_called_once_with(
-                gh_contributor_mock
-            )
+            mock_get.assert_called_once_with(repository=repository_mock, user=user_mock)
+            existing_contributor.from_github.assert_called_once_with(gh_contributor_mock)
             assert existing_contributor.save.call_count == 0
 
     def _setup_mock_queryset(self, mock_objects):
@@ -152,7 +145,9 @@ class TestRepositoryContributor(TestCase):
         qs.select_related.return_value = mock_queryset
         mock_queryset.filter.return_value = mock_queryset
         mock_queryset.exclude.return_value = mock_queryset
-        mock_queryset.values.return_value.annotate.return_value.order_by.return_value.__getitem__.return_value = []
+        (
+            mock_queryset.values.return_value.annotate.return_value.order_by.return_value.__getitem__.return_value
+        ) = []
         return mock_queryset
 
     def test_get_top_contributors_project_filter(self):
@@ -169,9 +164,7 @@ class TestRepositoryContributor(TestCase):
         with patch(REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
             mock_queryset = self._setup_mock_queryset(mock_objects)
             RepositoryContributor.get_top_contributors(chapter="my-chapter")
-            mock_queryset.filter.assert_any_call(
-                repository__key__iexact="www-chapter-my-chapter"
-            )
+            mock_queryset.filter.assert_any_call(repository__key__iexact="www-chapter-my-chapter")
 
     def test_get_top_contributors_committee_filter(self):
         """Test the committee filtering logic in get_top_contributors."""
@@ -212,7 +205,9 @@ class TestRepositoryContributor(TestCase):
             mock_queryset.filter.return_value = mock_queryset
             mock_queryset.exclude.return_value = mock_queryset
 
-            mock_queryset.values.return_value.annotate.return_value.order_by.return_value.__getitem__.return_value = [
+            (
+                mock_queryset.values.return_value.annotate.return_value.order_by.return_value.__getitem__
+            ).return_value = [
                 {
                     "user__avatar_url": "url1",
                     "user__login": "user1",
@@ -230,7 +225,7 @@ class TestRepositoryContributor(TestCase):
                     "contributions_count": 100,
                 }
             ]
-            self.assertEqual(result, expected)
+            assert result == expected
 
     def test_has_full_name_filter_valid_names(self):
         """Test has_full_name filter with valid full names that should be included."""
@@ -279,9 +274,7 @@ class TestRepositoryContributor(TestCase):
                         }
                     ]
 
-                    result = RepositoryContributor.get_top_contributors(
-                        has_full_name=True
-                    )
+                    result = RepositoryContributor.get_top_contributors(has_full_name=True)
 
                     assert result, f"Name '{name}' should be included but was filtered out"
                     assert any(c["name"] == name for c in result), (
@@ -316,9 +309,7 @@ class TestRepositoryContributor(TestCase):
             with self.subTest(name=name):
                 # Test regex doesn't match
                 regex_match = re.search(CONTRIBUTOR_FULL_NAME_REGEX, name) is not None
-                assert (
-                    not regex_match
-                ), f"Invalid name '{name}' should not match regex pattern"
+                assert not regex_match, f"Invalid name '{name}' should not match regex pattern"
 
                 # Test filter behavior
                 with patch(REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
@@ -338,18 +329,12 @@ class TestRepositoryContributor(TestCase):
                     mock_queryset.values.return_value = mock_values
                     mock_values.annotate.return_value = mock_annotate
                     mock_annotate.order_by.return_value = mock_order_by
-                    mock_order_by.__getitem__.return_value = (
-                        []
-                    )  # No results for invalid names
+                    mock_order_by.__getitem__.return_value = []  # No results for invalid names
 
-                    result = RepositoryContributor.get_top_contributors(
-                        has_full_name=True
-                    )
+                    result = RepositoryContributor.get_top_contributors(has_full_name=True)
 
                     # Should be excluded (empty results)
-                    assert (
-                        not result
-                    ), f"Name '{name}' should be excluded but was included"
+                    assert not result, f"Name '{name}' should be excluded but was included"
 
     def test_has_full_name_filter_with_false_value(self):
         """Test that has_full_name=False does not apply the filter."""
@@ -376,9 +361,5 @@ class TestRepositoryContributor(TestCase):
 
             # Should not call filter with regex
             filter_calls = mock_queryset.filter.call_args_list
-            regex_calls = [
-                call for call in filter_calls if "user__name__regex" in call.kwargs
-            ]
-            assert (
-                not regex_calls
-            ), "Should not apply regex filter when has_full_name=False"
+            regex_calls = [call for call in filter_calls if "user__name__regex" in call.kwargs]
+            assert not regex_calls, "Should not apply regex filter when has_full_name=False"

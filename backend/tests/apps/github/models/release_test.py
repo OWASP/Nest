@@ -1,8 +1,9 @@
+from datetime import UTC
 from unittest.mock import Mock
 
 from apps.github.models.release import Release
-from apps.github.models.user import User
 from apps.github.models.repository import Repository
+from apps.github.models.user import User
 
 
 class TestReleaseModel:
@@ -33,7 +34,9 @@ class TestReleaseModel:
         gh_release_mock = mocker.Mock()
         gh_release_mock.raw_data = {"node_id": "54321"}
 
-        mocker.patch("apps.github.models.release.Release.objects.get", side_effect=Release.DoesNotExist)
+        mocker.patch(
+            "apps.github.models.release.Release.objects.get", side_effect=Release.DoesNotExist
+        )
         mock_from_github = mocker.patch("apps.github.models.release.Release.from_github")
         mock_release_save = mocker.patch("apps.github.models.release.Release.save")
 
@@ -63,15 +66,16 @@ class TestReleaseModel:
     def test_str_representation(self, mocker):
         """Tests the __str__ method returns the correct format."""
         mock_author = mocker.Mock(spec=User)
-        mock_author.__str__ = lambda self: "testuser"
+        mock_author.__str__ = lambda self: "testuser"  # noqa: ARG005
         mock_author._state = mocker.Mock()
         release = Release(name="v1.0", author=mock_author)
         assert str(release) == "v1.0 by testuser"
 
     def test_summary_property(self):
         """Tests the summary property returns the correct format."""
-        from datetime import datetime, timezone
-        release = Release(tag_name="v1.0", published_at=datetime(2023, 1, 1, tzinfo=timezone.utc))
+        from datetime import datetime
+
+        release = Release(tag_name="v1.0", published_at=datetime(2023, 1, 1, tzinfo=UTC))
         assert release.summary == "v1.0 on Jan 01, 2023"
 
     def test_url_property(self, mocker):

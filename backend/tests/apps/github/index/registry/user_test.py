@@ -9,7 +9,7 @@ from apps.github.models.user import User
 
 @pytest.fixture
 def user_index(mocker):
-    """Returns an instance of the UserIndex."""
+    """Return an instance of the UserIndex."""
     mocker.patch("apps.common.index.IndexBase.__init__", return_value=None)
     return UserIndex()
 
@@ -34,8 +34,8 @@ class TestUserIndex:
 
     @patch("apps.github.models.user.User.get_non_indexable_logins", return_value=["user2"])
     def test_get_entities(self, mock_get_non_indexable_logins, user_index):
-        """
-        Test that get_entities constructs the correct queryset by excluding
+        """Test that get_entities constructs the correct queryset by excluding.
+
         bots and non-indexable users.
         """
         mock_user_manager = MagicMock()

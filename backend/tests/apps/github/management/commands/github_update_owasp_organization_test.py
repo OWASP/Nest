@@ -172,6 +172,7 @@ def test_handle(
         mock_chapter_bulk_save.assert_called_once()
         mock_committee_bulk_save.assert_called_once()
 
+
 @mock.patch("apps.github.management.commands.github_update_owasp_organization.get_github_client")
 @mock.patch("apps.github.management.commands.github_update_owasp_organization.sync_repository")
 @mock.patch("apps.github.management.commands.github_update_owasp_organization.logger")
@@ -181,9 +182,7 @@ def test_handle_full_sync_with_errors_and_repo_linking(
     mock_get_github_client,
     command,
 ):
-    """
-    Tests the full organization sync
-    """
+    """Tests the full organization sync."""
     mock_gh_client = mock.Mock()
     mock_get_github_client.return_value = mock_gh_client
     mock_org = mock.Mock()
@@ -234,7 +233,6 @@ def test_handle_full_sync_with_errors_and_repo_linking(
         mock.patch.object(Repository, "objects") as mock_repository_objects,
         mock.patch("builtins.print") as mock_print,
     ):
-        
         mock_project = mock.Mock()
         mock_project.owasp_repository = mock.Mock()
         mock_project_objects.all.return_value = [mock_project]
@@ -245,9 +243,7 @@ def test_handle_full_sync_with_errors_and_repo_linking(
             "Error syncing repository %s", "https://github.com/OWASP/www-chapter-error"
         )
         mock_print.assert_any_call(
-            "\n"
-            "OWASP GitHub repositories count != synced repositories count: "
-            "3 != 2"
+            "\nOWASP GitHub repositories count != synced repositories count: 3 != 2"
         )
         mock_project_objects.all.assert_called_once()
         mock_project.repositories.add.assert_called_once_with(mock_project.owasp_repository)

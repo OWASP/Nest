@@ -58,9 +58,18 @@ class TestRepositoryIndexMixin:
         ],
     )
     def test_is_indexable_for_repository(
-        self, repository_index_mixin_instance, is_archived, is_empty, is_template, project_exists, expected
+        self,
+        repository_index_mixin_instance,
+        is_archived,
+        is_empty,
+        is_template,
+        project_exists,
+        expected,
     ):
-        '''Tests the is_indexable property under various conditions (archived, empty, template, project existence).'''
+        """Tests the is_indexable property under various conditions.
+
+        (archived, empty, template, project existence).
+        """
         repository_index_mixin_instance.is_archived = is_archived
         repository_index_mixin_instance.is_empty = is_empty
         repository_index_mixin_instance.is_template = is_template
@@ -69,7 +78,7 @@ class TestRepositoryIndexMixin:
         assert repository_index_mixin_instance.is_indexable == expected
 
     def test_idx_project_key(self, repository_index_mixin_instance, mocker):
-        '''Tests the idx_project_key property with and without an associated project.'''
+        """Tests the idx_project_key property with and without an associated project."""
         # Case 1: Project exists
         mock_project = mocker.Mock()
         mock_project.nest_key = "project_key"
@@ -81,7 +90,7 @@ class TestRepositoryIndexMixin:
         assert repository_index_mixin_instance.idx_project_key == ""
 
     def test_idx_top_contributors(self, repository_index_mixin_instance, mocker):
-        '''Tests the idx_top_contributors property by mocking the get_top_contributors method.'''
+        """Tests the idx_top_contributors property by mocking the get_top_contributors method."""
         mock_get_top_contributors = mocker.patch(
             "apps.github.models.repository_contributor.RepositoryContributor.get_top_contributors"
         )
@@ -114,5 +123,5 @@ class TestRepositoryIndexMixin:
         ],
     )
     def test_repository_index(self, repository_index_mixin_instance, attr, expected):
-        '''Tests various simple repository index properties.'''
+        """Tests various simple repository index properties."""
         assert getattr(repository_index_mixin_instance, attr) == expected

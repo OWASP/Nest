@@ -1,4 +1,3 @@
-
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -9,7 +8,7 @@ from apps.github.models.repository import Repository
 
 @pytest.fixture
 def repository_index(mocker):
-    """Returns an instance of the RepositoryIndex."""
+    """Return an instance of the RepositoryIndex."""
     mocker.patch("apps.common.index.IndexBase.__init__", return_value=None)
     return RepositoryIndex()
 
@@ -31,8 +30,8 @@ class TestRepositoryIndex:
         mock_reindex_synonyms.assert_called_once_with("github", "repositories")
 
     def test_get_entities(self, repository_index):
-        """
-        Test that get_entities constructs the correct queryset by chaining
+        """Test that get_entities constructs the correct queryset by chaining.
+
         the expected manager methods.
         """
         mock_manager = MagicMock()

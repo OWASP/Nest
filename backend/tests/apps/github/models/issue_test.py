@@ -79,13 +79,9 @@ class TestIssueModel:
 
         issue.generate_summary()
 
-        mock_openai_instance.set_input.assert_called_once_with(
-            "Test Title\r\nTest Body"
-        )
+        mock_openai_instance.set_input.assert_called_once_with("Test Title\r\nTest Body")
         mock_openai_instance.set_max_tokens.assert_called_once_with(500)
-        mock_openai_instance.set_prompt.assert_called_once_with(
-            "Summarize the following issue"
-        )
+        mock_openai_instance.set_prompt.assert_called_once_with("Summarize the following issue")
         assert issue.summary == "This is a summary."
 
     @patch("apps.github.models.issue.Prompt.get_github_issue_project_summary")
@@ -127,9 +123,7 @@ class TestIssueModel:
 
         issue.generate_hint()
 
-        mock_openai_instance.set_input.assert_called_once_with(
-            "Test Title\r\nTest Body"
-        )
+        mock_openai_instance.set_input.assert_called_once_with("Test Title\r\nTest Body")
         mock_openai_instance.set_max_tokens.assert_called_once_with(1000)
         mock_openai_instance.set_prompt.assert_called_once_with(
             "Provide a hint for the following issue"

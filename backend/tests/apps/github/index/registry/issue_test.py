@@ -1,4 +1,3 @@
-
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -9,7 +8,7 @@ from apps.github.models.issue import Issue
 
 @pytest.fixture
 def issue_index(mocker):
-    """Returns an instance of the IssueIndex."""
+    """Return an instance of the IssueIndex."""
     mocker.patch("apps.common.index.IndexBase.__init__", return_value=None)
     return IssueIndex()
 
@@ -31,11 +30,10 @@ class TestIssueIndex:
         mock_reindex_synonyms.assert_called_once_with("github", "issues")
 
     def test_get_entities(self, issue_index):
-        """
-        Test that get_entities constructs the correct queryset by chaining
+        """Test that get_entities constructs the correct queryset by chaining.
+
         the expected manager methods.
         """
-        
         mock_open_issues_manager = MagicMock()
         mock_assignable_manager = MagicMock()
         mock_open_issues_manager.assignable = mock_assignable_manager

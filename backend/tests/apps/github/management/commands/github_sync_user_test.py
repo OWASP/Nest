@@ -3,24 +3,23 @@ from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
-from django.core.management import call_command
 from github import GithubException
 
 from apps.github.management.commands.github_sync_user import Command
 from apps.github.models import User
-from apps.github.models.organization import Organization
 from apps.github.models.repository import Repository
-from apps.github.models.repository_contributor import RepositoryContributor
 from apps.owasp.models.member_profile import MemberProfile
 
 
 class MockPaginatedList:
     """Helper class to mock PyGithub's PaginatedList."""
+
     def __init__(self, items):
         self._items = items
         self.totalCount = len(items)
 
     def __iter__(self):
+        """Return an iterator for the items."""
         return iter(self._items)
 
 
@@ -29,46 +28,57 @@ def mock_get_github_client():
     with patch("apps.github.management.commands.github_sync_user.get_github_client") as mock:
         yield mock
 
+
 @pytest.fixture
 def mock_gh(mock_get_github_client):
     mock_gh_instance = MagicMock()
     mock_get_github_client.return_value = mock_gh_instance
     return mock_gh_instance
 
+
 @pytest.fixture
 def mock_user():
     with patch("apps.github.models.user.User") as mock:
         yield mock
 
+
 @pytest.fixture
 def mock_repo_contributor():
-    with patch("apps.github.management.commands.github_sync_user.RepositoryContributor.objects") as mock:
+    with patch(
+        "apps.github.management.commands.github_sync_user.RepositoryContributor.objects"
+    ) as mock:
         yield mock
+
 
 @pytest.fixture
 def mock_org():
     with patch("apps.github.management.commands.github_sync_user.Organization.objects") as mock:
         yield mock
 
+
 @pytest.fixture
 def mock_repo():
     with patch("apps.github.management.commands.github_sync_user.Repository.objects") as mock:
         yield mock
+
 
 @pytest.fixture
 def mock_commit():
     with patch("apps.github.management.commands.github_sync_user.Commit") as mock:
         yield mock
 
+
 @pytest.fixture
 def mock_pr():
     with patch("apps.github.management.commands.github_sync_user.PullRequest") as mock:
         yield mock
 
+
 @pytest.fixture
 def mock_issue():
     with patch("apps.github.management.commands.github_sync_user.Issue") as mock:
         yield mock
+
 
 @pytest.fixture
 def mock_member_profile():
@@ -78,7 +88,7 @@ def mock_member_profile():
 
 @pytest.fixture
 def default_options():
-    """Default options for the handle command."""
+    """Provide default options for the handle command."""
     return {"username": "testuser", "start_at": None, "end_at": None, "skip_sync": False}
 
 
@@ -94,18 +104,18 @@ def mock_owasp_org(mock_org):
 
 
 def _create_mock_contribution(repo_name, full_name, date, **kwargs):
-    """Helper to create a mock contribution object."""
+    """Create a mock contribution object."""
     repo = MagicMock(spec=Repository)
     repo.name = repo_name
     repo.full_name = full_name
-    
+
     contribution = MagicMock(repository=repo, **kwargs)
-    
-    if 'commit' in kwargs:
+
+    if "commit" in kwargs:
         contribution.commit = MagicMock(author=MagicMock(date=date))
     else:
         contribution.created_at = date
-        
+
     return contribution
 
 
@@ -139,42 +149,77 @@ class TestGithubSyncUserCommand:
         """Test that the command's arguments are correctly added."""
         mock_parser = MagicMock()
         command.add_arguments(mock_parser)
-        mock_parser.add_argument.assert_any_call("username", type=str, help="GitHub username to fetch commits, PRs, and issues for")
-        mock_parser.add_argument.assert_any_call("--start-at", type=str, help="Start date (YYYY-MM-DD). Defaults to January 1st of current year.")
-        mock_parser.add_argument.assert_any_call("--end-at", type=str, help="End date (YYYY-MM-DD). Defaults to October 1st of current year.")
-        mock_parser.add_argument.assert_any_call("--skip-sync", action="store_true", help="Skip syncing; only populate first_contribution_at if null")
+        mock_parser.add_argument.assert_any_call(
+            "username", type=str, help="GitHub username to fetch commits, PRs, and issues for"
+        )
+        mock_parser.add_argument.assert_any_call(
+            "--start-at",
+            type=str,
+            help="Start date (YYYY-MM-DD). Defaults to January 1st of current year.",
+        )
+        mock_parser.add_argument.assert_any_call(
+            "--end-at",
+            type=str,
+            help="End date (YYYY-MM-DD). Defaults to October 1st of current year.",
+        )
+        mock_parser.add_argument.assert_any_call(
+            "--skip-sync",
+            action="store_true",
+            help="Skip syncing; only populate first_contribution_at if null",
+        )
 
     def test_handle_user_not_found(self, command, mock_gh):
         """Test that the command handles a GitHub user not found gracefully."""
         mock_gh.get_user.side_effect = GithubException(404, "Not Found")
-        options = {"username": "nonexistentuser", "start_at": None, "end_at": None, "skip_sync": False}
+        options = {
+            "username": "unknown_user",
+            "start_at": None,
+            "end_at": None,
+            "skip_sync": False,
+        }
         command.handle(**options)
-        assert "Could not fetch user nonexistentuser" in command.stderr.getvalue()
+        assert "Could not fetch user unknown_user" in command.stderr.getvalue()
 
-    def test_handle_no_contributions(self, command, mock_user, mock_repo_contributor, mock_gh, default_options):
+    def test_handle_no_contributions(
+        self, command, mock_user, mock_repo_contributor, mock_gh, default_options
+    ):
         """Test that the command handles a user with no local contributions."""
-        mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value = False
+        mock_qs = mock_repo_contributor.filter.return_value.select_related.return_value
+        mock_qs.exists.return_value = False
         command.handle(**default_options)
         assert "No contributions found for testuser" in command.stderr.getvalue()
 
-    def test_handle_no_owasp_contributions(self, command, mock_user, mock_repo_contributor, mock_org, mock_gh, default_options):
-        """Test that the command handles a user with no contributions to OWASP-related organizations."""
+    def test_handle_no_owasp_contributions(
+        self, command, mock_user, mock_repo_contributor, mock_org, mock_gh, default_options
+    ):
+        """Test that the command handles a user with no contributions to OWASP-related.
+
+        organizations.
+        """
         mock_user_instance = MagicMock(spec=User, id=1, pk=1, username="testuser")
         mock_user.update_data.return_value = mock_user_instance
 
         mock_contributor_qs = MagicMock()
         mock_repo_contributor.filter.return_value = mock_contributor_qs
-        mock_contributor_qs.select_related.return_value.exists.return_value = True
+        mock_selected_qs = mock_contributor_qs.select_related.return_value
+        mock_selected_qs.exists.return_value = True
         mock_contributor_qs.values_list.return_value = [1]
 
         mock_org.filter.return_value.distinct.return_value.exists.return_value = False
 
         command.handle(**default_options)
-        assert "testuser has no contributions to OWASP-related organizations" in command.stderr.getvalue()
+        assert (
+            "testuser has no contributions to OWASP-related organizations"
+            in command.stderr.getvalue()
+        )
 
-    @patch("apps.github.management.commands.github_sync_user.Command.populate_first_contribution_only")
+    @patch(
+        "apps.github.management.commands.github_sync_user.Command.populate_first_contribution_only"
+    )
     @patch("apps.github.models.user.User.update_data")
-    def test_handle_skip_sync(self, mock_update_data, mock_populate, command, mock_gh, default_options):
+    def test_handle_skip_sync(
+        self, mock_update_data, mock_populate, command, mock_gh, default_options
+    ):
         """Test that the command skips data sync when --skip-sync is used."""
         mock_user_instance = MagicMock(spec=User)
         mock_update_data.return_value = mock_user_instance
@@ -191,7 +236,9 @@ class TestGithubSyncUserCommand:
         command.populate_first_contribution_only("testuser", MagicMock(spec=User), mock_gh)
         assert "First contribution date already set" in command.stdout.getvalue()
 
-    def test_populate_first_contribution_no_owasp_orgs(self, command, mock_member_profile, mock_org, mock_gh):
+    def test_populate_first_contribution_no_owasp_orgs(
+        self, command, mock_member_profile, mock_org, mock_gh
+    ):
         """Test that populate_first_contribution_only handles no OWASP organizations."""
         mock_profile = MagicMock(spec=MemberProfile, first_contribution_at=None)
         mock_member_profile.get_or_create.return_value = (mock_profile, True)
@@ -204,7 +251,10 @@ class TestGithubSyncUserCommand:
     def test_populate_first_contribution_success_chooses_earliest(
         self, mock_update_data, mock_logger, command, mock_member_profile, mock_org, mock_gh
     ):
-        """Test that populate_first_contribution_only correctly chooses the earliest contribution."""
+        """Test that populate_first_contribution_only correctly chooses the earliest.
+
+        contribution.
+        """
         mock_user_instance = MagicMock(spec=User)
         mock_update_data.return_value = mock_user_instance
 
@@ -232,9 +282,7 @@ class TestGithubSyncUserCommand:
             MockPaginatedList([mock_issue_obj]),
         ]
 
-        command.populate_first_contribution_only(
-            "testuser", mock_user_instance, mock_gh
-        )
+        command.populate_first_contribution_only("testuser", mock_user_instance, mock_gh)
 
         expected_date = datetime(2025, 1, 1, tzinfo=UTC)
         mock_logger.info.assert_called_once_with(
@@ -247,19 +295,31 @@ class TestGithubSyncUserCommand:
         assert mock_profile.first_contribution_at == expected_date
         mock_profile.save.assert_called_once()
 
-    @patch("apps.github.management.commands.github_sync_user.Command.populate_first_contribution_only")
-    def test_handle_success(self, mock_populate, command, mock_user, mock_repo_contributor, mock_owasp_org, mock_repo, mock_commit, mock_pr, mock_issue, mock_gh, default_options):
-        """Test the successful end-to-end synchronization of user contributions."""
-        
-        mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value = True
-        mock_repo_contributor.filter.return_value.values_list.return_value = [1]
-
-        mock_repository = MagicMock(spec=Repository)
+    @patch(
+        "apps.github.management.commands.github_sync_user.Command.populate_first_contribution_only"
+    )
+    def test_handle_success(
+        self,
+        mock_populate,
+        command,
+        mock_user,
+        mock_repo_contributor,
+        mock_owasp_org,
+        mock_repo,
+        mock_commit,
+        mock_pr,
+        mock_issue,
+        mock_gh,
+        default_options,
+    ):
+        mock_repository = MagicMock()
+        mock_qs = mock_repo_contributor.filter.return_value
+        mock_qs.select_related.return_value.exists.return_value = True
+        mock_qs.values_list.return_value = [1]
         mock_repository.owner = MagicMock(login="OWASP")
         mock_repository.name = "test-repo"
         mock_repo.filter.return_value.select_related.return_value = [mock_repository]
 
-        
         mock_gh_repo = MagicMock(spec=Repository, full_name="OWASP/test-repo")
         mock_gh_commit = MagicMock(repository=mock_gh_repo, sha="123")
         mock_gh.search_commits.return_value = MockPaginatedList([mock_gh_commit])
@@ -268,7 +328,7 @@ class TestGithubSyncUserCommand:
         mock_gh_issue_search = MagicMock(repository=mock_gh_repo, number=2)
         mock_gh.search_issues.side_effect = [
             MockPaginatedList([mock_gh_pr_search]),
-            MockPaginatedList([mock_gh_issue_search])
+            MockPaginatedList([mock_gh_issue_search]),
         ]
 
         mock_full_gh_repo = MagicMock()
@@ -286,10 +346,26 @@ class TestGithubSyncUserCommand:
         mock_issue.bulk_save.assert_called_once()
         mock_populate.assert_called_once()
 
-    @patch("apps.github.management.commands.github_sync_user.Command.populate_first_contribution_only")
-    def test_handle_github_exception_on_commits(self, mock_populate, command, mock_user, mock_repo_contributor, mock_owasp_org, mock_repo, mock_commit, mock_pr, mock_issue, mock_gh, default_options):
-        """Test handling of GithubException during commit search."""
-        mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value = True
+    @patch(
+        "apps.github.management.commands.github_sync_user.Command.populate_first_contribution_only"
+    )
+    def test_handle_github_exception_on_commits(
+        self,
+        mock_populate,
+        command,
+        mock_user,
+        mock_repo_contributor,
+        mock_owasp_org,
+        mock_repo,
+        mock_commit,
+        mock_pr,
+        mock_issue,
+        mock_gh,
+        default_options,
+    ):
+        (
+            mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value
+        ) = True
         mock_repo_contributor.filter.return_value.values_list.return_value = [1]
 
         mock_repo.filter.return_value.select_related.return_value = []
@@ -303,11 +379,26 @@ class TestGithubSyncUserCommand:
         mock_pr.bulk_save.assert_not_called()
         mock_issue.bulk_save.assert_not_called()
 
-    @patch("apps.github.management.commands.github_sync_user.Command.populate_first_contribution_only")
-    def test_handle_no_contributions_in_date_range(self, mock_populate, command, mock_user, mock_repo_contributor, mock_owasp_org, mock_repo, mock_commit, mock_pr, mock_issue, mock_gh, default_options):
-        """Test handling when no contributions are found within the specified date range."""
-        mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value = True
-        mock_repo_contributor.filter.return_value.values_list.return_value = [1]
+    @patch(
+        "apps.github.management.commands.github_sync_user.Command.populate_first_contribution_only"
+    )
+    def test_handle_no_contributions_in_date_range(
+        self,
+        mock_populate,
+        command,
+        mock_user,
+        mock_repo_contributor,
+        mock_owasp_org,
+        mock_repo,
+        mock_commit,
+        mock_pr,
+        mock_issue,
+        mock_gh,
+        default_options,
+    ):
+        mock_qs = mock_repo_contributor.filter.return_value
+        mock_qs.select_related.return_value.exists.return_value = True
+        mock_qs.values_list.return_value = [1]
 
         mock_repo.filter.return_value.select_related.return_value = []
         mock_gh.search_commits.return_value = MockPaginatedList([])
@@ -320,10 +411,25 @@ class TestGithubSyncUserCommand:
         mock_pr.bulk_save.assert_not_called()
         mock_issue.bulk_save.assert_not_called()
 
-    @patch("apps.github.management.commands.github_sync_user.Command.populate_first_contribution_only")
-    def test_handle_repository_not_in_cache(self, mock_populate, command, mock_user, mock_repo_contributor, mock_owasp_org, mock_repo, mock_commit, mock_gh, default_options):
+    @patch(
+        "apps.github.management.commands.github_sync_user.Command.populate_first_contribution_only"
+    )
+    def test_handle_repository_not_in_cache(
+        self,
+        mock_populate,
+        command,
+        mock_user,
+        mock_repo_contributor,
+        mock_owasp_org,
+        mock_repo,
+        mock_commit,
+        mock_gh,
+        default_options,
+    ):
         """Test handling when a repository from GitHub is not found in the local cache."""
-        mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value = True
+        (
+            mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value
+        ) = True
         mock_repo_contributor.filter.return_value.values_list.return_value = [1]
 
         mock_repo.filter.return_value.select_related.return_value = []
@@ -362,7 +468,7 @@ class TestGithubSyncUserCommand:
         mock_member_profile.get_or_create.return_value = (mock_profile, True)
 
         mock_gh.search_commits.side_effect = GithubException(500, "Server Error")
-        
+
         mock_pr_obj = _create_mock_contribution(
             "pr-repo", "OWASP/pr-repo", datetime(2025, 1, 1, tzinfo=UTC)
         )

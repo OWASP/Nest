@@ -99,7 +99,7 @@ class TestCommitModel:
         mock_committer = User(id=2)
 
         with patch("apps.github.models.commit.Commit.save") as mock_save:
-            commit = Commit.update_data(
+            Commit.update_data(
                 gh_commit=mock_gh_commit,
                 repository=mock_repository,
                 author=mock_author,
@@ -109,7 +109,6 @@ class TestCommitModel:
             mock_get_node_id.assert_called_once_with(mock_gh_commit)
             mock_get.assert_called_once_with(node_id="test_node_id")
             mock_save.assert_called_once()
-
 
     @patch("apps.github.models.commit.Commit.get_node_id", return_value="test_node_id")
     @patch("apps.github.models.commit.Commit.objects.get")
@@ -128,7 +127,7 @@ class TestCommitModel:
 
         with patch("apps.github.models.commit.Commit.save") as mock_save:
             commit = Commit.update_data(
-                gh_commit= mock_gh_commit,
+                gh_commit=mock_gh_commit,
                 repository=mock_repository,
                 author=mock_author,
                 committer=mock_committer,
@@ -141,7 +140,6 @@ class TestCommitModel:
             assert commit.message == "New message"
             assert commit.created_at == "2024-01-01T00:00:00Z"
             mock_save.assert_called_once()
-
 
     @patch("apps.github.models.commit.Commit.get_node_id", return_value="test_node_id")
     @patch("apps.github.models.commit.Commit.objects.get")
@@ -157,7 +155,7 @@ class TestCommitModel:
         mock_committer = User(id=2)
 
         with patch("apps.github.models.commit.Commit.save") as mock_save:
-            commit = Commit.update_data(
+            Commit.update_data(
                 gh_commit=mock_gh_commit,
                 repository=mock_repository,
                 author=mock_author,
@@ -167,4 +165,3 @@ class TestCommitModel:
             mock_get_node_id.assert_called_once_with(mock_gh_commit)
             mock_get.assert_called_once_with(node_id="test_node_id")
             mock_save.assert_not_called()
-

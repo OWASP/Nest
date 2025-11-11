@@ -1,5 +1,5 @@
 from datetime import timedelta as td
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from django.utils import timezone
@@ -10,7 +10,7 @@ from apps.github.common import sync_repository
 
 @pytest.fixture
 def mock_common_deps(mocker):
-    """Mocks all dependencies for the sync_repository function."""
+    """Mock all dependencies for the sync_repository function."""
     mocks = {
         "Organization": mocker.patch("apps.github.common.Organization"),
         "User": mocker.patch("apps.github.common.User"),
@@ -36,12 +36,12 @@ def mock_common_deps(mocker):
     mock_repository.latest_updated_pull_request = None
     mock_repository.id = 1
 
-    yield mocks
+    return mocks
 
 
 @pytest.fixture
 def mock_gh_repository():
-    """Provides a mock GitHub repository object from the pygithub library."""
+    """Provide a mock GitHub repository object from the pygithub library."""
     gh_repo = MagicMock(name="gh_repository")
     gh_repo.name = "test-repo"
     gh_repo.organization = MagicMock(name="gh_organization")
@@ -58,13 +58,13 @@ def mock_gh_repository():
 
 @pytest.fixture
 def mock_repo(mock_common_deps):
-    """Provides the mock repository instance returned by Repository.update_data."""
+    """Provide the mock repository instance returned by Repository.update_data."""
     return mock_common_deps["Repository"].update_data.return_value
 
 
 @pytest.fixture
 def gh_item_factory():
-    """Factory to create mock GitHub items (issues, PRs, milestones)."""
+    """Create a factory to create mock GitHub items (issues, PRs, milestones)."""
 
     def _create_item(**kwargs):
         item = MagicMock()
@@ -175,7 +175,7 @@ class TestSyncRepository:
         gh_contributor = MagicMock(name="gh_contributor")
         mock_gh_repository.get_contributors.return_value = [gh_contributor]
         mock_common_deps["RepositoryContributor"].update_data.side_effect = (
-            lambda gh_contributor, **kwargs: gh_contributor
+            lambda gh_contributor, **kwargs: gh_contributor  # noqa: ARG005
         )
         mock_common_deps["User"].update_data.side_effect = [
             gh_contributor,
@@ -358,9 +358,7 @@ class TestSyncRepository:
             mock_common_deps["Milestone"].update_data.return_value.url,
         )
         mock_common_deps["Issue"].update_data.assert_called_once()
-        mock_common_deps[
-            "Issue"
-        ].update_data.return_value.assignees.add.assert_called_once_with(
+        mock_common_deps["Issue"].update_data.return_value.assignees.add.assert_called_once_with(
             mock_common_deps["User"].update_data.return_value
         )
         mock_common_deps["PullRequest"].update_data.assert_called_once()
@@ -369,6 +367,4 @@ class TestSyncRepository:
             author=mock_common_deps["User"].update_data.return_value,
             repository=mock_repo,
         )
-        mock_common_deps[
-            "PullRequest"
-        ].update_data.return_value.labels.add.assert_called_once()
+        mock_common_deps["PullRequest"].update_data.return_value.labels.add.assert_called_once()

@@ -1,4 +1,3 @@
-
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -9,7 +8,7 @@ from apps.github.models.organization import Organization
 
 @pytest.fixture
 def organization_index(mocker):
-    """Returns an instance of the OrganizationIndex."""
+    """Return an instance of the OrganizationIndex."""
     mocker.patch("apps.common.index.IndexBase.__init__", return_value=None)
     return OrganizationIndex()
 
@@ -31,8 +30,8 @@ class TestOrganizationIndex:
         mock_reindex_synonyms.assert_called_once_with("github", "organizations")
 
     def test_get_entities(self, organization_index):
-        """
-        Test that get_entities constructs the correct queryset by calling
+        """Test that get_entities constructs the correct queryset by calling.
+
         Organization.objects.filter with the expected argument.
         """
         mock_filter_manager = MagicMock()
@@ -41,7 +40,5 @@ class TestOrganizationIndex:
         with patch.object(Organization, "objects", mock_filter_manager):
             queryset = organization_index.get_entities()
 
-            mock_filter_manager.filter.assert_called_once_with(
-                is_owasp_related_organization=True
-            )
+            mock_filter_manager.filter.assert_called_once_with(is_owasp_related_organization=True)
             assert queryset == "final_queryset"

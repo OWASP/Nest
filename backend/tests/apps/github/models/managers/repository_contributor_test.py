@@ -27,8 +27,8 @@ class TestRepositoryContributorQuerySet:
         mock_queryset.exclude.assert_called_once()
         args, _ = mock_queryset.exclude.call_args
         q_object = args[0]
-        assert 'user__is_bot' in str(q_object)
-        assert 'user__login__endswith' in str(q_object)
+        assert "user__is_bot" in str(q_object)
+        assert "user__login__endswith" in str(q_object)
 
     def test_to_community_repositories_excludes_forks_and_non_community(self, mocker):
         """Tests that to_community_repositories excludes forks and non-community repos."""
@@ -37,8 +37,8 @@ class TestRepositoryContributorQuerySet:
         mock_queryset.exclude.assert_called_once()
         args, _ = mock_queryset.exclude.call_args
         q_object = args[0]
-        assert 'repository__is_fork' in str(q_object)
-        assert 'repository__organization__is_owasp_related_organization' in str(q_object)
+        assert "repository__is_fork" in str(q_object)
+        assert "repository__organization__is_owasp_related_organization" in str(q_object)
 
 
 class TestRepositoryContributorManager:

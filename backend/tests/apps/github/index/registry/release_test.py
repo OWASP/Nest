@@ -1,4 +1,3 @@
-
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -9,7 +8,7 @@ from apps.github.models.release import Release
 
 @pytest.fixture
 def release_index(mocker):
-    """Returns an instance of the ReleaseIndex."""
+    """Return an instance of the ReleaseIndex."""
     mocker.patch("apps.common.index.IndexBase.__init__", return_value=None)
     return ReleaseIndex()
 
@@ -31,16 +30,14 @@ class TestReleaseIndex:
         mock_reindex_synonyms.assert_called_once_with("github", "releases")
 
     def test_get_entities(self, release_index):
-        """
-        Test that get_entities constructs the correct queryset by calling
+        """Test that get_entities constructs the correct queryset by calling.
+
         Release.objects.filter with the expected arguments.
         """
-
         mock_filter_manager = MagicMock()
         mock_filter_manager.filter.return_value = "final_queryset"
 
         with patch.object(Release, "objects", mock_filter_manager):
-
             queryset = release_index.get_entities()
 
             mock_filter_manager.filter.assert_called_once_with(

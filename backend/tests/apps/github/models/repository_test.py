@@ -114,7 +114,7 @@ class TestRepositoryFromGithub:
         repository = Repository()
         repository.from_github(self.gh_repository)
 
-        assert repository.description == "" 
+        assert repository.description == ""
         assert repository.license == ""
 
     def test_from_github_with_empty_commits(self):
@@ -145,7 +145,9 @@ class TestRepositoryFromGithub:
     def test_from_github_with_compliant_funding_yml(self):
         """Test that from_github correctly identifies a compliant FUNDING.yml file."""
         self.setUp()
-        funding_yml_content = b"custom: ['https://owasp.org/donate?reponame=test-repo&owner=test-owner']"
+        funding_yml_content = (
+            b"custom: ['https://owasp.org/donate?reponame=test-repo&owner=test-owner']"
+        )
         mock_contents = MagicMock(content=b64encode(funding_yml_content))
         self.gh_repository.get_contents.return_value = mock_contents
         self.gh_repository.get_contents.side_effect = None
@@ -194,7 +196,10 @@ class TestRepositoryProperties:
         self.repository = Repository(owner=self.owner, name="test-repo")
 
     def test_latest_pull_request(self):
-        """Test the latest_pull_request property to ensure it returns the most recent pull request."""
+        """Test the latest_pull_request property to ensure it returns the most.
+
+        recent pull request.
+        """
         self.setUp()
         with patch.object(Repository, "pull_requests", new_callable=PropertyMock) as mock_prop:
             mock_manager = mock_prop.return_value
@@ -204,12 +209,17 @@ class TestRepositoryProperties:
             mock_manager.order_by.assert_called_with("-created_at")
 
     def test_latest_release(self):
-        """Test the latest_release property to ensure it returns the most recently published release."""
+        """Test the latest_release property to ensure it returns the most recently.
+
+        published release.
+        """
         self.setUp()
         with patch.object(Repository, "releases", new_callable=PropertyMock) as mock_prop:
             mock_manager = mock_prop.return_value
             mock_release = MagicMock()
-            mock_manager.filter.return_value.order_by.return_value.first.return_value = mock_release
+            mock_manager.filter.return_value.order_by.return_value.first.return_value = (
+                mock_release
+            )
             assert self.repository.latest_release == mock_release
             mock_manager.filter.assert_called_with(
                 is_draft=False, is_pre_release=False, published_at__isnull=False
@@ -217,7 +227,10 @@ class TestRepositoryProperties:
             mock_manager.filter.return_value.order_by.assert_called_with("-published_at")
 
     def test_latest_updated_issue(self):
-        """Test the latest_updated_issue property to ensure it returns the most recently updated issue."""
+        """Test the latest_updated_issue property to ensure it returns the most.
+
+        recently updated issue.
+        """
         self.setUp()
         with patch.object(Repository, "issues", new_callable=PropertyMock) as mock_prop:
             mock_manager = mock_prop.return_value
@@ -227,7 +240,10 @@ class TestRepositoryProperties:
             mock_manager.order_by.assert_called_with("-updated_at")
 
     def test_latest_updated_milestone(self):
-        """Test the latest_updated_milestone property to ensure it returns the most recently updated milestone."""
+        """Test the latest_updated_milestone property to ensure it returns the most.
+
+        recently updated milestone.
+        """
         self.setUp()
         with patch.object(Repository, "milestones", new_callable=PropertyMock) as mock_prop:
             mock_manager = mock_prop.return_value
@@ -237,7 +253,10 @@ class TestRepositoryProperties:
             mock_manager.order_by.assert_called_with("-updated_at")
 
     def test_latest_updated_pull_request(self):
-        """Test the latest_updated_pull_request property to ensure it returns the most recently updated pull request."""
+        """Test the latest_updated_pull_request property to ensure it returns the.
+
+        most recently updated pull request.
+        """
         self.setUp()
         with patch.object(Repository, "pull_requests", new_callable=PropertyMock) as mock_prop:
             mock_manager = mock_prop.return_value
@@ -266,7 +285,10 @@ class TestRepositoryProperties:
             assert self.repository.project == mock_project
 
     def test_published_releases(self):
-        """Test the published_releases property to ensure it filters for non-draft, non-prerelease releases."""
+        """Test the published_releases property to ensure it filters for non-draft,.
+
+        non-prerelease releases.
+        """
         self.setUp()
         with patch.object(Repository, "releases", new_callable=PropertyMock) as mock_prop:
             mock_manager = mock_prop.return_value
@@ -277,7 +299,10 @@ class TestRepositoryProperties:
             )
 
     def test_recent_milestones(self, mocker):
-        """Test the recent_milestones property to ensure it returns milestones ordered by creation date."""
+        """Test the recent_milestones property to ensure it returns milestones.
+
+        ordered by creation date.
+        """
         self.setUp()
         mock_filter = mocker.patch("apps.github.models.repository.Milestone.objects.filter")
         mock_filter.return_value.order_by.return_value = "recent_milestones"
@@ -286,7 +311,10 @@ class TestRepositoryProperties:
         mock_filter.return_value.order_by.assert_called_with("-created_at")
 
     def test_top_languages(self):
-        """Test the top_languages property to ensure it returns a sorted list of top languages, excluding ignored ones."""
+        """Test the top_languages property to ensure it returns a sorted list of.
+
+        top languages, excluding ignored ones.
+        """
         self.setUp()
         self.repository.languages = {
             "Python": 95,

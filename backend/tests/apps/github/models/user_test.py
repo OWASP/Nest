@@ -70,13 +70,11 @@ class TestUserModel:
         assert updated_user.node_id == "67890"
 
     @pytest.mark.parametrize(
-        "property_name, setup_mocks, expected_value",
+        ("property_name", "setup_mocks", "expected_value"),
         [
             (
                 "issues",
-                lambda: patch.object(
-                    User, "created_issues", all=Mock(return_value=["issue1"])
-                ),
+                lambda: patch.object(User, "created_issues", all=Mock(return_value=["issue1"])),
                 ["issue1"],
             ),
             ("get_absolute_url", None, "/members/test-user"),
@@ -99,14 +97,13 @@ class TestUserModel:
                     assert user.get_absolute_url() == expected_value
                 else:
                     assert getattr(user, property_name) == expected_value
+        elif property_name == "get_absolute_url":
+            assert user.get_absolute_url() == expected_value
         else:
-            if property_name == "get_absolute_url":
-                assert user.get_absolute_url() == expected_value
-            else:
-                assert getattr(user, property_name) == expected_value
+            assert getattr(user, property_name) == expected_value
 
     @pytest.mark.parametrize(
-        "user_type, expected_is_bot",
+        ("user_type", "expected_is_bot"),
         [
             ("User", False),
             ("Bot", True),
@@ -131,7 +128,7 @@ class TestUserModel:
         assert user.name == "Test User"
 
     @pytest.mark.parametrize(
-        "scenario, get_node_id_return, update_kwargs, expect_save",
+        ("scenario", "get_node_id_return", "update_kwargs", "expect_save"),
         [
             ("no_node_id", None, {}, False),
             ("with_kwargs", "12345", {"is_staff": True}, True),
@@ -155,7 +152,7 @@ class TestUserModel:
         gh_user_mock = Mock()
         mock_get_node_id.return_value = get_node_id_return
         mock_user_instance = Mock(spec=User)
-        mock_user_instance.save = mock_save  
+        mock_user_instance.save = mock_save
         mock_get.return_value = mock_user_instance
 
         result = User.update_data(gh_user_mock, **update_kwargs)
@@ -170,7 +167,6 @@ class TestUserModel:
                 mock_save.assert_called_once()
             else:
                 mock_save.assert_not_called()
-
 
     @pytest.mark.parametrize(
         ("entity_model", "entity_path", "property_name"),
@@ -190,31 +186,28 @@ class TestUserModel:
         entity_ids = [1, 2]
         expected_entities = f"mocked_{property_name}"
 
-        with patch(f"{entity_path}.objects.filter") as mock_entity_filter:
-            with patch(
-                "apps.owasp.models.entity_member.EntityMember.objects.filter"
-            ) as mock_em_filter:
-                mock_queryset = Mock()
-                mock_queryset.order_by.return_value = expected_entities
-                mock_entity_filter.return_value = mock_queryset
-                mock_em_filter.return_value.values_list.return_value = entity_ids
+        with (
+            patch(f"{entity_path}.objects.filter") as mock_entity_filter,
+            patch("apps.owasp.models.entity_member.EntityMember.objects.filter") as mock_em_filter,
+        ):
+            mock_queryset = Mock()
+            mock_queryset.order_by.return_value = expected_entities
+            mock_entity_filter.return_value = mock_queryset
+            mock_em_filter.return_value.values_list.return_value = entity_ids
 
+            result = getattr(user, property_name)
 
-                result = getattr(user, property_name)
-
-                assert result == expected_entities
-                mock_get_for_model.assert_called_with(entity_model)
-                mock_em_filter.assert_called_once_with(
-                    member=user,
-                    entity_type=mock_get_for_model.return_value,
-                    role=EntityMember.Role.LEADER,
-                    is_active=True,
-                    is_reviewed=True,
-                )
-                mock_entity_filter.assert_called_once_with(
-                    id__in=entity_ids, is_active=True
-                )
-                mock_queryset.order_by.assert_called_once_with("name")
+            assert result == expected_entities
+            mock_get_for_model.assert_called_with(entity_model)
+            mock_em_filter.assert_called_once_with(
+                member=user,
+                entity_type=mock_get_for_model.return_value,
+                role=EntityMember.Role.LEADER,
+                is_active=True,
+                is_reviewed=True,
+            )
+            mock_entity_filter.assert_called_once_with(id__in=entity_ids, is_active=True)
+            mock_queryset.order_by.assert_called_once_with("name")
 
     @patch("apps.github.models.user.BulkSaveModel.bulk_save")
     def test_bulk_save(self, mock_bulk_save):

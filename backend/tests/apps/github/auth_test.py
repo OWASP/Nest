@@ -52,7 +52,7 @@ class TestGitHubAppAuth:
                 GitHubAppAuth()
 
     @pytest.mark.parametrize(
-        "app_id, private_key, installation_id, expected",
+        ("app_id", "private_key", "installation_id", "expected"),
         [
             ("1", "key", "1", True),
             (None, "key", "1", False),

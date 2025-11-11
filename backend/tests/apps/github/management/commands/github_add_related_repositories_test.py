@@ -107,7 +107,6 @@ def test_handle_unknown_object_exception(
     mock_project,
 ):
     """Test handling of a 404 Not Found error from GitHub."""
-
     mock_projects_list = [mock_project]
     mock_active_projects.__iter__.return_value = iter(mock_projects_list)
     mock_active_projects.count.return_value = len(mock_projects_list)
@@ -122,7 +121,7 @@ def test_handle_unknown_object_exception(
     mock_gh_client = mock.Mock()
     mock_get_github_client.return_value = mock_gh_client
 
-    def raise_404(*a, **k):
+    def raise_404(*a, **k):  # noqa: ARG001
         raise UnknownObjectException(
             status=404,
             data={"message": "Not Found", "status": "404"},
@@ -173,10 +172,10 @@ def test_handle_sync_repository_exception(
     mock_gh_client = mock.Mock()
     mock_get_github_client.return_value = mock_gh_client
 
-    mock_gh_repository=mock.MagicMock()
+    mock_gh_repository = mock.MagicMock()
     mock_gh_client.get_repo.return_value = mock_gh_repository
 
-    def raise_404(*a, **k):
+    def raise_404(*a, **k):  # noqa: ARG001
         raise UnknownObjectException(
             status=404,
             data={"message": "Not Found", "status": "404"},
@@ -189,7 +188,9 @@ def test_handle_sync_repository_exception(
     with mock.patch.object(Project, "bulk_save") as mock_project_bulk_save:
         command.handle(offset=0)
 
-    mock_logger.exception.assert_called_once_with("Error syncing repository %s", "https://github.com/OWASP/test-repo")
+    mock_logger.exception.assert_called_once_with(
+        "Error syncing repository %s", "https://github.com/OWASP/test-repo"
+    )
     mock_project_bulk_save.assert_called_once_with([mock_project])
 
 
@@ -208,7 +209,6 @@ def test_handle_no_repository_path(
     mock_project,
 ):
     """Test that the command handles the case where a repository path cannot be determined."""
-
     mock_get_repository_path.return_value = None
     mock_projects_list = [mock_project]
     mock_active_projects.__iter__.return_value = iter(mock_projects_list)
@@ -224,14 +224,16 @@ def test_handle_no_repository_path(
     mock_gh_client = mock.Mock()
     mock_get_github_client.return_value = mock_gh_client
 
-    mock_gh_repository=mock.MagicMock()
+    mock_gh_repository = mock.MagicMock()
     mock_gh_client.get_repo.return_value = mock_gh_repository
 
     with mock.patch.object(Project, "bulk_save") as mock_project_bulk_save:
         command.handle(offset=0)
 
     mock_get_repository_path.assert_called_once_with("https://github.com/OWASP/test-repo")
-    mock_logger.info.assert_called_once_with("Couldn't get repository path for %s", "https://github.com/OWASP/test-repo")
+    mock_logger.info.assert_called_once_with(
+        "Couldn't get repository path for %s", "https://github.com/OWASP/test-repo"
+    )
     mock_get_github_client.return_value.get_repo.assert_not_called()
     mock_sync_repository.assert_not_called()
     mock_project_bulk_save.assert_called_once_with([mock_project])
@@ -246,7 +248,3 @@ def test_add_arguments(command):
         default=0,
         required=False,
     )
-
-
-
-

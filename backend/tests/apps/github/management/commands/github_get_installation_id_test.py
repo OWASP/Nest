@@ -145,10 +145,10 @@ class TestGitHubGetInstallationId(SimpleTestCase):
             mock.patch("sys.stderr", new_callable=io.StringIO) as mock_stderr,
             mock.patch("pathlib.Path.open", mock.mock_open(read_data=self.test_private_key)),
             mock.patch("pathlib.Path.exists", return_value=True),
-            pytest.raises(SystemExit),
         ):
             command = Command()
-            command.handle(app_id=123456)
+            with pytest.raises(SystemExit):
+                command.handle(app_id=123456)
 
         assert "Failed to get installations: API Error" in mock_stderr.getvalue()
 
@@ -159,7 +159,7 @@ class TestGitHubGetInstallationId(SimpleTestCase):
     ):
         """Test successful retrieval of multiple installation IDs."""
         from apps.github.management.commands.github_get_installation_id import Command
-        
+
         mock_installation_1 = mock.MagicMock()
         mock_installation_1.id = 12345
         mock_installation_1.account.type = "Organization"

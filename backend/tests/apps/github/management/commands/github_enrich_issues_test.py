@@ -118,10 +118,7 @@ def test_handle(
 @patch("apps.github.management.commands.github_enrich_issues.OpenAi")
 @patch("apps.github.management.commands.github_enrich_issues.Issue")
 def test_handle_with_offset(mock_issue_class, mock_open_ai_class):
-    """
-    Tests that the command correctly handles the --offset argument,
-    skipping the specified number of issues before processing.
-    """
+    """Test --offset argument handling ensuring command skips specified issues."""
     mock_open_ai = MagicMock()
     mock_open_ai_class.return_value = mock_open_ai
 
@@ -163,17 +160,13 @@ def test_handle_with_offset(mock_issue_class, mock_open_ai_class):
         issue.generate_hint.assert_called_once_with(open_ai=mock_open_ai)
         issue.generate_summary.assert_called_once_with(open_ai=mock_open_ai)
 
-    mock_issue_class.bulk_save.assert_called_once_with(
-        mock_issues[2:], fields=["hint", "summary"]
-    )
+    mock_issue_class.bulk_save.assert_called_once_with(mock_issues[2:], fields=["hint", "summary"])
 
 
 @patch("apps.github.management.commands.github_enrich_issues.OpenAi")
 @patch("apps.github.management.commands.github_enrich_issues.Issue")
 def test_handle_with_chunked_save(mock_issue_class, mock_open_ai_class):
-    """
-    Tests that the command correctly saves issues in chunks of 1000.
-    """
+    """Tests that the command correctly saves issues in chunks of 1000."""
     mock_open_ai = MagicMock()
     mock_open_ai_class.return_value = mock_open_ai
 
@@ -203,12 +196,12 @@ def test_handle_with_chunked_save(mock_issue_class, mock_open_ai_class):
 
     assert mock_issue_class.bulk_save.call_count == 2
 
-    #first call to bulk_save
+    # first call to bulk_save
     args, kwargs = mock_issue_class.bulk_save.call_args_list[0]
     assert len(args[0]) == 1000
     assert kwargs["fields"] == ["hint", "summary"]
 
-    #second call to bulk_save
+    # second call to bulk_save
     args, kwargs = mock_issue_class.bulk_save.call_args_list[1]
     assert len(args[0]) == 1
     assert kwargs["fields"] == ["hint", "summary"]
@@ -217,10 +210,7 @@ def test_handle_with_chunked_save(mock_issue_class, mock_open_ai_class):
 @patch("apps.github.management.commands.github_enrich_issues.OpenAi")
 @patch("apps.github.management.commands.github_enrich_issues.Issue")
 def test_handle_no_update_fields(mock_issue_class, mock_open_ai_class):
-    """
-    Tests that the command correctly handles the case where no fields
-    are specified for update.
-    """
+    """Test command handling when no fields are specified for update."""
     mock_open_ai = MagicMock()
     mock_open_ai_class.return_value = mock_open_ai
 
@@ -259,4 +249,3 @@ def test_handle_no_update_fields(mock_issue_class, mock_open_ai_class):
         issue.generate_summary.assert_not_called()
 
     mock_issue_class.bulk_save.assert_called_once_with(mock_issues, fields=[])
-
