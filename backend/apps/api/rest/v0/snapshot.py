@@ -155,6 +155,30 @@ def list_snapshot_issues(
 
 
 @router.get(
+    "/{str:snapshot_key}/members/",
+    description="Retrieve a paginated list of new members in a snapshot.",
+    operation_id="list_snapshot_members",
+    response=list[Member],
+    summary="List new members in snapshot",
+)
+@decorate_view(cache_response())
+def list_snapshot_members(
+    request: HttpRequest,
+    snapshot_key: str = Path(example="2025-02"),
+    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
+        None,
+        description="Ordering field",
+    ),
+) -> list[Member]:
+    """Get new members in snapshot."""
+    if snapshot := SnapshotModel.objects.filter(
+        key__iexact=snapshot_key, status=SnapshotModel.Status.COMPLETED
+    ).first():
+        return snapshot.new_users.order_by(ordering or "-created_at")
+    return UserModel.objects.none()
+
+
+@router.get(
     "/{str:snapshot_key}/projects/",
     description="Retrieve a paginated list of new projects in a snapshot.",
     operation_id="list_snapshot_projects",
@@ -200,27 +224,3 @@ def list_snapshot_releases(
     ).first():
         return snapshot.new_releases.order_by(ordering or "-created_at")
     return ReleaseModel.objects.none()
-
-
-@router.get(
-    "/{str:snapshot_key}/users/",
-    description="Retrieve a paginated list of new users in a snapshot.",
-    operation_id="list_snapshot_users",
-    response=list[Member],
-    summary="List new users in snapshot",
-)
-@decorate_view(cache_response())
-def list_snapshot_users(
-    request: HttpRequest,
-    snapshot_key: str = Path(example="2025-02"),
-    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
-        None,
-        description="Ordering field",
-    ),
-) -> list[Member]:
-    """Get new users in snapshot."""
-    if snapshot := SnapshotModel.objects.filter(
-        key__iexact=snapshot_key, status=SnapshotModel.Status.COMPLETED
-    ).first():
-        return snapshot.new_users.order_by(ordering or "-created_at")
-    return UserModel.objects.none()

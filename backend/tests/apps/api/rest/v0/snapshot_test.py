@@ -9,9 +9,9 @@ from apps.api.rest.v0.snapshot import (
     get_snapshot,
     list_snapshot_chapters,
     list_snapshot_issues,
+    list_snapshot_members,
     list_snapshot_projects,
     list_snapshot_releases,
-    list_snapshot_users,
 )
 from apps.github.models.issue import Issue
 from apps.github.models.release import Release
@@ -129,6 +129,17 @@ class TestSnapshotAPI:
         assert response[0].title == self.issue.title
 
     @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
+    def test_list_snapshot_members_success(self, mock_filter):
+        mock_filter.return_value.first.return_value = self.snapshot
+        request = self.factory.get("")
+
+        response = list_snapshot_members(request, snapshot_key=self.snapshot.key)
+
+        assert len(response) == 1
+        assert response[0] == self.user
+        assert response[0].username == self.user.username
+
+    @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
     def test_list_snapshot_projects_success(self, mock_filter):
         mock_filter.return_value.first.return_value = self.snapshot
         request = self.factory.get("")
@@ -149,14 +160,3 @@ class TestSnapshotAPI:
         assert len(response) == 1
         assert response[0] == self.release
         assert response[0].version == self.release.version
-
-    @patch("apps.owasp.models.snapshot.Snapshot.objects.filter")
-    def test_list_snapshot_users_success(self, mock_filter):
-        mock_filter.return_value.first.return_value = self.snapshot
-        request = self.factory.get("")
-
-        response = list_snapshot_users(request, snapshot_key=self.snapshot.key)
-
-        assert len(response) == 1
-        assert response[0] == self.user
-        assert response[0].username == self.user.username
