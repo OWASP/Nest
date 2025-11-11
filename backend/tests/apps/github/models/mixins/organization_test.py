@@ -1,8 +1,24 @@
+from datetime import UTC, datetime
 import pytest
 
 from apps.github.models.organization import Organization
 
 EXPECTED_CONTRIBUTOR_COUNT = 5
+
+
+@pytest.fixture
+def organization_instance():
+    """Provides a test instance of the Organization model."""
+    return Organization(
+        name="Test Organization",
+        login="test-org",
+        company="Test Company",
+        location="Test Location",
+        description="A test organization.",
+        followers_count=100,
+        public_repositories_count=10,
+        avatar_url="https://github.com/avatars/test-org",
+    )
 
 
 class TestOrganizationIndexMixin:
@@ -15,6 +31,33 @@ class TestOrganizationIndexMixin:
             name="Organization Name", login="login", company="Company", location="Location"
         )
         assert getattr(organization, attr) == expected
+
+    @pytest.mark.parametrize(
+        ("created_at_value", "expected_timestamp"),
+        [
+            (datetime(2023, 1, 1, tzinfo=UTC), datetime(2023, 1, 1, tzinfo=UTC).timestamp()),
+            (None, None),
+        ],
+    )
+    def test_idx_created_at(self, organization_instance, created_at_value, expected_timestamp):
+        """Tests the idx_created_at property returns the correct timestamp or None."""
+        organization_instance.created_at = created_at_value
+        assert organization_instance.idx_created_at == expected_timestamp
+
+    @pytest.mark.parametrize(
+        ("attr", "expected"),
+        [
+            ("idx_login", "test-org"),
+            ("idx_location", "Test Location"),
+            ("idx_followers_count", 100),
+            ("idx_public_repositories_count", 10),
+            ("idx_url", "https://github.com/test-org"),
+            ("idx_avatar_url", "https://github.com/avatars/test-org"),
+        ],
+    )
+    def test_additional_index_properties(self, organization_instance, attr, expected):
+        """Tests additional simple index properties that directly return model attributes."""
+        assert getattr(organization_instance, attr) == expected
 
     def test_is_indexable(self):
         organization = Organization(name="Organization Name", login="login")
@@ -29,12 +72,29 @@ class TestOrganizationIndexMixin:
         organization = Organization()
         assert not organization.is_indexable
 
+    @pytest.mark.parametrize(
+        ("is_owasp_related", "expected_indexable"),
+        [
+            (True, True),
+            (False, False),
+        ],
+    )
+    def test_is_indexable_owasp_related(self, is_owasp_related, expected_indexable):
+        """Tests the is_indexable property based on is_owasp_related_organization."""
+        organization = Organization(name="Organization Name", login="login", is_owasp_related_organization=is_owasp_related)
+        assert organization.is_indexable == expected_indexable
+
     def test_idx_description_with_value(self):
         organization = Organization(description="Organization Description")
         assert organization.idx_description == "Organization Description"
 
     def test_idx_description_empty(self):
         organization = Organization()
+        assert organization.idx_description == ""
+
+    def test_idx_description_none(self):
+        """Tests the idx_description property returns an empty string when description is None."""
+        organization = Organization(description=None)
         assert organization.idx_description == ""
 
     def test_idx_collaborators_count(self, mocker):
