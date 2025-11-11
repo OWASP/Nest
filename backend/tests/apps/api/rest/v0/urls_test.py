@@ -2,6 +2,7 @@ import pytest
 
 from apps.api.rest.v0 import api as main_router
 from apps.api.rest.v0 import api_root
+from apps.api.rest.v0.board_of_directors import router as board_of_directors_router
 from apps.api.rest.v0.chapter import router as chapter_router
 from apps.api.rest.v0.committee import router as committee_router
 from apps.api.rest.v0.event import router as event_router
@@ -31,6 +32,7 @@ class TestRouterRegistration:
         "/releases": release_router,
         "/repositories": repository_router,
         "/sponsors": sponsor_router,
+        "/boards": board_of_directors_router,
     }
 
     def test_all_routers_are_registered(self):

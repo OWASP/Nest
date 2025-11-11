@@ -43,6 +43,7 @@ arithmatex
 arkid15r
 askowasp
 bangbang
+boardofdirectors
 bsky
 certbot
 collectstatic
