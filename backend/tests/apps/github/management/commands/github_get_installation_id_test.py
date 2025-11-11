@@ -134,11 +134,13 @@ class TestGitHubGetInstallationId(SimpleTestCase):
 
         mock_path.assert_any_call(custom_key_path)
 
+    @mock.patch("apps.github.management.commands.github_get_installation_id.Auth.AppAuth")
     @mock.patch("apps.github.management.commands.github_get_installation_id.GithubIntegration")
-    def test_get_installation_id_github_exception(self, mock_github_integration):
+    def test_get_installation_id_github_exception(self, mock_github_integration, mock_app_auth):
         """Test when a generic exception occurs during GitHub API interaction."""
         from apps.github.management.commands.github_get_installation_id import Command
 
+        mock_app_auth.return_value = mock.MagicMock()
         mock_github_integration.side_effect = Exception("API Error")
 
         with (

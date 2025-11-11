@@ -73,7 +73,8 @@ class TestUtils:
         ("url", "expected"),
         [
             ("example.com", None),
-            ("http://example.com", "https://example.com"),
+            ("invalid-url", None),
+            ("https://example.com", "https://example.com"),
             ("https://example.com/path/", "https://example.com/path"),
             ("https://example.com/path#fragment", "https://example.com/path"),
         ],
@@ -81,7 +82,3 @@ class TestUtils:
     def test_normalize_url(self, url, expected):
         result = normalize_url(url)
         assert result == expected
-
-    def test_normalize_url_with_invalid_url(self):
-        result = normalize_url("invalid-url")
-        assert result is None

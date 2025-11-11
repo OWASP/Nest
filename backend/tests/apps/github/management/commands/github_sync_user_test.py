@@ -38,7 +38,7 @@ def mock_gh(mock_get_github_client):
 
 @pytest.fixture
 def mock_user():
-    with patch("apps.github.models.user.User") as mock:
+    with patch("apps.github.management.commands.github_sync_user.User") as mock:
         yield mock
 
 
@@ -216,7 +216,7 @@ class TestGithubSyncUserCommand:
     @patch(
         "apps.github.management.commands.github_sync_user.Command.populate_first_contribution_only"
     )
-    @patch("apps.github.models.user.User.update_data")
+    @patch("apps.github.management.commands.github_sync_user.User.update_data")
     def test_handle_skip_sync(
         self, mock_update_data, mock_populate, command, mock_gh, default_options
     ):
@@ -247,7 +247,7 @@ class TestGithubSyncUserCommand:
         assert "No OWASP organizations found" in command.stderr.getvalue()
 
     @patch("apps.github.management.commands.github_sync_user.logger")
-    @patch("apps.github.models.user.User.update_data")
+    @patch("apps.github.management.commands.github_sync_user.User.update_data")
     def test_populate_first_contribution_success_chooses_earliest(
         self, mock_update_data, mock_logger, command, mock_member_profile, mock_org, mock_gh
     ):

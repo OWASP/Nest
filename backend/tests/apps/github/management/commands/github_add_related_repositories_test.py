@@ -110,11 +110,7 @@ def test_handle_unknown_object_exception(
     mock_projects_list = [mock_project]
     mock_active_projects.__iter__.return_value = iter(mock_projects_list)
     mock_active_projects.count.return_value = len(mock_projects_list)
-    mock_active_projects.__getitem__.side_effect = (
-        lambda _, idx: mock_projects_list[idx]
-        if isinstance(idx, int)
-        else mock_projects_list[idx.start : idx.stop]
-    )
+
     mock_active_projects.__getitem__.side_effect = lambda idx: mock_projects_list[idx]
     mock_active_projects.order_by.return_value = mock_active_projects
 
@@ -161,11 +157,7 @@ def test_handle_sync_repository_exception(
     mock_projects_list = [mock_project]
     mock_active_projects.__iter__.return_value = iter(mock_projects_list)
     mock_active_projects.count.return_value = len(mock_projects_list)
-    mock_active_projects.__getitem__.side_effect = (
-        lambda _, idx: mock_projects_list[idx]
-        if isinstance(idx, int)
-        else mock_projects_list[idx.start : idx.stop]
-    )
+
     mock_active_projects.__getitem__.side_effect = lambda idx: mock_projects_list[idx]
     mock_active_projects.order_by.return_value = mock_active_projects
 
@@ -175,14 +167,7 @@ def test_handle_sync_repository_exception(
     mock_gh_repository = mock.MagicMock()
     mock_gh_client.get_repo.return_value = mock_gh_repository
 
-    def raise_404(*a, **k):  # noqa: ARG001
-        raise UnknownObjectException(
-            status=404,
-            data={"message": "Not Found", "status": "404"},
-            headers={},
-        )
-
-    mock_sync_repository.get_repo.side_effect = raise_404
+    mock_sync_repository.side_effect = Exception("Test sync error")
     mock_get_repository_path.return_value = "OWASP/test-repo"
 
     with mock.patch.object(Project, "bulk_save") as mock_project_bulk_save:
@@ -213,11 +198,7 @@ def test_handle_no_repository_path(
     mock_projects_list = [mock_project]
     mock_active_projects.__iter__.return_value = iter(mock_projects_list)
     mock_active_projects.count.return_value = len(mock_projects_list)
-    mock_active_projects.__getitem__.side_effect = (
-        lambda _, idx: mock_projects_list[idx]
-        if isinstance(idx, int)
-        else mock_projects_list[idx.start : idx.stop]
-    )
+
     mock_active_projects.__getitem__.side_effect = lambda idx: mock_projects_list[idx]
     mock_active_projects.order_by.return_value = mock_active_projects
 

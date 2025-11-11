@@ -66,7 +66,10 @@ class TestGitHubAppAuth:
     )
     def test_is_app_configured(self, app_id, private_key, installation_id, expected):
         """Test the _is_app_configured method with various inputs."""
-        with mock.patch("apps.github.auth.settings") as mock_settings:
+        with (
+            mock.patch("apps.github.auth.settings") as mock_settings,
+            mock.patch.dict(os.environ, {"GITHUB_TOKEN": "test-pat"}, clear=False),
+        ):
             mock_settings.GITHUB_APP_ID = app_id
             mock_settings.GITHUB_APP_INSTALLATION_ID = installation_id
             with mock.patch.object(GitHubAppAuth, "_load_private_key", return_value=private_key):

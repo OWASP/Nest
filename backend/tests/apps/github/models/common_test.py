@@ -41,7 +41,7 @@ class TestGenericUserModelProperties:
 class TestGenericUserModelFromGithub:
     def test_from_github(self):
         mock_data = mock.Mock()
-        mock_data.avatar_url = "http://example.com/avatar.png"
+        mock_data.avatar_url = "https://example.com/avatar.png"
         mock_data.collaborators = 10
         mock_data.company = "Test Inc."
         mock_data.created_at = "2023-01-01T00:00:00Z"
@@ -58,7 +58,7 @@ class TestGenericUserModelFromGithub:
         user = TestGenericUserModel()
         user.from_github(mock_data)
 
-        assert user.avatar_url == "http://example.com/avatar.png"
+        assert user.avatar_url == "https://example.com/avatar.png"
         assert user.collaborators_count == 10
         assert user.company == "Test Inc."
         assert user.created_at == "2023-01-01T00:00:00Z"

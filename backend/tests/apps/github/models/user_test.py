@@ -4,6 +4,7 @@ import pytest
 
 from apps.github.models.user import User
 from apps.owasp.models.chapter import Chapter
+from apps.owasp.models.entity_member import EntityMember
 from apps.owasp.models.project import Project
 
 
@@ -69,38 +70,25 @@ class TestUserModel:
         mock_get.assert_called_once_with(node_id="67890")
         assert updated_user.node_id == "67890"
 
-    @pytest.mark.parametrize(
-        ("property_name", "setup_mocks", "expected_value"),
-        [
-            (
-                "issues",
-                lambda: patch.object(User, "created_issues", all=Mock(return_value=["issue1"])),
-                ["issue1"],
-            ),
-            ("get_absolute_url", None, "/members/test-user"),
-            (
-                "nest_url",
-                lambda: patch(
-                    "apps.github.models.user.get_absolute_url",
-                    Mock(return_value="http://test.com/members/test-user"),
-                ),
-                "http://test.com/members/test-user",
-            ),
-        ],
-    )
-    def test_user_properties(self, property_name, setup_mocks, expected_value):
-        """Test various properties on the User model."""
+    def test_issues_property(self):
+        """Test the issues property."""
         user = User(login="test-user")
-        if setup_mocks:
-            with setup_mocks():
-                if property_name == "get_absolute_url":
-                    assert user.get_absolute_url() == expected_value
-                else:
-                    assert getattr(user, property_name) == expected_value
-        elif property_name == "get_absolute_url":
-            assert user.get_absolute_url() == expected_value
-        else:
-            assert getattr(user, property_name) == expected_value
+        with patch.object(User, "created_issues", all=Mock(return_value=["issue1"])):
+            assert user.issues == ["issue1"]
+
+    def test_get_absolute_url(self):
+        """Test the get_absolute_url method."""
+        user = User(login="test-user")
+        assert user.get_absolute_url() == "/members/test-user"
+
+    def test_nest_url_property(self):
+        """Test the nest_url property."""
+        user = User(login="test-user")
+        with patch(
+            "apps.github.models.user.get_absolute_url",
+            Mock(return_value="https://test.com/members/test-user"),
+        ):
+            assert user.nest_url == "https://test.com/members/test-user"
 
     @pytest.mark.parametrize(
         ("user_type", "expected_is_bot"),
@@ -180,8 +168,6 @@ class TestUserModel:
         self, mock_get_for_model, entity_model, entity_path, property_name
     ):
         """Test the chapters and projects properties in a DRY way."""
-        from apps.owasp.models.entity_member import EntityMember
-
         user = User()
         entity_ids = [1, 2]
         expected_entities = f"mocked_{property_name}"

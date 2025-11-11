@@ -172,22 +172,28 @@ class TestSyncRepository:
         self, mock_common_deps, mock_gh_repository
     ):
         """Tests that a contributor is skipped if User.update_data returns None."""
-        gh_contributor = MagicMock(name="gh_contributor")
-        mock_gh_repository.get_contributors.return_value = [gh_contributor]
+        gh_valid = MagicMock(name="gh_contributor_valid")
+        gh_invalid = MagicMock(name="gh_contributor_invalid")
+        mock_gh_repository.get_contributors.return_value = [gh_valid, gh_invalid]
         mock_common_deps["RepositoryContributor"].update_data.side_effect = (
             lambda gh_contributor, **kwargs: gh_contributor  # noqa: ARG005
         )
+        owner_user = MagicMock(name="owner_user")
+        valid_user = MagicMock(name="valid_user")
         mock_common_deps["User"].update_data.side_effect = [
-            gh_contributor,
-            gh_contributor,
+            owner_user,
+            valid_user,
             None,
         ]
 
         sync_repository(mock_gh_repository)
 
-        mock_common_deps["RepositoryContributor"].bulk_save.assert_called_once_with(
-            [gh_contributor]
+        mock_common_deps["RepositoryContributor"].update_data.assert_called_once_with(
+            gh_valid,
+            repository=mock_common_deps["Repository"].update_data.return_value,
+            user=valid_user,
         )
+        mock_common_deps["RepositoryContributor"].bulk_save.assert_called_once_with([gh_valid])
 
     def test_no_organization_on_gh_repository(self, mock_common_deps, mock_gh_repository):
         """Tests that sync works correctly when the repo has no organization."""

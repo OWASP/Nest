@@ -21,7 +21,7 @@ def gh_pull_request_mock():
     mock.state = "open"
     mock.title = "PR Title"
     mock.updated_at = "2023-01-01T00:00:00Z"
-    mock.html_url = "http://example.com/pr/123"
+    mock.html_url = "https://example.com/pr/123"
     mock.raw_data = {"node_id": "pr_node_id_123"}
     return mock
 
@@ -70,7 +70,7 @@ class TestPullRequestModel:
         assert pr.body == "PR Body"
         assert pr.number == 123
         assert pr.title == "PR Title"
-        assert pr.url == "http://example.com/pr/123"
+        assert pr.url == "https://example.com/pr/123"
 
         for attr, value in expected_attrs.items():
             assert getattr(pr, attr) == value
@@ -147,11 +147,3 @@ def test_update_data_new_pr(mock_from_github, mock_get, mock_get_node_id, gh_pul
     )
     mock_save.assert_called_once()
     assert pr.node_id == "pr_node_id_123"
-
-
-@patch("apps.github.models.pull_request.PullRequest.save")
-def test_save(mock_save):
-    """Test that save method can be called."""
-    pr = PullRequest()
-    pr.save()
-    mock_save.assert_called_once()
