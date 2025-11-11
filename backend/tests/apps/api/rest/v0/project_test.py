@@ -32,12 +32,14 @@ def test_project_serializer_validation(project_data):
             for key, value in data.items():
                 setattr(self, key, value)
             self.nest_key = data["key"]
+            self.leaders_raw = []
 
     project = ProjectDetail.from_orm(MockProject(project_data))
 
     assert project.created_at == datetime.fromisoformat(project_data["created_at"])
     assert project.description == project_data["description"]
     assert project.key == project_data["key"]
+    assert project.leaders == []
     assert project.level == project_data["level"]
     assert project.name == project_data["name"]
     assert project.updated_at == datetime.fromisoformat(project_data["updated_at"])
