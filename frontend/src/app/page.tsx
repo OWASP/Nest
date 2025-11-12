@@ -5,6 +5,7 @@ import {
   faBook,
   faCalendar,
   faCalendarAlt,
+  faCalendarPlus,
   faCode,
   faFileCode,
   faFolder,
@@ -168,10 +169,39 @@ export default function Home() {
               <div key={`card-${event.name}`} className="overflow-hidden">
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <button
-                    className="mb-2 w-full cursor-pointer text-left text-lg font-semibold text-blue-400 hover:underline"
+                    className="mb-2 w-full cursor-pointer text-left text-lg font-semibold text-blue-400 hover:underline flex items-center justify-between"
                     onClick={() => setModalOpenIndex(index)}
                   >
                     <TruncatedText text={event.name} />
+                    {(() => {
+  function getGoogleCalendarDate(dateStr) {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toISOString().replace(/[-:.]/g, '').replace('000Z', 'Z');
+  }
+  if (!event.startDate || !event.endDate) {
+    return null;
+  }
+  const gCalStartDate = getGoogleCalendarDate(event.startDate);
+  const gCalEndDate = getGoogleCalendarDate(event.endDate);
+  const title = encodeURIComponent(event.name);
+  const details = encodeURIComponent(event.summary || ""); 
+  const location = encodeURIComponent(event.suggestedLocation || ""); 
+  const dates = `${gCalStartDate}/${gCalEndDate}`;
+  const googleCalendarLink = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
+  return (
+    <a 
+      href={googleCalendarLink} 
+      target="_blank" 
+      rel="noopener noreferrer"
+      title="Add to Google Calendar"
+      onClick={(e) => e.stopPropagation()} 
+      className="text-gray-600 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400 p-1"
+    >
+      <FontAwesomeIcon icon={faCalendarPlus} className="h-4 w-4" />
+    </a>
+  );
+})()}
                   </button>
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-2 flex items-center">
