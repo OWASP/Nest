@@ -90,6 +90,17 @@ resource "aws_security_group" "redis" {
   }
 }
 
+resource "aws_security_group_rule" "rds_from_lambda" {
+  count                    = var.create_rds_proxy ? 0 : 1
+  description              = "PostgreSQL from Lambda"
+  from_port                = var.db_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.rds.id
+  source_security_group_id = aws_security_group.lambda.id
+  to_port                  = var.db_port
+  type                     = "ingress"
+}
+
 resource "aws_security_group_rule" "rds_from_proxy" {
   count                    = var.create_rds_proxy ? 1 : 0
   type                     = "ingress"
