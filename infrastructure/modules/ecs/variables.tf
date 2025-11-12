@@ -9,11 +9,10 @@ variable "common_tags" {
   default     = {}
 }
 
-variable "django_environment_variables" {
-  description = "A map of environment variables for the Django container."
+variable "container_parameters_arns" {
+  description = "Map of environment variable names to the ARNs of all SSM parameters."
   type        = map(string)
   default     = {}
-  sensitive   = true
 }
 
 variable "environment" {
