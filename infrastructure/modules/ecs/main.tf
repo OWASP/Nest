@@ -210,7 +210,7 @@ module "load_data_task" {
     pip install --target=/tmp/awscli-packages awscli
     export PYTHONPATH="/tmp/awscli-packages:$PYTHONPATH"
     python /tmp/awscli-packages/bin/aws s3 cp s3://${var.fixtures_s3_bucket}/nest.json.gz /tmp/nest.json.gz
-    python manage.py loaddata /tmp/nest.json.gz -v 3
+    python manage.py load_data --fixture-path /tmp/nest.json.gz
     EOT
   ]
   common_tags                  = var.common_tags
