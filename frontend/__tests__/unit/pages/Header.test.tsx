@@ -81,8 +81,12 @@ jest.mock('components/NavDropDown', () => {
     return (
       <div data-testid="nav-dropdown">
         {link.text}
-        {link.submenu?.map((sub: { href: string; text: string }, i: number) => (
-          <a key={i} href={sub.href} className={pathname === sub.href ? 'active' : ''}>
+        {link.submenu?.map((sub: { href: string; text: string }) => (
+          <a
+            key={`${sub.text}-${sub.href}`}
+            href={sub.href}
+            className={pathname === sub.href ? 'active' : ''}
+          >
             {sub.text}
           </a>
         ))}
