@@ -23,7 +23,12 @@ const RepositoryCard: React.FC<RepositoryCardListProps> = ({
     <div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {displayedRepositories.map((repository) => {
-          return <RepositoryItem key={`${repository.organization.login}-${repository.key}`} details={repository} />
+          return (
+            <RepositoryItem
+              key={`${repository.organization.login}-${repository.key}`}
+              details={repository}
+            />
+          )
         })}
       </div>
       {repositories.length > maxInitialDisplay && <ShowMoreButton onToggle={toggleRepositories} />}
