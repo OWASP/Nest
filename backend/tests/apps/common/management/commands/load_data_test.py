@@ -1,7 +1,7 @@
 import contextlib
 from unittest.mock import MagicMock, patch
 
-from apps.common.management.commands.load_data import Command
+from django.core.management import call_command
 
 
 class TestLoadDataCommand:
@@ -26,8 +26,7 @@ class TestLoadDataCommand:
         mock_unregister.return_value = None
         mock_register.return_value = None
 
-        command = Command()
-        command.handle()
+        call_command("load_data")
 
         mock_unregister.assert_called_once()
         mock_register.assert_called_once()
@@ -50,13 +49,12 @@ class TestLoadDataCommand:
         """Test that indexing is re-enabled even if call_command fails."""
         mock_call_command.side_effect = Exception("Call command failed")
 
-        command = Command()
         with patch("contextlib.suppress") as mock_suppress:
             mock_suppress.return_value.__enter__ = MagicMock()
             mock_suppress.return_value.__exit__ = MagicMock()
 
             with contextlib.suppress(Exception):
-                command.handle()
+                call_command("load_data")
 
         mock_unregister.assert_called_once()
         mock_register.assert_called_once()
