@@ -31,7 +31,12 @@ class Repository(RepositoryBase):
 class RepositoryDetail(RepositoryBase):
     """Detail schema for Repository (used in single item endpoints)."""
 
+    commits_count: int
+    contributors_count: int
     description: str | None = None
+    forks_count: int
+    open_issues_count: int
+    stars_count: int
 
 
 class RepositoryError(Schema):

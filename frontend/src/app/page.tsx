@@ -357,8 +357,8 @@ export default function Home() {
           </div>
         </SecondaryCard>
         <div className="grid gap-6 lg:grid-cols-5">
-          {counterData.map((stat, index) => (
-            <div key={index}>
+          {counterData.map((stat) => (
+            <div key={stat.label}>
               <SecondaryCard className="text-center">
                 <div className="mb-2 text-3xl font-bold text-blue-400">
                   <AnimatedCounter end={stat.value} duration={2} />+
