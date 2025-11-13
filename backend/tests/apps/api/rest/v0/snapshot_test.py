@@ -102,7 +102,7 @@ class TestSnapshotAPI:
         mock_filter.return_value.first.return_value = None
         request = self.factory.get("")
 
-        response = get_snapshot(request, snapshot_key="non-existent")
+        response = get_snapshot(request, snapshot_id="non-existent")
 
         assert response.status_code == HTTPStatus.NOT_FOUND
 
@@ -111,7 +111,7 @@ class TestSnapshotAPI:
         mock_filter.return_value.first.return_value = self.snapshot
         request = self.factory.get("")
 
-        response = get_snapshot(request, snapshot_key=self.snapshot.key)
+        response = get_snapshot(request, snapshot_id=self.snapshot.key)
 
         assert response.key == self.snapshot.key
         assert response.title == self.snapshot.title
@@ -123,7 +123,7 @@ class TestSnapshotAPI:
         mock_filter.return_value.first.return_value = None
         request = self.factory.get("")
 
-        response = list_snapshot_chapters(request, snapshot_key="non-existent")
+        response = list_snapshot_chapters(request, snapshot_id="non-existent")
 
         assert len(response) == 0
 
@@ -132,7 +132,7 @@ class TestSnapshotAPI:
         mock_filter.return_value.first.return_value = self.snapshot
         request = self.factory.get("")
 
-        response = list_snapshot_chapters(request, snapshot_key=self.snapshot.key)
+        response = list_snapshot_chapters(request, snapshot_id=self.snapshot.key)
 
         assert len(response) == 1
         assert response[0] == self.chapter
@@ -144,7 +144,7 @@ class TestSnapshotAPI:
         mock_filter.return_value.first.return_value = self.snapshot
         request = self.factory.get("")
 
-        response = list_snapshot_issues(request, snapshot_key=self.snapshot.key)
+        response = list_snapshot_issues(request, snapshot_id=self.snapshot.key)
 
         assert len(response) == 1
         assert response[0] == self.issue
@@ -154,7 +154,7 @@ class TestSnapshotAPI:
         mock_filter.return_value.first.return_value = None
         request = self.factory.get("")
 
-        response = list_snapshot_issues(request, snapshot_key="non-existent")
+        response = list_snapshot_issues(request, snapshot_id="non-existent")
 
         assert len(response) == 0
 
@@ -163,7 +163,7 @@ class TestSnapshotAPI:
         mock_filter.return_value.first.return_value = self.snapshot
         request = self.factory.get("")
 
-        response = list_snapshot_issues(request, snapshot_key=self.snapshot.key)
+        response = list_snapshot_issues(request, snapshot_id=self.snapshot.key)
 
         assert len(response) == 1
         assert response[0] == self.issue
@@ -174,7 +174,7 @@ class TestSnapshotAPI:
         mock_filter.return_value.first.return_value = None
         request = self.factory.get("")
 
-        response = list_snapshot_members(request, snapshot_key="non-existent")
+        response = list_snapshot_members(request, snapshot_id="non-existent")
 
         assert len(response) == 0
 
@@ -183,7 +183,7 @@ class TestSnapshotAPI:
         mock_filter.return_value.first.return_value = self.snapshot
         request = self.factory.get("")
 
-        response = list_snapshot_members(request, snapshot_key=self.snapshot.key)
+        response = list_snapshot_members(request, snapshot_id=self.snapshot.key)
 
         assert len(response) == 1
         assert response[0] == self.user
@@ -194,7 +194,7 @@ class TestSnapshotAPI:
         mock_filter.return_value.first.return_value = None
         request = self.factory.get("")
 
-        response = list_snapshot_projects(request, snapshot_key="non-existent")
+        response = list_snapshot_projects(request, snapshot_id="non-existent")
 
         assert len(response) == 0
 
@@ -203,7 +203,7 @@ class TestSnapshotAPI:
         mock_filter.return_value.first.return_value = self.snapshot
         request = self.factory.get("")
 
-        response = list_snapshot_projects(request, snapshot_key=self.snapshot.key)
+        response = list_snapshot_projects(request, snapshot_id=self.snapshot.key)
 
         assert len(response) == 1
         assert response[0] == self.project
@@ -215,7 +215,7 @@ class TestSnapshotAPI:
         mock_filter.return_value.first.return_value = self.snapshot
         request = self.factory.get("")
 
-        response = list_snapshot_releases(request, snapshot_key=self.snapshot.key)
+        response = list_snapshot_releases(request, snapshot_id=self.snapshot.key)
 
         assert len(response) == 1
         assert response[0] == self.release
@@ -225,7 +225,7 @@ class TestSnapshotAPI:
         mock_filter.return_value.first.return_value = None
         request = self.factory.get("")
 
-        response = list_snapshot_releases(request, snapshot_key="non-existent")
+        response = list_snapshot_releases(request, snapshot_id="non-existent")
 
         assert len(response) == 0
 
@@ -234,7 +234,7 @@ class TestSnapshotAPI:
         mock_filter.return_value.first.return_value = self.snapshot
         request = self.factory.get("")
 
-        response = list_snapshot_releases(request, snapshot_key=self.snapshot.key)
+        response = list_snapshot_releases(request, snapshot_id=self.snapshot.key)
 
         assert len(response) == 1
         assert response[0] == self.release

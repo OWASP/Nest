@@ -39,13 +39,6 @@ class Snapshot(models.Model):
         """Return a string representation of the snapshot."""
         return self.title
 
-    def save(self, *args, **kwargs) -> None:
-        """Save the snapshot instance."""
-        if not self.key:  # automatically set the key
-            self.key = now().strftime("%Y-%m")
-
-        super().save(*args, **kwargs)
-
     @property
     def new_chapters_count(self) -> int:
         """Return the count of new chapters."""
@@ -70,3 +63,10 @@ class Snapshot(models.Model):
     def new_users_count(self) -> int:
         """Return the count of new users."""
         return self.new_users.count()
+
+    def save(self, *args, **kwargs) -> None:
+        """Save the snapshot instance."""
+        if not self.key:  # automatically set the key
+            self.key = now().strftime("%Y-%m")
+
+        super().save(*args, **kwargs)
