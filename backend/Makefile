@@ -21,18 +21,15 @@ clean-backend-docker:
 create-superuser:
 	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
 
-ecs-%:
-	@$(MAKE) $* MAKE_EXEC=direct
-
 exec-backend-command:
-ifeq ($(MAKE_EXEC),direct)
+ifeq ($(EXEC_MODE),direct)
 	@$(CMD)
 else
 	@docker exec -i nest-backend $(CMD)
 endif
 
 exec-backend-command-it:
-ifeq ($(MAKE_EXEC),direct)
+ifeq ($(EXEC_MODE),direct)
 	@$(CMD)
 else
 	@docker exec -it nest-backend $(CMD) 2>/dev/null

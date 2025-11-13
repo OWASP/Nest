@@ -120,7 +120,7 @@ module "sync_data_task" {
   source = "./modules/task"
 
   aws_region                   = var.aws_region
-  command                      = ["make", "ecs-sync-data"]
+  command                      = ["/bin/sh", "-c", "EXEC_MODE=direct make sync-data"]
   common_tags                  = var.common_tags
   container_parameters_arns    = var.container_parameters_arns
   cpu                          = var.sync_data_task_cpu
@@ -146,8 +146,8 @@ module "owasp_update_project_health_metrics_task" {
     "-c",
     <<-EOT
     set -e
-    make ecs-owasp-update-project-health-requirements
-    make ecs-owasp-update-project-health-metrics
+    EXEC_MODE=direct make owasp-update-project-health-requirements
+    EXEC_MODE=direct make owasp-update-project-health-metrics
     EOT
   ]
   common_tags                  = var.common_tags
@@ -170,7 +170,7 @@ module "owasp_update_project_health_scores_task" {
   source = "./modules/task"
 
   aws_region                   = var.aws_region
-  command                      = ["make", "ecs-owasp-update-project-health-scores"]
+  command                      = ["/bin/sh", "-c", "EXEC_MODE=direct make owasp-update-project-health-scores"]
   common_tags                  = var.common_tags
   container_parameters_arns    = var.container_parameters_arns
   cpu                          = var.update_project_health_scores_task_cpu
@@ -191,7 +191,7 @@ module "migrate_task" {
   source = "./modules/task"
 
   aws_region                   = var.aws_region
-  command                      = ["make", "ecs-migrate"]
+  command                      = ["/bin/sh", "-c", "EXEC_MODE=direct make migrate"]
   common_tags                  = var.common_tags
   container_parameters_arns    = var.container_parameters_arns
   cpu                          = var.migrate_task_cpu
@@ -240,7 +240,7 @@ module "index_data_task" {
   source = "./modules/task"
 
   aws_region                   = var.aws_region
-  command                      = ["make", "ecs-index-data"]
+  command                      = ["/bin/sh", "-c", "EXEC_MODE=direct make index-data"]
   common_tags                  = var.common_tags
   container_parameters_arns    = var.container_parameters_arns
   cpu                          = var.index_data_task_cpu
