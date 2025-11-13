@@ -51,7 +51,7 @@ FROM python:3.13.7-alpine
 ARG OWASP_GID
 ARG OWASP_UID
 
-RUN apk update && apk add make && \
+RUN apk update && apk --no-cache add make && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp
 
