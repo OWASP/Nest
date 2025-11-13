@@ -1,27 +1,23 @@
 {
   "staging": {
     "app_function": "wsgi.application",
-    "django_settings": "settings.staging",
-    "environment_variables": {
-      "DJANGO_ALGOLIA_APPLICATION_ID": "${DJANGO_ALGOLIA_APPLICATION_ID}",
-      "DJANGO_ALGOLIA_WRITE_API_KEY": "${DJANGO_ALGOLIA_WRITE_API_KEY}",
-      "DJANGO_ALLOWED_HOSTS": "${DJANGO_ALLOWED_HOSTS}",
-      "DJANGO_AWS_ACCESS_KEY_ID": "${DJANGO_AWS_ACCESS_KEY_ID}",
-      "DJANGO_AWS_SECRET_ACCESS_KEY": "${DJANGO_AWS_SECRET_ACCESS_KEY}",
-      "DJANGO_CONFIGURATION": "Staging",
-      "DJANGO_DB_HOST": "${DJANGO_DB_HOST}",
-      "DJANGO_DB_NAME": "${DJANGO_DB_NAME}",
-      "DJANGO_DB_USER": "${DJANGO_DB_USER}",
-      "DJANGO_DB_PORT": "${DJANGO_DB_PORT}",
-      "DJANGO_DB_PASSWORD": "${DJANGO_DB_PASSWORD}",
-      "DJANGO_OPEN_AI_SECRET_KEY": "${DJANGO_OPEN_AI_SECRET_KEY}",
-      "DJANGO_REDIS_HOST": "${DJANGO_REDIS_HOST}",
-      "DJANGO_REDIS_PASSWORD": "${DJANGO_REDIS_PASSWORD}",
-      "DJANGO_SECRET_KEY": "${DJANGO_SECRET_KEY}",
-      "DJANGO_SENTRY_DSN": "${DJANGO_SENTRY_DSN}",
-      "DJANGO_SLACK_BOT_TOKEN": "${DJANGO_SLACK_BOT_TOKEN}",
-      "DJANGO_SLACK_SIGNING_SECRET": "${DJANGO_SLACK_SIGNING_SECRET}"
+    "aws_environment_variables": {
+      "AWS_SYSTEMS_MANAGER_PARAM_STORE_PATH": "/owasp-nest/staging"
     },
+    "django_settings": "settings.staging",
+    "extra_permissions": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "ssm:GetParametersByPath",
+          "ssm:GetParameter"
+        ],
+        "Resource": [
+          "arn:aws:ssm:${AWS_REGION}:${AWS_ACCOUNT_ID}:parameter/owasp-nest/staging",
+          "arn:aws:ssm:${AWS_REGION}:${AWS_ACCOUNT_ID}:parameter/owasp-nest/staging/*"
+        ]
+      }
+    ],
     "manage_roles": true,
     "project_name": "nest-backend",
     "runtime": "python3.13",

@@ -9,11 +9,10 @@ variable "common_tags" {
   default     = {}
 }
 
-variable "django_environment_variables" {
-  description = "A map of environment variables for the Django container."
+variable "container_parameters_arns" {
+  description = "Map of environment variable names to the ARNs of all SSM parameters."
   type        = map(string)
   default     = {}
-  sensitive   = true
 }
 
 variable "environment" {
@@ -69,7 +68,7 @@ variable "migrate_task_cpu" {
 variable "migrate_task_memory" {
   description = "The memory for the migrate task"
   type        = string
-  default     = "2048"
+  default     = "1024"
 }
 
 variable "private_subnet_ids" {
@@ -91,7 +90,7 @@ variable "sync_data_task_cpu" {
 variable "sync_data_task_memory" {
   description = "The memory for the sync-data task"
   type        = string
-  default     = "2048"
+  default     = "1024"
 }
 
 variable "update_project_health_metrics_task_cpu" {
@@ -103,7 +102,7 @@ variable "update_project_health_metrics_task_cpu" {
 variable "update_project_health_metrics_task_memory" {
   description = "The memory for the update-project-health-metrics task"
   type        = string
-  default     = "2048"
+  default     = "1024"
 }
 
 variable "update_project_health_scores_task_cpu" {
@@ -115,5 +114,5 @@ variable "update_project_health_scores_task_cpu" {
 variable "update_project_health_scores_task_memory" {
   description = "The memory for the update-project-health-scores task"
   type        = string
-  default     = "2048"
+  default     = "1024"
 }

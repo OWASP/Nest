@@ -38,16 +38,20 @@ RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_G
 COPY apps apps
 COPY docker/entrypoint.sh entrypoint.sh
 COPY manage.py wsgi.py ./
+COPY Makefile Makefile
 COPY settings settings
 COPY static static
 COPY templates templates
+
+# Required to run make targets
+RUN ln -s . backend
 
 FROM python:3.13.7-alpine
 
 ARG OWASP_GID
 ARG OWASP_UID
 
-RUN apk update && \
+RUN apk update && apk --no-cache add make && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp
 
