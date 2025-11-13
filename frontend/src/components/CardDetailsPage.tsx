@@ -156,8 +156,8 @@ const DetailsCard = ({
               title={<AnchorTitle title="Statistics" />}
               className="md:col-span-2"
             >
-              {stats.map((stat, index) => (
-                <div key={index}>
+              {stats.map((stat) => (
+                <div key={`${stat.unit}-${stat.value}`}>
                   <InfoBlock
                     className="pb-1"
                     icon={stat.icon}
@@ -313,9 +313,9 @@ export const SocialLinks = ({ urls }) => {
     <div>
       <strong>Social Links</strong>
       <div className="mt-2 flex flex-wrap gap-3">
-        {urls.map((url, index) => (
+        {urls.map((url) => (
           <a
-            key={index}
+            key={url}
             href={url}
             target="_blank"
             rel="noopener noreferrer"

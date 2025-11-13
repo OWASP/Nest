@@ -51,26 +51,24 @@ const leaders = {
 const projectKey = 'nest'
 
 const About = () => {
-  const {
-    data: projectMetadataResponse,
-    error: projectMetadataRequestError,
-    loading: projectMetadataLoading,
-  } = useQuery(GetProjectMetadataDocument, {
-    variables: { key: projectKey },
-  })
+  const { data: projectMetadataResponse, error: projectMetadataRequestError } = useQuery(
+    GetProjectMetadataDocument,
+    {
+      variables: { key: projectKey },
+    }
+  )
 
-  const {
-    data: topContributorsResponse,
-    error: topContributorsRequestError,
-    loading: topContributorsLoading,
-  } = useQuery(GetTopContributorsDocument, {
-    variables: {
-      excludedUsernames: Object.keys(leaders),
-      hasFullName: true,
-      key: projectKey,
-      limit: 24,
-    },
-  })
+  const { data: topContributorsResponse, error: topContributorsRequestError } = useQuery(
+    GetTopContributorsDocument,
+    {
+      variables: {
+        excludedUsernames: Object.keys(leaders),
+        hasFullName: true,
+        key: projectKey,
+        limit: 24,
+      },
+    }
+  )
 
   const { leadersData, isLoading: leadersLoading } = useLeadersData()
 
@@ -97,7 +95,12 @@ const About = () => {
     }
   }, [topContributorsResponse, topContributorsRequestError])
 
-  const isLoading = projectMetadataLoading || topContributorsLoading || leadersLoading
+  const isLoading =
+    !projectMetadataResponse ||
+    !topContributorsResponse ||
+    (projectMetadataRequestError && !projectMetadata) ||
+    (topContributorsRequestError && !topContributors) ||
+    leadersLoading
 
   if (isLoading) {
     return <LoadingSpinner />
@@ -251,8 +254,15 @@ const About = () => {
           </SecondaryCard>
         )}
         <SecondaryCard icon={faScroll} title={<AnchorTitle title="Our Story" />}>
-          {projectStory.map((text, index) => (
-            <div key={`story-${index}`} className="mb-4">
+          {projectStory.map((text) => (
+            <div
+              key={text
+                .slice(0, 40)
+                .trim()
+                .replaceAll(' ', '-')
+                .replaceAll(/[^\w-]/g, '')}
+              className="mb-4"
+            >
               <div>
                 <Markdown content={text} />
               </div>
