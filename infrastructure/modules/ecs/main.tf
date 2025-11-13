@@ -120,7 +120,7 @@ module "sync_data_task" {
   source = "./modules/task"
 
   aws_region                   = var.aws_region
-  command                      = ["python", "manage.py", "sync-data"]
+  command                      = ["make", "ecs-sync-data"]
   common_tags                  = var.common_tags
   container_parameters_arns    = var.container_parameters_arns
   cpu                          = var.sync_data_task_cpu
@@ -140,8 +140,16 @@ module "sync_data_task" {
 module "owasp_update_project_health_metrics_task" {
   source = "./modules/task"
 
-  aws_region                   = var.aws_region
-  command                      = ["/bin/sh", "-c", "python manage.py owasp-update-project-health-requirements && python manage.py owasp-update-project-health-metrics"]
+  aws_region = var.aws_region
+  command = [
+    "/bin/sh",
+    "-c",
+    <<-EOT
+    set -e
+    make ecs-owasp-update-project-health-requirements
+    make ecs-owasp-update-project-health-metrics
+    EOT
+  ]
   common_tags                  = var.common_tags
   container_parameters_arns    = var.container_parameters_arns
   cpu                          = var.update_project_health_metrics_task_cpu
@@ -162,7 +170,7 @@ module "owasp_update_project_health_scores_task" {
   source = "./modules/task"
 
   aws_region                   = var.aws_region
-  command                      = ["python", "manage.py", "owasp-update-project-health-scores"]
+  command                      = ["make", "ecs-owasp-update-project-health-scores"]
   common_tags                  = var.common_tags
   container_parameters_arns    = var.container_parameters_arns
   cpu                          = var.update_project_health_scores_task_cpu
@@ -183,7 +191,7 @@ module "migrate_task" {
   source = "./modules/task"
 
   aws_region                   = var.aws_region
-  command                      = ["python", "manage.py", "migrate"]
+  command                      = ["make", "ecs-migrate"]
   common_tags                  = var.common_tags
   container_parameters_arns    = var.container_parameters_arns
   cpu                          = var.migrate_task_cpu
@@ -231,17 +239,8 @@ module "load_data_task" {
 module "index_data_task" {
   source = "./modules/task"
 
-  aws_region = var.aws_region
-  command = [
-    "/bin/sh",
-    "-c",
-    <<-EOT
-    set -e
-    python manage.py algolia_reindex
-    python manage.py algolia_update_replicas
-    python manage.py algolia_update_synonyms
-    EOT
-  ]
+  aws_region                   = var.aws_region
+  command                      = ["make", "ecs-index-data"]
   common_tags                  = var.common_tags
   container_parameters_arns    = var.container_parameters_arns
   cpu                          = var.index_data_task_cpu
