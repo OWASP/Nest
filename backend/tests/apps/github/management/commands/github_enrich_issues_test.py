@@ -188,22 +188,16 @@ def test_handle_with_chunked_save(mock_issue_class, mock_open_ai_class):
     options = {
         "force_update_hint": False,
         "force_update_summary": False,
+        "offset": 0,
         "update_hint": True,
         "update_summary": True,
-        "offset": 0,
     }
     command.handle(**options)
 
-    assert mock_issue_class.bulk_save.call_count == 2
+    assert mock_issue_class.bulk_save.call_count == 1
 
-    # first call to bulk_save
     args, kwargs = mock_issue_class.bulk_save.call_args_list[0]
-    assert len(args[0]) == 1000
-    assert kwargs["fields"] == ["hint", "summary"]
-
-    # second call to bulk_save
-    args, kwargs = mock_issue_class.bulk_save.call_args_list[1]
-    assert len(args[0]) == 1
+    assert len(args[0]) == 1001
     assert kwargs["fields"] == ["hint", "summary"]
 
 

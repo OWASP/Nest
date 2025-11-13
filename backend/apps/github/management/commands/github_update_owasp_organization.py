@@ -56,10 +56,10 @@ class Command(BaseCommand):
             projects = []
 
             offset = options["offset"]
-            repository_synced = options["repository"]
+            repository = options["repository"]
 
-            if repository_synced:
-                gh_repositories = [gh_owasp_organization.get_repo(repository_synced)]
+            if repository:
+                gh_repositories = [gh_owasp_organization.get_repo(repository)]
                 gh_repositories_count = 1
             else:
                 gh_repositories = gh_owasp_organization.get_repos(
@@ -76,7 +76,7 @@ class Command(BaseCommand):
                 print(f"{prefix:<12} {repository_url}")
 
                 try:
-                    owasp_organization, repository = sync_repository(
+                    owasp_organization, owasp_repository = sync_repository(
                         gh_repository,
                         organization=owasp_organization,
                         user=owasp_user,
@@ -84,16 +84,20 @@ class Command(BaseCommand):
 
                     # OWASP chapters.
                     if entity_key.startswith("www-chapter-"):
-                        chapters.append(Chapter.update_data(gh_repository, repository, save=False))
+                        chapters.append(
+                            Chapter.update_data(gh_repository, owasp_repository, save=False)
+                        )
 
                     # OWASP projects.
                     elif entity_key.startswith("www-project-"):
-                        projects.append(Project.update_data(gh_repository, repository, save=False))
+                        projects.append(
+                            Project.update_data(gh_repository, owasp_repository, save=False)
+                        )
 
                     # OWASP committees.
                     elif entity_key.startswith("www-committee-"):
                         committees.append(
-                            Committee.update_data(gh_repository, repository, save=False)
+                            Committee.update_data(gh_repository, owasp_repository, save=False)
                         )
                 except Exception:
                     logger.exception("Error syncing repository %s", repository_url)
@@ -103,7 +107,7 @@ class Command(BaseCommand):
             Committee.bulk_save(committees)
             Project.bulk_save(projects)
 
-            if repository_synced is None:  # The entire organization is being synced.
+            if not repository:  # The entire organization is being synced.
                 # Check repository counts.
                 local_owasp_repositories_count = Repository.objects.filter(
                     is_owasp_repository=True,
