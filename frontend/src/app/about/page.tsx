@@ -147,6 +147,7 @@ const About = () => {
           <TopContributorsList
             contributors={topContributors}
             icon={faUsers}
+            label="Wall of Fame"
             maxInitialDisplay={12}
           />
         )}
