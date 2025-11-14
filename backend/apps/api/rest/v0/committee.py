@@ -9,8 +9,6 @@ from ninja import Path, Query, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
-from apps.owasp.models.chapter import Chapter as ChapterModel
-
 
 from apps.api.decorators.cache import cache_response
 from apps.owasp.models.committee import Committee as CommitteeModel
@@ -27,7 +25,7 @@ class CommitteeBase(Schema):
     updated_at: datetime
 
     @staticmethod
-    def resolve_key(obj:ChapterModel)->str:
+    def resolve_key(obj) -> str:
         """Resolve key."""
         return obj.nest_key
 
