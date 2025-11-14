@@ -454,7 +454,7 @@ class Command(BaseCommand):
 
             Message.bulk_save(messages.copy())
             if include_replies and messages:
-                print("Fetching message replies...")
+                logger.info("Fetching message replies...")
                 for message in messages:
                     if not message.has_replies:
                         continue
@@ -546,8 +546,11 @@ class Command(BaseCommand):
             )
 
         if replies_count := len(replies):
-            print(
-                f"Saving {replies_count} repl{pluralize(replies_count, 'y,ies')} for {message.url}"
+            logger.info(
+                "Saving %s repl%s for %s",
+                replies_count,
+                pluralize(replies_count, 'y,ies'),
+                message.url
             )
             Message.bulk_save(replies)
 

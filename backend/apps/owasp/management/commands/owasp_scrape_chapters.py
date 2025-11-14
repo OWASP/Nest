@@ -32,7 +32,7 @@ class Command(BaseCommand):
         chapters = []
         for idx, chapter in enumerate(active_chapters[offset:]):
             prefix = f"{idx + offset + 1} of {active_chapters_count}"
-            print(f"{prefix:<10} {chapter.owasp_url}")
+            logger.info("%-10s s", prefix, chapter.owasp_url)
 
             scraper = OwaspScraper(chapter.owasp_url)
             if scraper.page_tree is None:
