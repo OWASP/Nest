@@ -47,7 +47,7 @@ class Command(BaseCommand):
         offset = options["offset"]
         for idx, project in enumerate(active_projects[offset:]):
             prefix = f"{idx + offset + 1} of {active_projects_count - offset}"
-            print(f"{prefix:<10} {project.owasp_url}")
+            logger.info("%-10s %s", prefix, project.owasp_url)
 
             # Generate summary
             if update_summary and (prompt := Prompt.get_owasp_project_summary()):
