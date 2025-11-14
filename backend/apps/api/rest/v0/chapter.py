@@ -25,7 +25,7 @@ class ChapterBase(Schema):
     updated_at: datetime
 
     @staticmethod
-    def resolve_key(obj) -> str:
+    def resolve_key(obj: ChapterModel) -> str:
         """Resolve key."""
         return obj.nest_key
 

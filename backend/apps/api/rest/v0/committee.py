@@ -25,7 +25,7 @@ class CommitteeBase(Schema):
     updated_at: datetime
 
     @staticmethod
-    def resolve_key(obj) -> str:
+    def resolve_key(obj: CommitteeModel) -> str:
         """Resolve key."""
         return obj.nest_key
 
