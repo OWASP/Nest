@@ -134,7 +134,7 @@ services:
       - nest-network
     volumes:
       - ../backend:/home/owasp
-      - backend-venv-nestbot-ai-assistant:/home/owasp/.venv
+      - backend-venv:/home/owasp/.venv
 
 networks:
   nest-network:
