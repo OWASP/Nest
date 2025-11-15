@@ -37,9 +37,8 @@ export const getUserLocationFromBrowser = (): Promise<UserLocation | null> => {
       return
     }
 
-    // SONARQUBE S5604: Using intrusive permissions (geolocation) is necessary for the
-    // optional "Find chapters near you" feature. User explicitly opts-in by clicking button.
-    // Location data stays client-side only. No transmission to backend.
+    // # NOSONAR Geolocation permission is necessary for "Find chapters near you" feature.
+    // User explicitly opts-in via button click. Location stays client-side only.
     // eslint-disable-next-line no-unsanitized/property
     navigator.geolocation.getCurrentPosition(
       (position) => {
