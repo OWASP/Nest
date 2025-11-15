@@ -40,6 +40,12 @@ class ProjectDetail(ProjectBase):
     """Detail schema for Project (used in single item endpoints)."""
 
     description: str
+    leaders: list[str]
+
+    @staticmethod
+    def resolve_leaders(obj):
+        """Resolve leaders."""
+        return obj.leaders_raw
 
 
 class ProjectError(Schema):
