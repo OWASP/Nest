@@ -151,7 +151,7 @@ class Base(Configuration):
             "PORT": 6379,
             "PASSWORD": REDIS_PASSWORD,
             "DB": 1,
-            "DEFAULT_TIMEOUT": 360,
+            "DEFAULT_TIMEOUT": 300,
         }
     }
 

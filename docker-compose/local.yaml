@@ -29,7 +29,7 @@ services:
       - 8000:8000
     volumes:
       - ../backend:/home/owasp
-      - backend-venv-nestbot-ai-assistant:/home/owasp/.venv
+      - backend-venv:/home/owasp/.venv
 
   cache:
     command: >
@@ -48,7 +48,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - cache-data-nestbot-ai-assistant:/data
+      - cache-data:/data
 
   db:
     container_name: nest-db
@@ -65,7 +65,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - db-data-nestbot-ai-assistant:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
 
   docs:
     container_name: nest-docs
@@ -82,7 +82,7 @@ services:
       - 8001:8001
     volumes:
       - ../docs:/home/owasp/docs
-      - docs-venv-nestbot-ai-assistant:/home/owasp/.venv
+      - docs-venv:/home/owasp/.venv
 
   frontend:
     container_name: nest-frontend
@@ -104,8 +104,8 @@ services:
       - 3000:3000
     volumes:
       - ../frontend:/home/owasp
-      - frontend-next-nestbot-ai-assistant:/home/owasp/.next
-      - frontend-node-modules-nestbot-ai-assistant:/home/owasp/node_modules
+      - frontend-next:/home/owasp/.next
+      - frontend-node-modules:/home/owasp/node_modules
 
   worker:
     container_name: nest-worker
@@ -140,9 +140,9 @@ networks:
   nest-network:
 
 volumes:
-  backend-venv-nestbot-ai-assistant:
-  cache-data-nestbot-ai-assistant:
-  db-data-nestbot-ai-assistant:
-  docs-venv-nestbot-ai-assistant:
-  frontend-next-nestbot-ai-assistant:
-  frontend-node-modules-nestbot-ai-assistant:
+  backend-venv:
+  cache-data:
+  db-data:
+  docs-venv:
+  frontend-next:
+  frontend-node-modules:
