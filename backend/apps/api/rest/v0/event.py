@@ -11,6 +11,7 @@ from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
+from apps.api.rest.v0.common import LocationFilter
 from apps.owasp.models.event import Event as EventModel
 
 router = RouterPaginated(tags=["Events"])
@@ -24,6 +25,8 @@ class EventBase(Schema):
     name: str
     start_date: datetime
     url: str | None = None
+    longitude: float | None = None
+    latitude: float | None = None
 
 
 class Event(EventBase):
@@ -52,13 +55,26 @@ class EventError(Schema):
 @decorate_view(cache_response())
 def list_events(
     request: HttpRequest,
-    ordering: Literal["start_date", "-start_date", "end_date", "-end_date"] | None = Query(
+    filters: LocationFilter = Query(...),
+    ordering: Literal[
+        "start_date", "-start_date", "end_date", "-end_date", "longitude", "-longitude"
+    ]
+    | None = Query(
         None,
         description="Ordering field",
     ),
+    *,
+    upcoming: bool | None = Query(
+        None,
+        description="Filter for upcoming events",
+    ),
 ) -> list[Event]:
-    """Get all events."""
-    return EventModel.objects.order_by(ordering or "-start_date", "-end_date")
+    """Get list of events."""
+    if upcoming:
+        return filters.filter(
+            EventModel.upcoming_events().order_by(ordering or "start_date", "end_date")
+        )
+    return filters.filter(EventModel.objects.order_by(ordering or "-start_date", "-end_date"))
 
 
 @router.get(
