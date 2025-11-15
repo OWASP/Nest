@@ -91,6 +91,7 @@ const ChaptersPage = () => {
         <ChapterMapWrapper
           geoLocData={searchQuery ? chapters : geoLocData}
           showLocal={true}
+          showLocationSharing={true}
           style={{
             height: '400px',
             width: '100%',
