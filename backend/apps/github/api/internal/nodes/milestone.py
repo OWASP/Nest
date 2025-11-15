@@ -3,6 +3,7 @@
 import strawberry
 import strawberry_django
 
+from apps.common.extensions import CacheFieldExtension
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models.milestone import Milestone
 
@@ -22,7 +23,7 @@ from apps.github.models.milestone import Milestone
 class MilestoneNode(strawberry.relay.Node):
     """Github Milestone Node."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def author(self) -> UserNode | None:
         """Resolve author."""
         return self.author

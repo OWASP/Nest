@@ -2,6 +2,7 @@
 
 import strawberry
 
+from apps.common.extensions import CacheFieldExtension
 from apps.owasp.api.internal.nodes.sponsor import SponsorNode
 from apps.owasp.models.sponsor import Sponsor
 
@@ -10,7 +11,7 @@ from apps.owasp.models.sponsor import Sponsor
 class SponsorQuery:
     """Sponsor queries."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def sponsors(self) -> list[SponsorNode]:
         """Resolve sponsors."""
         return sorted(

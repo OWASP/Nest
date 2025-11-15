@@ -3,6 +3,7 @@
 import strawberry
 import strawberry_django
 
+from apps.common.extensions import CacheFieldExtension
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models.pull_request import PullRequest
 
@@ -17,7 +18,7 @@ from apps.github.models.pull_request import PullRequest
 class PullRequestNode(strawberry.relay.Node):
     """GitHub pull request node."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def author(self) -> UserNode | None:
         """Resolve author."""
         return self.author

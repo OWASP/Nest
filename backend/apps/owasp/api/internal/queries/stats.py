@@ -2,6 +2,7 @@
 
 import strawberry
 
+from apps.common.extensions import CacheFieldExtension
 from apps.common.utils import round_down
 from apps.github.models.user import User
 from apps.owasp.api.internal.nodes.stats import StatsNode
@@ -14,7 +15,7 @@ from apps.slack.models.workspace import Workspace
 class StatsQuery:
     """Stats queries."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def stats_overview(self) -> StatsNode:
         """Resolve stats overview."""
         active_projects_stats = Project.active_projects_count()

@@ -4,6 +4,7 @@ import strawberry
 from django.core.exceptions import ValidationError
 from django.db.models import OuterRef, Subquery
 
+from apps.common.extensions import CacheFieldExtension
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.models.milestone import Milestone
 
@@ -12,7 +13,7 @@ from apps.github.models.milestone import Milestone
 class MilestoneQuery:
     """Github Milestone Queries."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def recent_milestones(
         self,
         *,

@@ -6,6 +6,7 @@ import strawberry
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
+from apps.common.extensions import CacheFieldExtension
 from apps.mentorship.api.internal.nodes.program import PaginatedPrograms, ProgramNode
 from apps.mentorship.models import Program
 from apps.mentorship.models.mentor import Mentor
@@ -19,7 +20,7 @@ logger = logging.getLogger(__name__)
 class ProgramQuery:
     """Program queries."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def get_program(self, program_key: str) -> ProgramNode:
         """Get a program by Key."""
         try:

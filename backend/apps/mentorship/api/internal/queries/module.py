@@ -5,6 +5,7 @@ import logging
 import strawberry
 from django.core.exceptions import ObjectDoesNotExist
 
+from apps.common.extensions import CacheFieldExtension
 from apps.mentorship.api.internal.nodes.module import ModuleNode
 from apps.mentorship.models import Module
 
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 class ModuleQuery:
     """Module queries."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def get_program_modules(self, program_key: str) -> list[ModuleNode]:
         """Get all modules by program Key. Returns an empty list if program is not found."""
         return (
@@ -25,7 +26,7 @@ class ModuleQuery:
             .order_by("started_at")
         )
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def get_project_modules(self, project_key: str) -> list[ModuleNode]:
         """Get all modules by project Key. Returns an empty list if project is not found."""
         return (
@@ -35,7 +36,7 @@ class ModuleQuery:
             .order_by("started_at")
         )
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def get_module(self, module_key: str, program_key: str) -> ModuleNode:
         """Get a single module by its key within a specific program."""
         try:

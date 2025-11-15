@@ -2,6 +2,7 @@
 
 import strawberry
 
+from apps.common.extensions import CacheFieldExtension
 from apps.github.api.internal.nodes.organization import OrganizationNode
 from apps.github.models.organization import Organization
 
@@ -10,7 +11,7 @@ from apps.github.models.organization import Organization
 class OrganizationQuery:
     """Organization queries."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def organization(
         self,
         *,

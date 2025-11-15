@@ -3,6 +3,7 @@
 import strawberry
 from django.db.models import OuterRef, Subquery
 
+from apps.common.extensions import CacheFieldExtension
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.models.release import Release
 
@@ -11,7 +12,7 @@ from apps.github.models.release import Release
 class ReleaseQuery:
     """GraphQL query class for retrieving recent GitHub releases."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def recent_releases(
         self,
         *,

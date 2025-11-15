@@ -3,6 +3,7 @@
 import strawberry
 import strawberry_django
 
+from apps.common.extensions import CacheFieldExtension
 from apps.github.models.user import User
 from apps.nest.api.internal.nodes.badge import BadgeNode
 
@@ -33,7 +34,7 @@ class UserNode:
         """Resolve badge count."""
         return self.user_badges.filter(is_active=True).count()
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def badges(self) -> list[BadgeNode]:
         """Return user badges."""
         user_badges = (

@@ -2,6 +2,7 @@
 
 import strawberry
 
+from apps.common.extensions import CacheFieldExtension
 from apps.owasp.api.internal.nodes.event import EventNode
 from apps.owasp.models.event import Event
 
@@ -10,7 +11,7 @@ from apps.owasp.models.event import Event
 class EventQuery:
     """Event queries."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def upcoming_events(self, limit: int = 6) -> list[EventNode]:
         """Resolve upcoming events."""
         return Event.upcoming_events()[:limit]

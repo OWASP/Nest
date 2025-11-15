@@ -2,6 +2,7 @@
 
 import strawberry
 
+from apps.common.extensions import CacheFieldExtension
 from apps.owasp.api.internal.nodes.chapter import ChapterNode
 from apps.owasp.models.chapter import Chapter
 
@@ -10,7 +11,7 @@ from apps.owasp.models.chapter import Chapter
 class ChapterQuery:
     """Chapter queries."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def chapter(self, key: str) -> ChapterNode | None:
         """Resolve chapter."""
         try:
@@ -18,7 +19,7 @@ class ChapterQuery:
         except Chapter.DoesNotExist:
             return None
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def recent_chapters(self, limit: int = 8) -> list[ChapterNode]:
         """Resolve recent chapters."""
         return Chapter.active_chapters.order_by("-created_at")[:limit]

@@ -4,6 +4,7 @@ from datetime import datetime
 
 import strawberry
 
+from apps.common.extensions import CacheFieldExtension
 from apps.mentorship.api.internal.nodes.enum import (
     ExperienceLevelEnum,
     ProgramStatusEnum,
@@ -28,7 +29,7 @@ class ProgramNode:
     user_role: str | None = None
     tags: list[str] | None = None
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def admins(self) -> list[MentorNode] | None:
         """Get the list of program administrators."""
         return self.admins.all()

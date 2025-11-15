@@ -2,6 +2,7 @@
 
 import strawberry
 
+from apps.common.extensions import CacheFieldExtension
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models.repository_contributor import RepositoryContributor
@@ -12,7 +13,7 @@ from apps.github.models.user import User
 class UserQuery:
     """User queries."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def top_contributed_repositories(
         self,
         login: str,
@@ -36,7 +37,7 @@ class UserQuery:
             .order_by("-contributions_count")
         ]
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def user(
         self,
         login: str,

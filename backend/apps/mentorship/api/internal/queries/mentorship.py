@@ -2,6 +2,7 @@
 
 import strawberry
 
+from apps.common.extensions import CacheFieldExtension
 from apps.github.models.user import User as GithubUser
 from apps.mentorship.models.mentor import Mentor
 
@@ -17,7 +18,7 @@ class UserRolesResult:
 class MentorshipQuery:
     """GraphQL queries for mentorship-related data."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def is_mentor(self, login: str) -> bool:
         """Check if a GitHub login is a mentor."""
         if not login or not login.strip():
