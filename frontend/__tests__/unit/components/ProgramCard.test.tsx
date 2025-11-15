@@ -7,12 +7,17 @@ import type { Program } from 'types/mentorship'
 import ProgramCard from 'components/ProgramCard'
 
 jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, className }: { icon: unknown; className?: string }) => (
-    <span
-      data-testid={`icon-${icon === faEye ? 'eye' : icon === faEdit ? 'edit' : 'unknown'}`}
-      className={className}
-    />
-  ),
+  FontAwesomeIcon: ({ icon, className }: { icon: unknown; className?: string }) => {
+    let iconName = 'unknown'
+
+    if (icon === faEye) {
+      iconName = 'eye'
+    } else if (icon === faEdit) {
+      iconName = 'edit'
+    }
+
+    return <span data-testid={`icon-${iconName}`} className={className} />
+  },
 }))
 
 jest.mock('components/ActionButton', () => ({
