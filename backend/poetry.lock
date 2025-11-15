@@ -171,14 +171,14 @@ frozenlist = ">=1.1.0"
 
 [[package]]
 name = "algoliasearch"
-version = "4.32.0"
+version = "4.33.0"
 description = "A fully-featured and blazing-fast Python API client to interact with Algolia."
 optional = false
 python-versions = ">=3.8.1"
 groups = ["main"]
 files = [
-    {file = "algoliasearch-4.32.0-py3-none-any.whl", hash = "sha256:22f841f5bc6ff76936c5ba07d15a1aa94eb01582fa5ab9dfbf6e5de8b62c659e"},
-    {file = "algoliasearch-4.32.0.tar.gz", hash = "sha256:cc1aac9538d75f427e02daafbfcd4a9492535f7d0e96755d3c212bd1408575b3"},
+    {file = "algoliasearch-4.33.0-py3-none-any.whl", hash = "sha256:b0ffa950a25087ebe0aa099a68baeb197c4d346591c5f8d81d29ccdfad46e0bf"},
+    {file = "algoliasearch-4.33.0.tar.gz", hash = "sha256:ea4f8ada3cdad80f4628baa7afdc97aa311708ef31c1a9c556ef5d19d217b5fa"},
 ]
 
 [package.dependencies]
@@ -276,18 +276,18 @@ files = [
 
 [[package]]
 name = "boto3"
-version = "1.40.73"
+version = "1.40.74"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "boto3-1.40.73-py3-none-any.whl", hash = "sha256:85172e11e3b8d5a09504bc532b6589730ac68845410403ca3793d037b8a5d445"},
-    {file = "boto3-1.40.73.tar.gz", hash = "sha256:3716703cb8b126607533853d7e2a85f0bb23b0b9d4805c69170abead33d725ef"},
+    {file = "boto3-1.40.74-py3-none-any.whl", hash = "sha256:41fc8844b37ae27b24bcabf8369769df246cc12c09453988d0696ad06d6aa9ef"},
+    {file = "boto3-1.40.74.tar.gz", hash = "sha256:484e46bf394b03a7c31b34f90945ebe1390cb1e2ac61980d128a9079beac87d4"},
 ]
 
 [package.dependencies]
-botocore = ">=1.40.73,<1.41.0"
+botocore = ">=1.40.74,<1.41.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.14.0,<0.15.0"
 
@@ -296,14 +296,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.40.73"
+version = "1.40.74"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "botocore-1.40.73-py3-none-any.whl", hash = "sha256:87524c5fe552ecceaea72f51163b37ab35eb82aaa6a64eb80489ade7340c1d23"},
-    {file = "botocore-1.40.73.tar.gz", hash = "sha256:0650ceada268824282da9af8615f3e4cf2453be8bf85b820f9207eff958d56d0"},
+    {file = "botocore-1.40.74-py3-none-any.whl", hash = "sha256:f39f5763e35e75f0bd91212b7b36120b1536203e8003cd952ef527db79702b15"},
+    {file = "botocore-1.40.74.tar.gz", hash = "sha256:57de0b9ffeada06015b3c7e5186c77d0692b210d9e5efa294f3214df97e2f8ee"},
 ]
 
 [package.dependencies]
@@ -312,7 +312,7 @@ python-dateutil = ">=2.1,<3.0.0"
 urllib3 = {version = ">=1.25.4,<2.2.0 || >2.2.0,<3", markers = "python_version >= \"3.10\""}
 
 [package.extras]
-crt = ["awscrt (==0.27.6)"]
+crt = ["awscrt (==0.28.4)"]
 
 [[package]]
 name = "certifi"
@@ -1798,14 +1798,14 @@ langchain-core = ">=0.3.75,<2.0.0"
 
 [[package]]
 name = "langsmith"
-version = "0.4.42"
+version = "0.4.43"
 description = "Client library to connect to the LangSmith Observability and Evaluation Platform."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "langsmith-0.4.42-py3-none-any.whl", hash = "sha256:015b0a0c17eb1a61293e8cbb7d41778a4b37caddd267d54274ba94e4721b301b"},
-    {file = "langsmith-0.4.42.tar.gz", hash = "sha256:a6e808e47581403cb019b47c8c10627c1644f78ed4c03fa877d6ad661476c38f"},
+    {file = "langsmith-0.4.43-py3-none-any.whl", hash = "sha256:c97846a0b15061bc15844aac32fd1ce4a8e50983905f80a0d6079bb41b112ae3"},
+    {file = "langsmith-0.4.43.tar.gz", hash = "sha256:75c2468ab740438adfb32af8595ad8837c3af2bd1cdaf057d534182c5a07407a"},
 ]
 
 [package.dependencies]
