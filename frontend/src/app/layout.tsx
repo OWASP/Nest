@@ -6,7 +6,7 @@ import { Providers } from 'wrappers/provider'
 import { GTM_ID } from 'utils/env.client'
 import { IS_GITHUB_AUTH_ENABLED } from 'utils/env.server'
 import AutoScrollToTop from 'components/AutoScrollToTop'
-import BreadCrumbs from 'components/BreadCrumbs'
+import BreadCrumbsWrapper from 'components/BreadCrumbsWrapper'
 import Footer from 'components/Footer'
 import Header from 'components/Header'
 import ScrollToTop from 'components/ScrollToTop'
@@ -74,7 +74,7 @@ export default function RootLayout({
           <div className="flex min-h-screen flex-col">
             <AutoScrollToTop />
             <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
-            <BreadCrumbs />
+            <BreadCrumbsWrapper />
             <main className="flex flex-1 flex-col justify-center">{children}</main>
             <Footer />
             <ScrollToTop />

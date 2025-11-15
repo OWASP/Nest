@@ -18,6 +18,7 @@ import type { Project } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import PageLayout from 'components/PageLayout'
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams<{ projectKey: string }>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -89,25 +90,27 @@ const ProjectDetailsPage = () => {
   ]
 
   return (
-    <DetailsCard
-      details={projectDetails}
-      entityKey={project.key}
-      entityLeaders={project.entityLeaders}
-      healthMetricsData={project.healthMetricsList}
-      isActive={project.isActive}
-      languages={project.languages}
-      pullRequests={project.recentPullRequests}
-      recentIssues={project.recentIssues}
-      recentMilestones={project.recentMilestones}
-      recentReleases={project.recentReleases}
-      repositories={project.repositories}
-      stats={projectStats}
-      summary={project.summary}
-      title={project.name}
-      topContributors={topContributors}
-      topics={project.topics}
-      type="project"
-    />
+    <PageLayout breadcrumbData={{ projectName: project.name }}>
+      <DetailsCard
+        details={projectDetails}
+        entityKey={project.key}
+        entityLeaders={project.entityLeaders}
+        healthMetricsData={project.healthMetricsList}
+        isActive={project.isActive}
+        languages={project.languages}
+        pullRequests={project.recentPullRequests}
+        recentIssues={project.recentIssues}
+        recentMilestones={project.recentMilestones}
+        recentReleases={project.recentReleases}
+        repositories={project.repositories}
+        stats={projectStats}
+        summary={project.summary}
+        title={project.name}
+        topContributors={topContributors}
+        topics={project.topics}
+        type="project"
+      />
+    </PageLayout>
   )
 }
 

@@ -1,68 +1,98 @@
 import { render, screen } from '@testing-library/react'
-import { usePathname } from 'next/navigation'
-import BreadCrumbs from 'components/BreadCrumbs'
+import BreadCrumbRenderer from 'components/BreadCrumbs'
 import '@testing-library/jest-dom'
 
-jest.mock('next/navigation', () => ({
-  usePathname: jest.fn(),
-}))
+describe('BreadCrumbRenderer', () => {
+  const mockItems = [
+    { title: 'Home', path: '/' },
+    { title: 'Projects', path: '/projects' },
+    { title: 'OWASP ZAP', path: '/projects/zap' },
+  ]
 
-describe('BreadCrumb', () => {
-  afterEach(() => {
-    jest.clearAllMocks()
-  })
-
-  test('does not render on root path "/"', () => {
-    ;(usePathname as jest.Mock).mockReturnValue('/')
-
-    render(<BreadCrumbs />)
-    expect(screen.queryByText('Home')).not.toBeInTheDocument()
-  })
-
-  test('renders breadcrumb with multiple segments', () => {
-    ;(usePathname as jest.Mock).mockReturnValue('/dashboard/users/profile')
-
-    render(<BreadCrumbs />)
+  test('renders all breadcrumb items', () => {
+    render(<BreadCrumbRenderer items={mockItems} />)
 
     expect(screen.getByText('Home')).toBeInTheDocument()
-    expect(screen.getByText('Dashboard')).toBeInTheDocument()
-    expect(screen.getByText('Users')).toBeInTheDocument()
-    expect(screen.getByText('Profile')).toBeInTheDocument()
+    expect(screen.getByText('Projects')).toBeInTheDocument()
+    expect(screen.getByText('OWASP ZAP')).toBeInTheDocument()
   })
 
-  test('disables the last segment (non-clickable)', () => {
-    ;(usePathname as jest.Mock).mockReturnValue('/settings/account')
+  test('renders navigation element with correct aria-label', () => {
+    render(<BreadCrumbRenderer items={mockItems} />)
 
-    render(<BreadCrumbs />)
+    const nav = screen.getByRole('navigation')
+    expect(nav).toHaveAttribute('aria-label', 'breadcrumb')
+  })
 
-    const lastSegment = screen.getByText('Account')
-    expect(lastSegment).toBeInTheDocument()
-    expect(lastSegment).not.toHaveAttribute('href')
+  test('renders clickable links for non-last items', () => {
+    render(<BreadCrumbRenderer items={mockItems} />)
+
+    const homeLink = screen.getByText('Home').closest('a')
+    const projectsLink = screen.getByText('Projects').closest('a')
+
+    expect(homeLink).toHaveAttribute('href', '/')
+    expect(projectsLink).toHaveAttribute('href', '/projects')
+  })
+
+  test('disables the last item (non-clickable)', () => {
+    render(<BreadCrumbRenderer items={mockItems} />)
+
+    const lastItem = screen.getByText('OWASP ZAP')
+    expect(lastItem).not.toHaveAttribute('href')
+    expect(lastItem.tagName).toBe('SPAN')
+  })
+
+  test('applies hover styles to clickable links', () => {
+    render(<BreadCrumbRenderer items={mockItems} />)
+
+    const homeLink = screen.getByText('Home').closest('a')
+    expect(homeLink).toHaveClass('hover:text-blue-700', 'hover:underline')
+  })
+
+  test('applies disabled styling to last breadcrumb', () => {
+    render(<BreadCrumbRenderer items={mockItems} />)
+
+    const lastItem = screen.getByText('OWASP ZAP')
+    expect(lastItem).toHaveClass('cursor-default', 'font-semibold')
+  })
+
+  test('renders chevron separators between items', () => {
+    const { container } = render(<BreadCrumbRenderer items={mockItems} />)
+
+    const separators = container.querySelectorAll('[data-slot="separator"]')
+    expect(separators).toHaveLength(2)
+  })
+
+  test('handles single item (home only)', () => {
+    const singleItem = [{ title: 'Home', path: '/' }]
+    render(<BreadCrumbRenderer items={singleItem} />)
+
+    expect(screen.getByText('Home')).toBeInTheDocument()
+    const separators = screen.queryByRole('separator')
+    expect(separators).not.toBeInTheDocument()
+  })
+
+  test('handles empty items array', () => {
+    const { container } = render(<BreadCrumbRenderer items={[]} />)
+
+    const breadcrumbList = container.querySelector('[data-slot="list"]')
+    expect(breadcrumbList?.children).toHaveLength(0)
+  })
+
+  test('applies correct wrapper styling', () => {
+    const { container } = render(<BreadCrumbRenderer items={mockItems} />)
+
+    const wrapper = container.querySelector('.mt-16')
+    expect(wrapper).toHaveClass('w-full', 'pt-4')
   })
 
   test('links have correct href attributes', () => {
-    ;(usePathname as jest.Mock).mockReturnValue('/dashboard/users/profile')
-
-    render(<BreadCrumbs />)
+    render(<BreadCrumbRenderer items={mockItems} />)
 
     const homeLink = screen.getByText('Home').closest('a')
-    const dashboardLink = screen.getByText('Dashboard').closest('a')
-    const usersLink = screen.getByText('Users').closest('a')
+    const projectsLink = screen.getByText('Projects').closest('a')
 
     expect(homeLink).toHaveAttribute('href', '/')
-    expect(dashboardLink).toHaveAttribute('href', '/dashboard')
-    expect(usersLink).toHaveAttribute('href', '/dashboard/users')
-  })
-
-  test('links have hover styles', () => {
-    ;(usePathname as jest.Mock).mockReturnValue('/dashboard/users')
-
-    render(<BreadCrumbs />)
-
-    const homeLink = screen.getByText('Home').closest('a')
-    const dashboardLink = screen.getByText('Dashboard').closest('a')
-
-    expect(homeLink).toHaveClass('hover:text-blue-700', 'hover:underline')
-    expect(dashboardLink).toHaveClass('hover:text-blue-700', 'hover:underline')
+    expect(projectsLink).toHaveAttribute('href', '/projects')
   })
 })
