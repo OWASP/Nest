@@ -72,6 +72,9 @@ const ProgramActions: React.FC<ProgramActionsProps> = ({ status, setStatus }) =>
         type="button"
         onClick={() => setDropdownOpen((prev) => !prev)}
         className="rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
+        aria-label="Program actions menu"
+        aria-expanded={dropdownOpen}
+        aria-haspopup="true"
       >
         <FontAwesomeIcon icon={faEllipsisV} />
       </button>
