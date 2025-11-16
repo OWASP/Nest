@@ -26,7 +26,7 @@ class Context(TimestampedModel):
     class Meta:
         db_table = "ai_contexts"
         verbose_name = "Context"
-        unique_together = ("entity_type", "entity_id")
+        unique_together = ("entity_type", "entity_id", "source")
 
     def __str__(self):
         """Human readable representation."""
@@ -50,12 +50,13 @@ class Context(TimestampedModel):
         entity_id = entity.pk
 
         try:
-            context = Context.objects.get(entity_type=entity_type, entity_id=entity_id)
+            context = Context.objects.get(
+                entity_type=entity_type, entity_id=entity_id, source=source
+            )
         except Context.DoesNotExist:
-            context = Context(entity_type=entity_type, entity_id=entity_id)
+            context = Context(entity_type=entity_type, entity_id=entity_id, source=source)
 
         context.content = content
-        context.source = source
 
         if save:
             context.save()
