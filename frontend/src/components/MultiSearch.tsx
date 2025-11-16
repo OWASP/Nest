@@ -45,6 +45,14 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   const debouncedSearch = useMemo(
     () =>
       debounce(async (query: string) => {
+        // Guard clause: if query is empty, clear suggestions and bail early
+        if (!query || query.trim() === '') {
+          setSuggestions([])
+          setShowSuggestions(false)
+          return
+        }
+
+        // Only send GA event when there's a non-empty query
         if (query && query.trim() !== '') {
           sendGAEvent({
             event: 'homepageSearch',
@@ -52,34 +60,30 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
             value: query,
           })
         }
-        if (query.length > 0) {
-          const results = await Promise.all(
-            indexes.map(async (index) => {
-              const data = await fetchAlgoliaData(index, query, pageCount, suggestionCount)
-              return {
-                indexName: index,
-                hits: data.hits as Chapter[] | Event[] | Organization[] | Project[] | User[],
-                totalPages: data.totalPages || 0,
-              }
-            })
-          )
-          const filteredEvents =
-            eventData?.filter((event) => event.name.toLowerCase().includes(query.toLowerCase())) ||
-            []
 
-          if (filteredEvents.length > 0) {
-            results.push({
-              indexName: 'events',
-              hits: filteredEvents.slice(0, suggestionCount) as Event[],
-              totalPages: 1,
-            })
-          }
-          setSuggestions(results.filter((result) => result.hits.length > 0) as Suggestion[])
-          setShowSuggestions(true)
-        } else {
-          setSuggestions([])
-          setShowSuggestions(false)
+        const results = await Promise.all(
+          indexes.map(async (index) => {
+            const data = await fetchAlgoliaData(index, query, pageCount, suggestionCount)
+            return {
+              indexName: index,
+              hits: data.hits as Chapter[] | Event[] | Organization[] | Project[] | User[],
+              totalPages: data.totalPages || 0,
+            }
+          })
+        )
+        const filteredEvents =
+          eventData?.filter((event) => event.name.toLowerCase().includes(query.toLowerCase())) ||
+          []
+
+        if (filteredEvents.length > 0) {
+          results.push({
+            indexName: 'events',
+            hits: filteredEvents.slice(0, suggestionCount) as Event[],
+            totalPages: 1,
+          })
         }
+        setSuggestions(results.filter((result) => result.hits.length > 0) as Suggestion[])
+        setShowSuggestions(true)
       }, 300),
     [eventData, indexes]
   )
@@ -90,11 +94,9 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     }
   }, [debouncedSearch])
 
-  const handleSuggestionClick = useCallback(
+  // Extracted navigation logic to keep handler small and testable
+  const navigateToSuggestion = useCallback(
     (suggestion: Chapter | Project | User | Event | Organization, indexName: string) => {
-      setSearchQuery(suggestion.name ?? '')
-      setShowSuggestions(false)
-
       switch (indexName) {
         case 'chapters':
           router.push(`/chapters/${suggestion.key}`)
@@ -103,7 +105,6 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           globalThis.open((suggestion as Event).url, '_blank')
           break
         case 'organizations':
-          // Use type guard to safely access login property
           if ('login' in suggestion && suggestion.login) {
             router.push(`/organizations/${suggestion.login}`)
           }
@@ -119,43 +120,84 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     [router]
   )
 
+  // Keep click handler minimal: update UI then delegate navigation
+  const handleSuggestionClick = useCallback(
+    (suggestion: Chapter | Project | User | Event | Organization, indexName: string) => {
+      setSearchQuery(suggestion.name ?? '')
+      setShowSuggestions(false)
+      navigateToSuggestion(suggestion, indexName)
+    },
+    [navigateToSuggestion]
+  )
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      // Small, focused helpers for each key action to avoid deep nesting
+      const handleEscape = () => {
         setShowSuggestions(false)
         inputRef.current?.blur()
-      } else if (event.key === 'Enter' && highlightedIndex !== null) {
+      }
+
+      const handleEnterKey = () => {
+        if (highlightedIndex === null) return
         const { index, subIndex } = highlightedIndex
         const suggestion = suggestions[index].hits[subIndex]
         handleSuggestionClick(
           suggestion as Chapter | Organization | Project | User | Event,
           suggestions[index].indexName
         )
-      } else if (event.key === 'ArrowDown') {
+      }
+
+      const handleArrowDownKey = (event: KeyboardEvent) => {
         event.preventDefault()
+        if (suggestions.length === 0) return
+
         if (highlightedIndex === null) {
           setHighlightedIndex({ index: 0, subIndex: 0 })
-        } else {
-          const { index, subIndex } = highlightedIndex
-          if (subIndex < suggestions[index].hits.length - 1) {
-            setHighlightedIndex({ index, subIndex: subIndex + 1 })
-          } else if (index < suggestions.length - 1) {
-            setHighlightedIndex({ index: index + 1, subIndex: 0 })
-          }
+          return
         }
-      } else if (event.key === 'ArrowUp') {
+
+        const { index, subIndex } = highlightedIndex
+        if (subIndex < suggestions[index].hits.length - 1) {
+          setHighlightedIndex({ index, subIndex: subIndex + 1 })
+        } else if (index < suggestions.length - 1) {
+          setHighlightedIndex({ index: index + 1, subIndex: 0 })
+        }
+      }
+
+      const handleArrowUpKey = (event: KeyboardEvent) => {
         event.preventDefault()
-        if (highlightedIndex !== null) {
-          const { index, subIndex } = highlightedIndex
-          if (subIndex > 0) {
-            setHighlightedIndex({ index, subIndex: subIndex - 1 })
-          } else if (index > 0) {
-            setHighlightedIndex({
-              index: index - 1,
-              subIndex: suggestions[index - 1].hits.length - 1,
-            })
-          }
+        if (highlightedIndex === null) return
+
+        const { index, subIndex } = highlightedIndex
+        if (subIndex > 0) {
+          setHighlightedIndex({ index, subIndex: subIndex - 1 })
+        } else if (index > 0) {
+          setHighlightedIndex({
+            index: index - 1,
+            subIndex: suggestions[index - 1].hits.length - 1,
+          })
         }
+      }
+
+      if (event.key === 'Escape') {
+        handleEscape()
+        return
+      }
+
+      if (event.key === 'Enter') {
+        handleEnterKey()
+        return
+      }
+
+      if (event.key === 'ArrowDown') {
+        handleArrowDownKey(event)
+        return
+      }
+
+      if (event.key === 'ArrowUp') {
+        handleArrowUpKey(event)
+        return
       }
     }
 
@@ -164,7 +206,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [searchQuery, suggestions, highlightedIndex, handleSuggestionClick])
+  }, [suggestions, highlightedIndex, handleSuggestionClick])
 
   useEffect(() => {
     inputRef.current?.focus()
