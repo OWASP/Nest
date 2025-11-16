@@ -56,6 +56,14 @@ class Issue(GenericIssueModel):
         null=True,
         related_name="created_issues",
     )
+    level = models.ForeignKey(
+        "mentorship.TaskLevel",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="issues",
+        help_text="The difficulty level of this issue.",
+    )
 
     comments = GenericRelation("github.Comment", related_query_name="issue")
 
