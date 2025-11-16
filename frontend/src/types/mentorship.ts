@@ -43,8 +43,9 @@ export type Module = {
   mentors: Contributor[]
   startedAt: string
   endedAt: string
-  domains?: string[]
-  tags?: string[]
+  domains: string[]
+  tags: string[]
+  labels: string[]
 }
 
 export type ModuleFormData = {
@@ -55,6 +56,7 @@ export type ModuleFormData = {
   endedAt: string
   domains: string
   tags: string
+  labels: string
   projectName: string
   projectId: string
   mentorLogins: string

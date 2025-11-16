@@ -166,6 +166,9 @@ class Command(BaseCommand):
                                 )
                                 if assigned_date:
                                     updates["assigned_at"] = assigned_date
+                                    self.stdout.write(
+                                        f"Updated assignment date for issue #{issue.number}"
+                                    )
 
                     if created:
                         num_tasks_created += 1

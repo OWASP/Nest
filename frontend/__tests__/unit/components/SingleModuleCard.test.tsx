@@ -106,6 +106,7 @@ const mockModule: Module = {
   endedAt: '2024-12-31T23:59:59Z',
   domains: ['frontend', 'backend'],
   tags: ['react', 'nodejs'],
+  labels: ['good first issue', 'bug'],
 }
 
 const mockAdmins = [{ login: 'admin1' }, { login: 'admin2' }]

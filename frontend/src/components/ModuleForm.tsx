@@ -16,6 +16,7 @@ interface ModuleFormProps {
     endedAt: string
     domains: string
     tags: string
+    labels: string
     projectId: string
     projectName: string
     mentorLogins: string
@@ -182,6 +183,20 @@ const ModuleForm = ({
                     value={formData.tags}
                     onChange={handleInputChange}
                     placeholder="javascript, react"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="labels" className="mb-2 block text-sm font-semibold">
+                    Labels
+                  </label>
+                  <input
+                    id="labels"
+                    type="text"
+                    name="labels"
+                    value={formData.labels}
+                    onChange={handleInputChange}
+                    placeholder="good first issue, bug, enhancement"
                     className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
                   />
                 </div>
