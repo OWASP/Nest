@@ -1,5 +1,6 @@
 """Tests for question detector functionality."""
 
+import math
 import os
 from unittest.mock import MagicMock, patch
 
@@ -182,7 +183,7 @@ class TestQuestionDetector:
     def test_class_constants(self, detector):
         """Test that class constants are properly defined."""
         assert detector.MAX_TOKENS == 10
-        assert detector.TEMPERATURE == 0.1
+        assert math.isclose(detector.TEMPERATURE, 0.1)
         assert detector.CHAT_MODEL == "gpt-4o-mini"
 
     def test_openai_client_initialization(self, detector):
