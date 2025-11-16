@@ -64,9 +64,9 @@ const ProgramForm = ({
               <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
                 Basic Information
               </h2>
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
                 <div className="lg:col-span-2">
-                  <label htmlFor="program-name" className="mb-2 block text-sm font-medium">
+                  <label htmlFor="program-name" className="mb-2 block text-sm font-semibold">
                     Program Name *
                   </label>
                   <input
@@ -76,12 +76,12 @@ const ProgramForm = ({
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
                   />
                 </div>
 
                 <div className="lg:col-span-2">
-                  <label htmlFor="program-description" className="mb-2 block text-sm font-medium">
+                  <label htmlFor="program-description" className="mb-2 block text-sm font-semibold">
                     Description *
                   </label>
                   <textarea
@@ -91,20 +91,20 @@ const ProgramForm = ({
                     onChange={handleInputChange}
                     rows={4}
                     required
-                    className="w-full resize-none rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
                   />
                 </div>
               </div>
             </section>
 
             {/* Configuration */}
-            <section className="flex flex-col gap-6">
+            <section className="flex flex-col gap-6 text-gray-600 dark:text-gray-300">
               <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
                 Program Configuration
               </h2>
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <div>
-                  <label htmlFor="program-start-date" className="mb-2 block text-sm font-medium">
+                  <label htmlFor="program-start-date" className="mb-2 block text-sm font-semibold">
                     Start Date *
                   </label>
                   <input
@@ -114,11 +114,11 @@ const ProgramForm = ({
                     value={formData.startedAt}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
                   />
                 </div>
                 <div>
-                  <label htmlFor="program-end-date" className="mb-2 block text-sm font-medium">
+                  <label htmlFor="program-end-date" className="mb-2 block text-sm font-semibold">
                     End Date *
                   </label>
                   <input
@@ -128,11 +128,11 @@ const ProgramForm = ({
                     value={formData.endedAt}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
                   />
                 </div>
                 <div>
-                  <label htmlFor="mentees-limit" className="mb-2 block text-sm font-medium">
+                  <label htmlFor="mentees-limit" className="mb-2 block text-sm font-semibold">
                     Mentees Limit *
                   </label>
                   <input
@@ -143,7 +143,7 @@ const ProgramForm = ({
                     onChange={handleInputChange}
                     min={1}
                     required
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
                   />
                 </div>
               </div>
@@ -154,9 +154,9 @@ const ProgramForm = ({
               <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
                 Additional Details
               </h2>
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
                 <div>
-                  <label htmlFor="program-tags" className="mb-2 block text-sm font-medium">
+                  <label htmlFor="program-tags" className="mb-2 block text-sm font-semibold">
                     Tags
                   </label>
                   <input
@@ -166,11 +166,11 @@ const ProgramForm = ({
                     value={formData.tags}
                     onChange={handleInputChange}
                     placeholder="javascript, react"
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
                   />
                 </div>
-                <div>
-                  <label htmlFor="program-domains" className="mb-2 block text-sm font-medium">
+                <div className="">
+                  <label htmlFor="program-domains" className="mb-2 block text-sm font-semibold">
                     Domains
                   </label>
                   <input
@@ -180,25 +180,25 @@ const ProgramForm = ({
                     value={formData.domains}
                     onChange={handleInputChange}
                     placeholder="AI, Web Development"
-                    className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
                   />
                 </div>
                 {isEdit && (
                   <div className="lg:col-span-2">
                     <label
-                      htmlFor="mentor-github-usernames"
-                      className="mb-2 block text-sm font-medium"
+                      htmlFor="admin-github-usernames"
+                      className="mb-2 block text-sm font-semibold"
                     >
                       Admin GitHub Usernames
                     </label>
                     <input
-                      id="mentor-github-usernames"
+                      id="admin-github-usernames"
                       type="text"
                       name="adminLogins"
                       value={formData.adminLogins}
                       onChange={handleInputChange}
                       placeholder="johndoe, jane-doe"
-                      className="w-full rounded-lg border-2 bg-gray-50 px-4 py-3 text-gray-800 focus:outline-hidden dark:bg-gray-800 dark:text-gray-200"
+                      className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
                     />
                   </div>
                 )}
@@ -206,19 +206,19 @@ const ProgramForm = ({
             </section>
 
             {/* Submit Buttons */}
-            <div className="border-t-1 border-t-gray-200 pt-8 dark:border-t-gray-700">
+            <div className="border-t border-gray-200 pt-8 text-gray-600 dark:border-gray-700 dark:text-gray-300">
               <div className="flex flex-col justify-end gap-4 sm:flex-row">
                 <button
                   type="button"
                   onClick={() => history.back()}
-                  className="rounded-lg border-1 border-gray-200 px-6 py-3 font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
+                  className="rounded-lg border border-gray-50 px-6 py-3 font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex items-center justify-center gap-2 rounded-md border-1 border-[#0D6EFD] px-4 py-2 text-[#0D6EFD] hover:bg-[#0D6EFD] hover:text-white dark:text-sky-600 dark:hover:bg-sky-100"
+                  className="flex items-center justify-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-6 py-2 whitespace-nowrap text-[#1D7BD7] transition-all hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white"
                 >
                   {loading ? 'Saving...' : submitText}
                 </button>

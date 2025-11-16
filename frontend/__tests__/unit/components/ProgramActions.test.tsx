@@ -42,7 +42,7 @@ describe('ProgramActions', () => {
   })
 
   test('renders and toggles dropdown', () => {
-    render(<ProgramActions status="DRAFT" setStatus={setStatus} />)
+    render(<ProgramActions programKey="test-program" status="DRAFT" setStatus={setStatus} />)
     const button = screen.getByTestId('program-actions-button')
     fireEvent.click(button)
     expect(screen.getByText('Add Module')).toBeInTheDocument()
@@ -52,7 +52,7 @@ describe('ProgramActions', () => {
   })
 
   test('handles Add Module action', () => {
-    render(<ProgramActions status="DRAFT" setStatus={setStatus} />)
+    render(<ProgramActions programKey="test-program" status="DRAFT" setStatus={setStatus} />)
     const button = screen.getByTestId('program-actions-button')
     fireEvent.click(button)
     fireEvent.click(screen.getByRole('menuitem', { name: /add module/i }))
@@ -61,7 +61,7 @@ describe('ProgramActions', () => {
   })
 
   test('handles Publish action', () => {
-    render(<ProgramActions status="DRAFT" setStatus={setStatus} />)
+    render(<ProgramActions programKey="test-program" status="DRAFT" setStatus={setStatus} />)
     const button = screen.getByTestId('program-actions-button')
     fireEvent.click(button)
     fireEvent.click(screen.getByRole('menuitem', { name: /publish program/i }))
@@ -70,7 +70,7 @@ describe('ProgramActions', () => {
   })
 
   test('handles Move to Draft action', () => {
-    render(<ProgramActions status="PUBLISHED" setStatus={setStatus} />)
+    render(<ProgramActions programKey="test-program" status="PUBLISHED" setStatus={setStatus} />)
     const button = screen.getByTestId('program-actions-button')
     fireEvent.click(button)
     fireEvent.click(screen.getByRole('menuitem', { name: /move to draft/i }))
@@ -78,7 +78,7 @@ describe('ProgramActions', () => {
   })
 
   test('handles Mark as Completed action', () => {
-    render(<ProgramActions status="PUBLISHED" setStatus={setStatus} />)
+    render(<ProgramActions programKey="test-program" status="PUBLISHED" setStatus={setStatus} />)
     const button = screen.getByTestId('program-actions-button')
     fireEvent.click(button)
     fireEvent.click(screen.getByRole('menuitem', { name: /mark as completed/i }))
@@ -88,7 +88,7 @@ describe('ProgramActions', () => {
   test('dropdown closes on outside click', () => {
     render(
       <div>
-        <ProgramActions status="DRAFT" setStatus={setStatus} />
+        <ProgramActions programKey="test-program" status="DRAFT" setStatus={setStatus} />
         <button data-testid="outside">Outside</button>
       </div>
     )

@@ -220,7 +220,7 @@ class RepositoryBasedEntityModel(models.Model):
         leaders = {}
         for line in content.split("\n"):
             matches = re.findall(
-                r"^[-*]\s*\[([^\]]+)\]\(mailto:([^)]+)(\)|([^[<\n]))", line.strip()
+                r"^[-*]\s*\[([^\]]+)\]\((?:mailto:)?([^)]+)(\)|([^[<\n]))", line.strip()
             )
 
             for match in matches:

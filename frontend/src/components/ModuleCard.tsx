@@ -7,7 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import upperFirst from 'lodash/upperFirst'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useState } from 'react'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
@@ -68,20 +68,14 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
 }
 
 const ModuleItem = ({ details }: { details: Module }) => {
-  const router = useRouter()
-  const handleClick = () => {
-    router.push(`${window.location.pathname}/modules/${details.key}`)
-  }
-
   return (
     <div className="flex h-46 w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
-      <button
-        type="button"
-        onClick={handleClick}
+      <Link
+        href={`${window.location.pathname}/modules/${details.key}`}
         className="text-start font-semibold text-blue-400 hover:underline"
       >
         <TruncatedText text={details?.name} />
-      </button>
+      </Link>
       <TextInfoItem icon={faLevelUpAlt} label="Level" value={upperFirst(details.experienceLevel)} />
       <TextInfoItem icon={faCalendarAlt} label="Start" value={formatDate(details.startedAt)} />
       <TextInfoItem

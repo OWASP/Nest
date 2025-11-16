@@ -51,6 +51,7 @@ const DetailsCard = ({
   healthMetricsData,
   isActive = true,
   languages,
+  programKey,
   projectName,
   pullRequests,
   recentIssues,
@@ -76,7 +77,7 @@ const DetailsCard = ({
           <div className="flex w-full items-center justify-between">
             <h1 className="text-4xl font-bold">{title}</h1>
             {type === 'program' && accessLevel === 'admin' && canUpdateStatus && (
-              <ProgramActions status={status} setStatus={setStatus} />
+              <ProgramActions programKey={programKey} status={status} setStatus={setStatus} />
             )}
             {type === 'module' &&
               accessLevel === 'admin' &&
@@ -85,7 +86,7 @@ const DetailsCard = ({
               ) && (
                 <button
                   type="button"
-                  className="flex items-center justify-center gap-2 rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-nowrap text-[#0D6EFD] transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
+                  className="dark:hover:text-white' flex items-center justify-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-2 py-2 text-nowrap text-[#1D7BD7] hover:bg-[#1D7BD7] hover:text-white"
                   onClick={() => {
                     router.push(`${window.location.pathname}/edit`)
                   }}
