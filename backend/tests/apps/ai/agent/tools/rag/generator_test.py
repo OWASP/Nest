@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import openai
 import pytest
+from django.core.exceptions import ObjectDoesNotExist
 
 from apps.ai.agent.tools.rag.generator import Generator
 
@@ -102,6 +103,10 @@ class TestGenerator:
         with (
             patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
             patch("openai.OpenAI") as mock_openai,
+            patch(
+                "apps.core.models.prompt.Prompt.get_rag_system_prompt",
+                return_value="System prompt",
+            ),
         ):
             mock_client = MagicMock()
             mock_response = MagicMock()
@@ -128,6 +133,10 @@ class TestGenerator:
         with (
             patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
             patch("openai.OpenAI") as mock_openai,
+            patch(
+                "apps.core.models.prompt.Prompt.get_rag_system_prompt",
+                return_value="System prompt",
+            ),
         ):
             mock_client = MagicMock()
             mock_response = MagicMock()
@@ -150,6 +159,10 @@ class TestGenerator:
         with (
             patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
             patch("openai.OpenAI") as mock_openai,
+            patch(
+                "apps.core.models.prompt.Prompt.get_rag_system_prompt",
+                return_value="System prompt",
+            ),
         ):
             mock_client = MagicMock()
             mock_client.chat.completions.create.side_effect = openai.OpenAIError("API Error")
@@ -167,6 +180,10 @@ class TestGenerator:
         with (
             patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
             patch("openai.OpenAI") as mock_openai,
+            patch(
+                "apps.core.models.prompt.Prompt.get_rag_system_prompt",
+                return_value="System prompt",
+            ),
         ):
             mock_client = MagicMock()
             mock_response = MagicMock()
@@ -184,14 +201,123 @@ class TestGenerator:
             assert "No context provided" in call_args[1]["messages"][1]["content"]
 
     def test_system_prompt_content(self):
-        """Test that system prompt contains expected content."""
-        assert "OWASP Foundation" in Generator.SYSTEM_PROMPT
-        assert "context" in Generator.SYSTEM_PROMPT.lower()
-        assert "professional" in Generator.SYSTEM_PROMPT.lower()
-        assert "latitude and longitude" in Generator.SYSTEM_PROMPT.lower()
+        """Test that system prompt passed to OpenAI comes from Prompt getter."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch("openai.OpenAI") as mock_openai,
+            patch(
+                "apps.core.models.prompt.Prompt.get_rag_system_prompt",
+                return_value="OWASP Foundation system prompt",
+            ) as mock_prompt_getter,
+        ):
+            mock_client = MagicMock()
+            mock_response = MagicMock()
+            mock_response.choices = [MagicMock()]
+            mock_response.choices[0].message.content = "Answer"
+            mock_client.chat.completions.create.return_value = mock_response
+            mock_openai.return_value = mock_client
+
+            generator = Generator()
+            generator.generate_answer("Q", [])
+
+            call_args = mock_client.chat.completions.create.call_args
+            assert call_args[1]["messages"][0]["role"] == "system"
+            assert call_args[1]["messages"][0]["content"] == "OWASP Foundation system prompt"
+            mock_prompt_getter.assert_called_once()
+
+    def test_generate_answer_missing_system_prompt(self):
+        """Test answer generation when system prompt is missing."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch("openai.OpenAI") as mock_openai,
+            patch(
+                "apps.core.models.prompt.Prompt.get_rag_system_prompt",
+                return_value=None,
+            ),
+        ):
+            mock_client = MagicMock()
+            mock_openai.return_value = mock_client
+
+            generator = Generator()
+
+            chunks = [{"source_name": "Test", "text": "Test content"}]
+
+            with pytest.raises(
+                ObjectDoesNotExist, match="Prompt with key 'rag-system-prompt' not found"
+            ):
+                generator.generate_answer("Test query", chunks)
+
+    def test_generate_answer_empty_system_prompt(self):
+        """Test answer generation when system prompt is empty."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch("openai.OpenAI") as mock_openai,
+            patch(
+                "apps.core.models.prompt.Prompt.get_rag_system_prompt",
+                return_value="   ",
+            ),
+        ):
+            mock_client = MagicMock()
+            mock_openai.return_value = mock_client
+
+            generator = Generator()
+
+            chunks = [{"source_name": "Test", "text": "Test content"}]
+
+            with pytest.raises(
+                ObjectDoesNotExist, match="Prompt with key 'rag-system-prompt' not found"
+            ):
+                generator.generate_answer("Test query", chunks)
+
+    def test_generate_answer_empty_openai_response(self):
+        """Test answer generation when OpenAI returns empty content."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch("openai.OpenAI") as mock_openai,
+            patch(
+                "apps.core.models.prompt.Prompt.get_rag_system_prompt",
+                return_value="System prompt",
+            ),
+        ):
+            mock_client = MagicMock()
+            mock_response = MagicMock()
+            mock_response.choices = [MagicMock()]
+            mock_response.choices[0].message.content = ""
+            mock_client.chat.completions.create.return_value = mock_response
+            mock_openai.return_value = mock_client
+
+            generator = Generator()
+
+            chunks = [{"source_name": "Test", "text": "Test content"}]
+            result = generator.generate_answer("Test query", chunks)
+
+            assert result == ""
+
+    def test_generate_answer_none_openai_response(self):
+        """Test answer generation when OpenAI returns None content."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch("openai.OpenAI") as mock_openai,
+            patch(
+                "apps.core.models.prompt.Prompt.get_rag_system_prompt",
+                return_value="System prompt",
+            ),
+        ):
+            mock_client = MagicMock()
+            mock_response = MagicMock()
+            mock_response.choices = [MagicMock()]
+            mock_response.choices[0].message.content = None
+            mock_client.chat.completions.create.return_value = mock_response
+            mock_openai.return_value = mock_client
+
+            generator = Generator()
+
+            chunks = [{"source_name": "Test", "text": "Test content"}]
+
+            with pytest.raises(AttributeError):
+                generator.generate_answer("Test query", chunks)
 
     def test_constants(self):
         """Test class constants have expected values."""
         assert Generator.MAX_TOKENS == 2000
-        assert isinstance(Generator.SYSTEM_PROMPT, str)
-        assert len(Generator.SYSTEM_PROMPT) > 0
+        assert Generator.TEMPERATURE == 0.5
