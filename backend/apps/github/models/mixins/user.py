@@ -8,11 +8,16 @@ TOP_REPOSITORY_CONTRIBUTORS_LIMIT = 6
 
 
 class UserIndexMixin:
-    """User index mixin."""
+    """User index mixin providing properties for indexing user data."""
 
     @property
-    def is_indexable(self):
-        """Users to index."""
+    def is_indexable(self) -> bool:
+        """
+        Returns whether the user should be indexed.
+
+        Purpose: Determines if the user is eligible for search indexing,
+        considering if the user is a bot or belongs to non-indexable logins.
+        """
         return (
             not self.is_bot
             and not self.login.endswith(("Bot", "-bot"))
@@ -21,77 +26,138 @@ class UserIndexMixin:
 
     @property
     def idx_avatar_url(self) -> str:
-        """Return avatar URL for indexing."""
+        """
+        Returns the user's avatar URL.
+
+        Purpose: Provides image metadata for search indexing or display.
+        """
         return self.avatar_url
 
     @property
     def idx_badge_count(self) -> int:
-        """Return badge count for indexing."""
+        """
+        Returns the count of active badges the user has.
+
+        Purpose: Measures user recognition or achievements for indexing.
+        """
         return self.user_badges.filter(is_active=True).count()
 
     @property
     def idx_bio(self) -> str:
-        """Return bio for indexing."""
+        """
+        Returns the user's bio.
+
+        Purpose: Provides textual metadata for indexing and searchability.
+        """
         return self.bio
 
     @property
     def idx_company(self) -> str:
-        """Return company for indexing."""
+        """
+        Returns the user's associated company.
+
+        Purpose: Enables company-based filtering or indexing of users.
+        """
         return self.company
 
     @property
     def idx_created_at(self) -> float:
-        """Return created at timestamp for indexing."""
+        """
+        Returns the user's account creation timestamp.
+
+        Purpose: Useful for sorting and indexing users by creation date.
+        """
         return self.created_at.timestamp()
 
     @property
     def idx_email(self) -> str:
-        """Return email for indexing."""
+        """
+        Returns the user's email.
+
+        Purpose: Provides contact information if indexing or display requires it.
+        """
         return self.email
 
     @property
     def idx_key(self) -> str:
-        """Return key for indexing."""
+        """
+        Returns the user's unique key (login).
+
+        Purpose: Provides a unique identifier for indexing and linking users.
+        """
         return self.login
 
     @property
     def idx_followers_count(self) -> int:
-        """Return followers count for indexing."""
+        """
+        Returns the number of followers the user has.
+
+        Purpose: Indicates user popularity and helps with ranking in search.
+        """
         return self.followers_count
 
     @property
     def idx_following_count(self) -> int:
-        """Return following count for indexing."""
+        """
+        Returns the number of users the user is following.
+
+        Purpose: Provides engagement metrics for indexing and analytics.
+        """
         return self.following_count
 
     @property
     def idx_location(self) -> str:
-        """Return location for indexing."""
+        """
+        Returns the user's location.
+
+        Purpose: Enables geographic or location-based filtering and indexing.
+        """
         return self.location
 
     @property
     def idx_login(self) -> str:
-        """Return login for indexing."""
+        """
+        Returns the user's login name.
+
+        Purpose: Provides an identifier for indexing and search.
+        """
         return self.login
 
     @property
     def idx_name(self) -> str:
-        """Return name for indexing."""
+        """
+        Returns the user's full name.
+
+        Purpose: Useful for display and search indexing.
+        """
         return self.name
 
     @property
     def idx_public_repositories_count(self) -> int:
-        """Return public repositories count for indexing."""
+        """
+        Returns the number of public repositories owned by the user.
+
+        Purpose: Measures user activity and contribution for indexing.
+        """
         return self.public_repositories_count
 
     @property
     def idx_title(self) -> str:
-        """Return title for indexing."""
+        """
+        Returns the user's professional title.
+
+        Purpose: Provides metadata for display and search indexing.
+        """
         return self.title
 
     @property
-    def idx_contributions(self):
-        """Return contributions for indexing."""
+    def idx_contributions(self) -> list[dict]:
+        """
+        Returns a list of repository contributions for indexing.
+
+        Purpose: Provides detailed contribution information including counts,
+        repository metadata, license, owner, and latest release information.
+        """
         from apps.github.models.repository_contributor import RepositoryContributor
 
         return [
@@ -123,12 +189,21 @@ class UserIndexMixin:
 
     @property
     def idx_contributions_count(self) -> int:
-        """Return contributions count for indexing."""
+        """
+        Returns the total contributions count of the user.
+
+        Purpose: Provides a summary metric of user activity for indexing.
+        """
         return self.contributions_count
 
     @property
     def idx_issues(self) -> list[dict]:
-        """Return issues for indexing."""
+        """
+        Returns a list of issues created by the user for indexing.
+
+        Purpose: Provides detailed issue metadata for search indexing including
+        creation time, repository info, comments count, and URL.
+        """
         return [
             {
                 "created_at": i.created_at.timestamp(),
@@ -149,12 +224,21 @@ class UserIndexMixin:
 
     @property
     def idx_issues_count(self) -> int:
-        """Return issues count for indexing."""
+        """
+        Returns the total number of issues created by the user.
+
+        Purpose: Provides a metric of user activity for indexing.
+        """
         return self.issues.count()
 
     @property
     def idx_releases(self) -> list[dict]:
-        """Return releases for indexing."""
+        """
+        Returns a list of releases created by the user for indexing.
+
+        Purpose: Provides detailed release metadata including pre-release status,
+        repository info, publish date, tag name, and URL.
+        """
         return [
             {
                 "is_pre_release": r.is_pre_release,
@@ -175,15 +259,27 @@ class UserIndexMixin:
 
     @property
     def idx_releases_count(self) -> int:
-        """Return releases count for indexing."""
+        """
+        Returns the total number of releases created by the user.
+
+        Purpose: Provides a metric of user activity for indexing.
+        """
         return self.releases.count()
 
     @property
     def idx_updated_at(self) -> float:
-        """Return updated at timestamp for indexing."""
+        """
+        Returns the timestamp of the user's last profile update.
+
+        Purpose: Useful for sorting and indexing users by recent activity.
+        """
         return self.updated_at.timestamp()
 
     @property
     def idx_url(self) -> str:
-        """Return GitHub profile URL for indexing."""
+        """
+        Returns the GitHub profile URL of the user.
+
+        Purpose: Provides a reference URL for display or indexing.
+        """
         return self.url

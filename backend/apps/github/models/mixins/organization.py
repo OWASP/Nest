@@ -1,27 +1,40 @@
-"""GitHub organization mixins."""
+"""GitHub organization mixins for index-related functionality."""
 
 from __future__ import annotations
 
 
 class OrganizationIndexMixin:
-    """Organization index mixin."""
+    """Organization index mixin providing properties for search indexing."""
 
     @property
     def is_indexable(self) -> bool:
-        """Organizations to index."""
+        """
+        Indicates if the organization should be indexed.
+
+        Returns True if the organization is OWASP-related, has a name, and has a login.
+        Returns False otherwise.
+
+        Purpose: Determines whether this organization should appear in search indexes.
+        """
         return bool(self.is_owasp_related_organization and self.name and self.login)
 
     @property
     def idx_avatar_url(self) -> str:
-        """Return avatar URL for indexing."""
+        """
+        Returns the avatar URL of the organization.
+
+        Purpose: Provides the organization's avatar for display in search indexes.
+        """
         return self.avatar_url
 
     @property
     def idx_collaborators_count(self):
-        """Return collaborators count for indexing.
-
-        This calculates the total number of unique collaborators across all repositories
+        """
+        Returns the total number of unique collaborators across all repositories
         owned by this organization.
+
+        Purpose: Used for indexing to provide insights into the organization's activity
+        and reach within repositories.
         """
         from apps.github.models.repository import Repository
         from apps.github.models.repository_contributor import RepositoryContributor
@@ -40,40 +53,72 @@ class OrganizationIndexMixin:
 
     @property
     def idx_created_at(self) -> float | None:
-        """Return created at for indexing."""
+        """
+        Returns the creation timestamp of the organization.
+
+        Purpose: Used for sorting or filtering organizations by creation date in search indexes.
+        """
         return self.created_at.timestamp() if self.created_at else None
 
     @property
     def idx_description(self) -> str:
-        """Return description for indexing."""
+        """
+        Returns the description of the organization.
+
+        Purpose: Provides searchable descriptive content for indexing.
+        """
         return self.description or ""
 
     @property
     def idx_followers_count(self) -> int:
-        """Return followers count for indexing."""
+        """
+        Returns the followers count of the organization.
+
+        Purpose: Provides insight into the organization's popularity for search ranking.
+        """
         return self.followers_count
 
     @property
     def idx_location(self) -> str:
-        """Return location for indexing."""
+        """
+        Returns the location of the organization.
+
+        Purpose: Used for geographic filtering or search indexing.
+        """
         return self.location or ""
 
     @property
     def idx_login(self) -> str:
-        """Return login for indexing."""
+        """
+        Returns the login (username) of the organization.
+
+        Purpose: Used as a unique key for indexing and search operations.
+        """
         return self.login
 
     @property
     def idx_name(self) -> str:
-        """Return name for indexing."""
+        """
+        Returns the name of the organization.
+
+        Purpose: Used for display and search indexing.
+        """
         return self.name or ""
 
     @property
     def idx_public_repositories_count(self) -> int:
-        """Return public repositories count for indexing."""
+        """
+        Returns the count of public repositories owned by the organization.
+
+        Purpose: Used for indexing to provide insight into the organization's activity.
+        """
         return self.public_repositories_count
 
     @property
     def idx_url(self) -> str:
-        """Return URL for indexing."""
+        """
+        Returns the URL of the organization.
+
+        Purpose: Used to link to the organization's profile from search results.
+        """
         return self.url
