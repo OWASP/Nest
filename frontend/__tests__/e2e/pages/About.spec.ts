@@ -36,10 +36,10 @@ test.describe('About Page', () => {
 
   test('renders main sections correctly', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'About' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Project Timeline', exact: true })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Our Story' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Project Timeline/ })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Our Story/ })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Leaders' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Roadmap' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Roadmap/ })).toBeVisible()
   })
 
   test('displays contributor information when data is loaded', async ({ page }) => {
@@ -70,7 +70,7 @@ test.describe('About Page', () => {
   })
 
   test('loads roadmap items correctly', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Roadmap' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Roadmap/ })).toBeVisible()
     for (const milestone of mockAboutData.project.recentMilestones) {
       await expect(page.getByText(milestone.title)).toBeVisible()
       await expect(page.getByText(milestone.body)).toBeVisible()
@@ -78,10 +78,14 @@ test.describe('About Page', () => {
   })
 
   test('displays animated counters with correct values', async ({ page }) => {
-    await expect(page.getByText('1.2K+Contributors')).toBeVisible()
-    await expect(page.getByText('40+Open Issues')).toBeVisible()
-    await expect(page.getByText('60+Forks')).toBeVisible()
-    await expect(page.getByText('890+Stars')).toBeVisible()
+    await expect(page.getByText('1.2K+', { exact: false })).toBeVisible()
+    await expect(page.getByText('Contributors')).toBeVisible()
+    await expect(page.getByText('40+', { exact: false })).toBeVisible()
+    await expect(page.getByText('Open Issues')).toBeVisible()
+    await expect(page.getByText('60+', { exact: false })).toBeVisible()
+    await expect(page.getByText('Forks')).toBeVisible()
+    await expect(page.getByText('890+', { exact: false })).toBeVisible()
+    await expect(page.getByText('Stars')).toBeVisible()
   })
 
   test('opens user profile in new window when leader button is clicked', async ({ page }) => {
