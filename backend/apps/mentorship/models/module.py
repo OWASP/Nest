@@ -11,10 +11,14 @@ from apps.mentorship.models.common import (
     MatchingAttributes,
     StartEndRange,
 )
+from apps.mentorship.models.managers import PublishedModuleManager
 
 
 class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedModel):
     """Module model representing a program unit."""
+
+    objects = models.Manager()
+    published_modules = PublishedModuleManager()
 
     class Meta:
         db_table = "mentorship_modules"
