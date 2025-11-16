@@ -190,6 +190,7 @@ export type IssueNode = Node & {
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
   interestedUsers: Array<UserNode>;
+  isMerged: Scalars['Boolean']['output'];
   labels: Array<Scalars['String']['output']>;
   number: Scalars['Int']['output'];
   organizationName?: Maybe<Scalars['String']['output']>;
@@ -292,12 +293,14 @@ export type ModuleNodeTaskDeadlineArgs = {
 export type Mutation = {
   __typename?: 'Mutation';
   assignIssueToUser: ModuleNode;
+  clearTaskDeadline: ModuleNode;
   createApiKey: CreateApiKeyResult;
   createModule: ModuleNode;
   createProgram: ProgramNode;
   githubAuth: GitHubAuthResult;
   logoutUser: LogoutResult;
   revokeApiKey: RevokeApiKeyResult;
+  setTaskDeadline: ModuleNode;
   unassignIssueFromUser: ModuleNode;
   updateModule: ModuleNode;
   updateProgram: ProgramNode;
@@ -310,6 +313,13 @@ export type MutationAssignIssueToUserArgs = {
   moduleKey: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
   userLogin: Scalars['String']['input'];
+};
+
+
+export type MutationClearTaskDeadlineArgs = {
+  issueNumber: Scalars['Int']['input'];
+  moduleKey: Scalars['String']['input'];
+  programKey: Scalars['String']['input'];
 };
 
 
@@ -336,6 +346,14 @@ export type MutationGithubAuthArgs = {
 
 export type MutationRevokeApiKeyArgs = {
   uuid: Scalars['UUID']['input'];
+};
+
+
+export type MutationSetTaskDeadlineArgs = {
+  deadlineAt: Scalars['DateTime']['input'];
+  issueNumber: Scalars['Int']['input'];
+  moduleKey: Scalars['String']['input'];
+  programKey: Scalars['String']['input'];
 };
 
 

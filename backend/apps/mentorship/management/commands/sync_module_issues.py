@@ -143,7 +143,8 @@ class Command(BaseCommand):
                     if task.status != status:
                         updates["status"] = status
 
-                    if issue.repository:
+                    # Only fetch assigned_at when needed.
+                    if (created or task.assigned_at is None) and issue.repository:
                         repo_full_name = self._extract_repo_full_name(issue.repository)
                         if repo_full_name:
                             if repo_full_name not in repo_cache:
