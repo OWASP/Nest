@@ -1,3 +1,4 @@
+import type { PullRequest } from 'types/pullRequest'
 import type { RepositoryDetails, User } from 'types/user'
 
 export type Issue = {
@@ -9,10 +10,13 @@ export type Issue = {
   organizationName?: string
   projectName: string
   projectUrl: string
+  pullRequests?: PullRequest[]
   repository?: RepositoryDetails
   repositoryLanguages?: string[]
-  summary: string
+  body?: string
   title: string
+  state?: string
+  summary?: string
   updatedAt: number
   url: string
   objectID: string

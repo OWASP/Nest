@@ -82,6 +82,7 @@ const EditModulePage = () => {
         domains: (m.domains || []).join(', '),
         projectName: m.projectName,
         tags: (m.tags || []).join(', '),
+        labels: (m.labels || []).join(', '),
         projectId: m.projectId || '',
         mentorLogins: (m.mentors || []).map((mentor: { login: string }) => mentor.login).join(', '),
       })
@@ -103,6 +104,7 @@ const EditModulePage = () => {
         endedAt: formData.endedAt || null,
         domains: parseCommaSeparated(formData.domains),
         tags: parseCommaSeparated(formData.tags),
+        labels: parseCommaSeparated(formData.labels),
         projectName: formData.projectName,
         projectId: formData.projectId,
         mentorLogins: parseCommaSeparated(formData.mentorLogins),
