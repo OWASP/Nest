@@ -78,7 +78,7 @@ const Release: React.FC<ReleaseProps> = ({
                 if (!org || !repo) return
                 router.push(`/organizations/${org}/repositories/${repo}`)
               }}
-              aria-label={`View repository ${release.repositoryName || 'Unknown'}`}
+              aria-label={`View repository ${release.repositoryName}`}
             >
               <TruncatedText text={release.repositoryName} />
             </button>
