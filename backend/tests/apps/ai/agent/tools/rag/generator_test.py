@@ -1,5 +1,6 @@
 """Tests for the RAG Generator."""
 
+import math
 import os
 from unittest.mock import MagicMock, patch
 
@@ -320,4 +321,4 @@ class TestGenerator:
     def test_constants(self):
         """Test class constants have expected values."""
         assert Generator.MAX_TOKENS == 2000
-        assert Generator.TEMPERATURE == 0.5
+        assert math.isclose(Generator.TEMPERATURE, 0.5)
