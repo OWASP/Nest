@@ -63,6 +63,7 @@ const SortBy = ({
           <button
             onClick={() => onOrderChange(selectedOrder === 'asc' ? 'desc' : 'asc')}
             className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 bg-gray-100 p-0 shadow-sm transition-all duration-200 hover:bg-gray-200 hover:shadow-md focus:ring-2 focus:ring-gray-300 focus:ring-offset-1 focus:outline-none dark:border-gray-600 dark:bg-[#323232] dark:hover:bg-[#404040] dark:focus:ring-gray-500"
+            aria-label={selectedOrder === 'asc' ? 'Sort in ascending order' : 'Sort in descending order'}
           >
             {selectedOrder === 'asc' ? (
               <FontAwesomeIcon
