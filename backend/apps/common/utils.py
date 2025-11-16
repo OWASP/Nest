@@ -11,6 +11,9 @@ from django.template.defaultfilters import pluralize
 from django.utils.text import Truncator
 from django.utils.text import slugify as django_slugify
 from humanize import intword, naturaltime
+from typing import Optional, Iterable, Any
+from django.http import HttpRequest
+
 
 
 def convert_to_camel_case(text: str) -> str:
@@ -46,7 +49,7 @@ def convert_to_snake_case(text: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "_", text).lower()
 
 
-def clean_url(url: str) -> str | None:
+def clean_url(url: Optional[str]) -> Optional[str]:
     """Clean a URL by removing whitespace and trailing punctuation.
 
     Args:
@@ -85,7 +88,7 @@ def get_nest_user_agent() -> str:
     return settings.APP_NAME.replace(" ", "-").lower()
 
 
-def get_user_ip_address(request) -> str:
+def get_user_ip_address(request: HttpRequest) -> str:
     """Retrieve the user's IP address from the request.
 
     Args:
@@ -102,7 +105,7 @@ def get_user_ip_address(request) -> str:
     return x_forwarded_for.split(",")[0] if x_forwarded_for else request.META.get("REMOTE_ADDR")
 
 
-def join_values(fields: list, delimiter: str = " ") -> str:
+def join_values(fields: Iterable[Any], delimiter: str = " ") -> str:
     """Join non-empty field values using a specified delimiter.
 
     Args:
@@ -116,7 +119,7 @@ def join_values(fields: list, delimiter: str = " ") -> str:
     return delimiter.join(field for field in fields if field)
 
 
-def natural_date(value: int | str) -> str:
+def natural_date(value: int | str | datetime) -> str:
     """Convert a date or timestamp into a human-readable format.
 
     Args:
@@ -136,7 +139,7 @@ def natural_date(value: int | str) -> str:
     return naturaltime(dt)
 
 
-def natural_number(value: int, unit=None) -> str:
+def natural_number(value: int, unit: Optional[str] = None) -> str:
     """Convert a number into a human-readable format.
 
     Args:
@@ -193,7 +196,7 @@ def truncate(text: str, limit: int, truncate: str = "...") -> str:
     return Truncator(text).chars(limit, truncate=truncate)
 
 
-def validate_url(url: str) -> bool:
+def validate_url(url: Optional[str]) -> bool:
     """Validate that a URL has proper scheme and netloc.
 
     Args:

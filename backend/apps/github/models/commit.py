@@ -7,6 +7,10 @@ from django.db import models
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.github.models.common import NodeModel
 
+MAX_SHA_LENGTH = 64
+MESSAGE_PREVIEW_LENGTH = 100
+SHORT_SHA_LENGTH = 7
+
 
 class Commit(BulkSaveModel, NodeModel, TimestampedModel):
     """Commit model."""
@@ -29,7 +33,7 @@ class Commit(BulkSaveModel, NodeModel, TimestampedModel):
     )
     sha = models.CharField(
         verbose_name="SHA",
-        max_length=64,
+        max_length=MAX_SHA_LENGTH,
         help_text="Git commit SHA hash",
     )
 
@@ -59,8 +63,8 @@ class Commit(BulkSaveModel, NodeModel, TimestampedModel):
 
     def __str__(self) -> str:
         """Return human-readable representation."""
-        short_sha = self.sha[:7] if self.sha else "unknown"
-        message_preview = self.message[:100] if self.message else "No message"
+        short_sha = self.sha[:SHORT_SHA_LENGTH] if self.sha else "unknown"
+        message_preview = self.message[:MESSAGE_PREVIEW_LENGTH] if self.message else "No message"
         return f"{short_sha}: {message_preview}"
 
     @staticmethod

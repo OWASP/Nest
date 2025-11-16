@@ -10,6 +10,7 @@ from apps.common.models import TimestampedModel
 from apps.common.utils import truncate
 
 logger = logging.getLogger(__name__)
+SOURCE_MAX_LENGTH = 100
 
 
 class Context(TimestampedModel):
@@ -19,7 +20,8 @@ class Context(TimestampedModel):
     entity_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     entity_id = models.PositiveIntegerField()
     entity = GenericForeignKey("entity_type", "entity_id")
-    source = models.CharField(max_length=100, blank=True, default="")
+    source = models.CharField(
+        max_length=SOURCE_MAX_LENGTH, blank=True, default="")
 
     class Meta:
         db_table = "ai_contexts"
