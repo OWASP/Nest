@@ -42,7 +42,13 @@ const Release: React.FC<ReleaseProps> = ({
                 href={release.author.login ? `/members/${release.author.login}` : '#'}
               >
                 <Image
-                  alt={release.author.name || release.author.login}
+                  alt={
+                     release?.author?.name
+                     ? `${release.author.name}'s avatar`
+                     : release?.author?.login
+                     ? `${release.author.login}'s avatar`
+                     : 'Author avatar'
+                 }
                   className="mr-2 h-6 w-6 rounded-full"
                   height={24}
                   src={release.author.avatarUrl}
