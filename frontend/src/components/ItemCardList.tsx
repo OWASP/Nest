@@ -40,56 +40,61 @@ const ItemCardList = ({
   }) => JSX.Element
 }) => (
   <SecondaryCard icon={icon} title={title}>
-    {data && data.length > 0 ? (
-      <div
-        className={`grid ${showSingleColumn ? 'grid-cols-1' : 'gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
-      >
-        {data.map((item, index) => (
-          <div key={index} className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-            <div className="flex w-full flex-col justify-between">
-              <div className="flex w-full items-center">
-                {showAvatar && (
-                  <Tooltip
-                    closeDelay={100}
-                    content={item?.author?.name || item?.author?.login}
-                    id={`avatar-tooltip-${index}`}
-                    delay={100}
-                    placement="bottom"
-                    showArrow
-                  >
-                    <Link
-                      className="shrink-0 text-blue-400 hover:underline"
-                      href={`/members/${item?.author?.login}`}
-                    >
-                      <Image
-                        height={24}
-                        width={24}
-                        src={item?.author?.avatarUrl}
-                        alt={item?.author?.name || ''}
-                        className="mr-2 rounded-full"
-                      />
-                    </Link>
-                  </Tooltip>
-                )}
-                <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
+  {data && data.length > 0 ? (
+    <div
+      className={`grid ${showSingleColumn ? 'grid-cols-1' : 'gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
+    >
+      {data.map((item, index) => (
+        <div key={index} className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
+          <div className="flex w-full flex-col justify-between">
+            <div className="flex w-full items-center">
+              {showAvatar && (
+                <Tooltip
+                  closeDelay={100}
+                  content={item?.author?.name || item?.author?.login}
+                  id={`avatar-tooltip-${index}`}
+                  delay={100}
+                  placement="bottom"
+                  showArrow
+                >
                   <Link
-                    className="text-blue-400 hover:underline"
-                    href={item?.url || ''}
-                    target="_blank"
+                    className="shrink-0 text-blue-400 hover:underline"
+                    href={`/members/${item?.author?.login}`}
                   >
-                    <TruncatedText text={item.title || item.name} />
+                    <Image
+                      height={24}
+                      width={24}
+                      src={item?.author?.avatarUrl}
+                      alt={
+                        item?.author?.name
+                          ? `${item.author.name}'s avatar`
+                          : item?.author?.login
+                          ? `${item.author.login}'s avatar`
+                          : 'User avatar'
+                      }
+                      className="mr-2 rounded-full"
+                    />
                   </Link>
-                </h3>
-              </div>
-              <div className="ml-0.5 w-full">{renderDetails(item)}</div>
+                </Tooltip>
+              )}
+              <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
+                <Link
+                  className="text-blue-400 hover:underline"
+                  href={item?.url || ''}
+                  target="_blank"
+                >
+                  <TruncatedText text={item.title || item.name} />
+                </Link>
+              </h3>
             </div>
+            <div className="ml-0.5 w-full">{renderDetails(item)}</div>
           </div>
-        ))}
-      </div>
-    ) : (
-      <p>Nothing to display.</p>
-    )}
-  </SecondaryCard>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <p>Nothing to display.</p>
+  )}
+</SecondaryCard>
 )
-
 export default ItemCardList
