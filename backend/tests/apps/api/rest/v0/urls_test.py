@@ -12,6 +12,7 @@ from apps.api.rest.v0.organization import router as organization_router
 from apps.api.rest.v0.project import router as project_router
 from apps.api.rest.v0.release import router as release_router
 from apps.api.rest.v0.repository import router as repository_router
+from apps.api.rest.v0.snapshot import router as snapshot_router
 from apps.api.rest.v0.sponsor import router as sponsor_router
 
 
@@ -30,6 +31,7 @@ class TestRouterRegistration:
         "/projects": project_router,
         "/releases": release_router,
         "/repositories": repository_router,
+        "/snapshots": snapshot_router,
         "/sponsors": sponsor_router,
     }
 

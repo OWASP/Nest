@@ -48,8 +48,8 @@ export default function Footer() {
                   openSection === section.title ? 'max-h-96' : 'max-h-0 lg:max-h-full'
                 }`}
               >
-                {section.links.map((link, index) => (
-                  <div key={index} className="py-1">
+                {section.links.map((link) => (
+                  <div key={link.href || `span-${link.text}`} className="py-1">
                     {link.isSpan ? (
                       <span className="text-slate-600 dark:text-slate-400">{link.text}</span>
                     ) : (

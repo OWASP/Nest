@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
@@ -106,6 +107,23 @@ def get_user_ip_address(request: HttpRequest) -> str:
     if x_forwarded_for:
         return x_forwarded_for.split(",")[0]
     return request.META.get("REMOTE_ADDR", "")
+
+
+def is_valid_json(content: str) -> bool:
+    """Check if content is JSON format.
+
+    Args:
+        content: The content to check
+
+    Returns:
+        bool: True if content is valid JSON, False otherwise
+
+    """
+    try:
+        json.loads(content)
+    except (TypeError, ValueError):
+        return False
+    return True
 
 
 def join_values(fields: list, delimiter: str = " ") -> str:
