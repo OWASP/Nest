@@ -6,7 +6,7 @@ import logging
 import re
 from functools import lru_cache
 from html import escape as escape_html
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from urllib.parse import urljoin
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -22,7 +22,7 @@ from apps.common.constants import NL, OWASP_NEWS_URL
 logger: logging.Logger = logging.getLogger(__name__)
 
 
-def escape(content) -> str:
+def escape(content: str) -> str:
     """Escape HTML content.
 
     Args:
@@ -35,8 +35,24 @@ def escape(content) -> str:
     return escape_html(content, quote=False)
 
 
+def format_links_for_slack(text: str) -> str:
+    """Convert Markdown links to Slack markdown link format.
+
+    Args:
+        text (str): The input text that may include Markdown links.
+
+    Returns:
+        str: Text with Markdown links converted to Slack markdown links.
+
+    """
+    if not text:
+        return text
+    markdown_link_pattern = re.compile(r"\[([^\]]+)\]\((https?://[^\s)]+)\)")
+    return markdown_link_pattern.sub(r"<\2|\1>", text)
+
+
 @lru_cache
-def get_gsoc_projects(year: int) -> list:
+def get_gsoc_projects(year: int) -> list[dict[str, Any]]:
     """Get GSoC projects.
 
     Args:
@@ -66,18 +82,19 @@ def get_news_data(limit: int = 10, timeout: float | None = 30) -> list[dict[str,
 
     Args:
         limit (int, optional): The maximum number of news items to fetch.
+
         timeout (int, optional): The request timeout in seconds.
 
     Returns:
         list: A list of dictionaries containing news data (author, title, and URL).
 
     """
-    response = requests.get(OWASP_NEWS_URL, timeout=timeout)
+    response: requests.Response = requests.get(OWASP_NEWS_URL, timeout=timeout)
     tree = html.fromstring(response.content)
     h2_tags = tree.xpath("//h2")
 
-    items_total = 0
-    items = []
+    items_total: int = 0
+    items: list[dict[str, str]] = []
     for h2 in h2_tags:
         if anchor := h2.xpath(".//a[@href]"):
             author_tag = h2.xpath("./following-sibling::p[@class='author']")
@@ -97,7 +114,7 @@ def get_news_data(limit: int = 10, timeout: float | None = 30) -> list[dict[str,
 
 
 @lru_cache
-def get_staff_data(timeout: float | None = 30) -> list | None:
+def get_staff_data(timeout: float | None = 30) -> list[dict[str, Any]] | None:
     """Get staff data.
 
     Args:
@@ -107,7 +124,7 @@ def get_staff_data(timeout: float | None = 30) -> list | None:
         list or None: A sorted list of staff data dictionaries, or None if an error occurs.
 
     """
-    file_path = "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_data/staff.yml"
+    file_path: str = "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_data/staff.yml"
     try:
         return sorted(
             yaml.safe_load(
@@ -127,10 +144,10 @@ def get_sponsors_data(limit: int = 10) -> QuerySet | None:
     """Get sponsors data.
 
     Args:
-        limit (int, optional): The maximum number of sponsors to fetch.
+        limit: The maximum number of sponsors to fetch.
 
     Returns:
-        QuerySet or None: A queryset of sponsors, or None if an error occurs.
+        A queryset of sponsors, or None if an error occurs.
 
     """
     from apps.owasp.models.sponsor import Sponsor
@@ -147,10 +164,10 @@ def get_posts_data(limit: int = 5) -> QuerySet | None:
     """Get posts data.
 
     Args:
-        limit (int, optional): The maximum number of posts to fetch.
+        limit (int, optional): The maximum number of sponsors to fetch.
 
     Returns:
-        QuerySet or None: A queryset of recent posts, or None if an error occurs.
+        QuerySet or None: A queryset of sponsors, or None if an error occurs.
 
     """
     from apps.owasp.models.post import Post
@@ -162,7 +179,7 @@ def get_posts_data(limit: int = 5) -> QuerySet | None:
         return None
 
 
-def get_text(blocks: tuple) -> str:
+def get_text(blocks: tuple[dict[str, Any], ...]) -> str:
     """Convert blocks to plain text.
 
     Args:
@@ -172,7 +189,7 @@ def get_text(blocks: tuple) -> str:
         str: The plain text representation of the blocks.
 
     """
-    text = []
+    text: list[str] = []
 
     for block in blocks:
         match block.get("type"):
@@ -219,11 +236,11 @@ def strip_markdown(text: str) -> str:
     """Strip markdown formatting.
 
     Args:
-        text (str): The text with markdown formatting.
+        text: The text with markdown formatting.
 
     Returns:
-        str: The text with markdown formatting removed.
+        The text with markdown formatting removed.
 
     """
-    slack_link_pattern = re.compile(r"<(https?://[^|]+)\|([^>]+)>")
+    slack_link_pattern: re.Pattern[str] = re.compile(r"<(https?://[^|]+)\|([^>]+)>")
     return slack_link_pattern.sub(r"\2 (\1)", text).replace("*", "")

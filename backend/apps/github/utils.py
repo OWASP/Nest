@@ -33,12 +33,12 @@ def check_owasp_site_repository(key: str) -> bool:
     )
 
 
-def check_funding_policy_compliance(platform: str, target: str) -> bool:
+def check_funding_policy_compliance(platform: str, target: str | None) -> bool:
     """Check OWASP funding policy compliance.
 
     Args:
         platform (str): The funding platform (e.g., 'github', 'custom').
-        target (str): The funding target.
+        target (str | None): The funding target.
 
     Returns:
         bool: True if the funding policy is compliant, False otherwise.
@@ -50,8 +50,8 @@ def check_funding_policy_compliance(platform: str, target: str) -> bool:
     if platform == "github":
         return target.lower() == "owasp"
     if platform == "custom":
-        location = urlparse(target).netloc.lower()
-        owasp_org = "owasp.org"
+        location: str = urlparse(target).netloc.lower()
+        owasp_org: str = "owasp.org"
         return location == owasp_org or location.endswith(f".{owasp_org}")
 
     return False
@@ -66,17 +66,19 @@ def get_repository_file_content(
 
     Args:
         url (str): The URL of the file.
-        timeout (int, optional): The request timeout in seconds.
+        timeout (float | None, optional): The request timeout in seconds.
 
     Returns:
-        str: The content of the file, or None if the request fails.
+        str: The content of the file, or empty string if the request fails.
 
     """
     try:
-        return requests.get(url, timeout=timeout).text
+        response: requests.Response = requests.get(url, timeout=timeout)
     except RequestException as e:
         logger.exception("Failed to fetch file", extra={"URL": url, "error": str(e)})
         return ""
+    else:
+        return response.text
 
 
 def get_repository_path(url: str) -> str | None:
@@ -86,7 +88,8 @@ def get_repository_path(url: str) -> str | None:
         url (str): The repository URL.
 
     Returns:
-        str: The repository path in the format 'owner/repository_name', or None if parsing fails.
+        str | None: The repository path in the format 'owner/repository_name',
+            or None if parsing fails.
 
     """
     match = GITHUB_REPOSITORY_RE.search(url.split("#")[0])
@@ -101,19 +104,19 @@ def normalize_url(url: str, *, check_path: bool = False) -> str | None:
         check_path (bool, optional): Whether to check if the URL has a path.
 
     Returns:
-        str: The normalized URL, or None if the URL is invalid.
+        str | None: The normalized URL, or None if the URL is invalid.
 
     """
     parsed_url = urlparse(url)
     if not parsed_url.netloc or (check_path and not parsed_url.path):
         return None
 
-    http_prefix = "http://"  # NOSONAR
-    https_prefix = "https://"
+    http_prefix: str = "http://"  # NOSONAR
+    https_prefix: str = "https://"
     if not parsed_url.scheme:
         url = f"{https_prefix}{url}"
 
-    normalized_url = (
+    normalized_url: str = (
         f"{https_prefix}{url[len(http_prefix) :]}" if url.startswith(http_prefix) else url
     )
 
