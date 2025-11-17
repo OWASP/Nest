@@ -70,7 +70,7 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
 const ModuleItem = ({ details }: { details: Module }) => {
   const router = useRouter()
   const handleClick = () => {
-    router.push(`${window.location.pathname}/modules/${details.key}`)
+    router.push(`${globalThis.location.pathname}/modules/${details.key}`)
   }
 
   return (
@@ -98,7 +98,7 @@ export default ModuleCard
 export const getSimpleDuration = (start: string, end: string): string => {
   const startDate = new Date(start)
   const endDate = new Date(end)
-  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
     return 'Invalid duration'
   }
 

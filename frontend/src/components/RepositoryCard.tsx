@@ -2,13 +2,13 @@ import { faCodeFork, faStar, faUsers, faExclamationCircle } from '@fortawesome/f
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState } from 'react'
-import type { RepositoriesCardProps, RepositoryCardProps } from 'types/project'
-import ArchivedBadge from 'components/ArchivedBadge'
+import type { RepositoryCardListProps, RepositoryCardProps } from 'types/project'
 import InfoItem from 'components/InfoItem'
 import ShowMoreButton from 'components/ShowMoreButton'
+import StatusBadge from 'components/StatusBadge'
 import { TruncatedText } from 'components/TruncatedText'
 
-const RepositoriesCard: React.FC<RepositoriesCardProps> = ({
+const RepositoryCard: React.FC<RepositoryCardListProps> = ({
   maxInitialDisplay = 4,
   repositories,
 }) => {
@@ -22,8 +22,8 @@ const RepositoriesCard: React.FC<RepositoriesCardProps> = ({
   return (
     <div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {displayedRepositories.map((repository, index) => {
-          return <RepositoryItem key={index} details={repository} />
+        {displayedRepositories.map((repository) => {
+          return <RepositoryItem key={repository.key} details={repository} />
         })}
       </div>
       {repositories.length > maxInitialDisplay && <ShowMoreButton onToggle={toggleRepositories} />}
@@ -42,13 +42,13 @@ const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
       <div className="flex items-start justify-between gap-2">
         <button
           onClick={handleClick}
-          className="min-w-0 flex-1 text-start font-semibold text-blue-400 hover:underline"
+          className="min-w-0 flex-1 cursor-pointer text-start font-semibold text-blue-400 hover:underline"
         >
           <TruncatedText text={details?.name} />
         </button>
         {details.isArchived && (
           <div className="flex-shrink-0">
-            <ArchivedBadge size="sm" showIcon={false} />
+            <StatusBadge status="archived" size="sm" showIcon={false} />
           </div>
         )}
       </div>
@@ -73,4 +73,4 @@ const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
   )
 }
 
-export default RepositoriesCard
+export default RepositoryCard

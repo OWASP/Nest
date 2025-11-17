@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Skeleton } from '@heroui/skeleton'
 import { sendGTMEvent } from '@next/third-parties/google'
 import { debounce } from 'lodash'
+import { usePathname } from 'next/navigation'
 import React, { useEffect, useRef, useState, useMemo } from 'react'
 
 interface SearchProps {
@@ -20,14 +21,17 @@ const SearchBar: React.FC<SearchProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState(initialValue)
   const inputRef = useRef<HTMLInputElement>(null)
+  const pathname = usePathname()
 
   useEffect(() => {
     setSearchQuery(initialValue)
   }, [initialValue])
 
   useEffect(() => {
-    inputRef.current?.focus()
-  }, [])
+    if (!isLoaded && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [pathname, isLoaded])
 
   const debouncedSearch = useMemo(
     () =>
@@ -36,7 +40,7 @@ const SearchBar: React.FC<SearchProps> = ({
         if (query && query.trim() !== '') {
           sendGTMEvent({
             event: 'search',
-            path: window.location.pathname,
+            path: globalThis.location.pathname,
             value: query,
           })
         }

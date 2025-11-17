@@ -134,7 +134,7 @@ describe('LineChart', () => {
       render(<LineChart {...defaultProps} labels={labels} />)
 
       const chart = screen.getByTestId('mock-chart')
-      const options = JSON.parse(chart.getAttribute('data-options') || '{}')
+      const options = JSON.parse(chart.dataset.options || '{}')
       expect(options.xaxis.categories).toEqual(labels)
     })
 
@@ -142,7 +142,7 @@ describe('LineChart', () => {
       render(<LineChart {...defaultProps} />)
 
       const chart = screen.getByTestId('mock-chart')
-      const options = JSON.parse(chart.getAttribute('data-options') || '{}')
+      const options = JSON.parse(chart.dataset.options || '{}')
       expect(options.xaxis.categories).toBeUndefined()
     })
   })
@@ -160,7 +160,7 @@ describe('LineChart', () => {
       render(<LineChart {...defaultProps} />)
 
       const chart = screen.getByTestId('mock-chart')
-      const options = JSON.parse(chart.getAttribute('data-options') || '{}')
+      const options = JSON.parse(chart.dataset.options || '{}')
       expect(options.chart.foreColor).toBe('#1E1E2C')
       expect(options.tooltip.theme).toBe('light')
     })
@@ -177,7 +177,7 @@ describe('LineChart', () => {
       render(<LineChart {...defaultProps} />)
 
       const chart = screen.getByTestId('mock-chart')
-      const options = JSON.parse(chart.getAttribute('data-options') || '{}')
+      const options = JSON.parse(chart.dataset.options || '{}')
       expect(options.chart.foreColor).toBe('#ECECEC')
       expect(options.tooltip.theme).toBe('dark')
     })
@@ -195,7 +195,7 @@ describe('LineChart', () => {
       render(<LineChart {...defaultProps} />)
 
       const chart = screen.getByTestId('mock-chart')
-      const options = JSON.parse(chart.getAttribute('data-options') || '{}')
+      const options = JSON.parse(chart.dataset.options || '{}')
 
       expect(options.chart.toolbar.show).toBe(false)
       expect(options.xaxis.tickAmount).toBe(10)
@@ -206,7 +206,7 @@ describe('LineChart', () => {
       render(<LineChart {...defaultProps} />)
 
       const chart = screen.getByTestId('mock-chart')
-      const options = JSON.parse(chart.getAttribute('data-options') || '{}')
+      const options = JSON.parse(chart.dataset.options || '{}')
 
       expect(options.yaxis.labels.formatter).toBe('function')
       expect(mockFormatter).toBeDefined()
@@ -276,7 +276,7 @@ describe('LineChart', () => {
       render(<LineChart {...defaultProps} labels={[]} />)
 
       const chart = screen.getByTestId('mock-chart')
-      const options = JSON.parse(chart.getAttribute('data-options') || '{}')
+      const options = JSON.parse(chart.dataset.options || '{}')
       expect(options.xaxis.categories).toEqual([])
     })
 
@@ -292,7 +292,7 @@ describe('LineChart', () => {
       render(<LineChart {...defaultProps} />)
 
       const chart = screen.getByTestId('mock-chart')
-      const options = JSON.parse(chart.getAttribute('data-options') || '{}')
+      const options = JSON.parse(chart.dataset.options || '{}')
       // Should default to light theme color when theme is undefined
       expect(options.chart.foreColor).toBe('#1E1E2C')
     })

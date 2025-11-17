@@ -37,17 +37,17 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
 
   const handleView = () => {
     setDropdownOpen(false)
-    router.push(`${window.location.pathname}/modules/${module.key}`)
+    router.push(`${globalThis.location.pathname}/modules/${module.key}`)
   }
 
   const handleEdit = () => {
     setDropdownOpen(false)
-    router.push(`${window.location.pathname}/modules/${module.key}/edit`)
+    router.push(`${globalThis.location.pathname}/modules/${module.key}/edit`)
   }
 
   const handleCreate = () => {
     setDropdownOpen(false)
-    router.push(`${window.location.pathname}/modules/create`)
+    router.push(`${globalThis.location.pathname}/modules/create`)
   }
 
   const moduleDetails = [
@@ -73,7 +73,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
         <div className="flex cursor-pointer items-center gap-2">
           <FontAwesomeIcon icon={faUsers} className="text-gray-500 dark:text-gray-300" />
           <Link
-            href={`${window.location.pathname}/modules/${module.key}`}
+            href={`${globalThis.location.pathname}/modules/${module.key}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1"

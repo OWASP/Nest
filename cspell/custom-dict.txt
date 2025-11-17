@@ -1,3 +1,4 @@
+Agentic
 Agsoc
 Aichi
 Aissue
@@ -34,6 +35,7 @@ Whistleblower
 Wörld
 Xmark
 a2eeef
+agentic
 ahmedxgouda
 algoliasearch
 ansa
@@ -52,6 +54,7 @@ csrfguard
 csrfprotector
 csrftoken
 cva
+defectdojo
 demojize
 dismissable
 dsn
@@ -70,6 +73,7 @@ inlinehilite
 isanori
 jumpstart
 kasya
+langgraph
 lhci
 libexpat
 lighthouseci
@@ -105,8 +109,10 @@ pygoat
 pymdownx
 pypoetry
 pyyaml
+relativedelta
 repositorycontributor
 requirepass
+rqworker
 rsc
 saft
 sakanashi
@@ -122,6 +128,7 @@ tsc
 turbopack
 unhover
 usefixtures
+webgoat
 winsrdf
 wsgi
 xapp

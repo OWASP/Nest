@@ -30,7 +30,7 @@ def mock_get_github_client():
         yield mock_get_client
 
 
-def create_mock_organization(login="TestOrg", num_related_projects=1):
+def create_mock_organization(login="test-org", num_related_projects=1):
     org = mock.Mock(spec=Organization)
     org.login = login
     org.url = f"https://github.com/{login}"
@@ -70,7 +70,7 @@ def setup_organizations(num_orgs, num_repos_per_org):
     gh_orgs = []
 
     for i in range(num_orgs):
-        org_login = f"TestOrg{i + 1}"
+        org_login = f"test-org-{i + 1}"
         org = create_mock_organization(org_login)
         orgs.append(org)
 
@@ -168,21 +168,21 @@ class TestGithubUpdateExternalRepositories:
 
     def test_handle_with_specific_organization(self):
         """Test command execution with a specific organization."""
-        org = create_mock_organization("TestOrg")
-        gh_org = create_mock_github_org("TestOrg", 2)
+        org = create_mock_organization("test-org")
+        gh_org = create_mock_github_org("test-org", 2)
 
         self._setup_organizations_mock([org])
         self.mock_gh.get_organization.return_value = gh_org
 
         with mock.patch("builtins.print"):
-            self.command.handle(organization="TestOrg")
+            self.command.handle(organization="test-org")
 
         self.mock_unregister_indexes.assert_called_once()
         self.mock_register_indexes.assert_called_once()
 
-        self.mock_related_orgs.filter.assert_called_with(login__iexact="TestOrg")
+        self.mock_related_orgs.filter.assert_called_with(login__iexact="test-org")
         assert self.mock_gh.get_organization.call_count == 1
-        self.mock_gh.get_organization.assert_called_with("TestOrg")
+        self.mock_gh.get_organization.assert_called_with("test-org")
         assert self.mock_sync_repository.call_count == 2
 
     def test_handle_no_organizations_found(self, mock_logger):
@@ -201,7 +201,7 @@ class TestGithubUpdateExternalRepositories:
 
     def test_handle_invalid_related_projects(self, mock_logger):
         """Test handling of organization with invalid number of related projects."""
-        org = create_mock_organization("TestOrg", num_related_projects=0)
+        org = create_mock_organization("test-org", num_related_projects=0)
         self._setup_organizations_mock([org])
 
         with mock.patch("builtins.print"):
@@ -221,8 +221,8 @@ class TestGithubUpdateExternalRepositories:
 
     def test_handle_sync_repository_exception(self, mock_logger):
         """Test handling of sync_repository exceptions."""
-        org = create_mock_organization("TestOrg")
-        gh_org = create_mock_github_org("TestOrg", 1)
+        org = create_mock_organization("test-org")
+        gh_org = create_mock_github_org("test-org", 1)
 
         self._setup_organizations_mock([org])
         self.mock_gh.get_organization.return_value = gh_org
@@ -235,6 +235,6 @@ class TestGithubUpdateExternalRepositories:
         self.mock_register_indexes.assert_called_once()
 
         mock_logger.exception.assert_called_once_with(
-            "Error syncing repository %s", "https://github.com/TestOrg/repo-0"
+            "Error syncing repository %s", "https://github.com/test-org/repo-0"
         )
         assert self.mock_sync_repository.call_count == 1

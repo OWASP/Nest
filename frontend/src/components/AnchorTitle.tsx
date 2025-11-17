@@ -23,7 +23,7 @@ const AnchorTitle: React.FC<AnchorTitleProps> = ({ title }) => {
   }
 
   useEffect(() => {
-    const hash = window.location.hash.replace('#', '')
+    const hash = globalThis.location.hash.replace('#', '')
     if (hash === id) {
       requestAnimationFrame(() => scrollToElement())
     }
@@ -31,13 +31,13 @@ const AnchorTitle: React.FC<AnchorTitleProps> = ({ title }) => {
 
   useEffect(() => {
     const handlePopState = () => {
-      const hash = window.location.hash.replace('#', '')
+      const hash = globalThis.location.hash.replace('#', '')
       if (hash === id) {
         requestAnimationFrame(() => scrollToElement())
       }
     }
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
+    globalThis.addEventListener('popstate', handlePopState)
+    return () => globalThis.removeEventListener('popstate', handlePopState)
   }, [id, scrollToElement])
 
   return (

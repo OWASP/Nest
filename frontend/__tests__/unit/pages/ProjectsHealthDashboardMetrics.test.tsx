@@ -109,12 +109,12 @@ describe('MetricsPage', () => {
     const headers = ['Project Name', 'Stars', 'Forks', 'Contributors', 'Health Checked At', 'Score']
     render(<MetricsPage />)
     await waitFor(() => {
-      headers.forEach((header) => {
+      for (const header of headers) {
         expect(screen.getAllByText(header).length).toBeGreaterThan(0)
-      })
+      }
     })
   })
-  test('renders filter and sort dropdowns', async () => {
+  test('renders filter dropdown and sortable column headers', async () => {
     render(<MetricsPage />)
     const filterOptions = [
       'Incubator',
@@ -127,24 +127,74 @@ describe('MetricsPage', () => {
       'Reset All Filters',
     ]
     const filterSectionsLabels = ['Project Level', 'Project Health', 'Reset Filters']
-    const sortOptions = ['Ascending', 'Descending']
+    const sortableColumns = ['Stars', 'Forks', 'Contributors', 'Health Checked At', 'Score']
 
     await waitFor(() => {
-      filterSectionsLabels.forEach((label) => {
+      for (const label of filterSectionsLabels) {
         expect(screen.getAllByText(label).length).toBeGreaterThan(0)
-      })
-      filterOptions.forEach((option) => {
+      }
+
+      for (const option of filterOptions) {
         expect(screen.getAllByText(option).length).toBeGreaterThan(0)
         const button = screen.getByRole('button', { name: option })
         fireEvent.click(button)
         expect(button).toBeInTheDocument()
-      })
-      sortOptions.forEach((option) => {
-        expect(screen.getAllByText(option).length).toBeGreaterThan(0)
-        const button = screen.getByRole('button', { name: option })
-        fireEvent.click(button)
-        expect(button).toBeInTheDocument()
-      })
+      }
+
+      for (const column of sortableColumns) {
+        const sortButton = screen.getByTitle(`Sort by ${column}`)
+        expect(sortButton).toBeInTheDocument()
+      }
+    })
+  })
+
+  test('handles sorting state and URL updates', async () => {
+    const mockReplace = jest.fn()
+    const { useRouter, useSearchParams } = jest.requireMock('next/navigation')
+    ;(useRouter as jest.Mock).mockReturnValue({
+      push: jest.fn(),
+      replace: mockReplace,
+    })
+
+    // Test unsorted -> descending
+    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams())
+    const { rerender } = render(<MetricsPage />)
+
+    const sortButton = screen.getByTitle('Sort by Stars')
+    fireEvent.click(sortButton)
+
+    await waitFor(() => {
+      const lastCall = mockReplace.mock.calls[mockReplace.mock.calls.length - 1][0]
+      const url = new URL(lastCall, 'http://localhost')
+      expect(url.searchParams.get('order')).toBe('-stars')
+    })
+
+    // Test descending -> ascending
+    mockReplace.mockClear()
+    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('order=-stars'))
+    rerender(<MetricsPage />)
+
+    const sortButtonDesc = screen.getByTitle('Sort by Stars')
+    fireEvent.click(sortButtonDesc)
+
+    await waitFor(() => {
+      const lastCall = mockReplace.mock.calls[mockReplace.mock.calls.length - 1][0]
+      const url = new URL(lastCall, 'http://localhost')
+      expect(url.searchParams.get('order')).toBe('stars')
+    })
+
+    // Test ascending -> unsorted (removes order param, defaults to -score)
+    mockReplace.mockClear()
+    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('order=stars'))
+    rerender(<MetricsPage />)
+
+    const sortButtonAsc = screen.getByTitle('Sort by Stars')
+    fireEvent.click(sortButtonAsc)
+
+    await waitFor(() => {
+      const lastCall = mockReplace.mock.calls[mockReplace.mock.calls.length - 1][0]
+      const url = new URL(lastCall, 'http://localhost')
+      expect(url.searchParams.get('order')).toBeNull()
     })
   })
   test('render health metrics data', async () => {
@@ -153,7 +203,7 @@ describe('MetricsPage', () => {
     await waitFor(() => {
       expect(metrics.length).toBeGreaterThan(0)
 
-      metrics.forEach((metric) => {
+      for (const metric of metrics) {
         expect(screen.getByText(metric.projectName)).toBeInTheDocument()
         expect(screen.getByText(metric.starsCount.toString())).toBeInTheDocument()
         expect(screen.getByText(metric.forksCount.toString())).toBeInTheDocument()
@@ -168,7 +218,7 @@ describe('MetricsPage', () => {
           )
         ).toBeInTheDocument()
         expect(screen.getByText(metric.score.toString())).toBeInTheDocument()
-      })
+      }
     })
   })
   test('handles pagination', async () => {

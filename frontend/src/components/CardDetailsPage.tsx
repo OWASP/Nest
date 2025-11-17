@@ -17,7 +17,6 @@ import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
 import { scrollToAnchor } from 'utils/scrollToAnchor'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
-import ArchivedBadge from 'components/ArchivedBadge'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
@@ -30,9 +29,10 @@ import ProgramActions from 'components/ProgramActions'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
-import RepositoriesCard from 'components/RepositoriesCard'
+import RepositoryCard from 'components/RepositoryCard'
 import SecondaryCard from 'components/SecondaryCard'
 import SponsorCard from 'components/SponsorCard'
+import StatusBadge from 'components/StatusBadge'
 import ToggleableList from 'components/ToggleableList'
 import TopContributorsList from 'components/TopContributorsList'
 
@@ -91,19 +91,15 @@ const DetailsCard = ({
                   type="button"
                   className="flex items-center justify-center gap-2 rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-nowrap text-[#0D6EFD] transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
                   onClick={() => {
-                    router.push(`${window.location.pathname}/edit`)
+                    router.push(`${globalThis.location.pathname}/edit`)
                   }}
                 >
                   Edit Module
                 </button>
               )}
             <div className="flex items-center gap-3">
-              {!isActive && (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-red-600 bg-red-50 px-3 py-1 text-sm font-medium text-red-800 dark:border-red-500 dark:bg-red-900/30 dark:text-red-400">
-                  Inactive
-                </span>
-              )}
-              {isArchived && type === 'repository' && <ArchivedBadge size="md" />}
+              {!isActive && <StatusBadge status="inactive" size="md" />}
+              {isArchived && type === 'repository' && <StatusBadge status="archived" size="md" />}
               {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
                 <MetricsScoreCircle
                   score={healthMetricsData[0].score}
@@ -160,8 +156,8 @@ const DetailsCard = ({
               title={<AnchorTitle title="Statistics" />}
               className="md:col-span-2"
             >
-              {stats.map((stat, index) => (
-                <div key={index}>
+              {stats.map((stat) => (
+                <div key={`${stat.unit}-${stat.value}`}>
                   <InfoBlock
                     className="pb-1"
                     icon={stat.icon}
@@ -283,7 +279,7 @@ const DetailsCard = ({
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
             <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
-              <RepositoriesCard maxInitialDisplay={4} repositories={repositories} />
+              <RepositoryCard maxInitialDisplay={4} repositories={repositories} />
             </SecondaryCard>
           )}
         {type === 'program' && modules.length > 0 && (
@@ -317,9 +313,9 @@ export const SocialLinks = ({ urls }) => {
     <div>
       <strong>Social Links</strong>
       <div className="mt-2 flex flex-wrap gap-3">
-        {urls.map((url, index) => (
+        {urls.map((url) => (
           <a
-            key={index}
+            key={url}
             href={url}
             target="_blank"
             rel="noopener noreferrer"

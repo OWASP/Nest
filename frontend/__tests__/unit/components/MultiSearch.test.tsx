@@ -39,7 +39,7 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
 
 // Mock window.open globally
 const mockWindowOpen = jest.fn()
-Object.defineProperty(window, 'open', {
+Object.defineProperty(globalThis, 'open', {
   value: mockWindowOpen,
   writable: true,
 })
@@ -317,9 +317,10 @@ describe('Rendering', () => {
       await waitFor(() => {
         const suggestions = screen.getAllByText('Test Chapter')
         expect(suggestions.length).toBeGreaterThan(0)
-        suggestions.forEach((suggestion) => {
+
+        for (const suggestion of suggestions) {
           expect(suggestion).toBeInTheDocument()
-        })
+        }
       })
 
       await user.click(document.body)

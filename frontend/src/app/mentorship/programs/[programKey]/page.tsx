@@ -43,7 +43,7 @@ const ProgramDetailsPage = () => {
           const params = new URLSearchParams(searchParams.toString())
           params.delete('refresh')
           const cleaned = params.toString()
-          router.replace(cleaned ? `?${cleaned}` : window.location.pathname, { scroll: false })
+          router.replace(cleaned ? `?${cleaned}` : globalThis.location.pathname, { scroll: false })
         }
       }
 

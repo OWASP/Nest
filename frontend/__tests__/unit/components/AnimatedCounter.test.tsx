@@ -71,7 +71,7 @@ describe('AnimatedCounter', () => {
       })
 
       // Should show intermediate value
-      const displayedValue = parseInt(screen.getByText(/\d+/).textContent || '0')
+      const displayedValue = Number.parseInt(screen.getByText(/\d+/).textContent || '0')
       expect(displayedValue).toBeGreaterThan(0)
       expect(displayedValue).toBeLessThanOrEqual(50)
     })
@@ -173,7 +173,7 @@ describe('AnimatedCounter', () => {
 
   describe('Animation behavior', () => {
     it('calls requestAnimationFrame during animation', () => {
-      const requestAnimationFrameSpy = jest.spyOn(window, 'requestAnimationFrame')
+      const requestAnimationFrameSpy = jest.spyOn(globalThis, 'requestAnimationFrame')
       render(<AnimatedCounter end={100} duration={1} />)
 
       expect(requestAnimationFrameSpy).toHaveBeenCalled()
