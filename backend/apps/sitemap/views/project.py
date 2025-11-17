@@ -11,7 +11,12 @@ class ProjectSitemap(BaseSitemap):
     prefix = "/projects"
 
     def items(self):
-        """Return list of projects for sitemap generation."""
+        """Return list of projects for sitemap generation.
+
+        Returns:
+            list: List of indexable Project objects ordered by update/creation date.
+
+        """
         return [
             p
             for p in Project.active_projects.order_by(

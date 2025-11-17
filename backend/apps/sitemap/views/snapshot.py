@@ -11,7 +11,12 @@ class SnapshotSitemap(BaseSitemap):
     prefix = "/snapshots"
 
     def items(self):
-        """Return queryset of snapshots for sitemap generation."""
+        """Return queryset of snapshots for sitemap generation.
+
+        Returns:
+            QuerySet: Queryset of completed Snapshot objects ordered by update/creation date.
+
+        """
         return Snapshot.objects.filter(
             status=Snapshot.Status.COMPLETED,
         ).order_by(
@@ -20,5 +25,13 @@ class SnapshotSitemap(BaseSitemap):
         )
 
     def location(self, obj):
-        """Return the URL path for an object."""
+        """Return the URL path for a snapshot.
+
+        Args:
+            obj: Snapshot instance to generate URL for.
+
+        Returns:
+            str: The URL path for the snapshot.
+
+        """
         return f"{self.prefix}/{obj.key}"

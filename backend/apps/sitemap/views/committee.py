@@ -11,7 +11,12 @@ class CommitteeSitemap(BaseSitemap):
     prefix = "/committees"
 
     def items(self):
-        """Return list of committees for sitemap generation."""
+        """Return list of committees for sitemap generation.
+
+        Returns:
+            list: List of indexable Committee objects ordered by update/creation date.
+
+        """
         return [
             c
             for c in Committee.active_committees.order_by(

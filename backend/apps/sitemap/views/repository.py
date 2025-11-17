@@ -13,7 +13,13 @@ class RepositorySitemap(BaseSitemap):
     prefix = "/repositories"
 
     def items(self) -> QuerySet[Repository]:
-        """Return list of repositories for sitemap generation."""
+        """Return list of repositories for sitemap generation.
+
+        Returns:
+            QuerySet[Repository]: Queryset of non-archived, non-empty, non-template repositories
+                with organizations, ordered by update/creation date.
+
+        """
         return Repository.objects.filter(
             is_archived=False,
             is_empty=False,
