@@ -65,6 +65,7 @@ const ModuleDetailsPage = () => {
       admins={admins}
       tags={module.tags}
       domains={module.domains}
+      labels={module.labels}
       summary={module.description}
       mentors={module.mentors}
       type="module"
