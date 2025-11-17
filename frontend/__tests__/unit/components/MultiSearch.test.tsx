@@ -166,6 +166,10 @@ const expectTestLoginVisible = () => {
   expect(screen.getByText('test-login')).toBeInTheDocument()
 }
 
+const expectChaptersCountEqualsThree = () => {
+  expectChaptersCountEquals(3)
+}
+
 describe('Rendering', () => {
   it('renders successfully with minimal required props', () => {
     render(<MultiSearchBar {...defaultProps} />)
@@ -416,9 +420,9 @@ describe('Rendering', () => {
 
         const input = screen.getByPlaceholderText('Search...')
         await user.type(input, 'test')
-        await waitFor(() => expectSuggestionsToExist())
+        await waitFor(expectSuggestionsToExist)
         await user.keyboard('{ArrowDown}')
-        await waitFor(() => expectFirstListItemHighlighted())
+        await waitFor(expectFirstListItemHighlighted)
 
         expect(true).toBe(true)
       })
@@ -429,10 +433,10 @@ describe('Rendering', () => {
 
         const input = screen.getByPlaceholderText('Search...')
         await user.type(input, 'test')
-        await waitFor(() => expectTestChaptersExist())
+        await waitFor(expectTestChaptersExist)
         await user.keyboard('{ArrowDown}')
         await user.keyboard('{ArrowDown}')
-        await waitFor(() => expectSecondListItemHighlighted())
+        await waitFor(expectSecondListItemHighlighted)
 
         expect(true).toBe(true)
       })
@@ -443,12 +447,12 @@ describe('Rendering', () => {
 
         const input = screen.getByPlaceholderText('Search...')
         await user.type(input, 'test')
-        await waitFor(() => expectTestChaptersExist())
+        await waitFor(expectTestChaptersExist)
         await user.keyboard('{ArrowDown}')
         await user.keyboard('{ArrowDown}')
-        await waitFor(() => expectSecondListItemHighlighted())
+        await waitFor(expectSecondListItemHighlighted)
         await user.keyboard('{ArrowUp}')
-        await waitFor(() => expectFirstListItemHighlighted())
+        await waitFor(expectFirstListItemHighlighted)
 
         expect(true).toBe(true)
       })
@@ -460,9 +464,9 @@ describe('Rendering', () => {
         const input = screen.getByPlaceholderText('Search...')
         await user.type(input, 'test')
 
-        await waitFor(() => expectListItemsExist())
+        await waitFor(expectListItemsExist)
         await user.keyboard('{Escape}')
-        await waitFor(() => expectNoListItems())
+        await waitFor(expectNoListItems)
 
         expect(true).toBe(true)
       })
@@ -473,7 +477,7 @@ describe('Rendering', () => {
 
         const input = screen.getByPlaceholderText('Search...')
         await user.type(input, 'test')
-        await waitFor(() => expectListItemsExist())
+        await waitFor(expectListItemsExist)
         await user.keyboard('{ArrowDown}')
         await user.keyboard('{Enter}')
 
@@ -493,7 +497,7 @@ describe('Rendering', () => {
 
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
-      await waitFor(() => expectChaptersCountEquals(3))
+      await waitFor(expectChaptersCountEqualsThree)
 
       const chapterElements = screen.getAllByText('Test Chapter')
       await user.click(chapterElements[0])
@@ -530,7 +534,7 @@ describe('Rendering', () => {
 
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
-      await waitFor(() => expectOrgVisible())
+      await waitFor(expectOrgVisible)
 
       const organizationButton = screen.getByRole('button', { name: /Test Organization/i })
       await user.click(organizationButton)
@@ -549,7 +553,7 @@ describe('Rendering', () => {
 
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
-      await waitFor(() => expectProjectVisible())
+      await waitFor(expectProjectVisible)
 
       await user.click(screen.getByText('Test Project'))
 
@@ -567,7 +571,7 @@ describe('Rendering', () => {
 
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
-      await waitFor(() => expectUserVisible())
+      await waitFor(expectUserVisible)
 
       await user.click(screen.getByText('Test User'))
 
@@ -590,7 +594,7 @@ describe('Rendering', () => {
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'nonexistent')
 
-      await waitFor(() => expectNoListToExist())
+      await waitFor(expectNoListToExist)
 
       expect(true).toBe(true)
     })
@@ -607,7 +611,7 @@ describe('Rendering', () => {
 
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
-      await waitFor(() => expectOrgWithoutLoginVisible())
+      await waitFor(expectOrgWithoutLoginVisible)
 
       await user.click(screen.getByText('Org Without Login'))
 
@@ -628,7 +632,7 @@ describe('Rendering', () => {
 
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
-      await waitFor(() => expectTestLoginVisible())
+      await waitFor(expectTestLoginVisible)
 
       expect(true).toBe(true)
     })

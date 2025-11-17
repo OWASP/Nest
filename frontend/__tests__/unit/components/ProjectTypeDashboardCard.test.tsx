@@ -4,6 +4,8 @@ import '@testing-library/jest-dom'
 import React from 'react'
 import ProjectTypeDashboardCard from 'components/ProjectTypeDashboardCard'
 
+type ProjectHealthType = 'healthy' | 'needsAttention' | 'unhealthy'
+
 jest.mock('next/link', () => {
   return function MockedLink({
     children,
@@ -64,7 +66,7 @@ describe('ProjectTypeDashboardCard', () => {
     jest.clearAllMocks()
   })
 
-  const expectValidTypeRendersWithoutError = (type: 'healthy' | 'needsAttention' | 'unhealthy') => {
+  const expectValidTypeRendersWithoutError = (type: ProjectHealthType) => {
     expect(() => {
       render(<ProjectTypeDashboardCard type={type} count={10} icon={faHeartPulse} />)
     }).not.toThrow()
@@ -211,7 +213,6 @@ describe('ProjectTypeDashboardCard', () => {
       expect(screen.getByText(largeNumber.toString())).toBeInTheDocument()
     })
 
-    type ProjectHealthType = 'healthy' | 'needsAttention' | 'unhealthy'
     it('renders correctly with all type variants', () => {
       const types: Array<ProjectHealthType> = ['healthy', 'needsAttention', 'unhealthy']
 
@@ -360,7 +361,7 @@ describe('ProjectTypeDashboardCard', () => {
 
   describe('Type Safety and TypeScript Compliance', () => {
     it('only accepts valid type values', () => {
-      const validTypes: Array<'healthy' | 'needsAttention' | 'unhealthy'> = [
+      const validTypes: Array<ProjectHealthType> = [
         'healthy',
         'needsAttention',
         'unhealthy',
@@ -400,7 +401,7 @@ describe('ProjectTypeDashboardCard', () => {
     it('handles rapid prop changes gracefully', () => {
       const { rerender } = render(<ProjectTypeDashboardCard {...baseProps} />)
 
-      const types: Array<'healthy' | 'needsAttention' | 'unhealthy'> = [
+      const types: Array<ProjectHealthType> = [
         'healthy',
         'needsAttention',
         'unhealthy',
