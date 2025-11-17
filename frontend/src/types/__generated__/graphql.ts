@@ -236,24 +236,16 @@ export type LogoutResult = {
   ok: Scalars['Boolean']['output'];
 };
 
-export type MemberSnapshotNode = Node & {
-  __typename?: 'MemberSnapshotNode';
-  channelCommunications: Scalars['JSON']['output'];
-  chapterContributions: Scalars['JSON']['output'];
-  commitsCount: Scalars['Int']['output'];
-  communicationHeatmapData: Scalars['JSON']['output'];
-  contributionHeatmapData: Scalars['JSON']['output'];
-  endAt: Scalars['DateTime']['output'];
-  githubUser: UserNode;
-  /** The Globally Unique ID of this object */
-  id: Scalars['ID']['output'];
-  issuesCount: Scalars['Int']['output'];
-  messagesCount: Scalars['Int']['output'];
-  projectContributions: Scalars['JSON']['output'];
-  pullRequestsCount: Scalars['Int']['output'];
-  repositoryContributions: Scalars['JSON']['output'];
-  startAt: Scalars['DateTime']['output'];
-  totalContributions: Scalars['Int']['output'];
+export type MenteeNode = {
+  __typename?: 'MenteeNode';
+  avatarUrl: Scalars['String']['output'];
+  bio?: Maybe<Scalars['String']['output']>;
+  domains?: Maybe<Array<Scalars['String']['output']>>;
+  experienceLevel: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  login: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  tags?: Maybe<Array<Scalars['String']['output']>>;
 };
 
 export type MentorNode = {
@@ -291,10 +283,12 @@ export type ModuleNode = {
   id: Scalars['ID']['output'];
   interestedUsers: Array<UserNode>;
   issueByNumber?: Maybe<IssueNode>;
+  issueMentees: Array<UserNode>;
   issues: Array<IssueNode>;
   issuesCount: Scalars['Int']['output'];
   key: Scalars['String']['output'];
   labels?: Maybe<Array<Scalars['String']['output']>>;
+  mentees: Array<UserNode>;
   mentors: Array<MentorNode>;
   name: Scalars['String']['output'];
   program?: Maybe<ProgramNode>;
@@ -314,6 +308,11 @@ export type ModuleNodeInterestedUsersArgs = {
 
 export type ModuleNodeIssueByNumberArgs = {
   number: Scalars['Int']['input'];
+};
+
+
+export type ModuleNodeIssueMenteesArgs = {
+  issueNumber: Scalars['Int']['input'];
 };
 
 
@@ -647,6 +646,8 @@ export type Query = {
   boardsOfDirectors: Array<BoardOfDirectorsNode>;
   chapter?: Maybe<ChapterNode>;
   committee?: Maybe<CommitteeNode>;
+  getMenteeDetails: MenteeNode;
+  getMenteeModuleIssues: Array<IssueNode>;
   getModule: ModuleNode;
   getProgram: ProgramNode;
   getProgramModules: Array<ModuleNode>;
@@ -700,6 +701,22 @@ export type QueryChapterArgs = {
 
 export type QueryCommitteeArgs = {
   key: Scalars['String']['input'];
+};
+
+
+export type QueryGetMenteeDetailsArgs = {
+  menteeHandle: Scalars['String']['input'];
+  moduleKey: Scalars['String']['input'];
+  programKey: Scalars['String']['input'];
+};
+
+
+export type QueryGetMenteeModuleIssuesArgs = {
+  limit?: Scalars['Int']['input'];
+  menteeHandle: Scalars['String']['input'];
+  moduleKey: Scalars['String']['input'];
+  offset?: Scalars['Int']['input'];
+  programKey: Scalars['String']['input'];
 };
 
 

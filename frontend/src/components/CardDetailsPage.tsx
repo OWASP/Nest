@@ -22,6 +22,7 @@ import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
 import Leaders from 'components/Leaders'
 import LeadersList from 'components/LeadersList'
+import MenteeContributorsList from 'components/MenteeContributorsList'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import Milestones from 'components/Milestones'
 import ModuleCard from 'components/ModuleCard'
@@ -49,6 +50,7 @@ const DetailsCard = ({
   labels,
   modules,
   mentors,
+  mentees,
   admins,
   entityKey,
   geolocationData = null,
@@ -275,6 +277,16 @@ const DetailsCard = ({
             contributors={mentors}
             maxInitialDisplay={6}
             label="Mentors"
+          />
+        )}
+        {mentees && mentees.length > 0 && (
+          <MenteeContributorsList
+            icon={faUsers}
+            contributors={mentees}
+            maxInitialDisplay={6}
+            label="Mentees"
+            programKey={programKey || ''}
+            moduleKey={entityKey || ''}
           />
         )}
         {(type === 'project' ||

@@ -44,6 +44,12 @@ export const GET_MODULE_ISSUE_VIEW = gql`
         name
         avatarUrl
       }
+      issueMentees(issueNumber: $number) {
+        id
+        login
+        name
+        avatarUrl
+      }
     }
   }
 `

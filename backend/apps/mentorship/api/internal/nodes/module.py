@@ -7,6 +7,7 @@ import strawberry
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models import Label
+from apps.github.models.user import User
 from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum
 from apps.mentorship.api.internal.nodes.mentor import MentorNode
 from apps.mentorship.api.internal.nodes.program import ProgramNode
@@ -35,6 +36,34 @@ class ModuleNode:
     def mentors(self) -> list[MentorNode]:
         """Get the list of mentors for this module."""
         return self.mentors.all()
+
+    @strawberry.field
+    def mentees(self) -> list[UserNode]:
+        """Get the list of mentees for this module."""
+        mentee_users = (
+            self.menteemodule_set.select_related("mentee__github_user")
+            .filter(mentee__github_user__isnull=False)
+            .values_list("mentee__github_user", flat=True)
+        )
+
+        return list(User.objects.filter(id__in=mentee_users).order_by("login"))
+
+    @strawberry.field
+    def issue_mentees(self, issue_number: int) -> list[UserNode]:
+        """Return mentees assigned to this module's issue identified by its number."""
+        issue_ids = list(self.issues.filter(number=issue_number).values_list("id", flat=True))
+        if not issue_ids:
+            return []
+
+        # Get mentees assigned to tasks for this issue
+        mentee_users = (
+            Task.objects.filter(module=self, issue_id__in=issue_ids, assignee__isnull=False)
+            .select_related("assignee")
+            .values_list("assignee", flat=True)
+            .distinct()
+        )
+
+        return list(User.objects.filter(id__in=mentee_users).order_by("login"))
 
     @strawberry.field
     def project_name(self) -> str | None:

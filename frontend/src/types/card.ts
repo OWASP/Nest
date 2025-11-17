@@ -59,6 +59,7 @@ export interface DetailsCardProps {
   setStatus?: (newStatus: string) => void
   canUpdateStatus?: boolean
   mentors?: Contributor[]
+  mentees?: Contributor[]
   admins?: Contributor[]
   projectName?: string
   programKey?: string
