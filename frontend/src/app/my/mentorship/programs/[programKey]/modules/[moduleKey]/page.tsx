@@ -13,7 +13,7 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import { getSimpleDuration } from 'components/ModuleCard'
 
 const ModuleDetailsPage = () => {
-  const { programKey, moduleKey } = useParams()
+  const { programKey, moduleKey } = useParams() as { programKey: string; moduleKey: string }
   const [module, setModule] = useState<Module | null>(null)
   const [admins, setAdmins] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -68,8 +68,11 @@ const ModuleDetailsPage = () => {
       labels={module.labels}
       summary={module.description}
       mentors={module.mentors}
+      mentees={module.mentees}
       type="module"
       accessLevel="admin"
+      programKey={programKey}
+      entityKey={moduleKey}
     />
   )
 }
