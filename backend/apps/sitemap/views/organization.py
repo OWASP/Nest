@@ -14,7 +14,8 @@ class OrganizationSitemap(BaseSitemap):
         """Return a queryset of indexable Organization objects.
 
         Returns:
-            list: List of indexable OWASP-related Organization objects ordered by update/creation date.
+            list: List of indexable OWASP-related Organization objects
+                ordered by update/creation date.
 
         """
         return [
