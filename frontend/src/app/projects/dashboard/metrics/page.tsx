@@ -77,25 +77,21 @@ const SortableColumnHeader: FC<{
     }
   }
 
-  const alignmentClass = (() => {
-    if (align === 'center') {
-      return 'justify-center'
-    } else if (align === 'right') {
-      return 'justify-end'
-    } else {
-      return 'justify-start'
-    }
-  })()
+  const justifyMap = {
+    left: 'justify-start',
+    center: 'justify-center',
+    right: 'justify-end',
+  }
 
-  const textAlignClass = (() => {
-    if (align === 'center') {
-      return 'text-center'
-    } else if (align === 'right') {
-      return 'text-right'
-    } else {
-      return 'text-left'
-    }
-  })()
+  const alignmentClass = justifyMap[align] || justifyMap.left
+
+  const textAlignMap = {
+    left: 'text-left',
+    center: 'text-center',
+    right: 'text-right',
+  }
+
+  const textAlignClass = textAlignMap[align] || textAlignMap.left
 
   const fontAwesomeIconType = (() => {
     if (isActiveSortDesc) {
