@@ -116,6 +116,57 @@ const BoardCandidatesPage = () => {
     const [ledChapters, setLedChapters] = useState<Chapter[]>([])
     const [ledProjects, setLedProjects] = useState<Project[]>([])
 
+    const sortByName = <T extends { name: string }>(items: T[]): T[] => {
+      return items.sort((a, b) => a.name.localeCompare(b.name))
+    }
+
+    const sortByContributionCount = (entries: Array<[string, number]>): Array<[string, number]> => {
+      return entries.sort(([, a], [, b]) => (b as number) - (a as number))
+    }
+
+    const sortChannelsByMessageCount = (
+      entries: Array<[string, string | number]>
+    ): Array<[string, string | number]> => {
+      return entries.sort(([, a], [, b]) => (Number(b) || 0) - (Number(a) || 0))
+    }
+
+    // Render a single repository link item
+    const renderChannelLink = (channelName: string, messageCount: string | number) => (
+      <a
+        key={channelName}
+        href={`https://owasp.slack.com/archives/${channelName}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <span>#{channelName}</span>
+        <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-800 dark:bg-blue-800/40 dark:text-blue-300">
+          {Number(messageCount)} messages
+        </span>
+      </a>
+    )
+
+    // Render a single repository link item
+    const renderRepositoryLink = (repoName: string, count: number) => {
+      const commitCount = Number(count)
+      return (
+        <a
+          key={repoName}
+          href={`https://github.com/${repoName}/commits?author=${candidate.member?.login}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <span>{repoName}</span>
+          <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-800 dark:bg-blue-800/40 dark:text-blue-300">
+            {commitCount} commits
+          </span>
+        </a>
+      )
+    }
+
     const { data: snapshotData } = useQuery(GetMemberSnapshotDocument, {
       variables: {
         userLogin: candidate.member?.login || '',
@@ -152,7 +203,7 @@ const BoardCandidatesPage = () => {
           }
         }
 
-        setLedChapters(chapters.sort((a, b) => a.name.localeCompare(b.name)))
+        setLedChapters(sortByName(chapters))
       }
 
       fetchChapters()
@@ -181,7 +232,7 @@ const BoardCandidatesPage = () => {
           }
         }
 
-        setLedProjects(projects.sort((a, b) => a.name.localeCompare(b.name)))
+        setLedProjects(sortByName(projects))
       }
 
       fetchProjects()
@@ -204,7 +255,7 @@ const BoardCandidatesPage = () => {
       >
         <div className="flex w-full items-start gap-4">
           {candidate.member?.avatarUrl && (
-            <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-full ring-2 ring-gray-100 group-hover:ring-blue-400 dark:ring-gray-700">
+            <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full ring-2 ring-gray-100 group-hover:ring-blue-400 dark:ring-gray-700">
               <Image
                 fill
                 src={`${candidate.member.avatarUrl}&s=160`}
@@ -480,8 +531,8 @@ const BoardCandidatesPage = () => {
             {snapshot.repositoryContributions &&
               Object.keys(snapshot.repositoryContributions).length > 0 &&
               (() => {
-                const sortedRepos = Object.entries(snapshot.repositoryContributions).sort(
-                  ([, a], [, b]) => (b as number) - (a as number)
+                const sortedRepos = sortByContributionCount(
+                  Object.entries(snapshot.repositoryContributions)
                 )
                 const topRepo = sortedRepos[0]
                 const [topRepoName, topRepoCount] = topRepo
@@ -508,24 +559,11 @@ const BoardCandidatesPage = () => {
                     {sortedRepos.length > 1 && (
                       <div>
                         <div className="flex flex-wrap gap-2">
-                          {sortedRepos.slice(1).map(([repoName, count]) => {
-                            const commitCount = Number(count)
-                            return (
-                              <a
-                                key={repoName}
-                                href={`https://github.com/${repoName}/commits?author=${candidate.member?.login}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <span>{repoName}</span>
-                                <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-800 dark:bg-blue-800/40 dark:text-blue-300">
-                                  {commitCount} commits
-                                </span>
-                              </a>
-                            )
-                          })}
+                          {sortedRepos
+                            .slice(1)
+                            .map(([repoName, count]) =>
+                              renderRepositoryLink(repoName, count as number)
+                            )}
                         </div>
                       </div>
                     )}
@@ -570,8 +608,8 @@ const BoardCandidatesPage = () => {
             }
 
             return (() => {
-              const sortedChannels = Object.entries(snapshot.channelCommunications).sort(
-                ([, a], [, b]) => (Number(b) || 0) - (Number(a) || 0)
+              const sortedChannels = sortChannelsByMessageCount(
+                Object.entries(snapshot.channelCommunications!)
               )
 
               if (sortedChannels.length === 0) return null
@@ -601,21 +639,11 @@ const BoardCandidatesPage = () => {
                   {sortedChannels.length > 1 && (
                     <div>
                       <div className="flex flex-wrap gap-2">
-                        {sortedChannels.slice(1).map(([channelName, messageCount]) => (
-                          <a
-                            key={channelName}
-                            href={`https://owasp.slack.com/archives/${channelName}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <span>#{channelName}</span>
-                            <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-800 dark:bg-blue-800/40 dark:text-blue-300">
-                              {Number(messageCount)} messages
-                            </span>
-                          </a>
-                        ))}
+                        {sortedChannels
+                          .slice(1)
+                          .map(([channelName, messageCount]) =>
+                            renderChannelLink(channelName, messageCount)
+                          )}
                       </div>
                     </div>
                   )}

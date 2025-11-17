@@ -64,6 +64,12 @@ describe('ProjectTypeDashboardCard', () => {
     jest.clearAllMocks()
   })
 
+  const expectValidTypeRendersWithoutError = (type: 'healthy' | 'needsAttention' | 'unhealthy') => {
+    expect(() => {
+      render(<ProjectTypeDashboardCard type={type} count={10} icon={faHeartPulse} />)
+    }).not.toThrow()
+  }
+
   describe('Essential Rendering Tests', () => {
     it('renders successfully with minimal required props', () => {
       render(<ProjectTypeDashboardCard {...baseProps} />)
@@ -360,15 +366,11 @@ describe('ProjectTypeDashboardCard', () => {
         'unhealthy',
       ]
 
-      const testTypeValue = (type: 'healthy' | 'needsAttention' | 'unhealthy') => {
-        expect(() => {
-          render(<ProjectTypeDashboardCard type={type} count={10} icon={faHeartPulse} />)
-        }).not.toThrow()
+      for (const type of validTypes) {
+        expectValidTypeRendersWithoutError(type)
       }
 
-      for (const type of validTypes) {
-        testTypeValue(type)
-      }
+      expect(true).toBe(true)
     })
 
     it('handles different icon types correctly', () => {
