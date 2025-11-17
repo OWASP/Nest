@@ -1,9 +1,10 @@
 import { useQuery } from '@apollo/client/react'
 import { screen, waitFor } from '@testing-library/react'
+import { mockUserDetailsData } from '@unit/data/mockUserDetails'
+import React from 'react'
 import { render } from 'wrappers/testUtil'
 import UserDetailsPage from 'app/members/[memberKey]/page'
 import { drawContributions, fetchHeatmapData } from 'utils/helpers/githubHeatmap'
-import { mockUserDetailsData } from '@unit/data/mockUserDetails'
 
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
@@ -28,8 +29,8 @@ jest.mock('utils/helpers/githubHeatmap', () => ({
 // Render Next/Image as a regular <img> to inspect src/alt
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: (props: any) => {
-    // eslint-disable-next-line jsx-a11y/alt-text
+  default: (props: React.ComponentProps<'img'>) => {
+    // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
     return <img {...props} />
   },
 }))
@@ -189,11 +190,11 @@ describe('ContributionHeatmap behavior (via UserDetailsPage)', () => {
       rerender(<UserDetailsPage />)
 
       await waitFor(() => {
-        if ((drawContributions as jest.Mock).mock.calls.length > 0) {
-          const lastCallArgs = (drawContributions as jest.Mock).mock.calls.at(-1)
-          expect(lastCallArgs?.[1]?.themeName).toBe('light')
-        }
+        expect((drawContributions as jest.Mock).mock.calls.length).toBeGreaterThan(0)
       })
+
+      const lastCallArgs = (drawContributions as jest.Mock).mock.calls.at(-1)
+      expect(lastCallArgs?.[1]?.themeName).toBe('light')
     })
   })
 
