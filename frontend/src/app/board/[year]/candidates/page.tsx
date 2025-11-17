@@ -117,17 +117,17 @@ const BoardCandidatesPage = () => {
     const [ledProjects, setLedProjects] = useState<Project[]>([])
 
     const sortByName = <T extends { name: string }>(items: T[]): T[] => {
-      return items.sort((a, b) => a.name.localeCompare(b.name))
+      return [...items].sort((a, b) => a.name.localeCompare(b.name))
     }
 
     const sortByContributionCount = (entries: Array<[string, number]>): Array<[string, number]> => {
-      return entries.sort(([, a], [, b]) => (b as number) - (a as number))
+      return [...entries].sort(([, a], [, b]) => b - a)
     }
 
     const sortChannelsByMessageCount = (
-      entries: Array<[string, string | number]>
-    ): Array<[string, string | number]> => {
-      return entries.sort(([, a], [, b]) => (Number(b) || 0) - (Number(a) || 0))
+      entries: Array<[string, number]>
+    ): Array<[string, number]> => {
+      return [...entries].sort(([, a], [, b]) => b - a)
     }
 
     // Render a single repository link item
@@ -164,6 +164,68 @@ const BoardCandidatesPage = () => {
             {commitCount} commits
           </span>
         </a>
+      )
+    }
+
+    const renderTopActiveChannels = () => {
+      if (!snapshot) return null
+
+      const hasChannels =
+        snapshot.channelCommunications && Object.keys(snapshot.channelCommunications).length > 0
+
+      if (!hasChannels) {
+        return (
+          <div className="mt-4 w-full">
+            <h4 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Top 5 Active Channels
+            </h4>
+            <div className="inline-flex items-center gap-1.5 rounded-md bg-orange-50 px-2 py-1 text-xs font-medium text-orange-700 ring-1 ring-orange-700/10 ring-inset dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30">
+              No Engagement
+            </div>
+          </div>
+        )
+      }
+
+      const sortedChannels = sortChannelsByMessageCount(
+        Object.entries(snapshot.channelCommunications)
+      )
+
+      if (sortedChannels.length === 0) return null
+
+      const topChannel = sortedChannels[0]
+      const [topChannelName, topChannelCount] = topChannel
+
+      return (
+        <div className="mt-4 w-full">
+          <div className="mb-3">
+            <h4 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Top 5 Active Channels
+            </h4>
+            <a
+              href={`https://owasp.slack.com/archives/${topChannelName}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-700/10 ring-inset hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-400/30 dark:hover:bg-green-900/30"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span>#{topChannelName}</span>
+              <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-800 dark:bg-green-800/40 dark:text-green-300">
+                {Number(topChannelCount)} messages
+              </span>
+            </a>
+          </div>
+          {sortedChannels.length > 1 && (
+            <div>
+              <div className="flex flex-wrap gap-2">
+                {sortedChannels
+                  .slice(1)
+                  .map(([channelName, messageCount]) =>
+                    renderChannelLink(channelName, messageCount)
+                  )}
+              </div>
+            </div>
+          )}
+        </div>
       )
     }
 
@@ -561,9 +623,7 @@ const BoardCandidatesPage = () => {
                         <div className="flex flex-wrap gap-2">
                           {sortedRepos
                             .slice(1)
-                            .map(([repoName, count]) =>
-                              renderRepositoryLink(repoName, count as number)
-                            )}
+                            .map(([repoName, count]) => renderRepositoryLink(repoName, count))}
                         </div>
                       </div>
                     )}
@@ -587,70 +647,7 @@ const BoardCandidatesPage = () => {
             </div>
           )}
 
-        {/* Top 5 Active Channels */}
-        {snapshot &&
-          (() => {
-            const hasChannels =
-              snapshot.channelCommunications &&
-              Object.keys(snapshot.channelCommunications).length > 0
-
-            if (!hasChannels) {
-              return (
-                <div className="mt-4 w-full">
-                  <h4 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Top 5 Active Channels
-                  </h4>
-                  <div className="inline-flex items-center gap-1.5 rounded-md bg-orange-50 px-2 py-1 text-xs font-medium text-orange-700 ring-1 ring-orange-700/10 ring-inset dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30">
-                    No Engagement
-                  </div>
-                </div>
-              )
-            }
-
-            return (() => {
-              const sortedChannels = sortChannelsByMessageCount(
-                Object.entries(snapshot.channelCommunications!)
-              )
-
-              if (sortedChannels.length === 0) return null
-
-              const topChannel = sortedChannels[0]
-              const [topChannelName, topChannelCount] = topChannel
-
-              return (
-                <div className="mt-4 w-full">
-                  <div className="mb-3">
-                    <h4 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      Top 5 Active Channels
-                    </h4>
-                    <a
-                      href={`https://owasp.slack.com/archives/${topChannelName}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-700/10 ring-inset hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-400/30 dark:hover:bg-green-900/30"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <span>#{topChannelName}</span>
-                      <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-800 dark:bg-green-800/40 dark:text-green-300">
-                        {Number(topChannelCount)} messages
-                      </span>
-                    </a>
-                  </div>
-                  {sortedChannels.length > 1 && (
-                    <div>
-                      <div className="flex flex-wrap gap-2">
-                        {sortedChannels
-                          .slice(1)
-                          .map(([channelName, messageCount]) =>
-                            renderChannelLink(channelName, messageCount)
-                          )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )
-            })()
-          })()}
+        {renderTopActiveChannels()}
 
         {/* Additional Information */}
         {(candidate.member?.isOwaspBoardMember ||

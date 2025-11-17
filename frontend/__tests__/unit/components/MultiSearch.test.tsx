@@ -724,9 +724,9 @@ describe('Rendering', () => {
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
 
-      await waitFor(() => expectTestChaptersExist())
+      await waitFor(expectTestChaptersExist)
       await user.keyboard('{ArrowDown}')
-      await waitFor(() => expectFirstListItemHighlighted())
+      await waitFor(expectFirstListItemHighlighted)
 
       await user.clear(input)
       await user.type(input, 'new query')
@@ -735,7 +735,7 @@ describe('Rendering', () => {
         expect(mockFetchAlgoliaData).toHaveBeenCalledWith('chapters', 'new query', 1, 3)
       )
 
-      await waitFor(() => expectListItemsNotHighlighted())
+      await waitFor(expectListItemsNotHighlighted)
     })
 
     it('clears all state when clear button is clicked', async () => {

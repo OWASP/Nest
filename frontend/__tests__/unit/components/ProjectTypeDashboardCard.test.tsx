@@ -361,11 +361,7 @@ describe('ProjectTypeDashboardCard', () => {
 
   describe('Type Safety and TypeScript Compliance', () => {
     it('only accepts valid type values', () => {
-      const validTypes: Array<ProjectHealthType> = [
-        'healthy',
-        'needsAttention',
-        'unhealthy',
-      ]
+      const validTypes: Array<ProjectHealthType> = ['healthy', 'needsAttention', 'unhealthy']
 
       for (const type of validTypes) {
         expectValidTypeRendersWithoutError(type)
@@ -401,11 +397,7 @@ describe('ProjectTypeDashboardCard', () => {
     it('handles rapid prop changes gracefully', () => {
       const { rerender } = render(<ProjectTypeDashboardCard {...baseProps} />)
 
-      const types: Array<ProjectHealthType> = [
-        'healthy',
-        'needsAttention',
-        'unhealthy',
-      ]
+      const types: Array<ProjectHealthType> = ['healthy', 'needsAttention', 'unhealthy']
 
       for (const [index, type] of types.entries()) {
         rerender(<ProjectTypeDashboardCard type={type} count={index} icon={faHeartPulse} />)
