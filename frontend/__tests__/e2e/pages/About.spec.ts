@@ -78,14 +78,10 @@ test.describe('About Page', () => {
   })
 
   test('displays animated counters with correct values', async ({ page }) => {
-    await expect(page.getByText('1.2K+', { exact: false })).toBeVisible()
-    await expect(page.getByText('Contributors')).toBeVisible()
-    await expect(page.getByText('40+', { exact: false })).toBeVisible()
-    await expect(page.getByText('Open Issues')).toBeVisible()
-    await expect(page.getByText('60+', { exact: false })).toBeVisible()
-    await expect(page.getByText('Forks')).toBeVisible()
-    await expect(page.getByText('890+', { exact: false })).toBeVisible()
-    await expect(page.getByText('Stars')).toBeVisible()
+    await expect(page.getByText('1.2K+Contributors')).toBeVisible()
+    await expect(page.getByText('40+Open Issues')).toBeVisible()
+    await expect(page.getByText('60+Forks')).toBeVisible()
+    await expect(page.getByText('890+Stars')).toBeVisible()
   })
 
   test('opens user profile in new window when leader button is clicked', async ({ page }) => {
