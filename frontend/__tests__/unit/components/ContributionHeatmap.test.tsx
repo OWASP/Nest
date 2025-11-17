@@ -42,6 +42,10 @@ jest.mock('next-themes', () => ({
 }))
 
 // Minimal canvas stubs for jsdom
+// Store original methods to restore after tests
+const originalGetContext = HTMLCanvasElement.prototype.getContext
+const originalToDataURL = HTMLCanvasElement.prototype.toDataURL
+
 beforeAll(() => {
   Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
     value: jest.fn(() => ({
@@ -68,11 +72,28 @@ beforeAll(() => {
       fill: jest.fn(),
       measureText: jest.fn(() => ({ width: 0 })),
     })),
-    writable: false,
+    writable: true,
+    configurable: true,
   })
 
   Object.defineProperty(HTMLCanvasElement.prototype, 'toDataURL', {
     value: jest.fn(() => 'data:image/png;base64,heatmap'),
+    writable: true,
+    configurable: true,
+  })
+})
+
+afterAll(() => {
+  Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
+    value: originalGetContext,
+    writable: true,
+    configurable: true,
+  })
+
+  Object.defineProperty(HTMLCanvasElement.prototype, 'toDataURL', {
+    value: originalToDataURL,
+    writable: true,
+    configurable: true,
   })
 })
 
