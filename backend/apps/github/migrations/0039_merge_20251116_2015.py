@@ -5,8 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("github", "0036_comment"),
-        ("github", "0037_issue_level"),
+        ("github", "0037_issue_level_comment"),
         ("github", "0038_pullrequest_related_issues"),
     ]
 
