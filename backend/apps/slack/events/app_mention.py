@@ -5,6 +5,7 @@ import logging
 from apps.slack.blocks import markdown
 from apps.slack.common.handlers.ai import get_blocks
 from apps.slack.events.event import EventBase
+from apps.slack.models import Conversation
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +19,15 @@ class AppMention(EventBase):
         """Handle an incoming app mention event."""
         channel_id = event.get("channel")
         text = event.get("text", "")
+
+        try:
+            Conversation.objects.get(
+                slack_channel_id=channel_id,
+                is_nest_bot_assistant_enabled=True,
+            )
+        except Conversation.DoesNotExist:
+            logger.warning("Conversation not found or assistant not enabled.")
+            return
 
         query = text
         for mention in event.get("blocks", []):
