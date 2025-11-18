@@ -1,13 +1,13 @@
-import { useMutation } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useState } from 'react'
 import {
-  ASSIGN_ISSUE_TO_USER,
-  CLEAR_TASK_DEADLINE,
-  GET_MODULE_ISSUE_VIEW,
-  SET_TASK_DEADLINE,
-  UNASSIGN_ISSUE_FROM_USER,
-} from 'server/queries/issueQueries'
+  AssignIssueToUserDocument,
+  ClearTaskDeadlineDocument,
+  GetModuleIssueViewDocument,
+  SetTaskDeadlineDocument,
+  UnassignIssueFromUserDocument,
+} from 'types/__generated__/issueQueries.generated'
 
 interface UseIssueMutationsProps {
   programKey: string
@@ -22,14 +22,14 @@ export const useIssueMutations = ({ programKey, moduleKey, issueId }: UseIssueMu
   const commonMutationConfig = {
     refetchQueries: [
       {
-        query: GET_MODULE_ISSUE_VIEW,
+        query: GetModuleIssueViewDocument,
         variables: { programKey, moduleKey, number: Number(issueId) },
       },
     ],
     awaitRefetchQueries: true,
   }
 
-  const [assignIssue, { loading: assigning }] = useMutation(ASSIGN_ISSUE_TO_USER, {
+  const [assignIssue, { loading: assigning }] = useMutation(AssignIssueToUserDocument, {
     ...commonMutationConfig,
     onCompleted: () => {
       addToast({
@@ -51,7 +51,7 @@ export const useIssueMutations = ({ programKey, moduleKey, issueId }: UseIssueMu
     },
   })
 
-  const [unassignIssue, { loading: unassigning }] = useMutation(UNASSIGN_ISSUE_FROM_USER, {
+  const [unassignIssue, { loading: unassigning }] = useMutation(UnassignIssueFromUserDocument, {
     ...commonMutationConfig,
     onCompleted: () => {
       addToast({
@@ -73,31 +73,34 @@ export const useIssueMutations = ({ programKey, moduleKey, issueId }: UseIssueMu
     },
   })
 
-  const [setTaskDeadlineMutation, { loading: settingDeadline }] = useMutation(SET_TASK_DEADLINE, {
-    ...commonMutationConfig,
-    onCompleted: () => {
-      addToast({
-        title: 'Deadline updated',
-        variant: 'solid',
-        color: 'success',
-        timeout: 2500,
-        shouldShowTimeoutProgress: true,
-      })
-      setIsEditingDeadline(false)
-    },
-    onError: (err) => {
-      addToast({
-        title: 'Failed to update deadline: ' + err.message,
-        variant: 'solid',
-        color: 'danger',
-        timeout: 3500,
-        shouldShowTimeoutProgress: true,
-      })
-    },
-  })
+  const [setTaskDeadlineMutation, { loading: settingDeadline }] = useMutation(
+    SetTaskDeadlineDocument,
+    {
+      ...commonMutationConfig,
+      onCompleted: () => {
+        addToast({
+          title: 'Deadline updated',
+          variant: 'solid',
+          color: 'success',
+          timeout: 2500,
+          shouldShowTimeoutProgress: true,
+        })
+        setIsEditingDeadline(false)
+      },
+      onError: (err) => {
+        addToast({
+          title: 'Failed to update deadline: ' + err.message,
+          variant: 'solid',
+          color: 'danger',
+          timeout: 3500,
+          shouldShowTimeoutProgress: true,
+        })
+      },
+    }
+  )
 
   const [clearTaskDeadlineMutation, { loading: clearingDeadline }] = useMutation(
-    CLEAR_TASK_DEADLINE,
+    ClearTaskDeadlineDocument,
     {
       ...commonMutationConfig,
       onCompleted: () => {

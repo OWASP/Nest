@@ -91,8 +91,9 @@ describe('ProjectDetailsPage', () => {
 
   test('renders error message when GraphQL request fails', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: { repository: null },
+      data: { project: null },
       error: mockError,
+      loading: false,
     })
 
     render(<ProjectDetailsPage />)
@@ -173,8 +174,9 @@ describe('ProjectDetailsPage', () => {
 
   test('Handles case when no data is available', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: { repository: null },
+      data: { project: null },
       error: null,
+      loading: false,
     })
     render(<ProjectDetailsPage />)
     await waitFor(() => {

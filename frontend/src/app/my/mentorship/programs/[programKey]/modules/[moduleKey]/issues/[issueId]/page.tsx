@@ -1,6 +1,6 @@
 'use client'
 
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import {
   faCodeBranch,
   faLink,
@@ -15,7 +15,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { ErrorDisplay } from 'app/global-error'
-import { GET_MODULE_ISSUE_VIEW } from 'server/queries/issueQueries'
+import { GetModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
 import ActionButton from 'components/ActionButton'
 import AnchorTitle from 'components/AnchorTitle'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -60,7 +60,7 @@ const ModuleIssueDetailsPage = () => {
           : 'text-gray-600 dark:text-gray-300',
     }
   }
-  const { data, loading, error } = useQuery(GET_MODULE_ISSUE_VIEW, {
+  const { data, loading, error } = useQuery(GetModuleIssueViewDocument, {
     variables: { programKey, moduleKey, number: Number(issueId) },
     skip: !issueId,
     fetchPolicy: 'cache-first',

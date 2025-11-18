@@ -1,11 +1,11 @@
 'use client'
 
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GET_MODULE_MENTEE_DETAILS } from 'server/queries/menteeQueries'
+import { GetModuleMenteeDetailsDocument } from 'types/__generated__/menteeQueries.generated'
 import { Issue } from 'types/issue'
 import { MenteeDetails } from 'types/mentorship'
 import { LabelList } from 'components/LabelList'
@@ -25,7 +25,7 @@ const MenteeProfilePage = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
-  const { data, error } = useQuery(GET_MODULE_MENTEE_DETAILS, {
+  const { data, error } = useQuery(GetModuleMenteeDetailsDocument, {
     variables: {
       programKey,
       moduleKey,
@@ -37,8 +37,35 @@ const MenteeProfilePage = () => {
 
   useEffect(() => {
     if (data) {
-      setMenteeDetails(data.getMenteeDetails ?? null)
-      setMenteeIssues(data.getMenteeModuleIssues ?? [])
+      // Transform GraphQL MenteeNode to local MenteeDetails type
+      const menteeData = data.getMenteeDetails
+        ? {
+            ...data.getMenteeDetails,
+            completedLevels: [],
+            achievements: [],
+            penalties: [],
+            openIssues: [],
+            closedIssues: [],
+          }
+        : null
+      setMenteeDetails(menteeData)
+      // Transform GraphQL IssueNode to local Issue type
+      setMenteeIssues(
+        (data.getMenteeModuleIssues ?? []).map((issue) => ({
+          ...issue,
+          projectName: '',
+          projectUrl: issue.url,
+          updatedAt:
+            typeof issue.createdAt === 'number'
+              ? issue.createdAt
+              : new Date(issue.createdAt).getTime(),
+          createdAt:
+            typeof issue.createdAt === 'number'
+              ? issue.createdAt
+              : new Date(issue.createdAt).getTime(),
+          number: String(issue.number),
+        }))
+      )
     }
     if (error) {
       handleAppError(error)

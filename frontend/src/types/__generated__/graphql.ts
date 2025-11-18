@@ -236,6 +236,26 @@ export type LogoutResult = {
   ok: Scalars['Boolean']['output'];
 };
 
+export type MemberSnapshotNode = Node & {
+  __typename?: 'MemberSnapshotNode';
+  channelCommunications: Scalars['JSON']['output'];
+  chapterContributions: Scalars['JSON']['output'];
+  commitsCount: Scalars['Int']['output'];
+  communicationHeatmapData: Scalars['JSON']['output'];
+  contributionHeatmapData: Scalars['JSON']['output'];
+  endAt: Scalars['DateTime']['output'];
+  githubUser: UserNode;
+  /** The Globally Unique ID of this object */
+  id: Scalars['ID']['output'];
+  issuesCount: Scalars['Int']['output'];
+  messagesCount: Scalars['Int']['output'];
+  projectContributions: Scalars['JSON']['output'];
+  pullRequestsCount: Scalars['Int']['output'];
+  repositoryContributions: Scalars['JSON']['output'];
+  startAt: Scalars['DateTime']['output'];
+  totalContributions: Scalars['Int']['output'];
+};
+
 export type MenteeNode = {
   __typename?: 'MenteeNode';
   avatarUrl: Scalars['String']['output'];

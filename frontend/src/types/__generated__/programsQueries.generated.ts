@@ -8,7 +8,7 @@ export type GetMyProgramsQueryVariables = Types.Exact<{
 }>;
 
 
-export type GetMyProgramsQuery = { myPrograms: { __typename: 'PaginatedPrograms', currentPage: number, totalPages: number, programs: Array<{ __typename: 'ProgramNode', id: string, key: string, name: string, status: Types.ProgramStatusEnum, description: string, startedAt: unknown, endedAt: unknown, userRole: string | null }> } };
+export type GetMyProgramsQuery = { myPrograms: { __typename: 'PaginatedPrograms', currentPage: number, totalPages: number, programs: Array<{ __typename: 'ProgramNode', id: string, key: string, name: string, status: Types.ProgramStatusEnum, description: string, startedAt: any, endedAt: any, userRole: string | null }> } };
 
 export type GetProgramDetailsQueryVariables = Types.Exact<{
   programKey: Types.Scalars['String']['input'];

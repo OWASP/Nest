@@ -29,10 +29,7 @@ const ProgramDetailsPage = () => {
     onError: handleAppError,
   })
 
-  const {
-    data,
-    loading: isQueryLoading,
-  } = useQuery(GetProgramAndModulesDocument, {
+  const { data, loading: isQueryLoading } = useQuery(GetProgramAndModulesDocument, {
     variables: { programKey },
     skip: !programKey,
     notifyOnNetworkStatusChange: true,
@@ -88,7 +85,18 @@ const ProgramDetailsPage = () => {
   useEffect(() => {
     if (data?.getProgram) {
       setProgram(data.getProgram)
-      setModules(data.getProgramModules || [])
+      // Transform GraphQL ModuleNode to local Module type
+      // Note: getProgramModules doesn't return domains, tags, labels, or mentees
+      setModules(
+        (data.getProgramModules || []).map((module) => ({
+          ...module,
+          domains: [],
+          tags: [],
+          labels: [],
+          status: undefined,
+          mentees: [],
+        }))
+      )
     }
   }, [data])
 

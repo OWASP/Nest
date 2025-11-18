@@ -47,11 +47,42 @@ const UserDetailsPage: React.FC = () => {
   useEffect(() => {
     if (graphQLData) {
       setUser(graphQLData.user)
-      setIssues(graphQLData.recentIssues)
-      setMilestones(graphQLData.recentMilestones)
-      setPullRequests(graphQLData.recentPullRequests)
-      setReleases(graphQLData.recentReleases)
-      setTopRepositories(graphQLData.topContributedRepositories)
+      // Transform GraphQL IssueNode to local Issue type
+      setIssues(
+        (graphQLData.recentIssues || []).map((issue) => ({
+          ...issue,
+          projectName: issue.organizationName || issue.repositoryName || '',
+          projectUrl: issue.url,
+          updatedAt:
+            typeof issue.createdAt === 'number'
+              ? issue.createdAt
+              : new Date(issue.createdAt).getTime(),
+          createdAt:
+            typeof issue.createdAt === 'number'
+              ? issue.createdAt
+              : new Date(issue.createdAt).getTime(),
+        }))
+      )
+      setMilestones(graphQLData.recentMilestones || [])
+      // Transform GraphQL PullRequestNode to local PullRequest type
+      setPullRequests(
+        (graphQLData.recentPullRequests || []).map((pr) => ({
+          ...pr,
+          author: {
+            id: '',
+            login: '',
+            name: '',
+            avatarUrl: '',
+            url: '',
+          },
+          state: 'open',
+          organizationName: pr.organizationName || '',
+          createdAt:
+            typeof pr.createdAt === 'string' ? pr.createdAt : new Date(pr.createdAt).toISOString(),
+        }))
+      )
+      setReleases(graphQLData.recentReleases || [])
+      setTopRepositories(graphQLData.topContributedRepositories || [])
       setIsLoading(false)
     }
     if (graphQLRequestError) {

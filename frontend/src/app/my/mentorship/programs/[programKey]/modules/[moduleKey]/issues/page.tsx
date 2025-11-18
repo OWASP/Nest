@@ -1,13 +1,13 @@
 'use client'
 
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { Select, SelectItem } from '@heroui/select'
 import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GET_MODULE_ISSUES } from 'server/queries/moduleQueries'
+import { GetModuleIssuesDocument } from 'types/__generated__/moduleQueries.generated'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Pagination from 'components/Pagination'
 
@@ -22,7 +22,7 @@ const IssuesPage = () => {
   const [selectedLabel, setSelectedLabel] = useState<string>(searchParams.get('label') || LABEL_ALL)
   const [currentPage, setCurrentPage] = useState(1)
 
-  const { data, loading, error } = useQuery(GET_MODULE_ISSUES, {
+  const { data, loading, error } = useQuery(GetModuleIssuesDocument, {
     variables: {
       programKey,
       moduleKey,

@@ -1,4 +1,5 @@
-import { DocumentNode, useMutation } from '@apollo/client'
+import { DocumentNode } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import upperFirst from 'lodash/upperFirst'
 import { handleAppError } from 'app/global-error'

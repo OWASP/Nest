@@ -1,4 +1,5 @@
 import type { Contributor } from 'types/contributor'
+import type { Issue } from 'types/issue'
 // eslint-disable-next-line no-restricted-imports
 import { ExperienceLevelEnum, ProgramStatusEnum } from './__generated__/graphql'
 
@@ -62,8 +63,6 @@ export type ModuleFormData = {
   projectId: string
   mentorLogins: string
 }
-
-import type { Issue } from 'types/issue'
 
 export type CompletedLevel = {
   id: string
