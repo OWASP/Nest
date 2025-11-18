@@ -170,10 +170,10 @@ const BoardCandidatesPage = () => {
     const renderTopActiveChannels = () => {
       if (!snapshot) return null
 
-      const hasChannels =
-        snapshot.channelCommunications && Object.keys(snapshot.channelCommunications).length > 0
-
-      if (!hasChannels) {
+      if (
+        !snapshot.channelCommunications ||
+        Object.keys(snapshot.channelCommunications).length <= 0
+      ) {
         return (
           <div className="mt-4 w-full">
             <h4 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">

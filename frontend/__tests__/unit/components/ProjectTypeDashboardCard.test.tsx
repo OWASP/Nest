@@ -2,9 +2,8 @@ import { faHeartPulse, faExclamationTriangle, faSkull } from '@fortawesome/free-
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import React from 'react'
+import type { ProjectHealthType } from 'types/project'
 import ProjectTypeDashboardCard from 'components/ProjectTypeDashboardCard'
-
-type ProjectHealthType = 'healthy' | 'needsAttention' | 'unhealthy'
 
 jest.mock('next/link', () => {
   return function MockedLink({
