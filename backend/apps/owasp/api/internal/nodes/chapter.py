@@ -18,6 +18,7 @@ class GeoLocationType:
 @strawberry_django.type(
     Chapter,
     fields=[
+        "contribution_data",
         "country",
         "is_active",
         "meetup_group",
