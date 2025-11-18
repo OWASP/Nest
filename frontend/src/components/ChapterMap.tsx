@@ -2,6 +2,7 @@
 import L, { MarkerClusterGroup } from 'leaflet'
 import React, { useEffect, useRef, useState } from 'react'
 import type { Chapter } from 'types/chapter'
+import type { UserLocation } from 'utils/geolocationUtils'
 import 'leaflet.markercluster'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
@@ -12,10 +13,12 @@ const ChapterMap = ({
   geoLocData,
   showLocal,
   style,
+  userLocation,
 }: {
   geoLocData: Chapter[]
   showLocal: boolean
   style: React.CSSProperties
+  userLocation?: UserLocation | null
 }) => {
   const mapRef = useRef<L.Map | null>(null)
   const markerClusterRef = useRef<MarkerClusterGroup | null>(null)
@@ -103,7 +106,27 @@ const ChapterMap = ({
 
     markerClusterGroup.addLayers(markers)
 
-    if (showLocal && validGeoLocData.length > 0) {
+    // Zoom in when user shares location
+    if (userLocation && validGeoLocData.length > 0) {
+      const maxNearestChapters = 5
+      const localChapters = validGeoLocData.slice(0, maxNearestChapters - 1)
+      const localBounds = L.latLngBounds(
+        localChapters.map((chapter) => [
+          chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
+          chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
+        ])
+      )
+      const maxZoom = 12
+      const nearestChapter = validGeoLocData[0]
+      map.setView(
+        [
+          nearestChapter._geoloc?.lat ?? nearestChapter.geoLocation?.lat,
+          nearestChapter._geoloc?.lng ?? nearestChapter.geoLocation?.lng,
+        ],
+        maxZoom
+      )
+      map.fitBounds(localBounds, { maxZoom: maxZoom })
+    } else if (showLocal && validGeoLocData.length > 0) {
       const maxNearestChapters = 5
       const localChapters = validGeoLocData.slice(0, maxNearestChapters - 1)
       const localBounds = L.latLngBounds(
@@ -123,7 +146,7 @@ const ChapterMap = ({
       )
       map.fitBounds(localBounds, { maxZoom: maxZoom })
     }
-  }, [geoLocData, showLocal])
+  }, [geoLocData, showLocal, userLocation])
 
   return (
     <div className="relative" style={style}>

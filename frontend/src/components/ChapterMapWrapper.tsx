@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
-import dynamic from 'next/dynamic'
-import { Button } from '@heroui/button'
 import { faLocationDot } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Button } from '@heroui/button'
+import dynamic from 'next/dynamic'
+import React, { useState } from 'react'
 import type { Chapter } from 'types/chapter'
 import {
   getUserLocationFromBrowser,
@@ -44,7 +44,8 @@ const ChapterMapWrapper: React.FC<ChapterMapWrapperProps> = (props) => {
 
       if (location) {
         setUserLocation(location)
-        setSortedData(sortChaptersByDistance(props.geoLocData, location))
+        const sorted = sortChaptersByDistance(props.geoLocData, location)
+        setSortedData(sorted.map(({ _distance, ...chapter }) => chapter as unknown as Chapter))
       }
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -96,7 +97,7 @@ const ChapterMapWrapper: React.FC<ChapterMapWrapperProps> = (props) => {
         </div>
       </div>
 
-      <ChapterMap {...props} geoLocData={mapData} />
+      <ChapterMap {...props} geoLocData={mapData} userLocation={userLocation} />
     </div>
   )
 }

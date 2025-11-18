@@ -38,8 +38,6 @@ export const getUserLocationFromBrowser = (): Promise<UserLocation | null> => {
     }
 
     // # NOSONAR Geolocation permission is necessary for "Find chapters near you" feature.
-    // User explicitly opts-in via button click. Location stays client-side only.
-    // eslint-disable-next-line no-unsanitized/property
     navigator.geolocation.getCurrentPosition(
       (position) => {
         resolve({
