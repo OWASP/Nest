@@ -61,10 +61,10 @@ module "ecs" {
   aws_region                    = var.aws_region
   common_tags                   = local.common_tags
   container_parameters_arns     = module.parameters.ssm_parameter_arns
+  ecs_sg_id                     = module.security.ecs_sg_id
   environment                   = var.environment
   fixtures_read_only_policy_arn = module.storage.fixtures_read_only_policy_arn
   fixtures_s3_bucket            = var.fixtures_s3_bucket
-  lambda_sg_id                  = module.security.lambda_sg_id
   private_subnet_ids            = module.networking.private_subnet_ids
   project_name                  = var.project_name
 }

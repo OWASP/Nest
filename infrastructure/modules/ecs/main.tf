@@ -133,7 +133,7 @@ module "sync_data_task" {
   private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
   schedule_expression          = "cron(17 05 * * ? *)"
-  security_group_ids           = [var.lambda_sg_id]
+  security_group_ids           = [var.ecs_sg_id]
   task_name                    = "sync-data"
 }
 
@@ -162,7 +162,7 @@ module "owasp_update_project_health_metrics_task" {
   private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
   schedule_expression          = "cron(17 17 * * ? *)"
-  security_group_ids           = [var.lambda_sg_id]
+  security_group_ids           = [var.ecs_sg_id]
   task_name                    = "owasp-update-project-health-metrics"
 }
 
@@ -183,7 +183,7 @@ module "owasp_update_project_health_scores_task" {
   private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
   schedule_expression          = "cron(22 17 * * ? *)"
-  security_group_ids           = [var.lambda_sg_id]
+  security_group_ids           = [var.ecs_sg_id]
   task_name                    = "owasp-update-project-health-scores"
 }
 
@@ -202,7 +202,7 @@ module "migrate_task" {
   memory                       = var.migrate_task_memory
   private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
-  security_group_ids           = [var.lambda_sg_id]
+  security_group_ids           = [var.ecs_sg_id]
   task_name                    = "migrate"
 }
 
@@ -231,7 +231,7 @@ module "load_data_task" {
   memory                       = var.load_data_task_memory
   private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
-  security_group_ids           = [var.lambda_sg_id]
+  security_group_ids           = [var.ecs_sg_id]
   task_name                    = "load-data"
   task_role_arn                = aws_iam_role.ecs_task_role.arn
 }
@@ -251,6 +251,6 @@ module "index_data_task" {
   memory                       = var.index_data_task_memory
   private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
-  security_group_ids           = [var.lambda_sg_id]
+  security_group_ids           = [var.ecs_sg_id]
   task_name                    = "index-data"
 }
