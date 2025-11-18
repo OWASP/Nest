@@ -13,6 +13,7 @@ import type { Contributor } from 'types/contributor'
 import type { Project } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
+import ContributionHeatmap from 'components/ContributionHeatmap'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProjectDetailsPage = () => {
@@ -85,26 +86,48 @@ const ProjectDetailsPage = () => {
     },
   ]
 
+  // Calculate contribution heatmap date range (1 year back)
+  const today = new Date()
+  const oneYearAgo = new Date(today)
+  oneYearAgo.setFullYear(today.getFullYear() - 1)
+  const startDate = oneYearAgo.toISOString().split('T')[0]
+  const endDate = today.toISOString().split('T')[0]
+
   return (
-    <DetailsCard
-      details={projectDetails}
-      entityKey={project.key}
-      entityLeaders={project.entityLeaders}
-      healthMetricsData={project.healthMetricsList}
-      isActive={project.isActive}
-      languages={project.languages}
-      pullRequests={project.recentPullRequests}
-      recentIssues={project.recentIssues}
-      recentMilestones={project.recentMilestones}
-      recentReleases={project.recentReleases}
-      repositories={project.repositories}
-      stats={projectStats}
-      summary={project.summary}
-      title={project.name}
-      topContributors={topContributors}
-      topics={project.topics}
-      type="project"
-    />
+    <>
+      <DetailsCard
+        details={projectDetails}
+        entityKey={project.key}
+        entityLeaders={project.entityLeaders}
+        healthMetricsData={project.healthMetricsList}
+        isActive={project.isActive}
+        languages={project.languages}
+        pullRequests={project.recentPullRequests}
+        recentIssues={project.recentIssues}
+        recentMilestones={project.recentMilestones}
+        recentReleases={project.recentReleases}
+        repositories={project.repositories}
+        stats={projectStats}
+        summary={project.summary}
+        title={project.name}
+        topContributors={topContributors}
+        topics={project.topics}
+        type="project"
+      />
+      {project.contributionData && Object.keys(project.contributionData).length > 0 && (
+        <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+          <div className="mx-auto max-w-6xl">
+            <ContributionHeatmap
+              contributionData={project.contributionData}
+              startDate={startDate}
+              endDate={endDate}
+              title="Project Contribution Activity"
+              unit="contributions"
+            />
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 
