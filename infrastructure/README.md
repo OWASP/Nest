@@ -164,8 +164,7 @@ Migrate and load data into the new database.
       - Networking:
          - VPC: owasp-nest-staging-vpc
          - Subnets: subnets will be auto-selected due to VPC selection.
-         - Security group name: select all with `owasp-nest-staging-` prefix.
-            (*Note*: temporary step, will be further improved)
+         - Security group name: select the ECS security group (e.g. `owasp-nest-staging-ecs-sg`).
    - Click "Create"
    - The task is now running... Click on the task ID to view Logs, Status, etc.
    - Follow the same steps for `owasp-nest-staging-load-data` and `owasp-nest-staging-index-data`.
