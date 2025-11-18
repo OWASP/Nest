@@ -1,7 +1,6 @@
 """Management command to aggregate contributions for chapters and projects."""
 
 from datetime import datetime, timedelta
-from typing import Dict
 
 from django.core.management.base import BaseCommand
 from django.db.models import Q
@@ -47,11 +46,31 @@ class Command(BaseCommand):
             help="Skip the first N entities",
         )
 
+    def _aggregate_contribution_dates(
+        self,
+        queryset,
+        date_field: str,
+        contribution_map: dict[str, int],
+    ) -> None:
+        """Aggregate contribution dates from a queryset into the contribution map.
+
+        Args:
+            queryset: Django queryset to aggregate
+            date_field: Name of the date field to aggregate on
+            contribution_map: Dictionary to update with counts
+
+        """
+        dates = queryset.values_list(date_field, flat=True)
+        for date_value in dates:
+            if date_value:
+                date_key = date_value.date().isoformat()
+                contribution_map[date_key] = contribution_map.get(date_key, 0) + 1
+
     def aggregate_chapter_contributions(
         self,
         chapter: Chapter,
         start_date: datetime,
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         """Aggregate contributions for a chapter.
 
         Args:
@@ -70,49 +89,45 @@ class Command(BaseCommand):
         repository = chapter.owasp_repository
 
         # Aggregate commits
-        commits = Commit.objects.filter(
-            repository=repository,
-            created_at__gte=start_date,
-        ).values_list("created_at", flat=True)
-
-        for created_at in commits:
-            if created_at:
-                date_key = created_at.date().isoformat()
-                contribution_map[date_key] = contribution_map.get(date_key, 0) + 1
+        self._aggregate_contribution_dates(
+            Commit.objects.filter(
+                repository=repository,
+                created_at__gte=start_date,
+            ),
+            "created_at",
+            contribution_map,
+        )
 
         # Aggregate issues
-        issues = Issue.objects.filter(
-            repository=repository,
-            created_at__gte=start_date,
-        ).values_list("created_at", flat=True)
-
-        for created_at in issues:
-            if created_at:
-                date_key = created_at.date().isoformat()
-                contribution_map[date_key] = contribution_map.get(date_key, 0) + 1
+        self._aggregate_contribution_dates(
+            Issue.objects.filter(
+                repository=repository,
+                created_at__gte=start_date,
+            ),
+            "created_at",
+            contribution_map,
+        )
 
         # Aggregate pull requests
-        pull_requests = PullRequest.objects.filter(
-            repository=repository,
-            created_at__gte=start_date,
-        ).values_list("created_at", flat=True)
-
-        for created_at in pull_requests:
-            if created_at:
-                date_key = created_at.date().isoformat()
-                contribution_map[date_key] = contribution_map.get(date_key, 0) + 1
+        self._aggregate_contribution_dates(
+            PullRequest.objects.filter(
+                repository=repository,
+                created_at__gte=start_date,
+            ),
+            "created_at",
+            contribution_map,
+        )
 
         # Aggregate releases (exclude drafts)
-        releases = Release.objects.filter(
-            repository=repository,
-            published_at__gte=start_date,
-            is_draft=False,
-        ).values_list("published_at", flat=True)
-
-        for published_at in releases:
-            if published_at:
-                date_key = published_at.date().isoformat()
-                contribution_map[date_key] = contribution_map.get(date_key, 0) + 1
+        self._aggregate_contribution_dates(
+            Release.objects.filter(
+                repository=repository,
+                published_at__gte=start_date,
+                is_draft=False,
+            ),
+            "published_at",
+            contribution_map,
+        )
 
         return contribution_map
 
@@ -120,7 +135,7 @@ class Command(BaseCommand):
         self,
         project: Project,
         start_date: datetime,
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         """Aggregate contributions for a project across all its repositories.
 
         Args:
@@ -143,49 +158,45 @@ class Command(BaseCommand):
             return contribution_map
 
         # Aggregate commits
-        commits = Commit.objects.filter(
-            repository_id__in=repository_ids,
-            created_at__gte=start_date,
-        ).values_list("created_at", flat=True)
-
-        for created_at in commits:
-            if created_at:
-                date_key = created_at.date().isoformat()
-                contribution_map[date_key] = contribution_map.get(date_key, 0) + 1
+        self._aggregate_contribution_dates(
+            Commit.objects.filter(
+                repository_id__in=repository_ids,
+                created_at__gte=start_date,
+            ),
+            "created_at",
+            contribution_map,
+        )
 
         # Aggregate issues
-        issues = Issue.objects.filter(
-            repository_id__in=repository_ids,
-            created_at__gte=start_date,
-        ).values_list("created_at", flat=True)
-
-        for created_at in issues:
-            if created_at:
-                date_key = created_at.date().isoformat()
-                contribution_map[date_key] = contribution_map.get(date_key, 0) + 1
+        self._aggregate_contribution_dates(
+            Issue.objects.filter(
+                repository_id__in=repository_ids,
+                created_at__gte=start_date,
+            ),
+            "created_at",
+            contribution_map,
+        )
 
         # Aggregate pull requests
-        pull_requests = PullRequest.objects.filter(
-            repository_id__in=repository_ids,
-            created_at__gte=start_date,
-        ).values_list("created_at", flat=True)
-
-        for created_at in pull_requests:
-            if created_at:
-                date_key = created_at.date().isoformat()
-                contribution_map[date_key] = contribution_map.get(date_key, 0) + 1
+        self._aggregate_contribution_dates(
+            PullRequest.objects.filter(
+                repository_id__in=repository_ids,
+                created_at__gte=start_date,
+            ),
+            "created_at",
+            contribution_map,
+        )
 
         # Aggregate releases (exclude drafts)
-        releases = Release.objects.filter(
-            repository_id__in=repository_ids,
-            published_at__gte=start_date,
-            is_draft=False,
-        ).values_list("published_at", flat=True)
-
-        for published_at in releases:
-            if published_at:
-                date_key = published_at.date().isoformat()
-                contribution_map[date_key] = contribution_map.get(date_key, 0) + 1
+        self._aggregate_contribution_dates(
+            Release.objects.filter(
+                repository_id__in=repository_ids,
+                published_at__gte=start_date,
+                is_draft=False,
+            ),
+            "published_at",
+            contribution_map,
+        )
 
         return contribution_map
 
