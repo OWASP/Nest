@@ -38,7 +38,7 @@ def check_funding_policy_compliance(platform: str, target: str | None) -> bool:
 
     Args:
         platform (str): The funding platform (e.g., 'github', 'custom').
-        target (str | None): The funding target.
+        target (str, optional): The funding target.
 
     Returns:
         bool: True if the funding policy is compliant, False otherwise.
@@ -66,7 +66,7 @@ def get_repository_file_content(
 
     Args:
         url (str): The URL of the file.
-        timeout (float | None, optional): The request timeout in seconds.
+        timeout (float, optional): The request timeout in seconds.
 
     Returns:
         str: The content of the file, or empty string if the request fails.

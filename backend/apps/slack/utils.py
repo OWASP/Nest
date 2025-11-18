@@ -144,7 +144,7 @@ def get_sponsors_data(limit: int = 10) -> QuerySet | None:
     """Get sponsors data.
 
     Args:
-        limit: The maximum number of sponsors to fetch.
+        limit(int, optional): The maximum number of sponsors to fetch.
 
     Returns:
         A queryset of sponsors, or None if an error occurs.
@@ -164,7 +164,7 @@ def get_posts_data(limit: int = 5) -> QuerySet | None:
     """Get posts data.
 
     Args:
-        limit (int, optional): The maximum number of sponsors to fetch.
+        limit (int, optional): The maximum number of posts to fetch.
 
     Returns:
         QuerySet or None: A queryset of sponsors, or None if an error occurs.
@@ -236,7 +236,7 @@ def strip_markdown(text: str) -> str:
     """Strip markdown formatting.
 
     Args:
-        text: The text with markdown formatting.
+        text(str): The text with markdown formatting.
 
     Returns:
         The text with markdown formatting removed.

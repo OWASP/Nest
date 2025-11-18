@@ -27,9 +27,9 @@ def convert_to_camel_case(text: str) -> str:
         str: The converted string in camelCase.
 
     """
-    parts: list[str] = text.split("_")
-    offset: int = 1 if text.startswith("_") else 0
-    head: list[str] = parts[offset : offset + 1] or [text]
+    parts = text.split("_")
+    offset = 1 if text.startswith("_") else 0
+    head = parts[offset : offset + 1] or [text]
 
     segments: list[str] = [f"_{head[0]}" if offset else head[0]]
     segments.extend(word.capitalize() for word in parts[offset + 1 :])
@@ -147,7 +147,7 @@ def natural_number(value: int, unit: str | None = None) -> str:
 
     Args:
         value (int): The number to convert.
-        unit (str | None, optional): The unit to append.
+        unit (str , optional): The unit to append.
 
     Returns:
         str: The humanized number string.
