@@ -11,7 +11,7 @@ class OrganizationSitemap(BaseSitemap):
     prefix = "/organizations"
 
     def items(self):
-        """Return a queryset of indexable Organization objects.
+        """Return a list of indexable Organization objects for sitemap generation.
 
         Returns:
             list: List of indexable OWASP-related Organization objects

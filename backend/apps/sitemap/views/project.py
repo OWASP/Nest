@@ -14,7 +14,7 @@ class ProjectSitemap(BaseSitemap):
         """Return list of projects for sitemap generation.
 
         Returns:
-            list: List of indexable Project objects ordered by update/creation date.
+            list: List of indexable active Project objects ordered by update/creation date.
 
         """
         return [
