@@ -3,7 +3,6 @@
 from datetime import datetime, timedelta
 
 from django.core.management.base import BaseCommand
-from django.db.models import Q
 from django.utils import timezone
 
 from apps.github.models.commit import Commit
@@ -81,7 +80,7 @@ class Command(BaseCommand):
             Dictionary mapping YYYY-MM-DD to contribution count
 
         """
-        contribution_map = {}
+        contribution_map: dict[str, int] = {}
 
         if not chapter.owasp_repository:
             return contribution_map
@@ -146,7 +145,7 @@ class Command(BaseCommand):
             Dictionary mapping YYYY-MM-DD to contribution count
 
         """
-        contribution_map = {}
+        contribution_map: dict[str, int] = {}
 
         repositories = list(project.repositories.all())
         if project.owasp_repository:
