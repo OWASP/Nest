@@ -1,10 +1,5 @@
 """Test cases for ChapterNode."""
 
-from apps.github.api.internal.nodes.issue import IssueNode
-from apps.github.api.internal.nodes.milestone import MilestoneNode
-from apps.github.api.internal.nodes.pull_request import PullRequestNode
-from apps.github.api.internal.nodes.release import ReleaseNode
-from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.owasp.api.internal.nodes.chapter import ChapterNode
 
 
@@ -23,11 +18,11 @@ class TestChapterNode:
             "region",
             "summary",
             "key",
-            "owasp_repository",
-            "recent_issues",
-            "recent_milestones",
-            "recent_pull_requests",
-            "recent_releases",
+            "geo_location",
+            "suggested_location",
+            "meetup_group",
+            "postal_code",
+            "tags",
         }
         assert expected_field_names.issubset(field_names)
 
@@ -50,31 +45,6 @@ class TestChapterNode:
         field = self._get_field_by_name("region")
         assert field is not None
         assert field.type is str
-
-    def test_resolve_owasp_repository(self):
-        field = self._get_field_by_name("owasp_repository")
-        assert field is not None
-        assert field.type is RepositoryNode
-
-    def test_resolve_recent_issues(self):
-        field = self._get_field_by_name("recent_issues")
-        assert field is not None
-        assert field.type.of_type is IssueNode
-
-    def test_resolve_recent_milestones(self):
-        field = self._get_field_by_name("recent_milestones")
-        assert field is not None
-        assert field.type.of_type is MilestoneNode
-
-    def test_resolve_recent_pull_requests(self):
-        field = self._get_field_by_name("recent_pull_requests")
-        assert field is not None
-        assert field.type.of_type is PullRequestNode
-
-    def test_resolve_recent_releases(self):
-        field = self._get_field_by_name("recent_releases")
-        assert field is not None
-        assert field.type.of_type is ReleaseNode
 
     def test_resolve_is_active(self):
         field = self._get_field_by_name("is_active")
