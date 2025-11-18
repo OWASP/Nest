@@ -97,6 +97,13 @@ class Project(
     custom_tags = models.JSONField(verbose_name="Custom tags", default=list, blank=True)
     track_issues = models.BooleanField(verbose_name="Track issues", default=True)
 
+    contribution_data = models.JSONField(
+        verbose_name="Contribution Data",
+        default=dict,
+        blank=True,
+        help_text="Daily contribution counts (YYYY-MM-DD -> count mapping)",
+    )
+
     # GKs.
     members = GenericRelation("owasp.EntityMember")
 
