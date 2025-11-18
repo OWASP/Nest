@@ -9,6 +9,7 @@ import type { Chapter } from 'types/chapter'
 import type { Contributor } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
+import ContributionHeatmap from 'components/ContributionHeatmap'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 export default function ChapterDetailsPage() {
@@ -59,18 +60,41 @@ export default function ChapterDetailsPage() {
       ),
     },
   ]
+
+  // Calculate contribution heatmap date range (1 year back)
+  const today = new Date()
+  const oneYearAgo = new Date(today)
+  oneYearAgo.setFullYear(today.getFullYear() - 1)
+  const startDate = oneYearAgo.toISOString().split('T')[0]
+  const endDate = today.toISOString().split('T')[0]
+
   return (
-    <DetailsCard
-      details={details}
-      entityKey={chapter.key}
-      entityLeaders={chapter.entityLeaders}
-      geolocationData={[chapter]}
-      isActive={chapter.isActive}
-      socialLinks={chapter.relatedUrls}
-      summary={chapter.summary}
-      title={chapter.name}
-      topContributors={topContributors}
-      type="chapter"
-    />
+    <>
+      <DetailsCard
+        details={details}
+        entityKey={chapter.key}
+        entityLeaders={chapter.entityLeaders}
+        geolocationData={[chapter]}
+        isActive={chapter.isActive}
+        socialLinks={chapter.relatedUrls}
+        summary={chapter.summary}
+        title={chapter.name}
+        topContributors={topContributors}
+        type="chapter"
+      />
+      {chapter.contributionData && Object.keys(chapter.contributionData).length > 0 && (
+        <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+          <div className="mx-auto max-w-6xl">
+            <ContributionHeatmap
+              contributionData={chapter.contributionData}
+              startDate={startDate}
+              endDate={endDate}
+              title="Chapter Contribution Activity"
+              unit="contributions"
+            />
+          </div>
+        </div>
+      )}
+    </>
   )
 }
