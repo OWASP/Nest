@@ -37,7 +37,9 @@ export const getUserLocationFromBrowser = (): Promise<UserLocation | null> => {
       return
     }
 
-    // # NOSONAR Geolocation permission is necessary for "Find chapters near you" feature.
+    // # NOSONAR Geolocation permission is necessary for the "Find chapters near you" feature.
+    // User explicitly opts-in via button click. Location stays client-side only and is never
+    // transmitted to the backend. Used solely to calculate distance between user and chapters.
     navigator.geolocation.getCurrentPosition(
       (position) => {
         resolve({
@@ -63,18 +65,11 @@ const extractChapterCoordinates = (chapter: Record<string, unknown>): ChapterCoo
   const lat =
     (chapter._geoloc as Record<string, unknown>)?.lat ??
     (chapter.geoLocation as Record<string, unknown>)?.lat ??
-    (chapter.geoLocation as Record<string, unknown>)?.latitude ??
-    (chapter.location as Record<string, unknown>)?.lat ??
     null
 
   const lng =
     (chapter._geoloc as Record<string, unknown>)?.lng ??
-    (chapter._geoloc as Record<string, unknown>)?.lon ??
     (chapter.geoLocation as Record<string, unknown>)?.lng ??
-    (chapter.geoLocation as Record<string, unknown>)?.lon ??
-    (chapter.geoLocation as Record<string, unknown>)?.longitude ??
-    (chapter.location as Record<string, unknown>)?.lng ??
-    (chapter.location as Record<string, unknown>)?.lon ??
     null
 
   return { lat: lat as number | null, lng: lng as number | null }

@@ -106,10 +106,9 @@ const ChapterMap = ({
 
     markerClusterGroup.addLayers(markers)
 
-    // Zoom in when user shares location
     if (userLocation && validGeoLocData.length > 0) {
       const maxNearestChapters = 5
-      const localChapters = validGeoLocData.slice(0, maxNearestChapters - 1)
+      const localChapters = validGeoLocData.slice(0, maxNearestChapters)
       const localBounds = L.latLngBounds(
         localChapters.map((chapter) => [
           chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
