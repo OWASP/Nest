@@ -18,6 +18,7 @@ export type Chapter = {
   topContributors?: Contributor[]
   updatedAt?: number
   url?: string
+  contributionData?: Record<string, number>
 }
 
 export type GeoLocation = {
