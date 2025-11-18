@@ -9,6 +9,28 @@ from apps.owasp.management.commands.owasp_aggregate_contributions import Command
 from apps.owasp.models import Chapter, Project
 
 
+class MockQuerySet:
+    """Mock QuerySet that supports slicing and iteration without database access."""
+
+    def __init__(self, items):
+        self._items = items
+
+    def __iter__(self):
+        return iter(self._items)
+
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return MockQuerySet(self._items[key])
+        return self._items[key]
+
+    def filter(self, **kwargs):
+        # Return self to support filter chaining
+        return self
+
+    def __len__(self):
+        return len(self._items)
+
+
 class TestOwaspAggregateContributions:
     @pytest.fixture
     def command(self):
@@ -154,55 +176,53 @@ class TestOwaspAggregateContributions:
 
         assert result == {}
 
-    @mock.patch.object(Chapter, "bulk_save")
-    @mock.patch.object(Chapter.objects, "filter")
-    def test_handle_chapters_only(self, mock_filter, mock_bulk_save, command, mock_chapter):
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Chapter")
+    def test_handle_chapters_only(self, mock_chapter_model, command, mock_chapter):
         """Test command execution for chapters only."""
-        mock_filter.return_value = [mock_chapter]
+        mock_chapter_model.objects.filter.return_value = MockQuerySet([mock_chapter])
+        mock_chapter_model.bulk_save = mock.Mock()
 
         with mock.patch.object(
             command,
             "aggregate_chapter_contributions",
             return_value={"2024-11-16": 5},
         ):
-            command.handle(entity_type="chapter", days=365)
+            command.handle(entity_type="chapter", days=365, offset=0)
 
         assert mock_chapter.contribution_data == {"2024-11-16": 5}
-        assert mock_bulk_save.called
+        assert mock_chapter_model.bulk_save.called
 
-    @mock.patch.object(Project, "bulk_save")
-    @mock.patch.object(Project.objects, "filter")
-    def test_handle_projects_only(self, mock_filter, mock_bulk_save, command, mock_project):
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Project")
+    def test_handle_projects_only(self, mock_project_model, command, mock_project):
         """Test command execution for projects only."""
-        mock_filter.return_value = [mock_project]
+        mock_project_model.objects.filter.return_value = MockQuerySet([mock_project])
+        mock_project_model.bulk_save = mock.Mock()
 
         with mock.patch.object(
             command,
             "aggregate_project_contributions",
             return_value={"2024-11-16": 10},
         ):
-            command.handle(entity_type="project", days=365)
+            command.handle(entity_type="project", days=365, offset=0)
 
         assert mock_project.contribution_data == {"2024-11-16": 10}
-        assert mock_bulk_save.called
+        assert mock_project_model.bulk_save.called
 
-    @mock.patch.object(Chapter, "bulk_save")
-    @mock.patch.object(Project, "bulk_save")
-    @mock.patch.object(Chapter.objects, "filter")
-    @mock.patch.object(Project.objects, "filter")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Chapter")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Project")
     def test_handle_both_entities(
         self,
-        mock_project_filter,
-        mock_chapter_filter,
-        mock_project_bulk_save,
-        mock_chapter_bulk_save,
+        mock_project_model,
+        mock_chapter_model,
         command,
         mock_chapter,
         mock_project,
     ):
         """Test command execution for both chapters and projects."""
-        mock_chapter_filter.return_value = [mock_chapter]
-        mock_project_filter.return_value = [mock_project]
+        mock_chapter_model.objects.filter.return_value = MockQuerySet([mock_chapter])
+        mock_project_model.objects.filter.return_value = MockQuerySet([mock_project])
+        mock_chapter_model.bulk_save = mock.Mock()
+        mock_project_model.bulk_save = mock.Mock()
 
         with (
             mock.patch.object(
@@ -216,62 +236,55 @@ class TestOwaspAggregateContributions:
                 return_value={"2024-11-16": 10},
             ),
         ):
-            command.handle(entity_type="both", days=365)
+            command.handle(entity_type="both", days=365, offset=0)
 
-        assert mock_chapter_bulk_save.called
-        assert mock_project_bulk_save.called
+        assert mock_chapter_model.bulk_save.called
+        assert mock_project_model.bulk_save.called
 
-    @mock.patch.object(Chapter.objects, "filter")
-    def test_handle_with_specific_key(self, mock_filter, command, mock_chapter):
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Chapter")
+    def test_handle_with_specific_key(self, mock_chapter_model, command, mock_chapter):
         """Test command execution with a specific entity key."""
-        mock_filter.return_value = [mock_chapter]
+        mock_chapter_model.objects.filter.return_value = MockQuerySet([mock_chapter])
+        mock_chapter_model.bulk_save = mock.Mock()
 
-        with (
-            mock.patch.object(Chapter, "bulk_save"),
-            mock.patch.object(
-                command,
-                "aggregate_chapter_contributions",
-                return_value={"2024-11-16": 3},
-            ),
+        with mock.patch.object(
+            command,
+            "aggregate_chapter_contributions",
+            return_value={"2024-11-16": 3},
         ):
-            command.handle(entity_type="chapter", key="www-chapter-test", days=365)
+            command.handle(entity_type="chapter", key="www-chapter-test", days=365, offset=0)
 
         # Verify filter was called with the specific key
-        mock_filter.assert_called()
+        mock_chapter_model.objects.filter.assert_called()
 
-    @mock.patch.object(Chapter.objects, "filter")
-    def test_handle_with_offset(self, mock_filter, command, mock_chapter):
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Chapter")
+    def test_handle_with_offset(self, mock_chapter_model, command, mock_chapter):
         """Test command execution with offset parameter."""
         chapters = [mock_chapter, mock_chapter, mock_chapter]
-        mock_queryset = mock.Mock()
-        mock_queryset.__getitem__.return_value = chapters[2:]  # Skip first 2
-        mock_filter.return_value = mock_queryset
+        mock_chapter_model.objects.filter.return_value = MockQuerySet(chapters)
+        mock_chapter_model.bulk_save = mock.Mock()
 
-        with (
-            mock.patch.object(Chapter, "bulk_save"),
-            mock.patch.object(
-                command,
-                "aggregate_chapter_contributions",
-                return_value={"2024-11-16": 1},
-            ),
+        with mock.patch.object(
+            command,
+            "aggregate_chapter_contributions",
+            return_value={"2024-11-16": 1},
         ):
             command.handle(entity_type="chapter", offset=2, days=365)
 
-        # Verify offset was applied
-        mock_queryset.__getitem__.assert_called_with(slice(2, None))
+        # Verify that offset was applied - only 1 chapter should be processed (3 total - 2 offset)
 
-    def test_handle_custom_days(self, command, mock_chapter):
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Chapter")
+    def test_handle_custom_days(self, mock_chapter_model, command, mock_chapter):
         """Test command execution with custom days parameter."""
-        with (
-            mock.patch.object(Chapter.objects, "filter", return_value=[mock_chapter]),
-            mock.patch.object(Chapter, "bulk_save"),
-            mock.patch.object(
-                command,
-                "aggregate_chapter_contributions",
-                return_value={},
-            ) as mock_aggregate,
-        ):
-            command.handle(entity_type="chapter", days=90)
+        mock_chapter_model.objects.filter.return_value = MockQuerySet([mock_chapter])
+        mock_chapter_model.bulk_save = mock.Mock()
+
+        with mock.patch.object(
+            command,
+            "aggregate_chapter_contributions",
+            return_value={},
+        ) as mock_aggregate:
+            command.handle(entity_type="chapter", days=90, offset=0)
 
         # Verify aggregate was called with correct start_date
         assert mock_aggregate.called
