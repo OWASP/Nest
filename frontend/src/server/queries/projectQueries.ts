@@ -89,6 +89,7 @@ export const GET_PROJECT_DATA = gql`
       type
       updatedAt
       url
+      contributionData
       recentMilestones(limit: 5) {
         author {
           id
