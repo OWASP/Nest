@@ -1,0 +1,87 @@
+"""Test cases for ChapterNode."""
+
+from apps.github.api.internal.nodes.issue import IssueNode
+from apps.github.api.internal.nodes.milestone import MilestoneNode
+from apps.github.api.internal.nodes.pull_request import PullRequestNode
+from apps.github.api.internal.nodes.release import ReleaseNode
+from apps.github.api.internal.nodes.repository import RepositoryNode
+from apps.owasp.api.internal.nodes.chapter import ChapterNode
+
+
+class TestChapterNode:
+    def test_chapter_node_inheritance(self):
+        assert hasattr(ChapterNode, "__strawberry_definition__")
+
+    def test_meta_configuration(self):
+        field_names = {field.name for field in ChapterNode.__strawberry_definition__.fields}
+        expected_field_names = {
+            "contribution_data",
+            "country",
+            "created_at",
+            "is_active",
+            "name",
+            "region",
+            "summary",
+            "key",
+            "owasp_repository",
+            "recent_issues",
+            "recent_milestones",
+            "recent_pull_requests",
+            "recent_releases",
+        }
+        assert expected_field_names.issubset(field_names)
+
+    def _get_field_by_name(self, name):
+        return next(
+            (f for f in ChapterNode.__strawberry_definition__.fields if f.name == name), None
+        )
+
+    def test_resolve_key(self):
+        field = self._get_field_by_name("key")
+        assert field is not None
+        assert field.type is str
+
+    def test_resolve_country(self):
+        field = self._get_field_by_name("country")
+        assert field is not None
+        assert field.type is str
+
+    def test_resolve_region(self):
+        field = self._get_field_by_name("region")
+        assert field is not None
+        assert field.type is str
+
+    def test_resolve_owasp_repository(self):
+        field = self._get_field_by_name("owasp_repository")
+        assert field is not None
+        assert field.type is RepositoryNode
+
+    def test_resolve_recent_issues(self):
+        field = self._get_field_by_name("recent_issues")
+        assert field is not None
+        assert field.type.of_type is IssueNode
+
+    def test_resolve_recent_milestones(self):
+        field = self._get_field_by_name("recent_milestones")
+        assert field is not None
+        assert field.type.of_type is MilestoneNode
+
+    def test_resolve_recent_pull_requests(self):
+        field = self._get_field_by_name("recent_pull_requests")
+        assert field is not None
+        assert field.type.of_type is PullRequestNode
+
+    def test_resolve_recent_releases(self):
+        field = self._get_field_by_name("recent_releases")
+        assert field is not None
+        assert field.type.of_type is ReleaseNode
+
+    def test_resolve_is_active(self):
+        field = self._get_field_by_name("is_active")
+        assert field is not None
+        assert field.type is bool
+
+    def test_resolve_contribution_data(self):
+        field = self._get_field_by_name("contribution_data")
+        assert field is not None
+        # contribution_data is a JSON scalar type
