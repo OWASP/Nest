@@ -25,6 +25,13 @@ class SlackConfig(AppConfig):
         else None
     )
 
+    def ready(self):
+        """Configure Slack events when the app is ready."""
+        super().ready()
+        from apps.slack.events import configure_slack_events
+
+        configure_slack_events()
+
 
 if SlackConfig.app:
 

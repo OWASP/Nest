@@ -82,7 +82,7 @@ const UserDetailsPage: React.FC = () => {
       const username = mentionMatch[1]
       const punctuation = mentionMatch[2] || ''
       return (
-        <React.Fragment key={index}>
+        <React.Fragment key={`mention-${username}-${index}`}>
           <Link
             href={`https://github.com/${username}`}
             target="_blank"
@@ -96,7 +96,7 @@ const UserDetailsPage: React.FC = () => {
         </React.Fragment>
       )
     }
-    return <span key={index}>{word} </span>
+    return <span key={`word-${word}-${index}`}>{word} </span>
   })
 
   if (isLoading) {

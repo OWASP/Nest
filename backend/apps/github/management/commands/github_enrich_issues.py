@@ -38,25 +38,21 @@ class Command(BaseCommand):
             **options: Arbitrary keyword arguments containing command options.
 
         """
-        open_ai = OpenAi()
-
         force_update_hint = options["force_update_hint"]
         force_update_summary = options["force_update_summary"]
-        is_force_update = any((force_update_hint, force_update_summary))
+        offset = options["offset"]
 
+        is_force_update = any((force_update_hint, force_update_summary))
         open_issues = (
             Issue.open_issues if is_force_update else Issue.open_issues.without_summary
         ).order_by("-created_at")
         open_issues_count = open_issues.count()
 
-        update_hint = options["update_hint"]
-        update_summary = options["update_summary"]
-        update_fields = []
-        update_fields += ["hint"] if update_hint else []
-        update_fields += ["summary"] if update_summary else []
-
         issues = []
-        offset = options["offset"]
+        open_ai = OpenAi()
+        update_fields = []
+        update_fields += ["hint"] if (update_hint := options["update_hint"]) else []
+        update_fields += ["summary"] if (update_summary := options["update_summary"]) else []
         for idx, issue in enumerate(open_issues[offset:]):
             prefix = f"{idx + offset + 1} of {open_issues_count - offset}"
             print(f"{prefix:<10} {issue.title}")
@@ -68,8 +64,5 @@ class Command(BaseCommand):
                 issue.generate_summary(open_ai=open_ai)
 
             issues.append(issue)
-
-            if not len(issues) % 1000:
-                Issue.bulk_save(issues, fields=update_fields)
 
         Issue.bulk_save(issues, fields=update_fields)

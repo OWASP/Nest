@@ -24,7 +24,7 @@ const MyMentorshipPage: React.FC = () => {
   const username = (session as ExtendedSession)?.user?.login
 
   const initialQuery = searchParams.get('q') || ''
-  const initialPage = parseInt(searchParams.get('page') || '1', 10)
+  const initialPage = Number.parseInt(searchParams.get('page') || '1', 10)
 
   const [searchQuery, setSearchQuery] = useState(initialQuery)
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery)
