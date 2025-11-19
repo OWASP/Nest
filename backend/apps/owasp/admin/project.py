@@ -54,7 +54,13 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     )
 
     def custom_field_name(self, obj) -> str:
-        """Project custom name."""
+        """
+        Return a display-friendly project name for the admin list view.
+
+        If the project has a defined `name`, it is shown; otherwise the project
+        key is used as a fallback. This ensures that every project row has a
+        readable identifier even when optional fields are empty.
+        """
         return f"{obj.name or obj.key}"
 
     custom_field_name.short_description = "Name"

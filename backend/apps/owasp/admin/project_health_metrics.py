@@ -29,7 +29,13 @@ class ProjectHealthMetricsAdmin(admin.ModelAdmin, StandardOwaspAdminMixin):
     search_fields = ("project__name",)
 
     def project(self, obj):
-        """Display project name."""
+        """
+        Return the name of the related project for display purposes.
+
+        Used in the admin list view to show a readable project label instead
+        of the raw project foreign key reference.
+        
+        """
         return obj.project.name if obj.project else "N/A"
 
 
