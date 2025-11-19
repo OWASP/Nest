@@ -92,8 +92,6 @@ export const sortChaptersByDistance = (
 
       return { ...chapter, distance }
     })
-    .filter((item) => item !== null) // remove invalid ones
-    .sort((a, b) => a!.distance - b!.distance) as Array<
-    Record<string, unknown> & { distance: number }
-  >
+    .filter((item) => item !== null)
+    .sort((a, b) => a!.distance - b!.distance)
 }
