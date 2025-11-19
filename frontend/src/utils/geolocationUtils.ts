@@ -37,9 +37,11 @@ export const getUserLocationFromBrowser = (): Promise<UserLocation | null> => {
       return
     }
 
-    // # NOSONAR Geolocation permission is necessary for the "Find chapters near you" feature.
-    // User explicitly opts-in via button click. Location stays client-side only and is never
-    // transmitted to the backend. Used solely to calculate distance between user and chapters.
+    /* Geolocation permission is required for the "Find chapters near you" feature.
+       The user must explicitly opt in by clicking a button. The location data never
+       leaves the client and is not sent to the backend. It is used only to calculate
+       distances between the user and nearby chapters.
+    */
     navigator.geolocation.getCurrentPosition(
       (position) => {
         resolve({

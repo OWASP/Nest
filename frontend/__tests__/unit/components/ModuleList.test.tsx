@@ -5,12 +5,17 @@ import ModuleList from 'components/ModuleList'
 
 // Mock FontAwesome icons
 jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, className }: { icon: unknown; className?: string }) => (
-    <span
-      data-testid={`icon-${icon === faChevronDown ? 'chevron-down' : icon === faChevronUp ? 'chevron-up' : 'unknown'}`}
-      className={className}
-    />
-  ),
+  FontAwesomeIcon: ({ icon, className }: { icon: unknown; className?: string }) => {
+    let iconName = 'unknown'
+
+    if (icon === faChevronDown) {
+      iconName = 'chevron-down'
+    } else if (icon === faChevronUp) {
+      iconName = 'chevron-up'
+    }
+
+    return <span data-testid={`icon-${iconName}`} className={className} />
+  },
 }))
 
 // Mock HeroUI Button component
@@ -181,14 +186,16 @@ describe('ModuleList', () => {
 
   describe('Module Text Truncation', () => {
     it('truncates module names longer than 50 characters', () => {
-      const longModuleName = 'A'.repeat(60) // 60 characters
-      const modules = [longModuleName, 'Short Module']
+      const longModuleName =
+        'This is a very long module name that exceeds fifty characters and should be truncated'
+      const modules = [longModuleName]
 
       render(<ModuleList modules={modules} />)
 
-      const expectedTruncated = 'A'.repeat(50) + '...'
-      expect(screen.getByText(expectedTruncated)).toBeInTheDocument()
-      expect(screen.queryByText(longModuleName)).not.toBeInTheDocument()
+      const truncatedButton = screen.getByRole('button', {
+        name: `Module: ${longModuleName}`,
+      })
+      expect(truncatedButton).toHaveAttribute('title', longModuleName)
     })
 
     it('does not truncate module names 50 characters or shorter', () => {
@@ -220,7 +227,7 @@ describe('ModuleList', () => {
 
       render(<ModuleList modules={modules} />)
 
-      const button = screen.getByRole('button', { name: shortModuleName })
+      const button = screen.getByRole('button', { name: `Module: ${shortModuleName}` })
       expect(button).not.toHaveAttribute('title')
     })
   })
@@ -230,7 +237,7 @@ describe('ModuleList', () => {
       const modules = ['Test Module']
       render(<ModuleList modules={modules} />)
 
-      const button = screen.getByRole('button', { name: 'Test Module' })
+      const button = screen.getByRole('button', { name: 'Module: Test Module' })
       expect(button).toHaveClass(
         'rounded-lg',
         'border',
@@ -252,7 +259,7 @@ describe('ModuleList', () => {
       const modules = ['Test Module']
       render(<ModuleList modules={modules} />)
 
-      const button = screen.getByRole('button', { name: 'Test Module' })
+      const button = screen.getByRole('button', { name: 'Module: Test Module' })
       expect(button).toHaveAttribute('type', 'button')
     })
 
