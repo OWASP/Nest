@@ -61,6 +61,8 @@ def list_events(
         "-start_date",
         "end_date",
         "-end_date",
+        "latitude",
+        "-latitude",
         "longitude",
         "-longitude",
     ]
