@@ -96,6 +96,21 @@ describe('UserDetailsPage', () => {
     jest.clearAllMocks()
   })
 
+  // Helper functions to reduce nesting depth
+  const getBadgeElements = () => {
+    return screen.getAllByTestId(/^badge-/)
+  }
+
+  const getBadgeTestIds = () => {
+    const badgeElements = getBadgeElements()
+    return badgeElements.map((element) => element.dataset.testid)
+  }
+
+  const expectBadgesInCorrectOrder = (expectedOrder: string[]) => {
+    const badgeTestIds = getBadgeTestIds()
+    expect(badgeTestIds).toEqual(expectedOrder)
+  }
+
   test('renders loading state', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
@@ -733,6 +748,7 @@ describe('UserDetailsPage', () => {
       })
     })
 
+    // eslint-disable-next-line jest/expect-expect
     test('renders badges in correct order as returned by backend (weight ASC then name ASC)', async () => {
       // Backend returns badges sorted by weight ASC, then name ASC
       // This test verifies the frontend preserves the backend ordering
@@ -790,9 +806,6 @@ describe('UserDetailsPage', () => {
 
       render(<UserDetailsPage />)
       await waitFor(() => {
-        const badgeElements = screen.getAllByTestId(/^badge-/)
-        const badgeTestIds = badgeElements.map((element) => element.dataset.testid)
-
         // Expected order matches backend contract: weight ASC (1, 1, 1, 2, 3), then name ASC for equal weights
         const expectedOrder = [
           'badge-alpha-badge', // weight 1, name ASC
@@ -801,8 +814,7 @@ describe('UserDetailsPage', () => {
           'badge-security-expert', // weight 2
           'badge-top-contributor', // weight 3
         ]
-
-        expect(badgeTestIds).toEqual(expectedOrder)
+        expectBadgesInCorrectOrder(expectedOrder)
       })
     })
   })

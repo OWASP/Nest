@@ -36,7 +36,7 @@
     "@heroui/tooltip": "^2.2.24",
     "@next/eslint-plugin-next": "^15.5.6",
     "@next/third-parties": "^15.5.6",
-    "@sentry/nextjs": "^10.25.0",
+    "@sentry/nextjs": "^10.26.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/lodash": "^4.17.20",
     "apexcharts": "^5.3.6",
