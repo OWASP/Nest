@@ -42,7 +42,7 @@ export const getUserLocationFromBrowser = (): Promise<UserLocation | null> => {
        leaves the client and is not sent to the backend. It is used only to calculate
        distances between the user and nearby chapters.
     */
-    // sonarjs-disable-next-line javascript:S5604
+    // sonarjs-disable-next-line typescript:S5604
     navigator.geolocation.getCurrentPosition(
       (position) => {
         resolve({
