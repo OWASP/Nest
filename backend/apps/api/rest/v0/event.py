@@ -22,11 +22,11 @@ class EventBase(Schema):
 
     end_date: datetime | None = None
     key: str
+    latitude: float | None = None
+    longitude: float | None = None
     name: str
     start_date: datetime
     url: str | None = None
-    longitude: float | None = None
-    latitude: float | None = None
 
 
 class Event(EventBase):
@@ -57,23 +57,29 @@ def list_events(
     request: HttpRequest,
     filters: LocationFilter = Query(...),
     ordering: Literal[
-        "start_date", "-start_date", "end_date", "-end_date", "longitude", "-longitude"
+        "start_date",
+        "-start_date",
+        "end_date",
+        "-end_date",
+        "longitude",
+        "-longitude",
     ]
     | None = Query(
         None,
         description="Ordering field",
     ),
     *,
-    upcoming: bool | None = Query(
+    is_upcoming: bool | None = Query(
         None,
         description="Filter for upcoming events",
     ),
 ) -> list[Event]:
     """Get list of events."""
-    if upcoming:
+    if is_upcoming:
         return filters.filter(
             EventModel.upcoming_events().order_by(ordering or "start_date", "end_date")
         )
+
     return filters.filter(EventModel.objects.order_by(ordering or "-start_date", "-end_date"))
 
 

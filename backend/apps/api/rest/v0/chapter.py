@@ -22,10 +22,10 @@ class ChapterBase(Schema):
 
     created_at: datetime
     key: str
+    latitude: float | None = None
+    longitude: float | None = None
     name: str
     updated_at: datetime
-    longitude: float | None = None
-    latitude: float | None = None
 
     @staticmethod
     def resolve_key(obj):
@@ -72,10 +72,10 @@ def list_chapters(
         "-created_at",
         "updated_at",
         "-updated_at",
-        "longitude",
-        "-longitude",
         "latitude",
         "-latitude",
+        "longitude",
+        "-longitude",
     ]
     | None = Query(
         None,
