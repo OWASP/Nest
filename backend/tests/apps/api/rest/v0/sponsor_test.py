@@ -1,6 +1,9 @@
+from http import HTTPStatus
+from unittest.mock import MagicMock, patch
+
 import pytest
 
-from apps.api.rest.v0.sponsor import SponsorDetail
+from apps.api.rest.v0.sponsor import SponsorDetail, get_sponsor, list_sponsors
 
 
 class TestSponsorSchema:
@@ -63,3 +66,94 @@ class TestSponsorSchema:
         assert sponsor.job_url == ""
         assert sponsor.key == "test-sponsor"
         assert sponsor.name == "Test Sponsor"
+
+
+class TestListSponsors:
+    """Test cases for list_sponsors endpoint."""
+
+    @patch("apps.api.rest.v0.sponsor.SponsorModel.objects")
+    def test_list_sponsors_with_custom_ordering(self, mock_objects):
+        """Test listing sponsors with custom ordering."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_ordered = MagicMock()
+        mock_final = MagicMock()
+
+        mock_objects.order_by.return_value = mock_ordered
+        mock_filters.filter.return_value = mock_final
+
+        result = list_sponsors(mock_request, filters=mock_filters, ordering="name")
+
+        mock_objects.order_by.assert_called_once_with("name")
+        mock_filters.filter.assert_called_once_with(mock_ordered)
+        assert result == mock_final
+
+    @patch("apps.api.rest.v0.sponsor.SponsorModel.objects")
+    def test_list_sponsors_with_default_ordering(self, mock_objects):
+        """Test listing sponsors with default ordering."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_ordered = MagicMock()
+        mock_final = MagicMock()
+
+        mock_objects.order_by.return_value = mock_ordered
+        mock_filters.filter.return_value = mock_final
+
+        result = list_sponsors(mock_request, filters=mock_filters, ordering=None)
+
+        mock_objects.order_by.assert_called_once_with("name")
+        mock_filters.filter.assert_called_once_with(mock_ordered)
+        assert result == mock_final
+
+    @patch("apps.api.rest.v0.sponsor.SponsorModel.objects")
+    def test_list_sponsors_with_reverse_ordering(self, mock_objects):
+        """Test listing sponsors with reverse ordering."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_ordered = MagicMock()
+        mock_final = MagicMock()
+
+        mock_objects.order_by.return_value = mock_ordered
+        mock_filters.filter.return_value = mock_final
+
+        result = list_sponsors(mock_request, filters=mock_filters, ordering="-name")
+
+        mock_objects.order_by.assert_called_once_with("-name")
+        mock_filters.filter.assert_called_once_with(mock_ordered)
+        assert result == mock_final
+
+
+class TestGetSponsor:
+    """Test cases for get_sponsor endpoint."""
+
+    @patch("apps.api.rest.v0.sponsor.SponsorModel.objects")
+    def test_get_sponsor_found(self, mock_objects):
+        """Test getting a sponsor that exists."""
+        mock_request = MagicMock()
+        mock_filter = MagicMock()
+        mock_sponsor = MagicMock()
+
+        mock_objects.filter.return_value = mock_filter
+        mock_filter.first.return_value = mock_sponsor
+
+        result = get_sponsor(mock_request, sponsor_id="adobe")
+
+        mock_objects.filter.assert_called_once_with(key__iexact="adobe")
+        mock_filter.first.assert_called_once()
+        assert result == mock_sponsor
+
+    @patch("apps.api.rest.v0.sponsor.SponsorModel.objects")
+    def test_get_sponsor_not_found(self, mock_objects):
+        """Test getting a sponsor that does not exist returns 404."""
+        mock_request = MagicMock()
+        mock_filter = MagicMock()
+
+        mock_objects.filter.return_value = mock_filter
+        mock_filter.first.return_value = None
+
+        result = get_sponsor(mock_request, sponsor_id="nonexistent")
+
+        mock_objects.filter.assert_called_once_with(key__iexact="nonexistent")
+        mock_filter.first.assert_called_once()
+        assert result.status_code == HTTPStatus.NOT_FOUND
+        assert b"Sponsor not found" in result.content
