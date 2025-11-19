@@ -12,18 +12,27 @@ interface ContributionHeatmapProps {
   endDate: string
   title?: string
   unit?: string
+  stats?: {
+    commits?: number
+    pullRequests?: number
+    issues?: number
+    total?: number
+  }
+  variant?: 'default' | 'compact'
 }
 
 const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
   contributionData,
   startDate,
   endDate,
-  title,
   unit = 'contribution',
+  variant = 'default',
 }) => {
   const { theme } = useTheme()
   const isDarkMode = theme === 'dark'
 
+  const isCompact = variant === 'compact'
+  
   const { heatmapSeries } = useMemo(() => {
     const start = new Date(startDate)
     const end = new Date(endDate)
@@ -239,13 +248,8 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
   }
 
   return (
-    <div>
-      {title && (
-        <h4 className="mb-1 text-sm text-gray-700 dark:text-gray-300">
-          <span className="font-semibold">{title}</span>
-        </h4>
-      )}
-      <div className="w-full">
+    <div className="">
+      <div className="max-w-5xl">
         <style>
           {`
             .apexcharts-tooltip {
@@ -256,34 +260,29 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
             .apexcharts-tooltip * {
               border: none !important;
             }
-            .heatmap-container {
-              aspect-ratio: 4 / 1;
-              min-height: 132px;
-              max-width: 100%;
-              width: min(100%, 800px);
+            .heatmap-container-${isCompact ? 'compact' : 'default'} {
+              width: 100%;
+              ${isCompact ? 'min-width: 380px;' : 'max-width: 100%; overflow: visible;'}
             }
+            .heatmap-container-${isCompact ? 'compact' : 'default'} .apexcharts-heatmap-rect {
+              rx: 2;
+              ry: 2;
+            }
+            ${!isCompact ? '.heatmap-container-default .apexcharts-canvas { transform: scale(0.85); transform-origin: left top; }' : ''}
             @media (max-width: 768px) {
-              .heatmap-container {
-                width: min(100%, 600px);
+              .heatmap-container-${isCompact ? 'compact' : 'default'} {
+                ${isCompact ? 'min-width: 320px;' : 'transform: scale(0.7); transform-origin: left top;'}
               }
-            }
-            @media (max-width: 480px) {
-              .heatmap-container {
-                width: min(100%, 400px);
-              }
-            }
-            .heatmap-container .apexcharts-canvas {
-              height: 100% !important;
             }
           `}
         </style>
-        <div className="heatmap-container">
+        <div className={`heatmap-container-${isCompact ? 'compact' : 'default'}`}>
           <Chart
             options={options}
             series={heatmapSeries}
             type="heatmap"
-            height="100%"
-            width="100%"
+            height={isCompact ? '100%' : 200}
+            width={isCompact ? '100%' : '1200px'}
           />
         </div>
       </div>
