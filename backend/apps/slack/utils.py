@@ -168,7 +168,7 @@ def get_posts_data(limit: int = 5) -> QuerySet | None:
         limit (int, optional): The maximum number of posts to fetch.
 
     Returns:
-        QuerySet or None: A queryset of sponsors, or None if an error occurs.
+        QuerySet or None: A queryset of recent posts, or None if an error occurs.
 
     """
     from apps.owasp.models.post import Post
