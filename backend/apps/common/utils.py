@@ -55,7 +55,7 @@ def clean_url(url: str | None) -> str | None:
     """Clean a URL by removing whitespace and trailing punctuation.
 
     Args:
-        url (str | None): Raw URL string.
+        url (str | optional): Raw URL string.
 
     Returns:
         str | None: Cleaned URL string or None if empty.
@@ -103,10 +103,8 @@ def get_user_ip_address(request: HttpRequest) -> str:
     if settings.IS_LOCAL_ENVIRONMENT:
         return settings.PUBLIC_IP_ADDRESS
 
-    x_forwarded_for: str | None = request.META.get("HTTP_X_FORWARDED_FOR")
-    if x_forwarded_for:
-        return x_forwarded_for.split(",")[0]
-    return request.META.get("REMOTE_ADDR", "")
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+    return x_forwarded_for.split(",")[0] if x_forwarded_for else request.META.get("REMOTE_ADDR")
 
 
 def is_valid_json(content: str) -> bool:
@@ -151,7 +149,7 @@ def natural_date(value: int | str | datetime) -> str:
 
     """
     if isinstance(value, str):
-        dt: datetime = datetime.strptime(value, "%Y-%m-%d").replace(tzinfo=UTC)
+        dt = datetime.strptime(value, "%Y-%m-%d").replace(tzinfo=UTC)
     elif isinstance(value, int):
         dt = datetime.fromtimestamp(value, tz=UTC)
     else:
@@ -165,7 +163,7 @@ def natural_number(value: int, unit: str | None = None) -> str:
 
     Args:
         value (int): The number to convert.
-        unit (str,optional): The unit to append.
+        unit (str, optional): The unit to append.
 
     Returns:
         str: The humanized number string.
@@ -221,7 +219,7 @@ def validate_url(url: str | None) -> bool:
     """Validate that a URL has proper scheme and netloc.
 
     Args:
-        url (str | None): URL string to validate.
+        url (str | optional): URL string to validate.
 
     Returns:
         bool: True if URL is valid, False otherwise.

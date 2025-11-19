@@ -50,8 +50,8 @@ def check_funding_policy_compliance(platform: str, target: str | None) -> bool:
     if platform == "github":
         return target.lower() == "owasp"
     if platform == "custom":
-        location: str = urlparse(target).netloc.lower()
-        owasp_org: str = "owasp.org"
+        location = urlparse(target).netloc.lower()
+        owasp_org = "owasp.org"
         return location == owasp_org or location.endswith(f".{owasp_org}")
 
     return False
@@ -88,7 +88,7 @@ def get_repository_path(url: str) -> str | None:
         url (str): The repository URL.
 
     Returns:
-        str | None: The repository path in the format 'owner/repository_name',
+        str : The repository path in the format 'owner/repository_name',
             or None if parsing fails.
 
     """
@@ -104,19 +104,19 @@ def normalize_url(url: str, *, check_path: bool = False) -> str | None:
         check_path (bool, optional): Whether to check if the URL has a path.
 
     Returns:
-        str | None: The normalized URL, or None if the URL is invalid.
+        str : The normalized URL, or None if the URL is invalid.
 
     """
     parsed_url = urlparse(url)
     if not parsed_url.netloc or (check_path and not parsed_url.path):
         return None
 
-    http_prefix: str = "http://"  # NOSONAR
-    https_prefix: str = "https://"
+    http_prefix = "http://"  # NOSONAR
+    https_prefix = "https://"
     if not parsed_url.scheme:
         url = f"{https_prefix}{url}"
 
-    normalized_url: str = (
+    normalized_url = (
         f"{https_prefix}{url[len(http_prefix) :]}" if url.startswith(http_prefix) else url
     )
 
