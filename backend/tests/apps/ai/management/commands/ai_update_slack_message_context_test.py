@@ -72,10 +72,9 @@ class TestAiCreateSlackMessageContextCommand:
         parser = Mock()
         command.add_arguments(parser)
 
-        assert parser.add_argument.call_count == 6
+        assert parser.add_argument.call_count == 3
         calls = parser.add_argument.call_args_list
 
-        # First 3 calls are from parent class (BaseAICommand)
         assert calls[0][0] == ("--message-key",)
         assert calls[0][1]["type"] is str
         assert "Process only the message with this key" in calls[0][1]["help"]
@@ -86,19 +85,5 @@ class TestAiCreateSlackMessageContextCommand:
 
         assert calls[2][0] == ("--batch-size",)
         assert calls[2][1]["type"] is int
-        assert calls[2][1]["default"] == 50  # Default from parent class
+        assert calls[2][1]["default"] == 50
         assert "Number of messages to process in each batch" in calls[2][1]["help"]
-
-        # Next 3 calls are from the command itself (duplicates with different defaults)
-        assert calls[3][0] == ("--message-key",)
-        assert calls[3][1]["type"] is str
-        assert "Process only the message with this key" in calls[3][1]["help"]
-
-        assert calls[4][0] == ("--all",)
-        assert calls[4][1]["action"] == "store_true"
-        assert "Process all the messages" in calls[4][1]["help"]
-
-        assert calls[5][0] == ("--batch-size",)
-        assert calls[5][1]["type"] is int
-        assert calls[5][1]["default"] == 100  # Overridden default from command
-        assert "Number of messages to process in each batch" in calls[5][1]["help"]
