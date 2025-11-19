@@ -73,6 +73,17 @@ const DetailsCard = ({
 }: DetailsCardProps) => {
   const { data } = useSession()
   const router = useRouter()
+
+  // compute styles based on type prop
+  const secondaryCardStyles = (() => {
+    if (type === 'program' || type === 'module') {
+      return 'gap-2 md:col-span-7'
+    } else if (type === 'chapter') {
+      return 'gap-2 md:col-span-3'
+    }
+    return 'gap-2 md:col-span-5'
+  })()
+
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
@@ -122,13 +133,7 @@ const DetailsCard = ({
           <SecondaryCard
             icon={faRectangleList}
             title={<AnchorTitle title={`${upperFirst(type)} Details`} />}
-            className={
-              type === 'program' || type === 'module'
-                ? 'gap-2 md:col-span-7'
-                : type !== 'chapter'
-                  ? 'gap-2 md:col-span-5'
-                  : 'gap-2 md:col-span-3'
-            }
+            className={secondaryCardStyles}
           >
             {details?.map((detail) =>
               detail?.label === 'Leaders' ? (
