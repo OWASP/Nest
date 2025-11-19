@@ -20,13 +20,11 @@ class AppMention(EventBase):
         channel_id = event.get("channel")
         text = event.get("text", "")
 
-        try:
-            Conversation.objects.get(
-                slack_channel_id=channel_id,
-                is_nest_bot_assistant_enabled=True,
-            )
-        except Conversation.DoesNotExist:
-            logger.warning("Conversation not found or assistant not enabled.")
+        if not Conversation.objects.filter(
+            is_nest_bot_assistant_enabled=True,
+            slack_channel_id=channel_id,
+        ).exists():
+            logger.warning("NestBot AI Assistant is not enabled for this conversation.")
             return
 
         query = text
