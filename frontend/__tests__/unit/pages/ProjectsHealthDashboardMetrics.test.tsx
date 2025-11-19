@@ -148,6 +148,15 @@ describe('MetricsPage', () => {
     })
   })
 
+  test('SortableColumnHeader applies correct alignment classes', async () => {
+    render(<MetricsPage />)
+    const sortButton = await screen.findByTitle('Sort by Stars')
+    const wrapperDiv = sortButton.closest('div')
+    expect(wrapperDiv).not.toBeNull()
+    expect(wrapperDiv).toHaveClass('justify-center')
+    expect(sortButton).toHaveClass('text-center')
+  })
+
   test('handles sorting state and URL updates', async () => {
     const mockReplace = jest.fn()
     const { useRouter, useSearchParams } = jest.requireMock('next/navigation')

@@ -5,12 +5,17 @@ import ModuleList from 'components/ModuleList'
 
 // Mock FontAwesome icons
 jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, className }: { icon: unknown; className?: string }) => (
-    <span
-      data-testid={`icon-${icon === faChevronDown ? 'chevron-down' : icon === faChevronUp ? 'chevron-up' : 'unknown'}`}
-      className={className}
-    />
-  ),
+  FontAwesomeIcon: ({ icon, className }: { icon: unknown; className?: string }) => {
+    let iconName = 'unknown'
+
+    if (icon === faChevronDown) {
+      iconName = 'chevron-down'
+    } else if (icon === faChevronUp) {
+      iconName = 'chevron-up'
+    }
+
+    return <span data-testid={`icon-${iconName}`} className={className} />
+  },
 }))
 
 // Mock HeroUI Button component
