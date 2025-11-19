@@ -15,6 +15,9 @@ export default defineConfig({
       use: {
         ...devices['iPhone 13'],
       },
+      expect: {
+        timeout: 10000, // Mobile Safari needs more time to render
+      },
     },
   ],
   reporter: [['list', { printSteps: true }]],

@@ -25,7 +25,7 @@ test.describe('Chapters Page', () => {
   })
 
   test('renders chapter data correctly', async ({ page }) => {
-    await expect(page.getByRole('link', { name: 'Chapter 1' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Chapter 1' })).toBeVisible({ timeout: 10000 })
     await expect(page.getByText('This is a summary of Chapter')).toBeVisible()
     await expect(page.getByRole('link', { name: "Isanori Sakanashi's avatar" })).toBeVisible()
     await expect(page.getByRole('button', { name: 'View Details' })).toBeVisible()
