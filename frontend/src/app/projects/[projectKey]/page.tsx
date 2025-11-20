@@ -168,7 +168,7 @@ const ProjectDetailsPage = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Commits</p>
                     <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      {(contributionStats?.commits ?? 0).toLocaleString()}
+                      {typeof contributionStats?.commits === 'number' ? contributionStats.commits.toLocaleString() : '0'}
                     </p>
                   </div>
                 </div>
@@ -180,7 +180,7 @@ const ProjectDetailsPage = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">PRs</p>
                     <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      {(contributionStats?.pullRequests ?? 0).toLocaleString()}
+                      {typeof contributionStats?.pullRequests === 'number' ? contributionStats.pullRequests.toLocaleString() : '0'}
                     </p>
                   </div>
                 </div>
@@ -192,7 +192,7 @@ const ProjectDetailsPage = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Issues</p>
                     <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      {(contributionStats?.issues ?? 0).toLocaleString()}
+                      {typeof contributionStats?.issues === 'number' ? contributionStats.issues.toLocaleString() : '0'}
                     </p>
                   </div>
                 </div>
@@ -204,7 +204,7 @@ const ProjectDetailsPage = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total</p>
                     <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      {(contributionStats?.total ?? 0).toLocaleString()}
+                      {typeof contributionStats?.total === 'number' ? contributionStats.total.toLocaleString() : '0'}
                     </p>
                   </div>
                 </div>
