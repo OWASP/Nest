@@ -32,7 +32,7 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
   const isDarkMode = theme === 'dark'
 
   const isCompact = variant === 'compact'
-  
+
   const { heatmapSeries } = useMemo(() => {
     const start = new Date(startDate)
     const end = new Date(endDate)
