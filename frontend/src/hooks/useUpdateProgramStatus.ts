@@ -3,7 +3,8 @@ import { useMutation } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import upperFirst from 'lodash/upperFirst'
 import { handleAppError } from 'app/global-error'
-import { UPDATE_PROGRAM_STATUS_MUTATION } from 'server/mutations/programsMutations'
+import { ProgramStatusEnum } from 'types/__generated__/graphql'
+import { UpdateProgramStatusDocument } from 'types/__generated__/programsMutations.generated'
 
 interface UseUpdateProgramStatusProps {
   programKey: string
@@ -18,11 +19,11 @@ export const useUpdateProgramStatus = ({
   isAdmin,
   refetchQueries = [],
 }: UseUpdateProgramStatusProps) => {
-  const [updateProgramMutation] = useMutation(UPDATE_PROGRAM_STATUS_MUTATION, {
+  const [updateProgramMutation] = useMutation(UpdateProgramStatusDocument, {
     onError: handleAppError,
   })
 
-  const updateProgramStatus = async (newStatus: string) => {
+  const updateProgramStatus = async (newStatus: ProgramStatusEnum) => {
     if (!isAdmin) {
       addToast({
         title: 'Permission Denied',

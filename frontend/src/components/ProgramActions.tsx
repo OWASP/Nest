@@ -76,8 +76,8 @@ const ProgramActions: React.FC<ProgramActionsProps> = ({ programKey, status, set
         aria-haspopup="true"
       >
         <FontAwesomeIcon
-          icon={faEllipsisV}
           className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-200"
+          icon={faEllipsisV}
         />
       </button>
       {dropdownOpen && (

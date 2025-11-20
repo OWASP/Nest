@@ -20,6 +20,12 @@ export const UPDATE_MODULE = gql`
         name
         avatarUrl
       }
+      mentees {
+        id
+        login
+        name
+        avatarUrl
+      }
     }
   }
 `
@@ -27,22 +33,28 @@ export const UPDATE_MODULE = gql`
 export const CREATE_MODULE = gql`
   mutation CreateModule($input: CreateModuleInput!) {
     createModule(inputData: $input) {
+      description
+      domains
+      endedAt
+      experienceLevel
       id
       key
-      name
-      description
-      experienceLevel
-      startedAt
-      endedAt
-      domains
-      tags
       labels
+      name
       projectId
+      startedAt
+      tags
       mentors {
+        avatarUrl
         id
         login
         name
+      }
+      mentees {
         avatarUrl
+        id
+        login
+        name
       }
     }
   }

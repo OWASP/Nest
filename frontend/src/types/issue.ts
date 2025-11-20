@@ -3,13 +3,14 @@ import type { RepositoryDetails, User } from 'types/user'
 
 export type Issue = {
   author?: User
-  createdAt: number
+  createdAt: string | number
   hint?: string
   labels?: string[]
-  number?: string
-  organizationName?: string
-  projectName: string
-  projectUrl: string
+  number?: string | number
+  organizationName?: string | null
+  repositoryName?: string | null
+  projectName?: string
+  projectUrl?: string
   pullRequests?: PullRequest[]
   repository?: RepositoryDetails
   repositoryLanguages?: string[]
@@ -17,7 +18,7 @@ export type Issue = {
   title: string
   state?: string
   summary?: string
-  updatedAt: number
+  updatedAt?: string | number
   url: string
   objectID?: string
 }

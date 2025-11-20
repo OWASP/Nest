@@ -11,8 +11,8 @@ import { GetModuleIssuesDocument } from 'types/__generated__/moduleQueries.gener
 import LoadingSpinner from 'components/LoadingSpinner'
 import Pagination from 'components/Pagination'
 
-const LABEL_ALL = 'all'
 const ITEMS_PER_PAGE = 20
+const LABEL_ALL = 'all'
 const MAX_VISIBLE_LABELS = 5
 
 const IssuesPage = () => {

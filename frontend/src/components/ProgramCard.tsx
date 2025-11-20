@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
 import { useUpdateProgramStatus } from 'hooks/useUpdateProgramStatus'
 import type React from 'react'
-import { GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
+import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import { Program } from 'types/mentorship'
 import ActionButton from 'components/ActionButton'
 import ProgramActions from 'components/ProgramActions'
@@ -16,19 +16,21 @@ interface ProgramCardProps {
 }
 
 const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel, isAdmin }) => {
-  const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString('en-US', {
+  const formatDate = (d: string | number) => {
+    const date = typeof d === 'number' ? new Date(d * 1000) : new Date(d)
+    return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
     })
+  }
   const { updateProgramStatus } = useUpdateProgramStatus({
     programKey: program.key,
     programName: program.name,
     isAdmin,
     refetchQueries: [
       {
-        query: GET_PROGRAM_AND_MODULES,
+        query: GetProgramAndModulesDocument,
         variables: { programKey: program.key },
       },
     ],
@@ -79,14 +81,8 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel,
             )}
           </div>
           <div className="mb-2 text-sm text-gray-600 dark:text-gray-400">
-            <span>
-              {program.startedAt && program.endedAt
-                ? `${formatDate(program.startedAt)} – ${formatDate(program.endedAt)}`
-                : program.startedAt
-                  ? `Started: ${formatDate(program.startedAt)}`
-                  : 'No dates set'}
-            </span>
-            {accessLevel === 'admin' && (
+            <span>{dateInfo}</span>
+            {accessLevel === 'admin' && program.userRole && (
               <span
                 className={`ml-2 rounded-full px-2 py-1 text-xs font-medium capitalize ${
                   roleClass[program.userRole] ?? roleClass.default
@@ -96,8 +92,9 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel,
               </span>
             )}
           </div>
-          <div className="mb-2 text-xs text-gray-600 dark:text-gray-400">{dateInfo}</div>
-          <p className="mb-4 text-sm text-gray-700 dark:text-gray-300">{description}</p>
+          <p className="mb-4 line-clamp-6 text-sm text-gray-700 dark:text-gray-300">
+            {description}
+          </p>
         </div>
 
         <div className="flex gap-2">

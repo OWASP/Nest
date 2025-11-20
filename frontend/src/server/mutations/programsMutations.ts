@@ -3,22 +3,22 @@ import { gql } from '@apollo/client'
 export const UPDATE_PROGRAM = gql`
   mutation UpdateProgram($input: UpdateProgramInput!) {
     updateProgram(inputData: $input) {
+      description
+      domains
+      endedAt
+      experienceLevels
       id
       key
-      name
-      description
-      status
       menteesLimit
-      experienceLevels
+      name
       startedAt
-      endedAt
+      status
       tags
-      domains
       admins {
+        avatarUrl
         id
         login
         name
-        avatarUrl
       }
     }
   }
@@ -27,20 +27,20 @@ export const UPDATE_PROGRAM = gql`
 export const CREATE_PROGRAM = gql`
   mutation CreateProgram($input: CreateProgramInput!) {
     createProgram(inputData: $input) {
+      description
+      domains
+      endedAt
+      experienceLevels
       id
       key
-      name
-      description
       menteesLimit
-      experienceLevels
+      name
       startedAt
-      endedAt
       tags
-      domains
       admins {
+        avatarUrl
         login
         name
-        avatarUrl
       }
     }
   }

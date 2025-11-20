@@ -280,6 +280,7 @@ def sync_issue_comments(gh_client: Github, issue: Issue):
 
         if comments:
             Comment.bulk_save(comments)
+
         logger.info(
             "%d comments synced for issue #%s",
             len(comments),

@@ -56,34 +56,7 @@ export default function Home() {
 
   useEffect(() => {
     if (graphQLData) {
-      // Transform GraphQL types to local MainPageData type
-      const transformedData = {
-        ...graphQLData,
-        // Transform recentIssues to match local Issue type
-        recentIssues: (graphQLData.recentIssues || []).map((issue) => ({
-          ...issue,
-          projectName: issue.organizationName || issue.repositoryName || '',
-          projectUrl: issue.url,
-          updatedAt:
-            typeof issue.createdAt === 'number'
-              ? issue.createdAt
-              : new Date(issue.createdAt).getTime(),
-          createdAt:
-            typeof issue.createdAt === 'number'
-              ? issue.createdAt
-              : new Date(issue.createdAt).getTime(),
-        })),
-        // Transform recentPullRequests to match local PullRequest type
-        recentPullRequests: (graphQLData.recentPullRequests || []).map((pr) => ({
-          ...pr,
-          id: pr.id,
-          state: 'open',
-          organizationName: pr.organizationName || '',
-          createdAt:
-            typeof pr.createdAt === 'string' ? pr.createdAt : new Date(pr.createdAt).toISOString(),
-        })),
-      }
-      setData(transformedData)
+      setData(graphQLData)
       setIsLoading(false)
     }
     if (graphQLRequestError) {

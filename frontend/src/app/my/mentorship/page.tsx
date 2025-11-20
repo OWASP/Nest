@@ -136,10 +136,10 @@ const MyMentorshipPage: React.FC = () => {
             programs.map((p) => (
               <ProgramCard
                 accessLevel="admin"
-                key={p.id}
-                program={p}
-                onView={handleView}
                 isAdmin={p?.userRole === 'admin'}
+                key={p.id}
+                onView={handleView}
+                program={p}
               />
             ))
           )}

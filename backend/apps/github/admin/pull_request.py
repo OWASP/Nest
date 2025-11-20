@@ -13,8 +13,8 @@ class PullRequestAdmin(admin.ModelAdmin):
         "assignees",
         "author",
         "labels",
-        "repository",
         "related_issues",
+        "repository",
     )
     list_display = (
         "repository",

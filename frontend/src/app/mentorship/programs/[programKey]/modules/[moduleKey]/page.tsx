@@ -59,14 +59,14 @@ const ModuleDetailsPage = () => {
 
   return (
     <DetailsCard
-      details={moduleDetails}
-      title={module.name}
       admins={admins}
-      tags={module.tags}
+      details={moduleDetails}
       domains={module.domains}
       labels={module.labels}
-      summary={module.description}
       mentors={module.mentors}
+      summary={module.description}
+      tags={module.tags}
+      title={module.name}
       type="module"
     />
   )

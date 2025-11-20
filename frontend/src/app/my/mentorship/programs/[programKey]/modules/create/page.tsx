@@ -5,12 +5,13 @@ import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import { CreateModuleDocument } from 'types/__generated__/moduleMutations.generated'
-import { GetProgramAdminDetailsDocument } from 'types/__generated__/programsQueries.generated'
+import {
+  GetProgramAdminDetailsDocument,
+  GetProgramAndModulesDocument,
+} from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
-import { Module } from 'types/mentorship'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
@@ -33,17 +34,17 @@ const CreateModulePage = () => {
   })
 
   const [formData, setFormData] = useState({
-    name: '',
     description: '',
-    experienceLevel: ExperienceLevelEnum.Beginner,
-    startedAt: '',
-    endedAt: '',
     domains: '',
-    tags: '',
+    endedAt: '',
+    experienceLevel: ExperienceLevelEnum.Beginner,
     labels: '',
+    mentorLogins: '',
+    name: '',
     projectId: '',
     projectName: '',
-    mentorLogins: '',
+    startedAt: '',
+    tags: '',
   })
 
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
@@ -83,18 +84,18 @@ const CreateModulePage = () => {
 
     try {
       const input = {
-        name: formData.name,
         description: formData.description,
-        experienceLevel: formData.experienceLevel,
-        startedAt: formData.startedAt || null,
-        endedAt: formData.endedAt || null,
         domains: parseCommaSeparated(formData.domains),
-        tags: parseCommaSeparated(formData.tags),
+        endedAt: formData.endedAt || null,
+        experienceLevel: formData.experienceLevel,
         labels: parseCommaSeparated(formData.labels),
+        mentorLogins: parseCommaSeparated(formData.mentorLogins),
+        name: formData.name,
         programKey: programKey,
         projectId: formData.projectId,
         projectName: formData.projectName,
-        mentorLogins: parseCommaSeparated(formData.mentorLogins),
+        startedAt: formData.startedAt || null,
+        tags: parseCommaSeparated(formData.tags),
       }
 
       await createModule({
@@ -104,15 +105,15 @@ const CreateModulePage = () => {
           if (!created) return
           try {
             const existing = cache.readQuery({
-              query: GET_PROGRAM_AND_MODULES,
+              query: GetProgramAndModulesDocument,
               variables: { programKey },
-            }) as { getProgramModules: Module[] }
-            if (existing?.getProgramModules) {
+            })
+            if (existing?.getProgram && existing?.getProgramModules) {
               cache.writeQuery({
-                query: GET_PROGRAM_AND_MODULES,
+                query: GetProgramAndModulesDocument,
                 variables: { programKey },
                 data: {
-                  ...existing,
+                  getProgram: existing.getProgram,
                   getProgramModules: [created, ...existing.getProgramModules],
                 },
               })

@@ -95,19 +95,19 @@ const EditModulePage = () => {
 
     try {
       const input = {
-        key: moduleKey,
-        programKey: programKey,
-        name: formData.name,
         description: formData.description,
-        experienceLevel: formData.experienceLevel as ExperienceLevelEnum,
-        startedAt: formData.startedAt || null,
-        endedAt: formData.endedAt || null,
         domains: parseCommaSeparated(formData.domains),
-        tags: parseCommaSeparated(formData.tags),
+        endedAt: formData.endedAt || null,
+        experienceLevel: formData.experienceLevel as ExperienceLevelEnum,
+        key: moduleKey,
         labels: parseCommaSeparated(formData.labels),
-        projectName: formData.projectName,
-        projectId: formData.projectId,
         mentorLogins: parseCommaSeparated(formData.mentorLogins),
+        name: formData.name,
+        programKey: programKey,
+        projectId: formData.projectId,
+        projectName: formData.projectName,
+        startedAt: formData.startedAt || null,
+        tags: parseCommaSeparated(formData.tags),
       }
 
       await updateModule({ variables: { input } })

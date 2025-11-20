@@ -71,7 +71,16 @@ export const GET_PROGRAM_AND_MODULES = gql`
       experienceLevel
       startedAt
       endedAt
+      domains
+      tags
+      labels
       mentors {
+        id
+        login
+        name
+        avatarUrl
+      }
+      mentees {
         id
         login
         name

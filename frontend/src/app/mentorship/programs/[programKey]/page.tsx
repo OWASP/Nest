@@ -1,7 +1,7 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { ErrorDisplay } from 'app/global-error'
 import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 
@@ -29,10 +29,6 @@ const ProgramDetailsPage = () => {
   const [program, setProgram] = useState<Program | null>(null)
   const [modules, setModules] = useState<Module[]>([])
   const [isRefetching, setIsRefetching] = useState(false)
-  const processedDataRef = useRef<{ programId: string | null; modulesLength: number }>({
-    programId: null,
-    modulesLength: 0,
-  })
 
   const isLoading = isQueryLoading || isRefetching
 
@@ -51,40 +47,15 @@ const ProgramDetailsPage = () => {
           router.replace(cleaned ? `?${cleaned}` : globalThis.location.pathname, { scroll: false })
         }
       }
+
+      if (data?.getProgram) {
+        setProgram(data.getProgram)
+        setModules(data.getProgramModules || [])
+      }
     }
 
     processResult()
-  }, [shouldRefresh, refetch, router, searchParams])
-
-  useEffect(() => {
-    if (data?.getProgram) {
-      const currentProgramId = data.getProgram.id
-      const currentModulesLength = (data.getProgramModules || []).length
-      // Only update if the program ID or modules have changed to prevent infinite loops
-      if (
-        processedDataRef.current.programId !== currentProgramId ||
-        processedDataRef.current.modulesLength !== currentModulesLength
-      ) {
-        processedDataRef.current = {
-          programId: currentProgramId,
-          modulesLength: currentModulesLength,
-        }
-        setProgram(data.getProgram)
-        // Transform GraphQL ModuleNode to local Module type
-        // Note: getProgramModules doesn't return domains, tags, labels, or mentees
-        setModules(
-          (data.getProgramModules || []).map((module) => ({
-            ...module,
-            domains: [],
-            tags: [],
-            labels: [],
-            status: undefined,
-            mentees: [],
-          }))
-        )
-      }
-    }
-  }, [data])
+  }, [shouldRefresh, data, refetch, router, searchParams])
 
   if (isLoading) return <LoadingSpinner />
 
@@ -111,11 +82,11 @@ const ProgramDetailsPage = () => {
 
   return (
     <DetailsCard
-      modules={modules}
       details={programDetails}
-      tags={program.tags}
       domains={program.domains}
+      modules={modules}
       summary={program.description}
+      tags={program.tags}
       title={program.name}
       type="program"
     />

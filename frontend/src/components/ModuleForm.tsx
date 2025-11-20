@@ -9,17 +9,17 @@ import { SearchProjectNamesDocument } from 'types/__generated__/projectQueries.g
 
 interface ModuleFormProps {
   formData: {
-    name: string
     description: string
-    experienceLevel: string
-    startedAt: string
-    endedAt: string
     domains: string
-    tags: string
+    endedAt: string
+    experienceLevel: string
     labels: string
+    mentorLogins: string
+    name: string
     projectId: string
     projectName: string
-    mentorLogins: string
+    startedAt: string
+    tags: string
   }
   setFormData: React.Dispatch<React.SetStateAction<ModuleFormProps['formData']>>
   onSubmit: (e: React.FormEvent) => void

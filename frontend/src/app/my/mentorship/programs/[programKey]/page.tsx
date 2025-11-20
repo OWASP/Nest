@@ -85,18 +85,7 @@ const ProgramDetailsPage = () => {
   useEffect(() => {
     if (data?.getProgram) {
       setProgram(data.getProgram)
-      // Transform GraphQL ModuleNode to local Module type
-      // Note: getProgramModules doesn't return domains, tags, labels, or mentees
-      setModules(
-        (data.getProgramModules || []).map((module) => ({
-          ...module,
-          domains: [],
-          tags: [],
-          labels: [],
-          status: undefined,
-          mentees: [],
-        }))
-      )
+      setModules(data.getProgramModules || [])
     }
   }, [data])
 
@@ -125,18 +114,18 @@ const ProgramDetailsPage = () => {
 
   return (
     <DetailsCard
-      programKey={program.key}
-      modules={modules}
-      status={program.status}
-      setStatus={updateStatus}
+      accessLevel="admin"
+      admins={program.admins}
       canUpdateStatus={canUpdateStatus}
       details={programDetails}
-      admins={program.admins}
-      tags={program.tags}
       domains={program.domains}
+      modules={modules}
+      programKey={program.key}
+      setStatus={updateStatus}
+      status={program.status}
       summary={program.description}
+      tags={program.tags}
       title={program.name}
-      accessLevel="admin"
       type="program"
     />
   )

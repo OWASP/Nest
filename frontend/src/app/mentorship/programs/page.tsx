@@ -31,11 +31,11 @@ const ProgramsPage = () => {
 
     return (
       <ProgramCard
-        key={program.key}
-        program={program}
         accessLevel="user"
-        onView={handleButtonClick}
         isAdmin={false}
+        key={program.key}
+        onView={handleButtonClick}
+        program={program}
       />
     )
   }

@@ -28,43 +28,8 @@ const ProjectDetailsPage = () => {
   })
   useEffect(() => {
     if (data) {
-      if (data.project) {
-        // Transform GraphQL ProjectNode to local Project type
-        const projectData = {
-          ...data.project,
-          // Transform recentIssues to match local Issue type
-          recentIssues: (data.project.recentIssues || []).map((issue) => ({
-            ...issue,
-            projectName: issue.organizationName || issue.repositoryName || '',
-            projectUrl: issue.url,
-            updatedAt:
-              typeof issue.createdAt === 'number'
-                ? issue.createdAt
-                : new Date(issue.createdAt).getTime(),
-            createdAt:
-              typeof issue.createdAt === 'number'
-                ? issue.createdAt
-                : new Date(issue.createdAt).getTime(),
-          })),
-          // Transform recentPullRequests to match local PullRequest type
-          recentPullRequests: (data.project.recentPullRequests || []).map((pr, index) => ({
-            ...pr,
-            id: `pr-${index}-${pr.url}`,
-            state: 'open',
-            organizationName: pr.organizationName || '',
-            createdAt:
-              typeof pr.createdAt === 'string'
-                ? pr.createdAt
-                : new Date(pr.createdAt).toISOString(),
-          })),
-        }
-        setProject(projectData)
-        setTopContributors(data.topContributors || [])
-      } else {
-        // Project is null, set project to null
-        setProject(null)
-        setTopContributors([])
-      }
+      setProject(data.project)
+      setTopContributors(data.topContributors)
       setIsLoading(false)
     }
     if (graphQLRequestError) {

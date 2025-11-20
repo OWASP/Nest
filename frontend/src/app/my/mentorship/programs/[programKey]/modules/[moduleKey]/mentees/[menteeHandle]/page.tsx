@@ -37,35 +37,9 @@ const MenteeProfilePage = () => {
 
   useEffect(() => {
     if (data) {
-      // Transform GraphQL MenteeNode to local MenteeDetails type
-      const menteeData = data.getMenteeDetails
-        ? {
-            ...data.getMenteeDetails,
-            completedLevels: [],
-            achievements: [],
-            penalties: [],
-            openIssues: [],
-            closedIssues: [],
-          }
-        : null
-      setMenteeDetails(menteeData)
-      // Transform GraphQL IssueNode to local Issue type
-      setMenteeIssues(
-        (data.getMenteeModuleIssues ?? []).map((issue) => ({
-          ...issue,
-          projectName: '',
-          projectUrl: issue.url,
-          updatedAt:
-            typeof issue.createdAt === 'number'
-              ? issue.createdAt
-              : new Date(issue.createdAt).getTime(),
-          createdAt:
-            typeof issue.createdAt === 'number'
-              ? issue.createdAt
-              : new Date(issue.createdAt).getTime(),
-          number: String(issue.number),
-        }))
-      )
+      // GraphQL types match local types - use directly
+      setMenteeDetails(data.getMenteeDetails ?? null)
+      setMenteeIssues(data.getMenteeModuleIssues ?? [])
     }
     if (error) {
       handleAppError(error)

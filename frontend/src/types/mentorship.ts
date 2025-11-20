@@ -43,11 +43,11 @@ export type Module = {
   experienceLevel: ExperienceLevelEnum
   mentors: Contributor[]
   mentees?: Contributor[]
-  startedAt: string
-  endedAt: string
-  domains: string[]
-  tags: string[]
-  labels: string[]
+  startedAt: string | number
+  endedAt: string | number
+  domains?: string[] | null
+  tags?: string[] | null
+  labels?: string[] | null
 }
 
 export type ModuleFormData = {
@@ -98,11 +98,12 @@ export type MenteeDetails = {
   avatarUrl: string
   email?: string
   bio?: string
-  domains?: string[]
-  tags?: string[]
-  completedLevels: CompletedLevel[]
-  achievements: Achievement[]
-  penalties: Penalty[]
-  openIssues: Issue[]
-  closedIssues: Issue[]
+  domains?: string[] | null
+  tags?: string[] | null
+  experienceLevel?: string
+  completedLevels?: CompletedLevel[]
+  achievements?: Achievement[]
+  penalties?: Penalty[]
+  openIssues?: Issue[]
+  closedIssues?: Issue[]
 }

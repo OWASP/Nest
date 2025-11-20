@@ -11,10 +11,10 @@ from apps.github.models.issue import Issue
 @strawberry_django.type(
     Issue,
     fields=[
+        "body",
         "created_at",
         "number",
         "state",
-        "body",
         "title",
         "url",
     ],

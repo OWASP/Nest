@@ -11,9 +11,9 @@ from apps.github.models.pull_request import PullRequest
     PullRequest,
     fields=[
         "created_at",
-        "title",
-        "state",
         "merged_at",
+        "state",
+        "title",
     ],
 )
 class PullRequestNode(strawberry.relay.Node):
