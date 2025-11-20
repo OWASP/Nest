@@ -147,6 +147,8 @@ describe('ContributionHeatmap behavior (via UserDetailsPage)', () => {
       render(<UserDetailsPage />)
 
       await waitFor(() => {
+        // Ensure the page has finished loading user data first
+        expect(screen.getByText('Test User')).toBeInTheDocument()
         expect(screen.queryByAltText('Heatmap Background')).toBeNull()
         expect(screen.queryByAltText('Contribution Heatmap')).toBeNull()
       })
@@ -339,6 +341,8 @@ describe('ContributionHeatmap behavior (via UserDetailsPage)', () => {
       render(<UserDetailsPage />)
 
       await waitFor(() => {
+        // Ensure the page has finished loading user data first
+        expect(screen.getByText('Test User')).toBeInTheDocument()
         expect(screen.queryByAltText('Heatmap Background')).toBeNull()
         expect(screen.queryByAltText('Contribution Heatmap')).toBeNull()
       })
