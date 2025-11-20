@@ -31,7 +31,7 @@ class TestRouterRegistration:
         "/projects": project_router,
         "/releases": release_router,
         "/repositories": repository_router,
-        "/snapshots": snapshot_router,
+        "/community/snapshots": snapshot_router,
         "/sponsors": sponsor_router,
     }
 
