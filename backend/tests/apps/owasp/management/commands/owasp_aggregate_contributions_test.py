@@ -16,9 +16,11 @@ class MockQuerySet:
         self._items = items
 
     def __iter__(self):
+        """Return iterator over items."""
         return iter(self._items)
 
     def __getitem__(self, key):
+        """Get item by key or slice."""
         if isinstance(key, slice):
             return MockQuerySet(self._items[key])
         return self._items[key]
@@ -27,7 +29,16 @@ class MockQuerySet:
         # Return self to support filter chaining
         return self
 
+    def select_related(self, *fields):
+        """Mock select_related method."""
+        return self
+
+    def prefetch_related(self, *fields):
+        """Mock prefetch_related method."""
+        return self
+
     def __len__(self):
+        """Return length of items."""
         return len(self._items)
 
 
