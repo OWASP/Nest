@@ -54,4 +54,4 @@ class TestChapterNode:
     def test_resolve_contribution_data(self):
         field = self._get_field_by_name("contribution_data")
         assert field is not None
-        # contribution_data is a JSON scalar type
+        assert field.type is object
