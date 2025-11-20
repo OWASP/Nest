@@ -61,7 +61,8 @@ const generateHeatmapSeries = (
   }
 
   // Reverse the series so Monday is at the top and Sunday at the bottom
-  return { heatmapSeries: series.reverse() }
+  const reversedSeries = series.reverse()
+  return { heatmapSeries: reversedSeries }
 }
 
 // Helper function to generate chart options
@@ -235,6 +236,7 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
   contributionData,
   startDate,
   endDate,
+  title,
   unit = 'contribution',
   variant = 'default',
 }) => {
@@ -252,6 +254,11 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
 
   return (
     <div className="">
+      {title && (
+        <h3 className="mb-4 text-sm font-semibold text-gray-800 dark:text-gray-200">
+          {title}
+        </h3>
+      )}
       <div className="max-w-5xl">
         <style>
           {`
@@ -271,7 +278,7 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
               rx: 2;
               ry: 2;
             }
-            ${!isCompact ? '.heatmap-container-default .apexcharts-canvas { transform: scale(0.85); transform-origin: left top; }' : ''}
+            ${isCompact ? '' : '.heatmap-container-default .apexcharts-canvas { transform: scale(0.85); transform-origin: left top; }'}
             @media (max-width: 768px) {
               .heatmap-container-${isCompact ? 'compact' : 'default'} {
                 ${isCompact ? 'min-width: 320px;' : 'transform: scale(0.7); transform-origin: left top;'}
