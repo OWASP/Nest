@@ -268,10 +268,12 @@ class TestOwaspAggregateContributions:
             command,
             "aggregate_chapter_contributions",
             return_value={"2024-11-16": 1},
-        ):
+        ) as mock_aggregate:
             command.handle(entity_type="chapter", offset=2, days=365)
 
         # Verify that offset was applied - only 1 chapter should be processed (3 total - 2 offset)
+        mock_aggregate.assert_called_once()
+        mock_chapter_model.bulk_save.assert_called_once()
 
     @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Chapter")
     def test_handle_custom_days(self, mock_chapter_model, command, mock_chapter):
