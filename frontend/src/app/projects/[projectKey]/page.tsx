@@ -165,7 +165,7 @@ const ProjectDetailsPage = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Commits</p>
                     <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      {contributionStats?.commits?.toLocaleString() || 0}
+                      {(contributionStats?.commits ?? 0).toLocaleString()}
                     </p>
                   </div>
                 </div>
@@ -177,7 +177,7 @@ const ProjectDetailsPage = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">PRs</p>
                     <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      {contributionStats?.pullRequests?.toLocaleString() || 0}
+                      {(contributionStats?.pullRequests ?? 0).toLocaleString()}
                     </p>
                   </div>
                 </div>
@@ -189,7 +189,7 @@ const ProjectDetailsPage = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Issues</p>
                     <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      {contributionStats?.issues?.toLocaleString() || 0}
+                      {(contributionStats?.issues ?? 0).toLocaleString()}
                     </p>
                   </div>
                 </div>
@@ -201,7 +201,7 @@ const ProjectDetailsPage = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total</p>
                     <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      {contributionStats?.total?.toLocaleString() || 0}
+                      {(contributionStats?.total ?? 0).toLocaleString()}
                     </p>
                   </div>
                 </div>
