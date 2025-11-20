@@ -216,58 +216,66 @@ class Command(BaseCommand):
 
         # Process chapters
         if entity_type in ["chapter", "both"]:
-            chapter_queryset = Chapter.objects.filter(is_active=True)
-
-            if key:
-                chapter_queryset = chapter_queryset.filter(key=key)
-
-            if offset:
-                chapter_queryset = chapter_queryset[offset:]
-
-            chapter_queryset = chapter_queryset.select_related("owasp_repository")
-            chapters = list(chapter_queryset)
-            self.stdout.write(f"Processing {len(chapters)} chapters...")
-
-            for chapter in chapters:
-                contribution_data = self.aggregate_chapter_contributions(
-                    chapter,
-                    start_date,
-                )
-                chapter.contribution_data = contribution_data
-
-            if chapters:
-                Chapter.bulk_save(chapters, fields=("contribution_data",))
-                self.stdout.write(
-                    self.style.SUCCESS(f"✓ Updated {len(chapters)} chapters"),
-                )
+            self._process_chapters(start_date, key, offset)
 
         # Process projects
         if entity_type in ["project", "both"]:
-            project_queryset = Project.objects.filter(is_active=True)
-
-            if key:
-                project_queryset = project_queryset.filter(key=key)
-
-            if offset:
-                project_queryset = project_queryset[offset:]
-
-            project_queryset = project_queryset.select_related(
-                "owasp_repository"
-            ).prefetch_related("repositories")
-            projects = list(project_queryset)
-            self.stdout.write(f"Processing {len(projects)} projects...")
-
-            for project in projects:
-                contribution_data = self.aggregate_project_contributions(
-                    project,
-                    start_date,
-                )
-                project.contribution_data = contribution_data
-
-            if projects:
-                Project.bulk_save(projects, fields=("contribution_data",))
-                self.stdout.write(
-                    self.style.SUCCESS(f"✓ Updated {len(projects)} projects"),
-                )
+            self._process_projects(start_date, key, offset)
 
         self.stdout.write(self.style.SUCCESS("Done!"))
+
+    def _process_chapters(self, start_date, key, offset):
+        """Process chapters for contribution aggregation."""
+        chapter_queryset = Chapter.objects.filter(is_active=True)
+
+        if key:
+            chapter_queryset = chapter_queryset.filter(key=key)
+
+        if offset:
+            chapter_queryset = chapter_queryset[offset:]
+
+        chapter_queryset = chapter_queryset.select_related("owasp_repository")
+        chapters = list(chapter_queryset)
+        self.stdout.write(f"Processing {len(chapters)} chapters...")
+
+        for chapter in chapters:
+            contribution_data = self.aggregate_chapter_contributions(
+                chapter,
+                start_date,
+            )
+            chapter.contribution_data = contribution_data
+
+        if chapters:
+            Chapter.bulk_save(chapters, fields=("contribution_data",))
+            self.stdout.write(
+                self.style.SUCCESS(f"✓ Updated {len(chapters)} chapters"),
+            )
+
+    def _process_projects(self, start_date, key, offset):
+        """Process projects for contribution aggregation."""
+        project_queryset = Project.objects.filter(is_active=True)
+
+        if key:
+            project_queryset = project_queryset.filter(key=key)
+
+        if offset:
+            project_queryset = project_queryset[offset:]
+
+        project_queryset = project_queryset.select_related(
+            "owasp_repository"
+        ).prefetch_related("repositories")
+        projects = list(project_queryset)
+        self.stdout.write(f"Processing {len(projects)} projects...")
+
+        for project in projects:
+            contribution_data = self.aggregate_project_contributions(
+                project,
+                start_date,
+            )
+            project.contribution_data = contribution_data
+
+        if projects:
+            Project.bulk_save(projects, fields=("contribution_data",))
+            self.stdout.write(
+                self.style.SUCCESS(f"✓ Updated {len(projects)} projects"),
+            )
