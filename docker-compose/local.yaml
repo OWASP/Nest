@@ -98,6 +98,8 @@ services:
     environment:
       - NEXT_TELEMETRY_DISABLED=1
       - NODE_ENV=development
+      - NODE_OPTIONS=--max-old-space-size=8192
+
     networks:
       - nest-network
     ports:
