@@ -29,11 +29,11 @@ class MockQuerySet:
         # Return self to support filter chaining
         return self
 
-    def select_related(self, *fields):
+    def select_related(self, *_):
         """Mock select_related method."""
         return self
 
-    def prefetch_related(self, *fields):
+    def prefetch_related(self, *_):
         """Mock prefetch_related method."""
         return self
 
