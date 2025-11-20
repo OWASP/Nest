@@ -122,7 +122,7 @@ describe('ContributionHeatmap behavior (via UserDetailsPage)', () => {
       await waitFor(() => {
         const bg = screen.getByAltText('Heatmap Background')
         expect(bg).toBeInTheDocument()
-        const container = bg.closest('div.hidden.lg\\:block')
+        const container = bg.closest(String.raw`div.hidden.lg\:block`)
         expect(container).toBeInTheDocument()
       })
       expect(drawContributions).not.toHaveBeenCalled()
@@ -161,7 +161,9 @@ describe('ContributionHeatmap behavior (via UserDetailsPage)', () => {
       render(<UserDetailsPage />)
 
       await waitFor(() => {
-        const container = screen.getByAltText('Heatmap Background').closest('div.hidden.lg\\:block')
+        const container = screen
+          .getByAltText('Heatmap Background')
+          .closest(String.raw`div.hidden.lg\:block`)
         expect(container).toBeInTheDocument()
       })
     })
@@ -207,7 +209,7 @@ describe('ContributionHeatmap behavior (via UserDetailsPage)', () => {
         expect(screen.getByAltText('Heatmap Background')).toBeInTheDocument()
       })
 
-      currentTheme = 'light'
+      currentTheme = 'dark'
       rerender(<UserDetailsPage />)
 
       await waitFor(() => {
@@ -215,7 +217,7 @@ describe('ContributionHeatmap behavior (via UserDetailsPage)', () => {
       })
 
       const lastCallArgs = (drawContributions as jest.Mock).mock.calls.at(-1)
-      expect(lastCallArgs?.[1]?.themeName).toBe('light')
+      expect(lastCallArgs?.[1]?.themeName).toBe('dark')
     })
   })
 
@@ -423,7 +425,9 @@ describe('ContributionHeatmap behavior (via UserDetailsPage)', () => {
       render(<UserDetailsPage />)
 
       await waitFor(() => {
-        const container = screen.getByAltText('Heatmap Background').closest('div.hidden.lg\\:block')
+        const container = screen
+          .getByAltText('Heatmap Background')
+          .closest(String.raw`div.hidden.lg\:block`)
         expect(container).toHaveClass('hidden')
         expect(container).toHaveClass('lg:block')
       })
