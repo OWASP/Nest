@@ -224,6 +224,7 @@ class Command(BaseCommand):
             if offset:
                 chapter_queryset = chapter_queryset[offset:]
 
+            chapter_queryset = chapter_queryset.select_related("owasp_repository")
             chapters = list(chapter_queryset)
             self.stdout.write(f"Processing {len(chapters)} chapters...")
 
