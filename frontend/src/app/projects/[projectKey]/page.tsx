@@ -1,17 +1,12 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
 import {
-  faChartLine,
-  faCode,
-  faCodeBranch,
   faCodeFork,
-  faCodeMerge,
   faExclamationCircle,
   faFolderOpen,
   faStar,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -26,6 +21,7 @@ import type { Project } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import ContributionHeatmap from 'components/ContributionHeatmap'
+import ContributionStats from 'components/ContributionStats'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProjectDetailsPage = () => {
@@ -152,71 +148,7 @@ const ProjectDetailsPage = () => {
         <div className="bg-white pb-10 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
           <div className="mx-auto max-w-6xl">
             <div className="rounded-lg bg-gray-100 px-14 pt-6 shadow-md dark:bg-gray-800">
-              <h2 className="mb-4 flex items-center gap-2 text-2xl font-semibold text-gray-800 dark:text-gray-200">
-                <FontAwesomeIcon
-                  icon={faChartLine}
-                  className="h-6 w-6 text-gray-600 dark:text-gray-400"
-                />
-                Project Contribution Activity
-              </h2>
-              <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-                <div className="flex items-center gap-2">
-                  <FontAwesomeIcon
-                    icon={faCode}
-                    className="h-5 w-5 text-gray-600 dark:text-gray-400"
-                  />
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Commits</p>
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      {typeof contributionStats?.commits === 'number'
-                        ? contributionStats.commits.toLocaleString()
-                        : '0'}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <FontAwesomeIcon
-                    icon={faCodeBranch}
-                    className="h-5 w-5 text-gray-600 dark:text-gray-400"
-                  />
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">PRs</p>
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      {typeof contributionStats?.pullRequests === 'number'
-                        ? contributionStats.pullRequests.toLocaleString()
-                        : '0'}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <FontAwesomeIcon
-                    icon={faExclamationCircle}
-                    className="h-5 w-5 text-gray-600 dark:text-gray-400"
-                  />
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Issues</p>
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      {typeof contributionStats?.issues === 'number'
-                        ? contributionStats.issues.toLocaleString()
-                        : '0'}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <FontAwesomeIcon
-                    icon={faCodeMerge}
-                    className="h-5 w-5 text-gray-600 dark:text-gray-400"
-                  />
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total</p>
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      {typeof contributionStats?.total === 'number'
-                        ? contributionStats.total.toLocaleString()
-                        : '0'}
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <ContributionStats title="Project Contribution Activity" stats={contributionStats} />
               <div className="flex w-full items-center justify-center">
                 <ContributionHeatmap
                   contributionData={project.contributionData}
