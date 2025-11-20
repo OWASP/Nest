@@ -15,11 +15,11 @@ interface ContributionStatsData {
 }
 
 interface ContributionStatsProps {
-  title: string
-  stats?: ContributionStatsData
+  readonly title: string
+  readonly stats?: ContributionStatsData
 }
 
-export default function ContributionStats({ title, stats }: ContributionStatsProps) {
+export default function ContributionStats({ title, stats }: Readonly<ContributionStatsProps>) {
   const formatNumber = (value?: number) => {
     return typeof value === 'number' ? value.toLocaleString() : '0'
   }
