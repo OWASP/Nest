@@ -98,7 +98,6 @@ services:
     environment:
       - NEXT_TELEMETRY_DISABLED=1
       - NODE_ENV=development
-
     networks:
       - nest-network
     ports:
