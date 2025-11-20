@@ -152,7 +152,6 @@ const ProjectDetailsPage = () => {
                   startDate={startDate}
                   endDate={endDate}
                   unit="contribution"
-                  stats={contributionStats}
                 />
               </div>
             </div>
