@@ -113,7 +113,7 @@ export default function ChapterDetailsPage() {
         type="chapter"
       />
       {chapter.contributionData && Object.keys(chapter.contributionData).length > 0 && (
-        <div className="bg-white text-gray-600 dark:bg-[#212529] dark:text-gray-300 pb-10">
+        <div className="bg-white pb-10 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
           <div className="mx-auto max-w-6xl">
             <div className="rounded-lg bg-gray-100 px-14 pt-6 shadow-md dark:bg-gray-800">
               <h2 className="mb-4 flex items-center gap-2 text-2xl font-semibold text-gray-800 dark:text-gray-200">
@@ -123,7 +123,7 @@ export default function ChapterDetailsPage() {
                 />
                 Chapter Contribution Activity
               </h2>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-6">
+              <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
                 <div className="flex items-center gap-2">
                   <FontAwesomeIcon
                     icon={faCode}
@@ -132,7 +132,9 @@ export default function ChapterDetailsPage() {
                   <div>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Commits</p>
                     <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      {typeof contributionStats?.commits === 'number' ? contributionStats.commits.toLocaleString() : '0'}
+                      {typeof contributionStats?.commits === 'number'
+                        ? contributionStats.commits.toLocaleString()
+                        : '0'}
                     </p>
                   </div>
                 </div>
@@ -144,7 +146,9 @@ export default function ChapterDetailsPage() {
                   <div>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">PRs</p>
                     <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      {typeof contributionStats?.pullRequests === 'number' ? contributionStats.pullRequests.toLocaleString() : '0'}
+                      {typeof contributionStats?.pullRequests === 'number'
+                        ? contributionStats.pullRequests.toLocaleString()
+                        : '0'}
                     </p>
                   </div>
                 </div>
@@ -156,7 +160,9 @@ export default function ChapterDetailsPage() {
                   <div>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Issues</p>
                     <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      {typeof contributionStats?.issues === 'number' ? contributionStats.issues.toLocaleString() : '0'}
+                      {typeof contributionStats?.issues === 'number'
+                        ? contributionStats.issues.toLocaleString()
+                        : '0'}
                     </p>
                   </div>
                 </div>
@@ -168,12 +174,14 @@ export default function ChapterDetailsPage() {
                   <div>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total</p>
                     <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      {typeof contributionStats?.total === 'number' ? contributionStats.total.toLocaleString() : '0'}
+                      {typeof contributionStats?.total === 'number'
+                        ? contributionStats.total.toLocaleString()
+                        : '0'}
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="w-full flex justify-center items-center">
+              <div className="flex w-full items-center justify-center">
                 <ContributionHeatmap
                   contributionData={chapter.contributionData}
                   startDate={startDate}
