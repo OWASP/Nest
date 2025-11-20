@@ -105,18 +105,18 @@ const ProjectDetailsPage = () => {
   const startDate = oneYearAgo.toISOString().split('T')[0]
   const endDate = today.toISOString().split('T')[0]
 
-  // Calculate contribution stats from heatmap data
+  // Calculate estimated contribution stats from heatmap data
+  // Note: These are rough estimates since backend aggregates all contribution types
   const contributionStats = project.contributionData
     ? (() => {
         const totalContributions = Object.values(project.contributionData).reduce(
           (sum, count) => sum + count,
           0
         )
-        // Estimate breakdown based on typical GitHub activity patterns
-        // These are approximations since we aggregate all contributions
-        const commits = Math.floor(totalContributions * 0.6) // ~60% commits
-        const issues = Math.floor(totalContributions * 0.23) // ~23% issues
-        const pullRequests = Math.floor(totalContributions * 0.15) // ~15% PRs
+        // Frontend estimates - actual breakdown requires backend per-type data
+        const commits = Math.floor(totalContributions * 0.6) // Estimated ~60% commits
+        const issues = Math.floor(totalContributions * 0.23) // Estimated ~23% issues
+        const pullRequests = Math.floor(totalContributions * 0.15) // Estimated ~15% PRs
 
         return {
           commits,
@@ -215,6 +215,7 @@ const ProjectDetailsPage = () => {
                   startDate={startDate}
                   endDate={endDate}
                   unit="contribution"
+                  stats={contributionStats}
                 />
               </div>
             </div>
