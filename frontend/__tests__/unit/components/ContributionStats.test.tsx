@@ -107,14 +107,14 @@ describe('ContributionStats', () => {
     })
 
     it('handles null stats gracefully', () => {
-      render(<ContributionStats title="Null Stats" stats={null as any} />)
+      render(<ContributionStats title="Null Stats" stats={null as unknown as typeof mockStats} />)
 
       expect(screen.getByText('Null Stats')).toBeInTheDocument()
       expect(screen.getAllByText('0')).toHaveLength(4) // All stats should show 0
     })
 
     it('handles empty object stats', () => {
-      render(<ContributionStats title="Empty Stats" stats={{} as any} />)
+      render(<ContributionStats title="Empty Stats" stats={{} as typeof mockStats} />)
 
       expect(screen.getByText('Empty Stats')).toBeInTheDocument()
       expect(screen.getAllByText('0')).toHaveLength(4) // All stats should show 0
@@ -127,7 +127,7 @@ describe('ContributionStats', () => {
         commits: 100,
       }
 
-      render(<ContributionStats title="Partial Stats" stats={partialStats as any} />)
+      render(<ContributionStats title="Partial Stats" stats={partialStats as typeof mockStats} />)
 
       // Verify commits value
       expect(screen.getByText('100')).toBeInTheDocument()
@@ -143,7 +143,7 @@ describe('ContributionStats', () => {
         total: 75,
       }
 
-      render(<ContributionStats title="Mixed Stats" stats={partialStats as any} />)
+      render(<ContributionStats title="Mixed Stats" stats={partialStats as typeof mockStats} />)
 
       expect(screen.getByText('50')).toBeInTheDocument() // commits
       expect(screen.getByText('25')).toBeInTheDocument() // issues
@@ -182,9 +182,9 @@ describe('ContributionStats', () => {
 
     it('handles non-numeric values', () => {
       const invalidStats = {
-        commits: 'invalid' as any,
-        pullRequests: null as any,
-        issues: undefined as any,
+        commits: 'invalid' as unknown as number,
+        pullRequests: null as unknown as number,
+        issues: undefined as unknown as number,
         total: 42,
       }
 
