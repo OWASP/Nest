@@ -25,7 +25,7 @@ export default function ContributionStats({ title, stats }: Readonly<Contributio
   }
 
   return (
-    <>
+    <div data-testid="contribution-stats">
       <h2 className="mb-4 flex items-center gap-2 text-2xl font-semibold text-gray-800 dark:text-gray-200">
         <FontAwesomeIcon icon={faChartLine} className="h-6 w-6 text-gray-600 dark:text-gray-400" />
         {title}
@@ -77,6 +77,6 @@ export default function ContributionStats({ title, stats }: Readonly<Contributio
           </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }
