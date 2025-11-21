@@ -142,7 +142,7 @@ def natural_date(value: int | str | datetime) -> str:
     """Convert a date or timestamp into a human-readable format.
 
     Args:
-        value (int | str | datetime): The date or timestamp to convert.
+        value (int or str or datetime): The date or timestamp to convert.
 
     Returns:
         str: The humanized date string.

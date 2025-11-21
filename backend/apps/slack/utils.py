@@ -121,7 +121,7 @@ def get_staff_data(timeout: float | None = 30) -> list | None:
         timeout (float, optional): The request timeout in seconds.
 
     Returns:
-        list | None: A sorted list of staff data dictionaries, or None if an error occurs.
+        list or None: A sorted list of staff data dictionaries, or None if an error occurs.
 
     """
     file_path = "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_data/staff.yml"
@@ -147,7 +147,7 @@ def get_sponsors_data(limit: int = 10) -> QuerySet | None:
         limit (int, optional): The maximum number of sponsors to fetch.
 
     Returns:
-        QuerySet | None: A queryset of sponsors, or None if an error occurs.
+        QuerySet or None: A queryset of sponsors, or None if an error occurs.
 
     """
     from apps.owasp.models.sponsor import Sponsor
@@ -167,7 +167,7 @@ def get_posts_data(limit: int = 5) -> QuerySet | None:
         limit (int, optional): The maximum number of posts to fetch.
 
     Returns:
-        QuerySet | None: A queryset of recent posts, or None if an error occurs.
+        QuerySet or None: A queryset of recent posts, or None if an error occurs.
 
     """
     from apps.owasp.models.post import Post

@@ -86,7 +86,7 @@ def get_repository_path(url: str) -> str | None:
         url (str): The repository URL.
 
     Returns:
-        str | None: The repository path in the format 'owner/repository_name',
+        str or None: The repository path in the format 'owner/repository_name',
         or None if parsing fails.
 
     """
@@ -102,7 +102,7 @@ def normalize_url(url: str, *, check_path: bool = False) -> str | None:
         check_path (bool, optional): Whether to check if the URL has a path.
 
     Returns:
-        str | None: The normalized URL, or None if the URL is invalid.
+        str or None: The normalized URL, or None if the URL is invalid.
 
     """
     parsed_url = urlparse(url)
