@@ -61,7 +61,7 @@ const generateHeatmapSeries = (
   }
 
   // Reverse the series so Monday is at the top and Sunday at the bottom
-  const reversedSeries = series.reverse()
+  const reversedSeries = series.toReversed()
   return { heatmapSeries: reversedSeries }
 }
 
