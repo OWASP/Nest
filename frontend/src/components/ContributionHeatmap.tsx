@@ -245,8 +245,8 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
 
   const isCompact = variant === 'compact'
 
-  const { heatmapSeries } = useMemo(() => 
-    generateHeatmapSeries(startDate, endDate, contributionData), 
+  const { heatmapSeries } = useMemo(
+    () => generateHeatmapSeries(startDate, endDate, contributionData),
     [contributionData, startDate, endDate]
   )
 
@@ -255,9 +255,7 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
   return (
     <div className="">
       {title && (
-        <h3 className="mb-4 text-sm font-semibold text-gray-800 dark:text-gray-200">
-          {title}
-        </h3>
+        <h3 className="mb-4 text-sm font-semibold text-gray-800 dark:text-gray-200">{title}</h3>
       )}
       <div className="max-w-5xl">
         <style>
