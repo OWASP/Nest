@@ -73,12 +73,10 @@ def get_repository_file_content(
 
     """
     try:
-        response: requests.Response = requests.get(url, timeout=timeout)
+        return requests.get(url, timeout=timeout).text
     except RequestException as e:
         logger.exception("Failed to fetch file", extra={"URL": url, "error": str(e)})
         return ""
-    else:
-        return response.text
 
 
 def get_repository_path(url: str) -> str | None:
@@ -88,8 +86,8 @@ def get_repository_path(url: str) -> str | None:
         url (str): The repository URL.
 
     Returns:
-        str : The repository path in the format 'owner/repository_name',
-            or None if parsing fails.
+        str | None: The repository path in the format 'owner/repository_name',
+        or None if parsing fails.
 
     """
     match = GITHUB_REPOSITORY_RE.search(url.split("#")[0])
@@ -104,7 +102,7 @@ def normalize_url(url: str, *, check_path: bool = False) -> str | None:
         check_path (bool, optional): Whether to check if the URL has a path.
 
     Returns:
-        str : The normalized URL, or None if the URL is invalid.
+        str | None: The normalized URL, or None if the URL is invalid.
 
     """
     parsed_url = urlparse(url)

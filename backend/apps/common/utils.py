@@ -55,7 +55,7 @@ def clean_url(url: str | None) -> str | None:
     """Clean a URL by removing whitespace and trailing punctuation.
 
     Args:
-        url (str | optional): Raw URL string.
+        url (str, optional): Raw URL string.
 
     Returns:
         str | None: Cleaned URL string or None if empty.
@@ -142,7 +142,7 @@ def natural_date(value: int | str | datetime) -> str:
     """Convert a date or timestamp into a human-readable format.
 
     Args:
-        value (str | int | datetime): The date or timestamp to convert.
+        value (int | str | datetime): The date or timestamp to convert.
 
     Returns:
         str: The humanized date string.
@@ -219,7 +219,7 @@ def validate_url(url: str | None) -> bool:
     """Validate that a URL has proper scheme and netloc.
 
     Args:
-        url (str | optional): URL string to validate.
+        url (str, optional): URL string to validate.
 
     Returns:
         bool: True if URL is valid, False otherwise.

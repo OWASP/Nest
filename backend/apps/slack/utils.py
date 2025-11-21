@@ -6,7 +6,7 @@ import logging
 import re
 from functools import lru_cache
 from html import escape as escape_html
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 from urllib.parse import urljoin
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -53,7 +53,7 @@ def format_links_for_slack(text: str) -> str:
 
 
 @lru_cache
-def get_gsoc_projects(year: int) -> list[dict[str, Any]]:
+def get_gsoc_projects(year: int) -> list:
     """Get GSoC projects.
 
     Args:
@@ -83,19 +83,18 @@ def get_news_data(limit: int = 10, timeout: float | None = 30) -> list[dict[str,
 
     Args:
         limit (int, optional): The maximum number of news items to fetch.
-
-        timeout (int, optional): The request timeout in seconds.
+        timeout (float, optional): The request timeout in seconds.
 
     Returns:
         list: A list of dictionaries containing news data (author, title, and URL).
 
     """
-    response: requests.Response = requests.get(OWASP_NEWS_URL, timeout=timeout)
+    response = requests.get(OWASP_NEWS_URL, timeout=timeout)
     tree = html.fromstring(response.content)
     h2_tags = tree.xpath("//h2")
 
-    items_total: int = 0
-    items: list[dict[str, str]] = []
+    items_total = 0
+    items = []
     for h2 in h2_tags:
         if anchor := h2.xpath(".//a[@href]"):
             author_tag = h2.xpath("./following-sibling::p[@class='author']")
@@ -115,17 +114,17 @@ def get_news_data(limit: int = 10, timeout: float | None = 30) -> list[dict[str,
 
 
 @lru_cache
-def get_staff_data(timeout: float | None = 30) -> list[dict[str, Any]] | None:
+def get_staff_data(timeout: float | None = 30) -> list | None:
     """Get staff data.
 
     Args:
-        timeout (int, optional): The request timeout in seconds.
+        timeout (float, optional): The request timeout in seconds.
 
     Returns:
-        list or None: A sorted list of staff data dictionaries, or None if an error occurs.
+        list | None: A sorted list of staff data dictionaries, or None if an error occurs.
 
     """
-    file_path: str = "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_data/staff.yml"
+    file_path = "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_data/staff.yml"
     try:
         return sorted(
             yaml.safe_load(
@@ -148,7 +147,7 @@ def get_sponsors_data(limit: int = 10) -> QuerySet | None:
         limit (int, optional): The maximum number of sponsors to fetch.
 
     Returns:
-        A queryset of sponsors, or None if an error occurs.
+        QuerySet | None: A queryset of sponsors, or None if an error occurs.
 
     """
     from apps.owasp.models.sponsor import Sponsor
@@ -168,7 +167,7 @@ def get_posts_data(limit: int = 5) -> QuerySet | None:
         limit (int, optional): The maximum number of posts to fetch.
 
     Returns:
-        QuerySet or None: A queryset of recent posts, or None if an error occurs.
+        QuerySet | None: A queryset of recent posts, or None if an error occurs.
 
     """
     from apps.owasp.models.post import Post
@@ -180,7 +179,7 @@ def get_posts_data(limit: int = 5) -> QuerySet | None:
         return None
 
 
-def get_text(blocks: tuple[dict[str, Any], ...]) -> str:
+def get_text(blocks: tuple) -> str:
     """Convert blocks to plain text.
 
     Args:
@@ -190,7 +189,7 @@ def get_text(blocks: tuple[dict[str, Any], ...]) -> str:
         str: The plain text representation of the blocks.
 
     """
-    text: list[str] = []
+    text = []
 
     for block in blocks:
         match block.get("type"):
@@ -240,8 +239,8 @@ def strip_markdown(text: str) -> str:
         text (str): The text with markdown formatting.
 
     Returns:
-        The text with markdown formatting removed.
+        str: The text with markdown formatting removed.
 
     """
-    slack_link_pattern: re.Pattern[str] = re.compile(r"<(https?://[^|]+)\|([^>]+)>")
+    slack_link_pattern = re.compile(r"<(https?://[^|]+)\|([^>]+)>")
     return slack_link_pattern.sub(r"\2 (\1)", text).replace("*", "")
