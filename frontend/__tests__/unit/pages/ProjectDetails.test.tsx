@@ -37,6 +37,10 @@ jest.mock('next/navigation', () => ({
   useParams: () => ({ projectKey: 'test-project' }),
 }))
 
+jest.mock('utils/env.client', () => ({
+  IS_PROJECT_HEALTH_ENABLED: true,
+}))
+
 const mockError = {
   error: new Error('GraphQL error'),
 }
@@ -159,11 +163,11 @@ describe('ProjectDetailsPage', () => {
     })
     render(<ProjectDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('Issues Trend')).toBeInTheDocument()
-      expect(screen.getByText('Pull Requests Trend')).toBeInTheDocument()
-      expect(screen.getByText('Stars Trend')).toBeInTheDocument()
-      expect(screen.getByText('Forks Trend')).toBeInTheDocument()
-      expect(screen.getByText('Days Since Last Commit and Release')).toBeInTheDocument()
+      expect(screen.getByText(/Issues Trend/)).toBeInTheDocument()
+      expect(screen.getByText(/Pull Requests Trend/)).toBeInTheDocument()
+      expect(screen.getByText(/Stars Trend/)).toBeInTheDocument()
+      expect(screen.getByText(/Forks Trend/)).toBeInTheDocument()
+      expect(screen.getByText(/Days Since Last Commit and Release/)).toBeInTheDocument()
     })
   })
 

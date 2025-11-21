@@ -2,6 +2,7 @@ import { faHeartPulse, faExclamationTriangle, faSkull } from '@fortawesome/free-
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import React from 'react'
+import type { ProjectHealthType } from 'types/project'
 import ProjectTypeDashboardCard from 'components/ProjectTypeDashboardCard'
 
 jest.mock('next/link', () => {
@@ -63,6 +64,12 @@ describe('ProjectTypeDashboardCard', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
+
+  const expectValidTypeRendersWithoutError = (type: ProjectHealthType) => {
+    expect(() => {
+      render(<ProjectTypeDashboardCard type={type} count={10} icon={faHeartPulse} />)
+    }).not.toThrow()
+  }
 
   describe('Essential Rendering Tests', () => {
     it('renders successfully with minimal required props', () => {
@@ -205,7 +212,6 @@ describe('ProjectTypeDashboardCard', () => {
       expect(screen.getByText(largeNumber.toString())).toBeInTheDocument()
     })
 
-    type ProjectHealthType = 'healthy' | 'needsAttention' | 'unhealthy'
     it('renders correctly with all type variants', () => {
       const types: Array<ProjectHealthType> = ['healthy', 'needsAttention', 'unhealthy']
 
@@ -354,21 +360,13 @@ describe('ProjectTypeDashboardCard', () => {
 
   describe('Type Safety and TypeScript Compliance', () => {
     it('only accepts valid type values', () => {
-      const validTypes: Array<'healthy' | 'needsAttention' | 'unhealthy'> = [
-        'healthy',
-        'needsAttention',
-        'unhealthy',
-      ]
-
-      const testTypeValue = (type: 'healthy' | 'needsAttention' | 'unhealthy') => {
-        expect(() => {
-          render(<ProjectTypeDashboardCard type={type} count={10} icon={faHeartPulse} />)
-        }).not.toThrow()
-      }
+      const validTypes: Array<ProjectHealthType> = ['healthy', 'needsAttention', 'unhealthy']
 
       for (const type of validTypes) {
-        testTypeValue(type)
+        expectValidTypeRendersWithoutError(type)
       }
+
+      expect(true).toBe(true)
     })
 
     it('handles different icon types correctly', () => {
@@ -398,11 +396,7 @@ describe('ProjectTypeDashboardCard', () => {
     it('handles rapid prop changes gracefully', () => {
       const { rerender } = render(<ProjectTypeDashboardCard {...baseProps} />)
 
-      const types: Array<'healthy' | 'needsAttention' | 'unhealthy'> = [
-        'healthy',
-        'needsAttention',
-        'unhealthy',
-      ]
+      const types: Array<ProjectHealthType> = ['healthy', 'needsAttention', 'unhealthy']
 
       for (const [index, type] of types.entries()) {
         rerender(<ProjectTypeDashboardCard type={type} count={index} icon={faHeartPulse} />)

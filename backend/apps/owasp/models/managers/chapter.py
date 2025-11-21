@@ -7,7 +7,7 @@ from django.db.models import Q
 class ActiveChapterManager(models.Manager):
     """Active chapters."""
 
-    def get_queryset(self):
+    def get_queryset(self) -> models.QuerySet:
         """Get queryset."""
         return (
             super()
@@ -20,7 +20,7 @@ class ActiveChapterManager(models.Manager):
         )
 
     @property
-    def without_geo_data(self):
+    def without_geo_data(self) -> models.QuerySet:
         """Return chapters that don't have geo data."""
         return self.get_queryset().filter(
             Q(latitude__isnull=True) | Q(longitude__isnull=True),
