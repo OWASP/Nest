@@ -60,13 +60,13 @@ def check_funding_policy_compliance(platform: str, target: str | None) -> bool:
 def get_repository_file_content(
     url: str,
     *,
-    timeout: float | None = 30,
+    timeout: int | None = 30,
 ) -> str:
     """Get the content of a file from a repository.
 
     Args:
         url (str): The URL of the file.
-        timeout (float, optional): The request timeout in seconds.
+        timeout (int, optional): The request timeout in seconds.
 
     Returns:
         str: The content of the file, or empty string if the request fails.
