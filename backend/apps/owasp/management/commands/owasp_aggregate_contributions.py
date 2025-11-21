@@ -226,7 +226,7 @@ class Command(BaseCommand):
 
     def _process_chapters(self, start_date, key, offset):
         """Process chapters for contribution aggregation."""
-        chapter_queryset = Chapter.objects.filter(is_active=True)
+        chapter_queryset = Chapter.objects.filter(is_active=True).order_by("id")
 
         if key:
             chapter_queryset = chapter_queryset.filter(key=key)
@@ -253,7 +253,7 @@ class Command(BaseCommand):
 
     def _process_projects(self, start_date, key, offset):
         """Process projects for contribution aggregation."""
-        project_queryset = Project.objects.filter(is_active=True)
+        project_queryset = Project.objects.filter(is_active=True).order_by("id")
 
         if key:
             project_queryset = project_queryset.filter(key=key)
