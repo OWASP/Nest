@@ -261,9 +261,9 @@ class Command(BaseCommand):
         if offset:
             project_queryset = project_queryset[offset:]
 
-        project_queryset = project_queryset.select_related(
-            "owasp_repository"
-        ).prefetch_related("repositories")
+        project_queryset = project_queryset.select_related("owasp_repository").prefetch_related(
+            "repositories"
+        )
         projects = list(project_queryset)
         self.stdout.write(f"Processing {len(projects)} projects...")
 
