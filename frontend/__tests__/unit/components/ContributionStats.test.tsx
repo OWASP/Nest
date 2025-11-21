@@ -218,9 +218,7 @@ describe('ContributionStats', () => {
     })
 
     it('handles transitioning from undefined to actual data', () => {
-      const { rerender } = render(
-        <ContributionStats title="Transition Test" stats={undefined} />
-      )
+      const { rerender } = render(<ContributionStats title="Transition Test" stats={undefined} />)
 
       expect(screen.getAllByText('0')).toHaveLength(4)
 
@@ -328,11 +326,13 @@ describe('ContributionStats', () => {
       expect(icons).toHaveLength(5)
 
       // Check for specific icon types
-      const chartIcon = icons.find(icon => icon.getAttribute('data-icon') === 'chart-line')
-      const codeIcon = icons.find(icon => icon.getAttribute('data-icon') === 'code')
-      const branchIcon = icons.find(icon => icon.getAttribute('data-icon') === 'code-branch')
-      const issueIcon = icons.find(icon => icon.getAttribute('data-icon') === 'exclamation-circle')
-      const mergeIcon = icons.find(icon => icon.getAttribute('data-icon') === 'code-merge')
+      const chartIcon = icons.find((icon) => icon.getAttribute('data-icon') === 'chart-line')
+      const codeIcon = icons.find((icon) => icon.getAttribute('data-icon') === 'code')
+      const branchIcon = icons.find((icon) => icon.getAttribute('data-icon') === 'code-branch')
+      const issueIcon = icons.find(
+        (icon) => icon.getAttribute('data-icon') === 'exclamation-circle'
+      )
+      const mergeIcon = icons.find((icon) => icon.getAttribute('data-icon') === 'code-merge')
 
       expect(chartIcon).toBeInTheDocument()
       expect(codeIcon).toBeInTheDocument()

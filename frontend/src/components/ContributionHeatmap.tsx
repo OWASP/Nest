@@ -43,7 +43,7 @@ const generateHeatmapSeries = (
 
     // Only count contributions within the actual range
     const isInRange = currentDate >= start && currentDate <= end
-    const contributionCount = isInRange ? (contributionData?.[dateStr] || 0) : 0
+    const contributionCount = isInRange ? contributionData?.[dateStr] || 0 : 0
 
     series[adjustedDayIndex].data.push({
       x: weekLabel,
