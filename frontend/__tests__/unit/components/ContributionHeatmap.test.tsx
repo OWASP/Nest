@@ -481,12 +481,13 @@ describe('ContributionHeatmap', () => {
 
   describe('Large Datasets', () => {
     it('handles large contribution datasets efficiently', async () => {
-      // Generate large dataset (365 days)
+      // Generate large dataset (365 days) with deterministic values
       const largeDataset: Record<string, number> = {}
       for (let day = 1; day <= 365; day++) {
         const date = new Date(2024, 0, day)
         const dateStr = date.toISOString().split('T')[0]
-        largeDataset[dateStr] = Math.floor(Math.random() * 20) + 1
+        // Use deterministic values based on day number to ensure consistent tests
+        largeDataset[dateStr] = (day % 20) + 1
       }
 
       render(
