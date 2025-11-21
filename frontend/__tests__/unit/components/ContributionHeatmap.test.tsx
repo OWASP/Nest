@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { useTheme } from 'next-themes'
-import ContributionHeatmap from '../../../src/components/ContributionHeatmap'
+import ContributionHeatmap from 'components/ContributionHeatmap'
 
 // Mock next-themes
 jest.mock('next-themes', () => ({
@@ -8,8 +8,19 @@ jest.mock('next-themes', () => ({
 }))
 
 // Mock react-apexcharts with more detailed implementation
+interface MockChartProps {
+  options?: {
+    tooltip?: { enabled?: boolean }
+    chart?: { background?: string }
+  }
+  series?: Array<{ name: string; data?: unknown[] }>
+  type?: string
+  height?: string | number
+  width?: string | number
+}
+
 jest.mock('react-apexcharts', () => {
-  return function MockChart({ options, series, type, height, width }: any) {
+  return function MockChart({ options, series, type, height, width }: MockChartProps) {
     return (
       <div
         data-testid="contribution-heatmap-chart"
@@ -21,7 +32,7 @@ jest.mock('react-apexcharts', () => {
         data-chart-background={options?.chart?.background}
       >
         Mock Heatmap Chart
-        {series?.map((s: any, index: number) => (
+        {series?.map((s: { name: string; data?: unknown[] }, index: number) => (
           <div key={index} data-testid={`series-${index}`} data-series-name={s.name}>
             {s.name}: {s.data?.length || 0} data points
           </div>
@@ -214,7 +225,7 @@ describe('ContributionHeatmap', () => {
     it('handles null contribution data', async () => {
       render(
         <ContributionHeatmap
-          contributionData={null as any}
+          contributionData={null as unknown as Record<string, number>}
           startDate="2024-01-01"
           endDate="2024-01-31"
         />
@@ -228,7 +239,7 @@ describe('ContributionHeatmap', () => {
     it('handles undefined contribution data', async () => {
       render(
         <ContributionHeatmap
-          contributionData={undefined as any}
+          contributionData={undefined as unknown as Record<string, number>}
           startDate="2024-01-01"
           endDate="2024-01-31"
         />
@@ -590,9 +601,9 @@ describe('ContributionHeatmap', () => {
 
     it('handles non-numeric contribution values', async () => {
       const invalidData = {
-        '2024-01-01': 'invalid' as any,
-        '2024-01-02': null as any,
-        '2024-01-03': undefined as any,
+        '2024-01-01': 'invalid' as unknown as number,
+        '2024-01-02': null as unknown as number,
+        '2024-01-03': undefined as unknown as number,
         '2024-01-04': 5, // Valid value mixed in
       }
 
