@@ -11,7 +11,7 @@ jest.mock('next-themes', () => ({
 jest.mock('react-apexcharts', () => {
   return function MockChart({ options, series, type, height, width }: any) {
     return (
-      <div 
+      <div
         data-testid="contribution-heatmap-chart"
         data-type={type}
         data-height={height}
@@ -82,9 +82,9 @@ describe('ContributionHeatmap', () => {
 
     it('renders with title when provided', async () => {
       render(
-        <ContributionHeatmap 
-          {...defaultProps} 
-          title="Test Contribution Heatmap" 
+        <ContributionHeatmap
+          {...defaultProps}
+          title="Test Contribution Heatmap"
         />
       )
 
@@ -206,7 +206,7 @@ describe('ContributionHeatmap', () => {
   describe('Edge Cases - No Data', () => {
     it('handles empty contribution data', async () => {
       render(
-        <ContributionHeatmap 
+        <ContributionHeatmap
           contributionData={{}}
           startDate="2024-01-01"
           endDate="2024-01-31"
@@ -222,7 +222,7 @@ describe('ContributionHeatmap', () => {
 
     it('handles null contribution data', async () => {
       render(
-        <ContributionHeatmap 
+        <ContributionHeatmap
           contributionData={null as any}
           startDate="2024-01-01"
           endDate="2024-01-31"
@@ -236,7 +236,7 @@ describe('ContributionHeatmap', () => {
 
     it('handles undefined contribution data', async () => {
       render(
-        <ContributionHeatmap 
+        <ContributionHeatmap
           contributionData={undefined as any}
           startDate="2024-01-01"
           endDate="2024-01-31"
@@ -258,7 +258,7 @@ describe('ContributionHeatmap', () => {
       }
 
       render(
-        <ContributionHeatmap 
+        <ContributionHeatmap
           contributionData={sparseData}
           startDate="2024-01-01"
           endDate="2024-01-31"
@@ -276,7 +276,7 @@ describe('ContributionHeatmap', () => {
       }
 
       render(
-        <ContributionHeatmap 
+        <ContributionHeatmap
           contributionData={singleDayData}
           startDate="2024-01-01"
           endDate="2024-01-31"
@@ -296,7 +296,7 @@ describe('ContributionHeatmap', () => {
       }
 
       render(
-        <ContributionHeatmap 
+        <ContributionHeatmap
           contributionData={outsideRangeData}
           startDate="2024-01-01"
           endDate="2024-01-31"
@@ -312,7 +312,7 @@ describe('ContributionHeatmap', () => {
   describe('Loading States', () => {
     it('renders while data is loading (empty data)', async () => {
       render(
-        <ContributionHeatmap 
+        <ContributionHeatmap
           contributionData={{}}
           startDate="2024-01-01"
           endDate="2024-01-31"
@@ -328,7 +328,7 @@ describe('ContributionHeatmap', () => {
 
     it('handles transition from loading to data', async () => {
       const { rerender } = render(
-        <ContributionHeatmap 
+        <ContributionHeatmap
           contributionData={{}}
           startDate="2024-01-01"
           endDate="2024-01-31"
@@ -340,7 +340,7 @@ describe('ContributionHeatmap', () => {
 
       // Simulate data loading
       rerender(
-        <ContributionHeatmap 
+        <ContributionHeatmap
           contributionData={mockContributionData}
           startDate="2024-01-01"
           endDate="2024-01-31"
@@ -359,7 +359,7 @@ describe('ContributionHeatmap', () => {
     it('handles different date ranges correctly', async () => {
       // Test one week range
       const { unmount } = render(
-        <ContributionHeatmap 
+        <ContributionHeatmap
           contributionData={mockContributionData}
           startDate="2024-01-01"
           endDate="2024-01-07"
@@ -374,7 +374,7 @@ describe('ContributionHeatmap', () => {
 
       // Test three months range
       const { unmount: unmount2 } = render(
-        <ContributionHeatmap 
+        <ContributionHeatmap
           contributionData={mockContributionData}
           startDate="2024-01-01"
           endDate="2024-03-31"
@@ -389,7 +389,7 @@ describe('ContributionHeatmap', () => {
 
       // Test full year range
       render(
-        <ContributionHeatmap 
+        <ContributionHeatmap
           contributionData={mockContributionData}
           startDate="2024-01-01"
           endDate="2024-12-31"
@@ -404,7 +404,7 @@ describe('ContributionHeatmap', () => {
     it('handles invalid date ranges gracefully', async () => {
       // End date before start date
       render(
-        <ContributionHeatmap 
+        <ContributionHeatmap
           contributionData={mockContributionData}
           startDate="2024-12-31"
           endDate="2024-01-01"
@@ -418,7 +418,7 @@ describe('ContributionHeatmap', () => {
 
     it('handles malformed dates', async () => {
       render(
-        <ContributionHeatmap 
+        <ContributionHeatmap
           contributionData={mockContributionData}
           startDate="invalid-date"
           endDate="also-invalid"
@@ -491,7 +491,7 @@ describe('ContributionHeatmap', () => {
       }
 
       render(
-        <ContributionHeatmap 
+        <ContributionHeatmap
           contributionData={largeDataset}
           startDate="2024-01-01"
           endDate="2024-12-31"
@@ -515,7 +515,7 @@ describe('ContributionHeatmap', () => {
       }
 
       render(
-        <ContributionHeatmap 
+        <ContributionHeatmap
           contributionData={highContributionData}
           startDate="2024-01-01"
           endDate="2024-01-31"
@@ -531,8 +531,8 @@ describe('ContributionHeatmap', () => {
   describe('Accessibility', () => {
     it('has proper heading structure when title is provided', async () => {
       render(
-        <ContributionHeatmap 
-          {...defaultProps} 
+        <ContributionHeatmap
+          {...defaultProps}
           title="Accessible Heatmap"
         />
       )
@@ -543,8 +543,8 @@ describe('ContributionHeatmap', () => {
 
     it('provides meaningful content structure', async () => {
       render(
-        <ContributionHeatmap 
-          {...defaultProps} 
+        <ContributionHeatmap
+          {...defaultProps}
           title="Test Heatmap"
         />
       )
@@ -594,7 +594,7 @@ describe('ContributionHeatmap', () => {
       }
 
       render(
-        <ContributionHeatmap 
+        <ContributionHeatmap
           contributionData={negativeData}
           startDate="2024-01-01"
           endDate="2024-01-31"
@@ -615,7 +615,7 @@ describe('ContributionHeatmap', () => {
       }
 
       render(
-        <ContributionHeatmap 
+        <ContributionHeatmap
           contributionData={invalidData}
           startDate="2024-01-01"
           endDate="2024-01-31"

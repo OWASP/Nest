@@ -75,7 +75,7 @@ describe('ContributionStats', () => {
 
       const icons = screen.getAllByTestId('font-awesome-icon')
       expect(icons).toHaveLength(5) // Title icon + 4 stat icons
-      
+
       // Verify specific icon data attributes
       expect(screen.getByTestId('contribution-stats')).toBeInTheDocument()
       expect(screen.getByText('Test Contribution Activity')).toBeInTheDocument()
@@ -131,7 +131,7 @@ describe('ContributionStats', () => {
 
       // Verify commits value
       expect(screen.getByText('100')).toBeInTheDocument()
-      
+
       // Verify PRs, issues, and total are 0
       expect(screen.getAllByText('0')).toHaveLength(3) // pullRequests, issues, total should be 0
     })
@@ -248,7 +248,7 @@ describe('ContributionStats', () => {
       // Check that the container exists and the grid has proper classes
       const container = screen.getByTestId('contribution-stats')
       expect(container).toBeInTheDocument()
-      
+
       // The mb-6 class is on the grid div, not the container
       const grid = container.querySelector('.grid')
       expect(grid).toHaveClass('mb-6', 'grid', 'grid-cols-2', 'gap-4', 'sm:grid-cols-4')
@@ -315,7 +315,7 @@ describe('ContributionStats', () => {
 
       const heading = container.querySelector('h2')
       expect(heading).toHaveClass('mb-4', 'flex', 'items-center', 'gap-2')
-      
+
       // The mb-6 class is on the grid div
       const grid = container.querySelector('.grid')
       expect(grid).toHaveClass('mb-6', 'grid', 'grid-cols-2', 'gap-4', 'sm:grid-cols-4')
