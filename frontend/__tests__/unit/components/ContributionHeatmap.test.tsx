@@ -81,12 +81,7 @@ describe('ContributionHeatmap', () => {
     })
 
     it('renders with title when provided', async () => {
-      render(
-        <ContributionHeatmap
-          {...defaultProps}
-          title="Test Contribution Heatmap"
-        />
-      )
+      render(<ContributionHeatmap {...defaultProps} title="Test Contribution Heatmap" />)
 
       expect(screen.getByText('Test Contribution Heatmap')).toBeInTheDocument()
       await waitFor(() => {
@@ -206,11 +201,7 @@ describe('ContributionHeatmap', () => {
   describe('Edge Cases - No Data', () => {
     it('handles empty contribution data', async () => {
       render(
-        <ContributionHeatmap
-          contributionData={{}}
-          startDate="2024-01-01"
-          endDate="2024-01-31"
-        />
+        <ContributionHeatmap contributionData={{}} startDate="2024-01-01" endDate="2024-01-31" />
       )
 
       await waitFor(() => {
@@ -530,24 +521,14 @@ describe('ContributionHeatmap', () => {
 
   describe('Accessibility', () => {
     it('has proper heading structure when title is provided', async () => {
-      render(
-        <ContributionHeatmap
-          {...defaultProps}
-          title="Accessible Heatmap"
-        />
-      )
+      render(<ContributionHeatmap {...defaultProps} title="Accessible Heatmap" />)
 
       const heading = screen.getByRole('heading', { level: 3 })
       expect(heading).toHaveTextContent('Accessible Heatmap')
     })
 
     it('provides meaningful content structure', async () => {
-      render(
-        <ContributionHeatmap
-          {...defaultProps}
-          title="Test Heatmap"
-        />
-      )
+      render(<ContributionHeatmap {...defaultProps} title="Test Heatmap" />)
 
       expect(screen.getByText('Test Heatmap')).toBeInTheDocument()
       await waitFor(() => {
@@ -558,7 +539,8 @@ describe('ContributionHeatmap', () => {
     it('has proper container structure', async () => {
       render(<ContributionHeatmap {...defaultProps} />)
 
-      const container = screen.getByTestId('contribution-heatmap-chart').parentElement?.parentElement
+      const container = screen.getByTestId('contribution-heatmap-chart').parentElement
+        ?.parentElement
       expect(container).toHaveClass('max-w-5xl')
     })
   })
