@@ -44,7 +44,7 @@ class ChapterDetail(ChapterBase):
     @staticmethod
     def resolve_leaders(obj):
         """Resolve leaders."""
-        return obj.leaders_raw
+        return [leader.member_name for leader in obj.entity_leaders]
 
 
 class ChapterError(Schema):

@@ -27,12 +27,16 @@ from apps.api.rest.v0.chapter import ChapterDetail
     ],
 )
 def test_chapter_serializer_validation(chapter_data):
+    class MockEntityMember:
+        def __init__(self, name):
+            self.member_name = name
+
     class MockChapter:
         def __init__(self, data):
             for key, value in data.items():
                 setattr(self, key, value)
             self.nest_key = data["key"]
-            self.leaders_raw = ["Alice", "Bob"]
+            self.entity_leaders = [MockEntityMember("Alice"), MockEntityMember("Bob")]
 
     chapter = ChapterDetail.from_orm(MockChapter(chapter_data))
 
