@@ -14,6 +14,7 @@ from apps.common.open_ai import OpenAi
 from apps.common.utils import get_absolute_url, join_values
 from apps.core.models.prompt import Prompt
 from apps.owasp.models.common import RepositoryBasedEntityModel
+from apps.owasp.models.entity_channel import EntityChannel
 from apps.owasp.models.managers.chapter import ActiveChapterManager
 from apps.owasp.models.mixins.chapter import ChapterIndexMixin
 
@@ -66,6 +67,14 @@ class Chapter(
 
     # GRs.
     members = GenericRelation("owasp.EntityMember")
+
+    # related channels from EntityChannel
+    channels = GenericRelation(
+        EntityChannel,
+        content_type_field="entity_type",
+        object_id_field="entity_id",
+        related_query_name="chapter",
+    )
 
     def __str__(self) -> str:
         """Chapter human readable representation."""
