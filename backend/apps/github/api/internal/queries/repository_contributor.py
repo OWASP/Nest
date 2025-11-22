@@ -2,6 +2,7 @@
 
 import strawberry
 
+from apps.common.extensions import CacheFieldExtension
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.github.models.repository_contributor import RepositoryContributor
 
@@ -10,7 +11,7 @@ from apps.github.models.repository_contributor import RepositoryContributor
 class RepositoryContributorQuery:
     """Repository contributor queries."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def top_contributors(
         self,
         *,

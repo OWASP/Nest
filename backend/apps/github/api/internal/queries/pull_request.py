@@ -3,6 +3,7 @@
 import strawberry
 from django.db.models import OuterRef, Subquery
 
+from apps.common.extensions import CacheFieldExtension
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.models.pull_request import PullRequest
 from apps.owasp.models.project import Project
@@ -12,7 +13,7 @@ from apps.owasp.models.project import Project
 class PullRequestQuery:
     """Pull request queries."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def recent_pull_requests(
         self,
         *,

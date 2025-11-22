@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Annotated
 import strawberry
 import strawberry_django
 
+from apps.common.extensions import CacheFieldExtension
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.organization import OrganizationNode
@@ -41,7 +42,7 @@ RECENT_RELEASES_LIMIT = 5
 class RepositoryNode(strawberry.relay.Node):
     """Repository node."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def issues(self) -> list[IssueNode]:
         """Resolve recent issues."""
         # TODO(arkid15r): rename this to recent_issues.
@@ -57,7 +58,7 @@ class RepositoryNode(strawberry.relay.Node):
         """Resolve latest release."""
         return self.latest_release
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def organization(self) -> OrganizationNode | None:
         """Resolve organization."""
         return self.organization
@@ -67,25 +68,25 @@ class RepositoryNode(strawberry.relay.Node):
         """Resolve owner key."""
         return self.owner_key
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def project(
         self,
     ) -> Annotated["ProjectNode", strawberry.lazy("apps.owasp.api.internal.nodes.project")] | None:
         """Resolve project."""
         return self.project
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def recent_milestones(self, limit: int = 5) -> list[MilestoneNode]:
         """Resolve recent milestones."""
         return self.recent_milestones.select_related("repository").order_by("-created_at")[:limit]
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def releases(self) -> list[ReleaseNode]:
         """Resolve recent releases."""
         # TODO(arkid15r): rename this to recent_releases.
         return self.published_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT]
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def top_contributors(self) -> list[RepositoryContributorNode]:
         """Resolve top contributors."""
         return self.idx_top_contributors

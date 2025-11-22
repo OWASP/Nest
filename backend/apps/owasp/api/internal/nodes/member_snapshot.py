@@ -3,6 +3,7 @@
 import strawberry
 import strawberry_django
 
+from apps.common.extensions import CacheFieldExtension
 from apps.github.api.internal.nodes.user import UserNode
 from apps.owasp.models.member_snapshot import MemberSnapshot
 
@@ -28,7 +29,7 @@ class MemberSnapshotNode(strawberry.relay.Node):
         """Resolve commits count."""
         return self.commits_count
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def github_user(self) -> UserNode:
         """Resolve GitHub user."""
         return self.github_user

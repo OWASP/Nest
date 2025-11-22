@@ -3,6 +3,7 @@
 import strawberry
 from django.db.models import OuterRef, Subquery
 
+from apps.common.extensions import CacheFieldExtension
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.models.issue import Issue
 
@@ -11,7 +12,7 @@ from apps.github.models.issue import Issue
 class IssueQuery:
     """GraphQL query class for retrieving GitHub issues."""
 
-    @strawberry.field
+    @strawberry.field(extensions=[CacheFieldExtension()])
     def recent_issues(
         self,
         *,
