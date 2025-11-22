@@ -9,6 +9,7 @@ from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
+from apps.owasp.api.internal.nodes.entity_channel import EntityChannelNode
 from apps.owasp.api.internal.nodes.project_health_metrics import (
     ProjectHealthMetricsNode,
 )
@@ -110,3 +111,8 @@ class ProjectNode(GenericEntityNode):
     def topics(self) -> list[str]:
         """Resolve topics."""
         return self.idx_topics
+
+    @strawberry.field
+    def slack_channels(self) -> list[EntityChannelNode]:
+        """Resolve related slack channels."""
+        return self.channels.filter(platform="slack")
