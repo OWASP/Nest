@@ -1,5 +1,7 @@
 """Snapshot sitemap."""
 
+from django.db.models import QuerySet
+
 from apps.owasp.models.snapshot import Snapshot
 from apps.sitemap.views.base import BaseSitemap
 
@@ -10,8 +12,8 @@ class SnapshotSitemap(BaseSitemap):
     change_frequency = "monthly"
     prefix = "/snapshots"
 
-    def items(self):
-        """Return queryset of snapshots for sitemap generation.
+    def items(self) -> QuerySet[Snapshot]:
+        """Return snapshots for sitemap generation.
 
         Returns:
             QuerySet: Queryset of completed Snapshot objects ordered by update/creation date.

@@ -10,8 +10,8 @@ class OrganizationSitemap(BaseSitemap):
     change_frequency = "monthly"
     prefix = "/organizations"
 
-    def items(self):
-        """Return a list of indexable Organization objects for sitemap generation.
+    def items(self) -> list[Organization]:
+        """Return organizations for sitemap generation.
 
         Returns:
             list: List of indexable OWASP-related Organization objects
@@ -20,9 +20,7 @@ class OrganizationSitemap(BaseSitemap):
         """
         return [
             o
-            for o in Organization.objects.filter(
-                is_owasp_related_organization=True,
-            ).order_by(
+            for o in Organization.related_organizations.order_by(
                 "-updated_at",
                 "-created_at",
             )

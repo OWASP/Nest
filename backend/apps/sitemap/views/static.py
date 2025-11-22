@@ -16,7 +16,7 @@ from apps.sitemap.views.base import BaseSitemap
 class StaticSitemap(BaseSitemap):
     """A sitemap for static routes that includes all other dynamic sitemaps."""
 
-    def changefreq(self, item):
+    def changefreq(self, item) -> str:
         """Return the change frequency for a static route item.
 
         Args:
@@ -28,7 +28,7 @@ class StaticSitemap(BaseSitemap):
         """
         return item["changefreq"]
 
-    def location(self, item):
+    def location(self, item) -> str:
         """Return the URL path for a static route item.
 
         Args:
@@ -40,8 +40,8 @@ class StaticSitemap(BaseSitemap):
         """
         return item["path"]
 
-    def items(self):
-        """Return list of static routes for sitemap generation.
+    def items(self) -> tuple[dict, ...]:
+        """Return static routes for sitemap generation.
 
         Returns:
             tuple: Tuple of dictionaries containing static route configurations.
@@ -49,7 +49,7 @@ class StaticSitemap(BaseSitemap):
         """
         return BaseSitemap.STATIC_ROUTES
 
-    def lastmod(self, item):
+    def lastmod(self, item: dict) -> datetime:
         """Return the last modification date for a static route item.
 
         Args:
@@ -71,12 +71,12 @@ class StaticSitemap(BaseSitemap):
         }
 
         return (
-            model.objects.aggregate(latest=Max("updated_at"))["latest"]
+            model.objects.aggregate(latest=Max("updated_at"))["latest"]  #  type: ignore[attr-defined]
             if (model := path_to_model.get(item["path"]))
             else datetime.now(UTC)
         )
 
-    def priority(self, item):
+    def priority(self, item: dict) -> float:
         """Return the priority score for a static route item.
 
         Args:
