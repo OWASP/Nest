@@ -22,7 +22,7 @@ from apps.common.constants import NL, OWASP_NEWS_URL
 logger: logging.Logger = logging.getLogger(__name__)
 
 
-def escape(content) -> str:
+def escape(content: str) -> str:
     """Escape HTML content.
 
     Args:
@@ -83,7 +83,7 @@ def get_news_data(limit: int = 10, timeout: float | None = 30) -> list[dict[str,
 
     Args:
         limit (int, optional): The maximum number of news items to fetch.
-        timeout (int, optional): The request timeout in seconds.
+        timeout (float, optional): The request timeout in seconds.
 
     Returns:
         list: A list of dictionaries containing news data (author, title, and URL).
@@ -118,7 +118,7 @@ def get_staff_data(timeout: float | None = 30) -> list | None:
     """Get staff data.
 
     Args:
-        timeout (int, optional): The request timeout in seconds.
+        timeout (float, optional): The request timeout in seconds.
 
     Returns:
         list or None: A sorted list of staff data dictionaries, or None if an error occurs.
