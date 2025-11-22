@@ -25,6 +25,10 @@ jest.mock('hooks/useUpdateProgramStatus', () => ({
   useUpdateProgramStatus: () => ({ updateProgramStatus: jest.fn() }),
 }))
 
+jest.mock('hooks/useUpdateProgramStatus', () => ({
+  useUpdateProgramStatus: () => ({ updateProgramStatus: jest.fn() }),
+}))
+
 jest.mock('components/ActionButton', () => ({
   __esModule: true,
   default: ({ children, onClick }: { children: React.ReactNode; onClick: () => void }) => (

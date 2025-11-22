@@ -37,7 +37,6 @@ const MenteeProfilePage = () => {
 
   useEffect(() => {
     if (data) {
-      // GraphQL types match local types - use directly
       setMenteeDetails(data.getMenteeDetails ?? null)
       setMenteeIssues(data.getMenteeModuleIssues ?? [])
     }

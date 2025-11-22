@@ -15,6 +15,7 @@ from apps.github.models.issue import Issue
         "created_at",
         "number",
         "state",
+        "body",
         "title",
         "url",
     ],

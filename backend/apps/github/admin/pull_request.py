@@ -15,6 +15,7 @@ class PullRequestAdmin(admin.ModelAdmin):
         "labels",
         "related_issues",
         "repository",
+        "related_issues",
     )
     list_display = (
         "repository",
