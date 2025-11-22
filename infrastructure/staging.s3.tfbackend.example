@@ -1,0 +1,5 @@
+bucket         = "owasp-nest-staging-terraform-state"
+dynamodb_table = "owasp-nest-staging-terraform-state-lock"
+encrypt        = true
+key            = "nest/terraform.tfstate"
+region         = "us-east-2"

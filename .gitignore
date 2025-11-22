@@ -25,8 +25,12 @@ __pycache__
 *.log
 *.pdf
 *.pem
+*.s3.tfbackend
+!*.s3.tfbackend.example
 *.tfstate
 *.tfstate.*
+*.tfvars
+!*.tfvars.example
 **/.terraform/
 backend/*nest-backend-dev*.tar.gz
 backend/*nest-backend-dev*.zip
@@ -46,7 +50,6 @@ frontend/pnpm-debug.log*
 frontend/test-results/
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
-infrastructure/terraform.tfvars
 logs
 node_modules/
 TODO
