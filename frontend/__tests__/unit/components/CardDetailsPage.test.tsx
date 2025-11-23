@@ -880,7 +880,8 @@ describe('CardDetailsPage', () => {
       expect(mainContainer).toHaveClass(
         'min-h-screen',
         'bg-white',
-        'p-8',
+        'px-4',
+        'py-6',
         'text-gray-600',
         'dark:bg-[#212529]',
         'dark:text-gray-300'
@@ -891,7 +892,7 @@ describe('CardDetailsPage', () => {
       render(<CardDetailsPage {...defaultProps} />)
 
       const title = screen.getByRole('heading', { level: 1 })
-      expect(title).toHaveClass('text-4xl', 'font-bold')
+      expect(title).toHaveClass('text-2xl', 'font-bold', 'sm:text-3xl', 'md:text-4xl')
     })
 
     it('applies correct CSS classes to description', () => {
