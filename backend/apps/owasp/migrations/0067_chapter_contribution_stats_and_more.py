@@ -4,10 +4,10 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("owasp", "0066_chapter_contribution_data_project_contribution_data"),
     ]
+
 
 operations = [
     migrations.AddField(
