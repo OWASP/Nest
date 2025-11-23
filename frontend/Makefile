@@ -80,11 +80,8 @@ test-frontend-a11y:
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-a11y pnpm run test:a11y
 
 test-frontend-e2e:
-	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
-		--cache-from nest-test-frontend-e2e \
-		-f docker/frontend/Dockerfile.e2e.test frontend \
-		-t nest-test-frontend-e2e
-	@docker run --env-file frontend/.env.example --rm nest-test-frontend-e2e pnpm run test:e2e
+	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local \
+	docker compose --project-name nest-e2e -f docker-compose/e2e.yaml up --build --remove-orphans --abort-on-container-exit
 
 test-frontend-unit:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
