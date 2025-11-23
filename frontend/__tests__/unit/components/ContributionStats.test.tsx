@@ -4,7 +4,11 @@ import ContributionStats from 'components/ContributionStats'
 // Mock FontAwesome components
 jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: ({ icon, className }: { icon: unknown; className?: string }) => (
-    <div data-testid="font-awesome-icon" data-icon={typeof icon === 'string' ? icon : JSON.stringify(icon)} className={className} />
+    <div
+      data-testid="font-awesome-icon"
+      data-icon={typeof icon === 'string' ? icon : JSON.stringify(icon)}
+      className={className}
+    />
   ),
 }))
 
