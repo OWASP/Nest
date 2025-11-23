@@ -33,7 +33,11 @@ jest.mock('react-apexcharts', () => {
       >
         Mock Heatmap Chart
         {series?.map((s: { name: string; data?: unknown[] }, index: number) => (
-          <div key={s.name || `series-${index}`} data-testid={`series-${index}`} data-series-name={s.name}>
+          <div
+            key={s.name || `series-${index}`}
+            data-testid={`series-${index}`}
+            data-series-name={s.name}
+          >
             {s.name}: {s.data?.length || 0} data points
           </div>
         ))}
