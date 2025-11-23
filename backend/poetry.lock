@@ -276,18 +276,18 @@ files = [
 
 [[package]]
 name = "boto3"
-version = "1.41.1"
+version = "1.41.2"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "boto3-1.41.1-py3-none-any.whl", hash = "sha256:05009dadcb0c63a2a4a11780f615362a811aa85e7a6950f2793ecf8055fcd1f2"},
-    {file = "boto3-1.41.1.tar.gz", hash = "sha256:fdee48cff828cfe0fb66295ae4d5f47736ee35f11e1de6be6c6dcd910f0810a4"},
+    {file = "boto3-1.41.2-py3-none-any.whl", hash = "sha256:edcde82fdae4201aa690e3683f8e5b1a846cf1bbf79d03db4fa8a2f6f46dba9c"},
+    {file = "boto3-1.41.2.tar.gz", hash = "sha256:7054fbc61cadab383f40ea6d725013ba6c8f569641dddb14c0055e790280ad6c"},
 ]
 
 [package.dependencies]
-botocore = ">=1.41.1,<1.42.0"
+botocore = ">=1.41.2,<1.42.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.15.0,<0.16.0"
 
@@ -296,14 +296,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.41.1"
+version = "1.41.2"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "botocore-1.41.1-py3-none-any.whl", hash = "sha256:0db40b7dbddef56fe8cfa06b5eda73b327786db9d64c09c3a616fc9b5548120d"},
-    {file = "botocore-1.41.1.tar.gz", hash = "sha256:e98095492ef8f18d0d6a02ba87d9135c663d4627322e049228143b3a4ef4c2a3"},
+    {file = "botocore-1.41.2-py3-none-any.whl", hash = "sha256:154052dfaa7292212f01c8fab822c76cd10a15a7e164e4c45e4634eb40214b90"},
+    {file = "botocore-1.41.2.tar.gz", hash = "sha256:49a3e8f4c1a1759a687941fef8b36efd7bafcf63c1ef74aa75d6497eb4887c9c"},
 ]
 
 [package.dependencies]
@@ -943,24 +943,25 @@ hiredis = ["redis[hiredis] (>=4.0.2)"]
 
 [[package]]
 name = "django-rq"
-version = "3.1"
+version = "3.2.0"
 description = "An app that provides django integration for RQ (Redis Queue)"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "django_rq-3.1-py3-none-any.whl", hash = "sha256:9c8a725aa3f43251a5571ec51d7b65a01613358574d01a5101861480963e59b7"},
-    {file = "django_rq-3.1.tar.gz", hash = "sha256:8d7b9137b85b8df18b1cdf06244eb71b39f43ad020c0a0c7d49723f8940074ae"},
+    {file = "django_rq-3.2.0-py3-none-any.whl", hash = "sha256:a59aa137679b3aed69519be7886ab0417fb144cf38abe5cdcad4c5f36a774542"},
+    {file = "django_rq-3.2.0.tar.gz", hash = "sha256:e1bf7a69ecac87ddf4a22938d12587df7b5335b1dc0c9e0c9a6e0859822f5377"},
 ]
 
 [package.dependencies]
-django = ">=3.2"
+django = ">=4.2"
 redis = ">=3.5"
-rq = ">=2"
+rq = ">=2.6.1"
 
 [package.extras]
 prometheus = ["prometheus-client (>=0.4.0)"]
 sentry = ["sentry-sdk (>=1.0.0)"]
+testing = ["pytest (>=7.0)", "pytest-django (>=4.5)"]
 
 [[package]]
 name = "django-storages"
@@ -1903,14 +1904,14 @@ orjson = ">=3.10.1"
 
 [[package]]
 name = "langsmith"
-version = "0.4.45"
+version = "0.4.46"
 description = "Client library to connect to the LangSmith Observability and Evaluation Platform."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "langsmith-0.4.45-py3-none-any.whl", hash = "sha256:6326ad2e66c24d47361b4338fbc23e7fee8da624b289921a9c164e15217ed8e2"},
-    {file = "langsmith-0.4.45.tar.gz", hash = "sha256:f73f86353e31e8f89da2da2b1ebf9f695227f394d22df3ef5d7618e59738bd71"},
+    {file = "langsmith-0.4.46-py3-none-any.whl", hash = "sha256:783c16ef108c42a16ec2d8bc68067b969f3652e2fe82ca1289007baf947e4500"},
+    {file = "langsmith-0.4.46.tar.gz", hash = "sha256:0b73d47ebd0a27ea10edec1717f36f6a865cb9ffc7f4e6a419e2cea1ab3c5b1e"},
 ]
 
 [package.dependencies]
@@ -2685,14 +2686,14 @@ files = [
 
 [[package]]
 name = "owasp-schema"
-version = "0.1.42"
+version = "0.1.43"
 description = "A collection of OWASP schemas"
 optional = false
 python-versions = "<4.0,>=3.13"
 groups = ["main"]
 files = [
-    {file = "owasp_schema-0.1.42-py3-none-any.whl", hash = "sha256:f94addd98e58d1dfae05e229b5331f9d45fc15f8d641d0abe4578ddcc95e64a5"},
-    {file = "owasp_schema-0.1.42.tar.gz", hash = "sha256:2620d58a6211c51658c799f1f6886a486dee6550cf071df489049d5d7c53f19f"},
+    {file = "owasp_schema-0.1.43-py3-none-any.whl", hash = "sha256:8200bac18422435cde4f5a2c7a4ed1a159c7e7adc4a4797cdb30a6d0fe3e4694"},
+    {file = "owasp_schema-0.1.43.tar.gz", hash = "sha256:ad7d2fdd3242852ac14851a8597d6c5967f52cad7a9dc28a6f992740fcc88490"},
 ]
 
 [package.dependencies]
@@ -2883,14 +2884,14 @@ testing = ["coverage", "pytest", "pytest-benchmark"]
 
 [[package]]
 name = "pre-commit"
-version = "4.4.0"
+version = "4.5.0"
 description = "A framework for managing and maintaining multi-language pre-commit hooks."
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "pre_commit-4.4.0-py2.py3-none-any.whl", hash = "sha256:b35ea52957cbf83dcc5d8ee636cbead8624e3a15fbfa61a370e42158ac8a5813"},
-    {file = "pre_commit-4.4.0.tar.gz", hash = "sha256:f0233ebab440e9f17cabbb558706eb173d19ace965c68cdce2c081042b4fab15"},
+    {file = "pre_commit-4.5.0-py2.py3-none-any.whl", hash = "sha256:25e2ce09595174d9c97860a95609f9f852c0614ba602de3561e267547f2335e1"},
+    {file = "pre_commit-4.5.0.tar.gz", hash = "sha256:dc5a065e932b19fc1d4c653c6939068fe54325af8e741e74e88db4d28a4dd66b"},
 ]
 
 [package.dependencies]
@@ -4071,14 +4072,14 @@ files = [
 
 [[package]]
 name = "rq"
-version = "2.6.0"
+version = "2.6.1"
 description = "RQ is a simple, lightweight, library for creating background jobs, and processing them."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "rq-2.6.0-py3-none-any.whl", hash = "sha256:be5ccc0f0fc5f32da0999648340e31476368f08067f0c3fce6768d00064edbb5"},
-    {file = "rq-2.6.0.tar.gz", hash = "sha256:92ad55676cda14512c4eea5782f398a102dc3af108bea197c868c4c50c5d3e81"},
+    {file = "rq-2.6.1-py3-none-any.whl", hash = "sha256:5cc88d3bb5263a407fb2ba2dc6fe8dc710dae94b6f74396cdfe1b32beded9408"},
+    {file = "rq-2.6.1.tar.gz", hash = "sha256:db5c0d125ac9dbd4438f9a5225ea3e64050542b416fd791d424e2ab5b2853289"},
 ]
 
 [package.dependencies]
@@ -4404,14 +4405,14 @@ sanic = ["sanic (>=20.12.2)"]
 
 [[package]]
 name = "strawberry-graphql-django"
-version = "0.67.0"
+version = "0.67.2"
 description = "Strawberry GraphQL Django extension"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "strawberry_graphql_django-0.67.0-py3-none-any.whl", hash = "sha256:9916ba9e00f141f5f3a649f6740ec5a38a7501d3f7cd49a39f37624c0c489132"},
-    {file = "strawberry_graphql_django-0.67.0.tar.gz", hash = "sha256:3cbb9a9eab80224b093365394002e1ffb76849316953b3395359ee856f2c0024"},
+    {file = "strawberry_graphql_django-0.67.2-py3-none-any.whl", hash = "sha256:2d10b8156dd8b878f712e772a27bceea29965274883a9d4502c9e7fffbcf9cf3"},
+    {file = "strawberry_graphql_django-0.67.2.tar.gz", hash = "sha256:c08581b59defa5348995ab04b58fb5d2930194447fb16717ff8906cdd4694b9d"},
 ]
 
 [package.dependencies]
