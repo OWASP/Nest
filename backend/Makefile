@@ -29,8 +29,14 @@ exec-backend-command:
 exec-backend-command-it:
 	@docker exec -it nest-backend $(CMD) 2>/dev/null
 
+exec-backend-command-e2e:
+	@docker exec -it e2e-nest-backend $(CMD)
+
 exec-db-command-it:
 	@docker exec -it nest-db $(CMD)
+
+exec-db-command-e2e:
+	@docker exec -it e2e-nest-db $(CMD)
 
 clear-cache:
 	@CMD="python manage.py clear_cache" $(MAKE) exec-backend-command
@@ -56,6 +62,10 @@ dump-data:
 	@CMD="sed -E -i 's/(\"[^\"]*email\"): *\"([^\"]|\\\")*\"/\1: \"\"/g' data/nest.json" $(MAKE) exec-backend-command
 	@CMD="gzip -f data/nest.json" $(MAKE) exec-backend-command
 
+dump-data-e2e:
+	@echo "Dumping Nest e2e data"
+	@CMD="pg_dumpall -U nest_user_e2e --clean | gzip -9 > backend/data/nest-e2e.sql.gz" $(MAKE) exec-db-command-e2e
+
 enrich-data: \
 	github-enrich-issues \
 	owasp-enrich-chapters \
@@ -75,6 +85,10 @@ index-data:
 load-data:
 	@echo "Loading Nest data"
 	@CMD="python manage.py load_data" $(MAKE) exec-backend-command
+
+load-data-e2e:
+	@echo "Loading Nest e2e data"
+	@gunzip -c backend/data/nest-e2e.sql.gz | docker exec -i e2e-nest-db psql -U nest_user_e2e -d nest_db_e2e
 
 merge-migrations:
 	@CMD="python manage.py makemigrations --merge" $(MAKE) exec-backend-command
@@ -98,6 +112,10 @@ recreate-schema:
 restore-backup:
 	@echo "Restoring Nest backup"
 	@CMD="python manage.py restore_backup" $(MAKE) exec-backend-command
+
+run-backend-e2e:
+	@DOCKER_BUILDKIT=1 \
+	docker compose --project-name nest-e2e -f docker-compose/e2e.yaml up --build --remove-orphans --abort-on-container-exit backend db
 
 save-backup:
 	@echo "Saving Nest backup"

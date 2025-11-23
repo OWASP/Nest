@@ -6,6 +6,7 @@ __pycache__
 .DS_Store
 .env*
 !.env.example
+!.env.e2e.example
 .github/instructions/snyk_rules.instructions.md
 .idea
 .lighthouseci/
