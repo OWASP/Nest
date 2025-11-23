@@ -7,6 +7,7 @@ import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetChapterDataDocument } from 'types/__generated__/chapterQueries.generated'
 import type { Chapter } from 'types/chapter'
 import type { Contributor } from 'types/contributor'
+import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import ContributionHeatmap from 'components/ContributionHeatmap'
@@ -69,27 +70,11 @@ export default function ChapterDetailsPage() {
   const startDate = oneYearAgo.toISOString().split('T')[0]
   const endDate = today.toISOString().split('T')[0]
 
-  // Calculate estimated contribution stats from heatmap data
-  // Note: These are rough estimates since backend aggregates all contribution types
-  const contributionStats = chapter.contributionData
-    ? (() => {
-        const totalContributions = Object.values(chapter.contributionData).reduce(
-          (sum, count) => sum + count,
-          0
-        )
-        // Frontend estimates - actual breakdown requires backend per-type data
-        const commits = Math.floor(totalContributions * 0.6) // Estimated ~60% commits
-        const issues = Math.floor(totalContributions * 0.23) // Estimated ~23% issues
-        const pullRequests = Math.floor(totalContributions * 0.15) // Estimated ~15% PRs
-
-        return {
-          commits,
-          pullRequests,
-          issues,
-          total: totalContributions,
-        }
-      })()
-    : undefined
+  // Use real contribution stats from API with fallback to legacy data
+  const contributionStats = getContributionStats(
+    chapter.contributionStats,
+    chapter.contributionData
+  )
 
   return (
     <>
