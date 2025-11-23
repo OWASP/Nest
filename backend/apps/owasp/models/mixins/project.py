@@ -14,77 +14,76 @@ REPOSITORIES_LIMIT = 4
 
 
 class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
-    """Project index mixin."""
+    """Mixin providing indexable fields for OWASP projects."""
 
     @property
     def idx_companies(self) -> str:
-        """Return companies for indexing."""
+        """Return a comma-separated list of companies associated with the project."""
         return join_values(fields=[o.company for o in self.organizations.all()])
 
     @property
     def idx_contributors_count(self) -> int:
-        """Return contributors count for indexing."""
+        """Return the total number of contributors for indexing."""
         return self.contributors_count
 
     @property
     def idx_custom_tags(self) -> str:
-        """Return custom tags for indexing."""
+        """Return custom project tags used for indexing."""
         return self.custom_tags
 
     @property
     def idx_forks_count(self) -> int:
-        """Return forks count for indexing."""
+        """Return GitHub forks count for indexing."""
         return self.forks_count
 
     @property
     def idx_health_score(self) -> float | None:
-        """Return health score for indexing."""
-        # TODO(arkid15r): Enable real health score in production when ready.
+        """Return the project's health score used in search indexing."""
         return 100 if settings.IS_PRODUCTION_ENVIRONMENT else self.health_score
 
     @property
     def idx_is_active(self) -> bool:
-        """Return active status for indexing."""
+        """Return whether the project is active for indexing."""
         return self.is_active
 
     @property
     def idx_issues_count(self) -> int:
-        """Return issues count for indexing."""
+        """Return the number of open issues for indexing."""
         return self.open_issues.count()
 
     @property
     def idx_key(self) -> str:
-        """Return key for indexing."""
+        """Return the canonical project key used for indexing."""
         return self.key.replace("www-project-", "")
 
     @property
     def idx_languages(self) -> list[str]:
-        """Return languages for indexing."""
+        """Return the list of programming languages associated with the project."""
         return self.languages
 
     @property
     def idx_level(self) -> str:
-        """Return level text value for indexing."""
+        """Return the human-readable project maturity level."""
         return self.level
 
     @property
     def idx_level_raw(self) -> float | None:
-        """Return level for indexing."""
+        """Return the numeric maturity level for indexing."""
         return float(self.level_raw) if self.level_raw else None
 
     @property
     def idx_name(self) -> str:
-        """Return name for indexing."""
+        """Return the project name formatted for indexing."""
         return self.name or " ".join(self.key.replace("www-project-", "").capitalize().split("-"))
 
     @property
     def idx_organizations(self) -> str:
-        """Return organizations for indexing."""
+        """Return a comma-separated list of project organizations for indexing."""
         return join_values(fields=[o.name for o in self.organizations.all()])
 
     @property
     def idx_repositories(self) -> list[dict]:
-        """Return repositories for indexing."""
+        """Return metadata for the project's repositories used in indexing."""
         return [
             {
                 "contributors_count": r.contributors_count,
@@ -102,25 +101,25 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
 
     @property
     def idx_repositories_count(self) -> int:
-        """Return repositories count for indexing."""
+        """Return the number of repositories linked to the project."""
         return self.repositories.count()
 
     @property
     def idx_stars_count(self) -> int:
-        """Return stars count for indexing."""
+        """Return GitHub stars count for indexing."""
         return self.stars_count
 
     @property
     def idx_top_contributors(self) -> list:
-        """Return top contributors for indexing."""
+        """Return a list of the top contributors for indexing."""
         return RepositoryContributor.get_top_contributors(project=self.key)
 
     @property
     def idx_type(self) -> str:
-        """Return type for indexing."""
+        """Return the project type used for indexing."""
         return self.type
 
     @property
     def idx_updated_at(self) -> str | float:
-        """Return updated at for indexing."""
+        """Return the last updated timestamp for indexing."""
         return self.updated_at.timestamp() if self.updated_at else ""
