@@ -40,11 +40,11 @@ class ProjectDetail(ProjectBase):
     """Detail schema for Project (used in single item endpoints)."""
 
     description: str
-    leaders: list[str]
+    leader_names: list[str]
 
     @staticmethod
-    def resolve_leaders(obj):
-        """Resolve leaders."""
+    def resolve_leader_names(obj):
+        """Resolve leader names."""
         return [leader.member_name for leader in obj.entity_leaders]
 
 

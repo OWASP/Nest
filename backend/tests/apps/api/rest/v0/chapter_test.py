@@ -49,7 +49,7 @@ def test_chapter_serializer_validation(chapter_data):
     assert chapter.key == chapter_data["key"]
     assert chapter.latitude == chapter_data["latitude"]
     assert chapter.longitude == chapter_data["longitude"]
-    assert chapter.leaders == ["Alice", "Bob"]
+    assert chapter.leader_names == ["Alice", "Bob"]
     assert chapter.name == chapter_data["name"]
     assert chapter.region == chapter_data["region"]
     assert chapter.updated_at == datetime.fromisoformat(chapter_data["updated_at"])

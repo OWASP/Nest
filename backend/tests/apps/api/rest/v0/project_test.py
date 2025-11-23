@@ -43,7 +43,7 @@ def test_project_serializer_validation(project_data):
     assert project.created_at == datetime.fromisoformat(project_data["created_at"])
     assert project.description == project_data["description"]
     assert project.key == project_data["key"]
-    assert project.leaders == ["Alice", "Bob"]
+    assert project.leader_names == ["Alice", "Bob"]
     assert project.level == project_data["level"]
     assert project.name == project_data["name"]
     assert project.updated_at == datetime.fromisoformat(project_data["updated_at"])
