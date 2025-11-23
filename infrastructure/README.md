@@ -196,15 +196,3 @@ Migrate and load data into the new database.
   ```bash
   zappa update staging
   ```
-
-- To view logs for a `staging` deployment run:
-
-  ```bash
-  zappa tail staging
-  ```
-
-- To update a Zappa `staging` deployment run:
-
-  ```bash
-  zappa update staging
-  ```
