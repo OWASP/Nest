@@ -9,6 +9,8 @@ terraform {
   }
 }
 
+data "aws_caller_identity" "current" {}
+
 resource "aws_ecs_cluster" "main" {
   name = "${var.project_name}-${var.environment}-cluster"
   tags = var.common_tags
@@ -40,9 +42,32 @@ resource "aws_iam_role" "ecs_tasks_execution_role" {
   })
 }
 
+
+resource "aws_iam_policy" "ecs_tasks_execution_role_ssm_policy" {
+  name        = "${var.project_name}-${var.environment}-ecs-tasks-ssm-policy"
+  description = "Allow ECS tasks to read SSM parameters"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "ssm:GetParameters"
+        ]
+        Effect   = "Allow"
+        Resource = "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${var.project_name}/${var.environment}/*"
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role_policy_attachment" "ecs_tasks_execution_role_policy" {
-  role       = aws_iam_role.ecs_tasks_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+  role       = aws_iam_role.ecs_tasks_execution_role.name
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_tasks_execution_role_ssm_policy_attachment" {
+  policy_arn = aws_iam_policy.ecs_tasks_execution_role_ssm_policy.arn
+  role       = aws_iam_role.ecs_tasks_execution_role.name
 }
 
 resource "aws_iam_role" "ecs_task_role" {
@@ -64,8 +89,8 @@ resource "aws_iam_role" "ecs_task_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_task_role_fixtures_s3_access" {
-  role       = aws_iam_role.ecs_task_role.name
   policy_arn = var.fixtures_read_only_policy_arn
+  role       = aws_iam_role.ecs_task_role.name
 }
 
 resource "aws_iam_role" "event_bridge_role" {
@@ -87,8 +112,8 @@ resource "aws_iam_role" "event_bridge_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "event_bridge_role_policy" {
-  role       = aws_iam_role.event_bridge_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"
+  role       = aws_iam_role.event_bridge_role.name
 }
 
 module "sync_data_task" {
@@ -97,7 +122,7 @@ module "sync_data_task" {
   aws_region                   = var.aws_region
   command                      = ["python", "manage.py", "sync-data"]
   common_tags                  = var.common_tags
-  container_environment        = var.django_environment_variables
+  container_parameters_arns    = var.container_parameters_arns
   cpu                          = var.sync_data_task_cpu
   ecs_cluster_arn              = aws_ecs_cluster.main.arn
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
@@ -118,7 +143,7 @@ module "owasp_update_project_health_metrics_task" {
   aws_region                   = var.aws_region
   command                      = ["/bin/sh", "-c", "python manage.py owasp-update-project-health-requirements && python manage.py owasp-update-project-health-metrics"]
   common_tags                  = var.common_tags
-  container_environment        = var.django_environment_variables
+  container_parameters_arns    = var.container_parameters_arns
   cpu                          = var.update_project_health_metrics_task_cpu
   ecs_cluster_arn              = aws_ecs_cluster.main.arn
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
@@ -139,7 +164,7 @@ module "owasp_update_project_health_scores_task" {
   aws_region                   = var.aws_region
   command                      = ["python", "manage.py", "owasp-update-project-health-scores"]
   common_tags                  = var.common_tags
-  container_environment        = var.django_environment_variables
+  container_parameters_arns    = var.container_parameters_arns
   cpu                          = var.update_project_health_scores_task_cpu
   ecs_cluster_arn              = aws_ecs_cluster.main.arn
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
@@ -160,7 +185,7 @@ module "migrate_task" {
   aws_region                   = var.aws_region
   command                      = ["python", "manage.py", "migrate"]
   common_tags                  = var.common_tags
-  container_environment        = var.django_environment_variables
+  container_parameters_arns    = var.container_parameters_arns
   cpu                          = var.migrate_task_cpu
   ecs_cluster_arn              = aws_ecs_cluster.main.arn
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
@@ -189,7 +214,7 @@ module "load_data_task" {
     EOT
   ]
   common_tags                  = var.common_tags
-  container_environment        = var.django_environment_variables
+  container_parameters_arns    = var.container_parameters_arns
   cpu                          = var.load_data_task_cpu
   ecs_cluster_arn              = aws_ecs_cluster.main.arn
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
@@ -218,7 +243,7 @@ module "index_data_task" {
     EOT
   ]
   common_tags                  = var.common_tags
-  container_environment        = var.django_environment_variables
+  container_parameters_arns    = var.container_parameters_arns
   cpu                          = var.index_data_task_cpu
   ecs_cluster_arn              = aws_ecs_cluster.main.arn
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn

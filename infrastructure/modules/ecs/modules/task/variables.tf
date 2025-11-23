@@ -14,8 +14,8 @@ variable "common_tags" {
   default     = {}
 }
 
-variable "container_environment" {
-  description = "A map of environment variables to pass to the container."
+variable "container_parameters_arns" {
+  description = "A Map of environment variable names to the ARNs of all SSM parameters."
   type        = map(string)
   default     = {}
 }

@@ -43,9 +43,9 @@ resource "aws_ecs_task_definition" "task" {
           "awslogs-stream-prefix" = "ecs"
         }
       }
-      environment = [for name, value in var.container_environment : {
-        name  = name
-        value = value
+      secrets = [for name, valueFrom in var.container_parameters_arns : {
+        name      = name
+        valueFrom = valueFrom
       }]
     }
   ])
