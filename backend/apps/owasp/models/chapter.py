@@ -70,6 +70,12 @@ class Chapter(
         blank=True,
         help_text="Daily contribution counts (YYYY-MM-DD -> count mapping)",
     )
+    contribution_stats = models.JSONField(
+        verbose_name="Contribution Statistics",
+        default=dict,
+        blank=True,
+        help_text="Detailed contribution breakdown (commits, issues, pullRequests, releases)",
+    )
 
     # GRs.
     members = GenericRelation("owasp.EntityMember")
