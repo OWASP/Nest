@@ -38,7 +38,7 @@ const UserCard = ({
               fill
               src={`${avatar}&s=160`}
               alt={name ? `${name}'s profile picture` : 'User profile picture'}
-              objectFit="cover"
+              style={{ objectFit: 'cover' }}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gray-200 dark:bg-gray-700">
