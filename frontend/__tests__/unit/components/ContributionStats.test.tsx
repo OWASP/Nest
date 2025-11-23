@@ -4,7 +4,7 @@ import ContributionStats from 'components/ContributionStats'
 // Mock FontAwesome components
 jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: ({ icon, className }: { icon: unknown; className?: string }) => (
-    <div data-testid="font-awesome-icon" data-icon={String(icon)} className={className} />
+    <div data-testid="font-awesome-icon" data-icon={typeof icon === 'string' ? icon : JSON.stringify(icon)} className={className} />
   ),
 }))
 
@@ -326,13 +326,13 @@ describe('ContributionStats', () => {
       expect(icons).toHaveLength(5)
 
       // Check for specific icon types
-      const chartIcon = icons.find((icon) => icon.getAttribute('data-icon') === 'chart-line')
-      const codeIcon = icons.find((icon) => icon.getAttribute('data-icon') === 'code')
-      const branchIcon = icons.find((icon) => icon.getAttribute('data-icon') === 'code-branch')
+      const chartIcon = icons.find((icon) => (icon as HTMLElement).dataset.icon === 'chart-line')
+      const codeIcon = icons.find((icon) => (icon as HTMLElement).dataset.icon === 'code')
+      const branchIcon = icons.find((icon) => (icon as HTMLElement).dataset.icon === 'code-branch')
       const issueIcon = icons.find(
-        (icon) => icon.getAttribute('data-icon') === 'exclamation-circle'
+        (icon) => (icon as HTMLElement).dataset.icon === 'exclamation-circle'
       )
-      const mergeIcon = icons.find((icon) => icon.getAttribute('data-icon') === 'code-merge')
+      const mergeIcon = icons.find((icon) => (icon as HTMLElement).dataset.icon === 'code-merge')
 
       expect(chartIcon).toBeInTheDocument()
       expect(codeIcon).toBeInTheDocument()
