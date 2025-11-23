@@ -22,11 +22,11 @@ const generateHeatmapSeries = (
       contributionData
     )
   }
-  
+
   const start = new Date(startDate)
   const end = new Date(endDate)
 
-  // Handle invalid dates by using default range  
+  // Handle invalid dates by using default range
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
     const defaultEnd = new Date()
     const defaultStart = new Date()
@@ -37,7 +37,7 @@ const generateHeatmapSeries = (
       contributionData
     )
   }
-  
+
   // Handle invalid range by swapping dates
   if (start > end) {
     return generateHeatmapSeries(endDate, startDate, contributionData)
