@@ -31,7 +31,7 @@ export default defineConfig({
   },
   webServer: {
     command: 'pnpm run build && NEXT_SERVER_DISABLE_SSR=true pnpm run start',
-    timeout: 120_000,
+    timeout: 300_000,
     url: 'http://localhost:3000',
   },
   workers: os.cpus().length,
