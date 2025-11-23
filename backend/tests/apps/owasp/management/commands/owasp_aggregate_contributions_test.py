@@ -29,6 +29,10 @@ class MockQuerySet:
         # Return self to support filter chaining
         return self
 
+    def order_by(self, *fields):
+        """Mock order_by method."""
+        return self
+
     def select_related(self, *_):
         """Mock select_related method."""
         return self
@@ -54,6 +58,9 @@ class TestOwaspAggregateContributions:
         chapter.name = "Test Chapter"
         chapter.owasp_repository = mock.Mock()
         chapter.owasp_repository.id = 1
+        # Fix Django ORM compatibility
+        chapter.owasp_repository.resolve_expression = mock.Mock(return_value=chapter.owasp_repository)
+        chapter.owasp_repository.get_source_expressions = mock.Mock(return_value=[])
         return chapter
 
     @pytest.fixture
@@ -63,7 +70,20 @@ class TestOwaspAggregateContributions:
         project.name = "Test Project"
         project.owasp_repository = mock.Mock()
         project.owasp_repository.id = 1
-        project.repositories.all.return_value = [mock.Mock(id=2), mock.Mock(id=3)]
+        # Fix Django ORM compatibility
+        project.owasp_repository.resolve_expression = mock.Mock(return_value=project.owasp_repository)
+        project.owasp_repository.get_source_expressions = mock.Mock(return_value=[])
+        
+        # Mock additional repositories
+        additional_repo1 = mock.Mock(id=2)
+        additional_repo1.resolve_expression = mock.Mock(return_value=additional_repo1)
+        additional_repo1.get_source_expressions = mock.Mock(return_value=[])
+        
+        additional_repo2 = mock.Mock(id=3)
+        additional_repo2.resolve_expression = mock.Mock(return_value=additional_repo2)
+        additional_repo2.get_source_expressions = mock.Mock(return_value=[])
+        
+        project.repositories.all.return_value = [additional_repo1, additional_repo2]
         return project
 
     def test_aggregate_contribution_dates_helper(self, command):
@@ -188,10 +208,20 @@ class TestOwaspAggregateContributions:
         assert result == {}
 
     @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Chapter")
-    def test_handle_chapters_only(self, mock_chapter_model, command, mock_chapter):
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Commit")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Issue")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.PullRequest")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Release")
+    def test_handle_chapters_only(self, mock_release, mock_pr, mock_issue, mock_commit, mock_chapter_model, command, mock_chapter):
         """Test command execution for chapters only."""
         mock_chapter_model.objects.filter.return_value = MockQuerySet([mock_chapter])
         mock_chapter_model.bulk_save = mock.Mock()
+        
+        # Mock ORM queries to return counts
+        mock_commit.objects.filter.return_value.count.return_value = 5
+        mock_issue.objects.filter.return_value.count.return_value = 3
+        mock_pr.objects.filter.return_value.count.return_value = 2
+        mock_release.objects.filter.return_value.count.return_value = 1
 
         with mock.patch.object(
             command,
@@ -204,10 +234,20 @@ class TestOwaspAggregateContributions:
         assert mock_chapter_model.bulk_save.called
 
     @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Project")
-    def test_handle_projects_only(self, mock_project_model, command, mock_project):
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Commit")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Issue")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.PullRequest")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Release")
+    def test_handle_projects_only(self, mock_release, mock_pr, mock_issue, mock_commit, mock_project_model, command, mock_project):
         """Test command execution for projects only."""
         mock_project_model.objects.filter.return_value = MockQuerySet([mock_project])
         mock_project_model.bulk_save = mock.Mock()
+        
+        # Mock ORM queries to return counts
+        mock_commit.objects.filter.return_value.count.return_value = 8
+        mock_issue.objects.filter.return_value.count.return_value = 4
+        mock_pr.objects.filter.return_value.count.return_value = 3
+        mock_release.objects.filter.return_value.count.return_value = 2
 
         with mock.patch.object(
             command,
@@ -221,8 +261,16 @@ class TestOwaspAggregateContributions:
 
     @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Chapter")
     @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Project")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Commit")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Issue")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.PullRequest")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Release")
     def test_handle_both_entities(
         self,
+        mock_release,
+        mock_pr,
+        mock_issue,
+        mock_commit,
         mock_project_model,
         mock_chapter_model,
         command,
@@ -234,6 +282,12 @@ class TestOwaspAggregateContributions:
         mock_project_model.objects.filter.return_value = MockQuerySet([mock_project])
         mock_chapter_model.bulk_save = mock.Mock()
         mock_project_model.bulk_save = mock.Mock()
+        
+        # Mock ORM queries to return counts
+        mock_commit.objects.filter.return_value.count.return_value = 5
+        mock_issue.objects.filter.return_value.count.return_value = 3
+        mock_pr.objects.filter.return_value.count.return_value = 2
+        mock_release.objects.filter.return_value.count.return_value = 1
 
         with (
             mock.patch.object(
@@ -253,10 +307,20 @@ class TestOwaspAggregateContributions:
         assert mock_project_model.bulk_save.called
 
     @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Chapter")
-    def test_handle_with_specific_key(self, mock_chapter_model, command, mock_chapter):
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Commit")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Issue")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.PullRequest")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Release")
+    def test_handle_with_specific_key(self, mock_release, mock_pr, mock_issue, mock_commit, mock_chapter_model, command, mock_chapter):
         """Test command execution with a specific entity key."""
         mock_chapter_model.objects.filter.return_value = MockQuerySet([mock_chapter])
         mock_chapter_model.bulk_save = mock.Mock()
+        
+        # Mock ORM queries to return counts
+        mock_commit.objects.filter.return_value.count.return_value = 3
+        mock_issue.objects.filter.return_value.count.return_value = 2
+        mock_pr.objects.filter.return_value.count.return_value = 1
+        mock_release.objects.filter.return_value.count.return_value = 1
 
         with mock.patch.object(
             command,
@@ -269,11 +333,21 @@ class TestOwaspAggregateContributions:
         mock_chapter_model.objects.filter.assert_called()
 
     @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Chapter")
-    def test_handle_with_offset(self, mock_chapter_model, command, mock_chapter):
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Commit")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Issue")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.PullRequest")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Release")
+    def test_handle_with_offset(self, mock_release, mock_pr, mock_issue, mock_commit, mock_chapter_model, command, mock_chapter):
         """Test command execution with offset parameter."""
         chapters = [mock_chapter, mock_chapter, mock_chapter]
         mock_chapter_model.objects.filter.return_value = MockQuerySet(chapters)
         mock_chapter_model.bulk_save = mock.Mock()
+        
+        # Mock ORM queries to return counts
+        mock_commit.objects.filter.return_value.count.return_value = 1
+        mock_issue.objects.filter.return_value.count.return_value = 1
+        mock_pr.objects.filter.return_value.count.return_value = 1
+        mock_release.objects.filter.return_value.count.return_value = 0
 
         with mock.patch.object(
             command,
@@ -287,10 +361,20 @@ class TestOwaspAggregateContributions:
         mock_chapter_model.bulk_save.assert_called_once()
 
     @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Chapter")
-    def test_handle_custom_days(self, mock_chapter_model, command, mock_chapter):
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Commit")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Issue")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.PullRequest")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Release")
+    def test_handle_custom_days(self, mock_release, mock_pr, mock_issue, mock_commit, mock_chapter_model, command, mock_chapter):
         """Test command execution with custom days parameter."""
         mock_chapter_model.objects.filter.return_value = MockQuerySet([mock_chapter])
         mock_chapter_model.bulk_save = mock.Mock()
+        
+        # Mock ORM queries to return counts
+        mock_commit.objects.filter.return_value.count.return_value = 0
+        mock_issue.objects.filter.return_value.count.return_value = 0
+        mock_pr.objects.filter.return_value.count.return_value = 0
+        mock_release.objects.filter.return_value.count.return_value = 0
 
         with mock.patch.object(
             command,
