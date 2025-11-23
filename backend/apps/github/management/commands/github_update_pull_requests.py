@@ -22,14 +22,11 @@ class Command(BaseCommand):
     )
 
     def handle(self, *args, **options):
-        linked = 0
-        updated_prs = []
-
         logger.info("Linking PRs to issues using closing keywords")
 
-        queryset = PullRequest.objects.select_related("repository").all()
-
-        for pr in queryset:
+        linked_prs_count = 0
+        updated_prs = []
+        for pr in PullRequest.objects.select_related("repository").all():
             if not pr.repository:
                 logger.info("Skipping PR #%s: no repository", pr.number)
                 continue
@@ -41,13 +38,13 @@ class Command(BaseCommand):
                 continue
             issue_numbers = {int(n) for n in matches}
 
-            issues = list(Issue.objects.filter(repository=pr.repository, number__in=issue_numbers))
+            issues = Issue.objects.filter(repository=pr.repository, number__in=issue_numbers)
 
             existing_ids = set(pr.related_issues.values_list("id", flat=True))
             new_ids = {i.id for i in issues} - existing_ids
             if new_ids:
                 pr.related_issues.add(*new_ids)
-                linked += len(new_ids)
+                linked_prs_count += len(new_ids)
                 updated_prs.append(pr)
                 self.stdout.write(
                     f"Linked PR #{pr.number} ({pr.repository.name}) -> Issues "
@@ -57,4 +54,4 @@ class Command(BaseCommand):
         if updated_prs:
             PullRequest.bulk_save(updated_prs)
 
-        self.stdout.write(f"Linked: {linked}")
+        self.stdout.write(f"Linked: {linked_prs_count}")

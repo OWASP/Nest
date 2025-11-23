@@ -1,7 +1,7 @@
 """GraphQL mutations for mentorship modules in the mentorship app."""
 
-import datetime as dt
 import logging
+from datetime import datetime
 
 import strawberry
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
@@ -209,7 +209,7 @@ class ModuleMutation:
         module_key: str,
         program_key: str,
         issue_number: int,
-        deadline_at: dt.datetime,
+        deadline_at: datetime,
     ) -> ModuleNode:
         """Set a deadline for a task. User must be a mentor and an admin of the program."""
         user = info.context.request.user
@@ -328,17 +328,19 @@ class ModuleMutation:
                 key=input_data.key, program__key=input_data.program_key
             )
         except Module.DoesNotExist as e:
-            raise ObjectDoesNotExist(msg="Module not found.") from e
+            msg = "Module not found."
+            raise ObjectDoesNotExist(msg) from e
 
         try:
             creator_as_mentor = Mentor.objects.get(nest_user=user)
         except Mentor.DoesNotExist as err:
+            msg = "Only mentors can edit modules."
             logger.warning(
                 "User '%s' is not a mentor and cannot edit modules.",
                 user.username,
                 exc_info=True,
             )
-            raise PermissionDenied(msg="Only mentors can edit modules.") from err
+            raise PermissionDenied(msg) from err
 
         if not module.program.admins.filter(id=creator_as_mentor.id).exists():
             raise PermissionDenied

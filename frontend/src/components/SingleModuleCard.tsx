@@ -47,7 +47,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
 
   const handleIssue = () => {
     setDropdownOpen(false)
-    router.push(`${window.location.pathname}/modules/${module.key}/issues`)
+    router.push(`${globalThis.location.pathname}/modules/${module.key}/issues`)
   }
 
   const moduleDetails = [

@@ -9,6 +9,7 @@ from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum
 class MenteeNode:
     """A GraphQL node representing a mentorship mentee."""
 
+    # TODO (@arkid15r): migrate to decorator for consistency.
     id: str
     login: str
     name: str

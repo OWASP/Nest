@@ -260,10 +260,9 @@ def sync_issue_comments(gh_client: Github, issue: Issue):
             else getattr(issue, "updated_at", None)
         )
 
-        comments = []
-
         gh_comments = gh_issue.get_comments(since=since) if since else gh_issue.get_comments()
 
+        comments = []
         for gh_comment in gh_comments:
             author = User.update_data(gh_comment.user)
             if not author:
@@ -285,7 +284,6 @@ def sync_issue_comments(gh_client: Github, issue: Issue):
             len(comments),
             issue.number,
         )
-
     except UnknownObjectException as e:
         logger.warning(
             "Could not access issue #%s. Error: %s",

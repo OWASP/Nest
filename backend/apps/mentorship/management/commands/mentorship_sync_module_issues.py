@@ -15,12 +15,13 @@ from apps.mentorship.utils import normalize_name
 
 
 class Command(BaseCommand):
-    """Efficiently syncs issues to mentorship modules based on matching labels."""
+    """Sync issues to mentorship modules based on matching labels."""
 
     help = (
-        "Syncs issues to modules by matching labels from all repositories "
+        "Sync issues to modules by matching labels from all repositories "
         "associated with the module's project and creates related tasks."
     )
+
     ALLOWED_GITHUB_HOSTS = {"github.com", "www.github.com"}
     REPO_PATH_PARTS = 2
 
@@ -49,7 +50,7 @@ class Command(BaseCommand):
         return Task.Status.TODO
 
     def _get_last_assigned_date(self, repo, issue_number, assignee_login):
-        """Find the most recent 'assigned' event for a specific user using PyGithub."""
+        """Find the most recent 'assigned' event for a specific user."""
         try:
             gh_issue = repo.get_issue(number=issue_number)
             last_dt = None
@@ -99,12 +100,12 @@ class Command(BaseCommand):
         verbosity,
     ):
         """Process a single module to link issues and create tasks."""
-        project_repos = list(module.project.repositories.all())
+        project_repositories = module.project.repositories.all()
         linked_label_names = module.labels
         num_tasks_created = 0
 
         matched_issue_ids = set()
-        for repo in project_repos:
+        for repo in project_repositories:
             for label_name in linked_label_names:
                 normalized_label = normalize_name(label_name)
                 key = (repo.id, normalized_label)
@@ -187,7 +188,7 @@ class Command(BaseCommand):
 
         num_linked = len(matched_issue_ids)
         if num_linked > 0:
-            repo_names = ", ".join([r.name for r in project_repos])
+            repo_names = ", ".join([r.name for r in project_repositories])
             log_message = (
                 f"Updated module '{module.name}': set {num_linked} issues from "
                 f"repos: [{repo_names}]"
@@ -228,7 +229,7 @@ class Command(BaseCommand):
                 repo_cache=repo_cache,
                 verbosity=verbosity,
             )
-            if links_created > 0:
+            if links_created:
                 total_links_created += links_created
                 total_modules_updated += 1
 

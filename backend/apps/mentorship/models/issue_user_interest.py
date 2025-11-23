@@ -12,11 +12,16 @@ class IssueUserInterest(models.Model):
         verbose_name_plural = "Issue User Interests"
         unique_together = ("module", "issue", "user")
 
-    module = models.ForeignKey(
-        "mentorship.Module", on_delete=models.CASCADE, related_name="interests"
-    )
+    # FKs.
     issue = models.ForeignKey(
-        "github.Issue", on_delete=models.CASCADE, related_name="participant_interests"
+        "github.Issue",
+        on_delete=models.CASCADE,
+        related_name="participant_interests",
+    )
+    module = models.ForeignKey(
+        "mentorship.Module",
+        on_delete=models.CASCADE,
+        related_name="interests",
     )
     user = models.ForeignKey(
         "github.User",

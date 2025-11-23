@@ -1,4 +1,5 @@
 'use client'
+
 import { useQuery } from '@apollo/client/react'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'

@@ -19,6 +19,8 @@ from apps.mentorship.models.task import Task
 class ModuleNode:
     """A GraphQL node representing a mentorship module."""
 
+    # TODO (@arkid15r): migrate to decorator for consistency.
+
     id: strawberry.ID
     key: str
     name: str

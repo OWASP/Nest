@@ -47,6 +47,9 @@ class Issue(GenericIssueModel):
 
     comments_count = models.PositiveIntegerField(verbose_name="Comments", default=0)
 
+    # GRs.
+    comments = GenericRelation("github.Comment", related_query_name="issue")
+
     # FKs.
     author = models.ForeignKey(
         "github.User",
@@ -64,9 +67,6 @@ class Issue(GenericIssueModel):
         on_delete=models.SET_NULL,
         related_name="issues",
     )
-
-    comments = GenericRelation("github.Comment", related_query_name="issue")
-
     milestone = models.ForeignKey(
         "github.Milestone",
         on_delete=models.CASCADE,

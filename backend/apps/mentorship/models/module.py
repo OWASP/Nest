@@ -35,12 +35,10 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         blank=True,
         default="",
     )
-
     key = models.CharField(
         verbose_name="Key",
         max_length=200,
     )
-
     name = models.CharField(
         max_length=200,
         verbose_name="Name",
@@ -49,23 +47,21 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
     )
 
     # FKs.
+    labels = models.JSONField(
+        blank=True,
+        default=list,
+        verbose_name="Labels",
+    )
     program = models.ForeignKey(
         "mentorship.Program",
         related_name="modules",
         on_delete=models.CASCADE,
         verbose_name="Program",
     )
-
     project = models.ForeignKey(
         "owasp.Project",
         on_delete=models.CASCADE,
         verbose_name="Project",
-    )
-
-    labels = models.JSONField(
-        blank=True,
-        default=list,
-        verbose_name="Labels",
     )
 
     # M2Ms.
@@ -76,7 +72,6 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         blank=True,
         help_text="Issues linked to this module via label matching.",
     )
-
     mentors = models.ManyToManyField(
         "mentorship.Mentor",
         verbose_name="Mentors",

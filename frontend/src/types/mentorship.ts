@@ -35,19 +35,19 @@ export type ProgramList = {
 }
 
 export type Module = {
+  description: string
+  domains?: string[] | null
+  endedAt: string | number
+  experienceLevel: ExperienceLevelEnum
   id: string
   key: string
-  name: string
-  description: string
-  status?: ProgramStatusEnum
-  experienceLevel: ExperienceLevelEnum
-  mentors: Contributor[]
-  mentees?: Contributor[]
-  startedAt: string | number
-  endedAt: string | number
-  domains?: string[] | null
-  tags?: string[] | null
   labels?: string[] | null
+  mentees?: Contributor[]
+  mentors: Contributor[]
+  name: string
+  startedAt: string | number
+  status?: ProgramStatusEnum
+  tags?: string[] | null
 }
 
 export type ModuleFormData = {

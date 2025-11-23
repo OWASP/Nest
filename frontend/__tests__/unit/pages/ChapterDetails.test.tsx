@@ -127,7 +127,7 @@ describe('chapterDetailsPage Component', () => {
     })
     render(<ChapterDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText(`Want to become a sponsor?`)).toBeInTheDocument()
+      expect(screen.getByText('Want to become a sponsor?')).toBeInTheDocument()
       expect(screen.getByText(`Sponsor ${mockChapterDetailsData.chapter.name}`)).toBeInTheDocument()
     })
   })

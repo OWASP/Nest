@@ -104,7 +104,7 @@ const MyMentorshipPage: React.FC = () => {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-600 dark:text-white">My Mentorship</h1>
-          <p className="text-gray-600 dark:text-gray-400">Programs you’ve created or joined</p>
+          <p className="text-gray-600 dark:text-gray-400">Programs you've created or joined</p>
         </div>
         <ActionButton onClick={handleCreate}>
           <FontAwesomeIcon icon={faPlus} className="mr-2" />

@@ -25,21 +25,18 @@ class Task(TimestampedModel):
         COMPLETED = "COMPLETED", "Completed"
 
     assigned_at = models.DateTimeField(
-        null=True,
         blank=True,
+        null=True,
         help_text="Timestamp when the task was assigned to the mentee.",
     )
-
     deadline_at = models.DateTimeField(
         null=True, blank=True, help_text="Optional deadline for the task."
     )
-
     metadata = models.JSONField(
         default=dict,
         blank=True,
         help_text="Optional data",
     )
-
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
@@ -56,14 +53,12 @@ class Task(TimestampedModel):
         related_name="tasks",
         help_text="The mentee assigned to this task.",
     )
-
     issue = models.ForeignKey(
         "github.Issue",
         on_delete=models.PROTECT,
         related_name="mentorship_tasks",
         help_text="The GitHub issue this task corresponds to.",
     )
-
     module = models.ForeignKey(
         "mentorship.Module",
         on_delete=models.CASCADE,

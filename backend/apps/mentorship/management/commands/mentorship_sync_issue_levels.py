@@ -10,12 +10,12 @@ from apps.mentorship.utils import normalize_name
 
 
 class Command(BaseCommand):
-    """Syncs the `level` field on Issues based on matching labels, respecting Module constraints.
+    """Sync the `level` field on Issues based on matching labels, respecting Module constraints.
 
     If any label matches a TaskLevel in the Issue's Module, that TaskLevel is assigned.
     """
 
-    help = "Assigns a TaskLevel to each Issue by matching labels within the same Module."
+    help = "Assign a TaskLevel to each Issue by matching labels within the same Module."
 
     def _build_module_level_maps(self, all_levels):
         """Build a mapping from module ID to a dictionary of data.

@@ -9,6 +9,11 @@ from apps.mentorship.models.mentee_module import MenteeModule
 class MenteeModuleAdmin(admin.ModelAdmin):
     """Admin view for MenteeModule model."""
 
+    autocomplete_fields = (
+        "mentee",
+        "module",
+    )
+
     list_display = (
         "mentee",
         "module",
@@ -22,11 +27,14 @@ class MenteeModuleAdmin(admin.ModelAdmin):
         "ended_at",
     )
 
+    ordering = (
+        "mentee__github_user__login",
+        "module__name",
+    )
+
     search_fields = (
         "mentee__github_user__login",
         "mentee__github_user__name",
         "module__name",
         "module__program__name",
     )
-
-    ordering = ["mentee__github_user__login", "module__name"]
