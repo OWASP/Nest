@@ -1,16 +1,15 @@
 """WSGI config for OWASP Nest project."""
 
 import os
+from pathlib import Path
+
+import boto3
 
 
-def _populate_environ_from_ssm():
-    ssm_param_path = os.getenv("AWS_SYSTEMS_MANAGER_PARAM_STORE_PATH")
-    if not ssm_param_path:
+def populate_environ_from_ssm():
+    """Populate environment variables from AWS Systems Manager Parameter Store."""
+    if not (ssm_param_path := os.getenv("AWS_SYSTEMS_MANAGER_PARAM_STORE_PATH")):
         return
-
-    from pathlib import Path
-
-    import boto3
 
     client = boto3.client("ssm")
     paginator = client.get_paginator("get_parameters_by_path")
@@ -21,7 +20,7 @@ def _populate_environ_from_ssm():
             os.environ[Path(param["Name"]).name] = param["Value"]
 
 
-_populate_environ_from_ssm()
+populate_environ_from_ssm()
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.local")
 os.environ.setdefault("DJANGO_CONFIGURATION", "Local")

@@ -158,12 +158,12 @@ Migrate and load data into the new database.
 3. **Run ECS Tasks**:
    - Head over to Elastic Container Service in the AWS Console.
    - Click on `owasp-nest-staging-migrate` in `Task Definitions` section.
+   - Select the task definition revision.
    - Click Deploy > Run Task.
    - Use the following configuration:
-      - Task details
-         - Task definition revision: LATEST
       - Networking:
          - VPC: owasp-nest-staging-vpc
+         - Subnets: subnets will be auto-selected due to VPC selection.
          - Security group name: select all with `owasp-nest-staging-` prefix.
             (*Note*: temporary step, will be further improved)
    - Click "Create"
