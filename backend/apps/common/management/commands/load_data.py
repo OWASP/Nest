@@ -27,8 +27,6 @@ class Command(BaseCommand):
 
     def handle(self, *_args, **_options) -> None:
         """Load data into the OWASP Nest application."""
-        fixture_path = _options["fixture_path"]
-
         with index.disable_indexing(), transaction.atomic():
             # Run loaddata
-            call_command("loaddata", fixture_path, "-v", "3")
+            call_command("loaddata", _options["fixture_path"], "-v", "3")
