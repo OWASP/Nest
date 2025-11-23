@@ -51,9 +51,9 @@ runs:
 
       - name: Waiting for the backend to be ready
         run: |
-          until wget --spider http://localhost:8000/a; do
+          until wget --spider http://localhost:9000/a; do
             echo "Waiting for backend..."
-            sleep 3
+            sleep 5
           done
           echo "Backend is up!"
         shell: bash
