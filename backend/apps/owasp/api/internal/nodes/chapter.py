@@ -19,6 +19,7 @@ class GeoLocationType:
     Chapter,
     fields=[
         "contribution_data",
+        "contribution_stats",
         "country",
         "is_active",
         "meetup_group",
