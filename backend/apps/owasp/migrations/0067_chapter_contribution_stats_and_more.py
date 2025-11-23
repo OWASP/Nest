@@ -6,18 +6,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('owasp', '0066_chapter_contribution_data_project_contribution_data'),
+        ("owasp", "0066_chapter_contribution_data_project_contribution_data"),
     ]
 
-    operations = [
-        migrations.AddField(
-            model_name='chapter',
-            name='contribution_stats',
-            field=models.JSONField(blank=True, default=dict, help_text='Detailed contribution breakdown (commits, issues, pullRequests, releases)', verbose_name='Contribution Statistics'),
+operations = [
+    migrations.AddField(
+        model_name="chapter",
+        name="contribution_stats",
+        field=models.JSONField(
+            blank=True,
+            default=dict,
+            help_text="Detailed contribution breakdown (commits, issues, pullRequests, releases)",
+            verbose_name="Contribution Statistics",
         ),
-        migrations.AddField(
-            model_name='project',
-            name='contribution_stats',
-            field=models.JSONField(blank=True, default=dict, help_text='Detailed contribution breakdown (commits, issues, pullRequests, releases)', verbose_name='Contribution Statistics'),
+    ),
+    migrations.AddField(
+        model_name="project",
+        name="contribution_stats",
+        field=models.JSONField(
+            blank=True,
+            default=dict,
+            help_text="Detailed contribution breakdown (commits, issues, pullRequests, releases)",
+            verbose_name="Contribution Statistics",
         ),
-    ]
+    ),
+]
