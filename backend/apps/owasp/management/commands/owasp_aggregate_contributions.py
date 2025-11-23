@@ -199,6 +199,130 @@ class Command(BaseCommand):
 
         return contribution_map
 
+    def calculate_chapter_contribution_stats(
+        self,
+        chapter: Chapter,
+        start_date: datetime,
+    ) -> dict[str, int]:
+        """Calculate detailed contribution statistics for a chapter.
+
+        Args:
+            chapter: Chapter instance
+            start_date: Start date for calculation
+
+        Returns:
+            Dictionary with commits, issues, pullRequests, releases counts
+
+        """
+        stats = {
+            "commits": 0,
+            "issues": 0,
+            "pullRequests": 0,
+            "releases": 0,
+            "total": 0,
+        }
+
+        if not chapter.owasp_repository:
+            return stats
+
+        repository = chapter.owasp_repository
+
+        # Count commits
+        stats["commits"] = Commit.objects.filter(
+            repository=repository,
+            created_at__gte=start_date,
+        ).count()
+
+        # Count issues
+        stats["issues"] = Issue.objects.filter(
+            repository=repository,
+            created_at__gte=start_date,
+        ).count()
+
+        # Count pull requests
+        stats["pullRequests"] = PullRequest.objects.filter(
+            repository=repository,
+            created_at__gte=start_date,
+        ).count()
+
+        # Count releases (exclude drafts)
+        stats["releases"] = Release.objects.filter(
+            repository=repository,
+            published_at__gte=start_date,
+            is_draft=False,
+        ).count()
+
+        # Calculate total
+        stats["total"] = (
+            stats["commits"] + stats["issues"] + stats["pullRequests"] + stats["releases"]
+        )
+
+        return stats
+
+    def calculate_project_contribution_stats(
+        self,
+        project: Project,
+        start_date: datetime,
+    ) -> dict[str, int]:
+        """Calculate detailed contribution statistics for a project.
+
+        Args:
+            project: Project instance
+            start_date: Start date for calculation
+
+        Returns:
+            Dictionary with commits, issues, pullRequests, releases counts
+
+        """
+        stats = {
+            "commits": 0,
+            "issues": 0,
+            "pullRequests": 0,
+            "releases": 0,
+            "total": 0,
+        }
+
+        repositories = list(project.repositories.all())
+        if project.owasp_repository:
+            repositories.append(project.owasp_repository)
+
+        repository_ids = [repo.id for repo in repositories if repo]
+
+        if not repository_ids:
+            return stats
+
+        # Count commits
+        stats["commits"] = Commit.objects.filter(
+            repository_id__in=repository_ids,
+            created_at__gte=start_date,
+        ).count()
+
+        # Count issues
+        stats["issues"] = Issue.objects.filter(
+            repository_id__in=repository_ids,
+            created_at__gte=start_date,
+        ).count()
+
+        # Count pull requests
+        stats["pullRequests"] = PullRequest.objects.filter(
+            repository_id__in=repository_ids,
+            created_at__gte=start_date,
+        ).count()
+
+        # Count releases (exclude drafts)
+        stats["releases"] = Release.objects.filter(
+            repository_id__in=repository_ids,
+            published_at__gte=start_date,
+            is_draft=False,
+        ).count()
+
+        # Calculate total
+        stats["total"] = (
+            stats["commits"] + stats["issues"] + stats["pullRequests"] + stats["releases"]
+        )
+
+        return stats
+
     def handle(self, *args, **options):
         """Execute the command."""
         entity_type = options["entity_type"]
@@ -243,10 +367,15 @@ class Command(BaseCommand):
                 chapter,
                 start_date,
             )
+            contribution_stats = self.calculate_chapter_contribution_stats(
+                chapter,
+                start_date,
+            )
             chapter.contribution_data = contribution_data
+            chapter.contribution_stats = contribution_stats
 
         if chapters:
-            Chapter.bulk_save(chapters, fields=("contribution_data",))
+            Chapter.bulk_save(chapters, fields=("contribution_data", "contribution_stats"))
             self.stdout.write(
                 self.style.SUCCESS(f"✓ Updated {len(chapters)} chapters"),
             )
@@ -272,10 +401,15 @@ class Command(BaseCommand):
                 project,
                 start_date,
             )
+            contribution_stats = self.calculate_project_contribution_stats(
+                project,
+                start_date,
+            )
             project.contribution_data = contribution_data
+            project.contribution_stats = contribution_stats
 
         if projects:
-            Project.bulk_save(projects, fields=("contribution_data",))
+            Project.bulk_save(projects, fields=("contribution_data", "contribution_stats"))
             self.stdout.write(
                 self.style.SUCCESS(f"✓ Updated {len(projects)} projects"),
             )
