@@ -22,10 +22,18 @@ create-superuser:
 	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
 
 exec-backend-command:
+ifeq ($(EXEC_MODE),direct)
+	@$(CMD)
+else
 	@docker exec -i nest-backend $(CMD)
+endif
 
 exec-backend-command-it:
+ifeq ($(EXEC_MODE),direct)
+	@$(CMD)
+else
 	@docker exec -it nest-backend $(CMD) 2>/dev/null
+endif
 
 exec-db-command-it:
 	@docker exec -it nest-db $(CMD)
