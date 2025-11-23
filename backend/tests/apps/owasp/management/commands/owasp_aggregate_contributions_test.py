@@ -29,7 +29,7 @@ class MockQuerySet:
         # Return self to support filter chaining
         return self
 
-    def order_by(self, *fields):
+    def order_by(self, *_fields):
         """Mock order_by method."""
         return self
 

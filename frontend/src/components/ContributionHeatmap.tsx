@@ -40,7 +40,10 @@ const generateHeatmapSeries = (
 
   // Handle invalid range by swapping dates
   if (start > end) {
-    return generateHeatmapSeries(endDate, startDate, contributionData)
+    // Swap the date strings to ensure startDate comes before endDate
+    const swappedStartDate = endDate
+    const swappedEndDate = startDate
+    return generateHeatmapSeries(swappedStartDate, swappedEndDate, contributionData)
   }
 
   const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
