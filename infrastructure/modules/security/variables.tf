@@ -4,6 +4,12 @@ variable "common_tags" {
   default     = {}
 }
 
+variable "create_rds_proxy" {
+  description = "Whether to create an RDS proxy"
+  type        = bool
+  default     = false
+}
+
 variable "db_port" {
   description = "The port for the RDS database"
   type        = number
