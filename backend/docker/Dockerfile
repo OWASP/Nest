@@ -63,5 +63,3 @@ RUN rm -rf /home/owasp/.cache && \
     chmod +x /home/owasp/entrypoint.sh
 
 USER owasp
-
-EXPOSE 8000
