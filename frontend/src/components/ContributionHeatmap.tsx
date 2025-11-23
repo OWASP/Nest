@@ -11,17 +11,36 @@ const generateHeatmapSeries = (
   endDate: string,
   contributionData: Record<string, number>
 ) => {
+  // Handle missing dates by using default range
   if (!startDate || !endDate) {
-    throw new Error('startDate and endDate are required')
+    const defaultEnd = new Date()
+    const defaultStart = new Date()
+    defaultStart.setFullYear(defaultEnd.getFullYear() - 1)
+    return generateHeatmapSeries(
+      defaultStart.toISOString().split('T')[0],
+      defaultEnd.toISOString().split('T')[0],
+      contributionData
+    )
   }
+  
   const start = new Date(startDate)
   const end = new Date(endDate)
 
+  // Handle invalid dates by using default range  
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-    throw new Error('Invalid date format. Expected YYYY-MM-DD')
+    const defaultEnd = new Date()
+    const defaultStart = new Date()
+    defaultStart.setFullYear(defaultEnd.getFullYear() - 1)
+    return generateHeatmapSeries(
+      defaultStart.toISOString().split('T')[0],
+      defaultEnd.toISOString().split('T')[0],
+      contributionData
+    )
   }
+  
+  // Handle invalid range by swapping dates
   if (start > end) {
-    throw new Error('startDate must be before or equal to endDate')
+    return generateHeatmapSeries(endDate, startDate, contributionData)
   }
 
   const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
