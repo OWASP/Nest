@@ -18,6 +18,7 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetProjectDocument } from 'types/__generated__/projectQueries.generated'
 import type { Contributor } from 'types/contributor'
 import type { Project } from 'types/project'
+import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import ContributionHeatmap from 'components/ContributionHeatmap'
@@ -101,27 +102,11 @@ const ProjectDetailsPage = () => {
   const startDate = oneYearAgo.toISOString().split('T')[0]
   const endDate = today.toISOString().split('T')[0]
 
-  // Calculate estimated contribution stats from heatmap data
-  // Note: These are rough estimates since backend aggregates all contribution types
-  const contributionStats = project.contributionData
-    ? (() => {
-        const totalContributions = Object.values(project.contributionData).reduce(
-          (sum, count) => sum + count,
-          0
-        )
-        // Frontend estimates - actual breakdown requires backend per-type data
-        const commits = Math.floor(totalContributions * 0.6) // Estimated ~60% commits
-        const issues = Math.floor(totalContributions * 0.23) // Estimated ~23% issues
-        const pullRequests = Math.floor(totalContributions * 0.15) // Estimated ~15% PRs
-
-        return {
-          commits,
-          pullRequests,
-          issues,
-          total: totalContributions,
-        }
-      })()
-    : undefined
+  // Use real contribution stats from API with fallback to legacy data
+  const contributionStats = getContributionStats(
+    project.contributionStats,
+    project.contributionData
+  )
 
   return (
     <>
