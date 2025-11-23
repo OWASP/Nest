@@ -138,8 +138,8 @@ describe('ContributionHeatmap', () => {
 
       await waitFor(() => {
         const chart = screen.getByTestId('contribution-heatmap-chart')
-        expect(chart).toHaveAttribute('data-height', '200')
-        expect(chart).toHaveAttribute('data-width', '1200px')
+        expect(chart).toHaveAttribute('data-height', '220')
+        expect(chart).toHaveAttribute('data-width', '100%')
       })
     })
 
@@ -148,7 +148,7 @@ describe('ContributionHeatmap', () => {
 
       await waitFor(() => {
         const chart = screen.getByTestId('contribution-heatmap-chart')
-        expect(chart).toHaveAttribute('data-height', '100%')
+        expect(chart).toHaveAttribute('data-height', '180')
         expect(chart).toHaveAttribute('data-width', '100%')
       })
     })
@@ -158,8 +158,8 @@ describe('ContributionHeatmap', () => {
 
       await waitFor(() => {
         const chart = screen.getByTestId('contribution-heatmap-chart')
-        expect(chart).toHaveAttribute('data-height', '200')
-        expect(chart).toHaveAttribute('data-width', '1200px')
+        expect(chart).toHaveAttribute('data-height', '220')
+        expect(chart).toHaveAttribute('data-width', '100%')
       })
     })
   })
@@ -556,7 +556,7 @@ describe('ContributionHeatmap', () => {
 
       const container = screen.getByTestId('contribution-heatmap-chart').parentElement
         ?.parentElement
-      expect(container).toHaveClass('max-w-5xl')
+      expect(container).toHaveClass('w-full', 'overflow-x-auto')
     })
   })
 
@@ -567,7 +567,7 @@ describe('ContributionHeatmap', () => {
       await waitFor(() => {
         const chart = screen.getByTestId('contribution-heatmap-chart')
         const container = chart.parentElement
-        expect(container).toHaveClass('heatmap-container-default')
+        expect(container).toHaveClass('inline-block', 'min-w-[640px]', 'md:min-w-full')
       })
     })
 
@@ -577,7 +577,7 @@ describe('ContributionHeatmap', () => {
       await waitFor(() => {
         const chart = screen.getByTestId('contribution-heatmap-chart')
         const container = chart.parentElement
-        expect(container).toHaveClass('heatmap-container-compact')
+        expect(container).toHaveClass('inline-block', 'min-w-full')
       })
     })
   })
