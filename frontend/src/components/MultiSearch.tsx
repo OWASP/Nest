@@ -48,7 +48,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         if (query && query.trim() !== '') {
           sendGAEvent({
             event: 'homepageSearch',
-            path: window.location.pathname,
+            path: globalThis.location.pathname,
             value: query,
           })
         }
@@ -100,7 +100,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           router.push(`/chapters/${suggestion.key}`)
           break
         case 'events':
-          window.open((suggestion as Event).url, '_blank')
+          globalThis.open((suggestion as Event).url, '_blank')
           break
         case 'organizations':
           // Use type guard to safely access login property
@@ -264,7 +264,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                 <ul>
                   {suggestion.hits.map((hit, subIndex) => (
                     <li
-                      key={subIndex}
+                      key={`${hit.key || hit.login || hit.url}-${subIndex}`}
                       className={`flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
                         highlightedIndex &&
                         highlightedIndex.index === index &&

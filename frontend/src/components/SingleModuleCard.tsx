@@ -35,19 +35,19 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
     accessLevel === 'admin' &&
     admins?.some((admin) => admin.login === ((data as ExtendedSession)?.user?.login as string))
 
-  const handleView = () => {
-    setDropdownOpen(false)
-    router.push(`${window.location.pathname}/modules/${module.key}`)
-  }
-
   const handleEdit = () => {
     setDropdownOpen(false)
-    router.push(`${window.location.pathname}/modules/${module.key}/edit`)
+    router.push(`${globalThis.location.pathname}/modules/${module.key}/edit`)
   }
 
   const handleCreate = () => {
     setDropdownOpen(false)
-    router.push(`${window.location.pathname}/modules/create`)
+    router.push(`${globalThis.location.pathname}/modules/create`)
+  }
+
+  const handleIssue = () => {
+    setDropdownOpen(false)
+    router.push(`${globalThis.location.pathname}/modules/${module.key}/issues`)
   }
 
   const moduleDetails = [
@@ -73,7 +73,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
         <div className="flex cursor-pointer items-center gap-2">
           <FontAwesomeIcon icon={faUsers} className="text-gray-500 dark:text-gray-300" />
           <Link
-            href={`${window.location.pathname}/modules/${module.key}`}
+            href={`${globalThis.location.pathname}/modules/${module.key}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1"
@@ -89,41 +89,45 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
           </Link>
         </div>
 
-        <div className="relative" ref={dropdownRef}>
-          <button
-            onClick={() => setDropdownOpen((prev) => !prev)}
-            className="rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
-          >
-            <FontAwesomeIcon icon={faEllipsisV} />
-          </button>
+        {isAdmin && (
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setDropdownOpen((prev) => !prev)}
+              className="rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
+            >
+              <FontAwesomeIcon icon={faEllipsisV} />
+            </button>
 
-          {dropdownOpen && (
-            <div className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
-              <button
-                onClick={handleView}
-                className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                View Module
-              </button>
-              {showEdit && isAdmin && (
-                <button
-                  onClick={handleEdit}
-                  className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  Edit Module
-                </button>
-              )}
-              {isAdmin && (
-                <button
-                  onClick={handleCreate}
-                  className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  Create Module
-                </button>
-              )}
-            </div>
-          )}
-        </div>
+            {dropdownOpen && (
+              <div className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                {showEdit && isAdmin && (
+                  <button
+                    onClick={handleEdit}
+                    className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    Edit Module
+                  </button>
+                )}
+                {isAdmin && (
+                  <button
+                    onClick={handleCreate}
+                    className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    Create Module
+                  </button>
+                )}
+                {isAdmin && (
+                  <button
+                    onClick={handleIssue}
+                    className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    View Issues
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Description */}

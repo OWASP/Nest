@@ -11,6 +11,8 @@ from apps.github.models.pull_request import PullRequest
     PullRequest,
     fields=[
         "created_at",
+        "merged_at",
+        "state",
         "title",
     ],
 )

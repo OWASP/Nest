@@ -22,6 +22,7 @@ import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
 import Leaders from 'components/Leaders'
 import LeadersList from 'components/LeadersList'
+import MenteeContributorsList from 'components/MenteeContributorsList'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import Milestones from 'components/Milestones'
 import ModuleCard from 'components/ModuleCard'
@@ -46,8 +47,10 @@ const DetailsCard = ({
   tags,
   domains,
   entityLeaders,
+  labels,
   modules,
   mentors,
+  mentees,
   admins,
   entityKey,
   geolocationData = null,
@@ -55,6 +58,7 @@ const DetailsCard = ({
   isActive = true,
   isArchived = false,
   languages,
+  programKey,
   projectName,
   pullRequests,
   recentIssues,
@@ -73,6 +77,17 @@ const DetailsCard = ({
 }: DetailsCardProps) => {
   const { data } = useSession()
   const router = useRouter()
+
+  // compute styles based on type prop
+  const secondaryCardStyles = (() => {
+    if (type === 'program' || type === 'module') {
+      return 'gap-2 md:col-span-7'
+    } else if (type === 'chapter') {
+      return 'gap-2 md:col-span-3'
+    }
+    return 'gap-2 md:col-span-5'
+  })()
+
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
@@ -80,22 +95,33 @@ const DetailsCard = ({
           <div className="flex w-full items-center justify-between">
             <h1 className="text-4xl font-bold">{title}</h1>
             {type === 'program' && accessLevel === 'admin' && canUpdateStatus && (
-              <ProgramActions status={status} setStatus={setStatus} />
+              <ProgramActions programKey={programKey} status={status} setStatus={setStatus} />
             )}
             {type === 'module' &&
               accessLevel === 'admin' &&
               admins?.some(
                 (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
               ) && (
-                <button
-                  type="button"
-                  className="flex items-center justify-center gap-2 rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-nowrap text-[#0D6EFD] transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
-                  onClick={() => {
-                    router.push(`${window.location.pathname}/edit`)
-                  }}
-                >
-                  Edit Module
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    className="flex items-center justify-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-2 py-2 text-nowrap text-[#1D7BD7] hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white"
+                    onClick={() => {
+                      router.push(`${globalThis.location.pathname}/issues`)
+                    }}
+                  >
+                    View Issues
+                  </button>
+                  <button
+                    type="button"
+                    className="flex items-center justify-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-2 py-2 text-nowrap text-[#1D7BD7] hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white"
+                    onClick={() => {
+                      router.push(`${globalThis.location.pathname}/edit`)
+                    }}
+                  >
+                    Edit Module
+                  </button>
+                </div>
               )}
             <div className="flex items-center gap-3">
               {!isActive && <StatusBadge status="inactive" size="md" />}
@@ -122,13 +148,7 @@ const DetailsCard = ({
           <SecondaryCard
             icon={faRectangleList}
             title={<AnchorTitle title={`${upperFirst(type)} Details`} />}
-            className={
-              type === 'program' || type === 'module'
-                ? 'gap-2 md:col-span-7'
-                : type !== 'chapter'
-                  ? 'gap-2 md:col-span-5'
-                  : 'gap-2 md:col-span-3'
-            }
+            className={secondaryCardStyles}
           >
             {details?.map((detail) =>
               detail?.label === 'Leaders' ? (
@@ -156,8 +176,8 @@ const DetailsCard = ({
               title={<AnchorTitle title="Statistics" />}
               className="md:col-span-2"
             >
-              {stats.map((stat, index) => (
-                <div key={index}>
+              {stats.map((stat) => (
+                <div key={`${stat.unit}-${stat.value}`}>
                   <InfoBlock
                     className="pb-1"
                     icon={stat.icon}
@@ -202,26 +222,38 @@ const DetailsCard = ({
           </div>
         )}
         {(type === 'program' || type === 'module') && (
-          <div
-            className={`mb-8 grid grid-cols-1 gap-6 ${(tags?.length || 0) === 0 || (domains?.length || 0) === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
-          >
-            {tags?.length > 0 && (
-              <ToggleableList
-                items={tags}
-                icon={faTags}
-                label={<AnchorTitle title="Tags" />}
-                isDisabled={true}
-              />
+          <>
+            <div
+              className={`mb-8 grid grid-cols-1 gap-6 ${(tags?.length || 0) === 0 || (domains?.length || 0) === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
+            >
+              {tags?.length > 0 && (
+                <ToggleableList
+                  items={tags}
+                  icon={faTags}
+                  label={<AnchorTitle title="Tags" />}
+                  isDisabled={true}
+                />
+              )}
+              {domains?.length > 0 && (
+                <ToggleableList
+                  items={domains}
+                  icon={faChartPie}
+                  label={<AnchorTitle title="Domains" />}
+                  isDisabled={true}
+                />
+              )}
+            </div>
+            {labels?.length > 0 && (
+              <div className="mb-8">
+                <ToggleableList
+                  items={labels}
+                  icon={faTags}
+                  label={<AnchorTitle title="Labels" />}
+                  isDisabled={true}
+                />
+              </div>
             )}
-            {domains?.length > 0 && (
-              <ToggleableList
-                items={domains}
-                icon={faChartPie}
-                label={<AnchorTitle title="Domains" />}
-                isDisabled={true}
-              />
-            )}
-          </div>
+          </>
         )}
         {entityLeaders && entityLeaders.length > 0 && <Leaders users={entityLeaders} />}
         {topContributors && (
@@ -245,6 +277,16 @@ const DetailsCard = ({
             contributors={mentors}
             maxInitialDisplay={6}
             label="Mentors"
+          />
+        )}
+        {mentees && mentees.length > 0 && (
+          <MenteeContributorsList
+            icon={faUsers}
+            contributors={mentees}
+            maxInitialDisplay={6}
+            label="Mentees"
+            programKey={programKey || ''}
+            moduleKey={entityKey || ''}
           />
         )}
         {(type === 'project' ||
@@ -313,9 +355,9 @@ export const SocialLinks = ({ urls }) => {
     <div>
       <strong>Social Links</strong>
       <div className="mt-2 flex flex-wrap gap-3">
-        {urls.map((url, index) => (
+        {urls.map((url) => (
           <a
-            key={index}
+            key={url}
             href={url}
             target="_blank"
             rel="noopener noreferrer"

@@ -6,12 +6,14 @@ import {
   faHourglassHalf,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { capitalize } from 'lodash'
-import { useRouter } from 'next/navigation'
+import upperFirst from 'lodash/upperFirst'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import { TextInfoItem } from 'components/InfoItem'
+import { LabelList } from 'components/LabelList'
 import SingleModuleCard from 'components/SingleModuleCard'
 import { TruncatedText } from 'components/TruncatedText'
 
@@ -68,37 +70,40 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
 }
 
 const ModuleItem = ({ details }: { details: Module }) => {
-  const router = useRouter()
-  const handleClick = () => {
-    router.push(`${window.location.pathname}/modules/${details.key}`)
-  }
-
+  const pathname = usePathname()
   return (
     <div className="flex h-46 w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
-      <button
-        type="button"
-        onClick={handleClick}
+      <Link
+        href={`${pathname}/modules/${details.key}`}
         className="text-start font-semibold text-blue-400 hover:underline"
       >
         <TruncatedText text={details?.name} />
-      </button>
-      <TextInfoItem icon={faLevelUpAlt} label="Level" value={capitalize(details.experienceLevel)} />
+      </Link>
+      <TextInfoItem icon={faLevelUpAlt} label="Level" value={upperFirst(details.experienceLevel)} />
       <TextInfoItem icon={faCalendarAlt} label="Start" value={formatDate(details.startedAt)} />
       <TextInfoItem
         icon={faHourglassHalf}
         label="Duration"
         value={getSimpleDuration(details.startedAt, details.endedAt)}
       />
+      {details.labels && details.labels.length > 0 && (
+        <div className="mt-2">
+          <LabelList labels={details.labels} maxVisible={3} />
+        </div>
+      )}
     </div>
   )
 }
 
 export default ModuleCard
 
-export const getSimpleDuration = (start: string, end: string): string => {
-  const startDate = new Date(start)
-  const endDate = new Date(end)
-  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+export const getSimpleDuration = (start: string | number, end: string | number): string => {
+  if (!start || !end) return 'N/A'
+
+  const startDate = typeof start === 'number' ? new Date(start * 1000) : new Date(start)
+  const endDate = typeof end === 'number' ? new Date(end * 1000) : new Date(end)
+
+  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
     return 'Invalid duration'
   }
 

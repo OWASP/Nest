@@ -10,7 +10,7 @@ repos:
         exclude: (.github|pnpm-lock.yaml)
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.2
+    rev: v0.14.6
     hooks:
       - id: ruff-check
         args:
@@ -83,6 +83,6 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.11.0
+    rev: v2.11.1
     hooks:
       - id: pyproject-fmt

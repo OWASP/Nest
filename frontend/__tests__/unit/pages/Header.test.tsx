@@ -81,8 +81,12 @@ jest.mock('components/NavDropDown', () => {
     return (
       <div data-testid="nav-dropdown">
         {link.text}
-        {link.submenu?.map((sub: { href: string; text: string }, i: number) => (
-          <a key={i} href={sub.href} className={pathname === sub.href ? 'active' : ''}>
+        {link.submenu?.map((sub: { href: string; text: string }) => (
+          <a
+            key={`${sub.text}-${sub.href}`}
+            href={sub.href}
+            className={pathname === sub.href ? 'active' : ''}
+          >
             {sub.text}
           </a>
         ))}
@@ -190,7 +194,7 @@ describe('Header Component', () => {
   beforeEach(() => {
     mockUsePathname.mockReturnValue('/')
     // Mock window.innerWidth
-    Object.defineProperty(window, 'innerWidth', {
+    Object.defineProperty(globalThis, 'innerWidth', {
       writable: true,
       configurable: true,
       value: 1024,
@@ -487,7 +491,7 @@ describe('Header Component', () => {
 
       // Simulate resize event
       await act(async () => {
-        window.dispatchEvent(new Event('resize'))
+        globalThis.dispatchEvent(new Event('resize'))
       })
 
       // Test passes if no errors are thrown
@@ -685,7 +689,7 @@ describe('Header Component', () => {
 
     it('shows mobile menu button for mobile screens', () => {
       // Set window width to simulate mobile
-      Object.defineProperty(window, 'innerWidth', {
+      Object.defineProperty(globalThis, 'innerWidth', {
         writable: true,
         configurable: true,
         value: 400,

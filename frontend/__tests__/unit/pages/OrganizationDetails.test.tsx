@@ -207,7 +207,7 @@ describe('OrganizationDetailsPage', () => {
     })
     render(<OrganizationDetailsPage />)
     await waitFor(() => {
-      expect(screen.queryByText(`Want to become a sponsor?`)).toBeNull()
+      expect(screen.queryByText('Want to become a sponsor?')).toBeNull()
     })
   })
 })

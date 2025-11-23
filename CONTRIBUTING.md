@@ -281,7 +281,7 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
      make run
      ```
 
-   - Leave this terminal session running and wait until you see that [Nest local](http://localhost:8000/api/v1) is responding.
+   - Leave this terminal session running and wait until you see that [Nest local](http://localhost:8000/api/v0) is responding.
    - Please note as we use containerized approach this command must be run in parallel to other Nest commands you may want to use. You need to keep it running in the current terminal and use another terminal session for your work.
 
 1. **Load Initial Data**:
@@ -302,7 +302,7 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 
 1. **Verify API Endpoints**:
    - Check the following endpoints availability:
-     - [API](http://localhost:8000/api/v1/)
+     - [API](http://localhost:8000/api/v0/)
      - [GraphQL](http://localhost:8000/graphql/)
 
 ### Optional Steps
