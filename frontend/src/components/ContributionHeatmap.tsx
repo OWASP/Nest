@@ -12,8 +12,19 @@ const generateHeatmapSeries = (
   endDate: string,
   contributionData: Record<string, number>
 ) => {
+  // Validate date strings
+  if (!startDate || !endDate) {
+    throw new Error('startDate and endDate are required')
+  }
   const start = new Date(startDate)
   const end = new Date(endDate)
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    throw new Error('Invalid date format. Expected YYYY-MM-DD')
+  }
+  if (start > end) {
+    throw new Error('startDate must be before or equal to endDate')
+  }
   const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
   // Initialize series for each day of week
@@ -34,11 +45,8 @@ const generateHeatmapSeries = (
     const dayOfWeek = currentDate.getDay()
     // Convert Sunday=0 to Sunday=6, Monday=1 to Monday=0, etc.
     const adjustedDayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1
-    // Format date in local time to avoid timezone shift
-    const year = currentDate.getFullYear()
-    const month = String(currentDate.getMonth() + 1).padStart(2, '0')
-    const day = String(currentDate.getDate()).padStart(2, '0')
-    const dateStr = `${year}-${month}-${day}`
+    // Format date as UTC to match tooltip parsing
+    const dateStr = currentDate.toISOString().split('T')[0]
     const weekLabel = `W${weekNumber}`
 
     // Only count contributions within the actual range
@@ -164,8 +172,9 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
 
       const count = data.y
       const date = data.date
-      // Parse date as UTC to match data format
-      const formattedDate = new Date(date + 'T00:00:00Z').toLocaleDateString('en-US', {
+      // Parse date as UTC to match data format (YYYY-MM-DD expected)
+      const parsedDate = new Date(date + 'T00:00:00Z')
+      const formattedDate = parsedDate.toLocaleDateString('en-US', {
         weekday: 'short',
         month: 'short',
         day: 'numeric',
