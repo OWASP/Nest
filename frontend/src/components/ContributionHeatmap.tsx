@@ -298,7 +298,7 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
             options={options}
             series={heatmapSeries}
             type="heatmap"
-            height={isCompact ? 180 : 220}
+            height={isCompact ? 160 : 200}
             width="100%"
           />
         </div>
