@@ -47,6 +47,13 @@ export type Project = {
   repositories?: RepositoryCardProps[]
   recentMilestones?: Milestone[]
   contributionData?: Record<string, number>
+  contributionStats?: {
+    commits: number
+    issues: number
+    pullRequests: number
+    releases: number
+    total: number
+  }
 }
 
 export type RepositoryCardListProps = {
