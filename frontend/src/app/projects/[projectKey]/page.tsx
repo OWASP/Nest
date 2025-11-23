@@ -130,17 +130,20 @@ const ProjectDetailsPage = () => {
         type="project"
       />
       {project.contributionData && Object.keys(project.contributionData).length > 0 && (
-        <div className="bg-white pb-10 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
-          <div className="mx-auto max-w-6xl">
-            <div className="rounded-lg bg-gray-100 px-14 pt-6 shadow-md dark:bg-gray-800">
+        <div className="bg-white px-4 pb-10 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+          <div className="mx-auto w-full max-w-6xl">
+            <div className="rounded-lg bg-gray-100 px-4 pt-6 shadow-md sm:px-6 lg:px-10 dark:bg-gray-800">
               <ContributionStats title="Project Contribution Activity" stats={contributionStats} />
-              <div className="flex w-full items-center justify-center">
-                <ContributionHeatmap
-                  contributionData={project.contributionData}
-                  startDate={startDate}
-                  endDate={endDate}
-                  unit="contribution"
-                />
+
+              <div className="mt-4 flex w-full items-center justify-center">
+                <div className="w-full">
+                  <ContributionHeatmap
+                    contributionData={project.contributionData}
+                    startDate={startDate}
+                    endDate={endDate}
+                    unit="contribution"
+                  />
+                </div>
               </div>
             </div>
           </div>

@@ -6,13 +6,11 @@ const Chart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
 })
 
-// Helper function to generate heatmap series data
 const generateHeatmapSeries = (
   startDate: string,
   endDate: string,
   contributionData: Record<string, number>
 ) => {
-  // Validate date strings
   if (!startDate || !endDate) {
     throw new Error('startDate and endDate are required')
   }
@@ -25,15 +23,14 @@ const generateHeatmapSeries = (
   if (start > end) {
     throw new Error('startDate must be before or equal to endDate')
   }
+
   const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-  // Initialize series for each day of week
   const series = dayNames.map((day) => ({
     name: day,
     data: [] as Array<{ x: string; y: number; date: string }>,
   }))
 
-  // Find the first Monday before or on start date
   const firstDay = new Date(start)
   const daysToMonday = (firstDay.getDay() + 6) % 7
   firstDay.setDate(firstDay.getDate() - daysToMonday)
@@ -43,13 +40,10 @@ const generateHeatmapSeries = (
 
   while (currentDate <= end) {
     const dayOfWeek = currentDate.getDay()
-    // Convert Sunday=0 to Sunday=6, Monday=1 to Monday=0, etc.
     const adjustedDayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1
-    // Format date as UTC to match tooltip parsing
     const dateStr = currentDate.toISOString().split('T')[0]
     const weekLabel = `W${weekNumber}`
 
-    // Only count contributions within the actual range
     const isInRange = currentDate >= start && currentDate <= end
     const contributionCount = isInRange ? contributionData?.[dateStr] || 0 : 0
 
@@ -59,21 +53,17 @@ const generateHeatmapSeries = (
       date: dateStr,
     })
 
-    // Move to next day
     currentDate.setDate(currentDate.getDate() + 1)
 
-    // Increment week number when we hit Monday
     if (currentDate.getDay() === 1 && currentDate <= end) {
       weekNumber++
     }
   }
 
-  // Reverse the series so Monday is at the top and Sunday at the bottom
   const reversedSeries = series.slice().reverse()
   return { heatmapSeries: reversedSeries }
 }
 
-// Helper function to generate chart options
 const getChartOptions = (isDarkMode: boolean, unit: string) => ({
   chart: {
     type: 'heatmap' as const,
@@ -172,7 +162,6 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
 
       const count = data.y
       const date = data.date
-      // Parse date as UTC to match data format (YYYY-MM-DD expected)
       const parsedDate = new Date(date + 'T00:00:00Z')
       const formattedDate = parsedDate.toLocaleDateString('en-US', {
         weekday: 'short',
@@ -184,7 +173,6 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
       const bgColor = isDarkMode ? '#1F2937' : '#FFFFFF'
       const textColor = isDarkMode ? '#F3F4F6' : '#111827'
       const secondaryColor = isDarkMode ? '#9CA3AF' : '#6B7280'
-
       const unitLabel = count !== 1 ? `${unit}s` : unit
 
       return `
@@ -251,7 +239,6 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
 }) => {
   const { theme } = useTheme()
   const isDarkMode = theme === 'dark'
-
   const isCompact = variant === 'compact'
 
   const { heatmapSeries } = useMemo(
@@ -262,11 +249,13 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
   const options = useMemo(() => getChartOptions(isDarkMode, unit), [isDarkMode, unit])
 
   return (
-    <div className="">
+    <div className="w-full">
       {title && (
         <h3 className="mb-4 text-sm font-semibold text-gray-800 dark:text-gray-200">{title}</h3>
       )}
-      <div className="max-w-5xl">
+
+      {/* scroll wrapper for small screens */}
+      <div className="w-full overflow-x-auto">
         <style>
           {`
             .apexcharts-tooltip {
@@ -277,29 +266,18 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
             .apexcharts-tooltip * {
               border: none !important;
             }
-            .heatmap-container-${isCompact ? 'compact' : 'default'} {
-              width: 100%;
-              ${isCompact ? 'min-width: 380px;' : 'max-width: 100%; overflow: visible;'}
-            }
-            .heatmap-container-${isCompact ? 'compact' : 'default'} .apexcharts-heatmap-rect {
-              rx: 2;
-              ry: 2;
-            }
-            ${isCompact ? '' : '.heatmap-container-default .apexcharts-canvas { transform: scale(0.85); transform-origin: left top; }'}
-            @media (max-width: 768px) {
-              .heatmap-container-${isCompact ? 'compact' : 'default'} {
-                ${isCompact ? 'min-width: 320px;' : 'transform: scale(0.7); transform-origin: left top;'}
-              }
-            }
           `}
         </style>
-        <div className={`heatmap-container-${isCompact ? 'compact' : 'default'}`}>
+
+        <div
+          className={`inline-block ${isCompact ? 'min-w-full' : 'min-w-[640px] md:min-w-full'} `}
+        >
           <Chart
             options={options}
             series={heatmapSeries}
             type="heatmap"
-            height={isCompact ? '100%' : 200}
-            width={isCompact ? '100%' : '1200px'}
+            height={isCompact ? 180 : 220}
+            width="100%"
           />
         </div>
       </div>
