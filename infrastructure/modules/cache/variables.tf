@@ -26,13 +26,6 @@ variable "project_name" {
   type        = string
 }
 
-variable "redis_auth_token" {
-  description = "The auth token for Redis"
-  type        = string
-  sensitive   = true
-  default     = null
-}
-
 variable "redis_engine_version" {
   description = "The version of the Redis engine"
   type        = string
