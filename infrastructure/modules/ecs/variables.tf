@@ -15,6 +15,11 @@ variable "container_parameters_arns" {
   default     = {}
 }
 
+variable "ecs_sg_id" {
+  description = "The ID of the security group for the ECS tasks"
+  type        = string
+}
+
 variable "environment" {
   description = "The environment (e.g., staging, production)"
   type        = string
@@ -42,10 +47,7 @@ variable "index_data_task_memory" {
   default     = "2048"
 }
 
-variable "lambda_sg_id" {
-  description = "The ID of the security group for the Lambda function"
-  type        = string
-}
+
 
 variable "load_data_task_cpu" {
   description = "The CPU for the load-data task"
