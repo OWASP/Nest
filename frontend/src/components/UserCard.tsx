@@ -28,6 +28,7 @@ const UserCard = ({
 }: UserCardProps) => {
   return (
     <Button
+    type="button"
       onPress={button.onclick}
       className={`group flex flex-col items-center rounded-lg px-6 py-6 ${className}`}
     >

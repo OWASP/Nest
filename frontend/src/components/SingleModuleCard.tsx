@@ -92,6 +92,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
         {isAdmin && (
           <div className="relative" ref={dropdownRef}>
             <button
+            type="button"
               onClick={() => setDropdownOpen((prev) => !prev)}
               className="rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
             >
@@ -102,6 +103,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
               <div className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
                 {showEdit && isAdmin && (
                   <button
+                  type="button"
                     onClick={handleEdit}
                     className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
@@ -110,6 +112,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
                 )}
                 {isAdmin && (
                   <button
+                  type="button"
                     onClick={handleCreate}
                     className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
@@ -118,6 +121,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
                 )}
                 {isAdmin && (
                   <button
+                  type="button"
                     onClick={handleIssue}
                     className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                   >

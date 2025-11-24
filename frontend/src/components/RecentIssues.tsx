@@ -36,6 +36,7 @@ const RecentIssues: React.FC<RecentIssuesProps> = ({ data, showAvatar = true }) 
             <div className="flex flex-1 items-center overflow-hidden">
               <FontAwesomeIcon icon={faFolderOpen} className="mr-2 h-5 w-4" />
               <button
+              type="button"
                 className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
                 onClick={() =>
                   router.push(
