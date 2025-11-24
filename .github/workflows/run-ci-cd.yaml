@@ -55,10 +55,16 @@ jobs:
           restore-keys: |
             pre-commit-${{ runner.os }}-
 
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd
+        with:
+          terraform_version: 1.14.0
+
       - name: Setup TFLint
         uses: terraform-linters/setup-tflint@dfcb455ed8d56b55edf6447a37379108181a6707
         with:
-          tflint_version: v0.59.1
+          cache: true
+          tflint_version: v0.60.0
 
       - name: Run pre-commit
         uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd
