@@ -1,5 +1,6 @@
 'use client'
 import { useApolloClient } from '@apollo/client/react'
+import DomainSelect from './DomainSelect'
 import debounce from 'lodash/debounce'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
@@ -63,9 +64,7 @@ const ModuleForm = ({
         <form onSubmit={onSubmit}>
           <div className="flex flex-col gap-8 p-8">
             <section className="flex flex-col gap-6">
-              <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
-                Module Information
-              </h2>
+
               <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
                 <div className="lg:col-span-2">
                   <label htmlFor="module-name" className="mb-2 block text-sm font-semibold">
@@ -100,9 +99,7 @@ const ModuleForm = ({
             </section>
 
             <section className="flex flex-col gap-6">
-              <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
-                Module Configuration
-              </h2>
+
               <div className="grid grid-cols-1 gap-6 text-gray-600 md:grid-cols-2 lg:grid-cols-3 dark:text-gray-300">
                 <div>
                   <label htmlFor="startedAt" className="mb-2 block text-sm font-semibold">
@@ -154,22 +151,12 @@ const ModuleForm = ({
             </section>
 
             <section className="flex flex-col gap-6">
-              <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
-                Additional Details
-              </h2>
+
               <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
-                <div>
-                  <label htmlFor="domains" className="mb-2 block text-sm font-semibold">
-                    Domains
-                  </label>
-                  <input
-                    id="domains"
-                    type="text"
-                    name="domains"
+                <div className="">
+                  <DomainSelect
                     value={formData.domains}
-                    onChange={handleInputChange}
-                    placeholder="AI, Web Development"
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                    onChange={(val) => setFormData((prev) => ({ ...prev, domains: val }))}
                   />
                 </div>
                 <div>
@@ -243,7 +230,7 @@ const ModuleForm = ({
                 </button>
                 <button
                   type="submit"
-                  disabled={loading || !formData.projectId}
+                  disabled={loading}
                   className="flex items-center justify-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-4 py-2 whitespace-nowrap text-[#1D7BD7] transition-all hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white"
                 >
                   {loading ? 'Saving...' : submitText}

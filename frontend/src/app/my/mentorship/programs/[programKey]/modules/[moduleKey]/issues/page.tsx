@@ -5,6 +5,7 @@ import { Select, SelectItem } from '@heroui/select'
 import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetModuleIssuesDocument } from 'types/__generated__/moduleQueries.generated'
@@ -16,7 +17,7 @@ const LABEL_ALL = 'all'
 const MAX_VISIBLE_LABELS = 5
 
 const IssuesPage = () => {
-  const { programKey, moduleKey } = useParams() as { programKey: string; moduleKey: string }
+  const params = useParams<{ programKey: string; moduleKey: string }>()
   const router = useRouter()
   const searchParams = useSearchParams()
   const [selectedLabel, setSelectedLabel] = useState<string>(searchParams.get('label') || LABEL_ALL)
@@ -24,13 +25,13 @@ const IssuesPage = () => {
 
   const { data, loading, error } = useQuery(GetModuleIssuesDocument, {
     variables: {
-      programKey,
-      moduleKey,
+      programKey: params.programKey,
+      moduleKey: params.moduleKey,
       limit: ITEMS_PER_PAGE,
       offset: (currentPage - 1) * ITEMS_PER_PAGE,
       label: selectedLabel === LABEL_ALL ? null : selectedLabel,
     },
-    skip: !programKey || !moduleKey,
+    skip: !params.programKey || !params.moduleKey,
     fetchPolicy: 'cache-and-network',
   })
 
@@ -70,9 +71,9 @@ const IssuesPage = () => {
     }
 
     const labels = new Set<string>()
-    ;(moduleData?.issues || []).forEach((i) =>
-      (i.labels || []).forEach((l: string) => labels.add(l))
-    )
+      ; (moduleData?.issues || []).forEach((i) =>
+        (i.labels || []).forEach((l: string) => labels.add(l))
+      )
     return Array.from(labels).sort((a, b) => a.localeCompare(b))
   }, [moduleData])
 
@@ -93,7 +94,7 @@ const IssuesPage = () => {
   }
 
   const handleIssueClick = (issueNumber: number) => {
-    router.push(`/my/mentorship/programs/${programKey}/modules/${moduleKey}/issues/${issueNumber}`)
+    router.push(`/my/mentorship/programs/${params.programKey}/modules/${params.moduleKey}/issues/${issueNumber}`)
   }
 
   if (loading) return <LoadingSpinner />
@@ -192,13 +193,12 @@ const IssuesPage = () => {
                   <td className="px-6 py-4 text-center text-sm whitespace-nowrap">
                     <div className="flex justify-center">
                       <span
-                        className={`inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium ${
-                          issue.state === 'open'
-                            ? 'bg-[#238636] text-white'
-                            : issue.isMerged
-                              ? 'bg-[#8657E5] text-white'
-                              : 'bg-[#DA3633] text-white'
-                        }`}
+                        className={`inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium ${issue.state === 'open'
+                          ? 'bg-[#238636] text-white'
+                          : issue.isMerged
+                            ? 'bg-[#8657E5] text-white'
+                            : 'bg-[#DA3633] text-white'
+                          }`}
                       >
                         {issue.state === 'open' ? 'Open' : issue.isMerged ? 'Merged' : 'Closed'}
                       </span>
@@ -241,9 +241,12 @@ const IssuesPage = () => {
                             alt={issue.assignees[0].login}
                             className="rounded-full"
                           />
-                          <span className="max-w-[80px] truncate sm:max-w-[100px] md:max-w-[120px] lg:max-w-[150px]">
+                          <Link
+                            href={`/my/mentorship/programs/${params.programKey}/modules/${params.moduleKey}/mentees/${issue.assignees[0].login}`}
+                            className="max-w-[80px] truncate hover:underline hover:text-blue-600 sm:max-w-[100px] md:max-w-[120px] lg:max-w-[150px]"
+                          >
                             {issue.assignees[0].login || issue.assignees[0].name}
-                          </span>
+                          </Link>
                         </div>
                         {issue.assignees.length > 1 && (
                           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">
@@ -285,13 +288,12 @@ const IssuesPage = () => {
                   {issue.title}
                 </button>
                 <span
-                  className={`inline-flex flex-shrink-0 items-center rounded-full px-2 py-1 text-xs font-medium ${
-                    issue.state === 'open'
-                      ? 'bg-[#238636] text-white'
-                      : issue.isMerged
-                        ? 'bg-[#8657E5] text-white'
-                        : 'bg-[#DA3633] text-white'
-                  }`}
+                  className={`inline-flex flex-shrink-0 items-center rounded-full px-2 py-1 text-xs font-medium ${issue.state === 'open'
+                    ? 'bg-[#238636] text-white'
+                    : issue.isMerged
+                      ? 'bg-[#8657E5] text-white'
+                      : 'bg-[#DA3633] text-white'
+                    }`}
                 >
                   {issue.state === 'open' ? 'Open' : issue.isMerged ? 'Merged' : 'Closed'}
                 </span>

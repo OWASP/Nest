@@ -10,10 +10,10 @@ import type { Module, Program } from 'types/mentorship'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
-import LoadingSpinner from 'components/LoadingSpinner'
+import DetailsCardSkeleton from 'components/DetailsCardSkeleton'
 
 const ProgramDetailsPage = () => {
-  const { programKey } = useParams() as { programKey: string }
+  const params = useParams<{ programKey: string }>()
   const searchParams = useSearchParams()
   const router = useRouter()
   const shouldRefresh = searchParams.get('refresh') === 'true'
@@ -22,16 +22,16 @@ const ProgramDetailsPage = () => {
     refetch,
     loading: isQueryLoading,
   } = useQuery(GetProgramAndModulesDocument, {
-    variables: { programKey },
-    skip: !programKey,
+    variables: { programKey: params.programKey },
+    skip: !params.programKey,
     notifyOnNetworkStatusChange: true,
   })
 
-  const [program, setProgram] = useState<Program | null>(null)
-  const [modules, setModules] = useState<Module[]>([])
+  const program = data?.getProgram
+  const modules = data?.getProgramModules || []
   const [isRefetching, setIsRefetching] = useState(false)
 
-  const isLoading = isQueryLoading || isRefetching
+  const isLoading = isQueryLoading || isRefetching || !program
 
   useEffect(() => {
     const processResult = async () => {
@@ -50,17 +50,26 @@ const ProgramDetailsPage = () => {
       }
 
       if (data?.getProgram) {
-        setProgram(data.getProgram)
-        setModules(data.getProgramModules || [])
+        // Data is already assigned to variables above
       }
     }
 
     processResult()
   }, [shouldRefresh, data, refetch, router, searchParams])
 
-  if (isLoading) return <LoadingSpinner />
+  if (isLoading) return <DetailsCardSkeleton />
 
   if (!program && !isLoading) {
+    return (
+      <ErrorDisplay
+        statusCode={404}
+        title="Program Not Found"
+        message="Sorry, the program you're looking for doesn't exist."
+      />
+    )
+  }
+
+  if (program && program.status !== 'PUBLISHED') {
     return (
       <ErrorDisplay
         statusCode={404}

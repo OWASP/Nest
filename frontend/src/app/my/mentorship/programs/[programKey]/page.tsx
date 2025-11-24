@@ -2,7 +2,7 @@
 import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { capitalize } from 'lodash'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
@@ -14,28 +14,29 @@ import type { Module, Program } from 'types/mentorship'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
-import LoadingSpinner from 'components/LoadingSpinner'
+import DetailsCardSkeleton from 'components/DetailsCardSkeleton'
+import { getSimpleDuration } from 'components/ModuleCard'
 
 const ProgramDetailsPage = () => {
-  const { programKey } = useParams() as { programKey: string }
+  const params = useParams<{ programKey: string }>()
 
   const { data: session } = useSession()
+  const router = useRouter()
   const username = (session as ExtendedSession)?.user?.login
 
   const [program, setProgram] = useState<Program | null>(null)
   const [modules, setModules] = useState<Module[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   const [updateProgram] = useMutation(UpdateProgramStatusDocument, {
     onError: handleAppError,
   })
 
-  const { data, loading: isQueryLoading } = useQuery(GetProgramAndModulesDocument, {
-    variables: { programKey },
-    skip: !programKey,
-    notifyOnNetworkStatusChange: true,
+  const { data, error } = useQuery(GetProgramAndModulesDocument, {
+    variables: {
+      programKey: params.programKey,
+    },
   })
-
-  const isLoading = isQueryLoading
 
   const isAdmin = useMemo(
     () => !!program?.admins?.some((admin) => admin.login === username),
@@ -86,10 +87,14 @@ const ProgramDetailsPage = () => {
     if (data?.getProgram) {
       setProgram(data.getProgram)
       setModules(data.getProgramModules || [])
+      setIsLoading(false)
+    } else if (error) {
+      handleAppError(error)
+      setIsLoading(false)
     }
-  }, [data])
+  }, [data, error])
 
-  if (isLoading) return <LoadingSpinner />
+  if (isLoading) return <DetailsCardSkeleton />
 
   if (!program && !isLoading) {
     return (

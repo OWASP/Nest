@@ -43,7 +43,19 @@ const AnchorTitle: React.FC<AnchorTitleProps> = ({ title }) => {
   return (
     <div id={id} className="relative">
       <div className="group relative flex items-center">
-        <div className="flex items-center text-2xl font-semibold" data-anchor-title="true">
+        <div
+          className="flex cursor-pointer items-center text-2xl font-semibold"
+          data-anchor-title="true"
+          onClick={() => scrollToAnchorWithHistory(id)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              scrollToAnchorWithHistory(id)
+            }
+          }}
+        >
           {title}
         </div>
         <a

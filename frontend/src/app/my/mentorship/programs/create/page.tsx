@@ -8,8 +8,11 @@ import React, { useEffect, useState } from 'react'
 import { CreateProgramDocument } from 'types/__generated__/programsMutations.generated'
 import { ExtendedSession } from 'types/auth'
 import { parseCommaSeparated } from 'utils/parser'
+import { validateTags } from 'utils/validators'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/ProgramForm'
+
+import { useForm } from 'hooks/useForm'
 
 const CreateProgramPage = () => {
   const router = useRouter()
@@ -18,17 +21,7 @@ const CreateProgramPage = () => {
 
   const [redirected, setRedirected] = useState(false)
 
-  const [createProgram, { loading }] = useMutation(CreateProgramDocument)
-
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    menteesLimit: 5,
-    startedAt: '',
-    endedAt: '',
-    tags: '',
-    domains: '',
-  })
+  const [createProgram] = useMutation(CreateProgramDocument)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -47,43 +40,72 @@ const CreateProgramPage = () => {
     }
   }, [session, status, router, isProjectLeader])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    try {
-      const input = {
-        name: formData.name,
-        description: formData.description,
-        menteesLimit: Number(formData.menteesLimit),
-        startedAt: formData.startedAt,
-        endedAt: formData.endedAt,
-        tags: parseCommaSeparated(formData.tags),
-        domains: parseCommaSeparated(formData.domains),
+  const { values, errors, isSubmitting, setValues, handleSubmit } = useForm({
+    initialValues: {
+      name: '',
+      description: '',
+      menteesLimit: 5,
+      startedAt: '',
+      endedAt: '',
+      tags: '',
+      domains: '',
+    },
+    validate: (values) => {
+      const errors: Record<string, string> = {}
+      if (!values.name) errors.name = 'Program name is required'
+      if (!values.description) errors.description = 'Description is required'
+      if (!values.startedAt) errors.startedAt = 'Start date is required'
+      if (!values.endedAt) errors.endedAt = 'End date is required'
+      if (new Date(values.startedAt) > new Date(values.endedAt)) {
+        errors.startedAt = 'Start date cannot be after end date'
       }
 
-      await createProgram({ variables: { input } })
+      const tagError = validateTags(values.tags)
+      if (tagError) errors.tags = tagError
 
-      addToast({
-        description: 'Program created successfully!',
-        title: 'Success',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'success',
-        variant: 'solid',
-      })
+      return errors
+    },
+    onSubmit: async (values) => {
+      try {
+        const input = {
+          name: values.name,
+          description: values.description,
+          menteesLimit: Number(values.menteesLimit),
+          startedAt: values.startedAt,
+          endedAt: values.endedAt,
+          tags: parseCommaSeparated(values.tags),
+          domains: parseCommaSeparated(values.domains),
+        }
 
-      router.push('/my/mentorship')
-    } catch (err) {
-      addToast({
-        description: err?.message || 'Unable to complete the requested operation.',
-        title: 'GraphQL Request Failed',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'danger',
-        variant: 'solid',
-      })
-    }
-  }
+        await createProgram({ variables: { input } })
+
+        addToast({
+          description: 'Program created successfully!',
+          title: 'Success',
+          timeout: 3000,
+          shouldShowTimeoutProgress: true,
+          color: 'success',
+          variant: 'solid',
+        })
+
+        router.push('/my/mentorship')
+      } catch (err) {
+        let errorMessage = err?.message || 'Unable to complete the requested operation.'
+        if (errorMessage.toLowerCase().includes('duplicate') || errorMessage.toLowerCase().includes('unique')) {
+          errorMessage = 'A program with this name already exists. Please choose a different name.'
+        }
+
+        addToast({
+          description: errorMessage,
+          title: 'Creation Failed',
+          timeout: 3000,
+          shouldShowTimeoutProgress: true,
+          color: 'danger',
+          variant: 'solid',
+        })
+      }
+    },
+  })
 
   if (status === 'loading' || !session || redirected) {
     return <LoadingSpinner />
@@ -91,12 +113,13 @@ const CreateProgramPage = () => {
 
   return (
     <ProgramForm
-      formData={formData}
-      setFormData={setFormData}
+      formData={values}
+      setFormData={setValues}
       onSubmit={handleSubmit}
-      loading={loading}
+      loading={isSubmitting}
       title="Create Program"
       isEdit={false}
+      errors={errors}
     />
   )
 }

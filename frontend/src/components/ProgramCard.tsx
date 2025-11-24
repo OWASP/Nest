@@ -5,7 +5,6 @@ import { useUpdateProgramStatus } from 'hooks/useUpdateProgramStatus'
 import type React from 'react'
 import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import { Program } from 'types/mentorship'
-import ActionButton from 'components/ActionButton'
 import ProgramActions from 'components/ProgramActions'
 
 interface ProgramCardProps {
@@ -57,7 +56,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel,
 
   return (
     <div className="h-72 w-72 rounded-lg border border-gray-400 bg-white p-6 text-left transition-transform duration-300 hover:scale-[1.02] hover:brightness-105 md:h-80 md:w-80 lg:h-80 lg:w-96 dark:border-gray-600 dark:bg-gray-800">
-      <div className="flex h-full flex-col">
+      <div className="flex h-full flex-col cursor-pointer" onClick={() => onView(program.key)}>
         <div className="flex flex-1 flex-col pb-8">
           <div className="mb-2 flex items-start justify-between">
             <Tooltip
@@ -84,24 +83,16 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel,
             <span>{dateInfo}</span>
             {accessLevel === 'admin' && program.userRole && (
               <span
-                className={`ml-2 rounded-full px-2 py-1 text-xs font-medium capitalize ${
-                  roleClass[program.userRole] ?? roleClass.default
-                }`}
+                className={`ml-2 rounded-full px-2 py-1 text-xs font-medium capitalize ${roleClass[program.userRole] ?? roleClass.default
+                  }`}
               >
                 {program.userRole}
               </span>
             )}
           </div>
-          <p className="mb-4 line-clamp-6 text-sm text-gray-700 dark:text-gray-300">
+          <p className="mb-4 line-clamp-3 text-sm text-gray-700 dark:text-gray-300">
             {description}
           </p>
-        </div>
-
-        <div className="flex gap-2">
-          <ActionButton onClick={() => onView(program.key)}>
-            <FontAwesomeIcon icon={faEye} className="mr-1" />
-            {accessLevel === 'admin' ? 'Preview' : 'View Details'}
-          </ActionButton>
         </div>
       </div>
     </div>

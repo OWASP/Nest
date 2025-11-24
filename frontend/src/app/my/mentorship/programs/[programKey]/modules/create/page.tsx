@@ -13,12 +13,14 @@ import {
 } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import { parseCommaSeparated } from 'utils/parser'
+import { validateTags } from 'utils/validators'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
+import { useForm } from 'hooks/useForm'
 
 const CreateModulePage = () => {
   const router = useRouter()
-  const { programKey } = useParams() as { programKey: string }
+  const params = useParams<{ programKey: string }>()
   const { data: sessionData, status: sessionStatus } = useSession()
 
   const [createModule, { loading: mutationLoading }] = useMutation(CreateModuleDocument)
@@ -28,26 +30,113 @@ const CreateModulePage = () => {
     loading: queryLoading,
     error: queryError,
   } = useQuery(GetProgramAdminDetailsDocument, {
-    variables: { programKey },
-    skip: !programKey,
+    variables: { programKey: params.programKey },
+    skip: !params.programKey,
     fetchPolicy: 'network-only',
   })
 
-  const [formData, setFormData] = useState({
-    description: '',
-    domains: '',
-    endedAt: '',
-    experienceLevel: ExperienceLevelEnum.Beginner,
-    labels: '',
-    mentorLogins: '',
-    name: '',
-    projectId: '',
-    projectName: '',
-    startedAt: '',
-    tags: '',
-  })
-
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
+
+  const validate = (values: any) => {
+    const errors: Record<string, string> = {}
+
+    if (!values.name) errors.name = 'Name is required'
+    if (!values.description) errors.description = 'Description is required'
+    if (!values.startedAt) errors.startedAt = 'Start date is required'
+    if (!values.endedAt) errors.endedAt = 'End date is required'
+    if (!values.projectId) errors.projectId = 'Please select a valid project from the list.'
+
+    if (values.startedAt && values.endedAt) {
+      if (new Date(values.startedAt) > new Date(values.endedAt)) {
+        errors.startedAt = 'Start date cannot be after end date'
+      }
+    }
+
+    const tagError = validateTags(values.tags)
+    if (tagError) errors.tags = tagError
+
+    return errors
+  }
+
+  const { values, errors, isSubmitting, handleSubmit, setValues, setErrors } = useForm({
+    initialValues: {
+      description: '',
+      domains: '',
+      endedAt: '',
+      experienceLevel: ExperienceLevelEnum.Beginner,
+      labels: '',
+      mentorLogins: '',
+      name: '',
+      projectId: '',
+      projectName: '',
+      startedAt: '',
+      tags: '',
+    },
+    validate,
+    onSubmit: async (values) => {
+      try {
+        const input = {
+          description: values.description,
+          domains: parseCommaSeparated(values.domains),
+          endedAt: values.endedAt || null,
+          experienceLevel: values.experienceLevel,
+          labels: parseCommaSeparated(values.labels),
+          mentorLogins: parseCommaSeparated(values.mentorLogins),
+          name: values.name,
+          programKey: params.programKey,
+          projectId: values.projectId,
+          projectName: values.projectName,
+          startedAt: values.startedAt || null,
+          tags: parseCommaSeparated(values.tags),
+        }
+
+        await createModule({
+          variables: { input },
+          update: (cache, { data: mutationData }) => {
+            const created = mutationData?.createModule
+            if (!created) return
+            try {
+              const existing = cache.readQuery({
+                query: GetProgramAndModulesDocument,
+                variables: { programKey: params.programKey },
+              })
+              if (existing?.getProgram && existing?.getProgramModules) {
+                cache.writeQuery({
+                  query: GetProgramAndModulesDocument,
+                  variables: { programKey: params.programKey },
+                  data: {
+                    getProgram: existing.getProgram,
+                    getProgramModules: [created, ...existing.getProgramModules],
+                  },
+                })
+              }
+            } catch (_err) {
+              handleAppError(_err)
+              return
+            }
+          },
+        })
+
+        addToast({
+          title: 'Module Created',
+          description: 'The new module has been successfully created.',
+          color: 'success',
+          variant: 'solid',
+          timeout: 3000,
+        })
+
+        router.push(`/my/mentorship/programs/${params.programKey}`)
+      } catch (err: any) {
+        addToast({
+          title: 'Creation Failed',
+          description: err.message || 'Something went wrong while creating the module.',
+          color: 'danger',
+          variant: 'solid',
+          timeout: 4000,
+        })
+      }
+    },
+  })
 
   useEffect(() => {
     if (sessionStatus === 'loading' || queryLoading) {
@@ -77,73 +166,7 @@ const CreateModulePage = () => {
       })
       setTimeout(() => router.replace('/my/mentorship'), 1500)
     }
-  }, [sessionStatus, sessionData, queryLoading, programData, programKey, queryError, router])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    try {
-      const input = {
-        description: formData.description,
-        domains: parseCommaSeparated(formData.domains),
-        endedAt: formData.endedAt || null,
-        experienceLevel: formData.experienceLevel,
-        labels: parseCommaSeparated(formData.labels),
-        mentorLogins: parseCommaSeparated(formData.mentorLogins),
-        name: formData.name,
-        programKey: programKey,
-        projectId: formData.projectId,
-        projectName: formData.projectName,
-        startedAt: formData.startedAt || null,
-        tags: parseCommaSeparated(formData.tags),
-      }
-
-      await createModule({
-        variables: { input },
-        update: (cache, { data: mutationData }) => {
-          const created = mutationData?.createModule
-          if (!created) return
-          try {
-            const existing = cache.readQuery({
-              query: GetProgramAndModulesDocument,
-              variables: { programKey },
-            })
-            if (existing?.getProgram && existing?.getProgramModules) {
-              cache.writeQuery({
-                query: GetProgramAndModulesDocument,
-                variables: { programKey },
-                data: {
-                  getProgram: existing.getProgram,
-                  getProgramModules: [created, ...existing.getProgramModules],
-                },
-              })
-            }
-          } catch (_err) {
-            handleAppError(_err)
-            return
-          }
-        },
-      })
-
-      addToast({
-        title: 'Module Created',
-        description: 'The new module has been successfully created.',
-        color: 'success',
-        variant: 'solid',
-        timeout: 3000,
-      })
-
-      router.push(`/my/mentorship/programs/${programKey}`)
-    } catch (err) {
-      addToast({
-        title: 'Creation Failed',
-        description: err.message || 'Something went wrong while creating the module.',
-        color: 'danger',
-        variant: 'solid',
-        timeout: 4000,
-      })
-    }
-  }
+  }, [sessionStatus, sessionData, queryLoading, programData, params.programKey, queryError, router])
 
   if (accessStatus === 'checking') {
     return <LoadingSpinner />
@@ -163,11 +186,12 @@ const CreateModulePage = () => {
     <ModuleForm
       title="Create New Module"
       submitText="Create Module"
-      formData={formData}
-      setFormData={setFormData}
+      formData={values}
+      setFormData={setValues}
       onSubmit={handleSubmit}
-      loading={mutationLoading}
+      loading={isSubmitting}
       isEdit={false}
+      errors={errors}
     />
   )
 }

@@ -9,10 +9,10 @@ import SecondaryCard from 'components/SecondaryCard'
 interface MenteeIssuesProps {
   openIssues: Issue[]
   closedIssues: Issue[]
-  menteeHandle: string
+  menteeId: string
 }
 
-const MenteeIssues: React.FC<MenteeIssuesProps> = ({ openIssues, closedIssues, menteeHandle }) => {
+const MenteeIssues: React.FC<MenteeIssuesProps> = ({ openIssues, closedIssues, menteeId }) => {
   const [activeTab, setActiveTab] = useState<'open' | 'closed'>('open')
 
   const getStateColor = (state: string) => {
@@ -113,27 +113,25 @@ const MenteeIssues: React.FC<MenteeIssuesProps> = ({ openIssues, closedIssues, m
   )
 
   return (
-    <SecondaryCard icon={faBug} title={`Issues for @${menteeHandle}`} className="gap-2">
+    <SecondaryCard icon={faBug} title={`Issues for @${menteeId}`} className="gap-2">
       {/* Tab Navigation */}
       <div className="mb-4 flex border-b border-gray-200">
         <button
           onClick={() => setActiveTab('open')}
-          className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-            activeTab === 'open'
+          className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'open'
               ? 'border-blue-500 text-blue-600'
               : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
+            }`}
         >
           <FontAwesomeIcon icon={faBug} className="mr-2 h-4 w-4" />
           Open Issues ({openIssues.length})
         </button>
         <button
           onClick={() => setActiveTab('closed')}
-          className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-            activeTab === 'closed'
+          className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'closed'
               ? 'border-blue-500 text-blue-600'
               : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
+            }`}
         >
           <FontAwesomeIcon icon={faCheckCircle} className="mr-2 h-4 w-4" />
           Closed Issues ({closedIssues.length})

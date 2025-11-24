@@ -168,6 +168,13 @@ const eslintConfig = [
       'nest/no-global-nan': 'error',
       'nest/no-global-parsefloat': 'error',
       'nest/no-global-parseint': 'error',
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "TSAsExpression[expression.type='CallExpression'][expression.callee.name='useParams']",
+          message: "Do not cast useParams(). Use generic type instead: useParams<{ param: string }>()",
+        },
+      ],
       quotes: ['error', 'single', { avoidEscape: true }],
     },
   },

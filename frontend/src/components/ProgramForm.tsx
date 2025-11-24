@@ -1,6 +1,7 @@
 'use client'
 
 import type React from 'react'
+import DomainSelect from './DomainSelect'
 
 interface ProgramFormProps {
   formData: {
@@ -32,6 +33,7 @@ interface ProgramFormProps {
   title: string
   submitText?: string
   isEdit?: boolean
+  errors?: Partial<Record<keyof ProgramFormProps['formData'], string>>
 }
 
 const ProgramForm = ({
@@ -42,6 +44,7 @@ const ProgramForm = ({
   title,
   isEdit,
   submitText = 'Save',
+  errors = {},
 }: ProgramFormProps) => {
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -59,11 +62,8 @@ const ProgramForm = ({
       <div className="overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-[#212529]">
         <form onSubmit={onSubmit}>
           <div className="flex flex-col gap-8 p-8">
-            {/* Basic Information */}
             <section className="flex flex-col gap-6">
-              <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
-                Basic Information
-              </h2>
+
               <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
                 <div className="lg:col-span-2">
                   <label htmlFor="program-name" className="mb-2 block text-sm font-semibold">
@@ -97,11 +97,8 @@ const ProgramForm = ({
               </div>
             </section>
 
-            {/* Configuration */}
             <section className="flex flex-col gap-6 text-gray-600 dark:text-gray-300">
-              <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
-                Program Configuration
-              </h2>
+
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <div>
                   <label htmlFor="program-start-date" className="mb-2 block text-sm font-semibold">
@@ -114,8 +111,9 @@ const ProgramForm = ({
                     value={formData.startedAt}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                    className={`w-full rounded-lg border ${errors.startedAt ? 'border-red-500' : 'border-gray-600'} bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]`}
                   />
+                  {errors.startedAt && <p className="mt-1 text-sm text-red-500">{errors.startedAt}</p>}
                 </div>
                 <div>
                   <label htmlFor="program-end-date" className="mb-2 block text-sm font-semibold">
@@ -128,8 +126,9 @@ const ProgramForm = ({
                     value={formData.endedAt}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                    className={`w-full rounded-lg border ${errors.endedAt ? 'border-red-500' : 'border-gray-600'} bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]`}
                   />
+                  {errors.endedAt && <p className="mt-1 text-sm text-red-500">{errors.endedAt}</p>}
                 </div>
                 <div>
                   <label htmlFor="mentees-limit" className="mb-2 block text-sm font-semibold">
@@ -143,17 +142,15 @@ const ProgramForm = ({
                     onChange={handleInputChange}
                     min={1}
                     required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                    className={`w-full rounded-lg border ${errors.menteesLimit ? 'border-red-500' : 'border-gray-600'} bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]`}
                   />
+                  {errors.menteesLimit && <p className="mt-1 text-sm text-red-500">{errors.menteesLimit}</p>}
                 </div>
               </div>
             </section>
 
-            {/* Additional Details */}
             <section className="flex flex-col gap-6">
-              <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
-                Additional Details
-              </h2>
+
               <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
                 <div>
                   <label htmlFor="program-tags" className="mb-2 block text-sm font-semibold">
@@ -166,21 +163,15 @@ const ProgramForm = ({
                     value={formData.tags}
                     onChange={handleInputChange}
                     placeholder="javascript, react"
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                    className={`w-full rounded-lg border ${errors.tags ? 'border-red-500' : 'border-gray-600'} bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]`}
                   />
+                  {errors.tags && <p className="mt-1 text-sm text-red-500">{errors.tags}</p>}
                 </div>
                 <div className="">
-                  <label htmlFor="program-domains" className="mb-2 block text-sm font-semibold">
-                    Domains
-                  </label>
-                  <input
-                    id="program-domains"
-                    type="text"
-                    name="domains"
+                  <DomainSelect
                     value={formData.domains}
-                    onChange={handleInputChange}
-                    placeholder="AI, Web Development"
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                    onChange={(val) => setFormData((prev) => ({ ...prev, domains: val }))}
+                    error={errors.domains}
                   />
                 </div>
                 {isEdit && (
@@ -205,7 +196,6 @@ const ProgramForm = ({
               </div>
             </section>
 
-            {/* Submit Buttons */}
             <div className="border-t border-gray-200 pt-8 text-gray-600 dark:border-gray-700 dark:text-gray-300">
               <div className="flex flex-col justify-end gap-4 sm:flex-row">
                 <button

@@ -9,7 +9,7 @@ import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQu
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
-import LoadingSpinner from 'components/LoadingSpinner'
+import DetailsCardSkeleton from 'components/DetailsCardSkeleton'
 import { getSimpleDuration } from 'components/ModuleCard'
 
 const ModuleDetailsPage = () => {
@@ -36,7 +36,7 @@ const ModuleDetailsPage = () => {
     }
   }, [data, error])
 
-  if (isLoading) return <LoadingSpinner />
+  if (isLoading) return <DetailsCardSkeleton />
 
   if (!module) {
     return (
@@ -48,8 +48,19 @@ const ModuleDetailsPage = () => {
     )
   }
 
+  // @ts-ignore
+  if (data?.getProgram?.status !== 'PUBLISHED') {
+    return (
+      <ErrorDisplay
+        statusCode={404}
+        title="Program Not Found"
+        message="Sorry, the program for this module is not published."
+      />
+    )
+  }
+
   const moduleDetails = [
-    { label: 'Experience Level', value: upperFirst(module.experienceLevel) },
+    { label: 'Experience Level', value: upperFirst(module.experienceLevel.toLowerCase()) },
     { label: 'Start Date', value: formatDate(module.startedAt) },
     { label: 'End Date', value: formatDate(module.endedAt) },
     {
@@ -63,7 +74,6 @@ const ModuleDetailsPage = () => {
       admins={admins}
       details={moduleDetails}
       domains={module.domains}
-      labels={module.labels}
       mentors={module.mentors}
       summary={module.description}
       tags={module.tags}

@@ -44,7 +44,7 @@ const ProgramActions: React.FC<ProgramActionsProps> = ({ programKey, status, set
     { key: 'create_module', label: 'Add Module' },
     ...(status === ProgramStatusEnum.Draft ? [{ key: 'publish', label: 'Publish Program' }] : []),
     ...(status === ProgramStatusEnum.Published || status === ProgramStatusEnum.Completed
-      ? [{ key: 'draft', label: 'Move to Draft' }]
+      ? [{ key: 'draft', label: 'Unpublish Program' }]
       : []),
     ...(status === ProgramStatusEnum.Published
       ? [{ key: 'completed', label: 'Mark as Completed' }]
@@ -70,7 +70,7 @@ const ProgramActions: React.FC<ProgramActionsProps> = ({ programKey, status, set
         data-testid="program-actions-button"
         type="button"
         onClick={() => setDropdownOpen((prev) => !prev)}
-        className="rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
+        className="cursor-pointer rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
         aria-label="Program actions menu"
         aria-expanded={dropdownOpen}
         aria-haspopup="true"

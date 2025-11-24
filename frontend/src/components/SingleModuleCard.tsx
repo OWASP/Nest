@@ -93,7 +93,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setDropdownOpen((prev) => !prev)}
-              className="rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
+              className="cursor-pointer rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
             >
               <FontAwesomeIcon icon={faEllipsisV} />
             </button>
@@ -108,14 +108,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
                     Edit Module
                   </button>
                 )}
-                {isAdmin && (
-                  <button
-                    onClick={handleCreate}
-                    className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    Create Module
-                  </button>
-                )}
+
                 {isAdmin && (
                   <button
                     onClick={handleIssue}

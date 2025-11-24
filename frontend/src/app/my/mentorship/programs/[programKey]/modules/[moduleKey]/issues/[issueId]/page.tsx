@@ -24,7 +24,7 @@ import SecondaryCard from 'components/SecondaryCard'
 import { TruncatedText } from 'components/TruncatedText'
 
 const ModuleIssueDetailsPage = () => {
-  const params = useParams() as { programKey: string; moduleKey: string; issueId: string }
+  const params = useParams<{ programKey: string; moduleKey: string; issueId: string }>()
   const { programKey, moduleKey, issueId } = params
 
   const formatDeadline = (deadline: string | null) => {
@@ -86,10 +86,9 @@ const ModuleIssueDetailsPage = () => {
   const taskDeadline = data?.getModule?.taskDeadline as string | undefined
 
   const getButtonClassName = (disabled: boolean) =>
-    `inline-flex items-center justify-center rounded-md border p-1.5 text-sm ${
-      disabled
-        ? 'cursor-not-allowed border-gray-300 text-gray-400 dark:border-gray-600'
-        : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'
+    `inline-flex items-center justify-center rounded-md border p-1.5 text-sm ${disabled
+      ? 'cursor-not-allowed border-gray-300 text-gray-400 dark:border-gray-600'
+      : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'
     }`
 
   const labelButtonClassName =
@@ -121,13 +120,12 @@ const ModuleIssueDetailsPage = () => {
                 {issue.organizationName}/{issue.repositoryName} • #{issue.number}
               </span>
               <span
-                className={`inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium ${
-                  issue.state === 'open'
+                className={`inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium ${issue.state === 'open'
                     ? 'bg-[#238636] text-white'
                     : issue.isMerged
                       ? 'bg-[#8657E5] text-white'
                       : 'bg-[#DA3633] text-white'
-                }`}
+                  }`}
               >
                 {issue.state === 'open' ? 'Open' : issue.isMerged ? 'Merged' : 'Closed'}
               </span>
@@ -211,11 +209,10 @@ const ModuleIssueDetailsPage = () => {
                         setIsEditingDeadline(true)
                       }
                     }}
-                    className={`inline-flex items-center gap-2 rounded px-2 py-1 text-left transition-colors ${
-                      canEditDeadline
+                    className={`inline-flex items-center gap-2 rounded px-2 py-1 text-left transition-colors ${canEditDeadline
                         ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800'
                         : 'cursor-not-allowed font-medium'
-                    }`}
+                      }`}
                   >
                     {(() => {
                       const { text, color } = formatDeadline(taskDeadline)

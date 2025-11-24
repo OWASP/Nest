@@ -12,11 +12,12 @@ import type { ExtendedSession } from 'types/auth'
 import type { ModuleFormData } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
+import { validateTags } from 'utils/validators'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
 
 const EditModulePage = () => {
-  const { programKey, moduleKey } = useParams() as { programKey: string; moduleKey: string }
+  const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
   const router = useRouter()
   const { data: sessionData, status: sessionStatus } = useSession()
 
@@ -94,6 +95,40 @@ const EditModulePage = () => {
     if (!formData) return
 
     try {
+      if (new Date(formData.startedAt) > new Date(formData.endedAt)) {
+        addToast({
+          title: 'Validation Error',
+          description: 'Start date cannot be after end date.',
+          color: 'danger',
+          variant: 'solid',
+          timeout: 3000,
+        })
+        return
+      }
+
+      if (!formData.projectId) {
+        addToast({
+          title: 'Validation Error',
+          description: 'Please select a valid project from the list.',
+          color: 'danger',
+          variant: 'solid',
+          timeout: 3000,
+        })
+        return
+      }
+
+      const tagError = validateTags(formData.tags)
+      if (tagError) {
+        addToast({
+          title: 'Validation Error',
+          description: tagError,
+          color: 'danger',
+          variant: 'solid',
+          timeout: 3000,
+        })
+        return
+      }
+
       const input = {
         description: formData.description,
         domains: parseCommaSeparated(formData.domains),

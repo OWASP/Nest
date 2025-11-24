@@ -61,6 +61,12 @@ class Command(BaseCommand):
             .distinct()
         )
 
+        if not module.labels:
+            self.stdout.write(
+                self.style.WARNING(f"Skipping module '{module.name}' - no labels configured.")
+            )
+            return
+
         if not module_repos.exists():
             self.stdout.write(
                 self.style.WARNING(f"Skipping. Module '{module.name}' has no repositories.")

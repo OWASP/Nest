@@ -1,16 +1,37 @@
 'use client'
 
-import { useQuery } from '@apollo/client/react'
+import { gql } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetModuleMenteeDetailsDocument } from 'types/__generated__/menteeQueries.generated'
+import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import { Issue } from 'types/issue'
 import { MenteeDetails } from 'types/mentorship'
 import { LabelList } from 'components/LabelList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
+import { useSession } from 'next-auth/react'
+import { ExtendedSession } from 'types/auth'
+import { addToast } from '@heroui/toast'
+
+const UNASSIGN_ISSUE_MUTATION = gql`
+  mutation UnassignIssueFromUser($programKey: String!, $moduleKey: String!, $issueNumber: Int!, $userLogin: String!) {
+    unassignIssueFromUser(programKey: $programKey, moduleKey: $moduleKey, issueNumber: $issueNumber, userLogin: $userLogin) {
+      id
+    }
+  }
+`
+
+const ASSIGN_ISSUE_MUTATION = gql`
+  mutation AssignIssueToUser($programKey: String!, $moduleKey: String!, $issueNumber: Int!, $userLogin: String!) {
+    assignIssueToUser(programKey: $programKey, moduleKey: $moduleKey, issueNumber: $issueNumber, userLogin: $userLogin) {
+      id
+    }
+  }
+`
 
 const MenteeProfilePage = () => {
   const { programKey, moduleKey, menteeHandle } = useParams() as {
@@ -19,13 +40,18 @@ const MenteeProfilePage = () => {
     menteeHandle: string
   }
 
+  const { data: session } = useSession()
+  const username = (session as ExtendedSession)?.user?.login
+
   const [menteeDetails, setMenteeDetails] = useState<MenteeDetails | null>(null)
   const [menteeIssues, setMenteeIssues] = useState<Issue[]>([])
+  const [admins, setAdmins] = useState<any[]>([])
 
   const [isLoading, setIsLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [assignIssueNumber, setAssignIssueNumber] = useState('')
 
-  const { data, error } = useQuery(GetModuleMenteeDetailsDocument, {
+  const { data, error, refetch } = useQuery(GetModuleMenteeDetailsDocument, {
     variables: {
       programKey,
       moduleKey,
@@ -34,6 +60,75 @@ const MenteeProfilePage = () => {
     skip: !programKey || !moduleKey || !menteeHandle,
     fetchPolicy: 'cache-and-network',
   })
+
+  const { data: programData } = useQuery(GetProgramAdminsAndModulesDocument, {
+    variables: {
+      programKey,
+      moduleKey,
+    },
+    skip: !programKey || !moduleKey,
+  })
+
+  useEffect(() => {
+    if (programData?.getProgram?.admins) {
+      setAdmins(programData.getProgram.admins)
+    }
+  }, [programData])
+
+  const isAdmin = admins.some((admin) => admin.login === username)
+
+  const [unassignIssue] = useMutation(UNASSIGN_ISSUE_MUTATION)
+  const [assignIssue] = useMutation(ASSIGN_ISSUE_MUTATION)
+
+  const handleUnassign = async (issueNumber: number) => {
+    if (!confirm('Are you sure you want to unassign this issue?')) return
+
+    try {
+      await unassignIssue({
+        variables: {
+          programKey,
+          moduleKey,
+          issueNumber,
+          userLogin: menteeHandle,
+        },
+      })
+      addToast({
+        title: 'Success',
+        description: 'Issue unassigned successfully',
+        color: 'success',
+        variant: 'solid',
+      })
+      refetch()
+    } catch (err) {
+      handleAppError(err)
+    }
+  }
+
+  const handleAssign = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!assignIssueNumber) return
+
+    try {
+      await assignIssue({
+        variables: {
+          programKey,
+          moduleKey,
+          issueNumber: parseInt(assignIssueNumber),
+          userLogin: menteeHandle,
+        },
+      })
+      addToast({
+        title: 'Success',
+        description: 'Issue assigned successfully',
+        color: 'success',
+        variant: 'solid',
+      })
+      setAssignIssueNumber('')
+      refetch()
+    } catch (err) {
+      handleAppError(err)
+    }
+  }
 
   useEffect(() => {
     if (data) {
@@ -152,6 +247,28 @@ const MenteeProfilePage = () => {
 
         {/* Issues - moved to the end */}
         <SecondaryCard title="Issues Assigned">
+          {isAdmin && (
+            <div className="mb-6 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+              <h3 className="mb-2 font-semibold">Assign New Issue</h3>
+              <form onSubmit={handleAssign} className="flex gap-2">
+                <input
+                  type="number"
+                  placeholder="Issue Number"
+                  value={assignIssueNumber}
+                  onChange={(e) => setAssignIssueNumber(e.target.value)}
+                  className="rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700"
+                />
+                <button
+                  type="submit"
+                  disabled={!assignIssueNumber}
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+                >
+                  Assign
+                </button>
+              </form>
+            </div>
+          )}
+
           {menteeIssues.length === 0 ? (
             <p className="py-8 text-center text-gray-500 italic dark:text-gray-400">
               No issues assigned to this mentee in this module
@@ -175,23 +292,33 @@ const MenteeProfilePage = () => {
                 {filteredIssues.map((issue) => (
                   <div
                     key={issue.number}
-                    className="rounded-lg border border-gray-200 p-4 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
+                    className="flex items-center justify-between rounded-lg border border-gray-200 p-4 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
                   >
-                    <div className="flex items-center pb-4">
-                      <a
-                        href={issue.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-medium text-gray-900 transition-colors hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
-                      >
-                        {issue.title}
-                      </a>
-                    </div>
-
-                    {issue.labels && issue.labels.length > 0 && (
-                      <div className="mb-2">
-                        <LabelList labels={issue.labels} maxVisible={3} />
+                    <div>
+                      <div className="flex items-center pb-4">
+                        <a
+                          href={issue.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-gray-900 transition-colors hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
+                        >
+                          {issue.title}
+                        </a>
                       </div>
+
+                      {issue.labels && issue.labels.length > 0 && (
+                        <div className="mb-2">
+                          <LabelList labels={issue.labels} maxVisible={3} />
+                        </div>
+                      )}
+                    </div>
+                    {isAdmin && (
+                      <button
+                        onClick={() => handleUnassign(issue.number)}
+                        className="ml-4 rounded-lg border border-red-500 px-3 py-1 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      >
+                        Unassign
+                      </button>
                     )}
                   </div>
                 ))}
