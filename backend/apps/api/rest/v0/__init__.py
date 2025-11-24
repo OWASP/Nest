@@ -46,7 +46,7 @@ api_settings = {
 }
 
 api_settings_customization = {}
-if settings.IS_LOCAL_ENVIRONMENT:
+if settings.IS_LOCAL_ENVIRONMENT or settings.IS_E2E_ENVIRONMENT:
     api_settings_customization = {
         "auth": None,
         "servers": [
