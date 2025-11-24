@@ -441,6 +441,34 @@ Follow these steps to setup your e2e testing environment:
 
 **Please note that you only need to do these steps once.**
 
+#### Updating e2e Test Data
+
+If you need to update the e2e test data, follow these steps:
+
+1. Delete the e2e db container from `Docker Desktop Dashboard` or with the following command:
+
+   ```bash
+   docker rm -f e2e-nest-db
+   ```
+
+2. Delete the e2e db volume from `Docker Desktop Dashboard` or with the following command:
+
+   ```bash
+   docker volume rm nest-e2e_e2e-db-data
+   ```
+
+3. Re-run the e2e backend instance with the following command:
+
+   ```bash
+   make run-backend-e2e
+   ```
+
+4. Load the updated data into the e2e db with the following command (in another terminal session):
+
+   ```bash
+    make load-data-e2e
+    ```
+
 ### Test Coverage
 
 - There is a **minimum test coverage requirement** for the **backend** code -- see [pyproject.toml](https://github.com/OWASP/Nest/blob/main/backend/pyproject.toml).
