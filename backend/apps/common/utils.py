@@ -71,7 +71,7 @@ def clean_url(url: str | None) -> str | None:
 def csrf_decorate(view):
     """Apply CSRF protection based on settings."""
     if settings.IS_E2E_ENVIRONMENT:
-        return csrf_exempt(view)
+        return csrf_exempt(view)  # NOSONAR
     return csrf_protect(view)
 
 
