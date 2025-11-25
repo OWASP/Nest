@@ -943,14 +943,14 @@ hiredis = ["redis[hiredis] (>=4.0.2)"]
 
 [[package]]
 name = "django-rq"
-version = "3.2.0"
+version = "3.2.1"
 description = "An app that provides django integration for RQ (Redis Queue)"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "django_rq-3.2.0-py3-none-any.whl", hash = "sha256:a59aa137679b3aed69519be7886ab0417fb144cf38abe5cdcad4c5f36a774542"},
-    {file = "django_rq-3.2.0.tar.gz", hash = "sha256:e1bf7a69ecac87ddf4a22938d12587df7b5335b1dc0c9e0c9a6e0859822f5377"},
+    {file = "django_rq-3.2.1-py3-none-any.whl", hash = "sha256:4cadf9077d829c015eb1101a91ccb51f78686cfa125a6d589ad58e61dd13fc44"},
+    {file = "django_rq-3.2.1.tar.gz", hash = "sha256:8e18ce57ae48b981361a2887f9cbc1fb3bd4686d3cd0fa5de5dd29915fd3939d"},
 ]
 
 [package.dependencies]
@@ -5021,4 +5021,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "2c36a734ea6d56d6a1729cfd01f4127b616a816d5124e06dc30299b8bdd34e9d"
+content-hash = "67563fe36311aca7cbb88c2b50b232ab2cea6d8f5977c829afb41950f181584b"
