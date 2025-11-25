@@ -33,21 +33,11 @@ Follow these steps to set up the infrastructure:
   terraform apply
   ```
 
-### 2. Setup Main Infrastructure
+### 2. Setup Main Infrastructure (Staging)
 
 - Navigate to the main infrastructure directory. If you are in `infrastructure/backend`, you can use:
   ```bash
-  cd ..
-  ```
-
-- Create a backend configuration file:
-  ```bash
-  touch staging.s3.tfbackend
-  ```
-
-- Copy the contents from the backend example file:
-  ```bash
-  cat staging.s3.tfbackend.example > staging.s3.tfbackend
+  cd ../staging/
   ```
 
 - Create a local variables file:
@@ -62,7 +52,7 @@ Follow these steps to set up the infrastructure:
 
 - Initialize Terraform with the backend configuration:
   ```bash
-  terraform init -backend-config=staging.s3.tfbackend
+  terraform init
   ```
 
 - Apply the changes to create the main infrastructure using the command:
@@ -85,7 +75,7 @@ The Django backend deployment is managed by Zappa. This includes the API Gateway
    - Change the directory to `backend/` using the following command:
 
      ```bash
-     cd ../backend/
+     cd ../../backend/
      ```
 
     *Note*: The following steps assume the current working directory is `backend/`
