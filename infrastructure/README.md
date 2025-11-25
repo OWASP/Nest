@@ -21,7 +21,7 @@ Follow these steps to set up the infrastructure:
   ```bash
   cd infrastructure/backend/
   ```
-*Note:* Optionally change the region by setting `aws_region` in a `.tfvars` file.
+*Note:* Optionally change the region: set `aws_region` in a `.tfvars` file.
 
 - Initialize Terraform if needed:
   ```bash
@@ -49,6 +49,10 @@ Follow these steps to set up the infrastructure:
   ```bash
   cat terraform.tfvars.example > terraform.tfvars
   ```
+
+*Note:* Optionally change the region:
+  - set `aws_region` in a `.tfvars` file.
+  - set `region` in a `.tfbackend` file and provide it using `terraform init -backend-config=<file>`.
 
 - Initialize Terraform with the backend configuration:
   ```bash
