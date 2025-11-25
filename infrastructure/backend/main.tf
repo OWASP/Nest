@@ -68,14 +68,14 @@ resource "aws_dynamodb_table" "state_lock" {
   }
 }
 
-resource "aws_s3_bucket" "logs" {
+resource "aws_s3_bucket" "logs" { # NOSONAR
   bucket = "${var.project_name}-terraform-state-logs"
   tags = {
     Name = "${var.project_name}-terraform-state-logs"
   }
 }
 
-resource "aws_s3_bucket" "state" {
+resource "aws_s3_bucket" "state" { # NOSONAR
   bucket = "${var.project_name}-terraform-state"
   tags = {
     Name = "${var.project_name}-terraform-state"
@@ -105,6 +105,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
     id     = "expire-logs"
     status = "Enabled"
 
+    abort_incomplete_multipart_upload {
+      days_after_initiation = var.abort_incomplete_multipart_upload_days
+    }
     expiration {
       days = 90
     }

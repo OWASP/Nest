@@ -25,8 +25,7 @@ __pycache__
 *.log
 *.pdf
 *.pem
-*.s3.tfbackend
-!*.s3.tfbackend.example
+*.tfbackend
 *.tfstate
 *.tfstate.*
 *.tfvars
