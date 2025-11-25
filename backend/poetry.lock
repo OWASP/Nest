@@ -2698,14 +2698,14 @@ files = [
 
 [[package]]
 name = "owasp-schema"
-version = "0.1.43"
+version = "0.1.45"
 description = "A collection of OWASP schemas"
 optional = false
 python-versions = "<4.0,>=3.13"
 groups = ["main"]
 files = [
-    {file = "owasp_schema-0.1.43-py3-none-any.whl", hash = "sha256:8200bac18422435cde4f5a2c7a4ed1a159c7e7adc4a4797cdb30a6d0fe3e4694"},
-    {file = "owasp_schema-0.1.43.tar.gz", hash = "sha256:ad7d2fdd3242852ac14851a8597d6c5967f52cad7a9dc28a6f992740fcc88490"},
+    {file = "owasp_schema-0.1.45-py3-none-any.whl", hash = "sha256:a8dc54fd94a26267c673799e74273aff0ec4b43ca2649cd7a7c2409185f2da05"},
+    {file = "owasp_schema-0.1.45.tar.gz", hash = "sha256:15b241ef6f623af65063e32ea04ffce7112b850269df683223799f6e5cd2370c"},
 ]
 
 [package.dependencies]
@@ -5021,4 +5021,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "2c36a734ea6d56d6a1729cfd01f4127b616a816d5124e06dc30299b8bdd34e9d"
+content-hash = "887d00c34d6bcdda9e0b10cce3b8e1f4abd03e5705beb47808c043d4e1861533"
