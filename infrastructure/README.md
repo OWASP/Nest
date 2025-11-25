@@ -15,7 +15,7 @@ Ensure you have the following setup/installed:
 
 Follow these steps to set up the infrastructure:
 
-### 1. Setup Backend (One-time setup)
+1. **Setup Backend (one-time setup)**:
 
 - Navigate to the backend directory:
   ```bash
@@ -33,7 +33,7 @@ Follow these steps to set up the infrastructure:
   terraform apply
   ```
 
-### 2. Setup Main Infrastructure (Staging)
+2. **Setup Main Infrastructure (staging)**:
 
 - Navigate to the main infrastructure directory. If you are in `infrastructure/backend`, you can use:
   ```bash
@@ -50,7 +50,7 @@ Follow these steps to set up the infrastructure:
   cat terraform.tfvars.example > terraform.tfvars
   ```
 
-*Note:* Optionally change the region:
+- *Note:* Optionally change the region:
   - set `aws_region` in a `.tfvars` file.
   - set `region` in a `.tfbackend` file and provide it using `terraform init -backend-config=<file>`.
 
@@ -64,7 +64,7 @@ Follow these steps to set up the infrastructure:
   terraform apply
   ```
 
-### 3. Populate Secrets
+3. **Populate Secrets**
 
    - Visit the AWS Console > Systems Manager > Parameter Store.
    - Populate all `DJANGO_*` secrets that have `to-be-set-in-aws-console` value.
