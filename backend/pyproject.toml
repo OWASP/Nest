@@ -46,7 +46,7 @@ requests = "^2.32.5"
 sentry-sdk = { extras = [ "django" ], version = "^2.20.0" }
 slack-bolt = "^1.22.0"
 slack-sdk = "^3.37.0"
-strawberry-graphql = { extras = [ "django" ], version = "^0.286.0" }
+strawberry-graphql = { extras = [ "django" ], version = "^0.287.0" }
 strawberry-graphql-django = "^0.67.0"
 thefuzz = "^0.22.1"
 pyparsing = "^3.2.3"
