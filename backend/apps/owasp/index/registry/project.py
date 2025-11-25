@@ -86,6 +86,8 @@ class ProjectIndex(IndexBase):
             "contributors_count_desc": ["desc(idx_contributors_count)"],
             "forks_count_asc": ["asc(idx_forks_count)"],
             "forks_count_desc": ["desc(idx_forks_count)"],
+            "level_raw_asc": ["asc(idx_level_raw)"],
+            "level_raw_desc": ["desc(idx_level_raw)"],
             "name_asc": ["asc(idx_name)"],
             "name_desc": ["desc(idx_name)"],
             "stars_count_asc": ["asc(idx_stars_count)"],

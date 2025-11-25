@@ -16,9 +16,9 @@ class TestOrganizationSitemap:
     @patch("apps.sitemap.views.organization.Organization")
     def test_items(self, mock_organization):
         mock_obj = MagicMock(is_indexable=True)
-        mock_qs = MagicMock()
-        mock_qs.order_by.return_value = [mock_obj]
-        mock_organization.objects.filter.return_value = mock_qs
+        mock_queryset = MagicMock()
+        mock_queryset.__iter__ = lambda _: iter([mock_obj])
+        mock_organization.related_organizations.order_by.return_value = mock_queryset
         sitemap = OrganizationSitemap()
 
         assert list(sitemap.items()) == [mock_obj]

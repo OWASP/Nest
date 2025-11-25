@@ -116,6 +116,7 @@ export type CreateModuleInput = {
   domains?: Array<Scalars['String']['input']>;
   endedAt: Scalars['DateTime']['input'];
   experienceLevel: ExperienceLevelEnum;
+  labels?: Array<Scalars['String']['input']>;
   mentorLogins?: InputMaybe<Array<Scalars['String']['input']>>;
   name: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
@@ -210,11 +211,18 @@ export type GitHubAuthResult = {
 
 export type IssueNode = Node & {
   __typename?: 'IssueNode';
+  assignees: Array<UserNode>;
   author?: Maybe<UserNode>;
+  body: Scalars['String']['output'];
   createdAt: Scalars['DateTime']['output'];
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
+  interestedUsers: Array<UserNode>;
+  isMerged: Scalars['Boolean']['output'];
+  labels: Array<Scalars['String']['output']>;
+  number: Scalars['Int']['output'];
   organizationName?: Maybe<Scalars['String']['output']>;
+  pullRequests: Array<PullRequestNode>;
   repositoryName?: Maybe<Scalars['String']['output']>;
   state: Scalars['String']['output'];
   title: Scalars['String']['output'];
@@ -248,6 +256,18 @@ export type MemberSnapshotNode = Node & {
   totalContributions: Scalars['Int']['output'];
 };
 
+export type MenteeNode = {
+  __typename?: 'MenteeNode';
+  avatarUrl: Scalars['String']['output'];
+  bio?: Maybe<Scalars['String']['output']>;
+  domains?: Maybe<Array<Scalars['String']['output']>>;
+  experienceLevel: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  login: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  tags?: Maybe<Array<Scalars['String']['output']>>;
+};
+
 export type MentorNode = {
   __typename?: 'MentorNode';
   avatarUrl: Scalars['String']['output'];
@@ -275,12 +295,20 @@ export type MilestoneNode = Node & {
 
 export type ModuleNode = {
   __typename?: 'ModuleNode';
+  availableLabels: Array<Scalars['String']['output']>;
   description: Scalars['String']['output'];
   domains?: Maybe<Array<Scalars['String']['output']>>;
   endedAt: Scalars['DateTime']['output'];
   experienceLevel: ExperienceLevelEnum;
   id: Scalars['ID']['output'];
+  interestedUsers: Array<UserNode>;
+  issueByNumber?: Maybe<IssueNode>;
+  issueMentees: Array<UserNode>;
+  issues: Array<IssueNode>;
+  issuesCount: Scalars['Int']['output'];
   key: Scalars['String']['output'];
+  labels?: Maybe<Array<Scalars['String']['output']>>;
+  mentees: Array<UserNode>;
   mentors: Array<MentorNode>;
   name: Scalars['String']['output'];
   program?: Maybe<ProgramNode>;
@@ -288,19 +316,77 @@ export type ModuleNode = {
   projectName?: Maybe<Scalars['String']['output']>;
   startedAt: Scalars['DateTime']['output'];
   tags?: Maybe<Array<Scalars['String']['output']>>;
+  taskAssignedAt?: Maybe<Scalars['DateTime']['output']>;
+  taskDeadline?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+export type ModuleNodeInterestedUsersArgs = {
+  issueNumber: Scalars['Int']['input'];
+};
+
+
+export type ModuleNodeIssueByNumberArgs = {
+  number: Scalars['Int']['input'];
+};
+
+
+export type ModuleNodeIssueMenteesArgs = {
+  issueNumber: Scalars['Int']['input'];
+};
+
+
+export type ModuleNodeIssuesArgs = {
+  label?: InputMaybe<Scalars['String']['input']>;
+  limit?: Scalars['Int']['input'];
+  offset?: Scalars['Int']['input'];
+};
+
+
+export type ModuleNodeIssuesCountArgs = {
+  label?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type ModuleNodeTaskAssignedAtArgs = {
+  issueNumber: Scalars['Int']['input'];
+};
+
+
+export type ModuleNodeTaskDeadlineArgs = {
+  issueNumber: Scalars['Int']['input'];
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
+  assignIssueToUser: ModuleNode;
+  clearTaskDeadline: ModuleNode;
   createApiKey: CreateApiKeyResult;
   createModule: ModuleNode;
   createProgram: ProgramNode;
   githubAuth: GitHubAuthResult;
   logoutUser: LogoutResult;
   revokeApiKey: RevokeApiKeyResult;
+  setTaskDeadline: ModuleNode;
+  unassignIssueFromUser: ModuleNode;
   updateModule: ModuleNode;
   updateProgram: ProgramNode;
   updateProgramStatus: ProgramNode;
+};
+
+
+export type MutationAssignIssueToUserArgs = {
+  issueNumber: Scalars['Int']['input'];
+  moduleKey: Scalars['String']['input'];
+  programKey: Scalars['String']['input'];
+  userLogin: Scalars['String']['input'];
+};
+
+
+export type MutationClearTaskDeadlineArgs = {
+  issueNumber: Scalars['Int']['input'];
+  moduleKey: Scalars['String']['input'];
+  programKey: Scalars['String']['input'];
 };
 
 
@@ -327,6 +413,22 @@ export type MutationGithubAuthArgs = {
 
 export type MutationRevokeApiKeyArgs = {
   uuid: Scalars['UUID']['input'];
+};
+
+
+export type MutationSetTaskDeadlineArgs = {
+  deadlineAt: Scalars['DateTime']['input'];
+  issueNumber: Scalars['Int']['input'];
+  moduleKey: Scalars['String']['input'];
+  programKey: Scalars['String']['input'];
+};
+
+
+export type MutationUnassignIssueFromUserArgs = {
+  issueNumber: Scalars['Int']['input'];
+  moduleKey: Scalars['String']['input'];
+  programKey: Scalars['String']['input'];
+  userLogin: Scalars['String']['input'];
 };
 
 
@@ -548,8 +650,10 @@ export type PullRequestNode = Node & {
   createdAt: Scalars['DateTime']['output'];
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
+  mergedAt?: Maybe<Scalars['DateTime']['output']>;
   organizationName?: Maybe<Scalars['String']['output']>;
   repositoryName?: Maybe<Scalars['String']['output']>;
+  state: Scalars['String']['output'];
   title: Scalars['String']['output'];
   url: Scalars['String']['output'];
 };
@@ -562,6 +666,8 @@ export type Query = {
   boardsOfDirectors: Array<BoardOfDirectorsNode>;
   chapter?: Maybe<ChapterNode>;
   committee?: Maybe<CommitteeNode>;
+  getMenteeDetails: MenteeNode;
+  getMenteeModuleIssues: Array<IssueNode>;
   getModule: ModuleNode;
   getProgram: ProgramNode;
   getProgramModules: Array<ModuleNode>;
@@ -615,6 +721,22 @@ export type QueryChapterArgs = {
 
 export type QueryCommitteeArgs = {
   key: Scalars['String']['input'];
+};
+
+
+export type QueryGetMenteeDetailsArgs = {
+  menteeHandle: Scalars['String']['input'];
+  moduleKey: Scalars['String']['input'];
+  programKey: Scalars['String']['input'];
+};
+
+
+export type QueryGetMenteeModuleIssuesArgs = {
+  limit?: Scalars['Int']['input'];
+  menteeHandle: Scalars['String']['input'];
+  moduleKey: Scalars['String']['input'];
+  offset?: Scalars['Int']['input'];
+  programKey: Scalars['String']['input'];
 };
 
 
@@ -909,6 +1031,7 @@ export type UpdateModuleInput = {
   endedAt: Scalars['DateTime']['input'];
   experienceLevel: ExperienceLevelEnum;
   key: Scalars['String']['input'];
+  labels?: Array<Scalars['String']['input']>;
   mentorLogins?: InputMaybe<Array<Scalars['String']['input']>>;
   name: Scalars['String']['input'];
   programKey: Scalars['String']['input'];

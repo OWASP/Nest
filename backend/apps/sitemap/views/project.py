@@ -10,8 +10,13 @@ class ProjectSitemap(BaseSitemap):
     change_frequency = "weekly"
     prefix = "/projects"
 
-    def items(self):
-        """Return list of projects for sitemap generation."""
+    def items(self) -> list[Project]:
+        """Return projects for sitemap generation.
+
+        Returns:
+            list: List of indexable Project objects ordered by update/creation date.
+
+        """
         return [
             p
             for p in Project.active_projects.order_by(
