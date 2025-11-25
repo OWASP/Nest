@@ -1,16 +1,10 @@
 terraform {
-  required_version = ">= 1.0"
-
-  backend "s3" {}
+  required_version = "1.14.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.0"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.0"
+      version = "6.22.0"
     }
   }
 }
@@ -24,7 +18,7 @@ locals {
 }
 
 module "cache" {
-  source = "./modules/cache"
+  source = "../modules/cache"
 
   common_tags           = local.common_tags
   environment           = var.environment
@@ -38,7 +32,7 @@ module "cache" {
 }
 
 module "database" {
-  source = "./modules/database"
+  source = "../modules/database"
 
   common_tags                = local.common_tags
   create_rds_proxy           = var.create_rds_proxy
@@ -58,7 +52,7 @@ module "database" {
 }
 
 module "ecs" {
-  source = "./modules/ecs"
+  source = "../modules/ecs"
 
   aws_region                    = var.aws_region
   common_tags                   = local.common_tags
@@ -72,7 +66,7 @@ module "ecs" {
 }
 
 module "networking" {
-  source = "./modules/networking"
+  source = "../modules/networking"
 
   availability_zones   = var.availability_zones
   common_tags          = local.common_tags
@@ -84,7 +78,7 @@ module "networking" {
 }
 
 module "parameters" {
-  source = "./modules/parameters"
+  source = "../modules/parameters"
 
   common_tags    = local.common_tags
   db_host        = module.database.db_proxy_endpoint
@@ -99,7 +93,7 @@ module "parameters" {
 }
 
 module "security" {
-  source = "./modules/security"
+  source = "../modules/security"
 
   common_tags      = local.common_tags
   create_rds_proxy = var.create_rds_proxy
@@ -111,7 +105,7 @@ module "security" {
 }
 
 module "storage" {
-  source = "./modules/storage"
+  source = "../modules/storage"
 
   common_tags          = local.common_tags
   environment          = var.environment

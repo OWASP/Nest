@@ -1,19 +1,15 @@
 terraform {
-  required_version = ">= 1.0"
+  required_version = "1.14.0"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.0"
+      version = "6.22.0"
     }
   }
 }
 
-provider "aws" {
-  region = var.aws_region
-}
-
 resource "aws_dynamodb_table" "state_lock" {
-  name         = "${var.project_name}-${var.environment}-terraform-state-lock"
+  name         = "${var.project_name}-terraform-state-lock"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
   attribute {
@@ -21,16 +17,14 @@ resource "aws_dynamodb_table" "state_lock" {
     type = "S"
   }
   tags = {
-    Name      = "${var.project_name}-${var.environment}-terraform-state-lock"
-    ManagedBy = "Terraform"
+    Name = "${var.project_name}-terraform-state-lock"
   }
 }
 
-resource "aws_s3_bucket" "state" { # NOSONAR
-  bucket = "${var.project_name}-${var.environment}-terraform-state"
+resource "aws_s3_bucket" "state" {
+  bucket = "${var.project_name}-terraform-state"
   tags = {
-    Name      = "${var.project_name}-${var.environment}-terraform-state"
-    ManagedBy = "Terraform"
+    Name = "${var.project_name}-terraform-state"
   }
 }
 
