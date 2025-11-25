@@ -8,13 +8,33 @@ terraform {
   }
 }
 
+data "aws_iam_policy_document" "logs" {
+  statement {
+    sid    = "s3-log-delivery"
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["logging.s3.amazonaws.com"]
+    }
+
+    actions = ["s3:PutObject"]
+
+    resources = ["${aws_s3_bucket.logs.arn}/*"]
+  }
+}
+
 resource "aws_dynamodb_table" "state_lock" {
   name         = "${var.project_name}-terraform-state-lock"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
+
   attribute {
     name = "LockID"
     type = "S"
+  }
+  point_in_time_recovery {
+    enabled = true
   }
   tags = {
     Name = "${var.project_name}-terraform-state-lock"
@@ -26,6 +46,53 @@ resource "aws_s3_bucket" "state" {
   tags = {
     Name = "${var.project_name}-terraform-state"
   }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "state" {
+  bucket = aws_s3_bucket.state.id
+
+  rule {
+    abort_incomplete_multipart_upload {
+      days_after_initiation = var.abort_incomplete_multipart_upload_days
+    }
+    id = "delete-old-versions"
+    noncurrent_version_expiration {
+      noncurrent_days = var.noncurrent_version_expiration_days
+    }
+    status = "Enabled"
+  }
+}
+
+data "aws_iam_policy_document" "state_https_only" {
+  policy_id = "ForceHTTPS"
+
+  statement {
+    sid    = "HTTPSOnly"
+    effect = "Deny"
+
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
+    }
+
+    actions = ["s3:*"]
+
+    resources = [
+      aws_s3_bucket.state.arn,
+      "${aws_s3_bucket.state.arn}/*",
+    ]
+
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["false"]
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "state" {
+  bucket = aws_s3_bucket.state.id
+  policy = data.aws_iam_policy_document.state_https_only.json
 }
 
 resource "aws_s3_bucket_public_access_block" "state" {
@@ -47,6 +114,49 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
 
 resource "aws_s3_bucket_versioning" "state" {
   bucket = aws_s3_bucket.state.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket" "logs" {
+  bucket = "${var.project_name}-terraform-state-logs"
+  tags = {
+    Name = "${var.project_name}-terraform-state-logs"
+  }
+}
+
+resource "aws_s3_bucket_logging" "state" {
+  bucket = aws_s3_bucket.state.id
+
+  target_bucket = aws_s3_bucket.logs.id
+  target_prefix = "s3/"
+}
+
+resource "aws_s3_bucket_policy" "logs" {
+  bucket = aws_s3_bucket.logs.id
+  policy = data.aws_iam_policy_document.logs.json
+}
+
+resource "aws_s3_bucket_public_access_block" "logs" {
+  bucket                  = aws_s3_bucket.logs.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
+  bucket = aws_s3_bucket.logs.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_versioning" "logs" {
+  bucket = aws_s3_bucket.logs.id
   versioning_configuration {
     status = "Enabled"
   }
