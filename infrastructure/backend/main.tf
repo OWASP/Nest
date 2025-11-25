@@ -24,45 +24,6 @@ data "aws_iam_policy_document" "logs" {
   }
 }
 
-resource "aws_dynamodb_table" "state_lock" {
-  name         = "${var.project_name}-terraform-state-lock"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "LockID"
-
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
-  point_in_time_recovery {
-    enabled = true
-  }
-  tags = {
-    Name = "${var.project_name}-terraform-state-lock"
-  }
-}
-
-resource "aws_s3_bucket" "state" {
-  bucket = "${var.project_name}-terraform-state"
-  tags = {
-    Name = "${var.project_name}-terraform-state"
-  }
-}
-
-resource "aws_s3_bucket_lifecycle_configuration" "state" {
-  bucket = aws_s3_bucket.state.id
-
-  rule {
-    abort_incomplete_multipart_upload {
-      days_after_initiation = var.abort_incomplete_multipart_upload_days
-    }
-    id = "delete-old-versions"
-    noncurrent_version_expiration {
-      noncurrent_days = var.noncurrent_version_expiration_days
-    }
-    status = "Enabled"
-  }
-}
-
 data "aws_iam_policy_document" "state_https_only" {
   policy_id = "ForceHTTPS"
 
@@ -90,32 +51,20 @@ data "aws_iam_policy_document" "state_https_only" {
   }
 }
 
-resource "aws_s3_bucket_policy" "state" {
-  bucket = aws_s3_bucket.state.id
-  policy = data.aws_iam_policy_document.state_https_only.json
-}
+resource "aws_dynamodb_table" "state_lock" {
+  name         = "${var.project_name}-terraform-state-lock"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "LockID"
 
-resource "aws_s3_bucket_public_access_block" "state" {
-  bucket                  = aws_s3_bucket.state.id
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
-
-resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
-  bucket = aws_s3_bucket.state.id
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
+  attribute {
+    name = "LockID"
+    type = "S"
   }
-}
-
-resource "aws_s3_bucket_versioning" "state" {
-  bucket = aws_s3_bucket.state.id
-  versioning_configuration {
-    status = "Enabled"
+  point_in_time_recovery {
+    enabled = true
+  }
+  tags = {
+    Name = "${var.project_name}-terraform-state-lock"
   }
 }
 
@@ -123,6 +72,42 @@ resource "aws_s3_bucket" "logs" {
   bucket = "${var.project_name}-terraform-state-logs"
   tags = {
     Name = "${var.project_name}-terraform-state-logs"
+  }
+}
+
+resource "aws_s3_bucket" "state" {
+  bucket = "${var.project_name}-terraform-state"
+  tags = {
+    Name = "${var.project_name}-terraform-state"
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "state" {
+  bucket = aws_s3_bucket.state.id
+
+  rule {
+    id     = "delete-old-versions"
+    status = "Enabled"
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = var.abort_incomplete_multipart_upload_days
+    }
+    noncurrent_version_expiration {
+      noncurrent_days = var.noncurrent_version_expiration_days
+    }
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  rule {
+    id     = "expire-logs"
+    status = "Enabled"
+
+    expiration {
+      days = 90
+    }
   }
 }
 
@@ -138,8 +123,21 @@ resource "aws_s3_bucket_policy" "logs" {
   policy = data.aws_iam_policy_document.logs.json
 }
 
+resource "aws_s3_bucket_policy" "state" {
+  bucket = aws_s3_bucket.state.id
+  policy = data.aws_iam_policy_document.state_https_only.json
+}
+
 resource "aws_s3_bucket_public_access_block" "logs" {
   bucket                  = aws_s3_bucket.logs.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_public_access_block" "state" {
+  bucket                  = aws_s3_bucket.state.id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -152,6 +150,22 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
     }
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
+  bucket = aws_s3_bucket.state.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_versioning" "state" {
+  bucket = aws_s3_bucket.state.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 
