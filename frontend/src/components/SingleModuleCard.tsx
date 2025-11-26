@@ -1,7 +1,10 @@
+'use client'
+
 import { faUsers } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { capitalize } from 'lodash'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React from 'react'
 import { ExtendedSession } from 'types/auth'
@@ -13,7 +16,6 @@ import TopContributorsList from 'components/TopContributorsList'
 
 interface SingleModuleCardProps {
   module: Module
-  showEdit?: boolean
   accessLevel?: string
   admins?: {
     login: string
@@ -22,13 +24,14 @@ interface SingleModuleCardProps {
 
 const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel, admins }) => {
   const { data } = useSession()
+  const pathname = usePathname()
 
   const isAdmin =
     accessLevel === 'admin' &&
     admins?.some((admin) => admin.login === ((data as ExtendedSession)?.user?.login as string))
 
   // Extract programKey from pathname (e.g., /my/mentorship/programs/[programKey])
-  const programKey = globalThis.location?.pathname.split('/programs/')[1]?.split('/')[0] || ''
+  const programKey = pathname?.split('/programs/')[1]?.split('/')[0] || ''
 
   const moduleDetails = [
     { label: 'Experience Level', value: capitalize(module.experienceLevel) },
@@ -43,7 +46,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
         <div className="flex cursor-pointer items-center gap-2">
           <FontAwesomeIcon icon={faUsers} className="text-gray-500 dark:text-gray-300" />
           <Link
-            href={`${globalThis.location.pathname}/modules/${module.key}`}
+            href={`${pathname}/modules/${module.key}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1"

@@ -13,6 +13,7 @@ interface EntityActionsProps {
   moduleKey?: string
   status?: string
   setStatus?: (newStatus: string) => void
+  insideButton?: boolean // When true, uses div instead of button to avoid nested buttons
 }
 
 const EntityActions: React.FC<EntityActionsProps> = ({
@@ -21,6 +22,7 @@ const EntityActions: React.FC<EntityActionsProps> = ({
   moduleKey,
   status,
   setStatus,
+  insideButton = false,
 }) => {
   const router = useRouter()
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -88,38 +90,96 @@ const EntityActions: React.FC<EntityActionsProps> = ({
     }
   }, [])
 
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setDropdownOpen((prev) => !prev)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      e.stopPropagation()
+      setDropdownOpen((prev) => !prev)
+    }
+  }
+
   return (
     <div className="relative" ref={dropdownRef}>
-      <button
-        data-testid={`${type}-actions-button`}
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation()
-          setDropdownOpen((prev) => !prev)
-        }}
-        className="cursor-pointer rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
-        aria-label={`${type === 'program' ? 'Program' : 'Module'} actions menu`}
-        aria-expanded={dropdownOpen}
-        aria-haspopup="true"
-      >
-        <FontAwesomeIcon
-          className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-200"
-          icon={faEllipsisV}
-        />
-      </button>
+      {insideButton ? (
+        <div
+          data-testid={`${type}-actions-button`}
+          role="button"
+          tabIndex={0}
+          onKeyDown={handleKeyDown}
+          onClick={handleToggle}
+          className="cursor-pointer rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
+          aria-label={`${type === 'program' ? 'Program' : 'Module'} actions menu`}
+          aria-expanded={dropdownOpen}
+          aria-haspopup="true"
+        >
+          <FontAwesomeIcon
+            className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-200"
+            icon={faEllipsisV}
+          />
+        </div>
+      ) : (
+        <button
+          data-testid={`${type}-actions-button`}
+          type="button"
+          onClick={handleToggle}
+          className="cursor-pointer rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
+          aria-label={`${type === 'program' ? 'Program' : 'Module'} actions menu`}
+          aria-expanded={dropdownOpen}
+          aria-haspopup="true"
+        >
+          <FontAwesomeIcon
+            className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-200"
+            icon={faEllipsisV}
+          />
+        </button>
+      )}
       {dropdownOpen && (
         <div className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          {options.map((option) => (
-            <button
-              key={option.key}
-              type="button"
-              role="menuitem"
-              onClick={() => handleAction(option.key)}
-              className="block w-full cursor-pointer px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              {option.label}
-            </button>
-          ))}
+          {options.map((option) => {
+            const handleMenuItemClick = (e: React.MouseEvent) => {
+              e.stopPropagation()
+              handleAction(option.key)
+            }
+            const handleMenuItemKeyDown = (e: React.KeyboardEvent) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                e.stopPropagation()
+                handleAction(option.key)
+              }
+            }
+
+            if (insideButton) {
+              return (
+                <div
+                  key={option.key}
+                  role="menuitem"
+                  tabIndex={0}
+                  onClick={handleMenuItemClick}
+                  onKeyDown={handleMenuItemKeyDown}
+                  className="block w-full cursor-pointer px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  {option.label}
+                </div>
+              )
+            }
+
+            return (
+              <button
+                key={option.key}
+                type="button"
+                role="menuitem"
+                onClick={handleMenuItemClick}
+                className="block w-full cursor-pointer px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                {option.label}
+              </button>
+            )
+          })}
         </div>
       )}
     </div>

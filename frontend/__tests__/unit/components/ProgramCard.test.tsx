@@ -1,11 +1,15 @@
 import { faEye } from '@fortawesome/free-regular-svg-icons'
 import { faEdit } from '@fortawesome/free-solid-svg-icons'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
 import type { Program } from 'types/mentorship'
 import ProgramCard from 'components/ProgramCard'
+
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+}))
 
 jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: ({ icon, className }: { icon: unknown; className?: string }) => {
@@ -46,8 +50,23 @@ jest.mock('@heroui/tooltip', () => ({
   ),
 }))
 
+jest.mock('components/EntityActions', () => jest.requireActual('components/EntityActions'))
+
 describe('ProgramCard', () => {
   const mockOnView = jest.fn()
+  const mockPush = jest.fn()
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(useRouter as jest.Mock).mockReturnValue({
+      push: mockPush,
+      back: jest.fn(),
+      forward: jest.fn(),
+      refresh: jest.fn(),
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+    })
+  })
 
   const baseMockProgram: Program = {
     id: '1',
@@ -59,10 +78,6 @@ describe('ProgramCard', () => {
     endedAt: '2024-12-31T23:59:59Z',
     userRole: 'admin',
   }
-
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
 
   describe('Basic Rendering', () => {
     it('renders program name correctly', () => {
@@ -116,15 +131,13 @@ describe('ProgramCard', () => {
         />
       )
 
-      const card = container.querySelector('[role="button"][tabindex="0"]') as HTMLElement
+      const card = container.querySelector('button[type="button"]') as HTMLElement
       fireEvent.click(card)
 
       expect(mockOnView).toHaveBeenCalledWith('test-program')
     })
 
-    it('navigates to edit page when Edit is clicked', () => {
-      const router = useRouter()
-
+    it('navigates to edit page when Edit is clicked', async () => {
       render(
         <ProgramCard
           program={baseMockProgram}
@@ -134,10 +147,21 @@ describe('ProgramCard', () => {
         />
       )
 
-      fireEvent.click(screen.getByTestId('program-actions-button'))
-      fireEvent.click(screen.getByText('Edit'))
+      const actionsButton = screen.getByTestId('program-actions-button')
 
-      expect(router.push).toHaveBeenCalledWith('/my/mentorship/programs/test-program/edit')
+      await act(async () => {
+        fireEvent.click(actionsButton)
+      })
+
+      const editButton = await waitFor(() => {
+        return screen.getByText('Edit')
+      })
+
+      await act(async () => {
+        fireEvent.click(editButton)
+      })
+
+      expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program/edit')
     })
   })
 
@@ -155,7 +179,7 @@ describe('ProgramCard', () => {
       expect(screen.queryByText('admin')).not.toBeInTheDocument()
     })
 
-    it('shows only View Details button for user access', () => {
+    it('shows clickable card for user access', () => {
       render(
         <ProgramCard
           isAdmin={false}
@@ -165,7 +189,7 @@ describe('ProgramCard', () => {
         />
       )
 
-      const card = document.querySelector('[role="button"][tabindex="0"]')
+      const card = document.querySelector('button[type="button"]')
       expect(card).toBeInTheDocument()
       expect(screen.queryByText('Preview')).not.toBeInTheDocument()
       expect(screen.queryByText('Edit')).not.toBeInTheDocument()
@@ -182,7 +206,7 @@ describe('ProgramCard', () => {
         />
       )
 
-      const card = container.querySelector('[role="button"][tabindex="0"]') as HTMLElement
+      const card = container.querySelector('button[type="button"]') as HTMLElement
       fireEvent.click(card)
 
       expect(mockOnView).toHaveBeenCalledWith('test-program')
@@ -399,7 +423,7 @@ describe('ProgramCard', () => {
   })
 
   describe('Edge Cases', () => {
-    it('shows Edit in actions menu for admin access', () => {
+    it('shows actions button for admin access', () => {
       render(
         <ProgramCard
           isAdmin={true}
@@ -409,8 +433,7 @@ describe('ProgramCard', () => {
         />
       )
 
-      fireEvent.click(screen.getByTestId('program-actions-button'))
-      expect(screen.getByText('Edit')).toBeInTheDocument()
+      expect(screen.getByTestId('program-actions-button')).toBeInTheDocument()
     })
 
     it('handles program with minimal data', () => {

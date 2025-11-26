@@ -53,16 +53,9 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel,
   })()
 
   return (
-    <div
+    <button
+      type="button"
       onClick={() => onView(program.key)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          onView(program.key)
-        }
-      }}
-      role="button"
-      tabIndex={0}
       className="group h-72 w-72 cursor-pointer rounded-lg border border-gray-400 bg-white p-6 text-left transition-transform duration-300 hover:scale-[1.02] hover:brightness-105 md:h-80 md:w-80 lg:h-80 lg:w-96 dark:border-gray-600 dark:bg-gray-800"
     >
       <div className="flex h-full flex-col">
@@ -86,6 +79,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel,
                 programKey={program.key}
                 status={program.status}
                 setStatus={updateProgramStatus}
+                insideButton
               />
             )}
           </div>
@@ -104,7 +98,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel,
           <p className="line-clamp-8 text-sm text-gray-700 dark:text-gray-300">{description}</p>
         </div>
       </div>
-    </div>
+    </button>
   )
 }
 

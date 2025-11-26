@@ -27,14 +27,7 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
   const [showAllModule, setShowAllModule] = useState(false)
 
   if (modules.length === 1) {
-    return (
-      <SingleModuleCard
-        module={modules[0]}
-        showEdit={!!accessLevel && accessLevel === 'admin'}
-        accessLevel={accessLevel}
-        admins={admins}
-      />
-    )
+    return <SingleModuleCard module={modules[0]} accessLevel={accessLevel} admins={admins} />
   }
 
   const displayedModule = showAllModule ? modules : modules.slice(0, 4)

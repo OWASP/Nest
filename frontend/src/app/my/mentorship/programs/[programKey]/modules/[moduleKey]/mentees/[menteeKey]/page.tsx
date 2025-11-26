@@ -63,8 +63,12 @@ const MenteeProfilePage = () => {
   const openIssues = menteeIssues.filter((issue) => issue.state.toLowerCase() === 'open')
   const closedIssues = menteeIssues.filter((issue) => issue.state.toLowerCase() === 'closed')
 
-  const filteredIssues =
-    statusFilter === 'all' ? menteeIssues : statusFilter === 'open' ? openIssues : closedIssues
+  const issueMap: Record<string, Issue[]> = {
+    all: menteeIssues,
+    open: openIssues,
+    closed: closedIssues,
+  }
+  const filteredIssues = issueMap[statusFilter] || closedIssues
 
   return (
     <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
