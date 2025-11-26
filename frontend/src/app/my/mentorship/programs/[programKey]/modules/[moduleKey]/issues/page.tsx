@@ -16,7 +16,7 @@ const LABEL_ALL = 'all'
 const MAX_VISIBLE_LABELS = 5
 
 const IssuesPage = () => {
-  const { programKey, moduleKey } = useParams() as { programKey: string; moduleKey: string }
+  const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
   const router = useRouter()
   const searchParams = useSearchParams()
   const [selectedLabel, setSelectedLabel] = useState<string>(searchParams.get('label') || LABEL_ALL)

@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@apollo/client/react'
-import upperFirst from 'lodash/upperFirst'
+import capitalize from 'lodash/capitalize'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
@@ -49,7 +49,7 @@ const ModuleDetailsPage = () => {
   }
 
   const moduleDetails = [
-    { label: 'Experience Level', value: upperFirst(module.experienceLevel) },
+    { label: 'Experience Level', value: capitalize(module.experienceLevel) },
     { label: 'Start Date', value: formatDate(module.startedAt) },
     { label: 'End Date', value: formatDate(module.endedAt) },
     {
@@ -63,7 +63,6 @@ const ModuleDetailsPage = () => {
       admins={admins}
       details={moduleDetails}
       domains={module.domains}
-      labels={module.labels}
       mentors={module.mentors}
       summary={module.description}
       tags={module.tags}

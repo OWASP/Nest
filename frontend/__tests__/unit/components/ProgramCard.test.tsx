@@ -106,8 +106,8 @@ describe('ProgramCard', () => {
       expect(screen.getByText('admin')).toBeInTheDocument()
     })
 
-    it('calls onView when Preview button is clicked', () => {
-      render(
+    it('calls onView when card is clicked', () => {
+      const { container } = render(
         <ProgramCard
           program={baseMockProgram}
           onView={mockOnView}
@@ -116,13 +116,13 @@ describe('ProgramCard', () => {
         />
       )
 
-      const previewButton = screen.getByText('Preview').closest('button')
-      fireEvent.click(previewButton!)
+      const card = container.querySelector('[role="button"][tabindex="0"]') as HTMLElement
+      fireEvent.click(card)
 
       expect(mockOnView).toHaveBeenCalledWith('test-program')
     })
 
-    it('navigates to edit page when Edit Program is clicked', () => {
+    it('navigates to edit page when Edit is clicked', () => {
       const router = useRouter()
 
       render(
@@ -135,7 +135,7 @@ describe('ProgramCard', () => {
       )
 
       fireEvent.click(screen.getByTestId('program-actions-button'))
-      fireEvent.click(screen.getByText('Edit Program'))
+      fireEvent.click(screen.getByText('Edit'))
 
       expect(router.push).toHaveBeenCalledWith('/my/mentorship/programs/test-program/edit')
     })
@@ -165,13 +165,15 @@ describe('ProgramCard', () => {
         />
       )
 
-      expect(screen.getByText('View Details')).toBeInTheDocument()
+      const card = document.querySelector('[role="button"][tabindex="0"]')
+      expect(card).toBeInTheDocument()
       expect(screen.queryByText('Preview')).not.toBeInTheDocument()
       expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+      expect(screen.queryByText('View Details')).not.toBeInTheDocument()
     })
 
-    it('calls onView when View Details button is clicked', () => {
-      render(
+    it('calls onView when card is clicked', () => {
+      const { container } = render(
         <ProgramCard
           isAdmin={false}
           program={baseMockProgram}
@@ -180,8 +182,8 @@ describe('ProgramCard', () => {
         />
       )
 
-      const viewButton = screen.getByText('View Details').closest('button')
-      fireEvent.click(viewButton!)
+      const card = container.querySelector('[role="button"][tabindex="0"]') as HTMLElement
+      fireEvent.click(card)
 
       expect(mockOnView).toHaveBeenCalledWith('test-program')
     })
@@ -250,7 +252,7 @@ describe('ProgramCard', () => {
   })
 
   describe('Description Handling', () => {
-    it('renders long descriptions with line-clamp-6 CSS class', () => {
+    it('renders long descriptions with line-clamp-8 CSS class', () => {
       const longDescription = 'A'.repeat(300) // Long enough to trigger line clamping
       const longDescProgram = { ...baseMockProgram, description: longDescription }
 
@@ -266,7 +268,7 @@ describe('ProgramCard', () => {
       expect(screen.getByText(longDescription)).toBeInTheDocument()
       expect(screen.getByText(longDescription)).toBeInTheDocument()
       const descriptionElement = screen.getByText(longDescription)
-      expect(descriptionElement).toHaveClass('line-clamp-6')
+      expect(descriptionElement).toHaveClass('line-clamp-8')
     })
 
     it('shows full description when short', () => {
@@ -285,7 +287,7 @@ describe('ProgramCard', () => {
       expect(screen.getByText('Short description')).toBeInTheDocument()
 
       const descriptionElement = screen.getByText('Short description')
-      expect(descriptionElement).toHaveClass('line-clamp-6')
+      expect(descriptionElement).toHaveClass('line-clamp-8')
     })
 
     it('shows fallback text when description is empty', () => {
@@ -382,19 +384,6 @@ describe('ProgramCard', () => {
   })
 
   describe('Icons', () => {
-    it('renders eye icon for Preview button', () => {
-      render(
-        <ProgramCard
-          program={baseMockProgram}
-          isAdmin={true}
-          onView={mockOnView}
-          accessLevel="admin"
-        />
-      )
-
-      expect(screen.getByTestId('icon-eye')).toBeInTheDocument()
-    })
-
     it('renders actions button for admin menu', () => {
       render(
         <ProgramCard
@@ -407,23 +396,10 @@ describe('ProgramCard', () => {
 
       expect(screen.getByTestId('program-actions-button')).toBeInTheDocument()
     })
-
-    it('renders eye icon for View Details button', () => {
-      render(
-        <ProgramCard
-          isAdmin={false}
-          program={baseMockProgram}
-          onView={mockOnView}
-          accessLevel="user"
-        />
-      )
-
-      expect(screen.getByTestId('icon-eye')).toBeInTheDocument()
-    })
   })
 
   describe('Edge Cases', () => {
-    it('shows Edit Program in actions menu for admin access', () => {
+    it('shows Edit in actions menu for admin access', () => {
       render(
         <ProgramCard
           isAdmin={true}
@@ -434,7 +410,7 @@ describe('ProgramCard', () => {
       )
 
       fireEvent.click(screen.getByTestId('program-actions-button'))
-      expect(screen.getByText('Edit Program')).toBeInTheDocument()
+      expect(screen.getByText('Edit')).toBeInTheDocument()
     })
 
     it('handles program with minimal data', () => {

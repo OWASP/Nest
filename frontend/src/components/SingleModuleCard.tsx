@@ -1,13 +1,13 @@
-import { faUsers, faEllipsisV } from '@fortawesome/free-solid-svg-icons'
+import { faUsers } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { capitalize } from 'lodash'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import React, { useState, useRef, useEffect } from 'react'
+import React from 'react'
 import { ExtendedSession } from 'types/auth'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
+import EntityActions from 'components/EntityActions'
 import { getSimpleDuration } from 'components/ModuleCard'
 import TopContributorsList from 'components/TopContributorsList'
 
@@ -20,35 +20,15 @@ interface SingleModuleCardProps {
   }[]
 }
 
-const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
-  module,
-  showEdit,
-  accessLevel,
-  admins,
-}) => {
-  const router = useRouter()
+const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel, admins }) => {
   const { data } = useSession()
-  const [dropdownOpen, setDropdownOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
 
   const isAdmin =
     accessLevel === 'admin' &&
     admins?.some((admin) => admin.login === ((data as ExtendedSession)?.user?.login as string))
 
-  const handleEdit = () => {
-    setDropdownOpen(false)
-    router.push(`${globalThis.location.pathname}/modules/${module.key}/edit`)
-  }
-
-  const handleCreate = () => {
-    setDropdownOpen(false)
-    router.push(`${globalThis.location.pathname}/modules/create`)
-  }
-
-  const handleIssue = () => {
-    setDropdownOpen(false)
-    router.push(`${globalThis.location.pathname}/modules/${module.key}/issues`)
-  }
+  // Extract programKey from pathname (e.g., /my/mentorship/programs/[programKey])
+  const programKey = globalThis.location?.pathname.split('/programs/')[1]?.split('/')[0] || ''
 
   const moduleDetails = [
     { label: 'Experience Level', value: capitalize(module.experienceLevel) },
@@ -56,16 +36,6 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
     { label: 'End Date', value: formatDate(module.endedAt) },
     { label: 'Duration', value: getSimpleDuration(module.startedAt, module.endedAt) },
   ]
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
 
   return (
     <div className="flex flex-col gap-4 rounded-xl border border-gray-200 p-5 shadow-md dark:border-gray-700">
@@ -89,45 +59,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({
           </Link>
         </div>
 
-        {isAdmin && (
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setDropdownOpen((prev) => !prev)}
-              className="rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
-            >
-              <FontAwesomeIcon icon={faEllipsisV} />
-            </button>
-
-            {dropdownOpen && (
-              <div className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
-                {showEdit && isAdmin && (
-                  <button
-                    onClick={handleEdit}
-                    className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    Edit Module
-                  </button>
-                )}
-                {isAdmin && (
-                  <button
-                    onClick={handleCreate}
-                    className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    Create Module
-                  </button>
-                )}
-                {isAdmin && (
-                  <button
-                    onClick={handleIssue}
-                    className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    View Issues
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+        {isAdmin && <EntityActions type="module" programKey={programKey} moduleKey={module.key} />}
       </div>
 
       {/* Description */}

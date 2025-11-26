@@ -61,13 +61,10 @@ const ProgramForm = ({
           <div className="flex flex-col gap-8 p-8">
             {/* Basic Information */}
             <section className="flex flex-col gap-6">
-              <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
-                Basic Information
-              </h2>
               <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
                 <div className="lg:col-span-2">
                   <label htmlFor="program-name" className="mb-2 block text-sm font-semibold">
-                    Program Name *
+                    Name *
                   </label>
                   <input
                     id="program-name"
@@ -99,9 +96,6 @@ const ProgramForm = ({
 
             {/* Configuration */}
             <section className="flex flex-col gap-6 text-gray-600 dark:text-gray-300">
-              <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
-                Program Configuration
-              </h2>
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <div>
                   <label htmlFor="program-start-date" className="mb-2 block text-sm font-semibold">
@@ -151,9 +145,6 @@ const ProgramForm = ({
 
             {/* Additional Details */}
             <section className="flex flex-col gap-6">
-              <h2 className="mb-6 text-2xl font-semibold text-gray-600 dark:text-gray-300">
-                Additional Details
-              </h2>
               <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
                 <div>
                   <label htmlFor="program-tags" className="mb-2 block text-sm font-semibold">

@@ -66,7 +66,7 @@ describe('CreateModulePage', () => {
     render(<CreateModulePage />)
 
     // Fill all inputs
-    fireEvent.change(screen.getByLabelText(/Module Name/i), {
+    fireEvent.change(screen.getByLabelText('Name *'), {
       target: { value: 'My Test Module' },
     })
     fireEvent.change(screen.getByLabelText(/Description/i), {

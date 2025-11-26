@@ -86,8 +86,8 @@ describe('EditModulePage', () => {
     expect(await screen.findByDisplayValue('Existing Module')).toBeInTheDocument()
 
     // Modify values
-    fireEvent.change(screen.getByLabelText(/Module Name/i), {
-      target: { value: 'Updated Module Name' },
+    fireEvent.change(screen.getByLabelText('Name *'), {
+      target: { value: 'Updated Name' },
     })
     fireEvent.change(screen.getByLabelText(/Description/i), {
       target: { value: 'Updated description' },

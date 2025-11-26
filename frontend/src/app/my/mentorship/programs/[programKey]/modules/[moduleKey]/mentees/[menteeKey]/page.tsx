@@ -13,11 +13,11 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
 
 const MenteeProfilePage = () => {
-  const { programKey, moduleKey, menteeHandle } = useParams() as {
+  const { programKey, moduleKey, menteeKey } = useParams<{
     programKey: string
     moduleKey: string
-    menteeHandle: string
-  }
+    menteeKey: string
+  }>()
 
   const [menteeDetails, setMenteeDetails] = useState<MenteeDetails | null>(null)
   const [menteeIssues, setMenteeIssues] = useState<Issue[]>([])
@@ -29,9 +29,9 @@ const MenteeProfilePage = () => {
     variables: {
       programKey,
       moduleKey,
-      menteeHandle,
+      menteeKey,
     },
-    skip: !programKey || !moduleKey || !menteeHandle,
+    skip: !programKey || !moduleKey || !menteeKey,
     fetchPolicy: 'cache-and-network',
   })
 
