@@ -686,7 +686,74 @@ describe('ItemCardList Component', () => {
       )
 
       const avatarImage = screen.getByTestId('avatar-image')
-      expect(avatarImage).toHaveAttribute('alt', mockIssue.author.name)
+      expect(avatarImage).toHaveAttribute(
+        'alt',
+        `${mockIssue.author.name || mockIssue.author.login}'s avatar`
+      )
+    })
+
+    it('uses fallback alt text when author name is missing', () => {
+      const issueWithoutAuthor = {
+        ...mockIssue,
+        author: {
+          ...mockIssue.author,
+          name: null,
+        },
+      }
+
+      render(
+        <ItemCardList
+          title="Fallback Alt Text Test"
+          data={[issueWithoutAuthor]}
+          renderDetails={defaultProps.renderDetails}
+          showAvatar={true}
+        />
+      )
+
+      const avatarImage = screen.getByTestId('avatar-image')
+      expect(avatarImage).toHaveAttribute('alt', `${issueWithoutAuthor.author.login}'s avatar`)
+    })
+
+    it('uses generic fallback alt text when author is missing', () => {
+      const issueWithoutAuthor = {
+        ...mockIssue,
+        author: null,
+      }
+
+      render(
+        <ItemCardList
+          title="Missing Author Test"
+          data={[issueWithoutAuthor]}
+          renderDetails={defaultProps.renderDetails}
+          showAvatar={true}
+        />
+      )
+
+      const avatarImage = screen.getByTestId('avatar-image')
+      expect(avatarImage).toHaveAttribute('alt', "Author's avatar")
+    })
+
+    it('uses generic fallback alt text when author name and login are missing', () => {
+      const issueWithEmptyAuthor = {
+        ...mockIssue,
+        author: {
+          ...mockIssue.author,
+          name: '',
+          login: '',
+        },
+      }
+
+      render(
+        <ItemCardList
+          title="Empty Author Test"
+          data={[issueWithEmptyAuthor]}
+          renderDetails={defaultProps.renderDetails}
+          showAvatar={true}
+        />
+      )
+
+      const avatarImage = screen.getByTestId('avatar-image')
+      expect(avatarImage).toHaveAttribute('alt', "Author's avatar")
     })
 
     it('opens external links in new tab', () => {

@@ -96,12 +96,12 @@ describe('<RecentIssues />', () => {
 
   it('shows avatar when showAvatar is true', () => {
     render(<RecentIssues data={[baseIssue]} showAvatar={true} />)
-    expect(screen.getByAltText('User One')).toBeInTheDocument()
+    expect(screen.getByAltText("User One's avatar")).toBeInTheDocument()
   })
 
   it('hides avatar when showAvatar is false', () => {
     render(<RecentIssues data={[baseIssue]} showAvatar={false} />)
-    expect(screen.queryByAltText('User One')).not.toBeInTheDocument()
+    expect(screen.queryByAltText("User One's avatar")).not.toBeInTheDocument()
   })
 
   it('renders repositoryName and navigates on click', () => {
@@ -140,7 +140,7 @@ describe('<RecentIssues />', () => {
     render(<RecentIssues data={[issue]} />)
     expect(screen.getByText('Recent Issues')).toBeInTheDocument()
     expect(screen.getByText('repo')).toBeInTheDocument()
-    expect(screen.getByAltText('User One')).toBeInTheDocument()
+    expect(screen.getByAltText("User One's avatar")).toBeInTheDocument()
   })
 
   it('has accessible roles and labels', () => {
@@ -194,6 +194,19 @@ describe('<RecentIssues />', () => {
 
   it('defaults to showing avatar when showAvatar is not provided', () => {
     render(<RecentIssues data={[baseIssue]} />)
-    expect(screen.getByAltText('User One')).toBeInTheDocument()
+    expect(screen.getByAltText("User One's avatar")).toBeInTheDocument()
+  })
+
+  it('uses fallback alt text when author name and login are missing', () => {
+    const issueWithEmptyAuthor = {
+      ...baseIssue,
+      author: {
+        ...baseIssue.author,
+        name: '',
+        login: '',
+      },
+    }
+    render(<RecentIssues data={[issueWithEmptyAuthor]} />)
+    expect(screen.getByAltText("Author's avatar")).toBeInTheDocument()
   })
 })
