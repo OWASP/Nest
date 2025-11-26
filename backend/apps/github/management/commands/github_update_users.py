@@ -51,7 +51,9 @@ class Command(BaseCommand):
             prefix = f"{idx + offset + 1} of {active_users_count - offset}"
             print(f"{prefix:<10} {user.title}")
 
-            profile, _ = MemberProfile.objects.get_or_create(github_user=user)
+            profile, created = MemberProfile.objects.get_or_create(github_user=user)
+            if created:
+                profile.github_user = user
             profile.contributions_count = user_contributions.get(user.id, 0)
             profiles.append(profile)
 

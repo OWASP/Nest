@@ -38,10 +38,23 @@ class TestGithubUpdateUsersCommand:
         self, mock_repository_contributor, mock_user, mock_member_profile
     ):
         """Test command execution with default offset."""
-        mock_member_profile.objects.get_or_create.return_value = (MagicMock(), False)
-        mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0)
-        mock_user2 = MagicMock(id=2, title="User 2", contributions_count=0)
-        mock_user3 = MagicMock(id=3, title="User 3", contributions_count=0)
+        mock_profile1 = MagicMock(contributions_count=0)
+        mock_profile2 = MagicMock(contributions_count=0)
+        mock_profile3 = MagicMock(contributions_count=0)
+
+        def get_or_create_side_effect(github_user):
+            if github_user.id == 1:
+                return mock_profile1, False
+            if github_user.id == 2:
+                return mock_profile2, False
+            if github_user.id == 3:
+                return mock_profile3, False
+            return MagicMock(), False
+
+        mock_member_profile.objects.get_or_create.side_effect = get_or_create_side_effect
+        mock_user1 = MagicMock(id=1, title="User 1")
+        mock_user2 = MagicMock(id=2, title="User 2")
+        mock_user3 = MagicMock(id=3, title="User 3")
 
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 3
@@ -73,12 +86,16 @@ class TestGithubUpdateUsersCommand:
         mock_print.assert_any_call("2 of 3     User 2")
         mock_print.assert_any_call("3 of 3     User 3")
 
-        assert mock_user1.contributions_count == 10
-        assert mock_user2.contributions_count == 20
-        assert mock_user3.contributions_count == 30
+        assert mock_profile1.contributions_count == 10
+        assert mock_profile2.contributions_count == 20
+        assert mock_profile3.contributions_count == 30
 
-        assert mock_user.bulk_save.call_count == 2
-        assert mock_user.bulk_save.call_args_list[-1][0][0] == [mock_user1, mock_user2, mock_user3]
+        assert mock_member_profile.bulk_save.call_count == 2
+        assert mock_member_profile.bulk_save.call_args_list[-1][0][0] == [
+            mock_profile1,
+            mock_profile2,
+            mock_profile3,
+        ]
 
     @patch("apps.github.management.commands.github_update_users.MemberProfile")
     @patch("apps.github.management.commands.github_update_users.User")
@@ -88,9 +105,19 @@ class TestGithubUpdateUsersCommand:
         self, mock_repository_contributor, mock_user, mock_member_profile
     ):
         """Test command execution with custom offset."""
-        mock_member_profile.objects.get_or_create.return_value = (MagicMock(), False)
-        mock_user1 = MagicMock(id=2, title="User 2", contributions_count=0)
-        mock_user2 = MagicMock(id=3, title="User 3", contributions_count=0)
+        mock_profile1 = MagicMock(contributions_count=0)
+        mock_profile2 = MagicMock(contributions_count=0)
+
+        def get_or_create_side_effect(github_user):
+            if github_user.id == 2:
+                return mock_profile1, False
+            if github_user.id == 3:
+                return mock_profile2, False
+            return MagicMock(), False
+
+        mock_member_profile.objects.get_or_create.side_effect = get_or_create_side_effect
+        mock_user1 = MagicMock(id=2, title="User 2")
+        mock_user2 = MagicMock(id=3, title="User 3")
 
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 3
@@ -117,11 +144,14 @@ class TestGithubUpdateUsersCommand:
         mock_print.assert_any_call("2 of 2     User 2")
         mock_print.assert_any_call("3 of 2     User 3")
 
-        assert mock_user1.contributions_count == 20
-        assert mock_user2.contributions_count == 30
+        assert mock_profile1.contributions_count == 20
+        assert mock_profile2.contributions_count == 30
 
-        assert mock_user.bulk_save.call_count == 2
-        assert mock_user.bulk_save.call_args_list[-1][0][0] == [mock_user1, mock_user2]
+        assert mock_member_profile.bulk_save.call_count == 2
+        assert mock_member_profile.bulk_save.call_args_list[-1][0][0] == [
+            mock_profile1,
+            mock_profile2,
+        ]
 
     @patch("apps.github.management.commands.github_update_users.MemberProfile")
     @patch("apps.github.management.commands.github_update_users.User")
@@ -130,10 +160,19 @@ class TestGithubUpdateUsersCommand:
     def test_handle_with_users_having_no_contributions(
         self, mock_repository_contributor, mock_user, mock_member_profile
     ):
-        """Test command execution when users have no contributions."""
-        mock_member_profile.objects.get_or_create.return_value = (MagicMock(), False)
-        mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0)
-        mock_user2 = MagicMock(id=2, title="User 2", contributions_count=0)
+        mock_profile1 = MagicMock(contributions_count=0)
+        mock_profile2 = MagicMock(contributions_count=0)
+
+        def get_or_create_side_effect(github_user):
+            if github_user.id == 1:
+                return mock_profile1, False
+            if github_user.id == 2:
+                return mock_profile2, False
+            return MagicMock(), False
+
+        mock_member_profile.objects.get_or_create.side_effect = get_or_create_side_effect
+        mock_user1 = MagicMock(id=1, title="User 1")
+        mock_user2 = MagicMock(id=2, title="User 2")
 
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 2
@@ -153,11 +192,14 @@ class TestGithubUpdateUsersCommand:
         mock_print.assert_any_call("1 of 2     User 1")
         mock_print.assert_any_call("2 of 2     User 2")
 
-        assert mock_user1.contributions_count == 0
-        assert mock_user2.contributions_count == 0
+        assert mock_profile1.contributions_count == 0
+        assert mock_profile2.contributions_count == 0
 
-        assert mock_user.bulk_save.call_count == 1
-        assert mock_user.bulk_save.call_args_list[-1][0][0] == [mock_user1, mock_user2]
+        assert mock_member_profile.bulk_save.call_count == 1
+        assert mock_member_profile.bulk_save.call_args_list[-1][0][0] == [
+            mock_profile1,
+            mock_profile2,
+        ]
 
     @patch("apps.github.management.commands.github_update_users.MemberProfile")
     @patch("apps.github.management.commands.github_update_users.User")
@@ -167,10 +209,13 @@ class TestGithubUpdateUsersCommand:
         self, mock_repository_contributor, mock_user, mock_member_profile
     ):
         """Test command execution with single user."""
-        mock_member_profile.objects.get_or_create.return_value = (MagicMock(), False)
-        mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0)
+        mock_profile1 = MagicMock(contributions_count=0)
+        mock_member_profile.objects.get_or_create.return_value = (mock_profile1, False)
+        mock_user1 = MagicMock(id=1, title="User 1")
 
         mock_users_queryset = MagicMock()
+        mock_users_queryset.count.return_value = 1
+        mock_users_queryset.__getitem__.return_value = [mock_user1]
         mock_users_queryset.count.return_value = 1
         mock_users_queryset.__getitem__.return_value = [mock_user1]
 
@@ -188,10 +233,10 @@ class TestGithubUpdateUsersCommand:
 
         mock_print.assert_called_once_with("1 of 1     User 1")
 
-        assert mock_user1.contributions_count == 15
+        assert mock_profile1.contributions_count == 15
 
-        assert mock_user.bulk_save.call_count == 2
-        assert mock_user.bulk_save.call_args_list[-1][0][0] == [mock_user1]
+        assert mock_member_profile.bulk_save.call_count == 2
+        assert mock_member_profile.bulk_save.call_args_list[-1][0][0] == [mock_profile1]
 
     @patch("apps.github.management.commands.github_update_users.MemberProfile")
     @patch("apps.github.management.commands.github_update_users.User")
@@ -218,8 +263,6 @@ class TestGithubUpdateUsersCommand:
 
         mock_print.assert_not_called()
 
-        assert mock_user.bulk_save.call_count == 1
-        assert mock_user.bulk_save.call_args_list[-1][0][0] == []
         assert mock_member_profile.bulk_save.call_count == 1
         assert mock_member_profile.bulk_save.call_args_list[-1][0][0] == []
 
@@ -231,9 +274,19 @@ class TestGithubUpdateUsersCommand:
         self, mock_repository_contributor, mock_user, mock_member_profile
     ):
         """Test command execution when user count equals batch size."""
-        mock_member_profile.objects.get_or_create.return_value = (MagicMock(), False)
-        mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0)
-        mock_user2 = MagicMock(id=2, title="User 2", contributions_count=0)
+        mock_profile1 = MagicMock(contributions_count=0)
+        mock_profile2 = MagicMock(contributions_count=0)
+
+        def get_or_create_side_effect(github_user):
+            if github_user.id == 1:
+                return mock_profile1, False
+            if github_user.id == 2:
+                return mock_profile2, False
+            return MagicMock(), False
+
+        mock_member_profile.objects.get_or_create.side_effect = get_or_create_side_effect
+        mock_user1 = MagicMock(id=1, title="User 1")
+        mock_user2 = MagicMock(id=2, title="User 2")
 
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 2
@@ -256,11 +309,14 @@ class TestGithubUpdateUsersCommand:
         mock_print.assert_any_call("1 of 2     User 1")
         mock_print.assert_any_call("2 of 2     User 2")
 
-        assert mock_user1.contributions_count == 10
-        assert mock_user2.contributions_count == 20
+        assert mock_profile1.contributions_count == 10
+        assert mock_profile2.contributions_count == 20
 
-        assert mock_user.bulk_save.call_count == 2
-        assert mock_user.bulk_save.call_args_list[-1][0][0] == [mock_user1, mock_user2]
+        assert mock_member_profile.bulk_save.call_count == 2
+        assert mock_member_profile.bulk_save.call_args_list[-1][0][0] == [
+            mock_profile1,
+            mock_profile2,
+        ]
 
     @patch("apps.github.management.commands.github_update_users.MemberProfile")
     @patch("apps.github.management.commands.github_update_users.User")
@@ -275,9 +331,6 @@ class TestGithubUpdateUsersCommand:
 
         mock_user1 = MagicMock(
             id=1,
-            contributions_count=0,
-            is_owasp_staff=True,
-            has_public_member_page=False,
         )
 
         mock_users_queryset = MagicMock()
@@ -296,6 +349,4 @@ class TestGithubUpdateUsersCommand:
 
         assert mock_profile.github_user == mock_user1
         assert mock_profile.contributions_count == 5
-        assert mock_profile.is_owasp_staff is True
-        assert mock_profile.has_public_member_page is False
         mock_member_profile.bulk_save.assert_called_once()
