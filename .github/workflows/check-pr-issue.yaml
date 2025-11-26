@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Check PR linked issue and assignee
-        uses: arkid15r/check-pr-issue-action@a3635191c798f111aae577759b579dc37bb13e02
+        uses: arkid15r/check-pr-issue-action@198f78f3287881ccd01b45fe28b50b0b9a33feb1
         with:
           close_pr_on_failure: 'true'
           github_token: ${{ secrets.GITHUB_TOKEN }}
