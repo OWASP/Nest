@@ -74,7 +74,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, href, accessLevel, i
               </h3>
             </Tooltip>
             {accessLevel === 'admin' && isAdmin && (
-              <div role="button" tabIndex={0} onMouseDown={(e) => e.stopPropagation()}>
+              <div role="none" onMouseDown={(e) => e.stopPropagation()}>
                 <EntityActions
                   type="program"
                   programKey={program.key}
