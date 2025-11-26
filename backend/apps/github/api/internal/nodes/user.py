@@ -13,7 +13,6 @@ from apps.nest.api.internal.nodes.badge import BadgeNode
         "avatar_url",
         "bio",
         "company",
-        "contributions_count",
         "email",
         "followers_count",
         "following_count",
@@ -27,6 +26,13 @@ from apps.nest.api.internal.nodes.badge import BadgeNode
 )
 class UserNode:
     """GitHub user node."""
+
+    @strawberry.field
+    def contributions_count(self) -> int:
+        """Resolve contributions count."""
+        if hasattr(self, "owasp_profile"):
+            return self.owasp_profile.contributions_count
+        return 0
 
     @strawberry.field
     def badge_count(self) -> int:

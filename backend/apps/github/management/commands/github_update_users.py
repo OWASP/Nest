@@ -46,36 +46,22 @@ class Command(BaseCommand):
             .values("user_id")
             .annotate(total_contributions=Sum("contributions_count"))
         }
-        users = []
         profiles = []
         for idx, user in enumerate(active_users[offset:]):
             prefix = f"{idx + offset + 1} of {active_users_count - offset}"
             print(f"{prefix:<10} {user.title}")
 
-            user.contributions_count = user_contributions.get(user.id, 0)
-            users.append(user)
-
-            profile, created = MemberProfile.objects.get_or_create(github_user_id=user.id)
-            if created:
-                profile.github_user = user
-            profile.contributions_count = user.contributions_count
-            profile.is_owasp_staff = user.is_owasp_staff
-            profile.has_public_member_page = user.has_public_member_page
+            profile, _ = MemberProfile.objects.get_or_create(github_user=user)
+            profile.contributions_count = user_contributions.get(user.id, 0)
             profiles.append(profile)
 
-            if not len(users) % BATCH_SIZE:
-                User.bulk_save(users, fields=("contributions_count",))
+            if not len(profiles) % BATCH_SIZE:
                 MemberProfile.bulk_save(
                     profiles,
-                    fields=(
-                        "contributions_count",
-                        "is_owasp_staff",
-                        "has_public_member_page",
-                    ),
+                    fields=("contributions_count",),
                 )
 
-        User.bulk_save(users, fields=("contributions_count",))
         MemberProfile.bulk_save(
             profiles,
-            fields=("contributions_count", "is_owasp_staff", "has_public_member_page"),
+            fields=("contributions_count",),
         )

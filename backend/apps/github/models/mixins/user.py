@@ -124,7 +124,7 @@ class UserIndexMixin:
     @property
     def idx_contributions_count(self) -> int:
         """Return contributions count for indexing."""
-        return self.contributions_count
+        return self.owasp_profile.contributions_count
 
     @property
     def idx_issues(self) -> list[dict]:
