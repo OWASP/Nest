@@ -6,8 +6,8 @@ import { formatDate } from 'utils/dateFormatter'
 
 const SnapshotCard = ({ title, button, startAt, endAt }: SnapshotCardProps) => {
   return (
-    <Button
-      onClick={button.onclick}
+    <Button 
+      onPress={button.onclick}
       className="group flex h-40 w-full flex-col items-center rounded-lg bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
     >
       <div className="text-center">

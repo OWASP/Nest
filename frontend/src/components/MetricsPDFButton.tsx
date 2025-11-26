@@ -19,11 +19,13 @@ const MetricsPDFButton: FC<{
       closeDelay={100}
       showArrow
     >
-      <FontAwesomeIcon
-        icon={faFileArrowDown}
-        className="ml-2 h-7 w-7 cursor-pointer text-gray-500 transition-colors duration-200 hover:text-gray-700"
+      <button
         onClick={async () => await fetchMetricsPDF(path, fileName)}
-      />
+        aria-label={`Download ${fileName}`}
+        className="ml-2 rounded p-1 text-gray-500 transition-colors duration-200 hover:text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+      >
+        <FontAwesomeIcon icon={faFileArrowDown} className="h-7 w-7" />
+      </button>
     </Tooltip>
   )
 }

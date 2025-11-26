@@ -132,7 +132,7 @@ const ChapterMap = ({
         <button
           type="button"
           tabIndex={0}
-          className="absolute inset-0 z-[1000] flex cursor-pointer items-center justify-center rounded-[inherit] bg-black/10"
+          className="absolute inset-0 z-1000 flex cursor-pointer items-center justify-center rounded-[inherit] bg-black/10"
           onClick={() => {
             mapRef.current?.scrollWheelZoom.enable()
             setIsMapActive(true)
