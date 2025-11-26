@@ -725,7 +725,7 @@ export type QueryCommitteeArgs = {
 
 
 export type QueryGetMenteeDetailsArgs = {
-  menteeHandle: Scalars['String']['input'];
+  menteeKey: Scalars['String']['input'];
   moduleKey: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
 };
@@ -733,7 +733,7 @@ export type QueryGetMenteeDetailsArgs = {
 
 export type QueryGetMenteeModuleIssuesArgs = {
   limit?: Scalars['Int']['input'];
-  menteeHandle: Scalars['String']['input'];
+  menteeKey: Scalars['String']['input'];
   moduleKey: Scalars['String']['input'];
   offset?: Scalars['Int']['input'];
   programKey: Scalars['String']['input'];

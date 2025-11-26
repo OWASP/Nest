@@ -17,7 +17,7 @@ import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProgramDetailsPage = () => {
-  const { programKey } = useParams() as { programKey: string }
+  const { programKey } = useParams<{ programKey: string }>()
 
   const { data: session } = useSession()
   const username = (session as ExtendedSession)?.user?.login

@@ -1,6 +1,6 @@
 import { faUsers } from '@fortawesome/free-solid-svg-icons'
 import { screen } from '@testing-library/react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
@@ -11,6 +11,7 @@ import SingleModuleCard from 'components/SingleModuleCard'
 // Mock dependencies
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
+  usePathname: jest.fn(),
 }))
 
 jest.mock('next-auth/react', () => ({
@@ -80,6 +81,7 @@ jest.mock('components/TopContributorsList', () => ({
 
 const mockPush = jest.fn()
 const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>
+const mockUsePathname = usePathname as jest.MockedFunction<typeof usePathname>
 const mockUseSession = useSession as jest.MockedFunction<typeof useSession>
 
 // Test data
@@ -122,6 +124,7 @@ describe('SingleModuleCard', () => {
       replace: jest.fn(),
       prefetch: jest.fn(),
     })
+    mockUsePathname.mockReturnValue('/my/mentorship/programs/test-program')
     mockUseSession.mockReturnValue({
       data: null,
       status: 'unauthenticated',
@@ -166,7 +169,10 @@ describe('SingleModuleCard', () => {
       render(<SingleModuleCard module={mockModule} />)
 
       const moduleLink = screen.getByTestId('module-link')
-      expect(moduleLink).toHaveAttribute('href', '//modules/test-module')
+      expect(moduleLink).toHaveAttribute(
+        'href',
+        '/my/mentorship/programs/test-program/modules/test-module'
+      )
       expect(moduleLink).toHaveAttribute('target', '_blank')
       expect(moduleLink).toHaveAttribute('rel', 'noopener noreferrer')
     })
@@ -183,7 +189,10 @@ describe('SingleModuleCard', () => {
 
       // Should have clickable title for navigation
       const moduleLink = screen.getByTestId('module-link')
-      expect(moduleLink).toHaveAttribute('href', '//modules/test-module')
+      expect(moduleLink).toHaveAttribute(
+        'href',
+        '/my/mentorship/programs/test-program/modules/test-module'
+      )
     })
   })
 
@@ -197,14 +206,7 @@ describe('SingleModuleCard', () => {
 
     it('ignores admin-related props since menu is removed', () => {
       // These props are now ignored but should not cause errors
-      render(
-        <SingleModuleCard
-          module={mockModule}
-          showEdit={true}
-          accessLevel="admin"
-          admins={mockAdmins}
-        />
-      )
+      render(<SingleModuleCard module={mockModule} accessLevel="admin" admins={mockAdmins} />)
 
       expect(screen.getByText('Test Module')).toBeInTheDocument()
     })
@@ -225,7 +227,7 @@ describe('SingleModuleCard', () => {
     })
 
     it('handles undefined admins array gracefully', () => {
-      render(<SingleModuleCard module={mockModule} showEdit={true} accessLevel="admin" />)
+      render(<SingleModuleCard module={mockModule} accessLevel="admin" />)
 
       // Should render without errors even with admin props
       expect(screen.getByText('Test Module')).toBeInTheDocument()
@@ -238,7 +240,10 @@ describe('SingleModuleCard', () => {
 
       const moduleLink = screen.getByTestId('module-link')
       expect(moduleLink).toBeInTheDocument()
-      expect(moduleLink).toHaveAttribute('href', '//modules/test-module')
+      expect(moduleLink).toHaveAttribute(
+        'href',
+        '/my/mentorship/programs/test-program/modules/test-module'
+      )
       expect(moduleLink).toHaveAttribute('target', '_blank')
       expect(moduleLink).toHaveAttribute('rel', 'noopener noreferrer')
     })

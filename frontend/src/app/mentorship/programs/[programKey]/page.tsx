@@ -13,7 +13,7 @@ import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProgramDetailsPage = () => {
-  const { programKey } = useParams() as { programKey: string }
+  const { programKey } = useParams<{ programKey: string }>()
   const searchParams = useSearchParams()
   const router = useRouter()
   const shouldRefresh = searchParams.get('refresh') === 'true'

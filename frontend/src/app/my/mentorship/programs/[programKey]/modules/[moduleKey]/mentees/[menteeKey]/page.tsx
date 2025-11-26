@@ -13,11 +13,11 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
 
 const MenteeProfilePage = () => {
-  const { programKey, moduleKey, menteeHandle } = useParams() as {
+  const { programKey, moduleKey, menteeKey } = useParams<{
     programKey: string
     moduleKey: string
-    menteeHandle: string
-  }
+    menteeKey: string
+  }>()
 
   const [menteeDetails, setMenteeDetails] = useState<MenteeDetails | null>(null)
   const [menteeIssues, setMenteeIssues] = useState<Issue[]>([])
@@ -29,9 +29,9 @@ const MenteeProfilePage = () => {
     variables: {
       programKey,
       moduleKey,
-      menteeHandle,
+      menteeKey,
     },
-    skip: !programKey || !moduleKey || !menteeHandle,
+    skip: !programKey || !moduleKey || !menteeKey,
     fetchPolicy: 'cache-and-network',
   })
 
@@ -63,8 +63,12 @@ const MenteeProfilePage = () => {
   const openIssues = menteeIssues.filter((issue) => issue.state.toLowerCase() === 'open')
   const closedIssues = menteeIssues.filter((issue) => issue.state.toLowerCase() === 'closed')
 
-  const filteredIssues =
-    statusFilter === 'all' ? menteeIssues : statusFilter === 'open' ? openIssues : closedIssues
+  const issueMap: Record<string, Issue[]> = {
+    all: menteeIssues,
+    open: openIssues,
+    closed: closedIssues,
+  }
+  const filteredIssues = issueMap[statusFilter] || closedIssues
 
   return (
     <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">

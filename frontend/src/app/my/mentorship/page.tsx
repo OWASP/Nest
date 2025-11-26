@@ -81,7 +81,6 @@ const MyMentorshipPage: React.FC = () => {
   }, [error])
 
   const handleCreate = () => router.push('/my/mentorship/programs/create')
-  const handleView = (key: string) => router.push(`/my/mentorship/programs/${key}`)
 
   if (!username) {
     return <LoadingSpinner />
@@ -139,7 +138,7 @@ const MyMentorshipPage: React.FC = () => {
                 accessLevel="admin"
                 isAdmin={p?.userRole === 'admin'}
                 key={p.id}
-                onView={handleView}
+                href={`/my/mentorship/programs/${p.key}`}
                 program={p}
               />
             ))

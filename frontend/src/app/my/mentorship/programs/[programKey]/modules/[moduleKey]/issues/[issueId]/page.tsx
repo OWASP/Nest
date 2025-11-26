@@ -24,7 +24,7 @@ import SecondaryCard from 'components/SecondaryCard'
 import { TruncatedText } from 'components/TruncatedText'
 
 const ModuleIssueDetailsPage = () => {
-  const params = useParams() as { programKey: string; moduleKey: string; issueId: string }
+  const params = useParams<{ programKey: string; moduleKey: string; issueId: string }>()
   const { programKey, moduleKey, issueId } = params
 
   const formatDeadline = (deadline: string | null) => {
@@ -266,7 +266,7 @@ const ModuleIssueDetailsPage = () => {
                   className="flex items-center justify-between gap-2 rounded-lg bg-gray-200 p-3 dark:bg-gray-700"
                 >
                   <Link
-                    href={`/members/${a.login}`}
+                    href={`/my/mentorship/programs/${programKey}/modules/${moduleKey}/mentees/${a.login}`}
                     className="inline-flex items-center gap-2 text-blue-600 hover:underline dark:text-blue-400"
                   >
                     {a.avatarUrl ? (
