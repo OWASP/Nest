@@ -66,6 +66,10 @@ dump-data-e2e:
 	@echo "Dumping Nest e2e data"
 	@CMD="pg_dumpall -U nest_user_e2e --clean | gzip -9 > backend/data/nest-e2e.sql.gz" $(MAKE) exec-db-command-e2e
 
+dump-data-local:
+	@echo "Dumping Nest local data"
+	@CMD="pg_dumpall -U nest_user_dev --clean | gzip -9 > backend/data/nest-e2e.sql.gz" $(MAKE) exec-db-command-it
+
 enrich-data: \
 	github-enrich-issues \
 	owasp-enrich-chapters \
