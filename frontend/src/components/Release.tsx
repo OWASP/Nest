@@ -70,13 +70,24 @@ const Release: React.FC<ReleaseProps> = ({
           <div className="flex flex-1 items-center overflow-hidden">
             <FontAwesomeIcon icon={faFolderOpen} className="mr-2 h-5 w-4" />
             <button
-              className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
+              type="button"
+              aria-label={`Open repository ${release.repositoryName}`}
+              className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400 focus-visible:ring-2"
               disabled={!release.organizationName || !release.repositoryName}
               onClick={() => {
                 const org = release.organizationName || ''
                 const repo = release.repositoryName || ''
                 if (!org || !repo) return
                 router.push(`/organizations/${org}/repositories/${repo}`)
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  const org = release.organizationName || ''
+                  const repo = release.repositoryName || ''
+                  if (!org || !repo) return
+                  router.push(`/organizations/${org}/repositories/${repo}`)
+                }
               }}
             >
               <TruncatedText text={release.repositoryName} />

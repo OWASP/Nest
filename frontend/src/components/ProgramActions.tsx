@@ -18,7 +18,7 @@ const ProgramActions: React.FC<ProgramActionsProps> = ({ status, setStatus }) =>
   const router = useRouter()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-
+  const triggerRef = useRef<HTMLButtonElement | null>(null)
   const handleAction = (actionKey: string) => {
     switch (actionKey) {
       case 'edit Program':
@@ -65,25 +65,84 @@ const ProgramActions: React.FC<ProgramActionsProps> = ({ status, setStatus }) =>
     }
   }, [])
 
+  useEffect(() => {
+    if (!dropdownOpen) return
+    requestAnimationFrame(() => {
+      const items = dropdownRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]')
+      if (items && items.length > 0) items[0].focus()
+    })
+  }, [dropdownOpen])
+
+  const handleMenuKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const items = dropdownRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]')
+    if (!items || items.length === 0) return
+
+    const current = Array.from(items).indexOf(document.activeElement as HTMLElement)
+    switch (e.key) {
+      case 'ArrowDown': {
+        e.preventDefault()
+        const next = current < items.length - 1 ? current + 1 : 0
+        items[next].focus()
+        break
+      }
+      case 'ArrowUp': {
+        e.preventDefault()
+        const prev = current > 0 ? current - 1 : items.length - 1
+        items[prev].focus()
+        break
+      }
+      case 'Home': {
+        e.preventDefault()
+        items[0].focus()
+        break
+      }
+      case 'End': {
+        e.preventDefault()
+        items[items.length - 1].focus()
+        break
+      }
+      case 'Escape': {
+        e.preventDefault()
+        setDropdownOpen(false)
+        triggerRef.current?.focus()
+        break
+      }
+      default:
+        break
+    }
+  }
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button
         data-testid="program-actions-button"
         type="button"
+        aria-haspopup="menu"
+        aria-expanded={dropdownOpen}
         onClick={() => setDropdownOpen((prev) => !prev)}
-        className="rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            setDropdownOpen((prev) => !prev)
+          }
+        }}
+        className="rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus-visible:ring-1 focus-visible:ring-offset-1"
       >
         <FontAwesomeIcon icon={faEllipsisV} />
       </button>
       {dropdownOpen && (
-        <div className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+        <div
+          role="menu"
+          onKeyDown={handleMenuKeyDown}
+          className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
+        >
           {options.map((option) => (
             <button
               key={option.key}
               type="button"
               role="menuitem"
               onClick={() => handleAction(option.key)}
-              className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus-visible:ring-1 focus-visible:ring-offset-1"
             >
               {option.label}
             </button>

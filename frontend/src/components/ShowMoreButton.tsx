@@ -16,8 +16,15 @@ const ShowMoreButton = ({ onToggle }: { onToggle: () => void }) => {
       <Button
         type="button"
         disableAnimation
-        onPress={handleToggle}
-        className="flex items-center bg-transparent px-0 text-blue-400"
+        onKeyDown={(e: React.KeyboardEvent) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            handleToggle()
+          }
+        }}
+        aria-expanded={isExpanded}
+        aria-label={isExpanded ? 'Show less items' : 'Show more items'}
+        className="flex items-center bg-transparent px-0 text-blue-400 focus:outline-none focus-visible:ring-1 focus-visible:ring-offset-1"
       >
         {isExpanded ? (
           <>

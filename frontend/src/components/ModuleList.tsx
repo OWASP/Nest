@@ -22,7 +22,7 @@ const ModuleList: React.FC<ModuleListProps> = ({ modules }) => {
           return (
             <button
               key={`${module}-${index}`}
-              className="rounded-lg border border-gray-400 px-3 py-1 text-sm transition-all duration-200 ease-in-out hover:scale-105 hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700"
+              className="rounded-lg border border-gray-400 px-3 py-1 text-sm transition-all duration-200 ease-in-out hover:scale-105 hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700 focus-visible:ring-1"
               title={module.length > 50 ? module : undefined}
               type="button"
             >
@@ -36,7 +36,7 @@ const ModuleList: React.FC<ModuleListProps> = ({ modules }) => {
             disableAnimation
             aria-label={showAll ? 'Show fewer modules' : 'Show more modules'}
             onPress={() => setShowAll((prev) => !prev)}
-            className="mt-4 flex items-center bg-transparent text-blue-400 hover:underline"
+            className="mt-4 flex items-center bg-transparent text-blue-400 hover:underline focus:ring-1"
           >
             {showAll ? (
               <>

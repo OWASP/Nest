@@ -143,7 +143,18 @@ const Card = ({
 
           {/* Action Button */}
           <div className="flex sm:justify-end">
-            <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
+            <ActionButton 
+              tooltipLabel={tooltipLabel} 
+              url={button.url} 
+              onClick={button.onclick}
+              onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  button.onclick?.()
+                }
+              }}
+              className="focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
+            >
               {button.icon}
               {button.label}
             </ActionButton>
