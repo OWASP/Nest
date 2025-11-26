@@ -58,14 +58,14 @@ describe('ProgramCard', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(useRouter as jest.Mock).mockReturnValue({
-      push: mockPush,
-      back: jest.fn(),
-      forward: jest.fn(),
-      refresh: jest.fn(),
-      replace: jest.fn(),
-      prefetch: jest.fn(),
-    })
+      ; (useRouter as jest.Mock).mockReturnValue({
+        push: mockPush,
+        back: jest.fn(),
+        forward: jest.fn(),
+        refresh: jest.fn(),
+        replace: jest.fn(),
+        prefetch: jest.fn(),
+      })
   })
 
   const baseMockProgram: Program = {

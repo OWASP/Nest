@@ -62,20 +62,20 @@ const EntityActions: React.FC<EntityActionsProps> = ({
   const options =
     type === 'program'
       ? [
-          { key: 'edit_program', label: 'Edit' },
-          { key: 'create_module', label: 'Add Module' },
-          ...(status === ProgramStatusEnum.Draft ? [{ key: 'publish', label: 'Publish' }] : []),
-          ...(status === ProgramStatusEnum.Published || status === ProgramStatusEnum.Completed
-            ? [{ key: 'draft', label: 'Unpublish' }]
-            : []),
-          ...(status === ProgramStatusEnum.Published
-            ? [{ key: 'completed', label: 'Mark as Completed' }]
-            : []),
-        ]
+        { key: 'edit_program', label: 'Edit' },
+        { key: 'create_module', label: 'Add Module' },
+        ...(status === ProgramStatusEnum.Draft ? [{ key: 'publish', label: 'Publish' }] : []),
+        ...(status === ProgramStatusEnum.Published || status === ProgramStatusEnum.Completed
+          ? [{ key: 'draft', label: 'Unpublish' }]
+          : []),
+        ...(status === ProgramStatusEnum.Published
+          ? [{ key: 'completed', label: 'Mark as Completed' }]
+          : []),
+      ]
       : [
-          { key: 'edit_module', label: 'Edit' },
-          { key: 'view_issues', label: 'View Issues' },
-        ]
+        { key: 'edit_module', label: 'Edit' },
+        { key: 'view_issues', label: 'View Issues' },
+      ]
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
