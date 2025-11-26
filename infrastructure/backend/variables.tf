@@ -10,8 +10,14 @@ variable "aws_region" {
   default     = "us-east-2"
 }
 
+variable "expire_log_days" {
+  description = "The number of days to expire logs after."
+  type        = number
+  default     = 90
+}
+
 variable "noncurrent_version_expiration_days" {
-  description = "Specifies the number of days an object is noncurrent before it is expired."
+  description = "The number of days an object is noncurrent before it is expired."
   type        = number
   default     = 30
 }

@@ -10,17 +10,15 @@ terraform {
 
 data "aws_iam_policy_document" "logs" {
   statement {
-    sid    = "s3-log-delivery"
-    effect = "Allow"
+    actions   = ["s3:PutObject"]
+    effect    = "Allow"
+    resources = ["${aws_s3_bucket.logs.arn}/*"]
+    sid       = "s3-log-delivery"
 
     principals {
       type        = "Service"
       identifiers = ["logging.s3.amazonaws.com"]
     }
-
-    actions = ["s3:PutObject"]
-
-    resources = ["${aws_s3_bucket.logs.arn}/*"]
   }
 }
 
@@ -28,26 +26,23 @@ data "aws_iam_policy_document" "state_https_only" {
   policy_id = "ForceHTTPS"
 
   statement {
-    sid    = "HTTPSOnly"
-    effect = "Deny"
-
-    principals {
-      type        = "AWS"
-      identifiers = ["*"]
-    }
-
     actions = ["s3:*"]
+    sid     = "HTTPSOnly"
+    effect  = "Deny"
 
+    condition {
+      test     = "Bool"
+      values   = ["false"]
+      variable = "aws:SecureTransport"
+    }
+    principals {
+      identifiers = ["*"]
+      type        = "AWS"
+    }
     resources = [
       aws_s3_bucket.state.arn,
       "${aws_s3_bucket.state.arn}/*",
     ]
-
-    condition {
-      test     = "Bool"
-      variable = "aws:SecureTransport"
-      values   = ["false"]
-    }
   }
 }
 
@@ -55,6 +50,9 @@ resource "aws_dynamodb_table" "state_lock" {
   name         = "${var.project_name}-terraform-state-lock"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
+  tags = {
+    Name = "${var.project_name}-terraform-state-lock"
+  }
 
   attribute {
     name = "LockID"
@@ -62,9 +60,6 @@ resource "aws_dynamodb_table" "state_lock" {
   }
   point_in_time_recovery {
     enabled = true
-  }
-  tags = {
-    Name = "${var.project_name}-terraform-state-lock"
   }
 }
 
@@ -109,14 +104,13 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
       days_after_initiation = var.abort_incomplete_multipart_upload_days
     }
     expiration {
-      days = 90
+      days = var.expire_log_days
     }
   }
 }
 
 resource "aws_s3_bucket_logging" "state" {
-  bucket = aws_s3_bucket.state.id
-
+  bucket        = aws_s3_bucket.state.id
   target_bucket = aws_s3_bucket.logs.id
   target_prefix = "s3/"
 }
@@ -132,17 +126,17 @@ resource "aws_s3_bucket_policy" "state" {
 }
 
 resource "aws_s3_bucket_public_access_block" "logs" {
-  bucket                  = aws_s3_bucket.logs.id
   block_public_acls       = true
   block_public_policy     = true
+  bucket                  = aws_s3_bucket.logs.id
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
 
 resource "aws_s3_bucket_public_access_block" "state" {
-  bucket                  = aws_s3_bucket.state.id
   block_public_acls       = true
   block_public_policy     = true
+  bucket                  = aws_s3_bucket.state.id
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
