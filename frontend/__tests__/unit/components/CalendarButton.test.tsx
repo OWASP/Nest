@@ -119,6 +119,28 @@ describe('CalendarButton', () => {
       expect(svg).toHaveClass('text-blue-500')
     })
 
+    it('applies different size classes correctly', () => {
+      const { rerender } = render(<CalendarButton event={mockEvent} iconClassName="h-4 w-4" />)
+      let svg = document.querySelector('svg')
+      expect(svg).toHaveClass('h-4', 'w-4')
+
+      rerender(<CalendarButton event={mockEvent} iconClassName="h-6 w-6" />)
+      svg = document.querySelector('svg')
+      expect(svg).toHaveClass('h-6', 'w-6')
+      expect(svg).not.toHaveClass('h-4')
+
+      rerender(<CalendarButton event={mockEvent} iconClassName="h-8 w-8" />)
+      svg = document.querySelector('svg')
+      expect(svg).toHaveClass('h-8', 'w-8')
+      expect(svg).not.toHaveClass('h-6')
+    })
+
+    it('uses default iconClassName when not provided', () => {
+      render(<CalendarButton event={mockEvent} />)
+      const svg = document.querySelector('svg')
+      expect(svg).toHaveClass('h-4', 'w-4')
+    })
+
     it('does not apply iconClassName when custom icon is provided', () => {
       render(
         <CalendarButton

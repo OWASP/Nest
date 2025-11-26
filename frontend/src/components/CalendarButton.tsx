@@ -6,7 +6,7 @@ import getGoogleCalendarUrl from 'utils/getGoogleCalendarUrl'
 export default function CalendarButton({
   event,
   className = '',
-  iconClassName = '',
+  iconClassName = 'h-4 w-4',
   icon,
   showLabel = false,
   label = 'Add to Google Calendar',
