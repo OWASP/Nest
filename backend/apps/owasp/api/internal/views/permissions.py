@@ -7,7 +7,14 @@ from django.http import HttpResponseForbidden
 
 def has_dashboard_permission(request):
     """Check if user has dashboard access."""
-    return (user := request.user) and user.is_authenticated and user.github_user.is_owasp_staff
+    user = request.user
+    if not (user and user.is_authenticated and user.github_user):
+        return False
+
+    return (
+        hasattr(user.github_user, "owasp_profile")
+        and user.github_user.owasp_profile.is_owasp_staff
+    )
 
 
 def dashboard_access_required(view_func):
