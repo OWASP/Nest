@@ -52,20 +52,25 @@ jest.mock('@heroui/tooltip', () => ({
 
 jest.mock('components/EntityActions', () => jest.requireActual('components/EntityActions'))
 
+jest.mock('next/link', () => {
+  return ({ children, href }: { children: React.ReactNode; href: string }) => {
+    return <a href={href}>{children}</a>
+  }
+})
+
 describe('ProgramCard', () => {
-  const mockOnView = jest.fn()
   const mockPush = jest.fn()
 
   beforeEach(() => {
     jest.clearAllMocks()
-      ; (useRouter as jest.Mock).mockReturnValue({
-        push: mockPush,
-        back: jest.fn(),
-        forward: jest.fn(),
-        refresh: jest.fn(),
-        replace: jest.fn(),
-        prefetch: jest.fn(),
-      })
+    ;(useRouter as jest.Mock).mockReturnValue({
+      push: mockPush,
+      back: jest.fn(),
+      forward: jest.fn(),
+      refresh: jest.fn(),
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+    })
   })
 
   const baseMockProgram: Program = {
@@ -85,7 +90,7 @@ describe('ProgramCard', () => {
         <ProgramCard
           isAdmin={false}
           program={baseMockProgram}
-          onView={mockOnView}
+          href="/test/path"
           accessLevel="user"
         />
       )
@@ -98,7 +103,7 @@ describe('ProgramCard', () => {
         <ProgramCard
           isAdmin={false}
           program={baseMockProgram}
-          onView={mockOnView}
+          href="/test/path"
           accessLevel="user"
         />
       )
@@ -112,7 +117,7 @@ describe('ProgramCard', () => {
       render(
         <ProgramCard
           program={baseMockProgram}
-          onView={mockOnView}
+          href="/test/path"
           isAdmin={true}
           accessLevel="admin"
         />
@@ -121,27 +126,25 @@ describe('ProgramCard', () => {
       expect(screen.getByText('admin')).toBeInTheDocument()
     })
 
-    it('calls onView when card is clicked', () => {
+    it('renders Link with correct href', () => {
       const { container } = render(
         <ProgramCard
           program={baseMockProgram}
-          onView={mockOnView}
+          href="/my/mentorship/programs/test-program"
           isAdmin={true}
           accessLevel="admin"
         />
       )
 
-      const card = container.querySelector('button[type="button"]') as HTMLElement
-      fireEvent.click(card)
-
-      expect(mockOnView).toHaveBeenCalledWith('test-program')
+      const link = container.querySelector('a[href="/my/mentorship/programs/test-program"]')
+      expect(link).toBeInTheDocument()
     })
 
     it('navigates to edit page when Edit is clicked', async () => {
       render(
         <ProgramCard
           program={baseMockProgram}
-          onView={mockOnView}
+          href="/my/mentorship/programs/test-program"
           isAdmin={true}
           accessLevel="admin"
         />
@@ -171,7 +174,7 @@ describe('ProgramCard', () => {
         <ProgramCard
           isAdmin={false}
           program={baseMockProgram}
-          onView={mockOnView}
+          href="/test/path"
           accessLevel="user"
         />
       )
@@ -184,32 +187,30 @@ describe('ProgramCard', () => {
         <ProgramCard
           isAdmin={false}
           program={baseMockProgram}
-          onView={mockOnView}
+          href="/test/path"
           accessLevel="user"
         />
       )
 
-      const card = document.querySelector('button[type="button"]')
-      expect(card).toBeInTheDocument()
+      const link = document.querySelector('a[href="/test/path"]')
+      expect(link).toBeInTheDocument()
       expect(screen.queryByText('Preview')).not.toBeInTheDocument()
       expect(screen.queryByText('Edit')).not.toBeInTheDocument()
       expect(screen.queryByText('View Details')).not.toBeInTheDocument()
     })
 
-    it('calls onView when card is clicked', () => {
+    it('renders Link with correct href', () => {
       const { container } = render(
         <ProgramCard
           isAdmin={false}
           program={baseMockProgram}
-          onView={mockOnView}
+          href="/mentorship/programs/test-program"
           accessLevel="user"
         />
       )
 
-      const card = container.querySelector('button[type="button"]') as HTMLElement
-      fireEvent.click(card)
-
-      expect(mockOnView).toHaveBeenCalledWith('test-program')
+      const link = container.querySelector('a[href="/mentorship/programs/test-program"]')
+      expect(link).toBeInTheDocument()
     })
   })
 
@@ -217,12 +218,7 @@ describe('ProgramCard', () => {
     it('applies admin role styling', () => {
       const adminProgram = { ...baseMockProgram, userRole: 'admin' }
       render(
-        <ProgramCard
-          isAdmin={true}
-          program={adminProgram}
-          onView={mockOnView}
-          accessLevel="admin"
-        />
+        <ProgramCard isAdmin={true} program={adminProgram} href="/test/path" accessLevel="admin" />
       )
 
       const badge = screen.getByText('admin')
@@ -232,12 +228,7 @@ describe('ProgramCard', () => {
     it('applies mentor role styling', () => {
       const mentorProgram = { ...baseMockProgram, userRole: 'mentor' }
       render(
-        <ProgramCard
-          isAdmin={true}
-          program={mentorProgram}
-          onView={mockOnView}
-          accessLevel="admin"
-        />
+        <ProgramCard isAdmin={true} program={mentorProgram} href="/test/path" accessLevel="admin" />
       )
 
       const badge = screen.getByText('mentor')
@@ -250,7 +241,7 @@ describe('ProgramCard', () => {
         <ProgramCard
           isAdmin={true}
           program={unknownRoleProgram}
-          onView={mockOnView}
+          href="/test/path"
           accessLevel="admin"
         />
       )
@@ -262,12 +253,7 @@ describe('ProgramCard', () => {
     it('applies default styling when userRole is undefined', () => {
       const noRoleProgram = { ...baseMockProgram, userRole: undefined }
       render(
-        <ProgramCard
-          isAdmin={true}
-          program={noRoleProgram}
-          onView={mockOnView}
-          accessLevel="admin"
-        />
+        <ProgramCard isAdmin={true} program={noRoleProgram} href="/test/path" accessLevel="admin" />
       )
 
       // Should not render badge when userRole is undefined
@@ -284,7 +270,7 @@ describe('ProgramCard', () => {
         <ProgramCard
           isAdmin={false}
           program={longDescProgram}
-          onView={mockOnView}
+          href="/test/path"
           accessLevel="user"
         />
       )
@@ -303,7 +289,7 @@ describe('ProgramCard', () => {
         <ProgramCard
           isAdmin={false}
           program={shortDescProgram}
-          onView={mockOnView}
+          href="/test/path"
           accessLevel="user"
         />
       )
@@ -321,7 +307,7 @@ describe('ProgramCard', () => {
         <ProgramCard
           isAdmin={false}
           program={emptyDescProgram}
-          onView={mockOnView}
+          href="/test/path"
           accessLevel="user"
         />
       )
@@ -334,12 +320,7 @@ describe('ProgramCard', () => {
       const noDescProgram = { ...baseMockProgram, description: undefined as any }
 
       render(
-        <ProgramCard
-          isAdmin={false}
-          program={noDescProgram}
-          onView={mockOnView}
-          accessLevel="user"
-        />
+        <ProgramCard isAdmin={false} program={noDescProgram} href="/test/path" accessLevel="user" />
       )
 
       expect(screen.getByText('No description available.')).toBeInTheDocument()
@@ -352,7 +333,7 @@ describe('ProgramCard', () => {
         <ProgramCard
           isAdmin={false}
           program={baseMockProgram}
-          onView={mockOnView}
+          href="/test/path"
           accessLevel="user"
         />
       )
@@ -368,7 +349,7 @@ describe('ProgramCard', () => {
         <ProgramCard
           isAdmin={false}
           program={startOnlyProgram}
-          onView={mockOnView}
+          href="/test/path"
           accessLevel="user"
         />
       )
@@ -383,7 +364,7 @@ describe('ProgramCard', () => {
         <ProgramCard
           isAdmin={false}
           program={noDatesProgram}
-          onView={mockOnView}
+          href="/test/path"
           accessLevel="user"
         />
       )
@@ -398,7 +379,7 @@ describe('ProgramCard', () => {
         <ProgramCard
           isAdmin={false}
           program={endOnlyProgram}
-          onView={mockOnView}
+          href="/test/path"
           accessLevel="user"
         />
       )
@@ -413,7 +394,7 @@ describe('ProgramCard', () => {
         <ProgramCard
           program={baseMockProgram}
           isAdmin={true}
-          onView={mockOnView}
+          href="/test/path"
           accessLevel="admin"
         />
       )
@@ -428,7 +409,7 @@ describe('ProgramCard', () => {
         <ProgramCard
           isAdmin={true}
           program={baseMockProgram}
-          onView={mockOnView}
+          href="/test/path"
           accessLevel="admin"
         />
       )
@@ -451,7 +432,7 @@ describe('ProgramCard', () => {
         <ProgramCard
           isAdmin={false}
           program={minimalProgram}
-          onView={mockOnView}
+          href="/test/path"
           accessLevel="user"
         />
       )

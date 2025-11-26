@@ -1,7 +1,6 @@
 'use client'
 
 import { useSearchPage } from 'hooks/useSearchPage'
-import { useRouter } from 'next/navigation'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
 import { Program } from 'types/mentorship'
 import ProgramCard from 'components/ProgramCard'
@@ -22,19 +21,13 @@ const ProgramsPage = () => {
     hitsPerPage: 24,
   })
 
-  const router = useRouter()
-
   const renderProgramCard = (program: Program) => {
-    const handleButtonClick = () => {
-      router.push(`/mentorship/programs/${program.key}`)
-    }
-
     return (
       <ProgramCard
         accessLevel="user"
         isAdmin={false}
         key={program.key}
-        onView={handleButtonClick}
+        href={`/mentorship/programs/${program.key}`}
         program={program}
       />
     )

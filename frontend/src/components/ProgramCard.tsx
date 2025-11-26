@@ -1,5 +1,6 @@
 import { Tooltip } from '@heroui/tooltip'
 import { useUpdateProgramStatus } from 'hooks/useUpdateProgramStatus'
+import Link from 'next/link'
 import type React from 'react'
 import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import { Program } from 'types/mentorship'
@@ -7,12 +8,12 @@ import EntityActions from 'components/EntityActions'
 
 interface ProgramCardProps {
   program: Program
-  onView: (key: string) => void
+  href: string
   accessLevel: 'admin' | 'user'
   isAdmin: boolean
 }
 
-const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel, isAdmin }) => {
+const ProgramCard: React.FC<ProgramCardProps> = ({ program, href, accessLevel, isAdmin }) => {
   const formatDate = (d: string | number) => {
     const date = typeof d === 'number' ? new Date(d * 1000) : new Date(d)
     return date.toLocaleDateString('en-US', {
@@ -53,10 +54,9 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel,
   })()
 
   return (
-    <button
-      type="button"
-      onClick={() => onView(program.key)}
-      className="group h-72 w-72 cursor-pointer rounded-lg border border-gray-400 bg-white p-6 text-left transition-transform duration-300 hover:scale-[1.02] hover:brightness-105 md:h-80 md:w-80 lg:h-80 lg:w-96 dark:border-gray-600 dark:bg-gray-800"
+    <Link
+      href={href}
+      className="group block h-72 w-72 rounded-lg border border-gray-400 bg-white p-6 text-left transition-transform duration-300 hover:scale-[1.02] hover:brightness-105 md:h-80 md:w-80 lg:h-80 lg:w-96 dark:border-gray-600 dark:bg-gray-800"
     >
       <div className="flex h-full flex-col">
         <div className="flex flex-1 flex-col">
@@ -74,13 +74,14 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel,
               </h3>
             </Tooltip>
             {accessLevel === 'admin' && isAdmin && (
-              <EntityActions
-                type="program"
-                programKey={program.key}
-                status={program.status}
-                setStatus={updateProgramStatus}
-                insideButton
-              />
+              <div role="presentation" onMouseDown={(e) => e.stopPropagation()}>
+                <EntityActions
+                  type="program"
+                  programKey={program.key}
+                  status={program.status}
+                  setStatus={updateProgramStatus}
+                />
+              </div>
             )}
           </div>
           <div className="mb-2 text-sm text-gray-600 dark:text-gray-400">
@@ -98,7 +99,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel,
           <p className="line-clamp-8 text-sm text-gray-700 dark:text-gray-300">{description}</p>
         </div>
       </div>
-    </button>
+    </Link>
   )
 }
 

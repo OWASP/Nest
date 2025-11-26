@@ -98,9 +98,7 @@ describe('ProgramsPage Component', () => {
       expect(screen.getByText('Program 1')).toBeInTheDocument()
     })
 
-    const card = screen.getAllByRole('button')[0] // First program card
-    fireEvent.click(card)
-
-    expect(mockRouter.push).toHaveBeenCalledWith('/mentorship/programs/program_1')
+    const card = screen.getByRole('link', { name: /Program 1/i })
+    expect(card).toHaveAttribute('href', '/mentorship/programs/program_1')
   })
 })
