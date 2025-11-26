@@ -45,6 +45,7 @@ runs:
             --env-file backend/.env.e2e.example \
             --network host \
             -p 9000:9000 \
+            -e DJANGO_DB_HOST=localhost \
             owasp/nest:test-backend-e2e-latest \
             sh -c '
               gunicorn wsgi:application --bind 0.0.0.0:9000
