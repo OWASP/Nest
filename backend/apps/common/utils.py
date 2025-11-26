@@ -12,7 +12,6 @@ from django.conf import settings
 from django.template.defaultfilters import pluralize
 from django.utils.text import Truncator
 from django.utils.text import slugify as django_slugify
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from humanize import intword, naturaltime
 
 if TYPE_CHECKING:
@@ -66,13 +65,6 @@ def clean_url(url: str | None) -> str | None:
         return None
 
     return url.strip().rstrip(".,;:!?") or None
-
-
-def csrf_decorate(view):
-    """Apply CSRF protection based on settings."""
-    if settings.IS_E2E_ENVIRONMENT:
-        return csrf_exempt(view)  # NOSONAR
-    return csrf_protect(view)
 
 
 def get_absolute_url(path: str) -> str:
