@@ -1,6 +1,7 @@
 import { Skeleton } from '@heroui/skeleton'
 import LoadingSpinner from 'components/LoadingSpinner'
 import CardSkeleton from 'components/skeletons/Card'
+
 import UserCardSkeleton from 'components/skeletons/UserCard'
 
 function userCardRender() {
@@ -13,6 +14,8 @@ function userCardRender() {
     </div>
   )
 }
+
+
 
 const SkeletonBase = ({
   indexName,
@@ -49,6 +52,7 @@ const SkeletonBase = ({
       break
     case 'users':
       return userCardRender()
+   
     default:
       return <LoadingSpinner imageUrl={loadingImageUrl} />
   }
