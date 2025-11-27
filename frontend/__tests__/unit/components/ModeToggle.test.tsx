@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { renderHook } from '@testing-library/react'
 import { useTheme } from 'next-themes'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import ModeToggle from 'components/ModeToggle'
 
 jest.mock('next-themes', () => ({
@@ -115,7 +116,7 @@ describe('ModeToggle Component', () => {
     expect(setThemeMock).toHaveBeenCalledWith('light')
   })
 
-  test('should not render before mounted', () => {
+  test('should render after mount', () => {
     useThemeMock.mockReturnValue({
       theme: 'light',
       setTheme: jest.fn(),
@@ -123,7 +124,8 @@ describe('ModeToggle Component', () => {
 
     const { container } = render(<ModeToggle />)
 
-    // Component returns null initially (before useEffect runs)
-    expect(container.firstChild).toBeNull()
+    // Component is rendered after useEffect runs (which happens synchronously in RTL)
+    expect(container.firstChild).not.toBeNull()
+    expect(screen.getByRole('button')).toBeInTheDocument()
   })
 })
