@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('owasp', '0067_memberprofile_backward_compatibility'),
+        ("owasp", "0067_memberprofile_backward_compatibility"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='memberprofile',
-            name='has_public_member_page',
-            field=models.BooleanField(default=True, help_text="Whether the member's profile is publicly visible on the OWASP website", verbose_name='Has Public Member Page'),
+            model_name="memberprofile",
+            name="has_public_member_page",
+            field=models.BooleanField(
+                default=True,
+                help_text="Whether the member's profile is publicly visible on the OWASP website",
+                verbose_name="Has Public Member Page",
+            ),
         ),
     ]
