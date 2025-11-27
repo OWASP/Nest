@@ -1,7 +1,7 @@
 ARG OWASP_GID=1000
 ARG OWASP_UID=1000
 
-FROM python:3.13.7-alpine AS builder
+FROM python:3.14-alpine AS builder
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -20,6 +20,7 @@ RUN mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     apk update && apk upgrade && \
+    apk add g++ && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
     chown -R owasp:owasp /home/owasp
@@ -42,7 +43,7 @@ COPY settings settings
 COPY static static
 COPY templates templates
 
-FROM python:3.13.7-alpine
+FROM python:3.14-alpine
 
 ARG OWASP_GID
 ARG OWASP_UID
