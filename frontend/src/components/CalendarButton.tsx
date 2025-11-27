@@ -3,14 +3,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type { CalendarButtonProps } from 'types/calendar'
 import getGoogleCalendarUrl from 'utils/getGoogleCalendarUrl'
 
-export default function CalendarButton({
-  event,
-  className = '',
-  iconClassName = 'h-4 w-4',
-  icon,
-  showLabel = false,
-  label = 'Add to Google Calendar',
-}: CalendarButtonProps) {
+export default function CalendarButton(props: Readonly<CalendarButtonProps>) {
+  const {
+    event,
+    className = '',
+    iconClassName = 'h-4 w-4',
+    icon,
+    showLabel = false,
+    label = 'Add to Google Calendar',
+  } = props
   const href = getGoogleCalendarUrl(event)
   const safeTitle = event.title || 'event'
   const ariaLabel = `Add ${safeTitle} to Google Calendar`

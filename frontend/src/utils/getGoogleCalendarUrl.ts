@@ -1,6 +1,5 @@
+export type { CalendarEvent } from 'types/calendar'
 import type { CalendarEvent } from 'types/calendar'
-
-export type { CalendarEvent }
 
 const pad = (n: number, width = 2) => String(n).padStart(width, '0')
 
@@ -27,7 +26,7 @@ function detectIsAllDay(dateInput: string | Date): boolean {
 }
 
 export default function getGoogleCalendarUrl(event: CalendarEvent): string {
-  if (!event || !event.startDate || !event.title) {
+  if (!event?.startDate || !event.title) {
     throw new Error('getGoogleCalendarUrl: event, startDate and title are required')
   }
 
@@ -44,7 +43,8 @@ export default function getGoogleCalendarUrl(event: CalendarEvent): string {
   let datesParam: string
   if (isAllDay) {
     const s = formatLocalDate(start)
-    const e = formatLocalDate(end)
+    const endExclusive = new Date(end.getTime() + 24 * 60 * 60 * 1000)
+    const e = formatLocalDate(endExclusive)
     datesParam = `${s}/${e}`
   } else {
     const s = formatUTCDateTime(start)
@@ -54,7 +54,13 @@ export default function getGoogleCalendarUrl(event: CalendarEvent): string {
 
   const params = new URLSearchParams()
   params.set('text', event.title)
-  if (event.description) params.set('details', event.description)
+
+  let details = event.description || ''
+  if (event.url) {
+    details = details ? `${details}\n\n${event.url}` : event.url
+  }
+  if (details) params.set('details', details)
+
   if (event.location) params.set('location', event.location)
 
   const other = params.toString()

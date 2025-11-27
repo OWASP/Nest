@@ -1,4 +1,4 @@
-import type { JSX } from 'react'
+import type { ReactNode } from 'react'
 
 export type CalendarEvent = {
   title: string
@@ -6,13 +6,14 @@ export type CalendarEvent = {
   location?: string
   startDate: string | Date
   endDate?: string | Date
+  url?: string
 }
 
-export type CalendarButtonProps = {
+export type CalendarButtonProps = Readonly<{
   event: CalendarEvent
   className?: string
   iconClassName?: string
-  icon?: JSX.Element
+  icon?: ReactNode
   showLabel?: boolean
   label?: string
-}
+}>

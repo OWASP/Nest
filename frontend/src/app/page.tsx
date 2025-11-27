@@ -182,6 +182,7 @@ export default function Home() {
                         location: event.suggestedLocation || '',
                         startDate: event.startDate,
                         endDate: event.endDate,
+                        url: event.url,
                       }}
                       className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
                       iconClassName="h-4 w-4"

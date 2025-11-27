@@ -8,7 +8,7 @@ describe('getGoogleCalendarUrl', () => {
         startDate: '2025-12-01',
         endDate: '2025-12-03',
       })
-      expect(url).toContain('dates=20251201/20251203')
+      expect(url).toContain('dates=20251201/20251204')
       expect(url).not.toMatch(/dates=\d{8}T/)
     })
 
@@ -58,7 +58,7 @@ describe('getGoogleCalendarUrl', () => {
         title: 'All Day Event',
         startDate: '2025-12-25',
       })
-      expect(url).toContain('dates=20251225')
+      expect(url).toContain('dates=20251225/20251226')
     })
 
     it('handles Date object', () => {
@@ -212,7 +212,7 @@ describe('getGoogleCalendarUrl', () => {
         endDate: '2025-12-03',
       })
       expect(url).toContain('text=Security')
-      expect(url).toContain('dates=20251202/20251203')
+      expect(url).toContain('dates=20251202/20251204')
     })
 
     it('handles workshop with specific time', () => {
@@ -234,7 +234,7 @@ describe('getGoogleCalendarUrl', () => {
         startDate: '2026-10-27',
         endDate: '2026-10-30',
       })
-      expect(url).toContain('dates=20261027/20261030')
+      expect(url).toContain('dates=20261027/20261031')
     })
   })
 })
