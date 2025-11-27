@@ -49,26 +49,7 @@ django-shell:
 
 dump-data:
 	@echo "Dumping Nest data"
-	@CMD="python manage.py dumpdata \
-		github \
-		owasp \
-		slack.Conversation \
-		slack.Member \
-		slack.Message \
-		slack.Workspace \
-		--indent=4 \
-		--natural-foreign \
-		--natural-primary -o data/nest.json" $(MAKE) exec-backend-command
-	@CMD="sed -E -i 's/(\"[^\"]*email\"): *\"([^\"]|\\\")*\"/\1: \"\"/g' data/nest.json" $(MAKE) exec-backend-command
-	@CMD="gzip -f data/nest.json" $(MAKE) exec-backend-command
-
-dump-data-e2e:
-	@echo "Dumping Nest e2e data"
-	@CMD="pg_dumpall -U nest_user_e2e --clean | gzip -9 > backend/data/nest-e2e.sql.gz" $(MAKE) exec-db-command-e2e
-
-dump-data-local:
-	@echo "Dumping Nest local data"
-	@CMD="pg_dumpall -U nest_user_dev --clean | gzip -9 > backend/data/nest-e2e.sql.gz" $(MAKE) exec-db-command-it
+	@CMD="./data/dump.sh" $(MAKE) exec-backend-command-it
 
 enrich-data: \
 	github-enrich-issues \
@@ -87,12 +68,18 @@ index-data:
 	@CMD="python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
 
 load-data:
+	@echo "Recreating Nest schema"
+	@CMD="psql -U nest_user_dev -d nest_db_dev -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nest_user_dev'" \
+	$(MAKE) exec-db-command-it 2>/dev/null
 	@echo "Loading Nest data"
-	@CMD="python manage.py load_data" $(MAKE) exec-backend-command
+	@gunzip -c backend/data/nest.sql.gz | docker exec -i nest-db psql -U nest_user_dev -d nest_db_dev
 
 load-data-e2e:
+	@echo "Recreating Nest e2e schema"
+	@CMD="psql -U nest_user_e2e -d nest_db_e2e -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nest_user_e2e'" \
+	$(MAKE) exec-db-command-e2e 2>/dev/null
 	@echo "Loading Nest e2e data"
-	@gunzip -c backend/data/nest-e2e.sql.gz | docker exec -i e2e-nest-db psql -U nest_user_e2e -d nest_db_e2e
+	@gunzip -c backend/data/nest.sql.gz | docker exec -i e2e-nest-db psql -U nest_user_e2e -d nest_db_e2e
 
 merge-migrations:
 	@CMD="python manage.py makemigrations --merge" $(MAKE) exec-backend-command
