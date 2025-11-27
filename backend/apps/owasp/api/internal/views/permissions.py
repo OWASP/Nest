@@ -9,7 +9,7 @@ from django.http import HttpResponseForbidden
 def has_dashboard_permission(request):
     """Check if user has dashboard access."""
     user = getattr(request, "user", None)
-    if not (user and user.is_authenticated and hasattr(user, "github_user")):
+    if not (user and getattr(user, "is_authenticated", False)):
         return False
     try:
         github_user = user.github_user
