@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { GetCommunitySnapshotsDocument } from 'types/__generated__/snapshotQueries.generated'
 import type { Snapshot } from 'types/snapshot'
-import SnapshotSkeleton from 'components/skeletons/SnapshotSkeleton'
+import LoadingSpinner from 'components/LoadingSpinner'
 import SnapshotCard from 'components/SnapshotCard'
 
 const SnapshotsPage: React.FC = () => {
@@ -41,7 +41,7 @@ const SnapshotsPage: React.FC = () => {
 
   const renderSnapshotCard = (snapshot: Snapshot) => {
     const SubmitButton = {
-      label: 'View Snapshot',
+      label: 'View Details',
       icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
       onclick: () => handleButtonClick(snapshot),
     }
@@ -57,26 +57,22 @@ const SnapshotsPage: React.FC = () => {
     )
   }
 
+  if (isLoading) {
+    return <LoadingSpinner />
+  }
+
   return (
     <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5">
-        {isLoading ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {Array.from({ length: 12 }).map((_, index) => (
-              <SnapshotSkeleton key={index} />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {!snapshots?.length ? (
-              <div className="col-span-full py-8 text-center">No Snapshots found</div>
-            ) : (
-              snapshots.map((snapshot: Snapshot) => (
-                <div key={snapshot.key}>{renderSnapshotCard(snapshot)}</div>
-              ))
-            )}
-          </div>
-        )}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {!snapshots?.length ? (
+            <div className="col-span-full py-8 text-center">No Snapshots found</div>
+          ) : (
+            snapshots.map((snapshot: Snapshot) => (
+              <div key={snapshot.key}>{renderSnapshotCard(snapshot)}</div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   )
