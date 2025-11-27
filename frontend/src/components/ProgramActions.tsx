@@ -117,6 +117,7 @@ const ProgramActions: React.FC<ProgramActionsProps> = ({ status, setStatus }) =>
       <button
         data-testid="program-actions-button"
         type="button"
+        ref={triggerRef}
         aria-haspopup="menu"
         aria-expanded={dropdownOpen}
         onClick={() => setDropdownOpen((prev) => !prev)}
@@ -133,7 +134,6 @@ const ProgramActions: React.FC<ProgramActionsProps> = ({ status, setStatus }) =>
       {dropdownOpen && (
         <div
           role="menu"
-          tabIndex={0}
           onKeyDown={handleMenuKeyDown}
           className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
         >
@@ -142,6 +142,7 @@ const ProgramActions: React.FC<ProgramActionsProps> = ({ status, setStatus }) =>
               key={option.key}
               type="button"
               role="menuitem"
+              tabIndex={-1}
               onClick={() => handleAction(option.key)}
               className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus-visible:ring-1 focus-visible:ring-offset-1"
             >
