@@ -16,7 +16,6 @@ jest.mock('@heroui/button', () => ({
   }: React.PropsWithChildren<{
     onPress?: () => void
     'aria-label'?: string
-    isIconOnly?: boolean
     className?: string
   }>) => (
     <button onClick={onPress} aria-label={ariaLabel} className={className}>
