@@ -59,8 +59,8 @@ describe('SnapshotsPage', () => {
     render(<SnapshotsPage />)
 
     await waitFor(() => {
-      const loadingSkeletons = screen.getAllByRole('status')
-      expect(loadingSkeletons.length).toBeGreaterThan(0)
+      const loadingSpinners = screen.getAllByAltText('Loading indicator')
+      expect(loadingSpinners.length).toBe(2)
     })
   })
 
