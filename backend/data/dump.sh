@@ -1,5 +1,16 @@
 #!/bin/sh
 
+set -e
+
+# Cleanup function to ensure temp DB is dropped even on error
+cleanup() {
+    if [ -n "$TEMP_DB" ]; then
+        echo "Cleaning up temporary database $TEMP_DB..."
+        psql -h "$DJANGO_DB_HOST" -U "$DJANGO_DB_USER" -d postgres -c "DROP DATABASE IF EXISTS $TEMP_DB;" 2>/dev/null || true
+    fi
+}
+trap cleanup EXIT
+
 export PGPASSWORD="$DJANGO_DB_PASSWORD"
 export TEMP_DB="temp_$DJANGO_DB_NAME"
 
@@ -24,8 +35,12 @@ UPDATES=$(psql -h "$DJANGO_DB_HOST" -U "$DJANGO_DB_USER" -d "$TEMP_DB" -Atqc "
       AND n.nspname NOT IN ('pg_catalog','information_schema');
 ")
 
-echo "Hiding email addresses…"
-echo "$UPDATES" | psql -h "$DJANGO_DB_HOST" -U "$DJANGO_DB_USER" -d "$TEMP_DB"
+if [ -z "$UPDATES" ]; then
+    echo "No email fields found to hide."
+else
+    echo "Hiding email addresses…"
+    echo "$UPDATES" | psql -h "$DJANGO_DB_HOST" -U "$DJANGO_DB_USER" -d "$TEMP_DB"
+fi
 
 # 3. Dump the DB
 echo "Creating dump…"
