@@ -1,7 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { renderHook } from '@testing-library/react'
 import { useTheme } from 'next-themes'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import ModeToggle from 'components/ModeToggle'
 
 jest.mock('next-themes', () => ({
