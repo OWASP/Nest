@@ -1,4 +1,4 @@
-FROM python:3.14-alpine AS builder
+FROM python:3.13.7-alpine AS builder
 
 ENV APK_CACHE_DIR="/home/owasp/.cache/apk-backend-test" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
@@ -14,7 +14,6 @@ RUN mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     apk update && apk upgrade && \
-    apk add g++ && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
     chown -R owasp:owasp /home/owasp
@@ -37,7 +36,7 @@ COPY static static
 COPY templates templates
 COPY tests tests
 
-FROM python:3.14-alpine
+FROM python:3.13.7-alpine
 
 RUN addgroup -S owasp && \
     adduser -S -h /home/owasp -G owasp owasp && \
