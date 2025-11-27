@@ -46,7 +46,7 @@ api_settings = {
 }
 
 api_settings_customization = {}
-if settings.IS_LOCAL_ENVIRONMENT or settings.IS_E2E_ENVIRONMENT:
+if settings.IS_LOCAL_ENVIRONMENT:
     api_settings_customization = {
         "auth": None,
         "servers": [
@@ -57,6 +57,19 @@ if settings.IS_LOCAL_ENVIRONMENT or settings.IS_E2E_ENVIRONMENT:
         ],
         "throttle": [],
     }
+
+elif settings.IS_E2E_ENVIRONMENT:
+    api_settings_customization = {
+        "auth": None,
+        "servers": [
+            {
+                "description": "E2E",
+                "url": settings.SITE_URL,
+            }
+        ],
+        "throttle": [],
+    }
+
 elif settings.IS_STAGING_ENVIRONMENT:
     api_settings_customization = {
         "servers": [

@@ -286,6 +286,8 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 
 1. **Load Initial Data**:
 
+   - Make sure you have `gzip` installed on your machine.
+
    - Open a new terminal session and run the following command to populate the database with initial data from fixtures:
 
    ```bash
@@ -440,34 +442,6 @@ Follow these steps to setup your e2e testing environment:
    ```
 
 **Please note that you only need to do these steps once.**
-
-#### Updating e2e Test Data
-
-If you need to update the e2e test data, follow these steps:
-
-1. Delete the e2e db container from `Docker Desktop Dashboard` or with the following command:
-
-   ```bash
-   docker rm -f e2e-nest-db
-   ```
-
-2. Delete the e2e db volume from `Docker Desktop Dashboard` or with the following command:
-
-   ```bash
-   docker volume rm nest-e2e_e2e-db-data
-   ```
-
-3. Re-run the e2e backend instance with the following command:
-
-   ```bash
-   make run-backend-e2e
-   ```
-
-4. Load the updated data into the e2e db with the following command (in another terminal session):
-
-   ```bash
-    make load-data-e2e
-    ```
 
 ### Test Coverage
 
