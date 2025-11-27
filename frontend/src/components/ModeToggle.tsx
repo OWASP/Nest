@@ -4,6 +4,7 @@ import { Button } from '@heroui/button'
 import { Tooltip } from '@heroui/tooltip'
 import { useTheme } from 'next-themes'
 import { useState, useEffect } from 'react'
+
 export default function ModeToggle() {
   const [mounted, setMounted] = useState(false)
   const { theme, setTheme } = useTheme()
