@@ -85,10 +85,10 @@ const SearchBar: React.FC<SearchProps> = ({
               onChange={handleSearchChange}
               placeholder={placeholder}
               className="h-12 w-full rounded-lg border-1 border-gray-300 pr-10 pl-10 text-lg text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300"
-              aria-label={placeholder || 'Search'}
             />
             {searchQuery && (
               <button
+                type="button"
                 aria-label="Clear search"
                 className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-1"
                 onClick={handleClearSearch}
