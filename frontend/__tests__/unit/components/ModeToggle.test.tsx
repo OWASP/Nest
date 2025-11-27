@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { useTheme } from 'next-themes'
 import React from 'react'
 import ModeToggle from 'components/ModeToggle'
@@ -12,13 +12,8 @@ jest.mock('@heroui/button', () => ({
     children,
     onPress,
     'aria-label': ariaLabel,
-    className,
-  }: React.PropsWithChildren<{
-    onPress?: () => void
-    'aria-label'?: string
-    className?: string
-  }>) => (
-    <button onClick={onPress} aria-label={ariaLabel} className={className}>
+  }: React.PropsWithChildren<{ onPress?: () => void; 'aria-label'?: string }>) => (
+    <button onClick={onPress} aria-label={ariaLabel}>
       {children}
     </button>
   ),
@@ -28,20 +23,10 @@ jest.mock('@heroui/tooltip', () => ({
   Tooltip: ({ children }: React.PropsWithChildren) => <>{children}</>,
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon }: { icon: { iconName: string } }) => (
-    <svg data-testid={`icon-${icon.iconName}`} data-icon={icon.iconName} />
-  ),
-}))
-
 const useThemeMock = useTheme as jest.Mock
 
 describe('ModeToggle Component', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
-
-  test('should render correctly in light mode and show moon icon', async () => {
+  test('should render correctly in light mode and show moon icon', () => {
     useThemeMock.mockReturnValue({
       theme: 'light',
       setTheme: jest.fn(),
@@ -49,16 +34,14 @@ describe('ModeToggle Component', () => {
 
     render(<ModeToggle />)
 
-    await waitFor(() => {
-      const button = screen.getByRole('button', { name: /enable dark mode/i })
-      expect(button).toBeInTheDocument()
-    })
+    const button = screen.getByRole('button', { name: /enable dark mode/i })
+    expect(button).toBeInTheDocument()
 
-    const icon = screen.getByTestId('icon-moon')
+    const icon = document.querySelector('[data-icon="moon"]')
     expect(icon).toBeInTheDocument()
   })
 
-  test('should render correctly in dark mode and show lightbulb icon', async () => {
+  test('should render correctly in dark mode and show sun icon', () => {
     useThemeMock.mockReturnValue({
       theme: 'dark',
       setTheme: jest.fn(),
@@ -66,16 +49,14 @@ describe('ModeToggle Component', () => {
 
     render(<ModeToggle />)
 
-    await waitFor(() => {
-      const button = screen.getByRole('button', { name: /enable light mode/i })
-      expect(button).toBeInTheDocument()
-    })
+    const button = screen.getByRole('button', { name: /enable light mode/i })
+    expect(button).toBeInTheDocument()
 
-    const icon = screen.getByTestId('icon-lightbulb')
+    const icon = document.querySelector('[data-icon="lightbulb"]')
     expect(icon).toBeInTheDocument()
   })
 
-  test('should call setTheme to switch from light to dark when clicked', async () => {
+  test('should call setTheme to switch from light to dark when clicked', () => {
     const setThemeMock = jest.fn()
 
     useThemeMock.mockReturnValue({
@@ -84,18 +65,14 @@ describe('ModeToggle Component', () => {
     })
 
     render(<ModeToggle />)
-
-    await waitFor(() => {
-      expect(screen.getByRole('button')).toBeInTheDocument()
-    })
-
     const button = screen.getByRole('button')
+
     fireEvent.click(button)
 
     expect(setThemeMock).toHaveBeenCalledWith('dark')
   })
 
-  test('should call setTheme to switch from dark to light when clicked', async () => {
+  test('should call setTheme to switch from dark to light when clicked', () => {
     const setThemeMock = jest.fn()
 
     useThemeMock.mockReturnValue({
@@ -104,27 +81,10 @@ describe('ModeToggle Component', () => {
     })
 
     render(<ModeToggle />)
-
-    await waitFor(() => {
-      expect(screen.getByRole('button')).toBeInTheDocument()
-    })
-
     const button = screen.getByRole('button')
+
     fireEvent.click(button)
 
     expect(setThemeMock).toHaveBeenCalledWith('light')
-  })
-
-  test('should render after mount', () => {
-    useThemeMock.mockReturnValue({
-      theme: 'light',
-      setTheme: jest.fn(),
-    })
-
-    const { container } = render(<ModeToggle />)
-
-    // Component is rendered after useEffect runs (which happens synchronously in RTL)
-    expect(container.firstChild).not.toBeNull()
-    expect(screen.getByRole('button')).toBeInTheDocument()
   })
 })
