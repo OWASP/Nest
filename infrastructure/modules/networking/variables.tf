@@ -14,6 +14,12 @@ variable "environment" {
   type        = string
 }
 
+variable "log_retention_in_days" {
+  description = "The number of days to retain log events."
+  type        = number
+  default     = 90
+}
+
 variable "private_subnet_cidrs" {
   description = "A list of CIDR blocks for the private subnets"
   type        = list(string)

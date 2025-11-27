@@ -19,6 +19,18 @@ locals {
   redis_major_version  = split(".", var.redis_engine_version)[0]
 }
 
+resource "aws_cloudwatch_log_group" "engine_log" {
+  name              = "/aws/elasticache/${var.project_name}-${var.environment}-cache-engine-log"
+  retention_in_days = var.log_retention_in_days
+  tags              = var.common_tags
+}
+
+resource "aws_cloudwatch_log_group" "slow_log" {
+  name              = "/aws/elasticache/${var.project_name}-${var.environment}-cache-slow-log"
+  retention_in_days = var.log_retention_in_days
+  tags              = var.common_tags
+}
+
 resource "aws_elasticache_subnet_group" "main" {
   name       = "${var.project_name}-${var.environment}-cache-subnet-group"
   subnet_ids = var.subnet_ids
@@ -53,8 +65,20 @@ resource "aws_elasticache_replication_group" "main" {
   snapshot_retention_limit   = var.snapshot_retention_limit
   snapshot_window            = var.snapshot_window
   subnet_group_name          = aws_elasticache_subnet_group.main.name
+  transit_encryption_enabled = true
+  log_delivery_configuration {
+    destination      = aws_cloudwatch_log_group.engine_log.name
+    destination_type = "cloudwatch-logs"
+    log_format       = "json"
+    log_type         = "engine-log"
+  }
+  log_delivery_configuration {
+    destination      = aws_cloudwatch_log_group.slow_log.name
+    destination_type = "cloudwatch-logs"
+    log_format       = "json"
+    log_type         = "slow-log"
+  }
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-redis"
   })
-  transit_encryption_enabled = true
 }

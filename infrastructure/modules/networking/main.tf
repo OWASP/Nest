@@ -13,6 +13,27 @@ terraform {
   }
 }
 
+data "aws_iam_policy_document" "flow_logs_assume_role" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["vpc-flow-logs.amazonaws.com"]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "flow_logs_policy" {
+  statement {
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "logs:DescribeLogStreams",
+    ]
+    resources = ["${aws_cloudwatch_log_group.flow_logs.arn}:*"]
+  }
+}
+
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
@@ -20,6 +41,39 @@ resource "aws_vpc" "main" {
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-vpc"
   })
+}
+
+resource "aws_cloudwatch_log_group" "flow_logs" {
+  name              = "/aws/vpc-flow-logs/${var.project_name}-${var.environment}"
+  retention_in_days = var.log_retention_in_days
+  tags              = var.common_tags
+}
+
+resource "aws_flow_log" "main" {
+  iam_role_arn    = aws_iam_role.flow_logs.arn
+  log_destination = aws_cloudwatch_log_group.flow_logs.arn
+  traffic_type    = "ALL"
+  vpc_id          = aws_vpc.main.id
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-${var.environment}-vpc-flow-log"
+  })
+}
+
+resource "aws_iam_policy" "flow_logs" {
+  name   = "${var.project_name}-${var.environment}-flow-logs-policy"
+  policy = data.aws_iam_policy_document.flow_logs_policy.json
+  tags   = var.common_tags
+}
+
+resource "aws_iam_role" "flow_logs" {
+  name               = "${var.project_name}-${var.environment}-flow-logs-role"
+  assume_role_policy = data.aws_iam_policy_document.flow_logs_assume_role.json
+  tags               = var.common_tags
+}
+
+resource "aws_iam_role_policy_attachment" "flow_logs" {
+  role       = aws_iam_role.flow_logs.name
+  policy_arn = aws_iam_policy.flow_logs.arn
 }
 
 resource "aws_internet_gateway" "main" {

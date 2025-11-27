@@ -15,6 +15,12 @@ variable "environment" {
   type        = string
 }
 
+variable "log_retention_in_days" {
+  description = "The number of days to retain log events."
+  type        = number
+  default     = 90
+}
+
 variable "maintenance_window" {
   description = "The weekly time range for when maintenance on the cache cluster is performed."
   type        = string
