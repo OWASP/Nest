@@ -18,6 +18,7 @@ const ShowMoreButton = ({ onToggle }: { onToggle: () => void }) => {
         disableAnimation
         onPress={handleToggle}
         className="flex items-center bg-transparent px-0 text-blue-400"
+        aria-label={isExpanded ? 'Show fewer items' : 'Show more items'}
       >
         {isExpanded ? (
           <>
