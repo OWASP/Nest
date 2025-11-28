@@ -35,8 +35,8 @@ class Chunk(TimestampedModel):
     def split_text(text: str) -> list[str]:
         """Split text into chunks."""
         return RecursiveCharacterTextSplitter(
-            chunk_size=300,
-            chunk_overlap=40,
+            chunk_size=200,
+            chunk_overlap=20,
             length_function=len,
             separators=["\n\n", "\n", " ", ""],
         ).split_text(text)
@@ -61,11 +61,7 @@ class Chunk(TimestampedModel):
           Chunk: The created chunk instance.
 
         """
-        if Chunk.objects.filter(
-            context__entity_type=context.entity_type,
-            context__entity_id=context.entity_id,
-            text=text,
-        ).exists():
+        if Chunk.objects.filter(context=context, text=text).exists():
             return None
 
         chunk = Chunk(text=text, embedding=embedding, context=context)

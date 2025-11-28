@@ -5,12 +5,13 @@ from http import HTTPStatus
 from typing import Literal
 
 from django.http import HttpRequest
-from ninja import Field, FilterSchema, Path, Query, Schema
+from ninja import Field, Path, Query, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
+from apps.api.rest.v0.common import LocationFilter
 from apps.owasp.models.chapter import Chapter as ChapterModel
 
 router = RouterPaginated(tags=["Chapters"])
@@ -21,11 +22,13 @@ class ChapterBase(Schema):
 
     created_at: datetime
     key: str
+    latitude: float | None = None
+    longitude: float | None = None
     name: str
     updated_at: datetime
 
     @staticmethod
-    def resolve_key(obj):
+    def resolve_key(obj: ChapterModel) -> str:
         """Resolve key."""
         return obj.nest_key
 
@@ -47,7 +50,7 @@ class ChapterError(Schema):
     message: str
 
 
-class ChapterFilter(FilterSchema):
+class ChapterFilter(LocationFilter):
     """Filter for Chapter."""
 
     country: str | None = Field(None, description="Country of the chapter")
@@ -64,7 +67,17 @@ class ChapterFilter(FilterSchema):
 def list_chapters(
     request: HttpRequest,
     filters: ChapterFilter = Query(...),
-    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
+    ordering: Literal[
+        "created_at",
+        "-created_at",
+        "updated_at",
+        "-updated_at",
+        "latitude",
+        "-latitude",
+        "longitude",
+        "-longitude",
+    ]
+    | None = Query(
         None,
         description="Ordering field",
     ),

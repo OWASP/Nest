@@ -209,7 +209,29 @@ describe('RecentReleases Component', () => {
     // Should still render the release name
     expect(screen.getByText('v1.0 The First Release')).toBeInTheDocument()
     // Should handle missing author gracefully
-    expect(screen.getByAltText('testuser')).toBeInTheDocument()
+    expect(screen.getByAltText("testuser's avatar")).toBeInTheDocument()
+  })
+
+  it('should handle releases with author object but missing name and login', () => {
+    const releasesWithEmptyAuthor = [
+      {
+        ...mockReleases[0],
+        author: {
+          ...mockReleases[0].author,
+          name: '',
+          login: '',
+        },
+      },
+    ]
+
+    act(() => {
+      render(<RecentReleases data={releasesWithEmptyAuthor} />)
+    })
+
+    // Should still render the release name
+    expect(screen.getByText('v1.0 The First Release')).toBeInTheDocument()
+    // Should render fallback alt text because both name and login are missing
+    expect(screen.getByAltText('Release author avatar')).toBeInTheDocument()
   })
 
   it('should handle releases with missing repository information', () => {
@@ -278,7 +300,7 @@ describe('RecentReleases Component', () => {
     })
 
     // Check for proper alt text on images
-    const authorImage = screen.getByAltText('Test User')
+    const authorImage = screen.getByAltText("Test User's avatar")
     expect(authorImage).toBeInTheDocument()
 
     // Check for proper link roles

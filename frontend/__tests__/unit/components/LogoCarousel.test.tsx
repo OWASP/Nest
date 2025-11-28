@@ -102,9 +102,9 @@ describe('MovingLogos (LogoCarousel)', () => {
       expect(images).toHaveLength(4)
 
       expect(images[0]).toHaveAttribute('src', 'https://example.com/logo1.png')
-      expect(images[0]).toHaveAttribute('alt', 'Test Sponsor 1 logo')
+      expect(images[0]).toHaveAttribute('alt', "Test Sponsor 1's logo")
       expect(images[1]).toHaveAttribute('src', 'https://example.com/logo2.png')
-      expect(images[1]).toHaveAttribute('alt', 'Test Sponsor 2 logo')
+      expect(images[1]).toHaveAttribute('alt', "Test Sponsor 2's logo")
     })
 
     it('renders empty div when imageUrl is not provided', () => {
@@ -276,6 +276,22 @@ describe('MovingLogos (LogoCarousel)', () => {
       expect(imageContainer).toBeInTheDocument()
       expect(imageContainer?.querySelector('img')).not.toBeInTheDocument()
     })
+
+    it('uses generic fallback alt text when sponsor name is missing', () => {
+      const sponsorWithoutName: Sponsor[] = [
+        {
+          name: '',
+          imageUrl: 'https://example.com/logo.png',
+          url: 'https://example.com',
+          sponsorType: 'Gold',
+        },
+      ]
+
+      render(<MovingLogos sponsors={sponsorWithoutName} />)
+
+      const images = screen.getAllByTestId('sponsor-image')
+      expect(images[0]).toHaveAttribute('alt', 'Sponsor logo')
+    })
   })
 
   describe('Text and Content Rendering', () => {
@@ -300,16 +316,16 @@ describe('MovingLogos (LogoCarousel)', () => {
       render(<MovingLogos sponsors={mockSponsors} />)
 
       const images = screen.getAllByTestId('sponsor-image')
-      expect(images[0]).toHaveAttribute('alt', 'Test Sponsor 1 logo')
-      expect(images[1]).toHaveAttribute('alt', 'Test Sponsor 2 logo')
+      expect(images[0]).toHaveAttribute('alt', "Test Sponsor 1's logo")
+      expect(images[1]).toHaveAttribute('alt', "Test Sponsor 2's logo")
     })
 
     it('renders image alt text correctly', () => {
       render(<MovingLogos sponsors={mockSponsors} />)
 
       const images = screen.getAllByTestId('sponsor-image')
-      expect(images[0]).toHaveAttribute('alt', 'Test Sponsor 1 logo')
-      expect(images[1]).toHaveAttribute('alt', 'Test Sponsor 2 logo')
+      expect(images[0]).toHaveAttribute('alt', "Test Sponsor 1's logo")
+      expect(images[1]).toHaveAttribute('alt', "Test Sponsor 2's logo")
     })
   })
 
@@ -331,8 +347,8 @@ describe('MovingLogos (LogoCarousel)', () => {
       render(<MovingLogos sponsors={longNameSponsors} />)
 
       const images = screen.getAllByTestId('sponsor-image')
-      expect(images[0]).toHaveAttribute('alt', 'A'.repeat(1000) + ' logo')
-      expect(images[1]).toHaveAttribute('alt', 'A'.repeat(1000) + ' logo')
+      expect(images[0]).toHaveAttribute('alt', 'A'.repeat(1000) + "'s logo")
+      expect(images[1]).toHaveAttribute('alt', 'A'.repeat(1000) + "'s logo")
     })
 
     it('handles sponsors with special characters in names', () => {
@@ -348,8 +364,14 @@ describe('MovingLogos (LogoCarousel)', () => {
       render(<MovingLogos sponsors={specialCharSponsors} />)
 
       const images = screen.getAllByTestId('sponsor-image')
-      expect(images[0]).toHaveAttribute('alt', 'Sponsor & Co. (Ltd.) - "Special" <Characters> logo')
-      expect(images[1]).toHaveAttribute('alt', 'Sponsor & Co. (Ltd.) - "Special" <Characters> logo')
+      expect(images[0]).toHaveAttribute(
+        'alt',
+        'Sponsor & Co. (Ltd.) - "Special" <Characters>\'s logo'
+      )
+      expect(images[1]).toHaveAttribute(
+        'alt',
+        'Sponsor & Co. (Ltd.) - "Special" <Characters>\'s logo'
+      )
     })
 
     it('handles invalid URLs gracefully', () => {
@@ -396,10 +418,10 @@ describe('MovingLogos (LogoCarousel)', () => {
       render(<MovingLogos sponsors={mockSponsors} />)
 
       const images = screen.getAllByTestId('sponsor-image')
-      expect(images[0]).toHaveAttribute('alt', 'Test Sponsor 1 logo')
-      expect(images[1]).toHaveAttribute('alt', 'Test Sponsor 2 logo')
-      expect(images[2]).toHaveAttribute('alt', 'Test Sponsor 1 logo')
-      expect(images[3]).toHaveAttribute('alt', 'Test Sponsor 2 logo')
+      expect(images[0]).toHaveAttribute('alt', "Test Sponsor 1's logo")
+      expect(images[1]).toHaveAttribute('alt', "Test Sponsor 2's logo")
+      expect(images[2]).toHaveAttribute('alt', "Test Sponsor 1's logo")
+      expect(images[3]).toHaveAttribute('alt', "Test Sponsor 2's logo")
     })
 
     it('uses proper link attributes for accessibility', () => {
