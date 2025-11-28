@@ -23,6 +23,23 @@ jest.mock('@heroui/tooltip', () => ({
   Tooltip: ({ children }: React.PropsWithChildren) => <>{children}</>,
 }))
 
+jest.mock('@fortawesome/react-fontawesome', () => ({
+  FontAwesomeIcon: ({ icon, className }: { icon: { iconName?: string }; className?: string }) => (
+    <svg
+      data-icon={icon?.iconName || 'moon'}
+      className={className}
+      data-testid="font-awesome-icon"
+    />
+  ),
+}))
+
+jest.mock('components/icons/Sun', () => ({
+  __esModule: true,
+  default: ({ className }: { className?: string }) => (
+    <svg data-testid="sun-icon" data-icon="sun" className={className} viewBox="0 0 48 48" />
+  ),
+}))
+
 const useThemeMock = useTheme as jest.Mock
 
 describe('ModeToggle Component', () => {
@@ -52,7 +69,7 @@ describe('ModeToggle Component', () => {
     const button = screen.getByRole('button', { name: /enable light mode/i })
     expect(button).toBeInTheDocument()
 
-    const icon = document.querySelector('[data-icon="lightbulb"]')
+    const icon = document.querySelector('[data-icon="sun"]')
     expect(icon).toBeInTheDocument()
   })
 

@@ -1,9 +1,10 @@
-import { faMoon, faLightbulb } from '@fortawesome/free-regular-svg-icons'
+import { faMoon } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import { Tooltip } from '@heroui/tooltip'
 import { useTheme } from 'next-themes'
 import { useState, useEffect } from 'react'
+import Sun from 'components/icons/Sun'
 
 export default function ModeToggle() {
   const [mounted, setMounted] = useState(false)
@@ -28,11 +29,15 @@ export default function ModeToggle() {
           aria-label={theme === 'dark' ? 'Enable light mode' : 'Enable dark mode'}
         >
           <div className="absolute inset-0 flex items-center justify-center">
-            <FontAwesomeIcon
-              icon={theme === 'dark' ? faLightbulb : faMoon}
-              className="h-5 w-5 transform text-gray-900 transition-all duration-300 hover:rotate-12 dark:text-gray-100"
-              fixedWidth
-            />
+            {theme === 'dark' ? (
+              <Sun variant="regular" className="h-5 w-5 text-white transition-all duration-300" />
+            ) : (
+              <FontAwesomeIcon
+                icon={faMoon}
+                className="h-5 w-5 transform text-white transition-all duration-300 hover:rotate-12"
+                fixedWidth
+              />
+            )}
           </div>
         </Button>
       </Tooltip>
