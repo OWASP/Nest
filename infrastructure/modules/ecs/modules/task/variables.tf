@@ -54,7 +54,7 @@ variable "image_url" {
 variable "log_retention_in_days" {
   description = "The number of days to retain log events."
   type        = number
-  default     = 30
+  default     = 90
 }
 
 variable "memory" {
