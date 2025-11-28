@@ -15,45 +15,56 @@ Ensure you have the following setup/installed:
 
 Follow these steps to set up the infrastructure:
 
-1. **Change the Directory**:
+1. **Setup Backend (one-time setup)**:
 
-   - Change the directory using the following command:
+- Navigate to the backend directory:
+  ```bash
+  cd infrastructure/backend/
+  ```
+*Note:* Optionally change the region: set `aws_region` in a `.tfvars` file.
 
-     ```bash
-     cd infrastructure/
-     ```
+- Initialize Terraform if needed:
+  ```bash
+  terraform init
+  ```
 
-    *Note*: The following steps assume the current working directory is `infrastructure/`
+- Apply the changes to create the backend resources:
+  ```bash
+  terraform apply
+  ```
 
-2. **Create Variables File**:
+2. **Setup Main Infrastructure (staging)**:
 
-   - Create a local variables file in the `infrastructure` directory:
+- Navigate to the main infrastructure directory. If you are in `infrastructure/backend`, you can use:
+  ```bash
+  cd ../staging/
+  ```
 
-     ```bash
-     touch terraform.tfvars
-     ```
+- Create a local variables file:
+  ```bash
+  touch terraform.tfvars
+  ```
 
-   - Copy the contents from the template file into your new local environment file:
+- Copy the contents from the example file:
+  ```bash
+  cat terraform.tfvars.example > terraform.tfvars
+  ```
 
-     ```bash
-     cat terraform.tfvars.example > terraform.tfvars
-     ```
+- *Note:* Optionally change the region:
+  - set `aws_region` in a `.tfvars` file.
+  - set `region` in a `.tfbackend` file and provide it using `terraform init -backend-config=<file>`.
 
-3. **Apply Changes**:
+- Initialize Terraform with the backend configuration:
+  ```bash
+  terraform init
+  ```
 
-   - Init terraform if needed:
+- Apply the changes to create the main infrastructure using the command:
+  ```bash
+  terraform apply
+  ```
 
-     ```bash
-     terraform init
-     ```
-
-   - Apply the changes and create the infrastructure using the following command:
-
-     ```bash
-     terraform apply
-     ```
-
-4. **Populate Secrets**:
+3. **Populate Secrets**
 
    - Visit the AWS Console > Systems Manager > Parameter Store.
    - Populate all `DJANGO_*` secrets that have `to-be-set-in-aws-console` value.
@@ -68,7 +79,7 @@ The Django backend deployment is managed by Zappa. This includes the API Gateway
    - Change the directory to `backend/` using the following command:
 
      ```bash
-     cd ../backend/
+     cd ../../backend/
      ```
 
     *Note*: The following steps assume the current working directory is `backend/`
