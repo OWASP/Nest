@@ -31,8 +31,11 @@ __pycache__
 *.log
 *.pdf
 *.pem
+*.tfbackend
 *.tfstate
 *.tfstate.*
+*.tfvars
+!*.tfvars.example
 **/.terraform/
 backend-sbom-local.cdx.json
 backend/*nest-backend-dev*.tar.gz
@@ -58,7 +61,6 @@ frontend/pnpm-debug.log*
 frontend/test-results/
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
-infrastructure/terraform.tfvars
 logs
 node_modules/
 semgrep-security-report.txt
