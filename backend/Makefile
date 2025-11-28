@@ -49,7 +49,7 @@ django-shell:
 
 dump-data:
 	@echo "Dumping Nest data"
-	@CMD="./data/dump.sh" $(MAKE) exec-backend-command-it
+	@CMD="python manage.py dump_data" $(MAKE) exec-backend-command-it
 
 enrich-data: \
 	github-enrich-issues \
@@ -68,16 +68,10 @@ index-data:
 	@CMD="python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
 
 load-data:
-	@echo "Recreating Nest schema"
-	@CMD="psql -U nest_user_dev -d nest_db_dev -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nest_user_dev'" \
-	$(MAKE) exec-db-command-it 2>/dev/null
 	@echo "Loading Nest data"
 	@gunzip -c backend/data/nest.sql.gz | docker exec -i nest-db psql -U nest_user_dev -d nest_db_dev
 
 load-data-e2e:
-	@echo "Recreating Nest e2e schema"
-	@CMD="psql -U nest_user_e2e -d nest_db_e2e -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nest_user_e2e'" \
-	$(MAKE) exec-db-command-e2e 2>/dev/null
 	@echo "Loading Nest e2e data"
 	@gunzip -c backend/data/nest.sql.gz | docker exec -i e2e-nest-db psql -U nest_user_e2e -d nest_db_e2e
 
