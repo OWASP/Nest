@@ -39,6 +39,7 @@ const ToggleableList = ({
         {(showAll ? items : items.slice(0, limit)).map((item) => (
           <button
             key={item}
+            type="button"
             className="rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700"
             onClick={() => !isDisabled && handleButtonClick({ item })}
             aria-label={`Search for projects with ${item}`}
