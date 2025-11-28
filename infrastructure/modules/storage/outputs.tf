@@ -5,15 +5,15 @@ output "fixtures_read_only_policy_arn" {
 
 output "fixtures_s3_bucket_arn" {
   description = "The ARN of the S3 bucket for fixtures"
-  value       = aws_s3_bucket.fixtures.arn
+  value       = module.fixtures_bucket.arn
 }
 
 output "zappa_s3_bucket" {
   description = "The name of the S3 bucket for Zappa deployments"
-  value       = aws_s3_bucket.zappa
+  value       = module.zappa_bucket.bucket
 }
 
 output "zappa_s3_bucket_arn" {
   description = "The ARN of the S3 bucket for Zappa deployments"
-  value       = aws_s3_bucket.zappa.arn
+  value       = module.zappa_bucket.arn
 }
