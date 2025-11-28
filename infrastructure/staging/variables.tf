@@ -1,13 +1,13 @@
 variable "aws_region" {
   description = "The AWS region to deploy resources in."
   type        = string
-  default     = "us-east-1"
+  default     = "us-east-2"
 }
 
 variable "availability_zones" {
   description = "A list of availability zones for the VPC"
   type        = list(string)
-  default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  default     = ["us-east-2a", "us-east-2b", "us-east-2c"]
 }
 
 variable "create_rds_proxy" {
