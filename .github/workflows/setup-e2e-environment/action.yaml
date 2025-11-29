@@ -7,7 +7,7 @@ runs:
     steps:
       - name: Wait for database to be ready
         run: |
-          timeout 1m bash -c '
+          timeout 5m bash -c '
             until docker exec ${{ job.services.db.id }} pg_isready -U nest_user_e2e -d nest_db_e2e; do
               echo "Waiting for database..."
               sleep 5
@@ -48,7 +48,7 @@ runs:
 
       - name: Waiting for the backend to be ready
         run: |
-          timeout 1m bash -c '
+          timeout 5m bash -c '
             until wget --spider http://localhost:9000/a; do
               echo "Waiting for backend..."
               sleep 5

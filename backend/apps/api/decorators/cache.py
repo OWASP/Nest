@@ -36,8 +36,6 @@ def cache_response(
     def decorator(view_func):
         @wraps(view_func)
         def _wrapper(request, *args, **kwargs):
-            if settings.IS_E2E_ENVIRONMENT:
-                return view_func(request, *args, **kwargs)
             if request.method not in ("GET", "HEAD"):
                 return view_func(request, *args, **kwargs)
 
