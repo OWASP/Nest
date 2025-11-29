@@ -40,7 +40,6 @@ const ToggleableList = ({
           <button
             key={item}
             type="button"
-            aria-label={`Search projects for ${item}`}
             className="rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700 focus:outline-none focus-visible:ring-1 focus-visible:ring-offset-1 transition"
             onClick={() => !isDisabled && handleButtonClick({ item })}
             onKeyDown={(e) => {
@@ -49,6 +48,8 @@ const ToggleableList = ({
                 if (!isDisabled) handleButtonClick({ item })
               }
             }}
+            aria-label={`Search for projects with ${item}`}
+            disabled={isDisabled}
           >
             {item}
           </button>

@@ -14,7 +14,7 @@ interface ActionButtonProps {
 
 const ActionButton: React.FC<ActionButtonProps> = ({ url, onClick, tooltipLabel, children, onKeyDown, className = '' }) => {
   const baseStyles =
-    'flex items-center gap-2 px-2 py-2 rounded-md border border-[#1D7BD7] transition-all whitespace-nowrap justify-center bg-transparent text-blue-600 hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white'
+    'flex items-center gap-2 px-2 py-2 rounded-md border border-[#1D7BD7] transition-all whitespace-nowrap justify-center bg-transparent text-[#1D7BD7] hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white'
 
   return url ? (
     <TooltipWrapper tooltipLabel={tooltipLabel}>

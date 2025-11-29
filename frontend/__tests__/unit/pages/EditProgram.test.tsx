@@ -88,7 +88,7 @@ describe('EditProgramPage', () => {
 
     render(<EditProgramPage />)
 
-    expect(await screen.findByLabelText('Program Name *')).toBeInTheDocument()
+    expect(await screen.findByLabelText('Name *')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Test')).toBeInTheDocument()
   })
 })

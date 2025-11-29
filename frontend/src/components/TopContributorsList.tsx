@@ -49,7 +49,7 @@ const TopContributorsList = ({
           >
             <div className="flex w-full items-center gap-2">
               <Image
-                alt={item?.name || ''}
+                alt={item?.name ? `${item.name}'s avatar` : 'Contributor avatar'}
                 className="rounded-full"
                 height={24}
                 src={`${item?.avatarUrl}&s=60`}

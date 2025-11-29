@@ -117,6 +117,7 @@ const Card = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="transition-colors"
+                  aria-label={item.title || 'Social media link'}
                 >
                   <FontAwesomeIcon
                     icon={getSocialIcon(item.url)}

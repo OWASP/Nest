@@ -92,6 +92,7 @@ const SearchBar: React.FC<SearchProps> = ({
                 aria-label="Clear search"
                 className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-1"
                 onClick={handleClearSearch}
+                aria-label="Clear search"
               >
                 <FontAwesomeIcon icon={faTimes} />
               </button>

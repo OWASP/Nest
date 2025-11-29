@@ -168,6 +168,7 @@ const eslintConfig = [
       'nest/no-global-nan': 'error',
       'nest/no-global-parsefloat': 'error',
       'nest/no-global-parseint': 'error',
+      quotes: ['error', 'single', { avoidEscape: true }],
     },
   },
   {
