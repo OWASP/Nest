@@ -136,7 +136,7 @@ describe('ContributionHeatmap', () => {
       for (let i = 0; i < 365; i++) {
         const date = new Date('2024-01-01')
         date.setDate(date.getDate() + i)
-        largeData[date.toISOString().split('T')[0]] = Math.floor(Math.random() * 20)
+        largeData[date.toISOString().split('T')[0]] = (i % 20)
       }
       renderWithTheme(<ContributionHeatmap contributionData={largeData} startDate="2024-01-01" endDate="2024-12-31" />)
       expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
