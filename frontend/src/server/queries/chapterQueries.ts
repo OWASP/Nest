@@ -28,6 +28,8 @@ export const GET_CHAPTER_DATA = gql`
       summary
       updatedAt
       url
+      contributionData
+      contributionStats
     }
     topContributors(chapter: $key) {
       id
