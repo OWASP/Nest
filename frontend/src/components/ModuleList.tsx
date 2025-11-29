@@ -20,15 +20,13 @@ const ModuleList: React.FC<ModuleListProps> = ({ modules }) => {
         {displayedModules.map((module, index) => {
           const displayText = module.length > 50 ? `${module.slice(0, 50)}...` : module
           return (
-            <button
+            <div
               key={`${module}-${index}`}
-              className="rounded-lg border border-gray-400 px-3 py-1 text-sm transition-all duration-200 ease-in-out hover:scale-105 hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700"
+              className="rounded-lg border border-gray-400 px-3 py-1 text-sm transition-all duration-200 ease-in-out dark:border-gray-300"
               title={module.length > 50 ? module : undefined}
-              type="button"
-              aria-label={`Module: ${module}`}
             >
               {displayText}
-            </button>
+            </div>
           )
         })}
 
