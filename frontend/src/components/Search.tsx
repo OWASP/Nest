@@ -76,8 +76,10 @@ const SearchBar: React.FC<SearchProps> = ({
               icon={faSearch}
               className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
             />
+            <label htmlFor="search-input" className="sr-only">Search</label>
             <input
               ref={inputRef}
+              id="search-input"
               type="text"
               value={searchQuery}
               onChange={handleSearchChange}
@@ -86,9 +88,10 @@ const SearchBar: React.FC<SearchProps> = ({
             />
             {searchQuery && (
               <button
-                className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-hidden"
-                onClick={handleClearSearch}
+                type="button"
                 aria-label="Clear search"
+                className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-1"
+                onClick={handleClearSearch}
               >
                 <FontAwesomeIcon icon={faTimes} />
               </button>
