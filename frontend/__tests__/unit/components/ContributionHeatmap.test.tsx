@@ -20,7 +20,8 @@ jest.mock('react-apexcharts', () => {
             const hasLightMode = result.includes('#FFFFFF') || result.includes('#E5E7EB')
             const hasDarkMode = result.includes('#1F2937') || result.includes('#374151')
             // This ensures both light and dark mode branches are covered
-            void (hasLightMode || hasDarkMode)
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+            hasLightMode || hasDarkMode
           }
         }
         // Test with null/undefined data (edge case)
@@ -30,8 +31,8 @@ jest.mock('react-apexcharts', () => {
 
     return (
       <div data-testid="mock-heatmap-chart" data-type={props.type} data-height={props.height} data-series-length={mockSeries.length}>
-        {mockSeries.map((series, idx) => (
-          <div key={idx} data-testid={`series-${series.name}`}>{series.name}: {series.data.length} data points</div>
+        {mockSeries.map((series) => (
+          <div key={series.name} data-testid={`series-${series.name}`}>{series.name}: {series.data.length} data points</div>
         ))}
       </div>
     )
