@@ -110,7 +110,9 @@ describe('EditModulePage', () => {
 
     await waitFor(() => {
       expect(mockUpdateModule).toHaveBeenCalled()
-      expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program')
+      expect(mockPush).toHaveBeenCalledWith(
+        '/my/mentorship/programs/test-program/modules/test-module'
+      )
     })
   })
 
