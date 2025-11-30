@@ -136,7 +136,7 @@ The Django backend deployment is managed by Zappa. This includes the API Gateway
     ```bash
     zappa deploy staging
     ```
-    - **Note**: If the deployment is successful and returns a 5xx error, resolve the issues
+    - **Note**: If the deployment is successful but returns a `5xx` error, resolve the issues
       and use `zappa undeploy staging` & `zappa deploy staging`. The command `zappa update staging` may not work.
 
 Once deployed, use the URL provided by Zappa to test the API.
@@ -207,13 +207,12 @@ Migrate and load data into the new database.
 
 - Ensure all buckets and ECR repositories are empty.
 
-**Note:** Some resources have `prevent_destroy` set to `true`. Please set it to `false` manually.
+**Note:** Some resources have `prevent_destroy` set to `true`. Please set it to `false` before destruction.
 - To destroy Terraform infrastructure:
 
   ```bash
   terraform destroy
   ```
-
 
 ## Helpful Commands
 
