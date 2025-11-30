@@ -14,12 +14,6 @@ variable "fixtures_bucket_name" {
   type        = string
 }
 
-variable "force_destroy_bucket" {
-  description = "If true, deletes all objects from the bucket when the bucket is destroyed."
-  type        = bool
-  default     = false
-}
-
 variable "project_name" {
   description = "The name of the project"
   type        = string

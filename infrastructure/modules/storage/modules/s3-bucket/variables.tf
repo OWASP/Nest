@@ -9,12 +9,6 @@ variable "bucket_name" {
   type        = string
 }
 
-variable "force_destroy" {
-  description = "If true, deletes all objects from the bucket when the bucket is destroyed."
-  type        = bool
-  default     = false
-}
-
 variable "noncurrent_version_expiration_days" {
   description = "The number of days an object is noncurrent before it is expired."
   type        = number

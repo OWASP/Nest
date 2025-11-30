@@ -81,12 +81,6 @@ variable "environment" {
   }
 }
 
-variable "force_destroy_bucket" {
-  description = "If true, deletes all objects from the bucket when the bucket is destroyed."
-  type        = bool
-  default     = false
-}
-
 variable "fixtures_bucket_name" {
   description = "The name of the S3 bucket for fixtures"
   type        = string

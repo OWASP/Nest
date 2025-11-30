@@ -110,7 +110,6 @@ module "storage" {
   common_tags          = local.common_tags
   environment          = var.environment
   fixtures_bucket_name = var.fixtures_bucket_name
-  force_destroy_bucket = var.force_destroy_bucket
   project_name         = var.project_name
   zappa_bucket_name    = var.zappa_bucket_name
 }

@@ -31,8 +31,7 @@ resource "random_id" "suffix" {
 module "fixtures_bucket" {
   source = "./modules/s3-bucket"
 
-  bucket_name   = "${var.fixtures_bucket_name}-${random_id.suffix.hex}"
-  force_destroy = var.force_destroy_bucket
+  bucket_name = "${var.fixtures_bucket_name}-${random_id.suffix.hex}"
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-fixtures"
   })
@@ -41,8 +40,7 @@ module "fixtures_bucket" {
 module "zappa_bucket" {
   source = "./modules/s3-bucket"
 
-  bucket_name   = "${var.zappa_bucket_name}-${random_id.suffix.hex}"
-  force_destroy = var.force_destroy_bucket
+  bucket_name = "${var.zappa_bucket_name}-${random_id.suffix.hex}"
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-zappa-deployments"
   })
