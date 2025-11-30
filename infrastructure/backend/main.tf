@@ -5,6 +5,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "6.22.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.7.2"
+    }
   }
 }
 
@@ -46,6 +50,10 @@ data "aws_iam_policy_document" "state_https_only" {
   }
 }
 
+resource "random_id" "suffix" {
+  byte_length = 4
+}
+
 resource "aws_dynamodb_table" "state_lock" {
   name         = "${var.project_name}-terraform-state-lock"
   billing_mode = "PAY_PER_REQUEST"
@@ -64,14 +72,14 @@ resource "aws_dynamodb_table" "state_lock" {
 }
 
 resource "aws_s3_bucket" "logs" { # NOSONAR
-  bucket = "${var.project_name}-terraform-state-logs"
+  bucket = "${var.project_name}-terraform-state-logs-${random_id.suffix.hex}"
   tags = {
     Name = "${var.project_name}-terraform-state-logs"
   }
 }
 
 resource "aws_s3_bucket" "state" { # NOSONAR
-  bucket = "${var.project_name}-terraform-state"
+  bucket = "${var.project_name}-terraform-state-${random_id.suffix.hex}"
   tags = {
     Name = "${var.project_name}-terraform-state"
   }
