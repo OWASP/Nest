@@ -66,32 +66,22 @@ class Command(BaseCommand):
 
         try:
             # Fetch new data for each model type
-            new_chapters = self.get_new_items(
-                Chapter,
-                snapshot.start_at,
-                snapshot.end_at,
-            ).filter(
-                is_active=True,
+            new_chapters = Chapter.active_chapters.filter(
+                created_at__gte=snapshot.start_at,
+                created_at__lte=snapshot.end_at,
             )
             new_issues = self.get_new_items(
                 Issue,
                 snapshot.start_at,
                 snapshot.end_at,
             )
-            new_projects = self.get_new_items(
-                Project,
-                snapshot.start_at,
-                snapshot.end_at,
-            ).filter(
-                is_active=True,
+            new_projects = Project.active_projects.filter(
+                created_at__gte=snapshot.start_at,
+                created_at__lte=snapshot.end_at,
             )
-            new_releases = self.get_new_items(
-                Release,
-                snapshot.start_at,
-                snapshot.end_at,
-            ).filter(
-                is_draft=False,
-                is_pre_release=False,
+            new_releases = Release.active_releases.filter(
+                created_at__gte=snapshot.start_at,
+                created_at__lte=snapshot.end_at,
             )
             new_users = self.get_new_items(
                 User,
