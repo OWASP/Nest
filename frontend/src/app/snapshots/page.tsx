@@ -62,8 +62,8 @@ const SnapshotsPage: React.FC = () => {
       <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5">
         {isLoading ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {Array.from({ length: 12 }).map((_, index) => (
-              <SnapshotSkeleton key={index} />
+            {Array.from({ length: 12 }, (_, index) => (
+              <SnapshotSkeleton key={`snapshot-skeleton-${index}`} />
             ))}
           </div>
         ) : (

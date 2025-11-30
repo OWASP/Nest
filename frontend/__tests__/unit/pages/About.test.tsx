@@ -412,7 +412,9 @@ describe('About Component', () => {
     })
     await waitFor(() => {
       // Check for skeleton loading state by looking for skeleton containers
-      const skeletonContainers = document.querySelectorAll('.bg-gray-100.dark\\:bg-gray-800')
+      const skeletonContainers = document.querySelectorAll(
+        String.raw`.bg-gray-100.dark\:bg-gray-800`
+      )
       expect(skeletonContainers.length).toBeGreaterThan(0)
     })
   })

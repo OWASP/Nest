@@ -13,10 +13,7 @@ const SnapshotSkeleton: React.FC<SnapshotSkeletonProps> = ({
   showViewButton = true,
 }) => {
   return (
-    <div
-      role="status"
-      className="group flex h-40 w-full flex-col items-center rounded-lg bg-white p-6 text-left shadow-lg dark:bg-gray-800 dark:shadow-gray-900/30"
-    >
+    <output className="group flex h-40 w-full flex-col items-center rounded-lg bg-white p-6 text-left shadow-lg dark:bg-gray-800 dark:shadow-gray-900/30">
       <div className="text-center">{showTitle && <Skeleton className="h-7 w-56 rounded-md" />}</div>
 
       {showDateRange && (
@@ -32,7 +29,7 @@ const SnapshotSkeleton: React.FC<SnapshotSkeletonProps> = ({
           <Skeleton className="h-4 w-4 rounded" />
         </div>
       )}
-    </div>
+    </output>
   )
 }
 

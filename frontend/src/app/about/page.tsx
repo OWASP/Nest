@@ -50,6 +50,26 @@ const leaders = {
 
 const projectKey = 'nest'
 
+const getMilestoneStatus = (progress: number): string => {
+  if (progress === 100) {
+    return 'Completed'
+  }
+  if (progress > 0) {
+    return 'In Progress'
+  }
+  return 'Not Started'
+}
+
+const getMilestoneIcon = (progress: number) => {
+  if (progress === 100) {
+    return faCircleCheck
+  }
+  if (progress > 0) {
+    return faUserGear
+  }
+  return faClock
+}
+
 const About = () => {
   const {
     data: projectMetadataResponse,
@@ -218,28 +238,14 @@ const About = () => {
                         </Link>
                         <Tooltip
                           closeDelay={100}
-                          content={
-                            milestone.progress === 100
-                              ? 'Completed'
-                              : milestone.progress > 0
-                                ? 'In Progress'
-                                : 'Not Started'
-                          }
+                          content={getMilestoneStatus(milestone.progress)}
                           id={`tooltip-state-${index}`}
                           delay={100}
                           placement="top"
                           showArrow
                         >
                           <span className="absolute top-0 right-0 text-xl text-gray-400">
-                            <FontAwesomeIcon
-                              icon={
-                                milestone.progress === 100
-                                  ? faCircleCheck
-                                  : milestone.progress > 0
-                                    ? faUserGear
-                                    : faClock
-                              }
-                            />
+                            <FontAwesomeIcon icon={getMilestoneIcon(milestone.progress)} />
                           </span>
                         </Tooltip>
                       </div>
@@ -251,8 +257,8 @@ const About = () => {
           </SecondaryCard>
         )}
         <SecondaryCard icon={faScroll} title={<AnchorTitle title="Our Story" />}>
-          {projectStory.map((text, index) => (
-            <div key={`story-${index}`} className="mb-4">
+          {projectStory.map((text) => (
+            <div key={text} className="mb-4">
               <div>
                 <Markdown content={text} />
               </div>

@@ -4,11 +4,12 @@ import AboutSkeleton from 'components/skeletons/AboutSkeleton'
 import CardSkeleton from 'components/skeletons/Card'
 import SnapshotSkeleton from 'components/skeletons/SnapshotSkeleton'
 import UserCardSkeleton from 'components/skeletons/UserCard'
+
 function userCardRender() {
   const cardCount = 12
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {Array.from({ length: cardCount }).map((_, index) => (
+      {Array.from({ length: cardCount }, (_, index) => (
         <UserCardSkeleton key={`user-skeleton-${index}`} />
       ))}
     </div>
@@ -19,7 +20,7 @@ function snapshotCardRender() {
   const cardCount = 12
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {Array.from({ length: cardCount }).map((_, index) => (
+      {Array.from({ length: cardCount }, (_, index) => (
         <SnapshotSkeleton key={`snapshot-skeleton-${index}`} />
       ))}
     </div>
