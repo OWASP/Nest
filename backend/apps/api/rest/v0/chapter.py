@@ -41,7 +41,13 @@ class ChapterDetail(ChapterBase):
     """Detail schema for Chapter (used in single item endpoints)."""
 
     country: str
+    leader_names: list[str]
     region: str
+
+    @staticmethod
+    def resolve_leader_names(obj):
+        """Resolve leader names."""
+        return [leader.member_name for leader in obj.entity_leaders]
 
 
 class ChapterError(Schema):
