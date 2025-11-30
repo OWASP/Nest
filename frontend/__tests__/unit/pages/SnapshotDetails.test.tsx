@@ -3,8 +3,7 @@ import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockSnapshotDetailsData } from '@unit/data/mockSnapshotData'
 import { render } from 'wrappers/testUtil'
-import SnapshotDetailsPage from 'app/snapshots/[id]/page'
-
+import SnapshotDetailsPage from 'app/community/snapshots/[id]/page'
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),

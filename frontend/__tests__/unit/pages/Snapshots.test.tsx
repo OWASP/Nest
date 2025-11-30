@@ -3,7 +3,7 @@ import { addToast } from '@heroui/toast'
 import { screen, waitFor, fireEvent } from '@testing-library/react'
 import { act } from 'react'
 import { render } from 'wrappers/testUtil'
-import SnapshotsPage from 'app/snapshots/page'
+import SnapshotsPage from 'app/community/snapshots/page'
 
 const mockRouter = {
   push: jest.fn(),

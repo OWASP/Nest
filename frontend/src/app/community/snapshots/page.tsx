@@ -36,7 +36,7 @@ const SnapshotsPage: React.FC = () => {
   const router = useRouter()
 
   const handleButtonClick = (snapshot: Snapshot) => {
-    router.push(`/snapshots/${snapshot.key}`)
+    router.push(`/community/snapshots/${snapshot.key}`)
   }
 
   const renderSnapshotCard = (snapshot: Snapshot) => {
