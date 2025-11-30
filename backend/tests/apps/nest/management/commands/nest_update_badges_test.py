@@ -31,13 +31,18 @@ def make_mock_former_employees(mock_former_employee):
 
 def extract_is_owasp_staff(arg):
     """Extract is_owasp_staff value from Q object, dict, or tuple."""
+    key_to_check = "owasp_profile__is_owasp_staff"
+    legacy_key_to_check = "is_owasp_staff"
     if hasattr(arg, "children"):
         for key, value in arg.children:
-            if key == "is_owasp_staff":
+            if key in (key_to_check, legacy_key_to_check):
                 return value
-    if isinstance(arg, dict) and "is_owasp_staff" in arg:
-        return arg["is_owasp_staff"]
-    if isinstance(arg, tuple) and len(arg) == 2 and arg[0] == "is_owasp_staff":
+    if isinstance(arg, dict):
+        if key_to_check in arg:
+            return arg[key_to_check]
+        if legacy_key_to_check in arg:
+            return arg[legacy_key_to_check]
+    if isinstance(arg, tuple) and len(arg) == 2 and arg[0] in (key_to_check, legacy_key_to_check):
         return arg[1]
     return None
 
@@ -53,7 +58,7 @@ def user_filter_side_effect_factory(mock_employees, mock_former_employees):
         return None
 
     def user_filter_side_effect(*args, **kwargs):
-        staff_value = kwargs.get("is_owasp_staff")
+        staff_value = kwargs.get("owasp_profile__is_owasp_staff", kwargs.get("is_owasp_staff"))
         if staff_value is not None:
             return get_mock_for_staff_value(staff_value)
         for arg in args:

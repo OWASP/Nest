@@ -5,7 +5,7 @@ from __future__ import annotations
 from django.core.validators import RegexValidator
 from django.db import models
 
-from apps.common.models import TimestampedModel
+from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.github.models.user import User
 
 
@@ -71,6 +71,25 @@ class MemberProfile(TimestampedModel):
         help_text="LinkedIn username or custom URL ID (e.g., 'john-doe-123')",
     )
 
+    has_public_member_page = models.BooleanField(
+        default=True,
+        verbose_name="Has Public Member Page",
+        help_text="Whether the member's profile is publicly visible on the OWASP website",
+    )
+    is_owasp_staff = models.BooleanField(
+        default=False,
+        verbose_name="Is OWASP Staff",
+        help_text="Indicates if the user is OWASP Foundation staff.",
+    )
+    contributions_count = models.PositiveIntegerField(
+        verbose_name="Contributions count", default=0
+    )
+
     def __str__(self) -> str:
         """Return human-readable representation."""
         return f"OWASP member profile for {self.github_user.login}"
+
+    @staticmethod
+    def bulk_save(profiles, fields=None) -> None:
+        """Bulk save member profiles."""
+        BulkSaveModel.bulk_save(MemberProfile, profiles, fields=fields)

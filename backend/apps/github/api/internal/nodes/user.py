@@ -13,12 +13,10 @@ from apps.nest.api.internal.nodes.badge import BadgeNode
         "avatar_url",
         "bio",
         "company",
-        "contributions_count",
         "email",
         "followers_count",
         "following_count",
         "id",
-        "is_owasp_staff",
         "location",
         "login",
         "name",
@@ -27,6 +25,13 @@ from apps.nest.api.internal.nodes.badge import BadgeNode
 )
 class UserNode:
     """GitHub user node."""
+
+    @strawberry.field
+    def contributions_count(self) -> int:
+        """Resolve contributions count."""
+        if hasattr(self, "owasp_profile"):
+            return self.owasp_profile.contributions_count
+        return 0
 
     @strawberry.field
     def badge_count(self) -> int:
@@ -81,6 +86,13 @@ class UserNode:
         """Resolve if member is a Google Summer of Code mentor."""
         if hasattr(self, "owasp_profile"):
             return self.owasp_profile.is_gsoc_mentor
+        return False
+
+    @strawberry.field
+    def is_owasp_staff(self) -> bool:
+        """Resolve if the user is an OWASP staff member."""
+        if hasattr(self, "owasp_profile"):
+            return self.owasp_profile.is_owasp_staff
         return False
 
     @strawberry.field
