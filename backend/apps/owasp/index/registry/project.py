@@ -105,7 +105,11 @@ class ProjectIndex(IndexBase):
 
     def get_entities(self):
         """Get entities for indexing."""
-        return Project.objects.prefetch_related(
-            "organizations",
-            "repositories",
+        return (
+            Project.objects.prefetch_related(
+                "organizations",
+                "repositories",
+            )
+            .filter(organizations__isnull=False)
+            .distinct()
         )
