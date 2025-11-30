@@ -21,7 +21,8 @@ Follow these steps to set up the infrastructure:
   ```bash
   cd infrastructure/backend/
   ```
-*Note:* Optionally change the region: set `aws_region` in a `.tfvars` file.
+
+**Note:** Optionally change the region: set `aws_region` in a `.tfvars` file.
 
 - Initialize Terraform if needed:
   ```bash
@@ -32,6 +33,10 @@ Follow these steps to set up the infrastructure:
   ```bash
   terraform apply
   ```
+
+**Note:** Copy the state bucket name from the output.
+
+**Note:** It is recommended to not destroy the backend resources unless absolutely necessary.
 
 2. **Setup Main Infrastructure (staging)**:
 
@@ -50,13 +55,23 @@ Follow these steps to set up the infrastructure:
   cat terraform.tfvars.example > terraform.tfvars
   ```
 
-- *Note:* Optionally change the region:
-  - set `aws_region` in a `.tfvars` file.
-  - set `region` in a `.tfbackend` file and provide it using `terraform init -backend-config=<file>`.
+- Create a local backend configuration file:
+  ```bash
+  touch terraform.tfbackend
+  ```
+
+- Copy the contents from the example file:
+  ```bash
+  cat terraform.tfbackend.example > terraform.tfbackend
+  ```
+
+*Note:* Update the state bucket name in `terraform.tfbackend` with the name of the state bucket created in the previous step.
+
+*Note:* Update defaults (e.g. `region`) as needed.
 
 - Initialize Terraform with the backend configuration:
   ```bash
-  terraform init
+  terraform init -backend-config=terraform.tfbackend
   ```
 
 - Apply the changes to create the main infrastructure using the command:
