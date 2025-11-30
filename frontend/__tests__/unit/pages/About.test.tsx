@@ -411,9 +411,9 @@ describe('About Component', () => {
       render(<About />)
     })
     await waitFor(() => {
-      // Look for the element with alt text "Loading indicator"
-      const spinner = screen.getAllByAltText('Loading indicator')
-      expect(spinner.length).toBeGreaterThan(0)
+      // Check for skeleton loading state by looking for skeleton containers
+      const skeletonContainers = document.querySelectorAll('.bg-gray-100.dark\\:bg-gray-800')
+      expect(skeletonContainers.length).toBeGreaterThan(0)
     })
   })
 

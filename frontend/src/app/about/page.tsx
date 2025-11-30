@@ -37,9 +37,9 @@ import {
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
 import Leaders from 'components/Leaders'
-import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
+import AboutSkeleton from 'components/skeletons/AboutSkeleton'
 import TopContributorsList from 'components/TopContributorsList'
 
 const leaders = {
@@ -100,7 +100,7 @@ const About = () => {
   const isLoading = projectMetadataLoading || topContributorsLoading || leadersLoading
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return <AboutSkeleton />
   }
 
   if (!projectMetadata || !topContributors) {
