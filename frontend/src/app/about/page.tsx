@@ -257,8 +257,8 @@ const About = () => {
           </SecondaryCard>
         )}
         <SecondaryCard icon={faScroll} title={<AnchorTitle title="Our Story" />}>
-          {projectStory.map((text) => (
-            <div key={text} className="mb-4">
+          {projectStory.map((text, index) => (
+            <div key={index} className="mb-4">
               <div>
                 <Markdown content={text} />
               </div>
@@ -274,7 +274,7 @@ const About = () => {
                 )}
                 <div
                   aria-hidden="true"
-                  className="absolute top-[10px] left-0 h-3 w-3 rounded-full bg-gray-400"
+                  className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
                 ></div>
                 <div>
                   <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
