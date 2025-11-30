@@ -13,8 +13,8 @@ from apps.owasp.models.project import Project
 
 
 class EntityMemberAdmin(admin.ModelAdmin):
-    """Admin for EntityMember records (generic link to any OWASP entity)."""
-
+    """Admin configuration for EntityMember records."""
+    
     actions = ("approve_members",)
     autocomplete_fields = ("member",)
     list_display = (
@@ -42,7 +42,11 @@ class EntityMemberAdmin(admin.ModelAdmin):
 
     @admin.action(description="Approve selected members")
     def approve_members(self, request, queryset):
-        """Approve selected members."""
+        """Admin action to approve selected entity members.
+
+        Sets `is_active=True` and `is_reviewed=True` on all selected records
+        and displays a success message showing how many were updated.
+        """
         self.message_user(
             request,
             f"Successfully approved {queryset.update(is_active=True, is_reviewed=True)} members.",
@@ -50,7 +54,10 @@ class EntityMemberAdmin(admin.ModelAdmin):
 
     @admin.display(description="Entity", ordering="entity_type")
     def entity(self, obj):
-        """Return entity link."""
+        """Return a clickable admin link to the related entity.
+
+        Example output: a link to the Project/Chapter/Committee admin change page.
+        """
         return (
             format_html(
                 '<a href="{}" target="_blank">{}</a>',
@@ -66,7 +73,7 @@ class EntityMemberAdmin(admin.ModelAdmin):
 
     @admin.display(description="OWASP URL", ordering="entity_type")
     def owasp_url(self, obj):
-        """Return entity OWASP site URL."""
+        """Return a link to the OWASP site page of the linked entity."""
         return (
             format_html('<a href="{}" target="_blank">↗️</a>', obj.entity.owasp_url)
             if obj.entity
@@ -74,7 +81,15 @@ class EntityMemberAdmin(admin.ModelAdmin):
         )
 
     def get_search_results(self, request, queryset, search_term):
-        """Get search results from entity name or key."""
+        """Extend default search to also match entity names and keys.
+
+        In addition to the built-in search, this method searches:
+        - Project name or key
+        - Chapter name or key
+        - Committee name or key
+
+        and includes matching EntityMember rows in the results.
+        """
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
 
         if search_term:

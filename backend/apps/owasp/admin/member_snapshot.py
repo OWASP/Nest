@@ -108,7 +108,11 @@ class MemberSnapshotAdmin(admin.ModelAdmin):
     )
 
     def get_queryset(self, request):
-        """Optimize queryset with select_related."""
+        """Return an optimized queryset for the MemberSnapshot admin list view.
+
+        Ensures related GitHub user information is loaded efficiently to
+        avoid unnecessary database queries in the admin list view.
+        """
         queryset = super().get_queryset(request)
         return queryset.select_related("github_user")
 

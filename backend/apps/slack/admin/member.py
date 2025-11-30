@@ -24,7 +24,15 @@ class MemberAdmin(admin.ModelAdmin):
     )
 
     def approve_suggested_users(self, request, queryset):
-        """Approve all suggested users for selected members, enforcing one-to-one constraints."""
+        """
+        Admin action to assign a suggested user to each selected Member.
+
+        For each Member:
+        - If exactly one suggested user exists, it is assigned to the Member.
+        - If multiple suggested users exist, an error message is returned because only one can be assigned.
+        - If none exist, a warning message is shown.
+        
+        """
         for entity in queryset:
             suggestions = entity.suggested_users.all()
 

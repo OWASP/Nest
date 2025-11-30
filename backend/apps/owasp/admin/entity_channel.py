@@ -9,7 +9,7 @@ from apps.slack.models import Conversation
 
 @admin.action(description="Mark selected EntityChannels as reviewed")
 def mark_as_reviewed(_modeladmin, request, queryset):
-    """Admin action to mark selected EntityChannels as reviewed."""
+    """Mark selected EntityChannel records as reviewed."""
     messages.success(
         request,
         f"Marked {queryset.update(is_reviewed=True)} EntityChannel(s) as reviewed.",
@@ -62,7 +62,7 @@ class EntityChannelAdmin(admin.ModelAdmin):
     )
 
     def channel_search_display(self, obj):
-        """Display the channel name for the selected channel."""
+        """Return a readable channel label for admin display."""
         if obj.channel_id and obj.channel_type:
             try:
                 if obj.channel_type.model == "conversation":
@@ -71,11 +71,10 @@ class EntityChannelAdmin(admin.ModelAdmin):
             except Conversation.DoesNotExist:
                 return f"Channel {obj.channel_id} (not found)"
         return "-"
-
     channel_search_display.short_description = "Channel Name"
 
     def get_form(self, request, obj=None, **kwargs):
-        """Get the form for the EntityChannel model."""
+        """Return the admin form with Conversation content type metadata attached."""
         form = super().get_form(request, obj, **kwargs)
         form.conversation_content_type_id = ContentType.objects.get_for_model(Conversation).id
 
