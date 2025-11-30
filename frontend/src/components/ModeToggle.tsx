@@ -1,4 +1,4 @@
-import { faMoon, faLightbulb } from '@fortawesome/free-regular-svg-icons'
+import { faMoon, faSun } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import { Tooltip } from '@heroui/tooltip'
@@ -28,7 +28,7 @@ export default function ModeToggle() {
         >
           <div className="absolute inset-0 flex items-center justify-center">
             <FontAwesomeIcon
-              icon={theme === 'dark' ? faLightbulb : faMoon}
+              icon={theme === 'dark' ? faSun : faMoon}
               className="h-5 w-5 transform text-gray-900 transition-all duration-300 hover:rotate-12 dark:text-gray-100"
               fixedWidth
             />
