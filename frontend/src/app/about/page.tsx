@@ -257,8 +257,8 @@ const About = () => {
           </SecondaryCard>
         )}
         <SecondaryCard icon={faScroll} title={<AnchorTitle title="Our Story" />}>
-          {projectStory.map((text, index) => (
-            <div key={index} className="mb-4">
+          {projectStory.map((text) => (
+            <div key={`story-${text.substring(0, 50).replace(/\s/g, '-')}`} className="mb-4">
               <div>
                 <Markdown content={text} />
               </div>
