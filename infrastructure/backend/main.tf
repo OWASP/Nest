@@ -73,13 +73,22 @@ resource "aws_dynamodb_table" "state_lock" {
 
 resource "aws_s3_bucket" "logs" { # NOSONAR
   bucket = "${var.project_name}-terraform-state-logs-${random_id.suffix.hex}"
+
+  lifecycle {
+    prevent_destroy = true
+  }
   tags = {
     Name = "${var.project_name}-terraform-state-logs"
   }
 }
 
 resource "aws_s3_bucket" "state" { # NOSONAR
-  bucket = "${var.project_name}-terraform-state-${random_id.suffix.hex}"
+  bucket              = "${var.project_name}-terraform-state-${random_id.suffix.hex}"
+  object_lock_enabled = true
+
+  lifecycle {
+    prevent_destroy = true
+  }
   tags = {
     Name = "${var.project_name}-terraform-state"
   }
@@ -121,6 +130,17 @@ resource "aws_s3_bucket_logging" "state" {
   bucket        = aws_s3_bucket.state.id
   target_bucket = aws_s3_bucket.logs.id
   target_prefix = "s3/"
+}
+
+resource "aws_s3_bucket_object_lock_configuration" "state" {
+  bucket = aws_s3_bucket.state.id
+
+  rule {
+    default_retention {
+      days = 30
+      mode = "GOVERNANCE"
+    }
+  }
 }
 
 resource "aws_s3_bucket_policy" "logs" {

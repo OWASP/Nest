@@ -16,7 +16,7 @@ variable "force_destroy" {
 }
 
 variable "noncurrent_version_expiration_days" {
-  description = "Specifies the number of days an object is noncurrent before it is expired."
+  description = "The number of days an object is noncurrent before it is expired."
   type        = number
   default     = 30
 }

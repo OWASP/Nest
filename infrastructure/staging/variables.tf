@@ -87,10 +87,10 @@ variable "force_destroy_bucket" {
   default     = false
 }
 
-variable "fixtures_s3_bucket" {
+variable "fixtures_bucket_name" {
   description = "The name of the S3 bucket for fixtures"
   type        = string
-  default     = "nest-fixtures"
+  default     = "owasp-nest-fixtures"
 }
 
 variable "private_subnet_cidrs" {
@@ -141,7 +141,7 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
-variable "zappa_s3_bucket" {
+variable "zappa_bucket_name" {
   description = "The name of the S3 bucket for Zappa deployments"
   type        = string
   default     = "owasp-nest-zappa-deployments"

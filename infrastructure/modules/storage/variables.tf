@@ -9,7 +9,7 @@ variable "environment" {
   type        = string
 }
 
-variable "fixtures_s3_bucket" {
+variable "fixtures_bucket_name" {
   description = "The name of the S3 bucket for fixtures"
   type        = string
 }
@@ -25,7 +25,7 @@ variable "project_name" {
   type        = string
 }
 
-variable "zappa_s3_bucket" {
+variable "zappa_bucket_name" {
   description = "The name of the S3 bucket for Zappa deployments"
   type        = string
 }

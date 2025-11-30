@@ -30,7 +30,7 @@ variable "fixtures_read_only_policy_arn" {
   type        = string
 }
 
-variable "fixtures_s3_bucket" {
+variable "fixtures_bucket_name" {
   description = "The name of the S3 bucket for fixtures"
   type        = string
 }
