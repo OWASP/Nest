@@ -66,6 +66,9 @@ resource "aws_dynamodb_table" "state_lock" {
     name = "LockID"
     type = "S"
   }
+  lifecycle {
+    prevent_destroy = true
+  }
   point_in_time_recovery {
     enabled = true
   }

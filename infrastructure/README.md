@@ -203,11 +203,15 @@ Migrate and load data into the new database.
   zappa undeploy staging
   ```
 
+- Ensure all buckets and ECR repositories are empty.
+
+**Note:** Some resources have `prevent_destroy` set to `true`. Please set it to `false` manually.
 - To destroy Terraform infrastructure:
 
   ```bash
   terraform destroy
   ```
+
 
 ## Helpful Commands
 
