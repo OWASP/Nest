@@ -23,6 +23,23 @@ jest.mock('@heroui/tooltip', () => ({
   Tooltip: ({ children }: React.PropsWithChildren) => <>{children}</>,
 }))
 
+jest.mock('@fortawesome/react-fontawesome', () => ({
+  FontAwesomeIcon: ({ icon, className }: { icon: { iconName?: string }; className?: string }) => (
+    <svg
+      data-icon={icon?.iconName || 'moon'}
+      className={className}
+      data-testid="font-awesome-icon"
+    />
+  ),
+}))
+
+jest.mock('components/icons/Sun', () => ({
+  __esModule: true,
+  default: ({ className }: { className?: string }) => (
+    <svg data-testid="sun-icon" data-icon="sun" className={className} viewBox="0 0 48 48" />
+  ),
+}))
+
 const useThemeMock = useTheme as jest.Mock
 
 describe('ModeToggle Component', () => {
