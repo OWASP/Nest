@@ -27,9 +27,10 @@ jest.mock('react-apexcharts', () => {
             w: { config: { series: mockSeries } },
           })
           if (typeof result === 'string') {
-            const hasLightMode = result.includes('#FFFFFF') || result.includes('#E5E7EB')
-            const hasDarkMode = result.includes('#1F2937') || result.includes('#374151')
-            void (hasLightMode || hasDarkMode)
+            result.includes('#FFFFFF')
+            result.includes('#E5E7EB')
+            result.includes('#1F2937')
+            result.includes('#374151')
           }
         }
         tooltip.custom({
