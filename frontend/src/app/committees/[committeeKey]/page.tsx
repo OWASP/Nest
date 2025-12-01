@@ -17,7 +17,6 @@ import type { Contributor } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
-import PageLayout from 'components/PageLayout'
 
 export default function CommitteeDetailsPage() {
   const { committeeKey } = useParams<{ committeeKey: string }>()
@@ -81,16 +80,14 @@ export default function CommitteeDetailsPage() {
   ]
 
   return (
-    <PageLayout title={committee.name}>
-      <DetailsCard
-        details={details}
-        socialLinks={committee.relatedUrls}
-        stats={committeeStats}
-        summary={committee.summary}
-        title={committee.name}
-        topContributors={topContributors}
-        type="committee"
-      />
-    </PageLayout>
+    <DetailsCard
+      details={details}
+      socialLinks={committee.relatedUrls}
+      stats={committeeStats}
+      summary={committee.summary}
+      title={committee.name}
+      topContributors={topContributors}
+      type="committee"
+    />
   )
 }

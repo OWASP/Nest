@@ -1,10 +1,19 @@
 import { Metadata } from 'next'
+import { cache } from 'react'
 import React from 'react'
 import { apolloClient } from 'server/apolloClient'
 import { GetRepositoryMetadataDocument } from 'types/__generated__/repositoryQueries.generated'
 import { formatBreadcrumbTitle } from 'utils/breadcrumb'
 import { generateSeoMetadata } from 'utils/metaconfig'
 import PageLayout from 'components/PageLayout'
+
+const getRepositoryMetadata = cache(async (organizationKey: string, repositoryKey: string) => {
+  const { data } = await apolloClient.query({
+    query: GetRepositoryMetadataDocument,
+    variables: { organizationKey, repositoryKey },
+  })
+  return data
+})
 
 export async function generateMetadata({
   params,
@@ -15,10 +24,7 @@ export async function generateMetadata({
   }>
 }): Promise<Metadata> {
   const { repositoryKey, organizationKey } = await params
-  const { data } = await apolloClient.query({
-    query: GetRepositoryMetadataDocument,
-    variables: { organizationKey: organizationKey, repositoryKey: repositoryKey },
-  })
+  const data = await getRepositoryMetadata(organizationKey, repositoryKey)
   const repository = data?.repository
 
   return repository
@@ -39,10 +45,7 @@ export default async function RepositoryDetailsLayout({
   params: Promise<{ repositoryKey: string; organizationKey: string }>
 }>) {
   const { repositoryKey, organizationKey } = await params
-  const { data } = await apolloClient.query({
-    query: GetRepositoryMetadataDocument,
-    variables: { organizationKey, repositoryKey },
-  })
+  const data = await getRepositoryMetadata(organizationKey, repositoryKey)
   const repoName = data?.repository?.name
     ? formatBreadcrumbTitle(data.repository.name)
     : formatBreadcrumbTitle(repositoryKey)

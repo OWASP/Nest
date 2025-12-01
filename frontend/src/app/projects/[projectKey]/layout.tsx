@@ -1,0 +1,53 @@
+import { Metadata } from 'next'
+import { cache } from 'react'
+import React from 'react'
+import { apolloClient } from 'server/apolloClient'
+import { GetProjectMetadataDocument } from 'types/__generated__/projectQueries.generated'
+import { generateSeoMetadata } from 'utils/metaconfig'
+import PageLayout from 'components/PageLayout'
+
+const getProjectMetadata = cache(async (projectKey: string) => {
+  const { data } = await apolloClient.query({
+    query: GetProjectMetadataDocument,
+    variables: { key: projectKey },
+  })
+  return data
+})
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{
+    projectKey: string
+  }>
+}): Promise<Metadata> {
+  const { projectKey } = await params
+  const data = await getProjectMetadata(projectKey)
+  const project = data?.project
+
+  return project
+    ? generateSeoMetadata({
+        canonicalPath: `/projects/${projectKey}`,
+        description: project.summary ?? `${project.name} project details`,
+        keywords: ['owasp', 'project', projectKey, project.name],
+        title: project.name,
+      })
+    : null
+}
+
+export default async function ProjectDetailsLayout({
+  children,
+  params,
+}: Readonly<{
+  children: React.ReactNode
+  params: Promise<{ projectKey: string }>
+}>) {
+  const { projectKey } = await params
+  const data = await getProjectMetadata(projectKey)
+
+  if (!data?.project) {
+    return children
+  }
+
+  return <PageLayout title={data.project.name}>{children}</PageLayout>
+}
