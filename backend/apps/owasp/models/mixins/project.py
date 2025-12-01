@@ -11,6 +11,7 @@ from apps.owasp.models.mixins.common import RepositoryBasedEntityModelMixin
 ISSUES_LIMIT = 6
 RELEASES_LIMIT = 4
 REPOSITORIES_LIMIT = 4
+DEFAULT_HEALTH_SCORE = 100
 
 
 class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
@@ -40,7 +41,7 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
     def idx_health_score(self) -> float | None:
         """Return health score for indexing."""
         # TODO(arkid15r): Enable real health score in production when ready.
-        return 100 if settings.IS_PRODUCTION_ENVIRONMENT else self.health_score
+        return DEFAULT_HEALTH_SCORE if settings.IS_PRODUCTION_ENVIRONMENT else self.health_score
 
     @property
     def idx_is_active(self) -> bool:

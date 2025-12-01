@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from django.utils.text import Truncator
 
+DESCRIPTION_MAX_LENGTH = 1000
+
 
 class ReleaseIndexMixin:
     """Release index mixin."""
@@ -37,7 +39,7 @@ class ReleaseIndexMixin:
     @property
     def idx_description(self) -> str:
         """Return description for indexing."""
-        return Truncator(self.description).chars(1000, truncate="...")
+        return Truncator(self.description).chars(DESCRIPTION_MAX_LENGTH, truncate="...")
 
     @property
     def idx_is_pre_release(self) -> bool:
