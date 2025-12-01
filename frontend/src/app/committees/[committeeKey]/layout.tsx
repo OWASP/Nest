@@ -6,11 +6,15 @@ import { generateSeoMetadata } from 'utils/metaconfig'
 import PageLayout from 'components/PageLayout'
 
 const getCommitteeMetadata = cache(async (committeeKey: string) => {
-  const { data } = await apolloClient.query({
-    query: GetCommitteeMetadataDocument,
-    variables: { key: committeeKey },
-  })
-  return data
+  try {
+    const { data } = await apolloClient.query({
+      query: GetCommitteeMetadataDocument,
+      variables: { key: committeeKey },
+    })
+    return data
+  } catch {
+    return null
+  }
 })
 
 export async function generateMetadata({

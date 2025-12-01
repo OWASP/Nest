@@ -6,11 +6,15 @@ import { generateSeoMetadata } from 'utils/metaconfig'
 import PageLayout from 'components/PageLayout'
 
 const getChapterMetadata = cache(async (chapterKey: string) => {
-  const { data } = await apolloClient.query({
-    query: GetChapterMetadataDocument,
-    variables: { key: chapterKey },
-  })
-  return data
+  try {
+    const { data } = await apolloClient.query({
+      query: GetChapterMetadataDocument,
+      variables: { key: chapterKey },
+    })
+    return data
+  } catch {
+    return null
+  }
 })
 
 export async function generateMetadata({

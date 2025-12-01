@@ -7,11 +7,15 @@ import { generateSeoMetadata } from 'utils/metaconfig'
 import PageLayout from 'components/PageLayout'
 
 const getRepositoryMetadata = cache(async (organizationKey: string, repositoryKey: string) => {
-  const { data } = await apolloClient.query({
-    query: GetRepositoryMetadataDocument,
-    variables: { organizationKey, repositoryKey },
-  })
-  return data
+  try {
+    const { data } = await apolloClient.query({
+      query: GetRepositoryMetadataDocument,
+      variables: { organizationKey, repositoryKey },
+    })
+    return data
+  } catch {
+    return null
+  }
 })
 
 export async function generateMetadata({
