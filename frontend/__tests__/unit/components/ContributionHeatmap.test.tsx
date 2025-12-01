@@ -531,7 +531,7 @@ describe('ContributionHeatmap', () => {
       expect(chart).toHaveAttribute('data-type', 'heatmap')
     })
 
-    it('disables toolbar and legend as expected', () => {
+    it('renders heatmap chart', () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} />)
       expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
     })
