@@ -30,6 +30,32 @@ data "aws_iam_policy_document" "flow_logs_policy" {
   }
 }
 
+module "nacl" {
+  source = "./modules/nacl"
+
+  common_tags        = var.common_tags
+  environment        = var.environment
+  private_subnet_ids = aws_subnet.private[*].id
+  project_name       = var.project_name
+  public_subnet_ids  = aws_subnet.public[*].id
+  vpc_cidr           = var.vpc_cidr
+  vpc_id             = aws_vpc.main.id
+}
+
+module "vpc_endpoint" {
+  source = "./modules/vpc-endpoint"
+
+  aws_region             = var.aws_region
+  common_tags            = var.common_tags
+  environment            = var.environment
+  private_route_table_id = aws_route_table.private.id
+  private_subnet_ids     = aws_subnet.private[*].id
+  project_name           = var.project_name
+  public_route_table_id  = aws_route_table.public.id
+  vpc_cidr               = var.vpc_cidr
+  vpc_id                 = aws_vpc.main.id
+}
+
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
@@ -151,30 +177,4 @@ resource "aws_route_table_association" "private" {
   count          = length(aws_subnet.private)
   route_table_id = aws_route_table.private.id
   subnet_id      = aws_subnet.private[count.index].id
-}
-
-module "nacl" {
-  source = "./modules/nacl"
-
-  common_tags        = var.common_tags
-  environment        = var.environment
-  private_subnet_ids = aws_subnet.private[*].id
-  project_name       = var.project_name
-  public_subnet_ids  = aws_subnet.public[*].id
-  vpc_cidr           = var.vpc_cidr
-  vpc_id             = aws_vpc.main.id
-}
-
-module "vpc_endpoint" {
-  source = "./modules/vpc-endpoint"
-
-  aws_region             = var.aws_region
-  common_tags            = var.common_tags
-  environment            = var.environment
-  private_route_table_id = aws_route_table.private.id
-  private_subnet_ids     = aws_subnet.private[*].id
-  project_name           = var.project_name
-  public_route_table_id  = aws_route_table.public.id
-  vpc_cidr               = var.vpc_cidr
-  vpc_id                 = aws_vpc.main.id
 }
