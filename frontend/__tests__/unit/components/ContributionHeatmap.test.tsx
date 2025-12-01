@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import { ThemeProvider } from 'next-themes'
+import { ThemeProvider, useTheme } from 'next-themes'
 import React from 'react'
 import ContributionHeatmap from 'components/ContributionHeatmap'
 import '@testing-library/jest-dom'
@@ -20,23 +20,18 @@ jest.mock('react-apexcharts', () => {
     if (mockOptions.tooltip && typeof mockOptions.tooltip === 'object') {
       const tooltip = mockOptions.tooltip as { custom?: (...args: unknown[]) => unknown }
       if (tooltip.custom) {
-        // Test with valid data
         if (mockSeries[0]?.data.length > 0) {
           const result = tooltip.custom({
             seriesIndex: 0,
             dataPointIndex: 0,
             w: { config: { series: mockSeries } },
           })
-          // Force execution of all template literal branches by checking the result
           if (typeof result === 'string') {
             const hasLightMode = result.includes('#FFFFFF') || result.includes('#E5E7EB')
             const hasDarkMode = result.includes('#1F2937') || result.includes('#374151')
-            // This ensures both light and dark mode branches are covered
-            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-            hasLightMode || hasDarkMode
+            void (hasLightMode || hasDarkMode)
           }
         }
-        // Test with null/undefined data (edge case)
         tooltip.custom({
           seriesIndex: 0,
           dataPointIndex: 999,
@@ -68,8 +63,6 @@ jest.mock('next-themes', () => ({
 }))
 
 const renderWithTheme = (ui: React.ReactElement, theme: 'light' | 'dark' = 'light') => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { useTheme } = require('next-themes')
   ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
   return render(<ThemeProvider attribute="class">{ui}</ThemeProvider>)
 }
@@ -191,9 +184,6 @@ describe('ContributionHeatmap', () => {
         'light'
       )
       expect(screen.getByText('Light').parentElement).toHaveClass('text-gray-700')
-
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { useTheme } = require('next-themes')
       ;(useTheme as jest.Mock).mockReturnValue({ theme: 'dark', setTheme: jest.fn() })
       rerender(
         <ThemeProvider attribute="class">
@@ -291,9 +281,6 @@ describe('ContributionHeatmap', () => {
     it('tooltip respects theme colors', () => {
       const { rerender } = renderWithTheme(<ContributionHeatmap {...defaultProps} />, 'light')
       expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
-
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { useTheme } = require('next-themes')
       ;(useTheme as jest.Mock).mockReturnValue({ theme: 'dark', setTheme: jest.fn() })
       rerender(
         <ThemeProvider attribute="class">
@@ -309,7 +296,6 @@ describe('ContributionHeatmap', () => {
       )
       expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
 
-      // The tooltip custom function should handle null/undefined data points
       const styleTag = container.querySelector('style')
       expect(styleTag).toBeInTheDocument()
     })
@@ -318,8 +304,8 @@ describe('ContributionHeatmap', () => {
   describe('Week Number Calculation', () => {
     it('correctly calculates week numbers starting from Monday', () => {
       const data = {
-        '2024-01-01': 5, // Monday
-        '2024-01-08': 10, // Next Monday
+        '2024-01-01': 5,
+        '2024-01-08': 10,
       }
       renderWithTheme(
         <ContributionHeatmap contributionData={data} startDate="2024-01-01" endDate="2024-01-14" />
@@ -329,8 +315,8 @@ describe('ContributionHeatmap', () => {
 
     it('handles week transitions correctly', () => {
       const data = {
-        '2024-01-07': 5, // Sunday
-        '2024-01-08': 10, // Monday (next week)
+        '2024-01-07': 5,
+        '2024-01-08': 10,
       }
       renderWithTheme(
         <ContributionHeatmap contributionData={data} startDate="2024-01-07" endDate="2024-01-14" />
@@ -342,11 +328,11 @@ describe('ContributionHeatmap', () => {
   describe('Color Scale Logic', () => {
     it('applies correct color ranges for different activity levels', () => {
       const activityData = {
-        '2024-01-01': 0, // No activity
-        '2024-01-02': 2, // Low (1-4)
-        '2024-01-03': 6, // Medium (5-8)
-        '2024-01-04': 10, // High (9-12)
-        '2024-01-05': 15, // Very High (13+)
+        '2024-01-01': 0,
+        '2024-01-02': 2,
+        '2024-01-03': 6,
+        '2024-01-04': 10,
+        '2024-01-05': 15,
       }
       renderWithTheme(
         <ContributionHeatmap
@@ -385,7 +371,7 @@ describe('ContributionHeatmap', () => {
     it('handles leap year dates', () => {
       const leapYearData = {
         '2024-02-28': 5,
-        '2024-02-29': 10, // Leap year
+        '2024-02-29': 10,
         '2024-03-01': 3,
       }
       renderWithTheme(
@@ -484,7 +470,6 @@ describe('ContributionHeatmap', () => {
     it('maintains consistent rendering across multiple updates', () => {
       const { rerender } = renderWithTheme(<ContributionHeatmap {...defaultProps} />)
 
-      // Multiple sequential updates
       for (let i = 0; i < 5; i++) {
         const newData = { [`2024-01-${i + 1}`]: i * 5 }
         rerender(
@@ -513,7 +498,7 @@ describe('ContributionHeatmap', () => {
     it('formats date strings correctly in different formats', () => {
       const dateFormatData = {
         '2024-01-01': 5,
-        '2024-1-2': 10, // Single digit month/day
+        '2024-1-2': 10,
       }
       renderWithTheme(
         <ContributionHeatmap
@@ -621,10 +606,10 @@ describe('ContributionHeatmap', () => {
 
     it('renders correctly with all edge cases combined', () => {
       const complexData: Record<string, number> = {
-        '2024-02-29': 100, // Leap year
-        '2024-12-31': 50, // Year end
-        '2024-01-01': 0, // No activity
-        '2024-06-15': 1, // Single contribution
+        '2024-02-29': 100,
+        '2024-12-31': 50,
+        '2024-01-01': 0,
+        '2024-06-15': 1,
       }
 
       renderWithTheme(
