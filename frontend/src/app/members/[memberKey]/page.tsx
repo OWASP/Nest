@@ -26,7 +26,6 @@ import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/
 import Badges from 'components/Badges'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
-import PageLayout from 'components/PageLayout'
 
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams<{ memberKey: string }>()
@@ -232,21 +231,19 @@ const UserDetailsPage: React.FC = () => {
   )
 
   return (
-    <PageLayout breadcrumbData={{ memberName: user?.name || user?.login }}>
-      <DetailsCard
-        details={userDetails}
-        pullRequests={pullRequests}
-        recentIssues={issues}
-        recentMilestones={milestones}
-        recentReleases={releases}
-        repositories={topRepositories}
-        showAvatar={false}
-        stats={userStats}
-        title={user?.name || user?.login}
-        type="user"
-        userSummary={<UserSummary />}
-      />
-    </PageLayout>
+    <DetailsCard
+      details={userDetails}
+      pullRequests={pullRequests}
+      recentIssues={issues}
+      recentMilestones={milestones}
+      recentReleases={releases}
+      repositories={topRepositories}
+      showAvatar={false}
+      stats={userStats}
+      title={user?.name || user?.login}
+      type="user"
+      userSummary={<UserSummary />}
+    />
   )
 }
 

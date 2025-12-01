@@ -30,6 +30,8 @@ export async function generateMetadata({
 
 export default function ChapterDetailsLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+}: Readonly<{
+  children: React.ReactNode
+}>) {
   return children
 }

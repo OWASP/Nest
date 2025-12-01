@@ -81,7 +81,7 @@ export default function CommitteeDetailsPage() {
   ]
 
   return (
-    <PageLayout breadcrumbData={{ committeeName: committee.name }}>
+    <PageLayout title={committee.name}>
       <DetailsCard
         details={details}
         socialLinks={committee.relatedUrls}

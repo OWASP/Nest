@@ -1,64 +1,54 @@
-import upperFirst from 'lodash/upperFirst'
+import { useBreadcrumb } from 'contexts/BreadcrumbContext'
 import { usePathname } from 'next/navigation'
+import type { BreadcrumbItem } from 'types/breadcrumb'
+import { formatBreadcrumbTitle } from 'utils/breadcrumb'
 
-export interface BreadCrumbItem {
-  title: string
-  path: string
-}
+export type { BreadcrumbItem }
 
-interface BreadcrumbData {
-  projectName?: string
-  memberName?: string
-  chapterName?: string
-  committeeName?: string
-  orgName?: string
-  repoName?: string
-}
+const HIDDEN_SEGMENTS = ['repositories']
 
-export function useBreadcrumbs(breadcrumbData?: BreadcrumbData): BreadCrumbItem[] {
-  const pathname = usePathname()
-  const breadcrumbs: BreadCrumbItem[] = [{ title: 'Home', path: '/' }]
-
-  if (!pathname) return breadcrumbs
-
-  const segments = pathname.split('/').filter(Boolean)
-
-  const isNestedRepoRoute =
-    segments.length === 4 && segments[0] === 'organizations' && segments[2] === 'repositories'
-
-  if (isNestedRepoRoute) {
-    breadcrumbs.push({ title: 'Organizations', path: '/organizations' })
-
-    const orgTitle = breadcrumbData?.orgName || upperFirst(segments[1]).replaceAll('-', ' ')
-    breadcrumbs.push({
-      title: orgTitle,
-      path: `/organizations/${segments[1]}`,
-    })
-
-    const repoTitle = breadcrumbData?.repoName || upperFirst(segments[3]).replaceAll('-', ' ')
-    breadcrumbs.push({
-      title: repoTitle,
-      path: `/organizations/${segments[1]}/repositories/${segments[3]}`,
-    })
-  } else {
-    segments.forEach((segment, index) => {
-      const isLastSegment = index === segments.length - 1
-      const path = '/' + segments.slice(0, index + 1).join('/')
-
-      let title = upperFirst(segment).replaceAll('-', ' ')
-
-      if (isLastSegment && breadcrumbData) {
-        title =
-          breadcrumbData.projectName ||
-          breadcrumbData.memberName ||
-          breadcrumbData.chapterName ||
-          breadcrumbData.committeeName ||
-          breadcrumbData.orgName ||
-          title
-      }
-      breadcrumbs.push({ title, path })
-    })
+function buildBreadcrumbItems(
+  pathname: string | null,
+  registeredItems: BreadcrumbItem[]
+): BreadcrumbItem[] {
+  const registeredMap = new Map<string, BreadcrumbItem>()
+  for (const item of registeredItems) {
+    registeredMap.set(item.path, item)
   }
 
-  return breadcrumbs
+  const items: BreadcrumbItem[] = [registeredMap.get('/') ?? { title: 'Home', path: '/' }]
+
+  if (!pathname || pathname === '/') {
+    return items
+  }
+
+  const segments = pathname.split('/').filter(Boolean)
+  let currentPath = ''
+
+  for (const segment of segments) {
+    currentPath = `${currentPath}/${segment}`
+
+    if (HIDDEN_SEGMENTS.includes(segment)) {
+      continue
+    }
+
+    const registeredItem = registeredMap.get(currentPath)
+    if (registeredItem) {
+      items.push(registeredItem)
+    } else {
+      items.push({
+        title: formatBreadcrumbTitle(segment),
+        path: currentPath,
+      })
+    }
+  }
+
+  return items
+}
+
+export function useBreadcrumbs(): BreadcrumbItem[] {
+  const pathname = usePathname()
+  const registeredItems = useBreadcrumb()
+
+  return buildBreadcrumbItems(pathname, registeredItems)
 }

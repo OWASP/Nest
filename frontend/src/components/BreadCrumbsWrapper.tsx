@@ -3,35 +3,15 @@
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Breadcrumbs, BreadcrumbItem as HeroUIBreadcrumbItem } from '@heroui/react'
-import upperFirst from 'lodash/upperFirst'
+import { useBreadcrumbs } from 'hooks/useBreadcrumbs'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-const ROUTES_WITH_PAGE_LAYOUT = [
-  /^\/members\/[^/]+$/,
-  /^\/projects\/[^/]+$/,
-  /^\/chapters\/[^/]+$/,
-  /^\/committees\/[^/]+$/,
-  /^\/organizations\/[^/]+$/,
-  /^\/organizations\/[^/]+\/repositories\/[^/]+$/,
-]
-
 export default function BreadCrumbsWrapper() {
   const pathname = usePathname()
+  const items = useBreadcrumbs()
 
-  if (pathname === '/') return null
-
-  const usesPageLayout = ROUTES_WITH_PAGE_LAYOUT.some((pattern) => pattern.test(pathname))
-  if (usesPageLayout) return null
-
-  const segments = pathname.split('/').filter(Boolean)
-  const items = [
-    { title: 'Home', path: '/' },
-    ...segments.map((segment, index) => ({
-      title: upperFirst(segment).replaceAll('-', ' '),
-      path: '/' + segments.slice(0, index + 1).join('/'),
-    })),
-  ]
+  if (pathname === '/' || items.length <= 1) return null
 
   return (
     <div className="mt-16 w-full pt-4">
@@ -57,7 +37,7 @@ export default function BreadCrumbsWrapper() {
             return (
               <HeroUIBreadcrumbItem key={item.path} isDisabled={isLast}>
                 {isLast ? (
-                  <span className="cursor-default font-semibold text-gray-600 dark:text-gray-300">
+                  <span className="cursor-default font-semibold text-gray-800 dark:text-gray-100">
                     {item.title}
                   </span>
                 ) : (

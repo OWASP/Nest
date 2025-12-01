@@ -6,7 +6,6 @@ BOTTOMPADDING
 CCSP
 CISSP
 Cañón
-Cyclonedx
 DRF
 GBP
 GFKs
@@ -14,7 +13,6 @@ GSOC
 GTM
 Héllo
 Kateryna
-Kimminich
 NETTACKER
 NOASSERTION
 NOSONAR
@@ -45,7 +43,6 @@ arithmatex
 arkid15r
 askowasp
 bangbang
-bjornkimminich
 bsky
 certbot
 collectstatic
@@ -55,7 +52,6 @@ csrfguard
 csrfprotector
 csrftoken
 cva
-cyclonedx
 demojize
 dismissable
 dsn

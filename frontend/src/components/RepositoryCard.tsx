@@ -25,7 +25,7 @@ const RepositoryCard: React.FC<RepositoryCardListProps> = ({
         {displayedRepositories.map((repository) => {
           return (
             <RepositoryItem
-              key={`${repository.organization.login}-${repository.key}`}
+              key={`${repository.organization?.login ?? 'unknown'}-${repository.key}`}
               details={repository}
             />
           )
@@ -39,7 +39,7 @@ const RepositoryCard: React.FC<RepositoryCardListProps> = ({
 const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
   const router = useRouter()
   const handleClick = () => {
-    router.push(`/organizations/${details.organization.login}/repositories/${details.key}`)
+    router.push(`/organizations/${details.organization?.login}/repositories/${details.key}`)
   }
 
   return (

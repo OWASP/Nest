@@ -61,7 +61,7 @@ export default function ChapterDetailsPage() {
     },
   ]
   return (
-    <PageLayout breadcrumbData={{ chapterName: chapter.name }}>
+    <PageLayout title={chapter.name}>
       <DetailsCard
         details={details}
         entityKey={chapter.key}

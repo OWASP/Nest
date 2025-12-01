@@ -1,12 +1,12 @@
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Breadcrumbs, BreadcrumbItem as HeroUIBreadcrumbItem } from '@heroui/react'
-import type { BreadCrumbItem } from 'hooks/useBreadcrumbs'
 import Link from 'next/link'
+import type { BreadcrumbItem } from 'types/breadcrumb'
 
-interface BreadCrumbRendererProps {
-  items: BreadCrumbItem[]
-}
+type BreadCrumbRendererProps = Readonly<{
+  items: readonly BreadcrumbItem[]
+}>
 
 export default function BreadCrumbRenderer({ items }: BreadCrumbRendererProps) {
   return (

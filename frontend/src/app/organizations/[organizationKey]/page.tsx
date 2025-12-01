@@ -15,7 +15,6 @@ import { GetOrganizationDataDocument } from 'types/__generated__/organizationQue
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
-import PageLayout from 'components/PageLayout'
 const OrganizationDetailsPage = () => {
   const { organizationKey } = useParams<{ organizationKey: string }>()
   const [organization, setOrganization] = useState(null)
@@ -114,21 +113,19 @@ const OrganizationDetailsPage = () => {
   ]
 
   return (
-    <PageLayout breadcrumbData={{ orgName: organization.name }}>
-      <DetailsCard
-        details={organizationDetails}
-        recentIssues={issues}
-        recentReleases={releases}
-        recentMilestones={milestones}
-        pullRequests={pullRequests}
-        repositories={repositories}
-        stats={organizationStats}
-        summary={organization.description}
-        title={organization.name}
-        topContributors={topContributors}
-        type="organization"
-      />
-    </PageLayout>
+    <DetailsCard
+      details={organizationDetails}
+      recentIssues={issues}
+      recentReleases={releases}
+      recentMilestones={milestones}
+      pullRequests={pullRequests}
+      repositories={repositories}
+      stats={organizationStats}
+      summary={organization.description}
+      title={organization.name}
+      topContributors={topContributors}
+      type="organization"
+    />
   )
 }
 

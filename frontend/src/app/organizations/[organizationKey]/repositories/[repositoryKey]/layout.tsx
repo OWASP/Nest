@@ -2,7 +2,9 @@ import { Metadata } from 'next'
 import React from 'react'
 import { apolloClient } from 'server/apolloClient'
 import { GetRepositoryMetadataDocument } from 'types/__generated__/repositoryQueries.generated'
+import { formatBreadcrumbTitle } from 'utils/breadcrumb'
 import { generateSeoMetadata } from 'utils/metaconfig'
+import PageLayout from 'components/PageLayout'
 
 export async function generateMetadata({
   params,
@@ -29,6 +31,28 @@ export async function generateMetadata({
     : null
 }
 
-export default function RepositoryDetailsLayout({ children }: { children: React.ReactNode }) {
-  return children
+export default async function RepositoryDetailsLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode
+  params: Promise<{ repositoryKey: string; organizationKey: string }>
+}) {
+  const { repositoryKey, organizationKey } = await params
+  const { data } = await apolloClient.query({
+    query: GetRepositoryMetadataDocument,
+    variables: { organizationKey, repositoryKey },
+  })
+  const repoName = data?.repository?.name
+    ? formatBreadcrumbTitle(data.repository.name)
+    : formatBreadcrumbTitle(repositoryKey)
+
+  return (
+    <PageLayout
+      title={repoName}
+      path={`/organizations/${organizationKey}/repositories/${repositoryKey}`}
+    >
+      {children}
+    </PageLayout>
+  )
 }

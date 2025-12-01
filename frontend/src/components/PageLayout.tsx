@@ -1,28 +1,18 @@
 'use client'
 
-import { useBreadcrumbs } from 'hooks/useBreadcrumbs'
+import { BreadcrumbProvider } from 'contexts/BreadcrumbContext'
+import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
-import BreadCrumbRenderer from 'components/BreadCrumbs'
 
-interface PageLayoutProps {
-  breadcrumbData?: {
-    projectName?: string
-    memberName?: string
-    chapterName?: string
-    committeeName?: string
-    orgName?: string
-    repoName?: string
-  }
+type PageLayoutProps = Readonly<{
+  title: string
+  path?: string
   children: ReactNode
-}
+}>
 
-export default function PageLayout({ breadcrumbData, children }: PageLayoutProps) {
-  const breadcrumbItems = useBreadcrumbs(breadcrumbData)
+export default function PageLayout({ title, path, children }: PageLayoutProps) {
+  const pathname = usePathname()
+  const breadcrumbPath = path ?? pathname
 
-  return (
-    <>
-      <BreadCrumbRenderer items={breadcrumbItems} />
-      {children}
-    </>
-  )
+  return <BreadcrumbProvider item={{ title, path: breadcrumbPath }}>{children}</BreadcrumbProvider>
 }
