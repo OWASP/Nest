@@ -1,6 +1,5 @@
 import { Metadata } from 'next'
-import { cache } from 'react'
-import React from 'react'
+import React, { cache } from 'react'
 import { apolloClient } from 'server/apolloClient'
 import { GetProjectMetadataDocument } from 'types/__generated__/projectQueries.generated'
 import { generateSeoMetadata } from 'utils/metaconfig'
