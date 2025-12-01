@@ -1,14 +1,14 @@
 terraform {
-  required_version = ">= 1.0"
+  required_version = "1.14.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.0"
+      version = "6.22.0"
     }
     random = {
       source  = "hashicorp/random"
-      version = "~> 3.0"
+      version = "3.7.2"
     }
   }
 }
@@ -155,4 +155,30 @@ resource "aws_route_table_association" "private" {
   count          = length(aws_subnet.private)
   route_table_id = aws_route_table.private.id
   subnet_id      = aws_subnet.private[count.index].id
+}
+
+module "nacl" {
+  source = "./modules/nacl"
+
+  common_tags        = var.common_tags
+  environment        = var.environment
+  private_subnet_ids = aws_subnet.private[*].id
+  project_name       = var.project_name
+  public_subnet_ids  = aws_subnet.public[*].id
+  vpc_cidr           = var.vpc_cidr
+  vpc_id             = aws_vpc.main.id
+}
+
+module "vpc_endpoint" {
+  source = "./modules/vpc-endpoint"
+
+  aws_region             = var.aws_region
+  common_tags            = var.common_tags
+  environment            = var.environment
+  private_route_table_id = aws_route_table.private.id
+  private_subnet_ids     = aws_subnet.private[*].id
+  project_name           = var.project_name
+  public_route_table_id  = aws_route_table.public.id
+  vpc_cidr               = var.vpc_cidr
+  vpc_id                 = aws_vpc.main.id
 }

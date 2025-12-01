@@ -68,6 +68,7 @@ module "ecs" {
 module "networking" {
   source = "../modules/networking"
 
+  aws_region           = var.aws_region
   availability_zones   = var.availability_zones
   common_tags          = local.common_tags
   environment          = var.environment
@@ -95,13 +96,14 @@ module "parameters" {
 module "security" {
   source = "../modules/security"
 
-  common_tags      = local.common_tags
-  create_rds_proxy = var.create_rds_proxy
-  db_port          = var.db_port
-  environment      = var.environment
-  project_name     = var.project_name
-  redis_port       = var.redis_port
-  vpc_id           = module.networking.vpc_id
+  common_tags        = local.common_tags
+  create_rds_proxy   = var.create_rds_proxy
+  db_port            = var.db_port
+  environment        = var.environment
+  project_name       = var.project_name
+  redis_port         = var.redis_port
+  vpc_endpoint_sg_id = module.networking.vpc_endpoint_security_group_id
+  vpc_id             = module.networking.vpc_id
 }
 
 module "storage" {

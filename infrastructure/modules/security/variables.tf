@@ -36,6 +36,11 @@ variable "redis_port" {
   type        = number
 }
 
+variable "vpc_endpoint_sg_id" {
+  description = "Security group ID for VPC endpoints"
+  type        = string
+}
+
 variable "vpc_id" {
   description = "The ID of the VPC"
   type        = string
