@@ -3,9 +3,9 @@ import { usePathname } from 'next/navigation'
 import type { BreadcrumbItem } from 'types/breadcrumb'
 import { formatBreadcrumbTitle } from 'utils/breadcrumb'
 
-export type { BreadcrumbItem }
+export type { BreadcrumbItem } from 'types/breadcrumb'
 
-const HIDDEN_SEGMENTS = ['repositories']
+const HIDDEN_SEGMENTS = new Set(['repositories'])
 
 function buildBreadcrumbItems(
   pathname: string | null,
@@ -28,7 +28,7 @@ function buildBreadcrumbItems(
   for (const segment of segments) {
     currentPath = `${currentPath}/${segment}`
 
-    if (HIDDEN_SEGMENTS.includes(segment)) {
+    if (HIDDEN_SEGMENTS.has(segment)) {
       continue
     }
 

@@ -34,10 +34,10 @@ export async function generateMetadata({
 export default async function RepositoryDetailsLayout({
   children,
   params,
-}: {
+}: Readonly<{
   children: React.ReactNode
   params: Promise<{ repositoryKey: string; organizationKey: string }>
-}) {
+}>) {
   const { repositoryKey, organizationKey } = await params
   const { data } = await apolloClient.query({
     query: GetRepositoryMetadataDocument,

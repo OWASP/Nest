@@ -67,9 +67,7 @@ describe('useBreadcrumbs', () => {
       const unregisterFns: (() => void)[] = []
       act(() => {
         unregisterFns.push(
-          registerBreadcrumb({ title: 'Test Organization', path: '/organizations/test-org' })
-        )
-        unregisterFns.push(
+          registerBreadcrumb({ title: 'Test Organization', path: '/organizations/test-org' }),
           registerBreadcrumb({
             title: 'Test Repository',
             path: '/organizations/test-org/repositories/test-repo',
@@ -86,7 +84,9 @@ describe('useBreadcrumbs', () => {
       ])
 
       act(() => {
-        unregisterFns.forEach((fn) => fn())
+        for (const fn of unregisterFns) {
+          fn()
+        }
       })
     })
   })

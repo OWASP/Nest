@@ -15,7 +15,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 )
 
 // Helper component to register a breadcrumb before rendering BreadCrumbsWrapper
-function BreadCrumbsWrapperWithTitle({ path, title }: { path: string; title: string }) {
+function BreadCrumbsWrapperWithTitle({ path, title }: Readonly<{ path: string; title: string }>) {
   useEffect(() => {
     const unregister = registerBreadcrumb({ path, title })
     return unregister

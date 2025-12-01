@@ -54,21 +54,22 @@ export function useBreadcrumb(): BreadcrumbItem[] {
   return items
 }
 
-type BreadcrumbProviderProps = {
+type BreadcrumbProviderProps = Readonly<{
   item: BreadcrumbItem
   children: ReactNode
-}
+}>
 
 export function BreadcrumbProvider({ item, children }: BreadcrumbProviderProps) {
   useEffect(() => {
     const unregister = registerBreadcrumb(item)
     return unregister
-  }, [item])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item.path, item.title])
 
   return <>{children}</>
 }
 
-export function BreadcrumbRoot({ children }: { children: ReactNode }) {
+export function BreadcrumbRoot({ children }: Readonly<{ children: ReactNode }>) {
   useEffect(() => {
     const unregister = registerBreadcrumb({ title: 'Home', path: '/' })
     return unregister
