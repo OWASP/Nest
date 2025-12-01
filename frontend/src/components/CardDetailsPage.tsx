@@ -10,6 +10,8 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import upperFirst from 'lodash/upperFirst'
 import { useSession } from 'next-auth/react'
+import type { JSX } from 'react'
+import { useCallback } from 'react'
 import type { ExtendedSession } from 'types/auth'
 import type { DetailsCardProps } from 'types/card'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
@@ -35,6 +37,8 @@ import SponsorCard from 'components/SponsorCard'
 import StatusBadge from 'components/StatusBadge'
 import ToggleableList from 'components/ToggleableList'
 import TopContributorsList from 'components/TopContributorsList'
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i
+const sanitizeForUrl = (str: string) => encodeURIComponent(str.trim())
 
 const DetailsCard = ({
   description,
@@ -74,6 +78,63 @@ const DetailsCard = ({
   type,
   userSummary,
 }: DetailsCardProps) => {
+  const renderDetailValue = useCallback(
+    (detail: { label: string; value: string | JSX.Element }) => {
+      const { label, value } = detail
+
+      if (
+        value == null ||
+        value === '' ||
+        value === 'N/A' ||
+        value === 'Not available' ||
+        value === 'Unknown'
+      ) {
+        return 'N/A'
+      }
+
+      if (typeof value !== 'string') {
+        return value
+      }
+
+      switch (label) {
+        case 'Email':
+          if (!EMAIL_REGEX.test(value)) {
+            return value
+          }
+          return (
+            <a
+              href={`mailto:${sanitizeForUrl(value)}`}
+              className="text-blue-400 hover:underline"
+              aria-label={`Send email to ${value}`}
+            >
+              {value}
+            </a>
+          )
+
+        case 'Company':
+          if (value.startsWith('@')) {
+            const companyName = sanitizeForUrl(value.slice(1))
+            return (
+              <a
+                href={`https://github.com/${companyName}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:underline"
+                aria-label={`Visit ${value} on GitHub`}
+              >
+                {value}
+              </a>
+            )
+          }
+          return value
+
+        default:
+          return value
+      }
+    },
+    []
+  )
+
   const { data } = useSession()
 
   // compute styles based on type prop
@@ -140,7 +201,7 @@ const DetailsCard = ({
                 </div>
               ) : (
                 <div key={detail.label} className="pb-1">
-                  <strong>{detail.label}:</strong> {detail?.value || 'Unknown'}
+                  <strong>{detail.label}:</strong> {renderDetailValue(detail)}
                 </div>
               )
             )}
