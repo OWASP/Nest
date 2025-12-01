@@ -21,17 +21,11 @@ jest.mock('react-apexcharts', () => {
       const tooltip = mockOptions.tooltip as { custom?: (...args: unknown[]) => unknown }
       if (tooltip.custom) {
         if (mockSeries[0]?.data.length > 0) {
-          const result = tooltip.custom({
+          tooltip.custom({
             seriesIndex: 0,
             dataPointIndex: 0,
             w: { config: { series: mockSeries } },
           })
-          if (typeof result === 'string') {
-            result.includes('#FFFFFF')
-            result.includes('#E5E7EB')
-            result.includes('#1F2937')
-            result.includes('#374151')
-          }
         }
         tooltip.custom({
           seriesIndex: 0,
