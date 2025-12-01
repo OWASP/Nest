@@ -1,6 +1,6 @@
 export const dynamic = 'force-static';
 
-export default function GET(){
+export async function GET(){
     const content = ` # OWASP Nest - Gateway to OWASP                                            
                                                                            
     ## Overview                                                                
