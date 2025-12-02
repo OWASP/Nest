@@ -14,7 +14,7 @@ class HasDashboardAccess(BasePermission):
         if not (user and user.is_authenticated and user.github_user):
             return False
 
-        return (
-            hasattr(user.github_user, "owasp_profile")
-            and user.github_user.owasp_profile.is_owasp_staff
-        )
+        if hasattr(user.github_user, "owasp_profile"):
+            return user.github_user.owasp_profile.is_owasp_staff
+
+        return user.github_user.is_owasp_staff

@@ -42,7 +42,7 @@ class Command(BaseCommand):
 
         # Assign badge to employees who don't have it.
         employees_without_badge = User.objects.filter(
-            owasp_profile__is_owasp_staff=True,
+            is_owasp_staff=True,
         ).exclude(
             user_badges__badge=badge,
         )
@@ -60,7 +60,7 @@ class Command(BaseCommand):
 
         # Remove badge from non-OWASP employees.
         non_employees = User.objects.filter(
-            owasp_profile__is_owasp_staff=False,
+            is_owasp_staff=False,
             user_badges__badge=badge,
         ).distinct()
         removed_count = non_employees.count()

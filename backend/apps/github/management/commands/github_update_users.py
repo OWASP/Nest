@@ -47,6 +47,7 @@ class Command(BaseCommand):
             .annotate(total_contributions=Sum("contributions_count"))
         }
         profiles = []
+        users = []
         for idx, user in enumerate(active_users[offset:]):
             prefix = f"{idx + offset + 1} of {active_users_count - offset}"
             print(f"{prefix:<10} {user.title}")
@@ -54,16 +55,28 @@ class Command(BaseCommand):
             profile, created = MemberProfile.objects.get_or_create(github_user=user)
             if created:
                 profile.github_user = user
-            profile.contributions_count = user_contributions.get(user.id, 0)
+            contributions = user_contributions.get(user.id, 0)
+            profile.contributions_count = contributions
             profiles.append(profile)
+
+            user.contributions_count = contributions
+            users.append(user)
 
             if not len(profiles) % BATCH_SIZE:
                 MemberProfile.bulk_save(
                     profiles,
                     fields=("contributions_count",),
                 )
+                User.bulk_save(
+                    users,
+                    fields=("contributions_count",),
+                )
 
         MemberProfile.bulk_save(
             profiles,
+            fields=("contributions_count",),
+        )
+        User.bulk_save(
+            users,
             fields=("contributions_count",),
         )

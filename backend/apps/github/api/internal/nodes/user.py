@@ -29,9 +29,9 @@ class UserNode:
     @strawberry.field
     def contributions_count(self) -> int:
         """Resolve contributions count."""
-        if hasattr(self, "owasp_profile"):
+        if hasattr(self, "owasp_profile") and self.owasp_profile.contributions_count:
             return self.owasp_profile.contributions_count
-        return 0
+        return self.contributions_count
 
     @strawberry.field
     def badge_count(self) -> int:
@@ -93,7 +93,7 @@ class UserNode:
         """Resolve if the user is an OWASP staff member."""
         if hasattr(self, "owasp_profile"):
             return self.owasp_profile.is_owasp_staff
-        return False
+        return self.is_owasp_staff
 
     @strawberry.field
     def issues_count(self) -> int:
