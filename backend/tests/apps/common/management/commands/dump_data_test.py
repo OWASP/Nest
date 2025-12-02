@@ -8,7 +8,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "db-name",
         "USER": "db-user",
-        "PASSWORD": "db-pass",
+        "PASSWORD": "db-pass",  # NOSONAR
         "HOST": "db-host",
         "PORT": "5432",
     }
@@ -43,7 +43,7 @@ class TestDumpDataCommand:
             dbname="postgres",
             user="db-user",
             # ruff: noqa: S106
-            password="db-pass",
+            password="db-pass",  # NOSONAR
             host="db-host",
             port="5432",
         )
