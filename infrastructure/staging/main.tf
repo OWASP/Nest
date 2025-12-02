@@ -60,7 +60,7 @@ module "ecs" {
   ecs_sg_id                     = module.security.ecs_sg_id
   environment                   = var.environment
   fixtures_read_only_policy_arn = module.storage.fixtures_read_only_policy_arn
-  fixtures_bucket_name          = var.fixtures_bucket_name
+  fixtures_bucket_name          = module.storage.fixtures_s3_bucket_name
   private_subnet_ids            = module.networking.private_subnet_ids
   project_name                  = var.project_name
 }

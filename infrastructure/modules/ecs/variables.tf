@@ -35,6 +35,12 @@ variable "fixtures_bucket_name" {
   type        = string
 }
 
+variable "image_tag" {
+  description = "The Docker image tag to use for ECS tasks"
+  type        = string
+  default     = "latest"
+}
+
 variable "index_data_task_cpu" {
   description = "The CPU for the index-data task"
   type        = string
@@ -47,18 +53,16 @@ variable "index_data_task_memory" {
   default     = "2048"
 }
 
-
-
 variable "load_data_task_cpu" {
   description = "The CPU for the load-data task"
   type        = string
-  default     = "256"
+  default     = "512"
 }
 
 variable "load_data_task_memory" {
   description = "The memory for the load-data task"
   type        = string
-  default     = "2048"
+  default     = "4096"
 }
 
 variable "migrate_task_cpu" {
