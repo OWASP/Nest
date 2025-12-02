@@ -1,11 +1,20 @@
 """Dump masked data from the database into a compressed file."""
 
+import contextlib
 import os
 from pathlib import Path
 from subprocess import CalledProcessError, run
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
+from psycopg2 import ProgrammingError, connect, sql
+
+DB = settings.DATABASES["default"]
+HOST = DB.get("HOST", "localhost")
+PORT = str(DB.get("PORT", "5432"))
+USERNAME = DB.get("USER", "")
+PASSWORD = DB.get("PASSWORD", "")
+NAME = DB.get("NAME", "")
 
 
 class Command(BaseCommand):
@@ -22,56 +31,57 @@ class Command(BaseCommand):
             "--table",
             action="append",
             dest="tables",
-            default=["public.owasp_*", "public.github_*", "public.slack_*"],
+            default=[
+                "public.owasp_*",
+                "public.github_*",
+                "public.slack_members",
+                "public.slack_workspaces",
+                "public.slack_conversations",
+                "public.slack_messages",
+            ],
             help=(
                 "Table pattern to include. "
-                "Defaults: public.owasp_*, public.github_*, public.slack_*"
+                "Defaults: public.owasp_*, public.github_*, public.slack_members, "
+                "public.slack_workspaces, public.slack_conversations, public.slack_messages."
             ),
         )
 
     def handle(self, *args, **options):
-        db = settings.DATABASES["default"]
-        name = db.get("NAME", "")
-        user = db.get("USER", "")
-        password = db.get("PASSWORD", "")
-        host = db.get("HOST", "localhost")
-        port = str(db.get("PORT", "5432"))
         output_path = Path(options["output"]).resolve()
         tables = options["tables"] or []
-        # Ensure output directory exists
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        temp_db = f"temp_{name}"
+        temp_db = f"temp_{NAME}"
         env = os.environ.copy()
-        if password:
-            env["PGPASSWORD"] = password
-
+        env["PGPASSWORD"] = PASSWORD
         self.stdout.write(self.style.NOTICE(f"Creating temporary database: {temp_db}"))
         try:
             # 1) Create temp DB from template
-            self._psql(
-                host,
-                port,
-                user,
+            self._execute_sql(
                 "postgres",
-                f"CREATE DATABASE {temp_db} TEMPLATE {name};",
-                env,
+                [f"CREATE DATABASE {temp_db} TEMPLATE {NAME};"],
+            )
+            # 2) Get tables with email field
+            self.stdout.write(self.style.NOTICE("Fetching tables with email fields…"))
+
+            table_list = self._execute_sql(
+                temp_db,
+                [self._table_list_query()],
             )
 
-            # 2) Hide emails
+            # 3) Hide email fields
             self.stdout.write(self.style.NOTICE("Hiding email fields in temp DB…"))
-            self._psql(host, port, user, temp_db, self._hide_emails(), env, via_stdin=True)
-
-            # 3) Dump selected tables
+            self._execute_sql(temp_db, self._hide_emails_queries([row[0] for row in table_list]))
+            # 4) Dump selected tables
             self.stdout.write(self.style.NOTICE(f"Creating dump at: {output_path}"))
             dump_cmd = [
                 "pg_dump",
                 "-h",
-                host,
+                HOST,
                 "-p",
-                port,
+                PORT,
                 "-U",
-                user,
+                USERNAME,
                 "-d",
                 temp_db,
                 "--compress=9",
@@ -89,13 +99,9 @@ class Command(BaseCommand):
             # 4) Drop temp DB
             self.stdout.write(self.style.NOTICE(f"Dropping temporary database: {temp_db}"))
             try:
-                self._psql(
-                    host,
-                    port,
-                    user,
+                self._execute_sql(
                     "postgres",
-                    f"DROP DATABASE IF EXISTS {temp_db};",
-                    env,
+                    [f"DROP DATABASE IF EXISTS {temp_db};"],
                 )
             except CalledProcessError:
                 # Best-effort cleanup
@@ -103,56 +109,37 @@ class Command(BaseCommand):
                     self.style.WARNING(f"Failed to drop temp DB {temp_db} (ignored).")
                 )
 
-    def _hide_emails(self) -> str:
-        # Uses a DO block to UPDATE every column named 'email' in non-system schemas
+    def _table_list_query(self) -> str:
         return """
-DO $$
-DECLARE
-    record RECORD;
-    statement TEXT;
-BEGIN
-    FOR record IN
-        SELECT quote_ident(n.nspname) AS schemaname,
-               quote_ident(c.relname) AS tablename,
-               quote_ident(a.attname) AS colname
-        FROM pg_attribute a
-        JOIN pg_class c ON c.oid = a.attrelid
-        JOIN pg_namespace n ON n.oid = c.relnamespace
-        WHERE a.attname = 'email'
-          AND a.attnum > 0
-          AND NOT a.attisdropped
-          AND n.nspname NOT IN ('pg_catalog','information_schema','pg_toast')
-    LOOP
-        statement := format(
-            'UPDATE %s.%s SET %s = %L;', record.schemaname, record.tablename, record.colname, ''
-        );
-        EXECUTE statement;
-    END LOOP;
-END$$;
-""".strip()
+        SELECT table_name
+        FROM information_schema.columns
+        WHERE table_schema = 'public' AND column_name = 'email';
+        """
 
-    def _psql(
+    def _hide_emails_queries(self, tables: list[str]) -> list[str]:
+        return [
+            sql.SQL("UPDATE {table} SET email = '';").format(table=sql.Identifier(table))
+            for table in tables
+        ]
+
+    def _execute_sql(
         self,
-        host: str,
-        port: str,
-        user: str,
         dbname: str,
-        sql: str,
-        env: dict,
-        *,
-        via_stdin: bool = False,
+        sql_queries: list[str],
     ):
-        # Inputs are trusted; safe subprocess usage.
-        if via_stdin:
-            run(
-                ["psql", "-h", host, "-p", port, "-U", user, "-d", dbname],
-                input=sql.encode(),
-                check=True,
-                env=env,
-            )
-            return
-        run(
-            ["psql", "-h", host, "-p", port, "-U", user, "-d", dbname, "-c", sql],
-            check=True,
-            env=env,
+        connection = connect(
+            dbname=dbname,
+            user=USERNAME,
+            password=PASSWORD,
+            host=HOST,
+            port=PORT,
         )
+        connection.autocommit = True
+        rows = []
+        with connection.cursor() as cursor:
+            for sql in sql_queries:
+                cursor.execute(sql)
+                with contextlib.suppress(ProgrammingError):
+                    rows.extend(cursor.fetchall())
+        connection.close()
+        return rows
