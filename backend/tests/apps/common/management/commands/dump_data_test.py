@@ -52,16 +52,16 @@ class TestDumpDataCommand:
         )
         executed_sql = [str(c.args[0]) for c in mock_cursor.execute.call_args_list]
         assert "UPDATE public.users SET email = '';" in executed_sql
-        assert (
+        assert any(
             """
         SELECT table_name
         FROM information_schema.columns
         WHERE table_schema = 'public' AND column_name = 'email';
-        """
-            in executed_sql
+        """.strip()
+            in str(query).strip()
+            for query in executed_sql
         )
 
-        print(mock_run.call_args[0][0])
         assert [
             "pg_dump",
             "-h",
