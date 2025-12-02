@@ -15,6 +15,13 @@ class E2E(Base):
         "http://frontend:3000",  # NOSONAR
         "http://localhost:3000",
     )
+
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        }
+    }
+
     CORS_ALLOWED_ORIGINS = ALLOWED_ORIGINS
     CSRF_TRUSTED_ORIGINS = ALLOWED_ORIGINS
 
