@@ -180,7 +180,7 @@ Migrate and load data into the new database.
    - Upload the fixture present in `backend/data` to `nest-fixtures` bucket using the following command:
 
      ```bash
-     aws s3 cp data/nest.json.gz s3://nest-fixtures/
+     aws s3 cp data/nest.json.gz s3://owasp-nest-fixtures-<id>/
      ```
 
 3. **Run ECS Tasks**:
