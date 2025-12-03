@@ -1,5 +1,5 @@
 variable "abort_incomplete_multipart_upload_days" {
-  description = "Specifies the number of days after which an incomplete multipart upload is aborted."
+  description = "The number of days after which an incomplete multipart upload is aborted."
   type        = number
   default     = 7
 }
@@ -9,14 +9,8 @@ variable "bucket_name" {
   type        = string
 }
 
-variable "force_destroy" {
-  description = "If true, deletes all objects from the bucket when the bucket is destroyed."
-  type        = bool
-  default     = false
-}
-
 variable "noncurrent_version_expiration_days" {
-  description = "Specifies the number of days an object is noncurrent before it is expired."
+  description = "The number of days an object is noncurrent before it is expired."
   type        = number
   default     = 30
 }
