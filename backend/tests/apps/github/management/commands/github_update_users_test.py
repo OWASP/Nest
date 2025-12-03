@@ -216,8 +216,6 @@ class TestGithubUpdateUsersCommand:
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 1
         mock_users_queryset.__getitem__.return_value = [mock_user1]
-        mock_users_queryset.count.return_value = 1
-        mock_users_queryset.__getitem__.return_value = [mock_user1]
 
         mock_user.objects.order_by.return_value = mock_users_queryset
 

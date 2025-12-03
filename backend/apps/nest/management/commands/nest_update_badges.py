@@ -3,6 +3,7 @@
 import logging
 
 from django.core.management.base import BaseCommand
+from django.db.models import Q
 
 from apps.github.models.user import User
 from apps.nest.models.badge import Badge
@@ -42,19 +43,12 @@ class Command(BaseCommand):
 
         # Assign badge to employees who don't have it.
         employees_without_badge = User.objects.filter(
-            owasp_profile__is_owasp_staff=True,
+            Q(owasp_profile__is_owasp_staff=True) | 
+            Q(is_owasp_staff=True, owasp_profile__isnull=True),
         ).exclude(
             user_badges__badge=badge,
         )
         count = employees_without_badge.count()
-
-        if not count:
-            employees_without_badge = User.objects.filter(
-                is_owasp_staff=True,
-            ).exclude(
-                user_badges__badge=badge,
-            )
-            count = employees_without_badge.count()
 
         if count:
             for user in employees_without_badge:
@@ -68,17 +62,11 @@ class Command(BaseCommand):
 
         # Remove badge from non-OWASP employees.
         non_employees = User.objects.filter(
-            owasp_profile__is_owasp_staff=False,
+            Q(owasp_profile__is_owasp_staff=False) |
+            Q(is_owasp_staff=False, owasp_profile__isnull=True),
             user_badges__badge=badge,
         ).distinct()
         removed_count = non_employees.count()
-
-        if not removed_count:
-            non_employees = User.objects.filter(
-                is_owasp_staff=False,
-                user_badges__badge=badge,
-            ).distinct()
-            removed_count = non_employees.count()
 
         if removed_count:
             UserBadge.objects.filter(

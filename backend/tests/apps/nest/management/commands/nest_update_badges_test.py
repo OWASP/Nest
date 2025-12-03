@@ -179,26 +179,17 @@ class TestSyncUserBadgesCommand:
         mock_badge.id = 1
         mock_badge_get_or_create.return_value = (mock_badge, False)
 
-        # Set up employee mock that already has the badge
+
         mock_employees_with_badge = MagicMock()
         mock_employees_with_badge.exclude.return_value.count.return_value = 0
 
-        # No former employees have the badge
-        mock_non_employees_filter = MagicMock()
-        mock_non_employees_filter.count.return_value = 0
-        mock_non_employees_filter.distinct.return_value = mock_non_employees_filter
 
-        # Configure filter side effects for two command runs
-        mock_user_filter.side_effect = [
-            mock_employees_with_badge,
-            mock_employees_with_badge,
-            mock_non_employees_filter,
-            mock_non_employees_filter,
-            mock_employees_with_badge,
-            mock_employees_with_badge,
-            mock_non_employees_filter,
-            mock_non_employees_filter,
-        ]
+        mock_non_employees = MagicMock()
+        mock_non_employees.distinct.return_value.count.return_value = 0
+
+        mock_user_filter.side_effect = user_filter_side_effect_factory(
+            mock_employees_with_badge, mock_non_employees
+        )
 
         # First run
         out1 = StringIO()
@@ -214,5 +205,4 @@ class TestSyncUserBadgesCommand:
         assert "Added badge to 0 employees" in out2.getvalue()
         assert "Removed badge from 0 non-employees" in out2.getvalue()
 
-        # Ensure UserBadge.objects.filter().update() is not called
         mock_user_badge_filter.return_value.update.assert_not_called()
