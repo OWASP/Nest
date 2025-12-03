@@ -117,6 +117,7 @@ const MenteeIssues: React.FC<MenteeIssuesProps> = ({ openIssues, closedIssues, m
       {/* Tab Navigation */}
       <div className="mb-4 flex border-b border-gray-200">
         <button
+          type="button"
           onClick={() => setActiveTab('open')}
           className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
             activeTab === 'open'
@@ -128,6 +129,7 @@ const MenteeIssues: React.FC<MenteeIssuesProps> = ({ openIssues, closedIssues, m
           Open Issues ({openIssues.length})
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab('closed')}
           className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
             activeTab === 'closed'
