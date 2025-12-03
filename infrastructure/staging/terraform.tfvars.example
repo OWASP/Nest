@@ -6,5 +6,4 @@ db_name                    = "owasp_nest"
 db_user                    = "owasp_nest_db_user"
 db_port                    = 5432
 environment  = "staging"
-force_destroy_bucket = true
 project_name = "owasp-nest"

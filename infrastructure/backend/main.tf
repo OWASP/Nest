@@ -5,6 +5,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "6.22.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.7.2"
+    }
   }
 }
 
@@ -46,6 +50,10 @@ data "aws_iam_policy_document" "state_https_only" {
   }
 }
 
+resource "random_id" "suffix" {
+  byte_length = 4
+}
+
 resource "aws_dynamodb_table" "state_lock" {
   name         = "${var.project_name}-terraform-state-lock"
   billing_mode = "PAY_PER_REQUEST"
@@ -58,20 +66,32 @@ resource "aws_dynamodb_table" "state_lock" {
     name = "LockID"
     type = "S"
   }
+  lifecycle {
+    prevent_destroy = true
+  }
   point_in_time_recovery {
     enabled = true
   }
 }
 
 resource "aws_s3_bucket" "logs" { # NOSONAR
-  bucket = "${var.project_name}-terraform-state-logs"
+  bucket = "${var.project_name}-terraform-state-logs-${random_id.suffix.hex}"
+
+  lifecycle {
+    prevent_destroy = true
+  }
   tags = {
     Name = "${var.project_name}-terraform-state-logs"
   }
 }
 
 resource "aws_s3_bucket" "state" { # NOSONAR
-  bucket = "${var.project_name}-terraform-state"
+  bucket              = "${var.project_name}-terraform-state-${random_id.suffix.hex}"
+  object_lock_enabled = true
+
+  lifecycle {
+    prevent_destroy = true
+  }
   tags = {
     Name = "${var.project_name}-terraform-state"
   }
@@ -113,6 +133,17 @@ resource "aws_s3_bucket_logging" "state" {
   bucket        = aws_s3_bucket.state.id
   target_bucket = aws_s3_bucket.logs.id
   target_prefix = "s3/"
+}
+
+resource "aws_s3_bucket_object_lock_configuration" "state" {
+  bucket = aws_s3_bucket.state.id
+
+  rule {
+    default_retention {
+      days = 30
+      mode = "GOVERNANCE"
+    }
+  }
 }
 
 resource "aws_s3_bucket_policy" "logs" {
