@@ -33,7 +33,6 @@ import {
   projectTimeline,
   projectStory,
 } from 'utils/aboutData'
-import { getMilestoneProgressIcon, getMilestoneProgressText } from 'utils/milestoneProgress'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
 import Leaders from 'components/Leaders'
