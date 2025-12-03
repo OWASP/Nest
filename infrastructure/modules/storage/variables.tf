@@ -9,15 +9,9 @@ variable "environment" {
   type        = string
 }
 
-variable "fixtures_s3_bucket" {
+variable "fixtures_bucket_name" {
   description = "The name of the S3 bucket for fixtures"
   type        = string
-}
-
-variable "force_destroy_bucket" {
-  description = "If true, deletes all objects from the bucket when the bucket is destroyed."
-  type        = bool
-  default     = false
 }
 
 variable "project_name" {
@@ -25,7 +19,7 @@ variable "project_name" {
   type        = string
 }
 
-variable "zappa_s3_bucket" {
+variable "zappa_bucket_name" {
   description = "The name of the S3 bucket for Zappa deployments"
   type        = string
 }

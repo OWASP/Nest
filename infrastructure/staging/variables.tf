@@ -81,16 +81,10 @@ variable "environment" {
   }
 }
 
-variable "force_destroy_bucket" {
-  description = "If true, deletes all objects from the bucket when the bucket is destroyed."
-  type        = bool
-  default     = false
-}
-
-variable "fixtures_s3_bucket" {
+variable "fixtures_bucket_name" {
   description = "The name of the S3 bucket for fixtures"
   type        = string
-  default     = "nest-fixtures"
+  default     = "owasp-nest-fixtures"
 }
 
 variable "private_subnet_cidrs" {
@@ -141,7 +135,7 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
-variable "zappa_s3_bucket" {
+variable "zappa_bucket_name" {
   description = "The name of the S3 bucket for Zappa deployments"
   type        = string
   default     = "owasp-nest-zappa-deployments"

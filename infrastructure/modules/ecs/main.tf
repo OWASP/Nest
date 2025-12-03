@@ -217,7 +217,7 @@ module "load_data_task" {
     set -e
     pip install --target=/tmp/awscli-packages awscli
     export PYTHONPATH="/tmp/awscli-packages:$PYTHONPATH"
-    python /tmp/awscli-packages/bin/aws s3 cp s3://${var.fixtures_s3_bucket}/nest.json.gz /tmp/nest.json.gz
+    python /tmp/awscli-packages/bin/aws s3 cp s3://${var.fixtures_bucket_name}/nest.json.gz /tmp/nest.json.gz
     python manage.py load_data --fixture-path /tmp/nest.json.gz
     EOT
   ]

@@ -60,7 +60,7 @@ module "ecs" {
   ecs_sg_id                     = module.security.ecs_sg_id
   environment                   = var.environment
   fixtures_read_only_policy_arn = module.storage.fixtures_read_only_policy_arn
-  fixtures_s3_bucket            = var.fixtures_s3_bucket
+  fixtures_bucket_name          = var.fixtures_bucket_name
   private_subnet_ids            = module.networking.private_subnet_ids
   project_name                  = var.project_name
 }
@@ -109,8 +109,7 @@ module "storage" {
 
   common_tags          = local.common_tags
   environment          = var.environment
-  fixtures_s3_bucket   = var.fixtures_s3_bucket
-  force_destroy_bucket = var.force_destroy_bucket
+  fixtures_bucket_name = var.fixtures_bucket_name
   project_name         = var.project_name
-  zappa_s3_bucket      = var.zappa_s3_bucket
+  zappa_bucket_name    = var.zappa_bucket_name
 }
