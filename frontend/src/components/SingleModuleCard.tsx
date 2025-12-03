@@ -68,7 +68,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
 
       {/* Description */}
       <div>
-        <Markdown content={module.description} />
+        <Markdown content={module.description || 'No description available.'} />
       </div>
 
       {/* Details */}
