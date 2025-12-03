@@ -22,7 +22,6 @@ export type CardProps = {
   level?: Level
   projectLink?: string
   projectName?: string
-  modules?: string[]
   social?: { title: string; icon: string; url: string }[]
   summary: string
   title: string
@@ -53,13 +52,16 @@ export interface DetailsCardProps {
   heatmap?: JSX.Element
   isActive?: boolean
   isArchived?: boolean
+  labels?: string[]
   languages?: string[]
   status?: string
   setStatus?: (newStatus: string) => void
   canUpdateStatus?: boolean
   mentors?: Contributor[]
+  mentees?: Contributor[]
   admins?: Contributor[]
   projectName?: string
+  programKey?: string
   pullRequests?: PullRequest[]
   recentIssues?: Issue[]
   recentMilestones?: Milestone[]
