@@ -71,12 +71,14 @@ class Command(BaseCommand):
                     users,
                     fields=("contributions_count",),
                 )
+        if profiles:
+            MemberProfile.bulk_save(
+                profiles,
+                fields=("contributions_count",),
+            )
 
-        MemberProfile.bulk_save(
-            profiles,
-            fields=("contributions_count",),
-        )
-        User.bulk_save(
-            users,
-            fields=("contributions_count",),
-        )
+        if users:
+            User.bulk_save(
+                users,
+                fields=("contributions_count",),
+            )

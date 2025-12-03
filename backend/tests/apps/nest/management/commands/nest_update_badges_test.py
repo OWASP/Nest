@@ -123,31 +123,32 @@ class TestSyncUserBadgesCommand:
             for s in ("Removed badge from 1 non-staff", "Removed badge from 1 non-employees")
         )
 
+    @patch("apps.nest.management.commands.nest_update_badges.UserBadge.objects.filter")
     @patch("apps.nest.management.commands.nest_update_badges.Badge.objects.get_or_create")
     @patch("apps.nest.management.commands.nest_update_badges.User.objects.filter")
-    def test_badge_creation(self, mock_user_filter, mock_badge_get_or_create):
+    def test_badge_creation(
+        self, mock_user_filter, mock_badge_get_or_create, mock_user_badge_filter
+    ):
         # Set up badge creation mock
         mock_badge = MagicMock()
         mock_badge.name = OWASP_STAFF_BADGE_NAME
         mock_badge_get_or_create.return_value = (mock_badge, True)
 
-        # Set up empty querysets
-        mock_employees = MagicMock()
-        mock_employees.__iter__.return_value = iter([])
-        mock_employees.count.return_value = 0
-        mock_employees.exclude.return_value = mock_employees
-        mock_employees.values_list.return_value = []
-        mock_employees.exclude.return_value.values_list.return_value = []
-        mock_employees.exclude.return_value.distinct.return_value = mock_employees
-        mock_employees.exclude.return_value.distinct.return_value.values_list.return_value = []
+        # Set up a detailed mock for an empty queryset
+        mock_empty_queryset = MagicMock()
+        mock_empty_queryset.count.return_value = 0
+        mock_empty_queryset.exclude.return_value = mock_empty_queryset
+        mock_empty_queryset.distinct.return_value = mock_empty_queryset
+        mock_empty_queryset.values_list.return_value = []
 
-        mock_former_employees = MagicMock()
-        mock_former_employees.__iter__.return_value = iter([])
-        mock_former_employees.count.return_value = 0
-        mock_former_employees.values_list.return_value = []
-        mock_former_employees.distinct.return_value = mock_former_employees
-
-        mock_user_filter.side_effect = [mock_employees, mock_former_employees]
+        # The command makes up to 4 calls to User.objects.filter for employees
+        # and non-employees, so we provide a mock for each.
+        mock_user_filter.side_effect = [
+            mock_empty_queryset,
+            mock_empty_queryset,
+            mock_empty_queryset,
+            mock_empty_queryset,
+        ]
 
         out = StringIO()
         call_command("nest_update_badges", stdout=out)
@@ -162,10 +163,15 @@ class TestSyncUserBadgesCommand:
         )
         output = out.getvalue()
         assert f"Created badge: {mock_badge.name}" in output
+        # Verify that no badges were removed since the querysets are empty
+        mock_user_badge_filter.assert_not_called()
 
+    @patch("apps.nest.management.commands.nest_update_badges.UserBadge.objects.filter")
     @patch("apps.nest.management.commands.nest_update_badges.Badge.objects.get_or_create")
     @patch("apps.nest.management.commands.nest_update_badges.User.objects.filter")
-    def test_command_idempotency(self, mock_user_filter, mock_badge_get_or_create):
+    def test_command_idempotency(
+        self, mock_user_filter, mock_badge_get_or_create, mock_user_badge_filter
+    ):
         """Test that running the command multiple times has the same effect as running it once."""
         # Set up badge mock
         mock_badge = MagicMock()
@@ -174,28 +180,23 @@ class TestSyncUserBadgesCommand:
         mock_badge_get_or_create.return_value = (mock_badge, False)
 
         # Set up employee mock that already has the badge
-        mock_employee_with_badge = MagicMock()
-        mock_employees = MagicMock()
-        mock_employees.__iter__.return_value = iter([mock_employee_with_badge])
-        mock_employees.exclude.return_value = MagicMock()
-        mock_employees.exclude.return_value.count.return_value = 0
-        mock_employees.exclude.return_value.values_list.return_value = []
-        mock_employees.exclude.return_value.distinct.return_value = (
-            mock_employees.exclude.return_value
-        )
+        mock_employees_with_badge = MagicMock()
+        mock_employees_with_badge.exclude.return_value.count.return_value = 0
 
         # No former employees have the badge
         mock_non_employees_filter = MagicMock()
         mock_non_employees_filter.count.return_value = 0
-        mock_non_employees_filter.__iter__.return_value = iter([])
-        mock_non_employees_filter.values_list.return_value = []
         mock_non_employees_filter.distinct.return_value = mock_non_employees_filter
 
         # Configure filter side effects for two command runs
         mock_user_filter.side_effect = [
-            mock_employees,
+            mock_employees_with_badge,
+            mock_employees_with_badge,
             mock_non_employees_filter,
-            mock_employees,
+            mock_non_employees_filter,
+            mock_employees_with_badge,
+            mock_employees_with_badge,
+            mock_non_employees_filter,
             mock_non_employees_filter,
         ]
 
@@ -208,17 +209,10 @@ class TestSyncUserBadgesCommand:
         call_command("nest_update_badges", stdout=out2)
 
         # Check both outputs contain zero-count messages
-        assert any(
-            s in out1.getvalue() for s in ("Added badge to 0 employees", "Added badge to 0 staff")
-        )
-        assert any(
-            s in out1.getvalue()
-            for s in ("Removed badge from 0 non-employees", "Removed badge from 0 non-staff")
-        )
-        assert any(
-            s in out2.getvalue() for s in ("Added badge to 0 employees", "Added badge to 0 staff")
-        )
-        assert any(
-            s in out2.getvalue()
-            for s in ("Removed badge from 0 non-employees", "Removed badge from 0 non-staff")
-        )
+        assert "Added badge to 0 employees" in out1.getvalue()
+        assert "Removed badge from 0 non-employees" in out1.getvalue()
+        assert "Added badge to 0 employees" in out2.getvalue()
+        assert "Removed badge from 0 non-employees" in out2.getvalue()
+
+        # Ensure UserBadge.objects.filter().update() is not called
+        mock_user_badge_filter.return_value.update.assert_not_called()
