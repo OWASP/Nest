@@ -179,10 +179,8 @@ class TestSyncUserBadgesCommand:
         mock_badge.id = 1
         mock_badge_get_or_create.return_value = (mock_badge, False)
 
-
         mock_employees_with_badge = MagicMock()
         mock_employees_with_badge.exclude.return_value.count.return_value = 0
-
 
         mock_non_employees = MagicMock()
         mock_non_employees.distinct.return_value.count.return_value = 0
