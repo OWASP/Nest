@@ -55,9 +55,13 @@ test.describe('Repository Details Page', () => {
 
   test('should have top contributors', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Contributor 1', exact: true })).toBeVisible()
+    await expect(
+      page.getByRole('img', { name: "Contributor 1's avatar", exact: true })
+    ).toBeVisible()
     await expect(page.getByText('Contributor 1', { exact: true })).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Contributor 2', exact: true })).toBeVisible()
+    await expect(
+      page.getByRole('img', { name: "Contributor 2's avatar", exact: true })
+    ).toBeVisible()
     await expect(page.getByText('Contributor 2', { exact: true })).toBeVisible()
   })
 

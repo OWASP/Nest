@@ -50,6 +50,7 @@ const AnchorTitle: React.FC<AnchorTitleProps> = ({ title }) => {
           href={href}
           className="inherit-color ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
           onClick={handleClick}
+          aria-label={`Link to ${title} section`}
         >
           <FontAwesomeIcon icon={faLink} className="custom-icon h-7 w-5" />
         </a>

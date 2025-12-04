@@ -294,7 +294,7 @@ describe('About Component', () => {
       render(<About />)
     })
 
-    const roadmapSection = screen.getByRole('heading', { name: 'Roadmap' }).closest('div')
+    const roadmapSection = screen.getByRole('heading', { name: /Roadmap/ }).closest('div')
     expect(roadmapSection).toBeInTheDocument()
     const roadmapData = mockAboutData.project.recentMilestones
     const links = within(roadmapSection)

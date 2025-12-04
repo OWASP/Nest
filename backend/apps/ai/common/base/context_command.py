@@ -35,10 +35,12 @@ class BaseContextCommand(BaseAICommand):
             ):
                 processed += 1
                 entity_key = self.get_entity_key(entity)
-                self.stdout.write(f"Created context for {entity_key}")
+                self.stdout.write(f"Created/updated context for {entity_key}")
             else:
                 entity_key = self.get_entity_key(entity)
-                self.stdout.write(self.style.ERROR(f"Failed to create context for {entity_key}"))
+                self.stdout.write(
+                    self.style.ERROR(f"Failed to create/update context for {entity_key}")
+                )
 
         return processed
 

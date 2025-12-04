@@ -48,16 +48,20 @@ test.describe('Home Page', () => {
   })
 
   test('should have posts', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'News & Opinions' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'News & Opinions' })).toBeVisible({
+      timeout: 10000,
+    })
     await expect(page.getByRole('link', { name: 'Post 1', exact: true })).toBeVisible()
     await expect(page.getByText('Author 1')).toBeVisible()
-    await expect(page.getByText('Mar 6, 2025').first()).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText('Mar 6, 2025').first()).toBeVisible()
     await page.getByRole('link', { name: 'Post 1' }).click()
   })
 
   test('should have top contributors', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Contributor 1', exact: true })).toBeVisible()
+    await expect(
+      page.getByRole('img', { name: "Contributor 1's avatar", exact: true })
+    ).toBeVisible()
     await expect(page.getByText('Contributor 1', { exact: true })).toBeVisible()
   })
 
@@ -93,7 +97,9 @@ test.describe('Home Page', () => {
   })
 
   test('should have upcoming events', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Upcoming Events' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Upcoming Events' })).toBeVisible({
+      timeout: 10000,
+    })
     await expect(page.getByRole('button', { name: 'Event 1' })).toBeVisible()
     await expect(page.getByText('Apr 5 — 6, 2025')).toBeVisible()
     await page.getByRole('button', { name: 'Event 1' }).click()

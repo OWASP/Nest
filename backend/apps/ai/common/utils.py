@@ -70,6 +70,23 @@ def create_chunks_and_embeddings(
         return chunks
 
 
+def extract_json_from_markdown(content: str) -> str:
+    """Extract JSON content from markdown code blocks.
+
+    Args:
+        content (str): The content string that may contain markdown code blocks
+
+    Returns:
+        str: The extracted JSON content with code block markers removed
+
+    """
+    if "```json" in content:
+        return content.split("```json")[1].split("```")[0].strip()
+    if "```" in content:
+        return content.split("```")[1].split("```")[0].strip()
+    return content
+
+
 def regenerate_chunks_for_context(context: Context):
     """Regenerates all chunks for a single, specific context instance.
 

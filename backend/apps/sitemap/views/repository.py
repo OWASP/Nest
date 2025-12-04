@@ -1,7 +1,5 @@
 """Repository sitemap."""
 
-from django.db.models import QuerySet
-
 from apps.github.models.repository import Repository
 from apps.sitemap.views.base import BaseSitemap
 
@@ -12,17 +10,22 @@ class RepositorySitemap(BaseSitemap):
     change_frequency = "weekly"
     prefix = "/repositories"
 
-    def items(self) -> QuerySet[Repository]:
-        """Return list of repositories for sitemap generation."""
-        return Repository.objects.filter(
-            is_archived=False,
-            is_empty=False,
-            is_template=False,
-            organization__isnull=False,
-        ).order_by(
-            "-updated_at",
-            "-created_at",
-        )
+    def items(self) -> list[Repository]:
+        """Return repositories for sitemap generation.
+
+        Returns:
+            list[Repository]: List of indexable Repository objects ordered by
+                update/creation date.
+
+        """
+        return [
+            r
+            for r in Repository.objects.order_by(
+                "-updated_at",
+                "-created_at",
+            )
+            if r.organization and r.is_indexable
+        ]
 
     def location(self, obj: Repository) -> str:
         """Return the URL path for a repository.

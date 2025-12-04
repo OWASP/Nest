@@ -10,7 +10,7 @@ from apps.github.models.user import User
 class RepositoryContributorQuerySet(models.QuerySet):
     """Repository contributor queryset."""
 
-    def by_humans(self):
+    def by_humans(self) -> "RepositoryContributorQuerySet":
         """Return human repository contributors only."""
         return self.exclude(
             Q(user__is_bot=True)
@@ -19,7 +19,7 @@ class RepositoryContributorQuerySet(models.QuerySet):
             | Q(user__login__endswith="-bot")
         )
 
-    def to_community_repositories(self):
+    def to_community_repositories(self) -> "RepositoryContributorQuerySet":
         """Return community repositories contributors only."""
         return self.exclude(
             Q(repository__is_fork=True)
@@ -31,7 +31,7 @@ class RepositoryContributorQuerySet(models.QuerySet):
 class RepositoryContributorManager(models.Manager):
     """Repository contributor manager."""
 
-    def get_queryset(self):
+    def get_queryset(self) -> RepositoryContributorQuerySet:
         """Get queryset."""
         return RepositoryContributorQuerySet(
             self.model,
@@ -41,10 +41,10 @@ class RepositoryContributorManager(models.Manager):
             "user",
         )
 
-    def by_humans(self):
+    def by_humans(self) -> RepositoryContributorQuerySet:
         """Return human contributors only."""
         return self.get_queryset().by_humans()
 
-    def to_community_repositories(self):
+    def to_community_repositories(self) -> RepositoryContributorQuerySet:
         """Return community repository contributors only."""
         return self.get_queryset().to_community_repositories()

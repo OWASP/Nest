@@ -20,7 +20,7 @@ class Prompt(TimestampedModel):
 
     name = models.CharField(verbose_name="Name", max_length=100)
     key = models.CharField(verbose_name="Key", max_length=100, unique=True, blank=True)
-    text = models.TextField(verbose_name="Text", max_length=1000, default="", blank=True)
+    text = models.TextField(verbose_name="Text", max_length=3000, default="", blank=True)
 
     def __str__(self):
         """Prompt human readable representation."""
@@ -51,6 +51,16 @@ class Prompt(TimestampedModel):
             return ""
 
     @staticmethod
+    def get_evaluator_system_prompt() -> str:
+        """Return evaluator system prompt.
+
+        Returns:
+            str: The evaluator system prompt text.
+
+        """
+        return Prompt.get_text("evaluator-system-prompt")
+
+    @staticmethod
     def get_github_issue_hint() -> str:
         """Return GitHub issue hint prompt.
 
@@ -79,6 +89,16 @@ class Prompt(TimestampedModel):
 
         """
         return Prompt.get_text("github-issue-project-summary")
+
+    @staticmethod
+    def get_metadata_extractor_prompt() -> str:
+        """Return metadata extractor prompt.
+
+        Returns
+            str: The metadata extractor prompt text.
+
+        """
+        return Prompt.get_text("metadata-extractor-prompt")
 
     @staticmethod
     def get_owasp_chapter_suggested_location() -> str:
@@ -139,3 +159,23 @@ class Prompt(TimestampedModel):
 
         """
         return Prompt.get_text("owasp-project-summary")
+
+    @staticmethod
+    def get_rag_system_prompt() -> str:
+        """Return RAG system prompt.
+
+        Returns
+            str: The RAG system prompt text.
+
+        """
+        return Prompt.get_text("rag-system-prompt")
+
+    @staticmethod
+    def get_slack_question_detector_prompt() -> str:
+        """Return Slack question detector prompt.
+
+        Returns
+            str: The Slack question detector prompt text.
+
+        """
+        return Prompt.get_text("slack-question-detector-system-prompt")

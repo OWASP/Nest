@@ -6,7 +6,7 @@ export const mockGraphQLData = {
       leaders: ['Project Leader1', 'Project Leader2'],
       name: 'OWASP GameSec Framework',
       type: 'Tool',
-      url: `/projects/gamesec-framework`,
+      url: '/projects/gamesec-framework',
     },
     {
       createdAt: '2024-12-06T20:46:54+00:00',
@@ -14,7 +14,7 @@ export const mockGraphQLData = {
       leaders: ['Project Leader1', 'Project Leader2'],
       name: 'OWASP project 2',
       type: 'Documentation',
-      url: `/projects/owasp-project-2`,
+      url: '/projects/owasp-project-2',
     },
     {
       createdAt: '2024-12-06T20:46:54+00:00',
@@ -22,7 +22,7 @@ export const mockGraphQLData = {
       leaders: ['Project Leader1', 'Project Leader2'],
       name: 'OWASP project 3',
       type: 'Code',
-      url: `/projects/owasp-project-3`,
+      url: '/projects/owasp-project-3',
     },
     {
       createdAt: '2024-12-06T20:46:54+00:00',
@@ -30,7 +30,7 @@ export const mockGraphQLData = {
       leaders: ['Project Leader1', 'Project Leader2'],
       name: 'OWASP project 4',
       type: 'Other',
-      url: `/projects/owasp-project-4`,
+      url: '/projects/owasp-project-4',
     },
     {
       createdAt: '2024-12-06T20:46:54+00:00',
@@ -38,7 +38,7 @@ export const mockGraphQLData = {
       leaders: ['Project Leader1', 'Project Leader2'],
       name: 'OWASP project 5',
       type: '',
-      url: `/projects/owasp-project-5`,
+      url: '/projects/owasp-project-5',
     },
   ],
   recentPosts: [
@@ -63,7 +63,7 @@ export const mockGraphQLData = {
       leaders: ['Chapter Leader1', 'Chapter Leader2'],
       name: 'OWASP Sivagangai',
       suggestedLocation: 'Sivagangai, Tamil Nadu, India',
-      url: `/chapters/sivagangai`,
+      url: '/chapters/sivagangai',
     },
   ],
   topContributors: [

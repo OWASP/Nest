@@ -64,10 +64,14 @@ export class AppError extends Error {
 }
 
 export const handleAppError = (error: unknown) => {
-  const appError =
-    error instanceof AppError
-      ? error
-      : new AppError(500, error instanceof Error ? error.message : ERROR_CONFIGS['500'].message)
+  let appError: AppError
+
+  if (error instanceof AppError) {
+    appError = error
+  } else {
+    const message = error instanceof Error ? error.message : ERROR_CONFIGS['500'].message
+    appError = new AppError(500, message)
+  }
 
   if (appError.statusCode >= 500) {
     Sentry.captureException(error instanceof Error ? error : appError)

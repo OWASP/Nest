@@ -60,7 +60,7 @@ describe('CreateProgramPage (comprehensive tests)', () => {
 
     render(<CreateProgramPage />)
 
-    expect(screen.queryByLabelText('Program Name *')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Name *')).not.toBeInTheDocument()
   })
 
   test('redirects with toast if not a project leader', async () => {
@@ -103,7 +103,7 @@ describe('CreateProgramPage (comprehensive tests)', () => {
 
     render(<CreateProgramPage />)
 
-    expect(await screen.findByLabelText('Program Name *')).toBeInTheDocument()
+    expect(await screen.findByLabelText('Name *')).toBeInTheDocument()
   })
 
   test('submits form and redirects on success', async () => {
@@ -127,7 +127,7 @@ describe('CreateProgramPage (comprehensive tests)', () => {
 
     render(<CreateProgramPage />)
 
-    fireEvent.change(screen.getByLabelText('Program Name *'), {
+    fireEvent.change(screen.getByLabelText('Name *'), {
       target: { value: 'Test Program' },
     })
     fireEvent.change(screen.getByLabelText('Description *'), {
@@ -186,7 +186,7 @@ describe('CreateProgramPage (comprehensive tests)', () => {
 
     render(<CreateProgramPage />)
 
-    fireEvent.change(screen.getByLabelText('Program Name *'), {
+    fireEvent.change(screen.getByLabelText('Name *'), {
       target: { value: 'Test Program' },
     })
     fireEvent.change(screen.getByLabelText('Description *'), {

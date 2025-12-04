@@ -27,6 +27,7 @@ class ConversationAdmin(admin.ModelAdmin):
                     "is_private",
                     "is_archived",
                     "is_general",
+                    "is_nest_bot_assistant_enabled",
                 )
             },
         ),

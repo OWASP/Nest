@@ -521,11 +521,11 @@ describe('TopContributorsList Component', () => {
       render(<TopContributorsList {...defaultProps} />)
 
       const avatars = screen.getAllByTestId('contributor-avatar')
-      expect(avatars[0]).toHaveAttribute('alt', 'Alex Developer')
+      expect(avatars[0]).toHaveAttribute('alt', "Alex Developer's avatar")
       expect(avatars[0]).toHaveAttribute('title', 'Alex Developer')
-      expect(avatars[1]).toHaveAttribute('alt', 'Jane Developer')
+      expect(avatars[1]).toHaveAttribute('alt', "Jane Developer's avatar")
       expect(avatars[1]).toHaveAttribute('title', 'Jane Developer')
-      expect(avatars[2]).toHaveAttribute('alt', '')
+      expect(avatars[2]).toHaveAttribute('alt', 'Contributor avatar')
       expect(avatars[2]).toHaveAttribute('title', 'user3')
     })
 

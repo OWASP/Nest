@@ -40,7 +40,7 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
                   {sponsor.imageUrl ? (
                     <Image
                       fill
-                      alt={`${sponsor.name} logo`}
+                      alt={sponsor.name ? `${sponsor.name}'s logo` : 'Sponsor logo'}
                       src={sponsor.imageUrl}
                       style={{ objectFit: 'contain' }}
                     />
