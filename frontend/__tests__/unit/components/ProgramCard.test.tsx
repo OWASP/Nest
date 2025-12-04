@@ -340,7 +340,7 @@ describe('ProgramCard', () => {
       )
 
       expect(
-        screen.getByText((t) => t.includes('Jan 1, 2024') && t.includes('Dec 31, 2024'))
+        screen.getByText((t) => t.includes('Jan 1, 2024') && t.includes('Jan 1, 2025'))
       ).toBeInTheDocument()
     })
 
