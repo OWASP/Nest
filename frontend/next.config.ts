@@ -32,6 +32,20 @@ const nextConfig: NextConfig = {
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/productionBrowserSourceMaps
   productionBrowserSourceMaps: true,
   serverExternalPackages: ['import-in-the-middle'],
+  async redirects() {
+    return [
+      {
+        source: '/snapshots',
+        destination: '/community/snapshots',
+        permanent: true,
+      },
+      {
+        source: '/snapshots/:id',
+        destination: '/community/snapshots/:id',
+        permanent: true,
+      },
+    ]
+  },
   ...(isLocal ? {} : { output: 'standalone' }),
 }
 
@@ -48,13 +62,13 @@ export default withSentryConfig(nextConfig, {
   widenClientFileUpload: true,
   ...(process.env.NEXT_SENTRY_AUTH_TOKEN
     ? {
-        authToken: process.env.NEXT_SENTRY_AUTH_TOKEN,
-        // https://docs.sentry.io/platforms/javascript/guides/nextjs/sourcemaps/
-        sourcemaps: {
-          deleteSourcemapsAfterUpload: true,
-          disable: false,
-          ignore: ['**/node_modules/**'],
-        },
-      }
+      authToken: process.env.NEXT_SENTRY_AUTH_TOKEN,
+      // https://docs.sentry.io/platforms/javascript/guides/nextjs/sourcemaps/
+      sourcemaps: {
+        deleteSourcemapsAfterUpload: true,
+        disable: false,
+        ignore: ['**/node_modules/**'],
+      },
+    }
     : {}),
 })

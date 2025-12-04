@@ -10,7 +10,7 @@ const URL_PATHS = [
   '/members',
   '/organizations',
   '/projects',
-  '/snapshots',
+  '/community/snapshots',
 ]
 
 module.exports = {

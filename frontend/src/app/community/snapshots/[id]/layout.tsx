@@ -18,11 +18,11 @@ export async function generateMetadata({
 
   return snapshot
     ? generateSeoMetadata({
-        canonicalPath: `/snapshots/${snapshotKey}`,
-        description: `${snapshot?.title} details.`,
-        keywords: ['owasp', 'snapshot', snapshotKey, snapshot?.title],
-        title: snapshot?.title,
-      })
+      canonicalPath: `/community/snapshots/${snapshotKey}`,
+      description: `${snapshot?.title} details.`,
+      keywords: ['owasp', 'snapshot', snapshotKey, snapshot?.title],
+      title: snapshot?.title,
+    })
     : null
 }
 export default function SnapshotDetailsLayout({ children }: { children: React.ReactNode }) {
