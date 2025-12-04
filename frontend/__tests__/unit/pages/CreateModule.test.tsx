@@ -66,7 +66,7 @@ describe('CreateModulePage', () => {
     render(<CreateModulePage />)
 
     // Fill all inputs
-    fireEvent.change(screen.getByLabelText(/Module Name/i), {
+    fireEvent.change(screen.getByLabelText('Name *'), {
       target: { value: 'My Test Module' },
     })
     fireEvent.change(screen.getByLabelText(/Description/i), {
@@ -106,7 +106,7 @@ describe('CreateModulePage', () => {
 
     await waitFor(() => {
       expect(mockCreateModule).toHaveBeenCalled()
-      expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program?refresh=true')
+      expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program')
     })
   })
 })

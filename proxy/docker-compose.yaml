@@ -1,7 +1,9 @@
 services:
   nest-certbot:
     container_name: nest-certbot
+    entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done;'
     image: certbot/certbot
+    restart: unless-stopped
     volumes:
       - ./blocked_ips.conf:/etc/nginx/blocked_ips.conf
       - ./headers.conf:/etc/nginx/headers.conf
@@ -10,14 +12,17 @@ services:
       - ./redirects.conf:/etc/nginx/redirects.conf
       - ./staging.conf:/etc/nginx/conf.d/staging.conf
       - nest-certbot-webroot:/var/www/certbot
-    entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done;'
 
   nest-nginx:
     container_name: nest-nginx
     image: nginx:latest
+    networks:
+      - production_nest-app-network
+      - staging_nest-app-network
     ports:
       - 80:80
       - 443:443
+    restart: unless-stopped
     volumes:
       - ./blocked_ips.conf:/etc/nginx/blocked_ips.conf
       - ./headers.conf:/etc/nginx/headers.conf
@@ -26,9 +31,6 @@ services:
       - ./redirects.conf:/etc/nginx/redirects.conf
       - ./staging.conf:/etc/nginx/conf.d/staging.conf
       - nest-certbot-webroot:/var/www/certbot
-    networks:
-      - production_nest-app-network
-      - staging_nest-app-network
 
 networks:
   production_nest-app-network:

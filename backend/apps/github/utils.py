@@ -33,12 +33,12 @@ def check_owasp_site_repository(key: str) -> bool:
     )
 
 
-def check_funding_policy_compliance(platform: str, target: str) -> bool:
+def check_funding_policy_compliance(platform: str, target: str | None) -> bool:
     """Check OWASP funding policy compliance.
 
     Args:
         platform (str): The funding platform (e.g., 'github', 'custom').
-        target (str): The funding target.
+        target (str, optional): The funding target.
 
     Returns:
         bool: True if the funding policy is compliant, False otherwise.
@@ -57,19 +57,15 @@ def check_funding_policy_compliance(platform: str, target: str) -> bool:
     return False
 
 
-def get_repository_file_content(
-    url: str,
-    *,
-    timeout: float | None = 30,
-) -> str:
+def get_repository_file_content(url: str, *, timeout: float | None = 30) -> str:
     """Get the content of a file from a repository.
 
     Args:
         url (str): The URL of the file.
-        timeout (int, optional): The request timeout in seconds.
+        timeout (float, optional): The request timeout in seconds.
 
     Returns:
-        str: The content of the file, or None if the request fails.
+        str: The content of the file, or empty string if the request fails.
 
     """
     try:
@@ -86,7 +82,8 @@ def get_repository_path(url: str) -> str | None:
         url (str): The repository URL.
 
     Returns:
-        str: The repository path in the format 'owner/repository_name', or None if parsing fails.
+        str or None: The repository path in the format 'owner/repository_name',
+        or None if parsing fails.
 
     """
     match = GITHUB_REPOSITORY_RE.search(url.split("#")[0])
@@ -101,7 +98,7 @@ def normalize_url(url: str, *, check_path: bool = False) -> str | None:
         check_path (bool, optional): Whether to check if the URL has a path.
 
     Returns:
-        str: The normalized URL, or None if the URL is invalid.
+        str | None: The normalized URL, or None if the URL is invalid.
 
     """
     parsed_url = urlparse(url)

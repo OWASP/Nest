@@ -157,7 +157,7 @@ describe('UserCard', () => {
       const avatarImage = screen.getByTestId('user-avatar')
       expect(avatarImage).toBeInTheDocument()
       expect(avatarImage).toHaveAttribute('src', 'https://example.com/avatar.jpg&s=160')
-      expect(avatarImage).toHaveAttribute('alt', 'John Doe')
+      expect(avatarImage).toHaveAttribute('alt', "John Doe's profile picture")
     })
 
     it('renders default user icon when avatar is empty string', () => {
@@ -183,6 +183,12 @@ describe('UserCard', () => {
       render(<UserCard {...defaultProps} email="john@example.com" />)
 
       expect(screen.getByText('john@example.com')).toBeInTheDocument()
+    })
+
+    it('renders login  when company and location and email are not provided', () => {
+      render(<UserCard {...defaultProps} login="login" />)
+
+      expect(screen.getByText('login')).toBeInTheDocument()
     })
 
     it('prioritizes company over location and email', () => {
@@ -271,13 +277,16 @@ describe('UserCard', () => {
         <UserCard {...defaultProps} name="Jane Smith" avatar="https://example.com/avatar.jpg" />
       )
 
-      expect(screen.getByTestId('user-avatar')).toHaveAttribute('alt', 'Jane Smith')
+      expect(screen.getByTestId('user-avatar')).toHaveAttribute(
+        'alt',
+        "Jane Smith's profile picture"
+      )
     })
 
     it('uses fallback alt text when name is not provided', () => {
       render(<UserCard {...defaultProps} name="" avatar="https://example.com/avatar.jpg" />)
 
-      expect(screen.getByTestId('user-avatar')).toHaveAttribute('alt', 'user')
+      expect(screen.getByTestId('user-avatar')).toHaveAttribute('alt', 'User profile picture')
     })
 
     it('displays View Profile text', () => {
@@ -325,7 +334,7 @@ describe('UserCard', () => {
       render(<UserCard {...defaultProps} name="John Doe" avatar="https://example.com/avatar.jpg" />)
 
       const avatar = screen.getByTestId('user-avatar')
-      expect(avatar).toHaveAttribute('alt', 'John Doe')
+      expect(avatar).toHaveAttribute('alt', "John Doe's profile picture")
     })
 
     it('maintains semantic heading structure', () => {

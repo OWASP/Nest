@@ -16,7 +16,7 @@ class TestMemberSitemap:
     @patch("apps.sitemap.views.member.User")
     def test_items(self, mock_user):
         mock_obj = MagicMock(is_indexable=True)
-        mock_user.objects.filter.return_value = [mock_obj]
+        mock_user.objects.filter.return_value.order_by.return_value = [mock_obj]
         sitemap = MemberSitemap()
 
         assert list(sitemap.items()) == [mock_obj]

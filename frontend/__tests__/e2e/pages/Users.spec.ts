@@ -41,7 +41,7 @@ test.describe('Users Page', () => {
   })
 
   test('handles page change correctly', async ({ page }) => {
-    const nextPageButton = await page.getByRole('button', { name: '2', exact: true })
+    const nextPageButton = await page.getByRole('button', { name: 'Go to page 2' })
     await nextPageButton.waitFor({ state: 'visible' })
     await nextPageButton.click()
     await expect(page).toHaveURL(/page=2/)

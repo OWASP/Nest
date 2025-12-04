@@ -18,13 +18,10 @@ class TestRepositorySitemap:
 
     @patch("apps.sitemap.views.repository.Repository")
     def test_items(self, mock_repository):
-        mock_queryset = MagicMock()
-        mock_queryset.order_by.return_value = mock_queryset
-
         mock_obj = MagicMock(is_indexable=True)
+        mock_queryset = MagicMock()
         mock_queryset.__iter__ = lambda _: iter([mock_obj])
-
-        mock_repository.objects.filter.return_value = mock_queryset
+        mock_repository.objects.order_by.return_value = mock_queryset
 
         sitemap = RepositorySitemap()
 

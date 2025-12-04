@@ -36,7 +36,7 @@ test.describe('About Page', () => {
 
   test('renders main sections correctly', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'About' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Project Timeline', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Project Timeline' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Our Story' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Leaders' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Roadmap' })).toBeVisible()

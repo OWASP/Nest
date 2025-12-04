@@ -4,10 +4,15 @@ from __future__ import annotations
 
 import logging
 from datetime import timedelta as td
+from typing import TYPE_CHECKING
 
 from django.utils import timezone
 from github.GithubException import UnknownObjectException
 
+if TYPE_CHECKING:
+    from github import Github
+
+from apps.github.models.comment import Comment
 from apps.github.models.issue import Issue
 from apps.github.models.label import Label
 from apps.github.models.milestone import Milestone
@@ -227,3 +232,66 @@ def sync_repository(
     )
 
     return organization, repository
+
+
+def sync_issue_comments(gh_client: Github, issue: Issue):
+    """Sync new comments for a mentorship program specific issue on-demand.
+
+    Args:
+        gh_client (Github): GitHub client.
+        issue (Issue): The local database Issue object to sync comments for.
+
+    """
+    logger.info("Starting comment sync for issue #%s", issue.number)
+
+    try:
+        if not (repository := issue.repository):
+            logger.warning("Issue #%s has no repository, skipping", issue.number)
+            return
+
+        logger.info("Fetching repository: %s", repository.path)
+
+        gh_repository = gh_client.get_repo(repository.path)
+        gh_issue = gh_repository.get_issue(number=issue.number)
+
+        since = (
+            (issue.latest_comment.updated_at or issue.latest_comment.created_at)
+            if issue.latest_comment
+            else getattr(issue, "updated_at", None)
+        )
+
+        gh_comments = gh_issue.get_comments(since=since) if since else gh_issue.get_comments()
+
+        comments = []
+        for gh_comment in gh_comments:
+            author = User.update_data(gh_comment.user)
+            if not author:
+                logger.warning("Could not sync author for comment %s", gh_comment.id)
+                continue
+
+            comment = Comment.update_data(
+                gh_comment,
+                author=author,
+                content_object=issue,
+                save=False,
+            )
+            comments.append(comment)
+
+        if comments:
+            Comment.bulk_save(comments)
+        logger.info(
+            "%d comments synced for issue #%s",
+            len(comments),
+            issue.number,
+        )
+    except UnknownObjectException as e:
+        logger.warning(
+            "Could not access issue #%s. Error: %s",
+            issue.number,
+            e,
+        )
+    except Exception:
+        logger.exception(
+            "An unexpected error occurred during comment sync for issue #%s",
+            issue.number,
+        )

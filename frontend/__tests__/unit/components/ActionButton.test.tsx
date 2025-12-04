@@ -118,7 +118,7 @@ describe('ActionButton', () => {
     }).not.toThrow()
   })
 
-  it(`changes background and text color on hover`, async () => {
+  it('changes background and text color on hover', async () => {
     const user = userEvent.setup()
     render(<ActionButton>Test Button</ActionButton>)
     const button = screen.getByRole('button')

@@ -15,13 +15,20 @@ class TestIssueNode:
         field_names = {field.name for field in IssueNode.__strawberry_definition__.fields}
         expected_field_names = {
             "_id",
+            "assignees",
+            "author",
+            "body",
             "created_at",
+            "interested_users",
+            "is_merged",
+            "labels",
+            "number",
+            "organization_name",
+            "pull_requests",
+            "repository_name",
             "state",
             "title",
             "url",
-            "author",
-            "organization_name",
-            "repository_name",
         }
         assert field_names == expected_field_names
 

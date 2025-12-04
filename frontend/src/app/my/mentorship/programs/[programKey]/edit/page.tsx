@@ -17,7 +17,7 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/ProgramForm'
 const EditProgramPage = () => {
   const router = useRouter()
-  const { programKey } = useParams() as { programKey: string }
+  const { programKey } = useParams<{ programKey: string }>()
   const { data: session, status: sessionStatus } = useSession()
   const [updateProgram, { loading: mutationLoading }] = useMutation(UpdateProgramDocument)
   const {
@@ -114,7 +114,7 @@ const EditProgramPage = () => {
         timeout: 3000,
       })
 
-      router.push(`/my/mentorship/programs/${slugify(formData.name)}?refresh=true`)
+      router.push(`/my/mentorship/programs/${slugify(formData.name)}`)
     } catch (err) {
       addToast({
         title: 'Update Failed',

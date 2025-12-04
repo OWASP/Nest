@@ -42,7 +42,7 @@ api_settings = {
     "docs": Swagger(settings={"persistAuthorization": True}),
     "throttle": [AuthRateThrottle("10/s")],
     "title": "OWASP Nest",
-    "version": "0.2.5",
+    "version": "0.3.1",
 }
 
 api_settings_customization = {}

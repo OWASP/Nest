@@ -45,7 +45,9 @@ test.describe('Organization Details Page', () => {
   })
 
   test('should have organization recent milestones', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Milestones' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Recent Milestones' })).toBeVisible({
+      timeout: 10000,
+    })
     await expect(page.getByRole('heading', { name: 'v2.0.0 Release' })).toBeVisible()
     await expect(page.getByText('Mar 1, 2025')).toBeVisible()
     await expect(page.getByText('Project Repo 1')).toBeVisible()

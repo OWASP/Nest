@@ -9,7 +9,7 @@ from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 class RelatedOrganizationsManager(models.Manager):
     """OWASP related organizations manager."""
 
-    def get_queryset(self):
+    def get_queryset(self) -> models.QuerySet:
         """Get OWASP related organizations."""
         return (
             super()
