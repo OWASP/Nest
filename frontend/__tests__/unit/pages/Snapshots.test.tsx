@@ -40,7 +40,7 @@ const mockSnapshots = [
 
 describe('SnapshotsPage', () => {
   beforeEach(() => {
-    ; (useQuery as unknown as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: { snapshots: mockSnapshots },
       error: null,
     })
@@ -51,7 +51,7 @@ describe('SnapshotsPage', () => {
   })
 
   it('renders loading spinner initially', async () => {
-    ; (useQuery as unknown as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: null,
     })
@@ -74,7 +74,7 @@ describe('SnapshotsPage', () => {
   })
 
   it('renders "No Snapshots found" when no snapshots are available', async () => {
-    ; (useQuery as unknown as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: { snapshots: [] },
       error: null,
     })
@@ -87,7 +87,7 @@ describe('SnapshotsPage', () => {
   })
 
   it('shows an error toaster when GraphQL request fails', async () => {
-    ; (useQuery as unknown as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: new Error('GraphQL error'),
     })

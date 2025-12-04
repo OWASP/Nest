@@ -36,7 +36,7 @@ jest.mock('@/components/MarkdownWrapper', () => {
 
 describe('SnapshotDetailsPage', () => {
   beforeEach(() => {
-    ; (useQuery as unknown as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockSnapshotDetailsData,
       loading: false,
       error: null,
@@ -48,7 +48,7 @@ describe('SnapshotDetailsPage', () => {
   })
 
   test('renders loading state', async () => {
-    ; (useQuery as unknown as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       loading: true,
       error: null,
@@ -63,7 +63,7 @@ describe('SnapshotDetailsPage', () => {
   })
 
   test('renders snapshot details when data is available', async () => {
-    ; (useQuery as unknown as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockSnapshotDetailsData,
       error: null,
     })
@@ -80,7 +80,7 @@ describe('SnapshotDetailsPage', () => {
   })
 
   test('renders error message when GraphQL request fails', async () => {
-    ; (useQuery as unknown as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: mockError,
     })
@@ -100,7 +100,7 @@ describe('SnapshotDetailsPage', () => {
   })
 
   test('navigates to project page when project card is clicked', async () => {
-    ; (useQuery as unknown as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockSnapshotDetailsData,
     })
 
@@ -119,7 +119,7 @@ describe('SnapshotDetailsPage', () => {
   })
 
   test('navigates to chapter page when chapter card is clicked', async () => {
-    ; (useQuery as unknown as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockSnapshotDetailsData,
     })
 
@@ -138,7 +138,7 @@ describe('SnapshotDetailsPage', () => {
   })
 
   test('renders new releases correctly', async () => {
-    ; (useQuery as unknown as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockSnapshotDetailsData,
     })
 
@@ -154,7 +154,7 @@ describe('SnapshotDetailsPage', () => {
   })
 
   test('handles missing data gracefully', async () => {
-    ; (useQuery as unknown as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,
