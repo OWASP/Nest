@@ -39,7 +39,7 @@ const ToggleableList = ({
         {(showAll ? items : items.slice(0, limit)).map((item, index) => (
           <button
             key={index}
-            className={'rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700 ${ isDisabled ? "cursor-default" : "cursor-pointer" }'}
+            className={`rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700 ${ isDisabled ? "cursor-default" : "cursor-pointer" }`}
             onClick={() => !isDisabled && handleButtonClick({ item })}
           >
             {item}
