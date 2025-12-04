@@ -618,4 +618,62 @@ describe('ContributionHeatmap', () => {
       expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
     })
   })
+
+  describe('Variants', () => {
+    it('renders default variant with full dimensions', () => {
+      renderWithTheme(<ContributionHeatmap {...defaultProps} variant="default" />)
+      const chart = screen.getByTestId('mock-heatmap-chart')
+      // Verify full-size dimensions (200px height for default variant)
+      expect(chart).toHaveAttribute('data-height', '200')
+    })
+
+    it('renders compact variant with smaller dimensions', () => {
+      renderWithTheme(<ContributionHeatmap {...defaultProps} variant="compact" />)
+      const chart = screen.getByTestId('mock-heatmap-chart')
+      // Verify compact dimensions (160px height for compact variant)
+      expect(chart).toHaveAttribute('data-height', '160')
+    })
+
+    it('applies compact-specific container styling when variant is compact', () => {
+      const { container } = renderWithTheme(
+        <ContributionHeatmap {...defaultProps} title="Compact" variant="compact" />
+      )
+      // Verify compact variant uses min-w-full class instead of min-w-[640px]
+      const chartContainer = container.querySelector('.inline-block')
+      expect(chartContainer).toHaveClass('min-w-full')
+      expect(chartContainer).not.toHaveClass('min-w-[640px]')
+    })
+
+    it('applies default variant container styling when variant is default', () => {
+      const { container } = renderWithTheme(
+        <ContributionHeatmap {...defaultProps} title="Default" variant="default" />
+      )
+      // Verify default variant uses responsive min-width classes
+      const chartContainer = container.querySelector('.inline-block')
+      expect(chartContainer).toHaveClass('min-w-[640px]', 'md:min-w-full')
+    })
+
+    it('defaults to default variant when no variant is specified', () => {
+      renderWithTheme(<ContributionHeatmap {...defaultProps} />)
+      const chart = screen.getByTestId('mock-heatmap-chart')
+      // Should render with default variant dimensions
+      expect(chart).toHaveAttribute('data-height', '200')
+    })
+
+    it('renders title with same styling regardless of variant', () => {
+      const { rerender } = renderWithTheme(
+        <ContributionHeatmap {...defaultProps} title="Test Title" variant="default" />
+      )
+      let title = screen.getByText('Test Title')
+      expect(title).toHaveClass('mb-4', 'text-sm', 'font-semibold')
+
+      rerender(
+        <div>
+          <ContributionHeatmap {...defaultProps} title="Test Title" variant="compact" />
+        </div>
+      )
+      title = screen.getByText('Test Title')
+      expect(title).toHaveClass('mb-4', 'text-sm', 'font-semibold')
+    })
+  })
 })
