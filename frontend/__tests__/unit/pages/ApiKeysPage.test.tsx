@@ -63,6 +63,17 @@ describe('ApiKeysPage Component', () => {
   const mockCreateMutation = jest.fn()
   const mockRevokeMutation = jest.fn()
   
+  // Helper to create mutation function with callback support
+  const createMutationFn = (mockFn: jest.Mock, options?: { onCompleted?: (data: unknown) => void }) => {
+    return jest.fn(async (vars) => {
+      const result = await mockFn(vars)
+      if (options?.onCompleted) {
+        options.onCompleted(result.data)
+      }
+      return result
+    })
+  }
+  
   const setupMocks = (overrides = {}) => {
     mockUseQuery.mockReturnValue({
       data: mockApiKeys,
@@ -74,20 +85,10 @@ describe('ApiKeysPage Component', () => {
 
     mockUseMutation.mockImplementation((mutation, options) => {
       if (mutation === CreateApiKeyDocument) {
-        const mutationFn = jest.fn(async (vars) => {
-          const result = await mockCreateMutation(vars)
-          if (options?.onCompleted) options.onCompleted(result.data)
-          return result
-        })
-        return [mutationFn, { loading: false }]
+        return [createMutationFn(mockCreateMutation, options), { loading: false }]
       }
       if (mutation === RevokeApiKeyDocument) {
-        const mutationFn = jest.fn(async (vars) => {
-          const result = await mockRevokeMutation(vars)
-          if (options?.onCompleted) options.onCompleted(result.data)
-          return result
-        })
-        return [mutationFn, { loading: false }]
+        return [createMutationFn(mockRevokeMutation, options), { loading: false }]
       }
       return [jest.fn(), { loading: false }]
     })
@@ -307,17 +308,13 @@ describe('ApiKeysPage Component', () => {
 
   describe('Edge Cases', () => {
     test('disables create button when createLoading is true', async () => {
-      mockUseMutation.mockImplementation((mutation, options) => {
+      const createLoadingMutation = (mutation: unknown, options?: unknown) => {
         if (mutation === CreateApiKeyDocument) {
-          const mutationFn = jest.fn(async (vars) => {
-            const result = await mockCreateMutation(vars)
-            if (options?.onCompleted) options.onCompleted(result.data)
-            return result
-          })
-          return [mutationFn, { loading: true }]
+          return [createMutationFn(mockCreateMutation, options as { onCompleted?: (data: unknown) => void }), { loading: true }]
         }
         return [jest.fn(), { loading: false }]
-      })
+      }
+      mockUseMutation.mockImplementation(createLoadingMutation)
 
       render(<ApiKeysPage />)
       await openCreateModal()
