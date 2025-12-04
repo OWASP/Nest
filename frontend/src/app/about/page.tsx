@@ -64,7 +64,7 @@ const getMilestoneIcon = (progress: number) => {
     return faCircleCheck
   }
   if (progress > 0) {
-    return faUserGear
+    return faUsersGear
   }
   return faClock
 }
