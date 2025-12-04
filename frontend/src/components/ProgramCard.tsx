@@ -5,6 +5,7 @@ import type React from 'react'
 import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import { Program } from 'types/mentorship'
 import EntityActions from 'components/EntityActions'
+import Markdown from 'components/MarkdownWrapper'
 
 interface ProgramCardProps {
   program: Program
@@ -96,7 +97,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, href, accessLevel, i
               </span>
             )}
           </div>
-          <p className="line-clamp-8 text-sm text-gray-700 dark:text-gray-300">{description}</p>
+          <Markdown content={description} className="line-clamp-8" />
         </div>
       </div>
     </Link>
