@@ -291,7 +291,7 @@ describe('ApiKeysPage Component', () => {
       setupMocks({ data: { apiKeys: mockApiKeys.apiKeys, activeApiKeyCount: 2 } })
       render(<ApiKeysPage />)
       await waitFor(() => {
-        expect(screen.getByText(/2.*\/.*3.*active keys/i)).toBeInTheDocument()
+        expect(screen.getByText(/2\s*\/\s*3\s*active keys/i)).toBeInTheDocument()
       })
     })
   })
