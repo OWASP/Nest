@@ -72,7 +72,15 @@ class MemberProfileAdmin(admin.ModelAdmin):
     )
 
     def get_queryset(self, request):
-        """Optimize queryset with select_related."""
+        """Return queryset with select_related github_user.
+
+        Args:
+            request (HttpRequest): The current admin request.
+
+        Returns:
+            QuerySet: Optimized queryset with prefetched relations.
+
+        """
         queryset = super().get_queryset(request)
         return queryset.select_related("github_user")
 

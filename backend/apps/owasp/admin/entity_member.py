@@ -42,7 +42,13 @@ class EntityMemberAdmin(admin.ModelAdmin):
 
     @admin.action(description="Approve selected members")
     def approve_members(self, request, queryset):
-        """Approve selected members."""
+        """Approve selected members.
+
+        Args:
+            request (HttpRequest): The current admin request.
+            queryset (QuerySet): Selected EntityMember instances.
+
+        """
         self.message_user(
             request,
             f"Successfully approved {queryset.update(is_active=True, is_reviewed=True)} members.",
@@ -50,7 +56,7 @@ class EntityMemberAdmin(admin.ModelAdmin):
 
     @admin.display(description="Entity", ordering="entity_type")
     def entity(self, obj):
-        """Return entity link."""
+        """Return a clickable link to the entity."""
         return (
             format_html(
                 '<a href="{}" target="_blank">{}</a>',
@@ -66,7 +72,7 @@ class EntityMemberAdmin(admin.ModelAdmin):
 
     @admin.display(description="OWASP URL", ordering="entity_type")
     def owasp_url(self, obj):
-        """Return entity OWASP site URL."""
+        """Return a link to the entity's OWASP site."""
         return (
             format_html('<a href="{}" target="_blank">↗️</a>', obj.entity.owasp_url)
             if obj.entity
@@ -74,7 +80,17 @@ class EntityMemberAdmin(admin.ModelAdmin):
         )
 
     def get_search_results(self, request, queryset, search_term):
-        """Get search results from entity name or key."""
+        """Return search results by entity name or key.
+
+        Args:
+            request (HttpRequest): The current admin request.
+            queryset (QuerySet): Initial queryset of EntityMember instances.
+            search_term (str): The search term entered by the user.
+
+        Returns:
+            tuple: Filtered queryset and boolean indicating if DISTINCT is needed.
+
+        """
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
 
         if search_term:

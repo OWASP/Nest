@@ -26,7 +26,15 @@ class BaseOwaspAdminMixin:
     )
 
     def get_base_list_display(self, *additional_fields):
-        """Get base list display with additional fields."""
+        """Return base list display tuple with additional fields.
+
+        Args:
+            *additional_fields: Field names to add to base list display.
+
+        Returns:
+            tuple: Concatenated fields for list_display.
+
+        """
         return tuple(
             ("name",) if hasattr(self.model, "name") else (),
             *additional_fields,
@@ -34,7 +42,15 @@ class BaseOwaspAdminMixin:
         )
 
     def get_base_search_fields(self, *additional_fields):
-        """Get base search fields with additional fields."""
+        """Return base search fields tuple with additional fields.
+
+        Args:
+            *additional_fields: Field names to add to base search fields.
+
+        Returns:
+            tuple: Concatenated fields for search_fields.
+
+        """
         return self.search_field_names + additional_fields
 
 
@@ -80,7 +96,17 @@ class EntityChannelInline(GenericTabularInline):
     ordering = ("platform", "channel_id")
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
-        """Override to add custom widget for channel_id field and limit channel_type options."""
+        """Return form field with custom widget for channel_id and limited channel_type.
+
+        Args:
+            db_field (Field): The database field being rendered.
+            request (HttpRequest): The current admin request.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            FormField: Customized form field with appropriate widget and constraints.
+
+        """
         if db_field.name == "channel_id":
             kwargs["widget"] = ChannelIdWidget()
         elif db_field.name == "channel_type":
@@ -96,11 +122,19 @@ class GenericEntityAdminMixin(BaseOwaspAdminMixin):
     """Mixin for generic entity admin with common entity functionality."""
 
     def get_queryset(self, request):
-        """Get queryset with optimized relations."""
+        """Return queryset with prefetched repositories.
+
+        Args:
+            request (HttpRequest): The current admin request.
+
+        Returns:
+            QuerySet: Prefetched queryset for efficient relation access.
+
+        """
         return super().get_queryset(request).prefetch_related("repositories")
 
     def custom_field_github_urls(self, obj):
-        """Entity GitHub URLs with uniform formatting."""
+        """Return formatted GitHub repository links for the entity."""
         if not hasattr(obj, "repositories"):
             if not hasattr(obj, "owasp_repository") or not obj.owasp_repository:
                 return ""
@@ -113,7 +147,7 @@ class GenericEntityAdminMixin(BaseOwaspAdminMixin):
         )
 
     def custom_field_owasp_url(self, obj):
-        """Entity OWASP URL with uniform formatting."""
+        """Return formatted link to the entity's OWASP site."""
         if not hasattr(obj, "key") or not obj.key:
             return ""
 
@@ -122,7 +156,15 @@ class GenericEntityAdminMixin(BaseOwaspAdminMixin):
         )
 
     def _format_github_link(self, repository):
-        """Format a single GitHub repository link."""
+        """Return a formatted HTML link to a GitHub repository.
+
+        Args:
+            repository (Repository): The repository instance.
+
+        Returns:
+            str: HTML link or empty string if repository data is incomplete.
+
+        """
         if not repository or not hasattr(repository, "owner") or not repository.owner:
             return ""
         if not hasattr(repository.owner, "login") or not repository.owner.login:
