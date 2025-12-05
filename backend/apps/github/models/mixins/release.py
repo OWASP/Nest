@@ -39,7 +39,6 @@ class ReleaseIndexMixin:
     @property
     def idx_description(self) -> str:
         """Return description for indexing."""
-        return truncate(self.description, 1000, truncate="...")
         return truncate(self.description, limit=DESCRIPTION_MAX_LENGTH)
 
     @property
