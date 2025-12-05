@@ -1,8 +1,11 @@
 import * as Sentry from '@sentry/nextjs'
-import { SENTRY_DSN, ENVIRONMENT, RELEASE_VERSION } from 'utils/env.client'
+
+const ENVIRONMENT = process.env.ENVIRONMENT || "development";
+const RELEASE_VERSION = process.env.RELEASE_VERSION || "0.0.1";
+const SENTRY_DSN = process.env.SENTRY_DSN || "";
 
 Sentry.init({
-  dsn: SENTRY_DSN || '',
+  dsn: SENTRY_DSN,
   enabled: !!SENTRY_DSN,
   environment: ENVIRONMENT.toLowerCase(),
   release: RELEASE_VERSION,
