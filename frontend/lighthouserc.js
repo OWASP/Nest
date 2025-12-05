@@ -6,11 +6,11 @@ const URL_PATHS = [
   '/',
   '/about',
   '/chapters',
+  '/community/snapshots',
   '/contribute',
   '/members',
   '/organizations',
   '/projects',
-  '/community/snapshots',
 ]
 
 module.exports = {
