@@ -28,10 +28,10 @@ jobs:
           - python
     steps:
       - name: Check out repository
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@fdbfb4d2750291e159f0156def62b853c2798ca2
+        uses: github/codeql-action/init@fe4161a26a8629af62121b670040955b330f9af2
         with:
           languages: ${{ matrix.language }}
 
@@ -43,7 +43,7 @@ jobs:
 
       - name: Set up Node
         if: matrix.language == 'javascript-typescript'
-        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f
         with:
           node-version: 24
           cache: 'pnpm'
@@ -55,6 +55,6 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@fdbfb4d2750291e159f0156def62b853c2798ca2
+        uses: github/codeql-action/analyze@fe4161a26a8629af62121b670040955b330f9af2
         with:
           category: /language:${{ matrix.language }}
