@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 from django.conf import settings
-from django.utils.text import Truncator
 
 from apps.common.constants import NL
-from apps.common.utils import get_absolute_url
+from apps.common.utils import get_absolute_url, truncate
 from apps.slack.blocks import get_pagination_buttons, markdown
 from apps.slack.common.constants import TRUNCATION_INDICATOR
 from apps.slack.common.presentation import EntityPresentation
@@ -68,11 +67,15 @@ def get_blocks(
     ]
 
     for idx, committee in enumerate(committees):
-        name = Truncator(escape(committee["idx_name"])).chars(
-            presentation.name_truncation, truncate=TRUNCATION_INDICATOR
+        name = truncate(
+            escape(committee["idx_name"]),
+            presentation.name_truncation,
+            truncate=TRUNCATION_INDICATOR,
         )
-        summary = Truncator(committee["idx_summary"]).chars(
-            presentation.summary_truncation, truncate=TRUNCATION_INDICATOR
+        summary = truncate(
+            committee["idx_summary"],
+            presentation.summary_truncation,
+            truncate=TRUNCATION_INDICATOR,
         )
 
         leaders = committee.get("idx_leaders", [])

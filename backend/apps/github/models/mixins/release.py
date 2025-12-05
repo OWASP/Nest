@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from django.utils.text import Truncator
+from apps.common.utils import truncate
 
 
 class ReleaseIndexMixin:
@@ -37,7 +37,7 @@ class ReleaseIndexMixin:
     @property
     def idx_description(self) -> str:
         """Return description for indexing."""
-        return Truncator(self.description).chars(1000, truncate="...")
+        return truncate(self.description, 1000, truncate="...")
 
     @property
     def idx_is_pre_release(self) -> bool:
