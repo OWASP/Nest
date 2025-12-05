@@ -130,7 +130,7 @@ variable "redis_port" {
 }
 
 variable "secret_recovery_window_in_days" {
-  description = "Number of days to wait before deleting the secret"
+  description = "The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately."
   type        = number
   default     = 7
 }
