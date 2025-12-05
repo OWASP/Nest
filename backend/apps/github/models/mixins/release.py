@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from apps.common.utils import truncate
 
+DESCRIPTION_MAX_LENGTH = 1000
+
 
 class ReleaseIndexMixin:
     """Release index mixin."""
@@ -38,6 +40,7 @@ class ReleaseIndexMixin:
     def idx_description(self) -> str:
         """Return description for indexing."""
         return truncate(self.description, 1000, truncate="...")
+        return truncate(self.description, limit=DESCRIPTION_MAX_LENGTH)
 
     @property
     def idx_is_pre_release(self) -> bool:
