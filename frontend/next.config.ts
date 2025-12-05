@@ -32,20 +32,6 @@ const nextConfig: NextConfig = {
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/productionBrowserSourceMaps
   productionBrowserSourceMaps: true,
   serverExternalPackages: ['import-in-the-middle'],
-  async redirects() {
-    return [
-      {
-        source: '/snapshots',
-        destination: '/community/snapshots',
-        permanent: true,
-      },
-      {
-        source: '/snapshots/:id',
-        destination: '/community/snapshots/:id',
-        permanent: true,
-      },
-    ]
-  },
   ...(isLocal ? {} : { output: 'standalone' }),
 }
 
