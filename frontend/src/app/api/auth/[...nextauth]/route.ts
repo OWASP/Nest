@@ -18,7 +18,7 @@ async function checkIfProjectLeader(login: string): Promise<boolean> {
     })
     return data?.isProjectLeader ?? false
   } catch (err) {
-    throw new Error('Failed to fetch project leader status Error', err)
+    throw new Error(`Failed to fetch project leader status Error: ${err}`)
   }
 }
 
@@ -32,7 +32,7 @@ async function checkIfMentor(login: string): Promise<boolean> {
     })
     return data?.isMentor ?? false
   } catch (err) {
-    throw new Error('Failed to fetch mentor status Error', err)
+    throw new Error(`Failed to fetch mentor status Error: ${err}`)
   }
 }
 

@@ -286,7 +286,7 @@ export const ProjectSelector = ({ value, defaultName, onProjectChange }: Project
       } catch (err) {
         setRawResults([])
         setShowSuggestions(false)
-        throw new Error('Error fetching suggestions:', err)
+        throw new Error(`Error fetching suggestions: ${err}`)
       }
     }, 300),
     [client]
