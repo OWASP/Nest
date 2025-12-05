@@ -6,4 +6,3 @@ db_user                        = "owasp_nest_db_user"
 db_port                        = 5432
 environment                    = "staging"
 project_name                   = "owasp-nest"
-secret_recovery_window_in_days = 0
