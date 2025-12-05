@@ -12,3 +12,8 @@ output "private_subnet_ids" {
   description = "A list of private subnet IDs"
   value       = aws_subnet.private[*].id
 }
+
+output "vpc_endpoint_security_group_id" {
+  description = "Security group ID for VPC endpoints"
+  value       = module.vpc_endpoint.security_group_id
+}
