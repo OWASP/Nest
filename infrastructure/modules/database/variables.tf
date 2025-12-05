@@ -70,7 +70,7 @@ variable "db_password" {
 variable "db_skip_final_snapshot" {
   description = "Determines whether a final DB snapshot is created before the DB instance is deleted."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "db_storage_type" {
@@ -107,7 +107,7 @@ variable "proxy_security_group_ids" {
 variable "secret_recovery_window_in_days" {
   description = "The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately."
   type        = number
-  default     = 0
+  default     = 7
 }
 
 variable "security_group_ids" {

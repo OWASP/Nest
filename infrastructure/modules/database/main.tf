@@ -41,6 +41,7 @@ resource "aws_db_instance" "main" {
   copy_tags_to_snapshot           = var.db_copy_tags_to_snapshot
   db_name                         = var.db_name
   db_subnet_group_name            = aws_db_subnet_group.main.name
+  deletion_protection             = true
   enabled_cloudwatch_logs_exports = var.db_enabled_cloudwatch_logs_exports
   engine                          = "postgres"
   engine_version                  = var.db_engine_version

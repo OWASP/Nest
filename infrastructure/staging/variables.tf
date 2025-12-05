@@ -13,7 +13,7 @@ variable "availability_zones" {
 variable "create_rds_proxy" {
   description = "Whether to create an RDS proxy"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "db_allocated_storage" {
@@ -127,6 +127,12 @@ variable "redis_port" {
   description = "The port for the Redis cache"
   type        = number
   default     = 6379
+}
+
+variable "secret_recovery_window_in_days" {
+  description = "Number of days to wait before deleting the secret"
+  type        = number
+  default     = 7
 }
 
 variable "vpc_cidr" {
