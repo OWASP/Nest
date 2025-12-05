@@ -8,10 +8,10 @@ from apps.common.utils import join_values
 from apps.github.models.repository_contributor import RepositoryContributor
 from apps.owasp.models.mixins.common import RepositoryBasedEntityModelMixin
 
+DEFAULT_HEALTH_SCORE = 100
 ISSUES_LIMIT = 6
 RELEASES_LIMIT = 4
 REPOSITORIES_LIMIT = 4
-DEFAULT_HEALTH_SCORE = 100
 
 
 class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
