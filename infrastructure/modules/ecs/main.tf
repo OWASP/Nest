@@ -16,6 +16,28 @@ resource "aws_ecs_cluster" "main" {
   tags = var.common_tags
 }
 
+resource "aws_ecr_lifecycle_policy" "main" {
+  repository = aws_ecr_repository.main.name
+
+  policy = jsonencode({
+    rules = [
+      {
+        rulePriority = 1
+        description  = "Remove untagged images"
+        selection = {
+          tagStatus   = "untagged"
+          countType   = "sinceImagePushed"
+          countUnit   = "days"
+          countNumber = 7
+        }
+        action = {
+          type = "expire"
+        }
+      }
+    ]
+  })
+}
+
 resource "aws_ecr_repository" "main" {
   name = "${var.project_name}-${var.environment}-backend"
   image_scanning_configuration {
@@ -60,8 +82,43 @@ resource "aws_iam_policy" "ecs_tasks_execution_role_ssm_policy" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_tasks_execution_role_policy" {
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+resource "aws_iam_policy" "ecs_tasks_execution_policy" {
+  name        = "${var.project_name}-${var.environment}-ecs-tasks-execution-policy"
+  description = "Custom policy for ECS task execution - ECR and CloudWatch Logs access"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "ecr:GetAuthorizationToken"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+      {
+        Action = [
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:BatchGetImage",
+          "ecr:GetDownloadUrlForLayer"
+        ]
+        Effect   = "Allow"
+        Resource = aws_ecr_repository.main.arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/ecs/${var.project_name}-${var.environment}-*:*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_tasks_execution_policy_attachment" {
+  policy_arn = aws_iam_policy.ecs_tasks_execution_policy.arn
   role       = aws_iam_role.ecs_tasks_execution_role.name
 }
 
@@ -111,8 +168,37 @@ resource "aws_iam_role" "event_bridge_role" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "event_bridge_role_policy" {
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"
+resource "aws_iam_policy" "event_bridge_ecs_policy" {
+  name        = "${var.project_name}-${var.environment}-event-bridge-ecs-policy"
+  description = "Allow EventBridge to run ECS tasks"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "ecs:RunTask"
+        Effect = "Allow"
+        Condition = {
+          ArnLike = {
+            "ecs:cluster" = aws_ecs_cluster.main.arn
+          }
+        }
+        Resource = "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task-definition/${var.project_name}-${var.environment}-*:*"
+      },
+      {
+        Action = "iam:PassRole"
+        Effect = "Allow"
+        Resource = [
+          aws_iam_role.ecs_task_role.arn,
+          aws_iam_role.ecs_tasks_execution_role.arn
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "event_bridge_policy_attachment" {
+  policy_arn = aws_iam_policy.event_bridge_ecs_policy.arn
   role       = aws_iam_role.event_bridge_role.name
 }
 
@@ -128,7 +214,7 @@ module "sync_data_task" {
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
   environment                  = var.environment
   event_bridge_role_arn        = aws_iam_role.event_bridge_role.arn
-  image_url                    = aws_ecr_repository.main.repository_url
+  image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
   memory                       = var.sync_data_task_memory
   private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
@@ -157,7 +243,7 @@ module "owasp_update_project_health_metrics_task" {
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
   environment                  = var.environment
   event_bridge_role_arn        = aws_iam_role.event_bridge_role.arn
-  image_url                    = aws_ecr_repository.main.repository_url
+  image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
   memory                       = var.update_project_health_metrics_task_memory
   private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
@@ -178,7 +264,7 @@ module "owasp_update_project_health_scores_task" {
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
   environment                  = var.environment
   event_bridge_role_arn        = aws_iam_role.event_bridge_role.arn
-  image_url                    = aws_ecr_repository.main.repository_url
+  image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
   memory                       = var.update_project_health_scores_task_memory
   private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
@@ -198,7 +284,7 @@ module "migrate_task" {
   ecs_cluster_arn              = aws_ecs_cluster.main.arn
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
   environment                  = var.environment
-  image_url                    = "${aws_ecr_repository.main.repository_url}:latest"
+  image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
   memory                       = var.migrate_task_memory
   private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
@@ -215,9 +301,11 @@ module "load_data_task" {
     "-c",
     <<-EOT
     set -e
-    pip install --target=/tmp/awscli-packages awscli
-    export PYTHONPATH="/tmp/awscli-packages:$PYTHONPATH"
-    python /tmp/awscli-packages/bin/aws s3 cp s3://${var.fixtures_bucket_name}/nest.json.gz /tmp/nest.json.gz
+    python -c "
+    import boto3
+    s3 = boto3.client('s3')
+    s3.download_file('${var.fixtures_bucket_name}', 'nest.json.gz', '/tmp/nest.json.gz')
+    "
     python manage.py load_data --fixture-path /tmp/nest.json.gz
     EOT
   ]
@@ -227,7 +315,7 @@ module "load_data_task" {
   ecs_cluster_arn              = aws_ecs_cluster.main.arn
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
   environment                  = var.environment
-  image_url                    = "${aws_ecr_repository.main.repository_url}:latest"
+  image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
   memory                       = var.load_data_task_memory
   private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
@@ -247,7 +335,7 @@ module "index_data_task" {
   ecs_cluster_arn              = aws_ecs_cluster.main.arn
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
   environment                  = var.environment
-  image_url                    = "${aws_ecr_repository.main.repository_url}:latest"
+  image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
   memory                       = var.index_data_task_memory
   private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
