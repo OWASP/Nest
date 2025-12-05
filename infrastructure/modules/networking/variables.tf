@@ -1,3 +1,8 @@
+variable "aws_region" {
+  description = "The AWS region"
+  type        = string
+}
+
 variable "availability_zones" {
   description = "A list of availability zones for the VPC"
   type        = list(string)

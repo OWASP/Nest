@@ -1,14 +1,10 @@
 terraform {
-  required_version = ">= 1.0"
+  required_version = "1.14.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.0"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.0"
+      version = "6.22.0"
     }
   }
 }
@@ -105,6 +101,26 @@ resource "aws_security_group" "redis" {
     security_groups = [aws_security_group.lambda.id]
     to_port         = var.redis_port
   }
+}
+
+resource "aws_security_group_rule" "ecs_to_vpc_endpoints" {
+  description              = "Allow HTTPS to VPC endpoints"
+  from_port                = 443
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.ecs.id
+  source_security_group_id = var.vpc_endpoint_sg_id
+  to_port                  = 443
+  type                     = "egress"
+}
+
+resource "aws_security_group_rule" "lambda_to_vpc_endpoints" {
+  description              = "Allow HTTPS to VPC endpoints"
+  from_port                = 443
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.lambda.id
+  source_security_group_id = var.vpc_endpoint_sg_id
+  to_port                  = 443
+  type                     = "egress"
 }
 
 resource "aws_security_group_rule" "rds_from_ecs" {
