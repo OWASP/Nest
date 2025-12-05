@@ -35,11 +35,8 @@ class BaseOwaspAdminMixin:
             tuple: Concatenated fields for list_display.
 
         """
-        return tuple(
-            ("name",) if hasattr(self.model, "name") else (),
-            *additional_fields,
-            *self.list_display_field_names,
-        )
+        base = ("name",) if hasattr(self.model, "name") else ()
+        return base + tuple(additional_fields) + self.list_display_field_names
 
     def get_base_search_fields(self, *additional_fields):
         """Return base search fields tuple with additional fields.
