@@ -14,51 +14,52 @@ class TestUserQuery:
         """User mock fixture."""
         return Mock(spec=User)
 
-    def test_resolve_user_existing_with_public_member_page(self, mock_user):
-        """Test resolving an existing user with has_public_member_page=True."""
-        with patch("apps.github.models.user.User.objects.filter") as mock_filter:
-            mock_queryset = mock_filter.return_value
-            mock_queryset.first.return_value = mock_user
+    @patch("apps.github.models.user.User.objects.filter")
+    @patch("apps.github.models.user.User.objects.select_related")
+    def test_resolve_user_found_on_first_query(self, mock_select_related, mock_filter, mock_user):
+        """Test resolving an existing user on the first query."""
+        mock_select_related.return_value.filter.return_value.first.return_value = mock_user
 
-            result = UserQuery().user(login="test-user")
+        result = UserQuery().user(login="test-user")
 
-            assert result == mock_user
-            mock_filter.assert_called_once_with(has_public_member_page=True, login="test-user")
-            mock_queryset.first.assert_called_once()
+        assert result == mock_user
+        mock_select_related.assert_called_once_with("owasp_profile")
+        mock_select_related.return_value.filter.assert_called_once_with(
+            owasp_profile__has_public_member_page=True, login="test-user"
+        )
+        mock_filter.assert_not_called()
 
-    def test_resolve_user_not_found_when_has_public_member_page_false(self):
-        """Test resolving a user with has_public_member_page=False returns None."""
-        with patch("apps.github.models.user.User.objects.filter") as mock_filter:
-            mock_queryset = mock_filter.return_value
-            mock_queryset.first.return_value = None
+    @patch("apps.github.models.user.User.objects.filter")
+    @patch("apps.github.models.user.User.objects.select_related")
+    def test_resolve_user_found_on_second_query(self, mock_select_related, mock_filter, mock_user):
+        """Test resolving an existing user on the second (fallback) query."""
+        mock_select_related.return_value.filter.return_value.first.return_value = None
+        mock_filter.return_value.first.return_value = mock_user
 
-            result = UserQuery().user(login="test-user")
+        result = UserQuery().user(login="test-user")
 
-            assert result is None
-            mock_filter.assert_called_once_with(has_public_member_page=True, login="test-user")
-            mock_queryset.first.assert_called_once()
+        assert result == mock_user
+        mock_select_related.assert_called_once_with("owasp_profile")
+        mock_select_related.return_value.filter.assert_called_once_with(
+            owasp_profile__has_public_member_page=True, login="test-user"
+        )
+        mock_filter.assert_called_once_with(has_public_member_page=True, login="test-user")
 
-    def test_resolve_user_not_found(self):
-        """Test resolving a non-existent user."""
-        with patch("apps.github.models.user.User.objects.filter") as mock_filter:
-            mock_queryset = mock_filter.return_value
-            mock_queryset.first.return_value = None
+    @patch("apps.github.models.user.User.objects.filter")
+    @patch("apps.github.models.user.User.objects.select_related")
+    def test_resolve_user_not_found(self, mock_select_related, mock_filter):
+        """Test resolving a non-existent user returns None."""
+        mock_select_related.return_value.filter.return_value.first.return_value = None
+        mock_filter.return_value.first.return_value = None
 
-            result = UserQuery().user(login="non-existent")
+        result = UserQuery().user(login="non-existent")
 
-            assert result is None
-            mock_filter.assert_called_once_with(has_public_member_page=True, login="non-existent")
-            mock_queryset.first.assert_called_once()
-
-    def test_resolve_user_filters_by_public_member_page_and_login(self):
-        """Test that user query filters by both has_public_member_page and login."""
-        with patch("apps.github.models.user.User.objects.filter") as mock_filter:
-            mock_queryset = mock_filter.return_value
-            mock_queryset.first.return_value = None
-
-            UserQuery().user(login="test-user")
-
-            mock_filter.assert_called_once_with(has_public_member_page=True, login="test-user")
+        assert result is None
+        mock_select_related.assert_called_once_with("owasp_profile")
+        mock_select_related.return_value.filter.assert_called_once_with(
+            owasp_profile__has_public_member_page=True, login="non-existent"
+        )
+        mock_filter.assert_called_once_with(has_public_member_page=True, login="non-existent")
 
     def test_top_contributed_repositories(self):
         """Test resolving top contributed repositories."""

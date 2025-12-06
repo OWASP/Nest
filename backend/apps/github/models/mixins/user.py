@@ -124,6 +124,8 @@ class UserIndexMixin:
     @property
     def idx_contributions_count(self) -> int:
         """Return contributions count for indexing."""
+        if hasattr(self, "owasp_profile") and self.owasp_profile.contributions_count:
+            return self.owasp_profile.contributions_count
         return self.contributions_count
 
     @property
