@@ -78,7 +78,7 @@ describe('CreateModulePage', () => {
     }
     const createModuleFn = jest.fn(async (options) => {
       options.update(mockCache, { data: { createModule: { id: 'new-module' } } })
-      return Promise.resolve({ data: { createModule: { id: 'new-module' } } })
+      return { data: { createModule: { id: 'new-module' } } }
     })
     ;(useMutation as unknown as jest.Mock).mockReturnValue([createModuleFn, { loading: false }])
 
@@ -163,7 +163,7 @@ describe('CreateModulePage', () => {
     mockCache.readQuery.mockReturnValue(null)
     createModuleFn.mockImplementation(async (options) => {
       options.update(mockCache, { data: { createModule: { id: 'new-module' } } })
-      return Promise.resolve({})
+      return {}
     })
 
     await selectProjectAndSubmit()
@@ -180,7 +180,7 @@ describe('CreateModulePage', () => {
     mockCache.readQuery.mockReturnValue({ getProgram: {}, getProgramModules: [] })
     createModuleFn.mockImplementation(async (options) => {
       options.update(mockCache, { data: { createModule: null } })
-      return Promise.resolve({})
+      return {}
     })
 
     await selectProjectAndSubmit()
