@@ -365,6 +365,7 @@ export const ProjectSelector = ({
           variables: { query: trimmedQuery },
         })
 
+<<<<<<< HEAD
         const projects = data.searchProjects || []
         const filtered = projects.filter((proj) => proj.id !== value)
         setItems(filtered.slice(0, 5))
@@ -372,6 +373,14 @@ export const ProjectSelector = ({
         setItems([])
       } finally {
         setIsLoading(false)
+=======
+        setRawResults(data.searchProjects || [])
+        setShowSuggestions(true)
+      } catch (err) {
+        setRawResults([])
+        setShowSuggestions(false)
+        throw new Error(`Error fetching suggestions: ${err}`)
+>>>>>>> a1d77338 (fix: incorrect Error syntax)
       }
     }, 300),
     [client, value]
