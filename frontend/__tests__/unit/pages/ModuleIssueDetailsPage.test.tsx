@@ -211,38 +211,30 @@ describe('ModuleIssueDetailsPage', () => {
   })
 
   describe('Task Timeline and Deadline', () => {
-    const today = new Date()
-    const yesterday = new Date(today)
-    yesterday.setDate(today.getDate() - 1)
-    const tomorrow = new Date(today)
-    tomorrow.setDate(today.getDate() + 1)
-    const tenDaysFromNow = new Date(today)
-    tenDaysFromNow.setDate(today.getDate() + 10)
-
     it.each([
+      { dayOffset: -1, expectedText: '(overdue)', expectedColor: 'text-[#DA3633]' },
+      { dayOffset: 2, expectedText: '(2 days left)', expectedColor: 'text-[#F59E0B]' },
       {
-        deadline: yesterday.toISOString(),
-        expectedText: '(overdue)',
-        expectedColor: 'text-[#DA3633]',
-      },
-      {
-        deadline: tomorrow.toISOString(),
-        expectedText: '(1 days left)',
-        expectedColor: 'text-[#F59E0B]',
-      },
-      {
-        deadline: tenDaysFromNow.toISOString(),
+        dayOffset: 10,
         expectedText: '(10 days left)',
         expectedColor: 'text-gray-600 dark:text-gray-300',
       },
       {
-        deadline: null,
+        dayOffset: null,
         expectedText: 'No deadline set',
         expectedColor: 'text-gray-600 dark:text-gray-300',
       },
     ])(
-      'renders deadline text "$expectedText" for deadline "$deadline"',
-      ({ deadline, expectedText, expectedColor }) => {
+      'renders deadline text "$expectedText" for deadline with offset $dayOffset',
+      ({ dayOffset, expectedText, expectedColor }) => {
+        const today = new Date()
+        let deadline = null
+        if (dayOffset !== null) {
+          const deadlineDate = new Date(today)
+          deadlineDate.setDate(today.getDate() + dayOffset)
+          deadline = deadlineDate.toISOString()
+        }
+
         const dataWithDeadline = {
           ...mockIssueData,
           getModule: { ...mockIssueData.getModule, taskDeadline: deadline },
