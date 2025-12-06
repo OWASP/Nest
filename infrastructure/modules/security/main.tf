@@ -16,14 +16,6 @@ resource "aws_security_group" "ecs" {
     Name = "${var.project_name}-${var.environment}-ecs-sg"
   })
   vpc_id = var.vpc_id
-
-  egress {
-    cidr_blocks = var.default_egress_cidr_blocks
-    description = "Allow all outbound traffic"
-    from_port   = 0
-    protocol    = "-1"
-    to_port     = 0
-  }
 }
 
 resource "aws_security_group" "lambda" {
@@ -33,14 +25,6 @@ resource "aws_security_group" "lambda" {
     Name = "${var.project_name}-${var.environment}-lambda-sg"
   })
   vpc_id = var.vpc_id
-
-  egress {
-    cidr_blocks = var.default_egress_cidr_blocks
-    description = "Allow all outbound traffic"
-    from_port   = 0
-    protocol    = "-1"
-    to_port     = 0
-  }
 }
 
 resource "aws_security_group" "rds" {
@@ -50,14 +34,6 @@ resource "aws_security_group" "rds" {
     Name = "${var.project_name}-${var.environment}-rds-sg"
   })
   vpc_id = var.vpc_id
-
-  egress {
-    cidr_blocks = var.default_egress_cidr_blocks
-    description = "Allow all outbound traffic"
-    from_port   = 0
-    protocol    = "-1"
-    to_port     = 0
-  }
 }
 
 resource "aws_security_group" "rds_proxy" {
@@ -68,14 +44,6 @@ resource "aws_security_group" "rds_proxy" {
     Name = "${var.project_name}-${var.environment}-rds-proxy-sg"
   })
   vpc_id = var.vpc_id
-
-  egress {
-    cidr_blocks = var.default_egress_cidr_blocks
-    description = "Allow all outbound traffic"
-    from_port   = 0
-    protocol    = "-1"
-    to_port     = 0
-  }
 }
 
 resource "aws_security_group" "redis" {
@@ -85,22 +53,16 @@ resource "aws_security_group" "redis" {
     Name = "${var.project_name}-${var.environment}-redis-sg"
   })
   vpc_id = var.vpc_id
+}
 
-  egress {
-    cidr_blocks = var.default_egress_cidr_blocks
-    description = "Allow all outbound traffic"
-    from_port   = 0
-    protocol    = "-1"
-    to_port     = 0
-  }
-
-  ingress {
-    description     = "Redis from Lambda"
-    from_port       = var.redis_port
-    protocol        = "tcp"
-    security_groups = [aws_security_group.lambda.id]
-    to_port         = var.redis_port
-  }
+resource "aws_security_group_rule" "ecs_egress_all" {
+  cidr_blocks       = var.default_egress_cidr_blocks
+  description       = "Allow all outbound traffic"
+  from_port         = 0
+  protocol          = "-1"
+  security_group_id = aws_security_group.ecs.id
+  to_port           = 0
+  type              = "egress"
 }
 
 resource "aws_security_group_rule" "ecs_to_vpc_endpoints" {
@@ -113,6 +75,16 @@ resource "aws_security_group_rule" "ecs_to_vpc_endpoints" {
   type                     = "egress"
 }
 
+resource "aws_security_group_rule" "lambda_egress_all" {
+  cidr_blocks       = var.default_egress_cidr_blocks
+  description       = "Allow all outbound traffic"
+  from_port         = 0
+  protocol          = "-1"
+  security_group_id = aws_security_group.lambda.id
+  to_port           = 0
+  type              = "egress"
+}
+
 resource "aws_security_group_rule" "lambda_to_vpc_endpoints" {
   description              = "Allow HTTPS to VPC endpoints"
   from_port                = 443
@@ -121,6 +93,16 @@ resource "aws_security_group_rule" "lambda_to_vpc_endpoints" {
   source_security_group_id = var.vpc_endpoint_sg_id
   to_port                  = 443
   type                     = "egress"
+}
+
+resource "aws_security_group_rule" "rds_egress_all" {
+  cidr_blocks       = var.default_egress_cidr_blocks
+  description       = "Allow all outbound traffic"
+  from_port         = 0
+  protocol          = "-1"
+  security_group_id = aws_security_group.rds.id
+  to_port           = 0
+  type              = "egress"
 }
 
 resource "aws_security_group_rule" "rds_from_ecs" {
@@ -156,6 +138,17 @@ resource "aws_security_group_rule" "rds_from_proxy" {
   source_security_group_id = aws_security_group.rds_proxy[0].id
 }
 
+resource "aws_security_group_rule" "rds_proxy_egress_all" {
+  count             = var.create_rds_proxy ? 1 : 0
+  cidr_blocks       = var.default_egress_cidr_blocks
+  description       = "Allow all outbound traffic"
+  from_port         = 0
+  protocol          = "-1"
+  security_group_id = aws_security_group.rds_proxy[0].id
+  to_port           = 0
+  type              = "egress"
+}
+
 resource "aws_security_group_rule" "rds_proxy_from_ecs" {
   count                    = var.create_rds_proxy ? 1 : 0
   type                     = "ingress"
@@ -178,12 +171,32 @@ resource "aws_security_group_rule" "rds_proxy_from_lambda" {
   source_security_group_id = aws_security_group.lambda.id
 }
 
+resource "aws_security_group_rule" "redis_egress_all" {
+  cidr_blocks       = var.default_egress_cidr_blocks
+  description       = "Allow all outbound traffic"
+  from_port         = 0
+  protocol          = "-1"
+  security_group_id = aws_security_group.redis.id
+  to_port           = 0
+  type              = "egress"
+}
+
 resource "aws_security_group_rule" "redis_from_ecs" {
   description              = "Redis from ECS"
   from_port                = var.redis_port
   protocol                 = "tcp"
   security_group_id        = aws_security_group.redis.id
   source_security_group_id = aws_security_group.ecs.id
+  to_port                  = var.redis_port
+  type                     = "ingress"
+}
+
+resource "aws_security_group_rule" "redis_from_lambda" {
+  description              = "Redis from Lambda"
+  from_port                = var.redis_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.redis.id
+  source_security_group_id = aws_security_group.lambda.id
   to_port                  = var.redis_port
   type                     = "ingress"
 }
