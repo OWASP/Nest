@@ -34,21 +34,23 @@ module "cache" {
 module "database" {
   source = "../modules/database"
 
-  common_tags                = local.common_tags
-  create_rds_proxy           = var.create_rds_proxy
-  db_allocated_storage       = var.db_allocated_storage
-  db_backup_retention_period = var.db_backup_retention_period
-  db_engine_version          = var.db_engine_version
-  db_instance_class          = var.db_instance_class
-  db_name                    = var.db_name
-  db_password                = var.db_password
-  db_storage_type            = var.db_storage_type
-  db_subnet_ids              = module.networking.private_subnet_ids
-  db_user                    = var.db_user
-  environment                = var.environment
-  project_name               = var.project_name
-  proxy_security_group_ids   = [module.security.rds_proxy_sg_id]
-  security_group_ids         = [module.security.rds_sg_id]
+  common_tags                    = local.common_tags
+  create_rds_proxy               = var.create_rds_proxy
+  db_allocated_storage           = var.db_allocated_storage
+  db_backup_retention_period     = var.db_backup_retention_period
+  db_deletion_protection         = var.db_deletion_protection
+  db_engine_version              = var.db_engine_version
+  db_instance_class              = var.db_instance_class
+  db_name                        = var.db_name
+  db_password                    = var.db_password
+  db_storage_type                = var.db_storage_type
+  db_subnet_ids                  = module.networking.private_subnet_ids
+  db_user                        = var.db_user
+  environment                    = var.environment
+  project_name                   = var.project_name
+  proxy_security_group_ids       = [module.security.rds_proxy_sg_id]
+  secret_recovery_window_in_days = var.secret_recovery_window_in_days
+  security_group_ids             = [module.security.rds_sg_id]
 }
 
 module "ecs" {
