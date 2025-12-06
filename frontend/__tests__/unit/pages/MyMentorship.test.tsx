@@ -171,4 +171,29 @@ describe('MyMentorshipPage', () => {
       expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/create')
     })
   })
+
+  it('shows an error toast when GraphQL query fails', async () => {
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          name: 'User',
+          email: 'user@example.com',
+          login: 'User',
+          isLeader: true,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+
+    mockUseQuery.mockReturnValue({
+      data: undefined,
+      loading: false,
+      error: new Error('GraphQL error'),
+    })
+
+    render(<MyMentorshipPage />)
+
+    expect(await screen.findByText('My Mentorship')).toBeInTheDocument()
+  })
 })
