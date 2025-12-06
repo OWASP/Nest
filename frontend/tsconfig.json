@@ -2,7 +2,11 @@
   "compilerOptions": {
     "target": "ES2023",
     "useDefineForClassFields": true,
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "noEmit": true,
@@ -22,19 +26,48 @@
       }
     ],
     "paths": {
-      "@e2e/*": ["__tests__/e2e/*"],
-      "@unit/*": ["__tests__/unit/*"],
-      "*": ["./src/*"],
-      "app/*": ["src/app/*"],
-      "components/*": ["src/components/*"],
-      "hooks/*": ["src/hooks/*"],
-      "server/*": ["src/server/*"],
-      "types/*": ["src/types/*"],
-      "utils/*": ["src/utils/*"],
-      "wrappers/*": ["src/wrappers/*"]
+      "@e2e/*": [
+        "__tests__/e2e/*"
+      ],
+      "@unit/*": [
+        "__tests__/unit/*"
+      ],
+      "*": [
+        "./src/*"
+      ],
+      "app/*": [
+        "src/app/*"
+      ],
+      "components/*": [
+        "src/components/*"
+      ],
+      "hooks/*": [
+        "src/hooks/*"
+      ],
+      "server/*": [
+        "src/server/*"
+      ],
+      "types/*": [
+        "src/types/*"
+      ],
+      "utils/*": [
+        "src/utils/*"
+      ],
+      "wrappers/*": [
+        "src/wrappers/*"
+      ]
     },
     "strict": false
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "src",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
