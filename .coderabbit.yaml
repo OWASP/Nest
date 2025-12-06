@@ -1,9 +1,14 @@
+# https://docs.coderabbit.ai/reference/configuration
+
 chat:
   auto_reply: true
 code_generation:
   docstrings:
     language: en-US
 early_access: true
+issue_enrichment:
+  auto_enrich:
+    enabled: false
 language: en-US
 reviews:
   assess_linked_issues: true
