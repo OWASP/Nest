@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 from django.conf import settings
-from django.utils.text import Truncator
 
 from apps.common.constants import NL
-from apps.common.utils import get_absolute_url
+from apps.common.utils import get_absolute_url, truncate
 from apps.slack.blocks import get_pagination_buttons, markdown
-from apps.slack.common.constants import TRUNCATION_INDICATOR
 from apps.slack.common.presentation import EntityPresentation
 from apps.slack.constants import FEEDBACK_SHARING_INVITE
 from apps.slack.utils import escape
@@ -77,13 +75,9 @@ def get_blocks(
     blocks = []
     for idx, user in enumerate(users):
         user_name_raw = user.get("idx_name") or user.get("idx_login", "")
-        user_name = Truncator(escape(user_name_raw)).chars(
-            presentation.name_truncation, truncate=TRUNCATION_INDICATOR
-        )
+        user_name = truncate(escape(user_name_raw), presentation.name_truncation)
 
-        bio = Truncator(escape(user.get("idx_bio", "") or "")).chars(
-            presentation.summary_truncation, truncate=TRUNCATION_INDICATOR
-        )
+        bio = truncate(escape(user.get("idx_bio", "") or ""), presentation.summary_truncation)
 
         location = escape(user.get("idx_location", ""))
         company = escape(user.get("idx_company", ""))

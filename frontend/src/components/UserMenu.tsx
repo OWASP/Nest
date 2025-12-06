@@ -46,6 +46,7 @@ export default function UserMenu({
   if (status === 'unauthenticated') {
     return (
       <button
+        type="button"
         onClick={() => signIn('github', { callbackUrl: '/', prompt: 'login' })}
         className="group relative flex h-10 cursor-pointer items-center justify-center gap-2 rounded-md bg-[#87a1bc] p-4 text-sm font-medium text-black hover:ring-1 hover:ring-[#b0c7de] dark:bg-slate-900 dark:text-white dark:hover:bg-slate-900/90 dark:hover:ring-[#46576b]"
       >
@@ -66,6 +67,7 @@ export default function UserMenu({
   return (
     <div ref={dropdownRef} className="relative flex items-center justify-center">
       <button
+        type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         aria-expanded={isOpen}
         aria-haspopup="true"
@@ -109,7 +111,12 @@ export default function UserMenu({
             </Link>
           )}
 
-          <button onClick={handleLogout} disabled={isLoggingOut} className={userMenuItemClasses}>
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className={userMenuItemClasses}
+          >
             {isLoggingOut ? 'Signing out...' : 'Sign out'}
           </button>
         </div>
