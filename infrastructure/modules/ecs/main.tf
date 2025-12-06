@@ -1,10 +1,10 @@
 terraform {
-  required_version = ">= 1.0"
+  required_version = "1.14.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.0"
+      version = "6.22.0"
     }
   }
 }
@@ -80,6 +80,7 @@ resource "aws_iam_policy" "ecs_tasks_execution_role_ssm_policy" {
       }
     ]
   })
+  tags = var.common_tags
 }
 
 resource "aws_iam_policy" "ecs_tasks_execution_policy" {
@@ -115,6 +116,7 @@ resource "aws_iam_policy" "ecs_tasks_execution_policy" {
       }
     ]
   })
+  tags = var.common_tags
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_tasks_execution_policy_attachment" {
@@ -195,6 +197,7 @@ resource "aws_iam_policy" "event_bridge_ecs_policy" {
       }
     ]
   })
+  tags = var.common_tags
 }
 
 resource "aws_iam_role_policy_attachment" "event_bridge_policy_attachment" {

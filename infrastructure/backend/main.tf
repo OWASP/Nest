@@ -12,6 +12,14 @@ terraform {
   }
 }
 
+locals {
+  common_tags = {
+    Environment = "backend"
+    ManagedBy   = "Terraform"
+    Project     = var.project_name
+  }
+}
+
 data "aws_iam_policy_document" "logs" {
   statement {
     actions   = ["s3:PutObject"]
@@ -58,9 +66,9 @@ resource "aws_dynamodb_table" "state_lock" {
   name         = "${var.project_name}-terraform-state-lock"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
-  tags = {
+  tags = merge(local.common_tags, {
     Name = "${var.project_name}-terraform-state-lock"
-  }
+  })
 
   attribute {
     name = "LockID"
@@ -80,9 +88,9 @@ resource "aws_s3_bucket" "logs" { # NOSONAR
   lifecycle {
     prevent_destroy = true
   }
-  tags = {
+  tags = merge(local.common_tags, {
     Name = "${var.project_name}-terraform-state-logs"
-  }
+  })
 }
 
 resource "aws_s3_bucket" "state" { # NOSONAR
@@ -92,9 +100,9 @@ resource "aws_s3_bucket" "state" { # NOSONAR
   lifecycle {
     prevent_destroy = true
   }
-  tags = {
+  tags = merge(local.common_tags, {
     Name = "${var.project_name}-terraform-state"
-  }
+  })
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "state" {

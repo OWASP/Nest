@@ -1,5 +1,5 @@
 variable "auto_minor_version_upgrade" {
-  description = "Determines whether minor engine upgrades will be applied automatically."
+  description = "Whether minor engine upgrades will be applied automatically."
   type        = bool
   default     = true
 }

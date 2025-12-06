@@ -1,5 +1,5 @@
 variable "abort_incomplete_multipart_upload_days" {
-  description = "Specifies the number of days after which an incomplete multipart upload is aborted."
+  description = "The number of days after which an incomplete multipart upload is aborted."
   type        = number
   default     = 7
 }
