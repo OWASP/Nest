@@ -13,7 +13,7 @@ variable "availability_zones" {
 variable "create_rds_proxy" {
   description = "Whether to create an RDS proxy"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "db_allocated_storage" {
@@ -26,6 +26,12 @@ variable "db_backup_retention_period" {
   description = "The number of days to retain backups for"
   type        = number
   default     = 7
+}
+
+variable "db_deletion_protection" {
+  description = "Specifies whether to prevent database deletion."
+  type        = bool
+  default     = true
 }
 
 variable "db_engine_version" {
@@ -127,6 +133,12 @@ variable "redis_port" {
   description = "The port for the Redis cache"
   type        = number
   default     = 6379
+}
+
+variable "secret_recovery_window_in_days" {
+  description = "The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately."
+  type        = number
+  default     = 7
 }
 
 variable "vpc_cidr" {
