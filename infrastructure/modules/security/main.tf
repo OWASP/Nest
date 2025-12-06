@@ -129,18 +129,18 @@ resource "aws_security_group_rule" "rds_from_lambda" {
 
 resource "aws_security_group_rule" "rds_from_proxy" {
   count                    = var.create_rds_proxy ? 1 : 0
-  type                     = "ingress"
   description              = "PostgreSQL from RDS Proxy"
   from_port                = var.db_port
-  to_port                  = var.db_port
   protocol                 = "tcp"
   security_group_id        = aws_security_group.rds.id
   source_security_group_id = aws_security_group.rds_proxy[0].id
+  to_port                  = var.db_port
+  type                     = "ingress"
 }
 
 resource "aws_security_group_rule" "rds_proxy_egress_all" {
-  count             = var.create_rds_proxy ? 1 : 0
   cidr_blocks       = var.default_egress_cidr_blocks
+  count             = var.create_rds_proxy ? 1 : 0
   description       = "Allow all outbound traffic"
   from_port         = 0
   protocol          = "-1"
@@ -151,24 +151,24 @@ resource "aws_security_group_rule" "rds_proxy_egress_all" {
 
 resource "aws_security_group_rule" "rds_proxy_from_ecs" {
   count                    = var.create_rds_proxy ? 1 : 0
-  type                     = "ingress"
   description              = "PostgreSQL from ECS"
   from_port                = var.db_port
-  to_port                  = var.db_port
   protocol                 = "tcp"
   security_group_id        = aws_security_group.rds_proxy[0].id
   source_security_group_id = aws_security_group.ecs.id
+  to_port                  = var.db_port
+  type                     = "ingress"
 }
 
 resource "aws_security_group_rule" "rds_proxy_from_lambda" {
   count                    = var.create_rds_proxy ? 1 : 0
-  type                     = "ingress"
   description              = "PostgreSQL from Lambda"
   from_port                = var.db_port
-  to_port                  = var.db_port
   protocol                 = "tcp"
   security_group_id        = aws_security_group.rds_proxy[0].id
   source_security_group_id = aws_security_group.lambda.id
+  to_port                  = var.db_port
+  type                     = "ingress"
 }
 
 resource "aws_security_group_rule" "redis_egress_all" {
