@@ -404,8 +404,8 @@ describe('LoginPageContent', () => {
 
       const button = screen.getByRole('button', { name: /sign in with github/i })
       expect(button).toBeInTheDocument()
-      // Button doesn't have explicit type attribute, defaults to submit for form buttons
-      expect(button).not.toHaveAttribute('type')
+      // Button has explicit type="button" to prevent form submission behavior
+      expect(button).toHaveAttribute('type', 'button')
     })
 
     it('provides meaningful text for screen readers in all states', () => {

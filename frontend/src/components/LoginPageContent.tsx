@@ -71,6 +71,7 @@ const LoginPageContent: FC<LoginPageContentProps> = ({ isGitHubAuthEnabled }) =>
         </p>
 
         <button
+          type="button"
           onClick={() => signIn('github', { callbackUrl: '/' })}
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-black px-4 py-2 font-medium text-white transition-colors hover:bg-gray-900/90"
         >
