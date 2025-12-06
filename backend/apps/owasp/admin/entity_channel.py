@@ -9,7 +9,14 @@ from apps.slack.models import Conversation
 
 @admin.action(description="Mark selected EntityChannels as reviewed")
 def mark_as_reviewed(_modeladmin, request, queryset):
-    """Admin action to mark selected EntityChannels as reviewed."""
+    """Mark selected EntityChannels as reviewed.
+
+    Args:
+        _modeladmin (EntityChannelAdmin): The admin instance.
+        request (HttpRequest): The current admin request.
+        queryset (QuerySet): Selected EntityChannel instances.
+
+    """
     messages.success(
         request,
         f"Marked {queryset.update(is_reviewed=True)} EntityChannel(s) as reviewed.",
@@ -62,7 +69,7 @@ class EntityChannelAdmin(admin.ModelAdmin):
     )
 
     def channel_search_display(self, obj):
-        """Display the channel name for the selected channel."""
+        """Return the channel name for the selected EntityChannel."""
         if obj.channel_id and obj.channel_type:
             try:
                 if obj.channel_type.model == "conversation":
@@ -75,7 +82,17 @@ class EntityChannelAdmin(admin.ModelAdmin):
     channel_search_display.short_description = "Channel Name"
 
     def get_form(self, request, obj=None, **kwargs):
-        """Get the form for the EntityChannel model."""
+        """Return the form for EntityChannel with preset conversation content type.
+
+        Args:
+            request (HttpRequest): The current admin request.
+            obj (EntityChannel, optional): The instance being edited.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            Form: The form class with conversation_content_type_id preset.
+
+        """
         form = super().get_form(request, obj, **kwargs)
         form.conversation_content_type_id = ContentType.objects.get_for_model(Conversation).id
 

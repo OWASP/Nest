@@ -24,7 +24,13 @@ class MemberAdmin(admin.ModelAdmin):
     )
 
     def approve_suggested_users(self, request, queryset):
-        """Approve all suggested users for selected members, enforcing one-to-one constraints."""
+        """Approve suggested users for selected members.
+
+        Args:
+            request (HttpRequest): The current admin request.
+            queryset (QuerySet): Selected member instances.
+
+        """
         for entity in queryset:
             suggestions = entity.suggested_users.all()
 

@@ -54,7 +54,7 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     )
 
     def custom_field_name(self, obj) -> str:
-        """Project custom name."""
+        """Return the project name or key for admin list display."""
         return f"{obj.name or obj.key}"
 
     custom_field_name.short_description = "Name"
