@@ -80,6 +80,7 @@ const ProjectHealthMetricsDetails: FC = () => {
                 }
                 icon={faDollar}
                 compliant={metricsLatest.isFundingRequirementsCompliant}
+                size="sm"
               />
               <GeneralCompliantComponent
                 title={
@@ -89,6 +90,7 @@ const ProjectHealthMetricsDetails: FC = () => {
                 }
                 icon={faHandshake}
                 compliant={metricsLatest.isLeaderRequirementsCompliant}
+                size="sm"
               />
             </div>
           </div>

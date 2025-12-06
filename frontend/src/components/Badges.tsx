@@ -2,13 +2,14 @@ import { Tooltip } from '@heroui/tooltip'
 import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
 import { BADGE_CLASS_MAP } from 'utils/data'
 
+const BADGE_SIZE = 16
+const DEFAULT_ICON = BADGE_CLASS_MAP['medal']
+
 type BadgeProps = {
   name: string
   cssClass: string | undefined
   showTooltip?: boolean
 }
-
-const DEFAULT_ICON = BADGE_CLASS_MAP['medal']
 
 const normalizeCssClass = (cssClass: string | undefined) => {
   if (!cssClass || cssClass.trim() === '') {
@@ -30,7 +31,17 @@ const Badges = ({ name, cssClass, showTooltip = true }: BadgeProps) => {
   return (
     <div className="inline-flex items-center">
       <Tooltip content={name} isDisabled={!showTooltip}>
-        <FontAwesomeIconWrapper icon={icon} className="h-4 w-4" data-testid="badge-icon" />
+        <div
+          className="flex items-center justify-center"
+          style={{ width: BADGE_SIZE, height: BADGE_SIZE }}
+        >
+          <FontAwesomeIconWrapper
+            icon={icon}
+            data-testid="badge-icon"
+            style={{ width: BADGE_SIZE, height: BADGE_SIZE }}
+            fixedWidth
+          />
+        </div>
       </Tooltip>
     </div>
   )
