@@ -31,6 +31,7 @@ export const GET_REPOSITORY_DATA = gql`
       organization {
         id
         login
+        name
       }
       project {
         id

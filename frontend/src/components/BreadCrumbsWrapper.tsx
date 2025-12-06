@@ -1,14 +1,18 @@
+'use client'
+
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Breadcrumbs, BreadcrumbItem as HeroUIBreadcrumbItem } from '@heroui/react'
+import { useBreadcrumbs } from 'hooks/useBreadcrumbs'
 import Link from 'next/link'
-import type { BreadcrumbItem } from 'types/breadcrumb'
+import { usePathname } from 'next/navigation'
 
-type BreadCrumbRendererProps = Readonly<{
-  items: readonly BreadcrumbItem[]
-}>
+export default function BreadCrumbsWrapper() {
+  const pathname = usePathname()
+  const items = useBreadcrumbs()
 
-export default function BreadCrumbRenderer({ items }: BreadCrumbRendererProps) {
+  if (pathname === '/' || items.length <= 1) return null
+
   return (
     <div className="mt-16 w-full pt-4">
       <div className="w-full px-8 sm:px-8 md:px-8 lg:px-8">
@@ -31,12 +35,9 @@ export default function BreadCrumbRenderer({ items }: BreadCrumbRendererProps) {
             const isLast = index === items.length - 1
 
             return (
-              <HeroUIBreadcrumbItem key={item.path}>
+              <HeroUIBreadcrumbItem key={item.path} isDisabled={isLast}>
                 {isLast ? (
-                  <span
-                    className="cursor-default font-semibold text-gray-600 dark:text-gray-300"
-                    aria-current="page"
-                  >
+                  <span className="cursor-default font-semibold text-gray-800 dark:text-gray-100">
                     {item.title}
                   </span>
                 ) : (
