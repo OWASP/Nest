@@ -50,4 +50,5 @@ resource "aws_iam_policy" "fixtures_read_only" {
   name        = "${var.project_name}-${var.environment}-fixtures-read-only"
   description = "Allows read-only access to the fixtures S3 bucket"
   policy      = data.aws_iam_policy_document.fixtures_read_only.json
+  tags        = var.common_tags
 }
