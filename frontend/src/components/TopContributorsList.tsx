@@ -42,11 +42,14 @@ const TopContributorsList = ({
       }
     >
       <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4">
-        {displayContributors.map((item, index) => (
-          <div key={index} className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
+        {displayContributors.map((item) => (
+          <div
+            key={item.login}
+            className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+          >
             <div className="flex w-full items-center gap-2">
               <Image
-                alt={item?.name || ''}
+                alt={item?.name ? `${item.name}'s avatar` : 'Contributor avatar'}
                 className="rounded-full"
                 height={24}
                 src={`${item?.avatarUrl}&s=60`}

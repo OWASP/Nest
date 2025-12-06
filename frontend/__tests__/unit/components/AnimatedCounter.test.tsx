@@ -71,7 +71,7 @@ describe('AnimatedCounter', () => {
       })
 
       // Should show intermediate value
-      const displayedValue = parseInt(screen.getByText(/\d+/).textContent || '0')
+      const displayedValue = Number.parseInt(screen.getByText(/\d+/).textContent || '0')
       expect(displayedValue).toBeGreaterThan(0)
       expect(displayedValue).toBeLessThanOrEqual(50)
     })

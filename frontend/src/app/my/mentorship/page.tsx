@@ -1,4 +1,5 @@
 'use client'
+
 import { useQuery } from '@apollo/client/react'
 import { faPlus, faGraduationCap } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -24,7 +25,7 @@ const MyMentorshipPage: React.FC = () => {
   const username = (session as ExtendedSession)?.user?.login
 
   const initialQuery = searchParams.get('q') || ''
-  const initialPage = parseInt(searchParams.get('page') || '1', 10)
+  const initialPage = Number.parseInt(searchParams.get('page') || '1', 10)
 
   const [searchQuery, setSearchQuery] = useState(initialQuery)
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery)
@@ -80,8 +81,6 @@ const MyMentorshipPage: React.FC = () => {
   }, [error])
 
   const handleCreate = () => router.push('/my/mentorship/programs/create')
-  const handleView = (key: string) => router.push(`/my/mentorship/programs/${key}`)
-  const handleEdit = (key: string) => router.push(`/my/mentorship/programs/${key}/edit`)
 
   if (!username) {
     return <LoadingSpinner />
@@ -104,7 +103,7 @@ const MyMentorshipPage: React.FC = () => {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-600 dark:text-white">My Mentorship</h1>
-          <p className="text-gray-600 dark:text-gray-400">Programs you’ve created or joined</p>
+          <p className="text-gray-600 dark:text-gray-400">Programs you've created or joined</p>
         </div>
         <ActionButton onClick={handleCreate}>
           <FontAwesomeIcon icon={faPlus} className="mr-2" />
@@ -128,7 +127,7 @@ const MyMentorshipPage: React.FC = () => {
         searchPlaceholder="Search your programs"
         indexName="my-programs"
       >
-        <div className="mt-16 grid grid-cols-1 gap-x-4 gap-y-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
           {programs.length === 0 ? (
             <div className="col-span-full flex min-h-[40vh] flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
               <p className="text-lg font-semibold">Program not found</p>
@@ -137,10 +136,10 @@ const MyMentorshipPage: React.FC = () => {
             programs.map((p) => (
               <ProgramCard
                 accessLevel="admin"
+                isAdmin={p?.userRole === 'admin'}
                 key={p.id}
+                href={`/my/mentorship/programs/${p.key}`}
                 program={p}
-                onEdit={handleEdit}
-                onView={handleView}
               />
             ))
           )}

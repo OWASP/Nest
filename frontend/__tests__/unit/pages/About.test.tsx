@@ -218,7 +218,7 @@ describe('About Component', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByText('Top Contributors')).toBeInTheDocument()
+      expect(screen.getByText('Wall of Fame')).toBeInTheDocument()
       expect(screen.getByText('Contributor 1')).toBeInTheDocument()
       expect(screen.getByText('Contributor 6')).toBeInTheDocument()
       expect(screen.getByText('Contributor 10')).toBeInTheDocument()
@@ -294,7 +294,7 @@ describe('About Component', () => {
       render(<About />)
     })
 
-    const roadmapSection = screen.getByRole('heading', { name: 'Roadmap' }).closest('div')
+    const roadmapSection = screen.getByRole('heading', { name: /Roadmap/ }).closest('div')
     expect(roadmapSection).toBeInTheDocument()
     const roadmapData = mockAboutData.project.recentMilestones
     const links = within(roadmapSection)

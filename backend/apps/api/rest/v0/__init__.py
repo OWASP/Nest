@@ -16,6 +16,7 @@ from apps.api.rest.v0.organization import router as organization_router
 from apps.api.rest.v0.project import router as project_router
 from apps.api.rest.v0.release import router as release_router
 from apps.api.rest.v0.repository import router as repository_router
+from apps.api.rest.v0.snapshot import router as snapshot_router
 from apps.api.rest.v0.sponsor import router as sponsor_router
 
 ROUTERS = {
@@ -29,6 +30,7 @@ ROUTERS = {
     "/projects": project_router,
     "/releases": release_router,
     "/repositories": repository_router,
+    "/snapshots": snapshot_router,
     "/sponsors": sponsor_router,
 }
 
@@ -40,7 +42,7 @@ api_settings = {
     "docs": Swagger(settings={"persistAuthorization": True}),
     "throttle": [AuthRateThrottle("10/s")],
     "title": "OWASP Nest",
-    "version": "0.2.5",
+    "version": "0.3.1",
 }
 
 api_settings_customization = {}

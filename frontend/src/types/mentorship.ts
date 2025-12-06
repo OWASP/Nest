@@ -1,4 +1,5 @@
 import type { Contributor } from 'types/contributor'
+import type { Issue } from 'types/issue'
 // eslint-disable-next-line no-restricted-imports
 import { ExperienceLevelEnum, ProgramStatusEnum } from './__generated__/graphql'
 
@@ -34,17 +35,19 @@ export type ProgramList = {
 }
 
 export type Module = {
+  description: string
+  domains?: string[] | null
+  endedAt: string | number
+  experienceLevel: ExperienceLevelEnum
   id: string
   key: string
-  name: string
-  description: string
-  status?: ProgramStatusEnum
-  experienceLevel: ExperienceLevelEnum
+  labels?: string[] | null
+  mentees?: Contributor[]
   mentors: Contributor[]
-  startedAt: string
-  endedAt: string
-  domains?: string[]
-  tags?: string[]
+  name: string
+  startedAt: string | number
+  status?: ProgramStatusEnum
+  tags?: string[] | null
 }
 
 export type ModuleFormData = {
@@ -55,7 +58,52 @@ export type ModuleFormData = {
   endedAt: string
   domains: string
   tags: string
+  labels: string
   projectName: string
   projectId: string
   mentorLogins: string
+}
+
+export type CompletedLevel = {
+  id: string
+  name: string
+  level: number
+  completedAt: string
+  stack: string
+  description: string
+}
+
+export type Achievement = {
+  id: string
+  name: string
+  description: string
+  earnedAt: string
+  type: string
+  points: number
+}
+
+export type Penalty = {
+  id: string
+  reason: string
+  points: number
+  createdAt: string
+  status: string
+  description: string
+}
+
+export type MenteeDetails = {
+  id: string
+  login: string
+  name: string
+  avatarUrl: string
+  email?: string
+  bio?: string
+  domains?: string[] | null
+  tags?: string[] | null
+  experienceLevel?: string
+  completedLevels?: CompletedLevel[]
+  achievements?: Achievement[]
+  penalties?: Penalty[]
+  openIssues?: Issue[]
+  closedIssues?: Issue[]
 }

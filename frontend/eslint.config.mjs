@@ -15,6 +15,11 @@ import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import nextPlugin from '@next/eslint-plugin-next'
 import globals from 'globals'
+import noGlobalIsFiniteRule from './eslint-rules/no-global-isfinite.mjs'
+import noGlobalIsNaNRule from './eslint-rules/no-global-isnan.mjs'
+import noGlobalNaNRule from './eslint-rules/no-global-nan.mjs'
+import noGlobalParseFloatRule from './eslint-rules/no-global-parsefloat.mjs'
+import noGlobalParseIntRule from './eslint-rules/no-global-parseint.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -61,6 +66,15 @@ const eslintConfig = [
       react,
       'jsx-a11y': jsxA11y,
       '@next/next': nextPlugin,
+      nest: {
+        rules: {
+          'no-global-isfinite': noGlobalIsFiniteRule,
+          'no-global-isnan': noGlobalIsNaNRule,
+          'no-global-nan': noGlobalNaNRule,
+          'no-global-parsefloat': noGlobalParseFloatRule,
+          'no-global-parseint': noGlobalParseIntRule,
+        },
+      },
     },
     settings: {
       'import/resolver': {
@@ -149,6 +163,12 @@ const eslintConfig = [
       'jsx-a11y/no-distracting-elements': 'warn',
       'jsx-a11y/label-has-associated-control': 'error',
       'jsx-a11y/click-events-have-key-events': 'warn',
+      'nest/no-global-isfinite': 'error',
+      'nest/no-global-isnan': 'error',
+      'nest/no-global-nan': 'error',
+      'nest/no-global-parsefloat': 'error',
+      'nest/no-global-parseint': 'error',
+      quotes: ['error', 'single', { avoidEscape: true }],
     },
   },
   {
