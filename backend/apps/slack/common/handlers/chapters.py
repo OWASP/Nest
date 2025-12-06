@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 from django.conf import settings
-from django.utils.text import Truncator
 
 from apps.common.constants import NL
-from apps.common.utils import get_absolute_url
+from apps.common.utils import get_absolute_url, truncate
 from apps.slack.blocks import get_pagination_buttons, markdown
-from apps.slack.common.constants import TRUNCATION_INDICATOR
 from apps.slack.common.presentation import EntityPresentation
 from apps.slack.constants import FEEDBACK_SHARING_INVITE
 from apps.slack.utils import escape
@@ -80,19 +78,15 @@ def get_blocks(
             else ""
         )
 
-        name = Truncator(escape(chapter["idx_name"])).chars(
-            presentation.name_truncation, truncate=TRUNCATION_INDICATOR
-        )
-        summary = Truncator(chapter["idx_summary"]).chars(
-            presentation.summary_truncation, truncate=TRUNCATION_INDICATOR
-        )
+        name = truncate(escape(chapter["idx_name"]), presentation.name_truncation)
+        summary = truncate(escape(chapter["idx_summary"]), presentation.summary_truncation)
 
         blocks.append(
             markdown(
                 f"{offset + idx + 1}. <{chapter['idx_url']}|*{name}*>{NL}"
                 f"_{location}_{NL}"
                 f"{leaders_text}"
-                f"{escape(summary)}{NL}"
+                f"{summary}{NL}"
             )
         )
 

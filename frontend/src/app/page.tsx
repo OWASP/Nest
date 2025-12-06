@@ -30,6 +30,7 @@ import type { MainPageData } from 'types/home'
 import { formatDate, formatDateRange } from 'utils/dateFormatter'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
+import CalendarButton from 'components/CalendarButton'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import LeadersList from 'components/LeadersList'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -167,12 +168,26 @@ export default function Home() {
             {data.upcomingEvents.map((event: Event, index: number) => (
               <div key={`card-${event.name}`} className="overflow-hidden">
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                  <button
-                    className="mb-2 w-full cursor-pointer text-left text-lg font-semibold text-blue-400 hover:underline"
-                    onClick={() => setModalOpenIndex(index)}
-                  >
-                    <TruncatedText text={event.name} />
-                  </button>
+                  <div className="mb-2 flex items-center justify-between">
+                    <button
+                      className="cursor-pointer text-left text-lg font-semibold text-blue-400 hover:underline"
+                      onClick={() => setModalOpenIndex(index)}
+                    >
+                      <TruncatedText text={event.name} />
+                    </button>
+                    <CalendarButton
+                      event={{
+                        title: event.name,
+                        description: event.summary || '',
+                        location: event.suggestedLocation || '',
+                        startDate: event.startDate,
+                        endDate: event.endDate,
+                        url: event.url,
+                      }}
+                      className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                      iconClassName="h-4 w-4"
+                    />
+                  </div>
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-2 flex items-center">
                       <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
@@ -357,8 +372,8 @@ export default function Home() {
           </div>
         </SecondaryCard>
         <div className="grid gap-6 lg:grid-cols-5">
-          {counterData.map((stat, index) => (
-            <div key={index}>
+          {counterData.map((stat) => (
+            <div key={stat.label}>
               <SecondaryCard className="text-center">
                 <div className="mb-2 text-3xl font-bold text-blue-400">
                   <AnimatedCounter end={stat.value} duration={2} />+

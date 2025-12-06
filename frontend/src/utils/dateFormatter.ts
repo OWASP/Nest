@@ -60,9 +60,9 @@ export const formatDateRange = (startDate: number | string, endDate: number | st
   }
 }
 
-export const formatDateForInput = (dateStr: string) => {
+export const formatDateForInput = (dateStr: string | number) => {
   if (!dateStr) return ''
-  const date = new Date(dateStr)
+  const date = typeof dateStr === 'number' ? new Date(dateStr * 1000) : new Date(dateStr)
   if (Number.isNaN(date.getTime())) {
     throw new Error('Invalid date')
   }

@@ -10,8 +10,13 @@ class CommitteeSitemap(BaseSitemap):
     change_frequency = "monthly"
     prefix = "/committees"
 
-    def items(self):
-        """Return list of committees for sitemap generation."""
+    def items(self) -> list[Committee]:
+        """Return committees for sitemap generation.
+
+        Returns:
+            list: List of indexable Committee objects ordered by update/creation date.
+
+        """
         return [
             c
             for c in Committee.active_committees.order_by(

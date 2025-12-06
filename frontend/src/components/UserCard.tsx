@@ -34,7 +34,12 @@ const UserCard = ({
       <div className="flex w-full flex-col items-center gap-3">
         <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full ring-2 ring-gray-100 transition-all group-hover:ring-blue-400 dark:ring-gray-700">
           {avatar ? (
-            <Image fill src={`${avatar}&s=160`} alt={name || 'user'} objectFit="cover" />
+            <Image
+              fill
+              src={`${avatar}&s=160`}
+              alt={name ? `${name}'s profile picture` : 'User profile picture'}
+              style={{ objectFit: 'cover' }}
+            />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gray-200 dark:bg-gray-700">
               <FontAwesomeIcon

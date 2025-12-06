@@ -275,13 +275,18 @@ describe('Home', () => {
       for (const header of headers) {
         expect(screen.getByText(header)).toBeInTheDocument()
       }
-      // Wait for 2 seconds
-      setTimeout(() => {
-        for (const value of Object.values(stats)) {
-          expect(screen.getByText(`${millify(value)}+`)).toBeInTheDocument()
-        }
-      }, 2000)
     })
+
+    // Wait for animated counters to complete (2 seconds animation)
+    // Note: The "+" is rendered separately from the number, so we check for the number only
+    await waitFor(
+      () => {
+        for (const value of Object.values(stats)) {
+          expect(screen.getByText(millify(value), { exact: false })).toBeInTheDocument()
+        }
+      },
+      { timeout: 3000 }
+    )
   })
 
   test('renders event details including date range and location', async () => {

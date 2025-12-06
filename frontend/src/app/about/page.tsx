@@ -3,7 +3,6 @@ import { useQuery } from '@apollo/client/react'
 import {
   faCircleCheck,
   faClock,
-  faUserGear,
   faMapSigns,
   faScroll,
   faUsers,
@@ -34,6 +33,7 @@ import {
   projectTimeline,
   projectStory,
 } from 'utils/aboutData'
+import { getMilestoneProgressIcon, getMilestoneProgressText } from 'utils/milestoneProgress'
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
 import Leaders from 'components/Leaders'
@@ -51,26 +51,24 @@ const leaders = {
 const projectKey = 'nest'
 
 const About = () => {
-  const {
-    data: projectMetadataResponse,
-    error: projectMetadataRequestError,
-    loading: projectMetadataLoading,
-  } = useQuery(GetProjectMetadataDocument, {
-    variables: { key: projectKey },
-  })
+  const { data: projectMetadataResponse, error: projectMetadataRequestError } = useQuery(
+    GetProjectMetadataDocument,
+    {
+      variables: { key: projectKey },
+    }
+  )
 
-  const {
-    data: topContributorsResponse,
-    error: topContributorsRequestError,
-    loading: topContributorsLoading,
-  } = useQuery(GetTopContributorsDocument, {
-    variables: {
-      excludedUsernames: Object.keys(leaders),
-      hasFullName: true,
-      key: projectKey,
-      limit: 24,
-    },
-  })
+  const { data: topContributorsResponse, error: topContributorsRequestError } = useQuery(
+    GetTopContributorsDocument,
+    {
+      variables: {
+        excludedUsernames: Object.keys(leaders),
+        hasFullName: true,
+        key: projectKey,
+        limit: 24,
+      },
+    }
+  )
 
   const { leadersData, isLoading: leadersLoading } = useLeadersData()
 
@@ -97,7 +95,12 @@ const About = () => {
     }
   }, [topContributorsResponse, topContributorsRequestError])
 
-  const isLoading = projectMetadataLoading || topContributorsLoading || leadersLoading
+  const isLoading =
+    !projectMetadataResponse ||
+    !topContributorsResponse ||
+    (projectMetadataRequestError && !projectMetadata) ||
+    (topContributorsRequestError && !topContributors) ||
+    leadersLoading
 
   if (isLoading) {
     return <LoadingSpinner />
@@ -144,6 +147,7 @@ const About = () => {
           <TopContributorsList
             contributors={topContributors}
             icon={faUsers}
+            label="Wall of Fame"
             maxInitialDisplay={12}
           />
         )}
@@ -218,28 +222,14 @@ const About = () => {
                         </Link>
                         <Tooltip
                           closeDelay={100}
-                          content={
-                            milestone.progress === 100
-                              ? 'Completed'
-                              : milestone.progress > 0
-                                ? 'In Progress'
-                                : 'Not Started'
-                          }
+                          content={getMilestoneProgressText(milestone.progress)}
                           id={`tooltip-state-${index}`}
                           delay={100}
                           placement="top"
                           showArrow
                         >
                           <span className="absolute top-0 right-0 text-xl text-gray-400">
-                            <FontAwesomeIcon
-                              icon={
-                                milestone.progress === 100
-                                  ? faCircleCheck
-                                  : milestone.progress > 0
-                                    ? faUserGear
-                                    : faClock
-                              }
-                            />
+                            <FontAwesomeIcon icon={getMilestoneProgressIcon(milestone.progress)} />
                           </span>
                         </Tooltip>
                       </div>
@@ -251,8 +241,15 @@ const About = () => {
           </SecondaryCard>
         )}
         <SecondaryCard icon={faScroll} title={<AnchorTitle title="Our Story" />}>
-          {projectStory.map((text, index) => (
-            <div key={`story-${index}`} className="mb-4">
+          {projectStory.map((text) => (
+            <div
+              key={text
+                .slice(0, 40)
+                .trim()
+                .replaceAll(' ', '-')
+                .replaceAll(/[^\w-]/g, '')}
+              className="mb-4"
+            >
               <div>
                 <Markdown content={text} />
               </div>

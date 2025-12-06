@@ -36,11 +36,13 @@ const ToggleableList = ({
         </div>
       </h2>
       <div className="flex flex-wrap gap-2">
-        {(showAll ? items : items.slice(0, limit)).map((item, index) => (
+        {(showAll ? items : items.slice(0, limit)).map((item) => (
           <button
             key={item}
             className={`rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700 ${ isDisabled ? "cursor-default" : "cursor-pointer" }`}
             onClick={() => !isDisabled && handleButtonClick({ item })}
+            aria-label={`Search for projects with ${item}`}
+            disabled={isDisabled}
           >
             {item}
           </button>
