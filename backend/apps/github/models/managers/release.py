@@ -8,7 +8,7 @@ class ActiveReleaseManager(models.Manager):
 
     def get_queryset(self):
         """Get queryset of active releases.
-        
+
         Filters out draft and pre-releases, and ensures repository exists.
         """
         return (
