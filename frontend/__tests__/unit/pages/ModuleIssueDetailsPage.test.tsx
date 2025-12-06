@@ -46,13 +46,13 @@ const mockIssueData = {
       isMerged: false,
       organizationName: 'org',
       repositoryName: 'repo',
-      url: 'http://github.com/issue/123',
+      url: 'https://github.com/issue/123',
       assignees: [
         {
           id: 'assignee1',
           login: 'user1',
           name: 'User One',
-          avatarUrl: 'http://example.com/avatar1.png',
+          avatarUrl: 'https://example.com/avatar1.png',
         },
       ],
       labels: ['bug', 'critical'],
@@ -60,13 +60,13 @@ const mockIssueData = {
         {
           id: 'pr1',
           title: 'Fix for test issue',
-          url: 'http://github.com/pr/1',
+          url: 'https://github.com/pr/1',
           state: 'open',
           mergedAt: null,
           createdAt: new Date().toISOString(),
           author: {
             login: 'dev1',
-            avatarUrl: 'http://example.com/dev-avatar1.png',
+            avatarUrl: 'https://example.com/dev-avatar1.png',
           },
         },
       ],
@@ -77,7 +77,7 @@ const mockIssueData = {
       {
         id: 'user2',
         login: 'user2',
-        avatarUrl: 'http://example.com/avatar2.png',
+        avatarUrl: 'https://example.com/avatar2.png',
       },
     ],
   },
