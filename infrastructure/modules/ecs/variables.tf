@@ -1,5 +1,5 @@
 variable "aws_region" {
-  description = "The AWS region"
+  description = "The AWS region."
   type        = string
 }
 
@@ -83,7 +83,7 @@ variable "private_subnet_ids" {
 }
 
 variable "project_name" {
-  description = "The name of the project"
+  description = "The name of the project."
   type        = string
 }
 
