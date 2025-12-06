@@ -241,19 +241,14 @@ const About = () => {
                         </Link>
                         <Tooltip
                           closeDelay={100}
-
                           content={getMilestoneStatus(milestone.progress)}
-
-
                           id={`tooltip-state-${index}`}
                           delay={100}
                           placement="top"
                           showArrow
                         >
                           <span className="absolute top-0 right-0 text-xl text-gray-400">
-
                             <FontAwesomeIcon icon={getMilestoneIcon(milestone.progress)} />
-
                           </span>
                         </Tooltip>
                       </div>
@@ -266,9 +261,7 @@ const About = () => {
         )}
         <SecondaryCard icon={faScroll} title={<AnchorTitle title="Our Story" />}>
           {projectStory.map((text) => (
-
             <div key={`story-${text.substring(0, 50).replaceAll(' ', '-')}`} className="mb-4">
-
               <div>
                 <Markdown content={text} />
               </div>
