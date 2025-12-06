@@ -18,6 +18,14 @@ export type Chapter = {
   topContributors?: Contributor[]
   updatedAt?: number
   url?: string
+  contributionData?: Record<string, number>
+  contributionStats?: {
+    commits: number
+    issues: number
+    pullRequests: number
+    releases: number
+    total: number
+  }
 }
 
 export type GeoLocation = {

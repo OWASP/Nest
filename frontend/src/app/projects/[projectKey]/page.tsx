@@ -15,9 +15,13 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetProjectDocument } from 'types/__generated__/projectQueries.generated'
 import type { Contributor } from 'types/contributor'
 import type { Project } from 'types/project'
+import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
+import ContributionHeatmap from 'components/ContributionHeatmap'
+import ContributionStats from 'components/ContributionStats'
 import LoadingSpinner from 'components/LoadingSpinner'
+
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams<{ projectKey: string }>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -88,26 +92,61 @@ const ProjectDetailsPage = () => {
     },
   ]
 
+  // Calculate contribution heatmap date range (1 year back)
+  const today = new Date()
+  const oneYearAgo = new Date(today)
+  oneYearAgo.setFullYear(today.getFullYear() - 1)
+  const startDate = oneYearAgo.toISOString().split('T')[0]
+  const endDate = today.toISOString().split('T')[0]
+
+  // Use real contribution stats from API with fallback to legacy data
+  const contributionStats = getContributionStats(
+    project.contributionStats,
+    project.contributionData
+  )
+
   return (
-    <DetailsCard
-      details={projectDetails}
-      entityKey={project.key}
-      entityLeaders={project.entityLeaders}
-      healthMetricsData={project.healthMetricsList}
-      isActive={project.isActive}
-      languages={project.languages}
-      pullRequests={project.recentPullRequests}
-      recentIssues={project.recentIssues}
-      recentMilestones={project.recentMilestones}
-      recentReleases={project.recentReleases}
-      repositories={project.repositories}
-      stats={projectStats}
-      summary={project.summary}
-      title={project.name}
-      topContributors={topContributors}
-      topics={project.topics}
-      type="project"
-    />
+    <>
+      <DetailsCard
+        details={projectDetails}
+        entityKey={project.key}
+        entityLeaders={project.entityLeaders}
+        healthMetricsData={project.healthMetricsList}
+        isActive={project.isActive}
+        languages={project.languages}
+        pullRequests={project.recentPullRequests}
+        recentIssues={project.recentIssues}
+        recentMilestones={project.recentMilestones}
+        recentReleases={project.recentReleases}
+        repositories={project.repositories}
+        stats={projectStats}
+        summary={project.summary}
+        title={project.name}
+        topContributors={topContributors}
+        topics={project.topics}
+        type="project"
+      />
+      {project.contributionData && Object.keys(project.contributionData).length > 0 && (
+        <div className="bg-white px-4 pb-10 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+          <div className="mx-auto w-full max-w-6xl">
+            <div className="rounded-lg bg-gray-100 px-4 pt-6 shadow-md sm:px-6 lg:px-10 dark:bg-gray-800">
+              <ContributionStats title="Project Contribution Activity" stats={contributionStats} />
+
+              <div className="mt-4 flex w-full items-center justify-center">
+                <div className="w-full">
+                  <ContributionHeatmap
+                    contributionData={project.contributionData}
+                    startDate={startDate}
+                    endDate={endDate}
+                    unit="contribution"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 

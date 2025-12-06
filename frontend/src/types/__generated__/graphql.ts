@@ -60,6 +60,8 @@ export type BoardOfDirectorsNode = Node & {
 
 export type ChapterNode = Node & {
   __typename?: 'ChapterNode';
+  contributionData: Scalars['JSON']['output'];
+  contributionStats: Scalars['JSON']['output'];
   country: Scalars['String']['output'];
   createdAt: Scalars['Float']['output'];
   entityLeaders: Array<EntityMemberNode>;
@@ -603,6 +605,8 @@ export type ProjectHealthStatsNode = {
 
 export type ProjectNode = Node & {
   __typename?: 'ProjectNode';
+  contributionData: Scalars['JSON']['output'];
+  contributionStats: Scalars['JSON']['output'];
   contributorsCount: Scalars['Int']['output'];
   createdAt?: Maybe<Scalars['DateTime']['output']>;
   entityLeaders: Array<EntityMemberNode>;
