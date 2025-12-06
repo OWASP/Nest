@@ -40,7 +40,7 @@ export default function NavDropdown({ link, pathname }: NavDropDownProps) {
       )}
     >
       <button
-        className="flex items-center gap-2 whitespace-nowrap"
+        className="flex items-center gap-2 whitespace-nowrap cursor-pointer"
         onClick={() => setIsOpen((prev) => !prev)}
         aria-expanded={isOpen}
         aria-haspopup="true"
