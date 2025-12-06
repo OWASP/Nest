@@ -28,6 +28,12 @@ variable "db_backup_retention_period" {
   default     = 7
 }
 
+variable "db_deletion_protection" {
+  description = "Specifies whether to prevent database deletion."
+  type        = bool
+  default     = true
+}
+
 variable "db_engine_version" {
   description = "The version of the PostgreSQL engine"
   type        = string

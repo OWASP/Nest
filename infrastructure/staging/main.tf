@@ -38,6 +38,7 @@ module "database" {
   create_rds_proxy               = var.create_rds_proxy
   db_allocated_storage           = var.db_allocated_storage
   db_backup_retention_period     = var.db_backup_retention_period
+  db_deletion_protection         = var.db_deletion_protection
   db_engine_version              = var.db_engine_version
   db_instance_class              = var.db_instance_class
   db_name                        = var.db_name

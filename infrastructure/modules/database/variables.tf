@@ -33,6 +33,12 @@ variable "db_copy_tags_to_snapshot" {
   default     = true
 }
 
+variable "db_deletion_protection" {
+  description = "Specifies whether to prevent database deletion."
+  type        = bool
+  default     = true
+}
+
 variable "db_enabled_cloudwatch_logs_exports" {
   description = "List of log types to export to CloudWatch Logs."
   type        = list(string)
