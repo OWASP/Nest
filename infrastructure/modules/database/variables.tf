@@ -28,7 +28,7 @@ variable "db_backup_window" {
 }
 
 variable "db_copy_tags_to_snapshot" {
-  description = "Specifies whether to copy all instance tags to snapshots."
+  description = "Whether to copy all instance tags to snapshots."
   type        = bool
   default     = true
 }
@@ -74,7 +74,7 @@ variable "db_password" {
 }
 
 variable "db_skip_final_snapshot" {
-  description = "Determines whether a final DB snapshot is created before the DB instance is deleted."
+  description = "Whether a final DB snapshot is created before the DB instance is deleted."
   type        = bool
   default     = false
 }

@@ -32,7 +32,7 @@ variable "project_name" {
 }
 
 variable "redis_port" {
-  description = "The port for the Redis cache"
+  description = "The port for the Redis cache."
   type        = number
 }
 
