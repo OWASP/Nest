@@ -95,16 +95,6 @@ resource "aws_security_group_rule" "lambda_to_vpc_endpoints" {
   type                     = "egress"
 }
 
-resource "aws_security_group_rule" "rds_egress_all" {
-  cidr_blocks       = var.default_egress_cidr_blocks
-  description       = "Allow all outbound traffic"
-  from_port         = 0
-  protocol          = "-1"
-  security_group_id = aws_security_group.rds.id
-  to_port           = 0
-  type              = "egress"
-}
-
 resource "aws_security_group_rule" "rds_from_ecs" {
   count                    = var.create_rds_proxy ? 0 : 1
   description              = "PostgreSQL from ECS"
@@ -138,15 +128,15 @@ resource "aws_security_group_rule" "rds_from_proxy" {
   type                     = "ingress"
 }
 
-resource "aws_security_group_rule" "rds_proxy_egress_all" {
-  cidr_blocks       = var.default_egress_cidr_blocks
-  count             = var.create_rds_proxy ? 1 : 0
-  description       = "Allow all outbound traffic"
-  from_port         = 0
-  protocol          = "-1"
-  security_group_id = aws_security_group.rds_proxy[0].id
-  to_port           = 0
-  type              = "egress"
+resource "aws_security_group_rule" "rds_proxy_to_rds" {
+  count                    = var.create_rds_proxy ? 1 : 0
+  description              = "Allow RDS Proxy to reach RDS database"
+  from_port                = var.db_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.rds_proxy[0].id
+  source_security_group_id = aws_security_group.rds.id
+  to_port                  = var.db_port
+  type                     = "egress"
 }
 
 resource "aws_security_group_rule" "rds_proxy_from_ecs" {
@@ -169,16 +159,6 @@ resource "aws_security_group_rule" "rds_proxy_from_lambda" {
   source_security_group_id = aws_security_group.lambda.id
   to_port                  = var.db_port
   type                     = "ingress"
-}
-
-resource "aws_security_group_rule" "redis_egress_all" {
-  cidr_blocks       = var.default_egress_cidr_blocks
-  description       = "Allow all outbound traffic"
-  from_port         = 0
-  protocol          = "-1"
-  security_group_id = aws_security_group.redis.id
-  to_port           = 0
-  type              = "egress"
 }
 
 resource "aws_security_group_rule" "redis_from_ecs" {
