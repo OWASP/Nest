@@ -1,8 +1,8 @@
 <div align="center">
 
 <picture>
-  <source srcset="https://nest.owasp.org/img/owasp_icon_white_sm.png" media="(prefers-color-scheme: dark)">
-  <img src="https://nest.owasp.org/img/owasp_icon_black_sm.png" alt="OWASP Logo" width="200">
+  <source srcset="https://nest.owasp.org/img/logo_dark.png" media="(prefers-color-scheme: dark)">
+  <img src="https://nest.owasp.org/img/logo_light.png" alt="OWASP Logo" width="200">
 </picture>
 
 # [OWASP Nest](https://nest.owasp.org/)

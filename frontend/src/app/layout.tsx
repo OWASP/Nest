@@ -28,9 +28,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   description: 'Your gateway to OWASP. Discover, engage, and help shape the future!',
   icons: {
-    apple: 'https://owasp.org/www--site-theme/favicon.ico',
-    icon: 'https://owasp.org/www--site-theme/favicon.ico',
-    shortcut: 'https://owasp.org/www--site-theme/favicon.ico',
+    apple: '/img/favicon.png',
+    icon: '/img/favicon.png',
+    shortcut: '/img/favicon.png',
   },
   openGraph: {
     description: 'Your gateway to OWASP. Discover, engage, and help shape the future!',
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
       {
         alt: 'OWASP logo',
         height: 630,
-        url: 'https://nest.owasp.org/img/owasp_icon_white_background.png',
+        url: 'https://nest.owasp.org/img/nest_1200x630_light.png',
         width: 1200,
       },
     ],
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     creator: '@owasp',
     description: 'Your gateway to OWASP. Discover, engage, and help shape the future!',
-    images: ['https://nest.owasp.org/img/owasp_icon_white_background.png'],
+    images: ['https://nest.owasp.org/img/nest_1200x630_light.png'],
     site: '@owasp',
     title: 'Home – OWASP Nest',
   },
