@@ -126,7 +126,6 @@ speakerdeck
 superfences
 tiktok
 tsc
-turbopack
 unassigning
 unhover
 usefixtures
