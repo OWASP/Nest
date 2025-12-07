@@ -422,10 +422,9 @@ describe('CalendarButton', () => {
       )
       const link = container.querySelector('a')
       expect(link).toBeInTheDocument()
-      if (link) {
-        const computedStyle = globalThis.getComputedStyle(link)
-        expect(computedStyle.display).not.toBe('none')
-      }
+      expect(link).not.toBeNull()
+      const computedStyle = globalThis.getComputedStyle(link as Element)
+      expect(computedStyle.display).not.toBe('none')
     })
   })
 })
