@@ -380,11 +380,17 @@ export const ProjectSelector = ({
         setRawResults([])
         setShowSuggestions(false)
 <<<<<<< HEAD
+<<<<<<< HEAD
         throw new Error(`Error fetching suggestions: ${err}`)
 >>>>>>> a1d77338 (fix: incorrect Error syntax)
 =======
         setError(`Error fetching suggestions: ${err instanceof Error ? err.message : ''}`)
 >>>>>>> d34076e7 (fix: unhandled promise rejection in ModuleForm)
+=======
+        setError(`Error fetching suggestions: ${err instanceof Error ? err.message : String(err || 'Unknown error')}`)
+  }`
+)
+>>>>>>> cc0e211c (improve error message in ModuleForm)
       }
     }, 300),
     [client, value]
