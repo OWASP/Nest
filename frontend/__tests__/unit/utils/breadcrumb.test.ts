@@ -34,4 +34,16 @@ describe('formatBreadcrumbTitle', () => {
   it('handles trailing/leading hyphens', () => {
     expect(formatBreadcrumbTitle('-test-')).toBe(' Test ')
   })
+
+  it('preserves hyphens between consecutive numbers', () => {
+    expect(formatBreadcrumbTitle('snapshots-2025-09')).toBe('Snapshots 2025-09')
+  })
+
+  it('preserves hyphens in number sequences', () => {
+    expect(formatBreadcrumbTitle('report-1-2-3')).toBe('Report 1 2 3')
+  })
+
+  it('handles mixed words and date formats', () => {
+    expect(formatBreadcrumbTitle('report-2024-12-summary')).toBe('Report 2024-12 Summary')
+  })
 })
