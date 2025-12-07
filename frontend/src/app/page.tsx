@@ -170,6 +170,7 @@ export default function Home() {
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <div className="mb-2 flex items-center justify-between">
                     <button
+                      type="button"
                       className="cursor-pointer text-left text-lg font-semibold text-blue-400 hover:underline"
                       onClick={() => setModalOpenIndex(index)}
                     >
