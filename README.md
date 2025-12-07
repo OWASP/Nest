@@ -2,7 +2,7 @@
 
 <picture>
   <source srcset="https://raw.githubusercontent.com/OWASP/Nest/refs/heads/main/frontend/public/img/logo_dark.png" media="(prefers-color-scheme: dark)">
-  <img src="https://raw.githubusercontent.com/OWASP/Nest/refs/heads/main/frontend/public/img/logo_light.png" alt="OWASP Logo" width="200">
+  <img src="https://raw.githubusercontent.com/OWASP/Nest/refs/heads/main/frontend/public/img/logo_light.png" alt="OWASP Nest Logo" width="200">
 </picture>
 
 # [OWASP Nest](https://nest.owasp.org/)
