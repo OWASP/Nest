@@ -379,8 +379,12 @@ export const ProjectSelector = ({
       } catch (err) {
         setRawResults([])
         setShowSuggestions(false)
+<<<<<<< HEAD
         throw new Error(`Error fetching suggestions: ${err}`)
 >>>>>>> a1d77338 (fix: incorrect Error syntax)
+=======
+        setError(`Error fetching suggestions: ${err instanceof Error ? err.message : ''}`)
+>>>>>>> d34076e7 (fix: unhandled promise rejection in ModuleForm)
       }
     }, 300),
     [client, value]
