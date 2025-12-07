@@ -537,7 +537,13 @@ describe('NavDropdown Component', () => {
       render(<NavDropdown {...defaultProps} />)
 
       const button = screen.getByRole('button')
-      expect(button).toHaveClass('flex', 'items-center', 'gap-2', 'whitespace-nowrap')
+      expect(button).toHaveClass(
+        'flex',
+        'items-center',
+        'gap-2',
+        'whitespace-nowrap',
+        'cursor-pointer'
+      )
     })
 
     it('applies correct classes to dropdown menu when open', async () => {
