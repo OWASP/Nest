@@ -11,7 +11,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "sourceMap": true,
     "inlineSources": true,
@@ -36,12 +36,12 @@
     "strict": false
   },
   "include": [
-    "next-env.d.ts",
+    ".next/dev/types/**/*.ts",
+    ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    "src",
-    ".next/dev/types/**/*.ts"
+    "next-env.d.ts",
+    "src"
   ],
   "exclude": ["node_modules"]
 }

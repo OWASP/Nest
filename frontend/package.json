@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "build:turbo": "next build --turbo",
     "dev": "next dev --port 3000",
     "format": "prettier --log-level warn --write .",
     "format:check": "prettier --check .",
@@ -63,6 +62,7 @@
     "react-dom": "^19.2.1",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.10.1",
+    "require-in-the-middle": "^8.0.1",
     "rxjs": "^7.8.2",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7"
