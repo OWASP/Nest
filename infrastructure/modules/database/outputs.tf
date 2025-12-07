@@ -1,7 +1,6 @@
-output "db_password" {
-  description = "The password for the RDS database."
-  value       = local.db_password
-  sensitive   = true
+output "db_password_arn" {
+  description = "The SSM Parameter ARN of password of the RDS database."
+  value       = aws_ssm_parameter.django_db_password.arn
 }
 
 output "db_proxy_endpoint" {
