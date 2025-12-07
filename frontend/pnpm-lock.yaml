@@ -143,9 +143,6 @@ importers:
       react-router-dom:
         specifier: ^7.10.1
         version: 7.10.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      require-in-the-middle:
-        specifier: ^8.0.1
-        version: 8.0.1
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
@@ -285,6 +282,9 @@ importers:
       prettier-plugin-tailwindcss:
         specifier: ^0.7.2
         version: 0.7.2(prettier@3.7.4)
+      require-in-the-middle:
+        specifier: ^8.0.1
+        version: 8.0.1
       tailwindcss:
         specifier: ^4.1.17
         version: 4.1.17
