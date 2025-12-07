@@ -28,9 +28,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   description: 'Your gateway to OWASP. Discover, engage, and help shape the future!',
   icons: {
-    apple: '/img/favicon.png',
-    icon: '/img/favicon.png',
-    shortcut: '/img/favicon.png',
+    apple: '/img/favicon.ico',
+    icon: '/img/favicon.ico',
+    shortcut: '/img/favicon.ico',
   },
   openGraph: {
     description: 'Your gateway to OWASP. Discover, engage, and help shape the future!',
