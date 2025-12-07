@@ -241,7 +241,9 @@ describe('ModuleIssueDetailsPage', () => {
         }
         mockUseQuery.mockReturnValue({ data: dataWithDeadline, loading: false, error: undefined })
         render(<ModuleIssueDetailsPage />)
-        const deadlineElement = screen.getByText(new RegExp(expectedText.replaceAll(/[()]/g,  String.raw`\$&`)))
+        const deadlineElement = screen.getByText(
+          new RegExp(expectedText.replaceAll(/[()]/g, String.raw`\$&`))
+        )
         expect(deadlineElement).toBeInTheDocument()
         expect(deadlineElement).toHaveClass(expectedColor)
       }
