@@ -38,6 +38,7 @@ const ToggleableList = ({
       <div className="flex flex-wrap gap-2">
         {(showAll ? items : items.slice(0, limit)).map((item,index) => (
           <button
+            type="button"
             key={`${item} - ${index}`}
             className={`rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700 ${ isDisabled ? "cursor-default" : "cursor-pointer" }`}
             onClick={() => !isDisabled && handleButtonClick({ item })}
