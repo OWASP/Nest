@@ -10,7 +10,7 @@ repos:
         exclude: (.github|pnpm-lock.yaml)
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.4
+    rev: v0.14.8
     hooks:
       - id: ruff-check
         args:
@@ -70,7 +70,7 @@ repos:
       - id: file-contents-sorter
         args:
           - --unique
-        files: cspell/custom-dict.txt
+        files: (.github/workflows/check-pr-issue-skip-usernames.txt|cspell/custom-dict.txt)
       - id: mixed-line-ending
         args:
           - --fix=lf

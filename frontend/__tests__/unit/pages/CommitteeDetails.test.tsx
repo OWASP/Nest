@@ -131,7 +131,7 @@ describe('CommitteeDetailsPage Component', () => {
     })
     render(<CommitteeDetailsPage />)
     await waitFor(() => {
-      expect(screen.queryByText(`Want to become a sponsor?`)).toBeNull()
+      expect(screen.queryByText('Want to become a sponsor?')).toBeNull()
     })
   })
 })

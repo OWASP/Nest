@@ -128,7 +128,7 @@ describe('Release Component', () => {
   it('renders author avatar when showAvatar is true and author exists', () => {
     render(<Release release={mockReleases[0]} showAvatar={true} />)
 
-    const avatar = screen.getByAltText('Test User')
+    const avatar = screen.getByAltText("Test User's avatar")
     expect(avatar).toBeInTheDocument()
     expect(avatar).toHaveAttribute('src', 'https://example.com/avatar.png')
   })
@@ -190,7 +190,7 @@ describe('Release Component', () => {
   it('renders author name in tooltip when hovering over avatar', () => {
     render(<Release release={mockReleases[0]} />)
 
-    const tooltip = screen.getByAltText('Test User').closest('div')
+    const tooltip = screen.getByAltText("Test User's avatar").closest('div')
     expect(tooltip).toHaveAttribute('id', 'avatar-tooltip-0')
   })
 
@@ -202,7 +202,18 @@ describe('Release Component', () => {
     render(<Release release={releaseWithLoginOnly} />)
 
     // The login should be in the alt attribute of the image
-    const avatar = screen.getByAltText('testuser')
+    const avatar = screen.getByAltText("testuser's avatar")
+    expect(avatar).toBeInTheDocument()
+  })
+
+  it('renders fallback alt text when author exists but name and login are missing', () => {
+    const releaseWithEmptyAuthor = {
+      ...mockReleases[0],
+      author: { ...mockReleases[0].author, name: '', login: '' },
+    }
+    render(<Release release={releaseWithEmptyAuthor} />)
+
+    const avatar = screen.getByAltText('Release author avatar')
     expect(avatar).toBeInTheDocument()
   })
 
@@ -229,8 +240,8 @@ describe('Release Component', () => {
       </div>
     )
 
-    const tooltip1 = screen.getByAltText('Test User').closest('div')
-    const tooltip2 = screen.getByAltText('Jane Doe').closest('div')
+    const tooltip1 = screen.getByAltText("Test User's avatar").closest('div')
+    const tooltip2 = screen.getByAltText("Jane Doe's avatar").closest('div')
 
     expect(tooltip1).toHaveAttribute('id', 'avatar-tooltip-0')
     expect(tooltip2).toHaveAttribute('id', 'avatar-tooltip-1')
@@ -267,7 +278,7 @@ describe('Release Component', () => {
 
     expect(screen.getByText('v1.0 The First Release')).toBeInTheDocument()
     // Avatar should show by default, so we should find the author avatar
-    expect(screen.getByAltText('Test User')).toBeInTheDocument()
+    expect(screen.getByAltText("Test User's avatar")).toBeInTheDocument()
   })
 
   it('handles long release names with truncation', () => {
