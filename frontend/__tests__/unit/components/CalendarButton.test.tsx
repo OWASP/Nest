@@ -334,4 +334,96 @@ describe('CalendarButton', () => {
       expect(svg).toHaveClass('text-blue-500')
     })
   })
+
+  describe('long title overflow handling', () => {
+    it('remains accessible with very long event titles', () => {
+      const longTitle =
+        'This Is A Very Long Event Title That Extends Beyond Normal Length With Additional Description'
+      render(
+        <CalendarButton
+          event={{
+            title: longTitle,
+            startDate: '2026-06-22',
+            endDate: '2026-06-26',
+          }}
+          className="flex-shrink-0"
+        />
+      )
+      const link = screen.getByRole('link')
+      expect(link).toBeInTheDocument()
+      expect(link).toHaveAttribute('aria-label', `Add ${longTitle} to Google Calendar`)
+    })
+
+    it('maintains visibility with flex-shrink-0 class', () => {
+      render(
+        <CalendarButton
+          event={{
+            title: 'Very Long Event Title That Could Potentially Cause Overflow Issues',
+            startDate: '2025-12-01',
+          }}
+          className="flex-shrink-0 text-gray-600"
+        />
+      )
+      const link = screen.getByRole('link')
+      expect(link).toHaveClass('flex-shrink-0')
+      expect(link).toBeVisible()
+    })
+
+    it('works correctly in flex container with long text sibling', () => {
+      const { container } = render(
+        <div className="flex items-center justify-between gap-2">
+          <button className="min-w-0 flex-1 truncate">
+            This Is A Really Long Event Title That Should Be Truncated Properly
+          </button>
+          <CalendarButton
+            event={{
+              title: 'Event',
+              startDate: '2025-12-01',
+            }}
+            className="flex-shrink-0"
+          />
+        </div>
+      )
+      const link = container.querySelector('a')
+      expect(link).toBeInTheDocument()
+      expect(link).toHaveClass('flex-shrink-0')
+    })
+
+    it('handles extremely long titles gracefully', () => {
+      const extremelyLongTitle =
+        'This Is An Extremely Long Event Title With Many Words That Could Cause Layout Issues And Overflow Problems In Flex Containers With Limited Space Available'
+      render(
+        <CalendarButton
+          event={{
+            title: extremelyLongTitle,
+            startDate: '2026-06-22',
+          }}
+        />
+      )
+      const link = screen.getByRole('link')
+      expect(link).toBeInTheDocument()
+      expect(link.getAttribute('href')).toContain('calendar.google.com')
+    })
+
+    it('remains clickable when adjacent to truncated text', () => {
+      const { container } = render(
+        <div className="flex items-center gap-2">
+          <span className="truncate">
+            Another Very Long Text Element That Should Be Truncated With Ellipsis
+          </span>
+          <CalendarButton
+            event={{
+              title: 'Sample Event',
+              startDate: '2026-10-27',
+            }}
+            className="flex-shrink-0"
+          />
+        </div>
+      )
+      const link = container.querySelector('a')
+      expect(link).toBeInTheDocument()
+      const computedStyle = window.getComputedStyle(link!)
+      expect(computedStyle.display).not.toBe('none')
+    })
+  })
 })

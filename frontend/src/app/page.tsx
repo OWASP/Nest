@@ -168,9 +168,9 @@ export default function Home() {
             {data.upcomingEvents.map((event: Event, index: number) => (
               <div key={`card-${event.name}`} className="overflow-hidden">
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                  <div className="mb-2 flex items-center justify-between">
+                  <div className="mb-2 flex items-center justify-between gap-2">
                     <button
-                      className="cursor-pointer text-left text-lg font-semibold text-blue-400 hover:underline"
+                      className="min-w-0 flex-1 cursor-pointer text-left text-lg font-semibold text-blue-400 hover:underline"
                       onClick={() => setModalOpenIndex(index)}
                     >
                       <TruncatedText text={event.name} />
@@ -184,7 +184,7 @@ export default function Home() {
                         endDate: event.endDate,
                         url: event.url,
                       }}
-                      className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                      className="flex-shrink-0 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
                       iconClassName="h-4 w-4"
                     />
                   </div>
