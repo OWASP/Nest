@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { useQuery, useMutation } from '@apollo/client/react'
-import { screen, waitFor, fireEvent, within } from '@testing-library/react'
 import { addToast } from '@heroui/toast'
+import { screen, waitFor, fireEvent, within } from '@testing-library/react'
 import { mockApiKeys, mockCreateApiKeyResult } from '@unit/data/mockApiKeysData'
 import { format, addDays } from 'date-fns'
 import React from 'react'
@@ -45,7 +45,7 @@ jest.mock('next/navigation', () => ({
 beforeAll(() => {
   jest.useFakeTimers()
   jest.setSystemTime(new Date('2025-12-04T00:00:00.000Z'))
-  
+
   Object.defineProperty(navigator, 'clipboard', {
     value: { writeText: jest.fn().mockResolvedValue(undefined) },
     writable: true,
@@ -62,9 +62,11 @@ describe('ApiKeysPage Component', () => {
   const mockRefetch = jest.fn()
   const mockCreateMutation = jest.fn()
   const mockRevokeMutation = jest.fn()
-  
-  // Helper to create mutation function with callback support
-  const createMutationFn = (mockFn: jest.Mock, options?: { onCompleted?: (data: unknown) => void }) => {
+
+  const createMutationFn = (
+    mockFn: jest.Mock,
+    options?: { onCompleted?: (data: unknown) => void }
+  ) => {
     return jest.fn(async (vars) => {
       const result = await mockFn(vars)
       if (options?.onCompleted) {
@@ -73,7 +75,7 @@ describe('ApiKeysPage Component', () => {
       return result
     })
   }
-  
+
   const setupMocks = (overrides = {}) => {
     mockUseQuery.mockReturnValue({
       data: mockApiKeys,
@@ -92,7 +94,7 @@ describe('ApiKeysPage Component', () => {
       }
       return [jest.fn(), { loading: false }]
     })
-    
+
     mockCreateMutation.mockResolvedValue(mockCreateApiKeyResult)
     mockRevokeMutation.mockResolvedValue({ data: { revokeApiKey: { success: true } } })
   }
@@ -151,10 +153,10 @@ describe('ApiKeysPage Component', () => {
       await openCreateModal()
       fillKeyForm('Test New Key')
       fireEvent.click(screen.getByRole('button', { name: /create api key/i }))
-      
+
       const expectedDate = format(addDays(new Date(), 30), 'yyyy-MM-dd')
       const expectedIso = new Date(`${expectedDate}T00:00:00.000Z`).toISOString()
-      
+
       await waitFor(() => {
         expect(mockCreateMutation).toHaveBeenCalledWith({
           variables: {
@@ -184,11 +186,11 @@ describe('ApiKeysPage Component', () => {
     test('uses quick expiry buttons (90 days and 1 year)', async () => {
       render(<ApiKeysPage />)
       await openCreateModal()
-      
+
       fireEvent.click(screen.getByRole('button', { name: /90 days/i }))
       let expiryInput = screen.getByLabelText('Expiration Date') as HTMLInputElement
       expect(expiryInput.value).toBe(format(addDays(new Date(), 90), 'yyyy-MM-dd'))
-      
+
       fireEvent.click(screen.getByRole('button', { name: /1 year/i }))
       expiryInput = screen.getByLabelText('Expiration Date') as HTMLInputElement
       expect(expiryInput.value).toBe(format(addDays(new Date(), 365), 'yyyy-MM-dd'))
@@ -201,7 +203,7 @@ describe('ApiKeysPage Component', () => {
       await openCreateModal()
       fillKeyForm('a'.repeat(101))
       fireEvent.click(screen.getByRole('button', { name: /create api key/i }))
-      
+
       await waitFor(() => {
         expect(addToast).toHaveBeenCalledWith({
           title: 'Error',
@@ -217,7 +219,7 @@ describe('ApiKeysPage Component', () => {
       await openCreateModal()
       fillKeyForm('invalid@name!')
       fireEvent.click(screen.getByRole('button', { name: /create api key/i }))
-      
+
       await waitFor(() => {
         expect(addToast).toHaveBeenCalledWith({
           title: 'Error',
@@ -231,12 +233,12 @@ describe('ApiKeysPage Component', () => {
     test('validates expiration date is required', async () => {
       render(<ApiKeysPage />)
       await openCreateModal()
-      
+
       const expiryInput = screen.getByLabelText('Expiration Date') as HTMLInputElement
       fireEvent.change(expiryInput, { target: { value: '' } })
       fireEvent.change(screen.getByLabelText('API Key Name'), { target: { value: 'Valid Name' } })
       fireEvent.click(screen.getByRole('button', { name: /create api key/i }))
-      
+
       await waitFor(() => {
         expect(addToast).toHaveBeenCalledWith({
           title: 'Error',
@@ -253,10 +255,10 @@ describe('ApiKeysPage Component', () => {
       render(<ApiKeysPage />)
       const row = (await screen.findByText('mock key 1')).closest('tr')!
       fireEvent.click(within(row).getByRole('button'))
-      
+
       const dialog = await screen.findByRole('dialog')
       expect(within(dialog).getByText(/Are you sure you want to revoke/)).toBeInTheDocument()
-      
+
       fireEvent.click(within(dialog).getByRole('button', { name: /Revoke Key/i }))
       await waitFor(() => {
         expect(mockRevokeMutation).toHaveBeenCalledWith({ variables: { uuid: '1' } })
@@ -267,10 +269,10 @@ describe('ApiKeysPage Component', () => {
       render(<ApiKeysPage />)
       const row = (await screen.findByText('mock key 1')).closest('tr')!
       fireEvent.click(within(row).getByRole('button'))
-      
+
       const dialog = await screen.findByRole('dialog')
       fireEvent.click(within(dialog).getByRole('button', { name: /Cancel/i }))
-      
+
       await waitFor(() => {
         expect(mockRevokeMutation).not.toHaveBeenCalled()
       })
@@ -281,10 +283,12 @@ describe('ApiKeysPage Component', () => {
     test('disables create button and shows warning at maximum key limit', async () => {
       setupMocks({ data: { apiKeys: mockApiKeys.apiKeys, activeApiKeyCount: 3 } })
       render(<ApiKeysPage />)
-      
+
       await waitFor(() => {
         expect(screen.getByText(/Create New Key/)).toBeDisabled()
-        expect(screen.getByText(/You've reached the maximum number of API keys/)).toBeInTheDocument()
+        expect(
+          screen.getByText(/You've reached the maximum number of API keys/)
+        ).toBeInTheDocument()
       })
     })
 
@@ -295,14 +299,14 @@ describe('ApiKeysPage Component', () => {
         expect(screen.getByText(/2\s*\/\s*3\s*active keys/i)).toBeInTheDocument()
       })
     })
-  })
 
-  test('displays API key usage information', async () => {
-    render(<ApiKeysPage />)
-    await waitFor(() => {
-      expect(screen.getByText('API Key Usage')).toBeInTheDocument()
-      expect(screen.getByText('X-API-Key')).toBeInTheDocument()
-      expect(screen.getByText(/Keep your API keys secure/)).toBeInTheDocument()
+    test('displays API key usage information', async () => {
+      render(<ApiKeysPage />)
+      await waitFor(() => {
+        expect(screen.getByText('API Key Usage')).toBeInTheDocument()
+        expect(screen.getByText('X-API-Key')).toBeInTheDocument()
+        expect(screen.getByText(/Keep your API keys secure/)).toBeInTheDocument()
+      })
     })
   })
 
@@ -310,7 +314,13 @@ describe('ApiKeysPage Component', () => {
     test('disables create button when createLoading is true', async () => {
       const createLoadingMutation = (mutation: unknown, options?: unknown) => {
         if (mutation === CreateApiKeyDocument) {
-          return [createMutationFn(mockCreateMutation, options as { onCompleted?: (data: unknown) => void }), { loading: true }]
+          return [
+            createMutationFn(
+              mockCreateMutation,
+              options as { onCompleted?: (data: unknown) => void }
+            ),
+            { loading: true },
+          ]
         }
         return [jest.fn(), { loading: false }]
       }
@@ -319,7 +329,7 @@ describe('ApiKeysPage Component', () => {
       render(<ApiKeysPage />)
       await openCreateModal()
       fillKeyForm('Test Key')
-      
+
       const createButton = screen.getByRole('button', { name: /create api key/i })
       expect(createButton).toBeDisabled()
     })
@@ -338,7 +348,7 @@ describe('ApiKeysPage Component', () => {
 
       fireEvent.click(screen.getByText(/Create New Key/))
       await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
-      
+
       const nameInput = screen.getByLabelText('API Key Name') as HTMLInputElement
       expect(nameInput.value).toBe('')
     })
@@ -369,7 +379,7 @@ describe('ApiKeysPage Component', () => {
     test('handles exactly 100 character name (boundary case)', async () => {
       render(<ApiKeysPage />)
       await openCreateModal()
-      
+
       const exactlyHundred = 'a'.repeat(100)
       fillKeyForm(exactlyHundred)
       fireEvent.click(screen.getByRole('button', { name: /create api key/i }))
@@ -394,7 +404,7 @@ describe('ApiKeysPage Component', () => {
     test('accepts valid name with hyphens and spaces', async () => {
       render(<ApiKeysPage />)
       await openCreateModal()
-      
+
       const validName = 'My API Key-123'
       fillKeyForm(validName)
       fireEvent.click(screen.getByRole('button', { name: /create api key/i }))
@@ -433,7 +443,7 @@ describe('ApiKeysPage Component', () => {
       })
     })
 
-    test('shows correct date formatting in table', async () => {
+    test('displays table with date columns', async () => {
       render(<ApiKeysPage />)
       await waitFor(() => {
         const table = screen.getByRole('table')
@@ -446,7 +456,7 @@ describe('ApiKeysPage Component', () => {
     test('disables create button when name input is empty', async () => {
       render(<ApiKeysPage />)
       await openCreateModal()
-      
+
       const createButton = screen.getByRole('button', { name: /create api key/i })
       expect(createButton).toBeDisabled()
     })
