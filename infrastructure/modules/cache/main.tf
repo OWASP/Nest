@@ -1,14 +1,14 @@
 terraform {
-  required_version = ">= 1.0"
+  required_version = "1.14.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.0"
+      version = "6.22.0"
     }
     random = {
       source  = "hashicorp/random"
-      version = "~> 3.0"
+      version = "3.7.2"
     }
   }
 }
@@ -81,4 +81,12 @@ resource "aws_elasticache_replication_group" "main" {
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-redis"
   })
+}
+
+resource "aws_ssm_parameter" "django_redis_password" {
+  description = "The password of Redis cache (Required by Django)."
+  name        = "/${var.project_name}/${var.environment}/DJANGO_REDIS_PASSWORD"
+  tags        = var.common_tags
+  type        = "SecureString"
+  value       = local.redis_auth_token
 }
