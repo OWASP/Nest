@@ -76,7 +76,9 @@ describe('ApiKeysPage Component', () => {
     })
   }
 
-  const setupMocks = (overrides = {}, mutationLoading = { create: false, revoke: false }) => {
+  const setupMocks = (overrides = {}, mutationLoading?: { create: boolean; revoke: boolean }) => {
+    const loading = mutationLoading ?? { create: false, revoke: false }
+
     mockUseQuery.mockReturnValue({
       data: mockApiKeys,
       loading: false,
@@ -87,10 +89,10 @@ describe('ApiKeysPage Component', () => {
 
     mockUseMutation.mockImplementation((mutation, options) => {
       if (mutation === CreateApiKeyDocument) {
-        return [createMutationFn(mockCreateMutation, options), { loading: mutationLoading.create }]
+        return [createMutationFn(mockCreateMutation, options), { loading: loading.create }]
       }
       if (mutation === RevokeApiKeyDocument) {
-        return [createMutationFn(mockRevokeMutation, options), { loading: mutationLoading.revoke }]
+        return [createMutationFn(mockRevokeMutation, options), { loading: loading.revoke }]
       }
       return [jest.fn(), { loading: false }]
     })
