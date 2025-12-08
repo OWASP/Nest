@@ -49,6 +49,7 @@ resource "aws_lb" "main" {
 }
 
 resource "aws_lb_listener" "http" {
+  count             = var.enable_https ? 0 : 1
   load_balancer_arn = aws_lb.main.arn
   port              = 80
   protocol          = "HTTP" #NOSONAR
@@ -57,6 +58,24 @@ resource "aws_lb_listener" "http" {
   default_action {
     target_group_arn = aws_lb_target_group.main.arn
     type             = "forward"
+  }
+}
+
+resource "aws_lb_listener" "http_redirect" {
+  count             = var.enable_https ? 1 : 0
+  load_balancer_arn = aws_lb.main.arn
+  port              = 80
+  protocol          = "HTTP" #NOSONAR
+  tags              = var.common_tags
+
+  default_action {
+    type = "redirect"
+
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
   }
 }
 
@@ -98,7 +117,7 @@ resource "aws_lb_target_group" "main" {
   }
 }
 
-resource "aws_s3_bucket" "alb_logs" {
+resource "aws_s3_bucket" "alb_logs" { # NOSONAR
   bucket = "${var.project_name}-${var.environment}-alb-logs-${random_id.suffix.hex}"
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-alb-logs"

@@ -15,7 +15,7 @@ output "alb_zone_id" {
 
 output "http_listener_arn" {
   description = "The ARN of the HTTP listener."
-  value       = aws_lb_listener.http.arn
+  value       = var.enable_https ? aws_lb_listener.http_redirect[0].arn : aws_lb_listener.http[0].arn
 }
 
 output "target_group_arn" {

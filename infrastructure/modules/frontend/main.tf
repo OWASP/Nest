@@ -131,13 +131,10 @@ resource "aws_ecs_service" "frontend" {
   })
   task_definition = aws_ecs_task_definition.frontend.arn
 
-  dynamic "load_balancer" {
-    for_each = [1]
-    content {
-      container_name   = "frontend"
-      container_port   = 3000
-      target_group_arn = module.alb.target_group_arn
-    }
+  load_balancer {
+    container_name   = "frontend"
+    container_port   = 3000
+    target_group_arn = module.alb.target_group_arn
   }
 
   network_configuration {
