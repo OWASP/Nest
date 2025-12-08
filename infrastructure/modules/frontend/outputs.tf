@@ -11,10 +11,10 @@ output "acm_certificate_status" {
 output "acm_validation_records" {
   description = "The DNS validation records to add to your DNS provider."
   value = var.enable_https && var.domain_name != null ? {
-    for dvo in aws_acm_certificate.frontend[0].domain_validation_options : dvo.domain_name => {
-      name  = dvo.resource_record_name
-      type  = dvo.resource_record_type
-      value = dvo.resource_record_value
+    for domain_validation_option in aws_acm_certificate.frontend[0].domain_validation_options : dvo.domain_name => {
+      name  = domain_validation_option.resource_record_name
+      type  = domain_validation_option.resource_record_type
+      value = domain_validation_option.resource_record_value
     }
   } : {}
 }

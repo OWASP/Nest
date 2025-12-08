@@ -8,6 +8,7 @@ CCSP
 CISSP
 Cañón
 DRF
+ELB
 GBP
 GFKs
 GSOC
@@ -113,6 +114,7 @@ pygoat
 pymdownx
 pypoetry
 pyyaml
+rediss
 relativedelta
 repositorycontributor
 requirepass
