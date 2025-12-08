@@ -76,7 +76,7 @@ describe('ApiKeysPage Component', () => {
     })
   }
 
-  const setupMocks = (overrides = {}) => {
+  const setupMocks = (overrides = {}, mutationLoading = { create: false, revoke: false }) => {
     mockUseQuery.mockReturnValue({
       data: mockApiKeys,
       loading: false,
@@ -87,10 +87,10 @@ describe('ApiKeysPage Component', () => {
 
     mockUseMutation.mockImplementation((mutation, options) => {
       if (mutation === CreateApiKeyDocument) {
-        return [createMutationFn(mockCreateMutation, options), { loading: false }]
+        return [createMutationFn(mockCreateMutation, options), { loading: mutationLoading.create }]
       }
       if (mutation === RevokeApiKeyDocument) {
-        return [createMutationFn(mockRevokeMutation, options), { loading: false }]
+        return [createMutationFn(mockRevokeMutation, options), { loading: mutationLoading.revoke }]
       }
       return [jest.fn(), { loading: false }]
     })
@@ -254,9 +254,8 @@ describe('ApiKeysPage Component', () => {
   describe('API Key Revocation', () => {
     test('revokes API key after confirmation', async () => {
       render(<ApiKeysPage />)
-      const row = (await screen.findByText('mock key 1')).closest('tr')
-      expect(row).not.toBeNull()
-      fireEvent.click(within(row!).getByRole('button'))
+      const row = (await screen.findByText('mock key 1')).closest('tr')!
+      fireEvent.click(within(row).getByRole('button'))
 
       const dialog = await screen.findByRole('dialog')
       expect(within(dialog).getByText(/Are you sure you want to revoke/)).toBeInTheDocument()
@@ -269,9 +268,8 @@ describe('ApiKeysPage Component', () => {
 
     test('cancels revocation when cancel button is clicked', async () => {
       render(<ApiKeysPage />)
-      const row = (await screen.findByText('mock key 1')).closest('tr')
-      expect(row).not.toBeNull()
-      fireEvent.click(within(row!).getByRole('button'))
+      const row = (await screen.findByText('mock key 1')).closest('tr')!
+      fireEvent.click(within(row).getByRole('button'))
 
       const dialog = await screen.findByRole('dialog')
       fireEvent.click(within(dialog).getByRole('button', { name: /Cancel/i }))
@@ -315,28 +313,7 @@ describe('ApiKeysPage Component', () => {
 
   describe('Edge Cases', () => {
     test('disables create button when createLoading is true', async () => {
-      const createLoadingMutation = (mutation: unknown, options?: unknown) => {
-        if (mutation === CreateApiKeyDocument) {
-          return [
-            createMutationFn(
-              mockCreateMutation,
-              options as { onCompleted?: (data: unknown) => void }
-            ),
-            { loading: true },
-          ]
-        }
-        if (mutation === RevokeApiKeyDocument) {
-          return [
-            createMutationFn(
-              mockRevokeMutation,
-              options as { onCompleted?: (data: unknown) => void }
-            ),
-            { loading: false },
-          ]
-        }
-        return [jest.fn(), { loading: false }]
-      }
-      mockUseMutation.mockImplementation(createLoadingMutation)
+      setupMocks({}, { create: true, revoke: false })
 
       render(<ApiKeysPage />)
       await openCreateModal()
