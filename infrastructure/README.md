@@ -213,6 +213,7 @@ Migrate and load data into the new database.
   - Select the task definition revision.
   - Click Deploy > Run Task.
   - Use the following configuration:
+    - Environment: Cluster: owasp-nest-staging-tasks-cluster
     - Networking:
       - VPC: owasp-nest-staging-vpc
       - Subnets: subnets will be auto-selected due to VPC selection.
@@ -220,6 +221,93 @@ Migrate and load data into the new database.
   - Click "Create"
   - The task is now running... Click on the task ID to view Logs, Status, etc.
   - Follow the same steps for `owasp-nest-staging-load-data` and `owasp-nest-staging-index-data`.
+
+### Setup Frontend
+
+1. **Setup Frontend Image**:
+
+  - Change the directory to `frontend/` using the following command:
+
+    ```bash
+    cd frontend/
+    ```
+
+  - Build the frontend image using the following command:
+
+    > [!NOTE]
+    > Make sure to update the `.env` file with correct `NEXT_PUBLIC_*` variables.
+    > These are injected at build time.
+
+    ```bash
+    docker build -t owasp-nest-staging-frontend:latest -f docker/Dockerfile .
+    ```
+
+  - Tag the image:
+
+    > [!NOTE]
+    > Replace `us-east-2` with configured region and `000000000000` with AWS Account ID.
+
+    ```bash
+    docker tag owasp-nest-staging-frontend:latest 000000000000.dkr.ecr.us-east-2.amazonaws.com/owasp-nest-staging-frontend:latest
+    ```
+
+  - Push the image:
+
+    > [!NOTE]
+    > Replace `us-east-2` with configured region and `000000000000` with AWS Account ID.
+
+    ```bash
+    docker push 000000000000.dkr.ecr.us-east-2.amazonaws.com/owasp-nest-staging-frontend:latest
+    ```
+
+2. **Deploy Frontend Infrastructure**:
+
+  > [!IMPORTANT]
+  > Make sure to push the frontend Docker image before running `terraform apply`, as it runs frontend ECS tasks.
+
+  - Run Terraform apply:
+
+    ```bash
+    terraform apply
+    ```
+
+  > [!NOTE]
+  > On first apply, there may be an error 400 when creating the HTTPS Listener for ALB. This is expected because the ACM certificate is not yet validated.
+
+3. **Validate ACM Certificate**:
+
+  - Get the DNS validation records:
+
+    ```bash
+    terraform output frontend_acm_validation_records
+    ```
+
+  - Add the CNAME records to your DNS provider.
+
+  - Wait some time and run `terraform apply` to check if the certificate status has changed to `ISSUED`:
+
+    ```bash
+    terraform apply
+    ```
+
+4. **Configure Frontend Parameters**:
+
+  - Update the frontend server parameters using the Lambda URL from Terraform outputs.
+
+5. **Restart Frontend ECS Tasks**:
+
+  - Force a new deployment to pick up the updated configuration:
+
+    > [!NOTE]
+    > Replace `us-east-2` with configured region.
+
+    ```bash
+    aws ecs update-service \
+        --cluster owasp-nest-staging-frontend-cluster \
+        --service owasp-nest-staging-frontend-service \
+        --force-new-deployment \
+        --region us-east-2
+    ```
 
 ## Cleaning Up
 
