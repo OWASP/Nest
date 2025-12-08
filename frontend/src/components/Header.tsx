@@ -60,22 +60,16 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
         {/* Logo */}
         <Link href="/" onClick={() => setMobileMenuOpen(false)}>
           <div className="flex h-full items-center">
-            <Image
-              width={64}
-              height={64}
-              priority={true}
-              src={'/img/owasp_icon_white_sm.png'}
-              className="hidden dark:block"
-              alt="OWASP Logo"
-            />
-            <Image
-              width={64}
-              height={64}
-              priority={true}
-              src={'/img/owasp_icon_black_sm.png'}
-              className="block dark:hidden"
-              alt="OWASP Logo"
-            />
+            <div className="flex h-16 w-16 items-center justify-center py-2">
+              <Image
+                width={64}
+                height={64}
+                priority={true}
+                src={'/img/logo_dark.png'}
+                className="h-full w-auto object-contain"
+                alt="OWASP Logo"
+              />
+            </div>
             <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
               Nest
             </div>
@@ -158,22 +152,16 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           <div className="flex flex-col justify-center gap-5">
             <Link href="/" onClick={() => setMobileMenuOpen(false)}>
               <div className="flex h-full items-center">
-                <Image
-                  width={64}
-                  height={64}
-                  priority={true}
-                  src={'/img/owasp_icon_white_sm.png'}
-                  className="hidden h-16 dark:block"
-                  alt="OWASP Logo"
-                />
-                <Image
-                  width={64}
-                  height={64}
-                  priority={true}
-                  src={'/img/owasp_icon_black_sm.png'}
-                  className="block h-16 dark:hidden"
-                  alt="OWASP Logo"
-                />
+                <div className="flex h-16 w-16 items-center justify-center py-2">
+                  <Image
+                    width={64}
+                    height={64}
+                    priority={true}
+                    src={'/img/logo_dark.png'}
+                    className="h-full w-auto object-contain"
+                    alt="OWASP Logo"
+                  />
+                </div>
                 <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
                   Nest
                 </div>
