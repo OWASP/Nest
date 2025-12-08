@@ -5,7 +5,7 @@ variable "abort_incomplete_multipart_upload_days" {
 }
 
 variable "bucket_name" {
-  description = "The name of the bucket"
+  description = "The name of the bucket."
   type        = string
 }
 

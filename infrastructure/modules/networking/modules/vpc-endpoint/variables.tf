@@ -1,44 +1,44 @@
 variable "aws_region" {
-  description = "AWS region"
+  description = "The AWS region."
   type        = string
 }
 
 variable "common_tags" {
-  description = "Common tags to apply to all resources"
+  description = "A map of common tags to apply to all resources."
   type        = map(string)
 }
 
 variable "environment" {
-  description = "Environment name"
+  description = "The environment (e.g., staging, production)."
   type        = string
 }
 
 variable "private_route_table_id" {
-  description = "Private route table ID"
+  description = "The ID of the private route table."
   type        = string
 }
 
 variable "private_subnet_ids" {
-  description = "List of private subnet IDs"
+  description = "A list of private subnet IDs."
   type        = list(string)
 }
 
 variable "project_name" {
-  description = "Project name"
+  description = "The name of the project."
   type        = string
 }
 
 variable "public_route_table_id" {
-  description = "Public route table ID"
+  description = "The ID of the public route table."
   type        = string
 }
 
 variable "vpc_cidr" {
-  description = "VPC CIDR block"
+  description = "The CIDR block for the VPC."
   type        = string
 }
 
 variable "vpc_id" {
-  description = "VPC ID"
+  description = "The ID of the VPC."
   type        = string
 }

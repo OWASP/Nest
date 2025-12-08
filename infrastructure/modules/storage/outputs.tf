@@ -1,24 +1,24 @@
 output "fixtures_read_only_policy_arn" {
-  description = "The ARN of the fixtures read-only IAM policy"
+  description = "The ARN of the fixtures read-only IAM policy."
   value       = aws_iam_policy.fixtures_read_only.arn
 }
 
 output "fixtures_s3_bucket_arn" {
-  description = "The ARN of the S3 bucket for fixtures"
+  description = "The ARN of the S3 bucket for fixtures."
   value       = module.fixtures_bucket.arn
 }
 
 output "fixtures_s3_bucket_name" {
-  description = "The name of the S3 bucket for fixtures"
+  description = "The name of the S3 bucket for fixtures."
   value       = module.fixtures_bucket.bucket.id
 }
 
 output "zappa_s3_bucket" {
-  description = "The name of the S3 bucket for Zappa deployments"
+  description = "The name of the S3 bucket for Zappa deployments."
   value       = module.zappa_bucket.bucket
 }
 
 output "zappa_s3_bucket_arn" {
-  description = "The ARN of the S3 bucket for Zappa deployments"
+  description = "The ARN of the S3 bucket for Zappa deployments."
   value       = module.zappa_bucket.arn
 }
