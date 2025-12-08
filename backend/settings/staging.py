@@ -41,9 +41,14 @@ class Staging(Base):
     SITE_NAME = "nest.owasp.dev"
     SITE_URL = f"https://{SITE_NAME}"
 
-    ALLOWED_ORIGINS = (SITE_URL,)
+    ALLOWED_ORIGINS = values.ListValue(environ_name="ALLOWED_ORIGINS", default=[SITE_URL])
     CORS_ALLOWED_ORIGINS = ALLOWED_ORIGINS
     CSRF_TRUSTED_ORIGINS = ALLOWED_ORIGINS
+
+    SESSION_COOKIE_SAMESITE = values.Value(environ_name="SESSION_COOKIE_SAMESITE", default="Lax")
+    CSRF_COOKIE_SAMESITE = values.Value(environ_name="CSRF_COOKIE_SAMESITE", default="Lax")
+    CSRF_COOKIE_HTTPONLY = values.BooleanValue(environ_name="CSRF_COOKIE_HTTPONLY", default=False)
+    CSRF_COOKIE_SECURE = True
 
     IS_STAGING_ENVIRONMENT = True
 
