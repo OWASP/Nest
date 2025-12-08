@@ -58,7 +58,7 @@ module "ecs" {
 
   aws_region                    = var.aws_region
   common_tags                   = local.common_tags
-  container_parameters_arns     = module.parameters.ssm_parameter_arns
+  container_parameters_arns     = module.parameters.django_ssm_parameter_arns
   ecs_sg_id                     = module.security.ecs_sg_id
   environment                   = var.environment
   fixtures_read_only_policy_arn = module.storage.fixtures_read_only_policy_arn
@@ -83,16 +83,16 @@ module "networking" {
 module "parameters" {
   source = "../modules/parameters"
 
-  common_tags    = local.common_tags
-  db_host        = module.database.db_proxy_endpoint
-  db_name        = var.db_name
-  db_password    = module.database.db_password
-  db_port        = var.db_port
-  db_user        = var.db_user
-  environment    = var.environment
-  project_name   = var.project_name
-  redis_host     = module.cache.redis_primary_endpoint
-  redis_password = module.cache.redis_auth_token
+  common_tags        = local.common_tags
+  db_host            = module.database.db_proxy_endpoint
+  db_name            = var.db_name
+  db_password_arn    = module.database.db_password_arn
+  db_port            = var.db_port
+  db_user            = var.db_user
+  environment        = var.environment
+  project_name       = var.project_name
+  redis_host         = module.cache.redis_primary_endpoint
+  redis_password_arn = module.cache.redis_password_arn
 }
 
 module "security" {

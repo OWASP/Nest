@@ -26,8 +26,8 @@ variable "db_name" {
   type        = string
 }
 
-variable "db_password" {
-  description = "The password of the database."
+variable "db_password_arn" {
+  description = "The SSM Parameter ARN of password of the database."
   type        = string
   sensitive   = true
 }
@@ -57,8 +57,8 @@ variable "redis_host" {
   type        = string
 }
 
-variable "redis_password" {
-  description = "The password of the Redis cache."
+variable "redis_password_arn" {
+  description = "The SSM Parameter ARN of password of the Redis cache."
   type        = string
   sensitive   = true
 }
