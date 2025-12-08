@@ -133,16 +133,6 @@ resource "aws_security_group_rule" "frontend_from_alb" {
   type                     = "ingress"
 }
 
-resource "aws_security_group_rule" "frontend_from_internet" {
-  cidr_blocks       = ["0.0.0.0/0"]
-  description       = "Allow HTTP from internet when no ALB"
-  from_port         = 3000
-  protocol          = "tcp"
-  security_group_id = aws_security_group.frontend.id
-  to_port           = 3000
-  type              = "ingress"
-}
-
 resource "aws_security_group_rule" "frontend_https" {
   cidr_blocks       = ["0.0.0.0/0"]
   description       = "Allow HTTPS for external API calls"

@@ -195,14 +195,18 @@ resource "aws_iam_policy" "ecs_task_execution_policy" {
     Version = "2012-10-17"
     Statement = [
       {
+        Action   = "ecr:GetAuthorizationToken"
+        Effect   = "Allow"
+        Resource = "*" # NOSONAR
+      },
+      {
         Action = [
           "ecr:BatchCheckLayerAvailability",
           "ecr:BatchGetImage",
-          "ecr:GetAuthorizationToken",
           "ecr:GetDownloadUrlForLayer"
         ]
         Effect   = "Allow"
-        Resource = "*"
+        Resource = aws_ecr_repository.frontend.arn
       },
       {
         Action = [

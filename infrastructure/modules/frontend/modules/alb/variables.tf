@@ -32,6 +32,12 @@ variable "health_check_path" {
   default     = "/"
 }
 
+variable "log_retention_days" {
+  description = "The number of days to retain ALB access logs."
+  type        = number
+  default     = 90
+}
+
 variable "project_name" {
   description = "The project name."
   type        = string
