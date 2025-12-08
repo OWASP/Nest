@@ -119,6 +119,7 @@ describe('ApiKeysPage Component', () => {
       setupMocks({ data: null, loading: true })
       render(<ApiKeysPage />)
       expect(screen.queryByText('API Key Management')).not.toBeInTheDocument()
+      // Note: Using direct DOM query as skeleton components don't have semantic roles
       expect(document.querySelectorAll('.animate-pulse').length).toBeGreaterThan(0)
     })
 
@@ -253,8 +254,9 @@ describe('ApiKeysPage Component', () => {
   describe('API Key Revocation', () => {
     test('revokes API key after confirmation', async () => {
       render(<ApiKeysPage />)
-      const row = (await screen.findByText('mock key 1')).closest('tr')!
-      fireEvent.click(within(row).getByRole('button'))
+      const row = (await screen.findByText('mock key 1')).closest('tr')
+      expect(row).not.toBeNull()
+      fireEvent.click(within(row!).getByRole('button'))
 
       const dialog = await screen.findByRole('dialog')
       expect(within(dialog).getByText(/Are you sure you want to revoke/)).toBeInTheDocument()
@@ -267,8 +269,9 @@ describe('ApiKeysPage Component', () => {
 
     test('cancels revocation when cancel button is clicked', async () => {
       render(<ApiKeysPage />)
-      const row = (await screen.findByText('mock key 1')).closest('tr')!
-      fireEvent.click(within(row).getByRole('button'))
+      const row = (await screen.findByText('mock key 1')).closest('tr')
+      expect(row).not.toBeNull()
+      fireEvent.click(within(row!).getByRole('button'))
 
       const dialog = await screen.findByRole('dialog')
       fireEvent.click(within(dialog).getByRole('button', { name: /Cancel/i }))
@@ -320,6 +323,15 @@ describe('ApiKeysPage Component', () => {
               options as { onCompleted?: (data: unknown) => void }
             ),
             { loading: true },
+          ]
+        }
+        if (mutation === RevokeApiKeyDocument) {
+          return [
+            createMutationFn(
+              mockRevokeMutation,
+              options as { onCompleted?: (data: unknown) => void }
+            ),
+            { loading: false },
           ]
         }
         return [jest.fn(), { loading: false }]
