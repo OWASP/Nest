@@ -51,3 +51,9 @@ class Staging(Base):
 
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
+
+    # PostHog Configuration
+    POSTHOG_API_KEY = values.SecretValue(environ_name="DJANGO_POSTHOG_API_KEY")
+    POSTHOG_HOST = values.Value(
+        default="https://us.i.posthog.com", environ_name="DJANGO_POSTHOG_HOST"
+    )
