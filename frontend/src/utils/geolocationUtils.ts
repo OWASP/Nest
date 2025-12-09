@@ -94,6 +94,6 @@ export const sortChaptersByDistance = (
 
       return { ...chapter, distance }
     })
-    .filter((item) => item !== null)
-    .sort((a, b) => a!.distance - b!.distance)
+    .filter((item): item is Record<string, unknown> & { distance: number } => item !== null)
+    .sort((a, b) => a.distance - b.distance)
 }
