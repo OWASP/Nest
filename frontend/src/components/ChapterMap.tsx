@@ -1,4 +1,8 @@
 'use client'
+import { faLocationDot } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Button } from '@heroui/button'
+import { Tooltip } from '@heroui/tooltip'
 import L, { MarkerClusterGroup } from 'leaflet'
 import React, { useEffect, useRef, useState } from 'react'
 import type { Chapter } from 'types/chapter'
@@ -14,11 +18,13 @@ const ChapterMap = ({
   showLocal,
   style,
   userLocation,
+  onShareLocation,
 }: {
   geoLocData: Chapter[]
   showLocal: boolean
   style: React.CSSProperties
   userLocation?: UserLocation | null
+  onShareLocation?: () => void
 }) => {
   const mapRef = useRef<L.Map | null>(null)
   const markerClusterRef = useRef<MarkerClusterGroup | null>(null)
@@ -106,6 +112,29 @@ const ChapterMap = ({
 
     markerClusterGroup.addLayers(markers)
 
+    // Add user location marker if available
+    if (userLocation) {
+      const userMarkerIcon = new L.Icon({
+        iconAnchor: [22, 48],
+        iconRetinaUrl: '/img/user-marker-icon.png',
+        iconSize: [42, 48],
+        iconUrl: '/img/user-marker-icon.png',
+        popupAnchor: [3, -40],
+        shadowSize: [52, 48],
+        shadowUrl: '/img/marker-shadow.png',
+      })
+
+      const userMarker = L.marker([userLocation.latitude, userLocation.longitude], {
+        icon: userMarkerIcon,
+      })
+      const userPopup = L.popup()
+      const userPopupContent = document.createElement('div')
+      userPopupContent.textContent = 'Your Location'
+      userPopup.setContent(userPopupContent)
+      userMarker.bindPopup(userPopup)
+      userMarker.addTo(map)
+    }
+
     if (userLocation && validGeoLocData.length > 0) {
       const maxNearestChapters = 5
       const localChapters = validGeoLocData.slice(0, maxNearestChapters)
@@ -154,7 +183,7 @@ const ChapterMap = ({
         <button
           type="button"
           tabIndex={0}
-          className="absolute inset-0 z-[1000] flex cursor-pointer items-center justify-center rounded-[inherit] bg-black/10"
+          className="pointer-events-none absolute inset-0 z-[500] flex cursor-pointer items-center justify-center rounded-[inherit] bg-black/10"
           onClick={() => {
             mapRef.current?.scrollWheelZoom.enable()
             setIsMapActive(true)
@@ -168,11 +197,34 @@ const ChapterMap = ({
           }}
           aria-label="Click to interact with map"
         >
-          <p className="rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg dark:bg-gray-700 dark:text-white">
+          <p className="pointer-events-auto rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg dark:bg-gray-700 dark:text-white">
             Click to interact with map
           </p>
         </button>
       )}
+      <div className="absolute bottom-5 left-3 z-[999] w-fit">
+        {onShareLocation && (
+          <Tooltip
+            showArrow
+            content={
+              userLocation
+                ? 'Reset location filter'
+                : 'Share your current location to find nearby chapters'
+            }
+          >
+            <Button
+              isIconOnly
+              className="h-9 w-9 min-w-9 bg-white text-blue-600 shadow-lg hover:bg-gray-100"
+              onPress={onShareLocation}
+              aria-label={
+                userLocation ? 'Reset location filter' : 'Share location to find nearby chapters'
+              }
+            >
+              <FontAwesomeIcon icon={faLocationDot} size="sm" />
+            </Button>
+          </Tooltip>
+        )}
+      </div>
     </div>
   )
 }
