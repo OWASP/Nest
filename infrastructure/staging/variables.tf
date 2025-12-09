@@ -75,6 +75,12 @@ variable "db_port" {
   }
 }
 
+variable "db_skip_final_snapshot" {
+  description = "Whether a final DB snapshot is created before the DB instance is deleted."
+  type        = bool
+  default     = false
+}
+
 variable "db_storage_type" {
   description = "The storage type for the RDS database."
   type        = string
@@ -101,6 +107,42 @@ variable "fixtures_bucket_name" {
   description = "The name of the S3 bucket for fixtures."
   type        = string
   default     = "owasp-nest-fixtures"
+}
+
+variable "frontend_desired_count" {
+  description = "The desired number of frontend tasks."
+  type        = number
+  default     = 2
+}
+
+variable "frontend_domain_name" {
+  description = "The domain name for frontend (required for HTTPS)"
+  type        = string
+  default     = null
+}
+
+variable "frontend_enable_auto_scaling" {
+  description = "Whether to enable auto scaling for frontend."
+  type        = bool
+  default     = false
+}
+
+variable "frontend_enable_https" {
+  description = "Whether to enable HTTPS listener on ALB."
+  type        = bool
+  default     = false
+}
+
+variable "frontend_max_count" {
+  description = "The maximum number of tasks for auto scaling."
+  type        = number
+  default     = 6
+}
+
+variable "frontend_min_count" {
+  description = "The minimum number of tasks for auto scaling."
+  type        = number
+  default     = 2
 }
 
 variable "private_subnet_cidrs" {

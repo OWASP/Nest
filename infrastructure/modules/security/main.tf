@@ -9,11 +9,29 @@ terraform {
   }
 }
 
+resource "aws_security_group" "alb" {
+  description = "Security group for Application Load Balancer"
+  name        = "${var.project_name}-${var.environment}-alb-sg"
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-${var.environment}-alb-sg"
+  })
+  vpc_id = var.vpc_id
+}
+
 resource "aws_security_group" "ecs" {
   description = "Security group for ECS tasks"
   name        = "${var.project_name}-${var.environment}-ecs-sg"
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-ecs-sg"
+  })
+  vpc_id = var.vpc_id
+}
+
+resource "aws_security_group" "frontend" {
+  description = "Security group for frontend ECS tasks"
+  name        = "${var.project_name}-${var.environment}-frontend-sg"
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-${var.environment}-frontend-sg"
   })
   vpc_id = var.vpc_id
 }
@@ -55,6 +73,36 @@ resource "aws_security_group" "redis" {
   vpc_id = var.vpc_id
 }
 
+resource "aws_security_group_rule" "alb_http" {
+  cidr_blocks       = ["0.0.0.0/0"]
+  description       = "Allow HTTP from internet"
+  from_port         = 80
+  protocol          = "tcp"
+  security_group_id = aws_security_group.alb.id
+  to_port           = 80
+  type              = "ingress"
+}
+
+resource "aws_security_group_rule" "alb_https" {
+  cidr_blocks       = ["0.0.0.0/0"]
+  description       = "Allow HTTPS from internet"
+  from_port         = 443
+  protocol          = "tcp"
+  security_group_id = aws_security_group.alb.id
+  to_port           = 443
+  type              = "ingress"
+}
+
+resource "aws_security_group_rule" "alb_to_frontend" {
+  description              = "Allow traffic to frontend ECS tasks"
+  from_port                = 3000
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.alb.id
+  source_security_group_id = aws_security_group.frontend.id
+  to_port                  = 3000
+  type                     = "egress"
+}
+
 resource "aws_security_group_rule" "ecs_egress_all" {
   cidr_blocks       = var.default_egress_cidr_blocks
   description       = "Allow all outbound traffic"
@@ -70,6 +118,36 @@ resource "aws_security_group_rule" "ecs_to_vpc_endpoints" {
   from_port                = 443
   protocol                 = "tcp"
   security_group_id        = aws_security_group.ecs.id
+  source_security_group_id = var.vpc_endpoint_sg_id
+  to_port                  = 443
+  type                     = "egress"
+}
+
+resource "aws_security_group_rule" "frontend_from_alb" {
+  description              = "Allow traffic from ALB"
+  from_port                = 3000
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.frontend.id
+  source_security_group_id = aws_security_group.alb.id
+  to_port                  = 3000
+  type                     = "ingress"
+}
+
+resource "aws_security_group_rule" "frontend_https" {
+  cidr_blocks       = ["0.0.0.0/0"]
+  description       = "Allow HTTPS for external API calls"
+  from_port         = 443
+  protocol          = "tcp"
+  security_group_id = aws_security_group.frontend.id
+  to_port           = 443
+  type              = "egress"
+}
+
+resource "aws_security_group_rule" "frontend_to_vpc_endpoints" {
+  description              = "Allow HTTPS to VPC endpoints"
+  from_port                = 443
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.frontend.id
   source_security_group_id = var.vpc_endpoint_sg_id
   to_port                  = 443
   type                     = "egress"
