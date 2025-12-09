@@ -355,10 +355,11 @@ class Command(BaseCommand):
         if key:
             chapter_queryset = chapter_queryset.filter(key=key)
 
+        chapter_queryset = chapter_queryset.select_related("owasp_repository")
+
         if offset:
             chapter_queryset = chapter_queryset[offset:]
 
-        chapter_queryset = chapter_queryset.select_related("owasp_repository")
         chapters = list(chapter_queryset)
         self.stdout.write(f"Processing {len(chapters)} chapters...")
 
@@ -382,7 +383,12 @@ class Command(BaseCommand):
 
     def _process_projects(self, start_date, key, offset):
         """Process projects for contribution aggregation."""
-        project_queryset = Project.objects.filter(is_active=True).order_by("id")
+        project_queryset = (
+            Project.objects.filter(is_active=True)
+            .order_by("id")
+            .select_related("owasp_repository")
+            .prefetch_related("repositories")
+        )
 
         if key:
             project_queryset = project_queryset.filter(key=key)
@@ -390,9 +396,6 @@ class Command(BaseCommand):
         if offset:
             project_queryset = project_queryset[offset:]
 
-        project_queryset = project_queryset.select_related("owasp_repository").prefetch_related(
-            "repositories"
-        )
         projects = list(project_queryset)
         self.stdout.write(f"Processing {len(projects)} projects...")
 
