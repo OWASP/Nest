@@ -113,7 +113,7 @@ const ChapterMap = ({
     markerClusterGroup.addLayers(markers)
 
     // Add user location marker if available
-    if (userLocation) {
+    if (userLocation && map) {
       const userMarkerIcon = new L.Icon({
         iconAnchor: [22, 48],
         iconRetinaUrl: '/img/user-marker-icon.png',
