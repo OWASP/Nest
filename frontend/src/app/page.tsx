@@ -180,6 +180,7 @@ export default function Home() {
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-2 flex items-center">
                       <CalendarButton
+                        className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
                         event={{
                           title: event.name,
                           description: event.summary || '',
@@ -188,10 +189,9 @@ export default function Home() {
                           endDate: event.endDate,
                           url: event.url,
                         }}
-                        className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
                         iconClassName="h-4 w-4 mr-1"
-                        showLabel
                         label={formatDateRange(event.startDate, event.endDate)}
+                        showLabel
                       />
                     </div>
                     {event.suggestedLocation && (
