@@ -23,6 +23,7 @@
     "runtime": "python3.13",
     "s3_bucket": "${ZAPPA_S3_BUCKET}",
     "slim_handler": true,
+    "timeout_seconds": 60,
     "vpc_config": {
       "SecurityGroupIds": ["${AWS_LAMBDA_VPC_SECURITY_GROUP_ID}"],
       "SubnetIds": [

@@ -12,7 +12,7 @@ terraform {
 data "aws_caller_identity" "current" {}
 
 resource "aws_ecs_cluster" "main" {
-  name = "${var.project_name}-${var.environment}-cluster"
+  name = "${var.project_name}-${var.environment}-tasks-cluster"
   tags = var.common_tags
 }
 
