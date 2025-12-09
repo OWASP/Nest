@@ -91,8 +91,9 @@ describe('ProjectDetailsPage', () => {
 
   test('renders error message when GraphQL request fails', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: { repository: null },
+      data: { project: null },
       error: mockError,
+      loading: false,
     })
 
     render(<ProjectDetailsPage />)
@@ -173,8 +174,9 @@ describe('ProjectDetailsPage', () => {
 
   test('Handles case when no data is available', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: { repository: null },
+      data: { project: null },
       error: null,
+      loading: false,
     })
     render(<ProjectDetailsPage />)
     await waitFor(() => {
@@ -273,11 +275,11 @@ describe('ProjectDetailsPage', () => {
     render(<ProjectDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText(`2.2K Stars`)).toBeInTheDocument()
-      expect(screen.getByText(`10 Forks`)).toBeInTheDocument()
-      expect(screen.getByText(`1.2K Contributors`)).toBeInTheDocument()
-      expect(screen.getByText(`3 Repositories`)).toBeInTheDocument()
-      expect(screen.getByText(`10 Issues`)).toBeInTheDocument()
+      expect(screen.getByText('2.2K Stars')).toBeInTheDocument()
+      expect(screen.getByText('10 Forks')).toBeInTheDocument()
+      expect(screen.getByText('1.2K Contributors')).toBeInTheDocument()
+      expect(screen.getByText('3 Repositories')).toBeInTheDocument()
+      expect(screen.getByText('10 Issues')).toBeInTheDocument()
     })
   })
   test('renders project sponsor block correctly', async () => {
@@ -289,7 +291,7 @@ describe('ProjectDetailsPage', () => {
     render(<ProjectDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText(`Want to become a sponsor?`)).toBeInTheDocument()
+      expect(screen.getByText('Want to become a sponsor?')).toBeInTheDocument()
       expect(screen.getByText(`Sponsor ${mockProjectDetailsData.project.name}`)).toBeInTheDocument()
     })
   })

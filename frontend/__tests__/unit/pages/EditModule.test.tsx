@@ -86,8 +86,8 @@ describe('EditModulePage', () => {
     expect(await screen.findByDisplayValue('Existing Module')).toBeInTheDocument()
 
     // Modify values
-    fireEvent.change(screen.getByLabelText(/Module Name/i), {
-      target: { value: 'Updated Module Name' },
+    fireEvent.change(screen.getByLabelText('Name *'), {
+      target: { value: 'Updated Name' },
     })
     fireEvent.change(screen.getByLabelText(/Description/i), {
       target: { value: 'Updated description' },
@@ -110,7 +110,9 @@ describe('EditModulePage', () => {
 
     await waitFor(() => {
       expect(mockUpdateModule).toHaveBeenCalled()
-      expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program?refresh=true')
+      expect(mockPush).toHaveBeenCalledWith(
+        '/my/mentorship/programs/test-program/modules/test-module'
+      )
     })
   })
 
