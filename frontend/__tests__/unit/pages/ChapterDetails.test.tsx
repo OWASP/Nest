@@ -28,6 +28,7 @@ jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(() => mockRouter),
   useParams: () => ({ chapterKey: 'test-chapter' }),
+  usePathname: jest.fn(() => '/chapters/test-chapter'),
 }))
 
 describe('chapterDetailsPage Component', () => {

@@ -1,4 +1,5 @@
 import { GoogleAnalytics } from '@next/third-parties/google'
+import { BreadcrumbRoot } from 'contexts/BreadcrumbContext'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import React from 'react'
@@ -6,7 +7,7 @@ import { Providers } from 'wrappers/provider'
 import { GTM_ID } from 'utils/env.client'
 import { IS_GITHUB_AUTH_ENABLED } from 'utils/env.server'
 import AutoScrollToTop from 'components/AutoScrollToTop'
-import BreadCrumbs from 'components/BreadCrumbs'
+import BreadCrumbsWrapper from 'components/BreadCrumbsWrapper'
 import Footer from 'components/Footer'
 import Header from 'components/Header'
 import ScrollToTop from 'components/ScrollToTop'
@@ -71,14 +72,16 @@ export default function RootLayout({
         style={{ minHeight: '100vh' }}
       >
         <Providers>
-          <div className="flex min-h-screen flex-col">
-            <AutoScrollToTop />
-            <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
-            <BreadCrumbs />
-            <main className="flex flex-1 flex-col justify-center">{children}</main>
-            <Footer />
-            <ScrollToTop />
-          </div>
+          <BreadcrumbRoot>
+            <div className="flex min-h-screen flex-col">
+              <AutoScrollToTop />
+              <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
+              <BreadCrumbsWrapper />
+              <main className="flex flex-1 flex-col justify-center">{children}</main>
+              <Footer />
+              <ScrollToTop />
+            </div>
+          </BreadcrumbRoot>
         </Providers>
       </body>
       <GoogleAnalytics gaId={GTM_ID} />
