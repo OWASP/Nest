@@ -17,6 +17,7 @@ class TestProjectNode:
         field_names = {field.name for field in ProjectNode.__strawberry_definition__.fields}
         expected_field_names = {
             "contribution_data",
+            "contribution_stats",
             "contributors_count",
             "created_at",
             "forks_count",
@@ -104,3 +105,8 @@ class TestProjectNode:
         field = self._get_field_by_name("topics")
         assert field is not None
         assert field.type == list[str]
+
+    def test_resolve_contribution_stats(self):
+        field = self._get_field_by_name("contribution_stats")
+        assert field is not None
+        assert field.type.__class__.__name__ == "ScalarWrapper"
