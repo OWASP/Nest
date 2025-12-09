@@ -192,4 +192,28 @@ describe('ToggleableList', () => {
       'hover:scale-105'
     )
   })
+   it('applies cursor-pointer when isDisabled is false', () => {
+    render(<ToggleableList items={['React']} label="test-label" isDisabled={false} />)
+
+    const button = screen.getByText('React')
+    expect(button).toHaveClass('cursor-pointer')
+    expect(button).not.toHaveClass('cursor-default')
+  })
+
+  it('applies cursor-default when isDisabled is true', () => {
+    render(<ToggleableList items={['React']} label="test-label" isDisabled={true} />)
+
+    const button = screen.getByText('React')
+    expect(button).toHaveClass('cursor-default')
+    expect(button).not.toHaveClass('cursor-pointer')
+  })
+
+  it('does not navigate when isDisabled is true', () => {
+    render(<ToggleableList items={['React']} label="test-label" isDisabled={true} />)
+
+    const button = screen.getByText('React')
+    fireEvent.click(button)
+
+    expect(mockPush).not.toHaveBeenCalled()
+  })
 })

@@ -295,13 +295,11 @@ const MetricsPage: FC = () => {
               }
               setFilters(newFilters)
               setActiveFilters(
-                Array.from(
-                  newParams
-                    .entries()
-                    .filter(([key]) => key != 'order')
-                    .map(([, value]) => value)
-                )
+                Array.from(newParams.entries())
+                  .filter(([key]) => key != 'order')
+                  .map(([, value]) => value)
               )
+              
               router.replace(`/projects/dashboard/metrics?${newParams.toString()}`)
             }}
           />
