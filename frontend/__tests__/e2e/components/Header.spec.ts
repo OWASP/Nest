@@ -69,7 +69,7 @@ test.describe('Header - Desktop (Chrome)', () => {
 
     for (let i = 0; i < count; i++) {
       const btn = dropdownButtons.nth(i)
-      const cursor = await btn.evaluate((el) => window.getComputedStyle(el).cursor)
+      const cursor = await btn.evaluate((el) => globalThis.getComputedStyle(el).cursor)
       expect(cursor).toBe('pointer')
     }
   })
