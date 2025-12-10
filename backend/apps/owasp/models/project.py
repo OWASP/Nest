@@ -107,7 +107,7 @@ class Project(
         verbose_name="Contribution Statistics",
         default=dict,
         blank=True,
-        help_text="Detailed contribution breakdown (commits, issues, pullRequests, releases)",
+        help_text="Detailed contribution breakdown (commits, issues, pull requests, releases)",
     )
 
     # GKs.
