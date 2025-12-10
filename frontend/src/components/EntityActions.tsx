@@ -25,6 +25,9 @@ const EntityActions: React.FC<EntityActionsProps> = ({
   const router = useRouter()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const [focusedIndex, setFocusedIndex] = useState<number>(-1)
+  const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([])
+  const triggerButtonRef = useRef<HTMLButtonElement>(null)
 
   const handleAction = (actionKey: string) => {
     switch (actionKey) {
@@ -88,19 +91,87 @@ const EntityActions: React.FC<EntityActionsProps> = ({
     }
   }, [])
 
+  useEffect(() => {
+    if (dropdownOpen) {
+      setFocusedIndex(0)
+    } else {
+      setFocusedIndex(-1)
+      menuItemsRef.current = []
+    }
+  }, [dropdownOpen])
+
+  useEffect(() => {
+    if (dropdownOpen && focusedIndex >= 0 && menuItemsRef.current[focusedIndex]) {
+      menuItemsRef.current[focusedIndex]?.focus()
+    }
+  }, [dropdownOpen, focusedIndex])
+
+  useEffect(() => {
+    if (!dropdownOpen && triggerButtonRef.current) {
+      triggerButtonRef.current.focus()
+    }
+  }, [dropdownOpen])
+
   const handleToggle = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     setDropdownOpen((prev) => !prev)
   }
 
+  const handleTriggerKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      setDropdownOpen((prev) => !prev)
+    } else if (e.key === 'Escape' && dropdownOpen) {
+      e.preventDefault()
+      setDropdownOpen(false)
+    } else if (e.key === 'ArrowDown' && !dropdownOpen) {
+      e.preventDefault()
+      setDropdownOpen(true)
+    }
+  }
+
+  const handleMenuKeyDown = (e: React.KeyboardEvent) => {
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault()
+        setFocusedIndex((prev) => (prev < options.length - 1 ? prev + 1 : prev))
+        break
+      case 'ArrowUp':
+        e.preventDefault()
+        setFocusedIndex((prev) => (prev > 0 ? prev - 1 : 0))
+        break
+      case 'Home':
+        e.preventDefault()
+        setFocusedIndex(0)
+        break
+      case 'End':
+        e.preventDefault()
+        setFocusedIndex(options.length - 1)
+        break
+      case 'Escape':
+        e.preventDefault()
+        setDropdownOpen(false)
+        break
+      case 'Enter':
+      case ' ':
+        e.preventDefault()
+        if (focusedIndex >= 0) {
+          handleAction(options[focusedIndex].key)
+        }
+        break
+    }
+  }
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button
+        ref={triggerButtonRef}
         data-testid={`${type}-actions-button`}
         type="button"
         onClick={handleToggle}
-        className="cursor-pointer rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
+        onKeyDown={handleTriggerKeyDown}
+        className="cursor-pointer rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-hidden dark:focus:ring-blue-300"
         aria-label={`${type === 'program' ? 'Program' : 'Module'} actions menu`}
         aria-expanded={dropdownOpen}
         aria-haspopup="true"
@@ -111,8 +182,11 @@ const EntityActions: React.FC<EntityActionsProps> = ({
         />
       </button>
       {dropdownOpen && (
-        <div className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          {options.map((option) => {
+        <div
+          role="menu"
+          className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
+        >
+          {options.map((option, index) => {
             const handleMenuItemClick = (e: React.MouseEvent) => {
               e.preventDefault()
               e.stopPropagation()
@@ -122,10 +196,13 @@ const EntityActions: React.FC<EntityActionsProps> = ({
             return (
               <button
                 key={option.key}
+                ref={(el) => (menuItemsRef.current[index] = el)}
                 type="button"
                 role="menuitem"
+                tabIndex={-1}
                 onClick={handleMenuItemClick}
-                className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                onKeyDown={handleMenuKeyDown}
+                className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 focus:bg-gray-100 focus:outline-none dark:focus:bg-gray-700"
               >
                 {option.label}
               </button>

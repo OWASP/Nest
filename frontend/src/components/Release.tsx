@@ -74,7 +74,7 @@ const Release: React.FC<ReleaseProps> = ({
           <div className="flex flex-1 items-center overflow-hidden">
             <FontAwesomeIcon icon={faFolderOpen} className="mr-2 h-5 w-4" />
             <button
-              className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
+              className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-hidden dark:focus:ring-blue-300 focus:rounded"
               disabled={!release.organizationName || !release.repositoryName}
               onClick={() => {
                 const org = release.organizationName || ''
