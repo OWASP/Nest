@@ -1,5 +1,5 @@
 """Project API."""
-
+from .errors import project_not_found
 from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
@@ -104,4 +104,4 @@ def get_project(
     ).first():
         return project
 
-    return Response({"message": "Project not found"}, status=HTTPStatus.NOT_FOUND)
+    return project_not_found()

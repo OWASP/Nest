@@ -1,5 +1,5 @@
 """Event API."""
-
+from .errors import event_not_found
 from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
@@ -104,4 +104,4 @@ def get_event(
     if event := EventModel.objects.filter(key__iexact=event_id).first():
         return event
 
-    return Response({"message": "Event not found"}, status=HTTPStatus.NOT_FOUND)
+    return event_not_found()

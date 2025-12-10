@@ -1,5 +1,5 @@
 """Chapter API."""
-
+from .errors import chapter_not_found
 from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
@@ -109,4 +109,4 @@ def get_chapter(
     ).first():
         return chapter
 
-    return Response({"message": "Chapter not found"}, status=HTTPStatus.NOT_FOUND)
+    return chapter_not_found()
