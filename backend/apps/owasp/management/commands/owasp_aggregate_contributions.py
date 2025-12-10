@@ -22,27 +22,27 @@ class Command(BaseCommand):
         """Add command arguments."""
         parser.add_argument(
             "--entity-type",
+            choices=["chapter", "project"],
+            help="Entity type to aggregate: chapter, project",
+            required=True,
             type=str,
-            choices=["chapter", "project", "both"],
-            default="both",
-            help="Entity type to aggregate: chapter, project, or both",
         )
         parser.add_argument(
             "--days",
-            type=int,
             default=365,
             help="Number of days to look back for contributions (default: 365)",
+            type=int,
         )
         parser.add_argument(
             "--key",
-            type=str,
             help="Specific chapter or project key to aggregate",
+            type=str,
         )
         parser.add_argument(
             "--offset",
-            type=int,
             default=0,
             help="Skip the first N entities",
+            type=int,
         )
 
     def _aggregate_contribution_dates(
@@ -59,11 +59,12 @@ class Command(BaseCommand):
             contribution_map: Dictionary to update with counts
 
         """
-        dates = queryset.values_list(date_field, flat=True)
-        for date_value in dates:
-            if date_value:
-                date_key = date_value.date().isoformat()
-                contribution_map[date_key] = contribution_map.get(date_key, 0) + 1
+        for date_value in queryset.values_list(date_field, flat=True):
+            if not date_value:
+                continue
+
+            date_key = date_value.date().isoformat()
+            contribution_map[date_key] = contribution_map.get(date_key, 0) + 1
 
     def aggregate_chapter_contributions(
         self,
@@ -87,7 +88,7 @@ class Command(BaseCommand):
 
         repository = chapter.owasp_repository
 
-        # Aggregate commits
+        # Aggregate commits.
         self._aggregate_contribution_dates(
             Commit.objects.filter(
                 repository=repository,
@@ -97,32 +98,32 @@ class Command(BaseCommand):
             contribution_map,
         )
 
-        # Aggregate issues
+        # Aggregate issues.
         self._aggregate_contribution_dates(
             Issue.objects.filter(
-                repository=repository,
                 created_at__gte=start_date,
+                repository=repository,
             ),
             "created_at",
             contribution_map,
         )
 
-        # Aggregate pull requests
+        # Aggregate pull requests.
         self._aggregate_contribution_dates(
             PullRequest.objects.filter(
-                repository=repository,
                 created_at__gte=start_date,
+                repository=repository,
             ),
             "created_at",
             contribution_map,
         )
 
-        # Aggregate releases (exclude drafts)
+        # Aggregate published releases.
         self._aggregate_contribution_dates(
             Release.objects.filter(
-                repository=repository,
-                published_at__gte=start_date,
                 is_draft=False,
+                published_at__gte=start_date,
+                repository=repository,
             ),
             "published_at",
             contribution_map,
@@ -147,26 +148,24 @@ class Command(BaseCommand):
         """
         contribution_map: dict[str, int] = {}
 
-        repositories = list(project.repositories.all())
+        repository_ids = [r.id for r in project.repositories.all()]
         if project.owasp_repository:
-            repositories.append(project.owasp_repository)
-
-        repository_ids = [repo.id for repo in repositories if repo]
+            repository_ids.append(project.owasp_repository.id)
 
         if not repository_ids:
             return contribution_map
 
-        # Aggregate commits
+        # Aggregate commits.
         self._aggregate_contribution_dates(
             Commit.objects.filter(
-                repository_id__in=repository_ids,
                 created_at__gte=start_date,
+                repository_id__in=repository_ids,
             ),
             "created_at",
             contribution_map,
         )
 
-        # Aggregate issues
+        # Aggregate issues.
         self._aggregate_contribution_dates(
             Issue.objects.filter(
                 repository_id__in=repository_ids,
@@ -176,7 +175,7 @@ class Command(BaseCommand):
             contribution_map,
         )
 
-        # Aggregate pull requests
+        # Aggregate pull requests.
         self._aggregate_contribution_dates(
             PullRequest.objects.filter(
                 repository_id__in=repository_ids,
@@ -186,7 +185,7 @@ class Command(BaseCommand):
             contribution_map,
         )
 
-        # Aggregate releases (exclude drafts)
+        # Aggregate published releases.
         self._aggregate_contribution_dates(
             Release.objects.filter(
                 repository_id__in=repository_ids,
@@ -211,13 +210,13 @@ class Command(BaseCommand):
             start_date: Start date for calculation
 
         Returns:
-            Dictionary with commits, issues, pullRequests, releases counts
+            Dictionary with commits, issues, pull requests, releases counts
 
         """
         stats = {
             "commits": 0,
             "issues": 0,
-            "pullRequests": 0,
+            "pull_requests": 0,
             "releases": 0,
             "total": 0,
         }
@@ -240,7 +239,7 @@ class Command(BaseCommand):
         ).count()
 
         # Count pull requests
-        stats["pullRequests"] = PullRequest.objects.filter(
+        stats["pull_requests"] = PullRequest.objects.filter(
             repository=repository,
             created_at__gte=start_date,
         ).count()
@@ -254,7 +253,7 @@ class Command(BaseCommand):
 
         # Calculate total
         stats["total"] = (
-            stats["commits"] + stats["issues"] + stats["pullRequests"] + stats["releases"]
+            stats["commits"] + stats["issues"] + stats["pull_requests"] + stats["releases"]
         )
 
         return stats
@@ -271,13 +270,13 @@ class Command(BaseCommand):
             start_date: Start date for calculation
 
         Returns:
-            Dictionary with commits, issues, pullRequests, releases counts
+            Dictionary with commits, issues, pull requests, releases counts
 
         """
         stats = {
             "commits": 0,
             "issues": 0,
-            "pullRequests": 0,
+            "pull_requests": 0,
             "releases": 0,
             "total": 0,
         }
@@ -304,7 +303,7 @@ class Command(BaseCommand):
         ).count()
 
         # Count pull requests
-        stats["pullRequests"] = PullRequest.objects.filter(
+        stats["pull_requests"] = PullRequest.objects.filter(
             repository_id__in=repository_ids,
             created_at__gte=start_date,
         ).count()
@@ -318,7 +317,7 @@ class Command(BaseCommand):
 
         # Calculate total
         stats["total"] = (
-            stats["commits"] + stats["issues"] + stats["pullRequests"] + stats["releases"]
+            stats["commits"] + stats["issues"] + stats["pull_requests"] + stats["releases"]
         )
 
         return stats
@@ -338,52 +337,44 @@ class Command(BaseCommand):
             ),
         )
 
-        # Process chapters
-        if entity_type in ["chapter", "both"]:
+        if entity_type == "chapter":
             self._process_chapters(start_date, key, offset)
-
-        # Process projects
-        if entity_type in ["project", "both"]:
+        elif entity_type == "project":
             self._process_projects(start_date, key, offset)
 
         self.stdout.write(self.style.SUCCESS("Done!"))
 
     def _process_chapters(self, start_date, key, offset):
         """Process chapters for contribution aggregation."""
-        chapter_queryset = Chapter.objects.filter(is_active=True).order_by("id")
+        active_chapters = Chapter.objects.filter(is_active=True).order_by("id")
 
         if key:
-            chapter_queryset = chapter_queryset.filter(key=key)
+            active_chapters = active_chapters.filter(key=key)
 
-        chapter_queryset = chapter_queryset.select_related("owasp_repository")
+        active_chapters = active_chapters.select_related("owasp_repository")
 
         if offset:
-            chapter_queryset = chapter_queryset[offset:]
+            active_chapters = active_chapters[offset:]
 
-        chapters = list(chapter_queryset)
-        self.stdout.write(f"Processing {len(chapters)} chapters...")
+        self.stdout.write(f"Processing {active_chapters.count()} chapters...")
 
-        for chapter in chapters:
-            contribution_data = self.aggregate_chapter_contributions(
-                chapter,
-                start_date,
+        chapters = []
+        for chapter in active_chapters:
+            chapter.contribution_data = self.aggregate_chapter_contributions(chapter, start_date)
+            chapter.contribution_stats = self.calculate_chapter_contribution_stats(
+                chapter, start_date
             )
-            contribution_stats = self.calculate_chapter_contribution_stats(
-                chapter,
-                start_date,
-            )
-            chapter.contribution_data = contribution_data
-            chapter.contribution_stats = contribution_stats
+            chapters.append(chapter)
 
         if chapters:
             Chapter.bulk_save(chapters, fields=("contribution_data", "contribution_stats"))
             self.stdout.write(
-                self.style.SUCCESS(f"✓ Updated {len(chapters)} chapters"),
+                self.style.SUCCESS(f"Updated {active_chapters.count()} chapters"),
             )
 
     def _process_projects(self, start_date, key, offset):
         """Process projects for contribution aggregation."""
-        project_queryset = (
+        active_projects = (
             Project.objects.filter(is_active=True)
             .order_by("id")
             .select_related("owasp_repository")
@@ -391,28 +382,21 @@ class Command(BaseCommand):
         )
 
         if key:
-            project_queryset = project_queryset.filter(key=key)
+            active_projects = active_projects.filter(key=key)
 
         if offset:
-            project_queryset = project_queryset[offset:]
+            active_projects = active_projects[offset:]
 
-        projects = list(project_queryset)
-        self.stdout.write(f"Processing {len(projects)} projects...")
+        self.stdout.write(f"Processing {active_projects.count()} projects...")
 
-        for project in projects:
-            contribution_data = self.aggregate_project_contributions(
-                project,
-                start_date,
+        projects = []
+        for project in active_projects:
+            project.contribution_data = self.aggregate_project_contributions(project, start_date)
+            project.contribution_stats = self.calculate_project_contribution_stats(
+                project, start_date
             )
-            contribution_stats = self.calculate_project_contribution_stats(
-                project,
-                start_date,
-            )
-            project.contribution_data = contribution_data
-            project.contribution_stats = contribution_stats
+            projects.append(project)
 
         if projects:
             Project.bulk_save(projects, fields=("contribution_data", "contribution_stats"))
-            self.stdout.write(
-                self.style.SUCCESS(f"✓ Updated {len(projects)} projects"),
-            )
+            self.stdout.write(self.style.SUCCESS(f"Updated {active_projects.count()} projects"))
