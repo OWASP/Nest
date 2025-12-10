@@ -1,12 +1,10 @@
 'use client'
 
-import { faGithub } from '@fortawesome/free-brands-svg-icons'
-import { faSpinner } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import { useSession, signIn } from 'next-auth/react'
 import { FC, useCallback, useEffect } from 'react'
+import { FaGithub, FaSpinner } from 'react-icons/fa'
 import { userAuthStatus } from 'utils/constants'
 
 type LoginPageContentProps = {
@@ -45,7 +43,7 @@ const LoginPageContent: FC<LoginPageContentProps> = ({ isGitHubAuthEnabled }) =>
   if (status === userAuthStatus.LOADING) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center gap-2">
-        <FontAwesomeIcon icon={faSpinner} spin height={16} width={16} />
+        <FaSpinner className="animate-spin" height={16} width={16} />
         <span className="text-lg text-gray-500">Checking session...</span>
       </div>
     )
@@ -54,7 +52,7 @@ const LoginPageContent: FC<LoginPageContentProps> = ({ isGitHubAuthEnabled }) =>
   if (status === userAuthStatus.AUTHENTICATED) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center gap-2">
-        <FontAwesomeIcon icon={faSpinner} spin height={16} width={16} />
+        <FaSpinner className="animate-spin" height={16} width={16} />
         <span className="text-lg text-gray-500">Redirecting...</span>
       </div>
     )
@@ -75,7 +73,7 @@ const LoginPageContent: FC<LoginPageContentProps> = ({ isGitHubAuthEnabled }) =>
           onClick={() => signIn('github', { callbackUrl: '/' })}
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-black px-4 py-2 font-medium text-white transition-colors hover:bg-gray-900/90"
         >
-          <FontAwesomeIcon icon={faGithub} />
+          <FaGithub className="h-5 w-5" />
           Sign In with GitHub
         </button>
       </div>

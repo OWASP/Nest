@@ -1,7 +1,7 @@
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import dynamic from 'next/dynamic'
 import { useTheme } from 'next-themes'
 import React from 'react'
+import type { IconType } from 'react-icons'
 import { round } from 'utils/round'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
@@ -12,7 +12,7 @@ const Chart = dynamic(() => import('react-apexcharts'), {
 })
 
 const DonutBarChart: React.FC<{
-  icon: IconProp
+  icon: IconType
   title: string
   series: number[]
 }> = ({ icon, title, series }) => {
