@@ -1,15 +1,14 @@
-import {
-  faChevronDown,
-  faChevronUp,
-  faLevelUpAlt,
-  faCalendarAlt,
-  faHourglassHalf,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import {
+  FaChevronDown,
+  FaChevronUp,
+  FaLevelUpAlt,
+  FaCalendarAlt,
+  FaHourglassHalf,
+} from 'react-icons/fa'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import { TextInfoItem } from 'components/InfoItem'
@@ -49,11 +48,11 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
           >
             {showAllModule ? (
               <>
-                Show less <FontAwesomeIcon icon={faChevronUp} className="ml-1" />
+                Show less <FaChevronUp className="ml-1" />
               </>
             ) : (
               <>
-                Show more <FontAwesomeIcon icon={faChevronDown} className="ml-1" />
+                Show more <FaChevronDown className="ml-1" />
               </>
             )}
           </button>
@@ -73,10 +72,10 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
       >
         <TruncatedText text={module?.name} />
       </Link>
-      <TextInfoItem icon={faLevelUpAlt} label="Level" value={upperFirst(module.experienceLevel)} />
-      <TextInfoItem icon={faCalendarAlt} label="Start" value={formatDate(module.startedAt)} />
+      <TextInfoItem icon={FaLevelUpAlt} label="Level" value={upperFirst(module.experienceLevel)} />
+      <TextInfoItem icon={FaCalendarAlt} label="Start" value={formatDate(module.startedAt)} />
       <TextInfoItem
-        icon={faHourglassHalf}
+        icon={FaHourglassHalf}
         label="Duration"
         value={getSimpleDuration(module.startedAt, module.endedAt)}
       />
