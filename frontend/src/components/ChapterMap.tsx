@@ -2,6 +2,8 @@
 import L, { MarkerClusterGroup } from 'leaflet'
 import React, { useEffect, useRef, useState } from 'react'
 import type { Chapter } from 'types/chapter'
+import { faLockOpen } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import 'leaflet.markercluster'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
@@ -144,10 +146,11 @@ const ChapterMap = ({
               setIsMapActive(true)
             }
           }}
-          aria-label="Click to interact with map"
+          aria-label="Unlock map"
         >
-          <p className="rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg dark:bg-gray-700 dark:text-white">
-            Click to interact with map
+          <p className="flex items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg dark:bg-gray-700 dark:text-white">
+            <FontAwesomeIcon icon={faLockOpen} className="h-4 w-4" />
+            Unlock map
           </p>
         </button>
       )}
