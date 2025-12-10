@@ -7,6 +7,8 @@ import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
+import { FiUnlock } from 'react-icons/fi'
+
 
 const ChapterMap = ({
   geoLocData,
@@ -144,10 +146,11 @@ const ChapterMap = ({
               setIsMapActive(true)
             }
           }}
-          aria-label="Click to interact with map"
+          aria-label="Unlock map"
         >
-          <p className="rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg dark:bg-gray-700 dark:text-white">
-            Click to interact with map
+          <p className="flex items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg dark:bg-gray-700 dark:text-white">
+            <FiUnlock size={16} />
+            Unlock map
           </p>
         </button>
       )}
