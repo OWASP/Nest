@@ -106,6 +106,7 @@ const SortableColumnHeader: FC<{
   return (
     <div className={`flex items-center gap-1 ${alignmentClass}`}>
       <button
+        type="button"
         onClick={handleClick}
         className={`flex items-center gap-1 font-semibold transition-colors hover:text-blue-600 ${textAlignClass}`}
         title={`Sort by ${label}`}
