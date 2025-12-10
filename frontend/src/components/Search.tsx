@@ -87,7 +87,7 @@ const SearchBar: React.FC<SearchProps> = ({
             {searchQuery && (
               <button
                 type="button"
-                className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-hidden"
+                className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-hidden hover:text-gray-900"
                 onClick={handleClearSearch}
                 aria-label="Clear search"
               >
