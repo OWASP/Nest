@@ -381,6 +381,7 @@ export const ProjectSelector = ({
         setShowSuggestions(false)
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         throw new Error(`Error fetching suggestions: ${err}`)
 >>>>>>> a1d77338 (fix: incorrect Error syntax)
 =======
@@ -391,6 +392,11 @@ export const ProjectSelector = ({
   }`
 )
 >>>>>>> cc0e211c (improve error message in ModuleForm)
+=======
+        setError(
+          `Error fetching suggestions: ${err instanceof Error ? err.message : String(err || 'Unknown error')}`
+        )
+>>>>>>> f234628d (fix: fix syntax error in ModuleForm)
       }
     }, 300),
     [client, value]
