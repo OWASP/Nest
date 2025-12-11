@@ -45,6 +45,7 @@ dump-data:
 	@echo "Dumping Nest data"
 	@CMD="python manage.py dumpdata \
 		github \
+		mentorship \
 		owasp \
 		slack.Conversation \
 		slack.Member \
