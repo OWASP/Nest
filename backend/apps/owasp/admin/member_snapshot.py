@@ -114,7 +114,7 @@ class MemberSnapshotAdmin(admin.ModelAdmin):
             request (HttpRequest): The current admin request.
 
         Returns:
-            QuerySet: Queryset with related github_user included.
+            QuerySet: QuerySet with related github_user included.
 
         """
         queryset = super().get_queryset(request)

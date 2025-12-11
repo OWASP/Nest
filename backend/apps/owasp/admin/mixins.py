@@ -125,7 +125,7 @@ class GenericEntityAdminMixin(BaseOwaspAdminMixin):
             request (HttpRequest): The current admin request.
 
         Returns:
-            QuerySet: Queryset with related repositories prefetched.
+            QuerySet: QuerySet with related repositories prefetched.
 
         """
         return super().get_queryset(request).prefetch_related("repositories")
