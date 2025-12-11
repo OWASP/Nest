@@ -119,13 +119,13 @@ class GenericEntityAdminMixin(BaseOwaspAdminMixin):
     """Mixin for generic entity admin with common entity functionality."""
 
     def get_queryset(self, request):
-        """Optimize admin queryset for entities with repository relationships.
+        """Return the queryset for entities with repository relationships.
 
         Args:
             request (HttpRequest): The current admin request.
 
         Returns:
-            QuerySet: Optimized queryset for admin display.
+            QuerySet: Queryset with related repositories prefetched.
 
         """
         return super().get_queryset(request).prefetch_related("repositories")
