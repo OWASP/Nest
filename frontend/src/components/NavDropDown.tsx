@@ -44,7 +44,7 @@ export default function NavDropdown({ link, pathname }: NavDropDownProps) {
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label={`${link.text} menu`}
         aria-expanded={isOpen}
-        aria-haspopup="menu"
+        aria-haspopup="true"
         aria-controls={dropdownId}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -74,7 +74,6 @@ export default function NavDropdown({ link, pathname }: NavDropDownProps) {
             <Link
               key={`${submenu.href}-${idx}`}
               href={submenu.href || '/'}
-              role="menuitem"
               aria-current={pathname === submenu.href ? 'page' : undefined}
               className={cn(
                 'block w-full px-4 py-2 text-left text-sm transition-colors',

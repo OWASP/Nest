@@ -79,9 +79,9 @@ const SearchBar: React.FC<SearchProps> = ({
             />
             <input
               ref={inputRef}
-              type="search"
+              type="text"
               aria-label="search"
-              aria-describedby={searchQuery ? "search-clear-button" : undefined}
+              aria-describedby={searchQuery ? 'search-clear-button' : undefined}
               value={searchQuery}
               onChange={handleSearchChange}
               placeholder={placeholder}
@@ -95,7 +95,7 @@ const SearchBar: React.FC<SearchProps> = ({
                 onClick={handleClearSearch}
                 aria-label="Clear search"
               >
-                <FontAwesomeIcon icon={faTimes} aria-hidden="true"/>
+                <FontAwesomeIcon icon={faTimes} aria-hidden="true" />
               </button>
             )}
           </>

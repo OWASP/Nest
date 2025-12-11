@@ -25,11 +25,7 @@ const MetricsPDFButton: FC<{
         className="ml-2 cursor-pointer text-gray-500 transition-colors duration-200 hover:text-gray-700"
         aria-label="Download metrics as PDF"
       >
-      <FontAwesomeIcon
-        icon={faFileArrowDown}
-        className="h-7 w-7"
-        aria-hidden="true"
-        />
+        <FontAwesomeIcon icon={faFileArrowDown} className="h-7 w-7" aria-hidden="true" />
       </button>
     </Tooltip>
   )
