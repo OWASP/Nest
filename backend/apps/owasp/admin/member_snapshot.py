@@ -108,13 +108,13 @@ class MemberSnapshotAdmin(admin.ModelAdmin):
     )
 
     def get_queryset(self, request):
-        """Return queryset with select_related github_user.
+        """Return optimized queryset for the admin list view.
 
         Args:
             request (HttpRequest): The current admin request.
 
         Returns:
-            QuerySet: Optimized queryset with prefetched relations.
+            QuerySet: Prefetched queryset for efficient display.
 
         """
         queryset = super().get_queryset(request)

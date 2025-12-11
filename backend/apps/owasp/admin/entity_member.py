@@ -42,7 +42,7 @@ class EntityMemberAdmin(admin.ModelAdmin):
 
     @admin.action(description="Approve selected members")
     def approve_members(self, request, queryset):
-        """Approve selected members.
+        """Activate and mark members as reviewed for display in the entity roster.
 
         Args:
             request (HttpRequest): The current admin request.
@@ -56,7 +56,7 @@ class EntityMemberAdmin(admin.ModelAdmin):
 
     @admin.display(description="Entity", ordering="entity_type")
     def entity(self, obj):
-        """Return a clickable link to the entity."""
+        """Display the related OWASP entity for this member association."""
         return (
             format_html(
                 '<a href="{}" target="_blank">{}</a>',
@@ -72,7 +72,7 @@ class EntityMemberAdmin(admin.ModelAdmin):
 
     @admin.display(description="OWASP URL", ordering="entity_type")
     def owasp_url(self, obj):
-        """Return a link to the entity's OWASP site."""
+        """Display the entity's public OWASP website."""
         return (
             format_html('<a href="{}" target="_blank">↗️</a>', obj.entity.owasp_url)
             if obj.entity
@@ -80,7 +80,7 @@ class EntityMemberAdmin(admin.ModelAdmin):
         )
 
     def get_search_results(self, request, queryset, search_term):
-        """Return search results by entity name or key.
+        """Extend search to include associated entity names and keys.
 
         Args:
             request (HttpRequest): The current admin request.

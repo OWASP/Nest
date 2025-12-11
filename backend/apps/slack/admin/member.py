@@ -24,7 +24,7 @@ class MemberAdmin(admin.ModelAdmin):
     )
 
     def approve_suggested_users(self, request, queryset):
-        """Approve suggested users for selected members.
+        """Link selected Slack members to their suggested GitHub user accounts.
 
         Args:
             request (HttpRequest): The current admin request.
