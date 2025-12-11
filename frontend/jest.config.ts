@@ -9,7 +9,7 @@ const config: Config = {
     '!src/app/api/**',
     '!src/app/board/**',
     '!src/components/icons/**',
-    '!src/app/my/**',
+    '!src/app/settings/**',
     '!src/components/Mentee*.tsx',
     '!src/hooks/**',
     '!src/instrumentation.ts',
