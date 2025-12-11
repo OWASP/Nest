@@ -172,7 +172,6 @@ export default function Home() {
                     <button
                       className="min-w-0 flex-1 cursor-pointer text-left text-lg font-semibold text-blue-400 hover:underline"
                       type="button"
-                      className="cursor-pointer text-left text-lg font-semibold text-blue-400 hover:underline"
                       onClick={() => setModalOpenIndex(index)}
                     >
                       <TruncatedText text={event.name} />
