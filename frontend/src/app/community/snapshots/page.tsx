@@ -36,7 +36,7 @@ const SnapshotsPage: React.FC = () => {
   const router = useRouter()
 
   const handleButtonClick = (snapshot: Snapshot) => {
-    router.push(`/snapshots/${snapshot.key}`)
+    router.push(`/community/snapshots/${snapshot.key}`)
   }
 
   const renderSnapshotCard = (snapshot: Snapshot) => {
@@ -68,12 +68,12 @@ const SnapshotsPage: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {!snapshots?.length ? (
-              <div className="col-span-full py-8 text-center">No Snapshots found</div>
-            ) : (
+            {snapshots?.length ? (
               snapshots.map((snapshot: Snapshot) => (
                 <div key={snapshot.key}>{renderSnapshotCard(snapshot)}</div>
               ))
+            ) : (
+              <div className="col-span-full py-8 text-center">No Snapshots found</div>
             )}
           </div>
         )}
