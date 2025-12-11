@@ -6,7 +6,8 @@ import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import posthog from 'posthog-js'
 import { PostHogProvider } from 'posthog-js/react'
-import React, { Suspense, useEffect } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
+import { ENVIRONMENT } from 'utils/env.client'
 import apolloClient from 'utils/helpers/apolloClient'
 
 // <AppInitializer> is a component that initializes the Django session.
@@ -16,36 +17,47 @@ import apolloClient from 'utils/helpers/apolloClient'
 
 function AppInitializer() {
   useDjangoSession()
-
-  // Initialize PostHog
-  useEffect(() => {
-    const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'
-    const isStaging = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging'
-
-    if (isProduction || isStaging) {
-      posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-      })
-    }
-  }, [])
-
   return null
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const [posthogInitialized, setPosthogInitialized] = useState(false)
+
+  useEffect(() => {
+    const isProduction = ENVIRONMENT === 'production'
+    const isStaging = ENVIRONMENT === 'staging'
+    const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY
+    const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST
+
+    if ((isProduction || isStaging) && posthogKey && posthogHost) {
+      posthog.init(posthogKey, {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        api_host: posthogHost,
+      })
+    }
+
+    setPosthogInitialized(true)
+  }, [])
+
   return (
     <Suspense>
       <SessionProvider>
         <HeroUIProvider>
           <NextThemesProvider attribute="class" defaultTheme="dark">
             <ToastProvider />
-            <PostHogProvider client={posthog}>
+            {posthogInitialized ? (
+              <PostHogProvider client={posthog}>
+                <ApolloProvider client={apolloClient}>
+                  <AppInitializer />
+                  {children}
+                </ApolloProvider>
+              </PostHogProvider>
+            ) : (
               <ApolloProvider client={apolloClient}>
                 <AppInitializer />
                 {children}
               </ApolloProvider>
-            </PostHogProvider>
+            )}
           </NextThemesProvider>
         </HeroUIProvider>
       </SessionProvider>
