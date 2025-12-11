@@ -34,9 +34,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         api_host: posthogHost,
       })
+      setPosthogInitialized(true)
     }
-
-    setPosthogInitialized(true)
   }, [])
 
   return (
