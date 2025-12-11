@@ -365,38 +365,19 @@ export const ProjectSelector = ({
           variables: { query: trimmedQuery },
         })
 
-<<<<<<< HEAD
         const projects = data.searchProjects || []
         const filtered = projects.filter((proj) => proj.id !== value)
         setItems(filtered.slice(0, 5))
-      } catch {
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(
+          'Error fetching project suggestions:',
+          err instanceof Error ? err.message : String(err),
+          err
+        )
         setItems([])
       } finally {
         setIsLoading(false)
-=======
-        setRawResults(data.searchProjects || [])
-        setShowSuggestions(true)
-      } catch (err) {
-        setRawResults([])
-        setShowSuggestions(false)
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-        throw new Error(`Error fetching suggestions: ${err}`)
->>>>>>> a1d77338 (fix: incorrect Error syntax)
-=======
-        setError(`Error fetching suggestions: ${err instanceof Error ? err.message : ''}`)
->>>>>>> d34076e7 (fix: unhandled promise rejection in ModuleForm)
-=======
-        setError(`Error fetching suggestions: ${err instanceof Error ? err.message : String(err || 'Unknown error')}`)
-  }`
-)
->>>>>>> cc0e211c (improve error message in ModuleForm)
-=======
-        setError(
-          `Error fetching suggestions: ${err instanceof Error ? err.message : String(err || 'Unknown error')}`
-        )
->>>>>>> f234628d (fix: fix syntax error in ModuleForm)
       }
     }, 300),
     [client, value]
