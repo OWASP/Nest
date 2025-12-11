@@ -523,6 +523,7 @@ export type ProjectNode = Node & {
   relatedUrls: Array<Scalars['String']['output']>;
   repositories: Array<RepositoryNode>;
   repositoriesCount: Scalars['Int']['output'];
+  socialUrls: Array<Scalars['String']['output']>;
   starsCount: Scalars['Int']['output'];
   summary: Scalars['String']['output'];
   topContributors: Array<RepositoryContributorNode>;

@@ -679,6 +679,19 @@ describe('CardDetailsPage', () => {
       expect(screen.getByText('Social Links')).toBeInTheDocument()
       expect(screen.getAllByRole('link')).toHaveLength(2)
     })
+
+    it('renders social links for project type when socialLinks are provided', () => {
+      const socialLinks = [
+        'https://github.com/test',
+        'https://twitter.com/test',
+        'https://slack.com/test',
+      ]
+
+      render(<CardDetailsPage {...defaultProps} type="project" socialLinks={socialLinks} />)
+
+      expect(screen.getByText('Social Links')).toBeInTheDocument()
+      expect(screen.getAllByRole('link')).toHaveLength(3)
+    })
   })
 
   describe('Prop-based Behavior', () => {

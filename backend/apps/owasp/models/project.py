@@ -128,7 +128,7 @@ class Project(
     )
 
     # related channels from EntityChannel
-    channels = GenericRelation(
+    social_channels = GenericRelation(
         EntityChannel,
         content_type_field="entity_type",
         object_id_field="entity_id",

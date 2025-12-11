@@ -102,6 +102,7 @@ const ProjectDetailsPage = () => {
       recentReleases={project.recentReleases}
       repositories={project.repositories}
       stats={projectStats}
+      socialLinks={project.socialUrls}
       summary={project.summary}
       title={project.name}
       topContributors={topContributors}

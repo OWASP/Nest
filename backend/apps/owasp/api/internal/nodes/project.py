@@ -9,7 +9,6 @@ from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
-from apps.owasp.api.internal.nodes.entity_channel import EntityChannelNode
 from apps.owasp.api.internal.nodes.project_health_metrics import (
     ProjectHealthMetricsNode,
 )
@@ -113,6 +112,16 @@ class ProjectNode(GenericEntityNode):
         return self.idx_topics
 
     @strawberry.field
-    def slack_channels(self) -> list[EntityChannelNode]:
-        """Resolve related slack channels."""
-        return self.channels.filter(platform="slack")
+    def social_urls(self) -> list[str]:
+        """Resolve social URLs."""
+        urls = []
+        for ec in self.social_channels.filter(is_active=True):
+            channel = ec.channel
+            if (
+                ec.platform == "slack"
+                and hasattr(channel, "slack_channel_id")
+                and channel.slack_channel_id
+            ):
+                urls.append(f"https://slack.com/app_redirect?channel={channel.slack_channel_id}")
+
+        return urls

@@ -4,7 +4,6 @@ import strawberry
 import strawberry_django
 
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
-from apps.owasp.api.internal.nodes.entity_channel import EntityChannelNode
 from apps.owasp.models.chapter import Chapter
 
 
@@ -55,8 +54,3 @@ class ChapterNode(GenericEntityNode):
     def suggested_location(self) -> str | None:
         """Resolve suggested location."""
         return self.idx_suggested_location
-
-    @strawberry.field
-    def slack_channels(self) -> list[EntityChannelNode]:
-        """Resolve channels for this chapter."""
-        return self.channels.filter(platform="slack")
