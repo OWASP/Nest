@@ -274,6 +274,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                       }`}
                     >
                       <button
+                        type="button"
                         onClick={() => handleSuggestionClick(hit, suggestion.indexName)}
                         className="flex w-full cursor-pointer items-center overflow-hidden border-none bg-transparent p-0 text-left"
                       >

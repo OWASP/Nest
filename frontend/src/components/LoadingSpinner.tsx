@@ -6,9 +6,9 @@ interface LoadingSpinnerProps {
 }
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ imageUrl }) => {
-  const defaultImage = '/img/owasp_icon_white_sm.png'
+  const defaultImage = '/img/spinner_white.png'
   const image = imageUrl || defaultImage
-  const dark = image.replace('white', 'black')
+  const dark = image.replace('white', 'blue')
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center">
