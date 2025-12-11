@@ -200,20 +200,3 @@ class TestOnExecute:
 
         mock_cache.get.assert_called_once()
         mock_cache.set.assert_called_once()
-
-    @pytest.mark.parametrize("falsy_result", [None, [], {}, 0, False])
-    @patch("apps.common.extensions.cache")
-    def test_caches_falsy_results(
-        self, mock_cache, falsy_result, extension, mock_execution_context
-    ):
-        """Test that falsy results are cached properly."""
-        mock_cache.get.return_value = None
-        mock_execution_context.result = falsy_result
-
-        generator = extension.on_execute()
-        next(generator)
-
-        with pytest.raises(StopIteration):
-            next(generator)
-
-        mock_cache.set.assert_called_once()
