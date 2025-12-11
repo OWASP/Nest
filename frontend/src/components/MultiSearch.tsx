@@ -243,7 +243,9 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
             {searchQuery && (
               <button
                 type="button"
-                className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:text-gray-600"
+                className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 w-8 h-8 text-gray-400 
+                hover:bg-gray-600
+                hover:text-gray-200"
                 onClick={handleClearSearch}
                 aria-label="Clear search"
               >
