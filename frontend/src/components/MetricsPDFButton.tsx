@@ -19,11 +19,18 @@ const MetricsPDFButton: FC<{
       closeDelay={100}
       showArrow
     >
+      <button
+        type="button"
+        onClick={async () => await fetchMetricsPDF(path, fileName)}
+        className="ml-2 cursor-pointer text-gray-500 transition-colors duration-200 hover:text-gray-700"
+        aria-label="Download metrics as PDF"
+      >
       <FontAwesomeIcon
         icon={faFileArrowDown}
-        className="ml-2 h-7 w-7 cursor-pointer text-gray-500 transition-colors duration-200 hover:text-gray-700"
-        onClick={async () => await fetchMetricsPDF(path, fileName)}
-      />
+        className="h-7 w-7"
+        aria-hidden="true"
+        />
+      </button>
     </Tooltip>
   )
 }

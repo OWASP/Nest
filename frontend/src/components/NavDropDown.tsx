@@ -42,8 +42,9 @@ export default function NavDropdown({ link, pathname }: NavDropDownProps) {
       <button
         className="flex cursor-pointer items-center gap-2 whitespace-nowrap"
         onClick={() => setIsOpen((prev) => !prev)}
+        aria-label={`${link.text} menu`}
         aria-expanded={isOpen}
-        aria-haspopup="true"
+        aria-haspopup="menu"
         aria-controls={dropdownId}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -65,6 +66,7 @@ export default function NavDropdown({ link, pathname }: NavDropDownProps) {
       </button>
       {isOpen && (
         <div
+          role="menu"
           id={dropdownId}
           className="absolute top-full left-0 z-10 mt-1 w-48 overflow-hidden rounded-md bg-white shadow-lg dark:bg-slate-800"
         >
@@ -72,6 +74,8 @@ export default function NavDropdown({ link, pathname }: NavDropDownProps) {
             <Link
               key={`${submenu.href}-${idx}`}
               href={submenu.href || '/'}
+              role="menuitem"
+              aria-current={pathname === submenu.href ? 'page' : undefined}
               className={cn(
                 'block w-full px-4 py-2 text-left text-sm transition-colors',
                 pathname === submenu.href

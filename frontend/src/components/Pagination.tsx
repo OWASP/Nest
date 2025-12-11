@@ -58,7 +58,7 @@ const Pagination: React.FC<PaginationProps> = ({
   if (!isLoaded || totalPages <= 1) return null
 
   return (
-    <div className="mt-8 flex flex-col items-center justify-center gap-3">
+    <nav className="mt-8 flex flex-col items-center justify-center gap-3" aria-label='Pagination'>
       <div className="flex flex-wrap items-center justify-center gap-2">
         <Button
           type="button"
@@ -74,16 +74,15 @@ const Pagination: React.FC<PaginationProps> = ({
             {number === '...' ? (
               <span
                 className="flex h-10 w-10 items-center justify-center text-gray-600 dark:text-gray-400"
-                role="presentation"
-                aria-label="More pages"
+                aria-hidden="true"
               >
-                <FontAwesomeIcon icon={faEllipsisH} className="h-5 w-5"></FontAwesomeIcon>
+                <FontAwesomeIcon icon={faEllipsisH} className="h-5 w-5" aria-hidden="true"/>
               </span>
             ) : (
               <Button
                 type="button"
                 aria-current={currentPage === number ? 'page' : undefined}
-                aria-label={`Go to page ${number}`}
+             aria-label={`${currentPage === number ? 'Current page, ' : ''}Page ${number}`}
                 className={`flex h-10 min-w-10 items-center justify-center rounded-md px-3 text-sm font-medium ${
                   currentPage === number
                     ? 'bg-[#83a6cc] text-white dark:bg-white dark:text-black'
@@ -106,7 +105,7 @@ const Pagination: React.FC<PaginationProps> = ({
           Next
         </Button>
       </div>
-    </div>
+    </nav>
   )
 }
 

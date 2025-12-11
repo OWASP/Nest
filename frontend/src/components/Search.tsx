@@ -68,17 +68,20 @@ const SearchBar: React.FC<SearchProps> = ({
   }
 
   return (
-    <div className="w-full max-w-md p-4">
+    <div className="w-full max-w-md p-4" role="search">
       <div className="relative">
         {!isLoaded ? (
           <>
             <FontAwesomeIcon
               icon={faSearch}
               className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
+              aria-hidden="true"
             />
             <input
               ref={inputRef}
-              type="text"
+              type="search"
+              aria-label="search"
+              aria-describedby={searchQuery ? "search-clear-button" : undefined}
               value={searchQuery}
               onChange={handleSearchChange}
               placeholder={placeholder}
@@ -86,12 +89,13 @@ const SearchBar: React.FC<SearchProps> = ({
             />
             {searchQuery && (
               <button
+                id="search-clear-button"
                 type="button"
                 className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-hidden"
                 onClick={handleClearSearch}
                 aria-label="Clear search"
               >
-                <FontAwesomeIcon icon={faTimes} />
+                <FontAwesomeIcon icon={faTimes} aria-hidden="true"/>
               </button>
             )}
           </>
