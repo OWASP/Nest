@@ -37,8 +37,8 @@ runs:
           docker run -d --rm --name e2e-nest-backend \
             --env-file backend/.env.e2e.example \
             --network host \
-            -p 9000:9000 \
             -e DJANGO_DB_HOST=localhost \
+            -p 9000:9000 \
             owasp/nest:test-backend-e2e-latest \
             sh -c '
               python manage.py migrate &&
