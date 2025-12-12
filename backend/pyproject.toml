@@ -102,6 +102,10 @@ lint.per-file-ignores."**/management/commands/*.py" = [
   "SLF001", # https://docs.astral.sh/ruff/rules/private-member-access/
   "T201",   # https://docs.astral.sh/ruff/rules/print/
 ]
+lint.per-file-ignores."**/management/commands/dump_data.py" = [
+  "S603", # https://docs.astral.sh/ruff/rules/subprocess-without-shell-equals-true/,
+  "S607", # https://docs.astral.sh/ruff/rules/start-process-with-partial-path/,
+]
 lint.per-file-ignores."**/migrations/*.py" = [
   "D100",   # https://docs.astral.sh/ruff/rules/undocumented-public-module/
   "D101",   # https://docs.astral.sh/ruff/rules/undocumented-public-class/
