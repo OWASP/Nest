@@ -150,6 +150,7 @@ class TestResolve:
 
         assert result == cached_result
         mock_cache.get_or_set.assert_called_once()
+        mock_next.assert_not_called()
 
     @patch("apps.common.extensions.cache")
     def test_caches_result_on_miss(self, mock_cache, extension, mock_info, mock_next):
