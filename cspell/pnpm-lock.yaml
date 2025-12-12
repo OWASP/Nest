@@ -292,8 +292,8 @@ packages:
     resolution: {integrity: sha512-/rFeCpNJQbhSZjGVwO9RFV3xPqbnERS8MmIQzCtD/zl6gpJuV/bMLuN92oG3F7d8oDEHHRrujSXNUr8fpjntKw==}
     engines: {node: '>=18'}
 
-  comment-json@4.4.1:
-    resolution: {integrity: sha512-r1To31BQD5060QdkC+Iheai7gHwoSZobzunqkf2/kQ6xIAfJyrKNAFUwdKvkK7Qgu7pVTKQEa7ok7Ed3ycAJgg==}
+  comment-json@4.5.0:
+    resolution: {integrity: sha512-aKl8CwoMKxVTfAK4dFN4v54AEvuUh9pzmgVIBeK6gBomLwMgceQUKKWHzJdW1u1VQXQuwnJ7nJGWYYMTl5U4yg==}
     engines: {node: '>= 6'}
 
   core-util-is@1.0.3:
@@ -347,8 +347,8 @@ packages:
     engines: {node: '>=4'}
     hasBin: true
 
-  fast-equals@5.3.3:
-    resolution: {integrity: sha512-/boTcHZeIAQ2r/tL11voclBHDeP9WPxLt+tyAbVSyyXuUFyh0Tne7gJZTqGbxnvj79TjLdCXLOY7UIPhyG5MTw==}
+  fast-equals@5.3.4:
+    resolution: {integrity: sha512-d+yU9iNQbbC098NOuMlAIth/g+owbpX/uuOkH/DQcC2fMMyjOlX292Op29DrUKq388m4UUyOdWakUH/msGypOg==}
     engines: {node: '>=6.0.0'}
 
   fast-json-stable-stringify@2.1.0:
@@ -679,7 +679,7 @@ snapshots:
 
   commander@13.1.0: {}
 
-  comment-json@4.4.1:
+  comment-json@4.5.0:
     dependencies:
       array-timsort: 1.0.3
       core-util-is: 1.0.3
@@ -690,7 +690,7 @@ snapshots:
   cspell-config-lib@8.19.4:
     dependencies:
       '@cspell/cspell-types': 8.19.4
-      comment-json: 4.4.1
+      comment-json: 4.5.0
       yaml: 2.8.2
 
   cspell-dictionary@8.19.4:
@@ -698,7 +698,7 @@ snapshots:
       '@cspell/cspell-pipe': 8.19.4
       '@cspell/cspell-types': 8.19.4
       cspell-trie-lib: 8.19.4
-      fast-equals: 5.3.3
+      fast-equals: 5.3.4
 
   cspell-gitignore@8.19.4:
     dependencies:
@@ -732,7 +732,7 @@ snapshots:
       '@cspell/strong-weak-map': 8.19.4
       '@cspell/url': 8.19.4
       clear-module: 4.1.2
-      comment-json: 4.4.1
+      comment-json: 4.5.0
       cspell-config-lib: 8.19.4
       cspell-dictionary: 8.19.4
       cspell-glob: 8.19.4
@@ -740,7 +740,7 @@ snapshots:
       cspell-io: 8.19.4
       cspell-trie-lib: 8.19.4
       env-paths: 3.0.0
-      fast-equals: 5.3.3
+      fast-equals: 5.3.4
       gensequence: 7.0.0
       import-fresh: 3.3.1
       resolve-from: 5.0.0
@@ -778,7 +778,7 @@ snapshots:
 
   esprima@4.0.1: {}
 
-  fast-equals@5.3.3: {}
+  fast-equals@5.3.4: {}
 
   fast-json-stable-stringify@2.1.0: {}
 
