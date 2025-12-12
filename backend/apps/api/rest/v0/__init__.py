@@ -57,6 +57,17 @@ if settings.IS_PRODUCTION_ENVIRONMENT:
             }
         ],
     }
+elif settings.IS_E2E_ENVIRONMENT:
+    api_settings_customization = {
+        "auth": None,
+        "servers": [
+            {
+                "description": "E2E",
+                "url": settings.SITE_URL,
+            }
+        ],
+        "throttle": [],
+    }
 elif settings.IS_STAGING_ENVIRONMENT:
     api_settings_customization = {
         "servers": [
