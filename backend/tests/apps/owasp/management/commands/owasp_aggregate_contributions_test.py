@@ -41,6 +41,10 @@ class MockQuerySet:
         """Mock prefetch_related method."""
         return self
 
+    def count(self):
+        """Return count of items."""
+        return len(self._items)
+
     def __len__(self):
         """Return length of items."""
         return len(self._items)
@@ -146,7 +150,7 @@ class TestOwaspAggregateContributions:
             datetime(2024, 11, 17, 12, 0, 0, tzinfo=UTC),
         ]
 
-        result = command.aggregate_chapter_contributions(mock_chapter, start_date)
+        result = command.aggregate_contributions(mock_chapter, start_date)
 
         assert result == {
             "2024-11-16": 2,  # 1 commit + 1 issue
@@ -184,7 +188,7 @@ class TestOwaspAggregateContributions:
             datetime(2024, 11, 18, 12, 0, 0, tzinfo=UTC),
         ]
 
-        result = command.aggregate_project_contributions(mock_project, start_date)
+        result = command.aggregate_contributions(mock_project, start_date)
 
         assert result == {
             "2024-11-16": 2,  # 2 commits
@@ -197,7 +201,7 @@ class TestOwaspAggregateContributions:
         mock_chapter.owasp_repository = None
         start_date = datetime.now(tz=UTC) - timedelta(days=365)
 
-        result = command.aggregate_chapter_contributions(mock_chapter, start_date)
+        result = command.aggregate_contributions(mock_chapter, start_date)
 
         assert result == {}
 
@@ -207,7 +211,7 @@ class TestOwaspAggregateContributions:
         mock_project.repositories.all.return_value = []
         start_date = datetime.now(tz=UTC) - timedelta(days=365)
 
-        result = command.aggregate_project_contributions(mock_project, start_date)
+        result = command.aggregate_contributions(mock_project, start_date)
 
         assert result == {}
 
@@ -238,7 +242,7 @@ class TestOwaspAggregateContributions:
 
         with mock.patch.object(
             command,
-            "aggregate_chapter_contributions",
+            "aggregate_contributions",
             return_value={"2024-11-16": 5},
         ):
             command.handle(entity_type="chapter", days=365, offset=0)
@@ -273,7 +277,7 @@ class TestOwaspAggregateContributions:
 
         with mock.patch.object(
             command,
-            "aggregate_project_contributions",
+            "aggregate_contributions",
             return_value={"2024-11-16": 10},
         ):
             command.handle(entity_type="project", days=365, offset=0)
@@ -299,7 +303,7 @@ class TestOwaspAggregateContributions:
         mock_chapter,
         mock_project,
     ):
-        """Test command execution for both chapters and projects."""
+        """Test command execution for both chapters and projects (run separately)."""
         mock_chapter_model.objects.filter.return_value = MockQuerySet([mock_chapter])
         mock_project_model.objects.filter.return_value = MockQuerySet([mock_project])
         mock_chapter_model.bulk_save = mock.Mock()
@@ -311,19 +315,13 @@ class TestOwaspAggregateContributions:
         mock_pr.objects.filter.return_value.count.return_value = 2
         mock_release.objects.filter.return_value.count.return_value = 1
 
-        with (
-            mock.patch.object(
-                command,
-                "aggregate_chapter_contributions",
-                return_value={"2024-11-16": 5},
-            ),
-            mock.patch.object(
-                command,
-                "aggregate_project_contributions",
-                return_value={"2024-11-16": 10},
-            ),
+        with mock.patch.object(
+            command,
+            "aggregate_contributions",
+            return_value={"2024-11-16": 5},
         ):
-            command.handle(entity_type="both", days=365, offset=0)
+            command.handle(entity_type="chapter", days=365, offset=0)
+            command.handle(entity_type="project", days=365, offset=0)
 
         assert mock_chapter_model.bulk_save.called
         assert mock_project_model.bulk_save.called
@@ -355,7 +353,7 @@ class TestOwaspAggregateContributions:
 
         with mock.patch.object(
             command,
-            "aggregate_chapter_contributions",
+            "aggregate_contributions",
             return_value={"2024-11-16": 3},
         ):
             command.handle(entity_type="chapter", key="www-chapter-test", days=365, offset=0)
@@ -391,12 +389,15 @@ class TestOwaspAggregateContributions:
 
         with mock.patch.object(
             command,
-            "aggregate_chapter_contributions",
+            "aggregate_contributions",
             return_value={"2024-11-16": 1},
         ) as mock_aggregate:
             command.handle(entity_type="chapter", offset=2, days=365)
 
         # Verify that offset was applied - only 1 chapter should be processed (3 total - 2 offset)
+        assert mock_aggregate.call_count == 1, (
+            "Expected aggregate to be called once for 1 remaining chapter after offset"
+        )
         mock_aggregate.assert_called_once()
         mock_chapter_model.bulk_save.assert_called_once()
 
@@ -427,7 +428,7 @@ class TestOwaspAggregateContributions:
 
         with mock.patch.object(
             command,
-            "aggregate_chapter_contributions",
+            "aggregate_contributions",
             return_value={},
         ) as mock_aggregate:
             command.handle(entity_type="chapter", days=90, offset=0)

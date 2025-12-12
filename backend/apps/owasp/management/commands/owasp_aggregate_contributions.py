@@ -68,17 +68,16 @@ class Command(BaseCommand):
 
     def _get_repository_ids(self, entity):
         """Extract repository IDs from chapter or project."""
-        repo_ids = []
-        
+        repo_ids: set[int] = set()
+
         # Handle single owasp_repository
-        if hasattr(entity, 'owasp_repository') and entity.owasp_repository:
-            repo_ids.append(entity.owasp_repository.id)
-        
+        if hasattr(entity, "owasp_repository") and entity.owasp_repository:
+            repo_ids.add(entity.owasp_repository.id)
         # Handle multiple repositories (for projects)
-        if hasattr(entity, 'repositories'):
-            repo_ids.extend([r.id for r in entity.repositories.all()])
-        
-        return repo_ids
+        if hasattr(entity, "repositories"):
+            repo_ids.update([r.id for r in entity.repositories.all()])
+
+        return list(repo_ids)
 
     def aggregate_contributions(self, entity, start_date: datetime) -> dict[str, int]:
         """Aggregate contributions for a chapter or project.
@@ -92,7 +91,7 @@ class Command(BaseCommand):
 
         """
         contribution_map: dict[str, int] = {}
-        
+
         repo_ids = self._get_repository_ids(entity)
         if not repo_ids:
             return contribution_map
@@ -154,7 +153,7 @@ class Command(BaseCommand):
         stats = {
             "commits": 0,
             "issues": 0,
-            "pull_requests": 0,
+            "pullRequests": 0,
             "releases": 0,
             "total": 0,
         }
@@ -175,8 +174,8 @@ class Command(BaseCommand):
             created_at__gte=start_date,
         ).count()
 
-        # Count pull requests
-        stats["pull_requests"] = PullRequest.objects.filter(
+        # Count pullRequests
+        stats["pullRequests"] = PullRequest.objects.filter(
             repository_id__in=repo_ids,
             created_at__gte=start_date,
         ).count()
@@ -189,7 +188,7 @@ class Command(BaseCommand):
         ).count()
 
         stats["total"] = (
-            stats["commits"] + stats["issues"] + stats["pull_requests"] + stats["releases"]
+            stats["commits"] + stats["issues"] + stats["pullRequests"] + stats["releases"]
         )
 
         return stats
