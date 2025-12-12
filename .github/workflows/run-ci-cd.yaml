@@ -287,7 +287,7 @@ jobs:
 
       - name: Run frontend end-to-end tests
         run: |
-          docker run --env-file frontend/.env.example owasp/nest:test-frontend-e2e-latest pnpm run test:e2e
+          docker run --env-file frontend/.env.e2e.example owasp/nest:test-frontend-e2e-latest pnpm run test:e2e
     timeout-minutes: 10
 
   run-frontend-a11y-tests:
