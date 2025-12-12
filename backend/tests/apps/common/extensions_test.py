@@ -3,200 +3,160 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from graphql import OperationType
-from strawberry.types import ExecutionContext
+from strawberry.permission import PermissionExtension
 
-from apps.common.extensions import CacheExtension
-
-
-class TestCacheExtension:
-    """Test cases for the CacheExtension class."""
-
-    @pytest.fixture
-    def mock_request(self):
-        """Return a mock request with unauthenticated user."""
-        mock = MagicMock()
-        mock.user.is_authenticated = False
-        return mock
-
-    @pytest.fixture
-    def mock_execution_context(self, mock_request):
-        """Return a mock execution context."""
-        mock = MagicMock(spec=ExecutionContext)
-        mock.query = 'query { repository(key: "test") { name } }'
-        mock.variables = {"organization_key": "OWASP", "repository_key": "nest"}
-        mock.operation_type = OperationType.QUERY
-        mock.context.request = mock_request
-        return mock
-
-    @pytest.fixture
-    def extension(self, mock_execution_context):
-        """Return a CacheExtension instance with a mocked execution context."""
-        extension = CacheExtension()
-        extension.execution_context = mock_execution_context
-        return extension
-
-    def test_generate_key_creates_hash(self, extension, mock_execution_context):
-        """Test that generate_key creates a deterministic hash key."""
-        key1 = extension.generate_key(mock_execution_context)
-        key2 = extension.generate_key(mock_execution_context)
-
-        assert key1 == key2
-        assert key1.startswith("graphql-")
-        assert len(key1.split("-")[-1]) == 64  # SHA256 hex digest length
-
-    def test_generate_key_differs_for_different_queries(self, extension):
-        """Test that different queries produce different keys."""
-        context1 = MagicMock(spec=ExecutionContext)
-        context1.query = "query { repository { name } }"
-        context1.variables = {}
-
-        context2 = MagicMock(spec=ExecutionContext)
-        context2.query = "query { project { name } }"
-        context2.variables = {}
-
-        key1 = extension.generate_key(context1)
-        key2 = extension.generate_key(context2)
-
-        assert key1 != key2
-
-    def test_generate_key_differs_for_different_variables(self, extension):
-        """Test that different variables produce different keys."""
-        context1 = MagicMock(spec=ExecutionContext)
-        context1.query = "query { repository { name } }"
-        context1.variables = {"key": "nest"}
-
-        context2 = MagicMock(spec=ExecutionContext)
-        context2.query = "query { repository { name } }"
-        context2.variables = {"key": "owasp-web"}
-
-        key1 = extension.generate_key(context1)
-        key2 = extension.generate_key(context2)
-
-        assert key1 != key2
+from apps.common.extensions import CacheExtension, get_protected_fields
 
 
-class TestShouldSkipCache:
-    """Test cases for the should_skip_cache method."""
+class TestGenerateKey:
+    """Test cases for the generate_key method."""
 
     @pytest.fixture
     def extension(self):
         """Return a CacheExtension instance."""
         return CacheExtension()
 
-    def test_skips_cache_for_mutations(self, extension):
-        """Test that mutations are not cached."""
-        context = MagicMock(spec=ExecutionContext)
-        context.operation_type = OperationType.MUTATION
+    def test_creates_deterministic_hash(self, extension):
+        """Test that generate_key creates a deterministic hash key."""
+        key1 = extension.generate_key("chapter", {"key": "germany"})
+        key2 = extension.generate_key("chapter", {"key": "germany"})
 
-        assert extension.should_skip_cache(context) is True
+        assert key1 == key2
+        assert key1.startswith("graphql-")
+        assert len(key1.split("-")[-1]) == 64  # SHA256 hex digest length
 
-    def test_skips_cache_for_subscriptions(self, extension):
-        """Test that subscriptions are not cached."""
-        context = MagicMock(spec=ExecutionContext)
-        context.operation_type = OperationType.SUBSCRIPTION
+    def test_differs_for_different_field_names(self, extension):
+        """Test that different field names produce different keys."""
+        key1 = extension.generate_key("chapter", {"key": "germany"})
+        key2 = extension.generate_key("project", {"key": "germany"})
 
-        assert extension.should_skip_cache(context) is True
+        assert key1 != key2
 
-    def test_skips_cache_for_authenticated_queries(self, extension):
-        """Test that authenticated queries are not cached."""
-        context = MagicMock(spec=ExecutionContext)
-        context.operation_type = OperationType.QUERY
-        context.context.request.user.is_authenticated = True
+    def test_differs_for_different_args(self, extension):
+        """Test that different arguments produce different keys."""
+        key1 = extension.generate_key("chapter", {"key": "germany"})
+        key2 = extension.generate_key("chapter", {"key": "canada"})
 
-        assert extension.should_skip_cache(context) is True
+        assert key1 != key2
 
-    def test_caches_unauthenticated_queries(self, extension):
-        """Test that unauthenticated queries are cached."""
-        context = MagicMock(spec=ExecutionContext)
-        context.operation_type = OperationType.QUERY
-        context.context.request.user.is_authenticated = False
+    def test_sorts_args_for_consistency(self, extension):
+        """Test that argument order doesn't affect the key."""
+        key1 = extension.generate_key("chapter", {"a": "1", "b": "2"})
+        key2 = extension.generate_key("chapter", {"b": "2", "a": "1"})
 
-        assert extension.should_skip_cache(context) is False
+        assert key1 == key2
 
 
-class TestOnExecute:
-    """Test cases for the on_execute method."""
+class TestGetProtectedFields:
+    """Test cases for the get_protected_fields function."""
 
     @pytest.fixture
-    def mock_request(self):
-        """Return a mock request with unauthenticated user."""
+    def mock_schema(self):
+        """Return a mock schema with protected and public fields."""
+        mock_field_protected = MagicMock()
+        mock_field_protected.name = "api_keys"
+        mock_field_protected.extensions = [MagicMock(spec=PermissionExtension)]
+
+        mock_field_public = MagicMock()
+        mock_field_public.name = "chapters"
+        mock_field_public.extensions = []
+
+        mock_query_type = MagicMock()
+        mock_query_type.definition.fields = [mock_field_protected, mock_field_public]
+
+        mock_schema = MagicMock()
+        mock_schema.schema_converter.type_map.get.return_value = mock_query_type
+        return mock_schema
+
+    def test_returns_protected_fields_in_camel_case(self, mock_schema):
+        """Test that protected fields are returned in camelCase."""
+        get_protected_fields.cache_clear()
+        protected = get_protected_fields(mock_schema)
+
+        assert "apiKeys" in protected
+        assert "chapters" not in protected
+
+    def test_returns_tuple(self, mock_schema):
+        """Test that get_protected_fields returns a tuple."""
+        get_protected_fields.cache_clear()
+        protected = get_protected_fields(mock_schema)
+
+        assert isinstance(protected, tuple)
+
+
+class TestResolve:
+    """Test cases for the resolve method."""
+
+    @pytest.fixture(autouse=True)
+    def mock_protected_fields(self):
+        """Patch get_protected_fields for all tests."""
+        with patch("apps.common.extensions.get_protected_fields", return_value=("apiKeys",)):
+            yield
+
+    @pytest.fixture
+    def mock_info(self):
+        """Return a mock GraphQL resolve info."""
         mock = MagicMock()
-        mock.user.is_authenticated = False
+        mock.field_name = "chapter"
+        mock.parent_type.name = "Query"
         return mock
 
     @pytest.fixture
-    def mock_execution_context(self, mock_request):
-        """Return a mock execution context for a query."""
-        mock = MagicMock(spec=ExecutionContext)
-        mock.query = "query { repository { name } }"
-        mock.variables = {}
-        mock.operation_type = OperationType.QUERY
-        mock.context.request = mock_request
-        return mock
+    def mock_next(self):
+        """Return a mock next resolver."""
+        return MagicMock(return_value={"name": "OWASP"})
 
     @pytest.fixture
-    def extension(self, mock_execution_context):
+    def extension(self):
         """Return a CacheExtension instance."""
         extension = CacheExtension()
-        extension.execution_context = mock_execution_context
+        extension.execution_context = MagicMock()
         return extension
 
-    @patch("apps.common.extensions.cache")
-    def test_skips_cache_for_mutations(self, mock_cache, extension, mock_execution_context):
-        """Test that mutations skip caching entirely."""
-        mock_execution_context.operation_type = OperationType.MUTATION
+    def test_skips_introspection_queries(self, extension, mock_info, mock_next):
+        """Test that introspection queries skip caching."""
+        mock_info.field_name = "__schema"
 
-        generator = extension.on_execute()
-        next(generator)  # Yields once to let execution continue
+        result = extension.resolve(mock_next, None, mock_info)
 
-        with pytest.raises(StopIteration):
-            next(generator)  # Then stops
+        mock_next.assert_called_once()
+        assert result == mock_next.return_value
 
-        mock_cache.get.assert_not_called()
-        mock_cache.set.assert_not_called()
+    def test_skips_non_query_fields(self, extension, mock_info, mock_next):
+        """Test that non-Query parent types skip caching."""
+        mock_info.parent_type.name = "ChapterNode"
 
-    @patch("apps.common.extensions.cache")
-    def test_skips_cache_for_authenticated_queries(
-        self, mock_cache, extension, mock_execution_context
-    ):
-        """Test that authenticated queries skip caching."""
-        mock_execution_context.context.request.user.is_authenticated = True
+        result = extension.resolve(mock_next, None, mock_info)
 
-        generator = extension.on_execute()
-        next(generator)  # Yields once to let execution continue
+        mock_next.assert_called_once()
+        assert result == mock_next.return_value
 
-        with pytest.raises(StopIteration):
-            next(generator)  # Then stops
+    def test_skips_protected_fields(self, extension, mock_info, mock_next):
+        """Test that protected fields skip caching."""
+        mock_info.field_name = "apiKeys"
 
-        mock_cache.get.assert_not_called()
-        mock_cache.set.assert_not_called()
+        result = extension.resolve(mock_next, None, mock_info)
+
+        mock_next.assert_called_once()
+        assert result == mock_next.return_value
 
     @patch("apps.common.extensions.cache")
-    def test_returns_cached_result_on_hit(self, mock_cache, extension, mock_execution_context):
+    def test_returns_cached_result_on_hit(self, mock_cache, extension, mock_info, mock_next):
         """Test that cached result is returned on cache hit."""
-        cached_result = {"data": {"repository": {"name": "Nest"}}}
-        mock_cache.get.return_value = cached_result
+        cached_result = {"name": "Cached OWASP"}
+        mock_cache.get_or_set.return_value = cached_result
 
-        generator = extension.on_execute()
-        next(generator)
+        result = extension.resolve(mock_next, None, mock_info, key="germany")
 
-        assert mock_execution_context.result == cached_result
-        mock_cache.get.assert_called_once()
-        mock_cache.set.assert_not_called()
+        assert result == cached_result
+        mock_cache.get_or_set.assert_called_once()
 
     @patch("apps.common.extensions.cache")
-    def test_caches_result_on_miss(self, mock_cache, extension, mock_execution_context):
+    def test_caches_result_on_miss(self, mock_cache, extension, mock_info, mock_next):
         """Test that result is cached on cache miss."""
-        mock_cache.get.return_value = None
-        resolver_result = {"data": {"repository": {"name": "Nest"}}}
-        mock_execution_context.result = resolver_result
+        mock_cache.get_or_set.side_effect = lambda _key, default, _timeout: default()
 
-        generator = extension.on_execute()
-        next(generator)  # First yield (cache miss path)
+        extension.resolve(mock_next, None, mock_info, key="germany")
 
-        with pytest.raises(StopIteration):
-            next(generator)  # Second yield + cache.set
-
-        mock_cache.get.assert_called_once()
-        mock_cache.set.assert_called_once()
+        mock_next.assert_called_once()
+        mock_cache.get_or_set.assert_called_once()

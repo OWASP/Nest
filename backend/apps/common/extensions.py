@@ -2,60 +2,66 @@
 
 import hashlib
 import json
+from functools import lru_cache
 
 from django.conf import settings
 from django.core.cache import cache
-from graphql import OperationType
 from strawberry.extensions import SchemaExtension
-from strawberry.types import ExecutionContext
+from strawberry.permission import PermissionExtension
+from strawberry.schema import Schema
+from strawberry.utils.str_converters import to_camel_case
+
+
+@lru_cache(maxsize=1)
+def get_protected_fields(schema: Schema) -> tuple[str, ...]:
+    """Get protected field names.
+
+    Args:
+        schema (Schema): The GraphQL schema.
+
+    Returns:
+        tuple[str, ...]: Tuple of protected field names in camelCase.
+
+    """
+    query_type = schema.schema_converter.type_map.get("Query")
+    fields = getattr(getattr(query_type, "definition", None), "fields", ())
+    return tuple(
+        to_camel_case(field.name)
+        for field in fields
+        if any(isinstance(ext, PermissionExtension) for ext in field.extensions)
+    )
 
 
 class CacheExtension(SchemaExtension):
     """CacheExtension class."""
 
-    def generate_key(self, execution_context: ExecutionContext) -> str:
+    def generate_key(self, field_name: str, field_args: dict) -> str:
         """Generate a unique cache key for a query.
 
         Args:
-            execution_context (ExecutionContext): The execution context.
+            field_name (str): The GraphQL field name.
+            field_args (dict): The field's arguments.
 
         Returns:
             str: The unique cache key.
 
         """
-        key = f"{execution_context.query}:{json.dumps(execution_context.variables)}"
+        key = f"{field_name}:{json.dumps(field_args, sort_keys=True)}"
         return (
             f"{settings.GRAPHQL_RESOLVER_CACHE_PREFIX}-{hashlib.sha256(key.encode()).hexdigest()}"
         )
 
-    def should_skip_cache(self, execution_context: ExecutionContext) -> bool:
-        """Check if caching should be skipped for this request.
-
-        Args:
-            execution_context (ExecutionContext): The execution context.
-
-        Returns:
-            bool: True if caching should be skipped.
-
-        """
-        if execution_context.operation_type != OperationType.QUERY:
-            return True
-
-        request = execution_context.context.request
-        return hasattr(request, "user") and request.user.is_authenticated
-
-    def on_execute(self):
+    def resolve(self, _next, root, info, *args, **kwargs):
         """Wrap the resolver to provide caching."""
-        if self.should_skip_cache(self.execution_context):
-            yield
-            return
+        if (
+            info.field_name.startswith("__")
+            or info.parent_type.name != "Query"
+            or info.field_name in get_protected_fields(self.execution_context.schema)
+        ):
+            return _next(root, info, *args, **kwargs)
 
-        cache_key = self.generate_key(self.execution_context)
-        if cached_response := cache.get(cache_key):
-            self.execution_context.result = cached_response
-            yield
-            return
-
-        yield
-        result = self.execution_context.result
-        cache.set(cache_key, result, settings.GRAPHQL_RESOLVER_CACHE_TIME_SECONDS)
+        return cache.get_or_set(
+            self.generate_key(info.field_name, kwargs),
+            lambda: _next(root, info, *args, **kwargs),
+            settings.GRAPHQL_RESOLVER_CACHE_TIME_SECONDS,
+        )
