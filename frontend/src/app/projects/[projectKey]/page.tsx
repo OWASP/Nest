@@ -1,12 +1,5 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
-import {
-  faCodeFork,
-  faExclamationCircle,
-  faFolderOpen,
-  faStar,
-  faUsers,
-} from '@fortawesome/free-solid-svg-icons'
 import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -107,6 +100,9 @@ const ProjectDetailsPage = () => {
     project.contributionStats,
     project.contributionData
   )
+  const hasHeatmapData =
+    !!project.contributionData && Object.keys(project.contributionData).length > 0
+  const hasContributionStats = !!contributionStats
 
   return (
     <>
@@ -129,20 +125,26 @@ const ProjectDetailsPage = () => {
         topics={project.topics}
         type="project"
       />
-      {project.contributionData && Object.keys(project.contributionData).length > 0 && (
-        <div className="bg-white px-4 pb-10 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+      {(hasHeatmapData || hasContributionStats) && (
+        <div className="bg-white px-8 pb-10 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
           <div className="mx-auto w-full max-w-6xl">
             <div className="rounded-lg bg-gray-100 px-4 pt-6 shadow-md sm:px-6 lg:px-10 dark:bg-gray-800">
-              <ContributionStats title="Project Contribution Activity" stats={contributionStats} />
-
+              {hasContributionStats && (
+                <ContributionStats
+                  title="Project Contribution Activity"
+                  stats={contributionStats}
+                />
+              )}
               <div className="mt-4 flex w-full items-center justify-center">
                 <div className="w-full">
-                  <ContributionHeatmap
-                    contributionData={project.contributionData}
-                    startDate={startDate}
-                    endDate={endDate}
-                    unit="contribution"
-                  />
+                  {hasHeatmapData && (
+                    <ContributionHeatmap
+                      contributionData={project.contributionData!}
+                      startDate={startDate}
+                      endDate={endDate}
+                      unit="contribution"
+                    />
+                  )}
                 </div>
               </div>
             </div>

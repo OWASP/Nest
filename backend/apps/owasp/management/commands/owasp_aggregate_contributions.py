@@ -68,17 +68,16 @@ class Command(BaseCommand):
 
     def _get_repository_ids(self, entity):
         """Extract repository IDs from chapter or project."""
-        repo_ids = []
-        
-        # Handle single owasp_repository
-        if hasattr(entity, 'owasp_repository') and entity.owasp_repository:
-            repo_ids.append(entity.owasp_repository.id)
-        
-        # Handle multiple repositories (for projects)
-        if hasattr(entity, 'repositories'):
-            repo_ids.extend([r.id for r in entity.repositories.all()])
-        
-        return repo_ids
+        repo_ids: set[int] = set()
+
+        # Handle single owasp_repository.
+        if hasattr(entity, "owasp_repository") and entity.owasp_repository:
+            repo_ids.add(entity.owasp_repository.id)
+        # Handle multiple repositories (for projects).
+        if hasattr(entity, "repositories"):
+            repo_ids.update([r.id for r in entity.repositories.all()])
+
+        return list(repo_ids)
 
     def aggregate_contributions(self, entity, start_date: datetime) -> dict[str, int]:
         """Aggregate contributions for a chapter or project.
@@ -92,12 +91,12 @@ class Command(BaseCommand):
 
         """
         contribution_map: dict[str, int] = {}
-        
+
         repo_ids = self._get_repository_ids(entity)
         if not repo_ids:
             return contribution_map
 
-        # Aggregate commits
+        # Aggregate commits.
         self._aggregate_contribution_dates(
             Commit.objects.filter(
                 repository_id__in=repo_ids,
@@ -107,7 +106,7 @@ class Command(BaseCommand):
             contribution_map,
         )
 
-        # Aggregate issues
+        # Aggregate issues.
         self._aggregate_contribution_dates(
             Issue.objects.filter(
                 repository_id__in=repo_ids,
@@ -117,7 +116,7 @@ class Command(BaseCommand):
             contribution_map,
         )
 
-        # Aggregate pull requests
+        # Aggregate pull requests.
         self._aggregate_contribution_dates(
             PullRequest.objects.filter(
                 repository_id__in=repo_ids,
@@ -127,7 +126,7 @@ class Command(BaseCommand):
             contribution_map,
         )
 
-        # Aggregate releases
+        # Aggregate releases.
         self._aggregate_contribution_dates(
             Release.objects.filter(
                 repository_id__in=repo_ids,
@@ -154,7 +153,7 @@ class Command(BaseCommand):
         stats = {
             "commits": 0,
             "issues": 0,
-            "pull_requests": 0,
+            "pullRequests": 0,
             "releases": 0,
             "total": 0,
         }
@@ -163,25 +162,25 @@ class Command(BaseCommand):
         if not repo_ids:
             return stats
 
-        # Count commits
+        # Count commits.
         stats["commits"] = Commit.objects.filter(
             repository_id__in=repo_ids,
             created_at__gte=start_date,
         ).count()
 
-        # Count issues
+        # Count issues.
         stats["issues"] = Issue.objects.filter(
             repository_id__in=repo_ids,
             created_at__gte=start_date,
         ).count()
 
-        # Count pull requests
-        stats["pull_requests"] = PullRequest.objects.filter(
+        # Count pull requests.
+        stats["pullRequests"] = PullRequest.objects.filter(
             repository_id__in=repo_ids,
             created_at__gte=start_date,
         ).count()
 
-        # Count releases
+        # Count releases.
         stats["releases"] = Release.objects.filter(
             repository_id__in=repo_ids,
             published_at__gte=start_date,
@@ -189,7 +188,7 @@ class Command(BaseCommand):
         ).count()
 
         stats["total"] = (
-            stats["commits"] + stats["issues"] + stats["pull_requests"] + stats["releases"]
+            stats["commits"] + stats["issues"] + stats["pullRequests"] + stats["releases"]
         )
 
         return stats
@@ -249,15 +248,13 @@ class Command(BaseCommand):
 
     def _process_entities(self, queryset, start_date, label, model_class):
         """Process entities (chapters or projects) for contribution aggregation."""
-        count = queryset.count()
-        self.stdout.write(f"Processing {count} {label}...")
+        entities = list(queryset)
+        self.stdout.write(f"Processing {len(entities)} {label}...")
 
-        entities = []
-        for entity in queryset:
+        for entity in entities:
             entity.contribution_data = self.aggregate_contributions(entity, start_date)
             entity.contribution_stats = self.calculate_contribution_stats(entity, start_date)
-            entities.append(entity)
 
         if entities:
             model_class.bulk_save(entities, fields=("contribution_data", "contribution_stats"))
-            self.stdout.write(self.style.SUCCESS(f"Updated {count} {label}"))
+            self.stdout.write(self.style.SUCCESS(f"Updated {len(entities)} {label}"))

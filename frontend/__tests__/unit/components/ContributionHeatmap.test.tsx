@@ -192,7 +192,6 @@ describe('ContributionHeatmap', () => {
       const { container } = renderWithTheme(<ContributionHeatmap {...defaultProps} title="Test" />)
       expect(container.querySelector('.w-full')).toBeInTheDocument()
       expect(container.querySelector('style')).toBeInTheDocument()
-      expect(container.querySelector('.w-full')).toBeInTheDocument()
     })
 
     it('includes responsive media queries', () => {
@@ -638,19 +637,18 @@ describe('ContributionHeatmap', () => {
       const { container } = renderWithTheme(
         <ContributionHeatmap {...defaultProps} title="Compact" variant="compact" />
       )
-      // Verify compact variant uses min-w-full class instead of min-w-[640px]
-      const chartContainer = container.querySelector('.inline-block')
-      expect(chartContainer).toHaveClass('min-w-full')
-      expect(chartContainer).not.toHaveClass('min-w-[640px]')
+      // Verify compact variant uses min-w-fit class
+      const chartContainer = container.querySelector('.min-w-fit')
+      expect(chartContainer).toBeInTheDocument()
     })
 
     it('applies default variant container styling when variant is default', () => {
       const { container } = renderWithTheme(
         <ContributionHeatmap {...defaultProps} title="Default" variant="default" />
       )
-      // Verify default variant uses responsive min-width classes
-      const chartContainer = container.querySelector('.inline-block')
-      expect(chartContainer).toHaveClass('min-w-[640px]', 'md:min-w-full')
+      // Verify default variant uses min-w-fit class
+      const chartContainer = container.querySelector('.min-w-fit')
+      expect(chartContainer).toBeInTheDocument()
     })
 
     it('defaults to default variant when no variant is specified', () => {
@@ -668,9 +666,9 @@ describe('ContributionHeatmap', () => {
       expect(title).toHaveClass('mb-4', 'text-sm', 'font-semibold')
 
       rerender(
-        <div>
+        <ThemeProvider attribute="class">
           <ContributionHeatmap {...defaultProps} title="Test Title" variant="compact" />
-        </div>
+        </ThemeProvider>
       )
       title = screen.getByText('Test Title')
       expect(title).toHaveClass('mb-4', 'text-sm', 'font-semibold')

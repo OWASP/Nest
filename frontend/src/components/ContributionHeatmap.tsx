@@ -40,7 +40,6 @@ const generateHeatmapSeries = (
 
   // Handle invalid range by swapping dates
   if (start > end) {
-    // Swap the date strings to ensure startDate comes before endDate
     const swappedStartDate = endDate
     const swappedEndDate = startDate
     return generateHeatmapSeries(swappedStartDate, swappedEndDate, contributionData)
@@ -54,14 +53,14 @@ const generateHeatmapSeries = (
   }))
 
   const firstDay = new Date(start)
-  const daysToMonday = (firstDay.getDay() + 6) % 7
-  firstDay.setDate(firstDay.getDate() - daysToMonday)
+  const daysToMonday = (firstDay.getUTCDay() + 6) % 7
+  firstDay.setUTCDate(firstDay.getUTCDate() - daysToMonday)
 
   const currentDate = new Date(firstDay)
   let weekNumber = 1
 
   while (currentDate <= end) {
-    const dayOfWeek = currentDate.getDay()
+    const dayOfWeek = currentDate.getUTCDay()
     const adjustedDayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1
     const dateStr = currentDate.toISOString().split('T')[0]
     const weekLabel = `W${weekNumber}`
@@ -75,9 +74,9 @@ const generateHeatmapSeries = (
       date: dateStr,
     })
 
-    currentDate.setDate(currentDate.getDate() + 1)
+    currentDate.setUTCDate(currentDate.getUTCDate() + 1)
 
-    if (currentDate.getDay() === 1 && currentDate <= end) {
+    if (currentDate.getUTCDay() === 1 && currentDate <= end) {
       weekNumber++
     }
   }
@@ -270,6 +269,13 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
 
   const options = useMemo(() => getChartOptions(isDarkMode, unit), [isDarkMode, unit])
 
+  const chartWidth = useMemo(() => {
+    const weeksCount = heatmapSeries[0]?.data?.length || 0
+    const pixelPerWeek = isCompact ? 16 : 20
+    const calculatedWidth = weeksCount * pixelPerWeek + 50
+    return Math.max(600, calculatedWidth)
+  }, [heatmapSeries, isCompact])
+
   return (
     <div className="w-full">
       {title && (
@@ -291,16 +297,16 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
           `}
         </style>
 
-        <div
-          className={`inline-block ${isCompact ? 'min-w-full' : 'min-w-[640px] md:min-w-full'} `}
-        >
-          <Chart
-            options={options}
-            series={heatmapSeries}
-            type="heatmap"
-            height={isCompact ? 160 : 200}
-            width="100%"
-          />
+        <div style={{ width: `${chartWidth}px`, maxWidth: '100%' }} className="min-w-fit">
+          <div style={{ width: `${chartWidth}px` }}>
+            <Chart
+              options={options}
+              series={heatmapSeries}
+              type="heatmap"
+              height={isCompact ? 160 : 200}
+              width="100%"
+            />
+          </div>
         </div>
       </div>
     </div>

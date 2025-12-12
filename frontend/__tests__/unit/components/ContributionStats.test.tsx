@@ -1,26 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import ContributionStats from 'components/ContributionStats'
 
-// Mock FontAwesome components
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, className }: { icon: unknown; className?: string }) => (
-    <div
-      data-testid="font-awesome-icon"
-      data-icon={typeof icon === 'string' ? icon : JSON.stringify(icon)}
-      className={className}
-    />
-  ),
-}))
-
-// Mock FontAwesome icons
-jest.mock('@fortawesome/free-solid-svg-icons', () => ({
-  faChartLine: 'chart-line',
-  faCode: 'code',
-  faCodeBranch: 'code-branch',
-  faCodeMerge: 'code-merge',
-  faExclamationCircle: 'exclamation-circle',
-}))
-
 describe('ContributionStats', () => {
   const mockStats = {
     commits: 150,
@@ -74,10 +54,11 @@ describe('ContributionStats', () => {
       expect(screen.getByText('8,200')).toBeInTheDocument()
     })
 
-    it('renders all FontAwesome icons correctly', () => {
+    it('renders all react-icons correctly', () => {
       render(<ContributionStats {...defaultProps} />)
 
-      const icons = screen.getAllByTestId('font-awesome-icon')
+      const container = screen.getByTestId('contribution-stats')
+      const icons = container.querySelectorAll('svg')
       expect(icons).toHaveLength(5) // Title icon + 4 stat icons
 
       // Verify specific icon data attributes
@@ -326,23 +307,20 @@ describe('ContributionStats', () => {
     it('renders all required icons with proper attributes', () => {
       render(<ContributionStats {...defaultProps} />)
 
-      const icons = screen.getAllByTestId('font-awesome-icon')
+      const container = screen.getByTestId('contribution-stats')
+      const icons = container.querySelectorAll('svg')
       expect(icons).toHaveLength(5)
 
-      // Check for specific icon types
-      const chartIcon = icons.find((icon) => (icon as HTMLElement).dataset.icon === 'chart-line')
-      const codeIcon = icons.find((icon) => (icon as HTMLElement).dataset.icon === 'code')
-      const branchIcon = icons.find((icon) => (icon as HTMLElement).dataset.icon === 'code-branch')
-      const issueIcon = icons.find(
-        (icon) => (icon as HTMLElement).dataset.icon === 'exclamation-circle'
-      )
-      const mergeIcon = icons.find((icon) => (icon as HTMLElement).dataset.icon === 'code-merge')
+      // Verify icons have proper styling classes
+      icons.forEach((icon) => {
+        expect(icon).toHaveClass('text-gray-600', 'dark:text-gray-400')
+      })
 
-      expect(chartIcon).toBeInTheDocument()
-      expect(codeIcon).toBeInTheDocument()
-      expect(branchIcon).toBeInTheDocument()
-      expect(issueIcon).toBeInTheDocument()
-      expect(mergeIcon).toBeInTheDocument()
+      // Verify specific viewBox attributes for different react-icons
+      const viewBoxes = Array.from(icons).map((icon) => icon.getAttribute('viewBox'))
+      expect(viewBoxes).toContain('0 0 512 512') // chart-line and exclamation-circle
+      expect(viewBoxes).toContain('0 0 640 512') // code
+      expect(viewBoxes).toContain('0 0 384 512') // code-branch
     })
   })
 })

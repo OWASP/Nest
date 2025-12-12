@@ -75,6 +75,9 @@ export default function ChapterDetailsPage() {
     chapter.contributionStats,
     chapter.contributionData
   )
+  const hasHeatmapData =
+    !!chapter.contributionData && Object.keys(chapter.contributionData).length > 0
+  const hasContributionStats = !!contributionStats
 
   return (
     <>
@@ -90,19 +93,26 @@ export default function ChapterDetailsPage() {
         topContributors={topContributors}
         type="chapter"
       />
-      {chapter.contributionData && Object.keys(chapter.contributionData).length > 0 && (
-        <div className="bg-white px-4 pb-10 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+      {(hasHeatmapData || hasContributionStats) && (
+        <div className="bg-white px-8 pb-10 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
           <div className="mx-auto w-full max-w-6xl">
             <div className="rounded-lg bg-gray-100 px-4 pt-6 shadow-md sm:px-6 lg:px-10 dark:bg-gray-800">
-              <ContributionStats title="Chapter Contribution Activity" stats={contributionStats} />
+              {hasContributionStats && (
+                <ContributionStats
+                  title="Chapter Contribution Activity"
+                  stats={contributionStats}
+                />
+              )}
               <div className="mt-4 flex w-full items-center justify-center">
                 <div className="w-full">
-                  <ContributionHeatmap
-                    contributionData={chapter.contributionData}
-                    startDate={startDate}
-                    endDate={endDate}
-                    unit="contribution"
-                  />
+                  {hasHeatmapData && (
+                    <ContributionHeatmap
+                      contributionData={chapter.contributionData!}
+                      startDate={startDate}
+                      endDate={endDate}
+                      unit="contribution"
+                    />
+                  )}
                 </div>
               </div>
             </div>

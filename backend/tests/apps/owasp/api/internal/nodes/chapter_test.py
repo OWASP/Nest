@@ -55,11 +55,9 @@ class TestChapterNode:
     def test_resolve_contribution_data(self):
         field = self._get_field_by_name("contribution_data")
         assert field is not None
-        # JSONField is represented as a Strawberry ScalarWrapper for JSON type
         assert field.type.__class__.__name__ == "ScalarWrapper"
 
     def test_resolve_contribution_stats(self):
         field = self._get_field_by_name("contribution_stats")
         assert field is not None
-        # JSONField is represented as a Strawberry ScalarWrapper for JSON type
         assert field.type.__class__.__name__ == "ScalarWrapper"
