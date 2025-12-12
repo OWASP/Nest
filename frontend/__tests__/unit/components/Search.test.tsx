@@ -368,7 +368,7 @@ describe('SearchBar Component', () => {
       fireEvent.change(input, { target: { value: 'test' } })
       const clearButton = container.querySelector('button.absolute.rounded-full[class*="right-2"]')
       expect(clearButton).toHaveClass(
-        'absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 hover:bg-gray-100 focus:outline-hidden focus:ring-2 focus:ring-gray-300'
+        'absolute top-1/2 right-2 h-8 w-8 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:bg-gray-400 hover:text-gray-200 focus:ring-2 focus:ring-gray-300 focus:outline-hidden dark:hover:bg-gray-600'
       )
     })
 
