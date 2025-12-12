@@ -87,13 +87,11 @@ const SearchBar: React.FC<SearchProps> = ({
             {searchQuery && (
               <button
                 type="button"
-                className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 w-8 h-8 focus:ring-2 focus:ring-gray-300 focus:outline-hidden 
-                text-gray-400
-                hover:bg-gray-800 dark:hover:bg-gray-400 hover:text-gray-100 dark:hover:text-gray-800 "
+                className="absolute top-1/2 right-2 h-8 w-8 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:bg-gray-400 hover:text-gray-200 focus:ring-2 focus:ring-gray-300 focus:outline-hidden dark:hover:bg-gray-600"
                 onClick={handleClearSearch}
                 aria-label="Clear search"
               >
-                <FontAwesomeIcon icon={faTimes}/>
+                <FontAwesomeIcon icon={faTimes} />
               </button>
             )}
           </>
