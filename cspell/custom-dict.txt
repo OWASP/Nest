@@ -2,6 +2,7 @@ Agentic
 Agsoc
 Aichi
 Aissue
+Atqc
 Aupdated
 BOTTOMPADDING
 CCSP
@@ -19,6 +20,7 @@ NOASSERTION
 NOSONAR
 Nadu
 Nominatim
+PGPASSWORD
 PLR
 PYTHONUNBUFFERED
 RUF
@@ -44,6 +46,7 @@ apk
 arithmatex
 arkid15r
 askowasp
+attisdropped
 bangbang
 bsky
 certbot
@@ -99,6 +102,7 @@ nestbot
 ngx
 noinput
 nosniff
+nspname
 openstreetmap
 owasppcitoolkit
 owtf

@@ -7,21 +7,16 @@ runs:
     steps:
       - name: Wait for database to be ready
         run: |
-          until docker exec ${{ job.services.db.id }} pg_isready -U nest_user_e2e -d nest_db_e2e; do
-            echo "Waiting for database..."
-            sleep 5
-          done
+          timeout 5m bash -c '
+            until docker exec ${{ job.services.db.id }} pg_isready -U nest_user_e2e -d nest_db_e2e; do
+              echo "Waiting for database..."
+              sleep 5
+            done
+          '
         shell: bash
 
       - name: Install PostgreSQL client
         run: sudo apt-get install -y postgresql-client
-        shell: bash
-
-      - name: Load Postgres data
-        env:
-          PGPASSWORD: nest_user_e2e_password
-        run: |
-          gunzip -c backend/data/nest-e2e.sql.gz | psql -h localhost -U nest_user_e2e -d nest_db_e2e
         shell: bash
 
       - name: Build backend e2e image
@@ -42,18 +37,29 @@ runs:
           docker run -d --rm --name e2e-nest-backend \
             --env-file backend/.env.e2e.example \
             --network host \
+            -e DJANGO_DB_HOST=localhost \
             -p 9000:9000 \
             owasp/nest:test-backend-e2e-latest \
             sh -c '
+              python manage.py migrate &&
               gunicorn wsgi:application --bind 0.0.0.0:9000
           '
         shell: bash
 
       - name: Waiting for the backend to be ready
         run: |
-          until wget --spider http://localhost:9000/a; do
-            echo "Waiting for backend..."
-            sleep 5
-          done
+          timeout 5m bash -c '
+            until wget --spider http://localhost:9000/a; do
+              echo "Waiting for backend..."
+              sleep 5
+            done
+          '
           echo "Backend is up!"
+        shell: bash
+
+      - name: Load Postgres data
+        env:
+          PGPASSWORD: nest_user_e2e_password
+        run: |
+          gunzip -c backend/data/nest.sql.gz | psql -h localhost -U nest_user_e2e -d nest_db_e2e
         shell: bash

@@ -286,6 +286,8 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 
 1. **Load Initial Data**:
 
+   - Make sure you have `gzip` installed on your machine.
+
    - Open a new terminal session and run the following command to populate the database with initial data from fixtures:
 
    ```bash
