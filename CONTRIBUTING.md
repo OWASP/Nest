@@ -281,10 +281,12 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
      make run
      ```
 
-   - Leave this terminal session running and wait until you see that [Nest local](http://localhost:8000/api/v1) is responding.
+   - Leave this terminal session running and wait until you see that [Nest local](http://localhost:8000/api/v0) is responding.
    - Please note as we use containerized approach this command must be run in parallel to other Nest commands you may want to use. You need to keep it running in the current terminal and use another terminal session for your work.
 
 1. **Load Initial Data**:
+
+   - Make sure you have `gzip` installed on your machine.
 
    - Open a new terminal session and run the following command to populate the database with initial data from fixtures:
 
@@ -302,7 +304,7 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 
 1. **Verify API Endpoints**:
    - Check the following endpoints availability:
-     - [API](http://localhost:8000/api/v1/)
+     - [API](http://localhost:8000/api/v0/)
      - [GraphQL](http://localhost:8000/graphql/)
 
 ### Optional Steps
@@ -414,6 +416,32 @@ make test
 
 This command runs tests and checks that coverage threshold requirements are satisfied for both backend and frontend.
 **Please note your PR won't be merged if it fails the code tests checks.**
+
+### Setting Up e2e Testing Environment
+
+Follow these steps to setup your e2e testing environment:
+
+1. Make sure you have `gzip` installed on your machine.
+
+2. Run the e2e backend instance with the following command:
+
+   ```bash
+   make run-backend-e2e
+   ```
+
+3. Load the data into the e2e db with the following command (in another terminal session):
+
+   ```bash
+   make load-data-e2e
+   ```
+
+4. Now, you can stop the backend instance, and run the frontend e2e tests with the following command:
+
+   ```bash
+   make test-frontend-e2e
+   ```
+
+**Please note that you only need to do these steps once.**
 
 ### Test Coverage
 

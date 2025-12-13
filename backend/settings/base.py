@@ -19,6 +19,7 @@ class Base(Configuration):
     DEBUG = False
     GITHUB_APP_ID = None
     GITHUB_APP_INSTALLATION_ID = None
+    IS_E2E_ENVIRONMENT = False
     IS_LOCAL_ENVIRONMENT = False
     IS_PRODUCTION_ENVIRONMENT = False
     IS_STAGING_ENVIRONMENT = False
@@ -46,6 +47,7 @@ class Base(Configuration):
     THIRD_PARTY_APPS = (
         "algoliasearch_django",
         "corsheaders",
+        "django_rq",
         "ninja",
         "storages",
     )
@@ -141,6 +143,16 @@ class Base(Configuration):
                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
             },
             "TIMEOUT": 300,
+        }
+    }
+
+    RQ_QUEUES = {
+        "ai": {
+            "HOST": REDIS_HOST,
+            "PORT": 6379,
+            "PASSWORD": REDIS_PASSWORD,
+            "DB": 1,
+            "DEFAULT_TIMEOUT": 300,
         }
     }
 

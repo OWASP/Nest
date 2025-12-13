@@ -5,8 +5,12 @@ const config: Config = {
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',
-    '!src/app/api/**',
     '!src/app/**/layout.tsx',
+    '!src/app/api/**',
+    '!src/app/board/**',
+    '!src/app/my/**',
+    '!src/app/settings/**',
+    '!src/components/Mentee*.tsx',
     '!src/hooks/**',
     '!src/instrumentation.ts',
     '!src/instrumentation-client.ts',

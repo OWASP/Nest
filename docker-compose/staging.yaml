@@ -1,6 +1,7 @@
 services:
   staging-nest-backend:
     container_name: staging-nest-backend
+    entrypoint: /home/owasp/entrypoint.sh
     image: owasp/nest:backend-staging
     env_file: .env.backend
     depends_on:
@@ -57,6 +58,27 @@ services:
     restart: unless-stopped
     networks:
       - nest-app-network
+
+  staging-nest-worker:
+    container_name: staging-nest-worker
+    image: owasp/nest:backend-staging
+    env_file: .env.backend
+    command: >
+      sh -c '
+        python manage.py rqworker ai --with-scheduler
+      '
+    depends_on:
+      staging-nest-cache:
+        condition: service_healthy
+      staging-nest-db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - nest-app-network
+      - nest-cache-network
+      - nest-db-network
+    volumes:
+      - ./backend/data:/home/owasp/data
 
 networks:
   nest-app-network:

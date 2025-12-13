@@ -1,5 +1,6 @@
 include backend/apps/ai/Makefile
 include backend/apps/github/Makefile
+include backend/apps/mentorship/Makefile
 include backend/apps/nest/Makefile
 include backend/apps/owasp/Makefile
 include backend/apps/slack/Makefile
@@ -15,6 +16,7 @@ clean-backend-docker:
 	@docker container rm -f nest-backend >/dev/null 2>&1 || true
 	@docker container rm -f nest-cache >/dev/null 2>&1 || true
 	@docker container rm -f nest-db >/dev/null 2>&1 || true
+	@docker container rm -f nest-worker >/dev/null 2>&1 || true
 	@docker image rm -f nest-local-backend >/dev/null 2>&1 || true
 	@docker volume rm -f nest-local_backend-venv >/dev/null 2>&1 || true
 
@@ -27,8 +29,14 @@ exec-backend-command:
 exec-backend-command-it:
 	@docker exec -it nest-backend $(CMD) 2>/dev/null
 
+exec-backend-command-e2e:
+	@docker exec -it e2e-nest-backend $(CMD)
+
 exec-db-command-it:
 	@docker exec -it nest-db $(CMD)
+
+exec-db-command-e2e:
+	@docker exec -it e2e-nest-db $(CMD)
 
 clear-cache:
 	@CMD="python manage.py clear_cache" $(MAKE) exec-backend-command
@@ -41,17 +49,7 @@ django-shell:
 
 dump-data:
 	@echo "Dumping Nest data"
-	@CMD="python manage.py dumpdata \
-		github \
-		owasp \
-		slack.Conversation \
-		slack.Member \
-		slack.Workspace \
-		--indent=4 \
-		--natural-foreign \
-		--natural-primary -o data/nest.json" $(MAKE) exec-backend-command
-	@CMD="sed -E -i 's/\"email\": *\"([^\"]|\\\")*\"/\"email\": \"\"/g' data/nest.json" $(MAKE) exec-backend-command
-	@CMD="gzip -f data/nest.json" $(MAKE) exec-backend-command
+	@CMD="python manage.py dump_data" $(MAKE) exec-backend-command-it
 
 enrich-data: \
 	github-enrich-issues \
@@ -71,7 +69,11 @@ index-data:
 
 load-data:
 	@echo "Loading Nest data"
-	@CMD="python manage.py load_data" $(MAKE) exec-backend-command
+	@gunzip -c backend/data/nest.sql.gz | docker exec -i nest-db psql -U nest_user_dev -d nest_db_dev
+
+load-data-e2e:
+	@echo "Loading Nest e2e data"
+	@gunzip -c backend/data/nest.sql.gz | docker exec -i e2e-nest-db psql -U nest_user_e2e -d nest_db_e2e
 
 merge-migrations:
 	@CMD="python manage.py makemigrations --merge" $(MAKE) exec-backend-command
@@ -95,6 +97,10 @@ recreate-schema:
 restore-backup:
 	@echo "Restoring Nest backup"
 	@CMD="python manage.py restore_backup" $(MAKE) exec-backend-command
+
+run-backend-e2e:
+	@DOCKER_BUILDKIT=1 \
+	docker compose --project-name nest-e2e -f docker-compose/e2e.yaml up --build --remove-orphans --abort-on-container-exit backend db
 
 save-backup:
 	@echo "Saving Nest backup"

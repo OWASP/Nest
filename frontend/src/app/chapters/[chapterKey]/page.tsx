@@ -63,6 +63,7 @@ export default function ChapterDetailsPage() {
     <DetailsCard
       details={details}
       entityKey={chapter.key}
+      entityLeaders={chapter.entityLeaders}
       geolocationData={[chapter]}
       isActive={chapter.isActive}
       socialLinks={chapter.relatedUrls}

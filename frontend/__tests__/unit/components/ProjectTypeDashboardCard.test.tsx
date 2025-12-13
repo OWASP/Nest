@@ -2,6 +2,7 @@ import { faHeartPulse, faExclamationTriangle, faSkull } from '@fortawesome/free-
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import React from 'react'
+import type { ProjectHealthType } from 'types/project'
 import ProjectTypeDashboardCard from 'components/ProjectTypeDashboardCard'
 
 jest.mock('next/link', () => {
@@ -63,6 +64,12 @@ describe('ProjectTypeDashboardCard', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
+
+  const expectValidTypeRendersWithoutError = (type: ProjectHealthType) => {
+    expect(() => {
+      render(<ProjectTypeDashboardCard type={type} count={10} icon={faHeartPulse} />)
+    }).not.toThrow()
+  }
 
   describe('Essential Rendering Tests', () => {
     it('renders successfully with minimal required props', () => {
@@ -205,17 +212,16 @@ describe('ProjectTypeDashboardCard', () => {
       expect(screen.getByText(largeNumber.toString())).toBeInTheDocument()
     })
 
-    type ProjectHealthType = 'healthy' | 'needsAttention' | 'unhealthy'
     it('renders correctly with all type variants', () => {
       const types: Array<ProjectHealthType> = ['healthy', 'needsAttention', 'unhealthy']
 
-      types.forEach((type) => {
+      for (const type of types) {
         const { unmount } = render(
           <ProjectTypeDashboardCard type={type} count={10} icon={faHeartPulse} />
         )
         expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
         unmount()
-      })
+      }
     })
   })
 
@@ -354,31 +360,25 @@ describe('ProjectTypeDashboardCard', () => {
 
   describe('Type Safety and TypeScript Compliance', () => {
     it('only accepts valid type values', () => {
-      const validTypes: Array<'healthy' | 'needsAttention' | 'unhealthy'> = [
-        'healthy',
-        'needsAttention',
-        'unhealthy',
-      ]
+      const validTypes: Array<ProjectHealthType> = ['healthy', 'needsAttention', 'unhealthy']
 
-      const testTypeValue = (type: 'healthy' | 'needsAttention' | 'unhealthy') => {
-        expect(() => {
-          render(<ProjectTypeDashboardCard type={type} count={10} icon={faHeartPulse} />)
-        }).not.toThrow()
+      for (const type of validTypes) {
+        expectValidTypeRendersWithoutError(type)
       }
 
-      validTypes.forEach(testTypeValue)
+      expect(true).toBe(true)
     })
 
     it('handles different icon types correctly', () => {
       const icons = [faHeartPulse, faExclamationTriangle, faSkull]
 
-      icons.forEach((icon) => {
+      for (const icon of icons) {
         const { unmount } = render(
           <ProjectTypeDashboardCard type="healthy" count={10} icon={icon} />
         )
         expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
         unmount()
-      })
+      }
     })
   })
 
@@ -396,16 +396,12 @@ describe('ProjectTypeDashboardCard', () => {
     it('handles rapid prop changes gracefully', () => {
       const { rerender } = render(<ProjectTypeDashboardCard {...baseProps} />)
 
-      const types: Array<'healthy' | 'needsAttention' | 'unhealthy'> = [
-        'healthy',
-        'needsAttention',
-        'unhealthy',
-      ]
+      const types: Array<ProjectHealthType> = ['healthy', 'needsAttention', 'unhealthy']
 
-      types.forEach((type, index) => {
+      for (const [index, type] of types.entries()) {
         rerender(<ProjectTypeDashboardCard type={type} count={index} icon={faHeartPulse} />)
         expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
-      })
+      }
     })
   })
 })

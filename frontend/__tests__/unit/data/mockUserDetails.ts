@@ -13,6 +13,23 @@ export const mockUserDetailsData = {
     publicRepositoriesCount: 3,
     createdAt: 1723002473,
     contributionsCount: 100,
+    badges: [
+      {
+        id: '1',
+        name: 'Contributor',
+        cssClass: 'fa-medal',
+        description: 'Active contributor to OWASP projects',
+        weight: 1,
+      },
+      {
+        id: '2',
+        name: 'Security Expert',
+        cssClass: 'fa-shield-alt',
+        description: 'Security expertise demonstrated',
+        weight: 2,
+      },
+    ],
+    badgeCount: 2,
   },
   recentIssues: [
     {
@@ -45,6 +62,7 @@ export const mockUserDetailsData = {
   ],
   recentPullRequests: [
     {
+      id: 'mock-user-pr-1',
       createdAt: 1723002473,
       repositoryName: 'test-repo-3',
       title: 'Test Pull Request',

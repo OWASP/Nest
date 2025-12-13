@@ -1,10 +1,13 @@
 import type { Contributor } from 'types/contributor'
 import type { HealthMetricsProps } from 'types/healthMetrics'
 import type { Issue } from 'types/issue'
+import type { Leader } from 'types/leader'
 import type { Milestone } from 'types/milestone'
 import type { Organization } from 'types/organization'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
+
+export type ProjectHealthType = 'healthy' | 'needsAttention' | 'unhealthy'
 
 export type ProjectStats = {
   contributors: number
@@ -18,6 +21,7 @@ export type Project = {
   createdAt?: string
   contributorsCount?: number
   description?: string
+  entityLeaders?: Leader[]
   forksCount?: number
   healthMetricsList?: HealthMetricsProps[]
   isActive?: boolean
@@ -44,7 +48,7 @@ export type Project = {
   recentMilestones?: Milestone[]
 }
 
-export type RepositoriesCardProps = {
+export type RepositoryCardListProps = {
   maxInitialDisplay?: number
   repositories?: RepositoryCardProps[]
 }
@@ -52,6 +56,7 @@ export type RepositoriesCardProps = {
 export type RepositoryCardProps = {
   contributorsCount: number
   forksCount: number
+  isArchived?: boolean
   key?: string
   name: string
   openIssuesCount: number

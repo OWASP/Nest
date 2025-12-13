@@ -65,6 +65,14 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
   }) => <span data-testid={`icon-${icon.iconName}`} className={className} {...props} />,
 }))
 
+jest.mock('@heroui/tooltip', () => ({
+  Tooltip: ({ children, content }: { children: React.ReactNode; content: string }) => (
+    <div data-testid="tooltip" data-tooltip-content={content}>
+      {children}
+    </div>
+  ),
+}))
+
 jest.mock('millify', () => ({
   __esModule: true,
   default: (value: number) => {
@@ -90,6 +98,7 @@ describe('UserCard', () => {
     followersCount: 0,
     location: '',
     repositoriesCount: 0,
+    badgeCount: 0,
   }
 
   beforeEach(() => {
@@ -120,6 +129,7 @@ describe('UserCard', () => {
         followersCount: 1500,
         location: 'San Francisco, CA',
         repositoriesCount: 25,
+        badgeCount: 5,
         button: {
           label: 'View Profile',
           onclick: mockButtonClick,
@@ -129,7 +139,7 @@ describe('UserCard', () => {
       render(<UserCard {...fullProps} />)
 
       expect(screen.getByText('John Doe')).toBeInTheDocument()
-      expect(screen.getByText('Tech Corp')).toBeInTheDocument()
+      expect(screen.getByText(/Tech Corp/)).toBeInTheDocument()
       expect(screen.getByText('Software Developer')).toBeInTheDocument()
       expect(screen.getByTestId('user-avatar')).toHaveAttribute(
         'src',
@@ -160,7 +170,7 @@ describe('UserCard', () => {
     it('renders company information when provided', () => {
       render(<UserCard {...defaultProps} company="Tech Corp" />)
 
-      expect(screen.getByText('Tech Corp')).toBeInTheDocument()
+      expect(screen.getByText(/Tech Corp/)).toBeInTheDocument()
     })
 
     it('renders location when company is not provided', () => {
@@ -338,7 +348,15 @@ describe('UserCard', () => {
       render(<UserCard {...defaultProps} />)
 
       const button = screen.getByRole('button')
-      expect(button).toHaveClass('group', 'flex', 'flex-col', 'items-center', 'rounded-lg', 'p-6')
+      expect(button).toHaveClass(
+        'group',
+        'flex',
+        'flex-col',
+        'items-center',
+        'rounded-lg',
+        'px-6',
+        'py-6'
+      )
     })
   })
 
@@ -377,6 +395,43 @@ describe('UserCard', () => {
 
       expect(screen.getByText('1.2k')).toBeInTheDocument()
       expect(screen.getByText('5.7k')).toBeInTheDocument()
+    })
+  })
+
+  describe('Badge Count Display', () => {
+    it('renders badge count when greater than 0', () => {
+      render(<UserCard {...defaultProps} badgeCount={5} />)
+
+      expect(screen.getByTestId('icon-medal')).toBeInTheDocument()
+      expect(screen.getByText('5')).toBeInTheDocument()
+    })
+
+    it('does not render badge count when 0', () => {
+      render(<UserCard {...defaultProps} badgeCount={0} />)
+
+      expect(screen.queryByTestId('icon-medal')).not.toBeInTheDocument()
+    })
+
+    it('renders all three metrics when all are greater than 0', () => {
+      render(
+        <UserCard {...defaultProps} followersCount={100} repositoriesCount={50} badgeCount={3} />
+      )
+
+      expect(screen.getByTestId('icon-users')).toBeInTheDocument()
+      expect(screen.getByTestId('icon-folder-open')).toBeInTheDocument()
+      expect(screen.getByTestId('icon-medal')).toBeInTheDocument()
+    })
+
+    it('formats badge count with millify for large numbers', () => {
+      render(<UserCard {...defaultProps} badgeCount={1500} />)
+
+      expect(screen.getByText('1.5k')).toBeInTheDocument()
+    })
+
+    it('handles negative badge count', () => {
+      render(<UserCard {...defaultProps} badgeCount={-1} />)
+
+      expect(screen.queryByTestId('icon-medal')).not.toBeInTheDocument()
     })
   })
 })

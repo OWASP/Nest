@@ -1,6 +1,7 @@
 services:
   production-nest-backend:
     container_name: production-nest-backend
+    entrypoint: /home/owasp/entrypoint.sh
     image: owasp/nest:backend-production
     env_file: .env.backend
     depends_on:
@@ -58,6 +59,27 @@ services:
     restart: unless-stopped
     networks:
       - nest-app-network
+
+  production-nest-worker:
+    container_name: production-nest-worker
+    image: owasp/nest:backend-production
+    env_file: .env.backend
+    command: >
+      sh -c '
+        python manage.py rqworker ai --with-scheduler
+      '
+    depends_on:
+      production-nest-cache:
+        condition: service_healthy
+      production-nest-db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - nest-app-network
+      - nest-cache-network
+      - nest-db-network
+    volumes:
+      - ./backend/data:/home/owasp/data
 
 networks:
   nest-app-network:

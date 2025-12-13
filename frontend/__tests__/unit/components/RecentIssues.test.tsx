@@ -174,7 +174,16 @@ describe('<RecentIssues />', () => {
   })
 
   it('renders with missing props gracefully', () => {
-    render(<RecentIssues data={[{} as Issue]} showAvatar={false} />)
+    const minimalIssue: Issue = {
+      createdAt: 1704067200000,
+      title: '',
+      url: '',
+      objectID: 'minimal-issue',
+      projectName: '',
+      projectUrl: '',
+      updatedAt: 1704067200000,
+    }
+    render(<RecentIssues data={[minimalIssue]} showAvatar={false} />)
     expect(screen.getByText('Recent Issues')).toBeInTheDocument()
   })
 

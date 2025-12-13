@@ -45,6 +45,7 @@ urlpatterns = [
     path("owasp/", include(owasp_urls)),
     path("status/", get_status),
     path("", include("apps.sitemap.urls")),
+    path("django-rq/", include("django_rq.urls")),
 ]
 
 if SlackConfig.app:

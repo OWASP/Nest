@@ -15,8 +15,45 @@ jest.mock('@apollo/client/react', () => ({
 
 // Mock FontAwesome
 jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
+  FontAwesomeIcon: ({
+    icon,
+    className,
+    ...props
+  }: {
+    icon: string[] | { iconName: string }
+    className?: string
+    [key: string]: unknown
+  }) => {
+    const iconName = Array.isArray(icon) ? icon[1] : icon.iconName
+    return <span data-testid={`icon-${iconName}`} className={className} {...props} />
+  },
 }))
+
+// Mock Badges component
+jest.mock('components/Badges', () => {
+  const MockBadges = ({
+    name,
+    cssClass,
+    showTooltip,
+  }: {
+    name: string
+    cssClass: string
+    showTooltip?: boolean
+  }) => (
+    <div
+      data-testid={`badge-${name.toLowerCase().replaceAll(/\s+/g, '-')}`}
+      data-css-class={cssClass}
+      data-show-tooltip={showTooltip}
+    >
+      <span data-testid={`icon-${cssClass.replace('fa-', '')}`} />
+    </div>
+  )
+  MockBadges.displayName = 'MockBadges'
+  return {
+    __esModule: true,
+    default: MockBadges,
+  }
+})
 
 const mockRouter = {
   push: jest.fn(),
@@ -29,7 +66,7 @@ const mockError = {
 jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(() => mockRouter),
-  useParams: () => ({ userKey: 'test-user' }),
+  useParams: () => ({ memberKey: 'test-user' }),
 }))
 
 // Mock GitHub heatmap utilities
@@ -58,6 +95,21 @@ describe('UserDetailsPage', () => {
   afterEach(() => {
     jest.clearAllMocks()
   })
+
+  // Helper functions to reduce nesting depth
+  const getBadgeElements = () => {
+    return screen.getAllByTestId(/^badge-/)
+  }
+
+  const getBadgeTestIds = () => {
+    const badgeElements = getBadgeElements()
+    return badgeElements.map((element) => element.dataset.testid)
+  }
+
+  const expectBadgesInCorrectOrder = (expectedOrder: string[]) => {
+    const badgeTestIds = getBadgeTestIds()
+    expect(badgeTestIds).toEqual(expectedOrder)
+  }
 
   test('renders loading state', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
@@ -148,10 +200,10 @@ describe('UserDetailsPage', () => {
       const releasesTitle = screen.getByText('Recent Releases')
       expect(releasesTitle).toBeInTheDocument()
       const releases = mockUserDetailsData.recentReleases
-      releases.forEach((release) => {
+      for (const release of releases) {
         expect(screen.getByText(release.name)).toBeInTheDocument()
         expect(screen.getByText(release.repositoryName)).toBeInTheDocument()
-      })
+      }
     })
   })
 
@@ -168,12 +220,12 @@ describe('UserDetailsPage', () => {
       const milestonesTitle = screen.getByText('Recent Milestones')
       expect(milestonesTitle).toBeInTheDocument()
       const milestones = mockUserDetailsData.recentMilestones
-      milestones.forEach((milestone) => {
+      for (const milestone of milestones) {
         expect(screen.getByText(milestone.title)).toBeInTheDocument()
         expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
         expect(screen.getByText(`${milestone.openIssuesCount} open`)).toBeInTheDocument()
         expect(screen.getByText(`${milestone.closedIssuesCount} closed`)).toBeInTheDocument()
-      })
+      }
     })
   })
 
@@ -495,7 +547,275 @@ describe('UserDetailsPage', () => {
     })
     render(<UserDetailsPage />)
     await waitFor(() => {
-      expect(screen.queryByText(`Want to become a sponsor?`)).toBeNull()
+      expect(screen.queryByText('Want to become a sponsor?')).toBeNull()
+    })
+  })
+
+  describe('Badge Display Tests', () => {
+    test('renders badges section when user has badges', async () => {
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockUserDetailsData,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+      await waitFor(() => {
+        expect(screen.getByTestId('badge-contributor')).toBeInTheDocument()
+        expect(screen.getByTestId('badge-security-expert')).toBeInTheDocument()
+      })
+    })
+
+    test('renders badges with correct props', async () => {
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockUserDetailsData,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+      await waitFor(() => {
+        const contributorBadge = screen.getByTestId('badge-contributor')
+        expect(contributorBadge).toHaveAttribute('data-css-class', 'fa-medal')
+        expect(contributorBadge).toHaveAttribute('data-show-tooltip', 'true')
+
+        const securityBadge = screen.getByTestId('badge-security-expert')
+        expect(securityBadge).toHaveAttribute('data-css-class', 'fa-shield-alt')
+        expect(securityBadge).toHaveAttribute('data-show-tooltip', 'true')
+      })
+    })
+
+    test('does not render badges section when user has no badges', async () => {
+      const dataWithoutBadges = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          badges: [],
+          badgeCount: 0,
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithoutBadges,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+      await waitFor(() => {
+        expect(screen.queryByTestId(/^badge-/)).not.toBeInTheDocument()
+      })
+    })
+
+    test('does not render badges section when badges is undefined', async () => {
+      const dataWithoutBadges = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          badges: undefined,
+          badgeCount: 0,
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithoutBadges,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+      await waitFor(() => {
+        expect(screen.queryByTestId(/^badge-/)).not.toBeInTheDocument()
+      })
+    })
+
+    test('renders badges with fallback cssClass when not provided', async () => {
+      const dataWithIncompleteBadges = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          badges: [
+            {
+              id: '1',
+              name: 'Test Badge',
+              cssClass: undefined,
+              description: 'Test description',
+              weight: 1,
+            },
+          ],
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithIncompleteBadges,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+      await waitFor(() => {
+        const badge = screen.getByTestId('badge-test-badge')
+        expect(badge).toHaveAttribute('data-css-class', 'fa-medal')
+      })
+    })
+
+    test('renders badges with empty cssClass fallback', async () => {
+      const dataWithEmptyCssClass = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          badges: [
+            {
+              id: '1',
+              name: 'Test Badge',
+              cssClass: '',
+              description: 'Test description',
+              weight: 1,
+            },
+          ],
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithEmptyCssClass,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+      await waitFor(() => {
+        const badge = screen.getByTestId('badge-test-badge')
+        expect(badge).toHaveAttribute('data-css-class', 'fa-medal')
+      })
+    })
+
+    test('handles badges with special characters in names', async () => {
+      const dataWithSpecialBadges = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          badges: [
+            {
+              id: '1',
+              name: 'Badge & More!',
+              cssClass: 'fa-star',
+              description: 'Special badge',
+              weight: 1,
+            },
+          ],
+        },
+      }
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithSpecialBadges,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+      await waitFor(() => {
+        expect(screen.getByTestId('badge-badge-&-more!')).toBeInTheDocument()
+      })
+    })
+
+    test('handles badges with long names', async () => {
+      const dataWithLongNameBadge = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          badges: [
+            {
+              id: '1',
+              name: 'Very Long Badge Name That Exceeds Normal Length',
+              cssClass: 'fa-trophy',
+              description: 'Long name badge',
+              weight: 1,
+            },
+          ],
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithLongNameBadge,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+      await waitFor(() => {
+        expect(
+          screen.getByTestId('badge-very-long-badge-name-that-exceeds-normal-length')
+        ).toBeInTheDocument()
+      })
+    })
+
+    // eslint-disable-next-line jest/expect-expect
+    test('renders badges in correct order as returned by backend (weight ASC then name ASC)', async () => {
+      // Backend returns badges sorted by weight ASC, then name ASC
+      // This test verifies the frontend preserves the backend ordering
+      const dataWithOrderedBadges = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          badges: [
+            // Backend returns badges in this order: weight ASC, then name ASC
+            {
+              id: '3',
+              name: 'Alpha Badge',
+              cssClass: 'fa-star',
+              description: 'Alpha badge with weight 1',
+              weight: 1,
+            },
+            {
+              id: '4',
+              name: 'Beta Badge',
+              cssClass: 'fa-trophy',
+              description: 'Beta badge with weight 1',
+              weight: 1,
+            },
+            {
+              id: '1',
+              name: 'Contributor',
+              cssClass: 'fa-medal',
+              description: 'Active contributor',
+              weight: 1,
+            },
+            {
+              id: '2',
+              name: 'Security Expert',
+              cssClass: 'fa-shield-alt',
+              description: 'Security expertise',
+              weight: 2,
+            },
+            {
+              id: '5',
+              name: 'Top Contributor',
+              cssClass: 'fa-crown',
+              description: 'Highest weight badge',
+              weight: 3,
+            },
+          ],
+          badgeCount: 5,
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithOrderedBadges,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+      await waitFor(() => {
+        // Expected order matches backend contract: weight ASC (1, 1, 1, 2, 3), then name ASC for equal weights
+        const expectedOrder = [
+          'badge-alpha-badge', // weight 1, name ASC
+          'badge-beta-badge', // weight 1, name ASC
+          'badge-contributor', // weight 1, name ASC
+          'badge-security-expert', // weight 2
+          'badge-top-contributor', // weight 3
+        ]
+        expectBadgesInCorrectOrder(expectedOrder)
+      })
     })
   })
 })

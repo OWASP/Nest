@@ -6,6 +6,8 @@ __pycache__
 .DS_Store
 .env*
 !.env.example
+!.env.e2e.example
+.github/instructions/snyk_rules.instructions.md
 .idea
 .lighthouseci/
 .local
@@ -26,6 +28,7 @@ __pycache__
 *.pem
 backend/data/backup*
 backend/staticfiles
+design/
 frontend/blob-report/
 frontend/coverage
 frontend/dist

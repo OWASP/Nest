@@ -52,7 +52,11 @@ class Command(BaseCommand):
 
             project.organizations.clear()
             project.owners.clear()
-            for repository in project.repositories.all():
+            for repository in project.repositories.filter(
+                is_empty=False,
+                is_fork=False,
+                is_template=False,
+            ):
                 # Update organizations/owners.
                 if repository.organization:
                     project.organizations.add(repository.organization)
@@ -100,7 +104,10 @@ class Command(BaseCommand):
             project.topics = sorted(topics)
 
             project.has_active_repositories = project.repositories.filter(
-                is_archived=False, is_empty=False
+                is_archived=False,
+                is_empty=False,
+                is_fork=False,
+                is_template=False,
             ).exists()
 
             projects.append(project)

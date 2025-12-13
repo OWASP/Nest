@@ -210,8 +210,8 @@ describe('DialogComp', () => {
     const markdownElements = screen.getAllByTestId('markdown')
     expect(markdownElements).toHaveLength(2)
 
-    markdownElements.forEach((element) => {
+    for (const element of markdownElements) {
       expect(element).toHaveClass('md-wrapper')
-    })
+    }
   })
 })

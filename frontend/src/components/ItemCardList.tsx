@@ -45,7 +45,10 @@ const ItemCardList = ({
         className={`grid ${showSingleColumn ? 'grid-cols-1' : 'gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
       >
         {data.map((item, index) => (
-          <div key={index} className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
+          <div
+            key={item.objectID || `${item.repositoryName}-${item.title || item.name}-${item.url}`}
+            className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+          >
             <div className="flex w-full flex-col justify-between">
               <div className="flex w-full items-center">
                 {showAvatar && (

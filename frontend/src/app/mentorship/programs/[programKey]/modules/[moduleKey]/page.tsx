@@ -1,4 +1,5 @@
 'use client'
+
 import { useQuery } from '@apollo/client/react'
 import upperFirst from 'lodash/upperFirst'
 import { useParams } from 'next/navigation'
@@ -59,13 +60,14 @@ const ModuleDetailsPage = () => {
 
   return (
     <DetailsCard
-      details={moduleDetails}
-      title={module.name}
       admins={admins}
-      tags={module.tags}
+      details={moduleDetails}
       domains={module.domains}
-      summary={module.description}
+      labels={module.labels}
       mentors={module.mentors}
+      summary={module.description}
+      tags={module.tags}
+      title={module.name}
       type="module"
     />
   )

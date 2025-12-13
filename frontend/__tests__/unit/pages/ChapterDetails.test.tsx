@@ -104,7 +104,8 @@ describe('chapterDetailsPage Component', () => {
       ...mockChapterDetailsData,
       topContributors: [
         {
-          name: 'Contributor 1',
+          login: 'contributor1',
+          name: '',
           avatarUrl: 'https://example.com/avatar1.jpg',
         },
       ],
@@ -116,7 +117,7 @@ describe('chapterDetailsPage Component', () => {
     render(<ChapterDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Contributor 1')).toBeInTheDocument()
+      expect(screen.getByText('Contributor1')).toBeInTheDocument()
     })
   })
   test('renders chapter sponsor block correctly', async () => {
@@ -126,8 +127,17 @@ describe('chapterDetailsPage Component', () => {
     })
     render(<ChapterDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText(`Want to become a sponsor?`)).toBeInTheDocument()
+      expect(screen.getByText('Want to become a sponsor?')).toBeInTheDocument()
       expect(screen.getByText(`Sponsor ${mockChapterDetailsData.chapter.name}`)).toBeInTheDocument()
+    })
+  })
+
+  test('renders leaders block from entityLeaders', async () => {
+    render(<ChapterDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Leaders')).toBeInTheDocument()
+      expect(screen.getByText('Bob')).toBeInTheDocument()
+      expect(screen.getByText('Chapter Leader')).toBeInTheDocument()
     })
   })
 })

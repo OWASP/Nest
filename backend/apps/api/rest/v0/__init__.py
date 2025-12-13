@@ -5,37 +5,32 @@ from ninja import NinjaAPI, Swagger
 from ninja.pagination import RouterPaginated
 from ninja.throttling import AuthRateThrottle
 
-from apps.api.rest.auth.api_key import ApiKey as ApiKey
+from apps.api.rest.auth.api_key import ApiKey
 from apps.api.rest.v0.chapter import router as chapter_router
 from apps.api.rest.v0.committee import router as committee_router
 from apps.api.rest.v0.event import router as event_router
 from apps.api.rest.v0.issue import router as issue_router
 from apps.api.rest.v0.member import router as member_router
+from apps.api.rest.v0.milestone import router as milestone_router
 from apps.api.rest.v0.organization import router as organization_router
 from apps.api.rest.v0.project import router as project_router
 from apps.api.rest.v0.release import router as release_router
 from apps.api.rest.v0.repository import router as repository_router
+from apps.api.rest.v0.snapshot import router as snapshot_router
 from apps.api.rest.v0.sponsor import router as sponsor_router
 
 ROUTERS = {
-    # Chapters.
     "/chapters": chapter_router,
-    # Committees.
     "/committees": committee_router,
-    # Community.
-    "/members": member_router,
-    "/organizations": organization_router,
-    # Events.
     "/events": event_router,
-    # Issues.
     "/issues": issue_router,
-    # Projects.
+    "/members": member_router,
+    "/milestones": milestone_router,
+    "/organizations": organization_router,
     "/projects": project_router,
-    # Releases.
     "/releases": release_router,
-    # Repositories.
     "/repositories": repository_router,
-    # Sponsors.
+    "/snapshots": snapshot_router,
     "/sponsors": sponsor_router,
 }
 
@@ -47,7 +42,7 @@ api_settings = {
     "docs": Swagger(settings={"persistAuthorization": True}),
     "throttle": [AuthRateThrottle("10/s")],
     "title": "OWASP Nest",
-    "version": "0.2.4",
+    "version": "0.3.1",
 }
 
 api_settings_customization = {}
@@ -57,6 +52,17 @@ if settings.IS_LOCAL_ENVIRONMENT:
         "servers": [
             {
                 "description": "Local",
+                "url": settings.SITE_URL,
+            }
+        ],
+        "throttle": [],
+    }
+elif settings.IS_E2E_ENVIRONMENT:
+    api_settings_customization = {
+        "auth": None,
+        "servers": [
+            {
+                "description": "E2E",
                 "url": settings.SITE_URL,
             }
         ],
