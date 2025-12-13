@@ -7,8 +7,11 @@ import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetChapterDataDocument } from 'types/__generated__/chapterQueries.generated'
 import type { Chapter } from 'types/chapter'
 import type { Contributor } from 'types/contributor'
+import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
+import ContributionHeatmap from 'components/ContributionHeatmap'
+import ContributionStats from 'components/ContributionStats'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 export default function ChapterDetailsPage() {
@@ -59,18 +62,63 @@ export default function ChapterDetailsPage() {
       ),
     },
   ]
+
+  // Calculate contribution heatmap date range (1 year back)
+  const today = new Date()
+  const oneYearAgo = new Date(today)
+  oneYearAgo.setFullYear(today.getFullYear() - 1)
+  const startDate = oneYearAgo.toISOString().split('T')[0]
+  const endDate = today.toISOString().split('T')[0]
+
+  // Use real contribution stats from API with fallback to legacy data
+  const contributionStats = getContributionStats(
+    chapter.contributionStats,
+    chapter.contributionData
+  )
+  const hasHeatmapData =
+    !!chapter.contributionData && Object.keys(chapter.contributionData).length > 0
+  const hasContributionStats = !!contributionStats
+
   return (
-    <DetailsCard
-      details={details}
-      entityKey={chapter.key}
-      entityLeaders={chapter.entityLeaders}
-      geolocationData={[chapter]}
-      isActive={chapter.isActive}
-      socialLinks={chapter.relatedUrls}
-      summary={chapter.summary}
-      title={chapter.name}
-      topContributors={topContributors}
-      type="chapter"
-    />
+    <>
+      <DetailsCard
+        details={details}
+        entityKey={chapter.key}
+        entityLeaders={chapter.entityLeaders}
+        geolocationData={[chapter]}
+        isActive={chapter.isActive}
+        socialLinks={chapter.relatedUrls}
+        summary={chapter.summary}
+        title={chapter.name}
+        topContributors={topContributors}
+        type="chapter"
+      />
+      {(hasHeatmapData || hasContributionStats) && (
+        <div className="bg-white px-8 pb-10 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+          <div className="mx-auto w-full max-w-6xl">
+            <div className="rounded-lg bg-gray-100 px-4 pt-6 shadow-md sm:px-6 lg:px-10 dark:bg-gray-800">
+              {hasContributionStats && (
+                <ContributionStats
+                  title="Chapter Contribution Activity"
+                  stats={contributionStats}
+                />
+              )}
+              <div className="mt-4 flex w-full items-center justify-center">
+                <div className="w-full">
+                  {hasHeatmapData && (
+                    <ContributionHeatmap
+                      contributionData={chapter.contributionData!}
+                      startDate={startDate}
+                      endDate={endDate}
+                      unit="contribution"
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
