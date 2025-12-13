@@ -22,6 +22,7 @@ import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
 import Leaders from 'components/Leaders'
 import LeadersList from 'components/LeadersList'
+import Markdown from 'components/MarkdownWrapper'
 import MenteeContributorsList from 'components/MenteeContributorsList'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import Milestones from 'components/Milestones'
@@ -77,14 +78,12 @@ const DetailsCard = ({
   const { data } = useSession()
 
   // compute styles based on type prop
-  const secondaryCardStyles = (() => {
-    if (type === 'program' || type === 'module') {
-      return 'gap-2 md:col-span-7'
-    } else if (type === 'chapter') {
-      return 'gap-2 md:col-span-3'
-    }
-    return 'gap-2 md:col-span-5'
-  })()
+  const typeStylesMap = new Map([
+    ['program', 'gap-2 md:col-span-7'],
+    ['module', 'gap-2 md:col-span-7'],
+    ['chapter', 'gap-2 md:col-span-3'],
+  ])
+  const secondaryCardStyles = typeStylesMap.get(type) ?? 'gap-2 md:col-span-5'
 
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
@@ -121,7 +120,7 @@ const DetailsCard = ({
         <p className="mb-6 text-xl">{description}</p>
         {summary && (
           <SecondaryCard icon={faCircleInfo} title={<AnchorTitle title="Summary" />}>
-            <p>{summary}</p>
+            <Markdown content={summary} />
           </SecondaryCard>
         )}
 
