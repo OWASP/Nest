@@ -68,6 +68,7 @@ geocoders
 geoloc
 geopy
 graphiql
+graphqler
 gunicorn
 heroui
 hsl
