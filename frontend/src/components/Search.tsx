@@ -90,7 +90,7 @@ const SearchBar: React.FC<SearchProps> = ({
                 onClick={handleClearSearch}
                 aria-label="Clear search"
               >
-                <FaTimes />
+                <FaTimes className="h-4 w-4" aria-hidden="true"/>
               </button>
             )}
           </>

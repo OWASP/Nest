@@ -1,5 +1,5 @@
 import { FaCircleCheck, FaClock, FaUserGear } from 'react-icons/fa6'
-
+import { IconType } from'react-icons'
 // helper functions used in about/page.tsx
 export const getMilestoneProgressText = (progress: number): string => {
   if (progress === 100) {
@@ -11,7 +11,7 @@ export const getMilestoneProgressText = (progress: number): string => {
   }
 }
 
-export const getMilestoneProgressIcon = (progress: number) => {
+export const getMilestoneProgressIcon = (progress: number) : IconType => {
   if (progress === 100) {
     return FaCircleCheck
   } else if (progress > 0) {

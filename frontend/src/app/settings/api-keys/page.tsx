@@ -406,7 +406,7 @@ export default function Page() {
             </p>
             <div className="mt-3 rounded-md bg-yellow-50 p-3 dark:bg-yellow-900/20">
               <p className="text-sm text-yellow-800 dark:text-yellow-400">
-                <FaInfoCircle className="mr-2" />
+                <FaInfoCircle className="mr-2 inline align-middle" />
                 After revoking this key, you'll be able to create a new one if needed.
               </p>
             </div>

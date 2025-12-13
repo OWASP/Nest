@@ -5,10 +5,10 @@ import { useState } from 'react'
 import {
   FaChevronDown,
   FaChevronUp,
-  FaLevelUpAlt,
-  FaCalendarAlt,
+  FaTurnUp,
+  FaCalendar,
   FaHourglassHalf,
-} from 'react-icons/fa'
+} from 'react-icons/fa6'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import { TextInfoItem } from 'components/InfoItem'
@@ -72,8 +72,8 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
       >
         <TruncatedText text={module?.name} />
       </Link>
-      <TextInfoItem icon={FaLevelUpAlt} label="Level" value={upperFirst(module.experienceLevel)} />
-      <TextInfoItem icon={FaCalendarAlt} label="Start" value={formatDate(module.startedAt)} />
+      <TextInfoItem icon={FaTurnUp} label="Level" value={upperFirst(module.experienceLevel)} />
+      <TextInfoItem icon={FaCalendar} label="Start" value={formatDate(module.startedAt)} />
       <TextInfoItem
         icon={FaHourglassHalf}
         label="Duration"

@@ -20,11 +20,11 @@ const ShowMoreButton = ({ onToggle }: { onToggle: () => void }) => {
       >
         {isExpanded ? (
           <>
-            Show less <FaChevronUp className="ml-2 text-sm" />
+            Show less <FaChevronUp aria-hidden="true" className="ml-2 text-sm" />
           </>
         ) : (
           <>
-            Show more <FaChevronDown className="ml-2 text-sm" />
+            Show more <FaChevronDown area-hidden="true" className="ml-2 text-sm" />
           </>
         )}
       </Button>
