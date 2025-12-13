@@ -1,9 +1,11 @@
-import { faCalendarPlus } from '@fortawesome/free-solid-svg-icons'
+import { faCalendar, faCalendarPlus } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useState } from 'react'
 import type { CalendarButtonProps } from 'types/calendar'
 import getGoogleCalendarUrl from 'utils/getGoogleCalendarUrl'
 
 export default function CalendarButton(props: Readonly<CalendarButtonProps>) {
+  const [isHovered, setIsHovered] = useState(false)
   const {
     event,
     className = '',
@@ -24,8 +26,12 @@ export default function CalendarButton(props: Readonly<CalendarButtonProps>) {
       aria-label={ariaLabel}
       title={ariaLabel}
       className={className}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      {icon || <FontAwesomeIcon icon={faCalendarPlus} className={iconClassName} />}
+      {icon || (
+        <FontAwesomeIcon icon={isHovered ? faCalendarPlus : faCalendar} className={iconClassName} />
+      )}
       {showLabel && <span>{label}</span>}
     </a>
   )

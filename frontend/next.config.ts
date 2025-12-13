@@ -31,7 +31,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/productionBrowserSourceMaps
   productionBrowserSourceMaps: true,
-  serverExternalPackages: ['import-in-the-middle'],
+  serverExternalPackages: ['import-in-the-middle', 'require-in-the-middle'],
   ...(isLocal ? {} : { output: 'standalone' }),
 }
 
