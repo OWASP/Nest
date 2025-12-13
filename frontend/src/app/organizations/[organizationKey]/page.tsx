@@ -47,7 +47,11 @@ const OrganizationDetailsPage = () => {
   }, [graphQLData, graphQLRequestError, organizationKey])
 
   if (isLoading) {
-    return <div data-testid="org-loading-skeleton"><OrganizationDetailsPageSkeleton /></div>
+    return (
+      <div data-testid="org-loading-skeleton">
+        <OrganizationDetailsPageSkeleton />
+      </div>
+    )
   }
 
   if (!isLoading && !graphQLData?.organization) {

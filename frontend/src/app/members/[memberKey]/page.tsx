@@ -100,7 +100,11 @@ const UserDetailsPage: React.FC = () => {
   })
 
   if (isLoading) {
-    return <div data-testid="user-loading-skeleton"><MemberDetailsPageSkeleton /></div>
+    return (
+      <div data-testid="user-loading-skeleton">
+        <MemberDetailsPageSkeleton />
+      </div>
+    )
   }
 
   if (!isLoading && user == null) {
