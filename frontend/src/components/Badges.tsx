@@ -1,5 +1,5 @@
 import { Tooltip } from '@heroui/tooltip'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import { IconWrapper } from 'wrappers/IconWrapper'
 import { BADGE_CLASS_MAP } from 'utils/data'
 
 type BadgeProps = {
@@ -14,7 +14,6 @@ const normalizeCssClass = (cssClass: string | undefined) => {
   if (!cssClass || cssClass.trim() === '') {
     return ''
   }
-
   // Convert backend snake_case format to frontend camelCase format
   return cssClass.trim().replaceAll(/_([a-z])/g, (_, letter) => letter.toUpperCase())
 }
@@ -30,7 +29,7 @@ const Badges = ({ name, cssClass, showTooltip = true }: BadgeProps) => {
   return (
     <div className="inline-flex items-center">
       <Tooltip content={name} isDisabled={!showTooltip}>
-        <FontAwesomeIconWrapper icon={icon} className="h-4 w-4" data-testid="badge-icon" />
+        <IconWrapper icon={icon} className="h-4 w-4" data-testid="badge-icon" />
       </Tooltip>
     </div>
   )

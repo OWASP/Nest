@@ -1,7 +1,7 @@
-import type { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
 import millify from 'millify'
+import type { IconType } from 'react-icons'
+import { IconWrapper } from 'wrappers/IconWrapper'
 import { pluralize } from 'utils/pluralize'
 
 const InfoBlock = ({
@@ -14,7 +14,7 @@ const InfoBlock = ({
   value,
 }: {
   className?: string
-  icon: IconProp
+  icon: IconType
   label?: string
   pluralizedName?: string
   precision?: number
@@ -27,7 +27,7 @@ const InfoBlock = ({
 
   return (
     <div className={`flex ${className}`}>
-      <FontAwesomeIcon icon={icon} className="mt-1 mr-3 w-5" />
+      <IconWrapper icon={icon} className="mt-1 mr-3 w-5" />
       <div>
         <div className="text-sm md:text-base">
           {label && <div className="text-sm font-medium">{label}</div>}

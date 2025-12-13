@@ -1,21 +1,21 @@
 'use client'
 
-import { faChartLine, faChartBar } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Navbar, NavbarItem, NavbarContent } from '@heroui/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React from 'react'
+import { FaChartLine, FaChartBar } from 'react-icons/fa6'
+import { IconWrapper } from 'wrappers/IconWrapper'
 
 const NAVIGATION_ITEMS = [
   {
     label: 'Overview',
-    icon: faChartLine,
+    icon: FaChartLine,
     href: '/projects/dashboard',
   },
   {
     label: 'Metrics',
-    icon: faChartBar,
+    icon: FaChartBar,
     href: '/projects/dashboard/metrics',
   },
 ] as const
@@ -46,7 +46,7 @@ const ProjectsDashboardNavBar: React.FC = () => {
               className="text-blue-500 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500"
             >
               <div className="flex w-full items-center gap-2 rounded p-2 transition-colors duration-200 hover:bg-gray-200 dark:hover:bg-gray-800">
-                <FontAwesomeIcon icon={icon} className="text-xl" aria-hidden="true" />
+                <IconWrapper icon={icon} className="text-xl" aria-hidden="true" />
                 <span className="text-sm font-semibold">{label}</span>
               </div>
             </Link>

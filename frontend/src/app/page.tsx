@@ -1,25 +1,24 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import {
-  faBook,
-  faCalendar,
-  faCalendarAlt,
-  faCode,
-  faFileCode,
-  faFolder,
-  faGlobe,
-  faMapMarkerAlt,
-  faNewspaper,
-  faTag,
-  faUser,
-  faUsers,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToast } from '@heroui/toast'
 import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { IconType } from 'react-icons'
+import { FaCalendarAlt, FaMapMarkerAlt } from 'react-icons/fa'
+import {
+  FaBook,
+  FaCalendar,
+  FaCode,
+  FaFileCode,
+  FaFolder,
+  FaGlobe,
+  FaNewspaper,
+  FaTag,
+  FaUser,
+} from 'react-icons/fa6'
+import { HiUserGroup } from 'react-icons/hi'
+import { IconWrapper } from 'wrappers/IconWrapper'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { GetMainPageDataDocument } from 'types/__generated__/homeQueries.generated'
 import type { AlgoliaResponse } from 'types/algolia'
@@ -96,18 +95,18 @@ export default function Home() {
     return <LoadingSpinner />
   }
 
-  const getProjectIcon = (projectType: string) => {
+  const getProjectIcon = (projectType: string): IconType => {
     switch (projectType.toLowerCase()) {
       case 'code':
-        return faCode
+        return FaCode
       case 'documentation':
-        return faBook
+        return FaBook
       case 'other':
-        return faFileCode
+        return FaFileCode
       case 'tool':
-        return faTag
+        return FaTag
       default:
-        return faFileCode
+        return FaFileCode
     }
   }
 
@@ -156,7 +155,7 @@ export default function Home() {
           </div>
         </div>
         <SecondaryCard
-          icon={faCalendarAlt}
+          icon={FaCalendarAlt}
           title={
             <div className="flex items-center gap-2">
               <AnchorTitle title="Upcoming Events" className="flex items-center leading-none" />
@@ -176,27 +175,27 @@ export default function Home() {
                     >
                       <TruncatedText text={event.name} />
                     </button>
+                    <CalendarButton
+                      event={{
+                        title: event.name,
+                        description: event.summary || '',
+                        location: event.suggestedLocation || '',
+                        startDate: event.startDate,
+                        endDate: event.endDate,
+                        url: event.url,
+                      }}
+                      className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                      iconClassName="h-4 w-4"
+                    />
                   </div>
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-2 flex items-center">
-                      <CalendarButton
-                        className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
-                        event={{
-                          title: event.name,
-                          description: event.summary || '',
-                          location: event.suggestedLocation || '',
-                          startDate: event.startDate,
-                          endDate: event.endDate,
-                          url: event.url,
-                        }}
-                        iconClassName="h-4 w-4 mr-1"
-                        label={formatDateRange(event.startDate, event.endDate)}
-                        showLabel
-                      />
+                      <FaCalendar className="mr-2 h-4 w-4" />
+                      <span>{formatDateRange(event.startDate, event.endDate)}</span>
                     </div>
                     {event.suggestedLocation && (
                       <div className="flex flex-1 items-center overflow-hidden">
-                        <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1 h-4 w-4" />
+                        <FaMapMarkerAlt className="mr-1 h-4 w-4" />
                         <TruncatedText text={event.suggestedLocation} />
                       </div>
                     )}
@@ -217,7 +216,7 @@ export default function Home() {
         </SecondaryCard>
         <div className="grid gap-4 md:grid-cols-2">
           <SecondaryCard
-            icon={faMapMarkerAlt}
+            icon={FaMapMarkerAlt}
             title={
               <div className="flex items-center gap-2">
                 <AnchorTitle title="New Chapters" className="flex items-center leading-none" />
@@ -238,11 +237,11 @@ export default function Home() {
                   </h3>
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-4 flex items-center">
-                      <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                      <FaCalendar className="mr-2 h-4 w-4" />
                       <span>{formatDate(chapter.createdAt)}</span>
                     </div>
                     <div className="flex flex-1 items-center overflow-hidden">
-                      <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2 h-4 w-4" />
+                      <FaMapMarkerAlt className="mr-2 h-4 w-4" />
                       <TruncatedText text={chapter.suggestedLocation} />
                     </div>
                   </div>
@@ -250,7 +249,7 @@ export default function Home() {
                   {chapter.leaders.length > 0 && (
                     <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
                       {' '}
-                      <FontAwesomeIcon icon={faUsers} className="h-4 w-4" />
+                      <HiUserGroup className="mr-2 h-4 w-4 shrink-0" />
                       <LeadersList leaders={String(chapter.leaders)} />
                     </div>
                   )}
@@ -259,7 +258,7 @@ export default function Home() {
             </div>
           </SecondaryCard>
           <SecondaryCard
-            icon={faFolder}
+            icon={FaFolder}
             title={
               <div className="flex items-center gap-2">
                 <AnchorTitle title="New Projects" className="flex items-center leading-none" />
@@ -277,20 +276,17 @@ export default function Home() {
                   </Link>
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-4 flex items-center">
-                      <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                      <FaCalendar className="mr-2 h-4 w-4" />
                       <span>{formatDate(project.createdAt)}</span>
                     </div>
                     <div className="mr-4 flex flex-1 items-center overflow-hidden">
-                      <FontAwesomeIcon
-                        icon={getProjectIcon(project.type) as IconProp}
-                        className="mr-2 h-4 w-4"
-                      />
+                      <IconWrapper icon={getProjectIcon(project.type)} className="mr-2 h-4 w-4" />
                       <TruncatedText text={upperFirst(project.type)} />
                     </div>
                   </div>
                   {project.leaders.length > 0 && (
                     <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
-                      <FontAwesomeIcon icon={faUsers} className="h-4 w-4" />
+                      <HiUserGroup className="h-4 w-4 shrink-0" />
                       <LeadersList leaders={String(project.leaders)} />
                     </div>
                   )}
@@ -301,11 +297,7 @@ export default function Home() {
         </div>
         <div className="mb-20">
           <div className="mb-4 flex items-center gap-2">
-            <FontAwesomeIcon
-              icon={faGlobe}
-              className="h-5 w-5"
-              style={{ verticalAlign: 'middle' }}
-            />
+            <FaGlobe className="h-5 w-5" style={{ verticalAlign: 'middle' }} />
             <AnchorTitle title="Chapters Worldwide" className="flex items-center leading-none" />
           </div>
           <ChapterMapWrapper
@@ -322,7 +314,7 @@ export default function Home() {
         </div>
         <TopContributorsList
           contributors={data?.topContributors}
-          icon={faUsers}
+          icon={HiUserGroup}
           maxInitialDisplay={20}
         />
         <div className="grid-cols-2 gap-4 lg:grid">
@@ -334,7 +326,7 @@ export default function Home() {
           <RecentReleases data={data?.recentReleases} showSingleColumn={true} />
         </div>
         <SecondaryCard
-          icon={faNewspaper}
+          icon={FaNewspaper}
           title={
             <div className="flex items-center gap-2">
               <AnchorTitle title="News & Opinions" className="flex items-center leading-none" />
@@ -360,11 +352,11 @@ export default function Home() {
                 </h3>
                 <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                   <div className="mr-4 flex items-center">
-                    <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                    <FaCalendar className="mr-2 h-4 w-4" />
                     <span>{formatDate(post.publishedAt)}</span>
                   </div>
                   <div className="flex flex-1 items-center overflow-hidden">
-                    <FontAwesomeIcon icon={faUser} className="mr-2 h-4 w-4" />
+                    <FaUser className="mr-2 h-4 w-4" />
                     <LeadersList leaders={post.authorName} />
                   </div>
                 </div>

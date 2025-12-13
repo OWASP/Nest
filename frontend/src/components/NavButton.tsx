@@ -1,6 +1,7 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
 import { useState } from 'react'
+import type { IconType } from 'react-icons'
+import { IconWrapper } from 'wrappers/IconWrapper'
 import type { NavButtonProps } from 'types/button'
 import { cn } from 'utils/utility'
 
@@ -12,7 +13,7 @@ const NavButton = ({
   hoverIconColor,
   text,
   className,
-}: NavButtonProps) => {
+}: NavButtonProps & { defaultIcon: IconType; hoverIcon: IconType }) => {
   const [isHovered, setIsHovered] = useState(false)
 
   return (
@@ -27,7 +28,7 @@ const NavButton = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <FontAwesomeIcon
+      <IconWrapper
         icon={isHovered ? hoverIcon : defaultIcon}
         className={cn({
           'scale-110 text-yellow-400': isHovered,

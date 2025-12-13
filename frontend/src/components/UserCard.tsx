@@ -1,15 +1,9 @@
-import {
-  faChevronRight,
-  faFolderOpen,
-  faMedal,
-  faUser,
-  faUsers,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import { Tooltip } from '@heroui/tooltip'
 import millify from 'millify'
 import Image from 'next/image'
+import { FaChevronRight, FaFolderOpen, FaMedal, FaUser } from 'react-icons/fa6'
+import { HiUserGroup } from 'react-icons/hi'
 import type { UserCardProps } from 'types/card'
 
 const UserCard = ({
@@ -42,10 +36,7 @@ const UserCard = ({
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gray-200 dark:bg-gray-700">
-              <FontAwesomeIcon
-                icon={faUser}
-                className="h-12 w-12 text-gray-400 dark:text-gray-500"
-              />
+              <FaUser className="h-12 w-12 text-gray-400 dark:text-gray-500" />
             </div>
           )}
         </div>
@@ -72,19 +63,19 @@ const UserCard = ({
           <div className="flex flex-wrap justify-center gap-3 px-2">
             {followersCount > 0 && (
               <div className="flex items-center gap-1 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
-                <FontAwesomeIcon icon={faUsers} className="h-3.5 w-3.5" />
+                <HiUserGroup className="h-4 w-4" />
                 <span>{millify(followersCount, { precision: 1 })}</span>
               </div>
             )}
             {repositoriesCount > 0 && (
               <div className="flex items-center gap-1 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
-                <FontAwesomeIcon icon={faFolderOpen} className="h-3.5 w-3.5" />
+                <FaFolderOpen className="h-3.5 w-3.5" />
                 <span>{millify(repositoriesCount, { precision: 1 })}</span>
               </div>
             )}
             {badgeCount > 0 && (
               <div className="flex items-center gap-1 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
-                <FontAwesomeIcon icon={faMedal} className="h-3.5 w-3.5" aria-label="badges" />
+                <FaMedal className="h-3.5 w-3.5" aria-label="badges" />
                 <span>{millify(badgeCount, { precision: 1 })}</span>
               </div>
             )}
@@ -94,10 +85,7 @@ const UserCard = ({
 
       <div className="flex items-center justify-center text-sm font-medium text-blue-400">
         {button.label}
-        <FontAwesomeIcon
-          icon={faChevronRight}
-          className="ml-2 h-4 w-4 transform transition-transform group-hover:translate-x-1"
-        />
+        <FaChevronRight className="ml-2 h-4 w-4 transform transition-transform group-hover:translate-x-1" />
       </div>
     </Button>
   )

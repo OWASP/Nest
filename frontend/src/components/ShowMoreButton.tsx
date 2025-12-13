@@ -1,7 +1,6 @@
-import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import { useState } from 'react'
+import { FaChevronDown, FaChevronUp } from 'react-icons/fa'
 
 const ShowMoreButton = ({ onToggle }: { onToggle: () => void }) => {
   const [isExpanded, setIsExpanded] = useState(false)
@@ -21,11 +20,11 @@ const ShowMoreButton = ({ onToggle }: { onToggle: () => void }) => {
       >
         {isExpanded ? (
           <>
-            Show less <FontAwesomeIcon icon={faChevronUp} className="ml-2 text-sm" />
+            Show less <FaChevronUp className="ml-2 text-sm" />
           </>
         ) : (
           <>
-            Show more <FontAwesomeIcon icon={faChevronDown} className="ml-2 text-sm" />
+            Show more <FaChevronDown className="ml-2 text-sm" />
           </>
         )}
       </Button>

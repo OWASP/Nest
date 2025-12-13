@@ -1,10 +1,8 @@
-import { faMoon } from '@fortawesome/free-regular-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import { Tooltip } from '@heroui/tooltip'
 import { useTheme } from 'next-themes'
 import { useState, useEffect } from 'react'
-import Sun from 'components/icons/Sun'
+import { MdLightMode, MdDarkMode } from 'react-icons/md'
 
 export default function ModeToggle() {
   const [mounted, setMounted] = useState(false)
@@ -34,13 +32,9 @@ export default function ModeToggle() {
         >
           <div className="absolute inset-0 flex items-center justify-center">
             {theme === 'dark' ? (
-              <Sun variant="regular" className="h-5 w-5 text-white transition-all duration-300" />
+              <MdLightMode className="h-5 w-5 text-white transition-all duration-300" />
             ) : (
-              <FontAwesomeIcon
-                icon={faMoon}
-                className="h-5 w-5 transform text-white transition-all duration-300 hover:rotate-12"
-                fixedWidth
-              />
+              <MdDarkMode className="h-5 w-5 text-white transition-all duration-300" />
             )}
           </div>
         </Button>
