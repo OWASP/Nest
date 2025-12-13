@@ -273,6 +273,7 @@ jobs:
     needs:
       - scan-code
       - scan-ci-dependencies
+    runs-on: ubuntu-latest
     services:
       db:
         image: pgvector/pgvector:pg16
