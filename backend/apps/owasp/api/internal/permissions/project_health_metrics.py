@@ -11,7 +11,7 @@ class HasDashboardAccess(BasePermission):
 
     def has_permission(self, source, info, **kwargs) -> bool:
         """Check if the user has dashboard access."""
-        if settings.DISABLE_PERMISSIONS:
+        if settings.IS_E2E_ENVIRONMENT:
             return True
         return (
             (user := info.context.request.user)

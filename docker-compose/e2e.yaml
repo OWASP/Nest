@@ -60,6 +60,19 @@ services:
     networks:
       - e2e-nest-network
 
+  graphql:
+    container_name: nest-fuzz-test-graphql
+    build:
+      context: ../backend/docker
+      dockerfile: Dockerfile.fuzz
+    entrypoint:
+      - /app/entrypoint.sh
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - e2e-nest-network
+
 networks:
   e2e-nest-network:
 

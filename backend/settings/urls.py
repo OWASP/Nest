@@ -8,7 +8,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.views.decorators.csrf import csrf_protect
 from strawberry.django.views import GraphQLView
 
 from apps.api.rest.v0 import api as api_v0
@@ -19,27 +19,10 @@ from apps.owasp.api.internal.views.urls import urlpatterns as owasp_urls
 from apps.slack.apps import SlackConfig
 from settings.graphql import schema
 
-
-def csrf_decorator(view_func):
-    """Apply CSRF protection or exemption based on the environment.
-
-    Args:
-        view_func (function): The view function to decorate.
-
-    Returns:
-        function: The decorated view function with CSRF protection or exemption.
-
-    """
-    environment = settings.ENVIRONMENT
-    if environment == "Fuzz":
-        return csrf_exempt(view_func)  # NOSONAR
-    return csrf_protect(view_func)
-
-
 urlpatterns = [
     path("csrf/", get_csrf_token),
     path("idx/", csrf_protect(algolia_search)),
-    path("graphql/", csrf_decorator(GraphQLView.as_view(schema=schema, graphiql=settings.DEBUG))),
+    path("graphql/", csrf_protect(GraphQLView.as_view(schema=schema, graphiql=settings.DEBUG))),
     path("api/v0/", api_v0.urls),
     path("a/", admin.site.urls),
     path("owasp/", include(owasp_urls)),

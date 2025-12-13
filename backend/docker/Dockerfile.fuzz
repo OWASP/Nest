@@ -1,0 +1,11 @@
+FROM omar2535/graphqler:latest
+
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
+
+RUN apt-get update && \
+    apt-get install -y jq
+
+WORKDIR /app
+COPY ./entrypoint.fuzz.sh ./entrypoint.sh
+
+RUN chmod +x ./entrypoint.sh

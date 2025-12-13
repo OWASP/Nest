@@ -273,43 +273,47 @@ jobs:
     needs:
       - scan-code
       - scan-ci-dependencies
-    runs-on: ubuntu-latest
+    services:
+      db:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: nest_db_e2e
+          POSTGRES_PASSWORD: nest_user_e2e_password
+          POSTGRES_USER: nest_user_e2e
+        options: >-
+          --health-cmd="pg_isready -U nest_user_e2e -d nest_db_e2e -h localhost -p 5432"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=5
+        ports:
+          - 5432:5432
     steps:
       - name: Check out repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
 
       - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
 
-      - name: Create .env file for fuzz tests
+      - name: Setup E2E environment
+        uses: ./.github/workflows/setup-e2e-environment
+
+      - name: Build backend fuzz-testing image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        with:
+          cache-from: |
+            type=gha
+            type=registry,ref=owasp/nest:test-backend-fuzz-cache
+          cache-to: |
+            type=gha,compression=zstd
+          context: backend
+          file: backend/docker/Dockerfile.fuzz
+          load: true
+          platforms: linux/amd64
+          tags: owasp/nest:test-backend-fuzz-latest
+
+      - name: Run backend fuzz tests
         run: |
-          touch backend/fuzz_tests/.env
-          echo "DJANGO_DB_HOST=None" >> backend/fuzz_tests/.env
-          echo "DJANGO_DB_NAME=None" >> backend/fuzz_tests/.env
-          echo "DJANGO_DB_PASSWORD=None" >> backend/fuzz_tests/.env
-          echo "DJANGO_DB_PORT=None" >> backend/fuzz_tests/.env
-          echo "DJANGO_DB_USER=None" >> backend/fuzz_tests/.env
-          echo "DJANGO_SETTINGS_MODULE=settings.fuzz" >> backend/fuzz_tests/.env
-          echo "DJANGO_CONFIGURATION=Fuzz" >> backend/fuzz_tests/.env
-          echo "DJANGO_ALGOLIA_APPLICATION_ID=None" >> backend/fuzz_tests/.env
-          echo "DJANGO_ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES=None" >> backend/fuzz_tests/.env
-          echo "DJANGO_ALGOLIA_WRITE_API_KEY=None" >> backend/fuzz_tests/.env
-          echo "DJANGO_ALLOWED_HOSTS=*" >> backend/fuzz_tests/.env
-          echo "DJANGO_AWS_ACCESS_KEY_ID=None" >> backend/fuzz_tests/.env
-          echo "DJANGO_AWS_SECRET_ACCESS_KEY=None" >> backend/fuzz_tests/.env
-          echo "DJANGO_OPEN_AI_SECRET_KEY=None" >> backend/fuzz_tests/.env
-          echo "DJANGO_PUBLIC_IP_ADDRESS=127.0.0.1" >> backend/fuzz_tests/.env
-          echo "DJANGO_RELEASE_VERSION=None" >> backend/fuzz_tests/.env
-          echo "DJANGO_SECRET_KEY=None" >> backend/fuzz_tests/.env
-          echo "DJANGO_SENTRY_DSN=None" >> backend/fuzz_tests/.env
-          echo "DJANGO_SLACK_BOT_TOKEN=None" >> backend/fuzz_tests/.env
-          echo "DJANGO_SLACK_SIGNING_SECRET=None" >> backend/fuzz_tests/.env
-          echo "GITHUB_TOKEN=None" >> backend/fuzz_tests/.env
-          echo "DJANGO_REDIS_HOST=None" >> backend/fuzz_tests/.env
-          echo "DJANGO_REDIS_PASSWORD=None" >> backend/fuzz_tests/.env
-
-      - name: Run fuzz tests
-        run: make fuzz-test-backend
+          docker run owasp/nest:test-backend-fuzz-latest sh -c "./entrypoint.sh"
 
   build-staging-images:
     name: Build Staging Images

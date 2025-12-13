@@ -54,9 +54,6 @@ run:
 	docker compose -f docker-compose/local.yaml --project-name nest-local build && \
 	docker compose -f docker-compose/local.yaml --project-name nest-local up --remove-orphans
 
-fuzz-test-backend:
-	@COMPOSE_BAKE=true docker compose -f docker-compose/backend-fuzz.yaml up --build --abort-on-container-exit --remove-orphans
-
 test: \
 	test-nest-app
 
