@@ -114,14 +114,14 @@ const ChapterMap = ({
 
     // Add user location marker if available
     if (userLocation && map) {
-      const userMarkerIcon = new L.Icon({
-        iconAnchor: [22, 48],
-        iconRetinaUrl: '/img/user-marker-icon.png',
-        iconSize: [42, 48],
-        iconUrl: '/img/user-marker-icon.png',
-        popupAnchor: [3, -40],
-        shadowSize: [52, 48],
-        shadowUrl: '/img/marker-shadow.png',
+      const iconHtml =
+        '<img src="/img/marker-icon.png" style="filter: hue-rotate(150deg) saturate(1.5) brightness(0.9); width: 25px; height: 41px;" alt="User location" />'
+      const userMarkerIcon = L.divIcon({
+        html: iconHtml,
+        className: 'user-location-marker',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
       })
 
       const userMarker = L.marker([userLocation.latitude, userLocation.longitude], {
@@ -202,19 +202,18 @@ const ChapterMap = ({
           </p>
         </button>
       )}
-      <div className="absolute bottom-5 left-3 z-[999] w-fit">
+      <div className="absolute top-20 left-3 z-[999] w-fit">
         {onShareLocation && (
           <Tooltip
             showArrow
             content={
-              userLocation
-                ? 'Reset location filter'
-                : 'Share your current location to find nearby chapters'
+              userLocation ? 'Reset location filter' : 'Share your location to find nearby chapters'
             }
+            placement="bottom-start"
           >
             <Button
               isIconOnly
-              className="h-9 w-9 min-w-9 bg-white text-blue-600 shadow-lg hover:bg-gray-100"
+              className="h-[30px] w-[30px] min-w-[30px] rounded-xs bg-white text-gray-700 shadow-lg outline-2 outline-gray-400 hover:bg-gray-100 dark:outline-gray-700"
               onPress={onShareLocation}
               aria-label={
                 userLocation ? 'Reset location filter' : 'Share location to find nearby chapters'
