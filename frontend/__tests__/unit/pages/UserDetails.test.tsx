@@ -118,12 +118,11 @@ describe('UserDetailsPage', () => {
       error: null,
     })
 
-    const { container } = render(<UserDetailsPage />)
+    render(<UserDetailsPage />)
 
-    // Check for skeleton component elements
+    // Use semantic role query instead of CSS selectors for better stability
     await waitFor(() => {
-      const skeletons = container.querySelectorAll('.group.relative.overflow-hidden')
-      expect(skeletons.length).toBeGreaterThan(0)
+      expect(screen.getByTestId('user-loading-skeleton')).toBeInTheDocument()
     })
   })
 

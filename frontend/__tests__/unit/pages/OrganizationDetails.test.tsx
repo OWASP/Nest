@@ -57,9 +57,9 @@ describe('OrganizationDetailsPage', () => {
 
     render(<OrganizationDetailsPage />)
 
-    const skeletons = document.querySelectorAll('.bg-content3')
+    // Use semantic role query instead of CSS selectors for better stability
     await waitFor(() => {
-      expect(skeletons.length).toBeGreaterThan(0)
+      expect(screen.getByTestId('org-loading-skeleton')).toBeInTheDocument()
     })
   })
 
@@ -202,6 +202,7 @@ describe('OrganizationDetailsPage', () => {
       })
     })
   })
+
   test('does not render sponsor block', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockOrganizationDetailsData,
