@@ -144,7 +144,7 @@ const DetailsCard = ({
                 </div>
               )
             )}
-            {socialLinks && (type === 'chapter' || type === 'committee') && (
+            {socialLinks && (type === 'chapter' || type === 'committee' || type === 'project') && (
               <SocialLinks urls={socialLinks || []} />
             )}
           </SecondaryCard>
