@@ -121,14 +121,19 @@ class TestSyncUserBadgesCommand:
             for s in ("Removed badge from 1 non-staff", "Removed badge from 1 non-employees")
         )
 
+    @patch("apps.nest.management.commands.nest_update_badges.ContentType.objects.get_for_model")
     @patch("apps.nest.management.commands.nest_update_badges.EntityMember.objects.filter")
     @patch("apps.nest.management.commands.nest_update_badges.UserBadge.objects.get_or_create")
     @patch("apps.nest.management.commands.nest_update_badges.UserBadge.objects.filter")
     @patch("apps.nest.management.commands.nest_update_badges.Badge.objects.get_or_create")
     @patch("apps.nest.management.commands.nest_update_badges.User.objects.filter")
     def test_badge_creation(
-        self, mock_user_filter, mock_badge_get_or_create, mock_user_badge_filter, mock_user_badge_get_or_create, mock_entity_member_filter
+        self, mock_user_filter, mock_badge_get_or_create, mock_user_badge_filter, mock_user_badge_get_or_create, mock_entity_member_filter, mock_content_type
     ):
+        # Mock ContentType
+        mock_project_content_type = MagicMock()
+        mock_content_type.return_value = mock_project_content_type
+
         # Set up badge creation mocks
         mock_staff_badge = MagicMock()
         mock_staff_badge.name = OWASP_STAFF_BADGE_NAME
@@ -176,15 +181,20 @@ class TestSyncUserBadgesCommand:
         assert f"Created badge: {mock_staff_badge.name}" in output
         assert f"Created badge: {mock_leader_badge.name}" in output
 
+    @patch("apps.nest.management.commands.nest_update_badges.ContentType.objects.get_for_model")
     @patch("apps.nest.management.commands.nest_update_badges.EntityMember.objects.filter")
     @patch("apps.nest.management.commands.nest_update_badges.UserBadge.objects.get_or_create")
     @patch("apps.nest.management.commands.nest_update_badges.UserBadge.objects.filter")
     @patch("apps.nest.management.commands.nest_update_badges.Badge.objects.get_or_create")
     @patch("apps.nest.management.commands.nest_update_badges.User.objects.filter")
     def test_command_idempotency(
-        self, mock_user_filter, mock_badge_get_or_create, mock_user_badge_filter, mock_user_badge_get_or_create, mock_entity_member_filter
+        self, mock_user_filter, mock_badge_get_or_create, mock_user_badge_filter, mock_user_badge_get_or_create, mock_entity_member_filter, mock_content_type
     ):
         """Test that running the command multiple times has the same effect as running it once."""
+        # Mock ContentType
+        mock_project_content_type = MagicMock()
+        mock_content_type.return_value = mock_project_content_type
+
         # Set up badge mocks
         mock_staff_badge = MagicMock()
         mock_staff_badge.name = OWASP_STAFF_BADGE_NAME
@@ -267,6 +277,7 @@ class TestSyncUserBadgesCommand:
         )
         assert "Removed badge from 0 non-leaders" in out2.getvalue()
 
+    @patch("apps.nest.management.commands.nest_update_badges.ContentType.objects.get_for_model")
     @patch("apps.nest.management.commands.nest_update_badges.EntityMember.objects.filter")
     @patch("apps.nest.management.commands.nest_update_badges.UserBadge.objects.get_or_create")
     @patch("apps.nest.management.commands.nest_update_badges.UserBadge.objects.filter")
@@ -279,7 +290,12 @@ class TestSyncUserBadgesCommand:
         mock_user_badge_filter,
         mock_user_badge_get_or_create,
         mock_entity_member_filter,
+        mock_content_type,
     ):
+        # Mock ContentType
+        mock_project_content_type = MagicMock()
+        mock_content_type.return_value = mock_project_content_type
+
         # Set up badge mocks for both staff and project leader badges
         mock_staff_badge = MagicMock()
         mock_staff_badge.name = OWASP_STAFF_BADGE_NAME

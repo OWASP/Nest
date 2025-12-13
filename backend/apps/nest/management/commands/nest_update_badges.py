@@ -2,12 +2,14 @@
 
 import logging
 
+from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
 from apps.github.models.user import User
 from apps.nest.models.badge import Badge
 from apps.nest.models.user_badge import UserBadge
 from apps.owasp.models.entity_member import EntityMember
+from apps.owasp.models.project import Project
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +96,9 @@ class Command(BaseCommand):
             self.stdout.write(f"Created badge: {badge.name}")
 
         # Get all active and reviewed project leaders
+        project_content_type = ContentType.objects.get_for_model(Project)
         project_leaders = EntityMember.objects.filter(
+            entity_type=project_content_type,
             role=EntityMember.Role.LEADER,
             is_active=True,
             is_reviewed=True,
