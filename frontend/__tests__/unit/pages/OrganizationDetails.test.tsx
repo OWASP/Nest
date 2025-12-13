@@ -51,14 +51,15 @@ describe('OrganizationDetailsPage', () => {
   test('renders loading state', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
+      loading: true,
       error: null,
     })
 
     render(<OrganizationDetailsPage />)
 
-    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+    const skeletons = document.querySelectorAll('.bg-content3')
     await waitFor(() => {
-      expect(loadingSpinner.length).toBeGreaterThan(0)
+      expect(skeletons.length).toBeGreaterThan(0)
     })
   })
 

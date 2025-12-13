@@ -114,13 +114,16 @@ describe('UserDetailsPage', () => {
   test('renders loading state', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
+      loading: true,
       error: null,
     })
 
-    render(<UserDetailsPage />)
-    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+    const { container } = render(<UserDetailsPage />)
+
+    // Check for skeleton component elements
     await waitFor(() => {
-      expect(loadingSpinner.length).toBeGreaterThan(0)
+      const skeletons = container.querySelectorAll('.group.relative.overflow-hidden')
+      expect(skeletons.length).toBeGreaterThan(0)
     })
   })
 
@@ -137,10 +140,9 @@ describe('UserDetailsPage', () => {
     render(<UserDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
+      expect(screen.getByText('Test User')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Test User')).toBeInTheDocument()
     expect(screen.getByText('Statistics')).toBeInTheDocument()
     expect(screen.getByText('Test Company')).toBeInTheDocument()
     expect(screen.getByText('Test Location')).toBeInTheDocument()
@@ -540,6 +542,7 @@ describe('UserDetailsPage', () => {
       expect(bioContainer).toHaveClass('lg:text-left')
     })
   })
+
   test('does not render sponsor block', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
