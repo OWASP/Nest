@@ -37,13 +37,12 @@ class TestGetUsersBlocks:
         """Tests the happy path, ensuring user data is formatted correctly into blocks."""
         mocker.patch("apps.github.index.search.user.get_users", return_value=mock_users_data)
         blocks = get_blocks(search_query="john")
-        assert len(blocks) > 1
-        user_block_text = blocks[0]["text"]["text"]
-        assert "1. <https://github.com/johndoe|*John Doe*>" in user_block_text
-        assert "Company: OWASP" in user_block_text
-        assert "Location: San Francisco" in user_block_text
-        assert "Followers: 100" in user_block_text
-        assert "A passionate developer" in user_block_text
+        assert "OWASP users that I found for" in blocks[0]["text"]["text"]
+        assert "1. <https://github.com/johndoe|*John Doe*>" in blocks[1]["text"]["text"]
+        assert "Company: OWASP" in blocks[1]["text"]["text"]
+        assert "Location: San Francisco" in blocks[1]["text"]["text"]
+        assert "Followers: 100" in blocks[1]["text"]["text"]
+        assert "A passionate developer" in blocks[1]["text"]["text"]
 
     @pytest.mark.parametrize(
         ("include_pagination", "should_call_pagination"),
