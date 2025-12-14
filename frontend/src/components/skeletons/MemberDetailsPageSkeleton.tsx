@@ -93,7 +93,7 @@ const MemberDetailsPageSkeleton: React.FC = () => {
               {[1, 2, 3, 4, 5].map((i) => (
                 <div
                   key={`issue-${i}`}
-                  className="rounded-lg border-1 border-gray-200 bg-white p-4 shadow-xs dark:border-gray-700 dark:bg-gray-900"
+                  className="mb-4 rounded-lg border-1 border-gray-200 bg-white p-4 shadow-xs dark:border-gray-700 dark:bg-gray-900"
                 >
                   <Skeleton className="mb-2 h-5 w-4/5" />
                   <div className="mt-2 flex flex-wrap items-center text-sm">
