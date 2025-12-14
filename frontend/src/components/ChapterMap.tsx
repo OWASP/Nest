@@ -1,10 +1,9 @@
 'use client'
-import { faLocationDot } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import { Tooltip } from '@heroui/tooltip'
 import L, { MarkerClusterGroup } from 'leaflet'
 import React, { useEffect, useRef, useState } from 'react'
+import { FaLocationDot } from 'react-icons/fa6'
 import type { Chapter } from 'types/chapter'
 import type { UserLocation } from 'utils/geolocationUtils'
 import 'leaflet.markercluster'
@@ -219,7 +218,7 @@ const ChapterMap = ({
                 userLocation ? 'Reset location filter' : 'Share location to find nearby chapters'
               }
             >
-              <FontAwesomeIcon icon={faLocationDot} size="sm" />
+              <FaLocationDot size="sm" />
             </Button>
           </Tooltip>
         )}

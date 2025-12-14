@@ -363,7 +363,7 @@ describe('<NavButton />', () => {
 
       // Should have 2 children: react-icons icon and span
       expect(children).toHaveLength(2)
-      expect(children[0].tagName).toBe('SVG') // React-icons icon
+      expect(children[0].tagName.toUpperCase()).toBe('SVG') // React-icons icon
       expect(children[1].tagName).toBe('SPAN') // Text span
     })
   })
