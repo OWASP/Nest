@@ -3,10 +3,10 @@ import StatusBadge from 'components/StatusBadge'
 
 jest.mock('react-icons/fa', () => ({
   FaArchive: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg data-testid="fa-archive" className={props.className} aria-hidden="true" />
+    <svg className={props.className} aria-hidden="true" />
   ),
   FaBan: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg data-testid="fa-ban" className={props.className} aria-hidden="true" />
+    <svg className={props.className} aria-hidden="true" />
   ),
 }))
 

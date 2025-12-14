@@ -60,15 +60,6 @@ jest.mock('components/SecondaryCard', () => {
 describe('DonutBarChart Component Test Suite', () => {
   const mockUseTheme = useTheme as jest.MockedFunction<typeof useTheme>
 
-  // Map string icon names to react-icons components for test compatibility
-  const iconMap = {
-    'chart-pie': FaChartPie,
-    'chart-bar': FaChartBar,
-    'analytics': FaChartLine,
-    'dashboard': FaTachometerAlt,
-    'heart': FaHeart,
-  }
-
   beforeEach(() => {
     mockUseTheme.mockReturnValue({
       theme: 'light',

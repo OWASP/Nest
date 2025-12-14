@@ -3,8 +3,6 @@ import userEvent from '@testing-library/user-event'
 import React from 'react'
 import type { Icon } from 'types/icon'
 import DisplayIcon from 'components/DisplayIcon'
-import { FaStar, FaUsers, FaExclamationCircle, FaBalanceScale, FaQuestion } from 'react-icons/fa'
-import { FaCodeFork } from 'react-icons/fa6'
 interface TooltipProps {
   children: React.ReactNode
   content: string
@@ -48,7 +46,7 @@ jest.mock('wrappers/IconWrapper', () => ({
     // This derives a data-icon attribute from the react-icon component name
     let iconName = ''
     if (IconComponent?.displayName) {
-      iconName = IconComponent.displayName.replace(/^Fa/, 'fa-').replace(/([A-Z])/g, '-$1').toLowerCase()
+      iconName = 'fa-' + IconComponent.displayName.replace(/^Fa/, '').replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '')
     } else if (IconComponent?.name) {
       iconName = 'fa-' + IconComponent.name.replace(/^Fa/, '').replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '')
     }
@@ -65,10 +63,9 @@ jest.mock('utils/data', () => ({
   ICONS: {
     starsCount: { label: 'Stars', icon: require('react-icons/fa6').FaStar },
     forksCount: { label: 'Forks', icon: require('react-icons/fa6').FaCodeFork },
-    contributorsCount: { label: 'Contributors', icon: require('react-icons/fa6').FaUsers },
-    contributionCount: { label: 'Contributors', icon: require('react-icons/fa6').FaUsers },
-    issuesCount: { label: 'Issues', icon: require('react-icons/fa6').FaExclamationCircle },
-    license: { label: 'License', icon: require('react-icons/fa6').FaBalanceScale },
+    contributorsCount: { label: 'Contributors', icon: require('react-icons/fa6').FaUser },
+    createdAt: { label: 'Creation date', icon: require('react-icons/fa6').FaClock },
+    commentsCount: { label: 'Comments count', icon: require('react-icons/fa6').FaComment },
     unknownItem: { label: 'Unknown', icon: require('react-icons/fa6').FaQuestion },
   },
 }))
@@ -130,7 +127,7 @@ describe('DisplayIcon', () => {
       expect(screen.getByTestId('font-awesome-icon')).toHaveAttribute('data-icon', 'fa-code-fork')
 
       rerender(<DisplayIcon item="contributorsCount" icons={mockIcons} />)
-      expect(screen.getByTestId('font-awesome-icon')).toHaveAttribute('data-icon', 'fa-users')
+      expect(screen.getByTestId('font-awesome-icon')).toHaveAttribute('data-icon', 'fa-user')
     })
 
     it('applies different container classes based on item type', () => {

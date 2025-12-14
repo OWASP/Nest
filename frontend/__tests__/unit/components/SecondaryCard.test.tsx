@@ -1,4 +1,4 @@
-import { FaUser } from 'react-icons/fa'
+import { FaUser } from 'react-icons/fa6'
 import { render, screen } from '@testing-library/react'
 import SecondaryCard from 'components/SecondaryCard'
 

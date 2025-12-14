@@ -61,8 +61,9 @@ jest.mock('utils/env.client', () => ({
 
 jest.mock('utils/urlIconMappings', () => ({
   getSocialIcon: (url: string) => {
+    const safe = encodeURIComponent(url)
     return function MockSocialIcon(props: { className?: string }) {
-      return <span data-testid={`mock-social-icon-${url}`} className={props.className} />
+      return <span data-testid={`mock-social-icon-${safe}`} className={props.className} />
     }
   },
 }))

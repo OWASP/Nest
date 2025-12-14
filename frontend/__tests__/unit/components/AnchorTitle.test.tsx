@@ -1,6 +1,5 @@
 import { screen, render, fireEvent, waitFor } from '@testing-library/react'
 import slugifyMock from 'utils/slugify'
-import { FaLink } from 'react-icons/fa'
 import AnchorTitle from 'components/AnchorTitle'
 
 jest.mock('utils/slugify', () => ({

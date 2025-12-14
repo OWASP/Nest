@@ -13,8 +13,8 @@ jest.mock('components/AnchorTitle', () => ({
 }))
 
 jest.mock('wrappers/IconWrapper', () => ({
-  IconWrapper: ({ icon: IconComponent }: { icon: React.ComponentType }) => {
-    return IconComponent ? <IconComponent data-testid="icon" /> : <i className="icon" />
+  IconWrapper: ({ icon: IconComponent, className, ...props }: any) => {
+    return IconComponent ? <IconComponent className={className} data-testid="icon" {...props} /> : <i className="icon" />
   },
 }))
 

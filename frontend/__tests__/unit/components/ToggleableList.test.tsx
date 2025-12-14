@@ -20,8 +20,8 @@ jest.mock('components/ShowMoreButton', () => ({
 }))
 
 jest.mock('wrappers/IconWrapper', () => ({
-  IconWrapper: ({ icon: IconComponent, className }: { icon: React.ComponentType<{ className?: string }>; className?: string }) =>
-    IconComponent ? <span data-testid="react-icon"><IconComponent className={className} /></span> : null,
+  IconWrapper: ({ icon: Icon, className, ...props }: { icon: React.ComponentType<{ className?: string }> } & React.SVGProps<SVGSVGElement>) =>
+    <Icon className={className} data-testid="react-icon" {...props} />,
 }))
 
 describe('ToggleableList', () => {
@@ -50,8 +50,7 @@ describe('ToggleableList', () => {
 
     const iconElement = screen.getByTestId('react-icon')
     expect(iconElement).toBeInTheDocument()
-    const svg = iconElement.querySelector('svg')
-    expect(svg).toHaveClass('mr-2', 'h-5', 'w-5')
+    expect(iconElement).toHaveClass('mr-2', 'h-5', 'w-5')
   })
 
   it('respects custom limit prop', () => {

@@ -1,7 +1,7 @@
 import dynamic from 'next/dynamic'
 import { useTheme } from 'next-themes'
 import React from 'react'
-import { IconType } from 'react-icons'
+import type { IconType } from 'react-icons'
 import type { ApexLineChartSeries } from 'types/healthMetrics'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
