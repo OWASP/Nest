@@ -218,7 +218,7 @@ const ChapterMap = ({
                 userLocation ? 'Reset location filter' : 'Share location to find nearby chapters'
               }
             >
-              <FaLocationDot size="sm" />
+              <FaLocationDot size={14} />
             </Button>
           </Tooltip>
         )}
