@@ -112,7 +112,7 @@ class Command(BaseCommand):
         commit_query += " sort:author-date-asc"
         try:
             commits = gh.search_commits(query=commit_query, sort="author-date", order="asc")
-            if commits.totalCount > 0:
+            if commits.total_count > 0:
                 first_commit = next(iter(commits))
                 earliest_dates.append(
                     (first_commit.commit.author.date, "commit", first_commit.repository.name)
@@ -129,7 +129,7 @@ class Command(BaseCommand):
         pr_query += " sort:created-asc"
         try:
             prs = gh.search_issues(query=pr_query, sort="created", order="asc")
-            if prs.totalCount > 0:
+            if prs.total_count > 0:
                 first_pr = next(iter(prs))
                 earliest_dates.append((first_pr.created_at, "PR", first_pr.repository.name))
                 self.stdout.write(f"  Found earliest PR: {first_pr.created_at}")
@@ -143,7 +143,7 @@ class Command(BaseCommand):
         issue_query += " sort:created-asc"
         try:
             issues = gh.search_issues(query=issue_query, sort="created", order="asc")
-            if issues.totalCount > 0:
+            if issues.total_count > 0:
                 first_issue = next(iter(issues))
                 earliest_dates.append(
                     (first_issue.created_at, "issue", first_issue.repository.name)
@@ -271,8 +271,8 @@ class Command(BaseCommand):
             try:
                 gh_commits = gh.search_commits(query=commit_query)
 
-                self.stdout.write(f"  Found {gh_commits.totalCount} commits")
-                logger.info("Found %s commits in %s", gh_commits.totalCount, org.login)
+                self.stdout.write(f"  Found {gh_commits.total_count} commits")
+                logger.info("Found %s commits in %s", gh_commits.total_count, org.login)
 
                 processed_commits = 0
                 for gh_commit in gh_commits:
@@ -304,7 +304,7 @@ class Command(BaseCommand):
                     logger.info(
                         "Processed commit %s/%s: %s in %s",
                         processed_commits,
-                        gh_commits.totalCount,
+                        gh_commits.total_count,
                         gh_commit.sha[:7],
                         repo.name,
                     )
@@ -318,8 +318,8 @@ class Command(BaseCommand):
             try:
                 gh_prs = gh.search_issues(query=pr_query)
 
-                self.stdout.write(f"  Found {gh_prs.totalCount} pull requests")
-                logger.info("Found %s pull requests in %s", gh_prs.totalCount, org.login)
+                self.stdout.write(f"  Found {gh_prs.total_count} pull requests")
+                logger.info("Found %s pull requests in %s", gh_prs.total_count, org.login)
 
                 processed_prs = 0
                 for gh_issue in gh_prs:
@@ -360,7 +360,7 @@ class Command(BaseCommand):
                     logger.info(
                         "Processed PR %s/%s: #%s in %s",
                         processed_prs,
-                        gh_prs.totalCount,
+                        gh_prs.total_count,
                         gh_pr.number,
                         repo.name,
                     )
@@ -374,8 +374,8 @@ class Command(BaseCommand):
             try:
                 gh_issues = gh.search_issues(query=issue_query)
 
-                self.stdout.write(f"  Found {gh_issues.totalCount} issues")
-                logger.info("Found %s issues in %s", gh_issues.totalCount, org.login)
+                self.stdout.write(f"  Found {gh_issues.total_count} issues")
+                logger.info("Found %s issues in %s", gh_issues.total_count, org.login)
 
                 processed_issues = 0
                 for gh_issue in gh_issues:
@@ -401,7 +401,7 @@ class Command(BaseCommand):
                     logger.info(
                         "Processed issue %s/%s: #%s in %s",
                         processed_issues,
-                        gh_issues.totalCount,
+                        gh_issues.total_count,
                         gh_issue.number,
                         repo.name,
                     )

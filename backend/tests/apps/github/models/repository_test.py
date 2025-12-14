@@ -122,7 +122,7 @@ class TestRepositoryFromGithub:
     def test_from_github_with_empty_commits(self, gh_repository_setup):
         """Test that from_github sets the is_empty flag when a repository has no commits."""
         commits_mock = MagicMock()
-        type(commits_mock).totalCount = PropertyMock(
+        type(commits_mock).total_count = PropertyMock(
             side_effect=GithubException(
                 status=409, data={"message": "Git Repository is empty", "status": "409"}
             )
