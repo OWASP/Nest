@@ -50,7 +50,7 @@ def create_mock_organization(login="test-org", num_related_projects=1):
 def create_mock_github_org(org_login, num_repos):
     gh_org = mock.Mock()
     gh_repos = mock.MagicMock()
-    gh_repos.total_count = num_repos
+    gh_repos.totalCount = num_repos
 
     repo_mocks = []
     for i in range(num_repos):

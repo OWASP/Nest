@@ -108,13 +108,13 @@ def test_handle(
         class PaginatedListMock(list):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
-                self.total_count = len(self)
+                self.totalCount = len(self)
 
             def __getitem__(self, index):
                 if isinstance(index, slice):
                     result = super().__getitem__(index)
                     new_list = PaginatedListMock(result)
-                    new_list.total_count = self.total_count
+                    new_list.totalCount = self.totalCount
                     return new_list
                 return super().__getitem__(index)
 
@@ -198,13 +198,13 @@ def test_handle_full_sync_with_errors_and_repo_linking(
     class PaginatedListMock(list):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            self.total_count = len(self)
+            self.totalCount = len(self)
 
         def __getitem__(self, index):
             if isinstance(index, slice):
                 result = super().__getitem__(index)
                 new_list = PaginatedListMock(result)
-                new_list.total_count = self.total_count
+                new_list.totalCount = self.totalCount
                 return new_list
             return super().__getitem__(index)
 
@@ -215,7 +215,7 @@ def test_handle_full_sync_with_errors_and_repo_linking(
     ]
     mock_repos = PaginatedListMock(repos)
     mock_org.get_repos.return_value = mock_repos
-    mock_repos.total_count = 3
+    mock_repos.totalCount = 3
     mock_sync_repository.side_effect = [
         (mock.Mock(), mock.Mock()),
         Exception("Sync failed"),

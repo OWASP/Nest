@@ -254,14 +254,14 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         # Commits.
         if commits is not None:
             try:
-                self.commits_count = commits.total_count
+                self.commits_count = commits.totalCount
             except GithubException as e:
                 if e.data["status"] == "409" and "Git Repository is empty" in e.data["message"]:
                     self.is_empty = True
 
         # Contributors.
         if contributors is not None:
-            self.contributors_count = contributors.total_count
+            self.contributors_count = contributors.totalCount
 
         # Languages.
         if languages is not None:

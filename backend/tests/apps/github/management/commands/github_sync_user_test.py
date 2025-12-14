@@ -16,8 +16,7 @@ class MockPaginatedList:
 
     def __init__(self, items):
         self._items = items
-        self.total_count = len(items) #for linting errors
-        self.totalCount = len(items) #for PyGithub compatibility
+        self.totalCount = len(items)  # NOSONAR (for consistency with PyGithub).
 
     def __iter__(self):
         """Return an iterator for the items."""

@@ -70,7 +70,7 @@ class Command(BaseCommand):
                     sort="created",
                     direction="desc",
                 )
-                gh_repositories_count = gh_repositories.total_count
+                gh_repositories_count = gh_repositories.totalCount
                 for idx_repository, gh_repository in enumerate(gh_repositories):
                     prefix = f"{idx_repository + 1} of {gh_repositories_count}"
                     repository_url = (
