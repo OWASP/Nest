@@ -7,6 +7,8 @@ import type { Organization } from 'types/organization'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
 
+export type ProjectHealthType = 'healthy' | 'needsAttention' | 'unhealthy'
+
 export type ProjectStats = {
   contributors: number
   forks: number

@@ -29,7 +29,7 @@ const SearchPageLayout = ({
   searchPlaceholder,
   empty,
   indexName,
-  loadingImageUrl = '/img/owasp_icon_white_sm.png',
+  loadingImageUrl = '/img/spinner_light.png',
   sortChildren,
   children,
 }: SearchPageLayoutProps) => {

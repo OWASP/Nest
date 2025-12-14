@@ -22,6 +22,7 @@ jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(() => mockRouter),
   useParams: () => ({ committeeKey: 'test-committee' }),
+  usePathname: jest.fn(() => '/committees/test-committee'),
 }))
 
 describe('CommitteeDetailsPage Component', () => {
@@ -52,7 +53,7 @@ describe('CommitteeDetailsPage Component', () => {
   test('renders committee data correctly', async () => {
     render(<CommitteeDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('Test Committee')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Test Committee' })).toBeInTheDocument()
     })
     expect(screen.getByText('This is a test committee summary.')).toBeInTheDocument()
     expect(screen.getByText('Leader 1')).toBeInTheDocument()
@@ -130,7 +131,7 @@ describe('CommitteeDetailsPage Component', () => {
     })
     render(<CommitteeDetailsPage />)
     await waitFor(() => {
-      expect(screen.queryByText(`Want to become a sponsor?`)).toBeNull()
+      expect(screen.queryByText('Want to become a sponsor?')).toBeNull()
     })
   })
 })

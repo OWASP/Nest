@@ -11,10 +11,14 @@ from apps.mentorship.models.common import (
     MatchingAttributes,
     StartEndRange,
 )
+from apps.mentorship.models.managers import PublishedModuleManager
 
 
 class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedModel):
     """Module model representing a program unit."""
+
+    objects = models.Manager()
+    published_modules = PublishedModuleManager()
 
     class Meta:
         db_table = "mentorship_modules"
@@ -31,12 +35,10 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         blank=True,
         default="",
     )
-
     key = models.CharField(
         verbose_name="Key",
         max_length=200,
     )
-
     name = models.CharField(
         max_length=200,
         verbose_name="Name",
@@ -45,26 +47,31 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
     )
 
     # FKs.
+    labels = models.JSONField(
+        blank=True,
+        default=list,
+        verbose_name="Labels",
+    )
     program = models.ForeignKey(
         "mentorship.Program",
         related_name="modules",
         on_delete=models.CASCADE,
         verbose_name="Program",
     )
-
     project = models.ForeignKey(
         "owasp.Project",
         on_delete=models.CASCADE,
         verbose_name="Project",
     )
 
-    labels = models.JSONField(
-        blank=True,
-        default=list,
-        verbose_name="Labels",
-    )
-
     # M2Ms.
+    issues = models.ManyToManyField(
+        "github.Issue",
+        verbose_name="Linked Issues",
+        related_name="mentorship_modules",
+        blank=True,
+        help_text="Issues linked to this module via label matching.",
+    )
     mentors = models.ManyToManyField(
         "mentorship.Mentor",
         verbose_name="Mentors",

@@ -1,5 +1,7 @@
 """OWASP REST API v0."""
 
+from typing import Any
+
 from django.conf import settings
 from ninja import NinjaAPI, Swagger
 from ninja.pagination import RouterPaginated
@@ -42,20 +44,18 @@ api_settings = {
     "docs": Swagger(settings={"persistAuthorization": True}),
     "throttle": [AuthRateThrottle("10/s")],
     "title": "OWASP Nest",
-    "version": "0.2.5",
+    "version": "0.3.6",
 }
 
-api_settings_customization = {}
-if settings.IS_LOCAL_ENVIRONMENT:
+api_settings_customization: dict[str, Any] = {}
+if settings.IS_PRODUCTION_ENVIRONMENT:
     api_settings_customization = {
-        "auth": None,
         "servers": [
             {
-                "description": "Local",
+                "description": "Production",
                 "url": settings.SITE_URL,
             }
         ],
-        "throttle": [],
     }
 elif settings.IS_STAGING_ENVIRONMENT:
     api_settings_customization = {
@@ -66,14 +66,16 @@ elif settings.IS_STAGING_ENVIRONMENT:
             }
         ],
     }
-elif settings.IS_PRODUCTION_ENVIRONMENT:
+elif settings.IS_LOCAL_ENVIRONMENT:
     api_settings_customization = {
+        "auth": None,
         "servers": [
             {
-                "description": "Production",
+                "description": "Local",
                 "url": settings.SITE_URL,
             }
         ],
+        "throttle": [],
     }
 
 api = NinjaAPI(**{**api_settings, **api_settings_customization})

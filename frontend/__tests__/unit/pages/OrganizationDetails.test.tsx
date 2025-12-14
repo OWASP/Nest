@@ -28,6 +28,7 @@ jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(() => mockRouter),
   useParams: () => ({ repositoryKey: 'test-org' }),
+  usePathname: jest.fn(() => '/organizations/test-org'),
 }))
 
 const mockError = {
@@ -70,7 +71,7 @@ describe('OrganizationDetailsPage', () => {
     render(<OrganizationDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Test Organization')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Test Organization' })).toBeInTheDocument()
     })
 
     expect(screen.getByText('@test-org')).toBeInTheDocument()
@@ -207,7 +208,7 @@ describe('OrganizationDetailsPage', () => {
     })
     render(<OrganizationDetailsPage />)
     await waitFor(() => {
-      expect(screen.queryByText(`Want to become a sponsor?`)).toBeNull()
+      expect(screen.queryByText('Want to become a sponsor?')).toBeNull()
     })
   })
 })

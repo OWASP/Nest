@@ -11,7 +11,6 @@ import ActionButton from 'components/ActionButton'
 import ContributorAvatar from 'components/ContributorAvatar'
 import DisplayIcon from 'components/DisplayIcon'
 import Markdown from 'components/MarkdownWrapper'
-import ModuleList from 'components/ModuleList'
 
 const Card = ({
   title,
@@ -23,7 +22,6 @@ const Card = ({
   button,
   projectName,
   projectLink,
-  modules,
   social,
   tooltipLabel,
   timeline,
@@ -103,8 +101,6 @@ const Card = ({
       {/* Project summary */}
       <Markdown content={summary} className="mt-2 w-full text-gray-600 dark:text-gray-300" />
 
-      {/* Modules section (if available) */}
-      <ModuleList modules={modules} />
       <div className="mt-4 w-full">
         {/* Social icons section */}
         {social && social.length > 0 && (
@@ -117,6 +113,7 @@ const Card = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="transition-colors"
+                  aria-label={item.title || 'Social media link'}
                 >
                   <FontAwesomeIcon
                     icon={getSocialIcon(item.url)}

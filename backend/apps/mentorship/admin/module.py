@@ -8,6 +8,8 @@ from apps.mentorship.models.module import Module
 class ModuleAdmin(admin.ModelAdmin):
     """Admin view for Module model."""
 
+    autocomplete_fields = ("issues",)
+
     list_display = (
         "name",
         "program",

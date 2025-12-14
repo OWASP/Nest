@@ -3,7 +3,6 @@ import { useQuery } from '@apollo/client/react'
 import {
   faCircleCheck,
   faClock,
-  faUserGear,
   faMapSigns,
   faScroll,
   faUsers,
@@ -37,9 +36,9 @@ import {
 import AnchorTitle from 'components/AnchorTitle'
 import AnimatedCounter from 'components/AnimatedCounter'
 import Leaders from 'components/Leaders'
-import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
+import AboutSkeleton from 'components/skeletons/AboutSkeleton'
 import TopContributorsList from 'components/TopContributorsList'
 
 const leaders = {
@@ -49,6 +48,26 @@ const leaders = {
 }
 
 const projectKey = 'nest'
+
+const getMilestoneStatus = (progress: number): string => {
+  if (progress === 100) {
+    return 'Completed'
+  }
+  if (progress > 0) {
+    return 'In Progress'
+  }
+  return 'Not Started'
+}
+
+const getMilestoneIcon = (progress: number) => {
+  if (progress === 100) {
+    return faCircleCheck
+  }
+  if (progress > 0) {
+    return faUsersGear
+  }
+  return faClock
+}
 
 const About = () => {
   const { data: projectMetadataResponse, error: projectMetadataRequestError } = useQuery(
@@ -103,7 +122,7 @@ const About = () => {
     leadersLoading
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return <AboutSkeleton />
   }
 
   if (!projectMetadata || !topContributors) {
@@ -222,28 +241,14 @@ const About = () => {
                         </Link>
                         <Tooltip
                           closeDelay={100}
-                          content={
-                            milestone.progress === 100
-                              ? 'Completed'
-                              : milestone.progress > 0
-                                ? 'In Progress'
-                                : 'Not Started'
-                          }
+                          content={getMilestoneStatus(milestone.progress)}
                           id={`tooltip-state-${index}`}
                           delay={100}
                           placement="top"
                           showArrow
                         >
                           <span className="absolute top-0 right-0 text-xl text-gray-400">
-                            <FontAwesomeIcon
-                              icon={
-                                milestone.progress === 100
-                                  ? faCircleCheck
-                                  : milestone.progress > 0
-                                    ? faUserGear
-                                    : faClock
-                              }
-                            />
+                            <FontAwesomeIcon icon={getMilestoneIcon(milestone.progress)} />
                           </span>
                         </Tooltip>
                       </div>
@@ -256,14 +261,7 @@ const About = () => {
         )}
         <SecondaryCard icon={faScroll} title={<AnchorTitle title="Our Story" />}>
           {projectStory.map((text) => (
-            <div
-              key={text
-                .slice(0, 40)
-                .trim()
-                .replaceAll(' ', '-')
-                .replaceAll(/[^\w-]/g, '')}
-              className="mb-4"
-            >
+            <div key={`story-${text.substring(0, 50).replaceAll(' ', '-')}`} className="mb-4">
               <div>
                 <Markdown content={text} />
               </div>
@@ -279,7 +277,7 @@ const About = () => {
                 )}
                 <div
                   aria-hidden="true"
-                  className="absolute top-[10px] left-0 h-3 w-3 rounded-full bg-gray-400"
+                  className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
                 ></div>
                 <div>
                   <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>

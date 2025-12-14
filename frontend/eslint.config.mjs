@@ -1,11 +1,9 @@
 import { dirname } from 'path'
 import { fileURLToPath } from 'url'
-import { FlatCompat } from '@eslint/eslintrc'
 import path from 'path'
 
 import js from '@eslint/js'
-import typescriptEslint from '@typescript-eslint/eslint-plugin'
-import typescriptParser from '@typescript-eslint/parser'
+import tseslint from 'typescript-eslint'
 import prettierConfig from 'eslint-config-prettier'
 import importPlugin from 'eslint-plugin-import'
 import jest from 'eslint-plugin-jest'
@@ -24,12 +22,8 @@ import noGlobalParseIntRule from './eslint-rules/no-global-parseint.mjs'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-})
-
 const eslintConfig = [
-  ...compat.extends('next/typescript'),
+  ...tseslint.configs.recommended,
   react.configs.flat['jsx-runtime'],
   {
     ignores: [
@@ -47,7 +41,6 @@ const eslintConfig = [
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
-      parser: typescriptParser,
       ecmaVersion: 2023,
       sourceType: 'module',
       globals: {
@@ -58,7 +51,6 @@ const eslintConfig = [
       },
     },
     plugins: {
-      '@typescript-eslint': typescriptEslint,
       'react-hooks': reactHooks,
       import: importPlugin,
       jest,
@@ -168,6 +160,7 @@ const eslintConfig = [
       'nest/no-global-nan': 'error',
       'nest/no-global-parsefloat': 'error',
       'nest/no-global-parseint': 'error',
+      quotes: ['error', 'single', { avoidEscape: true }],
     },
   },
   {
