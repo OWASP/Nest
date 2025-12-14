@@ -79,6 +79,7 @@ jobs:
           cache-from: type=registry,ref=owasp/nest:test-fuzz-backend-cache
           cache-to: type=registry,ref=owasp/nest:test-fuzz-backend-cache,mode=max
           context: backend/docker
-          file: backend/docker/Dockerfile.fuzz
+          file: Dockerfile.fuzz
+          platforms: linux/amd64
           push: true
           tags: owasp/nest:test-fuzz-backend:latest
