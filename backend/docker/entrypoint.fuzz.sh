@@ -2,6 +2,11 @@
 
 set -e
 
+if [ -z "$BASE_URL" ]; then
+  echo "Error: BASE_URL environment variable is not set."
+  exit 1
+fi
+
 echo "Fetching CSRF token..."
 CSRF_TOKEN=$(wget -qO- "$BASE_URL/csrf" | jq -r '.csrftoken')
 
