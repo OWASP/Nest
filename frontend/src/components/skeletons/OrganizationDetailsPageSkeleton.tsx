@@ -147,7 +147,7 @@ const OrganizationDetailsPageSkeleton = () => {
               {Array.from({ length: 5 }, (_, i) => (
                 <div
                   key={`pr-${i}`}
-                  className="rounded-lg border-1 border-gray-200 bg-white p-4 shadow-xs dark:border-gray-700 dark:bg-gray-900"
+                  className="mb-4 rounded-lg border-1 border-gray-200 bg-white p-4 shadow-xs dark:border-gray-700 dark:bg-gray-900"
                 >
                   <Skeleton className="mb-2 h-5 w-full rounded" />
                   <div className="mt-2 flex flex-wrap items-center text-sm">
