@@ -126,7 +126,7 @@ export const projectTimeline: ProjectTimeline[] = [
   {
     title: 'Official OWASP Nest Logo Introduction',
     description:
-      "",
+      "Introduced the official OWASP Nest logo as part of the project’s branding and visual identity.",
     year: 'December 2025',
   }
 ]
