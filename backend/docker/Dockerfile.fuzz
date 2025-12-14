@@ -1,5 +1,5 @@
 # NOSONAR
-FROM omar2535/graphqler:latest
+FROM omar2535/graphqler@sha256:1d0ae86d0cf972e1de80f1b24c4e901fbff73fbe5bfb7eb4b5dd45f45fbff3f6
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
