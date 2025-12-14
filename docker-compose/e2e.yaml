@@ -68,7 +68,7 @@ services:
     entrypoint:
       - /app/entrypoint.sh
     environment:
-      GRAPHQL_URL: http://backend:9000/graphql/
+      BASE_URL: http://backend:9000
     depends_on:
       backend:
         condition: service_healthy
