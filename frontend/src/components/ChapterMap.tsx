@@ -28,6 +28,7 @@ const ChapterMap = ({
 }) => {
   const mapRef = useRef<L.Map | null>(null)
   const markerClusterRef = useRef<MarkerClusterGroup | null>(null)
+  const userMarkerRef = useRef<L.Marker | null>(null)
   const [isMapActive, setIsMapActive] = useState(false)
 
   useEffect(() => {
@@ -56,7 +57,12 @@ const ChapterMap = ({
         const originalEvent = e.originalEvent as MouseEvent
         const relatedTarget = originalEvent.relatedTarget as Node | null
         const container = mapRef.current?.getContainer()
-        if (relatedTarget && container?.contains(relatedTarget)) return
+        const mapParent = container?.parentElement
+        if (
+          relatedTarget &&
+          (container?.contains(relatedTarget) || mapParent?.contains(relatedTarget))
+        )
+          return
 
         mapRef.current?.scrollWheelZoom.disable()
         setIsMapActive(false)
@@ -112,7 +118,11 @@ const ChapterMap = ({
 
     markerClusterGroup.addLayers(markers)
 
-    // Add user location marker if available
+    if (userMarkerRef.current) {
+      userMarkerRef.current.remove()
+      userMarkerRef.current = null
+    }
+
     if (userLocation && map) {
       const iconHtml =
         '<img src="/img/marker-icon.png" style="filter: hue-rotate(150deg) saturate(1.5) brightness(0.9); width: 25px; height: 41px;" alt="User location" />'
@@ -133,6 +143,7 @@ const ChapterMap = ({
       userPopup.setContent(userPopupContent)
       userMarker.bindPopup(userPopup)
       userMarker.addTo(map)
+      userMarkerRef.current = userMarker
     }
 
     if (userLocation && validGeoLocData.length > 0) {

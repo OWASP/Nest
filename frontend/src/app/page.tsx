@@ -311,6 +311,7 @@ export default function Home() {
           <ChapterMapWrapper
             geoLocData={geoLocData}
             showLocal={false}
+            showLocationSharing={true}
             style={{
               height: '400px',
               width: '100%',

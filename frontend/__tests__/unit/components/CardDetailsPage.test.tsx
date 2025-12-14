@@ -107,11 +107,13 @@ jest.mock('components/ChapterMapWrapper', () => ({
     geoLocData: _geoLocData,
     showLocal,
     style,
+    showLocationSharing: _showLocationSharing,
     ...otherProps
   }: {
     geoLocData?: unknown
     showLocal: boolean
     style: React.CSSProperties
+    showLocationSharing?: boolean
     [key: string]: unknown
   }) => {
     return (
