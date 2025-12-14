@@ -54,7 +54,6 @@ pyparsing = "^3.2.3"
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.36.4"
 pre-commit = "^4.1.0"
-hypothesis = "^6.129.4"
 ruff = "^0.14.2"
 
 [tool.poetry.group.test.dependencies]
