@@ -238,12 +238,12 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
               onChange={handleSearchChange}
               onFocus={handleFocusSearch}
               placeholder={placeholder}
-              className="h-12 w-full rounded-lg border-1 border-gray-300 pr-10 pl-10 text-lg text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300"
+              className="h-12 w-full rounded-lg border-1 border-gray-300 bg-white pr-10 pl-10 text-lg text-black focus:ring-1 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-300"
             />
             {searchQuery && (
               <button
                 type="button"
-                className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:text-gray-600"
+                className="absolute top-1/2 right-2 h-8 w-8 -translate-y-1/2 rounded-md p-1 text-gray-400 hover:bg-gray-400 hover:text-gray-200 focus:ring-2 focus:ring-gray-300 focus:outline-hidden dark:hover:bg-gray-600"
                 onClick={handleClearSearch}
                 aria-label="Clear search"
               >
