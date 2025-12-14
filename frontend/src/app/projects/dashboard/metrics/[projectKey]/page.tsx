@@ -8,11 +8,11 @@ import {
   FaDollarSign,
   FaCodePullRequest,
   FaChartArea,
-  FaExclamationCircle,
   FaHandshake,
   FaStar,
   FaTags,
 } from 'react-icons/fa6'
+import { FaExclamationCircle } from 'react-icons/fa'
 import { handleAppError } from 'app/global-error'
 import { GetProjectHealthMetricsDetailsDocument } from 'types/__generated__/projectsHealthDashboardQueries.generated'
 import { HealthMetricsProps } from 'types/healthMetrics'

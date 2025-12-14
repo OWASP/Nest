@@ -1,11 +1,11 @@
-import { faUser } from '@fortawesome/free-solid-svg-icons'
+import { FaUser } from 'react-icons/fa'
 import { render, screen } from '@testing-library/react'
 import SecondaryCard from 'components/SecondaryCard'
 
 describe('SecondaryCard Component', () => {
   const defaultProps = {
     title: 'Test Title',
-    icon: faUser,
+    icon: FaUser,
     children: <p>Test children</p>,
     className: 'custom-class',
   }
@@ -51,7 +51,7 @@ describe('SecondaryCard Component', () => {
     it('renders a title and an icon when both are provided', () => {
       render(<SecondaryCard title={defaultProps.title} icon={defaultProps.icon} />)
       expect(screen.getByText(defaultProps.title)).toBeInTheDocument()
-      expect(screen.getByRole('img', { hidden: true })).toBeInTheDocument()
+      expect(document.querySelector('svg.h-5.w-5')).toBeInTheDocument()
     })
 
     it('renders children content correctly', () => {
@@ -135,7 +135,7 @@ describe('SecondaryCard Component', () => {
 
     it('has the correct className for the icon', () => {
       render(<SecondaryCard title={defaultProps.title} icon={defaultProps.icon} />)
-      const iconElement = screen.getByRole('img', { hidden: true })
+      const iconElement = document.querySelector('svg.h-5.w-5')
       expect(iconElement).toHaveClass('h-5', 'w-5')
     })
   })

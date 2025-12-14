@@ -1,11 +1,7 @@
-import { faUser } from '@fortawesome/free-solid-svg-icons'
+import { FaUser } from 'react-icons/fa'
 import { render, screen, fireEvent } from '@testing-library/react'
 import ToggleableList from 'components/ToggleableList'
 
-interface MockFontAwesomeIconProps {
-  icon: unknown
-  className?: string
-}
 
 const mockPush = jest.fn()
 jest.mock('next/navigation', () => ({
@@ -23,12 +19,9 @@ jest.mock('components/ShowMoreButton', () => ({
   ),
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, className }: MockFontAwesomeIconProps) => (
-    <span data-testid="font-awesome-icon" className={className}>
-      {String(icon)}
-    </span>
-  ),
+jest.mock('wrappers/IconWrapper', () => ({
+  IconWrapper: ({ icon: IconComponent, className }: { icon: React.ComponentType<{ className?: string }>; className?: string }) =>
+    IconComponent ? <span data-testid="react-icon"><IconComponent className={className} /></span> : null,
 }))
 
 describe('ToggleableList', () => {
@@ -53,11 +46,12 @@ describe('ToggleableList', () => {
   })
 
   it('renders with an icon', () => {
-    render(<ToggleableList items={mockItems} label="test-label" icon={faUser} />)
+    render(<ToggleableList items={mockItems} label="test-label" icon={FaUser} />)
 
-    const iconElement = screen.getByTestId('font-awesome-icon')
+    const iconElement = screen.getByTestId('react-icon')
     expect(iconElement).toBeInTheDocument()
-    expect(iconElement).toHaveClass('mr-2', 'h-5', 'w-5')
+    const svg = iconElement.querySelector('svg')
+    expect(svg).toHaveClass('mr-2', 'h-5', 'w-5')
   })
 
   it('respects custom limit prop', () => {

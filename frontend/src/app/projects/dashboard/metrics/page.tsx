@@ -94,7 +94,14 @@ const SortableColumnHeader: FC<{
 
   const textAlignClass = textAlignMap[align] || textAlignMap.left
 
-  const iconType: IconType = isActiveSortDesc ? FaSortDown : isActiveSortAsc ? FaSortUp : FaSort
+  let iconType: IconType
+  if (isActiveSortDesc) {
+    iconType = FaSortDown
+  } else if (isActiveSortAsc) {
+    iconType = FaSortUp
+  } else {
+    iconType = FaSort
+  }
 
   return (
     <div className={`flex items-center gap-1 ${alignmentClass}`}>

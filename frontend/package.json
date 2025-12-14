@@ -18,11 +18,6 @@
   },
   "dependencies": {
     "@apollo/client": "^4.0.10",
-    "@fortawesome/fontawesome-svg-core": "^7.1.0",
-    "@fortawesome/free-brands-svg-icons": "^7.1.0",
-    "@fortawesome/free-regular-svg-icons": "^7.1.0",
-    "@fortawesome/free-solid-svg-icons": "^7.1.0",
-    "@fortawesome/react-fontawesome": "^3.1.1",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@heroui/button": "^2.2.27",
     "@heroui/modal": "^2.2.24",

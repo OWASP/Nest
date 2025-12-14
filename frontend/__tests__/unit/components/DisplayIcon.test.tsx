@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event'
 import React from 'react'
 import type { Icon } from 'types/icon'
 import DisplayIcon from 'components/DisplayIcon'
-
+import { FaStar, FaUsers, FaExclamationCircle, FaBalanceScale, FaQuestion } from 'react-icons/fa'
+import { FaCodeFork } from 'react-icons/fa6'
 interface TooltipProps {
   children: React.ReactNode
   content: string
@@ -42,21 +43,33 @@ jest.mock('millify', () => ({
   }),
 }))
 
-jest.mock('wrappers/FontAwesomeIconWrapper', () => {
-  return function MockFontAwesomeIconWrapper({ className, icon }: IconWrapperProps) {
-    return <span data-testid="font-awesome-icon" data-icon={icon} className={className} />
-  }
-})
+jest.mock('wrappers/IconWrapper', () => ({
+  IconWrapper: ({ className, icon: IconComponent }: { className?: string; icon: React.ComponentType<{ className?: string }> }) => {
+    // This derives a data-icon attribute from the react-icon component name
+    let iconName = ''
+    if (IconComponent?.displayName) {
+      iconName = IconComponent.displayName.replace(/^Fa/, 'fa-').replace(/([A-Z])/g, '-$1').toLowerCase()
+    } else if (IconComponent?.name) {
+      iconName = 'fa-' + IconComponent.name.replace(/^Fa/, '').replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '')
+    }
+    return IconComponent ? (
+      <span data-testid="font-awesome-icon" data-icon={iconName} className={className}>
+        <IconComponent />
+      </span>
+    ) : null
+  },
+}))
 
+// Update ICONS mock to use react-icons components instead of string names
 jest.mock('utils/data', () => ({
   ICONS: {
-    starsCount: { label: 'Stars', icon: 'fa-star' },
-    forksCount: { label: 'Forks', icon: 'fa-code-fork' },
-    contributorsCount: { label: 'Contributors', icon: 'fa-users' },
-    contributionCount: { label: 'Contributors', icon: 'fa-users' },
-    issuesCount: { label: 'Issues', icon: 'fa-exclamation-circle' },
-    license: { label: 'License', icon: 'fa-balance-scale' },
-    unknownItem: { label: 'Unknown', icon: 'fa-question' },
+    starsCount: { label: 'Stars', icon: require('react-icons/fa6').FaStar },
+    forksCount: { label: 'Forks', icon: require('react-icons/fa6').FaCodeFork },
+    contributorsCount: { label: 'Contributors', icon: require('react-icons/fa6').FaUsers },
+    contributionCount: { label: 'Contributors', icon: require('react-icons/fa6').FaUsers },
+    issuesCount: { label: 'Issues', icon: require('react-icons/fa6').FaExclamationCircle },
+    license: { label: 'License', icon: require('react-icons/fa6').FaBalanceScale },
+    unknownItem: { label: 'Unknown', icon: require('react-icons/fa6').FaQuestion },
   },
 }))
 

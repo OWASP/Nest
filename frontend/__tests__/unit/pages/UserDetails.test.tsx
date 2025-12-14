@@ -13,22 +13,6 @@ jest.mock('@apollo/client/react', () => ({
   useQuery: jest.fn(),
 }))
 
-// Mock FontAwesome
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({
-    icon,
-    className,
-    ...props
-  }: {
-    icon: string[] | { iconName: string }
-    className?: string
-    [key: string]: unknown
-  }) => {
-    const iconName = Array.isArray(icon) ? icon[1] : icon.iconName
-    return <span data-testid={`icon-${iconName}`} className={className} {...props} />
-  },
-}))
-
 // Mock Badges component
 jest.mock('components/Badges', () => {
   const MockBadges = ({
@@ -655,7 +639,7 @@ describe('UserDetailsPage', () => {
       render(<UserDetailsPage />)
       await waitFor(() => {
         const badge = screen.getByTestId('badge-test-badge')
-        expect(badge).toHaveAttribute('data-css-class', 'fa-medal')
+        expect(badge).toHaveAttribute('data-css-class', 'medal')
       })
     })
 
@@ -685,7 +669,7 @@ describe('UserDetailsPage', () => {
       render(<UserDetailsPage />)
       await waitFor(() => {
         const badge = screen.getByTestId('badge-test-badge')
-        expect(badge).toHaveAttribute('data-css-class', 'fa-medal')
+        expect(badge).toHaveAttribute('data-css-class', 'medal')
       })
     })
 
@@ -775,7 +759,7 @@ describe('UserDetailsPage', () => {
             {
               id: '1',
               name: 'Contributor',
-              cssClass: 'fa-medal',
+              cssClass: 'medal',
               description: 'Active contributor',
               weight: 1,
             },

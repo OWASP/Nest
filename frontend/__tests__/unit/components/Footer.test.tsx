@@ -5,7 +5,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { ReactNode } from 'react'
-import { footerSections, footerIcons } from 'utils/constants'
 import Footer from 'components/Footer'
 
 // Define proper types for mock props
@@ -16,11 +15,6 @@ interface MockLinkProps {
   rel?: string
   className?: string
   'aria-label'?: string
-}
-
-interface MockFontAwesomeIconProps {
-  icon: unknown
-  className?: string
 }
 
 interface MockButtonProps {
@@ -41,14 +35,6 @@ jest.mock('next/link', () => {
     )
   }
 })
-
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, className }: MockFontAwesomeIconProps) => (
-    <span data-testid="font-awesome-icon" className={className}>
-      {typeof icon === 'string' ? icon : JSON.stringify(icon)}
-    </span>
-  ),
-}))
 
 jest.mock('@heroui/button', () => ({
   Button: ({ children, onPress, className, disableAnimation, ...props }: MockButtonProps) => (
@@ -83,12 +69,12 @@ jest.mock('utils/constants', () => ({
   ],
   footerIcons: [
     {
-      icon: 'faGithub',
+      icon: 'FA_GITHUB_PLACEHOLDER',
       href: 'https://github.com/owasp/nest',
       label: 'GitHub',
     },
     {
-      icon: 'faSlack',
+      icon: 'FA_SLACK_PLACEHOLDER',
       href: 'https://owasp.slack.com/archives/project-nest',
       label: 'Slack',
     },
@@ -99,6 +85,12 @@ jest.mock('utils/env.client', () => ({
   ENVIRONMENT: 'production',
   RELEASE_VERSION: '1.2.3',
 }))
+
+import { FaGithub, FaSlack } from 'react-icons/fa6'
+import { footerSections, footerIcons } from 'utils/constants'
+
+;(footerIcons as any)[0].icon = FaGithub
+;(footerIcons as any)[1].icon = FaSlack
 
 describe('Footer', () => {
   // Use the imported mocked constants
@@ -172,7 +164,7 @@ describe('Footer', () => {
         expect(link).toHaveAttribute('target', '_blank')
         expect(link).toHaveAttribute('rel', 'noopener noreferrer')
 
-        const iconElement = link.querySelector('[data-testid="font-awesome-icon"]')
+        const iconElement = link.querySelector('svg')
         expect(iconElement).toBeInTheDocument()
       }
     })
@@ -219,12 +211,12 @@ describe('Footer', () => {
       const firstSection = mockFooterSections[0]
       const button = screen.getByRole('button', { name: new RegExp(firstSection.title) })
 
-      let chevronIcons = button.querySelectorAll('[data-testid="font-awesome-icon"]')
-      expect(chevronIcons).toHaveLength(1)
+      let chevronIcons = button.querySelectorAll('svg')
+      expect(chevronIcons.length).toBeGreaterThan(0)
 
       fireEvent.click(button)
-      chevronIcons = button.querySelectorAll('[data-testid="font-awesome-icon"]')
-      expect(chevronIcons).toHaveLength(1)
+      chevronIcons = button.querySelectorAll('svg')
+      expect(chevronIcons.length).toBeGreaterThan(0)
     })
 
     test('handles multiple section toggles independently', () => {
@@ -376,8 +368,13 @@ describe('Footer', () => {
       const links = screen.getAllByRole('link')
       expect(links.length).toBeGreaterThan(0)
 
-      const icons = screen.getAllByTestId('font-awesome-icon')
-      expect(icons.length).toBeGreaterThan(0)
+      const socialLinks = screen.getByLabelText('OWASP Nest GitHub')
+      const svgIcon = socialLinks.querySelector('svg')
+      expect(svgIcon).toBeInTheDocument()
+
+      const slackLink = screen.getByLabelText('OWASP Nest Slack')
+      const slackSvg = slackLink.querySelector('svg')
+      expect(slackSvg).toBeInTheDocument()
 
       const buttons = screen.getAllByRole('button')
       expect(buttons.length).toBeGreaterThan(0)

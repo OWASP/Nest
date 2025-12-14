@@ -1,4 +1,4 @@
-import { faUsers } from '@fortawesome/free-solid-svg-icons'
+import { FaUsers } from 'react-icons/fa6'
 import { fireEvent, screen } from '@testing-library/react'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
@@ -49,23 +49,6 @@ jest.mock('next/image', () => ({
   ),
 }))
 
-// Mock FontAwesome icons
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({
-    icon,
-    className,
-    ...props
-  }: {
-    icon: { iconName: string }
-    className?: string
-    [key: string]: unknown
-  }) => (
-    <span data-testid={`icon-${icon.iconName}`} className={className} {...props}>
-      {icon.iconName}
-    </span>
-  ),
-}))
-
 // Mock utility functions
 jest.mock('utils/urlFormatter', () => ({
   getMemberUrl: (login: string) => `/members/${login}`,
@@ -94,22 +77,22 @@ jest.mock('components/SecondaryCard', () => ({
   default: ({
     children,
     title,
-    icon,
+    icon: Icon,
     className,
     ...props
   }: {
     children: React.ReactNode
     title?: React.ReactNode
-    icon?: { iconName: string }
+    icon?: React.ComponentType
     className?: string
     [key: string]: unknown
   }) => (
     <div className={className} data-testid="secondary-card" {...props}>
       {title && (
         <h2 className="mb-4 flex flex-row items-center gap-2 text-2xl font-semibold">
-          {icon && (
+          {Icon && (
             <span data-testid="card-icon" className="h-5 w-5">
-              {icon.iconName}
+              <Icon />
             </span>
           )}
           {title}
@@ -117,6 +100,50 @@ jest.mock('components/SecondaryCard', () => ({
       )}
       {children}
     </div>
+  ),
+}))
+
+jest.mock('components/ShowMoreButton', () => ({
+  __esModule: true,
+  default: ({ onToggle }: { onToggle: () => void }) => {
+    const [isExpanded, setIsExpanded] = React.useState(false)
+
+    const handleClick = () => {
+      setIsExpanded(!isExpanded)
+      onToggle()
+    }
+
+    return (
+      <button onClick={handleClick} role="button">
+        {isExpanded ? (
+          <>
+            <span data-testid="icon-chevron-up">chevron-up</span>
+            Show less
+          </>
+        ) : (
+          <>
+            <span data-testid="icon-chevron-down">chevron-down</span>
+            Show more
+          </>
+        )}
+      </button>
+    )
+  },
+}))
+
+jest.mock('react-icons/fa6', () => ({
+  FaChevronUp: (props: React.HTMLAttributes<HTMLSpanElement>) => (
+    <span data-testid="icon-chevron-up" {...props}>
+      chevron-up
+    </span>
+  ),
+  FaChevronDown: (props: React.HTMLAttributes<HTMLSpanElement>) => (
+    <span data-testid="icon-chevron-down" {...props}>
+      chevron-down
+    </span>
+  ),
+  FaUsers: (props: React.HTMLAttributes<HTMLSpanElement>) => (
+    <span {...props}>users</span>
   ),
 }))
 
@@ -272,14 +299,12 @@ describe('TopContributorsList Component', () => {
     })
 
     it('displays icon when provided', () => {
-      render(<TopContributorsList {...defaultProps} icon={faUsers} />)
-
+      render(<TopContributorsList {...defaultProps} icon={FaUsers} />)
       expect(screen.getByTestId('card-icon')).toBeInTheDocument()
     })
 
     it('does not display icon when not provided', () => {
       render(<TopContributorsList {...defaultProps} />)
-
       expect(screen.queryByTestId('card-icon')).not.toBeInTheDocument()
     })
   })

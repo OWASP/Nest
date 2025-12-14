@@ -2,31 +2,16 @@ import { render, screen } from '@testing-library/react'
 import React from 'react'
 import Badges from 'components/Badges'
 
-jest.mock('wrappers/FontAwesomeIconWrapper', () => {
-  const RealWrapper = jest.requireActual('wrappers/FontAwesomeIconWrapper').default
-
-  const getName = (icon) => {
-    if (!icon) return 'medal'
-    if (typeof icon === 'string') {
-      const m = icon.match(/fa-([a-z0-9-]+)$/i)
-      if (m) return m[1]
-      const last = icon.trim().split(/\s+/).pop() || ''
-      return last.replace(/^fa-/, '') || 'medal'
-    }
-    if (Array.isArray(icon) && icon.length >= 2) return String(icon[1])
-    if (icon && typeof icon === 'object') return icon.iconName || String(icon[1] ?? 'medal')
-    return 'medal'
-  }
-
-  return function MockFontAwesomeIconWrapper(props) {
-    const name = getName(props.icon)
+jest.mock('wrappers/IconWrapper', () => ({
+  IconWrapper: ({ icon, className, ...props }: { icon: React.ComponentType<{ className?: string }>, className?: string }) => {
+    const iconName = icon.name?.toLowerCase().replace('fa', '') || 'medal'
     return (
-      <div data-testid={`icon-${name}`}>
-        <RealWrapper {...props} />
+      <div data-testid="badge-icon" data-icon={iconName} className={className} {...props}>
+        <svg />
       </div>
     )
-  }
-})
+  },
+}))
 
 jest.mock('@heroui/tooltip', () => ({
   Tooltip: ({

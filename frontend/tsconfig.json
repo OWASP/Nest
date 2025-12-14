@@ -2,7 +2,11 @@
   "compilerOptions": {
     "target": "ES2023",
     "useDefineForClassFields": true,
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "noEmit": true,
@@ -11,7 +15,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "incremental": true,
     "sourceMap": true,
     "inlineSources": true,
@@ -22,16 +26,36 @@
       }
     ],
     "paths": {
-      "@e2e/*": ["__tests__/e2e/*"],
-      "@unit/*": ["__tests__/unit/*"],
-      "*": ["./src/*"],
-      "app/*": ["src/app/*"],
-      "components/*": ["src/components/*"],
-      "hooks/*": ["src/hooks/*"],
-      "server/*": ["src/server/*"],
-      "types/*": ["src/types/*"],
-      "utils/*": ["src/utils/*"],
-      "wrappers/*": ["src/wrappers/*"]
+      "@e2e/*": [
+        "__tests__/e2e/*"
+      ],
+      "@unit/*": [
+        "__tests__/unit/*"
+      ],
+      "*": [
+        "./src/*"
+      ],
+      "app/*": [
+        "src/app/*"
+      ],
+      "components/*": [
+        "src/components/*"
+      ],
+      "hooks/*": [
+        "src/hooks/*"
+      ],
+      "server/*": [
+        "src/server/*"
+      ],
+      "types/*": [
+        "src/types/*"
+      ],
+      "utils/*": [
+        "src/utils/*"
+      ],
+      "wrappers/*": [
+        "src/wrappers/*"
+      ]
     },
     "strict": false
   },
@@ -43,5 +67,7 @@
     "next-env.d.ts",
     "src"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

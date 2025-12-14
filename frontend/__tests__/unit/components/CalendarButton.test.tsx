@@ -1,5 +1,4 @@
-import { faCalendarDay, faCalendarPlus } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FaCalendarDay, FaCalendarPlus } from 'react-icons/fa6'
 import { render, screen } from '@testing-library/react'
 import CalendarButton from 'components/CalendarButton'
 
@@ -25,7 +24,7 @@ describe('CalendarButton', () => {
       expect(link.tagName).toBe('A')
     })
 
-    it('renders default FontAwesome calendar-plus icon', () => {
+    it('renders default calendar-plus icon', () => {
       render(<CalendarButton event={mockEvent} />)
       const svg = document.querySelector('svg')
       expect(svg).toBeInTheDocument()
@@ -35,7 +34,7 @@ describe('CalendarButton', () => {
       render(
         <CalendarButton
           event={mockEvent}
-          icon={<FontAwesomeIcon icon={faCalendarDay} data-testid="custom-icon" />}
+          icon={<FaCalendarDay data-testid="custom-icon" />}
         />
       )
       expect(screen.getByTestId('custom-icon')).toBeInTheDocument()
@@ -185,11 +184,11 @@ describe('CalendarButton', () => {
   })
 
   describe('icon prop extensibility', () => {
-    it('accepts FontAwesome icon as JSX', () => {
+    it('accepts icon as JSX', () => {
       render(
         <CalendarButton
           event={mockEvent}
-          icon={<FontAwesomeIcon icon={faCalendarPlus} className="custom-icon-class" />}
+          icon={<FaCalendarPlus className="custom-icon-class" />}
         />
       )
       const svg = document.querySelector('svg')
@@ -322,8 +321,7 @@ describe('CalendarButton', () => {
         <CalendarButton
           event={mockEvent}
           icon={
-            <FontAwesomeIcon
-              icon={faCalendarPlus}
+            <FaCalendarPlus
               className="h-6 w-6 text-blue-500 hover:text-blue-700"
             />
           }

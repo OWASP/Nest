@@ -23,27 +23,19 @@ jest.mock('@heroui/tooltip', () => ({
   Tooltip: ({ children }: React.PropsWithChildren) => <>{children}</>,
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, className }: { icon: { iconName?: string }; className?: string }) => (
-    <svg
-      data-icon={icon?.iconName || 'moon'}
-      className={className}
-      data-testid="font-awesome-icon"
-    />
+jest.mock('react-icons/md', () => ({
+  MdLightMode: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="md-light-mode-icon" data-icon="light" {...props} />
   ),
-}))
-
-jest.mock('components/icons/Sun', () => ({
-  __esModule: true,
-  default: ({ className }: { className?: string }) => (
-    <svg data-testid="sun-icon" data-icon="sun" className={className} viewBox="0 0 48 48" />
+  MdDarkMode: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="md-dark-mode-icon" data-icon="dark" {...props} />
   ),
 }))
 
 const useThemeMock = useTheme as jest.Mock
 
 describe('ModeToggle Component', () => {
-  test('should render correctly in light mode and show moon icon', () => {
+  test('should render correctly in light mode and show dark mode icon', () => {
     useThemeMock.mockReturnValue({
       theme: 'light',
       setTheme: jest.fn(),
@@ -54,11 +46,12 @@ describe('ModeToggle Component', () => {
     const button = screen.getByRole('button', { name: /enable dark mode/i })
     expect(button).toBeInTheDocument()
 
-    const icon = document.querySelector('[data-icon="moon"]')
+    const icon = screen.getByTestId('md-dark-mode-icon')
     expect(icon).toBeInTheDocument()
+    expect(icon).toHaveAttribute('data-icon', 'dark')
   })
 
-  test('should render correctly in dark mode and show sun icon', () => {
+  test('should render correctly in dark mode and show light mode icon', () => {
     useThemeMock.mockReturnValue({
       theme: 'dark',
       setTheme: jest.fn(),
@@ -69,8 +62,9 @@ describe('ModeToggle Component', () => {
     const button = screen.getByRole('button', { name: /enable light mode/i })
     expect(button).toBeInTheDocument()
 
-    const icon = document.querySelector('[data-icon="sun"]')
+    const icon = screen.getByTestId('md-light-mode-icon')
     expect(icon).toBeInTheDocument()
+    expect(icon).toHaveAttribute('data-icon', 'light')
   })
 
   test('should call setTheme to switch from light to dark when clicked', () => {

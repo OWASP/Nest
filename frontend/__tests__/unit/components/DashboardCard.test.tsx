@@ -1,4 +1,4 @@
-import { faUser, faChartBar } from '@fortawesome/free-solid-svg-icons'
+import { FaUser, FaChartBar } from 'react-icons/fa'
 import { render, screen } from '@testing-library/react'
 import React from 'react'
 import '@testing-library/jest-dom'
@@ -45,7 +45,7 @@ jest.mock('components/SecondaryCard', () => ({
 describe('DashboardCard', () => {
   const baseProps = {
     title: 'Test Card',
-    icon: faUser,
+    icon: FaUser,
     className: undefined,
     stats: undefined,
   }
@@ -56,7 +56,7 @@ describe('DashboardCard', () => {
 
   describe('Essential Rendering', () => {
     it('renders successfully with minimal required props', () => {
-      render(<DashboardCard title="Test Card" icon={faUser} />)
+      render(<DashboardCard title="Test Card" icon={FaUser} />)
       expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
       expect(screen.getByTestId('anchor-title')).toHaveTextContent('Test Card')
       expect(screen.getByTestId('secondary-content')).toBeInTheDocument()
@@ -101,15 +101,15 @@ describe('DashboardCard', () => {
     })
 
     it('renders different icons based on prop', () => {
-      const { rerender } = render(<DashboardCard {...baseProps} icon={faUser} />)
+      const { rerender } = render(<DashboardCard {...baseProps} icon={FaUser} />)
       expect(screen.getByTestId('secondary-content').querySelector('svg')).toBeInTheDocument()
-      rerender(<DashboardCard {...baseProps} icon={faChartBar} />)
+      rerender(<DashboardCard {...baseProps} icon={FaChartBar} />)
       expect(screen.getByTestId('secondary-content').querySelector('svg')).toBeInTheDocument()
     })
   })
 
   describe('DOM Structure', () => {
-    it('renders FontAwesomeIcon with correct icon', () => {
+    it('renders icon with correct icon', () => {
       render(<DashboardCard {...baseProps} />)
       expect(screen.getByTestId('secondary-content').querySelector('svg')).toBeInTheDocument()
     })
@@ -218,7 +218,7 @@ describe('DashboardCard', () => {
 
     it('handles rapid prop changes gracefully', () => {
       const { rerender } = render(<DashboardCard {...baseProps} stats="start" />)
-      const icons = [faUser, faChartBar]
+      const icons = [FaUser, FaChartBar]
       const titles = ['A', 'B', 'C']
       for (let i = 0; i < 3; i++) {
         rerender(

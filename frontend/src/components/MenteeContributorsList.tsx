@@ -3,7 +3,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import type { IconType } from 'react-icons'
-import { IconWrapper } from 'wrappers/IconWrapper'
 import type { Contributor } from 'types/contributor'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
@@ -43,7 +42,7 @@ const MenteeContributorsList = ({
 
   return (
     <SecondaryCard
-      icon={icon ? <IconWrapper icon={icon} className="h-5 w-5" /> : undefined}
+      icon={icon}
       title={
         <div className="flex items-center gap-2">
           <AnchorTitle title={label} className="flex items-center" />

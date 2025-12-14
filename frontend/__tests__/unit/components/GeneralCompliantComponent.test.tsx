@@ -1,7 +1,7 @@
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faCertificate } from '@fortawesome/free-solid-svg-icons'
 import { render, screen } from '@testing-library/react'
 import React from 'react'
+import { FaCertificate, FaAward } from 'react-icons/fa6'
+import type { IconType } from 'react-icons'
 
 import '@testing-library/jest-dom'
 
@@ -14,18 +14,26 @@ jest.mock('@heroui/tooltip', () => ({
   ),
 }))
 
+jest.mock('wrappers/IconWrapper', () => ({
+  IconWrapper: ({ icon: IconComponent, className }: { icon: React.ComponentType<React.SVGProps<SVGSVGElement> & { className?: string }>, className?: string }) => {
+    return IconComponent ? (
+      <IconComponent className={className} role="img" aria-hidden={true} />
+    ) : null
+  },
+}))
+
 import GeneralCompliantComponent from 'components/GeneralCompliantComponent'
 
 type GeneralCompliantComponentProps = {
   compliant: boolean
-  icon: IconProp
+  icon: IconType
   title: string
 }
 
 describe('GeneralCompliantComponent', () => {
   const baseProps: GeneralCompliantComponentProps = {
     compliant: true,
-    icon: faCertificate,
+    icon: FaCertificate,
     title: 'Test Title',
   }
 
@@ -75,7 +83,7 @@ describe('GeneralCompliantComponent', () => {
   })
 
   it('renders with custom icon', () => {
-    const customIcon = faCertificate
+    const customIcon = FaAward
     const { container } = render(<GeneralCompliantComponent {...baseProps} icon={customIcon} />)
     expect(container.querySelector('svg')).toBeInTheDocument()
   })

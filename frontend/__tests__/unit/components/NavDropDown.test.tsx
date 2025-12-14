@@ -22,9 +22,10 @@ jest.mock('next/link', () => {
   }
 })
 
-// Mock FontAwesome icons
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ className }) => <span data-testid="chevron-icon" className={className} />,
+jest.mock('react-icons/fa', () => ({
+  FaChevronDown: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="chevron-icon" className={props.className} {...props} />
+  ),
 }))
 
 // Mock utility function

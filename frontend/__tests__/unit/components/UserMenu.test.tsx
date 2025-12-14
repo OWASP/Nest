@@ -41,10 +41,11 @@ jest.mock('next/image', () => ({
   ),
 }))
 
-// Mock FontAwesome icons
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon }: { icon: unknown }) => (
-    <span data-testid="github-icon" data-icon={String(icon)} />
+
+// Add this react-icons mock for FaGithub:
+jest.mock('react-icons/fa', () => ({
+  FaGithub: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="github-icon" {...props} />
   ),
 }))
 

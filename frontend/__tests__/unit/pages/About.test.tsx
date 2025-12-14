@@ -20,13 +20,32 @@ jest.mock('@apollo/client/react', () => ({
 const mockRouter = {
   push: jest.fn(),
 }
+
 jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(() => mockRouter),
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
+jest.mock('react-icons/fa', () => ({
+  FaMapSigns: () => <span data-testid="mock-icon" />,
+  FaTools: () => <span data-testid="mock-icon" />,
+}))
+
+jest.mock('react-icons/fa6', () => ({
+  FaCircleCheck: () => <span data-testid="mock-icon" />,
+  FaClock: () => <span data-testid="mock-icon" />,
+  FaScroll: () => <span data-testid="mock-icon" />,
+  FaBullseye: () => <span data-testid="mock-icon" />,
+  FaUser: () => <span data-testid="mock-icon" />,
+  FaUsersGear: () => <span data-testid="mock-icon" />,
+  FaLink: () => <span data-testid="mock-icon" />,
+  FaChevronRight: () => <span data-testid="mock-icon" />,
+  FaFolderOpen: () => <span data-testid="mock-icon" />,
+  FaMedal: () => <span data-testid="mock-icon" />,
+}))
+
+jest.mock('react-icons/hi', () => ({
+  HiUserGroup: () => <span data-testid="mock-icon" />,
 }))
 
 jest.mock('@heroui/toast', () => ({
@@ -104,6 +123,63 @@ jest.mock('components/MarkdownWrapper', () => ({
   __esModule: true,
   default: ({ content }) => <div data-testid="markdown-content">{content}</div>,
 }))
+
+jest.mock('components/AnchorTitle', () => ({
+  __esModule: true,
+  default: ({ title }: { title: string }) => <span data-testid="anchor-title">{title}</span>,
+}))
+
+jest.mock('components/UserCard', () => ({
+  __esModule: true,
+  default: ({
+    name,
+    credentials,
+    description,
+    button,
+  }: {
+    name?: string
+    credentials?: string
+    description?: string
+    button?: { label?: string; onClick?: () => void; onclick?: () => void }
+  }) => (
+    <div data-testid="user-card">
+      {name && <span>{name}</span>}
+      {credentials && <span>{credentials}</span>}
+      {description && <span>{description}</span>}
+      {button?.label && (
+        <button
+          onClick={() => {
+            button.onClick?.()
+            button.onclick?.()
+          }}
+        >
+          {button.label}
+        </button>
+      )}
+    </div>
+  ),
+}))
+
+jest.mock('components/ShowMoreButton', () => {
+  const React = require('react')
+  return {
+    __esModule: true,
+    default: ({ onToggle, label }: { onToggle: () => void; label: string }) => {
+      const [expanded, setExpanded] = React.useState(false)
+
+      const handleToggle = () => {
+        setExpanded(!expanded)
+        onToggle()
+      }
+
+      return (
+        <button onClick={handleToggle} data-testid="show-more-button">
+          {expanded ? 'Show less' : 'Show more'}
+        </button>
+      )
+    },
+  }
+})
 
 const mockUserData = (username) => ({
   data: { user: mockAboutData.users[username] },
