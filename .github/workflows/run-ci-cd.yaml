@@ -315,7 +315,7 @@ jobs:
       - name: Run backend fuzz tests
         run: |
           docker run -e GRAPHQL_URL=http://localhost:9000/graphql/ --network host \
-          owasp/nest:test-backend-fuzz-latest sh -c "./entrypoint.sh"
+          --entrypoint /app/entrypoint.sh owasp/nest:test-backend-fuzz-latest
 
   build-staging-images:
     name: Build Staging Images
