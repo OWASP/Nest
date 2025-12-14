@@ -1,3 +1,4 @@
+# NOSONAR
 FROM omar2535/graphqler:latest
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]

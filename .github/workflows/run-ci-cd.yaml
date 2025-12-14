@@ -306,7 +306,7 @@ jobs:
             type=registry,ref=owasp/nest:test-backend-fuzz-cache
           cache-to: |
             type=gha,compression=zstd
-          context: backend
+          context: backend/docker
           file: backend/docker/Dockerfile.fuzz
           load: true
           platforms: linux/amd64
@@ -314,7 +314,8 @@ jobs:
 
       - name: Run backend fuzz tests
         run: |
-          docker run owasp/nest:test-backend-fuzz-latest sh -c "./entrypoint.sh"
+          docker run -e GRAPHQL_URL=http://localhost:9000/graphql/ --network host \
+          owasp/nest:test-backend-fuzz-latest sh -c "./entrypoint.sh"
 
   build-staging-images:
     name: Build Staging Images

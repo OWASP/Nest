@@ -13,4 +13,4 @@ echo "X-CSRFToken = \"$CSRF_TOKEN\"" >> ./config.toml
 echo "Cookie = \"csrftoken=$CSRF_TOKEN;\"" >> ./config.toml
 
 echo "Running Graphqler with custom configuration..."
-uv run graphqler --mode run --url http://backend:9000/graphql/ --path ./ --config ./config.toml
+uv run graphqler --mode run --url $GRAPHQL_URL --path ./ --config ./config.toml
