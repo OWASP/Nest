@@ -61,7 +61,7 @@ def get_blocks(
             markdown(
                 f"*No chapters found for `{search_query_escaped}`*{NL}"
                 if search_query
-                else f"*No chapters found*{NL}"
+                else "*No chapters found*{NL}"
             )
         ]
 
