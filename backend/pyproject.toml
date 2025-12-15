@@ -25,6 +25,7 @@ emoji = "^2.14.1"
 geopy = "^2.4.1"
 gunicorn = "^23.0.0"
 humanize = "^4.11.0"
+inflect = "^6.0.0"
 jinja2 = "^3.1.6"
 langchain = "^0.3.26"
 langchain-community = "^0.3.26"
@@ -50,7 +51,6 @@ strawberry-graphql = { extras = [ "django" ], version = "^0.287.0" }
 strawberry-graphql-django = "^0.70.0"
 thefuzz = "^0.22.1"
 pyparsing = "^3.2.3"
-inflect = "^6.0.0"
 
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.36.4"
