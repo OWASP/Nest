@@ -29,6 +29,7 @@ const ChapterMap = ({
   const mapRef = useRef<L.Map | null>(null)
   const markerClusterRef = useRef<MarkerClusterGroup | null>(null)
   const userMarkerRef = useRef<L.Marker | null>(null)
+  const initialViewRef = useRef<{ center: L.LatLngExpression; zoom: number } | null>(null)
   const [isMapActive, setIsMapActive] = useState(false)
 
   useEffect(() => {
@@ -42,6 +43,11 @@ const ChapterMap = ({
         maxBoundsViscosity: 1.0,
         scrollWheelZoom: false,
       }).setView([20, 0], 2)
+
+      initialViewRef.current = {
+        center: mapRef.current.getCenter(),
+        zoom: mapRef.current.getZoom(),
+      }
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
@@ -149,21 +155,15 @@ const ChapterMap = ({
     if (userLocation && validGeoLocData.length > 0) {
       const maxNearestChapters = 5
       const localChapters = validGeoLocData.slice(0, maxNearestChapters)
-      const localBounds = L.latLngBounds(
-        localChapters.map((chapter) => [
+      const locationsForBounds = [
+        [userLocation.latitude, userLocation.longitude],
+        ...localChapters.map((chapter) => [
           chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
           chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
-        ])
-      )
+        ]),
+      ]
+      const localBounds = L.latLngBounds(locationsForBounds)
       const maxZoom = 12
-      const nearestChapter = validGeoLocData[0]
-      map.setView(
-        [
-          nearestChapter._geoloc?.lat ?? nearestChapter.geoLocation?.lat,
-          nearestChapter._geoloc?.lng ?? nearestChapter.geoLocation?.lng,
-        ],
-        maxZoom
-      )
       map.fitBounds(localBounds, { maxZoom: maxZoom })
     } else if (showLocal && validGeoLocData.length > 0) {
       const maxNearestChapters = 5
@@ -184,6 +184,8 @@ const ChapterMap = ({
         maxZoom
       )
       map.fitBounds(localBounds, { maxZoom: maxZoom })
+    } else if (initialViewRef.current) {
+      map.setView(initialViewRef.current.center, initialViewRef.current.zoom)
     }
   }, [geoLocData, showLocal, userLocation])
 
