@@ -168,10 +168,10 @@ export default function Home() {
             {data.upcomingEvents.map((event: Event, index: number) => (
               <div key={`card-${event.name}`} className="overflow-hidden">
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                  <div className="mb-2 flex items-center justify-between">
+                  <div className="mb-2 flex items-center justify-between gap-2">
                     <button
+                      className="min-w-0 flex-1 cursor-pointer text-left text-lg font-semibold text-blue-400 hover:underline"
                       type="button"
-                      className="cursor-pointer text-left text-lg font-semibold text-blue-400 hover:underline"
                       onClick={() => setModalOpenIndex(index)}
                     >
                       <TruncatedText text={event.name} />

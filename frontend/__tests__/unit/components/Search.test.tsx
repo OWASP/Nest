@@ -73,7 +73,7 @@ describe('SearchBar Component', () => {
       const { container } = render(<SearchBar {...defaultProps} isLoaded={false} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toHaveValue('')
-      const clearButton = container.querySelector('button.absolute.rounded-full[class*="right-2"]')
+      const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
       expect(clearButton).not.toBeInTheDocument()
     })
 
@@ -81,7 +81,7 @@ describe('SearchBar Component', () => {
       const { container } = render(<SearchBar {...defaultProps} isLoaded={false} />)
       const input = screen.getByPlaceholderText('Search projects...')
       fireEvent.change(input, { target: { value: 'test' } })
-      const clearButton = container.querySelector('button.absolute.rounded-full[class*="right-2"]')
+      const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
       expect(clearButton).toBeInTheDocument()
     })
   })
@@ -145,7 +145,7 @@ describe('SearchBar Component', () => {
       const input = screen.getByPlaceholderText('Search projects...')
       fireEvent.change(input, { target: { value: 'test' } })
       expect(input).toHaveValue('test')
-      const clearButton = container.querySelector('button.absolute.rounded-full[class*="right-2"]')
+      const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
       fireEvent.click(clearButton)
       expect(input).toHaveValue('')
     })
@@ -312,7 +312,7 @@ describe('SearchBar Component', () => {
       fireEvent.change(input, { target: { value: 'edge case' } })
       expect(mockOnSearch).not.toHaveBeenCalled()
 
-      const clearButton = container.querySelector('button.absolute.rounded-full[class*="right-2"]')
+      const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
       fireEvent.click(clearButton)
 
       jest.advanceTimersByTime(750)
@@ -332,10 +332,10 @@ describe('SearchBar Component', () => {
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toBeInTheDocument()
       expect(input).toHaveAttribute('type', 'text')
-      let clearButton = container.querySelector('button.absolute.rounded-full[class*="right-2"]')
+      let clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
       expect(clearButton).not.toBeInTheDocument()
       fireEvent.change(input, { target: { value: 'test' } })
-      clearButton = container.querySelector('button.absolute.rounded-full[class*="right-2"]')
+      clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
       expect(clearButton).toBeInTheDocument()
     })
 
@@ -352,7 +352,7 @@ describe('SearchBar Component', () => {
       render(<SearchBar {...defaultProps} isLoaded={false} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toHaveClass(
-        'h-12 w-full rounded-lg border-1 border-gray-300 pl-10 pr-10 text-lg text-black focus:border-blue-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300'
+        'h-12 w-full rounded-lg border-1 border-gray-300 bg-white pr-10 pl-10 text-lg text-black focus:ring-1 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-300'
       )
     })
 
@@ -366,9 +366,9 @@ describe('SearchBar Component', () => {
       const { container } = render(<SearchBar {...defaultProps} isLoaded={false} />)
       const input = screen.getByPlaceholderText('Search projects...')
       fireEvent.change(input, { target: { value: 'test' } })
-      const clearButton = container.querySelector('button.absolute.rounded-full[class*="right-2"]')
+      const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
       expect(clearButton).toHaveClass(
-        'absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 hover:bg-gray-100 focus:outline-hidden focus:ring-2 focus:ring-gray-300'
+        'absolute top-1/2 right-2 h-8 w-8 -translate-y-1/2 rounded-md p-1 text-gray-400 hover:bg-gray-400 hover:text-gray-200 focus:ring-2 focus:ring-gray-300 focus:outline-hidden dark:hover:bg-gray-600'
       )
     })
 

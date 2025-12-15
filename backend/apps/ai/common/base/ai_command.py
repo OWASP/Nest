@@ -18,9 +18,9 @@ class BaseAICommand(BaseCommand):
     def __init__(self, *args, **kwargs):
         """Initialize the AI command with OpenAI client placeholder."""
         super().__init__(*args, **kwargs)
-        self.openai_client: openai.OpenAI | None = None
         self.entity_name = self.model_class.__name__.lower()
         self.entity_name_plural = self.model_class.__name__.lower() + "s"
+        self.openai_client = None
 
     def source_name(self) -> str:
         """Return the source name for context creation. Override if different from default."""
