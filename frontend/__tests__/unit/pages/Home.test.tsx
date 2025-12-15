@@ -2,7 +2,6 @@ import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockAlgoliaData, mockGraphQLData } from '@unit/data/mockHomeData'
-import millify from 'millify'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import Home from 'app/page'
@@ -181,17 +180,6 @@ describe('Home', () => {
     })
   })
 
-  test('renders AnimatedCounter components', async () => {
-    render(<Home />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Active Projects')).toBeInTheDocument()
-      expect(screen.getByText('Contributors')).toBeInTheDocument()
-      expect(screen.getByText('Local Chapters')).toBeInTheDocument()
-      expect(screen.getByText('Countries')).toBeInTheDocument()
-    })
-  })
-
   test('handles missing data gracefully', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockGraphQLData,
@@ -271,18 +259,21 @@ describe('Home', () => {
     ]
     const stats = mockGraphQLData.statsOverview
 
-    await waitFor(() => {
-      for (const header of headers) {
-        expect(screen.getByText(header)).toBeInTheDocument()
-      }
-    })
+    const statTexts = [
+      stats.activeProjectsStats.toLocaleString('en-US'),
+      stats.activeChaptersStats.toLocaleString('en-US'),
+      stats.contributorsStats.toLocaleString('en-US'),
+      stats.countriesStats.toLocaleString('en-US'),
+      stats.slackWorkspaceStats.toLocaleString('en-US'),
+    ]
 
-    // Wait for animated counters to complete (2 seconds animation)
-    // Note: The "+" is rendered separately from the number, so we check for the number only
     await waitFor(
       () => {
-        for (const value of Object.values(stats)) {
-          expect(screen.getByText(millify(value), { exact: false })).toBeInTheDocument()
+        for (const stat of statTexts) {
+          expect(screen.getByText(stat)).toBeInTheDocument()
+        }
+        for (const header of headers) {
+          expect(screen.getByText(header)).toBeInTheDocument()
         }
       },
       { timeout: 3000 }
