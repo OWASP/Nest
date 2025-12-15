@@ -1,6 +1,7 @@
 import { FaHeartPulse, FaSkull } from 'react-icons/fa6'
 import { FaExclamationTriangle } from 'react-icons/fa'
 import { render, screen, fireEvent } from '@testing-library/react'
+import type { IconType } from 'react-icons'
 import '@testing-library/jest-dom'
 import React from 'react'
 import type { ProjectHealthType } from 'types/project'
@@ -35,7 +36,7 @@ jest.mock('components/SecondaryCard', () => {
     ...props
   }: {
     title: string
-    icon: any
+    icon: IconType
     className?: string
     children: React.ReactNode
     [key: string]: unknown
@@ -139,11 +140,11 @@ describe('ProjectTypeDashboardCard', () => {
     it('passes different icons to SecondaryCard correctly', () => {
       const { rerender } = render(<ProjectTypeDashboardCard {...baseProps} icon={FaHeartPulse} />)
       let secondaryCard = screen.getByTestId('secondary-card')
-      expect(secondaryCard).toHaveAttribute('data-icon', JSON.stringify(FaHeartPulse))
+      expect(secondaryCard).toHaveAttribute('data-icon', 'FaHeartPulse')
 
       rerender(<ProjectTypeDashboardCard {...baseProps} icon={FaExclamationTriangle} />)
       secondaryCard = screen.getByTestId('secondary-card')
-      expect(secondaryCard).toHaveAttribute('data-icon', JSON.stringify(FaExclamationTriangle))
+      expect(secondaryCard).toHaveAttribute('data-icon', 'FaExclamationTriangle')
     })
 
     it('generates correct href for each type', () => {
@@ -335,7 +336,7 @@ describe('ProjectTypeDashboardCard', () => {
 
       const secondaryCard = screen.getByTestId('secondary-card')
       expect(secondaryCard).toHaveAttribute('data-title', 'Healthy')
-      expect(secondaryCard).toHaveAttribute('data-icon', JSON.stringify(FaHeartPulse))
+      expect(secondaryCard).toHaveAttribute('data-icon', 'FaHeartPulse')
     })
 
     it('renders SecondaryCard with correct content structure', () => {

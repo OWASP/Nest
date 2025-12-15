@@ -140,7 +140,7 @@ jest.mock('components/UserCard', () => ({
     name?: string
     credentials?: string
     description?: string
-    button?: { label?: string; onClick?: () => void; onclick?: () => void }
+    button?: { label?: string; onclick?: () => void }
   }) => (
     <div data-testid="user-card">
       {name && <span>{name}</span>}
@@ -149,7 +149,6 @@ jest.mock('components/UserCard', () => ({
       {button?.label && (
         <button
           onClick={() => {
-            button.onClick?.()
             button.onclick?.()
           }}
         >
