@@ -155,12 +155,15 @@ const ChapterMap = ({
     if (userLocation && validGeoLocData.length > 0) {
       const maxNearestChapters = 5
       const localChapters = validGeoLocData.slice(0, maxNearestChapters)
-      const locationsForBounds = [
+      const locationsForBounds: L.LatLngExpression[] = [
         [userLocation.latitude, userLocation.longitude],
-        ...localChapters.map((chapter) => [
-          chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
-          chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
-        ]),
+        ...localChapters.map(
+          (chapter) =>
+            [
+              chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
+              chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
+            ] as L.LatLngExpression
+        ),
       ]
       const localBounds = L.latLngBounds(locationsForBounds)
       const maxZoom = 12
