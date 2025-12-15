@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import inflect
-
 from django.conf import settings
+from django.template.defaultfilters import pluralize
 
 from apps.common.constants import NL
 from apps.common.utils import get_absolute_url, truncate
@@ -30,11 +29,10 @@ def get_blocks(
 
     Returns:
         list: A list of Slack blocks representing the chapters.
+
     """
     from apps.owasp.index.search.chapter import get_chapters
     from apps.owasp.models.chapter import Chapter
-
-    p = inflect.engine()
 
     presentation = presentation or EntityPresentation()
     search_query_escaped = escape(search_query)
@@ -75,11 +73,11 @@ def get_blocks(
     for idx, chapter in enumerate(chapters):
         location = chapter["idx_suggested_location"] or chapter["idx_country"]
         leaders = chapter.get("idx_leaders", [])
-
-        leaders_text = ""
-        if leaders and presentation.include_metadata:
-            leader_label = p.plural_noun("Leader", len(leaders))
-            leaders_text = f"_{leader_label}: {', '.join(leaders)}_{NL}"
+        leaders_text = (
+            f"_Leader{pluralize(len(leaders))}: {', '.join(leaders)}_{NL}"
+            if leaders and presentation.include_metadata
+            else ""
+        )
 
         name = truncate(escape(chapter["idx_name"]), presentation.name_truncation)
         summary = truncate(escape(chapter["idx_summary"]), presentation.summary_truncation)
