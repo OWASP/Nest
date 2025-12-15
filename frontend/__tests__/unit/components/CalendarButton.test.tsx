@@ -24,8 +24,8 @@ describe('CalendarButton', () => {
   let appendSpy: jest.SpyInstance
   let clickSpy: jest.SpyInstance
   let createSpy: jest.SpyInstance
-
-  beforeAll(() => {
+  
+  beforeEach(() => {
     globalThis.URL.createObjectURL = jest.fn(() => 'mock-url');
     globalThis.URL.revokeObjectURL = jest.fn();
   });
@@ -98,14 +98,10 @@ describe('CalendarButton', () => {
 
       expect(createSpy).toHaveBeenCalledWith('a')
 
-      const createdLink = createSpy.mock.results.find(
-        (call) => call.value instanceof HTMLAnchorElement && call.value.href === mockUrl
-      )?.value
-
-      expect(createdLink).toBeDefined()
-      expect(createdLink.download).toBe('invite.ics')
-
-      expect(appendSpy).toHaveBeenCalledWith(createdLink)
+      const appendedElement = appendSpy.mock.calls[0]?.[0] as HTMLAnchorElement
+      expect(appendedElement).toBeInstanceOf(HTMLAnchorElement)
+      expect(appendedElement.href).toBe(mockUrl)
+      expect(appendedElement.download).toBe('invite.ics')
 
       expect(clickSpy).toHaveBeenCalled()
 
