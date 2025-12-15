@@ -1,5 +1,5 @@
 'use client'
-import { faLocationDot } from '@fortawesome/free-solid-svg-icons'
+import { faLocationDot, faUnlock } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import { Tooltip } from '@heroui/tooltip'
@@ -195,10 +195,11 @@ const ChapterMap = ({
               setIsMapActive(true)
             }
           }}
-          aria-label="Click to interact with map"
+          aria-label="Unlock map"
         >
-          <p className="pointer-events-auto rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg dark:bg-gray-700 dark:text-white">
-            Click to interact with map
+          <p className="pointer-events-auto flex items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-100 hover:text-gray-900 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white">
+            <FontAwesomeIcon icon={faUnlock} aria-hidden="true" />
+            Unlock map
           </p>
         </button>
       )}
