@@ -25,6 +25,11 @@ describe('CalendarButton', () => {
   let clickSpy: jest.SpyInstance
   let createSpy: jest.SpyInstance
 
+  beforeAll(() => {
+    global.URL.createObjectURL = jest.fn(() => 'mock-url');
+    global.URL.revokeObjectURL = jest.fn();
+  });
+
   beforeEach(() => {
     globalThis.URL.createObjectURL = jest.fn(() => 'mock-url')
     globalThis.URL.revokeObjectURL = jest.fn()
