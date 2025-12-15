@@ -2,6 +2,7 @@ import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockAlgoliaData, mockGraphQLData } from '@unit/data/mockHomeData'
+import millify from 'millify'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import Home from 'app/page'
@@ -260,12 +261,13 @@ describe('Home', () => {
     const stats = mockGraphQLData.statsOverview
 
     const statTexts = [
-      stats.activeProjectsStats.toLocaleString('en-US'),
-      stats.activeChaptersStats.toLocaleString('en-US'),
-      stats.contributorsStats.toLocaleString('en-US'),
-      stats.countriesStats.toLocaleString('en-US'),
-      stats.slackWorkspaceStats.toLocaleString('en-US'),
-    ]
+      millify(stats.activeProjectsStats) + '+',
+      millify(stats.activeChaptersStats) + '+',
+      millify(stats.contributorsStats) + '+',
+      millify(stats.countriesStats) + '+',
+      millify(stats.slackWorkspaceStats) + '+'
+    ];
+
 
     await waitFor(
       () => {
