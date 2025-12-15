@@ -105,7 +105,7 @@ jest.mock('components/SecondaryCard', () => ({
 
 jest.mock('components/ShowMoreButton', () => ({
   __esModule: true,
-  default: ({ onToggle }: { onToggle: () => void }) => {
+  default: function ShowMoreButtonMock({ onToggle }: { onToggle: () => void }) {
     const [isExpanded, setIsExpanded] = React.useState(false)
 
     const handleClick = () => {
@@ -114,19 +114,22 @@ jest.mock('components/ShowMoreButton', () => ({
     }
 
     return (
-      <button onClick={handleClick} role="button">
-        {isExpanded ? (
-          <>
-            <span data-testid="icon-chevron-up">chevron-up</span>
-            Show less
-          </>
-        ) : (
-          <>
-            <span data-testid="icon-chevron-down">chevron-down</span>
-            Show more
-          </>
-        )}
-      </button>
+      <div className="mt-4 flex justify-start">
+        <button
+          onClick={handleClick}
+          className="flex items-center bg-transparent px-0 text-blue-400"
+        >
+          {isExpanded ? (
+            <>
+              Show less <span data-testid="icon-chevron-up" aria-hidden="true">chevron-up</span>
+            </>
+          ) : (
+            <>
+              Show more <span data-testid="icon-chevron-down" aria-hidden="true">chevron-down</span>
+            </>
+          )}
+        </button>
+      </div>
     )
   },
 }))

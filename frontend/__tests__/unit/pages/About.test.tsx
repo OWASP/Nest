@@ -1,4 +1,5 @@
 import { useQuery } from '@apollo/client/react'
+import React from 'react'
 import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { mockAboutData } from '@unit/data/mockAboutData'
@@ -160,26 +161,36 @@ jest.mock('components/UserCard', () => ({
   ),
 }))
 
-jest.mock('components/ShowMoreButton', () => {
-  const React = require('react')
-  return {
-    __esModule: true,
-    default: ({ onToggle, label }: { onToggle: () => void; label: string }) => {
-      const [expanded, setExpanded] = React.useState(false)
+jest.mock('components/ShowMoreButton', () => ({
+  __esModule: true,
+  default: function ShowMoreButtonMock({ onToggle }: { onToggle: () => void }) {
+    const [isExpanded, setIsExpanded] = React.useState(false)
 
-      const handleToggle = () => {
-        setExpanded(!expanded)
-        onToggle()
-      }
+    const handleClick = () => {
+      setIsExpanded(!isExpanded)
+      onToggle()
+    }
 
-      return (
-        <button onClick={handleToggle} data-testid="show-more-button">
-          {expanded ? 'Show less' : 'Show more'}
+    return (
+      <div className="mt-4 flex justify-start">
+        <button
+          onClick={handleClick}
+          className="flex items-center bg-transparent px-0 text-blue-400"
+        >
+          {isExpanded ? (
+            <>
+              Show less <span data-testid="icon-chevron-up" aria-hidden="true">chevron-up</span>
+            </>
+          ) : (
+            <>
+              Show more <span data-testid="icon-chevron-down" aria-hidden="true">chevron-down</span>
+            </>
+          )}
         </button>
-      )
-    },
-  }
-})
+      </div>
+    )
+  },
+}))
 
 const mockUserData = (username) => ({
   data: { user: mockAboutData.users[username] },

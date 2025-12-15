@@ -45,11 +45,18 @@ jest.mock('wrappers/IconWrapper', () => ({
   IconWrapper: ({ className, icon: IconComponent }: { className?: string; icon: React.ComponentType<{ className?: string }> }) => {
     // This derives a data-icon attribute from the react-icon component name
     let iconName = ''
+    const toKebab = (name: string) =>
+      name
+        .replaceAll('Fa', '')
+        .replaceAll(/([a-z0-9])([A-Z])/g, '$1-$2')
+        .toLowerCase()
+
     if (IconComponent?.displayName) {
-      iconName = 'fa-' + IconComponent.displayName.replace(/^Fa/, '').replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '')
+      iconName = 'fa-' + toKebab(IconComponent.displayName)
     } else if (IconComponent?.name) {
-      iconName = 'fa-' + IconComponent.name.replace(/^Fa/, '').replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '')
+      iconName = 'fa-' + toKebab(IconComponent.name)
     }
+
     return IconComponent ? (
       <span data-testid="font-awesome-icon" data-icon={iconName} className={className}>
         <IconComponent />
