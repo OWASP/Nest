@@ -175,23 +175,23 @@ export default function Home() {
                     >
                       <TruncatedText text={event.name} />
                     </button>
-                    <CalendarButton
-                      event={{
-                        title: event.name,
-                        description: event.summary || '',
-                        location: event.suggestedLocation || '',
-                        startDate: event.startDate,
-                        endDate: event.endDate,
-                        url: event.url,
-                      }}
-                      className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
-                      iconClassName="h-4 w-4"
-                    />
                   </div>
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-2 flex items-center">
-                      <FaCalendar className="mr-2 h-4 w-4" />
-                      <span>{formatDateRange(event.startDate, event.endDate)}</span>
+                      <CalendarButton
+                        className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                        event={{
+                          title: event.name,
+                          description: event.summary || '',
+                          location: event.suggestedLocation || '',
+                          startDate: event.startDate,
+                          endDate: event.endDate,
+                          url: event.url,
+                        }}
+                        iconClassName="h-4 w-4 mr-1"
+                        label={formatDateRange(event.startDate, event.endDate)}
+                        showLabel
+                      />
                     </div>
                     {event.suggestedLocation && (
                       <div className="flex flex-1 items-center overflow-hidden">
