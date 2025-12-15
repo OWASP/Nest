@@ -40,8 +40,7 @@ jest.mock('components/SecondaryCard', () => {
     children: React.ReactNode
     [key: string]: unknown
   }) {
-    const iconName =
-      (icon && (icon.name)) || (icon && typeof icon) || ''
+    const iconName = icon?.name ?? (icon && typeof icon) ?? ''
     return (
       <div
         data-testid="secondary-card"

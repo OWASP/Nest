@@ -1,4 +1,3 @@
-import { FaCodeCommit } from 'react-icons/fa6'
 import { render, screen } from '@testing-library/react'
 import { HealthMetricsProps } from 'types/healthMetrics'
 import HealthMetrics from 'components/HealthMetrics'

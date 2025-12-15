@@ -382,7 +382,7 @@ describe('SearchBar Component', () => {
       render(<SearchBar {...defaultProps} isLoaded={false} />)
       const input = screen.getByPlaceholderText('Search projects...')
       const searchIcon = document.querySelector(
-        'svg.pointer-events-none.absolute.left-3.top-1\\/2.h-4.w-4.-translate-y-1\\/2.text-gray-400'
+        String.raw`svg.pointer-events-none.absolute.left-3.top-1\/2.h-4.w-4.-translate-y-1\/2.text-gray-400`
       )
 
       expect(input).toBeInTheDocument()

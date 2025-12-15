@@ -47,12 +47,19 @@ jest.mock('components/AnchorTitle', () => {
 })
 
 jest.mock('components/SecondaryCard', () => {
-  const MockSecondaryCard = ({ title, icon, children }) => (
-    <div data-testid="secondary-card" data-icon={icon && icon.displayName ? icon.displayName : icon && icon.name ? icon.name : icon}>
-      <div data-testid="card-title">{title}</div>
-      <div data-testid="card-content">{children}</div>
-    </div>
-  )
+  const MockSecondaryCard = ({ title, icon, children }) => {
+    const iconName = icon?.displayName ?? icon?.name ?? icon
+
+    return (
+      <div
+        data-testid="secondary-card"
+        data-icon={iconName}
+      >
+        <div data-testid="card-title">{title}</div>
+        <div data-testid="card-content">{children}</div>
+      </div>
+    )
+  }
   MockSecondaryCard.displayName = 'SecondaryCard'
   return MockSecondaryCard
 })

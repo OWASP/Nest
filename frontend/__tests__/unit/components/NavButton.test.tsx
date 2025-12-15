@@ -10,13 +10,13 @@ import NavButton from 'components/NavButton'
 
 jest.mock('react-icons/fa', () => ({
   FaHome: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg data-testid="fa-home-icon" className="fa-house" {...props} role="img" aria-hidden="true" />
+    <svg data-testid="fa-home-icon" className="fa-house" {...props} aria-hidden="true" />
   ),
 }))
 
 jest.mock('react-icons/fa6', () => ({
   FaUser: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg data-testid="fa-user-icon" className="fa-user" {...props} role="img" aria-hidden="true" />
+    <svg data-testid="fa-user-icon" className="fa-user" {...props} aria-hidden="true" />
   ),
 }))
 
