@@ -14,9 +14,6 @@ from apps.slack.constants import FEEDBACK_SHARING_INVITE
 from apps.slack.utils import escape
 
 
-p = inflect.engine()
-
-
 def get_blocks(
     limit: int = 10,
     page: int = 1,
@@ -36,6 +33,8 @@ def get_blocks(
     """
     from apps.owasp.index.search.chapter import get_chapters
     from apps.owasp.models.chapter import Chapter
+
+    p = inflect.engine()
 
     presentation = presentation or EntityPresentation()
     search_query_escaped = escape(search_query)
@@ -79,7 +78,7 @@ def get_blocks(
 
         leaders_text = ""
         if leaders and presentation.include_metadata:
-            leader_label = p.plural("Leader", len(leaders))
+            leader_label = p.plural_noun("Leader", len(leaders))
             leaders_text = f"_{leader_label}: {', '.join(leaders)}_{NL}"
 
         name = truncate(escape(chapter["idx_name"]), presentation.name_truncation)
