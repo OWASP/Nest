@@ -17,16 +17,13 @@ RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     addgroup -S owasp && \
     adduser -S -h /home/owasp -G owasp owasp
 
-RUN python -m venv .venv && \
-    source .venv/bin/activate
-
 RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
     python -m pip install --upgrade pip && \
     pip install graphqler --cache-dir ${PIP_CACHE_DIR}
 
 WORKDIR /home/owasp
 
-COPY --chown=owasp:owasp --chmod=755 ./entrypoint.fuzz.sh ./entrypoint.sh
+COPY --chown=root:root --chmod=755 ./entrypoint.fuzz.sh ./entrypoint.sh
 
 RUN chmod +x ./entrypoint.sh && \
     chown -R owasp:owasp /home/owasp
