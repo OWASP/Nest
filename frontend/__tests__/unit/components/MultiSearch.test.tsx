@@ -306,7 +306,7 @@ describe('Rendering', () => {
       await waitFor(() => {
         expect(mockSendGAEvent).toHaveBeenCalledWith({
           event: 'homepageSearch',
-          path: expect.any(String),
+          path: globalThis.location.pathname,
           value: 'test query',
         })
       })

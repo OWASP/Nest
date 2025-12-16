@@ -24,7 +24,7 @@ jest.mock('wrappers/IconWrapper', () => ({
     return IconComponent ? (
       <IconComponent />
     ) : (
-      <svg data-testid="font-awesome-icon" data-icon="default" />
+      <svg data-testid="font-awesome-icon" data-icon="arrow-down-wide-short" />
     )
   },
 }))

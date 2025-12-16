@@ -1,6 +1,5 @@
 import { screen, render, fireEvent } from '@testing-library/react'
-import React from 'react'
-import { ReactNode } from 'react'
+import React, { ReactNode } from 'react'
 import { FaLeaf, FaFire, FaCrown, FaStar, FaGithub, FaTwitter } from 'react-icons/fa6'
 import type { CardProps } from 'types/card'
 import Card from 'components/Card'

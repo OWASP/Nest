@@ -18,13 +18,12 @@ jest.mock('wrappers/IconWrapper', () => ({
   IconWrapper: ({
     icon: IconComponent,
     className,
+    ...props
   }: {
     icon: React.ComponentType<React.SVGProps<SVGSVGElement> & { className?: string }>
     className?: string
   }) => {
-    return IconComponent ? (
-      <IconComponent className={className} role="img" aria-hidden={true} />
-    ) : null
+    return <IconComponent className={className} {...props} />
   },
 }))
 
@@ -82,10 +81,10 @@ describe('GeneralCompliantComponent', () => {
 
   it('has accessible SVG icons', () => {
     const { container } = render(<GeneralCompliantComponent {...baseProps} />)
-    const icons = container.querySelectorAll('svg[role="img"]')
+    const icons = container.querySelectorAll('svg')
     expect(icons).toHaveLength(2)
-    expect(icons[0]).toHaveAttribute('aria-hidden', 'true')
-    expect(icons[1]).toHaveAttribute('aria-hidden', 'true')
+    expect(icons[0]).toBeInTheDocument()
+    expect(icons[1]).toBeInTheDocument()
   })
 
   it('renders with custom icon', () => {

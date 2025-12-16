@@ -4,7 +4,7 @@
  */
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import { ReactNode } from 'react'
+import React, { ReactNode } from 'react'
 
 // Define proper types for mock props
 interface MockLinkProps {
@@ -45,6 +45,17 @@ jest.mock('@heroui/button', () => ({
     >
       {children}
     </button>
+  ),
+}))
+
+jest.mock('react-icons/fa6', () => ({
+  FaGithub: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="github-icon" {...props} />,
+  FaSlack: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="slack-icon" {...props} />,
+  FaChevronDown: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="chevron-down" {...props} />
+  ),
+  FaChevronUp: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="chevron-up" {...props} />
   ),
 }))
 
@@ -156,6 +167,23 @@ describe('Footer', () => {
     test('renders social media icons with correct attributes', () => {
       renderFooter()
 
+      // Test GitHub icon
+      const githubLink = screen.getByLabelText('OWASP Nest GitHub')
+      expect(githubLink).toBeInTheDocument()
+      expect(githubLink).toHaveAttribute('href', 'https://github.com/owasp/nest')
+      expect(githubLink).toHaveAttribute('target', '_blank')
+      expect(githubLink).toHaveAttribute('rel', 'noopener noreferrer')
+      expect(githubLink.querySelector('[data-testid="github-icon"]')).toBeInTheDocument()
+
+      // Test Slack icon
+      const slackLink = screen.getByLabelText('OWASP Nest Slack')
+      expect(slackLink).toBeInTheDocument()
+      expect(slackLink).toHaveAttribute('href', 'https://owasp.slack.com/archives/project-nest')
+      expect(slackLink).toHaveAttribute('target', '_blank')
+      expect(slackLink).toHaveAttribute('rel', 'noopener noreferrer')
+      expect(slackLink.querySelector('[data-testid="slack-icon"]')).toBeInTheDocument()
+
+      // Test that all icons have basic attributes
       for (const icon of mockFooterIcons) {
         const link = screen.getByLabelText(`OWASP Nest ${icon.label}`)
         expect(link).toBeInTheDocument()
@@ -210,12 +238,22 @@ describe('Footer', () => {
       const firstSection = mockFooterSections[0]
       const button = screen.getByRole('button', { name: new RegExp(firstSection.title) })
 
-      let chevronIcons = button.querySelectorAll('svg')
-      expect(chevronIcons.length).toBeGreaterThan(0)
+      // Initial state - should show chevron down (collapsed)
+      expect(button).toHaveAttribute('aria-expanded', 'false')
+      expect(button.querySelector('[data-testid="chevron-down"]')).toBeInTheDocument()
+      expect(button.querySelector('[data-testid="chevron-up"]')).not.toBeInTheDocument()
 
+      // Click to expand - should show chevron up
       fireEvent.click(button)
-      chevronIcons = button.querySelectorAll('svg')
-      expect(chevronIcons.length).toBeGreaterThan(0)
+      expect(button).toHaveAttribute('aria-expanded', 'true')
+      expect(button.querySelector('[data-testid="chevron-up"]')).toBeInTheDocument()
+      expect(button.querySelector('[data-testid="chevron-down"]')).not.toBeInTheDocument()
+
+      // Click to collapse - should show chevron down again
+      fireEvent.click(button)
+      expect(button).toHaveAttribute('aria-expanded', 'false')
+      expect(button.querySelector('[data-testid="chevron-down"]')).toBeInTheDocument()
+      expect(button.querySelector('[data-testid="chevron-up"]')).not.toBeInTheDocument()
     })
 
     test('handles multiple section toggles independently', () => {
