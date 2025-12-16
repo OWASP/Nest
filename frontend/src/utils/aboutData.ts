@@ -125,7 +125,8 @@ export const projectTimeline: ProjectTimeline[] = [
   },
   {
     title: 'OWASP Nest API Hackathon',
-    description: 'We hosted a successful hackathon to encourage adoption and hands-on use of the OWASP Nest REST API.',
+    description:
+      'We hosted a successful hackathon to encourage adoption and hands-on use of the OWASP Nest REST API.',
     year: 'November 2025',
   },
   {
