@@ -1,12 +1,35 @@
-# NOSONAR
-FROM omar2535/graphqler@sha256:1d0ae86d0cf972e1de80f1b24c4e901fbff73fbe5bfb7eb4b5dd45f45fbff3f6
+FROM python:3.12-alpine AS builder
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-RUN apt-get update && \
-    apt-get install -y jq
+ENV PIP_CACHE_DIR="/home/owasp/.cache/pip" \
+    PYTHONUNBUFFERED=1 \
+    APK_CACHE_DIR="/home/owasp/.cache/apk-fuzz-stage" \
+    APK_SYMLINK_DIR="/etc/apk/cache" \
+    CFLAGS="-std=gnu99"
 
-WORKDIR /app
-COPY ./entrypoint.fuzz.sh ./entrypoint.sh
+RUN mkdir -p ${APK_CACHE_DIR} && \
+    ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
-RUN chmod +x ./entrypoint.sh
+RUN --mount=type=cache,target=${APK_CACHE_DIR} \
+    apk update && apk upgrade && \
+    apk add curl jq gcc musl-dev libffi-dev linux-headers && \
+    addgroup -S owasp && \
+    adduser -S -h /home/owasp -G owasp owasp
+
+RUN python -m venv .venv && \
+    source .venv/bin/activate
+
+RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
+    python -m pip install --upgrade pip && \
+    pip install graphqler --cache-dir ${PIP_CACHE_DIR}
+
+WORKDIR /home/owasp
+
+COPY --chown=owasp:owasp ./entrypoint.fuzz.sh ./entrypoint.sh
+
+RUN chmod +x ./entrypoint.sh && \
+    chown -R owasp:owasp /home/owasp
+
+USER owasp
+ENTRYPOINT ["./entrypoint.sh"]

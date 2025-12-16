@@ -65,8 +65,6 @@ services:
     build:
       context: ../backend/docker
       dockerfile: Dockerfile.fuzz
-    entrypoint:
-      - /app/entrypoint.sh
     environment:
       BASE_URL: http://backend:9000
     depends_on:
