@@ -57,8 +57,5 @@ class SnapshotIssueManager(models.Manager):
         Filters out issues from empty repositories to ensure data integrity.
         """
         return (
-            super()
-            .get_queryset()
-            .select_related("repository")
-            .filter(repository__is_empty=False)
+            super().get_queryset().select_related("repository").filter(repository__is_empty=False)
         )
