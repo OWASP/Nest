@@ -265,9 +265,8 @@ describe('Home', () => {
       millify(stats.activeChaptersStats) + '+',
       millify(stats.contributorsStats) + '+',
       millify(stats.countriesStats) + '+',
-      millify(stats.slackWorkspaceStats) + '+'
-    ];
-
+      millify(stats.slackWorkspaceStats) + '+',
+    ]
 
     await waitFor(
       () => {
