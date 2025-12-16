@@ -23,7 +23,12 @@ const RepositoryCard: React.FC<RepositoryCardListProps> = ({
     <div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {displayedRepositories.map((repository) => {
-          return <RepositoryItem key={repository.key} details={repository} />
+          return (
+            <RepositoryItem
+              key={`${repository.organization?.login ?? 'unknown'}-${repository.key}`}
+              details={repository}
+            />
+          )
         })}
       </div>
       {repositories.length > maxInitialDisplay && <ShowMoreButton onToggle={toggleRepositories} />}
@@ -34,13 +39,14 @@ const RepositoryCard: React.FC<RepositoryCardListProps> = ({
 const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
   const router = useRouter()
   const handleClick = () => {
-    router.push(`/organizations/${details.organization.login}/repositories/${details.key}`)
+    router.push(`/organizations/${details.organization?.login}/repositories/${details.key}`)
   }
 
   return (
     <div className="flex h-46 w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <div className="flex items-start justify-between gap-2">
         <button
+          type="button"
           onClick={handleClick}
           className="min-w-0 flex-1 cursor-pointer text-start font-semibold text-blue-400 hover:underline"
         >

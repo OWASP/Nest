@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 from django.conf import settings
-from django.utils.text import Truncator
 
 from apps.common.constants import NL
-from apps.common.utils import get_absolute_url, natural_date
+from apps.common.utils import get_absolute_url, natural_date, truncate
 from apps.slack.blocks import get_pagination_buttons, markdown
-from apps.slack.common.constants import TRUNCATION_INDICATOR
 from apps.slack.common.presentation import EntityPresentation
 from apps.slack.constants import FEEDBACK_SHARING_INVITE
 from apps.slack.utils import escape
@@ -73,12 +71,8 @@ def get_blocks(
     ]
 
     for idx, project in enumerate(projects):
-        name = Truncator(escape(project["idx_name"])).chars(
-            presentation.name_truncation, truncate=TRUNCATION_INDICATOR
-        )
-        summary = Truncator(project["idx_summary"]).chars(
-            presentation.summary_truncation, truncate=TRUNCATION_INDICATOR
-        )
+        name = truncate(escape(project["idx_name"]), presentation.name_truncation)
+        summary = truncate(project["idx_summary"], presentation.summary_truncation)
 
         metadata = []
         if presentation.include_metadata:

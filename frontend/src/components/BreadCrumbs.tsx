@@ -1,19 +1,14 @@
-'use client'
-
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Breadcrumbs, BreadcrumbItem } from '@heroui/react'
-import upperFirst from 'lodash/upperFirst'
+import { Breadcrumbs, BreadcrumbItem as HeroUIBreadcrumbItem } from '@heroui/react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import type { BreadcrumbItem } from 'types/breadcrumb'
 
-export default function BreadCrumbs() {
-  const homeRoute = '/'
-  const pathname = usePathname()
-  const segments = pathname.split(homeRoute).filter(Boolean)
+type BreadCrumbRendererProps = Readonly<{
+  items: readonly BreadcrumbItem[]
+}>
 
-  if (pathname === homeRoute) return null
-
+export default function BreadCrumbRenderer({ items }: BreadCrumbRendererProps) {
   return (
     <div className="mt-16 w-full pt-4">
       <div className="w-full px-8 sm:px-8 md:px-8 lg:px-8">
@@ -32,35 +27,27 @@ export default function BreadCrumbs() {
             separator: 'flex items-center',
           }}
         >
-          <BreadcrumbItem>
-            <Link
-              href={homeRoute}
-              className="hover:text-blue-700 hover:underline dark:text-blue-400"
-            >
-              Home
-            </Link>
-          </BreadcrumbItem>
-
-          {segments.map((segment, index) => {
-            const href = homeRoute + segments.slice(0, index + 1).join(homeRoute)
-            const label = upperFirst(segment).replaceAll('-', ' ')
-            const isLast = index === segments.length - 1
+          {items.map((item, index) => {
+            const isLast = index === items.length - 1
 
             return (
-              <BreadcrumbItem key={href} isDisabled={isLast}>
+              <HeroUIBreadcrumbItem key={item.path}>
                 {isLast ? (
-                  <span className="cursor-default font-semibold text-gray-600 dark:text-gray-300">
-                    {label}
+                  <span
+                    className="cursor-default font-semibold text-gray-600 dark:text-gray-300"
+                    aria-current="page"
+                  >
+                    {item.title}
                   </span>
                 ) : (
                   <Link
-                    href={href}
+                    href={item.path}
                     className="hover:text-blue-700 hover:underline dark:text-blue-400"
                   >
-                    {label}
+                    {item.title}
                   </Link>
                 )}
-              </BreadcrumbItem>
+              </HeroUIBreadcrumbItem>
             )
           })}
         </Breadcrumbs>

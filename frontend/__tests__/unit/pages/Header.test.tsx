@@ -220,7 +220,7 @@ describe('Header Component', () => {
 
       // Use getAllByRole for multiple elements
       const logoImages = screen.getAllByRole('img', { name: /owasp logo/i })
-      expect(logoImages.length).toBe(4) // 2 in desktop header + 2 in mobile menu
+      expect(logoImages.length).toBe(2) // 1 in desktop header + 1 in mobile menu
 
       const brandTexts = screen.getAllByText('Nest')
       expect(brandTexts.length).toBe(2) // One in desktop header, one in mobile menu
@@ -235,7 +235,7 @@ describe('Header Component', () => {
       expect(screen.getByRole('banner')).toBeInTheDocument()
 
       const logoImages = screen.getAllByRole('img', { name: /owasp logo/i })
-      expect(logoImages.length).toBe(4)
+      expect(logoImages.length).toBe(2)
 
       const brandTexts = screen.getAllByText('Nest')
       expect(brandTexts.length).toBe(2)
@@ -250,12 +250,24 @@ describe('Header Component', () => {
       renderWithSession(<Header isGitHubAuthEnabled />)
 
       const logoImages = screen.getAllByRole('img', { name: /owasp logo/i })
-      expect(logoImages.length).toBe(4) // 2 in desktop header + 2 in mobile menu
+      expect(logoImages.length).toBe(2) // 1 in desktop header + 1 in mobile menu
 
       for (const logo of logoImages) {
         expect(logo).toHaveAttribute('width', '64')
         expect(logo).toHaveAttribute('height', '64')
         expect(logo).toHaveAttribute('src')
+      }
+    })
+
+    it('renders logo_dark.png image in both desktop and mobile header', () => {
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
+      const logoImages = screen.getAllByRole('img', { name: /owasp logo/i })
+      expect(logoImages.length).toBe(2)
+
+      for (const logo of logoImages) {
+        expect(logo).toHaveAttribute('src', '/img/logo_dark.png')
+        expect(logo).toBeInTheDocument()
       }
     })
 

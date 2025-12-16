@@ -18,6 +18,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToast } from '@heroui/toast'
 import upperFirst from 'lodash/upperFirst'
+import millify from 'millify'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
@@ -29,7 +30,6 @@ import type { MainPageData } from 'types/home'
 
 import { formatDate, formatDateRange } from 'utils/dateFormatter'
 import AnchorTitle from 'components/AnchorTitle'
-import AnimatedCounter from 'components/AnimatedCounter'
 import CalendarButton from 'components/CalendarButton'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import LeadersList from 'components/LeadersList'
@@ -168,30 +168,31 @@ export default function Home() {
             {data.upcomingEvents.map((event: Event, index: number) => (
               <div key={`card-${event.name}`} className="overflow-hidden">
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                  <div className="mb-2 flex items-center justify-between">
+                  <div className="mb-2 flex items-center justify-between gap-2">
                     <button
-                      className="cursor-pointer text-left text-lg font-semibold text-blue-400 hover:underline"
+                      className="min-w-0 flex-1 cursor-pointer text-left text-lg font-semibold text-blue-400 hover:underline"
+                      type="button"
                       onClick={() => setModalOpenIndex(index)}
                     >
                       <TruncatedText text={event.name} />
                     </button>
-                    <CalendarButton
-                      event={{
-                        title: event.name,
-                        description: event.summary || '',
-                        location: event.suggestedLocation || '',
-                        startDate: event.startDate,
-                        endDate: event.endDate,
-                        url: event.url,
-                      }}
-                      className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
-                      iconClassName="h-4 w-4"
-                    />
                   </div>
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-2 flex items-center">
-                      <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                      <span>{formatDateRange(event.startDate, event.endDate)}</span>
+                      <CalendarButton
+                        className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                        event={{
+                          title: event.name,
+                          description: event.summary || '',
+                          location: event.suggestedLocation || '',
+                          startDate: event.startDate,
+                          endDate: event.endDate,
+                          url: event.url,
+                        }}
+                        iconClassName="h-4 w-4 mr-1"
+                        label={formatDateRange(event.startDate, event.endDate)}
+                        showLabel
+                      />
                     </div>
                     {event.suggestedLocation && (
                       <div className="flex flex-1 items-center overflow-hidden">
@@ -375,9 +376,7 @@ export default function Home() {
           {counterData.map((stat) => (
             <div key={stat.label}>
               <SecondaryCard className="text-center">
-                <div className="mb-2 text-3xl font-bold text-blue-400">
-                  <AnimatedCounter end={stat.value} duration={2} />+
-                </div>
+                <div className="mb-2 text-3xl font-bold text-blue-400">{millify(stat.value)}+</div>
                 <div className="text-gray-600 dark:text-gray-400">{stat.label}</div>
               </SecondaryCard>
             </div>
