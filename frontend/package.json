@@ -35,7 +35,7 @@
     "@heroui/tooltip": "^2.2.25",
     "@next/eslint-plugin-next": "^16.0.10",
     "@next/third-parties": "^16.0.10",
-    "@sentry/nextjs": "^10.30.0",
+    "@sentry/nextjs": "^10.31.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/lodash": "^4.17.21",
     "apexcharts": "^5.3.6",
@@ -90,8 +90,8 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@types/react-gtm-module": "^2.0.4",
-    "@typescript-eslint/eslint-plugin": "^8.49.0",
-    "@typescript-eslint/parser": "^8.49.0",
+    "@typescript-eslint/eslint-plugin": "^8.50.0",
+    "@typescript-eslint/parser": "^8.50.0",
     "eslint": "^9.39.2",
     "eslint-config-next": "^16.0.10",
     "eslint-config-prettier": "^10.1.8",
@@ -115,7 +115,7 @@
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "~5.9.3",
-    "typescript-eslint": "^8.49.0",
+    "typescript-eslint": "^8.50.0",
     "util": "^0.12.5"
   },
   "engines": {
