@@ -228,5 +228,4 @@ const ChapterMap = ({
     </div>
   )
 }
-
 export default ChapterMap
