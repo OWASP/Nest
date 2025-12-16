@@ -6,7 +6,7 @@ services:
         python manage.py migrate &&
         python manage.py runserver 0.0.0.0:8000
       '
-    image: owasp/nest:backend-local
+    image: nest-local-backend
     build:
       context: ../backend
       dockerfile: docker/Dockerfile.local
@@ -114,7 +114,7 @@ services:
       sh -c '
         python manage.py rqworker ai --with-scheduler
       '
-    image: owasp/nest:backend-local
+    image: nest-local-backend
     depends_on:
       backend:
         condition: service_started
