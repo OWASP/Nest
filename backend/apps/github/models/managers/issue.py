@@ -46,3 +46,19 @@ class OpenIssueManager(models.Manager):
     def without_summary(self) -> models.QuerySet:
         """Return issues without summary."""
         return self.get_queryset().filter(summary="")
+
+
+class SnapshotIssueManager(models.Manager):
+    """Issues for snapshot processing."""
+
+    def get_queryset(self):
+        """Get queryset of issues with non-empty repositories.
+
+        Filters out issues from empty repositories to ensure data integrity.
+        """
+        return (
+            super()
+            .get_queryset()
+            .select_related("repository")
+            .filter(repository__is_empty=False)
+        )

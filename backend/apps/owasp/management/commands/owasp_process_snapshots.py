@@ -70,10 +70,9 @@ class Command(BaseCommand):
                 created_at__gte=snapshot.start_at,
                 created_at__lte=snapshot.end_at,
             )
-            new_issues = self.get_new_items(
-                Issue,
-                snapshot.start_at,
-                snapshot.end_at,
+            new_issues = Issue.snapshot_issues.filter(
+                created_at__gte=snapshot.start_at,
+                created_at__lte=snapshot.end_at,
             )
             new_projects = Project.active_projects.filter(
                 created_at__gte=snapshot.start_at,
@@ -83,10 +82,9 @@ class Command(BaseCommand):
                 created_at__gte=snapshot.start_at,
                 created_at__lte=snapshot.end_at,
             )
-            new_users = self.get_new_items(
-                User,
-                snapshot.start_at,
-                snapshot.end_at,
+            new_users = User.snapshot_users.filter(
+                created_at__gte=snapshot.start_at,
+                created_at__lte=snapshot.end_at,
             )
 
             # Add items to snapshot
@@ -113,7 +111,3 @@ class Command(BaseCommand):
         except Exception as e:
             error_msg = f"Failed to process snapshot: {e}"
             raise SnapshotProcessingError(error_msg) from e
-
-    def get_new_items(self, model, start_at, end_at):
-        """Get only newly created items within the given timeframe."""
-        return model.objects.filter(created_at__gte=start_at, created_at__lte=end_at)
