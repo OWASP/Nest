@@ -20,7 +20,7 @@ jest.mock('react-icons/fa6', () => ({
 
 // Mock IconWrapper to handle react-icons properly
 jest.mock('wrappers/IconWrapper', () => ({
-  IconWrapper: ({ icon: IconComponent }: { icon: React.ComponentType }) => {
+  IconWrapper: ({ icon: IconComponent }: { icon?: React.ComponentType }) => {
     return IconComponent ? (
       <IconComponent />
     ) : (
