@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from django.conf import settings
+from django.template.defaultfilters import pluralize
 
 from apps.common.constants import NL
 from apps.common.utils import get_absolute_url, truncate
@@ -73,7 +74,7 @@ def get_blocks(
         location = chapter["idx_suggested_location"] or chapter["idx_country"]
         leaders = chapter.get("idx_leaders", [])
         leaders_text = (
-            f"_Leader{'' if len(leaders) == 1 else 's'}: {', '.join(leaders)}_{NL}"
+            f"_Leader{pluralize(len(leaders))}: {', '.join(leaders)}_{NL}"
             if leaders and presentation.include_metadata
             else ""
         )
