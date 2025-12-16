@@ -1,8 +1,8 @@
 import { screen } from '@testing-library/react'
 import { render } from '@testing-library/react'
 import { useTheme } from 'next-themes'
-import DonutBarChart from 'components/DonutBarChart'
 import { FaChartPie, FaChartBar, FaChartLine, FaTachometerAlt, FaHeart } from 'react-icons/fa'
+import DonutBarChart from 'components/DonutBarChart'
 
 // Mock next-themes
 jest.mock('next-themes', () => ({
@@ -51,10 +51,7 @@ jest.mock('components/SecondaryCard', () => {
     const iconName = icon?.displayName ?? icon?.name ?? icon
 
     return (
-      <div
-        data-testid="secondary-card"
-        data-icon={iconName}
-      >
+      <div data-testid="secondary-card" data-icon={iconName}>
         <div data-testid="card-title">{title}</div>
         <div data-testid="card-content">{children}</div>
       </div>
@@ -80,26 +77,20 @@ describe('DonutBarChart Component Test Suite', () => {
 
   describe('Basic rendering functionality', () => {
     it('renders the component with required props', () => {
-      render(
-        <DonutBarChart icon={FaChartPie} title="Test Chart" series={[50, 30, 20]} />
-      )
+      render(<DonutBarChart icon={FaChartPie} title="Test Chart" series={[50, 30, 20]} />)
 
       expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
       expect(screen.getByTestId('apex-chart')).toBeInTheDocument()
     })
 
     it('renders title through AnchorTitle component', () => {
-      render(
-        <DonutBarChart icon={FaChartBar} title="Health Metrics" series={[60, 25, 15]} />
-      )
+      render(<DonutBarChart icon={FaChartBar} title="Health Metrics" series={[60, 25, 15]} />)
 
       expect(screen.getByTestId('anchor-title')).toHaveTextContent('Health Metrics')
     })
 
     it('passes icon to SecondaryCard', () => {
-      render(
-        <DonutBarChart icon={FaChartLine} title="System Status" series={[80, 15, 5]} />
-      )
+      render(<DonutBarChart icon={FaChartLine} title="System Status" series={[80, 15, 5]} />)
 
       expect(screen.getByTestId('secondary-card')).toHaveAttribute('data-icon', 'FaChartLine')
     })
@@ -310,17 +301,10 @@ describe('DonutBarChart Component Test Suite', () => {
 
       for (const iconType of iconTypes) {
         const { unmount } = render(
-          <DonutBarChart
-            icon={iconType}
-            title={`Test ${iconType.name}`}
-            series={[50, 30, 20]}
-          />
+          <DonutBarChart icon={iconType} title={`Test ${iconType.name}`} series={[50, 30, 20]} />
         )
 
-        expect(screen.getByTestId('secondary-card')).toHaveAttribute(
-          'data-icon',
-          iconType.name
-        )
+        expect(screen.getByTestId('secondary-card')).toHaveAttribute('data-icon', iconType.name)
         unmount()
       }
     })

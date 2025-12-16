@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
-import DialogComp from 'components/Modal'
 import { FaCheck } from 'react-icons/fa6'
+import DialogComp from 'components/Modal'
 
 jest.mock('@/components/MarkdownWrapper', () => {
   return ({ content, className }: { content: string; className?: string }) => (

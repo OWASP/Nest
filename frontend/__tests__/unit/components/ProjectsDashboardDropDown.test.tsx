@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
+import { FaFilter, FaSort } from 'react-icons/fa6'
 import ProjectsDashboardDropDown from 'components/ProjectsDashboardDropDown'
 
 jest.mock('react-icons/fa6', () => ({
@@ -20,11 +21,13 @@ jest.mock('react-icons/fa6', () => ({
 // Mock IconWrapper to handle react-icons properly
 jest.mock('wrappers/IconWrapper', () => ({
   IconWrapper: ({ icon: IconComponent }: { icon: React.ComponentType }) => {
-    return IconComponent ? <IconComponent /> : <svg data-testid="font-awesome-icon" data-icon="default" />
+    return IconComponent ? (
+      <IconComponent />
+    ) : (
+      <svg data-testid="font-awesome-icon" data-icon="default" />
+    )
   },
 }))
-
-import { FaFilter, FaSort } from 'react-icons/fa6'
 
 // Mock HeroUI components
 jest.mock('@heroui/react', () => ({
@@ -297,11 +300,7 @@ describe('ProjectsDashboardDropDown Component', () => {
   describe('Event handling', () => {
     it('calls onAction when dropdown item is clicked', () => {
       render(
-        <ProjectsDashboardDropDown
-          {...defaultProps}
-          onAction={mockOnAction}
-          selectedLabels={[]}
-        />
+        <ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} selectedLabels={[]} />
       )
 
       const items = screen.getAllByTestId('dropdown-item')
@@ -329,11 +328,7 @@ describe('ProjectsDashboardDropDown Component', () => {
 
     it('handles multiple clicks correctly', () => {
       render(
-        <ProjectsDashboardDropDown
-          {...defaultProps}
-          onAction={mockOnAction}
-          selectedLabels={[]}
-        />
+        <ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} selectedLabels={[]} />
       )
 
       const items = screen.getAllByTestId('dropdown-item')
@@ -432,11 +427,7 @@ describe('ProjectsDashboardDropDown Component', () => {
 
     it('renders all dropdown items correctly', () => {
       render(
-        <ProjectsDashboardDropDown
-          {...defaultProps}
-          onAction={mockOnAction}
-          selectedLabels={[]}
-        />
+        <ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} selectedLabels={[]} />
       )
 
       const items = screen.getAllByTestId('dropdown-item')

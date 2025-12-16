@@ -1,9 +1,9 @@
-import { FaHeartPulse, FaSkull } from 'react-icons/fa6'
-import { FaExclamationTriangle } from 'react-icons/fa'
 import { render, screen, fireEvent } from '@testing-library/react'
+import React from 'react'
 import type { IconType } from 'react-icons'
 import '@testing-library/jest-dom'
-import React from 'react'
+import { FaExclamationTriangle } from 'react-icons/fa'
+import { FaHeartPulse, FaSkull } from 'react-icons/fa6'
 import type { ProjectHealthType } from 'types/project'
 import ProjectTypeDashboardCard from 'components/ProjectTypeDashboardCard'
 

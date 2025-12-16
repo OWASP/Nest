@@ -1,5 +1,5 @@
-import { FaCalendarDay, FaCalendarPlus } from 'react-icons/fa6'
 import { render, screen } from '@testing-library/react'
+import { FaCalendarDay, FaCalendarPlus } from 'react-icons/fa6'
 import CalendarButton from 'components/CalendarButton'
 
 const mockEvent = {
@@ -32,10 +32,7 @@ describe('CalendarButton', () => {
 
     it('renders custom icon when provided', () => {
       render(
-        <CalendarButton
-          event={mockEvent}
-          icon={<FaCalendarDay data-testid="custom-icon" />}
-        />
+        <CalendarButton event={mockEvent} icon={<FaCalendarDay data-testid="custom-icon" />} />
       )
       expect(screen.getByTestId('custom-icon')).toBeInTheDocument()
     })
@@ -186,10 +183,7 @@ describe('CalendarButton', () => {
   describe('icon prop extensibility', () => {
     it('accepts icon as JSX', () => {
       render(
-        <CalendarButton
-          event={mockEvent}
-          icon={<FaCalendarPlus className="custom-icon-class" />}
-        />
+        <CalendarButton event={mockEvent} icon={<FaCalendarPlus className="custom-icon-class" />} />
       )
       const svg = document.querySelector('svg')
       expect(svg).toHaveClass('custom-icon-class')
@@ -320,11 +314,7 @@ describe('CalendarButton', () => {
       render(
         <CalendarButton
           event={mockEvent}
-          icon={
-            <FaCalendarPlus
-              className="h-6 w-6 text-blue-500 hover:text-blue-700"
-            />
-          }
+          icon={<FaCalendarPlus className="h-6 w-6 text-blue-500 hover:text-blue-700" />}
         />
       )
       const svg = document.querySelector('svg')

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
+import { IconType } from 'react-icons'
 import { HealthMetricsProps } from 'types/healthMetrics'
 import HealthMetrics from 'components/HealthMetrics'
-
 const getMockHealthMetric = (): HealthMetricsProps[] => [
   {
     createdAt: '2025-07-23T00:00:00Z',
@@ -51,12 +51,12 @@ const getMockIncompleteHealthMetric = (): any[] => [
   },
 ]
 
-jest.mock('components/BarChart', () => (props: { title: string; icon?: any }) => (
+jest.mock('components/BarChart', () => (props: { title: string; icon?: IconType }) => (
   <div
     data-testid="BarChart"
     data-props={JSON.stringify({
       ...props,
-      icon: props.icon?.name || null, 
+      icon: props.icon?.name || null,
     })}
   >
     {props.title}

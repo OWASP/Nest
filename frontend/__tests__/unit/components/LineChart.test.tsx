@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import { useTheme } from 'next-themes'
+import { FaChartLine } from 'react-icons/fa'
 import type { ApexLineChartSeries } from 'types/healthMetrics'
 import LineChart from 'components/LineChart'
-import { FaChartLine } from 'react-icons/fa'
 
 // Mock dependencies
 jest.mock('next-themes', () => ({
@@ -104,7 +104,7 @@ describe('LineChart', () => {
     })
 
     it('passes icon to SecondaryCard when provided', () => {
-      const iconProp = FaChartLine 
+      const iconProp = FaChartLine
       render(<LineChart {...defaultProps} icon={iconProp} />)
 
       const secondaryCard = screen.getByTestId('secondary-card')

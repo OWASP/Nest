@@ -5,7 +5,14 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { FaRegHeart, FaRegStar, FaHeart as FaSolidHeart, FaStar as FaSolidStar, FaBars, FaTimes } from 'react-icons/fa'
+import {
+  FaRegHeart,
+  FaRegStar,
+  FaHeart as FaSolidHeart,
+  FaStar as FaSolidStar,
+  FaBars,
+  FaTimes,
+} from 'react-icons/fa'
 import { desktopViewMinWidth, headerLinks } from 'utils/constants'
 import { cn } from 'utils/utility'
 import ModeToggle from 'components/ModeToggle'

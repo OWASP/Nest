@@ -34,7 +34,6 @@ jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))
 
-
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn() }),
 }))

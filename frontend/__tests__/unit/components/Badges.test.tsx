@@ -3,7 +3,14 @@ import React from 'react'
 import Badges from 'components/Badges'
 
 jest.mock('wrappers/IconWrapper', () => ({
-  IconWrapper: ({ icon, className, ...props }: { icon: React.ComponentType<{ className?: string }>, className?: string }) => {
+  IconWrapper: ({
+    icon,
+    className,
+    ...props
+  }: {
+    icon: React.ComponentType<{ className?: string }>
+    className?: string
+  }) => {
     const iconName = icon.name?.toLowerCase().replace('fa', '') || 'medal'
     return (
       <div data-testid="badge-icon" data-icon={iconName} className={className} {...props}>

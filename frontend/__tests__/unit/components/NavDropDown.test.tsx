@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import React from 'react'
 import '@testing-library/jest-dom'
 import type { Link as LinkType } from 'types/link'
 import NavDropdown from 'components/NavDropDown'

@@ -1,9 +1,9 @@
 import { useQuery } from '@apollo/client/react'
-import React, {act} from 'react'
 import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { mockAboutData } from '@unit/data/mockAboutData'
 import { useRouter } from 'next/navigation'
+import React, { act } from 'react'
 import { render } from 'wrappers/testUtil'
 import About from 'app/about/page'
 import {
@@ -177,11 +177,17 @@ jest.mock('components/ShowMoreButton', () => ({
         >
           {isExpanded ? (
             <>
-              Show less <span data-testid="icon-chevron-up" aria-hidden="true">chevron-up</span>
+              Show less{' '}
+              <span data-testid="icon-chevron-up" aria-hidden="true">
+                chevron-up
+              </span>
             </>
           ) : (
             <>
-              Show more <span data-testid="icon-chevron-down" aria-hidden="true">chevron-down</span>
+              Show more{' '}
+              <span data-testid="icon-chevron-down" aria-hidden="true">
+                chevron-down
+              </span>
             </>
           )}
         </button>

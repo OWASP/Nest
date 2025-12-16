@@ -2,6 +2,7 @@
 import { useQuery } from '@apollo/client/react'
 import { useParams } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
+import { FaExclamationCircle } from 'react-icons/fa'
 import {
   FaPeopleGroup,
   FaCodeFork,
@@ -12,7 +13,6 @@ import {
   FaStar,
   FaTags,
 } from 'react-icons/fa6'
-import { FaExclamationCircle } from 'react-icons/fa'
 import { handleAppError } from 'app/global-error'
 import { GetProjectHealthMetricsDetailsDocument } from 'types/__generated__/projectsHealthDashboardQueries.generated'
 import { HealthMetricsProps } from 'types/healthMetrics'

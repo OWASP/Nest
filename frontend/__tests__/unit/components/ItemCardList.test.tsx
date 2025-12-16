@@ -1,5 +1,5 @@
-import { FaCircleExclamation } from 'react-icons/fa6'
 import React from 'react'
+import { FaCircleExclamation } from 'react-icons/fa6'
 import { render, screen, cleanup } from 'wrappers/testUtil'
 import type { Issue } from 'types/issue'
 import type { Milestone } from 'types/milestone'

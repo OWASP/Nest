@@ -11,6 +11,7 @@ cspell-check: cspell-install cspell-run
 
 cspell-run:
 	@docker run \
+		--user $(shell id -u):$(shell id -g) \
 		--mount type=bind,src="$(PWD)",dst=/nest \
 		--rm \
 		cspell -c cspell/cspell.json "$(CMD)"

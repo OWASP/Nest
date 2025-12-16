@@ -1,11 +1,6 @@
 import React from 'react'
-import {
-  FaCodeCommit,
-  FaCodeFork,
-  FaCodePullRequest,
-  FaStar,
-} from 'react-icons/fa6'
 import { FaExclamationCircle } from 'react-icons/fa'
+import { FaCodeCommit, FaCodeFork, FaCodePullRequest, FaStar } from 'react-icons/fa6'
 import type { HealthMetricsProps } from 'types/healthMetrics'
 import BarChart from 'components/BarChart'
 import LineChart from 'components/LineChart'

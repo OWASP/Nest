@@ -14,7 +14,13 @@ jest.mock('utils/pluralize', () => ({
 
 // Update IconWrapper mock to handle react-icons properly
 jest.mock('wrappers/IconWrapper', () => ({
-  IconWrapper: ({ icon: IconComponent, className }: { icon: React.ComponentType<{ className?: string }>, className?: string }) => {
+  IconWrapper: ({
+    icon: IconComponent,
+    className,
+  }: {
+    icon: React.ComponentType<{ className?: string }>
+    className?: string
+  }) => {
     // Extract icon name for test id from component name
     const iconName = IconComponent?.name?.replace('Fa', '').toLowerCase() || 'icon'
     return IconComponent ? (

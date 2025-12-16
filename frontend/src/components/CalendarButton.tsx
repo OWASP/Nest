@@ -28,11 +28,12 @@ export default function CalendarButton(props: Readonly<CalendarButtonProps>) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {icon || (
-        isHovered
-          ? <FaCalendarPlus className={iconClassName} />
-          : <FaCalendar className={iconClassName} />
-      )}
+      {icon ||
+        (isHovered ? (
+          <FaCalendarPlus className={iconClassName} />
+        ) : (
+          <FaCalendar className={iconClassName} />
+        ))}
       {showLabel && <span>{label}</span>}
     </a>
   )

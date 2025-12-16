@@ -1,9 +1,9 @@
 import { render, screen, cleanup } from '@testing-library/react'
 import React from 'react'
 import '@testing-library/jest-dom'
+import { FaCode, FaTags } from 'react-icons/fa6'
 import type { DetailsCardProps } from 'types/card'
 import CardDetailsPage from 'components/CardDetailsPage'
-import { FaCode, FaTags } from 'react-icons/fa6'
 jest.mock('next/link', () => {
   const MockLink = ({
     children,
@@ -118,14 +118,14 @@ jest.mock('components/HealthMetrics', () => ({
 jest.mock('components/InfoBlock', () => ({
   __esModule: true,
   default: ({
-    icon: _icon,  // ← Destructure icon and prefix with _ to mark as intentionally unused
+    icon: _icon,
     pluralizedName,
     unit,
     value,
     className,
     ...props
   }: {
-    icon: unknown  // ← Change _icon to icon in the type
+    _icon: unknown
     pluralizedName?: string
     unit?: string
     value: number
@@ -261,10 +261,10 @@ jest.mock('components/SecondaryCard', () => ({
     title,
     children,
     className,
-    icon,  
+    icon: _icon,
     ...props
   }: {
-    icon?: unknown  
+    _icon?: unknown
     title: React.ReactNode
     children: React.ReactNode
     className?: string
@@ -300,12 +300,12 @@ jest.mock('components/ToggleableList', () => ({
   __esModule: true,
   default: ({
     items,
-    icon,
+    icon: _icon,
     label,
     ...props
   }: {
     items: string[]
-    icon: unknown
+    _icon: unknown
     label: React.ReactNode
     [key: string]: unknown
   }) => (

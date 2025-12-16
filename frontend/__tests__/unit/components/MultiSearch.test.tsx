@@ -2,6 +2,7 @@ import { sendGAEvent } from '@next/third-parties/google'
 import { screen, render, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useRouter } from 'next/navigation'
+import React from 'react'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { Chapter } from 'types/chapter'
 import { Event } from 'types/event'
@@ -34,15 +35,11 @@ jest.mock('react-icons/fa', () => ({
   FaSearch: (props: React.SVGProps<SVGSVGElement>) => (
     <svg data-testid="fa-search-icon" {...props} />
   ),
-  FaTimes: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg data-testid="fa-times-icon" {...props} />
-  ),
+  FaTimes: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="fa-times-icon" {...props} />,
 }))
 
 jest.mock('react-icons/fa6', () => ({
-  FaUser: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg data-testid="fa-user-icon" {...props} />
-  ),
+  FaUser: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="fa-user-icon" {...props} />,
   FaCalendar: (props: React.SVGProps<SVGSVGElement>) => (
     <svg data-testid="fa-calendar-icon" {...props} />
   ),

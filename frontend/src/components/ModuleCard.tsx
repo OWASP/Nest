@@ -2,13 +2,7 @@ import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import {
-  FaChevronDown,
-  FaChevronUp,
-  FaTurnUp,
-  FaCalendar,
-  FaHourglassHalf,
-} from 'react-icons/fa6'
+import { FaChevronDown, FaChevronUp, FaTurnUp, FaCalendar, FaHourglassHalf } from 'react-icons/fa6'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import { TextInfoItem } from 'components/InfoItem'

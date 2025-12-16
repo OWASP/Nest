@@ -1,7 +1,7 @@
-import { FaUser } from 'react-icons/fa'
 import { render, screen, fireEvent } from '@testing-library/react'
+import React from 'react'
+import { FaUser } from 'react-icons/fa'
 import ToggleableList from 'components/ToggleableList'
-
 
 const mockPush = jest.fn()
 jest.mock('next/navigation', () => ({
@@ -20,8 +20,13 @@ jest.mock('components/ShowMoreButton', () => ({
 }))
 
 jest.mock('wrappers/IconWrapper', () => ({
-  IconWrapper: ({ icon: Icon, className, ...props }: { icon: React.ComponentType<{ className?: string }> } & React.SVGProps<SVGSVGElement>) =>
-    <Icon className={className} data-testid="react-icon" {...props} />,
+  IconWrapper: ({
+    icon: Icon,
+    className,
+    ...props
+  }: { icon: React.ComponentType<{ className?: string }> } & React.SVGProps<SVGSVGElement>) => (
+    <Icon className={className} data-testid="react-icon" {...props} />
+  ),
 }))
 
 describe('ToggleableList', () => {

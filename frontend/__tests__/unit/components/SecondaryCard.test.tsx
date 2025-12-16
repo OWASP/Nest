@@ -1,5 +1,5 @@
-import { FaUser } from 'react-icons/fa6'
 import { render, screen } from '@testing-library/react'
+import { FaUser } from 'react-icons/fa6'
 import SecondaryCard from 'components/SecondaryCard'
 
 describe('SecondaryCard Component', () => {

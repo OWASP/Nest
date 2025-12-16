@@ -33,12 +33,16 @@ jest.mock('next/link', () => {
 })
 
 jest.mock('react-icons/fa', () => ({
-  FaBars: (props: any) => <svg data-testid="icon-bars" {...props} />,
-  FaTimes: (props: any) => <svg data-testid="icon-xmark" {...props} />,
-  FaRegHeart: (props: any) => <svg data-testid="icon-heart" {...props} />,
-  FaRegStar: (props: any) => <svg data-testid="icon-star" {...props} />,
-  FaHeart: (props: any) => <svg data-testid="icon-solid-heart" {...props} />,
-  FaStar: (props: any) => <svg data-testid="icon-solid-star" {...props} />,
+  FaBars: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-bars" {...props} />,
+  FaTimes: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-xmark" {...props} />,
+  FaRegHeart: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-heart" {...props} />,
+  FaRegStar: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-star" {...props} />,
+  FaHeart: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="icon-solid-heart" {...props} />
+  ),
+  FaStar: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="icon-solid-star" {...props} />
+  ),
 }))
 
 // Mock HeroUI Button

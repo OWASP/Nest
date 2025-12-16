@@ -3,8 +3,11 @@
  * @see {@link AutoScrollToTop.test.tsx} for structural reference.
  */
 import { render, screen, fireEvent } from '@testing-library/react'
+import React from 'react'
 import '@testing-library/jest-dom'
 import type { ComponentPropsWithoutRef } from 'react'
+import { FaHome } from 'react-icons/fa'
+import { FaUser } from 'react-icons/fa6'
 import type { NavButtonProps } from 'types/button'
 import NavButton from 'components/NavButton'
 
@@ -20,20 +23,18 @@ jest.mock('react-icons/fa6', () => ({
   ),
 }))
 
-// Import the mocked icons after the mocks are set up
-import { FaHome } from 'react-icons/fa'
-import { FaUser } from 'react-icons/fa6'
-
 // Mock IconWrapper to pass through the icon component
 jest.mock('wrappers/IconWrapper', () => ({
-  IconWrapper: ({ icon: IconComponent, className, style }: { 
-    icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>, 
-    className?: string,
+  IconWrapper: ({
+    icon: IconComponent,
+    className,
+    style,
+  }: {
+    icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>
+    className?: string
     style?: React.CSSProperties
   }) => {
-    return IconComponent ? (
-      <IconComponent className={className} style={style} />
-    ) : null
+    return IconComponent ? <IconComponent className={className} style={style} /> : null
   },
 }))
 

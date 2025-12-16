@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
+import { FaStar, FaCodeFork, FaUser, FaClock, FaComment, FaQuestion } from 'react-icons/fa6'
 import type { Icon } from 'types/icon'
 import DisplayIcon from 'components/DisplayIcon'
 interface TooltipProps {
@@ -10,11 +11,6 @@ interface TooltipProps {
   closeDelay: number
   showArrow: boolean
   placement: string
-}
-
-interface IconWrapperProps {
-  className?: string
-  icon: string
 }
 
 jest.mock('@heroui/tooltip', () => ({
@@ -42,7 +38,13 @@ jest.mock('millify', () => ({
 }))
 
 jest.mock('wrappers/IconWrapper', () => ({
-  IconWrapper: ({ className, icon: IconComponent }: { className?: string; icon: React.ComponentType<{ className?: string }> }) => {
+  IconWrapper: ({
+    className,
+    icon: IconComponent,
+  }: {
+    className?: string
+    icon: React.ComponentType<{ className?: string }>
+  }) => {
     // This derives a data-icon attribute from the react-icon component name
     let iconName = ''
     const toKebab = (name: string) =>
@@ -65,15 +67,14 @@ jest.mock('wrappers/IconWrapper', () => ({
   },
 }))
 
-// Update ICONS mock to use react-icons components instead of string names
 jest.mock('utils/data', () => ({
   ICONS: {
-    starsCount: { label: 'Stars', icon: require('react-icons/fa6').FaStar },
-    forksCount: { label: 'Forks', icon: require('react-icons/fa6').FaCodeFork },
-    contributorsCount: { label: 'Contributors', icon: require('react-icons/fa6').FaUser },
-    createdAt: { label: 'Creation date', icon: require('react-icons/fa6').FaClock },
-    commentsCount: { label: 'Comments count', icon: require('react-icons/fa6').FaComment },
-    unknownItem: { label: 'Unknown', icon: require('react-icons/fa6').FaQuestion },
+    starsCount: { label: 'Stars', icon: FaStar },
+    forksCount: { label: 'Forks', icon: FaCodeFork },
+    contributorsCount: { label: 'Contributors', icon: FaUser },
+    createdAt: { label: 'Creation date', icon: FaClock },
+    commentsCount: { label: 'Comments count', icon: FaComment },
+    unknownItem: { label: 'Unknown', icon: FaQuestion },
   },
 }))
 

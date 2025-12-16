@@ -1,8 +1,9 @@
 import { screen, render, fireEvent } from '@testing-library/react'
+import React from 'react'
 import { ReactNode } from 'react'
+import { FaLeaf, FaFire, FaCrown, FaStar, FaGithub, FaTwitter } from 'react-icons/fa6'
 import type { CardProps } from 'types/card'
 import Card from 'components/Card'
-import { FaLeaf, FaFire, FaCrown, FaStar, FaGithub, FaTwitter } from 'react-icons/fa6'
 
 // Define proper types for mock props
 interface MockLinkProps {
@@ -68,7 +69,13 @@ jest.mock('@heroui/tooltip', () => ({
 }))
 
 jest.mock('wrappers/IconWrapper', () => ({
-  IconWrapper: ({ icon, className }: { icon: React.ComponentType<{ className?: string }>, className?: string }) => {
+  IconWrapper: ({
+    icon,
+    className,
+  }: {
+    icon: React.ComponentType<{ className?: string }>
+    className?: string
+  }) => {
     const iconName = icon?.name?.toLowerCase().replace('fa', '') || 'icon'
     return (
       <span data-testid="icon-wrapper" data-icon={iconName} className={className}>

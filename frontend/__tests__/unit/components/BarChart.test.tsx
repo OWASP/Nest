@@ -1,7 +1,7 @@
-import { FaFire } from 'react-icons/fa'
 import { render, screen } from '@testing-library/react'
-import '@testing-library/jest-dom'
 import React from 'react'
+import { FaFire } from 'react-icons/fa'
+import '@testing-library/jest-dom'
 
 // Mock react-apexcharts completely
 jest.mock('react-apexcharts', () => {

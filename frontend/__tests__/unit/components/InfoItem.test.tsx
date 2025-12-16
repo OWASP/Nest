@@ -1,7 +1,7 @@
-import { FaUser } from 'react-icons/fa'
 import { render, screen } from '@testing-library/react'
 import millify from 'millify'
 import React from 'react'
+import { FaUser } from 'react-icons/fa'
 import { pluralize } from 'utils/pluralize'
 import InfoItem from 'components/InfoItem'
 

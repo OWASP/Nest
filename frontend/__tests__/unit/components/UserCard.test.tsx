@@ -60,12 +60,8 @@ jest.mock('react-icons/fa6', () => ({
   FaFolderOpen: (props: React.SVGProps<SVGSVGElement>) => (
     <svg data-testid="icon-folder-open" {...props} />
   ),
-  FaMedal: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg data-testid="icon-medal" {...props} />
-  ),
-  FaUser: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg data-testid="icon-user" {...props} />
-  ),
+  FaMedal: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-medal" {...props} />,
+  FaUser: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-user" {...props} />,
 }))
 
 jest.mock('react-icons/hi', () => ({

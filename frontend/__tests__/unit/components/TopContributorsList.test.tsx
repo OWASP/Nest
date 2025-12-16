@@ -1,6 +1,6 @@
-import { FaUsers } from 'react-icons/fa6'
 import { fireEvent, screen } from '@testing-library/react'
 import React from 'react'
+import { FaUsers } from 'react-icons/fa6'
 import { render } from 'wrappers/testUtil'
 import type { Contributor } from 'types/contributor'
 import TopContributorsList from 'components/TopContributorsList'
@@ -121,11 +121,17 @@ jest.mock('components/ShowMoreButton', () => ({
         >
           {isExpanded ? (
             <>
-              Show less <span data-testid="icon-chevron-up" aria-hidden="true">chevron-up</span>
+              Show less{' '}
+              <span data-testid="icon-chevron-up" aria-hidden="true">
+                chevron-up
+              </span>
             </>
           ) : (
             <>
-              Show more <span data-testid="icon-chevron-down" aria-hidden="true">chevron-down</span>
+              Show more{' '}
+              <span data-testid="icon-chevron-down" aria-hidden="true">
+                chevron-down
+              </span>
             </>
           )}
         </button>
@@ -145,9 +151,7 @@ jest.mock('react-icons/fa6', () => ({
       chevron-down
     </span>
   ),
-  FaUsers: (props: React.HTMLAttributes<HTMLSpanElement>) => (
-    <span {...props}>users</span>
-  ),
+  FaUsers: (props: React.HTMLAttributes<HTMLSpanElement>) => <span {...props}>users</span>,
 }))
 
 const mockContributors: Contributor[] = [

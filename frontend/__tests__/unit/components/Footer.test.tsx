@@ -5,7 +5,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { ReactNode } from 'react'
-import Footer from 'components/Footer'
 
 // Define proper types for mock props
 interface MockLinkProps {
@@ -88,9 +87,9 @@ jest.mock('utils/env.client', () => ({
 
 import { FaGithub, FaSlack } from 'react-icons/fa6'
 import { footerSections, footerIcons } from 'utils/constants'
-
-;(footerIcons as any)[0].icon = FaGithub
-;(footerIcons as any)[1].icon = FaSlack
+import Footer from 'components/Footer'
+;(footerIcons as unknown)[0].icon = FaGithub
+;(footerIcons as unknown)[1].icon = FaSlack
 
 describe('Footer', () => {
   // Use the imported mocked constants
