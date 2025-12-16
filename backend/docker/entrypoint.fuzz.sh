@@ -8,7 +8,7 @@ if [ -z "$BASE_URL" ]; then
 fi
 
 echo "Fetching CSRF token..."
-CSRF_TOKEN=$(wget -qO- "$BASE_URL/csrf" | jq -r '.csrftoken')
+CSRF_TOKEN=$(curl -fsSL "$BASE_URL/csrf" | jq -r '.csrftoken')
 
 echo "Creating configuration file with custom headers..."
 touch ./config.toml
