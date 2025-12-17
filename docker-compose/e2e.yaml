@@ -3,6 +3,7 @@ services:
     container_name: e2e-nest-backend
     command: >
       sh -c '
+        python manage.py migrate &&
         gunicorn wsgi:application --bind 0.0.0.0:9000
       '
     build:
@@ -57,19 +58,6 @@ services:
       backend:
         condition: service_healthy
     env_file: ../frontend/.env.e2e.example
-    networks:
-      - e2e-nest-network
-
-  graphql:
-    container_name: e2e-nest-fuzz-graphql
-    build:
-      context: ../backend/docker
-      dockerfile: Dockerfile.fuzz
-    environment:
-      BASE_URL: http://backend:9000
-    depends_on:
-      backend:
-        condition: service_healthy
     networks:
       - e2e-nest-network
 

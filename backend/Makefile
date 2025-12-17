@@ -75,6 +75,10 @@ load-data-e2e:
 	@echo "Loading Nest e2e data"
 	@gunzip -c backend/data/nest.sql.gz | docker exec -i e2e-nest-db psql -U nest_user_e2e -d nest_db_e2e
 
+load-data-fuzz:
+	@echo "Loading Nest fuzz data"
+	@gunzip -c backend/data/nest.sql.gz | docker exec -i fuzz-nest-db psql -U nest_user_fuzz -d nest_db_fuzz
+
 merge-migrations:
 	@CMD="python manage.py makemigrations --merge" $(MAKE) exec-backend-command
 
@@ -102,6 +106,10 @@ run-backend-e2e:
 	@DOCKER_BUILDKIT=1 \
 	docker compose --project-name nest-e2e -f docker-compose/e2e.yaml up --build --remove-orphans --abort-on-container-exit backend db
 
+run-backend-fuzz:
+	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz.yaml up --build --remove-orphans --abort-on-container-exit backend db
+
 save-backup:
 	@echo "Saving Nest backup"
 	@CMD="python manage.py dumpdata --natural-primary --natural-foreign --indent=2" $(MAKE) exec-backend-command > backend/data/backup.json
@@ -127,9 +135,9 @@ test-backend:
 		-e DJANGO_SETTINGS_MODULE=settings.test \
 		--env-file backend/.env.example \
 		--rm nest-test-backend pytest
-test-e2e-fuzz:
+test-fuzz:
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
-	docker compose --project-name nest-e2e -f docker-compose/e2e.yaml up --build --remove-orphans --abort-on-container-exit backend db graphql
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz.yaml up --build --remove-orphans --abort-on-container-exit
 
 update-backend-dependencies:
 	@cd backend && poetry update
