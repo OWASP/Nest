@@ -34,10 +34,19 @@ const getMockHealthMetric = (): HealthMetricsProps[] => [
   },
 ]
 
-// Using `any` intentionally for testing incomplete health metric data.
-// The structure may not match the full HealthMetric type, hence typing it strictly would be misleading.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getMockIncompleteHealthMetric = (): any[] => [
+// Using a partial type for testing incomplete health metric data.
+// The structure may not match the full HealthMetric type.
+const getMockIncompleteHealthMetric = (): Array<Partial<{
+  createdAt: string;
+  openIssuesCount: number;
+  unassignedIssuesCount: number;
+  unansweredIssuesCount: number;
+  openPullRequestsCount: number;
+  starsCount: number;
+  forksCount: number;
+  id: string;
+  projectKey: string;
+}>> => [
   {
     createdAt: '2025-07-23T00:00:00Z',
     openIssuesCount: 5,

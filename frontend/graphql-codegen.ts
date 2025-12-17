@@ -31,7 +31,7 @@ export default (async (): Promise<CodegenConfig> => {
             // Allow nullable input fields to remain unspecified
             inputValue: false,
           },
-          defaultScalarType: 'any',
+          defaultScalarType: 'unknown',
           // Apollo Client always includes `__typename` fields
           nonOptionalTypename: true,
           // Apollo Client doesn't add the `__typename` field to root types so

@@ -22,8 +22,13 @@ jest.mock('next/image', () => ({
 
 // Mock next/link
 jest.mock('next/link', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return function MockLink({ href, children, onClick, className, ...props }: any) {
+  return function MockLink({ href, children, onClick, className, ...props }: {
+    href: string;
+    children: React.ReactNode;
+    onClick?: React.MouseEventHandler<HTMLAnchorElement>;
+    className?: string;
+    [key: string]: unknown;
+  }) {
     return (
       <a href={href} onClick={onClick} className={className} {...props}>
         {children}
@@ -47,8 +52,12 @@ jest.mock('react-icons/fa', () => ({
 
 // Mock HeroUI Button
 jest.mock('@heroui/button', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Button: ({ children, onPress, className, ...props }: any) => (
+  Button: ({ children, onPress, className, ...props }: {
+    children: React.ReactNode;
+    onPress?: () => void;
+    className?: string;
+    [key: string]: unknown;
+  }) => (
     <button type="button" onClick={onPress} className={className} {...props}>
       {children}
     </button>
@@ -63,8 +72,11 @@ jest.mock('components/ModeToggle', () => {
 })
 
 jest.mock('components/NavButton', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return function MockNavButton({ href, text, className }: any) {
+  return function MockNavButton({ href, text, className }: {
+    href: string;
+    text: string;
+    className?: string;
+  }) {
     return (
       <a href={href} className={className} data-testid="nav-button">
         {text}
@@ -74,8 +86,13 @@ jest.mock('components/NavButton', () => {
 })
 
 jest.mock('components/NavDropDown', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return function MockNavDropdown({ link, pathname }: any) {
+  return function MockNavDropdown({ link, pathname }: {
+    link: {
+      text: string;
+      submenu?: Array<{ href: string; text: string }>;
+    };
+    pathname: string;
+  }) {
     return (
       <div data-testid="nav-dropdown">
         {link.text}
@@ -131,14 +148,12 @@ jest.mock('utils/constants', () => ({
 
 // Mock utility function
 jest.mock('utils/utility', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  cn: (...classes: any[]) => classes.filter(Boolean).join(' '),
+  cn: (...classes: unknown[]) => classes.filter(Boolean).join(' '),
 }))
 
 // Mock next-auth
 jest.mock('next-auth/react', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  SessionProvider: ({ children }: any) => children,
+  SessionProvider: ({ children }: { children: React.ReactNode }) => children,
   useSession: () => ({
     data: null,
     status: 'unauthenticated',
