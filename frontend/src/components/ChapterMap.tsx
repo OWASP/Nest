@@ -28,6 +28,8 @@ const ChapterMap = ({
 }) => {
   const mapRef = useRef<L.Map | null>(null)
   const markerClusterRef = useRef<MarkerClusterGroup | null>(null)
+  const userMarkerRef = useRef<L.Marker | null>(null)
+  const initialViewRef = useRef<{ center: L.LatLngExpression; zoom: number } | null>(null)
   const [isMapActive, setIsMapActive] = useState(false)
 
   useEffect(() => {
@@ -41,6 +43,11 @@ const ChapterMap = ({
         maxBoundsViscosity: 1.0,
         scrollWheelZoom: false,
       }).setView([20, 0], 2)
+
+      initialViewRef.current = {
+        center: mapRef.current.getCenter(),
+        zoom: mapRef.current.getZoom(),
+      }
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
@@ -56,7 +63,12 @@ const ChapterMap = ({
         const originalEvent = e.originalEvent as MouseEvent
         const relatedTarget = originalEvent.relatedTarget as Node | null
         const container = mapRef.current?.getContainer()
-        if (relatedTarget && container?.contains(relatedTarget)) return
+        const mapParent = container?.parentElement
+        if (
+          relatedTarget &&
+          (container?.contains(relatedTarget) || mapParent?.contains(relatedTarget))
+        )
+          return
 
         mapRef.current?.scrollWheelZoom.disable()
         setIsMapActive(false)
@@ -112,7 +124,11 @@ const ChapterMap = ({
 
     markerClusterGroup.addLayers(markers)
 
-    // Add user location marker if available
+    if (userMarkerRef.current) {
+      userMarkerRef.current.remove()
+      userMarkerRef.current = null
+    }
+
     if (userLocation && map) {
       const iconHtml =
         '<img src="/img/marker-icon.png" style="filter: hue-rotate(150deg) saturate(1.5) brightness(0.9); width: 25px; height: 41px;" alt="User location" />'
@@ -133,26 +149,24 @@ const ChapterMap = ({
       userPopup.setContent(userPopupContent)
       userMarker.bindPopup(userPopup)
       userMarker.addTo(map)
+      userMarkerRef.current = userMarker
     }
 
     if (userLocation && validGeoLocData.length > 0) {
       const maxNearestChapters = 5
       const localChapters = validGeoLocData.slice(0, maxNearestChapters)
-      const localBounds = L.latLngBounds(
-        localChapters.map((chapter) => [
-          chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
-          chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
-        ])
-      )
+      const locationsForBounds: L.LatLngExpression[] = [
+        [userLocation.latitude, userLocation.longitude],
+        ...localChapters.map(
+          (chapter) =>
+            [
+              chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
+              chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
+            ] as L.LatLngExpression
+        ),
+      ]
+      const localBounds = L.latLngBounds(locationsForBounds)
       const maxZoom = 12
-      const nearestChapter = validGeoLocData[0]
-      map.setView(
-        [
-          nearestChapter._geoloc?.lat ?? nearestChapter.geoLocation?.lat,
-          nearestChapter._geoloc?.lng ?? nearestChapter.geoLocation?.lng,
-        ],
-        maxZoom
-      )
       map.fitBounds(localBounds, { maxZoom: maxZoom })
     } else if (showLocal && validGeoLocData.length > 0) {
       const maxNearestChapters = 5
@@ -173,6 +187,8 @@ const ChapterMap = ({
         maxZoom
       )
       map.fitBounds(localBounds, { maxZoom: maxZoom })
+    } else if (initialViewRef.current) {
+      map.setView(initialViewRef.current.center, initialViewRef.current.zoom)
     }
   }, [geoLocData, showLocal, userLocation])
 

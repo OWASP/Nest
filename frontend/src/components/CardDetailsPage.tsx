@@ -176,6 +176,7 @@ const DetailsCard = ({
               <ChapterMapWrapper
                 geoLocData={geolocationData}
                 showLocal={true}
+                showLocationSharing={true}
                 style={{
                   borderRadius: '0.5rem',
                   boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',

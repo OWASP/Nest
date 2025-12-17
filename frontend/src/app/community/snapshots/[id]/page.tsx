@@ -138,6 +138,7 @@ const SnapshotDetailsPage: React.FC = () => {
             <ChapterMapWrapper
               geoLocData={snapshot.newChapters}
               showLocal={false}
+              showLocationSharing={true}
               style={{ height: '400px', width: '100%', zIndex: '0' }}
             />
           </div>
