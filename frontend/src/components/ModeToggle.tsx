@@ -2,7 +2,7 @@ import { Button } from '@heroui/button'
 import { Tooltip } from '@heroui/tooltip'
 import { useTheme } from 'next-themes'
 import { useState, useEffect } from 'react'
-import { MdLightMode, MdDarkMode } from 'react-icons/md'
+import { MdOutlineLightMode, MdOutlineDarkMode } from 'react-icons/md'
 
 export default function ModeToggle() {
   const [mounted, setMounted] = useState(false)
@@ -32,9 +32,9 @@ export default function ModeToggle() {
         >
           <div className="absolute inset-0 flex items-center justify-center">
             {theme === 'dark' ? (
-              <MdLightMode className="h-5 w-5 text-white transition-all duration-300" />
+              <MdOutlineLightMode className="h-5 w-5 text-white transition-all duration-300" />
             ) : (
-              <MdDarkMode className="h-5 w-5 text-white transition-all duration-300" />
+              <MdOutlineDarkMode className="h-5 w-5 text-white transition-all duration-300" />
             )}
           </div>
         </Button>

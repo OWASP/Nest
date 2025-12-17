@@ -11,7 +11,10 @@ jest.mock('wrappers/IconWrapper', () => ({
     icon: React.ComponentType<{ className?: string }>
     className?: string
   }) => {
-    const iconName = icon.name?.toLowerCase().replace('fa', '') || 'medal'
+    let iconName = icon.name?.toLowerCase() || 'medal'
+    iconName = iconName.replace(/^fa/, '')
+    iconName = iconName.replace(/^reg/, '')
+    if (!iconName) iconName = 'medal'
     return (
       <div data-testid="badge-icon" data-icon={iconName} className={className} {...props}>
         <svg />

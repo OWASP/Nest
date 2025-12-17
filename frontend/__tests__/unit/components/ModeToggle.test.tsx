@@ -24,11 +24,11 @@ jest.mock('@heroui/tooltip', () => ({
 }))
 
 jest.mock('react-icons/md', () => ({
-  MdLightMode: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg data-testid="md-light-mode-icon" data-icon="light" {...props} />
+  MdOutlineLightMode: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="md-outline-light-mode-icon" data-icon="light" {...props} />
   ),
-  MdDarkMode: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg data-testid="md-dark-mode-icon" data-icon="dark" {...props} />
+  MdOutlineDarkMode: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="md-outline-dark-mode-icon" data-icon="dark" {...props} />
   ),
 }))
 
@@ -46,7 +46,7 @@ describe('ModeToggle Component', () => {
     const button = screen.getByRole('button', { name: /enable dark mode/i })
     expect(button).toBeInTheDocument()
 
-    const icon = screen.getByTestId('md-dark-mode-icon')
+    const icon = screen.getByTestId('md-outline-dark-mode-icon')
     expect(icon).toBeInTheDocument()
     expect(icon).toHaveAttribute('data-icon', 'dark')
   })
@@ -62,7 +62,7 @@ describe('ModeToggle Component', () => {
     const button = screen.getByRole('button', { name: /enable light mode/i })
     expect(button).toBeInTheDocument()
 
-    const icon = screen.getByTestId('md-light-mode-icon')
+    const icon = screen.getByTestId('md-outline-light-mode-icon')
     expect(icon).toBeInTheDocument()
     expect(icon).toHaveAttribute('data-icon', 'light')
   })

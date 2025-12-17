@@ -8,10 +8,10 @@ import {
   FaSlack,
   FaXTwitter,
   FaYoutube,
-  FaClock,
-  FaComment,
-  FaStar,
-  FaUser,
+  FaRegClock,
+  FaRegComment,
+  FaRegStar,
+  FaRegUser,
   FaAward,
   FaBug,
   FaCertificate,
@@ -30,13 +30,13 @@ export const BADGE_CLASS_MAP: Record<string, IconType> = {
   certificate: FaCertificate,
   medal: FaMedal,
   ribbon: FaRibbon,
-  star: FaStar,
+  star: FaRegStar,
 } as const
 
 export const ICONS = {
   starsCount: {
     label: 'GitHub stars',
-    icon: FaStar,
+    icon: FaRegStar,
   },
   forksCount: {
     label: 'GitHub forks',
@@ -44,15 +44,15 @@ export const ICONS = {
   },
   contributorsCount: {
     label: 'GitHub contributors',
-    icon: FaUser,
+    icon: FaRegUser,
   },
   createdAt: {
     label: 'Creation date',
-    icon: FaClock,
+    icon: FaRegClock,
   },
   commentsCount: {
     label: 'Comments count',
-    icon: FaComment,
+    icon: FaRegComment,
   },
 } as const
 

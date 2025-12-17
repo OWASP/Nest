@@ -297,7 +297,7 @@ export default function Home() {
         </div>
         <div className="mb-20">
           <div className="mb-4 flex items-center gap-2">
-            <FaGlobe className="h-5 w-5" style={{ verticalAlign: 'middle' }} />
+            <FaGlobe className="h-4 w-4" style={{ verticalAlign: 'middle' }} />
             <AnchorTitle title="Chapters Worldwide" className="flex items-center leading-none" />
           </div>
           <ChapterMapWrapper

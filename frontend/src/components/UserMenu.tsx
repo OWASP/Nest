@@ -49,7 +49,7 @@ export default function UserMenu({
         onClick={() => signIn('github', { callbackUrl: '/', prompt: 'login' })}
         className="group relative flex h-10 cursor-pointer items-center justify-center gap-2 rounded-md bg-[#87a1bc] p-4 text-sm font-medium text-black hover:ring-1 hover:ring-[#b0c7de] dark:bg-slate-900 dark:text-white dark:hover:bg-slate-900/90 dark:hover:ring-[#46576b]"
       >
-        <FaGithub className="h-5 w-5" />
+        <FaGithub className="h-4 w-4" />
         Sign In
       </button>
     )
