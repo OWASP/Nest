@@ -2,9 +2,8 @@
  * @jest-environment jsdom
  */
 
-import { faCalendarDay, faCalendarPlus } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { FaCalendarDay, FaCalendarPlus } from 'react-icons/fa6'
 import getIcsFileUrl from 'utils/getIcsFileUrl'
 import CalendarButton from 'components/CalendarButton'
 
@@ -24,11 +23,6 @@ describe('CalendarButton', () => {
   let appendSpy: jest.SpyInstance
   let clickSpy: jest.SpyInstance
   let createSpy: jest.SpyInstance
-
-  beforeEach(() => {
-    globalThis.URL.createObjectURL = jest.fn(() => 'mock-url')
-    globalThis.URL.revokeObjectURL = jest.fn()
-  })
 
   beforeEach(() => {
     globalThis.URL.createObjectURL = jest.fn(() => 'mock-url')
