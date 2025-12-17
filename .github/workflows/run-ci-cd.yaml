@@ -300,7 +300,7 @@ jobs:
 
       - name: Stop Existing Backend
         run: |
-          docker stop e2e-nest-backend
+          docker stop e2e-nest-backend || true
 
       - name: Run backend with fuzz environment variables
         run: |
