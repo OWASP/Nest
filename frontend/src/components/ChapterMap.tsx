@@ -208,7 +208,6 @@ const ChapterMap = ({
       zoomControlRef.current = null
     }
 
-
     return () => {
       if (zoomControlRef.current) {
         zoomControlRef.current.remove()
