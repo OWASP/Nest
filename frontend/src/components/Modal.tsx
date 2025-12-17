@@ -1,8 +1,7 @@
-import { faBolt } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal'
 import React from 'react'
+import { FaBolt } from 'react-icons/fa6'
 import type { ModalProps } from 'types/modal'
 import ActionButton from 'components/ActionButton'
 import Markdown from 'components/MarkdownWrapper'
@@ -32,8 +31,8 @@ const DialogComp: React.FC<ModalProps> = ({
           <Markdown className="text-base text-gray-600 dark:text-gray-300" content={summary} />
           {hint && (
             <div className="rounded-md p-2">
-              <p className="flex flex-row gap-2 text-xl font-semibold">
-                <FontAwesomeIcon icon={faBolt} size="xs" /> How to tackle it
+              <p className="flex flex-row items-center gap-2 text-xl font-semibold">
+                <FaBolt size={14} /> How to tackle it
               </p>
               <Markdown
                 className="p-2 text-base text-gray-800 dark:border-white dark:text-gray-200"

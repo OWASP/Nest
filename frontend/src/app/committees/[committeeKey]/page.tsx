@@ -1,15 +1,11 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
-import {
-  faCode,
-  faCodeFork,
-  faExclamationCircle,
-  faStar,
-  faUsers,
-} from '@fortawesome/free-solid-svg-icons'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { FaExclamationCircle } from 'react-icons/fa'
+import { FaCode, FaCodeFork, FaStar } from 'react-icons/fa6'
+import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetCommitteeDataDocument } from 'types/__generated__/committeeQueries.generated'
 import type { Committee } from 'types/committee'
@@ -67,16 +63,16 @@ export default function CommitteeDetailsPage() {
   ]
 
   const committeeStats = [
-    { icon: faUsers, value: committee.contributorsCount, unit: 'Contributor' },
-    { icon: faCodeFork, value: committee.forksCount, unit: 'Fork' },
-    { icon: faStar, value: committee.starsCount, unit: 'Star' },
+    { icon: HiUserGroup, value: committee.contributorsCount, unit: 'Contributor' },
+    { icon: FaCodeFork, value: committee.forksCount, unit: 'Fork' },
+    { icon: FaStar, value: committee.starsCount, unit: 'Star' },
     {
-      icon: faCode,
+      icon: FaCode,
       value: committee.repositoriesCount,
       unit: 'Repository',
       pluralizedName: 'Repositories',
     },
-    { icon: faExclamationCircle, value: committee.issuesCount, unit: 'Issue' },
+    { icon: FaExclamationCircle, value: committee.issuesCount, unit: 'Issue' },
   ]
 
   return (

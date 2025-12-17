@@ -21,9 +21,11 @@ const ChapterMapWrapper: React.FC<ChapterMapWrapperProps> = (props) => {
   const [sortedData, setSortedData] = useState<Chapter[] | null>(null)
 
   const enableLocationSharing = props.showLocationSharing === true
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { showLocationSharing, ...mapProps } = props
 
   if (!enableLocationSharing) {
-    return <ChapterMap {...props} />
+    return <ChapterMap {...mapProps} />
   }
 
   const handleShareLocation = async () => {
@@ -50,9 +52,9 @@ const ChapterMapWrapper: React.FC<ChapterMapWrapperProps> = (props) => {
   const mapData = sortedData ?? props.geoLocData
 
   return (
-    <div className="space-y-4">
+    <div className="h-full w-full">
       <ChapterMap
-        {...props}
+        {...mapProps}
         geoLocData={mapData}
         userLocation={userLocation}
         onShareLocation={handleShareLocation}

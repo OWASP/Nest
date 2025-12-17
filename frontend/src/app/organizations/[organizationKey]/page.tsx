@@ -1,15 +1,11 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
-import {
-  faCodeFork,
-  faExclamationCircle,
-  faFolderOpen,
-  faStar,
-  faUsers,
-} from '@fortawesome/free-solid-svg-icons'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { FaExclamationCircle } from 'react-icons/fa'
+import { FaCodeFork, FaFolderOpen, FaStar } from 'react-icons/fa6'
+import { HiUserGroup } from 'react-icons/hi'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetOrganizationDataDocument } from 'types/__generated__/organizationQueries.generated'
 import { formatDate } from 'utils/dateFormatter'
@@ -85,27 +81,27 @@ const OrganizationDetailsPage = () => {
 
   const organizationStats = [
     {
-      icon: faStar,
+      icon: FaStar,
       value: organization.stats.totalStars,
       unit: 'Star',
     },
     {
-      icon: faCodeFork,
+      icon: FaCodeFork,
       value: organization.stats.totalForks,
       unit: 'Fork',
     },
     {
-      icon: faUsers,
+      icon: HiUserGroup,
       value: organization.stats.totalContributors,
       unit: 'Contributor',
     },
     {
-      icon: faExclamationCircle,
+      icon: FaExclamationCircle,
       value: organization.stats.totalIssues,
       unit: 'Issue',
     },
     {
-      icon: faFolderOpen,
+      icon: FaFolderOpen,
       value: organization.stats.totalRepositories,
       unit: 'Repository',
       pluralizedName: 'Repositories',

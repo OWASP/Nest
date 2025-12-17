@@ -1,16 +1,18 @@
 'use client'
-import { faHeart as faRegularHeart } from '@fortawesome/free-regular-svg-icons'
-import { faStar as faRegularStar } from '@fortawesome/free-regular-svg-icons'
-import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
-import { faHeart as faSolidHeart } from '@fortawesome/free-solid-svg-icons'
-import { faStar as faSolidStar } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import { useIsMobile } from 'hooks/useIsMobile'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import {
+  FaRegHeart,
+  FaRegStar,
+  FaHeart as FaSolidHeart,
+  FaStar as FaSolidStar,
+  FaBars,
+  FaTimes,
+} from 'react-icons/fa'
 import { desktopViewMinWidth, headerLinks } from 'utils/constants'
 import { cn } from 'utils/utility'
 import ModeToggle from 'components/ModeToggle'
@@ -107,8 +109,8 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
         <div className="flex items-center justify-normal gap-4">
           <NavButton
             href="https://github.com/OWASP/Nest"
-            defaultIcon={faRegularStar}
-            hoverIcon={faSolidStar}
+            defaultIcon={FaRegStar}
+            hoverIcon={FaSolidStar}
             defaultIconColor="#FDCE2D"
             hoverIconColor="#FDCE2D"
             text="Star"
@@ -117,8 +119,8 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
 
           <NavButton
             href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
-            defaultIcon={faRegularHeart}
-            hoverIcon={faSolidHeart}
+            defaultIcon={FaRegHeart}
+            hoverIcon={FaSolidHeart}
             defaultIconColor="#b55f95"
             hoverIconColor="#d9156c"
             text="Sponsor"
@@ -132,11 +134,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               className="flex h-11 w-11 items-center justify-center bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus:outline-hidden"
             >
               <span className="sr-only">Open main menu</span>
-              {mobileMenuOpen ? (
-                <FontAwesomeIcon icon={faTimes} size="2x" />
-              ) : (
-                <FontAwesomeIcon icon={faBars} className="h-6 w-6" />
-              )}
+              {mobileMenuOpen ? <FaTimes className="h-6 w-6" /> : <FaBars className="h-6 w-6" />}
             </Button>
           </div>
         </div>
@@ -217,16 +215,16 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
             {isMobile && <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />}
             <NavButton
               href="https://github.com/OWASP/Nest"
-              defaultIcon={faRegularStar}
-              hoverIcon={faSolidStar}
+              defaultIcon={FaRegStar}
+              hoverIcon={FaSolidStar}
               defaultIconColor="#FDCE2D"
               hoverIconColor="#FDCE2D"
               text="Star On Github"
             />
             <NavButton
               href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
-              defaultIcon={faRegularHeart}
-              hoverIcon={faSolidHeart}
+              defaultIcon={FaRegHeart}
+              hoverIcon={FaSolidHeart}
               defaultIconColor="#b55f95"
               hoverIconColor="#d9156c"
               text="Sponsor Us"

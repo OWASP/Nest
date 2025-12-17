@@ -1,7 +1,6 @@
-import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Breadcrumbs, BreadcrumbItem as HeroUIBreadcrumbItem } from '@heroui/react'
 import Link from 'next/link'
+import { FaChevronRight } from 'react-icons/fa'
 import type { BreadcrumbItem } from 'types/breadcrumb'
 
 type BreadCrumbRendererProps = Readonly<{
@@ -14,12 +13,7 @@ export default function BreadCrumbRenderer({ items }: BreadCrumbRendererProps) {
       <div className="w-full px-8 sm:px-8 md:px-8 lg:px-8">
         <Breadcrumbs
           aria-label="breadcrumb"
-          separator={
-            <FontAwesomeIcon
-              icon={faChevronRight}
-              className="mx-1 text-xs text-gray-400 dark:text-gray-500"
-            />
-          }
+          separator={<FaChevronRight className="mx-1 text-xs text-gray-400 dark:text-gray-500" />}
           className="text-gray-800 dark:text-gray-200"
           itemClasses={{
             base: 'transition-colors duration-200',

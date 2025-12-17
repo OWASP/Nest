@@ -68,6 +68,8 @@ services:
         python manage.py rqworker ai --with-scheduler
       '
     depends_on:
+      production-nest-backend:
+        condition: service_started
       production-nest-cache:
         condition: service_healthy
       production-nest-db:

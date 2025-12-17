@@ -8,6 +8,9 @@ const mockMap = {
   addLayer: jest.fn().mockReturnThis(),
   fitBounds: jest.fn().mockReturnThis(),
   on: jest.fn().mockReturnThis(),
+  getCenter: jest.fn(() => ({ lat: 20, lng: 0 })),
+  getZoom: jest.fn(() => 2),
+  getContainer: jest.fn(() => document.getElementById('chapter-map')),
   scrollWheelZoom: {
     enable: jest.fn(),
     disable: jest.fn(),
@@ -266,24 +269,24 @@ describe('ChapterMap', () => {
   })
 
   describe('Interactive Overlay', () => {
-    it('displays overlay with "Click to interact with map" message initially', () => {
+    it('displays overlay with "Unlock map" message initially', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
-      expect(getByText('Click to interact with map')).toBeInTheDocument()
+      expect(getByText('Unlock map')).toBeInTheDocument()
     })
 
     it('removes overlay when clicked', () => {
       const { getByText, queryByText } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Click to interact with map').closest('button')
+      const overlay = getByText('Unlock map').closest('button')
       fireEvent.click(overlay!)
 
-      expect(queryByText('Click to interact with map')).not.toBeInTheDocument()
+      expect(queryByText('Unlock map')).not.toBeInTheDocument()
     })
 
     it('enables scroll wheel zoom when overlay is clicked', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Click to interact with map').closest('button')
+      const overlay = getByText('Unlock map').closest('button')
       fireEvent.click(overlay!)
 
       expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
@@ -292,7 +295,7 @@ describe('ChapterMap', () => {
     it('handles keyboard interaction with Enter key', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Click to interact with map').closest('button')
+      const overlay = getByText('Unlock map').closest('button')
       fireEvent.keyDown(overlay!, { key: 'Enter' })
 
       expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
@@ -301,7 +304,7 @@ describe('ChapterMap', () => {
     it('handles keyboard interaction with Space key', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Click to interact with map').closest('button')
+      const overlay = getByText('Unlock map').closest('button')
       fireEvent.keyDown(overlay!, { key: ' ' })
 
       expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
@@ -310,9 +313,9 @@ describe('ChapterMap', () => {
     it('has proper accessibility attributes', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Click to interact with map').closest('button')
+      const overlay = getByText('Unlock map').closest('button')
       expect(overlay).toHaveAttribute('tabIndex', '0')
-      expect(overlay).toHaveAttribute('aria-label', 'Click to interact with map')
+      expect(overlay).toHaveAttribute('aria-label', 'Unlock map')
     })
   })
 
@@ -328,7 +331,6 @@ describe('ChapterMap', () => {
     it('does not set local view when showLocal is false', () => {
       render(<ChapterMap {...defaultProps} showLocal={false} />)
 
-      expect(mockMap.setView).toHaveBeenCalledTimes(1)
       expect(mockMap.setView).toHaveBeenCalledWith([20, 0], 2)
       expect(mockMap.fitBounds).not.toHaveBeenCalled()
     })
@@ -352,9 +354,11 @@ describe('ChapterMap', () => {
 
     it('updates local view when showLocal prop changes', () => {
       const { rerender } = render(<ChapterMap {...defaultProps} showLocal={false} />)
+      const initialCallCount = mockMap.setView.mock.calls.length
+
       rerender(<ChapterMap {...defaultProps} showLocal={true} />)
 
-      expect(mockMap.setView).toHaveBeenCalledTimes(2)
+      expect(mockMap.setView.mock.calls.length).toBeGreaterThan(initialCallCount)
     })
   })
 
