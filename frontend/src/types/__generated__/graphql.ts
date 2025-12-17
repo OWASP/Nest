@@ -14,8 +14,8 @@ export type Scalars = {
   Float: { input: number; output: number; }
   Date: { input: string | number; output: string | number; }
   DateTime: { input: string | number; output: string | number; }
-  JSON: { input: Record<string, unknown> | unknown[]; output: Record<string, unknown> | unknown[]; }
-  UUID: { input: string; output: string; }
+  JSON: { input: any; output: any; }
+  UUID: { input: any; output: any; }
 };
 
 export type ApiKeyNode = Node & {

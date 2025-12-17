@@ -22,12 +22,18 @@ jest.mock('next/image', () => ({
 
 // Mock next/link
 jest.mock('next/link', () => {
-  return function MockLink({ href, children, onClick, className, ...props }: {
-    href: string;
-    children: React.ReactNode;
-    onClick?: React.MouseEventHandler<HTMLAnchorElement>;
-    className?: string;
-    [key: string]: unknown;
+  return function MockLink({
+    href,
+    children,
+    onClick,
+    className,
+    ...props
+  }: {
+    href: string
+    children: React.ReactNode
+    onClick?: React.MouseEventHandler<HTMLAnchorElement>
+    className?: string
+    [key: string]: unknown
   }) {
     return (
       <a href={href} onClick={onClick} className={className} {...props}>
@@ -52,11 +58,16 @@ jest.mock('react-icons/fa', () => ({
 
 // Mock HeroUI Button
 jest.mock('@heroui/button', () => ({
-  Button: ({ children, onPress, className, ...props }: {
-    children: React.ReactNode;
-    onPress?: () => void;
-    className?: string;
-    [key: string]: unknown;
+  Button: ({
+    children,
+    onPress,
+    className,
+    ...props
+  }: {
+    children: React.ReactNode
+    onPress?: () => void
+    className?: string
+    [key: string]: unknown
   }) => (
     <button type="button" onClick={onPress} className={className} {...props}>
       {children}
@@ -72,10 +83,14 @@ jest.mock('components/ModeToggle', () => {
 })
 
 jest.mock('components/NavButton', () => {
-  return function MockNavButton({ href, text, className }: {
-    href: string;
-    text: string;
-    className?: string;
+  return function MockNavButton({
+    href,
+    text,
+    className,
+  }: {
+    href: string
+    text: string
+    className?: string
   }) {
     return (
       <a href={href} className={className} data-testid="nav-button">
@@ -86,12 +101,15 @@ jest.mock('components/NavButton', () => {
 })
 
 jest.mock('components/NavDropDown', () => {
-  return function MockNavDropdown({ link, pathname }: {
+  return function MockNavDropdown({
+    link,
+    pathname,
+  }: {
     link: {
-      text: string;
-      submenu?: Array<{ href: string; text: string }>;
-    };
-    pathname: string;
+      text: string
+      submenu?: Array<{ href: string; text: string }>
+    }
+    pathname: string
   }) {
     return (
       <div data-testid="nav-dropdown">

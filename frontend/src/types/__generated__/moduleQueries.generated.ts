@@ -6,7 +6,7 @@ export type GetModulesByProgramQueryVariables = Types.Exact<{
 }>;
 
 
-export type GetModulesByProgramQuery = { getProgramModules: Array<{ __typename: 'ModuleNode', id: string, key: string, name: string, description: string, experienceLevel: Types.ExperienceLevelEnum, startedAt: any, endedAt: any, projectId: string | null, projectName: string | null, mentors: Array<{ __typename: 'MentorNode', id: string, login: string, avatarUrl: string }>, mentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> }> };
+export type GetModulesByProgramQuery = { getProgramModules: Array<{ __typename: 'ModuleNode', id: string, key: string, name: string, description: string, experienceLevel: Types.ExperienceLevelEnum, startedAt: unknown, endedAt: unknown, projectId: string | null, projectName: string | null, mentors: Array<{ __typename: 'MentorNode', id: string, login: string, avatarUrl: string }>, mentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> }> };
 
 export type GetModuleByIdQueryVariables = Types.Exact<{
   moduleKey: Types.Scalars['String']['input'];
@@ -14,7 +14,7 @@ export type GetModuleByIdQueryVariables = Types.Exact<{
 }>;
 
 
-export type GetModuleByIdQuery = { getModule: { __typename: 'ModuleNode', id: string, key: string, name: string, description: string, tags: Array<string> | null, domains: Array<string> | null, experienceLevel: Types.ExperienceLevelEnum, startedAt: any, endedAt: any, mentors: Array<{ __typename: 'MentorNode', id: string, login: string, name: string, avatarUrl: string }>, mentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> } };
+export type GetModuleByIdQuery = { getModule: { __typename: 'ModuleNode', id: string, key: string, name: string, description: string, tags: Array<string> | null, domains: Array<string> | null, experienceLevel: Types.ExperienceLevelEnum, startedAt: unknown, endedAt: unknown, mentors: Array<{ __typename: 'MentorNode', id: string, login: string, name: string, avatarUrl: string }>, mentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> } };
 
 export type GetProgramAdminsAndModulesQueryVariables = Types.Exact<{
   programKey: Types.Scalars['String']['input'];
@@ -22,7 +22,7 @@ export type GetProgramAdminsAndModulesQueryVariables = Types.Exact<{
 }>;
 
 
-export type GetProgramAdminsAndModulesQuery = { getProgram: { __typename: 'ProgramNode', id: string, admins: Array<{ __typename: 'MentorNode', id: string, login: string, name: string, avatarUrl: string }> | null }, getModule: { __typename: 'ModuleNode', id: string, key: string, name: string, description: string, tags: Array<string> | null, labels: Array<string> | null, projectId: string | null, projectName: string | null, domains: Array<string> | null, experienceLevel: Types.ExperienceLevelEnum, startedAt: any, endedAt: any, mentors: Array<{ __typename: 'MentorNode', id: string, login: string, name: string, avatarUrl: string }>, mentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> } };
+export type GetProgramAdminsAndModulesQuery = { getProgram: { __typename: 'ProgramNode', id: string, admins: Array<{ __typename: 'MentorNode', id: string, login: string, name: string, avatarUrl: string }> | null }, getModule: { __typename: 'ModuleNode', id: string, key: string, name: string, description: string, tags: Array<string> | null, labels: Array<string> | null, projectId: string | null, projectName: string | null, domains: Array<string> | null, experienceLevel: Types.ExperienceLevelEnum, startedAt: unknown, endedAt: unknown, mentors: Array<{ __typename: 'MentorNode', id: string, login: string, name: string, avatarUrl: string }>, mentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> } };
 
 export type GetModuleIssuesQueryVariables = Types.Exact<{
   programKey: Types.Scalars['String']['input'];
