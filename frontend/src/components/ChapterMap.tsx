@@ -203,7 +203,13 @@ const ChapterMap = ({
         zoomControlRef.current = L.control.zoom({ position: 'topleft' })
         zoomControlRef.current.addTo(map)
       }
-    } else {
+    } else if (zoomControlRef.current) {
+      zoomControlRef.current.remove()
+      zoomControlRef.current = null
+    }
+
+
+    return () => {
       if (zoomControlRef.current) {
         zoomControlRef.current.remove()
         zoomControlRef.current = null
