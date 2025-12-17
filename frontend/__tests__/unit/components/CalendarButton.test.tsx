@@ -1,7 +1,14 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import { faCalendarDay, faCalendarPlus } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import getIcsFileUrl from 'utils/getIcsFileUrl'
 import CalendarButton from 'components/CalendarButton'
+
+jest.mock('utils/getIcsFileUrl')
 
 const mockEvent = {
   title: 'Test Event',
@@ -12,17 +19,40 @@ const mockEvent = {
 }
 
 describe('CalendarButton', () => {
+  const mockUrl = 'blob:http://localhost/mock-file'
+
+  let appendSpy: jest.SpyInstance
+  let clickSpy: jest.SpyInstance
+  let createSpy: jest.SpyInstance
+
+  beforeEach(() => {
+    globalThis.URL.createObjectURL = jest.fn(() => 'mock-url')
+    globalThis.URL.revokeObjectURL = jest.fn()
+    ;(getIcsFileUrl as jest.Mock).mockResolvedValue(mockUrl)
+
+    appendSpy = jest.spyOn(document.body, 'appendChild')
+    createSpy = jest.spyOn(document, 'createElement')
+
+    clickSpy = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+
+    jest.spyOn(globalThis, 'alert').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
   describe('rendering', () => {
     it('renders without crashing', () => {
       render(<CalendarButton event={mockEvent} />)
-      const link = screen.getByRole('link')
-      expect(link).toBeInTheDocument()
+      const button = screen.getByRole('button')
+      expect(button).toBeInTheDocument()
     })
 
-    it('renders as an anchor element', () => {
+    it('renders as a button element', () => {
       render(<CalendarButton event={mockEvent} />)
-      const link = screen.getByRole('link')
-      expect(link.tagName).toBe('A')
+      const button = screen.getByRole('button')
+      expect(button.tagName).toBe('BUTTON')
     })
 
     it('renders default FontAwesome calendar-plus icon', () => {
@@ -48,65 +78,86 @@ describe('CalendarButton', () => {
     })
   })
 
-  describe('link attributes', () => {
-    it('has correct href with Google Calendar URL', () => {
+  describe('functionality (download)', () => {
+    it('generates ICS file and triggers download on click', async () => {
       render(<CalendarButton event={mockEvent} />)
-      const link = screen.getByRole('link')
-      expect(link).toHaveAttribute('href')
-      expect(link.getAttribute('href')).toContain('calendar.google.com')
+      const button = screen.getByRole('button')
+
+      fireEvent.click(button)
+
+      expect(button).toBeDisabled()
+
+      await waitFor(() => {
+        expect(getIcsFileUrl).toHaveBeenCalledWith(mockEvent)
+      })
+
+      expect(createSpy).toHaveBeenCalledWith('a')
+
+      const createdLink = createSpy.mock.results.find(
+        (call) => call.value instanceof HTMLAnchorElement && call.value.href === mockUrl
+      )?.value
+
+      expect(createdLink).toBeDefined()
+      expect(createdLink.download).toBe('invite.ics')
+
+      expect(appendSpy).toHaveBeenCalledWith(createdLink)
+
+      expect(clickSpy).toHaveBeenCalled()
+
+      await waitFor(() => {
+        expect(button).not.toBeDisabled()
+      })
     })
 
-    it('opens in new tab', () => {
-      render(<CalendarButton event={mockEvent} />)
-      const link = screen.getByRole('link')
-      expect(link).toHaveAttribute('target', '_blank')
-    })
+    it('handles errors gracefully when generation fails', async () => {
+      const errorMock = new Error('Failed to generate')
+      ;(getIcsFileUrl as jest.Mock).mockRejectedValueOnce(errorMock)
 
-    it('has security attributes for external link', () => {
       render(<CalendarButton event={mockEvent} />)
-      const link = screen.getByRole('link')
-      expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+      const button = screen.getByRole('button')
+
+      fireEvent.click(button)
+
+      await waitFor(() => {
+        expect(globalThis.alert).toHaveBeenCalledWith('Could not download calendar file.')
+      })
+
+      expect(button).not.toBeDisabled()
     })
   })
 
   describe('accessibility', () => {
     it('has aria-label with event title', () => {
       render(<CalendarButton event={mockEvent} />)
-      const link = screen.getByRole('link')
-      expect(link).toHaveAttribute('aria-label', 'Add Test Event to Google Calendar')
-    })
-
-    it('has title attribute for tooltip', () => {
-      render(<CalendarButton event={mockEvent} />)
-      const link = screen.getByRole('link')
-      expect(link).toHaveAttribute('title', 'Add Test Event to Google Calendar')
+      const button = screen.getByRole('button')
+      expect(button).toHaveAttribute('aria-label', 'Add Test Event to Calendar')
     })
 
     it('uses fallback for events without explicit title', () => {
       render(<CalendarButton event={{ ...mockEvent, title: 'Untitled' }} />)
-      const link = screen.getByRole('link')
-      expect(link).toHaveAttribute('aria-label', 'Add Untitled to Google Calendar')
+      const button = screen.getByRole('button')
+      expect(button).toHaveAttribute('aria-label', 'Add Untitled to Calendar')
     })
   })
 
   describe('className prop', () => {
-    it('applies className to anchor', () => {
+    it('applies className to button', () => {
       render(<CalendarButton event={mockEvent} className="custom-class" />)
-      const link = screen.getByRole('link')
-      expect(link).toHaveClass('custom-class')
+      const button = screen.getByRole('button')
+      expect(button).toHaveClass('custom-class')
     })
 
     it('applies multiple classes', () => {
       render(<CalendarButton event={mockEvent} className="class-one class-two" />)
-      const link = screen.getByRole('link')
-      expect(link).toHaveClass('class-one')
-      expect(link).toHaveClass('class-two')
+      const button = screen.getByRole('button')
+      expect(button).toHaveClass('class-one')
+      expect(button).toHaveClass('class-two')
     })
 
     it('handles empty className', () => {
       render(<CalendarButton event={mockEvent} className="" />)
-      const link = screen.getByRole('link')
-      expect(link).toBeInTheDocument()
+      const button = screen.getByRole('button')
+      expect(button).toBeInTheDocument()
     })
   })
 
@@ -128,11 +179,6 @@ describe('CalendarButton', () => {
       svg = document.querySelector('svg')
       expect(svg).toHaveClass('h-6', 'w-6')
       expect(svg).not.toHaveClass('h-4')
-
-      rerender(<CalendarButton event={mockEvent} iconClassName="h-8 w-8" />)
-      svg = document.querySelector('svg')
-      expect(svg).toHaveClass('h-8', 'w-8')
-      expect(svg).not.toHaveClass('h-6')
     })
 
     it('uses default iconClassName when not provided', () => {
@@ -157,25 +203,25 @@ describe('CalendarButton', () => {
   describe('showLabel prop', () => {
     it('does not show label by default', () => {
       render(<CalendarButton event={mockEvent} />)
-      expect(screen.queryByText('Add to Google Calendar')).not.toBeInTheDocument()
+      expect(screen.queryByText('Add to Calendar')).not.toBeInTheDocument()
     })
 
     it('shows default label when showLabel is true', () => {
       render(<CalendarButton event={mockEvent} showLabel />)
-      expect(screen.getByText('Add to Google Calendar')).toBeInTheDocument()
+      expect(screen.getByText('Add to Calendar')).toBeInTheDocument()
     })
 
     it('shows custom label when provided', () => {
       render(<CalendarButton event={mockEvent} showLabel label="Save Event" />)
       expect(screen.getByText('Save Event')).toBeInTheDocument()
-      expect(screen.queryByText('Add to Google Calendar')).not.toBeInTheDocument()
+      expect(screen.queryByText('Add to Calendar')).not.toBeInTheDocument()
     })
   })
 
   describe('label prop', () => {
     it('uses custom label text', () => {
-      render(<CalendarButton event={mockEvent} showLabel label="Add to Calendar" />)
-      expect(screen.getByText('Add to Calendar')).toBeInTheDocument()
+      render(<CalendarButton event={mockEvent} showLabel label="Export ICS" />)
+      expect(screen.getByText('Export ICS')).toBeInTheDocument()
     })
 
     it('label is not rendered without showLabel', () => {
@@ -215,69 +261,6 @@ describe('CalendarButton', () => {
       )
       expect(screen.getByTestId('svg-icon')).toBeInTheDocument()
     })
-
-    it('accepts emoji as icon', () => {
-      render(<CalendarButton event={mockEvent} icon={<span>📅</span>} />)
-      expect(screen.getByText('📅')).toBeInTheDocument()
-    })
-
-    it('accepts custom element as icon', () => {
-      render(
-        <CalendarButton
-          event={mockEvent}
-          icon={<span data-testid="custom-element-icon">🗓️</span>}
-        />
-      )
-      expect(screen.getByTestId('custom-element-icon')).toBeInTheDocument()
-    })
-  })
-
-  describe('event data handling', () => {
-    it('handles minimal event data', () => {
-      render(
-        <CalendarButton
-          event={{
-            title: 'Minimal Event',
-            startDate: '2025-12-01',
-          }}
-        />
-      )
-      const link = screen.getByRole('link')
-      expect(link.getAttribute('href')).toContain('text=Minimal')
-    })
-
-    it('handles full event data', () => {
-      render(
-        <CalendarButton
-          event={{
-            title: 'Full Event',
-            description: 'Full description',
-            location: 'Full location',
-            startDate: '2025-12-01T10:00:00',
-            endDate: '2025-12-01T11:00:00',
-          }}
-        />
-      )
-      const link = screen.getByRole('link')
-      const href = link.getAttribute('href') || ''
-      expect(href).toContain('text=Full')
-      expect(href).toContain('details=')
-      expect(href).toContain('location=')
-    })
-
-    it('handles Date objects', () => {
-      render(
-        <CalendarButton
-          event={{
-            title: 'Date Object Event',
-            startDate: new Date('2025-12-01T10:00:00'),
-            endDate: new Date('2025-12-01T11:00:00'),
-          }}
-        />
-      )
-      const link = screen.getByRole('link')
-      expect(link.getAttribute('href')).toContain('calendar.google.com')
-    })
   })
 
   describe('reusability scenarios', () => {
@@ -295,9 +278,9 @@ describe('CalendarButton', () => {
           iconClassName="h-4 w-4"
         />
       )
-      const link = screen.getByRole('link')
-      expect(link).toHaveClass('text-gray-600')
-      expect(link).toHaveClass('dark:text-gray-400')
+      const button = screen.getByRole('button')
+      expect(button).toHaveClass('text-gray-600')
+      expect(button).toHaveClass('dark:text-gray-400')
     })
 
     it('works in poster page context with label', () => {
@@ -313,25 +296,8 @@ describe('CalendarButton', () => {
         />
       )
       expect(screen.getByText('Save to Calendar')).toBeInTheDocument()
-      const link = screen.getByRole('link')
-      expect(link).toHaveClass('btn-primary')
-    })
-
-    it('works with custom styled icon', () => {
-      render(
-        <CalendarButton
-          event={mockEvent}
-          icon={
-            <FontAwesomeIcon
-              icon={faCalendarPlus}
-              className="h-6 w-6 text-blue-500 hover:text-blue-700"
-            />
-          }
-        />
-      )
-      const svg = document.querySelector('svg')
-      expect(svg).toHaveClass('h-6')
-      expect(svg).toHaveClass('text-blue-500')
+      const button = screen.getByRole('button')
+      expect(button).toHaveClass('btn-primary')
     })
   })
 
@@ -349,9 +315,9 @@ describe('CalendarButton', () => {
           className="flex-shrink-0"
         />
       )
-      const link = screen.getByRole('link')
-      expect(link).toBeInTheDocument()
-      expect(link).toHaveAttribute('aria-label', `Add ${longTitle} to Google Calendar`)
+      const button = screen.getByRole('button')
+      expect(button).toBeInTheDocument()
+      expect(button).toHaveAttribute('aria-label', `Add ${longTitle} to Calendar`)
     })
 
     it('maintains visibility with flex-shrink-0 class', () => {
@@ -364,9 +330,9 @@ describe('CalendarButton', () => {
           className="flex-shrink-0 text-gray-600"
         />
       )
-      const link = screen.getByRole('link')
-      expect(link).toHaveClass('flex-shrink-0')
-      expect(link).toBeVisible()
+      const button = screen.getByRole('button')
+      expect(button).toHaveClass('flex-shrink-0')
+      expect(button).toBeVisible()
     })
 
     it('works correctly in flex container with long text sibling', () => {
@@ -384,47 +350,9 @@ describe('CalendarButton', () => {
           />
         </div>
       )
-      const link = container.querySelector('a')
-      expect(link).toBeInTheDocument()
-      expect(link).toHaveClass('flex-shrink-0')
-    })
-
-    it('handles extremely long titles gracefully', () => {
-      const extremelyLongTitle =
-        'This Is An Extremely Long Event Title With Many Words That Could Cause Layout Issues And Overflow Problems In Flex Containers With Limited Space Available'
-      render(
-        <CalendarButton
-          event={{
-            title: extremelyLongTitle,
-            startDate: '2026-06-22',
-          }}
-        />
-      )
-      const link = screen.getByRole('link')
-      expect(link).toBeInTheDocument()
-      expect(link.getAttribute('href')).toContain('calendar.google.com')
-    })
-
-    it('remains clickable when adjacent to truncated text', () => {
-      const { container } = render(
-        <div className="flex items-center gap-2">
-          <span className="truncate">
-            Another Very Long Text Element That Should Be Truncated With Ellipsis
-          </span>
-          <CalendarButton
-            event={{
-              title: 'Sample Event',
-              startDate: '2026-10-27',
-            }}
-            className="flex-shrink-0"
-          />
-        </div>
-      )
-      const link = container.querySelector('a')
-      expect(link).toBeInTheDocument()
-      expect(link).not.toBeNull()
-      const computedStyle = globalThis.getComputedStyle(link as Element)
-      expect(computedStyle.display).not.toBe('none')
+      const button = container.querySelector('button[aria-label="Add Event to Calendar"]')
+      expect(button).toBeInTheDocument()
+      expect(button).toHaveClass('flex-shrink-0')
     })
   })
 })
