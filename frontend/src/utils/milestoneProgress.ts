@@ -1,4 +1,4 @@
-import { IconType } from 'react-icons'
+import type { IconType } from 'react-icons'
 import { FaCircleCheck, FaClock, FaUserGear } from 'react-icons/fa6'
 // helper functions used in about/page.tsx
 export const getMilestoneProgressText = (progress: number): string => {

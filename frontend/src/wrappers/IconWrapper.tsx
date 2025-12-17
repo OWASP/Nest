@@ -1,5 +1,5 @@
 import { ComponentProps } from 'react'
-import { IconType } from 'react-icons'
+import type { IconType } from 'react-icons'
 
 export interface IconWrapperProps extends ComponentProps<'svg'> {
   icon: IconType

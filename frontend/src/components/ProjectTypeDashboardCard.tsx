@@ -3,7 +3,7 @@
 import clsx from 'clsx'
 import Link from 'next/link'
 import { FC } from 'react'
-import { IconType } from 'react-icons'
+import type { IconType } from 'react-icons'
 import SecondaryCard from 'components/SecondaryCard'
 
 const ProjectTypeDashboardCard: FC<{

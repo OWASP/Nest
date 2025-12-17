@@ -5,7 +5,7 @@ import upperFirst from 'lodash/upperFirst'
 import millify from 'millify'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { IconType } from 'react-icons'
+import type { IconType } from 'react-icons'
 import { FaCalendarAlt, FaMapMarkerAlt } from 'react-icons/fa'
 import {
   FaBook,
