@@ -15,10 +15,7 @@ from weasyprint import HTML
 from apps.common.open_ai import OpenAi
 from apps.owasp.models.snapshot import Snapshot
 
-logger: logging.Logger = logging.getLogger(__name__)
-
-# Required to cache fonts
-os.environ["XDG_CACHE_HOME"] = str(Path(tempfile.gettempdir()) / "cache")
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -35,27 +32,31 @@ class Slide:
 
     def render_and_save(self):
         """Render an HTML template as an image."""
-        html_content = render_to_string(self.template_name, self.context)
+        try:
+            html_content = render_to_string(self.template_name, self.context)
 
-        print(f"Rendering slide image: {self.name}")
+            logger.info("Rendering slide image: %s", self.name)
 
-        html = HTML(string=html_content)
+            html = HTML(string=html_content)
 
-        pdf = pdfium.PdfDocument(html.write_pdf())
-        page = pdf[0]
-        bitmap = page.render(scale=2)
-        pil_image = bitmap.to_pil()
+            pdf = pdfium.PdfDocument(html.write_pdf())
+            page = pdf[0]
+            bitmap = page.render(scale=2)
+            pil_image = bitmap.to_pil()
 
-        self.image_output_path.parent.mkdir(parents=True, exist_ok=True)
-        pil_image.save(self.image_output_path, "PNG")
+            self.image_output_path.parent.mkdir(parents=True, exist_ok=True)
+            pil_image.save(self.image_output_path, "PNG")
 
-        page.close()
-        pdf.close()
-        print(f"Saved {self.name} image to path: {self.image_output_path}")
+            page.close()
+            pdf.close()
+            logger.info("Saved %s image to path: %s", self.name, self.image_output_path)
+        except Exception:
+            logger.exception("Error rendering image for %s:", self.name)
+            raise
 
     def generate_transcript(self, open_ai: OpenAi):
         """Generate a transcript."""
-        print(f"Prompt: {self.input}")
+        logger.info("Prompt: %s", self.input)
         prompt = """
         You are a scriptwriter for a tech presentation.
         Your task is to generate a script for a presentation slide.
@@ -65,12 +66,15 @@ class Slide:
         open_ai.set_prompt(prompt)
         open_ai.set_input(self.input)
 
-        self.transcript = open_ai.complete()
-        print(f"Generated slide transcript: {self.transcript}")
+        try:
+            self.transcript = open_ai.complete()
+            logger.info("Generated slide transcript: %s", self.transcript)
+        except Exception:
+            logger.exception("Error generating transcript for %s:", self.name)
 
     def generate_audio(self):
         """Generate audio for the transcript."""
-        # TODO(rudransh-shrivastava): Implement code
+        # TODO(): Implement code
         self.audio_output_path = Path(tempfile.gettempdir()) / "test-audio.mp3"
 
     def generate_video(self):
@@ -89,10 +93,11 @@ class Slide:
                 shortest=None,
             ).run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
 
-            print(f"Generated video for {self.name}")
+            logger.info("Generated video for %s", self.name)
 
-        except ffmpeg.Error as e:
-            print(f"Error generating video for {self.name}: {e} {e.stderr}")
+        except ffmpeg.Error:
+            logger.exception("Error generating video for %s:", self.name)
+            raise
 
 
 class SlideBuilder:
@@ -163,6 +168,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options) -> None:
         """Handle the command execution."""
+        # Required to cache fonts
+        os.environ["XDG_CACHE_HOME"] = str(Path(tempfile.gettempdir()) / "cache")
+
         snapshot_key = options["snapshot_key"]
         output_dir = options["output_dir"]
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -172,10 +180,10 @@ class Command(BaseCommand):
         ).first()
 
         if not snapshot:
-            print(f"No completed snapshot found for key: {snapshot_key}")
+            logger.exception("No completed snapshot found for key: %s", snapshot_key)
             return
 
-        print(f"Generating video for snapshot: {snapshot_key}")
+        logger.info("Generating video for snapshot: %s", snapshot_key)
 
         slide_builder = SlideBuilder(snapshot, output_dir)
         generator = Generator()

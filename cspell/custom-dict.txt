@@ -35,6 +35,7 @@ Whistleblower
 Wörld
 Xmark
 a2eeef
+acodec
 agentic
 ahmedxgouda
 algoliasearch
@@ -78,6 +79,11 @@ kasya
 langgraph
 lhci
 libexpat
+libgobject
+libharfbuzz
+libpango
+libpangoft
+libx
 lighthouseci
 linkify
 lte
@@ -103,9 +109,11 @@ openstreetmap
 owasppcitoolkit
 owtf
 pdfgen
+pdfium
 pentest
 pentesting
 pgvector
+pil
 pnpmrc
 psycopg
 pygithub
@@ -132,6 +140,7 @@ tsc
 unassigning
 unhover
 usefixtures
+vcodec
 webgoat
 winsrdf
 wsgi

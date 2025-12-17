@@ -44,10 +44,10 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk-backend-stage" \
 RUN mkdir -p ${APK_CACHE_DIR} && \
     ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
-# WeasyPrint dependencies: https://doc.courtbouillon.org/weasyprint/stable/first_steps.html#alpine-3-17
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     apk update && apk upgrade && \
     apk add postgresql-client redis \
+    # WeasyPrint dependencies: https://doc.courtbouillon.org/weasyprint/stable/first_steps.html
     so:libgobject-2.0.so.0 so:libpango-1.0.so.0 so:libharfbuzz.so.0 \
     so:libharfbuzz-subset.so.0 so:libfontconfig.so.1 so:libpangoft2-1.0.so.0 \
     ttf-freefont ffmpeg && \
