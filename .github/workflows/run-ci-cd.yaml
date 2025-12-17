@@ -237,6 +237,35 @@ jobs:
       - name: Setup E2E environment
         uses: ./.github/workflows/setup-e2e-environment
 
+      - name: Start Backend in the background
+        run: |
+          docker run -d --rm --name e2e-nest-backend \
+            --env-file backend/.env.e2e.example \
+            --network host \
+            -e DJANGO_DB_HOST=localhost \
+            -p 9000:9000 \
+            owasp/nest:test-backend-e2e-latest \
+            sh -c '
+              python manage.py migrate &&
+              gunicorn wsgi:application --bind 0.0.0.0:9000
+          '
+      
+      - name: Waiting for the backend to be ready
+        run: |
+          timeout 5m bash -c '
+            until wget --spider http://localhost:9000/a; do
+              echo "Waiting for backend..."
+              sleep 5
+            done
+          '
+          echo "Backend is up!"
+
+      - name: Load Postgres data
+        env:
+          PGPASSWORD: nest_user_e2e_password
+        run: |
+          gunzip -c backend/data/nest.sql.gz | psql -h localhost -U nest_user_e2e -d nest_db_e2e
+
       - name: Build frontend end-to-end testing image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
@@ -298,10 +327,6 @@ jobs:
       - name: Setup E2E environment
         uses: ./.github/workflows/setup-e2e-environment
 
-      - name: Stop Existing Backend
-        run: |
-          docker stop e2e-nest-backend || true
-
       - name: Run backend with fuzz environment variables
         run: |
           docker run -d --rm --name fuzz-nest-backend \
@@ -313,6 +338,22 @@ jobs:
             sh -c '
               gunicorn wsgi:application --bind 0.0.0.0:9500
             '
+
+      - name: Waiting for the backend to be ready
+        run: |
+          timeout 5m bash -c '
+            until wget --spider http://localhost:9500/a; do
+              echo "Waiting for backend..."
+              sleep 5
+            done
+          '
+          echo "Backend is up!"
+
+      - name: Load Postgres data
+        env:
+          PGPASSWORD: nest_user_fuzz_password
+        run: |
+          gunzip -c backend/data/nest.sql.gz | psql -h localhost -U nest_user_fuzz -d nest_db_fuzz
 
       - name: Build Fuzz-testing image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
