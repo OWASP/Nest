@@ -3,7 +3,7 @@ import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import { FaRightToBracket } from 'react-icons/fa6'
 import { GetCommunitySnapshotsDocument } from 'types/__generated__/snapshotQueries.generated'
 import type { Snapshot } from 'types/snapshot'
 import SnapshotSkeleton from 'components/skeletons/SnapshotSkeleton'
@@ -41,8 +41,8 @@ const SnapshotsPage: React.FC = () => {
 
   const renderSnapshotCard = (snapshot: Snapshot) => {
     const SubmitButton = {
-      label: 'View Snapshot',
-      icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
+      label: 'View Details',
+      icon: <FaRightToBracket className="h-4 w-4" />,
       onclick: () => handleButtonClick(snapshot),
     }
 

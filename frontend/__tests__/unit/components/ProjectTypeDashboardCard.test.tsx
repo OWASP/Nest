@@ -1,7 +1,9 @@
-import { faHeartPulse, faExclamationTriangle, faSkull } from '@fortawesome/free-solid-svg-icons'
 import { render, screen, fireEvent } from '@testing-library/react'
-import '@testing-library/jest-dom'
 import React from 'react'
+import type { IconType } from 'react-icons'
+import '@testing-library/jest-dom'
+import { FaExclamationTriangle } from 'react-icons/fa'
+import { FaHeartPulse, FaSkull } from 'react-icons/fa6'
 import type { ProjectHealthType } from 'types/project'
 import ProjectTypeDashboardCard from 'components/ProjectTypeDashboardCard'
 
@@ -34,16 +36,17 @@ jest.mock('components/SecondaryCard', () => {
     ...props
   }: {
     title: string
-    icon: unknown
+    icon: IconType
     className?: string
     children: React.ReactNode
     [key: string]: unknown
   }) {
+    const iconName = icon?.name ?? (icon && typeof icon) ?? ''
     return (
       <div
         data-testid="secondary-card"
         data-title={title}
-        data-icon={JSON.stringify(icon)}
+        data-icon={iconName}
         className={className}
         {...props}
       >
@@ -58,7 +61,7 @@ describe('ProjectTypeDashboardCard', () => {
   const baseProps = {
     type: 'healthy' as const,
     count: 42,
-    icon: faHeartPulse,
+    icon: FaHeartPulse,
   }
 
   beforeEach(() => {
@@ -67,7 +70,7 @@ describe('ProjectTypeDashboardCard', () => {
 
   const expectValidTypeRendersWithoutError = (type: ProjectHealthType) => {
     expect(() => {
-      render(<ProjectTypeDashboardCard type={type} count={10} icon={faHeartPulse} />)
+      render(<ProjectTypeDashboardCard type={type} count={10} icon={FaHeartPulse} />)
     }).not.toThrow()
   }
 
@@ -102,21 +105,21 @@ describe('ProjectTypeDashboardCard', () => {
 
   describe('Conditional Rendering Logic', () => {
     it('renders correct title for healthy type', () => {
-      render(<ProjectTypeDashboardCard type="healthy" count={10} icon={faHeartPulse} />)
+      render(<ProjectTypeDashboardCard type="healthy" count={10} icon={FaHeartPulse} />)
 
       expect(screen.getByTestId('card-title')).toHaveTextContent('Healthy')
     })
 
     it('renders correct title for needsAttention type', () => {
       render(
-        <ProjectTypeDashboardCard type="needsAttention" count={5} icon={faExclamationTriangle} />
+        <ProjectTypeDashboardCard type="needsAttention" count={5} icon={FaExclamationTriangle} />
       )
 
       expect(screen.getByTestId('card-title')).toHaveTextContent('Need Attention')
     })
 
     it('renders correct title for unhealthy type', () => {
-      render(<ProjectTypeDashboardCard type="unhealthy" count={2} icon={faSkull} />)
+      render(<ProjectTypeDashboardCard type="unhealthy" count={2} icon={FaSkull} />)
 
       expect(screen.getByTestId('card-title')).toHaveTextContent('Unhealthy')
     })
@@ -135,13 +138,13 @@ describe('ProjectTypeDashboardCard', () => {
     })
 
     it('passes different icons to SecondaryCard correctly', () => {
-      const { rerender } = render(<ProjectTypeDashboardCard {...baseProps} icon={faHeartPulse} />)
+      const { rerender } = render(<ProjectTypeDashboardCard {...baseProps} icon={FaHeartPulse} />)
       let secondaryCard = screen.getByTestId('secondary-card')
-      expect(secondaryCard).toHaveAttribute('data-icon', JSON.stringify(faHeartPulse))
+      expect(secondaryCard).toHaveAttribute('data-icon', 'FaHeartPulse')
 
-      rerender(<ProjectTypeDashboardCard {...baseProps} icon={faExclamationTriangle} />)
+      rerender(<ProjectTypeDashboardCard {...baseProps} icon={FaExclamationTriangle} />)
       secondaryCard = screen.getByTestId('secondary-card')
-      expect(secondaryCard).toHaveAttribute('data-icon', JSON.stringify(faExclamationTriangle))
+      expect(secondaryCard).toHaveAttribute('data-icon', 'FaExclamationTriangle')
     })
 
     it('generates correct href for each type', () => {
@@ -217,7 +220,7 @@ describe('ProjectTypeDashboardCard', () => {
 
       for (const type of types) {
         const { unmount } = render(
-          <ProjectTypeDashboardCard type={type} count={10} icon={faHeartPulse} />
+          <ProjectTypeDashboardCard type={type} count={10} icon={FaHeartPulse} />
         )
         expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
         unmount()
@@ -264,7 +267,7 @@ describe('ProjectTypeDashboardCard', () => {
     })
 
     it('applies conditional CSS classes based on type prop - healthy', () => {
-      render(<ProjectTypeDashboardCard type="healthy" count={10} icon={faHeartPulse} />)
+      render(<ProjectTypeDashboardCard type="healthy" count={10} icon={FaHeartPulse} />)
 
       const secondaryCard = screen.getByTestId('secondary-card')
       const className = secondaryCard.getAttribute('class')
@@ -282,7 +285,7 @@ describe('ProjectTypeDashboardCard', () => {
     })
 
     it('applies conditional CSS classes based on type prop - unhealthy', () => {
-      render(<ProjectTypeDashboardCard type="unhealthy" count={5} icon={faSkull} />)
+      render(<ProjectTypeDashboardCard type="unhealthy" count={5} icon={FaSkull} />)
 
       const secondaryCard = screen.getByTestId('secondary-card')
       const className = secondaryCard.getAttribute('class')
@@ -301,7 +304,7 @@ describe('ProjectTypeDashboardCard', () => {
 
     it('applies conditional CSS classes based on type prop - needsAttention', () => {
       render(
-        <ProjectTypeDashboardCard type="needsAttention" count={3} icon={faExclamationTriangle} />
+        <ProjectTypeDashboardCard type="needsAttention" count={3} icon={FaExclamationTriangle} />
       )
 
       const secondaryCard = screen.getByTestId('secondary-card')
@@ -333,7 +336,7 @@ describe('ProjectTypeDashboardCard', () => {
 
       const secondaryCard = screen.getByTestId('secondary-card')
       expect(secondaryCard).toHaveAttribute('data-title', 'Healthy')
-      expect(secondaryCard).toHaveAttribute('data-icon', JSON.stringify(faHeartPulse))
+      expect(secondaryCard).toHaveAttribute('data-icon', 'FaHeartPulse')
     })
 
     it('renders SecondaryCard with correct content structure', () => {
@@ -370,7 +373,7 @@ describe('ProjectTypeDashboardCard', () => {
     })
 
     it('handles different icon types correctly', () => {
-      const icons = [faHeartPulse, faExclamationTriangle, faSkull]
+      const icons = [FaHeartPulse, FaExclamationTriangle, FaSkull]
 
       for (const icon of icons) {
         const { unmount } = render(
@@ -399,7 +402,7 @@ describe('ProjectTypeDashboardCard', () => {
       const types: Array<ProjectHealthType> = ['healthy', 'needsAttention', 'unhealthy']
 
       for (const [index, type] of types.entries()) {
-        rerender(<ProjectTypeDashboardCard type={type} count={index} icon={faHeartPulse} />)
+        rerender(<ProjectTypeDashboardCard type={type} count={index} icon={FaHeartPulse} />)
         expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
       }
     })

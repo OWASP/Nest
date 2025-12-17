@@ -60,7 +60,7 @@ describe('CalendarButton', () => {
       expect(button.tagName).toBe('BUTTON')
     })
 
-    it('renders default FontAwesome calendar-plus icon', () => {
+    it('renders default calendar-plus icon', () => {
       render(<CalendarButton event={mockEvent} />)
       const svg = document.querySelector('svg')
       expect(svg).toBeInTheDocument()
@@ -68,10 +68,7 @@ describe('CalendarButton', () => {
 
     it('renders custom icon when provided', () => {
       render(
-        <CalendarButton
-          event={mockEvent}
-          icon={<FontAwesomeIcon icon={faCalendarDay} data-testid="custom-icon" />}
-        />
+        <CalendarButton event={mockEvent} icon={<FaCalendarDay data-testid="custom-icon" />} />
       )
       expect(screen.getByTestId('custom-icon')).toBeInTheDocument()
     })
@@ -236,12 +233,9 @@ describe('CalendarButton', () => {
   })
 
   describe('icon prop extensibility', () => {
-    it('accepts FontAwesome icon as JSX', () => {
+    it('accepts icon as JSX', () => {
       render(
-        <CalendarButton
-          event={mockEvent}
-          icon={<FontAwesomeIcon icon={faCalendarPlus} className="custom-icon-class" />}
-        />
+        <CalendarButton event={mockEvent} icon={<FaCalendarPlus className="custom-icon-class" />} />
       )
       const svg = document.querySelector('svg')
       expect(svg).toHaveClass('custom-icon-class')

@@ -1,4 +1,4 @@
-import { faCircleCheck, faClock, faUserGear } from '@fortawesome/free-solid-svg-icons'
+import { FaCircleCheck, FaClock, FaUserGear } from 'react-icons/fa6'
 
 import { getMilestoneProgressIcon, getMilestoneProgressText } from 'utils/milestoneProgress'
 
@@ -18,16 +18,16 @@ describe('milestone progress helpers', () => {
   })
 
   describe('getMilestoneProgressIcon', () => {
-    test('returns faCircleCheck when progress is 100', () => {
-      expect(getMilestoneProgressIcon(100)).toBe(faCircleCheck)
+    test('returns FaCircleCheck when progress is 100', () => {
+      expect(getMilestoneProgressIcon(100)).toBe(FaCircleCheck)
     })
 
-    test('returns faUserGear when progress is between 1 and 99', () => {
-      expect(getMilestoneProgressIcon(50)).toBe(faUserGear)
+    test('returns FaUserGear when progress is between 1 and 99', () => {
+      expect(getMilestoneProgressIcon(50)).toBe(FaUserGear)
     })
 
-    test('returns faClock when progress is 0', () => {
-      expect(getMilestoneProgressIcon(0)).toBe(faClock)
+    test('returns FaClock when progress is 0', () => {
+      expect(getMilestoneProgressIcon(0)).toBe(FaClock)
     })
   })
 })

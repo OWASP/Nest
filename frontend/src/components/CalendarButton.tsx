@@ -3,6 +3,7 @@
 import { faCalendar, faCalendarPlus } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useState } from 'react'
+import { FaCalendar, FaCalendarPlus } from 'react-icons/fa6'
 import type { CalendarButtonProps } from 'types/calendar'
 import getIcsFileUrl from 'utils/getIcsFileUrl'
 
@@ -51,9 +52,12 @@ export default function CalendarButton(props: Readonly<CalendarButtonProps>) {
       title={ariaLabel}
       className={className}
     >
-      {icon || (
-        <FontAwesomeIcon icon={isHovered ? faCalendarPlus : faCalendar} className={iconClassName} />
-      )}
+      {icon ||
+        (isHovered ? (
+          <FaCalendarPlus className={iconClassName} />
+        ) : (
+          <FaCalendar className={iconClassName} />
+        ))}
       {showLabel && <span>{label}</span>}
     </button>
   )

@@ -1,7 +1,7 @@
-import { faBug, faCheckCircle, faClock } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type React from 'react'
 import { useState } from 'react'
+import { FaBug, FaCheckCircle, FaClock } from 'react-icons/fa'
+import { IconWrapper } from 'wrappers/IconWrapper'
 import type { Issue } from 'types/issue'
 import { formatDate } from 'utils/dateFormatter'
 import SecondaryCard from 'components/SecondaryCard'
@@ -31,11 +31,11 @@ const MenteeIssues: React.FC<MenteeIssuesProps> = ({ openIssues, closedIssues, m
   const getStateIcon = (state: string) => {
     switch (state.toLowerCase()) {
       case 'open':
-        return faBug
+        return FaBug
       case 'closed':
-        return faCheckCircle
+        return FaCheckCircle
       default:
-        return faClock
+        return FaClock
     }
   }
 
@@ -43,8 +43,8 @@ const MenteeIssues: React.FC<MenteeIssuesProps> = ({ openIssues, closedIssues, m
     <div className="space-y-3">
       {issues.length === 0 ? (
         <div className="py-8 text-center">
-          <FontAwesomeIcon
-            icon={activeTab === 'open' ? faBug : faCheckCircle}
+          <IconWrapper
+            icon={activeTab === 'open' ? FaBug : FaCheckCircle}
             className="mx-auto mb-2 h-8 w-8 text-gray-400"
           />
           <p className="text-gray-500">No {title.toLowerCase()} issues</p>
@@ -58,7 +58,7 @@ const MenteeIssues: React.FC<MenteeIssuesProps> = ({ openIssues, closedIssues, m
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="mb-2 flex items-center space-x-2">
-                  <FontAwesomeIcon
+                  <IconWrapper
                     icon={getStateIcon(issue.state || 'open')}
                     className="h-4 w-4 text-gray-500"
                   />
@@ -113,7 +113,7 @@ const MenteeIssues: React.FC<MenteeIssuesProps> = ({ openIssues, closedIssues, m
   )
 
   return (
-    <SecondaryCard icon={faBug} title={`Issues for @${menteeHandle}`} className="gap-2">
+    <SecondaryCard icon={FaBug} title={`Issues for @${menteeHandle}`} className="gap-2">
       {/* Tab Navigation */}
       <div className="mb-4 flex border-b border-gray-200">
         <button
@@ -125,7 +125,7 @@ const MenteeIssues: React.FC<MenteeIssuesProps> = ({ openIssues, closedIssues, m
               : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
-          <FontAwesomeIcon icon={faBug} className="mr-2 h-4 w-4" />
+          <IconWrapper icon={FaBug} className="mr-2 h-4 w-4" />
           Open Issues ({openIssues.length})
         </button>
         <button
@@ -137,7 +137,7 @@ const MenteeIssues: React.FC<MenteeIssuesProps> = ({ openIssues, closedIssues, m
               : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
-          <FontAwesomeIcon icon={faCheckCircle} className="mr-2 h-4 w-4" />
+          <IconWrapper icon={FaCheckCircle} className="mr-2 h-4 w-4" />
           Closed Issues ({closedIssues.length})
         </button>
       </div>

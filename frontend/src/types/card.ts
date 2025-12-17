@@ -1,5 +1,5 @@
-import type { IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import type { JSX } from 'react'
+import type { IconType } from 'react-icons'
 import type { Badge } from 'types/badge'
 import type { Button } from 'types/button'
 import type { Chapter } from 'types/chapter'
@@ -22,7 +22,7 @@ export type CardProps = {
   level?: Level
   projectLink?: string
   projectName?: string
-  social?: { title: string; icon: string; url: string }[]
+  social?: { title: string; icon: IconType; url: string }[]
   summary: string
   title: string
   timeline?: {
@@ -35,7 +35,7 @@ export type CardProps = {
 }
 
 type Stats = {
-  icon: IconDefinition
+  icon: IconType
   pluralizedName?: string
   unit?: string
   value: number
