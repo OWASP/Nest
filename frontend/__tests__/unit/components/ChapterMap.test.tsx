@@ -38,6 +38,11 @@ const mockLatLngBounds = {}
 
 const mockIcon = {}
 
+const mockZoomControl = {
+  addTo: jest.fn().mockReturnThis(),
+  remove: jest.fn(),
+}
+
 jest.mock('leaflet', () => ({
   map: jest.fn(() => mockMap),
   marker: jest.fn(() => mockMarker),
@@ -47,6 +52,9 @@ jest.mock('leaflet', () => ({
   latLngBounds: jest.fn(() => mockLatLngBounds),
   // eslint-disable-next-line @typescript-eslint/naming-convention
   Icon: jest.fn(() => mockIcon),
+  control: {
+    zoom: jest.fn(() => mockZoomControl),
+  },
 }))
 
 jest.mock('leaflet/dist/leaflet.css', () => ({}))
@@ -135,6 +143,7 @@ describe('ChapterMap', () => {
         ],
         maxBoundsViscosity: 1.0,
         scrollWheelZoom: false,
+        zoomControl: false,
       })
       expect(mockMap.setView).toHaveBeenCalledWith([20, 0], 2)
     })
@@ -397,6 +406,66 @@ describe('ChapterMap', () => {
       const mapContainer = document.getElementById('chapter-map')
       expect(mapContainer).toBeInTheDocument()
       expect(mapContainer).toHaveAttribute('id', 'chapter-map')
+    })
+  })
+
+  describe('Zoom Control Visibility', () => {
+    beforeEach(() => {
+      jest.clearAllMocks()
+    })
+
+    it('does not show zoom control initially', () => {
+      render(<ChapterMap {...defaultProps} />)
+      expect(L.map).toHaveBeenCalledWith(
+        'chapter-map',
+        expect.objectContaining({
+          zoomControl: false,
+        })
+      )
+    })
+
+    it('shows zoom control when unlock button is clicked', () => {
+      const { getByText } = render(<ChapterMap {...defaultProps} />)
+
+      const overlay = getByText('Unlock map').closest('button')
+      fireEvent.click(overlay)
+
+      expect(L.control.zoom).toHaveBeenCalledWith({ position: 'topleft' })
+      expect(mockZoomControl.addTo).toHaveBeenCalledWith(mockMap)
+    })
+  })
+
+  describe('Share Location Button Visibility', () => {
+    const mockOnShareLocation = jest.fn()
+
+    it('does not show share location button initially when map is not active', () => {
+      const { queryByLabelText } = render(
+        <ChapterMap {...defaultProps} onShareLocation={mockOnShareLocation} />
+      )
+
+      expect(queryByLabelText(/share location/i)).not.toBeInTheDocument()
+    })
+
+    it('shows share location button when map becomes active', () => {
+      const { getByText, getByLabelText } = render(
+        <ChapterMap {...defaultProps} onShareLocation={mockOnShareLocation} />
+      )
+
+      expect(getByText('Unlock map')).toBeInTheDocument()
+
+      const overlay = getByText('Unlock map').closest('button')
+      fireEvent.click(overlay)
+
+      expect(getByLabelText(/share location to find nearby chapters/i)).toBeInTheDocument()
+    })
+
+    it('does not render share location button when onShareLocation is not provided', () => {
+      const { getByText, queryByLabelText } = render(<ChapterMap {...defaultProps} />)
+
+      const overlay = getByText('Unlock map').closest('button')
+      fireEvent.click(overlay)
+
+      expect(queryByLabelText(/share location/i)).not.toBeInTheDocument()
     })
   })
 })

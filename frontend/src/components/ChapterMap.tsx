@@ -29,6 +29,7 @@ const ChapterMap = ({
   const mapRef = useRef<L.Map | null>(null)
   const markerClusterRef = useRef<MarkerClusterGroup | null>(null)
   const userMarkerRef = useRef<L.Marker | null>(null)
+  const zoomControlRef = useRef<L.Control.Zoom | null>(null)
   const initialViewRef = useRef<{ center: L.LatLngExpression; zoom: number } | null>(null)
   const [isMapActive, setIsMapActive] = useState(false)
 
@@ -42,6 +43,7 @@ const ChapterMap = ({
         ],
         maxBoundsViscosity: 1.0,
         scrollWheelZoom: false,
+        zoomControl: false,
       }).setView([20, 0], 2)
 
       initialViewRef.current = {
@@ -192,6 +194,23 @@ const ChapterMap = ({
     }
   }, [geoLocData, showLocal, userLocation])
 
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    if (isMapActive) {
+      if (!zoomControlRef.current) {
+        zoomControlRef.current = L.control.zoom({ position: 'topleft' })
+        zoomControlRef.current.addTo(map)
+      }
+    } else {
+      if (zoomControlRef.current) {
+        zoomControlRef.current.remove()
+        zoomControlRef.current = null
+      }
+    }
+  }, [isMapActive])
+
   return (
     <div className="relative" style={style}>
       <div id="chapter-map" className="h-full w-full" />
@@ -219,28 +238,32 @@ const ChapterMap = ({
           </p>
         </button>
       )}
-      <div className="absolute top-20 left-3 z-[999] w-fit">
-        {onShareLocation && (
-          <Tooltip
-            showArrow
-            content={
-              userLocation ? 'Reset location filter' : 'Share your location to find nearby chapters'
-            }
-            placement="bottom-start"
-          >
-            <Button
-              isIconOnly
-              className="h-[30px] w-[30px] min-w-[30px] rounded-xs bg-white text-gray-700 shadow-lg outline-2 outline-gray-400 hover:bg-gray-100 dark:outline-gray-700"
-              onPress={onShareLocation}
-              aria-label={
-                userLocation ? 'Reset location filter' : 'Share location to find nearby chapters'
+      {isMapActive && (
+        <div className="absolute top-20 left-3 z-[999] w-fit">
+          {onShareLocation && (
+            <Tooltip
+              showArrow
+              content={
+                userLocation
+                  ? 'Reset location filter'
+                  : 'Share your location to find nearby chapters'
               }
+              placement="bottom-start"
             >
-              <FaLocationDot size={14} />
-            </Button>
-          </Tooltip>
-        )}
-      </div>
+              <Button
+                isIconOnly
+                className="h-[30px] w-[30px] min-w-[30px] rounded-xs bg-white text-gray-700 shadow-lg outline-2 outline-gray-400 hover:bg-gray-100 dark:outline-gray-700"
+                onPress={onShareLocation}
+                aria-label={
+                  userLocation ? 'Reset location filter' : 'Share location to find nearby chapters'
+                }
+              >
+                <FaLocationDot size={14} />
+              </Button>
+            </Tooltip>
+          )}
+        </div>
+      )}
     </div>
   )
 }
