@@ -10,10 +10,6 @@ jest.mock('@apollo/client/react', () => ({
   useQuery: jest.fn(),
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
-}))
-
 const mockRouter = {
   push: jest.fn(),
 }

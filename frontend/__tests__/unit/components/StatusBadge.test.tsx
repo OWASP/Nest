@@ -1,9 +1,13 @@
 import { render, screen } from '@testing-library/react'
+import React from 'react'
 import StatusBadge from 'components/StatusBadge'
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ className }: { className: string }) => (
-    <svg className={className} aria-hidden="true" />
+jest.mock('react-icons/fa', () => ({
+  FaArchive: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg className={props.className} aria-hidden="true" />
+  ),
+  FaBan: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg className={props.className} aria-hidden="true" />
   ),
 }))
 

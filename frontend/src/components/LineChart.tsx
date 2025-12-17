@@ -1,7 +1,7 @@
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import dynamic from 'next/dynamic'
 import { useTheme } from 'next-themes'
 import React from 'react'
+import type { IconType } from 'react-icons'
 import type { ApexLineChartSeries } from 'types/healthMetrics'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
@@ -14,7 +14,7 @@ const LineChart: React.FC<{
   title: string
   series: ApexLineChartSeries[]
   labels?: string[]
-  icon?: IconProp
+  icon?: IconType
   round?: boolean
 }> = ({ title, series, labels, icon, round }) => {
   const { theme } = useTheme()

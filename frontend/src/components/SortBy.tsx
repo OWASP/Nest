@@ -1,7 +1,6 @@
-import { faArrowDownWideShort, faArrowUpWideShort } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Select, SelectItem } from '@heroui/select'
 import { Tooltip } from '@heroui/tooltip'
+import { FaArrowDownWideShort, FaArrowUpWideShort } from 'react-icons/fa6'
 import type { SortByProps } from 'types/sortBy'
 
 const SortBy = ({
@@ -69,15 +68,9 @@ const SortBy = ({
             }
           >
             {selectedOrder === 'asc' ? (
-              <FontAwesomeIcon
-                icon={faArrowUpWideShort}
-                className="h-4 w-4 text-gray-600 dark:text-gray-300"
-              />
+              <FaArrowUpWideShort className="h-4 w-4 text-gray-600 dark:text-gray-300" />
             ) : (
-              <FontAwesomeIcon
-                icon={faArrowDownWideShort}
-                className="h-4 w-4 text-gray-600 dark:text-gray-300"
-              />
+              <FaArrowDownWideShort className="h-4 w-4 text-gray-600 dark:text-gray-300" />
             )}
           </button>
         </Tooltip>
