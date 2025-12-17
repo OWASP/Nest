@@ -21,4 +21,5 @@ export type Issue = {
   title: string
   updatedAt?: string | number
   url: string
+  tags?: string[]
 }

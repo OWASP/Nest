@@ -42,6 +42,7 @@ def get_issues(
             "idx_project_url",
             "idx_repository_languages",
             "idx_summary",
+            "idx_tags",
             "idx_title",
             "idx_updated_at",
             "idx_url",

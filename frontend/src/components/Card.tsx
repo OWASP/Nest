@@ -24,6 +24,7 @@ const Card = ({
   social,
   tooltipLabel,
   timeline,
+  tags
 }: CardProps) => {
   return (
     <div className="mx-auto mt-4 mb-2 flex w-full max-w-[95%] flex-col items-start rounded-md border-1 border-gray-200 bg-white p-4 md:max-w-6xl dark:border-gray-700 dark:bg-[#212529]">
@@ -99,6 +100,20 @@ const Card = ({
 
       {/* Project summary */}
       <Markdown content={summary} className="mt-2 w-full text-gray-600 dark:text-gray-300" />
+
+      {/* Tags section */}
+      {tags && tags.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {tags.map((tag, index) => (
+            <span
+              key={`tag-${index}`}
+              className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className="mt-4 w-full">
         {/* Social icons section */}
