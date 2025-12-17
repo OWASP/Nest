@@ -2,6 +2,7 @@
 import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import upperFirst from 'lodash/upperFirst'
+import millify from 'millify'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { IconType } from 'react-icons'
@@ -28,7 +29,6 @@ import type { MainPageData } from 'types/home'
 
 import { formatDate, formatDateRange } from 'utils/dateFormatter'
 import AnchorTitle from 'components/AnchorTitle'
-import AnimatedCounter from 'components/AnimatedCounter'
 import CalendarButton from 'components/CalendarButton'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import LeadersList from 'components/LeadersList'
@@ -368,9 +368,7 @@ export default function Home() {
           {counterData.map((stat) => (
             <div key={stat.label}>
               <SecondaryCard className="text-center">
-                <div className="mb-2 text-3xl font-bold text-blue-400">
-                  <AnimatedCounter end={stat.value} duration={2} />+
-                </div>
+                <div className="mb-2 text-3xl font-bold text-blue-400">{millify(stat.value)}+</div>
                 <div className="text-gray-600 dark:text-gray-400">{stat.label}</div>
               </SecondaryCard>
             </div>

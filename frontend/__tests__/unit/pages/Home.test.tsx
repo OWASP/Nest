@@ -176,17 +176,6 @@ describe('Home', () => {
     })
   })
 
-  test('renders AnimatedCounter components', async () => {
-    render(<Home />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Active Projects')).toBeInTheDocument()
-      expect(screen.getByText('Contributors')).toBeInTheDocument()
-      expect(screen.getByText('Local Chapters')).toBeInTheDocument()
-      expect(screen.getByText('Countries')).toBeInTheDocument()
-    })
-  })
-
   test('handles missing data gracefully', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockGraphQLData,
@@ -266,18 +255,21 @@ describe('Home', () => {
     ]
     const stats = mockGraphQLData.statsOverview
 
-    await waitFor(() => {
-      for (const header of headers) {
-        expect(screen.getByText(header)).toBeInTheDocument()
-      }
-    })
+    const statTexts = [
+      millify(stats.activeProjectsStats) + '+',
+      millify(stats.activeChaptersStats) + '+',
+      millify(stats.contributorsStats) + '+',
+      millify(stats.countriesStats) + '+',
+      millify(stats.slackWorkspaceStats) + '+',
+    ]
 
-    // Wait for animated counters to complete (2 seconds animation)
-    // Note: The "+" is rendered separately from the number, so we check for the number only
     await waitFor(
       () => {
-        for (const value of Object.values(stats)) {
-          expect(screen.getByText(millify(value), { exact: false })).toBeInTheDocument()
+        for (const stat of statTexts) {
+          expect(screen.getByText(stat)).toBeInTheDocument()
+        }
+        for (const header of headers) {
+          expect(screen.getByText(header)).toBeInTheDocument()
         }
       },
       { timeout: 3000 }
