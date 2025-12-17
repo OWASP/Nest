@@ -249,7 +249,7 @@ jobs:
               python manage.py migrate &&
               gunicorn wsgi:application --bind 0.0.0.0:9000
           '
-      
+
       - name: Waiting for the backend to be ready
         run: |
           timeout 5m bash -c '
