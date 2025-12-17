@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=1920, height=1080">
+        <style>
+            @page {
+                size: 1920px 1080px;
+                margin: 0;
+            }
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Inter', sans-serif;
+                width: 1920px;
+                height: 1080px;
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+                color: white;
+            }
+
+            .slide {
+                width: 100%;
+                height: 100%;
+            }
+
+            .flex {
+                display: flex;
+            }
+
+            .flex-col {
+                flex-direction: column;
+            }
+
+            .items-center {
+                align-items: center;
+            }
+
+            .justify-center {
+                justify-content: center;
+            }
+
+            .text-center {
+                text-align: center;
+            }
+
+            .h-full {
+                height: 100%;
+            }
+
+            .p-12 {
+                padding: 3rem;
+            }
+
+            .mt-8 {
+                margin-top: 2rem;
+            }
+
+            .text-4xl {
+                font-size: 2.25rem;
+                line-height: 2.5rem;
+            }
+
+            .text-6xl {
+                font-size: 3.75rem;
+                line-height: 1;
+            }
+
+            .font-bold {
+                font-weight: 700;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="slide">
+            {% block content %}{% endblock %}
+        </div>
+    </body>
+</html>

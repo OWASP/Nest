@@ -50,6 +50,10 @@ strawberry-graphql = { extras = [ "django" ], version = "^0.287.0" }
 strawberry-graphql-django = "^0.71.0"
 thefuzz = "^0.22.1"
 pyparsing = "^3.2.3"
+weasyprint = "^67.0"
+pillow = "^12.0.0"
+pypdfium2 = "^5.2.0"
+ffmpeg-python = "^0.2.0"
 
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.36.4"
