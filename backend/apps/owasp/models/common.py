@@ -203,7 +203,7 @@ class RepositoryBasedEntityModel(models.Model):
                     name
                     for name in itertools.chain(
                         *re.findall(
-                            r"[-*]\s*\[\s*([^(]+?)\s*(?:\([^)]*\))?\]|\*\s*([\w\s]+)", line.strip()
+                            r"[-*]\s*(?:\[\s*([^(]+?)(?:\s*\([^)]*\))?\]|\s*([\w\s]+))", line.strip()
                         )
                     )
                     if name.strip()
