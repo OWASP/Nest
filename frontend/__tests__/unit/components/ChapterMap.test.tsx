@@ -266,24 +266,24 @@ describe('ChapterMap', () => {
   })
 
   describe('Interactive Overlay', () => {
-    it('displays overlay with "Click to interact with map" message initially', () => {
+    it('displays overlay with "Unlock map" message initially', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
-      expect(getByText('Click to interact with map')).toBeInTheDocument()
+      expect(getByText('Unlock map')).toBeInTheDocument()
     })
 
     it('removes overlay when clicked', () => {
       const { getByText, queryByText } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Click to interact with map').closest('button')
+      const overlay = getByText('Unlock map').closest('button')
       fireEvent.click(overlay!)
 
-      expect(queryByText('Click to interact with map')).not.toBeInTheDocument()
+      expect(queryByText('Unlock map')).not.toBeInTheDocument()
     })
 
     it('enables scroll wheel zoom when overlay is clicked', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Click to interact with map').closest('button')
+      const overlay = getByText('Unlock map').closest('button')
       fireEvent.click(overlay!)
 
       expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
@@ -292,7 +292,7 @@ describe('ChapterMap', () => {
     it('handles keyboard interaction with Enter key', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Click to interact with map').closest('button')
+      const overlay = getByText('Unlock map').closest('button')
       fireEvent.keyDown(overlay!, { key: 'Enter' })
 
       expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
@@ -301,7 +301,7 @@ describe('ChapterMap', () => {
     it('handles keyboard interaction with Space key', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Click to interact with map').closest('button')
+      const overlay = getByText('Unlock map').closest('button')
       fireEvent.keyDown(overlay!, { key: ' ' })
 
       expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
@@ -310,9 +310,9 @@ describe('ChapterMap', () => {
     it('has proper accessibility attributes', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Click to interact with map').closest('button')
+      const overlay = getByText('Unlock map').closest('button')
       expect(overlay).toHaveAttribute('tabIndex', '0')
-      expect(overlay).toHaveAttribute('aria-label', 'Click to interact with map')
+      expect(overlay).toHaveAttribute('aria-label', 'Unlock map')
     })
   })
 
