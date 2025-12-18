@@ -8,6 +8,7 @@ CCSP
 CISSP
 Cañón
 DRF
+ELEVENLABS
 GBP
 GFKs
 GSOC
@@ -59,6 +60,7 @@ defectdojo
 demojize
 dismissable
 dsn
+elevenlabs
 env
 facebookexternalhit
 gamesec

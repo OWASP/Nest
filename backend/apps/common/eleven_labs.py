@@ -19,7 +19,7 @@ class ElevenLabs:
 
     def __init__(
         self,
-        voice_id: str = "Xb7hH8MSUJpSbSDYk0k2",
+        voice_id: str = "Xb7hH8MSUJpSbSDYk0k2",  # cspell:disable-line
         model_id: str = "eleven_multilingual_v2",
         output_format: str = "mp3_44100_128",
     ) -> None:
