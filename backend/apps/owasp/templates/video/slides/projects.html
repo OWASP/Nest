@@ -1,0 +1,41 @@
+{% extends "video/base.html" %}
+{% block content %}
+    {% with project_count=projects|length %}
+        <div class="flex h-full flex-col p-12"
+             style="padding-left: 6rem;
+                    padding-right: 6rem">
+            <h1 class="text-6xl font-bold mb-12 text-center">{{ title }}</h1>
+            {% if project_count <= 15 %}
+                <div style="display: flex;
+                            flex-wrap: wrap;
+                            gap: 1rem;
+                            justify-content: center;
+                            width: 100%">
+                    {% for project in projects %}
+                        <div class="rounded-lg border-2 bg-card p-4"
+                             style="width: 24rem;
+                                    flex-shrink: 0">
+                            <div class="text-2xl font-bold text-owasp-blue mb-4">{{ project.name }}</div>
+                            {% if project.leaders %}<div class="text-lg text-gray-300">{{ project.leaders }}</div>{% endif %}
+                            {% if project.created_at %}<div class="text-lg text-gray-300 mt-2">{{ project.created_at }}</div>{% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="display: flex;
+                            flex-wrap: wrap;
+                            gap: 1rem;
+                            justify-content: center;
+                            width: 100%">
+                    {% for project in projects|slice:":25" %}
+                        <div class="rounded-lg border-2 bg-card p-4"
+                             style="width: 19rem;
+                                    flex-shrink: 0">
+                            <div class="text-xl font-bold text-owasp-blue">{{ project.name }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    {% endwith %}
+{% endblock %}

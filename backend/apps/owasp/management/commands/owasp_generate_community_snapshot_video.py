@@ -151,7 +151,7 @@ class Slide:
 
 
 class SlideBuilder:
-    def __init__(self, snapshot, output_dir: Path) -> None:
+    def __init__(self, snapshot: Snapshot, output_dir: Path) -> None:
         """Initialize SlideBuilder."""
         self.snapshot = snapshot
         self.output_dir = output_dir
@@ -172,6 +172,45 @@ class SlideBuilder:
             template_name="video/slides/intro.html",
             transcript=f"Hello everyone! welcome to the OWASP Nest {month_name} Snapshot",
             video_output_path=self.output_dir / "01_intro.mp4",
+        )
+
+    def create_projects_slide(self) -> Slide:
+        """Create a projects slide."""
+        print("Generating projects slide for snapshot")
+
+        new_projects = list(self.snapshot.new_projects.all())
+        project_count = len(new_projects)
+
+        projects_data = [
+            {
+                "created_at": project.created_at.strftime("%b %d, %Y")
+                if project.created_at
+                else None,
+                "leaders": ", ".join(project.leaders_raw) if project.leaders_raw else None,
+                "name": project.name,
+            }
+            for project in new_projects
+        ]
+
+        project_names = [p.name.replace("OWASP ", "") for p in new_projects]
+        formatted_project_names = (
+            f"{', '.join(project_names[:-1])}, and {project_names[-1]}"
+            if len(project_names) > 1
+            else project_names[0]
+        )
+
+        return Slide(
+            audio_output_path=self.output_dir / "02_projects.mp3",
+            context={
+                "title": f"New Projects ({project_count})",
+                "projects": projects_data,
+            },
+            image_output_path=self.output_dir / "02_projects.png",
+            name="Projects Slide",
+            template_name="video/slides/projects.html",
+            transcript=f"This time we welcomed {project_count} new projects "
+            f"including OWASP {formatted_project_names}.",
+            video_output_path=self.output_dir / "02_projects.mp4",
         )
 
 
@@ -241,5 +280,6 @@ class Command(BaseCommand):
         generator = Generator()
 
         generator.append_slide(slide_builder.create_intro_slide())
+        generator.append_slide(slide_builder.create_projects_slide())
 
         generator.generate_video()
