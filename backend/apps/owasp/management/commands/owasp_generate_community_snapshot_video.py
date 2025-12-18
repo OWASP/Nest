@@ -32,10 +32,12 @@ class Slide:
 
     def render_and_save(self):
         """Render an HTML template as an image."""
+        page = None
+        pdf = None
         try:
             html_content = render_to_string(self.template_name, self.context)
 
-            logger.info("Rendering slide image: %s", self.name)
+            print("Rendering slide image")
 
             html = HTML(string=html_content)
 
@@ -47,16 +49,19 @@ class Slide:
             self.image_output_path.parent.mkdir(parents=True, exist_ok=True)
             pil_image.save(self.image_output_path, "PNG")
 
-            page.close()
-            pdf.close()
-            logger.info("Saved %s image to path: %s", self.name, self.image_output_path)
+            print("Saved image to path:", self.image_output_path)
         except Exception:
             logger.exception("Error rendering image for %s:", self.name)
             raise
+        finally:
+            if page is not None:
+                page.close()
+            if pdf is not None:
+                pdf.close()
 
     def generate_transcript(self, open_ai: OpenAi):
         """Generate a transcript."""
-        logger.info("Prompt: %s", self.input)
+        print("Prompt:", self.input)
         prompt = """
         You are a scriptwriter for a tech presentation.
         Your task is to generate a script for a presentation slide.
@@ -65,12 +70,13 @@ class Slide:
         """
         open_ai.set_prompt(prompt)
         open_ai.set_input(self.input)
-
+        return
         try:
             self.transcript = open_ai.complete()
-            logger.info("Generated slide transcript: %s", self.transcript)
+            print("Generated slide transcript: %s", self.transcript)
         except Exception:
             logger.exception("Error generating transcript for %s:", self.name)
+            raise
 
     def generate_audio(self):
         """Generate audio for the transcript."""
@@ -93,7 +99,7 @@ class Slide:
                 shortest=None,
             ).run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
 
-            logger.info("Generated video for %s", self.name)
+            print("Generated video for:", self.name)
 
         except ffmpeg.Error:
             logger.exception("Error generating video for %s:", self.name)
@@ -108,6 +114,7 @@ class SlideBuilder:
 
     def create_intro_slide(self) -> Slide:
         """Create an introduction slide."""
+        print("Generating introduction slide for snapshot")
         month_name = self.snapshot.start_at.strftime("%B")
         return Slide(
             audio_output_path=self.output_dir / "01_intro.mp3",
@@ -180,10 +187,10 @@ class Command(BaseCommand):
         ).first()
 
         if not snapshot:
-            logger.exception("No completed snapshot found for key: %s", snapshot_key)
+            logger.error("No completed snapshot found for key: %s", snapshot_key)
             return
 
-        logger.info("Generating video for snapshot: %s", snapshot_key)
+        print("Generating video for snapshot:", snapshot_key)
 
         slide_builder = SlideBuilder(snapshot, output_dir)
         generator = Generator()
