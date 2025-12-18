@@ -32,6 +32,16 @@ export default (async (): Promise<CodegenConfig> => {
             inputValue: false,
           },
           defaultScalarType: 'unknown',
+          scalars: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            Date: 'string | number',
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            DateTime: 'string | number',
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            UUID: 'string',
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            JSON: 'Record<string, unknown> | unknown[]',
+          },
           // Apollo Client always includes `__typename` fields
           nonOptionalTypename: true,
           // Apollo Client doesn't add the `__typename` field to root types so
