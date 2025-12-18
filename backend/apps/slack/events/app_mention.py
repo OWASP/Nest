@@ -2,7 +2,6 @@
 
 import logging
 
-from apps.slack.blocks import markdown
 from apps.slack.common.handlers.ai import get_blocks
 from apps.slack.events.event import EventBase
 from apps.slack.models import Conversation
@@ -45,17 +44,25 @@ class AppMention(EventBase):
 
         thread_ts = event.get("thread_ts") or event.get("ts")
 
-        placeholder = client.chat_postMessage(
-            channel=channel_id,
-            blocks=[markdown("⏳ Thinking…")],
-            text="Thinking…",
-            thread_ts=thread_ts,
-        )
+        # Add 👀 reaction to indicate bot is processing
+        try:
+            client.reactions_add(
+                channel=channel_id,
+                timestamp=thread_ts,
+                name="eyes",
+            )
+        except Exception as e:
+            logger.warning(f"Failed to add reaction: {e}")
 
-        reply_blocks = get_blocks(query=query)
-        client.chat_update(
-            channel=channel_id,
-            ts=placeholder["ts"],
-            blocks=reply_blocks,
-            text=query,
-        )
+        # Generate and post AI response
+        try:
+            reply_blocks = get_blocks(query=query)
+            client.chat_postMessage(
+                channel=channel_id,
+                blocks=reply_blocks,
+                text=query,
+                thread_ts=thread_ts,
+            )
+        except Exception as e:
+            logger.error(f"Failed to generate or post AI response: {e}")
+            # Reaction stays visible even if AI response fails

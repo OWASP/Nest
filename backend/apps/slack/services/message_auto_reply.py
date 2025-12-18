@@ -41,6 +41,16 @@ def generate_ai_reply_if_unanswered(message_id: int):
     except SlackApiError:
         logger.exception("Error checking for replies for message")
 
+    # Add 👀 reaction to indicate bot is processing
+    try:
+        client.reactions_add(
+            channel=message.conversation.slack_channel_id,
+            timestamp=message.slack_message_id,
+            name="eyes",
+        )
+    except SlackApiError as e:
+        logger.warning(f"Failed to add reaction: {e}")
+
     ai_response_text = process_ai_query(query=message.text)
     if not ai_response_text:
         return

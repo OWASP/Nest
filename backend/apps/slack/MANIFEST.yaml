@@ -122,6 +122,7 @@ oauth_config:
       - groups:write
       - channels:manage
       - channels:history
+      - reactions:write
 settings:
   event_subscriptions:
     request_url: https://nest.owasp.org/integrations/slack/events/
