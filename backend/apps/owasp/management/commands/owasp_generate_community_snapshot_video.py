@@ -100,7 +100,7 @@ class Slide:
 
         transcript = open_ai.complete()
         if not transcript:
-            logger.exception("Error generating transcript for %s", self.name)
+            logger.error("Error generating transcript for %s", self.name)
             return
 
         self.transcript = transcript
