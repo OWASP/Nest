@@ -12,6 +12,7 @@ from django.core.management.base import BaseCommand
 from django.template.loader import render_to_string
 from weasyprint import HTML
 
+from apps.common.eleven_labs import ElevenLabs
 from apps.common.open_ai import OpenAi
 from apps.owasp.models.snapshot import Snapshot
 
@@ -51,7 +52,7 @@ class Slide:
 
             print("Saved image to path:", self.image_output_path)
         except Exception:
-            logger.exception("Error rendering image for %s:", self.name)
+            logger.exception("Error rendering image for: %s", self.name)
             raise
         finally:
             if page is not None:
@@ -70,18 +71,34 @@ class Slide:
         """
         open_ai.set_prompt(prompt)
         open_ai.set_input(self.input)
-        return
+
         try:
             self.transcript = open_ai.complete()
-            print("Generated slide transcript: %s", self.transcript)
+            print("Generated slide transcript:", self.transcript)
         except Exception:
-            logger.exception("Error generating transcript for %s:", self.name)
+            logger.exception("Error generating transcript for %s", self.name)
             raise
 
-    def generate_audio(self):
-        """Generate audio for the transcript."""
-        # TODO(): Implement code
-        self.audio_output_path = Path(tempfile.gettempdir()) / "test-audio.mp3"
+    def generate_audio(self, eleven_labs: ElevenLabs):
+        """Generate audio for the transcript.
+
+        Args:
+            eleven_labs (ElevenLabs): ElevenLabs client instance.
+
+        Raises:
+            RuntimeError: If transcript is missing or audio generation fails.
+
+        """
+        if not self.transcript:
+            msg = f"No transcript available for {self.name}"
+            raise RuntimeError(msg)
+
+        eleven_labs.set_text(self.transcript)
+        if eleven_labs.generate_to_file(self.audio_output_path):
+            print("Generated audio at path:", self.audio_output_path)
+        else:
+            msg = f"Failed to generate audio for {self.name}"
+            raise RuntimeError(msg)
 
     def generate_video(self):
         """Generate video for the slide."""
@@ -134,8 +151,9 @@ class SlideBuilder:
 class Generator:
     def __init__(self):
         """Initialize Video Generator."""
-        self.slides: list[Slide] = []
+        self.eleven_labs = ElevenLabs()
         self.open_ai = OpenAi()
+        self.slides: list[Slide] = []
 
     def append_slide(self, slide: Slide):
         """Append a slide to list."""
@@ -146,7 +164,7 @@ class Generator:
         for slide in self.slides:
             slide.render_and_save()
             slide.generate_transcript(self.open_ai)
-            slide.generate_audio()
+            slide.generate_audio(self.eleven_labs)
             slide.generate_video()
 
 
