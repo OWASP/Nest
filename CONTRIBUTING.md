@@ -84,6 +84,18 @@ Before contributing, ensure you have the following installed:
 - **Example Value**: `https://nest.owasp.org/idx/`
 - **Usage**: Used for services interacting with indexing/search features.
 
+#### `NEXT_PUBLIC_POSTHOG_KEY`
+
+- **Description**: PostHog project API key for frontend analytics.
+- **Usage**: Required for tracking user interactions in production/staging.
+
+#### `NEXT_PUBLIC_POSTHOG_HOST`
+
+- **Description**: PostHog API host URL.
+- **Example Value**: `https://us.i.posthog.com`
+- **Usage**: Specifies the PostHog instance endpoint for frontend.
+
+
 #### `NEXT_PUBLIC_RELEASE_VERSION`
 
 - **Description**: The current release version of the application.
@@ -171,6 +183,17 @@ Before contributing, ensure you have the following installed:
 
 - **Description**: The secret key for OpenAI API.
 - **Usage**: Used for OpenAI integration.
+
+#### `DJANGO_POSTHOG_API_KEY`
+
+- **Description**: PostHog project API key for backend analytics.
+- **Usage**: Used in production and staging environments for user analytics tracking.
+
+#### `DJANGO_POSTHOG_HOST`
+
+- **Description**: PostHog API host URL.
+- **Example Value**: `https://us.i.posthog.com`
+- **Usage**: Specifies the PostHog instance endpoint.
 
 #### `DJANGO_PUBLIC_IP_ADDRESS`
 
