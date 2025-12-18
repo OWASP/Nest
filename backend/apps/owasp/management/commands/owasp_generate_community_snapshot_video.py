@@ -170,7 +170,7 @@ class SlideBuilder:
             image_output_path=self.output_dir / "01_intro.png",
             name="Intro Slide",
             template_name="video/slides/intro.html",
-            transcript=f"Hello everyone! welcome to the OWASP Nest {month_name} Snapshot",
+            transcript=f"Hey everyone! Welcome to the OWASP Nest {month_name} Snapshot...",
             video_output_path=self.output_dir / "01_intro.mp4",
         )
 
@@ -208,7 +208,7 @@ class SlideBuilder:
             image_output_path=self.output_dir / "02_projects.png",
             name="Projects Slide",
             template_name="video/slides/projects.html",
-            transcript=f"This time we welcomed {project_count} new projects "
+            transcript=f"So... this time we've welcomed {project_count} new projects, "
             f"including OWASP {formatted_project_names}.",
             video_output_path=self.output_dir / "02_projects.mp4",
         )
@@ -217,7 +217,7 @@ class SlideBuilder:
 class Generator:
     def __init__(self) -> None:
         """Initialize Video Generator."""
-        self.eleven_labs = ElevenLabs()
+        self.eleven_labs = ElevenLabs(stability=0.4, style=0.1)
         self.open_ai = OpenAi()
         self.slides: list[Slide] = []
 
@@ -225,13 +225,29 @@ class Generator:
         """Append a slide to list."""
         self.slides.append(slide)
 
-    def generate_video(self) -> None:
+    def generate_video(self, output_path: Path) -> None:
         """Generate video."""
         for slide in self.slides:
             slide.render_and_save()
             slide.generate_transcript(self.open_ai)
             slide.generate_audio(self.eleven_labs)
             slide.generate_video()
+
+        self._combine_videos(output_path)
+
+    def _combine_videos(self, output_path: Path) -> None:
+        """Combine all slide videos into final video."""
+        inputs = [ffmpeg.input(str(slide.video_output_path)) for slide in self.slides]
+
+        video_streams = [inp.video for inp in inputs]
+        audio_streams = [inp.audio for inp in inputs]
+
+        joined_video = ffmpeg.concat(*video_streams, v=1, a=0)
+        joined_audio = ffmpeg.concat(*audio_streams, v=0, a=1)
+
+        ffmpeg.output(joined_video, joined_audio, str(output_path)).overwrite_output().run(
+            capture_stdout=True, capture_stderr=True
+        )
 
 
 class Command(BaseCommand):
@@ -282,4 +298,4 @@ class Command(BaseCommand):
         generator.append_slide(slide_builder.create_intro_slide())
         generator.append_slide(slide_builder.create_projects_slide())
 
-        generator.generate_video()
+        generator.generate_video(output_dir / f"{snapshot_key}_snapshot.mp4")
