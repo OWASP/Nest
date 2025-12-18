@@ -456,7 +456,8 @@ describe('EntityActions', () => {
     it('prevents event propagation on button click', () => {
       const mockParentClick = jest.fn()
       render(
-        <div role="button" tabIndex={0} onClick={mockParentClick} onKeyDown={() => {}}>
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+        <div onClick={mockParentClick}>
           <EntityActions type="program" programKey="test-program" />
         </div>
       )
@@ -469,7 +470,8 @@ describe('EntityActions', () => {
     it('prevents event propagation on menu item click', () => {
       const mockParentClick = jest.fn()
       render(
-        <div role="button" tabIndex={0} onClick={mockParentClick} onKeyDown={() => {}}>
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+        <div onClick={mockParentClick}>
           <EntityActions type="program" programKey="test-program" />
         </div>
       )
