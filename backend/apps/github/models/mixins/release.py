@@ -18,7 +18,6 @@ class ReleaseIndexMixin:
     @property
     def idx_author(self) -> list[dict[str, str]]:
         """Return author for indexing."""
-        """Get top contributors."""
         return (
             [
                 {
