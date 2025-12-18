@@ -27,10 +27,21 @@ class Slide:
     audio_output_path: Path
     context: dict[str, Any]
     image_output_path: Path
-    video_output_path: Path
-    input: str
     name: str
     template_name: str
+    video_output_path: Path
+    transcript: str | None = None
+    transcript_input: str | None = None
+
+    def __post_init__(self) -> None:
+        """Validate fields."""
+        if not self.transcript and not self.transcript_input:
+            msg = f"Slide '{self.name}' must have either transcript or transcript_input"
+            raise ValueError(msg)
+
+        if self.transcript and self.transcript_input:
+            msg = f"Slide '{self.name}' cannot have both transcript and transcript_input"
+            raise ValueError(msg)
 
     def render_and_save(self) -> None:
         """Render an HTML template as an image."""
@@ -62,23 +73,38 @@ class Slide:
                 pdf.close()
 
     def generate_transcript(self, open_ai: OpenAi) -> None:
-        """Generate a transcript."""
-        print("Prompt:", self.input)
+        """Generate a transcript.
+
+        Args:
+            open_ai (OpenAi): OpenAi client instance.
+
+        """
+        if self.transcript:
+            print("Using pre-set transcript:", self.transcript)
+            return
+        if not self.transcript_input:
+            logger.error("No transcript_input available for %s", self.name)
+            return
+
+        print("Generating transcript from prompt:", self.transcript_input)
+
         prompt = """
         You are a scriptwriter for a tech presentation.
         Your task is to generate a script for a presentation slide.
         The script should be simple and direct.
         Do not add any extra words, introduction or conclusion.
+        The output text will be the input text for ElevenLabs API.
         """
         open_ai.set_prompt(prompt)
-        open_ai.set_input(self.input)
+        open_ai.set_input(self.transcript_input)
 
-        try:
-            self.transcript = open_ai.complete()
-            print("Generated slide transcript:", self.transcript)
-        except Exception:
+        transcript = open_ai.complete()
+        if not transcript:
             logger.exception("Error generating transcript for %s", self.name)
-            raise
+            return
+
+        self.transcript = transcript
+        print("Generated slide transcript:", self.transcript)
 
     def generate_audio(self, eleven_labs: ElevenLabs) -> None:
         """Generate audio for the transcript.
@@ -142,9 +168,9 @@ class SlideBuilder:
                 "month_name": month_name,
             },
             image_output_path=self.output_dir / "01_intro.png",
-            input=f"Hello everyone! welcome to the OWASP Nest {month_name} Snapshot",
             name="Intro Slide",
             template_name="video/slides/intro.html",
+            transcript=f"Hello everyone! welcome to the OWASP Nest {month_name} Snapshot",
             video_output_path=self.output_dir / "01_intro.mp4",
         )
 
