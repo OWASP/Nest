@@ -2,12 +2,18 @@
  * @jest-environment jsdom
  */
 
+import { addToast } from '@heroui/toast'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { FaCalendarDay, FaCalendarPlus } from 'react-icons/fa6'
 import getIcsFileUrl from 'utils/getIcsFileUrl'
+import slugify from 'utils/slugify'
 import CalendarButton from 'components/CalendarButton'
 
 jest.mock('utils/getIcsFileUrl')
+
+jest.mock('@heroui/toast', () => ({
+  addToast: jest.fn(),
+}))
 
 const mockEvent = {
   title: 'Test Event',
@@ -94,7 +100,7 @@ describe('CalendarButton', () => {
       )?.value
 
       expect(createdLink).toBeDefined()
-      expect(createdLink.download).toBe('invite.ics')
+      expect(createdLink.download).toBe(`${slugify(mockEvent.title)}.ics`)
 
       expect(appendSpy).toHaveBeenCalledWith(createdLink)
 
@@ -115,7 +121,14 @@ describe('CalendarButton', () => {
       fireEvent.click(button)
 
       await waitFor(() => {
-        expect(globalThis.alert).toHaveBeenCalledWith('Could not download calendar file.')
+        expect(addToast).toHaveBeenCalledWith({
+          description: "couldn't export your calendar. Please try again.",
+          title: 'Download Failed',
+          timeout: 3000,
+          shouldShowTimeoutProgress: true,
+          color: 'danger',
+          variant: 'solid',
+        })
       })
 
       expect(button).not.toBeDisabled()

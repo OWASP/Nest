@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import { mockHomeData } from '@e2e/data/mockHomeData'
 import { test, expect } from '@playwright/test'
+import slugify from 'utils/slugify'
 
 test.describe('Calendar Export Functionality', () => {
   test.beforeEach(async ({ page }) => {
@@ -31,7 +32,7 @@ test.describe('Calendar Export Functionality', () => {
 
     const download = await downloadPromise
 
-    expect(download.suggestedFilename()).toBe('invite.ics')
+    expect(download.suggestedFilename()).toBe(`${slugify('Event 1')}.ics`)
 
     const path = await download.path()
     expect(path, 'Expected Playwright to provide a download path').toBeTruthy()

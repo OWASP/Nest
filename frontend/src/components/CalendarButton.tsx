@@ -1,9 +1,11 @@
 'use client'
 
+import { addToast } from '@heroui/toast'
 import { useState } from 'react'
 import { FaCalendar, FaCalendarPlus } from 'react-icons/fa6'
 import type { CalendarButtonProps } from 'types/calendar'
 import getIcsFileUrl from 'utils/getIcsFileUrl'
+import slugify from 'utils/slugify'
 
 export default function CalendarButton(props: Readonly<CalendarButtonProps>) {
   const [isHovered, setIsHovered] = useState(false)
@@ -27,11 +29,18 @@ export default function CalendarButton(props: Readonly<CalendarButtonProps>) {
       url = await getIcsFileUrl(event)
       link = document.createElement('a')
       link.href = url
-      link.setAttribute('download', 'invite.ics')
+      link.setAttribute('download', `${slugify(event.title)}.ics`)
       document.body.appendChild(link)
       link.click()
     } catch {
-      alert('Could not download calendar file.')
+      addToast({
+        description: "couldn't export your calendar. Please try again.",
+        title: 'Download Failed',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+        variant: 'solid',
+      })
     } finally {
       if (link) link.remove()
       if (url) URL.revokeObjectURL(url)
@@ -43,12 +52,12 @@ export default function CalendarButton(props: Readonly<CalendarButtonProps>) {
     <button
       type="button"
       onClick={handleDownload}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       disabled={isDownloading}
       aria-label={ariaLabel}
       title={ariaLabel}
-      className={className}
+      className={`${className} flex items-center`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {icon ||
         (isHovered ? (
