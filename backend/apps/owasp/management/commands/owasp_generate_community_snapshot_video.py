@@ -5,6 +5,7 @@ import os
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import ffmpeg
 import pypdfium2 as pdfium
@@ -24,14 +25,14 @@ class Slide:
     """Represents a single video slide."""
 
     audio_output_path: Path
-    context: dict
+    context: dict[str, Any]
     image_output_path: Path
     video_output_path: Path
     input: str
     name: str
     template_name: str
 
-    def render_and_save(self):
+    def render_and_save(self) -> None:
         """Render an HTML template as an image."""
         page = None
         pdf = None
@@ -60,7 +61,7 @@ class Slide:
             if pdf is not None:
                 pdf.close()
 
-    def generate_transcript(self, open_ai: OpenAi):
+    def generate_transcript(self, open_ai: OpenAi) -> None:
         """Generate a transcript."""
         print("Prompt:", self.input)
         prompt = """
@@ -79,7 +80,7 @@ class Slide:
             logger.exception("Error generating transcript for %s", self.name)
             raise
 
-    def generate_audio(self, eleven_labs: ElevenLabs):
+    def generate_audio(self, eleven_labs: ElevenLabs) -> None:
         """Generate audio for the transcript.
 
         Args:
@@ -100,7 +101,7 @@ class Slide:
             msg = f"Failed to generate audio for {self.name}"
             raise RuntimeError(msg)
 
-    def generate_video(self):
+    def generate_video(self) -> None:
         """Generate video for the slide."""
         image_stream = ffmpeg.input(self.image_output_path, loop=1, framerate=60)
         audio_stream = ffmpeg.input(self.audio_output_path)
@@ -124,7 +125,7 @@ class Slide:
 
 
 class SlideBuilder:
-    def __init__(self, snapshot, output_dir):
+    def __init__(self, snapshot, output_dir: Path) -> None:
         """Initialize SlideBuilder."""
         self.snapshot = snapshot
         self.output_dir = output_dir
@@ -149,17 +150,17 @@ class SlideBuilder:
 
 
 class Generator:
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Video Generator."""
         self.eleven_labs = ElevenLabs()
         self.open_ai = OpenAi()
         self.slides: list[Slide] = []
 
-    def append_slide(self, slide: Slide):
+    def append_slide(self, slide: Slide) -> None:
         """Append a slide to list."""
         self.slides.append(slide)
 
-    def generate_video(self):
+    def generate_video(self) -> None:
         """Generate video."""
         for slide in self.slides:
             slide.render_and_save()
