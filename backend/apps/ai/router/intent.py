@@ -1,6 +1,8 @@
 import json
 import hashlib
 import logging
+import spacy
+from spacy.matcher import Matcher
 from .client import RedisRouterClient
 
 logger = logging.getLogger(__name__)
@@ -8,16 +10,49 @@ logger = logging.getLogger(__name__)
 class IntentRouter:
     def __init__(self):
         self.redis = RedisRouterClient().get_connection()
+        
+        # Load spaCy model (Lightweight English)
+        # We do this in __init__ so it loads once when the Router starts
+        try:
+            self.nlp = spacy.load("en_core_web_sm")
+        except OSError:
+            # Fallback if model isn't downloaded
+            logger.error("❌ Model 'en_core_web_sm' not found. Run: python -m spacy download en_core_web_sm")
+            raise
+
+        # Initialize the Matcher with the model's vocabulary
+        self.matcher = Matcher(self.nlp.vocab)
+        self._register_patterns()
+
+    def _register_patterns(self):
+        """
+        Define the linguistic patterns that signify a STATIC intent.
+        'LEMMA' means it matches base words (run -> running, ran).
+        'LOWER' means case-insensitive matching.
+        """
+        patterns = [
+            # Entities: "Who is the maintainer?", "repo link"
+            [{"LEMMA": "maintainer"}],
+            [{"LEMMA": "leader"}],
+            [{"LOWER": "github"}, {"LEMMA": "repo", "OP": "?"}], # Matches "github" OR "github repo"
+            [{"LOWER": "cve"}],
+            [{"LOWER": "owasp"}],
+            
+            # Actions: "Where to download?", "How to install?"
+            [{"LEMMA": "download"}],
+            [{"LEMMA": "install"}],
+            [{"LEMMA": "version"}],
+            [{"LEMMA": "license"}]
+        ]
+        
+        # Add these patterns under the label "STATIC_INDICATOR"
+        self.matcher.add("STATIC_INDICATOR", patterns)
 
     def _get_cache_key(self, query: str) -> str:
-        # Create a unique SHA256 hash of the query for caching
         query_hash = hashlib.sha256(query.lower().strip().encode()).hexdigest()
         return f"nestbot_cache:intent:{query_hash}"
 
     def get_intent(self, user_query: str) -> dict:
-        """
-        Decides if a query is STATIC or DYNAMIC and returns arguments.
-        """
         cache_key = self._get_cache_key(user_query)
 
         # --- 1. CIRCUIT BREAKER / CACHE CHECK ---
@@ -29,88 +64,43 @@ class IntentRouter:
         except Exception as e:
             logger.warning(f"Redis Circuit Breaker Triggered: {e}")
 
-        # --- 2. HEURISTICS ---
-        static_keywords = [
-            "leader", "maintainer", "cve", "github", "repo", 
-            "version", "download", "link", "url"
-        ]
+        # --- 2. SPACY PROCESSING ---
+        # Process the text
+        doc = self.nlp(user_query)
+        
+        # Run the Matcher
+        matches = self.matcher(doc)
         
         intent_type = "DYNAMIC"
         confidence = 0.0
-        matched_keyword = None  # We want to know WHICH word triggered it
+        matched_keyword = None
 
-        # Loop through keywords to find a match
-        for word in static_keywords:
-            if word in user_query.lower():
-                intent_type = "STATIC"
-                confidence = 1.0
-                matched_keyword = word
-                break  # Stop checking after first match
+        # If matches are found, it's STATIC
+        if matches:
+            intent_type = "STATIC"
+            confidence = 1.0
+            # Get the string representation of the first match
+            match_id, start, end = matches[0]
+            matched_span = doc[start:end]
+            matched_keyword = matched_span.text
 
-        # --- 3. BUILD THE DICTIONARY (THE FIX) ---
+        # --- 3. BUILD RESULT ---
         result = {
             "intent": intent_type,
             "confidence": confidence,
-            "source": "heuristic",
-            # NEW SECTION: Arguments for the Service Layer
+            "source": "spacy_heuristic",
             "args": {
-                "query": user_query,           # The service needs the raw text
-                "keyword": matched_keyword,    # The service might want to know why we picked this
-                "timestamp": 12345             # Example of other data you could pass
+                "query": user_query,
+                "keyword": matched_keyword,
+                # spaCy Bonus: Pass the identified entities (like 'OWASP')
+                "entities": [ent.text for ent in doc.ents] 
             }
         }
 
-        # --- 4. WRITE BACK TO CACHE ---
+        # --- 4. WRITE TO CACHE ---
         try:
             self.redis.set(cache_key, json.dumps(result), ex=3600)
         except Exception:
             pass 
-
-        return result        """
-        Decides if a query is STATIC (Deterministic) or DYNAMIC (LLM).
-        """
-        cache_key = self._get_cache_key(user_query)
-
-        # --- 1. CIRCUIT BREAKER / CACHE CHECK ---
-        try:
-            cached_data = self.redis.get(cache_key)
-            if cached_data:
-                logger.info(f"⚡ Intent Cache Hit: {cache_key}")
-                return json.loads(cached_data)
-        except Exception as e:
-            # RFC 3.1.3: Fail-Open Policy
-            # If Redis is down, log it and continue to Heuristics
-            logger.warning(f"Redis Circuit Breaker Triggered: {e}")
-
-        # --- 2. HEURISTICS (The "Rule-Based" Brain) ---
-        # RFC 3.1.1: Regex Pre-filter
-        # RFC: Deterministic Rules based on Project Entities
-        static_keywords = [
-            # Entities
-            "leader", "maintainer", "cve", "github", "repo", "repository",
-            "license", "documentation", "docs", "version",
-            # Actions
-            "download", "install", "update", "link", "url"
-        ]
-        
-        intent_type = "DYNAMIC" # Default to AI
-        confidence = 0.0
-
-        if any(w in user_query.lower() for w in static_keywords):
-            intent_type = "STATIC"
-            confidence = 1.0
-
-        result = {
-            "intent": intent_type,
-            "confidence": confidence,
-            "source": "heuristic"
-        }
-
-        # --- 3. WRITE BACK TO CACHE ---
-        try:
-            # RFC 3.1.2: Cache result for 1 hour (3600s)
-            self.redis.set(cache_key, json.dumps(result), ex=3600)
-        except Exception:
-            pass  # Fail silently on write
 
         return result
