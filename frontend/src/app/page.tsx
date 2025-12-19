@@ -240,10 +240,12 @@ export default function Home() {
                       <FaCalendar className="mr-2 h-4 w-4" />
                       <span>{formatDate(chapter.createdAt)}</span>
                     </div>
-                    <div className="flex flex-1 items-center overflow-hidden">
-                      <FaMapMarkerAlt className="mr-2 h-4 w-4" />
-                      <TruncatedText text={chapter.suggestedLocation} />
-                    </div>
+                    {chapter.suggestedLocation && (
+                      <div className="flex flex-1 items-center overflow-hidden">
+                        <FaMapMarkerAlt className="mr-2 h-4 w-4" />
+                        <TruncatedText text={chapter.suggestedLocation} />
+                      </div>
+                    )}
                   </div>
 
                   {chapter.leaders.length > 0 && (

@@ -171,14 +171,14 @@ frozenlist = ">=1.1.0"
 
 [[package]]
 name = "algoliasearch"
-version = "4.35.0"
+version = "4.35.2"
 description = "A fully-featured and blazing-fast Python API client to interact with Algolia."
 optional = false
 python-versions = ">=3.8.1"
 groups = ["main"]
 files = [
-    {file = "algoliasearch-4.35.0-py3-none-any.whl", hash = "sha256:8596def2cbba773cbd641474d39f9091b34d18840bcfa84ff5c0f8f6cdfe8424"},
-    {file = "algoliasearch-4.35.0.tar.gz", hash = "sha256:38fe34cc0d27744e56dfa3a09f2617934e4bcd5874a22f5c2d4f6844c9397edd"},
+    {file = "algoliasearch-4.35.2-py3-none-any.whl", hash = "sha256:bb079506dd6527d26640929e4d35fafb64338437444dc23efb2ebbf98061e977"},
+    {file = "algoliasearch-4.35.2.tar.gz", hash = "sha256:6108a4195dbf07a3762a026907e486228692e8026b9db568c9093c280235fd5d"},
 ]
 
 [package.dependencies]
@@ -275,18 +275,18 @@ files = [
 
 [[package]]
 name = "boto3"
-version = "1.42.11"
+version = "1.42.12"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "boto3-1.42.11-py3-none-any.whl", hash = "sha256:54939f7fc1b2777771c2a66ecc77025b2af86e567b5cf68d30dc3838205f0a4a"},
-    {file = "boto3-1.42.11.tar.gz", hash = "sha256:2537d9462b70f4432385202709d1c8aa2291f802cfd8588d33334112116c554a"},
+    {file = "boto3-1.42.12-py3-none-any.whl", hash = "sha256:8112e1beb5978bb455ea4b41a9ef26fc408f6340d8ff69ef93dded4f80fd53e9"},
+    {file = "boto3-1.42.12.tar.gz", hash = "sha256:649b134d25b278c24fcc8b3f94519de3884283b7848dc32f42b0ffdd9d19ce99"},
 ]
 
 [package.dependencies]
-botocore = ">=1.42.11,<1.43.0"
+botocore = ">=1.42.12,<1.43.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.16.0,<0.17.0"
 
@@ -295,14 +295,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.42.11"
+version = "1.42.12"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "botocore-1.42.11-py3-none-any.whl", hash = "sha256:73b0796870f16ccd44729c767ade20e8ed62b31b3aa2be07b35377338dcf6d7c"},
-    {file = "botocore-1.42.11.tar.gz", hash = "sha256:4c5278b9e0f6217f428aade811d409e321782bd14f0a202ff95a298d841be1f7"},
+    {file = "botocore-1.42.12-py3-none-any.whl", hash = "sha256:4f163880350f6d831857ce5d023875b7c6534be862e5affd9fcf82b8d1ab3537"},
+    {file = "botocore-1.42.12.tar.gz", hash = "sha256:1f9f63c3d6bb1f768519da30d6018706443c5d8af5472274d183a4945f3d81f8"},
 ]
 
 [package.dependencies]
