@@ -19,6 +19,13 @@ from apps.owasp.models.snapshot import Snapshot
 
 logger = logging.getLogger(__name__)
 
+ELEVENLABS_STABILITY = 0.4
+ELEVENLABS_STYLE = 0.1
+MAX_DETAILED_PROJECTS = 20
+MAX_TRANSCRIPT_PROJECTS = 4
+PDF_RENDER_SCALE = 2
+VIDEO_FRAMERATE = 60
+
 
 @dataclass
 class Slide:
@@ -56,7 +63,7 @@ class Slide:
 
             pdf = pdfium.PdfDocument(html.write_pdf())
             page = pdf[0]
-            bitmap = page.render(scale=2)
+            bitmap = page.render(scale=PDF_RENDER_SCALE)
             pil_image = bitmap.to_pil()
 
             self.image_output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -129,7 +136,7 @@ class Slide:
 
     def generate_video(self) -> None:
         """Generate video for the slide."""
-        image_stream = ffmpeg.input(self.image_output_path, loop=1, framerate=60)
+        image_stream = ffmpeg.input(self.image_output_path, loop=1, framerate=VIDEO_FRAMERATE)
         audio_stream = ffmpeg.input(self.audio_output_path)
 
         try:
@@ -178,21 +185,22 @@ class SlideBuilder:
         """Create a projects slide."""
         print("Generating projects slide for snapshot")
 
-        new_projects = list(self.snapshot.new_projects.all())
-        project_count = len(new_projects)
+        new_projects = self.snapshot.new_projects.order_by("-stars_count")
+        project_count = new_projects.count()
 
         projects_data = [
             {
-                "created_at": project.created_at.strftime("%b %d, %Y")
-                if project.created_at
-                else None,
+                "created_at": project.created_at.strftime("%b %d, %Y"),
                 "leaders": ", ".join(project.leaders_raw) if project.leaders_raw else None,
                 "name": project.name,
+                "stars_count": project.stars_count,
             }
             for project in new_projects
         ]
 
-        project_names = [p.name.replace("OWASP ", "") for p in new_projects]
+        project_names = [
+            p.name.replace("OWASP ", "") for p in new_projects[:MAX_TRANSCRIPT_PROJECTS]
+        ]
         formatted_project_names = (
             f"{', '.join(project_names[:-1])}, and {project_names[-1]}"
             if len(project_names) > 1
@@ -202,8 +210,9 @@ class SlideBuilder:
         return Slide(
             audio_output_path=self.output_dir / "02_projects.mp3",
             context={
-                "title": f"New Projects ({project_count})",
                 "projects": projects_data,
+                "show_details": project_count <= MAX_DETAILED_PROJECTS,
+                "title": f"New Projects ({project_count})",
             },
             image_output_path=self.output_dir / "02_projects.png",
             name="Projects Slide",
@@ -217,7 +226,7 @@ class SlideBuilder:
 class Generator:
     def __init__(self) -> None:
         """Initialize Video Generator."""
-        self.eleven_labs = ElevenLabs(stability=0.4, style=0.1)
+        self.eleven_labs = ElevenLabs(stability=ELEVENLABS_STABILITY, style=ELEVENLABS_STYLE)
         self.open_ai = OpenAi()
         self.slides: list[Slide] = []
 
