@@ -19,7 +19,6 @@ interface MockTooltipProps {
   id?: string
   closeDelay?: number
   delay?: number
-  placement?: string
   showArrow?: boolean
 }
 
