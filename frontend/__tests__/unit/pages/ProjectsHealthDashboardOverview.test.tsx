@@ -13,10 +13,6 @@ jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
-}))
-
 jest.mock('hooks/useDjangoSession', () => ({
   useDjangoSession: () => ({
     isSyncing: false,

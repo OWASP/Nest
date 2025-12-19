@@ -1,18 +1,18 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
-import {
-  faPeopleGroup,
-  faCodeFork,
-  faDollar,
-  faCodePullRequest,
-  faChartArea,
-  faExclamationCircle,
-  faHandshake,
-  faStar,
-  faTags,
-} from '@fortawesome/free-solid-svg-icons'
 import { useParams } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
+import { FaExclamationCircle } from 'react-icons/fa'
+import {
+  FaPeopleGroup,
+  FaCodeFork,
+  FaDollarSign,
+  FaCodePullRequest,
+  FaChartArea,
+  FaHandshake,
+  FaStar,
+  FaTags,
+} from 'react-icons/fa6'
 import { handleAppError } from 'app/global-error'
 import { GetProjectHealthMetricsDetailsDocument } from 'types/__generated__/projectsHealthDashboardQueries.generated'
 import { HealthMetricsProps } from 'types/healthMetrics'
@@ -78,7 +78,7 @@ const ProjectHealthMetricsDetails: FC = () => {
                     ? 'Funding Requirements Compliant'
                     : 'Funding Requirements Not Compliant'
                 }
-                icon={faDollar}
+                icon={FaDollarSign}
                 compliant={metricsLatest.isFundingRequirementsCompliant}
               />
               <GeneralCompliantComponent
@@ -87,7 +87,7 @@ const ProjectHealthMetricsDetails: FC = () => {
                     ? 'Leader Requirements Compliant'
                     : 'Leader Requirements Not Compliant'
                 }
-                icon={faHandshake}
+                icon={FaHandshake}
                 compliant={metricsLatest.isLeaderRequirementsCompliant}
               />
             </div>
@@ -95,7 +95,7 @@ const ProjectHealthMetricsDetails: FC = () => {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <LineChart
               title="Stars"
-              icon={faStar}
+              icon={FaStar}
               series={[
                 {
                   name: 'Stars',
@@ -107,7 +107,7 @@ const ProjectHealthMetricsDetails: FC = () => {
             />
             <LineChart
               title="Forks"
-              icon={faCodeFork}
+              icon={FaCodeFork}
               series={[
                 {
                   name: 'Forks',
@@ -121,7 +121,7 @@ const ProjectHealthMetricsDetails: FC = () => {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <LineChart
               title="Issues"
-              icon={faExclamationCircle}
+              icon={FaExclamationCircle}
               series={[
                 {
                   name: 'Open Issues',
@@ -145,7 +145,7 @@ const ProjectHealthMetricsDetails: FC = () => {
             />
             <LineChart
               title="Open Pull Requests"
-              icon={faCodePullRequest}
+              icon={FaCodePullRequest}
               series={[
                 {
                   name: 'Open Pull Requests',
@@ -159,7 +159,7 @@ const ProjectHealthMetricsDetails: FC = () => {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <LineChart
               title="Releases"
-              icon={faTags}
+              icon={FaTags}
               series={[
                 {
                   name: 'Recent Releases',
@@ -175,7 +175,7 @@ const ProjectHealthMetricsDetails: FC = () => {
             />
             <LineChart
               title="Contributors"
-              icon={faPeopleGroup}
+              icon={FaPeopleGroup}
               series={[
                 {
                   name: 'Contributors',
@@ -188,7 +188,7 @@ const ProjectHealthMetricsDetails: FC = () => {
           </div>
           <BarChart
             title="Days Metrics"
-            icon={faChartArea}
+            icon={FaChartArea}
             labels={[
               'Project Age',
               'Days Since Last Commit',

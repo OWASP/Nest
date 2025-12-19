@@ -1,10 +1,9 @@
-import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Skeleton } from '@heroui/skeleton'
 import { sendGTMEvent } from '@next/third-parties/google'
 import { debounce } from 'lodash'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useRef, useState, useMemo } from 'react'
+import { FaSearch, FaTimes } from 'react-icons/fa'
 
 interface SearchProps {
   isLoaded: boolean
@@ -72,9 +71,10 @@ const SearchBar: React.FC<SearchProps> = ({
       <div className="relative">
         {!isLoaded ? (
           <>
-            <FontAwesomeIcon
-              icon={faSearch}
+            <FaSearch
+              data-testid="search-icon"
               className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
+              aria-hidden="true"
             />
             <input
               ref={inputRef}
@@ -82,16 +82,16 @@ const SearchBar: React.FC<SearchProps> = ({
               value={searchQuery}
               onChange={handleSearchChange}
               placeholder={placeholder}
-              className="h-12 w-full rounded-lg border-1 border-gray-300 pr-10 pl-10 text-lg text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300"
+              className="h-12 w-full rounded-lg border-1 border-gray-300 bg-white pr-10 pl-10 text-lg text-black focus:ring-1 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-300"
             />
             {searchQuery && (
               <button
                 type="button"
-                className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-hidden"
+                className="absolute top-1/2 right-2 h-8 w-8 -translate-y-1/2 rounded-md p-1 text-gray-400 hover:bg-gray-400 hover:text-gray-200 focus:ring-2 focus:ring-gray-300 focus:outline-hidden dark:hover:bg-gray-600"
                 onClick={handleClearSearch}
                 aria-label="Clear search"
               >
-                <FontAwesomeIcon icon={faTimes} />
+                <FaTimes className="h-4 w-4" aria-hidden="true" />
               </button>
             )}
           </>
