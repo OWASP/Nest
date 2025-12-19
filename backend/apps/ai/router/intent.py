@@ -84,10 +84,13 @@ class IntentRouter:
 
         # --- 2. HEURISTICS (The "Rule-Based" Brain) ---
         # RFC 3.1.1: Regex Pre-filter
-        # These keywords strongly suggest a factual lookup
+        # RFC: Deterministic Rules based on Project Entities
         static_keywords = [
-            "leader", "maintainer", "cve", "github", "repo", 
-            "version", "download", "link", "url"
+            # Entities
+            "leader", "maintainer", "cve", "github", "repo", "repository",
+            "license", "documentation", "docs", "version",
+            # Actions
+            "download", "install", "update", "link", "url"
         ]
         
         intent_type = "DYNAMIC" # Default to AI
