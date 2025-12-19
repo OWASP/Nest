@@ -26,6 +26,7 @@ class ProjectIndex(IndexBase):
         "idx_level",
         "idx_name",
         "idx_organizations",
+        "idx_related_urls",
         "idx_repositories",
         "idx_repositories_count",
         "idx_stars_count",
