@@ -43,3 +43,7 @@ logs
 node_modules/
 TODO
 venv/
+.env
+.venv
+users.acl
+dump.rdb
