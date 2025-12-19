@@ -16,6 +16,57 @@ class IntentRouter:
 
     def get_intent(self, user_query: str) -> dict:
         """
+        Decides if a query is STATIC or DYNAMIC and returns arguments.
+        """
+        cache_key = self._get_cache_key(user_query)
+
+        # --- 1. CIRCUIT BREAKER / CACHE CHECK ---
+        try:
+            cached_data = self.redis.get(cache_key)
+            if cached_data:
+                logger.info(f"⚡ Intent Cache Hit: {cache_key}")
+                return json.loads(cached_data)
+        except Exception as e:
+            logger.warning(f"Redis Circuit Breaker Triggered: {e}")
+
+        # --- 2. HEURISTICS ---
+        static_keywords = [
+            "leader", "maintainer", "cve", "github", "repo", 
+            "version", "download", "link", "url"
+        ]
+        
+        intent_type = "DYNAMIC"
+        confidence = 0.0
+        matched_keyword = None  # We want to know WHICH word triggered it
+
+        # Loop through keywords to find a match
+        for word in static_keywords:
+            if word in user_query.lower():
+                intent_type = "STATIC"
+                confidence = 1.0
+                matched_keyword = word
+                break  # Stop checking after first match
+
+        # --- 3. BUILD THE DICTIONARY (THE FIX) ---
+        result = {
+            "intent": intent_type,
+            "confidence": confidence,
+            "source": "heuristic",
+            # NEW SECTION: Arguments for the Service Layer
+            "args": {
+                "query": user_query,           # The service needs the raw text
+                "keyword": matched_keyword,    # The service might want to know why we picked this
+                "timestamp": 12345             # Example of other data you could pass
+            }
+        }
+
+        # --- 4. WRITE BACK TO CACHE ---
+        try:
+            self.redis.set(cache_key, json.dumps(result), ex=3600)
+        except Exception:
+            pass 
+
+        return result        """
         Decides if a query is STATIC (Deterministic) or DYNAMIC (LLM).
         """
         cache_key = self._get_cache_key(user_query)
