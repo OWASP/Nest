@@ -1,7 +1,9 @@
 name: Check PR linked issue and assignee
 
 on:
-  - pull_request_target
+  pull_request_target:
+    types:
+      - opened
 
 permissions:
   contents: read
@@ -14,6 +16,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
 
       - name: Check PR linked issue and assignee
         uses: arkid15r/check-pr-issue-action@695d61fbecffc01edae1c36470e7de19979fd79b
