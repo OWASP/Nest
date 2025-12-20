@@ -11,12 +11,14 @@ echo "Fetching CSRF token..."
 CSRF_TOKEN=$(curl -fsSL "$BASE_URL/csrf" | jq -r '.csrftoken')
 
 echo "Creating configuration file with custom headers..."
-touch ./config.toml
+:> ./config.toml
 
 echo "MAX_TIME = 300" >> ./config.toml
 echo "[CUSTOM_HEADERS]" >> ./config.toml
 echo "X-CSRFToken = \"$CSRF_TOKEN\"" >> ./config.toml
 echo "Cookie = \"csrftoken=$CSRF_TOKEN;\"" >> ./config.toml
+
+cat ./config.toml
 
 echo "Running Graphqler with custom configuration..."
 

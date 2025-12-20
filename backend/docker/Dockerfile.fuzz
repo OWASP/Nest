@@ -13,7 +13,7 @@ RUN mkdir -p ${APK_CACHE_DIR} && \
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     apk update && apk upgrade && \
-    apk add curl jq gcc musl-dev libffi-dev linux-headers && \
+    apk add curl jq gcc musl-dev libffi-dev openblas && \
     addgroup -S owasp && \
     adduser -S -h /home/owasp -G owasp owasp
 
