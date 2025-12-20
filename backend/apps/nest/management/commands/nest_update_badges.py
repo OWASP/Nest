@@ -101,6 +101,7 @@ class Command(BaseCommand):
                     role=EntityMember.Role.LEADER,
                     is_active=True,
                     is_reviewed=True,
+                    member__isnull=False,
                 ).values_list("member_id", flat=True),
             )
             .distinct()
@@ -123,3 +124,30 @@ class Command(BaseCommand):
 
         logger.info("Added '%s' badge to %s users", OWASP_PROJECT_LEADER_BADGE_NAME, count)
         self.stdout.write(f"Added badge to {count} project leaders")
+
+        # Remove badge from users who are no longer project leaders.
+        current_leader_ids = (
+            EntityMember.objects.filter(
+                entity_type=ContentType.objects.get_for_model(Project),
+                role=EntityMember.Role.LEADER,
+                is_active=True,
+                is_reviewed=True,
+                member__isnull=False,
+            )
+            .values_list("member_id", flat=True)
+            .distinct()
+        )
+
+        non_leaders = UserBadge.objects.filter(
+            badge=badge,
+            is_active=True,
+        ).exclude(user_id__in=current_leader_ids)
+        removed_count = non_leaders.count()
+
+        if removed_count:
+            non_leaders.update(is_active=False)
+
+        logger.info(
+            "Removed '%s' badge from %s users", OWASP_PROJECT_LEADER_BADGE_NAME, removed_count
+        )
+        self.stdout.write(f"Removed badge from {removed_count} non-project leaders")
