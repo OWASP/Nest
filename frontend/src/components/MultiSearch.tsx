@@ -82,6 +82,17 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     }
   }, [debouncedSearch])
 
+  // Reset highlighted index when suggestions change
+  useEffect(() => {
+    if (highlightedIndex !== null) {
+      const { index, subIndex } = highlightedIndex
+      // If the current highlighted index is out of bounds, reset it
+      if (!suggestions[index]?.hits?.[subIndex]) {
+        setHighlightedIndex(null)
+      }
+    }
+  }, [suggestions, highlightedIndex])
+
   const handleSuggestionClick = useCallback(
     (suggestion: Chapter | Project | User | Event | Organization, indexName: string) => {
       setSearchQuery(suggestion.name ?? '')
@@ -118,18 +129,23 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         inputRef.current?.blur()
       } else if (event.key === 'Enter' && highlightedIndex !== null) {
         const { index, subIndex } = highlightedIndex
-        const suggestion = suggestions[index].hits[subIndex]
-        handleSuggestionClick(
-          suggestion as Chapter | Organization | Project | User | Event,
-          suggestions[index].indexName
-        )
+        // Validate that the highlighted index still exists
+        if (suggestions[index]?.hits?.[subIndex]) {
+          const suggestion = suggestions[index].hits[subIndex]
+          handleSuggestionClick(
+            suggestion as Chapter | Organization | Project | User | Event,
+            suggestions[index].indexName
+          )
+        }
       } else if (event.key === 'ArrowDown') {
         event.preventDefault()
+        if (suggestions.length === 0) return
         if (highlightedIndex === null) {
           setHighlightedIndex({ index: 0, subIndex: 0 })
         } else {
           const { index, subIndex } = highlightedIndex
-          if (subIndex < suggestions[index].hits.length - 1) {
+          // Validate current index before accessing
+          if (suggestions[index]?.hits && subIndex < suggestions[index].hits.length - 1) {
             setHighlightedIndex({ index, subIndex: subIndex + 1 })
           } else if (index < suggestions.length - 1) {
             setHighlightedIndex({ index: index + 1, subIndex: 0 })
@@ -141,7 +157,8 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           const { index, subIndex } = highlightedIndex
           if (subIndex > 0) {
             setHighlightedIndex({ index, subIndex: subIndex - 1 })
-          } else if (index > 0) {
+          } else if (index > 0 && suggestions[index - 1]?.hits) {
+            // Validate previous index before accessing
             setHighlightedIndex({
               index: index - 1,
               subIndex: suggestions[index - 1].hits.length - 1,

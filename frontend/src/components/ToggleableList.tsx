@@ -25,6 +25,12 @@ const ToggleableList = ({
   const handleButtonClick = ({ item }: { item: string }) => {
     router.push(`/projects?q=${encodeURIComponent(item)}`)
   }
+  const handleKeyDown = (e: React.KeyboardEvent, item: string) => {
+    if (!isDisabled && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault()
+      handleButtonClick({ item })
+    }
+  }
   return (
     <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
       <h2 className="mb-4 text-2xl font-semibold">
@@ -42,6 +48,7 @@ const ToggleableList = ({
             key={`${item}-${index}`}
             className={`rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700 ${isDisabled ? 'cursor-default' : 'cursor-pointer'}`}
             onClick={() => !isDisabled && handleButtonClick({ item })}
+            onKeyDown={(e) => handleKeyDown(e, item)}
             aria-label={`Search for projects with ${item}`}
             disabled={isDisabled}
           >

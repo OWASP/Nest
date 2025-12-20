@@ -24,7 +24,7 @@ const ShowMoreButton = ({ onToggle }: { onToggle: () => void }) => {
           </>
         ) : (
           <>
-            Show more <FaChevronDown area-hidden="true" className="ml-2 text-sm" />
+            Show more <FaChevronDown aria-hidden="true" className="ml-2 text-sm" />
           </>
         )}
       </Button>
