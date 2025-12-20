@@ -101,6 +101,7 @@ nestbot
 noinput
 nosniff
 nspname
+openblas
 openstreetmap
 owasppcitoolkit
 owtf

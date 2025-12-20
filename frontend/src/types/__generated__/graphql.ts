@@ -587,7 +587,7 @@ export type ProjectHealthMetricsOrder = {
 
 export type ProjectHealthStatsNode = {
   __typename?: 'ProjectHealthStatsNode';
-  averageScore: Scalars['Float']['output'];
+  averageScore?: Maybe<Scalars['Float']['output']>;
   monthlyOverallScores: Array<Scalars['Float']['output']>;
   monthlyOverallScoresMonths: Array<Scalars['Int']['output']>;
   projectsCountHealthy: Scalars['Int']['output'];
