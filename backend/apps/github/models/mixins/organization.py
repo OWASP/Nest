@@ -8,20 +8,31 @@ class OrganizationIndexMixin:
 
     @property
     def is_indexable(self) -> bool:
-        """Organizations to index."""
+        """Determine if the organization is indexable.
+
+        Returns:
+            bool: True if it's an OWASP-related organization with a name and login, False otherwise.
+        """
         return bool(self.is_owasp_related_organization and self.name and self.login)
 
     @property
     def idx_avatar_url(self) -> str:
-        """Return avatar URL for indexing."""
+        """Return the avatar URL for indexing.
+
+        Returns:
+            str: The URL of the organization's avatar.
+        """
         return self.avatar_url
 
     @property
     def idx_collaborators_count(self):
-        """Return collaborators count for indexing.
+        """Return the collaborators count for indexing.
 
         This calculates the total number of unique collaborators across all repositories
         owned by this organization.
+
+        Returns:
+            int: The total count of unique collaborators.
         """
         from apps.github.models.repository import Repository
         from apps.github.models.repository_contributor import RepositoryContributor
@@ -40,40 +51,72 @@ class OrganizationIndexMixin:
 
     @property
     def idx_created_at(self) -> float | None:
-        """Return created at for indexing."""
+        """Return the created at timestamp for indexing.
+
+        Returns:
+            float | None: The creation timestamp, or None if not available.
+        """
         return self.created_at.timestamp() if self.created_at else None
 
     @property
     def idx_description(self) -> str:
-        """Return description for indexing."""
+        """Return the description for indexing.
+
+        Returns:
+            str: The organization's description.
+        """
         return self.description or ""
 
     @property
     def idx_followers_count(self) -> int:
-        """Return followers count for indexing."""
+        """Return the followers count for indexing.
+
+        Returns:
+            int: The number of followers the organization has.
+        """
         return self.followers_count
 
     @property
     def idx_location(self) -> str:
-        """Return location for indexing."""
+        """Return the location for indexing.
+
+        Returns:
+            str: The organization's location.
+        """
         return self.location or ""
 
     @property
     def idx_login(self) -> str:
-        """Return login for indexing."""
+        """Return the login for indexing.
+
+        Returns:
+            str: The organization's login name.
+        """
         return self.login
 
     @property
     def idx_name(self) -> str:
-        """Return name for indexing."""
+        """Return the name for indexing.
+
+        Returns:
+            str: The organization's name.
+        """
         return self.name or ""
 
     @property
     def idx_public_repositories_count(self) -> int:
-        """Return public repositories count for indexing."""
+        """Return the public repositories count for indexing.
+
+        Returns:
+            int: The number of public repositories owned by the organization.
+        """
         return self.public_repositories_count
 
     @property
     def idx_url(self) -> str:
-        """Return URL for indexing."""
+        """Return the URL for indexing.
+
+        Returns:
+            str: The URL of the organization's GitHub profile.
+        """
         return self.url
