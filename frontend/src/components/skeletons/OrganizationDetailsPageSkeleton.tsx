@@ -73,24 +73,24 @@ const OrganizationDetailsPageSkeleton = () => {
           {/* Recent Issues */}
           <div className="mb-8 min-h-[600px] rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
             <h2 className="mb-4 flex flex-row items-center gap-2 text-2xl font-semibold">
-              <Skeleton className="h-5 w-5 rounded" />
-              <Skeleton className="h-6 w-36 rounded" />
+              <Skeleton className="h-5 w-5" />
+              <Skeleton className="h-6 w-32" />
             </h2>
             <div className="space-y-3">
-              {Array.from({ length: 5 }, (_, i) => (
+              {[1, 2, 3, 4, 5].map((i) => (
                 <div
                   key={`issue-${i}`}
                   className="mb-4 rounded-lg border-1 border-gray-200 bg-white p-4 shadow-xs dark:border-gray-700 dark:bg-gray-900"
                 >
-                  <Skeleton className="mb-2 h-5 w-full rounded" />
+                  <Skeleton className="mb-2 h-5 w-4/5" />
                   <div className="mt-2 flex flex-wrap items-center text-sm">
                     <div className="mr-4 flex items-center">
-                      <Skeleton className="mr-2 h-4 w-4 rounded" />
-                      <Skeleton className="h-4 w-24 rounded" />
+                      <Skeleton className="mr-2 h-4 w-4" />
+                      <Skeleton className="h-4 w-20" />
                     </div>
                     <div className="flex flex-1 items-center overflow-hidden">
-                      <Skeleton className="mr-2 h-5 w-4 rounded" />
-                      <Skeleton className="h-4 w-full rounded" />
+                      <Skeleton className="mr-2 h-5 w-4" />
+                      <Skeleton className="h-4 w-24" />
                     </div>
                   </div>
                 </div>
@@ -101,32 +101,24 @@ const OrganizationDetailsPageSkeleton = () => {
           {/* Recent Milestones */}
           <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
             <h2 className="mb-4 flex flex-row items-center gap-2 text-2xl font-semibold">
-              <Skeleton className="h-5 w-5 rounded" />
-              <Skeleton className="h-6 w-44 rounded" />
+              <Skeleton className="h-5 w-5" />
+              <Skeleton className="h-6 w-40" />
             </h2>
             <div className="space-y-3">
-              {Array.from({ length: 2 }, (_, i) => (
+              {[1, 2].map((i) => (
                 <div
                   key={`milestone-${i}`}
                   className="mb-4 rounded-lg border-1 border-gray-200 bg-white p-4 shadow-xs dark:border-gray-700 dark:bg-gray-900"
                 >
-                  <Skeleton className="mb-2 h-5 w-full rounded" />
+                  <Skeleton className="mb-2 h-5 w-3/4" />
                   <div className="mt-2 flex flex-wrap items-center text-sm">
                     <div className="mr-4 flex items-center">
-                      <Skeleton className="mr-2 h-4 w-4 rounded" />
-                      <Skeleton className="h-4 w-24 rounded" />
+                      <Skeleton className="mr-2 h-4 w-4" />
+                      <Skeleton className="h-4 w-20" />
                     </div>
-                    <div className="mr-4 flex items-center">
-                      <Skeleton className="mr-2 h-4 w-4 rounded" />
-                      <Skeleton className="h-4 w-20 rounded" />
-                    </div>
-                    <div className="mr-4 flex items-center">
-                      <Skeleton className="mr-2 h-4 w-4 rounded" />
-                      <Skeleton className="h-4 w-16 rounded" />
-                    </div>
-                    <div className="flex flex-1 items-center overflow-hidden">
-                      <Skeleton className="mr-2 h-5 w-4 rounded" />
-                      <Skeleton className="h-4 w-full rounded" />
+                    <div className="flex items-center">
+                      <Skeleton className="mr-2 h-4 w-4" />
+                      <Skeleton className="h-4 w-24" />
                     </div>
                   </div>
                 </div>
@@ -140,24 +132,24 @@ const OrganizationDetailsPageSkeleton = () => {
           {/* Recent Pull Requests */}
           <div className="mb-8 min-h-[600px] rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
             <h2 className="mb-4 flex flex-row items-center gap-2 text-2xl font-semibold">
-              <Skeleton className="h-5 w-5 rounded" />
-              <Skeleton className="h-6 w-52 rounded" />
+              <Skeleton className="h-5 w-5" />
+              <Skeleton className="h-6 w-48" />
             </h2>
             <div className="space-y-3">
-              {Array.from({ length: 5 }, (_, i) => (
+              {[1, 2, 3, 4, 5].map((i) => (
                 <div
                   key={`pr-${i}`}
                   className="mb-4 rounded-lg border-1 border-gray-200 bg-white p-4 shadow-xs dark:border-gray-700 dark:bg-gray-900"
                 >
-                  <Skeleton className="mb-2 h-5 w-full rounded" />
+                  <Skeleton className="mb-2 h-5 w-3/4" />
                   <div className="mt-2 flex flex-wrap items-center text-sm">
                     <div className="mr-4 flex items-center">
-                      <Skeleton className="mr-2 h-4 w-4 rounded" />
-                      <Skeleton className="h-4 w-24 rounded" />
+                      <Skeleton className="mr-2 h-4 w-4" />
+                      <Skeleton className="h-4 w-20" />
                     </div>
-                    <div className="mr-4 flex flex-1 items-center overflow-hidden">
-                      <Skeleton className="mr-2 h-5 w-4 rounded" />
-                      <Skeleton className="h-4 w-full rounded" />
+                    <div className="flex flex-1 items-center overflow-hidden">
+                      <Skeleton className="mr-2 h-5 w-4" />
+                      <Skeleton className="h-4 w-24" />
                     </div>
                   </div>
                 </div>
@@ -168,21 +160,24 @@ const OrganizationDetailsPageSkeleton = () => {
           {/* Recent Releases */}
           <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
             <h2 className="mb-4 flex flex-row items-center gap-2 text-2xl font-semibold">
-              <Skeleton className="h-5 w-5 rounded" />
-              <Skeleton className="h-6 w-40 rounded" />
+              <Skeleton className="h-5 w-5" />
+              <Skeleton className="h-6 w-36" />
             </h2>
-            <div className="grid grid-cols-1">
-              {Array.from({ length: 5 }, (_, i) => (
-                <div key={`release-${i}`} className="mb-3">
-                  <Skeleton className="mb-2 h-5 w-32 rounded" />
-                  <div className="flex items-center gap-4 text-sm">
-                    <div className="flex items-center">
-                      <Skeleton className="mr-2 h-4 w-4 rounded" />
-                      <Skeleton className="h-4 w-24 rounded" />
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={`release-${i}`}
+                  className="mb-4 rounded-lg border-1 border-gray-200 bg-white p-4 shadow-xs dark:border-gray-700 dark:bg-gray-900"
+                >
+                  <Skeleton className="mb-2 h-5 w-2/3" />
+                  <div className="mt-2 flex flex-wrap items-center text-sm">
+                    <div className="mr-4 flex items-center">
+                      <Skeleton className="mr-2 h-4 w-4" />
+                      <Skeleton className="h-4 w-20" />
                     </div>
                     <div className="flex items-center">
-                      <Skeleton className="mr-2 h-5 w-5 rounded-full" />
-                      <Skeleton className="h-4 w-20 rounded" />
+                      <Skeleton className="mr-2 h-4 w-4" />
+                      <Skeleton className="h-4 w-24" />
                     </div>
                   </div>
                 </div>
@@ -201,7 +196,7 @@ const OrganizationDetailsPageSkeleton = () => {
             {Array.from({ length: 4 }, (_, i) => (
               <div
                 key={`repo-${i}`}
-                className="flex h-46 w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs dark:border-gray-700 dark:bg-gray-800"
+                className="flex h-46 w-full flex-col gap-3 rounded-lg border-1 border-gray-200 bg-gray-100 p-4 shadow-xs dark:border-gray-700 dark:bg-gray-800"
               >
                 <Skeleton className="h-5 w-3/4 rounded" />
                 <div className="flex flex-col gap-2 text-sm">
