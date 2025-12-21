@@ -140,20 +140,23 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
         """Return the repositories for indexing.
 
         Returns:
-            list[dict]: A list of dictionaries containing basic details of project repositories.
+            list[dict]: A list of dictionaries containing details of project repositories.
         """
         return [
             {
+                "contributors_count": r.contributors_count,
                 "description": r.description,
                 "forks_count": r.forks_count,
                 "key": r.key.lower(),
+                "latest_release": str(r.latest_release.summary) if r.latest_release else "",
                 "license": r.license,
                 "name": r.name,
+                "owner_key": r.owner.login.lower(),
                 "stars_count": r.stars_count,
             }
             for r in self.repositories.order_by("-stars_count")[:REPOSITORIES_LIMIT]
         ]
-
+    
     @property
     def idx_repositories_count(self) -> int:
         """Return the repositories count for indexing.

@@ -17,11 +17,13 @@ class RepositoryIndexMixin:
         """Determine if the repository is indexable.
 
         Returns:
-            bool: True if the repository is not archived and not empty; False otherwise.
+            bool: True if not archived, not empty, not a template, and belongs to a project; False otherwise.
         """
         return (
             not self.is_archived
             and not self.is_empty
+            and not self.is_template
+            and self.project_set.exists()
         )
 
     @property

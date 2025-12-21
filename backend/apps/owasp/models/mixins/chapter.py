@@ -14,11 +14,12 @@ class ChapterIndexMixin(RepositoryBasedEntityModelMixin):
         """Determine if the chapter is indexable.
 
         Returns:
-            bool: True if the chapter has valid geolocation data; False otherwise.
+            bool: True if the chapter has valid geolocation, and the associated repository is not empty; False otherwise.
         """
         return (
             self.latitude is not None
             and self.longitude is not None
+            and not self.owasp_repository.is_empty
         )
 
     @property
