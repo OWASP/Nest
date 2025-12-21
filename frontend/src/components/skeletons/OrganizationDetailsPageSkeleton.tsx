@@ -1,5 +1,22 @@
 import { Skeleton } from '@heroui/skeleton'
 
+// Reusable card skeleton component
+const ItemCardSkeleton = ({ titleWidth }: { titleWidth: string }) => (
+  <div className="mb-4 rounded-lg border-1 border-gray-200 bg-white p-4 shadow-xs dark:border-gray-700 dark:bg-gray-900">
+    <Skeleton className={`mb-2 h-5 ${titleWidth}`} />
+    <div className="mt-2 flex flex-wrap items-center text-sm">
+      <div className="mr-4 flex items-center">
+        <Skeleton className="mr-2 h-4 w-4" />
+        <Skeleton className="h-4 w-20" />
+      </div>
+      <div className="flex flex-1 items-center overflow-hidden">
+        <Skeleton className="mr-2 h-5 w-4" />
+        <Skeleton className="h-4 w-24" />
+      </div>
+    </div>
+  </div>
+)
+
 const OrganizationDetailsPageSkeleton = () => {
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
@@ -78,22 +95,7 @@ const OrganizationDetailsPageSkeleton = () => {
             </h2>
             <div className="space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div
-                  key={`issue-${i}`}
-                  className="mb-4 rounded-lg border-1 border-gray-200 bg-white p-4 shadow-xs dark:border-gray-700 dark:bg-gray-900"
-                >
-                  <Skeleton className="mb-2 h-5 w-4/5" />
-                  <div className="mt-2 flex flex-wrap items-center text-sm">
-                    <div className="mr-4 flex items-center">
-                      <Skeleton className="mr-2 h-4 w-4" />
-                      <Skeleton className="h-4 w-20" />
-                    </div>
-                    <div className="flex flex-1 items-center overflow-hidden">
-                      <Skeleton className="mr-2 h-5 w-4" />
-                      <Skeleton className="h-4 w-24" />
-                    </div>
-                  </div>
-                </div>
+                <ItemCardSkeleton key={`issue-${i}`} titleWidth="w-4/5" />
               ))}
             </div>
           </div>
@@ -106,22 +108,7 @@ const OrganizationDetailsPageSkeleton = () => {
             </h2>
             <div className="space-y-3">
               {[1, 2].map((i) => (
-                <div
-                  key={`milestone-${i}`}
-                  className="mb-4 rounded-lg border-1 border-gray-200 bg-white p-4 shadow-xs dark:border-gray-700 dark:bg-gray-900"
-                >
-                  <Skeleton className="mb-2 h-5 w-3/4" />
-                  <div className="mt-2 flex flex-wrap items-center text-sm">
-                    <div className="mr-4 flex items-center">
-                      <Skeleton className="mr-2 h-4 w-4" />
-                      <Skeleton className="h-4 w-20" />
-                    </div>
-                    <div className="flex items-center">
-                      <Skeleton className="mr-2 h-4 w-4" />
-                      <Skeleton className="h-4 w-24" />
-                    </div>
-                  </div>
-                </div>
+                <ItemCardSkeleton key={`milestone-${i}`} titleWidth="w-3/4" />
               ))}
             </div>
           </div>
@@ -137,22 +124,7 @@ const OrganizationDetailsPageSkeleton = () => {
             </h2>
             <div className="space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div
-                  key={`pr-${i}`}
-                  className="mb-4 rounded-lg border-1 border-gray-200 bg-white p-4 shadow-xs dark:border-gray-700 dark:bg-gray-900"
-                >
-                  <Skeleton className="mb-2 h-5 w-3/4" />
-                  <div className="mt-2 flex flex-wrap items-center text-sm">
-                    <div className="mr-4 flex items-center">
-                      <Skeleton className="mr-2 h-4 w-4" />
-                      <Skeleton className="h-4 w-20" />
-                    </div>
-                    <div className="flex flex-1 items-center overflow-hidden">
-                      <Skeleton className="mr-2 h-5 w-4" />
-                      <Skeleton className="h-4 w-24" />
-                    </div>
-                  </div>
-                </div>
+                <ItemCardSkeleton key={`pr-${i}`} titleWidth="w-3/4" />
               ))}
             </div>
           </div>
@@ -165,22 +137,7 @@ const OrganizationDetailsPageSkeleton = () => {
             </h2>
             <div className="space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div
-                  key={`release-${i}`}
-                  className="mb-4 rounded-lg border-1 border-gray-200 bg-white p-4 shadow-xs dark:border-gray-700 dark:bg-gray-900"
-                >
-                  <Skeleton className="mb-2 h-5 w-2/3" />
-                  <div className="mt-2 flex flex-wrap items-center text-sm">
-                    <div className="mr-4 flex items-center">
-                      <Skeleton className="mr-2 h-4 w-4" />
-                      <Skeleton className="h-4 w-20" />
-                    </div>
-                    <div className="flex items-center">
-                      <Skeleton className="mr-2 h-4 w-4" />
-                      <Skeleton className="h-4 w-24" />
-                    </div>
-                  </div>
-                </div>
+                <ItemCardSkeleton key={`release-${i}`} titleWidth="w-2/3" />
               ))}
             </div>
           </div>
