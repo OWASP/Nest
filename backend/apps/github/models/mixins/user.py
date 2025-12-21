@@ -15,13 +15,9 @@ class UserIndexMixin:
         """Determine if the user is indexable.
 
         Returns:
-            bool: True if the user is not a bot and has an indexable login, False otherwise.
+            bool: True if the user is not a bot, False otherwise.
         """
-        return (
-            not self.is_bot
-            and not self.login.endswith(("Bot", "-bot"))
-            and self.login not in self.get_non_indexable_logins()
-        )
+        return not self.is_bot
 
     @property
     def idx_avatar_url(self) -> str:
@@ -154,32 +150,20 @@ class UserIndexMixin:
         """Return formatted contributions for indexing.
 
         Returns:
-            list[dict]: A list of dictionaries containing contribution details for top repositories.
+            list[dict]: A list of dictionaries containing basic contribution details.
         """
         from apps.github.models.repository_contributor import RepositoryContributor
 
         return [
             {
                 "contributions_count": rc.contributions_count,
-                "repository_contributors_count": rc.repository.contributors_count,
                 "repository_description": rc.repository.description,
-                "repository_forks_count": rc.repository.forks_count,
                 "repository_key": rc.repository.key.lower(),
                 "repository_name": rc.repository.name,
-                "repository_latest_release": str(rc.repository.latest_release.summary)
-                if rc.repository.latest_release
-                else "",
-                "repository_license": rc.repository.license,
-                "repository_owner_key": rc.repository.owner.login.lower(),
                 "repository_stars_count": rc.repository.stars_count,
             }
             for rc in RepositoryContributor.objects.filter(
                 user=self,
-            )
-            .exclude(
-                Q(repository__is_fork=True)
-                | Q(repository__organization__is_owasp_related_organization=False)
-                | Q(user__login__in=self.get_non_indexable_logins())
             )
             .order_by("-contributions_count")
             .select_related("repository")[:TOP_REPOSITORY_CONTRIBUTORS_LIMIT]
