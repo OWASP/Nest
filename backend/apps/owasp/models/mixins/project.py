@@ -62,7 +62,7 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
         """Return health score for indexing.
 
         Returns:
-            float | None: The project health score.
+            float | None: DEFAULT_HEALTH_SCORE when in production, otherwise the actual health score.
 
         """
         # TODO(arkid15r): Enable real health score in production when ready.
@@ -192,11 +192,11 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
         return self.stars_count
 
     @property
-    def idx_top_contributors(self) -> list:
+    def idx_top_contributors(self) -> list[dict]:
         """Return top contributors for indexing.
 
         Returns:
-            list: A list of top contributor details for the project.
+            list[dict]: A list of top contributor details for the project.
 
         """
         return RepositoryContributor.get_top_contributors(project=self.key)
