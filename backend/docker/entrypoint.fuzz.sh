@@ -3,7 +3,7 @@
 set -e
 
 if [ -z "$BASE_URL" ]; then
-  echo "Error: BASE_URL environment variable is not set."
+  echo "Error: BASE_URL environment variable is not set." >&2
   exit 1
 fi
 

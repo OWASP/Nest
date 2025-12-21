@@ -18,9 +18,12 @@ runs:
     using: composite
     steps:
       - name: Wait for database to be ready
+        env:
+          DB_USERNAME: ${{ inputs.db_username }}
+          DB_NAME: ${{ inputs.db_name }}
         run: |
           timeout 5m bash -c '
-            until docker exec ${{ job.services.db.id }} pg_isready -U ${{ inputs.db_username }} -d ${{ inputs.db_name }}; do
+            until docker exec ${{ job.services.db.id }} pg_isready -U $DB_USERNAME -d $DB_NAME; do
               echo "Waiting for database..."
               sleep 5
             done
