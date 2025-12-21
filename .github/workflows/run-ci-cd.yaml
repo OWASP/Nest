@@ -234,8 +234,8 @@ jobs:
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
 
-      - name: Setup E2E environment
-        uses: ./.github/workflows/setup-e2e-environment
+      - name: Setup Backend environment
+        uses: ./.github/workflows/setup-backend-environment
 
       - name: Start Backend in the background
         run: |
@@ -244,7 +244,7 @@ jobs:
             --network host \
             -e DJANGO_DB_HOST=localhost \
             -p 9000:9000 \
-            owasp/nest:test-backend-e2e-latest \
+            owasp/nest:test-backend-latest \
             sh -c '
               python manage.py migrate &&
               gunicorn wsgi:application --bind 0.0.0.0:9000
@@ -324,8 +324,8 @@ jobs:
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
 
-      - name: Setup E2E environment
-        uses: ./.github/workflows/setup-e2e-environment
+      - name: Setup Backend environment
+        uses: ./.github/workflows/setup-backend-environment
 
       - name: Run backend with fuzz environment variables
         run: |
@@ -334,7 +334,7 @@ jobs:
             --network host \
             -e DJANGO_DB_HOST=localhost \
             -p 9500:9500 \
-            owasp/nest:test-backend-e2e-latest \
+            owasp/nest:test-backend-latest \
             sh -c '
               gunicorn wsgi:application --bind 0.0.0.0:9500
             '

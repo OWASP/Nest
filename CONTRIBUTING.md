@@ -441,6 +441,30 @@ Follow these steps to setup your e2e testing environment:
    make test-frontend-e2e
    ```
 
+### Setting Up Fuzz Testing Environment
+
+Follow these steps to setup your fuzz testing environment:
+
+1. Make sure you have `gzip` installed on your machine.
+
+2. Run the fuzz backend instance with the following command:
+
+   ```bash
+   make run-backend-fuzz
+   ```
+
+3. Load the data into the fuzz db with the following command (in another terminal session):
+
+   ```bash
+   make load-data-fuzz
+   ```
+
+4. Now, you can stop the backend instance, and run the fuzz tests with the following command:
+
+   ```bash
+   make test-fuzz
+   ```
+
 **Please note that you only need to do these steps once.**
 
 ### Test Coverage

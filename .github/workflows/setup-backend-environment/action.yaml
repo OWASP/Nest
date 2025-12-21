@@ -1,6 +1,6 @@
-name: Set up E2E environment
+name: Set up Backend environment
 
-description: Sets up the environment for end-to-end testing.
+description: Sets up the Backend environment for E2E, and Fuzz testing.
 
 runs:
     using: composite
@@ -19,7 +19,7 @@ runs:
         run: sudo apt-get install -y postgresql-client
         shell: bash
 
-      - name: Build backend e2e image
+      - name: Build backend image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           cache-from: |
@@ -30,4 +30,4 @@ runs:
           file: backend/docker/Dockerfile
           load: true
           platforms: linux/amd64
-          tags: owasp/nest:test-backend-e2e-latest
+          tags: owasp/nest:test-backend-latest
