@@ -153,7 +153,7 @@ const OrganizationDetailsPageSkeleton = () => {
             {Array.from({ length: 4 }, (_, i) => (
               <div
                 key={`repo-${i}`}
-                className="flex h-46 w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs dark:border-gray-700 dark:bg-gray-800"
+                className="flex h-48 w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs dark:border-gray-700 dark:bg-gray-800"
               >
                 <Skeleton className="h-5 w-3/4 rounded" />
                 <div className="flex flex-col gap-2 text-sm">
