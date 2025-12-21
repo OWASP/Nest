@@ -57,8 +57,6 @@ export function useSearchPage<T>({
         (searchQuery !== searchQueryParam || sortBy !== sortByParam || order !== orderParam)
       ) {
         setCurrentPage(1)
-      } else if (searchQuery !== searchQueryParam) {
-        setCurrentPage(1)
       }
     }
   }, [searchParams, order, searchQuery, sortBy, indexName])
