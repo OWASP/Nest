@@ -219,7 +219,7 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
         """Return updated at timestamp for indexing.
 
         Returns:
-            str | float: The project's last update timestamp, or empty string.
+            str | float: The project's last update timestamp as a float, or empty string if unavailable.
 
         """
         return self.updated_at.timestamp() if self.updated_at else ""
