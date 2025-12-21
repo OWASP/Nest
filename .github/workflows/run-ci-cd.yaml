@@ -236,6 +236,9 @@ jobs:
 
       - name: Setup Backend environment
         uses: ./.github/workflows/setup-backend-environment
+        with:
+          db_username: nest_user_e2e
+          db_name: nest_db_e2e
 
       - name: Start Backend in the background
         run: |
@@ -326,6 +329,9 @@ jobs:
 
       - name: Setup Backend environment
         uses: ./.github/workflows/setup-backend-environment
+        with:
+          db_username: nest_user_fuzz
+          db_name: nest_db_fuzz
 
       - name: Run backend with fuzz environment variables
         run: |

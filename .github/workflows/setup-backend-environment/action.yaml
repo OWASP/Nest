@@ -1,6 +1,18 @@
 name: Set up Backend environment
 
-description: Sets up the Backend environment for E2E, and Fuzz testing.
+description: Sets up the Backend environment testing.
+
+on:
+  workflow_call:
+    inputs:
+      db_username:
+        description: 'Database username'
+        required: true
+        type: string
+      db_name:
+        description: 'Database name'
+        required: true
+        type: string
 
 runs:
     using: composite
@@ -8,7 +20,7 @@ runs:
       - name: Wait for database to be ready
         run: |
           timeout 5m bash -c '
-            until docker exec ${{ job.services.db.id }} pg_isready -U nest_user_e2e -d nest_db_e2e; do
+            until docker exec ${{ job.services.db.id }} pg_isready -U ${{ inputs.db_username }} -d ${{ inputs.db_name }}; do
               echo "Waiting for database..."
               sleep 5
             done
