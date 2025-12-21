@@ -6,11 +6,9 @@ inputs:
   db_username:
     description: 'Database username'
     required: true
-    type: string
   db_name:
     description: 'Database name'
     required: true
-    type: string
 
 runs:
     using: composite
