@@ -185,7 +185,7 @@ class RepositoryIndexMixin:
             int: The number of subscribers to the repository.
 
         """
-        return self.stars_count
+        return self.subscribers_count 
 
     @property
     def idx_top_contributors(self) -> list[dict[str, Any]]:

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from django.conf import settings
 
 from apps.common.utils import join_values
@@ -22,7 +24,7 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
         """Return companies for indexing.
 
         Returns:
-            str: A comma-separated string of company names.
+            str: A space-separated string of company names.
 
         """
         return join_values(fields=[o.company for o in self.organizations.all()])
@@ -62,7 +64,8 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
         """Return health score for indexing.
 
         Returns:
-            float | None: DEFAULT_HEALTH_SCORE when in production, otherwise the actual health score.
+            float | None: DEFAULT_HEALTH_SCORE when settings.IS_PRODUCTION_ENVIRONMENT is True,
+                otherwise the actual health score.
 
         """
         # TODO(arkid15r): Enable real health score in production when ready.
@@ -143,17 +146,17 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
         """Return organizations for indexing.
 
         Returns:
-            str: A comma-separated string of organization names.
+            str: A space-separated string of organization names.
 
         """
         return join_values(fields=[o.name for o in self.organizations.all()])
 
     @property
-    def idx_repositories(self) -> list[dict]:
+    def idx_repositories(self) -> list[dict[str, Any]]:
         """Return repositories for indexing.
 
         Returns:
-            list[dict]: A list of repository details for the project.
+            list[dict[str, Any]]: A list of repository details for the project.
 
         """
         return [
@@ -192,11 +195,11 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
         return self.stars_count
 
     @property
-    def idx_top_contributors(self) -> list[dict]:
+    def idx_top_contributors(self) -> list[dict[str, Any]]:
         """Return top contributors for indexing.
 
         Returns:
-            list[dict]: A list of top contributor details for the project.
+            list[dict[str, Any]]: A list of top contributor details for the project.
 
         """
         return RepositoryContributor.get_top_contributors(project=self.key)
