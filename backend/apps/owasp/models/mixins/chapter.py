@@ -11,10 +11,11 @@ class ChapterIndexMixin(RepositoryBasedEntityModelMixin):
 
     @property
     def is_indexable(self) -> bool:
-        """Determine if the chapter is indexable.
+        """Determine if the chapter should be indexed.
 
         Returns:
-            bool: True if the chapter has valid geolocation, and the associated repository is not empty; False otherwise.
+            bool: True if the chapter meets indexing criteria, False otherwise.
+
         """
         return (
             self.latitude is not None
@@ -24,108 +25,120 @@ class ChapterIndexMixin(RepositoryBasedEntityModelMixin):
 
     @property
     def idx_country(self) -> str:
-        """Return the country for indexing.
+        """Return country for indexing.
 
         Returns:
-            str: The country associated with the chapter.
+            str: The country where the chapter is located.
+
         """
         return self.country
 
     @property
     def idx_created_at(self) -> float:
-        """Return the created at timestamp for indexing.
+        """Return created at timestamp for indexing.
 
         Returns:
-            float: The creation timestamp of the chapter or its repository.
+            float: The chapter creation timestamp.
+
         """
         return (self.created_at or self.owasp_repository.created_at).timestamp()
 
     @property
     def idx_geo_location(self) -> tuple[float, float]:
-        """Return the geographic location for indexing.
+        """Return geographic location for indexing.
 
         Returns:
-            tuple[float, float]: A tuple of (latitude, longitude).
+            tuple[float, float]: The latitude and longitude of the chapter.
+
         """
         return self.latitude, self.longitude
 
     @property
     def idx_is_active(self) -> bool:
-        """Return the active status for indexing.
+        """Return active status for indexing.
 
         Returns:
             bool: True if the chapter is active, False otherwise.
+
         """
         return self.is_active
 
     @property
     def idx_key(self) -> str:
-        """Return the key for indexing.
+        """Return key for indexing.
 
         Returns:
             str: The chapter key without the 'www-chapter-' prefix.
+
         """
         return self.key.replace("www-chapter-", "")
 
     @property
     def idx_meetup_group(self) -> str:
-        """Return the meetup group for indexing.
+        """Return meetup group for indexing.
 
         Returns:
-            str: The name of the chapter's meetup group.
+            str: The chapter's Meetup group identifier.
+
         """
         return self.meetup_group
 
     @property
     def idx_postal_code(self) -> str:
-        """Return the postal code for indexing.
+        """Return postal code for indexing.
 
         Returns:
-            str: The postal code of the chapter's location.
+            str: The postal code of the chapter location.
+
         """
         return self.postal_code
 
     @property
     def idx_region(self) -> str:
-        """Return the region for indexing.
+        """Return region for indexing.
 
         Returns:
-            str: The region associated with the chapter.
+            str: The region where the chapter is located.
+
         """
         return self.region
 
     @property
     def idx_related_urls(self) -> list:
-        """Return the related URLs for indexing.
+        """Return related URLs for indexing.
 
         Returns:
             list: A list of URLs related to the chapter.
+
         """
         return self.related_urls
 
     @property
     def idx_suggested_location(self) -> str:
-        """Return the suggested location for indexing.
+        """Return suggested location for indexing.
 
         Returns:
-            str: The suggested location string, or empty if 'None'.
+            str: The suggested location for the chapter, or empty string.
+
         """
         return self.suggested_location if self.suggested_location != "None" else ""
 
     @property
     def idx_top_contributors(self) -> list:
-        """Return the top contributors for indexing.
+        """Return top contributors for indexing.
 
         Returns:
-            list: A list of top contributors for the chapter.
+            list: A list of top contributor details for the chapter.
+
         """
         return RepositoryContributor.get_top_contributors(chapter=self.key)
 
     @property
     def idx_updated_at(self) -> float:
-        """Return the updated at timestamp for indexing.
+        """Return updated at timestamp for indexing.
 
         Returns:
-            float: The last update timestamp of the chapter or its repository.
+            float: The chapter's last update timestamp.
+
         """
         return (self.updated_at or self.owasp_repository.updated_at).timestamp()

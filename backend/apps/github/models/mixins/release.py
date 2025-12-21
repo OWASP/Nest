@@ -12,19 +12,21 @@ class ReleaseIndexMixin:
 
     @property
     def is_indexable(self) -> bool:
-        """Determine if the release is indexable.
+        """Determine if the release should be indexed.
 
         Returns:
             bool: True if the release is not a draft, False otherwise.
+
         """
         return not self.is_draft
 
     @property
     def idx_author(self) -> list[dict[str, str]]:
-        """Return the author details for indexing.
+        """Return author for indexing.
 
         Returns:
-            list[dict[str, str]]: A list containing a dictionary with author's avatar URL, login, and name.
+            list[dict[str, str]]: A list containing author details, or empty list.
+
         """
         return (
             [
@@ -40,72 +42,80 @@ class ReleaseIndexMixin:
 
     @property
     def idx_created_at(self) -> float:
-        """Return the created at timestamp for indexing.
+        """Return created at timestamp for indexing.
 
         Returns:
-            float: The creation timestamp of the release.
+            float: The release creation timestamp.
+
         """
         return self.created_at.timestamp()
 
     @property
     def idx_description(self) -> str:
-        """Return the truncated description for indexing.
+        """Return description for indexing.
 
         Returns:
-            str: The truncated description of the release.
+            str: The truncated release description.
+
         """
         return truncate(self.description, limit=DESCRIPTION_MAX_LENGTH)
 
     @property
     def idx_is_pre_release(self) -> bool:
-        """Return the pre-release status for indexing.
+        """Return pre-release status for indexing.
 
         Returns:
             bool: True if the release is a pre-release, False otherwise.
+
         """
         return self.is_pre_release
 
     @property
     def idx_name(self) -> str:
-        """Return the name for indexing.
+        """Return name for indexing.
 
         Returns:
             str: The name of the release.
+
         """
         return self.name
 
     @property
     def idx_project(self) -> str:
-        """Return the project nest key for indexing.
+        """Return project for indexing.
 
         Returns:
-            str: The nest key of the associated project, or an empty string.
+            str: The nest key of the associated project, or empty string.
+
         """
         return self.repository.project.nest_key if self.repository.project else ""
 
     @property
     def idx_published_at(self) -> float | None:
-        """Return the published at timestamp for indexing.
+        """Return published at timestamp for indexing.
 
         Returns:
-            float | None: The publication timestamp, or None if not available.
+            float | None: The release publication timestamp, or None.
+
         """
         return self.published_at.timestamp() if self.published_at else None
 
     @property
     def idx_repository(self) -> str:
-        """Return the lowercase repository path for indexing.
+        """Return repository for indexing.
 
         Returns:
-            str: The lowercase path of the repository.
+            str: The repository path in lowercase.
+
         """
         return self.repository.path.lower()
 
     @property
     def idx_tag_name(self) -> str:
-        """Return the tag name for indexing.
+        """Return tag name for indexing.
 
         Returns:
             str: The tag name of the release.
+
         """
         return self.tag_name

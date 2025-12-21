@@ -8,72 +8,80 @@ class ProgramIndexMixin:
 
     @property
     def is_indexable(self) -> bool:
-        """Determine if the program is indexable.
+        """Determine if the program should be indexed.
 
         Returns:
             bool: True if the program is published, False otherwise.
+
         """
         return self.status == self.__class__.ProgramStatus.PUBLISHED
 
     @property
     def idx_name(self) -> str:
-        """Return the name for indexing.
+        """Return name for Algolia indexing.
 
         Returns:
-            str: The name of the program.
+            str: The program name.
+
         """
         return self.name
 
     @property
     def idx_key(self) -> str:
-        """Return the unique key for indexing.
+        """Return unique key for Algolia indexing.
 
         Returns:
-            str: The unique key of the program.
+            str: The program key.
+
         """
         return self.key
 
     @property
     def idx_status(self) -> str:
-        """Return the status for indexing.
+        """Return status for Algolia indexing.
 
         Returns:
-            str: The status of the program.
+            str: The program status.
+
         """
         return self.status
 
     @property
     def idx_description(self) -> str:
-        """Return the description for indexing.
+        """Return description for Algolia indexing.
 
         Returns:
-            str: The description of the program.
+            str: The program description.
+
         """
         return self.description or ""
 
     @property
     def idx_experience_levels(self) -> list[str]:
-        """Return the experience levels for indexing.
+        """Return experience levels for Algolia filtering.
 
         Returns:
-            list[str]: A list of experience levels required for the program.
+            list[str]: A list of experience levels.
+
         """
         return self.experience_levels or []
 
     @property
     def idx_started_at(self) -> str | None:
-        """Return the formatted start date for indexing.
+        """Return formatted start datetime.
 
         Returns:
-            str | None: The ISO formatted start date of the program, or None.
+            str | None: The start datetime in ISO format, or None.
+
         """
         return self.started_at.isoformat() if self.started_at else None
 
     @property
     def idx_ended_at(self) -> str | None:
-        """Return the formatted end date for indexing.
+        """Return formatted end datetime for filtering/sorting.
 
         Returns:
-            str | None: The ISO formatted end date of the program, or None.
+            str | None: The end datetime in ISO format, or None.
+
         """
         return self.ended_at.isoformat() if self.ended_at else None

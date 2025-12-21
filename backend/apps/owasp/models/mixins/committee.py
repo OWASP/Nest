@@ -11,45 +11,50 @@ class CommitteeIndexMixin(RepositoryBasedEntityModelMixin):
 
     @property
     def idx_created_at(self):
-        """Return the created at timestamp for indexing.
+        """Return created at timestamp for indexing.
 
         Returns:
-            float: The creation timestamp of the committee.
+            float: The committee creation timestamp.
+
         """
         return self.created_at.timestamp()
 
     @property
     def idx_key(self):
-        """Return the key for indexing.
+        """Return key for indexing.
 
         Returns:
             str: The committee key without the 'www-committee-' prefix.
+
         """
         return self.key.replace("www-committee-", "")
 
     @property
     def idx_related_urls(self):
-        """Return the related URLs for indexing.
+        """Return related URLs for indexing.
 
         Returns:
             list: A list of URLs related to the committee.
+
         """
         return self.related_urls
 
     @property
     def idx_top_contributors(self) -> list[str]:
-        """Return the top contributors for indexing.
+        """Return top contributors for indexing.
 
         Returns:
-            list[str]: A list of top contributors for the committee.
+            list[str]: A list of top contributor details for the committee.
+
         """
         return RepositoryContributor.get_top_contributors(committee=self.key)
 
     @property
     def idx_updated_at(self):
-        """Return the last update timestamp for indexing.
+        """Return updated at timestamp for indexing.
 
         Returns:
-            float: The last update timestamp of the committee.
+            float: The committee's last update timestamp.
+
         """
         return self.updated_at.timestamp()

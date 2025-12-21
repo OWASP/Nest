@@ -12,10 +12,11 @@ class UserIndexMixin:
 
     @property
     def is_indexable(self):
-        """Determine if the user is indexable.
+        """Determine if the user should be indexed.
 
         Returns:
-            bool: True if the user is not a bot and has an indexable login, False otherwise.
+            bool: True if the user meets indexing criteria, False otherwise.
+
         """
         return (
             not self.is_bot
@@ -25,136 +26,151 @@ class UserIndexMixin:
 
     @property
     def idx_avatar_url(self) -> str:
-        """Return the avatar URL for indexing.
+        """Return avatar URL for indexing.
 
         Returns:
             str: The URL of the user's avatar.
+
         """
         return self.avatar_url
 
     @property
     def idx_badge_count(self) -> int:
-        """Return the active badge count for indexing.
+        """Return badge count for indexing.
 
         Returns:
             int: The number of active badges the user has.
+
         """
         return self.user_badges.filter(is_active=True).count()
 
     @property
     def idx_bio(self) -> str:
-        """Return the bio for indexing.
+        """Return bio for indexing.
 
         Returns:
             str: The user's biography.
+
         """
         return self.bio
 
     @property
     def idx_company(self) -> str:
-        """Return the company for indexing.
+        """Return company for indexing.
 
         Returns:
             str: The name of the user's company.
+
         """
         return self.company
 
     @property
     def idx_created_at(self) -> float:
-        """Return the created at timestamp for indexing.
+        """Return created at timestamp for indexing.
 
         Returns:
-            float: The creation timestamp of the user profile.
+            float: The user's account creation timestamp.
+
         """
         return self.created_at.timestamp()
 
     @property
     def idx_email(self) -> str:
-        """Return the email for indexing.
+        """Return email for indexing.
 
         Returns:
             str: The user's email address.
+
         """
         return self.email
 
     @property
     def idx_key(self) -> str:
-        """Return the key (login) for indexing.
+        """Return key for indexing.
 
         Returns:
-            str: The login name of the user.
+            str: The user's login as the index key.
+
         """
         return self.login
 
     @property
     def idx_followers_count(self) -> int:
-        """Return the followers count for indexing.
+        """Return followers count for indexing.
 
         Returns:
             int: The number of followers the user has.
+
         """
         return self.followers_count
 
     @property
     def idx_following_count(self) -> int:
-        """Return the following count for indexing.
+        """Return following count for indexing.
 
         Returns:
             int: The number of users the user is following.
+
         """
         return self.following_count
 
     @property
     def idx_location(self) -> str:
-        """Return the location for indexing.
+        """Return location for indexing.
 
         Returns:
             str: The user's location.
+
         """
         return self.location
 
     @property
     def idx_login(self) -> str:
-        """Return the login for indexing.
+        """Return login for indexing.
 
         Returns:
             str: The user's login name.
+
         """
         return self.login
 
     @property
     def idx_name(self) -> str:
-        """Return the name for indexing.
+        """Return name for indexing.
 
         Returns:
-            str: The user's name.
+            str: The user's display name.
+
         """
         return self.name
 
     @property
     def idx_public_repositories_count(self) -> int:
-        """Return the public repositories count for indexing.
+        """Return public repositories count for indexing.
 
         Returns:
-            int: The number of public repositories owned by the user.
+            int: The number of public repositories the user owns.
+
         """
         return self.public_repositories_count
 
     @property
     def idx_title(self) -> str:
-        """Return the title for indexing.
+        """Return title for indexing.
 
         Returns:
             str: The user's title.
+
         """
         return self.title
 
     @property
     def idx_contributions(self):
-        """Return formatted contributions for indexing.
+        """Return contributions for indexing.
 
         Returns:
-            list[dict]: A list of dictionaries containing contribution details for top repositories.
+            list[dict]: A list of contribution details for top repositories.
+
         """
         from apps.github.models.repository_contributor import RepositoryContributor
 
@@ -187,19 +203,21 @@ class UserIndexMixin:
 
     @property
     def idx_contributions_count(self) -> int:
-        """Return the total contributions count for indexing.
+        """Return contributions count for indexing.
 
         Returns:
             int: The total number of contributions.
+
         """
         return self.contributions_count
 
     @property
     def idx_issues(self) -> list[dict]:
-        """Return recent issues for indexing.
+        """Return issues for indexing.
 
         Returns:
-            list[dict]: A list of dictionaries containing details of the user's recent issues.
+            list[dict]: A list of the user's recent issues.
+
         """
         return [
             {
@@ -221,19 +239,21 @@ class UserIndexMixin:
 
     @property
     def idx_issues_count(self) -> int:
-        """Return the total issues count for indexing.
+        """Return issues count for indexing.
 
         Returns:
-            int: The total number of issues the user is associated with.
+            int: The total number of issues associated with the user.
+
         """
         return self.issues.count()
 
     @property
     def idx_releases(self) -> list[dict]:
-        """Return recent releases for indexing.
+        """Return releases for indexing.
 
         Returns:
-            list[dict]: A list of dictionaries containing details of the user's recent releases.
+            list[dict]: A list of the user's recent releases.
+
         """
         return [
             {
@@ -255,27 +275,30 @@ class UserIndexMixin:
 
     @property
     def idx_releases_count(self) -> int:
-        """Return the total releases count for indexing.
+        """Return releases count for indexing.
 
         Returns:
-            int: The total number of releases the user is associated with.
+            int: The total number of releases associated with the user.
+
         """
         return self.releases.count()
 
     @property
     def idx_updated_at(self) -> float:
-        """Return the updated at timestamp for indexing.
+        """Return updated at timestamp for indexing.
 
         Returns:
-            float: The last update timestamp of the user profile.
+            float: The user's last update timestamp.
+
         """
         return self.updated_at.timestamp()
 
     @property
     def idx_url(self) -> str:
-        """Return the GitHub profile URL for indexing.
+        """Return GitHub profile URL for indexing.
 
         Returns:
             str: The URL of the user's GitHub profile.
+
         """
         return self.url
