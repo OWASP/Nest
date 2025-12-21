@@ -52,10 +52,12 @@ export function useSearchPage<T>({
       const searchQueryParam = searchParams.get('q') || ''
       const sortByParam = searchParams.get('sortBy') || 'default'
       const orderParam = searchParams.get('order') || 'desc'
-      if (
-        indexName === 'projects' &&
-        (searchQuery !== searchQueryParam || sortBy !== sortByParam || order !== orderParam)
-      ) {
+
+      const searchQueryChanged = searchQuery !== searchQueryParam
+      const sortOrOrderChanged = sortBy !== sortByParam || order !== orderParam
+
+      // Reset page if search query changes (all indices) or if sort/order changes (projects only)
+      if (searchQueryChanged || (indexName === 'projects' && sortOrOrderChanged)) {
         setCurrentPage(1)
       }
     }
