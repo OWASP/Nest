@@ -4,9 +4,9 @@
     "@cspell/dict-data-science": "^2.0.13",
     "@cspell/dict-en_us": "^4.4.26",
     "@cspell/dict-fullstack": "^3.2.7",
-    "@cspell/dict-golang": "^6.0.24",
+    "@cspell/dict-golang": "^6.0.25",
     "@cspell/dict-k8s": "^1.0.12",
-    "@cspell/dict-people-names": "^1.1.15",
+    "@cspell/dict-people-names": "^1.1.16",
     "@cspell/dict-software-terms": "^4.2.5",
     "@cspell/dict-win32": "^2.0.10",
     "cspell": "^8.19.4"
