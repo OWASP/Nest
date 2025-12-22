@@ -1,12 +1,17 @@
 services:
   redis:
-    image: redis/redis-stack-server:7.2.0-v1
+    image: redis/redis-stack-server:7.4.0
     container_name: nestbot_redis
     ports:
       - "6379:6379"
     restart: unless-stopped
     networks:
       - nest-network
+    volumes:
+      - redis-data:/data
 
 networks:
   nest-network:
+
+volumes:
+  redis-data:
