@@ -67,6 +67,14 @@ class Command(BaseCommand):
             )
             return
 
+        if not module.labels.exists():
+            self.stdout.write(
+                self.style.WARNING(
+                    f"Skipping. Module '{module.name}' has no labels. No comments will be synced."
+                )
+            )
+            return
+
         relevant_issues = Issue.objects.filter(
             repository_id__in=module_repos, state=Issue.State.OPEN
         ).distinct()
