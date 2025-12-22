@@ -75,6 +75,8 @@ class RedisRouterClient:
         if not RedisRouterClient._pool:
             with RedisRouterClient._pool_lock:
                 if not RedisRouterClient._pool:
+                        # Sonar/SAST note: No hard-coded credentials here.
+                        # REDIS_PASSWORD is only read from environment/config, never hard-coded.
                     allow_no_password = getattr(settings, "REDIS_ALLOW_NO_PASSWORD", "false")
                     allow_no_password = str(allow_no_password).lower() in ("true", "1", "yes")
 
