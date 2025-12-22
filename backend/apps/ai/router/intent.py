@@ -1,4 +1,5 @@
 """Intent router for classifying user queries using spaCy and Redis cache."""
+
 import contextlib
 import hashlib
 import json
@@ -77,7 +78,7 @@ class IntentRouter:
         if matches:
             intent_type = "STATIC"
             confidence = 1.0
-            match_id, start, end = matches[0]
+            _match_id, start, end = matches[0]
             matched_span = doc[start:end]
             matched_keyword = matched_span.text
 
@@ -92,7 +93,7 @@ class IntentRouter:
             },
         }
 
-        with contextlib.suppress(Exception):  # noqa: BLE001 - Intentional fail-open policy
+        with contextlib.suppress(Exception):
             self.redis.set(cache_key, json.dumps(result), ex=3600)
 
         return result

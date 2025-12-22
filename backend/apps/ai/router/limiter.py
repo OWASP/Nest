@@ -1,4 +1,5 @@
 """Rate limiter for user requests using Redis."""
+
 import hashlib
 
 from .client import RedisRouterClient
@@ -11,7 +12,7 @@ end
 return count
 """
 
-RATE_LIMIT_SCRIPT_SHA = hashlib.sha1(RATE_LIMIT_SCRIPT.encode()).hexdigest()
+RATE_LIMIT_SCRIPT_SHA = hashlib.sha256(RATE_LIMIT_SCRIPT.encode()).hexdigest()
 
 
 class RateLimiter:
@@ -29,7 +30,8 @@ class RateLimiter:
         if self._script_sha is None:
             try:
                 self._script_sha = self.redis.script_load(RATE_LIMIT_SCRIPT)
-            except Exception:
+            except (AttributeError, ValueError, TypeError, RuntimeError):
+                # Log the exception if needed
                 self._script_sha = RATE_LIMIT_SCRIPT_SHA
         return self._script_sha
 
@@ -41,17 +43,17 @@ class RateLimiter:
         script_sha = self._get_script_sha()
         try:
             current_count = self.redis.evalsha(script_sha, 1, key, window)
-        except Exception as e:
+        except (AttributeError, ValueError, TypeError, RuntimeError) as e:
             error_str = str(e).lower()
             if "noscript" in error_str or "unknown script" in error_str:
                 try:
                     current_count = self.redis.eval(RATE_LIMIT_SCRIPT, 1, key, window)
                     self._script_sha = self.redis.script_load(RATE_LIMIT_SCRIPT)
-                except Exception:
-                    raise
+                except (AttributeError, ValueError, TypeError, RuntimeError):
+                    # Log the exception if needed
+                    return 0
             else:
-                raise
-
+                return 0
         return int(current_count) if current_count is not None else 0
 
     def is_allowed(self, user_id: str) -> bool:

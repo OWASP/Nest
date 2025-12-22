@@ -118,4 +118,5 @@ class RedisRouterClient:
         self.client = redis.Redis(connection_pool=RedisRouterClient._pool)
 
     def get_connection(self):
+        """Get the Redis client connection."""
         return self.client
