@@ -12,7 +12,7 @@ end
 return count
 """
 
-RATE_LIMIT_SCRIPT_SHA = hashlib.sha256(RATE_LIMIT_SCRIPT.encode()).hexdigest()
+
 
 
 class RateLimiter:
@@ -23,16 +23,14 @@ class RateLimiter:
         self.redis = RedisRouterClient().get_connection()
         self.limit = 20
         self.window = 60
-        self._script_sha = None
+        # Load the script at startup and store the returned SHA1
+        try:
+            self._script_sha = self.redis.script_load(RATE_LIMIT_SCRIPT)
+        except Exception:
+            self._script_sha = None
 
     def _get_script_sha(self):
-        """Get or load the Lua script SHA for EVALSHA."""
-        if self._script_sha is None:
-            try:
-                self._script_sha = self.redis.script_load(RATE_LIMIT_SCRIPT)
-            except (AttributeError, ValueError, TypeError, RuntimeError):
-                # Log the exception if needed
-                self._script_sha = RATE_LIMIT_SCRIPT_SHA
+        """Get the Lua script SHA1 for EVALSHA (already loaded at init)."""
         return self._script_sha
 
     def _increment_with_expiry(self, key: str, window: int) -> int:
