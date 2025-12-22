@@ -17,6 +17,32 @@ const ItemCardSkeleton = ({ titleWidth }: { titleWidth: string }) => (
   </div>
 )
 
+const SectionSkeleton = ({
+  titleWidth,
+  itemCount,
+  itemKeyPrefix,
+  titleSkeletonWidth,
+  minHeight,
+}: {
+  titleWidth: string
+  itemCount: number
+  itemKeyPrefix: string
+  titleSkeletonWidth: string
+  minHeight?: string
+}) => (
+  <div className={`mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 ${minHeight || ''}`}>
+    <h2 className="mb-4 flex flex-row items-center gap-2 text-2xl font-semibold">
+      <Skeleton className="h-5 w-5" />
+      <Skeleton className={`h-6 ${titleSkeletonWidth}`} />
+    </h2>
+    <div className="space-y-3">
+      {Array.from({ length: itemCount }, (_, i) => (
+        <ItemCardSkeleton key={`${itemKeyPrefix}-${i}`} titleWidth={titleWidth} />
+      ))}
+    </div>
+  </div>
+)
+
 const OrganizationDetailsPageSkeleton = () => {
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
@@ -87,60 +113,41 @@ const OrganizationDetailsPageSkeleton = () => {
 
         {/* Two Column Layout - Recent Issues and Milestones */}
         <div className="grid-cols-2 gap-4 lg:grid">
-          {/* Recent Issues */}
-          <div className="mb-8 min-h-[600px] rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
-            <h2 className="mb-4 flex flex-row items-center gap-2 text-2xl font-semibold">
-              <Skeleton className="h-5 w-5" />
-              <Skeleton className="h-6 w-32" />
-            </h2>
-            <div className="space-y-3">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <ItemCardSkeleton key={`issue-${i}`} titleWidth="w-4/5" />
-              ))}
-            </div>
-          </div>
-
-          {/* Recent Milestones */}
-          <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
-            <h2 className="mb-4 flex flex-row items-center gap-2 text-2xl font-semibold">
-              <Skeleton className="h-5 w-5" />
-              <Skeleton className="h-6 w-40" />
-            </h2>
-            <div className="space-y-3">
-              {[1, 2].map((i) => (
-                <ItemCardSkeleton key={`milestone-${i}`} titleWidth="w-3/4" />
-              ))}
-            </div>
-          </div>
+          {[
+            { keyPrefix: 'issue', titleWidth: 'w-32' },
+            { keyPrefix: 'milestone', titleWidth: 'w-32' },
+          ].map(({ keyPrefix, titleWidth }) => (
+            <SectionSkeleton
+              key={keyPrefix}
+              titleWidth="w-4/5"
+              itemCount={5}
+              itemKeyPrefix={keyPrefix}
+              titleSkeletonWidth={titleWidth}
+              minHeight="min-h-[600px]"
+            />
+          ))}
         </div>
 
         {/* Two Column Layout - Pull Requests and Releases */}
         <div className="grid-cols-2 gap-4 lg:grid">
-          {/* Recent Pull Requests */}
-          <div className="mb-8 min-h-[600px] rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
-            <h2 className="mb-4 flex flex-row items-center gap-2 text-2xl font-semibold">
-              <Skeleton className="h-5 w-5" />
-              <Skeleton className="h-6 w-48" />
-            </h2>
-            <div className="space-y-3">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <ItemCardSkeleton key={`pr-${i}`} titleWidth="w-3/4" />
-              ))}
-            </div>
-          </div>
-
-          {/* Recent Releases */}
-          <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
-            <h2 className="mb-4 flex flex-row items-center gap-2 text-2xl font-semibold">
-              <Skeleton className="h-5 w-5" />
-              <Skeleton className="h-6 w-36" />
-            </h2>
-            <div className="space-y-3">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <ItemCardSkeleton key={`release-${i}`} titleWidth="w-2/3" />
-              ))}
-            </div>
-          </div>
+          {[
+            {
+              keyPrefix: 'pr',
+              titleWidth: 'w-48',
+              itemTitleWidth: 'w-3/4',
+              minHeight: 'min-h-[600px]',
+            },
+            { keyPrefix: 'release', titleWidth: 'w-36', itemTitleWidth: 'w-2/3' },
+          ].map(({ keyPrefix, titleWidth, itemTitleWidth, minHeight }) => (
+            <SectionSkeleton
+              key={keyPrefix}
+              titleWidth={itemTitleWidth}
+              itemCount={5}
+              itemKeyPrefix={keyPrefix}
+              titleSkeletonWidth={titleWidth}
+              minHeight={minHeight}
+            />
+          ))}
         </div>
 
         {/* Repositories */}
