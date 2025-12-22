@@ -1,10 +1,10 @@
 'use client'
-import { faLocationDot } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import { Tooltip } from '@heroui/tooltip'
 import L, { MarkerClusterGroup } from 'leaflet'
 import React, { useEffect, useRef, useState } from 'react'
+import { FaUnlock } from 'react-icons/fa'
+import { FaLocationDot } from 'react-icons/fa6'
 import type { Chapter } from 'types/chapter'
 import type { UserLocation } from 'utils/geolocationUtils'
 import 'leaflet.markercluster'
@@ -28,6 +28,9 @@ const ChapterMap = ({
 }) => {
   const mapRef = useRef<L.Map | null>(null)
   const markerClusterRef = useRef<MarkerClusterGroup | null>(null)
+  const userMarkerRef = useRef<L.Marker | null>(null)
+  const zoomControlRef = useRef<L.Control.Zoom | null>(null)
+  const initialViewRef = useRef<{ center: L.LatLngExpression; zoom: number } | null>(null)
   const [isMapActive, setIsMapActive] = useState(false)
 
   useEffect(() => {
@@ -40,7 +43,13 @@ const ChapterMap = ({
         ],
         maxBoundsViscosity: 1.0,
         scrollWheelZoom: false,
+        zoomControl: false,
       }).setView([20, 0], 2)
+
+      initialViewRef.current = {
+        center: mapRef.current.getCenter(),
+        zoom: mapRef.current.getZoom(),
+      }
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
@@ -56,7 +65,12 @@ const ChapterMap = ({
         const originalEvent = e.originalEvent as MouseEvent
         const relatedTarget = originalEvent.relatedTarget as Node | null
         const container = mapRef.current?.getContainer()
-        if (relatedTarget && container?.contains(relatedTarget)) return
+        const mapParent = container?.parentElement
+        if (
+          relatedTarget &&
+          (container?.contains(relatedTarget) || mapParent?.contains(relatedTarget))
+        )
+          return
 
         mapRef.current?.scrollWheelZoom.disable()
         setIsMapActive(false)
@@ -112,7 +126,11 @@ const ChapterMap = ({
 
     markerClusterGroup.addLayers(markers)
 
-    // Add user location marker if available
+    if (userMarkerRef.current) {
+      userMarkerRef.current.remove()
+      userMarkerRef.current = null
+    }
+
     if (userLocation && map) {
       const iconHtml =
         '<img src="/img/marker-icon.png" style="filter: hue-rotate(150deg) saturate(1.5) brightness(0.9); width: 25px; height: 41px;" alt="User location" />'
@@ -133,26 +151,24 @@ const ChapterMap = ({
       userPopup.setContent(userPopupContent)
       userMarker.bindPopup(userPopup)
       userMarker.addTo(map)
+      userMarkerRef.current = userMarker
     }
 
     if (userLocation && validGeoLocData.length > 0) {
       const maxNearestChapters = 5
       const localChapters = validGeoLocData.slice(0, maxNearestChapters)
-      const localBounds = L.latLngBounds(
-        localChapters.map((chapter) => [
-          chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
-          chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
-        ])
-      )
+      const locationsForBounds: L.LatLngExpression[] = [
+        [userLocation.latitude, userLocation.longitude],
+        ...localChapters.map(
+          (chapter) =>
+            [
+              chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
+              chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
+            ] as L.LatLngExpression
+        ),
+      ]
+      const localBounds = L.latLngBounds(locationsForBounds)
       const maxZoom = 12
-      const nearestChapter = validGeoLocData[0]
-      map.setView(
-        [
-          nearestChapter._geoloc?.lat ?? nearestChapter.geoLocation?.lat,
-          nearestChapter._geoloc?.lng ?? nearestChapter.geoLocation?.lng,
-        ],
-        maxZoom
-      )
       map.fitBounds(localBounds, { maxZoom: maxZoom })
     } else if (showLocal && validGeoLocData.length > 0) {
       const maxNearestChapters = 5
@@ -173,8 +189,32 @@ const ChapterMap = ({
         maxZoom
       )
       map.fitBounds(localBounds, { maxZoom: maxZoom })
+    } else if (initialViewRef.current) {
+      map.setView(initialViewRef.current.center, initialViewRef.current.zoom)
     }
   }, [geoLocData, showLocal, userLocation])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    if (isMapActive) {
+      if (!zoomControlRef.current) {
+        zoomControlRef.current = L.control.zoom({ position: 'topleft' })
+        zoomControlRef.current.addTo(map)
+      }
+    } else if (zoomControlRef.current) {
+      zoomControlRef.current.remove()
+      zoomControlRef.current = null
+    }
+
+    return () => {
+      if (zoomControlRef.current) {
+        zoomControlRef.current.remove()
+        zoomControlRef.current = null
+      }
+    }
+  }, [isMapActive])
 
   return (
     <div className="relative" style={style}>
@@ -195,37 +235,41 @@ const ChapterMap = ({
               setIsMapActive(true)
             }
           }}
-          aria-label="Click to interact with map"
+          aria-label="Unlock map"
         >
-          <p className="pointer-events-auto rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg dark:bg-gray-700 dark:text-white">
-            Click to interact with map
+          <p className="pointer-events-auto flex items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white">
+            <FaUnlock aria-hidden="true" />
+            Unlock map
           </p>
         </button>
       )}
-      <div className="absolute top-20 left-3 z-[999] w-fit">
-        {onShareLocation && (
-          <Tooltip
-            showArrow
-            content={
-              userLocation ? 'Reset location filter' : 'Share your location to find nearby chapters'
-            }
-            placement="bottom-start"
-          >
-            <Button
-              isIconOnly
-              className="h-[30px] w-[30px] min-w-[30px] rounded-xs bg-white text-gray-700 shadow-lg outline-2 outline-gray-400 hover:bg-gray-100 dark:outline-gray-700"
-              onPress={onShareLocation}
-              aria-label={
-                userLocation ? 'Reset location filter' : 'Share location to find nearby chapters'
+      {isMapActive && (
+        <div className="absolute top-20 left-3 z-[999] w-fit">
+          {onShareLocation && (
+            <Tooltip
+              showArrow
+              content={
+                userLocation
+                  ? 'Reset location filter'
+                  : 'Share your location to find nearby chapters'
               }
+              placement="bottom-start"
             >
-              <FontAwesomeIcon icon={faLocationDot} size="sm" />
-            </Button>
-          </Tooltip>
-        )}
-      </div>
+              <Button
+                isIconOnly
+                className="h-[30px] w-[30px] min-w-[30px] rounded-xs bg-white text-gray-700 shadow-lg outline-2 outline-gray-400 hover:bg-gray-100 dark:outline-gray-700"
+                onPress={onShareLocation}
+                aria-label={
+                  userLocation ? 'Reset location filter' : 'Share location to find nearby chapters'
+                }
+              >
+                <FaLocationDot size={14} />
+              </Button>
+            </Tooltip>
+          )}
+        </div>
+      )}
     </div>
   )
 }
-
 export default ChapterMap

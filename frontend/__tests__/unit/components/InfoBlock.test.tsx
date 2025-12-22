@@ -1,9 +1,9 @@
-import { faUser, faStar, faCode } from '@fortawesome/free-solid-svg-icons'
 import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import millify from 'millify'
 import React from 'react'
+import { FaUser, FaStar, FaCode } from 'react-icons/fa6'
 import { pluralize } from 'utils/pluralize'
 import InfoBlock from 'components/InfoBlock'
 
@@ -12,16 +12,23 @@ jest.mock('utils/pluralize', () => ({
   pluralize: jest.fn(),
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({
-    icon,
+// Update IconWrapper mock to handle react-icons properly
+jest.mock('wrappers/IconWrapper', () => ({
+  IconWrapper: ({
+    icon: IconComponent,
     className,
-    ...props
   }: {
-    icon: { iconName: string }
+    icon: React.ComponentType<{ className?: string }>
     className?: string
-    [key: string]: unknown
-  }) => <span data-testid={`icon-${icon.iconName}`} className={className} {...props} />,
+  }) => {
+    // Extract icon name for test id from component name
+    const iconName = IconComponent?.name?.replace('Fa', '').toLowerCase() || 'icon'
+    return IconComponent ? (
+      <span data-testid={`icon-${iconName}`} className={className}>
+        <IconComponent />
+      </span>
+    ) : null
+  },
 }))
 
 jest.mock('@heroui/tooltip', () => ({
@@ -48,7 +55,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('100')
         mockPluralize.mockReturnValue('items')
 
-        render(<InfoBlock icon={faUser} value={100} />)
+        render(<InfoBlock icon={FaUser} value={100} />)
 
         expect(screen.getByTestId('icon-user')).toBeInTheDocument()
         expect(screen.getByText('100 items')).toBeInTheDocument()
@@ -61,7 +68,7 @@ describe('InfoBlock Component', () => {
 
         render(
           <InfoBlock
-            icon={faStar}
+            icon={FaStar}
             value={1500}
             unit="contributor"
             pluralizedName="contributors"
@@ -82,7 +89,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('50')
         mockPluralize.mockReturnValue('projects')
 
-        render(<InfoBlock icon={faCode} value={50} label="Active Projects" />)
+        render(<InfoBlock icon={FaCode} value={50} label="Active Projects" />)
 
         expect(screen.getByText('Active Projects')).toBeInTheDocument()
         expect(screen.getByText('Active Projects')).toHaveClass('text-sm', 'font-medium')
@@ -92,7 +99,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('50')
         mockPluralize.mockReturnValue('projects')
 
-        render(<InfoBlock icon={faCode} value={50} />)
+        render(<InfoBlock icon={FaCode} value={50} />)
 
         expect(screen.queryByText('Active Projects')).not.toBeInTheDocument()
       })
@@ -101,7 +108,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('0')
         mockPluralize.mockReturnValue('items')
 
-        render(<InfoBlock icon={faUser} value={0} />)
+        render(<InfoBlock icon={FaUser} value={0} />)
 
         expect(screen.getByText('No items')).toBeInTheDocument()
       })
@@ -110,7 +117,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('5')
         mockPluralize.mockReturnValue('items')
 
-        render(<InfoBlock icon={faUser} value={5} />)
+        render(<InfoBlock icon={FaUser} value={5} />)
 
         expect(screen.getByText('5 items')).toBeInTheDocument()
         expect(screen.queryByText('No items')).not.toBeInTheDocument()
@@ -123,7 +130,7 @@ describe('InfoBlock Component', () => {
         mockPluralize.mockReturnValue('users')
 
         const { container } = render(
-          <InfoBlock icon={faUser} value={100} className="custom-spacing pb-4" />
+          <InfoBlock icon={FaUser} value={100} className="custom-spacing pb-4" />
         )
 
         const wrapper = container.firstChild as HTMLElement
@@ -134,7 +141,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('100')
         mockPluralize.mockReturnValue('users')
 
-        const { container } = render(<InfoBlock icon={faUser} value={100} />)
+        const { container } = render(<InfoBlock icon={FaUser} value={100} />)
 
         const wrapper = container.firstChild as HTMLElement
         expect(wrapper).toHaveClass('flex')
@@ -145,7 +152,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('1.234k')
         mockPluralize.mockReturnValue('items')
 
-        render(<InfoBlock icon={faUser} value={1234} precision={3} />)
+        render(<InfoBlock icon={FaUser} value={1234} precision={3} />)
 
         expect(mockMillify).toHaveBeenCalledWith(1234, { precision: 3 })
       })
@@ -154,7 +161,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('1.2k')
         mockPluralize.mockReturnValue('items')
 
-        render(<InfoBlock icon={faUser} value={1234} />)
+        render(<InfoBlock icon={FaUser} value={1234} />)
 
         expect(mockMillify).toHaveBeenCalledWith(1234, { precision: 1 })
       })
@@ -163,7 +170,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('5')
         mockPluralize.mockReturnValue('people')
 
-        render(<InfoBlock icon={faUser} value={5} unit="person" pluralizedName="people" />)
+        render(<InfoBlock icon={FaUser} value={5} unit="person" pluralizedName="people" />)
 
         expect(mockPluralize).toHaveBeenCalledWith(5, 'person', 'people')
       })
@@ -172,7 +179,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('5')
         mockPluralize.mockReturnValue('users')
 
-        render(<InfoBlock icon={faUser} value={5} unit="user" />)
+        render(<InfoBlock icon={FaUser} value={5} unit="user" />)
 
         expect(mockPluralize).toHaveBeenCalledWith(5, 'user')
       })
@@ -184,7 +191,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('100')
         mockPluralize.mockReturnValue('items')
 
-        render(<InfoBlock icon={faUser} value={100} />)
+        render(<InfoBlock icon={FaUser} value={100} />)
 
         const tooltip = screen.getByTestId('tooltip')
 
@@ -208,7 +215,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('100')
         mockPluralize.mockReturnValue('items')
 
-        render(<InfoBlock icon={faUser} value={100} />)
+        render(<InfoBlock icon={FaUser} value={100} />)
 
         const tooltip = screen.getByTestId('tooltip')
 
@@ -230,7 +237,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('100')
         mockPluralize.mockReturnValue('items')
 
-        render(<InfoBlock icon={faUser} value={100} />)
+        render(<InfoBlock icon={FaUser} value={100} />)
 
         // Verify only the formatted value is rendered, no label
         expect(screen.getByText('100 items')).toBeInTheDocument()
@@ -244,7 +251,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('100')
         mockPluralize.mockReturnValue('items')
 
-        const { container } = render(<InfoBlock icon={faUser} value={100} />)
+        const { container } = render(<InfoBlock icon={FaUser} value={100} />)
 
         const wrapper = container.firstChild as HTMLElement
         expect(wrapper).toHaveClass('flex')
@@ -254,7 +261,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('1.2k')
         mockPluralize.mockReturnValue('items')
 
-        render(<InfoBlock icon={faUser} value={1234} />)
+        render(<InfoBlock icon={FaUser} value={1234} />)
 
         expect(mockMillify).toHaveBeenCalledWith(1234, { precision: 1 })
       })
@@ -265,7 +272,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('2.5k')
         mockPluralize.mockReturnValue('stars')
 
-        render(<InfoBlock icon={faStar} value={2500} />)
+        render(<InfoBlock icon={FaStar} value={2500} />)
 
         expect(screen.getByText('2.5k stars')).toBeInTheDocument()
       })
@@ -274,7 +281,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('100')
         mockPluralize.mockReturnValue('repos')
 
-        render(<InfoBlock icon={faCode} value={100} label="Repositories" />)
+        render(<InfoBlock icon={FaCode} value={100} label="Repositories" />)
 
         const label = screen.getByText('Repositories')
         expect(label).toHaveClass('text-sm', 'font-medium')
@@ -284,7 +291,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('1.5k')
         mockPluralize.mockReturnValue('contributors')
 
-        render(<InfoBlock icon={faUser} value={1500} />)
+        render(<InfoBlock icon={FaUser} value={1500} />)
 
         const tooltip = screen.getByTestId('tooltip')
         expect(tooltip).toHaveAttribute('title', '1,500 contributors')
@@ -294,7 +301,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('0')
         mockPluralize.mockReturnValue('items')
 
-        render(<InfoBlock icon={faUser} value={0} />)
+        render(<InfoBlock icon={FaUser} value={0} />)
 
         const tooltip = screen.getByTestId('tooltip')
         expect(tooltip).toHaveAttribute('title', 'No items')
@@ -306,7 +313,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('0')
         mockPluralize.mockReturnValue('items')
 
-        render(<InfoBlock icon={faUser} value={0} />)
+        render(<InfoBlock icon={FaUser} value={0} />)
 
         expect(screen.getByText('No items')).toBeInTheDocument()
         expect(screen.getByTestId('tooltip')).toHaveAttribute('title', 'No items')
@@ -316,7 +323,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('1.2B')
         mockPluralize.mockReturnValue('users')
 
-        render(<InfoBlock icon={faUser} value={1234567890} />)
+        render(<InfoBlock icon={FaUser} value={1234567890} />)
 
         expect(screen.getByText('1.2B users')).toBeInTheDocument()
         expect(mockMillify).toHaveBeenCalledWith(1234567890, { precision: 1 })
@@ -326,7 +333,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('-100')
         mockPluralize.mockReturnValue('items')
 
-        render(<InfoBlock icon={faUser} value={-100} />)
+        render(<InfoBlock icon={FaUser} value={-100} />)
 
         expect(screen.getByText('-100 items')).toBeInTheDocument()
       })
@@ -335,7 +342,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('1.234k')
         mockPluralize.mockReturnValue('items')
 
-        render(<InfoBlock icon={faUser} value={1234.56} precision={3} />)
+        render(<InfoBlock icon={FaUser} value={1234.56} precision={3} />)
 
         expect(mockMillify).toHaveBeenCalledWith(1234.56, { precision: 3 })
       })
@@ -344,7 +351,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('42')
         mockPluralize.mockReturnValue('answers')
 
-        render(<InfoBlock icon={faUser} value={42} />)
+        render(<InfoBlock icon={FaUser} value={42} />)
 
         expect(screen.getByText('42 answers')).toBeInTheDocument()
         expect(screen.getByTestId('icon-user')).toBeInTheDocument()
@@ -357,7 +364,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('100')
         mockPluralize.mockReturnValue('items')
 
-        const { container } = render(<InfoBlock icon={faUser} value={100} />)
+        const { container } = render(<InfoBlock icon={FaUser} value={100} />)
 
         const wrapper = container.firstChild as HTMLElement
         expect(wrapper).toHaveClass('flex')
@@ -374,7 +381,7 @@ describe('InfoBlock Component', () => {
         mockPluralize.mockReturnValue('items')
 
         const { container } = render(
-          <InfoBlock icon={faUser} value={100} className="custom-class pb-1" />
+          <InfoBlock icon={FaUser} value={100} className="custom-class pb-1" />
         )
 
         const wrapper = container.firstChild as HTMLElement
@@ -385,7 +392,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('100')
         mockPluralize.mockReturnValue('items')
 
-        render(<InfoBlock icon={faUser} value={100} />)
+        render(<InfoBlock icon={FaUser} value={100} />)
 
         const icon = screen.getByTestId('icon-user')
         expect(icon).toHaveClass('mr-3', 'mt-1', 'w-5')
@@ -395,7 +402,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('100')
         mockPluralize.mockReturnValue('items')
 
-        render(<InfoBlock icon={faUser} value={100} label="Test Label" />)
+        render(<InfoBlock icon={FaUser} value={100} label="Test Label" />)
 
         const textContainer = screen.getByText('100 items').closest('div')
         expect(textContainer).toHaveClass('text-sm', 'md:text-base')
@@ -410,7 +417,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('1.5k')
         mockPluralize.mockReturnValue('contributors')
 
-        render(<InfoBlock icon={faUser} value={1500} />)
+        render(<InfoBlock icon={FaUser} value={1500} />)
 
         const tooltip = screen.getByTestId('tooltip')
         expect(tooltip).toHaveAttribute('title', '1,500 contributors')
@@ -420,7 +427,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('100')
         mockPluralize.mockReturnValue('items')
 
-        render(<InfoBlock icon={faUser} value={100} />)
+        render(<InfoBlock icon={FaUser} value={100} />)
 
         const tooltip = screen.getByTestId('tooltip')
 
@@ -436,7 +443,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('5.67k')
         mockPluralize.mockReturnValue('items')
 
-        render(<InfoBlock icon={faUser} value={5678} precision={2} />)
+        render(<InfoBlock icon={FaUser} value={5678} precision={2} />)
 
         expect(mockMillify).toHaveBeenCalledWith(5678, { precision: 2 })
         expect(mockMillify).toHaveBeenCalledTimes(1)
@@ -446,7 +453,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('3')
         mockPluralize.mockReturnValue('people')
 
-        render(<InfoBlock icon={faUser} value={3} unit="person" pluralizedName="people" />)
+        render(<InfoBlock icon={FaUser} value={3} unit="person" pluralizedName="people" />)
 
         expect(mockPluralize).toHaveBeenCalledWith(3, 'person', 'people')
         expect(mockPluralize).toHaveBeenCalledTimes(1)
@@ -456,7 +463,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('3')
         mockPluralize.mockReturnValue('users')
 
-        render(<InfoBlock icon={faUser} value={3} unit="user" />)
+        render(<InfoBlock icon={FaUser} value={3} unit="user" />)
 
         expect(mockPluralize).toHaveBeenCalledWith(3, 'user')
         expect(mockPluralize).toHaveBeenCalledTimes(1)
@@ -468,7 +475,7 @@ describe('InfoBlock Component', () => {
         mockMillify.mockReturnValue('2.5k')
         mockPluralize.mockReturnValue('stars')
 
-        render(<InfoBlock icon={faStar} value={2500} />)
+        render(<InfoBlock icon={FaStar} value={2500} />)
 
         const tooltip = screen.getByTestId('tooltip')
         expect(tooltip).toContainHTML('2.5k stars')
@@ -482,11 +489,11 @@ describe('InfoBlock Component', () => {
       mockMillify.mockReturnValue('100')
       mockPluralize.mockReturnValue('items')
 
-      const { rerender } = render(<InfoBlock icon={faUser} value={100} />)
+      const { rerender } = render(<InfoBlock icon={FaUser} value={100} />)
 
-      rerender(<InfoBlock icon={faUser} value={200} />)
-      rerender(<InfoBlock icon={faUser} value={300} />)
-      rerender(<InfoBlock icon={faUser} value={400} />)
+      rerender(<InfoBlock icon={FaUser} value={200} />)
+      rerender(<InfoBlock icon={FaUser} value={300} />)
+      rerender(<InfoBlock icon={FaUser} value={400} />)
 
       expect(screen.getByTestId('icon-user')).toBeInTheDocument()
       expect(screen.getByTestId('tooltip')).toBeInTheDocument()

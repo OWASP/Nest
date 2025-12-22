@@ -1,7 +1,7 @@
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import dynamic from 'next/dynamic'
 import { useTheme } from 'next-themes'
 import React from 'react'
+import type { IconType } from 'react-icons'
 import { ApexBarChartDataSeries } from 'types/healthMetrics'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
@@ -13,7 +13,7 @@ const Chart = dynamic(() => import('react-apexcharts'), {
 
 const BarChart: React.FC<{
   title: string
-  icon?: IconProp
+  icon?: IconType
   labels: string[]
   days: number[]
   requirements: number[]

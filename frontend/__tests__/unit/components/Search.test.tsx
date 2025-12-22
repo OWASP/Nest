@@ -374,16 +374,16 @@ describe('SearchBar Component', () => {
 
     it('has the correct class names for search icon', () => {
       render(<SearchBar {...defaultProps} isLoaded={false} />)
-      const searchIcon = screen.getByRole('img', { hidden: true })
-      expect(searchIcon).toHaveClass(
-        'pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400'
-      )
+      const searchIcon = screen.getByTestId('search-icon')
+      expect(searchIcon).toBeInTheDocument()
     })
 
     it('maintains proper DOM structure with all elements', () => {
       render(<SearchBar {...defaultProps} isLoaded={false} />)
       const input = screen.getByPlaceholderText('Search projects...')
-      const searchIcon = screen.getByRole('img', { hidden: true })
+      const searchIcon = document.querySelector(
+        String.raw`svg.pointer-events-none.absolute.left-3.top-1\/2.h-4.w-4.-translate-y-1\/2.text-gray-400`
+      )
 
       expect(input).toBeInTheDocument()
       expect(searchIcon).toBeInTheDocument()

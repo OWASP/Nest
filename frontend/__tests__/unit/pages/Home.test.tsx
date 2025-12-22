@@ -17,11 +17,6 @@ jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 
-jest.mock('wrappers/FontAwesomeIconWrapper', () => ({
-  __esModule: true,
-  default: () => <span data-testid="mock-icon" />,
-}))
-
 jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))

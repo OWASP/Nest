@@ -1,5 +1,5 @@
-import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons'
 import React from 'react'
+import { FaCircleExclamation } from 'react-icons/fa6'
 import { render, screen, cleanup } from 'wrappers/testUtil'
 import type { Issue } from 'types/issue'
 import type { Milestone } from 'types/milestone'
@@ -225,7 +225,7 @@ describe('ItemCardList Component', () => {
         <ItemCardList
           title="Complete List"
           data={[mockIssue]}
-          icon={faCircleExclamation}
+          icon={FaCircleExclamation}
           renderDetails={defaultProps.renderDetails}
           showAvatar={true}
           showSingleColumn={false}
@@ -307,7 +307,7 @@ describe('ItemCardList Component', () => {
         <ItemCardList
           title="With Icon"
           data={[mockIssue]}
-          icon={faCircleExclamation}
+          icon={FaCircleExclamation}
           renderDetails={defaultProps.renderDetails}
         />
       )
