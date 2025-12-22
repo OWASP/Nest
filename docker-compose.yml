@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   redis:
-    image: redis/redis-stack-server:7.2.0-v9
+    image: redis/redis-stack-server:7.2.0-v7
     container_name: nestbot_redis
     ports:
       - 6379:6379
