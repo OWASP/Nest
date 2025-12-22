@@ -1,54 +1,121 @@
 """Redis client for router operations with fail-open policy."""
 
 import logging
-import os
+import threading
 
 import redis
-from dotenv import load_dotenv
-
-# Load secrets from .env file
-load_dotenv()
-
-# RFC 3.1.3: Fail-Open Policy Configuration
-REDIS_CONFIG = {
-    "host": os.getenv("REDIS_HOST", "localhost"),
-    "port": int(os.getenv("REDIS_PORT", "6379") or "6379"),
-    "username": os.getenv("REDIS_USER", "nest_router"),
-    "password": os.getenv("REDIS_PASSWORD"),
-    "decode_responses": True,
-    # Strict 50ms timeout. If Redis is slow, we drop the connection.
-    "socket_timeout": 0.05,
-    "socket_connect_timeout": 0.05,
-}
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
 
+def _get_timeout_value(
+    setting_name: str, default: float, min_value: float = 0.1, max_value: float = 5.0
+) -> float:
+    """Get and validate timeout value from Django settings.
+
+    Args:
+        setting_name: Name of the Django setting to retrieve.
+        default: Default value if setting is not found or invalid.
+        min_value: Minimum allowed timeout value in seconds.
+        max_value: Maximum allowed timeout value in seconds.
+
+    Returns:
+        Validated timeout value in seconds.
+
+    """
+    try:
+        timeout = getattr(settings, setting_name, default)
+        timeout = float(timeout)
+    except (ValueError, TypeError) as e:
+        logger.warning(
+            "Invalid timeout value for %s: %s. Using default: %s",
+            setting_name,
+            e,
+            default,
+        )
+        return default
+
+    if timeout < min_value:
+        logger.warning(
+            "Timeout %s (%s) is below minimum (%s), using minimum value",
+            setting_name,
+            timeout,
+            min_value,
+        )
+        return min_value
+
+    if timeout > max_value:
+        logger.warning(
+            "Timeout %s (%s) exceeds maximum (%s), using maximum value",
+            setting_name,
+            timeout,
+            max_value,
+        )
+        return max_value
+
+    return timeout
+
+
 class RedisRouterClient:
-    """Redis client wrapper with singleton connection pool and fail-open policy."""
+    """Redis client wrapper with shared connection pool and fail-open policy."""
 
     _pool = None
+    _pool_lock = threading.Lock()
 
     def __init__(self):
-        """Initialize Redis client with singleton connection pool."""
-        # RFC 3.1.1: Singleton BlockingConnectionPool
-        if not RedisRouterClient._pool:
-            if not REDIS_CONFIG["password"]:
-                logger.warning("⚠️ REDIS_PASSWORD is missing in .env")
+        """Initialize Redis client with shared connection pool.
 
-            try:
-                RedisRouterClient._pool = redis.BlockingConnectionPool(
-                    **REDIS_CONFIG, max_connections=10
-                )
-            except Exception:
-                logger.exception("Failed to create Redis pool")
-                raise
+        Timeout values are configurable via Django settings:
+        - REDIS_ROUTER_SOCKET_TIMEOUT: Socket operation timeout (default: 0.3s)
+        - REDIS_ROUTER_SOCKET_CONNECT_TIMEOUT: Connection timeout (default: 0.3s)
+
+        These can be overridden via environment variables with the same names.
+        """
+        if not RedisRouterClient._pool:
+            with RedisRouterClient._pool_lock:
+                if not RedisRouterClient._pool:
+                    allow_no_password = getattr(settings, "REDIS_ALLOW_NO_PASSWORD", "false")
+                    allow_no_password = str(allow_no_password).lower() in ("true", "1", "yes")
+
+                    if not settings.REDIS_PASSWORD and not allow_no_password:
+                        error_msg = (
+                            "REDIS_PASSWORD is required but not set. "
+                            "Set REDIS_PASSWORD environment variable, or "
+                            "set REDIS_ALLOW_NO_PASSWORD=true for development mode."
+                        )
+                        logger.error(error_msg)
+                        raise ValueError(error_msg)
+
+                    socket_timeout = _get_timeout_value(
+                        "REDIS_ROUTER_SOCKET_TIMEOUT",
+                        default=0.3,
+                        min_value=0.1,
+                        max_value=5.0,
+                    )
+                    socket_connect_timeout = _get_timeout_value(
+                        "REDIS_ROUTER_SOCKET_CONNECT_TIMEOUT",
+                        default=0.3,
+                        min_value=0.1,
+                        max_value=5.0,
+                    )
+
+                    try:
+                        RedisRouterClient._pool = redis.BlockingConnectionPool(
+                            host=settings.REDIS_HOST,
+                            port=6379,
+                            username=getattr(settings, "REDIS_USER", "nest_router"),
+                            password=settings.REDIS_PASSWORD,
+                            decode_responses=True,
+                            socket_timeout=socket_timeout,
+                            socket_connect_timeout=socket_connect_timeout,
+                            max_connections=10,
+                        )
+                    except Exception:
+                        logger.exception("Failed to create Redis pool")
+                        raise
 
         self.client = redis.Redis(connection_pool=RedisRouterClient._pool)
 
     def get_connection(self):
-        """Return the Redis client instance.
-
-        Operations on this client might raise TimeoutError (Circuit Breaker).
-        """
         return self.client

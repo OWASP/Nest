@@ -1,0 +1,13 @@
+services:
+  redis:
+    image: redis/redis-stack-server:7.2.0-v1
+    container_name: nestbot_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - nest-network
+
+networks:
+  nest-network:
+
