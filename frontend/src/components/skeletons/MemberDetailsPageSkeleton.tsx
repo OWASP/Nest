@@ -154,25 +154,25 @@ const MemberDetailsPageSkeleton: React.FC = () => {
           </div>
 
           {/* Recent Releases */}
-          <div className="mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
+          <div className="mb-8 min-h-[600px] rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
             <h2 className="mb-4 flex flex-row items-center gap-2 text-2xl font-semibold">
               <Skeleton className="h-5 w-5" />
-              <Skeleton className="h-6 w-36" />
+              <Skeleton className="h-6 w-48" />
             </h2>
             <div className="space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (
                 <div
-                  key={`release-${i}`}
+                  key={`pr-${i}`}
                   className="mb-4 rounded-lg border-1 border-gray-200 bg-white p-4 shadow-xs dark:border-gray-700 dark:bg-gray-900"
                 >
-                  <Skeleton className="mb-2 h-5 w-2/3" />
+                  <Skeleton className="mb-2 h-5 w-3/4" />
                   <div className="mt-2 flex flex-wrap items-center text-sm">
                     <div className="mr-4 flex items-center">
                       <Skeleton className="mr-2 h-4 w-4" />
                       <Skeleton className="h-4 w-20" />
                     </div>
-                    <div className="flex items-center">
-                      <Skeleton className="mr-2 h-4 w-4" />
+                    <div className="flex flex-1 items-center overflow-hidden">
+                      <Skeleton className="mr-2 h-5 w-4" />
                       <Skeleton className="h-4 w-24" />
                     </div>
                   </div>
@@ -221,7 +221,7 @@ const MemberDetailsPageSkeleton: React.FC = () => {
                 </div>
               ))}
             </div>
-            <div className="mt-4 flex justify-center">
+            <div className="mt-4 flex justify-start">
               <Skeleton className="h-10 w-24 rounded-md" />
             </div>
           </div>
