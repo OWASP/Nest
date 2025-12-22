@@ -75,61 +75,62 @@ class RedisRouterClient:
         if not RedisRouterClient._pool:
             with RedisRouterClient._pool_lock:
                 if not RedisRouterClient._pool:
-                    # Sonar/SAST note: No hard-coded credentials here.
-                    # REDIS_PASSWORD is only read from environment/config, never hard-coded.
-                    allow_no_password = getattr(settings, "REDIS_ALLOW_NO_PASSWORD", "false")
-                    allow_no_password = str(allow_no_password).lower() in ("true", "1", "yes")
-
-                    password_missing = settings.REDIS_PASSWORD is None or settings.REDIS_PASSWORD == ""
-                    if password_missing:
-                        if allow_no_password:
-                            logger.warning(
-                                "REDIS is running without authentication (REDIS_PASSWORD not set) for development mode."
-                            )
-                        else:
-                            error_msg = (
-                                "REDIS_PASSWORD is required but not set. "
-                                "Set REDIS_PASSWORD environment variable, or "
-                                "set REDIS_ALLOW_NO_PASSWORD=true for development mode."
-                            )
-                            logger.error(error_msg)
-                            raise ValueError(error_msg)
-
-                    socket_timeout = _get_timeout_value(
-                        "REDIS_ROUTER_SOCKET_TIMEOUT",
-                        default=0.3,
-                        min_value=0.1,
-                        max_value=5.0,
-                    )
-                    socket_connect_timeout = _get_timeout_value(
-                        "REDIS_ROUTER_SOCKET_CONNECT_TIMEOUT",
-                        default=0.3,
-                        min_value=0.1,
-                        max_value=5.0,
-                    )
-
-                    try:
-                        redis_port = getattr(settings, "REDIS_PORT", 6379)
-                        try:
-                            redis_port = int(redis_port)
-                        except (TypeError, ValueError):
-                            logger.warning(f"Invalid REDIS_PORT value '{redis_port}', falling back to 6379.")
-                            redis_port = 6379
-                        RedisRouterClient._pool = redis.BlockingConnectionPool(
-                            host=settings.REDIS_HOST,
-                            port=redis_port,
-                            username=getattr(settings, "REDIS_USER", "nest_router"),
-                            password=settings.REDIS_PASSWORD,
-                            decode_responses=True,
-                            socket_timeout=socket_timeout,
-                            socket_connect_timeout=socket_connect_timeout,
-                            max_connections=10,
-                        )
-                    except Exception:
-                        logger.exception("Failed to create Redis pool")
-                        raise
+                    self._validate_redis_password()
+                    RedisRouterClient._pool = self._create_redis_pool()
 
         self.client = redis.Redis(connection_pool=RedisRouterClient._pool)
+
+    def _validate_redis_password(self):
+        allow_no_password = getattr(settings, "REDIS_ALLOW_NO_PASSWORD", "false")
+        allow_no_password = str(allow_no_password).lower() in ("true", "1", "yes")
+        password_missing = settings.REDIS_PASSWORD is None or settings.REDIS_PASSWORD == ""
+        if password_missing:
+            if allow_no_password:
+                logger.warning(
+                    "REDIS is running without authentication (REDIS_PASSWORD not set) for development mode."
+                )
+            else:
+                error_msg = (
+                    "REDIS_PASSWORD is required but not set. "
+                    "Set REDIS_PASSWORD environment variable, or "
+                    "set REDIS_ALLOW_NO_PASSWORD=true for development mode."
+                )
+                logger.error(error_msg)
+                raise ValueError(error_msg)
+
+    def _create_redis_pool(self):
+        socket_timeout = _get_timeout_value(
+            "REDIS_ROUTER_SOCKET_TIMEOUT",
+            default=0.3,
+            min_value=0.1,
+            max_value=5.0,
+        )
+        socket_connect_timeout = _get_timeout_value(
+            "REDIS_ROUTER_SOCKET_CONNECT_TIMEOUT",
+            default=0.3,
+            min_value=0.1,
+            max_value=5.0,
+        )
+        try:
+            redis_port = getattr(settings, "REDIS_PORT", 6379)
+            try:
+                redis_port = int(redis_port)
+            except (TypeError, ValueError):
+                logger.warning(f"Invalid REDIS_PORT value '{redis_port}', falling back to 6379.")
+                redis_port = 6379
+            return redis.BlockingConnectionPool(
+                host=settings.REDIS_HOST,
+                port=redis_port,
+                username=getattr(settings, "REDIS_USER", "nest_router"),
+                password=settings.REDIS_PASSWORD,
+                decode_responses=True,
+                socket_timeout=socket_timeout,
+                socket_connect_timeout=socket_connect_timeout,
+                max_connections=10,
+            )
+        except Exception:
+            logger.exception("Failed to create Redis pool")
+            raise
 
     def get_connection(self):
         """Get the Redis client connection."""
