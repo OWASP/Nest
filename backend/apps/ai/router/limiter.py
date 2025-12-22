@@ -2,8 +2,11 @@
 
 
 import hashlib
+import logging
 import redis
 from redis.exceptions import RedisError
+
+logger = logging.getLogger(__name__)
 
 from .client import RedisRouterClient
 
@@ -34,8 +37,6 @@ class RateLimiter:
             self._script_sha = self.redis.script_load(RATE_LIMIT_SCRIPT)
         except (AttributeError, ValueError, TypeError, RuntimeError, redis.exceptions.RedisError) as e:
             # Log the exception for diagnostics
-            import logging
-            logger = logging.getLogger(__name__)
             logger.warning(f"Failed to load Redis script: {e}")
             self._script_sha = RATE_LIMIT_SCRIPT_SHA
 
@@ -58,12 +59,10 @@ class RateLimiter:
                     current_count = self.redis.eval(RATE_LIMIT_SCRIPT, 1, key, window)
                     self._script_sha = self.redis.script_load(RATE_LIMIT_SCRIPT)
                 except (AttributeError, ValueError, TypeError, RuntimeError, RedisError) as inner_e:
-                    logger = logging.getLogger(__name__)
                     logger.warning(f"Failed to eval/load Redis script: {inner_e}")
                     self._script_sha = RATE_LIMIT_SCRIPT_SHA
                     return 0
             else:
-                logger = logging.getLogger(__name__)
                 logger.warning(f"Redis evalsha error: {e}")
                 return 0
         return int(current_count) if current_count is not None else 0
