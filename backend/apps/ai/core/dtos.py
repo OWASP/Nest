@@ -1,45 +1,37 @@
+"""Data Transfer Objects for the AI core module."""
+
+from typing import Any
+
 from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
+
+
+class RouterIntentDTO(BaseModel):
+    """Data transfer object for Layer 1 intent classification."""
+
+    label: str = Field(..., description="The classified intent label (STATIC/DYNAMIC)")
+    confidence: float = Field(..., description="Confidence score of the classification")
 
 
 class AIQueryDTO(BaseModel):
-    """
-    Represents a query sent to the AI service.
-    """
-    text: str
-    project_id: str
-    
+    """Data transfer object for incoming AI queries."""
 
-#LAYER 1: Router DTOs
-class RouterIntentDTO(BaseModel):
-    """
-    Represents an intent for the AI Router.
-    """
-    label: str # 'static' or 'dynamic'
-    confidence: float
+    text: str = Field(..., description="The raw input text")
+    context: dict[str, Any] = Field(default_factory=dict, description="Metadata context")
+
+
+class AIResponseDTO(BaseModel):
+    """Data transfer object for the final AI response."""
+
+    answer: str = Field(..., description="Final text answer")
+    source: str = Field(..., description="Data source (e.g., database, hybrid_rag)")
+    intent: RouterIntentDTO = Field(..., description="Intent metadata from Layer 1")
+    show_manual_search_btn: bool = Field(default=False, description="UX Escape Hatch")
+
 
 class ProjectPublicDTO(BaseModel):
-    
-    """
-    Security Contract: Defines exactly what data is safe to expose.
-    Mitigates OWASP LLM01 - Data Exposure, by preventing sensitive data leakage.
-    """
-    
+    """Sanitized project data for public exposure (Security Allowlist)."""
+
     name: str
-    maintainers: List[str]
-    url: Dict[str, str]  # URL with validation {"repo":}
-    description: str
-    
-    #Strict mode: no extra fields
-    class Config:
-        extra = "ignore"
-        
-# Unified Response DTO
-class AIResponseDTO(BaseModel):
-    """
-    Represents a response from the AI service.
-    """
-    answer: str
-    source: str #"cache", "statuc_lookup"
-    intent: Optional[RouterIntentDTO] = None
-    show_manual_search_btn: bool = False # The Escape Hatch for the AI
+    description: str | None = None
+    url: str | None = None
+    stars: int = 0
