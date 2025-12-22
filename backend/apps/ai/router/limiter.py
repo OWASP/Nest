@@ -65,4 +65,4 @@ class RateLimiter:
         except Exception:  # noqa: BLE001 - Intentional fail-open policy
             return True
         else:
-            return not current_count > self.limit
+            return current_count <= self.limit
