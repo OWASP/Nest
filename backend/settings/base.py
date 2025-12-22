@@ -137,6 +137,18 @@ class Base(Configuration):
 
     REDIS_HOST = values.SecretValue(environ_name="REDIS_HOST")
     REDIS_PASSWORD = values.SecretValue(environ_name="REDIS_PASSWORD")
+    REDIS_ALLOW_NO_PASSWORD = values.Value(
+        environ_name="REDIS_ALLOW_NO_PASSWORD",
+        default="false",
+    )
+    REDIS_ROUTER_SOCKET_TIMEOUT = values.FloatValue(
+        environ_name="REDIS_ROUTER_SOCKET_TIMEOUT",
+        default=0.3,
+    )
+    REDIS_ROUTER_SOCKET_CONNECT_TIMEOUT = values.FloatValue(
+        environ_name="REDIS_ROUTER_SOCKET_CONNECT_TIMEOUT",
+        default=0.3,
+    )
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
