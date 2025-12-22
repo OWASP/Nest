@@ -32,9 +32,11 @@ export default function CalendarButton(props: Readonly<CalendarButtonProps>) {
       link.setAttribute('download', `${slugify(event.title)}.ics`)
       document.body.appendChild(link)
       link.click()
-    } catch {
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to download ICS file:', err)
       addToast({
-        description: "couldn't export your calendar. Please try again.",
+        description: 'Failed to download ICS file',
         title: 'Download Failed',
         timeout: 3000,
         shouldShowTimeoutProgress: true,

@@ -112,6 +112,7 @@ describe('CalendarButton', () => {
     })
 
     it('handles errors gracefully when generation fails', async () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
       const errorMock = new Error('Failed to generate')
       ;(getIcsFileUrl as jest.Mock).mockRejectedValueOnce(errorMock)
 
@@ -122,16 +123,21 @@ describe('CalendarButton', () => {
 
       await waitFor(() => {
         expect(addToast).toHaveBeenCalledWith({
-          description: "couldn't export your calendar. Please try again.",
+          description: 'Failed to download ICS file',
           title: 'Download Failed',
           timeout: 3000,
           shouldShowTimeoutProgress: true,
           color: 'danger',
           variant: 'solid',
         })
+        expect(consoleSpy).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to download ICS file'),
+          errorMock
+        )
       })
 
       expect(button).not.toBeDisabled()
+      consoleSpy.mockRestore()
     })
   })
 
