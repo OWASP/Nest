@@ -11,7 +11,6 @@ import 'leaflet.markercluster'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
-import 'leaflet.markercluster'
 
 const ChapterMap = ({
   geoLocData,
@@ -42,9 +41,15 @@ const ChapterMap = ({
           [90, 180],
         ],
         maxBoundsViscosity: 1.0,
+        minZoom: 2.4,
+        dragging: false,
+        doubleClickZoom: false,
+        touchZoom: false,
+        boxZoom: false,
+        keyboard: false,
         scrollWheelZoom: false,
         zoomControl: false,
-      }).setView([20, 0], 2)
+      }).setView([20, 0], 2.4)
 
       initialViewRef.current = {
         center: mapRef.current.getCenter(),
@@ -54,10 +59,10 @@ const ChapterMap = ({
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
         className: 'map-tiles',
+        noWrap: true,
       }).addTo(mapRef.current)
 
       mapRef.current.on('click', () => {
-        mapRef.current?.scrollWheelZoom.enable()
         setIsMapActive(true)
       })
 
@@ -72,7 +77,6 @@ const ChapterMap = ({
         )
           return
 
-        mapRef.current?.scrollWheelZoom.disable()
         setIsMapActive(false)
       })
     }
@@ -81,6 +85,8 @@ const ChapterMap = ({
 
     if (!markerClusterRef.current) {
       markerClusterRef.current = L.markerClusterGroup()
+      markerClusterRef.current.on('clusterclick', () => setIsMapActive(true))
+      markerClusterRef.current.on('click', () => setIsMapActive(true))
       map.addLayer(markerClusterRef.current)
     } else {
       markerClusterRef.current.clearLayers()
@@ -150,6 +156,7 @@ const ChapterMap = ({
       userPopupContent.textContent = 'Your Location'
       userPopup.setContent(userPopupContent)
       userMarker.bindPopup(userPopup)
+      userMarker.on('click', () => setIsMapActive(true))
       userMarker.addTo(map)
       userMarkerRef.current = userMarker
     }
@@ -199,13 +206,29 @@ const ChapterMap = ({
     if (!map) return
 
     if (isMapActive) {
+      map.dragging.enable()
+      map.touchZoom.enable()
+      map.doubleClickZoom.enable()
+      map.scrollWheelZoom.enable()
+      map.boxZoom.enable()
+      map.keyboard.enable()
+
       if (!zoomControlRef.current) {
         zoomControlRef.current = L.control.zoom({ position: 'topleft' })
         zoomControlRef.current.addTo(map)
       }
-    } else if (zoomControlRef.current) {
-      zoomControlRef.current.remove()
-      zoomControlRef.current = null
+    } else {
+      map.dragging.disable()
+      map.touchZoom.disable()
+      map.doubleClickZoom.disable()
+      map.scrollWheelZoom.disable()
+      map.boxZoom.disable()
+      map.keyboard.disable()
+
+      if (zoomControlRef.current) {
+        zoomControlRef.current.remove()
+        zoomControlRef.current = null
+      }
     }
 
     return () => {
@@ -225,13 +248,11 @@ const ChapterMap = ({
           tabIndex={0}
           className="pointer-events-none absolute inset-0 z-[500] flex cursor-pointer items-center justify-center rounded-[inherit] bg-black/10"
           onClick={() => {
-            mapRef.current?.scrollWheelZoom.enable()
             setIsMapActive(true)
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault()
-              mapRef.current?.scrollWheelZoom.enable()
               setIsMapActive(true)
             }
           }}
