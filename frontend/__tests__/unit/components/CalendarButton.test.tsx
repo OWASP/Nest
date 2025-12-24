@@ -31,6 +31,7 @@ describe('CalendarButton', () => {
   let createSpy: jest.SpyInstance
 
   beforeEach(() => {
+    jest.clearAllMocks()
     globalThis.URL.createObjectURL = jest.fn(() => 'mock-url')
     globalThis.URL.revokeObjectURL = jest.fn()
     ;(getIcsFileUrl as jest.Mock).mockResolvedValue(mockUrl)
@@ -144,13 +145,17 @@ describe('CalendarButton', () => {
         )
       })
 
-      expect(button).not.toBeDisabled()
+      await waitFor(() => {
+        expect(button).not.toBeDisabled()
+      })
+
       expect(addToast).not.toHaveBeenCalledWith(
         expect.objectContaining({
           color: 'success',
           title: `${mockEvent.title}`,
         })
       )
+      expect(addToast).toHaveBeenCalledTimes(1)
       consoleSpy.mockRestore()
     })
   })
