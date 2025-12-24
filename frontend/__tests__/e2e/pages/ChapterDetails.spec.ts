@@ -35,6 +35,8 @@ test.describe('Chapter Details Page', () => {
     await expect(page.locator('#chapter-map')).toBeVisible()
     await expect(page.locator('#chapter-map').locator('img').nth(1)).toBeVisible()
 
+    await page.getByRole('button', { name: 'Unlock map' }).click()
+
     await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Zoom out' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Marker' })).toBeVisible()

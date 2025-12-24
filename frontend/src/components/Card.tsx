@@ -1,8 +1,7 @@
-import { faCalendar } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
 import Link from 'next/link'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import { FaCalendar } from 'react-icons/fa6'
+import { IconWrapper } from 'wrappers/IconWrapper'
 import type { CardProps } from 'types/card'
 import { ICONS } from 'utils/data'
 import { formatDateRange } from 'utils/dateFormatter'
@@ -45,7 +44,7 @@ const Card = ({
                 className="flex h-8 w-8 min-w-8 items-center justify-center rounded-full text-xs shadow"
                 style={{ backgroundColor: level.color }}
               >
-                <FontAwesomeIconWrapper icon={level.icon} className="text-white" />
+                <IconWrapper icon={level.icon} className="text-white" />
               </span>
             </Tooltip>
           )}
@@ -80,7 +79,7 @@ const Card = ({
         {/* Timeline Section (Optional) */}
         {timeline?.start && timeline?.end && (
           <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+            <FaCalendar className="mr-2 h-4 w-4" />
             <span>{formatDateRange(timeline.start, timeline.end)}</span>
           </div>
         )}
@@ -106,21 +105,21 @@ const Card = ({
         {social && social.length > 0 && (
           <div className="mb-3 flex">
             <div className="flex flex-wrap gap-3">
-              {social.map((item) => (
-                <Link
-                  key={`${item.title}-${item.url}`}
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-colors"
-                  aria-label={item.title || 'Social media link'}
-                >
-                  <FontAwesomeIcon
-                    icon={getSocialIcon(item.url)}
-                    className="h-5 w-5 text-blue-500 hover:text-gray-600 dark:hover:text-gray-400"
-                  />
-                </Link>
-              ))}
+              {social.map((item) => {
+                const SocialIcon = getSocialIcon(item.url)
+                return (
+                  <Link
+                    key={`${item.title}-${item.url}`}
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-colors"
+                    aria-label={item.title || 'Social media link'}
+                  >
+                    <SocialIcon className="h-5 w-5 text-blue-500 hover:text-gray-600 dark:hover:text-gray-400" />
+                  </Link>
+                )
+              })}
             </div>
           </div>
         )}

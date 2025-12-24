@@ -6,16 +6,20 @@ import { useSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import CreateModulePage from 'app/my/mentorship/programs/[programKey]/modules/create/page'
 
+// Mock dependencies to isolate the component
+jest.mock('@heroui/toast', () => ({ addToast: jest.fn() }))
+jest.mock('app/global-error', () => ({
+  handleAppError: jest.fn(),
+  ErrorDisplay: ({ title }: { title: string }) => <div>{title}</div>,
+}))
 jest.mock('next-auth/react', () => ({
   ...jest.requireActual('next-auth/react'),
   useSession: jest.fn(),
 }))
-
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
   useParams: jest.fn(),
 }))
-
 jest.mock('@apollo/client/react', () => ({
   useMutation: jest.fn(),
   useQuery: jest.fn(),
@@ -34,11 +38,11 @@ describe('CreateModulePage', () => {
   })
 
   beforeEach(() => {
-    ;(useRouter as jest.Mock).mockReturnValue({ push: mockPush, replace: mockReplace })
-    ;(useParams as jest.Mock).mockReturnValue({ programKey: 'test-program' })
-    ;(useApolloClient as jest.Mock).mockReturnValue({
-      query: mockQuery,
-    })
+    ; (useRouter as jest.Mock).mockReturnValue({ push: mockPush, replace: mockReplace })
+      ; (useParams as jest.Mock).mockReturnValue({ programKey: 'test-program' })
+      ; (useApolloClient as jest.Mock).mockReturnValue({
+        query: mockQuery,
+      })
   })
 
   afterEach(() => {
@@ -48,28 +52,28 @@ describe('CreateModulePage', () => {
   it('submits the form and navigates to programs page', async () => {
     const user = userEvent.setup()
 
-    ;(useSession as jest.Mock).mockReturnValue({
-      data: { user: { login: 'admin-user' } },
-      status: 'authenticated',
-    })
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: {
-        getProgram: {
-          admins: [{ login: 'admin-user' }],
-        },
-      },
-      loading: false,
-    })
-    ;(useMutation as unknown as jest.Mock).mockReturnValue([
-      mockCreateModule.mockResolvedValue({
+      ; (useSession as jest.Mock).mockReturnValue({
+        data: { user: { login: 'admin-user' } },
+        status: 'authenticated',
+      })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
         data: {
-          createModule: {
-            key: 'my-test-module',
+          getProgram: {
+            admins: [{ login: 'admin-user' }],
           },
         },
-      }),
-      { loading: false },
-    ])
+        loading: false,
+      })
+      ; (useMutation as unknown as jest.Mock).mockReturnValue([
+        mockCreateModule.mockResolvedValue({
+          data: {
+            createModule: {
+              key: 'my-test-module',
+            },
+          },
+        }),
+        { loading: false },
+      ])
 
     render(<CreateModulePage />)
 

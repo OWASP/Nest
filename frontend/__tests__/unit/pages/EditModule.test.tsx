@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useApolloClient } from '@apollo/client/react'
+import { addToast } from '@heroui/toast'
 import { screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
@@ -21,6 +22,10 @@ jest.mock('@apollo/client/react', () => ({
   useMutation: jest.fn(),
   useQuery: jest.fn(),
   useApolloClient: jest.fn(),
+}))
+
+jest.mock('@heroui/toast', () => ({
+  addToast: jest.fn(),
 }))
 
 describe('EditModulePage', () => {
@@ -114,6 +119,45 @@ describe('EditModulePage', () => {
       expect(mockPush).toHaveBeenCalledWith(
         '/my/mentorship/programs/test-program/modules/test-module'
       )
+    })
+  })
+
+  it('shows access denied and redirects if user is not an admin', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'non-admin-user' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin-user' }], // User is not in this list
+        },
+        getModule: {
+          name: 'Existing Module',
+        },
+      },
+    })
+
+    render(<EditModulePage />)
+
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalledWith({
+        title: 'Access Denied',
+        description: 'Only program admins can edit modules.',
+        color: 'danger',
+        variant: 'solid',
+        timeout: 4000,
+      })
+    })
+
+    // Advance timers to trigger the redirect
+    act(() => {
+      jest.advanceTimersByTime(1500)
+    })
+
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalledWith('/my/mentorship/programs/test-program')
     })
   })
 
