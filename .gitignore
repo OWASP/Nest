@@ -3,6 +3,7 @@ __pycache__
 .bash_history
 .cache
 .coverage
+.cursor/rules/snyk_rules.mdc
 .DS_Store
 .env*
 !.env.example

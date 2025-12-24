@@ -1,9 +1,8 @@
 'use client'
 
-import { faFileArrowDown } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
 import { FC } from 'react'
+import { FaFileArrowDown } from 'react-icons/fa6'
 import { fetchMetricsPDF } from 'server/fetchMetricsPDF'
 
 const MetricsPDFButton: FC<{
@@ -19,8 +18,7 @@ const MetricsPDFButton: FC<{
       closeDelay={100}
       showArrow
     >
-      <FontAwesomeIcon
-        icon={faFileArrowDown}
+      <FaFileArrowDown
         className="ml-2 h-7 w-7 cursor-pointer text-gray-500 transition-colors duration-200 hover:text-gray-700"
         onClick={async () => await fetchMetricsPDF(path, fileName)}
       />

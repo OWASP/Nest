@@ -1,21 +1,19 @@
-import { faEye } from '@fortawesome/free-regular-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
 import { useUpdateProgramStatus } from 'hooks/useUpdateProgramStatus'
+import Link from 'next/link'
 import type React from 'react'
 import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import { Program } from 'types/mentorship'
-import ActionButton from 'components/ActionButton'
-import ProgramActions from 'components/ProgramActions'
+import EntityActions from 'components/EntityActions'
 
 interface ProgramCardProps {
   program: Program
-  onView: (key: string) => void
+  href: string
   accessLevel: 'admin' | 'user'
   isAdmin: boolean
 }
 
-const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel, isAdmin }) => {
+const ProgramCard: React.FC<ProgramCardProps> = ({ program, href, accessLevel, isAdmin }) => {
   const formatDate = (d: string | number) => {
     const date = typeof d === 'number' ? new Date(d * 1000) : new Date(d)
     return date.toLocaleDateString('en-US', {
@@ -56,9 +54,12 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel,
   })()
 
   return (
-    <div className="h-72 w-72 rounded-lg border border-gray-400 bg-white p-6 text-left transition-transform duration-300 hover:scale-[1.02] hover:brightness-105 md:h-80 md:w-80 lg:h-80 lg:w-96 dark:border-gray-600 dark:bg-gray-800">
+    <Link
+      href={href}
+      className="group block h-72 w-72 rounded-lg border border-gray-400 bg-white p-6 text-left transition-transform duration-300 hover:scale-[1.02] hover:brightness-105 md:h-80 md:w-80 lg:h-80 lg:w-96 dark:border-gray-600 dark:bg-gray-800"
+    >
       <div className="flex h-full flex-col">
-        <div className="flex flex-1 flex-col pb-8">
+        <div className="flex flex-1 flex-col">
           <div className="mb-2 flex items-start justify-between">
             <Tooltip
               closeDelay={100}
@@ -73,11 +74,14 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel,
               </h3>
             </Tooltip>
             {accessLevel === 'admin' && isAdmin && (
-              <ProgramActions
-                programKey={program.key}
-                status={program.status}
-                setStatus={updateProgramStatus}
-              />
+              <div role="none" onMouseDown={(e) => e.stopPropagation()}>
+                <EntityActions
+                  type="program"
+                  programKey={program.key}
+                  status={program.status}
+                  setStatus={updateProgramStatus}
+                />
+              </div>
             )}
           </div>
           <div className="mb-2 text-sm text-gray-600 dark:text-gray-400">
@@ -92,19 +96,10 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, onView, accessLevel,
               </span>
             )}
           </div>
-          <p className="mb-4 line-clamp-6 text-sm text-gray-700 dark:text-gray-300">
-            {description}
-          </p>
-        </div>
-
-        <div className="flex gap-2">
-          <ActionButton onClick={() => onView(program.key)}>
-            <FontAwesomeIcon icon={faEye} className="mr-1" />
-            {accessLevel === 'admin' ? 'Preview' : 'View Details'}
-          </ActionButton>
+          <p className="line-clamp-8 text-sm text-gray-700 dark:text-gray-300">{description}</p>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }
 

@@ -1,10 +1,9 @@
-import { faCalendar, faFolderOpen } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React from 'react'
+import { FaCalendar, FaFolderOpen } from 'react-icons/fa6'
 import type { Release as ReleaseType } from 'types/release'
 import { formatDate } from 'utils/dateFormatter'
 import { TruncatedText } from 'components/TruncatedText'
@@ -42,7 +41,11 @@ const Release: React.FC<ReleaseProps> = ({
                 href={release.author.login ? `/members/${release.author.login}` : '#'}
               >
                 <Image
-                  alt={release.author.name || release.author.login}
+                  alt={
+                    release.author && (release.author.name || release.author.login)
+                      ? `${release.author.name || release.author.login}'s avatar`
+                      : 'Release author avatar'
+                  }
                   className="mr-2 h-6 w-6 rounded-full"
                   height={24}
                   src={release.author.avatarUrl}
@@ -64,12 +67,13 @@ const Release: React.FC<ReleaseProps> = ({
         </div>
         <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
           <div className="mr-4 flex items-center">
-            <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+            <FaCalendar className="mr-2 h-4 w-4" aria-hidden="true" />
             <span>{formatDate(release.publishedAt)}</span>
           </div>
           <div className="flex flex-1 items-center overflow-hidden">
-            <FontAwesomeIcon icon={faFolderOpen} className="mr-2 h-5 w-4" />
+            <FaFolderOpen className="mr-2 h-5 w-4 shrink-0" aria-hidden="true" />
             <button
+              type="button"
               className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
               disabled={!release.organizationName || !release.repositoryName}
               onClick={() => {

@@ -93,7 +93,12 @@ class ProjectNode(GenericEntityNode):
     @strawberry.field
     def repositories(self) -> list[RepositoryNode]:
         """Resolve repositories."""
-        return self.repositories.order_by("-pushed_at", "-updated_at")
+        return self.repositories.filter(
+            organization__isnull=False,
+        ).order_by(
+            "-pushed_at",
+            "-updated_at",
+        )
 
     @strawberry.field
     def repositories_count(self) -> int:

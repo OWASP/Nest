@@ -70,6 +70,7 @@ geopy
 graphiql
 graphqler
 gunicorn
+hackathon
 heroui
 hsl
 igoat
@@ -132,7 +133,6 @@ speakerdeck
 superfences
 tiktok
 tsc
-turbopack
 unassigning
 unhover
 usefixtures

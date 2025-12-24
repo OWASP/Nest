@@ -220,9 +220,9 @@ export type IssueNode = Node & {
   interestedUsers: Array<UserNode>;
   isMerged: Scalars['Boolean']['output'];
   labels: Array<Scalars['String']['output']>;
-  linkedPullRequests: Array<PullRequestNode>;
   number: Scalars['Int']['output'];
   organizationName?: Maybe<Scalars['String']['output']>;
+  pullRequests: Array<PullRequestNode>;
   repositoryName?: Maybe<Scalars['String']['output']>;
   state: Scalars['String']['output'];
   title: Scalars['String']['output'];
@@ -730,7 +730,7 @@ export type QueryCommitteeArgs = {
 
 
 export type QueryGetMenteeDetailsArgs = {
-  menteeHandle: Scalars['String']['input'];
+  menteeKey: Scalars['String']['input'];
   moduleKey: Scalars['String']['input'];
   programKey: Scalars['String']['input'];
 };
@@ -738,7 +738,7 @@ export type QueryGetMenteeDetailsArgs = {
 
 export type QueryGetMenteeModuleIssuesArgs = {
   limit?: Scalars['Int']['input'];
-  menteeHandle: Scalars['String']['input'];
+  menteeKey: Scalars['String']['input'];
   moduleKey: Scalars['String']['input'];
   offset?: Scalars['Int']['input'];
   programKey: Scalars['String']['input'];
@@ -939,7 +939,7 @@ export type RepositoryContributorNode = {
   __typename?: 'RepositoryContributorNode';
   avatarUrl: Scalars['String']['output'];
   contributionsCount: Scalars['Int']['output'];
-  id?: Maybe<Scalars['ID']['output']>;
+  id: Scalars['ID']['output'];
   login: Scalars['String']['output'];
   name: Scalars['String']['output'];
   projectKey?: Maybe<Scalars['String']['output']>;

@@ -1,11 +1,6 @@
-import {
-  faExclamationCircle,
-  faCodeCommit,
-  faCodeFork,
-  faCodePullRequest,
-  faStar,
-} from '@fortawesome/free-solid-svg-icons'
 import React from 'react'
+import { FaExclamationCircle } from 'react-icons/fa'
+import { FaCodeCommit, FaCodeFork, FaCodePullRequest, FaStar } from 'react-icons/fa6'
 import type { HealthMetricsProps } from 'types/healthMetrics'
 import BarChart from 'components/BarChart'
 import LineChart from 'components/LineChart'
@@ -40,7 +35,7 @@ const HealthMetrics: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
             },
           ]}
           labels={labels}
-          icon={faExclamationCircle}
+          icon={FaExclamationCircle}
         />
         <LineChart
           title="Pull Requests Trend"
@@ -52,7 +47,7 @@ const HealthMetrics: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
             },
           ]}
           labels={labels}
-          icon={faCodePullRequest}
+          icon={FaCodePullRequest}
         />
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -66,7 +61,7 @@ const HealthMetrics: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
             },
           ]}
           labels={labels}
-          icon={faStar}
+          icon={FaStar}
         />
         <LineChart
           title="Forks Trend"
@@ -78,13 +73,13 @@ const HealthMetrics: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
             },
           ]}
           labels={labels}
-          icon={faCodeFork}
+          icon={FaCodeFork}
         />
       </div>
 
       <BarChart
         title="Days Since Last Commit and Release"
-        icon={faCodeCommit}
+        icon={FaCodeCommit}
         labels={['Days Since Last Commit', 'Days Since Last Release']}
         days={[data[length - 1]?.lastCommitDays ?? 0, data[length - 1]?.lastReleaseDays ?? 0]}
         requirements={[

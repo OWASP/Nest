@@ -15,8 +15,8 @@ services:
       - nest-cache-network
       - nest-db-network
     volumes:
+      - ./.github.pem:/home/owasp/.github.pem:ro
       - ./backend/data:/home/owasp/data
-      - ~/.github.pem:/home/owasp/.github.pem:ro
 
   production-nest-cache:
     container_name: production-nest-cache
@@ -69,6 +69,8 @@ services:
         python manage.py rqworker ai --with-scheduler
       '
     depends_on:
+      production-nest-backend:
+        condition: service_started
       production-nest-cache:
         condition: service_healthy
       production-nest-db:

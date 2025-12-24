@@ -1,16 +1,14 @@
-import {
-  faCircleInfo,
-  faChartPie,
-  faFolderOpen,
-  faCode,
-  faTags,
-  faUsers,
-  faRectangleList,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import upperFirst from 'lodash/upperFirst'
-import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import {
+  FaCircleInfo,
+  FaChartPie,
+  FaFolderOpen,
+  FaCode,
+  FaTags,
+  FaRectangleList,
+} from 'react-icons/fa6'
+import { HiUserGroup } from 'react-icons/hi'
 import type { ExtendedSession } from 'types/auth'
 import type { DetailsCardProps } from 'types/card'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
@@ -18,6 +16,7 @@ import { scrollToAnchor } from 'utils/scrollToAnchor'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
+import EntityActions from 'components/EntityActions'
 import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
 import Leaders from 'components/Leaders'
@@ -26,7 +25,6 @@ import MenteeContributorsList from 'components/MenteeContributorsList'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import Milestones from 'components/Milestones'
 import ModuleCard from 'components/ModuleCard'
-import ProgramActions from 'components/ProgramActions'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
@@ -76,7 +74,6 @@ const DetailsCard = ({
   userSummary,
 }: DetailsCardProps) => {
   const { data } = useSession()
-  const router = useRouter()
 
   // compute styles based on type prop
   const secondaryCardStyles = (() => {
@@ -94,36 +91,20 @@ const DetailsCard = ({
         <div className="mt-4 flex flex-row items-center">
           <div className="flex w-full items-center justify-between">
             <h1 className="text-4xl font-bold">{title}</h1>
-            {type === 'program' && accessLevel === 'admin' && canUpdateStatus && (
-              <ProgramActions programKey={programKey} status={status} setStatus={setStatus} />
-            )}
-            {type === 'module' &&
-              accessLevel === 'admin' &&
-              admins?.some(
-                (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
-              ) && (
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    className="flex items-center justify-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-2 py-2 text-nowrap text-[#1D7BD7] hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white"
-                    onClick={() => {
-                      router.push(`${globalThis.location.pathname}/issues`)
-                    }}
-                  >
-                    View Issues
-                  </button>
-                  <button
-                    type="button"
-                    className="flex items-center justify-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-2 py-2 text-nowrap text-[#1D7BD7] hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white"
-                    onClick={() => {
-                      router.push(`${globalThis.location.pathname}/edit`)
-                    }}
-                  >
-                    Edit Module
-                  </button>
-                </div>
-              )}
             <div className="flex items-center gap-3">
+              {type === 'program' && accessLevel === 'admin' && canUpdateStatus && (
+                <EntityActions
+                  type="program"
+                  programKey={programKey}
+                  status={status}
+                  setStatus={setStatus}
+                />
+              )}
+              {type === 'module' &&
+                accessLevel === 'admin' &&
+                admins?.some(
+                  (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
+                ) && <EntityActions type="module" programKey={programKey} moduleKey={entityKey} />}
               {!isActive && <StatusBadge status="inactive" size="md" />}
               {isArchived && type === 'repository' && <StatusBadge status="archived" size="md" />}
               {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
@@ -138,7 +119,7 @@ const DetailsCard = ({
         </div>
         <p className="mb-6 text-xl">{description}</p>
         {summary && (
-          <SecondaryCard icon={faCircleInfo} title={<AnchorTitle title="Summary" />}>
+          <SecondaryCard icon={FaCircleInfo} title={<AnchorTitle title="Summary" />}>
             <p>{summary}</p>
           </SecondaryCard>
         )}
@@ -146,7 +127,7 @@ const DetailsCard = ({
         {userSummary && <SecondaryCard>{userSummary}</SecondaryCard>}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
-            icon={faRectangleList}
+            icon={FaRectangleList}
             title={<AnchorTitle title={`${upperFirst(type)} Details`} />}
             className={secondaryCardStyles}
           >
@@ -172,7 +153,7 @@ const DetailsCard = ({
             type === 'user' ||
             type === 'organization') && (
             <SecondaryCard
-              icon={faChartPie}
+              icon={FaChartPie}
               title={<AnchorTitle title="Statistics" />}
               className="md:col-span-2"
             >
@@ -194,6 +175,7 @@ const DetailsCard = ({
               <ChapterMapWrapper
                 geoLocData={geolocationData}
                 showLocal={true}
+                showLocationSharing={true}
                 style={{
                   borderRadius: '0.5rem',
                   boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
@@ -212,42 +194,44 @@ const DetailsCard = ({
             {languages.length !== 0 && (
               <ToggleableList
                 items={languages}
-                icon={faCode}
+                icon={FaCode}
                 label={<AnchorTitle title="Languages" />}
               />
             )}
             {topics.length !== 0 && (
-              <ToggleableList items={topics} icon={faTags} label={<AnchorTitle title="Topics" />} />
+              <ToggleableList items={topics} icon={FaTags} label={<AnchorTitle title="Topics" />} />
             )}
           </div>
         )}
         {(type === 'program' || type === 'module') && (
           <>
-            <div
-              className={`mb-8 grid grid-cols-1 gap-6 ${(tags?.length || 0) === 0 || (domains?.length || 0) === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
-            >
-              {tags?.length > 0 && (
-                <ToggleableList
-                  items={tags}
-                  icon={faTags}
-                  label={<AnchorTitle title="Tags" />}
-                  isDisabled={true}
-                />
-              )}
-              {domains?.length > 0 && (
-                <ToggleableList
-                  items={domains}
-                  icon={faChartPie}
-                  label={<AnchorTitle title="Domains" />}
-                  isDisabled={true}
-                />
-              )}
-            </div>
+            {((tags?.length || 0) > 0 || (domains?.length || 0) > 0) && (
+              <div
+                className={`mb-8 grid grid-cols-1 gap-6 ${(tags?.length || 0) === 0 || (domains?.length || 0) === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
+              >
+                {tags?.length > 0 && (
+                  <ToggleableList
+                    items={tags}
+                    icon={FaTags}
+                    label={<AnchorTitle title="Tags" />}
+                    isDisabled={true}
+                  />
+                )}
+                {domains?.length > 0 && (
+                  <ToggleableList
+                    items={domains}
+                    icon={FaChartPie}
+                    label={<AnchorTitle title="Domains" />}
+                    isDisabled={true}
+                  />
+                )}
+              </div>
+            )}
             {labels?.length > 0 && (
               <div className="mb-8">
                 <ToggleableList
                   items={labels}
-                  icon={faTags}
+                  icon={FaTags}
                   label={<AnchorTitle title="Labels" />}
                   isDisabled={true}
                 />
@@ -259,13 +243,13 @@ const DetailsCard = ({
         {topContributors && (
           <TopContributorsList
             contributors={topContributors}
-            icon={faUsers}
+            icon={HiUserGroup}
             maxInitialDisplay={12}
           />
         )}
         {admins && admins.length > 0 && type === 'program' && (
           <TopContributorsList
-            icon={faUsers}
+            icon={HiUserGroup}
             contributors={admins}
             maxInitialDisplay={6}
             label="Admins"
@@ -273,7 +257,7 @@ const DetailsCard = ({
         )}
         {mentors && mentors.length > 0 && (
           <TopContributorsList
-            icon={faUsers}
+            icon={HiUserGroup}
             contributors={mentors}
             maxInitialDisplay={6}
             label="Mentors"
@@ -281,7 +265,7 @@ const DetailsCard = ({
         )}
         {mentees && mentees.length > 0 && (
           <MenteeContributorsList
-            icon={faUsers}
+            icon={HiUserGroup}
             contributors={mentees}
             maxInitialDisplay={6}
             label="Mentees"
@@ -320,13 +304,13 @@ const DetailsCard = ({
         )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
-            <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
+            <SecondaryCard icon={FaFolderOpen} title={<AnchorTitle title="Repositories" />}>
               <RepositoryCard maxInitialDisplay={4} repositories={repositories} />
             </SecondaryCard>
           )}
         {type === 'program' && modules.length > 0 && (
           <SecondaryCard
-            icon={faFolderOpen}
+            icon={FaFolderOpen}
             title={<AnchorTitle title={modules.length === 1 ? 'Module' : 'Modules'} />}
           >
             <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
@@ -355,17 +339,20 @@ export const SocialLinks = ({ urls }) => {
     <div>
       <strong>Social Links</strong>
       <div className="mt-2 flex flex-wrap gap-3">
-        {urls.map((url) => (
-          <a
-            key={url}
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-400 transition-colors hover:text-gray-800 dark:hover:text-gray-200"
-          >
-            <FontAwesomeIcon icon={getSocialIcon(url)} className="h-5 w-5" />
-          </a>
-        ))}
+        {urls.map((url) => {
+          const SocialIcon = getSocialIcon(url)
+          return (
+            <a
+              key={url}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 transition-colors hover:text-gray-800 dark:hover:text-gray-200"
+            >
+              <SocialIcon className="h-5 w-5" />
+            </a>
+          )
+        })}
       </div>
     </div>
   )

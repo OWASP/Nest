@@ -17,7 +17,7 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/ProgramForm'
 const EditProgramPage = () => {
   const router = useRouter()
-  const { programKey } = useParams() as { programKey: string }
+  const { programKey } = useParams<{ programKey: string }>()
   const { data: session, status: sessionStatus } = useSession()
   const [updateProgram, { loading: mutationLoading }] = useMutation(UpdateProgramDocument)
   const {

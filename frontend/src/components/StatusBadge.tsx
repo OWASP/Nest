@@ -1,13 +1,12 @@
-import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
-import { faArchive, faBan } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import type React from 'react'
+import type { IconType } from 'react-icons'
+import { FaArchive, FaBan } from 'react-icons/fa'
 
 export type StatusType = 'archived' | 'inactive'
 
 interface StatusConfig {
   text: string
-  icon: IconDefinition
+  icon: IconType
   bgColor: string
   textColor: string
   borderColor: string
@@ -24,14 +23,14 @@ interface StatusBadgeProps {
   showIcon?: boolean
   size?: 'sm' | 'md' | 'lg'
   customText?: string
-  customIcon?: IconDefinition
+  customIcon?: IconType
   customTooltip?: string
 }
 
 const statusConfig: Record<StatusType, StatusConfig> = {
   archived: {
     text: 'Archived',
-    icon: faArchive,
+    icon: FaArchive,
     bgColor: 'bg-yellow-50',
     textColor: 'text-yellow-800',
     borderColor: 'border-yellow-600',
@@ -43,7 +42,7 @@ const statusConfig: Record<StatusType, StatusConfig> = {
   },
   inactive: {
     text: 'Inactive',
-    icon: faBan,
+    icon: FaBan,
     bgColor: 'bg-red-50',
     textColor: 'text-red-800',
     borderColor: 'border-red-600',
@@ -66,7 +65,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
 }) => {
   const config = statusConfig[status]
   const displayText = customText ?? config.text
-  const displayIcon = customIcon ?? config.icon
+  const DisplayIcon = customIcon ?? config.icon
   const displayTooltip = customTooltip ?? config.tooltip
 
   const sizeClasses = {
@@ -81,7 +80,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
       title={displayTooltip}
       aria-label={config.ariaLabel}
     >
-      {showIcon && <FontAwesomeIcon icon={displayIcon} className="h-3 w-3" />}
+      {showIcon && <DisplayIcon className="h-3 w-3" />}
       {displayText}
     </span>
   )

@@ -1,15 +1,8 @@
-import {
-  faChevronDown,
-  faChevronUp,
-  faLevelUpAlt,
-  faCalendarAlt,
-  faHourglassHalf,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import { FaChevronDown, FaChevronUp, FaTurnUp, FaCalendar, FaHourglassHalf } from 'react-icons/fa6'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import { TextInfoItem } from 'components/InfoItem'
@@ -27,23 +20,17 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
   const [showAllModule, setShowAllModule] = useState(false)
 
   if (modules.length === 1) {
-    return (
-      <SingleModuleCard
-        module={modules[0]}
-        showEdit={!!accessLevel && accessLevel === 'admin'}
-        accessLevel={accessLevel}
-        admins={admins}
-      />
-    )
+    return <SingleModuleCard module={modules[0]} accessLevel={accessLevel} admins={admins} />
   }
 
   const displayedModule = showAllModule ? modules : modules.slice(0, 4)
+  const isAdmin = accessLevel === 'admin'
 
   return (
     <div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {displayedModule.map((module) => {
-          return <ModuleItem key={module.key || module.id} details={module} />
+          return <ModuleItem key={module.key || module.id} module={module} isAdmin={isAdmin} />
         })}
       </div>
       {modules.length > 4 && (
@@ -55,11 +42,11 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
           >
             {showAllModule ? (
               <>
-                Show less <FontAwesomeIcon icon={faChevronUp} className="ml-1" />
+                Show less <FaChevronUp className="ml-1" />
               </>
             ) : (
               <>
-                Show more <FontAwesomeIcon icon={faChevronDown} className="ml-1" />
+                Show more <FaChevronDown className="ml-1" />
               </>
             )}
           </button>
@@ -69,26 +56,26 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
   )
 }
 
-const ModuleItem = ({ details }: { details: Module }) => {
+const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) => {
   const pathname = usePathname()
   return (
     <div className="flex h-46 w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <Link
-        href={`${pathname}/modules/${details.key}`}
+        href={`${pathname}/modules/${module.key}`}
         className="text-start font-semibold text-blue-400 hover:underline"
       >
-        <TruncatedText text={details?.name} />
+        <TruncatedText text={module?.name} />
       </Link>
-      <TextInfoItem icon={faLevelUpAlt} label="Level" value={upperFirst(details.experienceLevel)} />
-      <TextInfoItem icon={faCalendarAlt} label="Start" value={formatDate(details.startedAt)} />
+      <TextInfoItem icon={FaTurnUp} label="Level" value={upperFirst(module.experienceLevel)} />
+      <TextInfoItem icon={FaCalendar} label="Start" value={formatDate(module.startedAt)} />
       <TextInfoItem
-        icon={faHourglassHalf}
+        icon={FaHourglassHalf}
         label="Duration"
-        value={getSimpleDuration(details.startedAt, details.endedAt)}
+        value={getSimpleDuration(module.startedAt, module.endedAt)}
       />
-      {details.labels && details.labels.length > 0 && (
+      {isAdmin && module.labels && module.labels.length > 0 && (
         <div className="mt-2">
-          <LabelList labels={details.labels} maxVisible={3} />
+          <LabelList labels={module.labels} maxVisible={3} />
         </div>
       )}
     </div>

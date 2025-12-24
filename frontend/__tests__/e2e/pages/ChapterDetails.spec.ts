@@ -35,6 +35,8 @@ test.describe('Chapter Details Page', () => {
     await expect(page.locator('#chapter-map')).toBeVisible()
     await expect(page.locator('#chapter-map').locator('img').nth(1)).toBeVisible()
 
+    await page.getByRole('button', { name: 'Unlock map' }).click()
+
     await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Zoom out' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Marker' })).toBeVisible()
@@ -42,9 +44,13 @@ test.describe('Chapter Details Page', () => {
 
   test('should have top contributors', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Contributor 1', exact: true })).toBeVisible()
+    await expect(
+      page.getByRole('img', { name: "Contributor 1's avatar", exact: true })
+    ).toBeVisible()
     await expect(page.getByText('Contributor 1', { exact: true })).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Contributor 2', exact: true })).toBeVisible()
+    await expect(
+      page.getByRole('img', { name: "Contributor 2's avatar", exact: true })
+    ).toBeVisible()
     await expect(page.getByText('Contributor 2', { exact: true })).toBeVisible()
   })
 

@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client'
 
 export const GET_MODULE_MENTEE_DETAILS = gql`
-  query GetModuleMenteeDetails($programKey: String!, $moduleKey: String!, $menteeHandle: String!) {
-    getMenteeDetails(programKey: $programKey, moduleKey: $moduleKey, menteeHandle: $menteeHandle) {
+  query GetModuleMenteeDetails($programKey: String!, $moduleKey: String!, $menteeKey: String!) {
+    getMenteeDetails(programKey: $programKey, moduleKey: $moduleKey, menteeKey: $menteeKey) {
       id
       login
       name
@@ -15,7 +15,7 @@ export const GET_MODULE_MENTEE_DETAILS = gql`
     getMenteeModuleIssues(
       programKey: $programKey
       moduleKey: $moduleKey
-      menteeHandle: $menteeHandle
+      menteeKey: $menteeKey
       limit: 50
     ) {
       id

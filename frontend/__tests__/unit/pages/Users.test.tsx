@@ -28,11 +28,6 @@ jest.mock('components/Pagination', () =>
   ))
 )
 
-jest.mock('wrappers/FontAwesomeIconWrapper', () => ({
-  __esModule: true,
-  default: () => <span data-testid="mock-icon" />,
-}))
-
 describe('UsersPage Component', () => {
   let mockRouter: { push: jest.Mock }
 

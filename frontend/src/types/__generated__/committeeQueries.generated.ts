@@ -6,7 +6,7 @@ export type GetCommitteeDataQueryVariables = Types.Exact<{
 }>;
 
 
-export type GetCommitteeDataQuery = { committee: { __typename: 'CommitteeNode', id: string, contributorsCount: number, createdAt: number, forksCount: number, issuesCount: number, leaders: Array<string>, name: string, relatedUrls: Array<string>, repositoriesCount: number, starsCount: number, summary: string, updatedAt: number, url: string } | null, topContributors: Array<{ __typename: 'RepositoryContributorNode', id: string | null, avatarUrl: string, login: string, name: string }> };
+export type GetCommitteeDataQuery = { committee: { __typename: 'CommitteeNode', id: string, contributorsCount: number, createdAt: number, forksCount: number, issuesCount: number, leaders: Array<string>, name: string, relatedUrls: Array<string>, repositoriesCount: number, starsCount: number, summary: string, updatedAt: number, url: string } | null, topContributors: Array<{ __typename: 'RepositoryContributorNode', id: string, avatarUrl: string, login: string, name: string }> };
 
 export type GetCommitteeMetadataQueryVariables = Types.Exact<{
   key: Types.Scalars['String']['input'];

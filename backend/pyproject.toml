@@ -14,7 +14,7 @@ packages = [ { include = "apps" } ]
 [tool.poetry.dependencies]
 algoliasearch = "^4.13.2"
 algoliasearch-django = "^4.0.0"
-django = "^5.2"
+django = "^6.0"
 django-configurations = "^2.5.1"
 django-cors-headers = "^4.7.0"
 django-ninja = "^1.4.3"
@@ -32,7 +32,7 @@ langgraph = "^1.0.1"
 lxml = "^6.0.0"
 markdown = "^3.7"
 openai = "^2.0.1"
-owasp-schema = "^0.1.36"
+owasp-schema = "^0.1.46"
 pgvector = "^0.4.1"
 psycopg2-binary = "^2.9.9"
 pydantic = "^2.11.1"
@@ -46,8 +46,8 @@ requests = "^2.32.5"
 sentry-sdk = { extras = [ "django" ], version = "^2.20.0" }
 slack-bolt = "^1.22.0"
 slack-sdk = "^3.37.0"
-strawberry-graphql = { extras = [ "django" ], version = "^0.286.0" }
-strawberry-graphql-django = "^0.67.0"
+strawberry-graphql = { extras = [ "django" ], version = "^0.287.0" }
+strawberry-graphql-django = "^0.70.0"
 thefuzz = "^0.22.1"
 pyparsing = "^3.2.3"
 
@@ -146,7 +146,6 @@ addopts = [
 filterwarnings = [
   "ignore::DeprecationWarning:pytest_cov",
   "ignore::DeprecationWarning:xdist",
-  "ignore::django.conf.RemovedInDjango60Warning:django",
   "ignore::pydantic.warnings.PydanticDeprecatedSince20",
 ]
 log_level = "INFO"

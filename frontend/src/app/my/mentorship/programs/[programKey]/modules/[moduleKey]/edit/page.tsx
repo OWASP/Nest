@@ -16,7 +16,7 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
 
 const EditModulePage = () => {
-  const { programKey, moduleKey } = useParams() as { programKey: string; moduleKey: string }
+  const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
   const router = useRouter()
   const { data: sessionData, status: sessionStatus } = useSession()
 
@@ -119,7 +119,7 @@ const EditModulePage = () => {
         variant: 'solid',
         timeout: 3000,
       })
-      router.push(`/my/mentorship/programs/${programKey}`)
+      router.push(`/my/mentorship/programs/${programKey}/modules/${moduleKey}`)
     } catch (err) {
       handleAppError(err)
     }

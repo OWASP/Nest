@@ -1,15 +1,11 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
-import {
-  faCodeCommit,
-  faCodeFork,
-  faExclamationCircle,
-  faStar,
-  faUsers,
-} from '@fortawesome/free-solid-svg-icons'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { FaExclamationCircle } from 'react-icons/fa'
+import { FaCodeCommit, FaCodeFork, FaStar } from 'react-icons/fa6'
+import { HiUserGroup } from 'react-icons/hi'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetRepositoryDataDocument } from 'types/__generated__/repositoryQueries.generated'
 import type { Contributor } from 'types/contributor'
@@ -81,28 +77,27 @@ const RepositoryDetailsPage = () => {
 
   const RepositoryStats = [
     {
-      icon: faStar,
+      icon: FaStar,
       value: repository.starsCount,
       unit: 'Star',
     },
     {
-      icon: faCodeFork,
+      icon: FaCodeFork,
       value: repository.forksCount,
       unit: 'Fork',
     },
     {
-      icon: faUsers,
+      icon: HiUserGroup,
       value: repository.contributorsCount,
       unit: 'Contributor',
     },
-
     {
-      icon: faExclamationCircle,
+      icon: FaExclamationCircle,
       value: repository.openIssuesCount,
       unit: 'Issue',
     },
     {
-      icon: faCodeCommit,
+      icon: FaCodeCommit,
       value: repository.commitsCount,
       unit: 'Commit',
     },

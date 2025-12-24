@@ -1,6 +1,6 @@
-import { faUsers } from '@fortawesome/free-solid-svg-icons'
 import { fireEvent, screen } from '@testing-library/react'
 import React from 'react'
+import { FaUsers } from 'react-icons/fa6'
 import { render } from 'wrappers/testUtil'
 import type { Contributor } from 'types/contributor'
 import TopContributorsList from 'components/TopContributorsList'
@@ -49,23 +49,6 @@ jest.mock('next/image', () => ({
   ),
 }))
 
-// Mock FontAwesome icons
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({
-    icon,
-    className,
-    ...props
-  }: {
-    icon: { iconName: string }
-    className?: string
-    [key: string]: unknown
-  }) => (
-    <span data-testid={`icon-${icon.iconName}`} className={className} {...props}>
-      {icon.iconName}
-    </span>
-  ),
-}))
-
 // Mock utility functions
 jest.mock('utils/urlFormatter', () => ({
   getMemberUrl: (login: string) => `/members/${login}`,
@@ -94,22 +77,22 @@ jest.mock('components/SecondaryCard', () => ({
   default: ({
     children,
     title,
-    icon,
+    icon: Icon,
     className,
     ...props
   }: {
     children: React.ReactNode
     title?: React.ReactNode
-    icon?: { iconName: string }
+    icon?: React.ComponentType
     className?: string
     [key: string]: unknown
   }) => (
     <div className={className} data-testid="secondary-card" {...props}>
       {title && (
         <h2 className="mb-4 flex flex-row items-center gap-2 text-2xl font-semibold">
-          {icon && (
+          {Icon && (
             <span data-testid="card-icon" className="h-5 w-5">
-              {icon.iconName}
+              <Icon />
             </span>
           )}
           {title}
@@ -118,6 +101,57 @@ jest.mock('components/SecondaryCard', () => ({
       {children}
     </div>
   ),
+}))
+
+jest.mock('components/ShowMoreButton', () => ({
+  __esModule: true,
+  default: function ShowMoreButtonMock({ onToggle }: { onToggle: () => void }) {
+    const [isExpanded, setIsExpanded] = React.useState(false)
+
+    const handleClick = () => {
+      setIsExpanded(!isExpanded)
+      onToggle()
+    }
+
+    return (
+      <div className="mt-4 flex justify-start">
+        <button
+          onClick={handleClick}
+          className="flex items-center bg-transparent px-0 text-blue-400"
+        >
+          {isExpanded ? (
+            <>
+              Show less{' '}
+              <span data-testid="icon-chevron-up" aria-hidden="true">
+                chevron-up
+              </span>
+            </>
+          ) : (
+            <>
+              Show more{' '}
+              <span data-testid="icon-chevron-down" aria-hidden="true">
+                chevron-down
+              </span>
+            </>
+          )}
+        </button>
+      </div>
+    )
+  },
+}))
+
+jest.mock('react-icons/fa6', () => ({
+  FaChevronUp: (props: React.HTMLAttributes<HTMLSpanElement>) => (
+    <span data-testid="icon-chevron-up" {...props}>
+      chevron-up
+    </span>
+  ),
+  FaChevronDown: (props: React.HTMLAttributes<HTMLSpanElement>) => (
+    <span data-testid="icon-chevron-down" {...props}>
+      chevron-down
+    </span>
+  ),
+  FaUsers: (props: React.HTMLAttributes<HTMLSpanElement>) => <span {...props}>users</span>,
 }))
 
 const mockContributors: Contributor[] = [
@@ -272,14 +306,12 @@ describe('TopContributorsList Component', () => {
     })
 
     it('displays icon when provided', () => {
-      render(<TopContributorsList {...defaultProps} icon={faUsers} />)
-
+      render(<TopContributorsList {...defaultProps} icon={FaUsers} />)
       expect(screen.getByTestId('card-icon')).toBeInTheDocument()
     })
 
     it('does not display icon when not provided', () => {
       render(<TopContributorsList {...defaultProps} />)
-
       expect(screen.queryByTestId('card-icon')).not.toBeInTheDocument()
     })
   })
@@ -521,11 +553,11 @@ describe('TopContributorsList Component', () => {
       render(<TopContributorsList {...defaultProps} />)
 
       const avatars = screen.getAllByTestId('contributor-avatar')
-      expect(avatars[0]).toHaveAttribute('alt', 'Alex Developer')
+      expect(avatars[0]).toHaveAttribute('alt', "Alex Developer's avatar")
       expect(avatars[0]).toHaveAttribute('title', 'Alex Developer')
-      expect(avatars[1]).toHaveAttribute('alt', 'Jane Developer')
+      expect(avatars[1]).toHaveAttribute('alt', "Jane Developer's avatar")
       expect(avatars[1]).toHaveAttribute('title', 'Jane Developer')
-      expect(avatars[2]).toHaveAttribute('alt', '')
+      expect(avatars[2]).toHaveAttribute('alt', 'Contributor avatar')
       expect(avatars[2]).toHaveAttribute('title', 'user3')
     })
 

@@ -1,8 +1,8 @@
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { JSX } from 'react'
+import type { IconType } from 'react-icons'
 import type { Issue } from 'types/issue'
 import type { Milestone } from 'types/milestone'
 import type { PullRequest } from 'types/pullRequest'
@@ -20,7 +20,7 @@ const ItemCardList = ({
 }: {
   title: React.ReactNode
   data: Issue[] | Milestone[] | PullRequest[] | Release[]
-  icon?: IconProp
+  icon?: IconType
   showAvatar?: boolean
   showSingleColumn?: boolean
   renderDetails: (item: {
@@ -68,7 +68,11 @@ const ItemCardList = ({
                         height={24}
                         width={24}
                         src={item?.author?.avatarUrl}
-                        alt={item?.author?.name || ''}
+                        alt={
+                          item.author && (item.author.name || item.author.login)
+                            ? `${item.author.name || item.author.login}'s avatar`
+                            : "Author's avatar"
+                        }
                         className="mr-2 rounded-full"
                       />
                     </Link>
