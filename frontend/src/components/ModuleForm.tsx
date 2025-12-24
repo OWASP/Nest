@@ -11,6 +11,13 @@ import { FormButtons } from 'components/forms/shared/FormButtons'
 import { FormDateInput } from 'components/forms/shared/FormDateInput'
 import { FormTextarea } from 'components/forms/shared/FormTextarea'
 import { FormTextInput } from 'components/forms/shared/FormTextInput'
+import {
+  validateDescription,
+  validateEndDate,
+  validateName,
+  validateRequired,
+  validateStartDate,
+} from 'components/forms/shared/formValidationUtils'
 import { useFormValidation } from 'components/forms/shared/useFormValidation'
 
 interface ModuleFormProps {
@@ -66,35 +73,12 @@ const ModuleForm = ({
     }
   }
 
-  const validateRequired = (value: string, fieldName: string): string | undefined => {
-    if (!value || (typeof value === 'string' && !value.trim())) {
-      return `${fieldName} is required`
-    }
-    return undefined
+  const validateNameLocal = (value: string): string | undefined => {
+    return validateName(value)
   }
 
-  const validateName = (value: string): string | undefined => {
-    const requiredError = validateRequired(value, 'Name')
-    if (requiredError) return requiredError
-    if (value.length > 200) return 'Name must be 200 characters or less'
-    return undefined
-  }
-
-  const validateDescription = (value: string): string | undefined => {
-    return validateRequired(value, 'Description')
-  }
-
-  const validateStartDate = (value: string): string | undefined => {
-    return validateRequired(value, 'Start date')
-  }
-
-  const validateEndDate = (value: string): string | undefined => {
-    const requiredError = validateRequired(value, 'End date')
-    if (requiredError) return requiredError
-    if (formData.startedAt && new Date(value) <= new Date(formData.startedAt)) {
-      return 'End date must be after start date'
-    }
-    return undefined
+  const validateEndDateLocal = (value: string): string | undefined => {
+    return validateEndDate(value, formData.startedAt)
   }
 
   const validateProject = (projectId: string, projectName: string): string | undefined => {
@@ -110,7 +94,11 @@ const ModuleForm = ({
 
   const errors = useFormValidation(
     [
-      { field: 'name', shouldValidate: touched.name, validator: () => validateName(formData.name) },
+      {
+        field: 'name',
+        shouldValidate: touched.name,
+        validator: () => validateNameLocal(formData.name),
+      },
       {
         field: 'description',
         shouldValidate: touched.description,
@@ -124,7 +112,7 @@ const ModuleForm = ({
       {
         field: 'endedAt',
         shouldValidate: touched.endedAt || (touched.startedAt && !!formData.endedAt),
-        validator: () => validateEndDate(formData.endedAt),
+        validator: () => validateEndDateLocal(formData.endedAt),
       },
       {
         field: 'projectId',
@@ -158,10 +146,10 @@ const ModuleForm = ({
     setTouched(newTouched)
 
     // Validate all required fields
-    const nameError = validateName(formData.name)
+    const nameError = validateNameLocal(formData.name)
     const descriptionError = validateDescription(formData.description)
     const startDateError = validateStartDate(formData.startedAt)
-    const endDateError = validateEndDate(formData.endedAt)
+    const endDateError = validateEndDateLocal(formData.endedAt)
     const projectError = validateProject(formData.projectId, formData.projectName)
     const experienceLevelError = validateExperienceLevel(formData.experienceLevel)
 

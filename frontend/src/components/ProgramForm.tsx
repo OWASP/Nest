@@ -9,6 +9,12 @@ import { FormContainer } from 'components/forms/shared/FormContainer'
 import { FormDateInput } from 'components/forms/shared/FormDateInput'
 import { FormTextarea } from 'components/forms/shared/FormTextarea'
 import { FormTextInput } from 'components/forms/shared/FormTextInput'
+import {
+  validateDescription,
+  validateEndDate,
+  validateName,
+  validateStartDate,
+} from 'components/forms/shared/formValidationUtils'
 import { useFormValidation } from 'components/forms/shared/useFormValidation'
 
 interface ProgramFormProps {
@@ -65,48 +71,19 @@ const ProgramForm = ({
     }
   }
 
-  const validateRequired = (value: string, fieldName: string): string | undefined => {
-    if (!value || (typeof value === 'string' && !value.trim())) {
-      return `${fieldName} is required`
-    }
-    return undefined
-  }
-
-  const validateName = (value: string): string | undefined => {
-    const requiredError = validateRequired(value, 'Name')
-    if (requiredError) return requiredError
-    if (value.length > 200) return 'Name must be 200 characters or less'
-    if (nameUniquenessError) return nameUniquenessError
-    return undefined
+  const validateNameLocal = (value: string): string | undefined => {
+    return validateName(value, nameUniquenessError)
   }
 
   const validateNameWithUniqueness = (
     value: string,
     uniquenessError?: string | undefined
   ): string | undefined => {
-    const requiredError = validateRequired(value, 'Name')
-    if (requiredError) return requiredError
-    if (value.length > 200) return 'Name must be 200 characters or less'
-    if (uniquenessError) return uniquenessError
-    return undefined
+    return validateName(value, uniquenessError)
   }
 
-  const validateDescription = (value: string): string | undefined => {
-    return validateRequired(value, 'Description')
-  }
-
-  const validateStartDate = (value: string): string | undefined => {
-    return validateRequired(value, 'Start date')
-  }
-
-  const validateEndDate = (value: string): string | undefined => {
-    if (!value) {
-      return 'End date is required'
-    }
-    if (formData.startedAt && new Date(value) <= new Date(formData.startedAt)) {
-      return 'End date must be after start date'
-    }
-    return undefined
+  const validateEndDateLocal = (value: string): string | undefined => {
+    return validateEndDate(value, formData.startedAt)
   }
 
   const validateMenteesLimit = (value: number | string): string | undefined => {
@@ -122,7 +99,11 @@ const ProgramForm = ({
 
   const errors = useFormValidation(
     [
-      { field: 'name', shouldValidate: touched.name, validator: () => validateName(formData.name) },
+      {
+        field: 'name',
+        shouldValidate: touched.name,
+        validator: () => validateNameLocal(formData.name),
+      },
       {
         field: 'description',
         shouldValidate: touched.description,
@@ -136,7 +117,7 @@ const ProgramForm = ({
       {
         field: 'endedAt',
         shouldValidate: touched.endedAt || (touched.startedAt && !!formData.endedAt),
-        validator: () => validateEndDate(formData.endedAt),
+        validator: () => validateEndDateLocal(formData.endedAt),
       },
       {
         field: 'menteesLimit',
@@ -204,7 +185,7 @@ const ProgramForm = ({
     const nameError = validateNameWithUniqueness(formData.name, uniquenessError)
     const descriptionError = validateDescription(formData.description)
     const startDateError = validateStartDate(formData.startedAt)
-    const endDateError = validateEndDate(formData.endedAt)
+    const endDateError = validateEndDate(formData.endedAt, formData.startedAt)
     const menteesLimitError =
       touched.menteesLimit || formData.menteesLimit !== undefined
         ? validateMenteesLimit(formData.menteesLimit)
