@@ -110,7 +110,8 @@ const EditModulePage = () => {
         tags: parseCommaSeparated(formData.tags),
       }
 
-      await updateModule({ variables: { input } })
+      const result = await updateModule({ variables: { input } })
+      const updatedModuleKey = result.data?.updateModule?.key || moduleKey
 
       addToast({
         title: 'Module Updated',
@@ -119,7 +120,7 @@ const EditModulePage = () => {
         variant: 'solid',
         timeout: 3000,
       })
-      router.push(`/my/mentorship/programs/${programKey}/modules/${moduleKey}`)
+      router.push(`/my/mentorship/programs/${programKey}/modules/${updatedModuleKey}`)
     } catch (err) {
       handleAppError(err)
     }

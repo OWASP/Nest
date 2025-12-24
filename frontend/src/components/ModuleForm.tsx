@@ -1,9 +1,12 @@
 'use client'
 import { useApolloClient } from '@apollo/client/react'
+import { Button } from '@heroui/button'
+import { Autocomplete, AutocompleteItem, Input } from '@heroui/react'
+import { Select, SelectItem } from '@heroui/select'
 import debounce from 'lodash/debounce'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import { SearchProjectNamesDocument } from 'types/__generated__/projectQueries.generated'
 
@@ -46,199 +49,366 @@ const ModuleForm = ({
   submitText = 'Save',
 }: ModuleFormProps) => {
   const router = useRouter()
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+
+  const handleInputChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handleSelectChange = (keys: React.Key | Set<React.Key> | 'all') => {
+    const keySet = keys instanceof Set ? keys : keys === 'all' ? new Set() : new Set([keys])
+    const [value] = Array.from(keySet as Set<string>)
+    if (value) {
+      setFormData((prev) => ({ ...prev, experienceLevel: value }))
+    }
+  }
+
+  const validateName = (value: string): string | undefined => {
+    if (!value.trim()) {
+      return 'Name is required'
+    }
+    if (value.length > 200) {
+      return 'Name must be 200 characters or less'
+    }
+    return undefined
+  }
+
+  const validateDescription = (value: string): string | undefined => {
+    if (!value.trim()) {
+      return 'Description is required'
+    }
+    return undefined
+  }
+
+  const validateStartDate = (value: string): string | undefined => {
+    if (!value) {
+      return 'Start date is required'
+    }
+    return undefined
+  }
+
+  const validateEndDate = (value: string): string | undefined => {
+    if (!value) {
+      return 'End date is required'
+    }
+    if (formData.startedAt && value && new Date(value) <= new Date(formData.startedAt)) {
+      return 'End date must be after start date'
+    }
+    return undefined
+  }
+
+  const validateProject = (projectId: string, projectName: string): string | undefined => {
+    if (!projectId || !projectName.trim()) {
+      return 'Project is required'
+    }
+    return undefined
+  }
+
+  const errors = useMemo(() => {
+    const errs: Record<string, string | undefined> = {}
+    if (touched.name) {
+      errs.name = validateName(formData.name)
+    }
+    if (touched.description) {
+      errs.description = validateDescription(formData.description)
+    }
+    if (touched.startedAt) {
+      errs.startedAt = validateStartDate(formData.startedAt)
+    }
+    if (touched.endedAt || (touched.startedAt && formData.endedAt)) {
+      errs.endedAt = validateEndDate(formData.endedAt)
+    }
+    if (touched.projectId) {
+      errs.projectId = validateProject(formData.projectId, formData.projectName)
+    }
+    return errs
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData, touched])
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const allFields = ['name', 'description', 'startedAt', 'endedAt', 'projectId']
+    const newTouched: Record<string, boolean> = {}
+    allFields.forEach((field) => {
+      newTouched[field] = true
+    })
+    setTouched(newTouched)
+
+    // Validate all required fields
+    const nameError = validateName(formData.name)
+    const descriptionError = validateDescription(formData.description)
+    const startDateError = validateStartDate(formData.startedAt)
+    const endDateError = validateEndDate(formData.endedAt)
+    const projectError = validateProject(formData.projectId, formData.projectName)
+
+    if (nameError || descriptionError || startDateError || endDateError || projectError) {
+      return
+    }
+
+    onSubmit(e)
+  }
+
   return (
-    <div className="text-text flex w-full flex-col items-center justify-normal p-5">
+    <div className="text-text module-form-container flex w-full flex-col items-center justify-normal p-5">
       <div className="mb-8 text-left">
         <h1 className="mb-2 text-4xl font-bold text-gray-800 dark:text-gray-200">{title}</h1>
       </div>
 
-      <div className="overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-[#212529]">
-        <form onSubmit={onSubmit}>
+      <div className="w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-[#212529]">
+        <form onSubmit={handleSubmit} noValidate>
           <div className="flex flex-col gap-8 p-8">
+            {/* Basic Information */}
             <section className="flex flex-col gap-6">
               <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
-                <div className="lg:col-span-2">
-                  <label htmlFor="module-name" className="mb-2 block text-sm font-semibold">
-                    Name *
-                  </label>
-                  <input
+                <div
+                  className="w-full min-w-0 lg:col-span-2"
+                  style={{ maxWidth: '100%', overflow: 'hidden' }}
+                >
+                  <Input
                     id="module-name"
                     type="text"
-                    name="name"
+                    label="Name"
+                    labelPlacement="outside"
+                    placeholder="Enter module name"
                     value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                    onValueChange={(value) => handleInputChange('name', value)}
+                    isRequired
+                    isInvalid={touched.name && !!errors.name}
+                    errorMessage={touched.name ? errors.name : undefined}
+                    classNames={{
+                      base: 'w-full min-w-0',
+                      label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
+                      input: 'text-gray-800 dark:text-gray-200',
+                      inputWrapper: 'bg-gray-50 dark:bg-gray-800',
+                      helperWrapper: 'min-w-0 max-w-full w-full',
+                      errorMessage: 'break-words whitespace-normal max-w-full w-full',
+                    }}
                   />
                 </div>
 
-                <div className="lg:col-span-2">
-                  <label htmlFor="module-description" className="mb-2 block text-sm font-semibold">
-                    Description *
-                  </label>
-                  <textarea
-                    id="module-description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    rows={4}
-                    required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
-                  />
+                <div
+                  className="w-full min-w-0 lg:col-span-2"
+                  style={{ maxWidth: '100%', overflow: 'hidden' }}
+                >
+                  <div className="flex flex-col gap-2">
+                    <label
+                      htmlFor="module-description"
+                      className="text-sm font-semibold text-gray-600 dark:text-gray-300"
+                    >
+                      Description <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      id="module-description"
+                      placeholder="Enter module description"
+                      value={formData.description}
+                      onChange={(e) => handleInputChange('description', e.target.value)}
+                      rows={4}
+                      required
+                      className={`w-full min-w-0 rounded-lg border px-3 py-2 text-gray-800 placeholder:text-gray-400 focus:border-[#1D7BD7] focus:ring-1 focus:ring-[#1D7BD7] focus:outline-none dark:bg-gray-800 dark:text-gray-200 dark:focus:ring-[#1D7BD7] ${
+                        touched.description && errors.description
+                          ? 'border-red-500 dark:border-red-500'
+                          : 'border-gray-300 dark:border-gray-600'
+                      }`}
+                    />
+                    {touched.description && errors.description && (
+                      <p className="text-sm break-words whitespace-normal text-red-500">
+                        {errors.description}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </section>
 
-            <section className="flex flex-col gap-6">
-              <div className="grid grid-cols-1 gap-6 text-gray-600 md:grid-cols-2 lg:grid-cols-3 dark:text-gray-300">
-                <div>
-                  <label htmlFor="startedAt" className="mb-2 block text-sm font-semibold">
-                    Start Date *
-                  </label>
-                  <input
+            {/* Configuration */}
+            <section className="flex flex-col gap-6 text-gray-600 dark:text-gray-300">
+              <div className="module-config-grid grid gap-6">
+                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+                  <Input
+                    id="module-start-date"
                     type="date"
-                    name="startedAt"
-                    id="startedAt"
+                    label="Start Date"
+                    labelPlacement="outside"
                     value={formData.startedAt}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                    onValueChange={(value) => handleInputChange('startedAt', value)}
+                    isRequired
+                    isInvalid={touched.startedAt && !!errors.startedAt}
+                    errorMessage={touched.startedAt ? errors.startedAt : undefined}
+                    classNames={{
+                      base: 'w-full min-w-0',
+                      label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
+                      input: 'text-gray-800 dark:text-gray-200',
+                      inputWrapper: 'bg-gray-50 dark:bg-gray-800',
+                      helperWrapper: 'min-w-0 max-w-full w-full',
+                      errorMessage: 'break-words whitespace-normal max-w-full w-full',
+                    }}
                   />
                 </div>
-                <div>
-                  <label htmlFor="endedAt" className="mb-2 block text-sm font-semibold">
-                    End Date *
-                  </label>
-                  <input
+                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+                  <Input
+                    id="module-end-date"
                     type="date"
-                    name="endedAt"
-                    id="endedAt"
+                    label="End Date"
+                    labelPlacement="outside"
                     value={formData.endedAt}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                    onValueChange={(value) => handleInputChange('endedAt', value)}
+                    isRequired
+                    isInvalid={touched.endedAt && !!errors.endedAt}
+                    errorMessage={touched.endedAt ? errors.endedAt : undefined}
+                    min={formData.startedAt || undefined}
+                    classNames={{
+                      base: 'w-full min-w-0',
+                      label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
+                      input: 'text-gray-800 dark:text-gray-200',
+                      inputWrapper: 'bg-gray-50 dark:bg-gray-800',
+                      helperWrapper: 'min-w-0 max-w-full w-full',
+                      errorMessage: 'break-words whitespace-normal max-w-full w-full',
+                    }}
                   />
                 </div>
-                <div>
-                  <label htmlFor="experienceLevel" className="mb-2 block text-sm font-semibold">
-                    Experience Level
-                  </label>
-                  <select
-                    name="experienceLevel"
+                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+                  <Select
                     id="experienceLevel"
-                    value={formData.experienceLevel}
-                    onChange={handleInputChange}
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                    label="Experience Level"
+                    labelPlacement="outside"
+                    selectedKeys={
+                      formData.experienceLevel ? new Set([formData.experienceLevel]) : new Set()
+                    }
+                    onSelectionChange={handleSelectChange}
+                    classNames={{
+                      base: 'w-full min-w-0',
+                      label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
+                      trigger: 'bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200',
+                      value: 'text-gray-800 dark:text-gray-200',
+                      helperWrapper: 'min-w-0 max-w-full w-full',
+                      errorMessage: 'break-words whitespace-normal max-w-full w-full',
+                    }}
                   >
                     {EXPERIENCE_LEVELS.map((lvl) => (
-                      <option key={lvl.key} value={lvl.key}>
-                        {lvl.label}
-                      </option>
+                      <SelectItem key={lvl.key}>{lvl.label}</SelectItem>
                     ))}
-                  </select>
+                  </Select>
                 </div>
               </div>
             </section>
 
+            {/* Additional Details */}
             <section className="flex flex-col gap-6">
               <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
-                <div>
-                  <label htmlFor="domains" className="mb-2 block text-sm font-semibold">
-                    Domains
-                  </label>
-                  <input
-                    id="domains"
+                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+                  <Input
+                    id="module-domains"
                     type="text"
-                    name="domains"
-                    value={formData.domains}
-                    onChange={handleInputChange}
+                    label="Domains"
+                    labelPlacement="outside"
                     placeholder="AI, Web Development"
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                    value={formData.domains}
+                    onValueChange={(value) => handleInputChange('domains', value)}
+                    classNames={{
+                      base: 'w-full min-w-0',
+                      label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
+                      input: 'text-gray-800 dark:text-gray-200',
+                      inputWrapper: 'bg-gray-50 dark:bg-gray-800',
+                      helperWrapper: 'min-w-0 max-w-full w-full',
+                      errorMessage: 'break-words whitespace-normal max-w-full w-full',
+                    }}
                   />
                 </div>
-                <div>
-                  <label htmlFor="tags" className="mb-2 block text-sm font-semibold">
-                    Tags
-                  </label>
-                  <input
-                    id="tags"
+                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+                  <Input
+                    id="module-tags"
                     type="text"
-                    name="tags"
-                    value={formData.tags}
-                    onChange={handleInputChange}
+                    label="Tags"
+                    labelPlacement="outside"
                     placeholder="javascript, react"
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                    value={formData.tags}
+                    onValueChange={(value) => handleInputChange('tags', value)}
+                    classNames={{
+                      base: 'w-full min-w-0',
+                      label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
+                      input: 'text-gray-800 dark:text-gray-200',
+                      inputWrapper: 'bg-gray-50 dark:bg-gray-800',
+                      helperWrapper: 'min-w-0 max-w-full w-full',
+                      errorMessage: 'break-words whitespace-normal max-w-full w-full',
+                    }}
                   />
                 </div>
-                <div>
-                  <label htmlFor="labels" className="mb-2 block text-sm font-semibold">
-                    Labels
-                  </label>
-                  <input
-                    id="labels"
+                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+                  <Input
+                    id="module-labels"
                     type="text"
-                    name="labels"
-                    value={formData.labels}
-                    onChange={handleInputChange}
+                    label="Labels"
+                    labelPlacement="outside"
                     placeholder="good first issue, bug, enhancement"
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                    value={formData.labels}
+                    onValueChange={(value) => handleInputChange('labels', value)}
+                    classNames={{
+                      base: 'w-full min-w-0',
+                      label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
+                      input: 'text-gray-800 dark:text-gray-200',
+                      inputWrapper: 'bg-gray-50 dark:bg-gray-800',
+                      helperWrapper: 'min-w-0 max-w-full w-full',
+                      errorMessage: 'break-words whitespace-normal max-w-full w-full',
+                    }}
                   />
                 </div>
-                <div>
+                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
                   <ProjectSelector
                     value={formData.projectId}
                     defaultName={formData.projectName}
-                    onProjectChange={(id, name) =>
+                    onProjectChange={(id, name) => {
                       setFormData((prev) => ({
                         ...prev,
                         projectId: id ?? '',
                         projectName: name,
                       }))
-                    }
+                    }}
+                    isInvalid={touched.projectId && !!errors.projectId}
+                    errorMessage={touched.projectId ? errors.projectId : undefined}
                   />
                 </div>
                 {isEdit && (
-                  <div className="lg:col-span-2">
-                    <label htmlFor="mentorLogins" className="mb-2 block text-sm font-semibold">
-                      Mentor GitHub Usernames
-                    </label>
-                    <input
-                      id="mentorLogins"
+                  <div
+                    className="w-full min-w-0 lg:col-span-2"
+                    style={{ maxWidth: '100%', overflow: 'hidden' }}
+                  >
+                    <Input
+                      id="module-mentor-logins"
                       type="text"
-                      name="mentorLogins"
-                      value={formData.mentorLogins}
-                      onChange={handleInputChange}
+                      label="Mentor GitHub Usernames"
+                      labelPlacement="outside"
                       placeholder="johndoe, jane-doe"
-                      className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                      value={formData.mentorLogins}
+                      onValueChange={(value) => handleInputChange('mentorLogins', value)}
+                      classNames={{
+                        base: 'w-full min-w-0',
+                        label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
+                        input: 'text-gray-800 dark:text-gray-200',
+                        inputWrapper: 'bg-gray-50 dark:bg-gray-800',
+                        helperWrapper: 'min-w-0 max-w-full w-full',
+                        errorMessage: 'break-words whitespace-normal max-w-full w-full',
+                      }}
                     />
                   </div>
                 )}
               </div>
             </section>
 
-            <div className="border-t border-t-gray-200 pt-8 dark:border-t-gray-700">
+            {/* Submit Buttons */}
+            <div className="border-t border-gray-200 pt-8 text-gray-600 dark:border-gray-700 dark:text-gray-300">
               <div className="flex flex-col justify-end gap-4 sm:flex-row">
-                <button
+                <Button
                   type="button"
-                  onClick={() => router.back()}
-                  className="rounded-lg border border-gray-50 px-6 py-3 font-semibold text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
+                  variant="bordered"
+                  onPress={() => router.back()}
+                  className="font-medium"
                 >
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading || !formData.projectId}
-                  className="flex items-center justify-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-4 py-2 whitespace-nowrap text-[#1D7BD7] transition-all hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white"
-                >
+                </Button>
+                <Button type="submit" isDisabled={loading} color="primary" className="font-medium">
                   {loading ? 'Saving...' : submitText}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -254,130 +424,131 @@ type ProjectSelectorProps = {
   value: string
   defaultName: string
   onProjectChange: (id: string | null, name: string) => void
+  isInvalid?: boolean
+  errorMessage?: string
 }
 
-export const ProjectSelector = ({ value, defaultName, onProjectChange }: ProjectSelectorProps) => {
+export const ProjectSelector = ({
+  value,
+  defaultName,
+  onProjectChange,
+  isInvalid,
+  errorMessage,
+}: ProjectSelectorProps) => {
   const client = useApolloClient()
-  const [searchText, setSearchText] = useState(defaultName || '')
-  const [rawResults, setRawResults] = useState<{ id: string; name: string }[]>([])
-  const [suggestions, setSuggestions] = useState<{ id: string; name: string }[]>([])
-  const [showSuggestions, setShowSuggestions] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [inputValue, setInputValue] = useState(defaultName || '')
+  const [items, setItems] = useState<{ id: string; name: string }[]>([])
+  const [isLoading, setIsLoading] = useState(false)
 
-  const suggestionClicked = useRef(false)
-  const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => {
+    if (value && defaultName && defaultName !== inputValue) {
+      setInputValue(defaultName)
+    } else if (!value && !defaultName && inputValue) {
+      setInputValue('')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultName, value])
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchSuggestions = useCallback(
     debounce(async (query: string) => {
-      if (!query.trim()) {
-        setRawResults([])
+      const trimmedQuery = query.trim()
+      if (trimmedQuery.length < 2) {
+        setItems([])
+        setIsLoading(false)
         return
       }
 
+      setIsLoading(true)
       try {
         const { data } = await client.query({
           query: SearchProjectNamesDocument,
-          variables: { query },
+          variables: { query: trimmedQuery },
         })
 
-        setRawResults(data.searchProjects || [])
-        setShowSuggestions(true)
-      } catch (err) {
-        setRawResults([])
-        setShowSuggestions(false)
-        throw new Error('Error fetching suggestions:', err)
+        const projects = data.searchProjects || []
+        const filtered = projects.filter((proj) => proj.id !== value)
+        setItems(filtered.slice(0, 5))
+      } catch {
+        setItems([])
+      } finally {
+        setIsLoading(false)
       }
     }, 300),
-    [client]
+    [client, value]
   )
 
   // Trigger search suggestions on user input
   useEffect(() => {
-    fetchSuggestions(searchText)
+    fetchSuggestions(inputValue)
     return () => {
       fetchSuggestions.cancel()
     }
-  }, [searchText, fetchSuggestions])
+  }, [inputValue, fetchSuggestions])
 
-  // Filter out selected project from results
-  useEffect(() => {
-    const filtered = rawResults.filter((proj) => proj.id !== value)
-    setSuggestions(filtered.slice(0, 5))
-  }, [rawResults, value])
-
-  const handleSelect = (id: string, name: string) => {
-    suggestionClicked.current = true
-    setSearchText(name)
-    setShowSuggestions(false)
-    setError(null)
-    onProjectChange(id, name)
-  }
-
-  const handleBlur = () => {
-    blurTimeoutRef.current = setTimeout(() => {
-      setShowSuggestions(false)
-
-      if (!suggestionClicked.current && searchText.trim() && !value) {
-        setError('Project not found. Please select a valid project from the list.')
+  const handleSelectionChange = (keys: React.Key | Set<React.Key> | 'all') => {
+    const keySet = keys instanceof Set ? keys : keys === 'all' ? new Set() : new Set([keys])
+    const selectedKey = Array.from(keySet as Set<string>)[0]
+    if (selectedKey) {
+      const selectedProject = items.find((item) => item.id === selectedKey)
+      if (selectedProject) {
+        setInputValue(selectedProject.name)
+        onProjectChange(selectedProject.id, selectedProject.name)
       }
-
-      suggestionClicked.current = false
-    }, 150)
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target.value
-    setSearchText(input)
-    setError(null)
-
-    if (value && input !== defaultName) {
-      onProjectChange(null, input)
+    } else {
+      // Selection cleared
+      setInputValue('')
+      onProjectChange(null, '')
     }
   }
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (blurTimeoutRef.current) {
-        clearTimeout(blurTimeoutRef.current)
-      }
-    }
-  }, [])
+  const handleInputChange = (newValue: string) => {
+    setInputValue(newValue)
+    onProjectChange(null, newValue)
+  }
+
+  // Don't show validation error while user is actively typing (has text but no project selected)
+  const isTyping = inputValue.trim() !== '' && !value
+  const displayError = isTyping ? undefined : errorMessage
+  const shouldShowInvalid = isTyping ? false : isInvalid
 
   return (
-    <div className="relative">
-      <label htmlFor="projectSelector" className="mb-2 block text-sm font-semibold">
-        Project Name *
-      </label>
-      <input
+    <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+      <Autocomplete
         id="projectSelector"
-        type="text"
+        label="Project Name"
+        labelPlacement="outside"
         placeholder="Start typing project name..."
-        value={searchText}
-        required
-        onChange={handleInputChange}
-        onBlur={handleBlur}
-        className="w-full max-w-md rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] sm:w-96 dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
-      />
-
-      {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute z-10 mt-1 w-full rounded-md border border-gray-300 bg-white shadow-lg dark:bg-gray-700">
-          {suggestions.map((project) => (
-            <button
-              key={project.id}
-              type="button"
-              onMouseDown={() => (suggestionClicked.current = true)}
-              onClick={() => handleSelect(project.id, project.name)}
-              className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600"
-            >
-              {project.name}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+        inputValue={inputValue}
+        selectedKey={value || null}
+        onInputChange={handleInputChange}
+        onSelectionChange={handleSelectionChange}
+        menuTrigger="input"
+        isRequired
+        isInvalid={shouldShowInvalid}
+        errorMessage={displayError}
+        isLoading={isLoading}
+        allowsCustomValue={false}
+        classNames={{
+          base: 'w-full min-w-0',
+          selectorButton: 'hidden',
+        }}
+        inputProps={{
+          classNames: {
+            label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
+            input: 'text-gray-800 dark:text-gray-200',
+            inputWrapper: 'bg-gray-50 dark:bg-gray-800',
+            helperWrapper: 'min-w-0 max-w-full w-full',
+            errorMessage: 'break-words whitespace-normal max-w-full w-full',
+          },
+        }}
+      >
+        {items.map((project) => (
+          <AutocompleteItem key={project.id} textValue={project.name}>
+            {project.name}
+          </AutocompleteItem>
+        ))}
+      </Autocomplete>
     </div>
   )
 }

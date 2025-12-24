@@ -12,7 +12,6 @@ import { GetProgramDetailsDocument } from 'types/__generated__/programsQueries.g
 import type { ExtendedSession } from 'types/auth'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
-import slugify from 'utils/slugify'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/ProgramForm'
 const EditProgramPage = () => {
@@ -104,7 +103,8 @@ const EditProgramPage = () => {
         status: formData.status,
       }
 
-      await updateProgram({ variables: { input } })
+      const result = await updateProgram({ variables: { input } })
+      const updatedProgramKey = result.data?.updateProgram?.key || programKey
 
       addToast({
         title: 'Program Updated',
@@ -114,7 +114,7 @@ const EditProgramPage = () => {
         timeout: 3000,
       })
 
-      router.push(`/my/mentorship/programs/${slugify(formData.name)}`)
+      router.push(`/my/mentorship/programs/${updatedProgramKey}`)
     } catch (err) {
       addToast({
         title: 'Update Failed',

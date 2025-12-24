@@ -1,6 +1,9 @@
 'use client'
 
+import { Button } from '@heroui/button'
+import { Input } from '@heroui/react'
 import type React from 'react'
+import { useState, useMemo } from 'react'
 
 interface ProgramFormProps {
   formData: {
@@ -43,101 +46,242 @@ const ProgramForm = ({
   isEdit,
   submitText = 'Save',
 }: ProgramFormProps) => {
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+
+  const handleInputChange = (name: string, value: string | number) => {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const validateName = (value: string): string | undefined => {
+    if (!value.trim()) {
+      return 'Name is required'
+    }
+    if (value.length > 200) {
+      return 'Name must be 200 characters or less'
+    }
+    return undefined
+  }
+
+  const validateDescription = (value: string): string | undefined => {
+    if (!value.trim()) {
+      return 'Description is required'
+    }
+    return undefined
+  }
+
+  const validateStartDate = (value: string): string | undefined => {
+    if (!value) {
+      return 'Start date is required'
+    }
+    return undefined
+  }
+
+  const validateEndDate = (value: string): string | undefined => {
+    if (!value) {
+      return 'End date is required'
+    }
+    if (formData.startedAt && value && new Date(value) <= new Date(formData.startedAt)) {
+      return 'End date must be after start date'
+    }
+    return undefined
+  }
+
+  const validateMenteesLimit = (value: number | string): string | undefined => {
+    const numValue = typeof value === 'string' ? Number(value) : value
+    if (!numValue || numValue < 1) {
+      return 'Mentees limit must be at least 1'
+    }
+    if (!Number.isInteger(numValue)) {
+      return 'Mentees limit must be a whole number'
+    }
+    return undefined
+  }
+
+  const errors = useMemo(() => {
+    const errs: Record<string, string | undefined> = {}
+    if (touched.name) {
+      errs.name = validateName(formData.name)
+    }
+    if (touched.description) {
+      errs.description = validateDescription(formData.description)
+    }
+    if (touched.startedAt) {
+      errs.startedAt = validateStartDate(formData.startedAt)
+    }
+    if (touched.endedAt || (touched.startedAt && formData.endedAt)) {
+      errs.endedAt = validateEndDate(formData.endedAt)
+    }
+    if (touched.menteesLimit) {
+      errs.menteesLimit = validateMenteesLimit(formData.menteesLimit)
+    }
+    return errs
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData, touched])
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const allFields = ['name', 'description', 'startedAt', 'endedAt', 'menteesLimit']
+    const newTouched: Record<string, boolean> = {}
+    allFields.forEach((field) => {
+      newTouched[field] = true
+    })
+    setTouched(newTouched)
+
+    // Validate all required fields
+    const nameError = validateName(formData.name)
+    const descriptionError = validateDescription(formData.description)
+    const startDateError = validateStartDate(formData.startedAt)
+    const endDateError = validateEndDate(formData.endedAt)
+    const menteesLimitError = validateMenteesLimit(formData.menteesLimit)
+
+    // Prevent submission if any validation errors exist
+    if (nameError || descriptionError || startDateError || endDateError || menteesLimitError) {
+      return
+    }
+
+    onSubmit(e)
+  }
+
   return (
-    <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5">
+    <div className="text-text program-form-container flex min-h-screen w-full flex-col items-center justify-normal p-5">
       <div className="mb-8 text-left">
         <h1 className="mb-2 text-4xl font-bold text-gray-800 dark:text-gray-200">{title}</h1>
       </div>
 
-      <div className="overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-[#212529]">
-        <form onSubmit={onSubmit}>
+      <div className="w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-[#212529]">
+        <form onSubmit={handleSubmit} noValidate>
           <div className="flex flex-col gap-8 p-8">
             {/* Basic Information */}
             <section className="flex flex-col gap-6">
               <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
-                <div className="lg:col-span-2">
-                  <label htmlFor="program-name" className="mb-2 block text-sm font-semibold">
-                    Name *
-                  </label>
-                  <input
+                <div
+                  className="w-full min-w-0 lg:col-span-2"
+                  style={{ maxWidth: '100%', overflow: 'hidden' }}
+                >
+                  <Input
                     id="program-name"
                     type="text"
-                    name="name"
+                    label="Name"
+                    labelPlacement="outside"
+                    placeholder="Enter program name"
                     value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                    onValueChange={(value) => handleInputChange('name', value)}
+                    isRequired
+                    isInvalid={touched.name && !!errors.name}
+                    errorMessage={touched.name ? errors.name : undefined}
+                    classNames={{
+                      base: 'w-full min-w-0',
+                      label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
+                      input: 'text-gray-800 dark:text-gray-200',
+                      inputWrapper: 'bg-gray-50 dark:bg-gray-800',
+                      helperWrapper: 'min-w-0 max-w-full w-full',
+                      errorMessage: 'break-words whitespace-normal max-w-full w-full',
+                    }}
                   />
                 </div>
 
-                <div className="lg:col-span-2">
-                  <label htmlFor="program-description" className="mb-2 block text-sm font-semibold">
-                    Description *
-                  </label>
-                  <textarea
-                    id="program-description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    rows={4}
-                    required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
-                  />
+                <div
+                  className="w-full min-w-0 lg:col-span-2"
+                  style={{ maxWidth: '100%', overflow: 'hidden' }}
+                >
+                  <div className="flex flex-col gap-2">
+                    <label
+                      htmlFor="program-description"
+                      className="text-sm font-semibold text-gray-600 dark:text-gray-300"
+                    >
+                      Description <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      id="program-description"
+                      placeholder="Enter program description"
+                      value={formData.description}
+                      onChange={(e) => handleInputChange('description', e.target.value)}
+                      rows={4}
+                      required
+                      className={`w-full min-w-0 rounded-lg border px-3 py-2 text-gray-800 placeholder:text-gray-400 focus:border-[#1D7BD7] focus:ring-1 focus:ring-[#1D7BD7] focus:outline-none dark:bg-gray-800 dark:text-gray-200 dark:focus:ring-[#1D7BD7] ${
+                        touched.description && errors.description
+                          ? 'border-red-500 dark:border-red-500'
+                          : 'border-gray-300 dark:border-gray-600'
+                      }`}
+                    />
+                    {touched.description && errors.description && (
+                      <p className="text-sm break-words whitespace-normal text-red-500">
+                        {errors.description}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </section>
 
             {/* Configuration */}
             <section className="flex flex-col gap-6 text-gray-600 dark:text-gray-300">
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <div>
-                  <label htmlFor="program-start-date" className="mb-2 block text-sm font-semibold">
-                    Start Date *
-                  </label>
-                  <input
+              <div className="config-grid grid gap-6">
+                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+                  <Input
                     id="program-start-date"
                     type="date"
-                    name="startedAt"
+                    label="Start Date"
+                    labelPlacement="outside"
                     value={formData.startedAt}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                    onValueChange={(value) => handleInputChange('startedAt', value)}
+                    isRequired
+                    isInvalid={touched.startedAt && !!errors.startedAt}
+                    errorMessage={touched.startedAt ? errors.startedAt : undefined}
+                    classNames={{
+                      base: 'w-full min-w-0',
+                      label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
+                      input: 'text-gray-800 dark:text-gray-200',
+                      inputWrapper: 'bg-gray-50 dark:bg-gray-800',
+                      helperWrapper: 'min-w-0 max-w-full w-full',
+                      errorMessage: 'break-words whitespace-normal max-w-full w-full',
+                    }}
                   />
                 </div>
-                <div>
-                  <label htmlFor="program-end-date" className="mb-2 block text-sm font-semibold">
-                    End Date *
-                  </label>
-                  <input
+                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+                  <Input
                     id="program-end-date"
                     type="date"
-                    name="endedAt"
+                    label="End Date"
+                    labelPlacement="outside"
                     value={formData.endedAt}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                    onValueChange={(value) => handleInputChange('endedAt', value)}
+                    isRequired
+                    isInvalid={touched.endedAt && !!errors.endedAt}
+                    errorMessage={touched.endedAt ? errors.endedAt : undefined}
+                    min={formData.startedAt || undefined}
+                    classNames={{
+                      base: 'w-full min-w-0',
+                      label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
+                      input: 'text-gray-800 dark:text-gray-200',
+                      inputWrapper: 'bg-gray-50 dark:bg-gray-800',
+                      helperWrapper: 'min-w-0 max-w-full w-full',
+                      errorMessage: 'break-words whitespace-normal max-w-full w-full',
+                    }}
                   />
                 </div>
-                <div>
-                  <label htmlFor="mentees-limit" className="mb-2 block text-sm font-semibold">
-                    Mentees Limit *
-                  </label>
-                  <input
+                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+                  <Input
                     id="mentees-limit"
                     type="number"
-                    name="menteesLimit"
-                    value={formData.menteesLimit}
-                    onChange={handleInputChange}
+                    label="Mentees Limit"
+                    labelPlacement="outside"
+                    placeholder="Enter mentees limit"
+                    value={formData.menteesLimit.toString()}
+                    onValueChange={(value) => handleInputChange('menteesLimit', Number(value) || 0)}
+                    isRequired
+                    isInvalid={touched.menteesLimit && !!errors.menteesLimit}
+                    errorMessage={touched.menteesLimit ? errors.menteesLimit : undefined}
                     min={1}
-                    required
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                    classNames={{
+                      base: 'w-full min-w-0',
+                      label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
+                      input: 'text-gray-800 dark:text-gray-200',
+                      inputWrapper: 'bg-gray-50 dark:bg-gray-800',
+                      helperWrapper: 'min-w-0 max-w-full w-full',
+                      errorMessage: 'break-words whitespace-normal max-w-full w-full',
+                    }}
                   />
                 </div>
               </div>
@@ -146,50 +290,65 @@ const ProgramForm = ({
             {/* Additional Details */}
             <section className="flex flex-col gap-6">
               <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
-                <div>
-                  <label htmlFor="program-tags" className="mb-2 block text-sm font-semibold">
-                    Tags
-                  </label>
-                  <input
+                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+                  <Input
                     id="program-tags"
                     type="text"
-                    name="tags"
-                    value={formData.tags}
-                    onChange={handleInputChange}
+                    label="Tags"
+                    labelPlacement="outside"
                     placeholder="javascript, react"
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                    value={formData.tags}
+                    onValueChange={(value) => handleInputChange('tags', value)}
+                    classNames={{
+                      base: 'w-full min-w-0',
+                      label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
+                      input: 'text-gray-800 dark:text-gray-200',
+                      inputWrapper: 'bg-gray-50 dark:bg-gray-800',
+                      helperWrapper: 'min-w-0 max-w-full w-full',
+                      errorMessage: 'break-words whitespace-normal max-w-full w-full',
+                    }}
                   />
                 </div>
-                <div className="">
-                  <label htmlFor="program-domains" className="mb-2 block text-sm font-semibold">
-                    Domains
-                  </label>
-                  <input
+                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+                  <Input
                     id="program-domains"
                     type="text"
-                    name="domains"
-                    value={formData.domains}
-                    onChange={handleInputChange}
+                    label="Domains"
+                    labelPlacement="outside"
                     placeholder="AI, Web Development"
-                    className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                    value={formData.domains}
+                    onValueChange={(value) => handleInputChange('domains', value)}
+                    classNames={{
+                      base: 'w-full min-w-0',
+                      label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
+                      input: 'text-gray-800 dark:text-gray-200',
+                      inputWrapper: 'bg-gray-50 dark:bg-gray-800',
+                      helperWrapper: 'min-w-0 max-w-full w-full',
+                      errorMessage: 'break-words whitespace-normal max-w-full w-full',
+                    }}
                   />
                 </div>
                 {isEdit && (
-                  <div className="lg:col-span-2">
-                    <label
-                      htmlFor="admin-github-usernames"
-                      className="mb-2 block text-sm font-semibold"
-                    >
-                      Admin GitHub Usernames
-                    </label>
-                    <input
+                  <div
+                    className="w-full min-w-0 lg:col-span-2"
+                    style={{ maxWidth: '100%', overflow: 'hidden' }}
+                  >
+                    <Input
                       id="admin-github-usernames"
                       type="text"
-                      name="adminLogins"
-                      value={formData.adminLogins}
-                      onChange={handleInputChange}
+                      label="Admin GitHub Usernames"
+                      labelPlacement="outside"
                       placeholder="johndoe, jane-doe"
-                      className="w-full rounded-lg border border-gray-600 bg-gray-50 px-4 py-3 text-gray-800 focus:border-[#1D7BD7] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#1D7BD7] dark:bg-gray-800 dark:text-gray-200 dark:focus-visible:ring-[#1D7BD7]"
+                      value={formData.adminLogins || ''}
+                      onValueChange={(value) => handleInputChange('adminLogins', value)}
+                      classNames={{
+                        base: 'w-full min-w-0',
+                        label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
+                        input: 'text-gray-800 dark:text-gray-200',
+                        inputWrapper: 'bg-gray-50 dark:bg-gray-800',
+                        helperWrapper: 'min-w-0 max-w-full w-full',
+                        errorMessage: 'break-words whitespace-normal max-w-full w-full',
+                      }}
                     />
                   </div>
                 )}
@@ -199,20 +358,17 @@ const ProgramForm = ({
             {/* Submit Buttons */}
             <div className="border-t border-gray-200 pt-8 text-gray-600 dark:border-gray-700 dark:text-gray-300">
               <div className="flex flex-col justify-end gap-4 sm:flex-row">
-                <button
+                <Button
                   type="button"
-                  onClick={() => history.back()}
-                  className="rounded-lg border border-gray-50 px-6 py-3 font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                  variant="bordered"
+                  onPress={() => history.back()}
+                  className="font-medium"
                 >
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex items-center justify-center gap-2 rounded-md border border-[#1D7BD7] bg-transparent px-6 py-2 whitespace-nowrap text-[#1D7BD7] transition-all hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white"
-                >
+                </Button>
+                <Button type="submit" isDisabled={loading} color="primary" className="font-medium">
                   {loading ? 'Saving...' : submitText}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
