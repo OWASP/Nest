@@ -2,6 +2,8 @@
  * Shared validation utilities for form components.
  */
 
+import type { ValidationRule } from 'components/forms/shared/useFormValidation'
+
 export const validateRequired = (value: string, fieldName: string): string | undefined => {
   if (!value || (typeof value === 'string' && !value.trim())) {
     return `${fieldName} is required`
@@ -32,4 +34,48 @@ export const validateEndDate = (value: string, startDate?: string): string | und
     return 'End date must be after start date'
   }
   return undefined
+}
+
+type CommonFormData = {
+  name: string
+  description: string
+  startedAt: string
+  endedAt: string
+}
+
+type CommonTouched = {
+  name?: boolean
+  description?: boolean
+  startedAt?: boolean
+  endedAt?: boolean
+}
+
+export const getCommonValidationRules = (
+  formData: CommonFormData,
+  touched: CommonTouched,
+  validateNameLocal: (value: string) => string | undefined,
+  validateEndDateLocal: (value: string) => string | undefined
+): ValidationRule[] => {
+  return [
+    {
+      field: 'name',
+      shouldValidate: touched.name ?? false,
+      validator: () => validateNameLocal(formData.name),
+    },
+    {
+      field: 'description',
+      shouldValidate: touched.description ?? false,
+      validator: () => validateDescription(formData.description),
+    },
+    {
+      field: 'startedAt',
+      shouldValidate: touched.startedAt ?? false,
+      validator: () => validateStartDate(formData.startedAt),
+    },
+    {
+      field: 'endedAt',
+      shouldValidate: (touched.endedAt ?? false) || (touched.startedAt && !!formData.endedAt),
+      validator: () => validateEndDateLocal(formData.endedAt),
+    },
+  ]
 }

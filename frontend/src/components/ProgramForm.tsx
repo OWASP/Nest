@@ -10,6 +10,7 @@ import { FormDateInput } from 'components/forms/shared/FormDateInput'
 import { FormTextarea } from 'components/forms/shared/FormTextarea'
 import { FormTextInput } from 'components/forms/shared/FormTextInput'
 import {
+  getCommonValidationRules,
   validateDescription,
   validateEndDate,
   validateName,
@@ -99,29 +100,10 @@ const ProgramForm = ({
 
   const errors = useFormValidation(
     [
-      {
-        field: 'name',
-        shouldValidate: touched.name,
-        validator: () => validateNameLocal(formData.name),
-      },
-      {
-        field: 'description',
-        shouldValidate: touched.description,
-        validator: () => validateDescription(formData.description),
-      },
-      {
-        field: 'startedAt',
-        shouldValidate: touched.startedAt,
-        validator: () => validateStartDate(formData.startedAt),
-      },
-      {
-        field: 'endedAt',
-        shouldValidate: touched.endedAt || (touched.startedAt && !!formData.endedAt),
-        validator: () => validateEndDateLocal(formData.endedAt),
-      },
+      ...getCommonValidationRules(formData, touched, validateNameLocal, validateEndDateLocal),
       {
         field: 'menteesLimit',
-        shouldValidate: touched.menteesLimit,
+        shouldValidate: touched.menteesLimit ?? false,
         validator: () => validateMenteesLimit(formData.menteesLimit),
       },
     ],
@@ -243,7 +225,10 @@ const ProgramForm = ({
             id="program-start-date"
             label="Start Date"
             value={formData.startedAt}
-            onValueChange={(value) => handleInputChange('startedAt', value)}
+            onValueChange={(value) => {
+              handleInputChange('startedAt', value)
+              setTouched((prev) => ({ ...prev, startedAt: true }))
+            }}
             error={errors.startedAt}
             touched={touched.startedAt}
             required
@@ -252,7 +237,10 @@ const ProgramForm = ({
             id="program-end-date"
             label="End Date"
             value={formData.endedAt}
-            onValueChange={(value) => handleInputChange('endedAt', value)}
+            onValueChange={(value) => {
+              handleInputChange('endedAt', value)
+              setTouched((prev) => ({ ...prev, endedAt: true }))
+            }}
             error={errors.endedAt}
             touched={touched.endedAt}
             required

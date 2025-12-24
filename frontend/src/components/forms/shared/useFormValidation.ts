@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-type ValidationRule = {
+export type ValidationRule = {
   field: string
   shouldValidate: boolean
   validator: () => string | undefined

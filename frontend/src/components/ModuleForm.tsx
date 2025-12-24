@@ -12,6 +12,7 @@ import { FormDateInput } from 'components/forms/shared/FormDateInput'
 import { FormTextarea } from 'components/forms/shared/FormTextarea'
 import { FormTextInput } from 'components/forms/shared/FormTextInput'
 import {
+  getCommonValidationRules,
   validateDescription,
   validateEndDate,
   validateName,
@@ -94,34 +95,15 @@ const ModuleForm = ({
 
   const errors = useFormValidation(
     [
-      {
-        field: 'name',
-        shouldValidate: touched.name,
-        validator: () => validateNameLocal(formData.name),
-      },
-      {
-        field: 'description',
-        shouldValidate: touched.description,
-        validator: () => validateDescription(formData.description),
-      },
-      {
-        field: 'startedAt',
-        shouldValidate: touched.startedAt,
-        validator: () => validateStartDate(formData.startedAt),
-      },
-      {
-        field: 'endedAt',
-        shouldValidate: touched.endedAt || (touched.startedAt && !!formData.endedAt),
-        validator: () => validateEndDateLocal(formData.endedAt),
-      },
+      ...getCommonValidationRules(formData, touched, validateNameLocal, validateEndDateLocal),
       {
         field: 'projectId',
-        shouldValidate: touched.projectId,
+        shouldValidate: touched.projectId ?? false,
         validator: () => validateProject(formData.projectId, formData.projectName),
       },
       {
         field: 'experienceLevel',
-        shouldValidate: touched.experienceLevel,
+        shouldValidate: touched.experienceLevel ?? false,
         validator: () => validateExperienceLevel(formData.experienceLevel),
       },
     ],
@@ -184,7 +166,10 @@ const ModuleForm = ({
                   label="Name"
                   placeholder="Enter module name"
                   value={formData.name}
-                  onValueChange={(value) => handleInputChange('name', value)}
+                  onValueChange={(value) => {
+                    handleInputChange('name', value)
+                    setTouched((prev) => ({ ...prev, name: true }))
+                  }}
                   error={errors.name}
                   touched={touched.name}
                   required
@@ -214,7 +199,10 @@ const ModuleForm = ({
                   id="module-start-date"
                   label="Start Date"
                   value={formData.startedAt}
-                  onValueChange={(value) => handleInputChange('startedAt', value)}
+                  onValueChange={(value) => {
+                    handleInputChange('startedAt', value)
+                    setTouched((prev) => ({ ...prev, startedAt: true }))
+                  }}
                   error={errors.startedAt}
                   touched={touched.startedAt}
                   required
@@ -223,7 +211,10 @@ const ModuleForm = ({
                   id="module-end-date"
                   label="End Date"
                   value={formData.endedAt}
-                  onValueChange={(value) => handleInputChange('endedAt', value)}
+                  onValueChange={(value) => {
+                    handleInputChange('endedAt', value)
+                    setTouched((prev) => ({ ...prev, endedAt: true }))
+                  }}
                   error={errors.endedAt}
                   touched={touched.endedAt}
                   required
