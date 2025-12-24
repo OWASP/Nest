@@ -309,6 +309,7 @@ jobs:
       - scan-code
       - scan-ci-dependencies
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       db:
         image: pgvector/pgvector:pg16
