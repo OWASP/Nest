@@ -207,9 +207,9 @@ describe('ChapterMap', () => {
       const overlay = document.querySelector('[aria-label="Unlock map"]')
       fireEvent.click(overlay!)
 
-      // Triger mouseout handler
+      // Trigger mouseout handler
       const mouseoutHandler = mockMap.on.mock.calls.find((call) => call[0] === 'mouseout')?.[1]
-      
+
        // Simulate mouseout event that is NOT contained by map or map parent
        // We mock the event structure needed by the handler
       const mockEvent = {
@@ -217,7 +217,7 @@ describe('ChapterMap', () => {
              relatedTarget: document.body // Target is outside map container
          }
       }
-      
+
       act(() => {
         mouseoutHandler(mockEvent)
       })
