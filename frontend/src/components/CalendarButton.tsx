@@ -29,9 +29,17 @@ export default function CalendarButton(props: Readonly<CalendarButtonProps>) {
       url = await getIcsFileUrl(event)
       link = document.createElement('a')
       link.href = url
-      link.setAttribute('download', `${slugify(event.title)}.ics`)
+      link.setAttribute('download', `${slugify(safeTitle)}.ics`)
       document.body.appendChild(link)
       link.click()
+      addToast({
+        description: 'Successfully downloaded ICS file',
+        title: `${event.title}`,
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'success',
+        variant: 'solid',
+      })
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('Failed to download ICS file:', err)
@@ -47,14 +55,6 @@ export default function CalendarButton(props: Readonly<CalendarButtonProps>) {
       if (link) link.remove()
       if (url) URL.revokeObjectURL(url)
       setIsDownloading(false)
-      addToast({
-        description: 'Successfully downloaded ICS file',
-        title: `${event.title}`,
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'success',
-        variant: 'solid',
-      })
     }
   }
 

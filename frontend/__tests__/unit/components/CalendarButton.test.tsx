@@ -94,21 +94,14 @@ describe('CalendarButton', () => {
       })
 
       expect(createSpy).toHaveBeenCalledWith('a')
-
       const createdLink = createSpy.mock.results.find(
         (call) => call.value instanceof HTMLAnchorElement && call.value.href === mockUrl
       )?.value
 
       expect(createdLink).toBeDefined()
       expect(createdLink.download).toBe(`${slugify(mockEvent.title)}.ics`)
-
       expect(appendSpy).toHaveBeenCalledWith(createdLink)
-
       expect(clickSpy).toHaveBeenCalled()
-
-      await waitFor(() => {
-        expect(button).not.toBeDisabled()
-      })
 
       expect(addToast).toHaveBeenCalledWith({
         description: 'Successfully downloaded ICS file',
@@ -118,6 +111,12 @@ describe('CalendarButton', () => {
         color: 'success',
         variant: 'solid',
       })
+
+      await waitFor(() => {
+        expect(button).not.toBeDisabled()
+      })
+
+      expect(addToast).toHaveBeenCalledTimes(1)
     })
 
     it('handles errors gracefully when generation fails', async () => {
