@@ -4,8 +4,7 @@ import taskLists from 'markdown-it-task-lists'
 
 export default function Markdown({ content, className }: { content: string; className?: string }) {
   // Safe to use markdown-it as we use DOMPurify to sanitize the content.
-  // sonar-disable-next-line typescript:S5247
-  const md = markdownit({  
+  const md = markdownit({  // NOSONAR
     breaks: true,
     html: true,
     linkify: true,
