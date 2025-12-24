@@ -135,6 +135,7 @@ test-backend:
 		-e DJANGO_SETTINGS_MODULE=settings.test \
 		--env-file backend/.env.example \
 		--rm nest-test-backend pytest
+
 test-fuzz:
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
 	docker compose --project-name nest-fuzz -f docker-compose/fuzz.yaml up --build --remove-orphans --abort-on-container-exit

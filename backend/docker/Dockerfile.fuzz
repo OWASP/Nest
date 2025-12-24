@@ -1,4 +1,4 @@
-FROM python:3.12-alpine@sha256:68d81cd281ee785f48cdadecb6130d05ec6957f1249814570dc90e5100d3b146 AS builder
+FROM python:3.12.12-alpine AS builder
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
