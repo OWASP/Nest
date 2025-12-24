@@ -60,6 +60,7 @@ const ModuleForm = ({
     const [value] = Array.from(keySet as Set<string>)
     if (value) {
       setFormData((prev) => ({ ...prev, experienceLevel: value }))
+      setTouched((prev) => ({ ...prev, experienceLevel: true }))
     }
   }
 
@@ -104,6 +105,13 @@ const ModuleForm = ({
     return undefined
   }
 
+  const validateExperienceLevel = (value: string): string | undefined => {
+    if (!value || !value.trim()) {
+      return 'Experience level is required'
+    }
+    return undefined
+  }
+
   const errors = useMemo(() => {
     const errs: Record<string, string | undefined> = {}
     if (touched.name) {
@@ -121,6 +129,9 @@ const ModuleForm = ({
     if (touched.projectId) {
       errs.projectId = validateProject(formData.projectId, formData.projectName)
     }
+    if (touched.experienceLevel) {
+      errs.experienceLevel = validateExperienceLevel(formData.experienceLevel)
+    }
     return errs
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData, touched])
@@ -128,7 +139,14 @@ const ModuleForm = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    const allFields = ['name', 'description', 'startedAt', 'endedAt', 'projectId']
+    const allFields = [
+      'name',
+      'description',
+      'startedAt',
+      'endedAt',
+      'projectId',
+      'experienceLevel',
+    ]
     const newTouched: Record<string, boolean> = {}
     allFields.forEach((field) => {
       newTouched[field] = true
@@ -141,8 +159,16 @@ const ModuleForm = ({
     const startDateError = validateStartDate(formData.startedAt)
     const endDateError = validateEndDate(formData.endedAt)
     const projectError = validateProject(formData.projectId, formData.projectName)
+    const experienceLevelError = validateExperienceLevel(formData.experienceLevel)
 
-    if (nameError || descriptionError || startDateError || endDateError || projectError) {
+    if (
+      nameError ||
+      descriptionError ||
+      startDateError ||
+      endDateError ||
+      projectError ||
+      experienceLevelError
+    ) {
       return
     }
 
@@ -276,6 +302,9 @@ const ModuleForm = ({
                       formData.experienceLevel ? new Set([formData.experienceLevel]) : new Set()
                     }
                     onSelectionChange={handleSelectChange}
+                    isRequired
+                    isInvalid={touched.experienceLevel && !!errors.experienceLevel}
+                    errorMessage={touched.experienceLevel ? errors.experienceLevel : undefined}
                     classNames={{
                       base: 'w-full min-w-0',
                       label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',

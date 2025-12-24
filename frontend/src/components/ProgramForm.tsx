@@ -1,9 +1,11 @@
 'use client'
 
+import { useApolloClient } from '@apollo/client/react'
 import { Button } from '@heroui/button'
 import { Input } from '@heroui/react'
 import type React from 'react'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
+import { GetMyProgramsDocument } from 'types/__generated__/programsQueries.generated'
 
 interface ProgramFormProps {
   formData: {
@@ -35,6 +37,7 @@ interface ProgramFormProps {
   title: string
   submitText?: string
   isEdit?: boolean
+  currentProgramKey?: string
 }
 
 const ProgramForm = ({
@@ -45,11 +48,17 @@ const ProgramForm = ({
   title,
   isEdit,
   submitText = 'Save',
+  currentProgramKey,
 }: ProgramFormProps) => {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [nameUniquenessError, setNameUniquenessError] = useState<string | undefined>(undefined)
+  const client = useApolloClient()
 
   const handleInputChange = (name: string, value: string | number) => {
     setFormData((prev) => ({ ...prev, [name]: value }))
+    if (name === 'name') {
+      setNameUniquenessError(undefined)
+    }
   }
 
   const validateName = (value: string): string | undefined => {
@@ -58,6 +67,9 @@ const ProgramForm = ({
     }
     if (value.length > 200) {
       return 'Name must be 200 characters or less'
+    }
+    if (nameUniquenessError) {
+      return nameUniquenessError
     }
     return undefined
   }
@@ -88,8 +100,8 @@ const ProgramForm = ({
 
   const validateMenteesLimit = (value: number | string): string | undefined => {
     const numValue = typeof value === 'string' ? Number(value) : value
-    if (!numValue || numValue < 1) {
-      return 'Mentees limit must be at least 1'
+    if (numValue < 0) {
+      return 'Mentees limit cannot be negative'
     }
     if (!Number.isInteger(numValue)) {
       return 'Mentees limit must be a whole number'
@@ -116,24 +128,68 @@ const ProgramForm = ({
     }
     return errs
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData, touched])
+  }, [formData, touched, nameUniquenessError])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const checkNameUniquenessSync = useCallback(
+    async (name: string): Promise<string | undefined> => {
+      if (!name.trim()) {
+        return undefined
+      }
+
+      try {
+        const { data } = await client.query({
+          query: GetMyProgramsDocument,
+          variables: { search: name.trim(), page: 1, limit: 100 },
+        })
+
+        const programs = data?.myPrograms?.programs || []
+        const duplicateProgram = programs.find(
+          (program: { name: string; key: string }) =>
+            program.name.toLowerCase() === name.trim().toLowerCase() &&
+            (!isEdit || program.key !== currentProgramKey)
+        )
+
+        if (duplicateProgram) {
+          return 'A program with this name already exists'
+        }
+        return undefined
+      } catch {
+        // Silently fail uniqueness check - backend will catch it
+        return undefined
+      }
+    },
+    [client, isEdit, currentProgramKey]
+  )
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const allFields = ['name', 'description', 'startedAt', 'endedAt', 'menteesLimit']
+    const allFields = ['name', 'description', 'startedAt', 'endedAt']
     const newTouched: Record<string, boolean> = {}
     allFields.forEach((field) => {
       newTouched[field] = true
     })
+    if (formData.menteesLimit !== undefined && formData.menteesLimit !== null) {
+      newTouched.menteesLimit = true
+    }
     setTouched(newTouched)
+
+    if (formData.name.trim()) {
+      const uniquenessError = await checkNameUniquenessSync(formData.name)
+      if (uniquenessError) {
+        setNameUniquenessError(uniquenessError)
+      }
+    }
 
     // Validate all required fields
     const nameError = validateName(formData.name)
     const descriptionError = validateDescription(formData.description)
     const startDateError = validateStartDate(formData.startedAt)
     const endDateError = validateEndDate(formData.endedAt)
-    const menteesLimitError = validateMenteesLimit(formData.menteesLimit)
+    const menteesLimitError =
+      touched.menteesLimit || formData.menteesLimit !== undefined
+        ? validateMenteesLimit(formData.menteesLimit)
+        : undefined
 
     // Prevent submission if any validation errors exist
     if (nameError || descriptionError || startDateError || endDateError || menteesLimitError) {
@@ -166,7 +222,10 @@ const ProgramForm = ({
                     labelPlacement="outside"
                     placeholder="Enter program name"
                     value={formData.name}
-                    onValueChange={(value) => handleInputChange('name', value)}
+                    onValueChange={(value) => {
+                      handleInputChange('name', value)
+                      setTouched((prev) => ({ ...prev, name: true }))
+                    }}
                     isRequired
                     isInvalid={touched.name && !!errors.name}
                     errorMessage={touched.name ? errors.name : undefined}
@@ -267,13 +326,12 @@ const ProgramForm = ({
                     type="number"
                     label="Mentees Limit"
                     labelPlacement="outside"
-                    placeholder="Enter mentees limit"
+                    placeholder="Enter mentees limit (0 for unlimited)"
                     value={formData.menteesLimit.toString()}
                     onValueChange={(value) => handleInputChange('menteesLimit', Number(value) || 0)}
-                    isRequired
                     isInvalid={touched.menteesLimit && !!errors.menteesLimit}
                     errorMessage={touched.menteesLimit ? errors.menteesLimit : undefined}
-                    min={1}
+                    min={0}
                     classNames={{
                       base: 'w-full min-w-0',
                       label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',

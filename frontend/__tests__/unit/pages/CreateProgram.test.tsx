@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client/react'
+import { useMutation, useApolloClient } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { useRouter as mockUseRouter } from 'next/navigation'
@@ -9,6 +9,7 @@ import CreateProgramPage from 'app/my/mentorship/programs/create/page'
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
   useMutation: jest.fn(),
+  useApolloClient: jest.fn(),
 }))
 
 jest.mock('next/navigation', () => ({
@@ -29,12 +30,22 @@ jest.mock('@heroui/toast', () => ({
 
 const mockRouterPush = jest.fn()
 const mockCreateProgram = jest.fn()
+const mockQuery = jest.fn().mockResolvedValue({
+  data: {
+    myPrograms: {
+      programs: [],
+    },
+  },
+})
 
 describe('CreateProgramPage (comprehensive tests)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(mockUseRouter as jest.Mock).mockReturnValue({ push: mockRouterPush })
     ;(useMutation as unknown as jest.Mock).mockReturnValue([mockCreateProgram, { loading: false }])
+    ;(useApolloClient as jest.Mock).mockReturnValue({
+      query: mockQuery,
+    })
   })
 
   test('redirects if unauthenticated', async () => {
@@ -154,7 +165,7 @@ describe('CreateProgramPage (comprehensive tests)', () => {
           input: {
             name: 'Test Program',
             description: 'A description',
-            menteesLimit: 5,
+            menteesLimit: 0,
             startedAt: '2025-01-01',
             endedAt: '2025-12-31',
             tags: ['tag1', 'tag2'],

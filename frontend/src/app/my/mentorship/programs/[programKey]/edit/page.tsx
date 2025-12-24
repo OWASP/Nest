@@ -31,7 +31,7 @@ const EditProgramPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    menteesLimit: 5,
+    menteesLimit: 0,
     startedAt: '',
     endedAt: '',
     tags: '',
@@ -73,7 +73,7 @@ const EditProgramPage = () => {
       setFormData({
         name: program.name || '',
         description: program.description || '',
-        menteesLimit: program.menteesLimit ?? 5,
+        menteesLimit: program.menteesLimit ?? 0,
         startedAt: formatDateForInput(program.startedAt),
         endedAt: formatDateForInput(program.endedAt),
         tags: (program.tags || []).join(', '),
@@ -147,6 +147,7 @@ const EditProgramPage = () => {
       title="Edit Program"
       submitText="Save"
       isEdit={true}
+      currentProgramKey={programKey}
     />
   )
 }

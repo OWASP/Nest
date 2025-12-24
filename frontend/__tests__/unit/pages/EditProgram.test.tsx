@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/client/react'
+import { useQuery, useApolloClient } from '@apollo/client/react'
 import { render, screen, waitFor } from '@testing-library/react'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
@@ -18,6 +18,7 @@ jest.mock('@apollo/client/react', () => {
     ...actual,
     useMutation: jest.fn(() => [jest.fn(), { loading: false }]),
     useQuery: jest.fn(),
+    useApolloClient: jest.fn(),
   }
 })
 jest.mock('@heroui/toast', () => ({
@@ -27,10 +28,20 @@ jest.mock('@heroui/toast', () => ({
 describe('EditProgramPage', () => {
   const mockPush = jest.fn()
   const mockReplace = jest.fn()
+  const mockQuery = jest.fn().mockResolvedValue({
+    data: {
+      myPrograms: {
+        programs: [],
+      },
+    },
+  })
 
   beforeEach(() => {
     ;(useRouter as jest.Mock).mockReturnValue({ push: mockPush, replace: mockReplace })
     ;(useParams as jest.Mock).mockReturnValue({ programKey: 'program_1' })
+    ;(useApolloClient as jest.Mock).mockReturnValue({
+      query: mockQuery,
+    })
     jest.clearAllMocks()
   })
 
