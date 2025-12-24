@@ -53,7 +53,8 @@ describe('BreadCrumbRenderer', () => {
     render(<BreadCrumbRenderer items={mockItems} />)
 
     const lastItem = screen.getByText('OWASP ZAP')
-    expect(lastItem).toHaveClass('cursor-default', 'font-semibold')
+    const parentSpan = lastItem.parentElement
+    expect(parentSpan).toHaveClass('cursor-default', 'font-semibold')
   })
 
   test('renders chevron separators between items', () => {

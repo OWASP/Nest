@@ -5,7 +5,10 @@ from unittest.mock import MagicMock, patch
 
 from django.core.management import call_command
 
-from apps.nest.management.commands.nest_update_badges import OWASP_STAFF_BADGE_NAME
+from apps.nest.management.commands.nest_update_badges import (
+    OWASP_PROJECT_LEADER_BADGE_NAME,
+    OWASP_STAFF_BADGE_NAME,
+)
 
 
 def make_mock_employees(mock_employee):
@@ -27,6 +30,18 @@ def make_mock_former_employees(mock_former_employee):
     mock_former_employees.values_list.return_value = [mock_former_employee.id]
     mock_former_employees.distinct.return_value = mock_former_employees
     return mock_former_employees
+
+
+def make_mock_project_leaders(mock_leader):
+    """Create mock objects for project leaders query chain."""
+    mock_filtered_leaders = MagicMock()
+    mock_distinct_leaders = MagicMock()
+    mock_leaders_without_badge = MagicMock()
+    mock_leaders_without_badge.__iter__.return_value = iter([mock_leader])
+    mock_leaders_without_badge.count.return_value = 1
+    mock_filtered_leaders.distinct.return_value = mock_distinct_leaders
+    mock_distinct_leaders.exclude.return_value = mock_leaders_without_badge
+    return mock_filtered_leaders
 
 
 def extract_is_owasp_staff(arg):
@@ -69,6 +84,8 @@ def user_filter_side_effect_factory(mock_employees, mock_former_employees):
 class TestSyncUserBadgesCommand:
     """Tests for the nest_update_badges management command."""
 
+    @patch("apps.nest.management.commands.nest_update_badges.EntityMember.objects.filter")
+    @patch("apps.nest.management.commands.nest_update_badges.ContentType.objects.get_for_model")
     @patch("apps.nest.management.commands.nest_update_badges.UserBadge.objects.get_or_create")
     @patch("apps.nest.management.commands.nest_update_badges.UserBadge.objects.filter")
     @patch("apps.nest.management.commands.nest_update_badges.Badge.objects.get_or_create")
@@ -79,6 +96,8 @@ class TestSyncUserBadgesCommand:
         mock_badge_get_or_create,
         mock_user_badge_filter,
         mock_user_badge_get_or_create,
+        mock_content_type_get,
+        mock_entity_member_filter,
     ):
         # Set up badge mock
         mock_badge = MagicMock()
@@ -118,15 +137,77 @@ class TestSyncUserBadgesCommand:
             for s in ("Removed badge from 1 non-staff", "Removed badge from 1 non-employees")
         )
 
+    @patch("apps.nest.management.commands.nest_update_badges.EntityMember.objects.filter")
+    @patch("apps.nest.management.commands.nest_update_badges.ContentType.objects.get_for_model")
+    @patch("apps.nest.management.commands.nest_update_badges.UserBadge.objects.get_or_create")
+    @patch("apps.nest.management.commands.nest_update_badges.UserBadge.objects.filter")
     @patch("apps.nest.management.commands.nest_update_badges.Badge.objects.get_or_create")
     @patch("apps.nest.management.commands.nest_update_badges.User.objects.filter")
-    def test_badge_creation(self, mock_user_filter, mock_badge_get_or_create):
-        # Set up badge creation mock
+    def test_sync_owasp_project_leader_badge(
+        self,
+        mock_user_filter,
+        mock_badge_get_or_create,
+        mock_user_badge_filter,
+        mock_user_badge_get_or_create,
+        mock_content_type_get_for_model,
+        mock_entity_member_filter,
+    ):
+        mock_badge = MagicMock()
+        mock_badge.name = OWASP_PROJECT_LEADER_BADGE_NAME
+        mock_badge_get_or_create.return_value = (mock_badge, False)
+        mock_leader = MagicMock()
+        mock_leader.id = 999
+        mock_project_leaders = make_mock_project_leaders(mock_leader)
+
+        def user_filter_side_effect(*_args, **kwargs):
+            if "id__in" in kwargs:
+                return mock_project_leaders
+            return MagicMock()
+
+        mock_user_filter.side_effect = user_filter_side_effect
+        mock_user_badge_get_or_create.return_value = (MagicMock(), True)
+        mock_entity_qs = MagicMock()
+        mock_values_qs = MagicMock()
+        mock_distinct_qs = MagicMock()
+        mock_entity_member_filter.return_value = mock_entity_qs
+        mock_entity_qs.values_list.return_value = mock_values_qs
+        mock_values_qs.distinct.return_value = mock_distinct_qs
+        mock_distinct_qs.__iter__.return_value = iter([mock_leader.id])
+        out = StringIO()
+        call_command("nest_update_badges", stdout=out)
+
+        mock_badge_get_or_create.assert_any_call(
+            name=OWASP_PROJECT_LEADER_BADGE_NAME,
+            defaults={
+                "description": "Official OWASP Project Leader",
+                "css_class": "fa-user-shield",
+                "weight": 90,
+            },
+        )
+
+        mock_user_badge_get_or_create.assert_any_call(user=mock_leader, badge=mock_badge)
+
+        output = out.getvalue()
+        assert "Added badge to 1 project leaders" in output
+
+    @patch("apps.nest.management.commands.nest_update_badges.EntityMember.objects.filter")
+    @patch("apps.nest.management.commands.nest_update_badges.ContentType.objects.get_for_model")
+    @patch("apps.nest.management.commands.nest_update_badges.UserBadge.objects.get_or_create")
+    @patch("apps.nest.management.commands.nest_update_badges.UserBadge.objects.filter")
+    @patch("apps.nest.management.commands.nest_update_badges.Badge.objects.get_or_create")
+    @patch("apps.nest.management.commands.nest_update_badges.User.objects.filter")
+    def test_badge_creation(
+        self,
+        mock_user_filter,
+        mock_badge_get_or_create,
+        mock_user_badge_filter,
+        mock_user_badge_get_or_create,
+        mock_content_type_get,
+        mock_entity_member_filter,
+    ):
         mock_badge = MagicMock()
         mock_badge.name = OWASP_STAFF_BADGE_NAME
         mock_badge_get_or_create.return_value = (mock_badge, True)
-
-        # Set up empty querysets
         mock_employees = MagicMock()
         mock_employees.__iter__.return_value = iter([])
         mock_employees.count.return_value = 0
@@ -142,12 +223,23 @@ class TestSyncUserBadgesCommand:
         mock_former_employees.values_list.return_value = []
         mock_former_employees.distinct.return_value = mock_former_employees
 
-        mock_user_filter.side_effect = [mock_employees, mock_former_employees]
+        mock_user_filter.side_effect = [
+            mock_employees,
+            mock_former_employees,
+            mock_employees,
+        ]
+        mock_entity_qs = MagicMock()
+        mock_values_qs = MagicMock()
+        mock_distinct_qs = MagicMock()
+        mock_entity_member_filter.return_value = mock_entity_qs
+        mock_entity_qs.values_list.return_value = mock_values_qs
+        mock_values_qs.distinct.return_value = mock_distinct_qs
+        mock_distinct_qs.__iter__.return_value = iter([])
 
         out = StringIO()
         call_command("nest_update_badges", stdout=out)
 
-        mock_badge_get_or_create.assert_called_once_with(
+        mock_badge_get_or_create.assert_any_call(
             name=OWASP_STAFF_BADGE_NAME,
             defaults={
                 "description": "Official OWASP Staff",
@@ -158,9 +250,21 @@ class TestSyncUserBadgesCommand:
         output = out.getvalue()
         assert f"Created badge: {mock_badge.name}" in output
 
+    @patch("apps.nest.management.commands.nest_update_badges.EntityMember.objects.filter")
+    @patch("apps.nest.management.commands.nest_update_badges.ContentType.objects.get_for_model")
+    @patch("apps.nest.management.commands.nest_update_badges.UserBadge.objects.get_or_create")
+    @patch("apps.nest.management.commands.nest_update_badges.UserBadge.objects.filter")
     @patch("apps.nest.management.commands.nest_update_badges.Badge.objects.get_or_create")
     @patch("apps.nest.management.commands.nest_update_badges.User.objects.filter")
-    def test_command_idempotency(self, mock_user_filter, mock_badge_get_or_create):
+    def test_command_idempotency(
+        self,
+        mock_user_filter,
+        mock_badge_get_or_create,
+        mock_user_badge_filter,
+        mock_user_badge_get_or_create,
+        mock_content_type_get,
+        mock_entity_member_filter,
+    ):
         """Test that running the command multiple times has the same effect as running it once."""
         # Set up badge mock
         mock_badge = MagicMock()
@@ -186,13 +290,29 @@ class TestSyncUserBadgesCommand:
         mock_non_employees_filter.values_list.return_value = []
         mock_non_employees_filter.distinct.return_value = mock_non_employees_filter
 
+        mock_leaders = MagicMock()
+        mock_leaders.distinct.return_value = mock_leaders
+        mock_leaders.exclude.return_value = mock_leaders
+        mock_leaders.count.return_value = 0
+
         # Configure filter side effects for two command runs
         mock_user_filter.side_effect = [
             mock_employees,
             mock_non_employees_filter,
+            mock_leaders,
             mock_employees,
             mock_non_employees_filter,
+            mock_leaders,
         ]
+        mock_entity_qs = MagicMock()
+        mock_values_qs = MagicMock()
+        mock_distinct_qs = MagicMock()
+        mock_entity_member_filter.return_value = mock_entity_qs
+        mock_entity_qs.values_list.return_value = mock_values_qs
+        mock_values_qs.distinct.return_value = mock_distinct_qs
+        mock_distinct_qs.__iter__.return_value = iter([])
+        mock_user_badge_filter.return_value.count.return_value = 0
+        mock_user_badge_filter.return_value.exclude.return_value.count.return_value = 0
 
         # First run
         out1 = StringIO()

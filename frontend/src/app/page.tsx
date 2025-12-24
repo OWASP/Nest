@@ -195,7 +195,7 @@ export default function Home() {
                     </div>
                     {event.suggestedLocation && (
                       <div className="flex flex-1 items-center overflow-hidden">
-                        <FaMapMarkerAlt className="mr-1 h-4 w-4" />
+                        <FaMapMarkerAlt className="mr-1 h-4 w-4 shrink-0" />
                         <TruncatedText text={event.suggestedLocation} />
                       </div>
                     )}
@@ -242,7 +242,7 @@ export default function Home() {
                     </div>
                     {chapter.suggestedLocation && (
                       <div className="flex flex-1 items-center overflow-hidden">
-                        <FaMapMarkerAlt className="mr-2 h-4 w-4" />
+                        <FaMapMarkerAlt className="mr-2 h-4 w-4 shrink-0" />
                         <TruncatedText text={chapter.suggestedLocation} />
                       </div>
                     )}
@@ -282,7 +282,10 @@ export default function Home() {
                       <span>{formatDate(project.createdAt)}</span>
                     </div>
                     <div className="mr-4 flex flex-1 items-center overflow-hidden">
-                      <IconWrapper icon={getProjectIcon(project.type)} className="mr-2 h-4 w-4" />
+                      <IconWrapper
+                        icon={getProjectIcon(project.type)}
+                        className="mr-2 h-4 w-4 shrink-0"
+                      />
                       <TruncatedText text={upperFirst(project.type)} />
                     </div>
                   </div>
@@ -359,7 +362,7 @@ export default function Home() {
                     <span>{formatDate(post.publishedAt)}</span>
                   </div>
                   <div className="flex flex-1 items-center overflow-hidden">
-                    <FaUser className="mr-2 h-4 w-4" />
+                    <FaUser className="mr-2 h-4 w-4 shrink-0" />
                     <LeadersList leaders={post.authorName} />
                   </div>
                 </div>

@@ -2,6 +2,7 @@ import { Breadcrumbs, BreadcrumbItem as HeroUIBreadcrumbItem } from '@heroui/rea
 import Link from 'next/link'
 import { FaChevronRight } from 'react-icons/fa'
 import type { BreadcrumbItem } from 'types/breadcrumb'
+import { TruncatedText } from 'components/TruncatedText'
 
 type BreadCrumbRendererProps = Readonly<{
   items: readonly BreadcrumbItem[]
@@ -31,14 +32,20 @@ export default function BreadCrumbRenderer({ items }: BreadCrumbRendererProps) {
                     className="cursor-default font-semibold text-gray-600 dark:text-gray-300"
                     aria-current="page"
                   >
-                    {item.title}
+                    <TruncatedText
+                      text={item.title}
+                      className="max-w-xs sm:max-w-sm md:max-w-none"
+                    />
                   </span>
                 ) : (
                   <Link
                     href={item.path}
                     className="hover:text-blue-700 hover:underline dark:text-blue-400"
                   >
-                    {item.title}
+                    <TruncatedText
+                      text={item.title}
+                      className="max-w-xs sm:max-w-sm md:max-w-none"
+                    />
                   </Link>
                 )}
               </HeroUIBreadcrumbItem>
