@@ -46,7 +46,6 @@ const ChapterMap = ({
         doubleClickZoom: false,
         touchZoom: false,
         boxZoom: false,
-        
         keyboard: false,
         scrollWheelZoom: false,
         zoomControl: false,
@@ -153,7 +152,6 @@ const ChapterMap = ({
       userPopupContent.textContent = 'Your Location'
       userPopup.setContent(userPopupContent)
       userMarker.bindPopup(userPopup)
-
       userMarker.addTo(map)
       userMarkerRef.current = userMarker
     }
@@ -209,7 +207,6 @@ const ChapterMap = ({
       map.scrollWheelZoom.enable()
       map.boxZoom.enable()
       map.keyboard.enable()
-      map.getContainer().style.pointerEvents = 'auto'
 
       if (!zoomControlRef.current) {
         zoomControlRef.current = L.control.zoom({ position: 'topleft' })
@@ -222,7 +219,6 @@ const ChapterMap = ({
       map.scrollWheelZoom.disable()
       map.boxZoom.disable()
       map.keyboard.disable()
-      map.getContainer().style.pointerEvents = 'none'
 
       if (zoomControlRef.current) {
         zoomControlRef.current.remove()
@@ -247,7 +243,7 @@ const ChapterMap = ({
         >
           <button
             type="button"
-            className="flex cursor-pointer items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white"
+            className="flex cursor-pointer items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white"
             onClick={() => setIsMapActive(true)}
             aria-label="Unlock map"
           >

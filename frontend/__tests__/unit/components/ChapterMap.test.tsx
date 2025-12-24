@@ -1,4 +1,4 @@
-import { render, fireEvent } from '@testing-library/react'
+import { render, fireEvent, act } from '@testing-library/react'
 import * as L from 'leaflet'
 import { Chapter } from 'types/chapter'
 import ChapterMap from 'components/ChapterMap'
@@ -199,7 +199,39 @@ describe('ChapterMap', () => {
       render(<ChapterMap {...defaultProps} />)
       expect(mockMap.on).toHaveBeenCalledWith('mouseout', expect.any(Function))
     })
+
+    it('locks map on mouseout', () => {
+      render(<ChapterMap {...defaultProps} />)
+
+      // Simulate map activation
+      const overlay = document.querySelector('[aria-label="Unlock map"]')
+      fireEvent.click(overlay!)
+
+      // Triger mouseout handler
+      const mouseoutHandler = mockMap.on.mock.calls.find((call) => call[0] === 'mouseout')?.[1]
+      
+       // Simulate mouseout event that is NOT contained by map or map parent
+       // We mock the event structure needed by the handler
+      const mockEvent = {
+         originalEvent: {
+             relatedTarget: document.body // Target is outside map container
+         }
+      }
+      
+      act(() => {
+        mouseoutHandler(mockEvent)
+      })
+
+      // Expect map to be disabled (handlers disabled)
+      expect(mockMap.dragging.disable).toHaveBeenCalled()
+      expect(mockMap.touchZoom.disable).toHaveBeenCalled()
+      expect(mockMap.doubleClickZoom.disable).toHaveBeenCalled()
+      expect(mockMap.scrollWheelZoom.disable).toHaveBeenCalled()
+      expect(mockMap.boxZoom.disable).toHaveBeenCalled()
+      expect(mockMap.keyboard.disable).toHaveBeenCalled()
+    })
   })
+
 
   describe('Markers', () => {
     it('creates markers for each chapter', () => {
@@ -326,7 +358,12 @@ describe('ChapterMap', () => {
       const overlay = getByText('Unlock map').closest('button')
       fireEvent.click(overlay!)
 
+      expect(mockMap.dragging.enable).toHaveBeenCalled()
+      expect(mockMap.touchZoom.enable).toHaveBeenCalled()
+      expect(mockMap.doubleClickZoom.enable).toHaveBeenCalled()
       expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
+      expect(mockMap.boxZoom.enable).toHaveBeenCalled()
+      expect(mockMap.keyboard.enable).toHaveBeenCalled()
     })
 
 
