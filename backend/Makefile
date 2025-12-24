@@ -69,15 +69,15 @@ index-data:
 
 load-data:
 	@echo "Loading Nest data"
-	@gunzip -c backend/data/nest.sql.gz | docker exec -i nest-db psql -U nest_user_dev -d nest_db_dev
+	docker exec -i nest-db pg_restore -U nest_user_dev -d nest_db_dev < ./backend/data/nest.dump
 
 load-data-e2e:
 	@echo "Loading Nest e2e data"
-	@gunzip -c backend/data/nest.sql.gz | docker exec -i e2e-nest-db psql -U nest_user_e2e -d nest_db_e2e
+	docker exec -i e2e-nest-db pg_restore -U nest_user_e2e -d nest_db_e2e < ./backend/data/nest.dump
 
 load-data-fuzz:
 	@echo "Loading Nest fuzz data"
-	@gunzip -c backend/data/nest.sql.gz | docker exec -i fuzz-nest-db psql -U nest_user_fuzz -d nest_db_fuzz
+	docker exec -i fuzz-nest-db pg_restore -U nest_user_fuzz -d nest_db_fuzz < ./backend/data/nest.dump
 
 merge-migrations:
 	@CMD="python manage.py makemigrations --merge" $(MAKE) exec-backend-command
@@ -138,7 +138,9 @@ test-backend:
 
 test-fuzz:
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
-	docker compose --project-name nest-fuzz -f docker-compose/fuzz.yaml up --build --remove-orphans --exit-code-from graphql
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz.yaml up --build --remove-orphans --abort-on-container-exit db data-purger data-loader
+	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz.yaml up --build --remove-orphans --abort-on-container-exit db backend graphql
 
 update-backend-dependencies:
 	@cd backend && poetry update
