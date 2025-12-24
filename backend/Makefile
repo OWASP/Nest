@@ -138,7 +138,7 @@ test-backend:
 
 test-fuzz:
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
-	docker compose --project-name nest-fuzz -f docker-compose/fuzz.yaml up --build --remove-orphans --abort-on-container-exit
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz.yaml up --build --remove-orphans --exit-code-from graphql
 
 update-backend-dependencies:
 	@cd backend && poetry update

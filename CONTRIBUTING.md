@@ -417,55 +417,59 @@ make test
 This command runs tests and checks that coverage threshold requirements are satisfied for both backend and frontend.
 **Please note your PR won't be merged if it fails the code tests checks.**
 
-### Setting Up e2e Testing Environment
+### Running e2e Tests
 
-Follow these steps to setup your e2e testing environment:
+Run the frontend e2e tests with the following command:
 
-1. Make sure you have `gzip` installed on your machine.
+```bash
+make test-frontend-e2e
+```
 
-2. Run the e2e backend instance with the following command:
+This command automatically:
 
-   ```bash
-   make run-backend-e2e
-   ```
+- Starts the database and backend containers
+- Runs migrations and loads test data
+- Executes the e2e tests
+- Cleans up containers when done
 
-3. Load the data into the e2e db with the following command (in another terminal session):
+For debugging, you can run the e2e backend separately:
 
-   ```bash
-   make load-data-e2e
-   ```
+```bash
+make run-backend-e2e
+```
 
-4. Now, you can stop the backend instance, and run the frontend e2e tests with the following command:
+Then load data manually in another terminal:
 
-   ```bash
-   make test-frontend-e2e
-   ```
+```bash
+make load-data-e2e
+```
 
-### Setting Up Fuzz Testing Environment
+### Running Fuzz Tests
 
-Follow these steps to setup your fuzz testing environment:
+Run the fuzz tests with the following command:
 
-1. Make sure you have `gzip` installed on your machine.
+```bash
+make test-fuzz
+```
 
-2. Run the fuzz backend instance with the following command:
+This command automatically:
 
-   ```bash
-   make run-backend-fuzz
-   ```
+- Starts the database and backend containers
+- Runs migrations and loads test data
+- Executes the fuzz tests
+- Cleans up containers when done
 
-3. Load the data into the fuzz db with the following command (in another terminal session):
+For debugging, you can run the fuzz backend separately:
 
-   ```bash
-   make load-data-fuzz
-   ```
+```bash
+make run-backend-fuzz
+```
 
-4. Now, you can stop the backend instance, and run the fuzz tests with the following command:
+Then load data manually in another terminal:
 
-   ```bash
-   make test-fuzz
-   ```
-
-**Please note that you only need to do these steps once.**
+```bash
+make load-data-fuzz
+```
 
 ### Test Coverage
 
