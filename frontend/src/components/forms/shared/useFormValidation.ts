@@ -6,13 +6,6 @@ export type ValidationRule = {
   validator: () => string | undefined
 }
 
-/**
- * Custom hook for form validation that computes errors based on validation rules.
- *
- * @param validations - Array of validation rules to apply
- * @param dependencies - Dependencies array for useMemo (typically formData, touched, and other relevant state)
- * @returns Record of field names to error messages (undefined if no error)
- */
 export const useFormValidation = (
   validations: ValidationRule[],
   dependencies: unknown[]
