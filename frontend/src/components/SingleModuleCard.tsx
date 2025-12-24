@@ -1,12 +1,11 @@
 'use client'
 
-import { faUsers } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { capitalize } from 'lodash'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React from 'react'
+import { HiUserGroup } from 'react-icons/hi'
 import { ExtendedSession } from 'types/auth'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
@@ -45,7 +44,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
     <div className="flex flex-col gap-4 rounded-xl border border-gray-200 p-5 shadow-md dark:border-gray-700">
       <div className="flex items-center justify-between">
         <div className="flex cursor-pointer items-center gap-2">
-          <FontAwesomeIcon icon={faUsers} className="text-gray-500 dark:text-gray-300" />
+          <HiUserGroup className="text-gray-500 dark:text-gray-300" />
           <Link
             href={`${pathname}/modules/${module.key}`}
             target="_blank"
@@ -83,7 +82,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
       {/* Mentors */}
       {module.mentors?.length > 0 && (
         <TopContributorsList
-          icon={faUsers}
+          icon={HiUserGroup}
           contributors={module.mentors}
           maxInitialDisplay={6}
           label="Mentors"

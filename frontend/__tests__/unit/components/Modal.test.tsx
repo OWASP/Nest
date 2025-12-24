@@ -1,7 +1,6 @@
-import { faCheck } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
+import { FaCheck } from 'react-icons/fa6'
 import DialogComp from 'components/Modal'
 
 jest.mock('@/components/MarkdownWrapper', () => {
@@ -83,7 +82,7 @@ describe('DialogComp', () => {
     onClose: mockOnClose,
     button: {
       label: 'Action',
-      icon: <FontAwesomeIcon icon={faCheck} />,
+      icon: <FaCheck data-testid="fa-check-icon" />,
       url: 'https://example.com',
       onPress: mockOnClick,
     },
@@ -151,6 +150,7 @@ describe('DialogComp', () => {
     render(<DialogComp {...defaultProps} />)
     expect(screen.getByTestId('action-button')).toBeInTheDocument()
     expect(screen.getByText('Action')).toBeInTheDocument()
+    expect(screen.getByTestId('fa-check-icon')).toBeInTheDocument()
   })
 
   it('renders with minimal required props', () => {

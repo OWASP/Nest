@@ -1,15 +1,14 @@
-import {
-  faCircleInfo,
-  faChartPie,
-  faFolderOpen,
-  faCode,
-  faTags,
-  faUsers,
-  faRectangleList,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import upperFirst from 'lodash/upperFirst'
 import { useSession } from 'next-auth/react'
+import {
+  FaCircleInfo,
+  FaChartPie,
+  FaFolderOpen,
+  FaCode,
+  FaTags,
+  FaRectangleList,
+} from 'react-icons/fa6'
+import { HiUserGroup } from 'react-icons/hi'
 import type { ExtendedSession } from 'types/auth'
 import type { DetailsCardProps } from 'types/card'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
@@ -119,7 +118,7 @@ const DetailsCard = ({
         </div>
         <p className="mb-6 text-xl">{description}</p>
         {summary && (
-          <SecondaryCard icon={faCircleInfo} title={<AnchorTitle title="Summary" />}>
+          <SecondaryCard icon={FaCircleInfo} title={<AnchorTitle title="Summary" />}>
             <Markdown content={summary} />
           </SecondaryCard>
         )}
@@ -127,7 +126,7 @@ const DetailsCard = ({
         {userSummary && <SecondaryCard>{userSummary}</SecondaryCard>}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
-            icon={faRectangleList}
+            icon={FaRectangleList}
             title={<AnchorTitle title={`${upperFirst(type)} Details`} />}
             className={secondaryCardStyles}
           >
@@ -153,7 +152,7 @@ const DetailsCard = ({
             type === 'user' ||
             type === 'organization') && (
             <SecondaryCard
-              icon={faChartPie}
+              icon={FaChartPie}
               title={<AnchorTitle title="Statistics" />}
               className="md:col-span-2"
             >
@@ -175,6 +174,7 @@ const DetailsCard = ({
               <ChapterMapWrapper
                 geoLocData={geolocationData}
                 showLocal={true}
+                showLocationSharing={true}
                 style={{
                   borderRadius: '0.5rem',
                   boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
@@ -193,12 +193,12 @@ const DetailsCard = ({
             {languages.length !== 0 && (
               <ToggleableList
                 items={languages}
-                icon={faCode}
+                icon={FaCode}
                 label={<AnchorTitle title="Languages" />}
               />
             )}
             {topics.length !== 0 && (
-              <ToggleableList items={topics} icon={faTags} label={<AnchorTitle title="Topics" />} />
+              <ToggleableList items={topics} icon={FaTags} label={<AnchorTitle title="Topics" />} />
             )}
           </div>
         )}
@@ -211,7 +211,7 @@ const DetailsCard = ({
                 {tags?.length > 0 && (
                   <ToggleableList
                     items={tags}
-                    icon={faTags}
+                    icon={FaTags}
                     label={<AnchorTitle title="Tags" />}
                     isDisabled={true}
                   />
@@ -219,7 +219,7 @@ const DetailsCard = ({
                 {domains?.length > 0 && (
                   <ToggleableList
                     items={domains}
-                    icon={faChartPie}
+                    icon={FaChartPie}
                     label={<AnchorTitle title="Domains" />}
                     isDisabled={true}
                   />
@@ -230,7 +230,7 @@ const DetailsCard = ({
               <div className="mb-8">
                 <ToggleableList
                   items={labels}
-                  icon={faTags}
+                  icon={FaTags}
                   label={<AnchorTitle title="Labels" />}
                   isDisabled={true}
                 />
@@ -242,13 +242,13 @@ const DetailsCard = ({
         {topContributors && (
           <TopContributorsList
             contributors={topContributors}
-            icon={faUsers}
+            icon={HiUserGroup}
             maxInitialDisplay={12}
           />
         )}
         {admins && admins.length > 0 && type === 'program' && (
           <TopContributorsList
-            icon={faUsers}
+            icon={HiUserGroup}
             contributors={admins}
             maxInitialDisplay={6}
             label="Admins"
@@ -256,7 +256,7 @@ const DetailsCard = ({
         )}
         {mentors && mentors.length > 0 && (
           <TopContributorsList
-            icon={faUsers}
+            icon={HiUserGroup}
             contributors={mentors}
             maxInitialDisplay={6}
             label="Mentors"
@@ -264,7 +264,7 @@ const DetailsCard = ({
         )}
         {mentees && mentees.length > 0 && (
           <MenteeContributorsList
-            icon={faUsers}
+            icon={HiUserGroup}
             contributors={mentees}
             maxInitialDisplay={6}
             label="Mentees"
@@ -303,13 +303,13 @@ const DetailsCard = ({
         )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
-            <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
+            <SecondaryCard icon={FaFolderOpen} title={<AnchorTitle title="Repositories" />}>
               <RepositoryCard maxInitialDisplay={4} repositories={repositories} />
             </SecondaryCard>
           )}
         {type === 'program' && modules.length > 0 && (
           <SecondaryCard
-            icon={faFolderOpen}
+            icon={FaFolderOpen}
             title={<AnchorTitle title={modules.length === 1 ? 'Module' : 'Modules'} />}
           >
             <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
@@ -338,17 +338,20 @@ export const SocialLinks = ({ urls }) => {
     <div>
       <strong>Social Links</strong>
       <div className="mt-2 flex flex-wrap gap-3">
-        {urls.map((url) => (
-          <a
-            key={url}
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-400 transition-colors hover:text-gray-800 dark:hover:text-gray-200"
-          >
-            <FontAwesomeIcon icon={getSocialIcon(url)} className="h-5 w-5" />
-          </a>
-        ))}
+        {urls.map((url) => {
+          const SocialIcon = getSocialIcon(url)
+          return (
+            <a
+              key={url}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 transition-colors hover:text-gray-800 dark:hover:text-gray-200"
+            >
+              <SocialIcon className="h-5 w-5" />
+            </a>
+          )
+        })}
       </div>
     </div>
   )

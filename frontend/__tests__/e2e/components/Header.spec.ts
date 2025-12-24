@@ -58,6 +58,21 @@ test.describe('Header - Desktop (Chrome)', () => {
     await expect(navbar.getByRole('link', { name: 'Organizations' })).toBeVisible()
     await expect(navbar.getByRole('link', { name: 'Snapshots' })).toBeVisible()
   })
+
+  test('all dropdown triggers should use pointer cursor', async ({ page }) => {
+    await page.goto('/')
+
+    const dropdownButtons = page.locator('#navbar-sticky button')
+
+    const count = await dropdownButtons.count()
+    expect(count).toBeGreaterThan(0)
+
+    for (let i = 0; i < count; i++) {
+      const btn = dropdownButtons.nth(i)
+      const cursor = await btn.evaluate((el) => globalThis.getComputedStyle(el).cursor)
+      expect(cursor).toBe('pointer')
+    }
+  })
 })
 
 // Mobile tests (iPhone 13)

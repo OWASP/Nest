@@ -1,9 +1,8 @@
 'use client'
-import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import Link from 'next/link'
 import { useState, useCallback } from 'react'
+import { FaChevronDown, FaChevronUp } from 'react-icons/fa6'
 import type { Section } from 'types/section'
 import { footerIcons } from 'utils/constants'
 import { footerSections } from 'utils/constants'
@@ -36,9 +35,9 @@ export default function Footer() {
                 <h3>{section.title}</h3>
                 <div className="transition-transform duration-200 lg:hidden">
                   {openSection === section.title ? (
-                    <FontAwesomeIcon icon={faChevronUp} className="h-4 w-4" />
+                    <FaChevronUp className="h-4 w-4" />
                   ) : (
-                    <FontAwesomeIcon icon={faChevronDown} className="h-4 w-4" />
+                    <FaChevronDown className="h-4 w-4" />
                   )}
                 </div>
               </Button>
@@ -70,18 +69,21 @@ export default function Footer() {
 
         {/* Social Media Icons Section */}
         <div className="mb-0 flex flex-row justify-center gap-6">
-          {footerIcons.map((social) => (
-            <Link
-              key={social.label}
-              href={social.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`OWASP Nest ${social.label}`}
-              className="text-slate-600 transition-colors duration-200 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
-            >
-              <FontAwesomeIcon icon={social.icon} className="h-6 w-6" />
-            </Link>
-          ))}
+          {footerIcons.map((social) => {
+            const SocialIcon = social.icon
+            return (
+              <Link
+                key={social.label}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`OWASP Nest ${social.label}`}
+                className="text-slate-600 transition-colors duration-200 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+              >
+                <SocialIcon className="h-4 w-4" />
+              </Link>
+            )
+          })}
         </div>
         {/* Footer bottom section with copyright and version */}
         <div className="grid w-full place-content-center">

@@ -1,8 +1,8 @@
-import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState } from 'react'
+import type { IconType } from 'react-icons'
+import { IconWrapper } from 'wrappers/IconWrapper'
 import ShowMoreButton from 'components/ShowMoreButton'
 
 const ToggleableList = ({
@@ -15,7 +15,7 @@ const ToggleableList = ({
   items: string[]
   label: React.ReactNode
   limit?: number
-  icon?: IconDefinition
+  icon?: IconType
   isDisabled?: boolean
 }) => {
   const [showAll, setShowAll] = useState(false)
@@ -30,16 +30,17 @@ const ToggleableList = ({
       <h2 className="mb-4 text-2xl font-semibold">
         <div className="flex items-center">
           <div className="flex flex-row items-center gap-2">
-            {icon && <FontAwesomeIcon icon={icon} className="mr-2 h-5 w-5" />}
+            {icon && <IconWrapper icon={icon} className="mr-2 h-5 w-5" />}
           </div>
           <span>{label}</span>
         </div>
       </h2>
       <div className="flex flex-wrap gap-2">
-        {(showAll ? items : items.slice(0, limit)).map((item) => (
+        {(showAll ? items : items.slice(0, limit)).map((item, index) => (
           <button
-            key={item}
-            className="rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700"
+            type="button"
+            key={`${item}-${index}`}
+            className={`rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700 ${isDisabled ? 'cursor-default' : 'cursor-pointer'}`}
             onClick={() => !isDisabled && handleButtonClick({ item })}
             aria-label={`Search for projects with ${item}`}
             disabled={isDisabled}

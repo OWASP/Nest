@@ -1,5 +1,5 @@
-import { faCircleCheck, faClock, faUserGear } from '@fortawesome/free-solid-svg-icons'
-
+import type { IconType } from 'react-icons'
+import { FaCircleCheck, FaClock, FaUserGear } from 'react-icons/fa6'
 // helper functions used in about/page.tsx
 export const getMilestoneProgressText = (progress: number): string => {
   if (progress === 100) {
@@ -11,12 +11,12 @@ export const getMilestoneProgressText = (progress: number): string => {
   }
 }
 
-export const getMilestoneProgressIcon = (progress: number) => {
+export const getMilestoneProgressIcon = (progress: number): IconType => {
   if (progress === 100) {
-    return faCircleCheck
+    return FaCircleCheck
   } else if (progress > 0) {
-    return faUserGear
+    return FaUserGear
   } else {
-    return faClock
+    return FaClock
   }
 }

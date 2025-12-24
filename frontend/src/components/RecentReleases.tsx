@@ -1,5 +1,5 @@
-import { faTag } from '@fortawesome/free-solid-svg-icons'
 import React from 'react'
+import { FaTag } from 'react-icons/fa6'
 import type { Release as ReleaseType } from 'types/release'
 import AnchorTitle from 'components/AnchorTitle'
 import Release from 'components/Release'
@@ -18,7 +18,7 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
 }) => {
   return (
     <SecondaryCard
-      icon={faTag}
+      icon={FaTag}
       title={
         <div className="flex items-center gap-2">
           <AnchorTitle title="Recent Releases" className="flex items-center leading-none" />

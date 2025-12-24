@@ -1,7 +1,6 @@
-import { faEllipsisH } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import React from 'react'
+import { FaEllipsis } from 'react-icons/fa6'
 
 interface PaginationProps {
   currentPage: number
@@ -77,7 +76,7 @@ const Pagination: React.FC<PaginationProps> = ({
                 role="presentation"
                 aria-label="More pages"
               >
-                <FontAwesomeIcon icon={faEllipsisH} className="h-5 w-5"></FontAwesomeIcon>
+                <FaEllipsis className="h-5 w-5" />
               </span>
             ) : (
               <Button
