@@ -43,14 +43,20 @@ def weighted_reciprocal_rank(
 
     # Score by rank position in vector results
     for rank, doc in enumerate(vector_results, start=1):
-        doc_id = str(doc.get(id_key, id(doc)))
+        if id_key not in doc:
+            msg = f"Document missing required '{id_key}' field"
+            raise ValueError(msg)
+        doc_id = str(doc[id_key])
         scores[doc_id] = scores.get(doc_id, 0.0) + 1.0 / (k + rank)
         if doc_id not in docs:
             docs[doc_id] = doc
 
     # Score by rank position in BM25 results
     for rank, doc in enumerate(bm25_results, start=1):
-        doc_id = str(doc.get(id_key, id(doc)))
+        if id_key not in doc:
+            msg = f"Document missing required '{id_key}' field"
+            raise ValueError(msg)
+        doc_id = str(doc[id_key])
         scores[doc_id] = scores.get(doc_id, 0.0) + 1.0 / (k + rank)
         if doc_id not in docs:
             docs[doc_id] = doc

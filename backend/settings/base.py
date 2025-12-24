@@ -137,9 +137,9 @@ class Base(Configuration):
 
     REDIS_HOST = values.SecretValue(environ_name="REDIS_HOST")
     REDIS_PASSWORD = values.SecretValue(environ_name="REDIS_PASSWORD")
-    REDIS_ALLOW_NO_PASSWORD = values.Value(
+    REDIS_ALLOW_NO_PASSWORD = values.BooleanValue(
         environ_name="REDIS_ALLOW_NO_PASSWORD",
-        default="false",
+        default=False,
     )
     REDIS_ROUTER_SOCKET_TIMEOUT = values.FloatValue(
         environ_name="REDIS_ROUTER_SOCKET_TIMEOUT",

@@ -105,7 +105,10 @@ class Engine:
                 temperature=self.TEMPERATURE,
                 max_tokens=self.MAX_TOKENS,
             )
-            return resp.choices[0].message.content.strip()
+            # Defensive check for empty choices or content
+            if resp.choices and resp.choices[0].message.content:
+                return resp.choices[0].message.content.strip()
+            return FALLBACK_RESPONSE
 
         except openai.OpenAIError:
             logger.exception("LLM API call failed")
