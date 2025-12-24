@@ -66,7 +66,14 @@ const ModuleForm = ({
   }
 
   const handleSelectChange = (keys: React.Key | Set<React.Key> | 'all') => {
-    const keySet = keys instanceof Set ? keys : keys === 'all' ? new Set() : new Set([keys])
+    let keySet: Set<React.Key>
+    if (keys instanceof Set) {
+      keySet = keys
+    } else if (keys === 'all') {
+      keySet = new Set()
+    } else {
+      keySet = new Set([keys])
+    }
     const [value] = Array.from(keySet as Set<string>)
     if (value) {
       setFormData((prev) => ({ ...prev, experienceLevel: value }))
@@ -378,7 +385,14 @@ export const ProjectSelector = ({
   }, [inputValue, fetchSuggestions])
 
   const handleSelectionChange = (keys: React.Key | Set<React.Key> | 'all') => {
-    const keySet = keys instanceof Set ? keys : keys === 'all' ? new Set() : new Set([keys])
+    let keySet: Set<React.Key>
+    if (keys instanceof Set) {
+      keySet = keys
+    } else if (keys === 'all') {
+      keySet = new Set()
+    } else {
+      keySet = new Set([keys])
+    }
     const selectedKey = Array.from(keySet as Set<string>)[0]
     if (selectedKey) {
       const selectedProject = items.find((item) => item.id === selectedKey)
