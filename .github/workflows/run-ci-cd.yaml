@@ -378,7 +378,7 @@ jobs:
           file: backend/docker/Dockerfile.fuzz
           load: true
           platforms: linux/amd64
-          tags: owasp/nest:test-fuzz-backend:latest
+          tags: owasp/nest:test-fuzz-backend-latest
 
       - name: Run backend fuzz tests
         run: |
