@@ -1,7 +1,3 @@
-/**
- * Shared validation utilities for form components.
- */
-
 import type { ValidationRule } from 'components/forms/shared/useFormValidation'
 
 export const validateRequired = (value: string, fieldName: string): string | undefined => {
