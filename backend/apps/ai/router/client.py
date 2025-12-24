@@ -87,7 +87,8 @@ class RedisRouterClient:
         if password_missing:
             if allow_no_password:
                 logger.warning(
-                    "REDIS is running without authentication (REDIS_PASSWORD not set) for development mode."
+                    "REDIS is running without authentication "
+                    "(REDIS_PASSWORD not set) for development mode."
                 )
             else:
                 error_msg = (
@@ -116,7 +117,7 @@ class RedisRouterClient:
             try:
                 redis_port = int(redis_port)
             except (TypeError, ValueError):
-                logger.warning(f"Invalid REDIS_PORT value '{redis_port}', falling back to 6379.")
+                logger.warning("Invalid REDIS_PORT value '%s', falling back to 6379.", redis_port)
                 redis_port = 6379
             return redis.BlockingConnectionPool(
                 host=settings.REDIS_HOST,

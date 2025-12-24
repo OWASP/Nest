@@ -3,13 +3,13 @@ services:
     image: redis/redis-stack-server:7.4.0
     container_name: nestbot_redis
     ports:
-      - "6379:6379"
+      - 6379:6379
     restart: unless-stopped
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
-    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    command: [redis-server, --requirepass, '${REDIS_PASSWORD}']
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      test: [CMD, redis-cli, -a, '${REDIS_PASSWORD}', ping]
       interval: 30s
       timeout: 10s
       retries: 5
