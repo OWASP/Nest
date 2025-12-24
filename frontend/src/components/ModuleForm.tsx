@@ -1,14 +1,16 @@
 'use client'
 import { useApolloClient } from '@apollo/client/react'
-import { Button } from '@heroui/button'
-import { Autocomplete, AutocompleteItem, Input } from '@heroui/react'
+import { Autocomplete, AutocompleteItem } from '@heroui/react'
 import { Select, SelectItem } from '@heroui/select'
 import debounce from 'lodash/debounce'
-import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import { SearchProjectNamesDocument } from 'types/__generated__/projectQueries.generated'
+import { FormButtons } from 'components/forms/shared/FormButtons'
+import { FormDateInput } from 'components/forms/shared/FormDateInput'
+import { FormTextarea } from 'components/forms/shared/FormTextarea'
+import { FormTextInput } from 'components/forms/shared/FormTextInput'
 
 interface ModuleFormProps {
   formData: {
@@ -48,7 +50,6 @@ const ModuleForm = ({
   isEdit,
   submitText = 'Save',
 }: ModuleFormProps) => {
-  const router = useRouter()
   const [touched, setTouched] = useState<Record<string, boolean>>({})
 
   const handleInputChange = (name: string, value: string) => {
@@ -64,35 +65,32 @@ const ModuleForm = ({
     }
   }
 
+  const validateRequired = (value: string, fieldName: string): string | undefined => {
+    if (!value || (typeof value === 'string' && !value.trim())) {
+      return `${fieldName} is required`
+    }
+    return undefined
+  }
+
   const validateName = (value: string): string | undefined => {
-    if (!value.trim()) {
-      return 'Name is required'
-    }
-    if (value.length > 200) {
-      return 'Name must be 200 characters or less'
-    }
+    const requiredError = validateRequired(value, 'Name')
+    if (requiredError) return requiredError
+    if (value.length > 200) return 'Name must be 200 characters or less'
     return undefined
   }
 
   const validateDescription = (value: string): string | undefined => {
-    if (!value.trim()) {
-      return 'Description is required'
-    }
-    return undefined
+    return validateRequired(value, 'Description')
   }
 
   const validateStartDate = (value: string): string | undefined => {
-    if (!value) {
-      return 'Start date is required'
-    }
-    return undefined
+    return validateRequired(value, 'Start date')
   }
 
   const validateEndDate = (value: string): string | undefined => {
-    if (!value) {
-      return 'End date is required'
-    }
-    if (formData.startedAt && value && new Date(value) <= new Date(formData.startedAt)) {
+    const requiredError = validateRequired(value, 'End date')
+    if (requiredError) return requiredError
+    if (formData.startedAt && new Date(value) <= new Date(formData.startedAt)) {
       return 'End date must be after start date'
     }
     return undefined
@@ -106,32 +104,50 @@ const ModuleForm = ({
   }
 
   const validateExperienceLevel = (value: string): string | undefined => {
-    if (!value || !value.trim()) {
-      return 'Experience level is required'
-    }
-    return undefined
+    return validateRequired(value, 'Experience level')
   }
 
   const errors = useMemo(() => {
     const errs: Record<string, string | undefined> = {}
-    if (touched.name) {
-      errs.name = validateName(formData.name)
-    }
-    if (touched.description) {
-      errs.description = validateDescription(formData.description)
-    }
-    if (touched.startedAt) {
-      errs.startedAt = validateStartDate(formData.startedAt)
-    }
-    if (touched.endedAt || (touched.startedAt && formData.endedAt)) {
-      errs.endedAt = validateEndDate(formData.endedAt)
-    }
-    if (touched.projectId) {
-      errs.projectId = validateProject(formData.projectId, formData.projectName)
-    }
-    if (touched.experienceLevel) {
-      errs.experienceLevel = validateExperienceLevel(formData.experienceLevel)
-    }
+    const validations: Array<{
+      field: string
+      shouldValidate: boolean
+      validator: () => string | undefined
+    }> = [
+      { field: 'name', shouldValidate: touched.name, validator: () => validateName(formData.name) },
+      {
+        field: 'description',
+        shouldValidate: touched.description,
+        validator: () => validateDescription(formData.description),
+      },
+      {
+        field: 'startedAt',
+        shouldValidate: touched.startedAt,
+        validator: () => validateStartDate(formData.startedAt),
+      },
+      {
+        field: 'endedAt',
+        shouldValidate: touched.endedAt || (touched.startedAt && !!formData.endedAt),
+        validator: () => validateEndDate(formData.endedAt),
+      },
+      {
+        field: 'projectId',
+        shouldValidate: touched.projectId,
+        validator: () => validateProject(formData.projectId, formData.projectName),
+      },
+      {
+        field: 'experienceLevel',
+        shouldValidate: touched.experienceLevel,
+        validator: () => validateExperienceLevel(formData.experienceLevel),
+      },
+    ]
+
+    validations.forEach(({ field, shouldValidate, validator }) => {
+      if (shouldValidate) {
+        errs[field] = validator()
+      }
+    })
+
     return errs
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData, touched])
@@ -187,112 +203,53 @@ const ModuleForm = ({
             {/* Basic Information */}
             <section className="flex flex-col gap-6">
               <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
-                <div
+                <FormTextInput
+                  id="module-name"
+                  label="Name"
+                  placeholder="Enter module name"
+                  value={formData.name}
+                  onValueChange={(value) => handleInputChange('name', value)}
+                  error={errors.name}
+                  touched={touched.name}
+                  required
                   className="w-full min-w-0 lg:col-span-2"
-                  style={{ maxWidth: '100%', overflow: 'hidden' }}
-                >
-                  <Input
-                    id="module-name"
-                    type="text"
-                    label="Name"
-                    labelPlacement="outside"
-                    placeholder="Enter module name"
-                    value={formData.name}
-                    onValueChange={(value) => handleInputChange('name', value)}
-                    isRequired
-                    isInvalid={touched.name && !!errors.name}
-                    errorMessage={touched.name ? errors.name : undefined}
-                    classNames={{
-                      base: 'w-full min-w-0',
-                      label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
-                      input: 'text-gray-800 dark:text-gray-200',
-                      inputWrapper: 'bg-gray-50 dark:bg-gray-800',
-                      helperWrapper: 'min-w-0 max-w-full w-full',
-                      errorMessage: 'break-words whitespace-normal max-w-full w-full',
-                    }}
-                  />
-                </div>
+                />
 
-                <div
-                  className="w-full min-w-0 lg:col-span-2"
-                  style={{ maxWidth: '100%', overflow: 'hidden' }}
-                >
-                  <div className="flex flex-col gap-2">
-                    <label
-                      htmlFor="module-description"
-                      className="text-sm font-semibold text-gray-600 dark:text-gray-300"
-                    >
-                      Description <span className="text-red-500">*</span>
-                    </label>
-                    <textarea
-                      id="module-description"
-                      placeholder="Enter module description"
-                      value={formData.description}
-                      onChange={(e) => handleInputChange('description', e.target.value)}
-                      rows={4}
-                      required
-                      className={`w-full min-w-0 rounded-lg border px-3 py-2 text-gray-800 placeholder:text-gray-400 focus:border-[#1D7BD7] focus:ring-1 focus:ring-[#1D7BD7] focus:outline-none dark:bg-gray-800 dark:text-gray-200 dark:focus:ring-[#1D7BD7] ${
-                        touched.description && errors.description
-                          ? 'border-red-500 dark:border-red-500'
-                          : 'border-gray-300 dark:border-gray-600'
-                      }`}
-                    />
-                    {touched.description && errors.description && (
-                      <p className="text-sm break-words whitespace-normal text-red-500">
-                        {errors.description}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                <FormTextarea
+                  id="module-description"
+                  label="Description"
+                  placeholder="Enter module description"
+                  value={formData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  error={errors.description}
+                  touched={touched.description}
+                  required
+                />
               </div>
             </section>
 
             {/* Configuration */}
             <section className="flex flex-col gap-6 text-gray-600 dark:text-gray-300">
               <div className="module-config-grid grid gap-6">
-                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
-                  <Input
-                    id="module-start-date"
-                    type="date"
-                    label="Start Date"
-                    labelPlacement="outside"
-                    value={formData.startedAt}
-                    onValueChange={(value) => handleInputChange('startedAt', value)}
-                    isRequired
-                    isInvalid={touched.startedAt && !!errors.startedAt}
-                    errorMessage={touched.startedAt ? errors.startedAt : undefined}
-                    classNames={{
-                      base: 'w-full min-w-0',
-                      label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
-                      input: 'text-gray-800 dark:text-gray-200',
-                      inputWrapper: 'bg-gray-50 dark:bg-gray-800',
-                      helperWrapper: 'min-w-0 max-w-full w-full',
-                      errorMessage: 'break-words whitespace-normal max-w-full w-full',
-                    }}
-                  />
-                </div>
-                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
-                  <Input
-                    id="module-end-date"
-                    type="date"
-                    label="End Date"
-                    labelPlacement="outside"
-                    value={formData.endedAt}
-                    onValueChange={(value) => handleInputChange('endedAt', value)}
-                    isRequired
-                    isInvalid={touched.endedAt && !!errors.endedAt}
-                    errorMessage={touched.endedAt ? errors.endedAt : undefined}
-                    min={formData.startedAt || undefined}
-                    classNames={{
-                      base: 'w-full min-w-0',
-                      label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
-                      input: 'text-gray-800 dark:text-gray-200',
-                      inputWrapper: 'bg-gray-50 dark:bg-gray-800',
-                      helperWrapper: 'min-w-0 max-w-full w-full',
-                      errorMessage: 'break-words whitespace-normal max-w-full w-full',
-                    }}
-                  />
-                </div>
+                <FormDateInput
+                  id="module-start-date"
+                  label="Start Date"
+                  value={formData.startedAt}
+                  onValueChange={(value) => handleInputChange('startedAt', value)}
+                  error={errors.startedAt}
+                  touched={touched.startedAt}
+                  required
+                />
+                <FormDateInput
+                  id="module-end-date"
+                  label="End Date"
+                  value={formData.endedAt}
+                  onValueChange={(value) => handleInputChange('endedAt', value)}
+                  error={errors.endedAt}
+                  touched={touched.endedAt}
+                  required
+                  min={formData.startedAt || undefined}
+                />
                 <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
                   <Select
                     id="experienceLevel"
@@ -325,63 +282,27 @@ const ModuleForm = ({
             {/* Additional Details */}
             <section className="flex flex-col gap-6">
               <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
-                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
-                  <Input
-                    id="module-domains"
-                    type="text"
-                    label="Domains"
-                    labelPlacement="outside"
-                    placeholder="AI, Web Development"
-                    value={formData.domains}
-                    onValueChange={(value) => handleInputChange('domains', value)}
-                    classNames={{
-                      base: 'w-full min-w-0',
-                      label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
-                      input: 'text-gray-800 dark:text-gray-200',
-                      inputWrapper: 'bg-gray-50 dark:bg-gray-800',
-                      helperWrapper: 'min-w-0 max-w-full w-full',
-                      errorMessage: 'break-words whitespace-normal max-w-full w-full',
-                    }}
-                  />
-                </div>
-                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
-                  <Input
-                    id="module-tags"
-                    type="text"
-                    label="Tags"
-                    labelPlacement="outside"
-                    placeholder="javascript, react"
-                    value={formData.tags}
-                    onValueChange={(value) => handleInputChange('tags', value)}
-                    classNames={{
-                      base: 'w-full min-w-0',
-                      label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
-                      input: 'text-gray-800 dark:text-gray-200',
-                      inputWrapper: 'bg-gray-50 dark:bg-gray-800',
-                      helperWrapper: 'min-w-0 max-w-full w-full',
-                      errorMessage: 'break-words whitespace-normal max-w-full w-full',
-                    }}
-                  />
-                </div>
-                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
-                  <Input
-                    id="module-labels"
-                    type="text"
-                    label="Labels"
-                    labelPlacement="outside"
-                    placeholder="good first issue, bug, enhancement"
-                    value={formData.labels}
-                    onValueChange={(value) => handleInputChange('labels', value)}
-                    classNames={{
-                      base: 'w-full min-w-0',
-                      label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
-                      input: 'text-gray-800 dark:text-gray-200',
-                      inputWrapper: 'bg-gray-50 dark:bg-gray-800',
-                      helperWrapper: 'min-w-0 max-w-full w-full',
-                      errorMessage: 'break-words whitespace-normal max-w-full w-full',
-                    }}
-                  />
-                </div>
+                <FormTextInput
+                  id="module-domains"
+                  label="Domains"
+                  placeholder="AI, Web Development"
+                  value={formData.domains}
+                  onValueChange={(value) => handleInputChange('domains', value)}
+                />
+                <FormTextInput
+                  id="module-tags"
+                  label="Tags"
+                  placeholder="javascript, react"
+                  value={formData.tags}
+                  onValueChange={(value) => handleInputChange('tags', value)}
+                />
+                <FormTextInput
+                  id="module-labels"
+                  label="Labels"
+                  placeholder="good first issue, bug, enhancement"
+                  value={formData.labels}
+                  onValueChange={(value) => handleInputChange('labels', value)}
+                />
                 <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
                   <ProjectSelector
                     value={formData.projectId}
@@ -398,48 +319,19 @@ const ModuleForm = ({
                   />
                 </div>
                 {isEdit && (
-                  <div
+                  <FormTextInput
+                    id="module-mentor-logins"
+                    label="Mentor GitHub Usernames"
+                    placeholder="johndoe, jane-doe"
+                    value={formData.mentorLogins}
+                    onValueChange={(value) => handleInputChange('mentorLogins', value)}
                     className="w-full min-w-0 lg:col-span-2"
-                    style={{ maxWidth: '100%', overflow: 'hidden' }}
-                  >
-                    <Input
-                      id="module-mentor-logins"
-                      type="text"
-                      label="Mentor GitHub Usernames"
-                      labelPlacement="outside"
-                      placeholder="johndoe, jane-doe"
-                      value={formData.mentorLogins}
-                      onValueChange={(value) => handleInputChange('mentorLogins', value)}
-                      classNames={{
-                        base: 'w-full min-w-0',
-                        label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
-                        input: 'text-gray-800 dark:text-gray-200',
-                        inputWrapper: 'bg-gray-50 dark:bg-gray-800',
-                        helperWrapper: 'min-w-0 max-w-full w-full',
-                        errorMessage: 'break-words whitespace-normal max-w-full w-full',
-                      }}
-                    />
-                  </div>
+                  />
                 )}
               </div>
             </section>
 
-            {/* Submit Buttons */}
-            <div className="border-t border-gray-200 pt-8 text-gray-600 dark:border-gray-700 dark:text-gray-300">
-              <div className="flex flex-col justify-end gap-4 sm:flex-row">
-                <Button
-                  type="button"
-                  variant="bordered"
-                  onPress={() => router.back()}
-                  className="font-medium"
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" isDisabled={loading} color="primary" className="font-medium">
-                  {loading ? 'Saving...' : submitText}
-                </Button>
-              </div>
-            </div>
+            <FormButtons loading={loading} submitText={submitText} />
           </div>
         </form>
       </div>
