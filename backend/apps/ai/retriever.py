@@ -37,10 +37,16 @@ def weighted_reciprocal_rank(
         Each result gets an 'rrf_score' field added.
 
     Raises:
+        ValueError: If k is not a positive number (must be > 0).
         ValueError: If any document in vector_results or bm25_results
             is missing the specified id_key field.
 
     """
+    # Validate k parameter to prevent division-by-zero or nonsensical scores
+    if not isinstance(k, (int, float)) or k <= 0:
+        msg = f"k must be a positive number, got {k!r}"
+        raise ValueError(msg)
+
     scores: dict[str, float] = {}
     docs: dict[str, dict[str, Any]] = {}
 
