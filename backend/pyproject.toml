@@ -45,6 +45,7 @@ reportlab = "^4.4.2"
 requests = "^2.32.5"
 sentry-sdk = { extras = [ "django" ], version = "^2.20.0" }
 slack-bolt = "^1.22.0"
+spacy = "^3.8.0"
 slack-sdk = "^3.37.0"
 strawberry-graphql = { extras = [ "django" ], version = "^0.287.0" }
 strawberry-graphql-django = "^0.70.0"
