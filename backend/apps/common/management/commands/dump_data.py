@@ -24,7 +24,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--output",
             default=str(Path(settings.BASE_DIR) / "data" / "nest.dump"),
-            help="Output dump path (default: data/nest.sql.gz)",
+            help="Output dump path (default: data/nest.dump)",
         )
         parser.add_argument(
             "-t",
