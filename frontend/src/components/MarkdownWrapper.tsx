@@ -4,13 +4,12 @@ import taskLists from 'markdown-it-task-lists'
 
 export default function Markdown({ content, className }: { content: string; className?: string }) {
   // Safe to use markdown-it as we use DOMPurify to sanitize the content.
-  // NOSONAR
   const md = markdownit({
     breaks: true,
     html: true,
     linkify: true,
     typographer: true,
-  }).use(taskLists)
+  }).use(taskLists) // NOSONAR
 
   return (
     <div
