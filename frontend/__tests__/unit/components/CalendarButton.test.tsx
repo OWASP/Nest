@@ -109,6 +109,15 @@ describe('CalendarButton', () => {
       await waitFor(() => {
         expect(button).not.toBeDisabled()
       })
+
+      expect(addToast).toHaveBeenCalledWith({
+        description: 'Successfully downloaded ICS file',
+        title: `${mockEvent.title}`,
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'success',
+        variant: 'solid',
+      })
     })
 
     it('handles errors gracefully when generation fails', async () => {

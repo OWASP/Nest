@@ -47,6 +47,14 @@ export default function CalendarButton(props: Readonly<CalendarButtonProps>) {
       if (link) link.remove()
       if (url) URL.revokeObjectURL(url)
       setIsDownloading(false)
+      addToast({
+        description: 'Successfully downloaded ICS file',
+        title: `${event.title}`,
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'success',
+        variant: 'solid',
+      })
     }
   }
 
