@@ -71,7 +71,7 @@ class Command(BaseCommand):
                 "-d",
                 temp_db,
                 "--compress=9",
-                "--clean",
+                "--data-only",
             ]
             dump_cmd += [f"--table={table}" for table in tables]
             dump_cmd += ["-f", str(output_path)]
