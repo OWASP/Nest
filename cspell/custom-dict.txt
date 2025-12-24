@@ -69,6 +69,7 @@ gunicorn
 hackathon
 heroui
 hsl
+ics
 igoat
 inlinehilite
 isanori
