@@ -46,6 +46,7 @@ const ChapterMap = ({
         doubleClickZoom: false,
         touchZoom: false,
         boxZoom: false,
+        
         keyboard: false,
         scrollWheelZoom: false,
         zoomControl: false,
@@ -62,9 +63,7 @@ const ChapterMap = ({
         noWrap: true,
       }).addTo(mapRef.current)
 
-      mapRef.current.on('click', () => {
-        setIsMapActive(true)
-      })
+
 
       mapRef.current.on('mouseout', (e: L.LeafletMouseEvent) => {
         const originalEvent = e.originalEvent as MouseEvent
@@ -85,8 +84,6 @@ const ChapterMap = ({
 
     if (!markerClusterRef.current) {
       markerClusterRef.current = L.markerClusterGroup()
-      markerClusterRef.current.on('clusterclick', () => setIsMapActive(true))
-      markerClusterRef.current.on('click', () => setIsMapActive(true))
       map.addLayer(markerClusterRef.current)
     } else {
       markerClusterRef.current.clearLayers()
@@ -156,7 +153,7 @@ const ChapterMap = ({
       userPopupContent.textContent = 'Your Location'
       userPopup.setContent(userPopupContent)
       userMarker.bindPopup(userPopup)
-      userMarker.on('click', () => setIsMapActive(true))
+
       userMarker.addTo(map)
       userMarkerRef.current = userMarker
     }
@@ -212,6 +209,7 @@ const ChapterMap = ({
       map.scrollWheelZoom.enable()
       map.boxZoom.enable()
       map.keyboard.enable()
+      map.getContainer().style.pointerEvents = 'auto'
 
       if (!zoomControlRef.current) {
         zoomControlRef.current = L.control.zoom({ position: 'topleft' })
@@ -224,6 +222,7 @@ const ChapterMap = ({
       map.scrollWheelZoom.disable()
       map.boxZoom.disable()
       map.keyboard.disable()
+      map.getContainer().style.pointerEvents = 'none'
 
       if (zoomControlRef.current) {
         zoomControlRef.current.remove()
@@ -243,26 +242,19 @@ const ChapterMap = ({
     <div className="relative" style={style}>
       <div id="chapter-map" className="h-full w-full" />
       {!isMapActive && (
-        <button
-          type="button"
-          tabIndex={0}
-          className="pointer-events-none absolute inset-0 z-[500] flex cursor-pointer items-center justify-center rounded-[inherit] bg-black/10"
-          onClick={() => {
-            setIsMapActive(true)
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              setIsMapActive(true)
-            }
-          }}
-          aria-label="Unlock map"
+        <div
+          className="absolute inset-0 z-[2000] flex items-center justify-center rounded-[inherit] bg-black/10"
         >
-          <p className="pointer-events-auto flex items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white">
+          <button
+            type="button"
+            className="flex cursor-pointer items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white"
+            onClick={() => setIsMapActive(true)}
+            aria-label="Unlock map"
+          >
             <FaUnlock aria-hidden="true" />
             Unlock map
-          </p>
-        </button>
+          </button>
+        </div>
       )}
       {isMapActive && (
         <div className="absolute top-20 left-3 z-[999] w-fit">
