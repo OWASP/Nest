@@ -82,4 +82,4 @@ jobs:
           file: Dockerfile.fuzz
           platforms: linux/amd64
           push: true
-          tags: owasp/nest:test-fuzz-backend:latest
+          tags: owasp/nest:test-fuzz-backend-latest

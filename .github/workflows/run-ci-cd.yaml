@@ -383,7 +383,7 @@ jobs:
       - name: Run backend fuzz tests
         run: |
           docker run -e BASE_URL=http://localhost:9500 --network host \
-          owasp/nest:test-fuzz-backend:latest
+          owasp/nest:test-fuzz-backend-latest
 
   build-staging-images:
     name: Build Staging Images
