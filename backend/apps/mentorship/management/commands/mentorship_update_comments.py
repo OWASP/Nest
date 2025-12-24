@@ -40,7 +40,22 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("Starting mentorship issue processing job..."))
 
-        for module in published_modules:
+        modules_with_labels = published_modules.exclude(labels=[]).select_related("project")
+        modules_without_labels = published_modules.filter(labels=[])
+
+        if modules_without_labels.count():
+            for module in modules_without_labels:
+                self.stdout.write(
+                    self.style.WARNING(f"Skipping. Module '{module.name}' has no labels.")
+                )
+
+        if modules_with_labels.count() == 0:
+            self.stdout.write(
+                self.style.WARNING("No published mentorship modules with labels found. Exiting.")
+            )
+            return
+
+        for module in modules_with_labels:
             self.stdout.write(f"\nProcessing module: {module.name}...")
             self.process_module(module)
 
@@ -64,14 +79,6 @@ class Command(BaseCommand):
         if not module_repos.exists():
             self.stdout.write(
                 self.style.WARNING(f"Skipping. Module '{module.name}' has no repositories.")
-            )
-            return
-
-        if not module.labels.exists():
-            self.stdout.write(
-                self.style.WARNING(
-                    f"Skipping. Module '{module.name}' has no labels. No comments will be synced."
-                )
             )
             return
 
