@@ -145,6 +145,12 @@ describe('CalendarButton', () => {
       })
 
       expect(button).not.toBeDisabled()
+      expect(addToast).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          color: 'success',
+          title: `${mockEvent.title}`,
+        })
+      )
       consoleSpy.mockRestore()
     })
   })
