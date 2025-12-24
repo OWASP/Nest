@@ -92,7 +92,7 @@ const ProgramForm = ({
     if (!value) {
       return 'End date is required'
     }
-    if (formData.startedAt && value && new Date(value) <= new Date(formData.startedAt)) {
+    if (formData.startedAt && new Date(value) <= new Date(formData.startedAt)) {
       return 'End date must be after start date'
     }
     return undefined
