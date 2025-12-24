@@ -290,6 +290,7 @@ const ModuleForm = ({
                         projectId: id ?? '',
                         projectName: name,
                       }))
+                      setTouched((prev) => ({ ...prev, projectId: true }))
                     }}
                     isInvalid={touched.projectId && !!errors.projectId}
                     errorMessage={touched.projectId ? errors.projectId : undefined}
