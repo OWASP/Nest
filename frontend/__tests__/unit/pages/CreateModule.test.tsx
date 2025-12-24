@@ -38,11 +38,11 @@ describe('CreateModulePage', () => {
   })
 
   beforeEach(() => {
-    ; (useRouter as jest.Mock).mockReturnValue({ push: mockPush, replace: mockReplace })
-      ; (useParams as jest.Mock).mockReturnValue({ programKey: 'test-program' })
-      ; (useApolloClient as jest.Mock).mockReturnValue({
-        query: mockQuery,
-      })
+    ;(useRouter as jest.Mock).mockReturnValue({ push: mockPush, replace: mockReplace })
+    ;(useParams as jest.Mock).mockReturnValue({ programKey: 'test-program' })
+    ;(useApolloClient as jest.Mock).mockReturnValue({
+      query: mockQuery,
+    })
   })
 
   afterEach(() => {
@@ -52,28 +52,28 @@ describe('CreateModulePage', () => {
   it('submits the form and navigates to programs page', async () => {
     const user = userEvent.setup()
 
-      ; (useSession as jest.Mock).mockReturnValue({
-        data: { user: { login: 'admin-user' } },
-        status: 'authenticated',
-      })
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin-user' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin-user' }],
+        },
+      },
+      loading: false,
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([
+      mockCreateModule.mockResolvedValue({
         data: {
-          getProgram: {
-            admins: [{ login: 'admin-user' }],
+          createModule: {
+            key: 'my-test-module',
           },
         },
-        loading: false,
-      })
-      ; (useMutation as unknown as jest.Mock).mockReturnValue([
-        mockCreateModule.mockResolvedValue({
-          data: {
-            createModule: {
-              key: 'my-test-module',
-            },
-          },
-        }),
-        { loading: false },
-      ])
+      }),
+      { loading: false },
+    ])
 
     render(<CreateModulePage />)
 
