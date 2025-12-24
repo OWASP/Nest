@@ -43,13 +43,13 @@ class Command(BaseCommand):
         modules_with_labels = published_modules.exclude(labels=[]).select_related("project")
         modules_without_labels = published_modules.filter(labels=[])
 
-        if modules_without_labels.count():
+        if modules_without_labels.exists():
             for module in modules_without_labels:
                 self.stdout.write(
                     self.style.WARNING(f"Skipping. Module '{module.name}' has no labels.")
                 )
 
-        if modules_with_labels.count() == 0:
+        if not modules_with_labels.exists():
             self.stdout.write(
                 self.style.WARNING("No published mentorship modules with labels found. Exiting.")
             )
