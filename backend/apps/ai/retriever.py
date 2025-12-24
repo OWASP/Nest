@@ -10,7 +10,6 @@ from typing import Any
 
 # Fixed constants per project requirements
 RRF_K = 60  # Smoothing constant for RRF formula
-HNSW_M = 16  # HNSW index parameter (for reference)
 
 
 def weighted_reciprocal_rank(
