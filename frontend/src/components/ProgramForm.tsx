@@ -2,13 +2,14 @@
 
 import { useApolloClient } from '@apollo/client/react'
 import type React from 'react'
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { GetMyProgramsDocument } from 'types/__generated__/programsQueries.generated'
 import { FormButtons } from 'components/forms/shared/FormButtons'
 import { FormContainer } from 'components/forms/shared/FormContainer'
 import { FormDateInput } from 'components/forms/shared/FormDateInput'
 import { FormTextarea } from 'components/forms/shared/FormTextarea'
 import { FormTextInput } from 'components/forms/shared/FormTextInput'
+import { useFormValidation } from 'components/forms/shared/useFormValidation'
 
 interface ProgramFormProps {
   formData: {
@@ -119,13 +120,8 @@ const ProgramForm = ({
     return undefined
   }
 
-  const errors = useMemo(() => {
-    const errs: Record<string, string | undefined> = {}
-    const validations: Array<{
-      field: string
-      shouldValidate: boolean
-      validator: () => string | undefined
-    }> = [
+  const errors = useFormValidation(
+    [
       { field: 'name', shouldValidate: touched.name, validator: () => validateName(formData.name) },
       {
         field: 'description',
@@ -147,17 +143,9 @@ const ProgramForm = ({
         shouldValidate: touched.menteesLimit,
         validator: () => validateMenteesLimit(formData.menteesLimit),
       },
-    ]
-
-    validations.forEach(({ field, shouldValidate, validator }) => {
-      if (shouldValidate) {
-        errs[field] = validator()
-      }
-    })
-
-    return errs
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData, touched, nameUniquenessError])
+    ],
+    [formData, touched, nameUniquenessError]
+  )
 
   const checkNameUniquenessSync = useCallback(
     async (name: string): Promise<string | undefined> => {
@@ -207,9 +195,9 @@ const ProgramForm = ({
     let uniquenessError: string | undefined
     if (formData.name.trim()) {
       uniquenessError = await checkNameUniquenessSync(formData.name)
-      if (uniquenessError) {
-        setNameUniquenessError(uniquenessError)
-      }
+      setNameUniquenessError(uniquenessError)
+    } else {
+      setNameUniquenessError(undefined)
     }
 
     // Validate all required fields, using the captured uniquenessError

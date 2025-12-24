@@ -4,13 +4,14 @@ import { Autocomplete, AutocompleteItem } from '@heroui/react'
 import { Select, SelectItem } from '@heroui/select'
 import debounce from 'lodash/debounce'
 import type React from 'react'
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import { SearchProjectNamesDocument } from 'types/__generated__/projectQueries.generated'
 import { FormButtons } from 'components/forms/shared/FormButtons'
 import { FormDateInput } from 'components/forms/shared/FormDateInput'
 import { FormTextarea } from 'components/forms/shared/FormTextarea'
 import { FormTextInput } from 'components/forms/shared/FormTextInput'
+import { useFormValidation } from 'components/forms/shared/useFormValidation'
 
 interface ModuleFormProps {
   formData: {
@@ -107,13 +108,8 @@ const ModuleForm = ({
     return validateRequired(value, 'Experience level')
   }
 
-  const errors = useMemo(() => {
-    const errs: Record<string, string | undefined> = {}
-    const validations: Array<{
-      field: string
-      shouldValidate: boolean
-      validator: () => string | undefined
-    }> = [
+  const errors = useFormValidation(
+    [
       { field: 'name', shouldValidate: touched.name, validator: () => validateName(formData.name) },
       {
         field: 'description',
@@ -140,17 +136,9 @@ const ModuleForm = ({
         shouldValidate: touched.experienceLevel,
         validator: () => validateExperienceLevel(formData.experienceLevel),
       },
-    ]
-
-    validations.forEach(({ field, shouldValidate, validator }) => {
-      if (shouldValidate) {
-        errs[field] = validator()
-      }
-    })
-
-    return errs
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData, touched])
+    ],
+    [formData, touched]
+  )
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -220,7 +208,10 @@ const ModuleForm = ({
                   label="Description"
                   placeholder="Enter module description"
                   value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  onChange={(e) => {
+                    handleInputChange('description', e.target.value)
+                    setTouched((prev) => ({ ...prev, description: true }))
+                  }}
                   error={errors.description}
                   touched={touched.description}
                   required

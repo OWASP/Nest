@@ -21,7 +21,7 @@ interface FormTextInputProps {
   error?: string
   touched?: boolean
   required?: boolean
-  min?: number
+  min?: number | string
   className?: string
   onBlur?: () => void
 }
