@@ -75,6 +75,8 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    volumes:
+      - ../backend/fuzzing_results:/home/owasp/fuzzing_results
     networks:
       - fuzz-nest-network
 

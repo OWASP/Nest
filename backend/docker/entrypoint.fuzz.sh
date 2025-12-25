@@ -22,4 +22,4 @@ cat ./config.toml
 
 echo "Running Graphqler with custom configuration..."
 
-python -m graphqler --mode run --url "$BASE_URL/graphql/" --path ./ --config ./config.toml
+python -m graphqler --mode run --url "$BASE_URL/graphql/" --path ./fuzzing_results --config ./config.toml

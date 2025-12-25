@@ -4,6 +4,7 @@ __pycache__
 .cache
 .coverage
 .cursor/rules/snyk_rules.mdc
+backend/fuzzing_results/
 .DS_Store
 .env*
 !.env.example
