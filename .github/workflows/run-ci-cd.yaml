@@ -384,6 +384,7 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/fuzzing_results &&
           docker run -e BASE_URL=http://localhost:9500 --network host \
+          --user $(id -u):$(id -g) \
           -v ${{ github.workspace }}/fuzzing_results:/home/owasp/fuzzing_results \
           owasp/nest:test-fuzz-backend-latest
 
