@@ -1,8 +1,4 @@
-"""Handler for the OWASP Staff badge.
-
-This module manages the assignment and revocation of the OWASP Staff badge
-based on users' staff status.
-"""
+"""Handler for the OWASP Staff badge."""
 
 from django.db.models import QuerySet
 
@@ -19,10 +15,10 @@ class OWASPStaffBadgeHandler(BaseBadgeHandler):
     weight = 100
 
     def get_eligible_users(self) -> QuerySet[User]:
-        """
-        Get all users who should have the OWASP Staff badge.
+        """Get all users who should have the OWASP Staff badge.
 
         Returns:
             QuerySet of users with is_owasp_staff=True.
+
         """
         return User.objects.filter(is_owasp_staff=True)

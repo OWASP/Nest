@@ -8,24 +8,39 @@ from apps.nest.badges import OWASPProjectLeaderBadgeHandler, OWASPStaffBadgeHand
 
 logger = logging.getLogger(__name__)
 
-# Constants for backward compatibility with existing tests
-OWASP_STAFF_BADGE_NAME = "OWASP Staff"
-OWASP_PROJECT_LEADER_BADGE_NAME = "OWASP Project Leader"
-
 
 class Command(BaseCommand):
     """Sync badges for users based on their roles and attributes."""
 
     help = "Sync badges for users based on their roles and attributes"
-    BADGE_HANDLERS = [
-        OWASPStaffBadgeHandler,
-        OWASPProjectLeaderBadgeHandler,
-    ]
+
+    BADGE_HANDLERS = {
+        "staff": OWASPStaffBadgeHandler,
+        "leader": OWASPProjectLeaderBadgeHandler,
+    }
+
+    def add_arguments(self, parser):
+        """Add command arguments."""
+        parser.add_argument(
+            "--handler",
+            type=str,
+            choices=self.BADGE_HANDLERS.keys(),
+            help="Specific badge handler to run. Runs all if omitted.",
+            required=False,
+        )
 
     def handle(self, *args, **options):
         """Execute the command."""
-        self.stdout.write("Syncing user badges...")
-        for handler_class in self.BADGE_HANDLERS:
+        handler_key = options.get("handler")
+
+        if handler_key:
+            self.stdout.write(f"Syncing specific badge: {handler_key}...")
+            handlers_to_run = [self.BADGE_HANDLERS[handler_key]]
+        else:
+            self.stdout.write("Syncing ALL user badges...")
+            handlers_to_run = self.BADGE_HANDLERS.values()
+
+        for handler_class in handlers_to_run:
             try:
                 self.stdout.write(f"Processing badge: {handler_class.name}")
                 handler = handler_class(stdout=self.stdout, style=self.style)
