@@ -12,9 +12,14 @@ jest.mock('components/AnchorTitle', () => ({
   default: ({ title }: { title: string }) => <span>{title}</span>,
 }))
 
-jest.mock('wrappers/FontAwesomeIconWrapper', () => ({
-  __esModule: true,
-  default: () => <i className="fa" />,
+jest.mock('wrappers/IconWrapper', () => ({
+  IconWrapper: ({ icon: IconComponent, className, ...props }) => {
+    return IconComponent ? (
+      <IconComponent className={className} data-testid="icon" {...props} />
+    ) : (
+      <i className="icon" />
+    )
+  },
 }))
 
 describe('Leaders Component', () => {

@@ -8,7 +8,7 @@ const config: Config = {
     '!src/app/**/layout.tsx',
     '!src/app/api/**',
     '!src/app/board/**',
-    '!src/app/my/**',
+    '!src/components/icons/**',
     '!src/app/settings/**',
     '!src/components/Mentee*.tsx',
     '!src/hooks/**',

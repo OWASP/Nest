@@ -11,7 +11,7 @@ from pyparsing import (
     Word,
     ZeroOrMore,
     alphanums,
-    oneOf,
+    one_of,
 )
 from pyparsing import (
     Optional as PyparsingOptional,
@@ -121,10 +121,10 @@ class QueryParser:
 
     # Grammar definitions (class-level constants).
     FIELD_NAME = Regex(r"[a-z0-9_]+")
-    QUOTED_VALUE = QuotedString(quoteChar='"', escChar="\\", unquoteResults=False)
+    QUOTED_VALUE = QuotedString(quote_char='"', esc_char="\\", unquote_results=False)
     UNQUOTED_VALUE = Word(alphanums + '+-.<>=/_"')
     FIELD_VALUE = QUOTED_VALUE | UNQUOTED_VALUE
-    COMPARISON_OPERATOR = PyparsingOptional(oneOf(">= <= > < ="), default="=")
+    COMPARISON_OPERATOR = PyparsingOptional(one_of(">= <= > < ="), default="=")
     COMPARISON_PATTERN = Group(COMPARISON_OPERATOR + UNQUOTED_VALUE)
     DATE_PATTERN = Regex(r"\d{4}-\d{2}-\d{2}") | Regex(r"\d{8}")  # YYYY-MM-DD or YYYYMMDD format.
     BOOLEAN_TRUE_VALUES = {"true", "1", "yes", "on"}
@@ -280,7 +280,7 @@ class QueryParser:
     def _is_field_name(field_name: str) -> bool:
         """Check if a field name is valid."""
         try:
-            QueryParser.FIELD_NAME.parseString(field_name, parseAll=True)
+            QueryParser.FIELD_NAME.parse_string(field_name, parse_all=True)
         except ParseException:
             return False
 
@@ -378,7 +378,7 @@ class QueryParser:
             )
         )
         try:
-            result = parser.parseString(query, parseAll=True)
+            result = parser.parse_string(query, parse_all=True)
         except ParseException as e:
             raise QueryParserError(
                 message=f"Failed to tokenize query: {e!s}",
@@ -457,8 +457,8 @@ class QueryParser:
 
         """
         try:
-            match = QueryParser.COMPARISON_PATTERN.parseString(
-                QueryParser._remove_quotes(value), parseAll=True
+            match = QueryParser.COMPARISON_PATTERN.parse_string(
+                QueryParser._remove_quotes(value), parse_all=True
             )
         except ParseException as e:
             raise QueryParserError(
@@ -483,7 +483,7 @@ class QueryParser:
 
         """
         try:
-            return QueryParser.FIELD_VALUE.parseString(value, parseAll=True)[0]
+            return QueryParser.FIELD_VALUE.parse_string(value, parse_all=True)[0]
         except ParseException as e:
             raise QueryParserError(
                 message=f"Invalid string value: {e!s}", error_type="STRING_VALUE_ERROR"
@@ -568,7 +568,7 @@ class QueryParser:
             operator, clean_value = QueryParser._parse_comparison_pattern(
                 QueryParser._remove_quotes(value)
             )
-            result = QueryParser.DATE_PATTERN.parseString(clean_value, parseAll=True)
+            result = QueryParser.DATE_PATTERN.parse_string(clean_value, parse_all=True)
         except ParseException as e:
             raise QueryParserError(
                 message=f"Invalid date value: {e!s}", error_type="DATE_VALUE_ERROR"

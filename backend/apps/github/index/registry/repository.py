@@ -72,6 +72,7 @@ class RepositoryIndex(IndexBase):
         """
         return Repository.objects.filter(
             is_template=False,
+            organization__isnull=False,
         ).prefetch_related(
             "repositorycontributor_set",
         )

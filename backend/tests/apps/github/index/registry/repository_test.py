@@ -40,7 +40,9 @@ class TestRepositoryIndex:
         with patch.object(Repository, "objects", mock_manager):
             queryset = repository_index.get_entities()
 
-            mock_manager.filter.assert_called_once_with(is_template=False)
+            mock_manager.filter.assert_called_once_with(
+                is_template=False, organization__isnull=False
+            )
             mock_manager.filter.return_value.prefetch_related.assert_called_once_with(
                 "repositorycontributor_set"
             )

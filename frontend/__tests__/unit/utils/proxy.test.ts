@@ -1,6 +1,6 @@
-import authenticationMiddleware from 'middleware'
 import { NextRequest, NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
+import proxy from 'proxy'
 
 // Mock the external dependencies
 jest.mock('next-auth/jwt', () => ({
@@ -17,7 +17,7 @@ jest.mock('next/server', () => ({
   },
 }))
 
-describe('Authentication Middleware', () => {
+describe('Authentication Proxy', () => {
   const mockRequest = (url = 'http://localhost/'): NextRequest =>
     ({
       url,
@@ -42,7 +42,7 @@ describe('Authentication Middleware', () => {
         const request = mockRequest(testCaseInfo.url)
         const expectedRedirectUrl = new URL('/auth/login', testCaseInfo.url)
 
-        const result = await authenticationMiddleware(request)
+        const result = await proxy(request)
 
         expect(getToken).toHaveBeenCalledWith({ req: request })
         expect(NextResponse.redirect).toHaveBeenCalledWith(expectedRedirectUrl)
@@ -63,7 +63,7 @@ describe('Authentication Middleware', () => {
       ;(getToken as jest.Mock).mockResolvedValue(testUser)
       const request = mockRequest('http://localhost/dashboard')
 
-      const result = await authenticationMiddleware(request)
+      const result = await proxy(request)
 
       expect(getToken).toHaveBeenCalledWith({ req: request })
       expect(NextResponse.next).toHaveBeenCalled()
@@ -74,7 +74,7 @@ describe('Authentication Middleware', () => {
       ;(getToken as jest.Mock).mockResolvedValue(testUser)
       const request = mockRequest()
 
-      const result = await authenticationMiddleware(request)
+      const result = await proxy(request)
 
       expect(NextResponse.next).toHaveBeenCalled()
       expect(result).toEqual({ type: 'next' })

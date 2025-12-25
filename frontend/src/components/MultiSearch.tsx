@@ -1,19 +1,11 @@
-import { faAlgolia } from '@fortawesome/free-brands-svg-icons'
-import {
-  faSearch,
-  faTimes,
-  faUser,
-  faCalendar,
-  faFolder,
-  faBuilding,
-  faLocationDot,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { sendGAEvent } from '@next/third-parties/google'
 import { debounce } from 'lodash'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { FaTimes, FaSearch } from 'react-icons/fa'
+import { FaUser, FaCalendar, FaFolder, FaBuilding, FaLocationDot } from 'react-icons/fa6'
+import { SiAlgolia } from 'react-icons/si'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import type { Chapter } from 'types/chapter'
 import type { Event } from 'types/event'
@@ -207,17 +199,17 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   const getIconForIndex = (indexName: string) => {
     switch (indexName) {
       case 'chapters':
-        return faLocationDot
+        return <FaLocationDot className="mr-2 shrink-0 text-gray-400" />
       case 'events':
-        return faCalendar
+        return <FaCalendar className="mr-2 shrink-0 text-gray-400" />
       case 'organizations':
-        return faBuilding
+        return <FaBuilding className="mr-2 shrink-0 text-gray-400" />
       case 'projects':
-        return faFolder
+        return <FaFolder className="mr-2 shrink-0 text-gray-400" />
       case 'users':
-        return faUser
+        return <FaUser className="mr-2 shrink-0 text-gray-400" />
       default:
-        return faSearch
+        return <FaSearch className="mr-2 shrink-0 text-gray-400" />
     }
   }
 
@@ -226,8 +218,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
       <div className="relative">
         {isLoaded ? (
           <>
-            <FontAwesomeIcon
-              icon={faSearch}
+            <FaSearch
               className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
               aria-hidden="true"
             />
@@ -238,16 +229,16 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
               onChange={handleSearchChange}
               onFocus={handleFocusSearch}
               placeholder={placeholder}
-              className="h-12 w-full rounded-lg border-1 border-gray-300 pr-10 pl-10 text-lg text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-300 dark:focus:ring-blue-300"
+              className="h-12 w-full rounded-lg border-1 border-gray-300 bg-white pr-10 pl-10 text-lg text-black focus:ring-1 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-300"
             />
             {searchQuery && (
               <button
                 type="button"
-                className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:text-gray-600"
+                className="absolute top-1/2 right-2 h-8 w-8 -translate-y-1/2 rounded-md p-1 text-gray-400 hover:bg-gray-400 hover:text-gray-200 focus:ring-2 focus:ring-gray-300 focus:outline-hidden dark:hover:bg-gray-600"
                 onClick={handleClearSearch}
                 aria-label="Clear search"
               >
-                <FontAwesomeIcon icon={faTimes} />
+                <FaTimes />
               </button>
             )}
           </>
@@ -274,13 +265,11 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                       }`}
                     >
                       <button
+                        type="button"
                         onClick={() => handleSuggestionClick(hit, suggestion.indexName)}
                         className="flex w-full cursor-pointer items-center overflow-hidden border-none bg-transparent p-0 text-left"
                       >
-                        <FontAwesomeIcon
-                          icon={getIconForIndex(suggestion.indexName)}
-                          className="mr-2 shrink-0 text-gray-400"
-                        />
+                        {getIconForIndex(suggestion.indexName)}
                         <span className="block max-w-full truncate">{hit.name || hit.login}</span>
                       </button>
                     </li>
@@ -295,7 +284,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
               rel="noopener noreferrer"
               target="_blank"
             >
-              <FontAwesomeIcon icon={faAlgolia} className="h-3 w-3" aria-hidden="true" />
+              <SiAlgolia className="h-3 w-3" aria-hidden="true" />
               <span className="text-xs">Search by Algolia</span>
             </a>
           </div>

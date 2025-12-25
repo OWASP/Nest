@@ -1,10 +1,8 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
-import { faCalendar } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useRouter, useParams } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import { FaCalendar, FaRightToBracket } from 'react-icons/fa6'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetSnapshotDetailsDocument } from 'types/__generated__/snapshotQueries.generated'
 import type { Chapter } from 'types/chapter'
@@ -49,7 +47,7 @@ const SnapshotDetailsPage: React.FC = () => {
 
     const submitButton = {
       label: 'View Details',
-      icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
+      icon: <FaRightToBracket className="h-4 w-4" />,
       onclick: handleButtonClick,
     }
 
@@ -78,7 +76,7 @@ const SnapshotDetailsPage: React.FC = () => {
 
     const submitButton = {
       label: 'View Details',
-      icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
+      icon: <FaRightToBracket className="h-4 w-4" />,
       onclick: handleButtonClick,
     }
 
@@ -119,7 +117,7 @@ const SnapshotDetailsPage: React.FC = () => {
             </h1>
             <div className="flex flex-wrap items-center gap-2 text-gray-600 dark:text-gray-300">
               <div className="flex items-center">
-                <FontAwesomeIcon icon={faCalendar} className="mr-1 h-4 w-4" />
+                <FaCalendar className="mr-1 h-4 w-4" />
                 <span>
                   {formatDate(snapshot.startAt)} - {formatDate(snapshot.endAt)}
                 </span>
@@ -138,6 +136,7 @@ const SnapshotDetailsPage: React.FC = () => {
             <ChapterMapWrapper
               geoLocData={snapshot.newChapters}
               showLocal={false}
+              showLocationSharing={true}
               style={{ height: '400px', width: '100%', zIndex: '0' }}
             />
           </div>

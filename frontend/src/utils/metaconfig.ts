@@ -17,7 +17,7 @@ export function generateSeoMetadata({
   title,
   description,
   canonicalPath,
-  ogImage = 'https://nest.owasp.org/img/owasp_icon_white_background.png',
+  ogImage = 'https://nest.owasp.org/img/nest_1200x630_light.png',
   keywords = [],
   type = 'website',
   locale = 'en_US',

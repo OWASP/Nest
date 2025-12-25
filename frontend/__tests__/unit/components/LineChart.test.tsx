@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { useTheme } from 'next-themes'
+import { FaChartLine } from 'react-icons/fa'
 import type { ApexLineChartSeries } from 'types/healthMetrics'
 import LineChart from 'components/LineChart'
 
@@ -103,7 +104,7 @@ describe('LineChart', () => {
     })
 
     it('passes icon to SecondaryCard when provided', () => {
-      const iconProp = 'chart-line'
+      const iconProp = FaChartLine
       render(<LineChart {...defaultProps} icon={iconProp} />)
 
       const secondaryCard = screen.getByTestId('secondary-card')

@@ -53,23 +53,20 @@ jest.mock('@heroui/button', () => {
   }
 })
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({
-    icon,
-    className,
-    ...props
-  }: {
-    icon: { iconName: string }
-    className?: string
-    [key: string]: unknown
-  }) => <span data-testid={`icon-${icon.iconName}`} className={className} {...props} />,
+jest.mock('react-icons/fa6', () => ({
+  FaChevronRight: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="icon-chevron-right" {...props} />
+  ),
+  FaFolderOpen: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="icon-folder-open" {...props} />
+  ),
+  FaMedal: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-medal" {...props} />,
+  FaUser: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-user" {...props} />,
 }))
 
-jest.mock('@heroui/tooltip', () => ({
-  Tooltip: ({ children, content }: { children: React.ReactNode; content: string }) => (
-    <div data-testid="tooltip" data-tooltip-content={content}>
-      {children}
-    </div>
+jest.mock('react-icons/hi', () => ({
+  HiUserGroup: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="icon-users" {...props} />
   ),
 }))
 

@@ -27,7 +27,7 @@ export const fetchMetricsPDF = async (path: string, fileName: string): Promise<v
     link.setAttribute('download', `${fileName}-${new Date().toISOString().split('T')[0]}.pdf`)
     document.body.appendChild(link)
     link.click()
-    document.body.removeChild(link)
+    link.remove()
     globalThis.URL.revokeObjectURL(url)
   } catch (error) {
     handleAppError(error)

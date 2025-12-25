@@ -2,17 +2,44 @@
  * @file Complete unit tests for the NavButton component.
  * @see {@link AutoScrollToTop.test.tsx} for structural reference.
  */
-import { faHome, faUser } from '@fortawesome/free-solid-svg-icons'
 import { render, screen, fireEvent } from '@testing-library/react'
+import React from 'react'
 import '@testing-library/jest-dom'
 import type { ComponentPropsWithoutRef } from 'react'
+import { FaHome } from 'react-icons/fa'
+import { FaUser } from 'react-icons/fa6'
 import type { NavButtonProps } from 'types/button'
 import NavButton from 'components/NavButton'
 
-// The NavButton component uses next/link internally. We mock it to isolate
-// the NavButton's behavior and prevent actual navigation during tests.
+jest.mock('react-icons/fa', () => ({
+  FaHome: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="fa-home-icon" className="fa-house" {...props} aria-hidden="true" />
+  ),
+}))
+
+jest.mock('react-icons/fa6', () => ({
+  FaUser: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="fa-user-icon" className="fa-user" {...props} aria-hidden="true" />
+  ),
+}))
+
+// Mock IconWrapper to pass through the icon component
+jest.mock('wrappers/IconWrapper', () => ({
+  IconWrapper: ({
+    icon: IconComponent,
+    className,
+    style,
+  }: {
+    icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>
+    className?: string
+    style?: React.CSSProperties
+  }) => {
+    return IconComponent ? <IconComponent className={className} style={style} /> : null
+  },
+}))
+
+// Mock Next.js Link
 jest.mock('next/link', () => {
-  // Mock implementation returns a simple anchor tag with the passed props.
   return function MockLink({ children, href, ...props }: ComponentPropsWithoutRef<'a'>) {
     return (
       <a href={href} {...props}>
@@ -23,16 +50,15 @@ jest.mock('next/link', () => {
 })
 
 describe('<NavButton />', () => {
-  // Define default props to reduce repetition in tests.
-  const defaultProps: NavButtonProps = {
+  const defaultProps: NavButtonProps & { defaultIcon: typeof FaHome; hoverIcon: typeof FaUser } = {
     href: '/test-path',
-    defaultIcon: faHome,
-    hoverIcon: faUser,
+    defaultIcon: FaHome,
+    hoverIcon: FaUser,
     text: 'Test Button',
   }
 
   // Helper function to render the component with optional prop overrides.
-  const renderNavButton = (props: Partial<NavButtonProps> = {}) => {
+  const renderNavButton = (props: Partial<typeof defaultProps> = {}) => {
     return render(<NavButton {...defaultProps} {...props} />)
   }
 
@@ -50,13 +76,10 @@ describe('<NavButton />', () => {
       expect(screen.getByText(customText)).toBeInTheDocument()
     })
 
-    it('should render the default FontAwesome icon', () => {
+    it('should render the default react-icons icon', () => {
       renderNavButton()
-      // FontAwesome icons are rendered as SVGs. We check for their presence.
-      const icon = screen.getByRole('img', { hidden: true })
+      const icon = screen.getByTestId('fa-home-icon')
       expect(icon).toBeInTheDocument()
-      // Check for a class associated with the default icon (faHome).
-      expect(icon.parentElement?.querySelector('.fa-house')).toBeInTheDocument()
     })
 
     it('should render text content inside a span element', () => {
@@ -87,11 +110,12 @@ describe('<NavButton />', () => {
         hoverIconColor: 'rgb(0, 255, 0)', // green
       })
 
-      const icon = screen.getByRole('img', { hidden: true })
+      const icon = screen.getByTestId('fa-home-icon')
       expect(icon).toHaveStyle({ color: 'rgb(255, 0, 0)' })
 
       fireEvent.mouseEnter(screen.getByRole('link'))
-      expect(icon).toHaveStyle({ color: 'rgb(0, 255, 0)' })
+      const hoverIcon = screen.getByTestId('fa-user-icon')
+      expect(hoverIcon).toHaveStyle({ color: 'rgb(0, 255, 0)' })
     })
 
     it('should apply custom className while preserving default classes', () => {
@@ -107,64 +131,60 @@ describe('<NavButton />', () => {
     it('should switch from default icon to hover icon on mouse enter', () => {
       renderNavButton()
       const link = screen.getByRole('link')
-      const iconContainer = link.querySelector('svg')?.parentElement
 
-      // Initially, the default icon (fa-house) should be present.
-      expect(iconContainer?.querySelector('.fa-house')).toBeInTheDocument()
-      expect(iconContainer?.querySelector('.fa-user')).not.toBeInTheDocument()
+      expect(screen.getByTestId('fa-home-icon')).toBeInTheDocument()
+      expect(screen.queryByTestId('fa-user-icon')).not.toBeInTheDocument()
 
-      // On hover, the hover icon (fa-user) should be present.
       fireEvent.mouseEnter(link)
-      expect(iconContainer?.querySelector('.fa-user')).toBeInTheDocument()
-      expect(iconContainer?.querySelector('.fa-house')).not.toBeInTheDocument()
+      expect(screen.getByTestId('fa-user-icon')).toBeInTheDocument()
+      expect(screen.queryByTestId('fa-home-icon')).not.toBeInTheDocument()
     })
 
     it('should revert to the default icon on mouse leave', () => {
       renderNavButton()
       const link = screen.getByRole('link')
-      const iconContainer = link.querySelector('svg')?.parentElement
 
       // Hover to change state
       fireEvent.mouseEnter(link)
-      expect(iconContainer?.querySelector('.fa-user')).toBeInTheDocument()
+      expect(screen.getByTestId('fa-user-icon')).toBeInTheDocument()
 
       // Leave to revert state
       fireEvent.mouseLeave(link)
-      expect(iconContainer?.querySelector('.fa-house')).toBeInTheDocument()
-      expect(iconContainer?.querySelector('.fa-user')).not.toBeInTheDocument()
+      expect(screen.getByTestId('fa-home-icon')).toBeInTheDocument()
+      expect(screen.queryByTestId('fa-user-icon')).not.toBeInTheDocument()
     })
 
     it('should apply scaling transform and yellow color on hover', () => {
       renderNavButton()
       const link = screen.getByRole('link')
-      const icon = screen.getByRole('img', { hidden: true })
 
-      // The icon should not be scaled initially
-      expect(icon).not.toHaveClass('scale-110')
-      expect(icon).not.toHaveClass('text-yellow-400')
+      const defaultIcon = screen.getByTestId('fa-home-icon')
+      expect(defaultIcon).not.toHaveClass('scale-110')
+      expect(defaultIcon).not.toHaveClass('text-yellow-400')
 
-      // On hover, it should scale up and turn yellow
       fireEvent.mouseEnter(link)
-      expect(icon).toHaveClass('scale-110')
-      expect(icon).toHaveClass('text-yellow-400')
+      const hoverIcon = screen.getByTestId('fa-user-icon')
+      expect(hoverIcon).toHaveClass('scale-110')
+      expect(hoverIcon).toHaveClass('text-yellow-400')
 
-      // On leave, it should scale back down and remove yellow
+      // On leave, should revert to default icon without hover classes
       fireEvent.mouseLeave(link)
-      expect(icon).not.toHaveClass('scale-110')
-      expect(icon).not.toHaveClass('text-yellow-400')
+      const revertedIcon = screen.getByTestId('fa-home-icon')
+      expect(revertedIcon).not.toHaveClass('scale-110')
+      expect(revertedIcon).not.toHaveClass('text-yellow-400')
     })
 
     it('should maintain hover state when mouse moves within the component', () => {
       renderNavButton()
       const link = screen.getByRole('link')
-      const icon = screen.getByRole('img', { hidden: true })
 
       fireEvent.mouseEnter(link)
-      expect(icon).toHaveClass('scale-110')
+      const hoverIcon = screen.getByTestId('fa-user-icon')
+      expect(hoverIcon).toHaveClass('scale-110')
 
       // Moving mouse within component should maintain hover state
       fireEvent.mouseMove(link)
-      expect(icon).toHaveClass('scale-110')
+      expect(screen.getByTestId('fa-user-icon')).toHaveClass('scale-110')
     })
   })
 
@@ -246,7 +266,7 @@ describe('<NavButton />', () => {
   describe('Default Values and Fallbacks', () => {
     it('should render without crashing when optional color props are not provided', () => {
       expect(() => {
-        render(<NavButton href="/test" defaultIcon={faHome} hoverIcon={faUser} text="Test" />)
+        render(<NavButton href="/test" defaultIcon={FaHome} hoverIcon={FaUser} text="Test" />)
       }).not.toThrow()
     })
 
@@ -258,7 +278,7 @@ describe('<NavButton />', () => {
     })
 
     it('should render without custom className', () => {
-      render(<NavButton href="/test" defaultIcon={faHome} hoverIcon={faUser} text="Test" />)
+      render(<NavButton href="/test" defaultIcon={FaHome} hoverIcon={FaUser} text="Test" />)
       const link = screen.getByRole('link')
       expect(link).toBeInTheDocument()
       expect(link).toHaveClass('group') // Should still have default classes
@@ -328,12 +348,12 @@ describe('<NavButton />', () => {
   })
 
   describe('Component Composition & Structure', () => {
-    it('should render Link wrapper with FontAwesome icon and span inside', () => {
+    it('should render Link wrapper with react-icons icon and span inside', () => {
       renderNavButton()
       const link = screen.getByRole('link')
 
       // Should contain both icon and text span
-      expect(link.querySelector('svg')).toBeInTheDocument() // FontAwesome renders as SVG
+      expect(screen.getByTestId('fa-home-icon')).toBeInTheDocument() // React-icons renders as SVG
       expect(link.querySelector('span')).toBeInTheDocument()
     })
 
@@ -342,9 +362,9 @@ describe('<NavButton />', () => {
       const link = screen.getByRole('link')
       const children = link.children
 
-      // Should have 2 children: FontAwesome icon and span
+      // Should have 2 children: react-icons icon and span
       expect(children).toHaveLength(2)
-      expect(children[0].tagName).toBe('svg') // FontAwesome icon
+      expect(children[0].tagName.toUpperCase()).toBe('SVG') // React-icons icon
       expect(children[1].tagName).toBe('SPAN') // Text span
     })
   })
@@ -358,7 +378,6 @@ describe('<NavButton />', () => {
     it('should handle rapid hover state changes', () => {
       renderNavButton()
       const link = screen.getByRole('link')
-      const icon = screen.getByRole('img', { hidden: true })
 
       // Rapid mouse enter/leave should work correctly
       fireEvent.mouseEnter(link)
@@ -367,8 +386,9 @@ describe('<NavButton />', () => {
       fireEvent.mouseLeave(link)
 
       // Should end up in non-hovered state
-      expect(icon).not.toHaveClass('scale-110')
-      expect(icon).not.toHaveClass('text-yellow-400')
+      const defaultIcon = screen.getByTestId('fa-home-icon')
+      expect(defaultIcon).not.toHaveClass('scale-110')
+      expect(defaultIcon).not.toHaveClass('text-yellow-400')
     })
   })
 })

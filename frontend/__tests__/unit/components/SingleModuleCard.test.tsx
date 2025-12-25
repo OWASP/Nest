@@ -1,4 +1,3 @@
-import { faUsers } from '@fortawesome/free-solid-svg-icons'
 import { screen } from '@testing-library/react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
@@ -48,9 +47,9 @@ jest.mock('next/link', () => ({
   ),
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, className }: { icon: unknown; className?: string }) => (
-    <span data-testid={`icon-${icon === faUsers ? 'users' : 'ellipsis'}`} className={className} />
+jest.mock('react-icons/hi', () => ({
+  HiUserGroup: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="icon-users" {...props} />
   ),
 }))
 

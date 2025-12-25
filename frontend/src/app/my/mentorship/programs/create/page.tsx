@@ -23,7 +23,7 @@ const CreateProgramPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    menteesLimit: 5,
+    menteesLimit: 0,
     startedAt: '',
     endedAt: '',
     tags: '',

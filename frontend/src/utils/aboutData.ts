@@ -120,8 +120,20 @@ export const projectTimeline: ProjectTimeline[] = [
   {
     title: 'Lab Level Promotion',
     description:
-      "OWASP Nest promoted to Lab level, marking a significant milestone in the project's growth and maturity within the OWASP ecosystem",
+      "OWASP Nest promoted to Lab level, marking a significant milestone in the project's growth and maturity within the OWASP ecosystem.",
     year: 'October 2025',
+  },
+  {
+    title: 'OWASP Nest API Hackathon',
+    description:
+      'We hosted a successful hackathon to encourage adoption and hands-on use of the OWASP Nest REST API.',
+    year: 'November 2025',
+  },
+  {
+    title: 'OWASP Nest Logo Introduction',
+    description:
+      "Introduced the official OWASP Nest logo as part of the project's branding and visual identity.",
+    year: 'December 2025',
   },
 ]
 

@@ -56,8 +56,8 @@ describe('<SortBy />', () => {
       render(<SortBy {...defaultProps} selectedOrder="asc" />)
     })
     // Look for the icon that indicates ascending order
-    const sortIcon = screen.getByRole('img', { hidden: true })
-    expect(sortIcon.classList.contains('fa-arrow-up-wide-short')).toBe(true)
+    const sortIcon = screen.getByLabelText(/Sort in ascending order/i).querySelector('svg')
+    expect(sortIcon).toBeInTheDocument()
   })
 
   it('renders descending icon and tooltip when order is "desc"', async () => {
@@ -65,8 +65,8 @@ describe('<SortBy />', () => {
       render(<SortBy {...defaultProps} selectedOrder="desc" />)
     })
     // Look for the icon that indicates descending order
-    const sortIcon = screen.getByRole('img', { hidden: true })
-    expect(sortIcon.classList.contains('fa-arrow-down-wide-short')).toBe(true)
+    const sortIcon = screen.getByLabelText(/Sort in descending order/i).querySelector('svg')
+    expect(sortIcon).toBeInTheDocument()
   })
 
   it('toggles order when the button is clicked', async () => {

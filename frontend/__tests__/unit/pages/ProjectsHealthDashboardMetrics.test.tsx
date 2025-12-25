@@ -12,10 +12,6 @@ jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
-}))
-
 const createDropDownMockItem = (item, onAction) => (
   <button key={item.key} onClick={() => onAction(item.key)}>
     {item.label}

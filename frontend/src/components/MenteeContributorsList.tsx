@@ -1,8 +1,8 @@
-import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import upperFirst from 'lodash/upperFirst'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
+import type { IconType } from 'react-icons'
 import type { Contributor } from 'types/contributor'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
@@ -12,7 +12,7 @@ interface MenteeContributorsListProps {
   contributors: Contributor[]
   label?: string
   maxInitialDisplay?: number
-  icon?: IconProp
+  icon?: IconType
   programKey: string
   moduleKey: string
 }

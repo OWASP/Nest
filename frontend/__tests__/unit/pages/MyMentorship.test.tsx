@@ -1,9 +1,14 @@
 import { useQuery } from '@apollo/client/react'
+import { addToast } from '@heroui/toast'
 import { screen, waitFor, fireEvent } from '@testing-library/react'
 import { useRouter as useRouterMock } from 'next/navigation'
 import { useSession as mockUseSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import MyMentorshipPage from 'app/my/mentorship/page'
+
+jest.mock('@heroui/toast', () => ({
+  addToast: jest.fn(),
+}))
 
 jest.mock('@apollo/client/react', () => {
   const actual = jest.requireActual('@apollo/client/react')
@@ -35,6 +40,7 @@ jest.mock('hooks/useUpdateProgramStatus', () => ({
 
 const mockUseQuery = useQuery as unknown as jest.Mock
 const mockPush = jest.fn()
+const mockAddToast = addToast as jest.Mock
 
 beforeEach(() => {
   jest.clearAllMocks()
@@ -169,6 +175,39 @@ describe('MyMentorshipPage', () => {
 
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/create')
+    })
+  })
+
+  it('shows an error toast when GraphQL query fails', async () => {
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          name: 'User',
+          email: 'user@example.com',
+          login: 'User',
+          isLeader: true,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+
+    mockUseQuery.mockReturnValue({
+      data: undefined,
+      loading: false,
+      error: new Error('GraphQL error'),
+    })
+
+    render(<MyMentorshipPage />)
+
+    await waitFor(() => {
+      expect(mockAddToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'GraphQL Error',
+          description: 'Failed to fetch your programs',
+          color: 'danger',
+        })
+      )
     })
   })
 })

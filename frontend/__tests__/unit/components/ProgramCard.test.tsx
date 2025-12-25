@@ -1,5 +1,3 @@
-import { faEye } from '@fortawesome/free-regular-svg-icons'
-import { faEdit } from '@fortawesome/free-solid-svg-icons'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
 import React from 'react'
@@ -11,22 +9,26 @@ jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, className }: { icon: unknown; className?: string }) => {
-    let iconName = 'unknown'
-
-    if (icon === faEye) {
-      iconName = 'eye'
-    } else if (icon === faEdit) {
-      iconName = 'edit'
-    }
-
-    return <span data-testid={`icon-${iconName}`} className={className} />
-  },
+jest.mock('react-icons/fa6', () => ({
+  FaEye: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="icon-eye" className={props.className} {...props} />
+  ),
+  FaPencilAlt: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="icon-edit" className={props.className} {...props} />
+  ),
 }))
 
-jest.mock('hooks/useUpdateProgramStatus', () => ({
-  useUpdateProgramStatus: () => ({ updateProgramStatus: jest.fn() }),
+// Mock IconWrapper to handle react-icons properly
+jest.mock('wrappers/IconWrapper', () => ({
+  IconWrapper: ({
+    icon: IconComponent,
+    className,
+  }: {
+    icon: React.ComponentType<{ className?: string }>
+    className?: string
+  }) => {
+    return IconComponent ? <IconComponent className={className} /> : null
+  },
 }))
 
 jest.mock('hooks/useUpdateProgramStatus', () => ({
@@ -80,7 +82,7 @@ describe('ProgramCard', () => {
     description: 'This is a test program description',
     status: ProgramStatusEnum.Published,
     startedAt: '2024-01-01T00:00:00Z',
-    endedAt: '2024-12-31T23:59:59Z',
+    endedAt: '2024-12-31T12:00:00Z',
     userRole: 'admin',
   }
 

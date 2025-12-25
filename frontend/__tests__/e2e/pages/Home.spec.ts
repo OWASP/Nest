@@ -100,9 +100,9 @@ test.describe('Home Page', () => {
     await expect(page.getByRole('heading', { name: 'Upcoming Events' })).toBeVisible({
       timeout: 10000,
     })
-    await expect(page.getByRole('button', { name: 'Event 1' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Event 1', exact: true })).toBeVisible()
     await expect(page.getByText('Apr 5 — 6, 2025')).toBeVisible()
-    await page.getByRole('button', { name: 'Event 1' }).click()
+    await page.getByRole('button', { name: 'Event 1', exact: true }).click()
   })
 
   test('should have stats', async ({ page }) => {

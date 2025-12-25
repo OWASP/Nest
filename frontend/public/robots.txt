@@ -1,10 +1,5 @@
 User-agent: *
-Disallow:
-
-User-agent: facebookexternalhit
-Disallow:
-
-User-agent: Twitterbot
-Disallow:
+Disallow: /_next/
+Disallow: /api/
 
 Sitemap: https://nest.owasp.org/sitemap.xml

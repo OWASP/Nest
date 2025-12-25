@@ -1,10 +1,6 @@
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faLink } from '@fortawesome/free-solid-svg-icons'
 import { screen, render, fireEvent, waitFor } from '@testing-library/react'
 import slugifyMock from 'utils/slugify'
 import AnchorTitle from 'components/AnchorTitle'
-
-library.add(faLink)
 
 jest.mock('utils/slugify', () => ({
   __esModule: true,
@@ -101,7 +97,7 @@ describe('AnchorTitle Component', () => {
       expect(titleElement).toHaveAttribute('data-anchor-title', 'true')
     })
 
-    it('renders FontAwesome link icon', () => {
+    it('renders react-icons link icon', () => {
       render(<AnchorTitle title="Test" />)
       const link = screen.getByRole('link')
       const icon = link.querySelector('svg')

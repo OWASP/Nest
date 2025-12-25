@@ -121,3 +121,10 @@ beforeEach(() => {
   globalThis.runAnimationFrameCallbacks = jest.fn()
   globalThis.removeAnimationFrameCallbacks = jest.fn()
 })
+
+jest.mock('ics', () => {
+  return {
+    __esModule: true,
+    createEvent: jest.fn(),
+  }
+})

@@ -66,8 +66,10 @@ geoloc
 geopy
 graphiql
 gunicorn
+hackathon
 heroui
 hsl
+ics
 igoat
 inlinehilite
 isanori
@@ -126,7 +128,6 @@ speakerdeck
 superfences
 tiktok
 tsc
-turbopack
 unassigning
 unhover
 usefixtures

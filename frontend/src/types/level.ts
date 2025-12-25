@@ -1,5 +1,7 @@
+import type { IconType } from 'react-icons'
+
 export type Level = {
   color: string
-  icon: string
+  icon: IconType
   level?: string
 }

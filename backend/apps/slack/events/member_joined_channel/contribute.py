@@ -3,11 +3,7 @@
 from pathlib import Path
 
 from apps.common.utils import convert_to_snake_case, get_absolute_url
-from apps.slack.constants import (
-    OWASP_CONTRIBUTE_CHANNEL_ID,
-    OWASP_PROJECT_NEST_CHANNEL_ID,
-    OWASP_SPONSORSHIP_CHANNEL_ID,
-)
+from apps.slack.constants import OWASP_CONTRIBUTE_CHANNEL_ID
 from apps.slack.events.event import EventBase
 
 
@@ -61,9 +57,6 @@ class Contribute(EventBase):
         return {
             **super().get_context(event),
             "ACTIVE_PROJECTS_COUNT": Project.active_projects_count(),
-            "CONTRIBUTE_CHANNEL_ID": OWASP_CONTRIBUTE_CHANNEL_ID,
             "CONTRIBUTE_PAGE_URL": get_absolute_url("/contribute"),
             "OPEN_ISSUES_COUNT": Issue.open_issues_count(),
-            "PROJECT_NEST_CHANNEL_ID": OWASP_PROJECT_NEST_CHANNEL_ID,
-            "SPONSORSHIP_CHANNEL_ID": OWASP_SPONSORSHIP_CHANNEL_ID,
         }

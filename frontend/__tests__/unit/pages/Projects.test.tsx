@@ -27,10 +27,6 @@ jest.mock('components/Pagination', () =>
     </div>
   ))
 )
-jest.mock('wrappers/FontAwesomeIconWrapper', () => ({
-  __esModule: true,
-  default: () => <span data-testid="mock-icon" />,
-}))
 
 jest.mock('@/components/MarkdownWrapper', () => {
   return ({ content, className }: { content: string; className?: string }) => (

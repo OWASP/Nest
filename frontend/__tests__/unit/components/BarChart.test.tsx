@@ -1,11 +1,7 @@
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faFire } from '@fortawesome/free-solid-svg-icons'
 import { render, screen } from '@testing-library/react'
-import '@testing-library/jest-dom'
 import React from 'react'
-
-// Register FontAwesome icon
-library.add(faFire)
+import { FaFire } from 'react-icons/fa'
+import '@testing-library/jest-dom'
 
 // Mock react-apexcharts completely
 jest.mock('react-apexcharts', () => {
@@ -170,8 +166,7 @@ describe('<BarChart />', () => {
   })
 
   it('renders with custom icon when provided', () => {
-    // cspell:ignore fas
-    renderWithTheme(<BarChart {...mockProps} icon={['fas', 'fire']} />)
+    renderWithTheme(<BarChart {...mockProps} icon={FaFire} />)
     expect(screen.getByTestId('anchor-title')).toHaveTextContent('Calories Burned')
     expect(screen.getByTestId('card-icon')).toBeInTheDocument()
   })

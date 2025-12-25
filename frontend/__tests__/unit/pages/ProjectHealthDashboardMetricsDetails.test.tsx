@@ -27,10 +27,6 @@ jest.mock('hooks/useDjangoSession', () => ({
   }),
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => <span data-testid="mock-icon"></span>,
-}))
-
 const mockError = {
   error: new Error('GraphQL error'),
 }

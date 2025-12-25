@@ -1,7 +1,6 @@
-import { faArrowDownWideShort, faArrowUpWideShort } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Select, SelectItem } from '@heroui/select'
 import { Tooltip } from '@heroui/tooltip'
+import { FaArrowDownWideShort, FaArrowUpWideShort } from 'react-icons/fa6'
 import type { SortByProps } from 'types/sortBy'
 
 const SortBy = ({
@@ -61,6 +60,7 @@ const SortBy = ({
           closeDelay={100}
         >
           <button
+            type="button"
             onClick={() => onOrderChange(selectedOrder === 'asc' ? 'desc' : 'asc')}
             className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 bg-gray-100 p-0 shadow-sm transition-all duration-200 hover:bg-gray-200 hover:shadow-md focus:ring-2 focus:ring-gray-300 focus:ring-offset-1 focus:outline-none dark:border-gray-600 dark:bg-[#323232] dark:hover:bg-[#404040] dark:focus:ring-gray-500"
             aria-label={
@@ -68,15 +68,9 @@ const SortBy = ({
             }
           >
             {selectedOrder === 'asc' ? (
-              <FontAwesomeIcon
-                icon={faArrowUpWideShort}
-                className="h-4 w-4 text-gray-600 dark:text-gray-300"
-              />
+              <FaArrowUpWideShort className="h-4 w-4 text-gray-600 dark:text-gray-300" />
             ) : (
-              <FontAwesomeIcon
-                icon={faArrowDownWideShort}
-                className="h-4 w-4 text-gray-600 dark:text-gray-300"
-              />
+              <FaArrowDownWideShort className="h-4 w-4 text-gray-600 dark:text-gray-300" />
             )}
           </button>
         </Tooltip>

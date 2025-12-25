@@ -105,6 +105,8 @@ describe('GlobalError component', () => {
 
     expect(Sentry.captureException).toHaveBeenCalledWith(error)
     expect(screen.getByText('Server Error')).toBeInTheDocument()
+    const button = screen.getByRole('button', { name: 'Return to Home' })
+    expect(button).toHaveClass('bg-owasp-blue', 'dark:bg-slate-800')
   })
 })
 

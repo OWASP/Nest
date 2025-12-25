@@ -7,6 +7,7 @@ import {
 } from 'types/__generated__/userQueries.generated'
 import { generateSeoMetadata } from 'utils/metaconfig'
 import { generateProfilePageStructuredData } from 'utils/structuredData'
+import PageLayout from 'components/PageLayout'
 import StructuredDataScript from 'components/StructuredDataScript'
 
 export async function generateMetadata({
@@ -55,9 +56,9 @@ export default async function UserDetailsLayout({
   }
 
   return (
-    <>
+    <PageLayout title={data?.user?.name || data?.user?.login || ''}>
       <StructuredDataScript data={generateProfilePageStructuredData(data.user)} />
       {children}
-    </>
+    </PageLayout>
   )
 }

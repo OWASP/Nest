@@ -53,8 +53,9 @@ jest.mock('components/ItemCardList', () => {
   }) => {
     const getIconLabel = (iconProp: unknown): string => {
       if (!iconProp) return 'no-icon'
+      if (typeof iconProp === 'function' && iconProp.name) return iconProp.name
       if (typeof iconProp === 'string') return iconProp
-      return JSON.stringify(iconProp)
+      return typeof iconProp
     }
 
     return (

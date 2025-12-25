@@ -18,7 +18,7 @@ export async function generateMetadata({
 
   return snapshot
     ? generateSeoMetadata({
-        canonicalPath: `/snapshots/${snapshotKey}`,
+        canonicalPath: `/community/snapshots/${snapshotKey}`,
         description: `${snapshot?.title} details.`,
         keywords: ['owasp', 'snapshot', snapshotKey, snapshot?.title],
         title: snapshot?.title,

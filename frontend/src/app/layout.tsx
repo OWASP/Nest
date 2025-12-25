@@ -1,4 +1,5 @@
 import { GoogleAnalytics } from '@next/third-parties/google'
+import { BreadcrumbRoot } from 'contexts/BreadcrumbContext'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import React from 'react'
@@ -6,7 +7,7 @@ import { Providers } from 'wrappers/provider'
 import { GTM_ID } from 'utils/env.client'
 import { IS_GITHUB_AUTH_ENABLED } from 'utils/env.server'
 import AutoScrollToTop from 'components/AutoScrollToTop'
-import BreadCrumbs from 'components/BreadCrumbs'
+import BreadCrumbsWrapper from 'components/BreadCrumbsWrapper'
 import Footer from 'components/Footer'
 import Header from 'components/Header'
 import ScrollToTop from 'components/ScrollToTop'
@@ -28,9 +29,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   description: 'Your gateway to OWASP. Discover, engage, and help shape the future!',
   icons: {
-    apple: 'https://owasp.org/www--site-theme/favicon.ico',
-    icon: 'https://owasp.org/www--site-theme/favicon.ico',
-    shortcut: 'https://owasp.org/www--site-theme/favicon.ico',
+    apple: '/img/favicon.ico',
+    icon: '/img/favicon.ico',
+    shortcut: '/img/favicon.ico',
   },
   openGraph: {
     description: 'Your gateway to OWASP. Discover, engage, and help shape the future!',
@@ -38,7 +39,7 @@ export const metadata: Metadata = {
       {
         alt: 'OWASP logo',
         height: 630,
-        url: 'https://nest.owasp.org/img/owasp_icon_white_background.png',
+        url: 'https://nest.owasp.org/img/nest_1200x630_light.png',
         width: 1200,
       },
     ],
@@ -53,7 +54,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     creator: '@owasp',
     description: 'Your gateway to OWASP. Discover, engage, and help shape the future!',
-    images: ['https://nest.owasp.org/img/owasp_icon_white_background.png'],
+    images: ['https://nest.owasp.org/img/nest_1200x630_light.png'],
     site: '@owasp',
     title: 'Home – OWASP Nest',
   },
@@ -71,14 +72,16 @@ export default function RootLayout({
         style={{ minHeight: '100vh' }}
       >
         <Providers>
-          <div className="flex min-h-screen flex-col">
-            <AutoScrollToTop />
-            <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
-            <BreadCrumbs />
-            <main className="flex flex-1 flex-col justify-center">{children}</main>
-            <Footer />
-            <ScrollToTop />
-          </div>
+          <BreadcrumbRoot>
+            <div className="flex min-h-screen flex-col">
+              <AutoScrollToTop />
+              <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
+              <BreadCrumbsWrapper />
+              <main className="flex flex-1 flex-col justify-center">{children}</main>
+              <Footer />
+              <ScrollToTop />
+            </div>
+          </BreadcrumbRoot>
         </Providers>
       </body>
       <GoogleAnalytics gaId={GTM_ID} />

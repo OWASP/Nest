@@ -63,7 +63,7 @@ class Member(TimestampedModel):
         BulkSaveModel.bulk_save(Member, members, fields=fields)
 
     @staticmethod
-    def update_data(member_data, workspace, *, save=True) -> None:
+    def update_data(member_data, workspace, *, save=True) -> "Member":
         """Update instance based on Slack data."""
         member_id = member_data["id"]
         try:

@@ -2,6 +2,7 @@ import { sendGAEvent } from '@next/third-parties/google'
 import { screen, render, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useRouter } from 'next/navigation'
+import React from 'react'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { Chapter } from 'types/chapter'
 import { Event } from 'types/event'
@@ -30,10 +31,32 @@ jest.mock('lodash', () => ({
   }),
 }))
 
-// Mock FontAwesome
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, className }: { icon: { iconName: string }; className?: string }) => (
-    <div data-testid="font-awesome-icon" data-icon={icon.iconName} className={className} />
+jest.mock('react-icons/fa', () => ({
+  FaSearch: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="fa-search-icon" {...props} />
+  ),
+  FaTimes: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="fa-times-icon" {...props} />,
+}))
+
+jest.mock('react-icons/fa6', () => ({
+  FaUser: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="fa-user-icon" {...props} />,
+  FaCalendar: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="fa-calendar-icon" {...props} />
+  ),
+  FaFolder: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="fa-folder-icon" {...props} />
+  ),
+  FaBuilding: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="fa-building-icon" {...props} />
+  ),
+  FaLocationDot: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="fa-location-dot-icon" {...props} />
+  ),
+}))
+
+jest.mock('react-icons/si', () => ({
+  SiAlgolia: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="si-algolia-icon" {...props} />
   ),
 }))
 
@@ -175,7 +198,7 @@ describe('Rendering', () => {
     render(<MultiSearchBar {...defaultProps} />)
 
     expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument()
-    expect(screen.getByTestId('font-awesome-icon')).toBeInTheDocument()
+    expect(screen.getByTestId('fa-search-icon')).toBeInTheDocument()
   })
 
   it('renders loading state when not loaded', () => {
@@ -239,7 +262,7 @@ describe('Rendering', () => {
       render(<MultiSearchBar {...defaultProps} />)
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
-      expect(screen.getByRole('button')).toBeInTheDocument()
+      expect(screen.getByTestId('fa-times-icon')).toBeInTheDocument()
     })
 
     it('clears search when clear button is clicked', async () => {
@@ -248,7 +271,7 @@ describe('Rendering', () => {
       render(<MultiSearchBar {...defaultProps} />)
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
-      const clearButton = screen.getByRole('button')
+      const clearButton = screen.getByLabelText('Clear search')
       await user.click(clearButton)
       expect(input).toHaveValue('')
     })
@@ -283,7 +306,7 @@ describe('Rendering', () => {
       await waitFor(() => {
         expect(mockSendGAEvent).toHaveBeenCalledWith({
           event: 'homepageSearch',
-          path: expect.any(String), // Don't rely on specific window.location.pathname
+          path: globalThis.location.pathname,
           value: 'test query',
         })
       })
@@ -312,7 +335,6 @@ describe('Rendering', () => {
 
       const input = screen.getByPlaceholderText('Search...')
 
-      // Test filtering for "JavaScript"
       await user.type(input, 'JavaScript')
 
       await waitFor(() => {
@@ -321,7 +343,6 @@ describe('Rendering', () => {
         expect(screen.queryByText('React Meetup')).not.toBeInTheDocument()
       })
 
-      // Clear and test different filter
       await user.clear(input)
       await user.type(input, 'Python')
 
@@ -369,8 +390,21 @@ describe('Rendering', () => {
       await user.type(input, 'test')
 
       await waitFor(() => {
-        const icons = screen.getAllByTestId('font-awesome-icon')
-        expect(icons.length).toBeGreaterThan(1)
+        expect(screen.getByTestId('fa-location-dot-icon')).toBeInTheDocument() // chapters
+        expect(screen.getByTestId('fa-user-icon')).toBeInTheDocument() // users
+        expect(screen.getByTestId('fa-folder-icon')).toBeInTheDocument() // projects
+      })
+    })
+
+    it('shows Algolia branding icon', async () => {
+      const user = userEvent.setup()
+      render(<MultiSearchBar {...defaultProps} />)
+
+      const input = screen.getByPlaceholderText('Search...')
+      await user.type(input, 'test')
+
+      await waitFor(() => {
+        expect(screen.getByTestId('si-algolia-icon')).toBeInTheDocument()
       })
     })
 
@@ -529,7 +563,6 @@ describe('Rendering', () => {
       })
 
       const user = userEvent.setup()
-      // Changed 'organization' to 'organizations' (plural)
       render(<MultiSearchBar {...defaultProps} indexes={['organizations']} />)
 
       const input = screen.getByPlaceholderText('Search...')
@@ -703,7 +736,7 @@ describe('Rendering', () => {
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
 
-      const clearButton = screen.getByRole('button')
+      const clearButton = screen.getByLabelText('Clear search')
       expect(clearButton).toBeInTheDocument()
 
       await user.click(clearButton)
@@ -745,7 +778,7 @@ describe('Rendering', () => {
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
 
-      const clearButton = screen.getByRole('button')
+      const clearButton = screen.getByLabelText('Clear search')
       await user.click(clearButton)
 
       expect(input).toHaveValue('')
