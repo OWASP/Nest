@@ -3,6 +3,7 @@ services:
     container_name: e2e-nest-backend
     command: >
       sh -c '
+        python manage.py migrate &&
         gunicorn wsgi:application --bind 0.0.0.0:9000
       '
     image: nest-backend-e2e
@@ -24,43 +25,13 @@ services:
       timeout: 10s
       start_period: 5s
 
-  data-purger:
-    container_name: e2e-nest-data-purger
-    image: nest-backend-e2e
-    build:
-      context: ../backend
-      dockerfile: docker/Dockerfile
-    depends_on:
-      db:
-        condition: service_healthy
-    env_file: ../backend/.env.e2e.example
-    environment:
-      PGPASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_e2e_password}
-      POSTGRES_USER: ${DJANGO_DB_USER:-nest_user_e2e}
-      POSTGRES_DB: ${DJANGO_DB_NAME:-nest_db_e2e}
-    networks:
-      - e2e-nest-network
-    healthcheck:
-      test: [CMD-SHELL, test -f /tmp/data-purged]
-      interval: 5s
-      retries: 10
-      timeout: 5s
-    command: >
-      sh -c '
-        echo "Migrating database..." &&
-        python manage.py migrate &&
-        echo "Purging existing data..." &&
-        python manage.py purge_data &&
-        touch /tmp/data-purged &&
-        tail -f /dev/null
-      '
   data-loader:
     container_name: e2e-nest-data-loader
     image: pgvector/pgvector:pg16
     depends_on:
       db:
         condition: service_healthy
-      data-purger:
+      backend:
         condition: service_healthy
     environment:
       PGPASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_e2e_password}
