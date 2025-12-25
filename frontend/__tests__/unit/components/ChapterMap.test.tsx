@@ -234,7 +234,7 @@ describe('ChapterMap', () => {
 
       // Unlock map to enable interactions
       const unlockButton = getByText('Unlock map').closest('button')
-      fireEvent.click(unlockButton!)
+      fireEvent.click(unlockButton)
 
       // Clear mocks to ensure we are testing cleanup calls
       jest.clearAllMocks()
@@ -364,7 +364,7 @@ describe('ChapterMap', () => {
       const { getByText, queryByText } = render(<ChapterMap {...defaultProps} />)
 
       const overlay = getByText('Unlock map').closest('button')
-      fireEvent.click(overlay!)
+      fireEvent.click(overlay)
 
       expect(queryByText('Unlock map')).not.toBeInTheDocument()
     })
@@ -373,7 +373,7 @@ describe('ChapterMap', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
       const overlay = getByText('Unlock map').closest('button')
-      fireEvent.click(overlay!)
+      fireEvent.click(overlay)
 
       expect(mockMap.dragging.enable).toHaveBeenCalled()
       expect(mockMap.touchZoom.enable).toHaveBeenCalled()
@@ -395,7 +395,7 @@ describe('ChapterMap', () => {
 
       // Unlock first
       const unlockButton = getByText('Unlock map').closest('button')
-      fireEvent.click(unlockButton!)
+      fireEvent.click(unlockButton)
       expect(queryByText('Unlock map')).not.toBeInTheDocument()
 
       // Press Escape

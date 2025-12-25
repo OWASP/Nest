@@ -260,16 +260,8 @@ const ChapterMap = ({
       {!isMapActive && (
         <>
           <div
-            role="button"
-            tabIndex={0}
             className="absolute inset-0 z-[2000] rounded-[inherit] bg-black/10"
-            onClick={() => setIsMapActive(false)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                setIsMapActive(false)
-              }
-            }}
-            aria-label="Lock map"
+            aria-hidden="true"
           />
           <div className="pointer-events-none absolute inset-0 z-[2000] flex items-center justify-center">
             <button
