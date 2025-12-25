@@ -91,7 +91,7 @@ describe('EditModulePage', () => {
     expect(await screen.findByDisplayValue('Existing Module')).toBeInTheDocument()
 
     // Modify values
-    fireEvent.change(screen.getByLabelText('Name *'), {
+    fireEvent.change(screen.getByLabelText('Name'), {
       target: { value: 'Updated Name' },
     })
     fireEvent.change(screen.getByLabelText(/Description/i), {
@@ -103,7 +103,8 @@ describe('EditModulePage', () => {
     fireEvent.change(screen.getByLabelText(/Tags/i), {
       target: { value: 'graphql, react' },
     })
-    fireEvent.change(screen.getByLabelText(/Project Name/i), {
+    const projectInput = screen.getByPlaceholderText(/Start typing project name/i)
+    fireEvent.change(projectInput, {
       target: { value: 'Awesome Project' },
     })
 
