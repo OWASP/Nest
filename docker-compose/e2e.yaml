@@ -12,6 +12,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      cache:
+        condition: service_healthy
     env_file: ../backend/.env.e2e.example
     networks:
       - e2e-nest-network
@@ -68,6 +70,25 @@ services:
     ports:
       - 5433:5432
 
+  cache:
+    command: >
+      sh -c '
+        redis-server --requirepass $$REDIS_PASSWORD --maxmemory 100mb --maxmemory-policy allkeys-lru
+      '
+    container_name: e2e-nest-cache
+    image: redis:7.2.7-alpine3.21
+    environment:
+      REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-e2e-cache-password}
+    healthcheck:
+      interval: 5s
+      retries: 5
+      test: [CMD, redis-cli, -a, $$REDIS_PASSWORD, ping]
+      timeout: 5s
+    networks:
+      - e2e-nest-network
+    volumes:
+      - e2e-cache-data:/data
+
   e2e-tests:
     container_name: e2e-nest-tests
     build:
@@ -88,3 +109,4 @@ networks:
   e2e-nest-network:
 volumes:
   e2e-db-data:
+  e2e-cache-data:
