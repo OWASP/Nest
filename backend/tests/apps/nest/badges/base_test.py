@@ -10,6 +10,7 @@ from apps.nest.badges.base import BaseBadgeHandler
 
 class ConcreteTestHandler(BaseBadgeHandler):
     """Concrete implementation of BaseBadgeHandler for testing purposes."""
+
     name = "Test Badge"
     description = "Test Description"
     css_class = "fa-test"
@@ -17,6 +18,7 @@ class ConcreteTestHandler(BaseBadgeHandler):
 
     def get_eligible_users(self):
         return MagicMock()
+
 
 class TestBaseBadgeHandler(SimpleTestCase):
     """Tests for the BaseBadgeHandler logic."""
@@ -32,9 +34,9 @@ class TestBaseBadgeHandler(SimpleTestCase):
         mock_badge_instance = MagicMock()
         mock_badge_instance.name = "Test Badge"
         mock_badge_model.objects.get_or_create.return_value = (mock_badge_instance, True)
-        
+
         mock_qs = MagicMock()
-        mock_qs.exclude.return_value = [] 
+        mock_qs.exclude.return_value = []
         self.handler.get_eligible_users = MagicMock(return_value=mock_qs)
 
         self.handler.process()
@@ -47,7 +49,7 @@ class TestBaseBadgeHandler(SimpleTestCase):
                 "weight": 50,
             },
         )
-        self.assertIn("Created badge: 'Test Badge'", self.out.getvalue())
+        assert "Created badge: 'Test Badge'" in self.out.getvalue()
 
     @patch("apps.nest.badges.base.UserBadge")
     @patch("apps.nest.badges.base.Badge")
@@ -67,14 +69,18 @@ class TestBaseBadgeHandler(SimpleTestCase):
         mock_user_badge_model.objects.get_or_create.return_value = (mock_user_badge, False)
         self.handler.process()
 
-        mock_user_badge_model.objects.get_or_create.assert_called_with(user=user_1, badge=mock_badge)
+        mock_user_badge_model.objects.get_or_create.assert_called_with(
+            user=user_1, badge=mock_badge
+        )
         assert mock_user_badge.is_active is True
         mock_user_badge.save.assert_called_with(update_fields=["is_active"])
-        self.assertIn("Added 'Test Badge' badge to 1 users", self.out.getvalue())
+        assert "Added 'Test Badge' badge to 1 users" in self.out.getvalue()
 
     @patch("apps.nest.badges.base.UserBadge")
     @patch("apps.nest.badges.base.Badge")
-    def test_process_revokes_badge_from_ineligible_users(self, mock_badge_model, mock_user_badge_model):
+    def test_process_revokes_badge_from_ineligible_users(
+        self, mock_badge_model, mock_user_badge_model
+    ):
         """Test that ineligible users lose the badge."""
         mock_badge = MagicMock()
         mock_badge_model.objects.get_or_create.return_value = (mock_badge, False)
@@ -92,4 +98,4 @@ class TestBaseBadgeHandler(SimpleTestCase):
         self.handler.process()
 
         mock_revocation_qs.update.assert_called_with(is_active=False)
-        self.assertIn("Removed 'Test Badge' badge from 5 users", self.out.getvalue())
+        assert "Removed 'Test Badge' badge from 5 users" in self.out.getvalue()

@@ -40,6 +40,7 @@ class Command(BaseCommand):
             self.stdout.write("Syncing ALL user badges...")
             handlers_to_run = self.BADGE_HANDLERS.values()
 
+        failed_count = 0
         for handler_class in handlers_to_run:
             try:
                 self.stdout.write(f"Processing badge: {handler_class.name}")
@@ -48,5 +49,11 @@ class Command(BaseCommand):
             except Exception:
                 logger.exception("Error processing badge %s", handler_class.name)
                 self.stdout.write(self.style.ERROR(f"Failed to update {handler_class.name}"))
+                failed_count += 1
 
-        self.stdout.write(self.style.SUCCESS("User badges sync completed"))
+        if failed_count:
+            self.stdout.write(
+                self.style.WARNING(f"User badges sync completed with {failed_count} failures.")
+            )
+        else:
+            self.stdout.write(self.style.SUCCESS("User badges sync completed"))
