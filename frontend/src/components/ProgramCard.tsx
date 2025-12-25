@@ -57,7 +57,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, href, accessLevel, i
   return (
     <Link
       href={href}
-      className="group block h-72 w-72 rounded-lg border border-gray-400 bg-white p-6 text-left transition-transform duration-300 hover:scale-[1.02] hover:brightness-105 md:h-80 md:w-80 lg:h-80 lg:w-96 dark:border-gray-600 dark:bg-gray-800"
+      className="group block h-72 w-72 rounded-lg border border-gray-400 bg-white p-6 text-left text-inherit transition-transform duration-300 hover:scale-[1.02] hover:brightness-105 md:h-80 md:w-80 lg:h-80 lg:w-96 dark:border-gray-600 dark:bg-gray-800"
     >
       <div className="flex h-full flex-col">
         <div className="flex flex-1 flex-col">

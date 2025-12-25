@@ -147,6 +147,12 @@
     color: #1d7bd7;
   }
 
+  a .md-wrapper ul,
+  a .md-wrapper ol,
+  a .md-wrapper li {
+    color: inherit;
+  }
+
   .navlink {
     color: inherit;
   }
