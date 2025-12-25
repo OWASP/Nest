@@ -77,12 +77,12 @@ const DetailsCard = ({
   const { data } = useSession()
 
   // compute styles based on type prop
-  const typeStylesMap = new Map([
-    ['program', 'gap-2 md:col-span-7'],
-    ['module', 'gap-2 md:col-span-7'],
-    ['chapter', 'gap-2 md:col-span-3'],
-  ])
-  const secondaryCardStyles = typeStylesMap.get(type) ?? 'gap-2 md:col-span-5'
+  const typeStylesMap = {
+    chapter: 'gap-2 md:col-span-3',
+    module: 'gap-2 md:col-span-7',
+    program: 'gap-2 md:col-span-7',
+  }
+  const secondaryCardStyles = typeStylesMap[type] ?? 'gap-2 md:col-span-5'
 
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
