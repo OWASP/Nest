@@ -25,6 +25,8 @@ from apps.owasp.models.snapshot import Snapshot as SnapshotModel
 
 router = RouterPaginated(tags=["Community"])
 
+ORDERING_FIELD_DESCRIPTION = "Ordering field"
+
 
 class SnapshotBase(Schema):
     """Base schema for Snapshot (used in list endpoints)."""
@@ -114,7 +116,7 @@ def list_snapshots(
     ]
     | None = Query(
         None,
-        description="Ordering field",
+        description=ORDERING_FIELD_DESCRIPTION,
     ),
 ) -> list[Snapshot]:
     """Get all snapshots."""
@@ -160,7 +162,7 @@ def list_snapshot_chapters(
     snapshot_id: str = Path(example="2025-02"),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None,
-        description="Ordering field",
+        description=ORDERING_FIELD_DESCRIPTION,
     ),
 ) -> list[Chapter]:
     """Get new chapters in snapshot."""
@@ -185,7 +187,7 @@ def list_snapshot_issues(
     snapshot_id: str = Path(example="2025-02"),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None,
-        description="Ordering field",
+        description=ORDERING_FIELD_DESCRIPTION,
     ),
 ) -> list[SnapshotIssue]:
     """Get new issues in snapshot."""
@@ -212,7 +214,7 @@ def list_snapshot_members(
     snapshot_id: str = Path(example="2025-02"),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None,
-        description="Ordering field",
+        description=ORDERING_FIELD_DESCRIPTION,
     ),
 ) -> list[Member]:
     """Get new members in snapshot."""
@@ -237,7 +239,7 @@ def list_snapshot_projects(
     snapshot_id: str = Path(example="2025-02"),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None,
-        description="Ordering field",
+        description=ORDERING_FIELD_DESCRIPTION,
     ),
 ) -> list[Project]:
     """Get new projects in snapshot."""
@@ -262,7 +264,7 @@ def list_snapshot_releases(
     snapshot_id: str = Path(example="2025-02"),
     ordering: Literal["created_at", "-created_at", "published_at", "-published_at"] | None = Query(
         None,
-        description="Ordering field",
+        description=ORDERING_FIELD_DESCRIPTION,
     ),
 ) -> list[SnapshotRelease]:
     """Get new releases in snapshot."""
