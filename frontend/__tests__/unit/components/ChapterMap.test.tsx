@@ -39,7 +39,6 @@ const mockMap = {
 
 const mockMarker = {
   bindPopup: jest.fn().mockReturnThis(),
-  on: jest.fn().mockReturnThis(),
 }
 
 const mockPopup = {
@@ -49,7 +48,6 @@ const mockPopup = {
 const mockMarkerClusterGroup = {
   addLayers: jest.fn(),
   clearLayers: jest.fn(),
-  on: jest.fn().mockReturnThis(),
 }
 
 const mockTileLayer = {
@@ -201,21 +199,21 @@ describe('ChapterMap', () => {
     })
 
     it('locks map on mouseout', () => {
-      render(<ChapterMap {...defaultProps} />)
+      const { getByLabelText } = render(<ChapterMap {...defaultProps} />)
 
       // Simulate map activation
-      const overlay = document.querySelector('[aria-label="Unlock map"]')
-      fireEvent.click(overlay!)
+      const overlay = getByLabelText('Unlock map')
+      fireEvent.click(overlay)
 
       // Trigger mouseout handler
       const mouseoutHandler = mockMap.on.mock.calls.find((call) => call[0] === 'mouseout')?.[1]
 
-       // Simulate mouseout event that is NOT contained by map or map parent
-       // We mock the event structure needed by the handler
+      // Simulate mouseout event that is NOT contained by map or map parent
+      // We mock the event structure needed by the handler
       const mockEvent = {
-         originalEvent: {
-             relatedTarget: document.body // Target is outside map container
-         }
+        originalEvent: {
+          relatedTarget: document.body, // Target is outside map container
+        },
       }
 
       act(() => {
@@ -230,8 +228,27 @@ describe('ChapterMap', () => {
       expect(mockMap.boxZoom.disable).toHaveBeenCalled()
       expect(mockMap.keyboard.disable).toHaveBeenCalled()
     })
-  })
 
+    it('disables map interactions on unmount', () => {
+      const { unmount, getByText } = render(<ChapterMap {...defaultProps} />)
+
+      // Unlock map to enable interactions
+      const unlockButton = getByText('Unlock map').closest('button')
+      fireEvent.click(unlockButton!)
+
+      // Clear mocks to ensure we are testing cleanup calls
+      jest.clearAllMocks()
+
+      unmount()
+
+      expect(mockMap.dragging.disable).toHaveBeenCalled()
+      expect(mockMap.touchZoom.disable).toHaveBeenCalled()
+      expect(mockMap.doubleClickZoom.disable).toHaveBeenCalled()
+      expect(mockMap.scrollWheelZoom.disable).toHaveBeenCalled()
+      expect(mockMap.boxZoom.disable).toHaveBeenCalled()
+      expect(mockMap.keyboard.disable).toHaveBeenCalled()
+    })
+  })
 
   describe('Markers', () => {
     it('creates markers for each chapter', () => {
@@ -366,13 +383,26 @@ describe('ChapterMap', () => {
       expect(mockMap.keyboard.enable).toHaveBeenCalled()
     })
 
-
-
     it('has proper accessibility attributes', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
       const overlay = getByText('Unlock map').closest('button')
       expect(overlay).toHaveAttribute('aria-label', 'Unlock map')
+    })
+
+    it('locks map when Escape key is pressed', () => {
+      const { getByText, queryByText } = render(<ChapterMap {...defaultProps} />)
+
+      // Unlock first
+      const unlockButton = getByText('Unlock map').closest('button')
+      fireEvent.click(unlockButton!)
+      expect(queryByText('Unlock map')).not.toBeInTheDocument()
+
+      // Press Escape
+      fireEvent.keyDown(document, { key: 'Escape' })
+
+      // Should be locked again (overlay visible)
+      expect(getByText('Unlock map')).toBeInTheDocument()
     })
   })
 

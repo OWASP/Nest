@@ -62,8 +62,6 @@ const ChapterMap = ({
         noWrap: true,
       }).addTo(mapRef.current)
 
-
-
       mapRef.current.on('mouseout', (e: L.LeafletMouseEvent) => {
         const originalEvent = e.originalEvent as MouseEvent
         const relatedTarget = originalEvent.relatedTarget as Node | null
@@ -207,7 +205,6 @@ const ChapterMap = ({
       map.scrollWheelZoom.enable()
       map.boxZoom.enable()
       map.keyboard.enable()
-
       if (!zoomControlRef.current) {
         zoomControlRef.current = L.control.zoom({ position: 'topleft' })
         zoomControlRef.current.addTo(map)
@@ -227,6 +224,14 @@ const ChapterMap = ({
     }
 
     return () => {
+      if (map) {
+        map.dragging?.disable()
+        map.touchZoom?.disable()
+        map.doubleClickZoom?.disable()
+        map.scrollWheelZoom?.disable()
+        map.boxZoom?.disable()
+        map.keyboard?.disable()
+      }
       if (zoomControlRef.current) {
         zoomControlRef.current.remove()
         zoomControlRef.current = null
@@ -234,23 +239,50 @@ const ChapterMap = ({
     }
   }, [isMapActive])
 
+  useEffect(() => {
+    if (!isMapActive) return
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsMapActive(false)
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [isMapActive])
+
   return (
     <div className="relative" style={style}>
       <div id="chapter-map" className="h-full w-full" />
       {!isMapActive && (
-        <div
-          className="absolute inset-0 z-[2000] flex items-center justify-center rounded-[inherit] bg-black/10"
-        >
-          <button
-            type="button"
-            className="flex cursor-pointer items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white"
-            onClick={() => setIsMapActive(true)}
-            aria-label="Unlock map"
-          >
-            <FaUnlock aria-hidden="true" />
-            Unlock map
-          </button>
-        </div>
+        <>
+          <div
+            role="button"
+            tabIndex={0}
+            className="absolute inset-0 z-[2000] rounded-[inherit] bg-black/10"
+            onClick={() => setIsMapActive(false)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                setIsMapActive(false)
+              }
+            }}
+            aria-label="Lock map"
+          />
+          <div className="pointer-events-none absolute inset-0 z-[2000] flex items-center justify-center">
+            <button
+              type="button"
+              className="pointer-events-auto flex cursor-pointer items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white"
+              onClick={() => setIsMapActive(true)}
+              aria-label="Unlock map"
+            >
+              <FaUnlock aria-hidden="true" />
+              Unlock map
+            </button>
+          </div>
+        </>
       )}
       {isMapActive && (
         <div className="absolute top-20 left-3 z-[999] w-fit">
