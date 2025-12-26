@@ -16,7 +16,7 @@
 
     - name: Copy docker compose file
       copy:
-        src: '{{ github_workspace }}/docker-compose/proxy.yaml'
+        src: '{{ github_workspace }}/docker-compose/proxy/compose.yaml'
         dest: ~/docker-compose.yaml
         mode: '0644'
 
