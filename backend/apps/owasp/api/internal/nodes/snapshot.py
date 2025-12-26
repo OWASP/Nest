@@ -7,7 +7,6 @@ from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.user import UserNode
 from apps.owasp.api.internal.nodes.chapter import ChapterNode
-from apps.owasp.api.internal.nodes.common import GenericEntityNode
 from apps.owasp.api.internal.nodes.project import ProjectNode
 from apps.owasp.models.snapshot import Snapshot
 
@@ -23,7 +22,7 @@ RECENT_ISSUES_LIMIT = 100
         "title",
     ],
 )
-class SnapshotNode(GenericEntityNode):
+class SnapshotNode(strawberry.relay.Node):
     """Snapshot node."""
 
     @strawberry.field

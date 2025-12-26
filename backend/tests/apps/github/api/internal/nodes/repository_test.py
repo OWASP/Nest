@@ -32,7 +32,6 @@ class TestRepositoryNode:
             "name",
             "open_issues_count",
             "organization",
-            "owner_key",
             "project",
             "recent_milestones",
             "releases",
@@ -64,17 +63,12 @@ class TestRepositoryNode:
     def test_resolve_latest_release(self):
         field = self._get_field_by_name("latest_release")
         assert field is not None
-        assert field.type is str
+        assert field.type.of_type is str
 
     def test_resolve_organization(self):
         field = self._get_field_by_name("organization")
         assert field is not None
         assert field.type.of_type is OrganizationNode
-
-    def test_resolve_owner_key(self):
-        field = self._get_field_by_name("owner_key")
-        assert field is not None
-        assert field.type is str
 
     def test_resolve_recent_milestones(self):
         field = self._get_field_by_name("recent_milestones")
@@ -139,14 +133,6 @@ class TestRepositoryNode:
         result = RepositoryNode.organization(mock_repository)
         assert result == mock_organization
 
-    def test_owner_key_method(self):
-        """Test owner_key method resolution."""
-        mock_repository = Mock()
-        mock_repository.owner_key = "test-owner"
-
-        result = RepositoryNode.owner_key(mock_repository)
-        assert result == "test-owner"
-
     def test_project_method(self):
         """Test project method resolution."""
         mock_repository = Mock()
@@ -182,11 +168,26 @@ class TestRepositoryNode:
     def test_top_contributors_method(self):
         """Test top_contributors method resolution."""
         mock_repository = Mock()
-        mock_contributors = [Mock(), Mock()]
-        mock_repository.idx_top_contributors = mock_contributors
+        mock_repository.idx_top_contributors = [
+            {
+                "avatar_url": "url1",
+                "contributions_count": 100,
+                "id": "user1",
+                "login": "user1",
+                "name": "User 1",
+            },
+            {
+                "avatar_url": "url2",
+                "contributions_count": 50,
+                "id": "user2",
+                "login": "user2",
+                "name": "User 2",
+            },
+        ]
 
         result = RepositoryNode.top_contributors(mock_repository)
-        assert result == mock_contributors
+        assert len(result) == 2
+        assert all(isinstance(c, RepositoryContributorNode) for c in result)
 
     def test_topics_method(self):
         """Test topics method resolution."""

@@ -3,9 +3,8 @@
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from django.core.exceptions import ValidationError
 
-from apps.github.api.internal.queries.milestone import MilestoneQuery
+from apps.github.api.internal.queries.milestone import MilestoneQuery, MilestoneStateEnum
 from apps.github.models.milestone import Milestone
 
 
@@ -31,9 +30,9 @@ class TestMilestoneQuery:
     @pytest.mark.parametrize(
         ("state", "manager"),
         [
-            ("open", "open_milestones"),
-            ("closed", "closed_milestones"),
-            ("all", "objects"),
+            (MilestoneStateEnum.OPEN, "open_milestones"),
+            (MilestoneStateEnum.CLOSED, "closed_milestones"),
+            (None, "objects"),
         ],
     )
     def test_recent_milestones_by_state(self, get_queryset, state, manager):
@@ -66,7 +65,7 @@ class TestMilestoneQuery:
                 limit=3,
                 login="user",
                 organization="github",
-                state="open",
+                state=MilestoneStateEnum.OPEN,
             )
 
             get_queryset.filter.assert_any_call(author__login="user")
@@ -90,19 +89,11 @@ class TestMilestoneQuery:
                 limit=1,
                 login=None,
                 organization=None,
-                state="open",
+                state=MilestoneStateEnum.OPEN,
             )
 
             assert isinstance(result, list)
             assert filtered_queryset.__getitem__.called
-
-    def test_recent_milestones_invalid_state(self):
-        """Test ValidationError for invalid state parameter."""
-        with pytest.raises(ValidationError) as exc_info:
-            MilestoneQuery().recent_milestones(state="invalid")
-
-        assert "Invalid state: invalid" in str(exc_info.value)
-        assert "Valid states are 'open', 'closed', or 'all'" in str(exc_info.value)
 
     def test_recent_milestones_with_all_parameters(self, get_queryset):
         """Test recent milestones with all parameters provided."""
@@ -110,7 +101,11 @@ class TestMilestoneQuery:
             mock_manager.all.return_value = get_queryset
 
             result = MilestoneQuery().recent_milestones(
-                distinct=False, limit=10, login="testuser", organization="owasp", state="closed"
+                distinct=False,
+                limit=10,
+                login="testuser",
+                organization="owasp",
+                state=MilestoneStateEnum.CLOSED,
             )
 
         assert isinstance(result, list)

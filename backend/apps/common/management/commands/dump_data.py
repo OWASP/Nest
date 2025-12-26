@@ -23,8 +23,8 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
             "--output",
-            default=str(Path(settings.BASE_DIR) / "data" / "nest.sql.gz"),
-            help="Output dump path (default: data/nest.sql.gz)",
+            default=str(Path(settings.BASE_DIR) / "data" / "nest.dump"),
+            help="Output dump path (default: data/nest.dump)",
         )
         parser.add_argument(
             "-t",
@@ -71,7 +71,10 @@ class Command(BaseCommand):
                 "-d",
                 temp_db,
                 "--compress=9",
-                "--clean",
+                "--data-only",
+                "--no-owner",
+                "--no-privileges",
+                "--format=custom",
             ]
             dump_cmd += [f"--table={table}" for table in tables]
             dump_cmd += ["-f", str(output_path)]

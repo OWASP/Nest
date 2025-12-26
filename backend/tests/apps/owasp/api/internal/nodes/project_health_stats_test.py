@@ -45,7 +45,6 @@ class TestHealthStatsNode:
     @pytest.mark.parametrize(
         ("field_name", "expected_type"),
         [
-            ("average_score", float),
             ("monthly_overall_scores", list[float]),
             ("monthly_overall_scores_months", list[int]),
             ("projects_count_healthy", int),

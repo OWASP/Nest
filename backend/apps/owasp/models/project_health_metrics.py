@@ -1,5 +1,7 @@
 """Project health metrics model."""
 
+from functools import cached_property
+
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models.functions import ExtractMonth, TruncDate
@@ -90,7 +92,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
     @property
     def age_days_requirement(self) -> int:
         """Get the age requirement for the project."""
-        return self.project_requirements.age_days
+        return self.project_requirements.age_days if self.project_requirements else 0
 
     @property
     def last_commit_days(self) -> int:
@@ -100,7 +102,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
     @property
     def last_commit_days_requirement(self) -> int:
         """Get the last commit requirement for the project."""
-        return self.project_requirements.last_commit_days
+        return self.project_requirements.last_commit_days if self.project_requirements else 0
 
     @property
     def last_pull_request_days(self) -> int:
@@ -114,7 +116,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
     @property
     def last_pull_request_days_requirement(self) -> int:
         """Get the last pull request requirement for the project."""
-        return self.project_requirements.last_pull_request_days
+        return self.project_requirements.last_pull_request_days if self.project_requirements else 0
 
     @property
     def last_release_days(self) -> int:
@@ -124,7 +126,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
     @property
     def last_release_days_requirement(self) -> int:
         """Get the last release requirement for the project."""
-        return self.project_requirements.last_release_days
+        return self.project_requirements.last_release_days if self.project_requirements else 0
 
     @property
     def owasp_page_last_update_days(self) -> int:
@@ -138,10 +140,14 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
     @property
     def owasp_page_last_update_days_requirement(self) -> int:
         """Get the OWASP page last update requirement for the project."""
-        return self.project_requirements.owasp_page_last_update_days
+        return (
+            self.project_requirements.owasp_page_last_update_days
+            if self.project_requirements
+            else 0
+        )
 
-    @property
-    def project_requirements(self) -> ProjectHealthRequirements:
+    @cached_property
+    def project_requirements(self) -> ProjectHealthRequirements | None:
         """Get the project health requirements for the project's level."""
         return ProjectHealthRequirements.objects.get(level=self.project.level)
 
