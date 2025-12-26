@@ -19,15 +19,11 @@ on:
       - published
   workflow_dispatch:
 
-permissions:
-  contents: read
-
-concurrency:
-  cancel-in-progress: true
-  group: ${{ github.repository }}-${{ github.workflow }}-${{ github.ref }}
-
 env:
   FORCE_COLOR: 1
+
+permissions:
+  contents: read
 
 jobs:
   pre-commit:

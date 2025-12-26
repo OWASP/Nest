@@ -6,7 +6,7 @@ jest.mock('dompurify', () => ({
   sanitize: (html: string) => html,
 }))
 
-jest.mock('markdown-it/index.mjs', () => {
+jest.mock('markdown-it', () => {
   return jest.fn().mockImplementation(() => ({
     render: (content: string) => {
       // Very simple mock: replace **bold** and [link](url)

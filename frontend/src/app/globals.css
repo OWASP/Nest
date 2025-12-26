@@ -175,6 +175,28 @@
     color: #1d7bd7;
   }
 
+  a .md-wrapper {
+    color: rgb(75 85 99); /* gray-600 */
+  }
+
+  .dark a .md-wrapper {
+    color: rgb(156 163 175); /* gray-400 */
+  }
+
+  a .md-wrapper a {
+    color: #1d7bd7;
+  }
+
+  .dark a .md-wrapper a {
+    color: #1d7bd7;
+  }
+
+  a .md-wrapper ul,
+  a .md-wrapper ol,
+  a .md-wrapper li {
+    color: inherit;
+  }
+
   .navlink {
     color: inherit;
   }
@@ -295,6 +317,24 @@
 
   .icon-flip {
     transition: transform 1s ease;
+  }
+
+  .md-wrapper ul,
+  .md-wrapper ol {
+    margin: 0 0 1em 1.5em;
+    padding-left: 1.5em;
+  }
+
+  .md-wrapper ul {
+    list-style-type: disc;
+  }
+
+  .md-wrapper ol {
+    list-style-type: decimal;
+  }
+
+  .md-wrapper li {
+    margin: 0.25em 0;
   }
 
   .flip-container:hover .icon-flip {

@@ -278,8 +278,7 @@ describe('ProgramCard', () => {
       )
 
       expect(screen.getByText(longDescription)).toBeInTheDocument()
-      expect(screen.getByText(longDescription)).toBeInTheDocument()
-      const descriptionElement = screen.getByText(longDescription)
+      const descriptionElement = screen.getByText(longDescription).closest('.md-wrapper')
       expect(descriptionElement).toHaveClass('line-clamp-8')
     })
 
@@ -298,7 +297,7 @@ describe('ProgramCard', () => {
 
       expect(screen.getByText('Short description')).toBeInTheDocument()
 
-      const descriptionElement = screen.getByText('Short description')
+      const descriptionElement = screen.getByText('Short description').closest('.md-wrapper')
       expect(descriptionElement).toHaveClass('line-clamp-8')
     })
 

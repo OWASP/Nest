@@ -621,7 +621,8 @@ describe('UserMenu Component', () => {
 
       await waitFor(() => {
         const dropdownId = avatarButton.getAttribute('aria-controls')
-        const dropdown = document.getElementById(dropdownId!)
+        expect(dropdownId).not.toBeNull()
+        const dropdown = document.getElementById(dropdownId)
         expect(dropdown).toBeInTheDocument()
       })
     })
@@ -708,7 +709,8 @@ describe('UserMenu Component', () => {
 
       await waitFor(() => {
         const dropdownId = avatarButton.getAttribute('aria-controls')
-        const dropdown = document.getElementById(dropdownId!)
+        expect(dropdownId).not.toBeNull()
+        const dropdown = document.getElementById(dropdownId)
         expect(dropdown).toHaveClass(
           'absolute',
           'right-0',

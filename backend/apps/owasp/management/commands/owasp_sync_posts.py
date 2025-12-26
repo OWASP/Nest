@@ -58,7 +58,10 @@ class Command(BaseCommand):
             **options: Arbitrary keyword arguments.
 
         """
-        # TODO(arkid15r): Add pagination support.
+        # The GitHub contents API has an upper limit of 1,000 files for a directory.
+        # The _posts directory currently contains a bit more than 100 files (as of Dec 2025).
+        # If you need to retrieve more files, use the Git Trees API.
+        # https://docs.github.com/en/rest/git/trees?apiVersion=2022-11-28
         post_repository_content = get_repository_file_content(
             "https://api.github.com/repos/OWASP/owasp.github.io/contents/_posts"
         )

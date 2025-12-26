@@ -10,6 +10,7 @@ import { ExtendedSession } from 'types/auth'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import EntityActions from 'components/EntityActions'
+import Markdown from 'components/MarkdownWrapper'
 import { getSimpleDuration } from 'components/ModuleCard'
 import TopContributorsList from 'components/TopContributorsList'
 
@@ -66,7 +67,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
 
       {/* Description */}
       <div>
-        <p>{module.description}</p>
+        <Markdown content={module.description || 'No description available.'} />
       </div>
 
       {/* Details */}

@@ -5,6 +5,7 @@ import type React from 'react'
 import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import { Program } from 'types/mentorship'
 import EntityActions from 'components/EntityActions'
+import Markdown from 'components/MarkdownWrapper'
 
 interface ProgramCardProps {
   program: Program
@@ -56,7 +57,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, href, accessLevel, i
   return (
     <Link
       href={href}
-      className="group block h-72 w-72 rounded-lg border border-gray-400 bg-white p-6 text-left transition-transform duration-300 hover:scale-[1.02] hover:brightness-105 md:h-80 md:w-80 lg:h-80 lg:w-96 dark:border-gray-600 dark:bg-gray-800"
+      className="group block h-72 w-72 rounded-lg border border-gray-400 bg-white p-6 text-left text-inherit transition-transform duration-300 hover:scale-[1.02] hover:brightness-105 md:h-80 md:w-80 lg:h-80 lg:w-96 dark:border-gray-600 dark:bg-gray-800"
     >
       <div className="flex h-full flex-col">
         <div className="flex flex-1 flex-col">
@@ -67,7 +68,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, href, accessLevel, i
               showArrow
               content={program.name}
               placement="bottom"
-              isDisabled={program.name.length > 50 ? false : true}
+              isDisabled={program.name.length <= 50}
             >
               <h3 className="mr-1 line-clamp-2 h-12 overflow-hidden text-base font-semibold text-gray-600 dark:text-white">
                 {program.name}
@@ -96,7 +97,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, href, accessLevel, i
               </span>
             )}
           </div>
-          <p className="line-clamp-8 text-sm text-gray-700 dark:text-gray-300">{description}</p>
+          <Markdown content={description} className="line-clamp-8" />
         </div>
       </div>
     </Link>
