@@ -145,7 +145,12 @@ const ChapterMap = ({
   )
 
   return (
-    <div className="relative" style={style} onMouseLeave={() => setIsMapActive(false)}>
+    <div
+      role="presentation"
+      className="relative"
+      style={style}
+      onMouseLeave={() => setIsMapActive(false)}
+    >
       <MapContainer
         center={[20, 0]}
         zoom={2}
@@ -156,7 +161,7 @@ const ChapterMap = ({
           [-90, -180],
           [90, 180],
         ]}
-        maxBoundsViscosity={1.0}
+        maxBoundsViscosity={1}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

@@ -188,7 +188,7 @@ describe('ChapterMap Refactored Tests', () => {
       const { getByText, queryByText } = render(<ChapterMap {...defaultProps} />)
 
       const unlockButton = getByText('Unlock map').closest('button')
-      fireEvent.click(unlockButton!)
+      fireEvent.click(unlockButton)
 
       expect(queryByText('Unlock map')).not.toBeInTheDocument()
 
@@ -202,7 +202,7 @@ describe('ChapterMap Refactored Tests', () => {
       const { getByText, container } = render(<ChapterMap {...defaultProps} />)
 
       const unlockButton = getByText('Unlock map').closest('button')
-      fireEvent.click(unlockButton!)
+      fireEvent.click(unlockButton)
       const wrapper = container.firstChild as HTMLElement
       fireEvent.mouseLeave(wrapper)
 
@@ -256,7 +256,7 @@ describe('ChapterMap Refactored Tests', () => {
 
       expect(queryByLabelText(/share location/i)).not.toBeInTheDocument()
 
-      fireEvent.click(getByText('Unlock map').closest('button')!)
+      fireEvent.click(getByText('Unlock map').closest('button'))
       expect(queryByLabelText(/share location/i)).toBeInTheDocument()
     })
 
@@ -271,7 +271,7 @@ describe('ChapterMap Refactored Tests', () => {
           userLocation={userLocation}
         />
       )
-      fireEvent.click(getByText('Unlock map').closest('button')!)
+      fireEvent.click(getByText('Unlock map').closest('button'))
       const locationButton = getByLabelText('Reset location filter')
       expect(locationButton).toBeInTheDocument()
     })
@@ -301,7 +301,7 @@ describe('ChapterMap Refactored Tests', () => {
 
       const popups = getAllByTestId('popup')
       const clickableButton = popups[0].querySelector('button')
-      fireEvent.click(clickableButton!)
+      fireEvent.click(clickableButton)
 
       expect(mockPush).toHaveBeenCalledWith('/chapters/new-york')
     })
@@ -312,7 +312,7 @@ describe('ChapterMap Refactored Tests', () => {
       const { getByText, queryByText } = render(<ChapterMap {...defaultProps} />)
 
       const unlockButton = getByText('Unlock map').closest('button')
-      fireEvent.keyDown(unlockButton!, { key: 'Enter' })
+      fireEvent.keyDown(unlockButton, { key: 'Enter' })
 
       expect(queryByText('Unlock map')).not.toBeInTheDocument()
 
@@ -325,7 +325,7 @@ describe('ChapterMap Refactored Tests', () => {
       const { getByText, queryByText } = render(<ChapterMap {...defaultProps} />)
 
       const unlockButton = getByText('Unlock map').closest('button')
-      fireEvent.keyDown(unlockButton!, { key: ' ' })
+      fireEvent.keyDown(unlockButton, { key: ' ' })
 
       expect(queryByText('Unlock map')).not.toBeInTheDocument()
 
@@ -338,7 +338,7 @@ describe('ChapterMap Refactored Tests', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
       const unlockButton = getByText('Unlock map').closest('button')
-      fireEvent.keyDown(unlockButton!, { key: 'Tab' })
+      fireEvent.keyDown(unlockButton, { key: 'Tab' })
 
       expect(getByText('Unlock map')).toBeInTheDocument()
     })
@@ -351,7 +351,7 @@ describe('ChapterMap Refactored Tests', () => {
       const { container, getByText } = render(<ChapterMap {...defaultProps} />)
       expect(container).toBeInTheDocument()
 
-      fireEvent.click(getByText('Unlock map').closest('button')!)
+      fireEvent.click(getByText('Unlock map').closest('button'))
 
       expect(L.control.zoom).not.toHaveBeenCalled()
     })
