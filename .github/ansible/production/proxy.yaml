@@ -12,6 +12,7 @@
           - docker-compose.yaml
           - headers.conf
           - production.conf
+          - proxy_cache.conf
           - redirects.conf
 
       - name: Retart services
