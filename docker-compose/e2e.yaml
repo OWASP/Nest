@@ -6,7 +6,9 @@ services:
         python manage.py migrate &&
         gunicorn wsgi:application --bind 0.0.0.0:9000
       '
-    image: nest-backend-e2e
+    build:
+      context: ../backend
+      dockerfile: docker/Dockerfile
     depends_on:
       db:
         condition: service_healthy
