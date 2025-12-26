@@ -11,12 +11,22 @@ updates:
       interval: daily
 
   - package-ecosystem: docker
+    directory: /docker-compose
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
     directory: /docs/docker
     schedule:
       interval: daily
 
   - package-ecosystem: docker
     directory: /frontend/docker
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /proxy
     schedule:
       interval: daily
 
