@@ -145,8 +145,7 @@ const ChapterMap = ({
   )
 
   return (
-    <div
-      role="region"
+    <section
       aria-label="Chapter Map"
       className="relative"
       style={style}
@@ -254,7 +253,7 @@ const ChapterMap = ({
           )}
         </div>
       )}
-    </div>
+    </section>
   )
 }
 export default ChapterMap
