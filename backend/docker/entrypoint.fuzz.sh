@@ -10,6 +10,11 @@ fi
 echo "Fetching CSRF token..."
 CSRF_TOKEN=$(curl -fsSL "$BASE_URL/csrf" | jq -r '.csrftoken')
 
+if [ -z "$CSRF_TOKEN" ] || [ "$CSRF_TOKEN" = "null" ]; then
+  echo "Error: Failed to retrieve CSRF token." >&2
+  exit 1
+fi
+
 echo "Creating configuration file with custom headers..."
 :> ./config.toml
 
