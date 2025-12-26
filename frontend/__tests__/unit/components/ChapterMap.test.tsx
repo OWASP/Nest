@@ -170,7 +170,7 @@ describe('ChapterMap Refactored Tests', () => {
     })
 
     it('renders user location marker when provided', () => {
-      const userLocation = { latitude: 10, longitude: 10, accuracy: 10 }
+      const userLocation = { latitude: 10, longitude: 10 }
       const { getAllByTestId } = render(
         <ChapterMap {...defaultProps} userLocation={userLocation} />
       )
@@ -262,7 +262,7 @@ describe('ChapterMap Refactored Tests', () => {
 
     it('shows "Reset location filter" tooltip when user location is provided', () => {
       const onShareLocation = jest.fn()
-      const userLocation = { latitude: 10, longitude: 10, accuracy: 10 }
+      const userLocation = { latitude: 10, longitude: 10 }
 
       const { getByText, getByLabelText } = render(
         <ChapterMap

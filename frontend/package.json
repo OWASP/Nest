@@ -58,6 +58,7 @@
     "react-icons": "^5.5.0",
     "react-leaflet": "^5.0.0",
     "react-leaflet-cluster": "^4.0.0",
+    "@react-leaflet/core": "^3.0.0",
     "react-router-dom": "^7.11.0",
     "rxjs": "^7.8.2",
     "tailwind-merge": "^3.4.0",

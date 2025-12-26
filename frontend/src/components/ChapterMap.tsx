@@ -146,7 +146,8 @@ const ChapterMap = ({
 
   return (
     <div
-      role="presentation"
+      role="region"
+      aria-label="Chapter Map"
       className="relative"
       style={style}
       onMouseLeave={() => setIsMapActive(false)}
