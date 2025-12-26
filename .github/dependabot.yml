@@ -10,7 +10,7 @@ updates:
     schedule:
       interval: daily
 
-  - package-ecosystem: docker
+  - package-ecosystem: docker-compose
     directory: /docker-compose
     schedule:
       interval: daily
