@@ -8,6 +8,7 @@
           mode: '0644'
         loop:
           - blocked_ips.conf
+          - cloudflare_realip.conf
           - docker-compose.yaml
           - headers.conf
           - production.conf

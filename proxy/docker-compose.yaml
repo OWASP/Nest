@@ -6,6 +6,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./blocked_ips.conf:/etc/nginx/blocked_ips.conf
+      - ./cloudflare_realip.conf:/etc/nginx/cloudflare_realip.conf
       - ./headers.conf:/etc/nginx/headers.conf
       - ./letsencrypt:/etc/letsencrypt
       - ./production.conf:/etc/nginx/conf.d/production.conf
@@ -25,6 +26,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./blocked_ips.conf:/etc/nginx/blocked_ips.conf
+      - ./cloudflare_realip.conf:/etc/nginx/cloudflare_realip.conf
       - ./headers.conf:/etc/nginx/headers.conf
       - ./letsencrypt:/etc/letsencrypt
       - ./production.conf:/etc/nginx/conf.d/production.conf
