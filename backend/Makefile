@@ -132,7 +132,7 @@ restore-backup:
 
 run-backend-e2e:
 	@DOCKER_BUILDKIT=1 \
-	docker compose --project-name nest-e2e -f docker-compose/e2e.yaml up --build --remove-orphans --abort-on-container-exit backend db
+	docker compose --project-name nest-e2e -f docker-compose/e2e.yaml up --build --remove-orphans --abort-on-container-exit backend db cache
 
 run-backend-fuzz:
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
