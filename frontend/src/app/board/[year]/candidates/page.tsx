@@ -676,10 +676,6 @@ const BoardCandidatesPage = () => {
     )
   }
 
-  if (isLoading) {
-    return <LoadingSpinner />
-  }
-
   if (!graphQLData?.boardOfDirectors) {
     return (
       <ErrorDisplay
@@ -688,6 +684,10 @@ const BoardCandidatesPage = () => {
         message={`Sorry, the board information for ${year} doesn't exist`}
       />
     )
+  }
+  
+  if (isLoading) {
+    return <LoadingSpinner />
   }
 
   return (
