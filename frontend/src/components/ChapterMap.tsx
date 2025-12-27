@@ -28,6 +28,7 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
       }
     }
     return () => {
+      if (!map) return
       map.scrollWheelZoom.disable()
       if (zoomControlRef.current) {
         zoomControlRef.current.remove()
