@@ -4,7 +4,7 @@
         <h1 class="text-6xl font-bold mb-12 text-center">{{ title }}</h1>
         <div class="flex flex-wrap gap-4 justify-center w-full">
             {% for project in projects %}
-                <div class="rounded-lg border-2 bg-card p-4 shrink-0 {% if show_details %}w-96{% else %}w-76{% endif %}">
+                <div class="rounded-lg border-2 bg-card p-4 shrink-0 {% if show_details %}w-96{% else %}w-72{% endif %}">
                     <div class="{% if show_details %}text-2xl{% else %}text-xl{% endif %} font-bold text-owasp-blue {% if show_details %}mb-4{% endif %}">
                         {{ project.name }}
                     </div>
