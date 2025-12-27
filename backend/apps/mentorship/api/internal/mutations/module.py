@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 # Error messages
 MODULE_NOT_FOUND_MSG = "Module not found."
 ISSUE_NOT_FOUND_IN_MODULE_MSG = "Issue not found in this module."
+ASSIGNEE_NOT_FOUND_MSG = "Assignee not found."
 
 
 def get_github_issue(module: Module, issue_number: int) -> tuple:
@@ -37,7 +38,7 @@ def get_github_issue(module: Module, issue_number: int) -> tuple:
         .first()
     )
     if issue is None:
-        raise ObjectDoesNotExist(msg=ISSUE_NOT_FOUND_IN_MODULE_MSG)
+        raise ObjectDoesNotExist(ISSUE_NOT_FOUND_IN_MODULE_MSG)
 
     if not issue.repository:
         raise ValidationError(message="Issue has no repository.")
@@ -164,7 +165,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
+            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
@@ -172,7 +173,7 @@ class ModuleMutation:
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
-            raise ObjectDoesNotExist(msg="Assignee not found.")
+            raise ObjectDoesNotExist(ASSIGNEE_NOT_FOUND_MSG)
 
         try:
             issue, gh_issue = get_github_issue(module, issue_number)
@@ -232,7 +233,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
+            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
@@ -242,7 +243,7 @@ class ModuleMutation:
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
-            raise ObjectDoesNotExist(msg="Assignee not found.")
+            raise ObjectDoesNotExist(ASSIGNEE_NOT_FOUND_MSG)
 
         try:
             issue, gh_issue = get_github_issue(module, issue_number)
@@ -279,7 +280,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
+            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
@@ -292,7 +293,7 @@ class ModuleMutation:
             .first()
         )
         if issue is None:
-            raise ObjectDoesNotExist(msg=ISSUE_NOT_FOUND_IN_MODULE_MSG)
+            raise ObjectDoesNotExist(ISSUE_NOT_FOUND_IN_MODULE_MSG)
 
         assignees = issue.assignees.all()
         if not assignees.exists():
@@ -339,7 +340,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
+            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
@@ -352,7 +353,7 @@ class ModuleMutation:
             .first()
         )
         if issue is None:
-            raise ObjectDoesNotExist(msg=ISSUE_NOT_FOUND_IN_MODULE_MSG)
+            raise ObjectDoesNotExist(ISSUE_NOT_FOUND_IN_MODULE_MSG)
 
         assignees = issue.assignees.all()
         if not assignees.exists():
@@ -383,7 +384,7 @@ class ModuleMutation:
                 key=input_data.key, program__key=input_data.program_key
             )
         except Module.DoesNotExist as e:
-            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG) from e
+            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e
 
         try:
             creator_as_mentor = Mentor.objects.get(nest_user=user)
