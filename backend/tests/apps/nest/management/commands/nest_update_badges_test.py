@@ -4,6 +4,7 @@ from io import StringIO
 from unittest.mock import MagicMock, patch
 
 from django.core.management import call_command
+from django.db.models import Q
 
 from apps.nest.management.commands.nest_update_badges import (
     OWASP_PROJECT_LEADER_BADGE_NAME,
@@ -46,10 +47,17 @@ def make_mock_project_leaders(mock_leader):
 
 def extract_is_owasp_staff(arg):
     """Extract is_owasp_staff value from Q object, dict, or tuple."""
-    if hasattr(arg, "children"):
-        for key, value in arg.children:
-            if key == "is_owasp_staff":
-                return value
+    if isinstance(arg, Q):
+        for child in arg.children:
+            if isinstance(child, tuple):
+                if child[0] == "owasp_profile__is_owasp_staff":
+                    return child[1]
+                if child[0] == "is_owasp_staff":
+                    return child[1]
+            if isinstance(child, Q):
+                nested_value = extract_is_owasp_staff(child)
+                if nested_value is not None:
+                    return nested_value
     if isinstance(arg, dict) and "is_owasp_staff" in arg:
         return arg["is_owasp_staff"]
     if isinstance(arg, tuple) and len(arg) == 2 and arg[0] == "is_owasp_staff":
