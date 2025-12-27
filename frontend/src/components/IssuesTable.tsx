@@ -132,14 +132,14 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
                 </div>
               </td>
 
-              {/* Status - positioned next to title on mobile, in column on desktop */}
+              {/* Status */}
               <td className="absolute top-4 right-4 block lg:relative lg:top-auto lg:right-auto lg:table-cell lg:px-6 lg:py-4 lg:text-center lg:text-sm lg:whitespace-nowrap">
                 <div className="flex justify-center">
                   {getStatusBadge(issue.state, issue.isMerged)}
                 </div>
               </td>
 
-              {/* Labels - same rendering, different styling on mobile vs desktop */}
+              {/* Labels */}
               <td className="block pb-3 lg:table-cell lg:px-6 lg:py-4">
                 {issue.labels && issue.labels.length > 0 ? (
                   <div className="flex flex-wrap gap-1 lg:gap-2">
@@ -160,7 +160,7 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
                 ) : null}
               </td>
 
-              {/* Assignee - same rendering, different sizing on mobile vs desktop */}
+              {/* Assignee */}
               {showAssignee && (
                 <td className="block pb-0 text-xs text-gray-600 lg:table-cell lg:px-6 lg:py-4 lg:text-sm lg:text-gray-700 dark:text-gray-400 dark:lg:text-gray-300">
                   {issue.assignees && issue.assignees.length > 0 ? (
