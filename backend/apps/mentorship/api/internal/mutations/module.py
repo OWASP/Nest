@@ -7,20 +7,26 @@ import strawberry
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import transaction
 from django.utils import timezone
+from github.GithubException import GithubException
 
+from apps.github.auth import get_github_client
 from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.nodes.module import (
     CreateModuleInput,
     ModuleNode,
     UpdateModuleInput,
 )
-from apps.mentorship.models import Mentor, Module, Program
+from apps.mentorship.models import Mentee, MenteeModule, Mentor, Module, Program
 from apps.mentorship.models.issue_user_interest import IssueUserInterest
 from apps.mentorship.models.task import Task
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.models import Project
 
 logger = logging.getLogger(__name__)
+
+# Error messages
+MODULE_NOT_FOUND_MSG = "Module not found."
+ISSUE_NOT_FOUND_IN_MODULE_MSG = "Issue not found in this module."
 
 
 def resolve_mentors_from_logins(logins: list[str]) -> set[Mentor]:
@@ -129,7 +135,7 @@ class ModuleMutation:
         issue_number: int,
         user_login: str,
     ) -> ModuleNode:
-        """Assign an issue to a user by updating Issue.assignees within the module scope."""
+        """Assign an issue to a user by updating Issue.assignees and creating a Task."""
         user = info.context.request.user
 
         module = (
@@ -138,23 +144,66 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg="Module not found.")
+            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
             raise PermissionDenied(msg="Only mentors can assign issues.")
-        if not module.program.admins.filter(id=mentor.id).exists():
-            raise PermissionDenied
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
             raise ObjectDoesNotExist(msg="Assignee not found.")
 
-        issue = module.issues.filter(number=issue_number).first()
+        issue = (
+            module.issues.select_related("repository", "repository__owner")
+            .filter(number=issue_number)
+            .first()
+        )
         if issue is None:
-            raise ObjectDoesNotExist(msg="Issue not found in this module.")
+            raise ObjectDoesNotExist(msg=ISSUE_NOT_FOUND_IN_MODULE_MSG)
+
+        if not issue.repository:
+            raise ValidationError(message="Issue has no repository.")
+
+        try:
+            gh_client = get_github_client()
+            gh_repository = gh_client.get_repo(issue.repository.path)
+            gh_issue = gh_repository.get_issue(number=issue.number)
+            gh_issue.add_to_assignees(user_login)
+        except GithubException as e:
+            raise ValidationError(message=f"Failed to assign issue on GitHub: {e}") from e
+
+        except Exception as e:
+            raise ValidationError(
+                message=f"Unexpected error while assigning issue on GitHub: {e}"
+            ) from e
 
         issue.assignees.add(gh_user)
+        now = timezone.now()
+        mentee, _ = Mentee.objects.get_or_create(github_user=gh_user)
+
+        MenteeModule.objects.get_or_create(
+            mentee=mentee,
+            module=module,
+            defaults={
+                "started_at": module.started_at or now,
+                "ended_at": module.ended_at,
+            },
+        )
+
+        task, created = Task.objects.get_or_create(
+            module=module,
+            issue=issue,
+            assignee=gh_user,
+            defaults={
+                "assigned_at": now,
+                "status": Task.Status.IN_PROGRESS,
+            },
+        )
+
+        if not created and task.assigned_at is None:
+            task.assigned_at = now
+            task.save(update_fields=["assigned_at"])
 
         IssueUserInterest.objects.filter(module=module, issue_id=issue.id, user=gh_user).delete()
 
@@ -180,7 +229,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist
+            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
@@ -192,11 +241,37 @@ class ModuleMutation:
         if gh_user is None:
             raise ObjectDoesNotExist(msg="Assignee not found.")
 
-        issue = module.issues.filter(number=issue_number).first()
+        issue = (
+            module.issues.select_related("repository", "repository__owner")
+            .filter(number=issue_number)
+            .first()
+        )
+
         if issue is None:
-            raise ObjectDoesNotExist(msg=f"Issue {issue_number} not found in this module.")
+            raise ObjectDoesNotExist(msg=ISSUE_NOT_FOUND_IN_MODULE_MSG)
+
+        if not issue.repository:
+            raise ValidationError(message="Issue has no repository.")
+
+        try:
+            gh_client = get_github_client()
+            gh_repository = gh_client.get_repo(issue.repository.path)
+            gh_issue = gh_repository.get_issue(number=issue.number)
+            gh_issue.remove_from_assignees(user_login)
+        except GithubException as e:
+            raise ValidationError(message=f"Failed to unassign issue on GitHub: {e}") from e
+
+        except Exception as e:
+            raise ValidationError(
+                message=f"Unexpected error while unassigning issue on GitHub: {e}"
+            ) from e
 
         issue.assignees.remove(gh_user)
+
+        task = Task.objects.filter(module=module, issue=issue, assignee=gh_user).first()
+        if task:
+            task.status = Task.Status.CLOSED
+            task.save(update_fields=["status"])
 
         return module
 
@@ -211,7 +286,7 @@ class ModuleMutation:
         issue_number: int,
         deadline_at: datetime,
     ) -> ModuleNode:
-        """Set a deadline for a task. User must be a mentor and an admin of the program."""
+        """Set a deadline for a task. User must be a mentor of the program."""
         user = info.context.request.user
 
         module = (
@@ -220,13 +295,11 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg="Module not found.")
+            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
             raise PermissionDenied(msg="Only mentors can set deadlines.")
-        if not module.program.admins.filter(id=mentor.id).exists():
-            raise PermissionDenied
 
         issue = (
             module.issues.select_related("repository")
@@ -235,7 +308,7 @@ class ModuleMutation:
             .first()
         )
         if issue is None:
-            raise ObjectDoesNotExist(msg="Issue not found in this module.")
+            raise ObjectDoesNotExist(msg=ISSUE_NOT_FOUND_IN_MODULE_MSG)
 
         assignees = issue.assignees.all()
         if not assignees.exists():
@@ -273,7 +346,7 @@ class ModuleMutation:
         program_key: str,
         issue_number: int,
     ) -> ModuleNode:
-        """Clear the deadline for a task. User must be a mentor and an admin of the program."""
+        """Clear the deadline for a task. User must be a mentor of the program."""
         user = info.context.request.user
 
         module = (
@@ -282,13 +355,11 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg="Module not found.")
+            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
             raise PermissionDenied(msg="Only mentors can clear deadlines.")
-        if not module.program.admins.filter(id=mentor.id).exists():
-            raise PermissionDenied
 
         issue = (
             module.issues.select_related("repository")
@@ -297,7 +368,7 @@ class ModuleMutation:
             .first()
         )
         if issue is None:
-            raise ObjectDoesNotExist(msg="Issue not found in this module.")
+            raise ObjectDoesNotExist(msg=ISSUE_NOT_FOUND_IN_MODULE_MSG)
 
         assignees = issue.assignees.all()
         if not assignees.exists():
@@ -328,8 +399,7 @@ class ModuleMutation:
                 key=input_data.key, program__key=input_data.program_key
             )
         except Module.DoesNotExist as e:
-            msg = "Module not found."
-            raise ObjectDoesNotExist(msg) from e
+            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG) from e
 
         try:
             creator_as_mentor = Mentor.objects.get(nest_user=user)
