@@ -2,19 +2,11 @@
 
 import logging
 
-from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
-from apps.github.models.user import User
-from apps.nest.models.badge import Badge
-from apps.nest.models.user_badge import UserBadge
-from apps.owasp.models.entity_member import EntityMember
-from apps.owasp.models.project import Project
+from apps.nest.badges import OWASPProjectLeaderBadgeHandler, OWASPStaffBadgeHandler
 
 logger = logging.getLogger(__name__)
-
-OWASP_STAFF_BADGE_NAME = "OWASP Staff"
-OWASP_PROJECT_LEADER_BADGE_NAME = "OWASP Project Leader"
 
 
 class Command(BaseCommand):
@@ -22,132 +14,46 @@ class Command(BaseCommand):
 
     help = "Sync badges for users based on their roles and attributes"
 
+    BADGE_HANDLERS = {
+        "staff": OWASPStaffBadgeHandler,
+        "leader": OWASPProjectLeaderBadgeHandler,
+    }
+
+    def add_arguments(self, parser):
+        """Add command arguments."""
+        parser.add_argument(
+            "--handler",
+            type=str,
+            choices=self.BADGE_HANDLERS.keys(),
+            help="Specific badge handler to run. Runs all if omitted.",
+            required=False,
+        )
+
     def handle(self, *args, **options):
         """Execute the command."""
-        self.stdout.write("Syncing user badges...")
-        self.update_owasp_staff_badge()
-        self.update_owasp_project_leader_badge()
-        self.stdout.write(self.style.SUCCESS("User badges sync completed"))
+        handler_key = options.get("handler")
 
-    def update_owasp_staff_badge(self):
-        """Sync OWASP Staff badge for users."""
-        # Get or create the OWASP Staff badge
-        badge, created = Badge.objects.get_or_create(
-            name=OWASP_STAFF_BADGE_NAME,
-            defaults={
-                "description": "Official OWASP Staff",
-                "css_class": "fa-user-shield",
-                "weight": 100,  # High weight for importance
-            },
-        )
+        if handler_key:
+            self.stdout.write(f"Syncing specific badge: {handler_key}...")
+            handlers_to_run = [self.BADGE_HANDLERS[handler_key]]
+        else:
+            self.stdout.write("Syncing ALL user badges...")
+            handlers_to_run = self.BADGE_HANDLERS.values()
 
-        if created:
-            logger.info("Created '%s' badge", OWASP_STAFF_BADGE_NAME)
-            self.stdout.write(f"Created badge: {badge.name}")
+        failed_count = 0
+        for handler_class in handlers_to_run:
+            try:
+                self.stdout.write(f"Processing badge: {handler_class.name}")
+                handler = handler_class(stdout=self.stdout, style=self.style)
+                handler.process()
+            except Exception:
+                logger.exception("Error processing badge %s", handler_class.name)
+                self.stdout.write(self.style.ERROR(f"Failed to update {handler_class.name}"))
+                failed_count += 1
 
-        # Assign badge to employees who don't have it.
-        employees_without_badge = User.objects.filter(
-            is_owasp_staff=True,
-        ).exclude(
-            user_badges__badge=badge,
-        )
-        count = employees_without_badge.count()
-
-        if count:
-            for user in employees_without_badge:
-                user_badge, created = UserBadge.objects.get_or_create(user=user, badge=badge)
-                if not user_badge.is_active:
-                    user_badge.is_active = True
-                    user_badge.save(update_fields=["is_active"])
-
-        logger.info("Added '%s' badge to %s users", OWASP_STAFF_BADGE_NAME, count)
-        self.stdout.write(f"Added badge to {count} employees")
-
-        # Remove badge from non-OWASP employees.
-        non_employees = User.objects.filter(
-            is_owasp_staff=False,
-            user_badges__badge=badge,
-        ).distinct()
-        removed_count = non_employees.count()
-
-        if removed_count:
-            UserBadge.objects.filter(
-                user_id__in=non_employees.values_list("id", flat=True),
-                badge=badge,
-            ).update(is_active=False)
-
-        logger.info("Removed '%s' badge from %s users", OWASP_STAFF_BADGE_NAME, removed_count)
-        self.stdout.write(f"Removed badge from {removed_count} non-employees")
-
-    def update_owasp_project_leader_badge(self):
-        """Sync OWASP Project Leader badge for users."""
-        badge, created = Badge.objects.get_or_create(
-            name=OWASP_PROJECT_LEADER_BADGE_NAME,
-            defaults={
-                "description": "Official OWASP Project Leader",
-                "css_class": "fa-user-shield",
-                "weight": 90,
-            },
-        )
-
-        if created:
-            logger.info("Created '%s' badge", OWASP_PROJECT_LEADER_BADGE_NAME)
-            self.stdout.write(f"Created badge: {badge.name}")
-
-        project_leaders_without_badge = (
-            User.objects.filter(
-                id__in=EntityMember.objects.filter(
-                    entity_type=ContentType.objects.get_for_model(Project),
-                    role=EntityMember.Role.LEADER,
-                    is_active=True,
-                    is_reviewed=True,
-                    member__isnull=False,
-                ).values_list("member_id", flat=True),
+        if failed_count:
+            self.stdout.write(
+                self.style.WARNING(f"User badges sync completed with {failed_count} failures.")
             )
-            .distinct()
-            .exclude(
-                user_badges__badge=badge,
-            )
-        )
-
-        count = project_leaders_without_badge.count()
-
-        if count:
-            for user in project_leaders_without_badge:
-                user_badge, created = UserBadge.objects.get_or_create(
-                    user=user,
-                    badge=badge,
-                )
-                if not user_badge.is_active:
-                    user_badge.is_active = True
-                    user_badge.save(update_fields=["is_active"])
-
-        logger.info("Added '%s' badge to %s users", OWASP_PROJECT_LEADER_BADGE_NAME, count)
-        self.stdout.write(f"Added badge to {count} project leaders")
-
-        # Remove badge from users who are no longer project leaders.
-        current_leader_ids = (
-            EntityMember.objects.filter(
-                entity_type=ContentType.objects.get_for_model(Project),
-                role=EntityMember.Role.LEADER,
-                is_active=True,
-                is_reviewed=True,
-                member__isnull=False,
-            )
-            .values_list("member_id", flat=True)
-            .distinct()
-        )
-
-        non_leaders = UserBadge.objects.filter(
-            badge=badge,
-            is_active=True,
-        ).exclude(user_id__in=current_leader_ids)
-        removed_count = non_leaders.count()
-
-        if removed_count:
-            non_leaders.update(is_active=False)
-
-        logger.info(
-            "Removed '%s' badge from %s users", OWASP_PROJECT_LEADER_BADGE_NAME, removed_count
-        )
-        self.stdout.write(f"Removed badge from {removed_count} non-project leaders")
+        else:
+            self.stdout.write(self.style.SUCCESS("User badges sync completed"))
