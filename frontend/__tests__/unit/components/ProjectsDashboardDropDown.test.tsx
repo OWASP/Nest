@@ -75,17 +75,12 @@ jest.mock('@heroui/react', () => ({
     </div>
   ),
   DropdownSection: ({ children, title }: { children: React.ReactNode; title: string }) => (
-    <div
-      data-testid="dropdown-section"
-      data-title={title}
-      role="group"
-      aria-labelledby={`section-${title}`}
-    >
-      <div id={`section-${title}`} className="section-title">
+    <fieldset data-testid="dropdown-section" data-title={title}>
+      <legend id={`section-${title}`} className="section-title">
         {title}
-      </div>
+      </legend>
       {children}
-    </div>
+    </fieldset>
   ),
   DropdownItem: (props: { children: React.ReactNode }) => {
     const itemText = typeof props.children === 'string' ? props.children : 'item'
