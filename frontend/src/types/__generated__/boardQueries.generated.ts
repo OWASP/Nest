@@ -13,7 +13,7 @@ export type GetMemberSnapshotQueryVariables = Types.Exact<{
 }>;
 
 
-export type GetMemberSnapshotQuery = { memberSnapshot: { __typename: 'MemberSnapshotNode', channelCommunications: any, chapterContributions: any, commitsCount: number, communicationHeatmapData: any, contributionHeatmapData: any, endAt: any, id: string, issuesCount: number, messagesCount: number, projectContributions: any, pullRequestsCount: number, repositoryContributions: any, startAt: any, totalContributions: number, githubUser: { __typename: 'UserNode', login: string } } | null };
+export type GetMemberSnapshotQuery = { memberSnapshot: { __typename: 'MemberSnapshotNode', channelCommunications: unknown, chapterContributions: unknown, commitsCount: number, communicationHeatmapData: unknown, contributionHeatmapData: unknown, endAt: unknown, id: string, issuesCount: number, messagesCount: number, projectContributions: unknown, pullRequestsCount: number, repositoryContributions: unknown, startAt: unknown, totalContributions: number, githubUser: { __typename: 'UserNode', login: string } } | null };
 
 export type GetChapterByKeyQueryVariables = Types.Exact<{
   key: Types.Scalars['String']['input'];
