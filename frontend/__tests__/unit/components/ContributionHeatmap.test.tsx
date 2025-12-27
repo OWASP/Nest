@@ -222,7 +222,7 @@ describe('ContributionHeatmap', () => {
     it('sets correct dimensions and series count', () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} />)
       const chart = screen.getByTestId('mock-heatmap-chart')
-      expect(chart).toHaveAttribute('data-height', '200')
+      expect(chart).toHaveAttribute('data-height', '195')
       expect(chart).toHaveAttribute('data-series-length', '7')
     })
 
@@ -622,23 +622,23 @@ describe('ContributionHeatmap', () => {
     it('renders default variant with full dimensions', () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} variant="default" />)
       const chart = screen.getByTestId('mock-heatmap-chart')
-      // Verify full-size dimensions (200px height for default variant)
-      expect(chart).toHaveAttribute('data-height', '200')
+      // Verify full-size dimensions (195px height for default variant)
+      expect(chart).toHaveAttribute('data-height', '195')
     })
 
     it('renders compact variant with smaller dimensions', () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} variant="compact" />)
       const chart = screen.getByTestId('mock-heatmap-chart')
-      // Verify compact dimensions (160px height for compact variant)
-      expect(chart).toHaveAttribute('data-height', '160')
+      // Verify compact dimensions (150px height for compact variant)
+      expect(chart).toHaveAttribute('data-height', '150')
     })
 
     it('applies compact-specific container styling when variant is compact', () => {
       const { container } = renderWithTheme(
         <ContributionHeatmap {...defaultProps} title="Compact" variant="compact" />
       )
-      // Verify compact variant uses min-w-fit class
-      const chartContainer = container.querySelector('.min-w-fit')
+      // Verify compact variant uses inline-block and min-w-full classes
+      const chartContainer = container.querySelector('.inline-block.min-w-full')
       expect(chartContainer).toBeInTheDocument()
     })
 
@@ -646,8 +646,8 @@ describe('ContributionHeatmap', () => {
       const { container } = renderWithTheme(
         <ContributionHeatmap {...defaultProps} title="Default" variant="default" />
       )
-      // Verify default variant uses min-w-fit class
-      const chartContainer = container.querySelector('.min-w-fit')
+      // Verify default variant uses inline-block and min-w-full classes
+      const chartContainer = container.querySelector('.inline-block.min-w-full')
       expect(chartContainer).toBeInTheDocument()
     })
 
@@ -655,7 +655,7 @@ describe('ContributionHeatmap', () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} />)
       const chart = screen.getByTestId('mock-heatmap-chart')
       // Should render with default variant dimensions
-      expect(chart).toHaveAttribute('data-height', '200')
+      expect(chart).toHaveAttribute('data-height', '195')
     })
 
     it('renders title with same styling regardless of variant', () => {

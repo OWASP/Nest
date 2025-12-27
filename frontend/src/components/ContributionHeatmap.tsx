@@ -269,12 +269,23 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
 
   const options = useMemo(() => getChartOptions(isDarkMode, unit), [isDarkMode, unit])
 
-  const chartWidth = useMemo(() => {
+  const calculateChartWidth = useMemo(() => {
     const weeksCount = heatmapSeries[0]?.data?.length || 0
-    const pixelPerWeek = isCompact ? 16 : 20
-    const calculatedWidth = weeksCount * pixelPerWeek + 50
+
+    if (isCompact) {
+      const pixelPerWeek = 13.4
+      const padding = 40
+      const calculatedWidth = weeksCount * pixelPerWeek + padding
+      return Math.max(400, calculatedWidth)
+    }
+
+    const pixelPerWeek = 19.5
+    const padding = 50
+    const calculatedWidth = weeksCount * pixelPerWeek + padding
     return Math.max(600, calculatedWidth)
   }, [heatmapSeries, isCompact])
+
+  const chartWidth = calculateChartWidth
 
   return (
     <div className="w-full">
@@ -283,7 +294,7 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
       )}
 
       {/* scroll wrapper for small screens */}
-      <div className="w-full overflow-x-auto">
+      <div className="scrollbar-hide hover:scrollbar-default w-full overflow-x-auto overflow-y-hidden">
         <style>
           {`
             .apexcharts-tooltip {
@@ -294,19 +305,43 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
             .apexcharts-tooltip * {
               border: none !important;
             }
+            .scrollbar-hide {
+              scrollbar-width: none;
+              -ms-overflow-style: none;
+            }
+            .scrollbar-hide::-webkit-scrollbar {
+              display: none;
+            }
+            .scrollbar-hide:hover {
+              scrollbar-width: thin;
+              -ms-overflow-style: auto;
+            }
+            .scrollbar-hide:hover::-webkit-scrollbar {
+              display: block;
+              height: 8px;
+            }
+            .scrollbar-hide:hover::-webkit-scrollbar-track {
+              background: ${isDarkMode ? '#374151' : '#F3F4F6'};
+              border-radius: 4px;
+            }
+            .scrollbar-hide:hover::-webkit-scrollbar-thumb {
+              background: ${isDarkMode ? '#6B7280' : '#D1D5DB'};
+              border-radius: 4px;
+            }
+            .scrollbar-hide:hover::-webkit-scrollbar-thumb:hover {
+              background: '#9CA3AF';
+            }
           `}
         </style>
 
-        <div style={{ width: `${chartWidth}px`, maxWidth: '100%' }} className="min-w-fit">
-          <div style={{ width: `${chartWidth}px` }}>
-            <Chart
-              options={options}
-              series={heatmapSeries}
-              type="heatmap"
-              height={isCompact ? 160 : 200}
-              width="100%"
-            />
-          </div>
+        <div className="inline-block min-w-full">
+          <Chart
+            options={options}
+            series={heatmapSeries}
+            type="heatmap"
+            height={isCompact ? 150 : 195}
+            width={chartWidth}
+          />
         </div>
       </div>
     </div>

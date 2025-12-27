@@ -88,14 +88,13 @@ const ProjectDetailsPage = () => {
     },
   ]
 
-  // Calculate contribution heatmap date range (1 year back)
   const today = new Date()
+  today.setUTCHours(0, 0, 0, 0)
   const oneYearAgo = new Date(today)
-  oneYearAgo.setFullYear(today.getFullYear() - 1)
+  oneYearAgo.setUTCFullYear(today.getUTCFullYear() - 1)
   const startDate = oneYearAgo.toISOString().split('T')[0]
   const endDate = today.toISOString().split('T')[0]
 
-  // Use real contribution stats from API with fallback to legacy data
   const contributionStats = getContributionStats(
     project.contributionStats,
     project.contributionData
@@ -135,7 +134,7 @@ const ProjectDetailsPage = () => {
                   stats={contributionStats}
                 />
               )}
-              <div className="mt-4 flex w-full items-center justify-center">
+              <div className="flex w-full items-center justify-center">
                 <div className="w-full">
                   {hasHeatmapData && (
                     <ContributionHeatmap
