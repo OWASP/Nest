@@ -16,6 +16,7 @@ from weasyprint import HTML
 from apps.common.eleven_labs import ElevenLabs
 from apps.common.open_ai import OpenAi
 from apps.owasp.models.snapshot import Snapshot
+from apps.owasp.models.sponsor import Sponsor
 
 logger = logging.getLogger(__name__)
 
@@ -56,8 +57,6 @@ class Slide:
         pdf = None
         try:
             html_content = render_to_string(self.template_name, self.context)
-
-            print("Rendering slide image")
 
             html = HTML(string=html_content)
 
@@ -168,17 +167,36 @@ class SlideBuilder:
         print("Generating introduction slide for snapshot")
         month_name = self.snapshot.start_at.strftime("%B")
         return Slide(
-            audio_output_path=self.output_dir / "01_intro.mp3",
+            audio_output_path=self.output_dir / "intro.mp3",
             context={
                 "formatted_start": self.snapshot.start_at.strftime("%b %d"),
                 "formatted_end": self.snapshot.end_at.strftime("%b %d, %Y"),
                 "month_name": month_name,
             },
-            image_output_path=self.output_dir / "01_intro.png",
+            image_output_path=self.output_dir / "intro.png",
             name="Intro Slide",
             template_name="video/slides/intro.html",
             transcript=f"Hey everyone! Welcome to the OWASP Nest {month_name} Snapshot...",
-            video_output_path=self.output_dir / "01_intro.mp4",
+            video_output_path=self.output_dir / "intro.mp4",
+        )
+
+    def create_sponsors_slide(self) -> Slide:
+        """Create a sponsors slide."""
+        print("Generating sponsors slide for snapshot")
+
+        sponsors = Sponsor.objects.values("image_url", "name").order_by("name")
+
+        return Slide(
+            audio_output_path=self.output_dir / "sponsors.mp3",
+            context={
+                "sponsors": list(sponsors),
+                "title": "Our Sponsors",
+            },
+            image_output_path=self.output_dir / "sponsors.png",
+            name="Sponsors Slide",
+            template_name="video/slides/sponsors.html",
+            transcript="A HUGE thanks to the sponsors who make our work possible...",
+            video_output_path=self.output_dir / "sponsors.mp4",
         )
 
     def create_projects_slide(self) -> Slide:
@@ -208,18 +226,18 @@ class SlideBuilder:
         )
 
         return Slide(
-            audio_output_path=self.output_dir / "02_projects.mp3",
+            audio_output_path=self.output_dir / "projects.mp3",
             context={
                 "projects": projects_data,
                 "show_details": project_count <= MAX_DETAILED_PROJECTS,
                 "title": f"New Projects ({project_count})",
             },
-            image_output_path=self.output_dir / "02_projects.png",
+            image_output_path=self.output_dir / "projects.png",
             name="Projects Slide",
             template_name="video/slides/projects.html",
             transcript=f"So... this time we've welcomed {project_count} new projects, "
             f"including OWASP {formatted_project_names}.",
-            video_output_path=self.output_dir / "02_projects.mp4",
+            video_output_path=self.output_dir / "projects.mp4",
         )
 
 
@@ -305,6 +323,10 @@ class Command(BaseCommand):
         generator = Generator()
 
         generator.append_slide(slide_builder.create_intro_slide())
-        generator.append_slide(slide_builder.create_projects_slide())
+        generator.append_slide(slide_builder.create_sponsors_slide())
+        if snapshot.new_projects.exists():
+            generator.append_slide(slide_builder.create_projects_slide())
+        else:
+            print("Skipping projects slide - No new projects in snapshot.")
 
         generator.generate_video(output_dir / f"{snapshot_key}_snapshot.mp4")

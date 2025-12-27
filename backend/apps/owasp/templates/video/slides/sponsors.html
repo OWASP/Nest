@@ -1,0 +1,15 @@
+{% extends "video/base.html" %}
+{% block content %}
+    <div class="flex h-full flex-col p-8">
+        <h1 class="text-6xl font-bold mb-8 text-center">{{ title }}</h1>
+        <div class="flex flex-wrap items-center justify-center gap-4 w-full">
+            {% for sponsor in sponsors %}
+                <div class="shrink-0 w-32 h-32 bg-white rounded-lg p-2">
+                    <img src="{{ sponsor.image_url }}"
+                         alt="{{ sponsor.name }}"
+                         class="w-full h-full object-contain">
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
