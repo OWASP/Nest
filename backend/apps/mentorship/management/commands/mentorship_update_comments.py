@@ -41,13 +41,6 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Starting mentorship issue processing job..."))
 
         modules_with_labels = published_modules.exclude(labels=[]).select_related("project")
-        modules_without_labels = published_modules.filter(labels=[])
-
-        if modules_without_labels.exists():
-            for module in modules_without_labels:
-                self.stdout.write(
-                    self.style.WARNING(f"Skipping. Module '{module.name}' has no labels.")
-                )
 
         if not modules_with_labels.exists():
             self.stdout.write(
