@@ -62,7 +62,14 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
           </Link>
         </div>
 
-        {isAdmin && <EntityActions type="module" programKey={programKey} moduleKey={module.key} isAdmin={isAdmin} />}
+        {isAdmin && (
+          <EntityActions
+            type="module"
+            programKey={programKey}
+            moduleKey={module.key}
+            isAdmin={isAdmin}
+          />
+        )}
       </div>
 
       {/* Description */}

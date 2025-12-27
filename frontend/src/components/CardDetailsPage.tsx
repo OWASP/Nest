@@ -103,7 +103,14 @@ const DetailsCard = ({
                 accessLevel === 'admin' &&
                 admins?.some(
                   (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
-                ) && <EntityActions type="module" programKey={programKey} moduleKey={entityKey} isAdmin={true} />}
+                ) && (
+                  <EntityActions
+                    type="module"
+                    programKey={programKey}
+                    moduleKey={entityKey}
+                    isAdmin={true}
+                  />
+                )}
               {!isActive && <StatusBadge status="inactive" size="md" />}
               {isArchived && type === 'repository' && <StatusBadge status="archived" size="md" />}
               {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (

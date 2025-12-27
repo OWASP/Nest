@@ -1,5 +1,6 @@
 'use client'
 
+import { gql } from '@apollo/client'
 import { useMutation } from '@apollo/client/react'
 import { Button } from '@heroui/button'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal'
@@ -8,9 +9,18 @@ import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState, useRef, useEffect } from 'react'
 import { FaEllipsisV } from 'react-icons/fa'
-import { DELETE_MODULE_MUTATION } from '../graphql/mutations/deleteModule'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
 import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
+
+const DELETE_MODULE_MUTATION = gql`
+  mutation DeleteModule($programKey: String!, $moduleKey: String!) {
+    deleteModule(programKey: $programKey, moduleKey: $moduleKey)
+  }
+`
+
+type DeleteModuleResponse = {
+  deleteModule: boolean
+}
 
 interface EntityActionsProps {
   type: 'program' | 'module'
@@ -145,7 +155,9 @@ const EntityActions: React.FC<EntityActionsProps> = ({
       : [
           { key: 'edit_module', label: 'Edit' },
           { key: 'view_issues', label: 'View Issues' },
-          ...(isAdmin ? [{ key: 'delete_module', label: 'Delete', className: 'text-red-500' }] : []),
+          ...(isAdmin
+            ? [{ key: 'delete_module', label: 'Delete', className: 'text-red-500' }]
+            : []),
         ]
 
   useEffect(() => {
