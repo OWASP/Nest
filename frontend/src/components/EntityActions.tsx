@@ -1,10 +1,26 @@
 'use client'
 
+import { gql } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
+import { Button } from '@heroui/button'
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal'
+import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState, useRef, useEffect } from 'react'
 import { FaEllipsisV } from 'react-icons/fa'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
+import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
+
+interface DeleteModuleResponse {
+  deleteModule: boolean
+}
+
+const DELETE_MODULE_MUTATION = gql`
+  mutation DeleteModule($programKey: String!, $moduleKey: String!) {
+    deleteModule(programKey: $programKey, moduleKey: $moduleKey)
+  }
+`
 
 interface EntityActionsProps {
   type: 'program' | 'module'
@@ -23,7 +39,11 @@ const EntityActions: React.FC<EntityActionsProps> = ({
 }) => {
   const router = useRouter()
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  const [deleteModule] = useMutation<DeleteModuleResponse>(DELETE_MODULE_MUTATION)
 
   const handleAction = (actionKey: string) => {
     switch (actionKey) {
@@ -43,6 +63,9 @@ const EntityActions: React.FC<EntityActionsProps> = ({
           router.push(`/my/mentorship/programs/${programKey}/modules/${moduleKey}/issues`)
         }
         break
+      case 'delete_module':
+        setDeleteModalOpen(true)
+        break
       case 'publish':
         setStatus?.(ProgramStatusEnum.Published)
         break
@@ -54,6 +77,66 @@ const EntityActions: React.FC<EntityActionsProps> = ({
         break
     }
     setDropdownOpen(false)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!moduleKey) return
+
+    setIsDeleting(true)
+
+    try {
+      const result = await deleteModule({
+        variables: { programKey, moduleKey },
+
+        update(cache) {
+          const existing = cache.readQuery({
+            query: GetProgramAndModulesDocument,
+            variables: { programKey },
+          })
+
+          if (!existing || !existing.getProgramModules) {
+            throw new Error('Program modules not found in cache')
+          }
+
+          cache.writeQuery({
+            query: GetProgramAndModulesDocument,
+            variables: { programKey },
+            data: {
+              ...existing,
+              getProgramModules: existing.getProgramModules.filter(
+                (module) => module.key !== moduleKey
+              ),
+            },
+          })
+        },
+      })
+
+      if (!result?.data || typeof result.data !== 'object' || !('deleteModule' in result.data)) {
+        throw new Error('Delete mutation failed on server')
+      }
+
+      addToast({
+        title: 'Success',
+        description: 'Module has been deleted successfully.',
+        color: 'success',
+      })
+
+      setDeleteModalOpen(false)
+      router.push(`/my/mentorship/programs/${programKey}`)
+    } catch (error) {
+      const description =
+        error instanceof Error && error.message.includes('Permission')
+          ? 'You do not have permission to delete this module.'
+          : 'Failed to delete module. Please try again.'
+
+      addToast({
+        title: 'Error',
+        description,
+        color: 'danger',
+      })
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   const options =
@@ -72,6 +155,7 @@ const EntityActions: React.FC<EntityActionsProps> = ({
       : [
           { key: 'edit_module', label: 'Edit' },
           { key: 'view_issues', label: 'View Issues' },
+          { key: 'delete_module', label: 'Delete', className: 'text-red-500' },
         ]
 
   useEffect(() => {
@@ -94,42 +178,76 @@ const EntityActions: React.FC<EntityActionsProps> = ({
   }
 
   return (
-    <div className="relative" ref={dropdownRef}>
-      <button
-        data-testid={`${type}-actions-button`}
-        type="button"
-        onClick={handleToggle}
-        className="cursor-pointer rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
-        aria-label={`${type === 'program' ? 'Program' : 'Module'} actions menu`}
-        aria-expanded={dropdownOpen}
-        aria-haspopup="true"
-      >
-        <FaEllipsisV className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-200" />
-      </button>
-      {dropdownOpen && (
-        <div className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          {options.map((option) => {
-            const handleMenuItemClick = (e: React.MouseEvent) => {
-              e.preventDefault()
-              e.stopPropagation()
-              handleAction(option.key)
-            }
+    <>
+      <div className="relative" ref={dropdownRef}>
+        <button
+          data-testid={`${type}-actions-button`}
+          type="button"
+          onClick={handleToggle}
+          className="cursor-pointer rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
+          aria-label={`${type === 'program' ? 'Program' : 'Module'} actions menu`}
+          aria-expanded={dropdownOpen}
+          aria-haspopup="true"
+        >
+          <FaEllipsisV className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-200" />
+        </button>
+        {dropdownOpen && (
+          <div className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+            {options.map((option) => {
+              const handleMenuItemClick = (e: React.MouseEvent) => {
+                e.preventDefault()
+                e.stopPropagation()
+                handleAction(option.key)
+              }
 
-            return (
-              <button
-                key={option.key}
-                type="button"
-                role="menuitem"
-                onClick={handleMenuItemClick}
-                className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+              return (
+                <button
+                  key={option.key}
+                  type="button"
+                  role="menuitem"
+                  onClick={handleMenuItemClick}
+                  className={`block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 ${
+                    option.className || ''
+                  }`}
+                >
+                  {option.label}
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {type === 'module' && (
+        <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)}>
+          <ModalContent>
+            <ModalHeader className="flex flex-col gap-1">Delete Module</ModalHeader>
+            <ModalBody>
+              <p>Are you sure you want to delete this module? This action cannot be undone.</p>
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                color="default"
+                variant="light"
+                onPress={() => setDeleteModalOpen(false)}
+                disabled={isDeleting}
               >
-                {option.label}
-              </button>
-            )
-          })}
-        </div>
+                Cancel
+              </Button>
+              <Button
+                color="danger"
+                onPress={handleDeleteConfirm}
+                isLoading={isDeleting}
+                disabled={isDeleting}
+                className="text-white"
+              >
+                Delete
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       )}
-    </div>
+    </>
   )
 }
 

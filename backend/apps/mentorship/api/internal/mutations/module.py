@@ -399,3 +399,64 @@ class ModuleMutation:
         module.program.save(update_fields=["experience_levels"])
 
         return module
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
+    def delete_module(
+        self,
+        info: strawberry.Info,
+        program_key: str,
+        module_key: str,
+    ) -> str:
+        """Delete a mentorship module. User must be an admin of the program."""
+        user = info.context.request.user
+
+        try:
+            module = Module.objects.select_related("program").get(
+                key=module_key, program__key=program_key
+            )
+        except Module.DoesNotExist as e:
+            msg = "Module not found."
+            raise ObjectDoesNotExist(msg) from e
+
+        try:
+            admin_as_mentor = Mentor.objects.get(nest_user=user)
+        except Mentor.DoesNotExist as err:
+            msg = "Only mentors can delete modules."
+            logger.warning(
+                "User '%s' is not a mentor and cannot delete modules.",
+                user.username,
+                exc_info=True,
+            )
+            raise PermissionDenied(msg) from err
+
+        if not module.program.admins.filter(id=admin_as_mentor.id).exists():
+            raise PermissionDenied
+
+        program = module.program
+        module_name = module.name
+
+        # Clean up experience levels if this module is the only one using it
+        experience_level_to_remove = module.experience_level
+        if (
+            experience_level_to_remove in program.experience_levels
+            and not Module.objects.filter(
+                program=program, experience_level=experience_level_to_remove
+            )
+            .exclude(id=module.id)
+            .exists()
+        ):
+            program.experience_levels.remove(experience_level_to_remove)
+            program.save(update_fields=["experience_levels"])
+
+        # Delete the module
+        module.delete()
+
+        logger.info(
+            "User '%s' deleted module '%s' from program '%s'.",
+            user.username,
+            module_name,
+            program_key,
+        )
+
+        return f"Module '{module_name}' has been deleted successfully."
