@@ -22,6 +22,10 @@ owasp-enrich-projects:
 	@echo "Enriching OWASP projects"
 	@CMD="python manage.py owasp_enrich_projects" $(MAKE) exec-backend-command
 
+owasp-generate-community-snapshot-video:
+	@echo "Generating OWASP community snapshot video"
+	@CMD="python manage.py owasp_generate_community_snapshot_video --snapshot-key=$(snapshot_key)" $(MAKE) exec-backend-command
+
 owasp-process-snapshots:
 	@echo "Processing OWASP snapshots"
 	@CMD="python manage.py owasp_process_snapshots" $(MAKE) exec-backend-command

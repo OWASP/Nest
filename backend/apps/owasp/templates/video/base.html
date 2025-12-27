@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=1920, height=1080">
+        <style>
+            @page {
+                margin: 0;
+                size: 1920px 1080px;
+            }
+
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                background: #212529;
+                color: #fff;
+                font-family: 'Arial', sans-serif;
+                height: 1080px;
+                width: 1920px;
+            }
+
+            .slide {
+                height: 100%;
+                width: 100%;
+            }
+
+            .bg-card {
+                background: #1f2937;
+            }
+
+            .bg-white {
+                background: #ffffff;
+            }
+
+            .border-2 {
+                border: 0.125rem solid #374151;
+            }
+
+            .flex {
+                display: flex;
+            }
+
+            .flex-col {
+                flex-direction: column;
+            }
+
+            .flex-wrap {
+                flex-wrap: wrap;
+            }
+
+            .font-bold {
+                font-weight: 700;
+            }
+
+            .gap-4 {
+                gap: 1rem;
+            }
+
+            .h-full {
+                height: 100%;
+            }
+
+            .h-32 {
+                height: 8rem;
+            }
+
+            .items-center {
+                align-items: center;
+            }
+
+            .justify-center {
+                justify-content: center;
+            }
+
+            .mb-4 {
+                margin-bottom: 1rem;
+            }
+
+            .mb-8 {
+                margin-bottom: 2rem;
+            }
+
+            .mb-12 {
+                margin-bottom: 3rem;
+            }
+
+            .mt-1 {
+                margin-top: 0.25rem;
+            }
+
+            .mt-2 {
+                margin-top: 0.5rem;
+            }
+
+            .mt-4 {
+                margin-top: 1rem;
+            }
+
+            .mt-8 {
+                margin-top: 2rem;
+            }
+
+            .object-contain {
+                object-fit: contain;
+            }
+
+            .p-4 {
+                padding: 1rem;
+            }
+
+            .p-2 {
+                padding: 0.5rem;
+            }
+
+            .p-8 {
+                padding: 2rem;
+            }
+
+            .p-12 {
+                padding: 3rem;
+            }
+
+            .px-24 {
+                padding-left: 6rem;
+                padding-right: 6rem;
+            }
+
+            .rounded-lg {
+                border-radius: 0.5rem;
+            }
+
+            .shrink-0 {
+                flex-shrink: 0;
+            }
+
+            .text-2xl {
+                font-size: 1.5rem;
+                line-height: 2rem;
+            }
+
+            .text-4xl {
+                font-size: 2.25rem;
+                line-height: 2.5rem;
+            }
+
+            .text-6xl {
+                font-size: 3.75rem;
+                line-height: 1;
+            }
+
+            .text-center {
+                text-align: center;
+            }
+
+            .text-gray-300 {
+                color: #d1d5db;
+            }
+
+            .text-lg {
+                font-size: 1.125rem;
+                line-height: 1.75rem;
+            }
+
+            .text-owasp-blue {
+                color: #98AFC7;
+            }
+
+            .text-xl {
+                font-size: 1.25rem;
+                line-height: 1.75rem;
+            }
+
+            .w-72 {
+                width: 18rem;
+            }
+
+            .w-96 {
+                width: 24rem;
+            }
+
+            .w-full {
+                width: 100%;
+            }
+
+            .w-32 {
+                width: 8rem;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="slide">
+            {% block content %}{% endblock %}
+        </div>
+    </body>
+</html>
