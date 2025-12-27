@@ -342,7 +342,10 @@ class ModuleMutation:
             )
             raise PermissionDenied(msg) from err
 
-        if not module.program.admins.filter(id=creator_as_mentor.id).exists():
+        is_program_admin = module.program.admins.filter(id=creator_as_mentor.id).exists()
+        is_module_mentor = module.mentors.filter(id=creator_as_mentor.id).exists()
+
+        if not (is_program_admin or is_module_mentor):
             raise PermissionDenied
 
         started_at, ended_at = _validate_module_dates(

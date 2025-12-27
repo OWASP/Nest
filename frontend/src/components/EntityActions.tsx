@@ -1,6 +1,5 @@
 'use client'
 
-import { gql } from '@apollo/client'
 import { useMutation } from '@apollo/client/react'
 import { Button } from '@heroui/button'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal'
@@ -9,18 +8,9 @@ import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState, useRef, useEffect } from 'react'
 import { FaEllipsisV } from 'react-icons/fa'
+import { DELETE_MODULE_MUTATION } from '../graphql/mutations/deleteModule'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
 import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
-
-interface DeleteModuleResponse {
-  deleteModule: boolean
-}
-
-const DELETE_MODULE_MUTATION = gql`
-  mutation DeleteModule($programKey: String!, $moduleKey: String!) {
-    deleteModule(programKey: $programKey, moduleKey: $moduleKey)
-  }
-`
 
 interface EntityActionsProps {
   type: 'program' | 'module'
@@ -28,6 +18,7 @@ interface EntityActionsProps {
   moduleKey?: string
   status?: string
   setStatus?: (newStatus: string) => void
+  isAdmin?: boolean
 }
 
 const EntityActions: React.FC<EntityActionsProps> = ({
@@ -36,6 +27,7 @@ const EntityActions: React.FC<EntityActionsProps> = ({
   moduleKey,
   status,
   setStatus,
+  isAdmin = false,
 }) => {
   const router = useRouter()
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -94,24 +86,22 @@ const EntityActions: React.FC<EntityActionsProps> = ({
             variables: { programKey },
           })
 
-          if (!existing || !existing.getProgramModules) {
-            throw new Error('Program modules not found in cache')
+          if (existing?.getProgramModules) {
+            cache.writeQuery({
+              query: GetProgramAndModulesDocument,
+              variables: { programKey },
+              data: {
+                ...existing,
+                getProgramModules: existing.getProgramModules.filter(
+                  (module) => module.key !== moduleKey
+                ),
+              },
+            })
           }
-
-          cache.writeQuery({
-            query: GetProgramAndModulesDocument,
-            variables: { programKey },
-            data: {
-              ...existing,
-              getProgramModules: existing.getProgramModules.filter(
-                (module) => module.key !== moduleKey
-              ),
-            },
-          })
         },
       })
 
-      if (!result?.data || typeof result.data !== 'object' || !('deleteModule' in result.data)) {
+      if (!result?.data || typeof result.data !== 'object' || !result.data.deleteModule) {
         throw new Error('Delete mutation failed on server')
       }
 
@@ -155,7 +145,7 @@ const EntityActions: React.FC<EntityActionsProps> = ({
       : [
           { key: 'edit_module', label: 'Edit' },
           { key: 'view_issues', label: 'View Issues' },
-          { key: 'delete_module', label: 'Delete', className: 'text-red-500' },
+          ...(isAdmin ? [{ key: 'delete_module', label: 'Delete', className: 'text-red-500' }] : []),
         ]
 
   useEffect(() => {
