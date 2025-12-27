@@ -29,6 +29,26 @@ MODULE_NOT_FOUND_MSG = "Module not found."
 ISSUE_NOT_FOUND_IN_MODULE_MSG = "Issue not found in this module."
 
 
+def get_github_issue(module: Module, issue_number: int) -> tuple:
+    """Get local issue and GitHub issue objects for a module issue."""
+    issue = (
+        module.issues.select_related("repository", "repository__owner")
+        .filter(number=issue_number)
+        .first()
+    )
+    if issue is None:
+        raise ObjectDoesNotExist(msg=ISSUE_NOT_FOUND_IN_MODULE_MSG)
+
+    if not issue.repository:
+        raise ValidationError(message="Issue has no repository.")
+
+    gh_client = get_github_client()
+    gh_repository = gh_client.get_repo(issue.repository.path)
+    gh_issue = gh_repository.get_issue(number=issue.number)
+
+    return issue, gh_issue
+
+
 def resolve_mentors_from_logins(logins: list[str]) -> set[Mentor]:
     """Resolve a list of GitHub logins to a set of Mentor objects."""
     mentors = set()
@@ -154,29 +174,11 @@ class ModuleMutation:
         if gh_user is None:
             raise ObjectDoesNotExist(msg="Assignee not found.")
 
-        issue = (
-            module.issues.select_related("repository", "repository__owner")
-            .filter(number=issue_number)
-            .first()
-        )
-        if issue is None:
-            raise ObjectDoesNotExist(msg=ISSUE_NOT_FOUND_IN_MODULE_MSG)
-
-        if not issue.repository:
-            raise ValidationError(message="Issue has no repository.")
-
         try:
-            gh_client = get_github_client()
-            gh_repository = gh_client.get_repo(issue.repository.path)
-            gh_issue = gh_repository.get_issue(number=issue.number)
+            issue, gh_issue = get_github_issue(module, issue_number)
             gh_issue.add_to_assignees(user_login)
         except GithubException as e:
             raise ValidationError(message=f"Failed to assign issue on GitHub: {e}") from e
-
-        except Exception as e:
-            raise ValidationError(
-                message=f"Unexpected error while assigning issue on GitHub: {e}"
-            ) from e
 
         issue.assignees.add(gh_user)
         now = timezone.now()
@@ -203,7 +205,8 @@ class ModuleMutation:
 
         if not created and task.assigned_at is None:
             task.assigned_at = now
-            task.save(update_fields=["assigned_at"])
+            task.status = Task.Status.IN_PROGRESS
+            task.save(update_fields=["assigned_at", "status"])
 
         IssueUserInterest.objects.filter(module=module, issue_id=issue.id, user=gh_user).delete()
 
@@ -241,30 +244,11 @@ class ModuleMutation:
         if gh_user is None:
             raise ObjectDoesNotExist(msg="Assignee not found.")
 
-        issue = (
-            module.issues.select_related("repository", "repository__owner")
-            .filter(number=issue_number)
-            .first()
-        )
-
-        if issue is None:
-            raise ObjectDoesNotExist(msg=ISSUE_NOT_FOUND_IN_MODULE_MSG)
-
-        if not issue.repository:
-            raise ValidationError(message="Issue has no repository.")
-
         try:
-            gh_client = get_github_client()
-            gh_repository = gh_client.get_repo(issue.repository.path)
-            gh_issue = gh_repository.get_issue(number=issue.number)
+            issue, gh_issue = get_github_issue(module, issue_number)
             gh_issue.remove_from_assignees(user_login)
         except GithubException as e:
             raise ValidationError(message=f"Failed to unassign issue on GitHub: {e}") from e
-
-        except Exception as e:
-            raise ValidationError(
-                message=f"Unexpected error while unassigning issue on GitHub: {e}"
-            ) from e
 
         issue.assignees.remove(gh_user)
 
