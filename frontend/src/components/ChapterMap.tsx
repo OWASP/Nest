@@ -11,7 +11,6 @@ import 'leaflet.markercluster'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
-import 'leaflet.markercluster'
 
 const ChapterMap = ({
   geoLocData,
@@ -42,9 +41,15 @@ const ChapterMap = ({
           [90, 180],
         ],
         maxBoundsViscosity: 1.0,
+        minZoom: 2.4,
+        dragging: false,
+        doubleClickZoom: false,
+        touchZoom: false,
+        boxZoom: false,
+        keyboard: false,
         scrollWheelZoom: false,
         zoomControl: false,
-      }).setView([20, 0], 2)
+      }).setView([20, 0], 2.4)
 
       initialViewRef.current = {
         center: mapRef.current.getCenter(),
@@ -54,12 +59,8 @@ const ChapterMap = ({
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
         className: 'map-tiles',
+        noWrap: true,
       }).addTo(mapRef.current)
-
-      mapRef.current.on('click', () => {
-        mapRef.current?.scrollWheelZoom.enable()
-        setIsMapActive(true)
-      })
 
       mapRef.current.on('mouseout', (e: L.LeafletMouseEvent) => {
         const originalEvent = e.originalEvent as MouseEvent
@@ -72,7 +73,6 @@ const ChapterMap = ({
         )
           return
 
-        mapRef.current?.scrollWheelZoom.disable()
         setIsMapActive(false)
       })
     }
@@ -199,16 +199,39 @@ const ChapterMap = ({
     if (!map) return
 
     if (isMapActive) {
+      map.dragging.enable()
+      map.touchZoom.enable()
+      map.doubleClickZoom.enable()
+      map.scrollWheelZoom.enable()
+      map.boxZoom.enable()
+      map.keyboard.enable()
       if (!zoomControlRef.current) {
         zoomControlRef.current = L.control.zoom({ position: 'topleft' })
         zoomControlRef.current.addTo(map)
       }
-    } else if (zoomControlRef.current) {
-      zoomControlRef.current.remove()
-      zoomControlRef.current = null
+    } else {
+      map.dragging.disable()
+      map.touchZoom.disable()
+      map.doubleClickZoom.disable()
+      map.scrollWheelZoom.disable()
+      map.boxZoom.disable()
+      map.keyboard.disable()
+
+      if (zoomControlRef.current) {
+        zoomControlRef.current.remove()
+        zoomControlRef.current = null
+      }
     }
 
     return () => {
+      if (map) {
+        map.dragging?.disable()
+        map.touchZoom?.disable()
+        map.doubleClickZoom?.disable()
+        map.scrollWheelZoom?.disable()
+        map.boxZoom?.disable()
+        map.keyboard?.disable()
+      }
       if (zoomControlRef.current) {
         zoomControlRef.current.remove()
         zoomControlRef.current = null
@@ -216,32 +239,42 @@ const ChapterMap = ({
     }
   }, [isMapActive])
 
+  useEffect(() => {
+    if (!isMapActive) return
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsMapActive(false)
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [isMapActive])
+
   return (
     <div className="relative" style={style}>
       <div id="chapter-map" className="h-full w-full" />
       {!isMapActive && (
-        <button
-          type="button"
-          tabIndex={0}
-          className="pointer-events-none absolute inset-0 z-[500] flex cursor-pointer items-center justify-center rounded-[inherit] bg-black/10"
-          onClick={() => {
-            mapRef.current?.scrollWheelZoom.enable()
-            setIsMapActive(true)
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              mapRef.current?.scrollWheelZoom.enable()
-              setIsMapActive(true)
-            }
-          }}
-          aria-label="Unlock map"
-        >
-          <p className="pointer-events-auto flex items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white">
-            <FaUnlock aria-hidden="true" />
-            Unlock map
-          </p>
-        </button>
+        <>
+          <div
+            className="absolute inset-0 z-[2000] rounded-[inherit] bg-black/10"
+            aria-hidden="true"
+          />
+          <div className="pointer-events-none absolute inset-0 z-[2000] flex items-center justify-center">
+            <button
+              type="button"
+              className="pointer-events-auto flex cursor-pointer items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white"
+              onClick={() => setIsMapActive(true)}
+              aria-label="Unlock map"
+            >
+              <FaUnlock aria-hidden="true" />
+              Unlock map
+            </button>
+          </div>
+        </>
       )}
       {isMapActive && (
         <div className="absolute top-20 left-3 z-[999] w-fit">

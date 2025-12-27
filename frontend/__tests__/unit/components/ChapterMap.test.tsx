@@ -1,4 +1,4 @@
-import { render, fireEvent } from '@testing-library/react'
+import { render, fireEvent, act } from '@testing-library/react'
 import * as L from 'leaflet'
 import { Chapter } from 'types/chapter'
 import ChapterMap from 'components/ChapterMap'
@@ -12,6 +12,26 @@ const mockMap = {
   getZoom: jest.fn(() => 2),
   getContainer: jest.fn(() => document.getElementById('chapter-map')),
   scrollWheelZoom: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  dragging: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  touchZoom: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  doubleClickZoom: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  boxZoom: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  keyboard: {
     enable: jest.fn(),
     disable: jest.fn(),
   },
@@ -142,10 +162,16 @@ describe('ChapterMap', () => {
           [90, 180],
         ],
         maxBoundsViscosity: 1.0,
+        minZoom: 2.4,
+        dragging: false,
+        doubleClickZoom: false,
+        touchZoom: false,
+        boxZoom: false,
+        keyboard: false,
         scrollWheelZoom: false,
         zoomControl: false,
       })
-      expect(mockMap.setView).toHaveBeenCalledWith([20, 0], 2)
+      expect(mockMap.setView).toHaveBeenCalledWith([20, 0], 2.4)
     })
 
     it('adds tile layer to the map', () => {
@@ -155,6 +181,7 @@ describe('ChapterMap', () => {
         {
           attribution: '© OpenStreetMap contributors',
           className: 'map-tiles',
+          noWrap: true,
         }
       )
       expect(mockTileLayer.addTo).toHaveBeenCalledWith(mockMap)
@@ -168,8 +195,58 @@ describe('ChapterMap', () => {
 
     it('sets up event listeners for map interaction', () => {
       render(<ChapterMap {...defaultProps} />)
-      expect(mockMap.on).toHaveBeenCalledWith('click', expect.any(Function))
       expect(mockMap.on).toHaveBeenCalledWith('mouseout', expect.any(Function))
+    })
+
+    it('locks map on mouseout', () => {
+      const { getByLabelText } = render(<ChapterMap {...defaultProps} />)
+
+      // Simulate map activation
+      const overlay = getByLabelText('Unlock map')
+      fireEvent.click(overlay)
+
+      // Trigger mouseout handler
+      const mouseoutHandler = mockMap.on.mock.calls.find((call) => call[0] === 'mouseout')?.[1]
+
+      // Simulate mouseout event that is NOT contained by map or map parent
+      // We mock the event structure needed by the handler
+      const mockEvent = {
+        originalEvent: {
+          relatedTarget: document.body, // Target is outside map container
+        },
+      }
+
+      act(() => {
+        mouseoutHandler(mockEvent)
+      })
+
+      // Expect map to be disabled (handlers disabled)
+      expect(mockMap.dragging.disable).toHaveBeenCalled()
+      expect(mockMap.touchZoom.disable).toHaveBeenCalled()
+      expect(mockMap.doubleClickZoom.disable).toHaveBeenCalled()
+      expect(mockMap.scrollWheelZoom.disable).toHaveBeenCalled()
+      expect(mockMap.boxZoom.disable).toHaveBeenCalled()
+      expect(mockMap.keyboard.disable).toHaveBeenCalled()
+    })
+
+    it('disables map interactions on unmount', () => {
+      const { unmount, getByText } = render(<ChapterMap {...defaultProps} />)
+
+      // Unlock map to enable interactions
+      const unlockButton = getByText('Unlock map').closest('button')
+      fireEvent.click(unlockButton)
+
+      // Clear mocks to ensure we are testing cleanup calls
+      jest.clearAllMocks()
+
+      unmount()
+
+      expect(mockMap.dragging.disable).toHaveBeenCalled()
+      expect(mockMap.touchZoom.disable).toHaveBeenCalled()
+      expect(mockMap.doubleClickZoom.disable).toHaveBeenCalled()
+      expect(mockMap.scrollWheelZoom.disable).toHaveBeenCalled()
+      expect(mockMap.boxZoom.disable).toHaveBeenCalled()
+      expect(mockMap.keyboard.disable).toHaveBeenCalled()
     })
   })
 
@@ -287,7 +364,7 @@ describe('ChapterMap', () => {
       const { getByText, queryByText } = render(<ChapterMap {...defaultProps} />)
 
       const overlay = getByText('Unlock map').closest('button')
-      fireEvent.click(overlay!)
+      fireEvent.click(overlay)
 
       expect(queryByText('Unlock map')).not.toBeInTheDocument()
     })
@@ -296,35 +373,36 @@ describe('ChapterMap', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
       const overlay = getByText('Unlock map').closest('button')
-      fireEvent.click(overlay!)
+      fireEvent.click(overlay)
 
+      expect(mockMap.dragging.enable).toHaveBeenCalled()
+      expect(mockMap.touchZoom.enable).toHaveBeenCalled()
+      expect(mockMap.doubleClickZoom.enable).toHaveBeenCalled()
       expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
-    })
-
-    it('handles keyboard interaction with Enter key', () => {
-      const { getByText } = render(<ChapterMap {...defaultProps} />)
-
-      const overlay = getByText('Unlock map').closest('button')
-      fireEvent.keyDown(overlay!, { key: 'Enter' })
-
-      expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
-    })
-
-    it('handles keyboard interaction with Space key', () => {
-      const { getByText } = render(<ChapterMap {...defaultProps} />)
-
-      const overlay = getByText('Unlock map').closest('button')
-      fireEvent.keyDown(overlay!, { key: ' ' })
-
-      expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
+      expect(mockMap.boxZoom.enable).toHaveBeenCalled()
+      expect(mockMap.keyboard.enable).toHaveBeenCalled()
     })
 
     it('has proper accessibility attributes', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
       const overlay = getByText('Unlock map').closest('button')
-      expect(overlay).toHaveAttribute('tabIndex', '0')
       expect(overlay).toHaveAttribute('aria-label', 'Unlock map')
+    })
+
+    it('locks map when Escape key is pressed', () => {
+      const { getByText, queryByText } = render(<ChapterMap {...defaultProps} />)
+
+      // Unlock first
+      const unlockButton = getByText('Unlock map').closest('button')
+      fireEvent.click(unlockButton)
+      expect(queryByText('Unlock map')).not.toBeInTheDocument()
+
+      // Press Escape
+      fireEvent.keyDown(document, { key: 'Escape' })
+
+      // Should be locked again (overlay visible)
+      expect(getByText('Unlock map')).toBeInTheDocument()
     })
   })
 
@@ -340,14 +418,14 @@ describe('ChapterMap', () => {
     it('does not set local view when showLocal is false', () => {
       render(<ChapterMap {...defaultProps} showLocal={false} />)
 
-      expect(mockMap.setView).toHaveBeenCalledWith([20, 0], 2)
+      expect(mockMap.setView).toHaveBeenCalledWith([20, 0], 2.4)
       expect(mockMap.fitBounds).not.toHaveBeenCalled()
     })
 
     it('handles showLocal with empty data', () => {
       render(<ChapterMap {...defaultProps} geoLocData={[]} showLocal={true} />)
 
-      expect(mockMap.setView).toHaveBeenCalledWith([20, 0], 2)
+      expect(mockMap.setView).toHaveBeenCalledWith([20, 0], 2.4)
       expect(mockMap.fitBounds).not.toHaveBeenCalled()
     })
   })
