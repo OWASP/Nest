@@ -22,6 +22,7 @@ export const GET_MODULE_MENTEE_DETAILS = gql`
       number
       title
       state
+      isMerged
       labels
       assignees {
         login
