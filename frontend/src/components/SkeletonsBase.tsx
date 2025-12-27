@@ -2,9 +2,10 @@ import { Skeleton } from '@heroui/skeleton'
 import LoadingSpinner from 'components/LoadingSpinner'
 import AboutSkeleton from 'components/skeletons/AboutSkeleton'
 import CardSkeleton from 'components/skeletons/Card'
+import MemberDetailsPageSkeleton from 'components/skeletons/MemberDetailsPageSkeleton'
+import OrganizationDetailsPageSkeleton from 'components/skeletons/OrganizationDetailsPageSkeleton'
 import SnapshotSkeleton from 'components/skeletons/SnapshotSkeleton'
 import UserCardSkeleton from 'components/skeletons/UserCard'
-
 function userCardRender() {
   const cardCount = 12
   return (
@@ -68,6 +69,11 @@ const SkeletonBase = ({
       return snapshotCardRender()
     case 'about':
       return <AboutSkeleton />
+    case 'member-details':
+    case 'members':
+      return <MemberDetailsPageSkeleton />
+    case 'organizations-details':
+      return <OrganizationDetailsPageSkeleton />
     default:
       return <LoadingSpinner imageUrl={loadingImageUrl} />
   }

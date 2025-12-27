@@ -20,7 +20,7 @@ import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
 import Badges from 'components/Badges'
 import DetailsCard from 'components/CardDetailsPage'
-import LoadingSpinner from 'components/LoadingSpinner'
+import MemberDetailsPageSkeleton from 'components/skeletons/MemberDetailsPageSkeleton'
 
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams<{ memberKey: string }>()
@@ -94,7 +94,11 @@ const UserDetailsPage: React.FC = () => {
   })
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return (
+      <div data-testid="user-loading-skeleton">
+        <MemberDetailsPageSkeleton />
+      </div>
+    )
   }
 
   if (!isLoading && user == null) {

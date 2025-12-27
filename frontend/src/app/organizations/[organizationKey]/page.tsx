@@ -10,7 +10,7 @@ import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetOrganizationDataDocument } from 'types/__generated__/organizationQueries.generated'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
-import LoadingSpinner from 'components/LoadingSpinner'
+import OrganizationDetailsPageSkeleton from 'components/skeletons/OrganizationDetailsPageSkeleton'
 const OrganizationDetailsPage = () => {
   const { organizationKey } = useParams<{ organizationKey: string }>()
   const [organization, setOrganization] = useState(null)
@@ -43,7 +43,11 @@ const OrganizationDetailsPage = () => {
   }, [graphQLData, graphQLRequestError, organizationKey])
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return (
+      <div data-testid="org-loading-skeleton">
+        <OrganizationDetailsPageSkeleton />
+      </div>
+    )
   }
 
   if (!isLoading && !graphQLData?.organization) {
