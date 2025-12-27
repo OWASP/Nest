@@ -6,7 +6,10 @@ import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { useMemo, useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GetModuleMenteeDetailsDocument } from 'types/__generated__/menteeQueries.generated'
+import {
+  GetModuleMenteeDetailsDocument,
+  type GetModuleMenteeDetailsQuery,
+} from 'types/__generated__/menteeQueries.generated'
 import { MenteeDetails } from 'types/mentorship'
 import IssuesTable, { type IssueRow } from 'components/IssuesTable'
 import { LabelList } from 'components/LabelList'
@@ -25,17 +28,7 @@ const MenteeProfilePage = () => {
 
   const [menteeDetails, setMenteeDetails] = useState<MenteeDetails | null>(null)
   const [menteeIssuesData, setMenteeIssuesData] = useState<
-    Array<{
-      id: string
-      number: number
-      title: string
-      state: string
-      isMerged?: boolean
-      labels: string[]
-      createdAt: string | Date
-      url: string
-      assignees: Array<{ login: string; name: string; avatarUrl: string }>
-    }>
+    GetModuleMenteeDetailsQuery['getMenteeModuleIssues']
   >([])
 
   const [isLoading, setIsLoading] = useState(true)
@@ -73,6 +66,7 @@ const MenteeProfilePage = () => {
       state: issue.state,
       isMerged: issue.isMerged,
       labels: issue.labels || [],
+      assignees: issue.assignees || [],
       url: issue.url,
     }))
   }, [menteeIssuesData])

@@ -26,6 +26,27 @@ jest.mock('next/image', () => {
   }
 })
 
+jest.mock('@heroui/tooltip', () => ({
+  Tooltip: ({
+    children,
+    content,
+    isDisabled,
+  }: {
+    children: React.ReactNode
+    content: string
+    isDisabled?: boolean
+  }) => {
+    if (isDisabled) {
+      return <>{children}</>
+    }
+    return (
+      <div data-testid="tooltip" data-content={content}>
+        {children}
+      </div>
+    )
+  },
+}))
+
 const mockIssues: IssueRow[] = [
   {
     objectID: '1',
@@ -243,15 +264,6 @@ describe('<IssuesTable />', () => {
       fireEvent.click(issueButtons[0])
       expect(onIssueClick).toHaveBeenCalledWith(123)
     })
-
-    it('calls onIssueClick for mobile view', () => {
-      const onIssueClick = jest.fn()
-      render(<IssuesTable {...defaultProps} onIssueClick={onIssueClick} />)
-      const issueButtons = screen.getAllByRole('button', { name: /Test Issue 1/i })
-      expect(issueButtons.length).toBeGreaterThan(0)
-      fireEvent.click(issueButtons[0])
-      expect(onIssueClick).toHaveBeenCalledWith(123)
-    })
   })
 
   describe('Empty State', () => {
@@ -292,14 +304,23 @@ describe('<IssuesTable />', () => {
         labels: [],
       }
       render(<IssuesTable issues={[longTitleIssue]} />)
-      const buttons = screen.getAllByRole('button', { name: new RegExp(longTitleIssue.title, 'i') })
-      expect(buttons.length).toBeGreaterThan(0)
+      const tooltips = screen.getAllByTestId('tooltip')
+      const longTitleTooltip = tooltips.find(
+        (tooltip) => tooltip.dataset.content === longTitleIssue.title
+      )
+      expect(longTitleTooltip).toBeInTheDocument()
+      expect(longTitleTooltip?.dataset.content).toBe(longTitleIssue.title)
     })
 
     it('disables tooltip for short titles', () => {
       render(<IssuesTable issues={[mockIssues[0]]} />)
       const buttons = screen.getAllByRole('button', { name: /Test Issue 1/i })
       expect(buttons.length).toBeGreaterThan(0)
+      const tooltips = screen.queryAllByTestId('tooltip')
+      const shortTitleTooltip = tooltips.find(
+        (tooltip) => tooltip.dataset.content === mockIssues[0].title
+      )
+      expect(shortTitleTooltip).toBeUndefined()
     })
   })
 
