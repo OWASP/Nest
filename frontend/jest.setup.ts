@@ -139,4 +139,3 @@ jest.mock('@apollo/client/react', () => {
     ]),
   }
 })
-
