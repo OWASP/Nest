@@ -463,6 +463,7 @@ const BoardCandidatesPage = () => {
                     contributionData={snapshot.contributionHeatmapData}
                     startDate={snapshot.startAt}
                     endDate={snapshot.endAt}
+                    variant="compact"
                   />
                 </div>
               )}
@@ -625,6 +626,7 @@ const BoardCandidatesPage = () => {
                 endDate={snapshot.endAt}
                 title="OWASP Community Engagement"
                 unit="message"
+                variant="compact"
               />
             </div>
           )}
