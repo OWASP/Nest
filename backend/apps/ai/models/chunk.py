@@ -9,8 +9,32 @@ from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import truncate
 
 
+class ChunkQuerySet(models.QuerySet):
+    """QuerySet for Chunk model."""
+
+    def order_by_similarity(self, query_vector, limit=10):
+        """Order chunks by similarity to the query vector.
+
+        Args:
+            query_vector: The embedding vector to compare against.
+            limit: Maximum number of results to return.
+
+        """
+        from pgvector.django import CosineDistance
+
+        return self.annotate(distance=CosineDistance("embedding", query_vector)).order_by(
+            "distance"
+        )[:limit]
+
+
+class ChunkManager(models.Manager.from_queryset(ChunkQuerySet)):  # type: ignore[misc]
+    """Manager for Chunk model."""
+
+
 class Chunk(TimestampedModel):
     """AI Chunk model for storing text chunks with embeddings."""
+
+    objects = ChunkManager()
 
     class Meta:
         db_table = "ai_chunks"

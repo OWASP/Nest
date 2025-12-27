@@ -1,6 +1,6 @@
 """OWASP app post model."""
 
-from datetime import UTC, datetime
+from datetime import datetime
 
 from django.db import models
 from django.utils import timezone
@@ -69,7 +69,7 @@ class Post(BulkSaveModel, TimestampedModel):
                 published_at.year,
                 published_at.month,
                 published_at.day,
-                tzinfo=UTC,
+                tzinfo=timezone.utc,
             )
         )
 
