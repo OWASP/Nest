@@ -1,9 +1,11 @@
 from unittest.mock import Mock, patch
 
 import pytest
+from django.contrib.contenttypes.fields import GenericRelation
 
 from apps.github.models.repository import Repository
 from apps.github.models.user import User
+from apps.owasp.models.entity_channel import EntityChannel
 from apps.owasp.models.enums.project import ProjectLevel, ProjectType
 from apps.owasp.models.project import Project
 
@@ -131,3 +133,11 @@ class TestProjectModel:
         assert project.level == ProjectLevel.LAB
         assert project.type == ProjectType.TOOL
         assert project.updated_at == owasp_repository.updated_at
+
+    def test_social_channels_(self):
+        assert hasattr(Project, "social_channels")
+        field = Project._meta.get_field("social_channels")
+        assert isinstance(field, GenericRelation)
+        assert field.related_model is EntityChannel
+        assert field.content_type_field_name == "entity_type"
+        assert field.object_id_field_name == "entity_id"

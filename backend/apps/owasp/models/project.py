@@ -19,6 +19,7 @@ from apps.github.models.milestone import Milestone
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
 from apps.owasp.models.common import RepositoryBasedEntityModel
+from apps.owasp.models.entity_channel import EntityChannel
 from apps.owasp.models.enums.project import (
     ProjectLevel,
     ProjectType,
@@ -124,6 +125,14 @@ class Project(
         "github.Repository",
         verbose_name="Repositories",
         blank=True,
+    )
+
+    # related channels from EntityChannel
+    social_channels = GenericRelation(
+        EntityChannel,
+        content_type_field="entity_type",
+        object_id_field="entity_id",
+        related_query_name="project",
     )
 
     def __str__(self) -> str:

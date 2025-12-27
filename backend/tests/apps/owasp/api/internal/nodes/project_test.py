@@ -36,6 +36,7 @@ class TestProjectNode:
             "repositories",
             "repositories_count",
             "topics",
+            "social_urls",
         }
         assert expected_field_names.issubset(field_names)
 
@@ -101,5 +102,10 @@ class TestProjectNode:
 
     def test_resolve_topics(self):
         field = self._get_field_by_name("topics")
+        assert field is not None
+        assert field.type == list[str]
+
+    def test_resolve_social_urls(self):
+        field = self._get_field_by_name("social_urls")
         assert field is not None
         assert field.type == list[str]
