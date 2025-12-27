@@ -131,11 +131,14 @@ jest.mock('ics', () => {
 
 jest.mock('@apollo/client/react', () => {
   const actual = jest.requireActual('@apollo/client/react')
+  const mockUseMutation = jest.fn(() => [
+    jest.fn().mockResolvedValue({ data: { deleteModule: true } }),
+    { data: null, loading: false, error: null, called: false },
+  ])
+  
   return {
     ...actual,
-    useMutation: jest.fn(() => [
-      jest.fn().mockResolvedValue({ data: { deleteModule: true } }),
-      { data: null, loading: false, error: null, called: false },
-    ]),
+    useMutation: mockUseMutation,
+    __mockUseMutation: mockUseMutation,
   }
 })
