@@ -59,12 +59,24 @@ class ProjectService:
         from apps.owasp.models.project import Project
 
         try:
-            project = Project.objects.get(key=project_key, is_active=True)
+            return self._fetch_project(key=project_key)
         except Project.DoesNotExist:
-            logger.debug("Project lookup miss: %s", project_key)
+            logger.debug("Project lookup miss by key: %s", project_key)
+
+        # Fallback: Try fuzzy match on name
+        try:
+            return self._fetch_project(name__iexact=project_key)
+        except Project.DoesNotExist:
+            logger.debug("Project lookup miss by name: %s", project_key)
             return None
 
-        # Extract maintainer names, preferring display name over login
+    def _fetch_project(self, **kwargs) -> ProjectPublicDTO:
+        """Fetch and convert a project instance."""
+        from apps.owasp.models.project import Project
+
+        project = Project.objects.get(is_active=True, **kwargs)
+
+        # Extract maintainer names
         maintainer_names = []
         for leader in project.entity_leaders:
             name = getattr(leader, "name", None) or getattr(leader, "login", None)

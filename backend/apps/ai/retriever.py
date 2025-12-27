@@ -79,3 +79,81 @@ def weighted_reciprocal_rank(
         output.append(merged)
 
     return output
+
+
+class HybridRetriever:
+    """Combines vector semantic search with keyword BM25 search."""
+
+    def search(self, query: str, limit: int = 5) -> list[dict[str, Any]]:
+        """Perform hybrid search.
+
+        Args:
+            query: Search query string.
+            limit: Number of results to return.
+
+        Returns:
+            List of ranked results with 'rrf_score'.
+
+        """
+        # Fetch more candidates for RRF re-ranking
+        candidate_limit = limit * 2
+
+        # Parallel execution would be ideal here, but sequential for now
+        vector_res = self._vector_search(query, candidate_limit)
+        keyword_res = self._keyword_search(query, candidate_limit)
+
+        return weighted_reciprocal_rank(vector_res, keyword_res)[:limit]
+
+    def _vector_search(self, query: str, limit: int) -> list[dict[str, Any]]:
+        """Run semantic vector search using pgvector."""
+        import os
+
+        import openai
+
+        from apps.ai.models.chunk import Chunk
+
+        api_key = os.getenv("DJANGO_OPEN_AI_SECRET_KEY")
+        if not api_key:
+            # Fail gracefully or log warning, but for now raise to signal config error
+            msg = "DJANGO_OPEN_AI_SECRET_KEY not set"
+            raise ValueError(msg)
+
+        client = openai.OpenAI(api_key=api_key)
+        # embedding model should also be configurable, usually text-embedding-ada-002 or 3-small
+        resp = client.embeddings.create(input=query, model="text-embedding-3-small")
+        embedding = resp.data[0].embedding
+
+        chunks = Chunk.objects.order_by_similarity(embedding, limit=limit)
+
+        return [
+            {
+                "source_id": chunk.id,
+                "text": chunk.text,
+                "context_id": chunk.context_id,
+                "score": getattr(chunk, "distance", 0),  # distance, lower is better
+            }
+            for chunk in chunks
+        ]
+
+    def _keyword_search(self, query: str, limit: int) -> list[dict[str, Any]]:
+        """Run keyword search using Postgres SearchVector."""
+        from django.contrib.postgres.search import SearchRank, SearchVector
+
+        from apps.ai.models.chunk import Chunk
+
+        vector = SearchVector("text")
+        chunks = (
+            Chunk.objects.annotate(rank=SearchRank(vector, query))
+            .filter(rank__gt=0.01)
+            .order_by("-rank")[:limit]
+        )
+
+        return [
+            {
+                "source_id": chunk.id,
+                "text": chunk.text,
+                "context_id": chunk.context_id,
+                "score": chunk.rank,
+            }
+            for chunk in chunks
+        ]

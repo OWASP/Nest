@@ -19,9 +19,9 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = (
-    "You are a helpful assistant for OWASP projects. "
-    "Answer questions using the provided project information. "
-    "Be concise and direct. If you don't have enough information, say so."
+    "You are NestBot, an AI assistant for OWASP. "
+    "Answer strict based on the context provided. "
+    "Do not hallucinate. If the answer is not in the context, say 'I verify don't know'."
 )
 
 FALLBACK_RESPONSE = (
@@ -36,7 +36,7 @@ class Engine:
     MAX_TOKENS = 800
     TEMPERATURE = 0
 
-    def __init__(self, chat_model: str = "gpt-4o") -> None:
+    def __init__(self, chat_model: str = "gpt-4o-mini") -> None:
         """Initialize the Engine.
 
         Args:
@@ -105,11 +105,11 @@ class Engine:
                 temperature=self.TEMPERATURE,
                 max_tokens=self.MAX_TOKENS,
             )
+        except openai.OpenAIError:
+            logger.exception("LLM API call failed")
+            return FALLBACK_RESPONSE
+        else:
             # Defensive check for empty choices or content
             if resp.choices and resp.choices[0].message.content:
                 return resp.choices[0].message.content.strip()
-            return FALLBACK_RESPONSE
-
-        except openai.OpenAIError:
-            logger.exception("LLM API call failed")
             return FALLBACK_RESPONSE

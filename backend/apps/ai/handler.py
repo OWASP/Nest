@@ -103,18 +103,61 @@ class QueryHandler:
             List of sanitized project DTOs.
 
         """
-        # Try entity-based lookup first
-        project_dtos = []
+        from apps.ai.models.chunk import Chunk
+        from apps.ai.retriever import HybridRetriever
 
-        for entity in entities[:3]:  # Limit entity lookups
+        # 1. Try entity-based lookup first
+        project_dtos = []
+        for entity in entities[:3]:
             project_key = self._infer_project_key(entity)
-            dto = self.project_service.get_project_details(project_key)
-            if dto:
+            if dto := self.project_service.get_project_details(project_key):
                 project_dtos.append(dto)
 
-        # Fall back to search if no direct matches
-        if not project_dtos:
-            project_dtos = self.project_service.search_projects(query, limit=5)
+        # 2. If we have good entity matches, we might stop here or mix them.
+        # But for RAG, we often want the search context too.
+        # However, if we found exact projects, maybe that's enough?
+        # The spec says: "Call Retriever.search. Convert results... Call Engine."
+        # It implies we ALWAYS search in dynamic flow. But let's keep entity matches if found.
+
+        # 3. Hybrid Search
+        retriever = HybridRetriever()
+        search_results = retriever.search(query, limit=5)
+
+        # 4. Convert chunks to Projects/Context
+        # We need to map Chunk -> Context -> Entity -> Project
+        # This is a bit complex. The Chunk has a context.
+        # Let's gather the Chunk IDs and prefetch.
+        chunk_ids = [r["source_id"] for r in search_results]
+        chunks = Chunk.objects.filter(id__in=chunk_ids).select_related("context")
+
+        seen_projects = {p.name for p in project_dtos}
+
+        for chunk in chunks:
+            # We assume the context entity IS a project or related to one.
+            # For now, let's assume context.entity is a Project.
+            # We need to handle GenericForeignKey.
+            entity = chunk.context.entity
+
+            # Check if it's a Project
+            # Ideally we check isinstance(entity, Project) but let's use duck typing or class name
+            if entity.__class__.__name__ == "Project" and entity.name not in seen_projects:
+                # We need to convert this ORM model to DTO
+                # We can reuse the service logic or map manually.
+                # Reusing service is safer (sanitization).
+                maintainer_names = []
+                for leader in entity.entity_leaders:
+                    name = getattr(leader, "name", None) or getattr(leader, "login", None)
+                    if name:
+                        maintainer_names.append(name)
+
+                dto = ProjectPublicDTO(
+                    name=entity.name or "",
+                    url=entity.url,
+                    description=entity.description,
+                    maintainers=maintainer_names,
+                )
+                project_dtos.append(dto)
+                seen_projects.add(entity.name)
 
         return project_dtos
 
