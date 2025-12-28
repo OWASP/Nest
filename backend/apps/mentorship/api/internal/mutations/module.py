@@ -258,7 +258,8 @@ class ModuleMutation:
             task = Task.objects.filter(module=module, issue=issue, assignee=gh_user).first()
             if task:
                 task.status = Task.Status.CLOSED
-                task.save(update_fields=["status"])
+                task.assigned_at = None
+                task.save(update_fields=["status", "assigned_at"])
 
         return module
 
