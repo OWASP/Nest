@@ -141,7 +141,7 @@ class SlideBuilder:
                 "formatted_end": self.snapshot.end_at.strftime("%b %d, %Y"),
                 "month_name": month_name,
             },
-            name="Intro Slide",
+            name="intro",
             output_dir=self.output_dir,
             template_name="video/slides/intro.html",
             transcript=f"Hey everyone! Welcome to the OWASP Nest {month_name} Snapshot...",
@@ -159,7 +159,7 @@ class SlideBuilder:
                 "title": "Our Sponsors",
             },
             output_dir=self.output_dir,
-            name="Sponsors Slide",
+            name="sponsors",
             template_name="video/slides/sponsors.html",
             transcript="A HUGE thanks to the sponsors who make our work possible...",
         )
@@ -197,10 +197,23 @@ class SlideBuilder:
                 "title": f"New Projects ({project_count})",
             },
             output_dir=self.output_dir,
-            name="Projects Slide",
+            name="projects",
             template_name="video/slides/projects.html",
             transcript=f"So... this time we've welcomed {project_count} new projects, "
             f"including OWASP {formatted_project_names}.",
+        )
+
+    def create_thank_you_slide(self) -> Slide:
+        """Create a thank you slide."""
+        print("Generating thank you slide")
+
+        return Slide(
+            context={},
+            output_dir=self.output_dir,
+            name="thank_you",
+            template_name="video/slides/thank_you.html",
+            transcript="Thanks for tuning in!... Visit OWASP Nest at nest dot owasp dot org "
+            "for more community updates.... Until next time!",
         )
 
 
@@ -289,5 +302,7 @@ class Command(BaseCommand):
             generator.append_slide(slide_builder.create_projects_slide())
         else:
             print("Skipping projects slide - No new projects in snapshot.")
+
+        generator.append_slide(slide_builder.create_thank_you_slide())
 
         generator.generate_video(output_dir / f"{snapshot_key}_snapshot.mp4")
