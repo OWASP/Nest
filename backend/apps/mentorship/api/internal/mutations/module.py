@@ -146,7 +146,6 @@ class ModuleMutation:
         return module
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
-    @transaction.atomic
     def assign_issue_to_user(
         self,
         info: strawberry.Info,
@@ -181,40 +180,42 @@ class ModuleMutation:
         except GithubException as e:
             raise ValidationError(message=f"Failed to assign issue on GitHub: {e}") from e
 
-        issue.assignees.add(gh_user)
-        now = timezone.now()
-        mentee, _ = Mentee.objects.get_or_create(github_user=gh_user)
+        with transaction.atomic():
+            issue.assignees.add(gh_user)
+            now = timezone.now()
+            mentee, _ = Mentee.objects.get_or_create(github_user=gh_user)
 
-        MenteeModule.objects.get_or_create(
-            mentee=mentee,
-            module=module,
-            defaults={
-                "started_at": module.started_at or now,
-                "ended_at": module.ended_at,
-            },
-        )
+            MenteeModule.objects.get_or_create(
+                mentee=mentee,
+                module=module,
+                defaults={
+                    "started_at": module.started_at or now,
+                    "ended_at": module.ended_at,
+                },
+            )
 
-        task, created = Task.objects.get_or_create(
-            module=module,
-            issue=issue,
-            assignee=gh_user,
-            defaults={
-                "assigned_at": now,
-                "status": Task.Status.IN_PROGRESS,
-            },
-        )
+            task, created = Task.objects.get_or_create(
+                module=module,
+                issue=issue,
+                assignee=gh_user,
+                defaults={
+                    "assigned_at": now,
+                    "status": Task.Status.IN_PROGRESS,
+                },
+            )
 
-        if not created and task.assigned_at is None:
-            task.assigned_at = now
-            task.status = Task.Status.IN_PROGRESS
-            task.save(update_fields=["assigned_at", "status"])
+            if not created and task.assigned_at is None:
+                task.assigned_at = now
+                task.status = Task.Status.IN_PROGRESS
+                task.save(update_fields=["assigned_at", "status"])
 
-        IssueUserInterest.objects.filter(module=module, issue_id=issue.id, user=gh_user).delete()
+            IssueUserInterest.objects.filter(
+                module=module, issue_id=issue.id, user=gh_user
+            ).delete()
 
         return module
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
-    @transaction.atomic
     def unassign_issue_from_user(
         self,
         info: strawberry.Info,
@@ -251,12 +252,13 @@ class ModuleMutation:
         except GithubException as e:
             raise ValidationError(message=f"Failed to unassign issue on GitHub: {e}") from e
 
-        issue.assignees.remove(gh_user)
+        with transaction.atomic():
+            issue.assignees.remove(gh_user)
 
-        task = Task.objects.filter(module=module, issue=issue, assignee=gh_user).first()
-        if task:
-            task.status = Task.Status.CLOSED
-            task.save(update_fields=["status"])
+            task = Task.objects.filter(module=module, issue=issue, assignee=gh_user).first()
+            if task:
+                task.status = Task.Status.CLOSED
+                task.save(update_fields=["status"])
 
         return module
 
