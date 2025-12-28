@@ -14,7 +14,6 @@ from django.template.loader import render_to_string
 from weasyprint import HTML
 
 from apps.common.eleven_labs import ElevenLabs
-from apps.common.open_ai import OpenAi
 from apps.owasp.models.snapshot import Snapshot
 from apps.owasp.models.sponsor import Sponsor
 
@@ -209,7 +208,6 @@ class Generator:
     def __init__(self) -> None:
         """Initialize Video Generator."""
         self.eleven_labs = ElevenLabs(stability=ELEVENLABS_STABILITY, style=ELEVENLABS_STYLE)
-        self.open_ai = OpenAi()
         self.slides: list[Slide] = []
 
     def append_slide(self, slide: Slide) -> None:
