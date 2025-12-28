@@ -151,11 +151,24 @@ class SlideBuilder:
         """Create a sponsors slide."""
         print("Generating sponsors slide for snapshot")
 
-        sponsors = Sponsor.objects.values("image_url", "name").order_by("name")
+        sponsors = [
+            {"image_url": s.image_url, "name": s.name}
+            for s in sorted(
+                Sponsor.objects.all(),
+                key=lambda x: {
+                    Sponsor.SponsorType.DIAMOND: 1,
+                    Sponsor.SponsorType.PLATINUM: 2,
+                    Sponsor.SponsorType.GOLD: 3,
+                    Sponsor.SponsorType.SILVER: 4,
+                    Sponsor.SponsorType.SUPPORTER: 5,
+                    Sponsor.SponsorType.NOT_SPONSOR: 6,
+                }[x.sponsor_type],
+            )
+        ]
 
         return Slide(
             context={
-                "sponsors": list(sponsors),
+                "sponsors": sponsors,
                 "title": "Our Sponsors",
             },
             output_dir=self.output_dir,
