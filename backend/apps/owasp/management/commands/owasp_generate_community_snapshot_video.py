@@ -20,11 +20,16 @@ from apps.owasp.models.sponsor import Sponsor
 
 logger = logging.getLogger(__name__)
 
+AUDIO_EXTENSION = ".mp3"
 ELEVENLABS_STABILITY = 0.4
 ELEVENLABS_STYLE = 0.1
+IMAGE_EXTENSION = ".png"
+IMAGE_FORMAT = "PNG"
 MAX_DETAILED_PROJECTS = 20
 MAX_TRANSCRIPT_PROJECTS = 4
+OUTPUT_DIR = Path(tempfile.gettempdir())
 PDF_RENDER_SCALE = 2
+VIDEO_EXTENSION = ".mp4"
 VIDEO_FRAMERATE = 60
 
 
@@ -32,26 +37,25 @@ VIDEO_FRAMERATE = 60
 class Slide:
     """Represents a single video slide."""
 
-    audio_output_path: Path
     context: dict[str, Any]
-    image_output_path: Path
     name: str
+    output_dir: Path
     template_name: str
-    video_output_path: Path
     transcript: str | None = None
-    transcript_input: str | None = None
 
-    def __post_init__(self) -> None:
-        """Validate fields."""
-        if not self.transcript and not self.transcript_input:
-            msg = f"Slide '{self.name}' must have either transcript or transcript_input"
-            raise ValueError(msg)
+    @property
+    def audio_path(self) -> Path:
+        return self.output_dir / f"{self.name}{AUDIO_EXTENSION}"
 
-        if self.transcript and self.transcript_input:
-            msg = f"Slide '{self.name}' cannot have both transcript and transcript_input"
-            raise ValueError(msg)
+    @property
+    def image_path(self) -> Path:
+        return self.output_dir / f"{self.name}{IMAGE_EXTENSION}"
 
-    def render_and_save(self) -> None:
+    @property
+    def video_path(self) -> Path:
+        return self.output_dir / f"{self.name}{VIDEO_EXTENSION}"
+
+    def render_and_save_image(self) -> None:
         """Render an HTML template as an image."""
         page = None
         pdf = None
@@ -65,10 +69,10 @@ class Slide:
             bitmap = page.render(scale=PDF_RENDER_SCALE)
             pil_image = bitmap.to_pil()
 
-            self.image_output_path.parent.mkdir(parents=True, exist_ok=True)
-            pil_image.save(self.image_output_path, "PNG")
+            self.image_path.parent.mkdir(parents=True, exist_ok=True)
+            pil_image.save(self.image_path, IMAGE_FORMAT)
 
-            print("Saved image to path:", self.image_output_path)
+            print("Saved image to path:", self.image_path)
         except Exception:
             logger.exception("Error rendering image for: %s", self.name)
             raise
@@ -78,41 +82,7 @@ class Slide:
             if pdf is not None:
                 pdf.close()
 
-    def generate_transcript(self, open_ai: OpenAi) -> None:
-        """Generate a transcript.
-
-        Args:
-            open_ai (OpenAi): OpenAi client instance.
-
-        """
-        if self.transcript:
-            print("Using pre-set transcript:", self.transcript)
-            return
-        if not self.transcript_input:
-            logger.error("No transcript_input available for %s", self.name)
-            return
-
-        print("Generating transcript from prompt:", self.transcript_input)
-
-        prompt = """
-        You are a scriptwriter for a tech presentation.
-        Your task is to generate a script for a presentation slide.
-        The script should be simple and direct.
-        Do not add any extra words, introduction or conclusion.
-        The output text will be the input text for ElevenLabs API.
-        """
-        open_ai.set_prompt(prompt)
-        open_ai.set_input(self.transcript_input)
-
-        transcript = open_ai.complete()
-        if not transcript:
-            logger.error("Error generating transcript for %s", self.name)
-            return
-
-        self.transcript = transcript
-        print("Generated slide transcript:", self.transcript)
-
-    def generate_audio(self, eleven_labs: ElevenLabs) -> None:
+    def generate_and_save_audio(self, eleven_labs: ElevenLabs) -> None:
         """Generate audio for the transcript.
 
         Args:
@@ -127,22 +97,22 @@ class Slide:
             raise RuntimeError(msg)
 
         eleven_labs.set_text(self.transcript)
-        if eleven_labs.generate_to_file(self.audio_output_path):
-            print("Generated audio at path:", self.audio_output_path)
+        if eleven_labs.generate_to_file(self.audio_path):
+            print("Generated audio at path:", self.audio_path)
         else:
             msg = f"Failed to generate audio for {self.name}"
             raise RuntimeError(msg)
 
-    def generate_video(self) -> None:
+    def generate_and_save_video(self) -> None:
         """Generate video for the slide."""
-        image_stream = ffmpeg.input(self.image_output_path, loop=1, framerate=VIDEO_FRAMERATE)
-        audio_stream = ffmpeg.input(self.audio_output_path)
+        image_stream = ffmpeg.input(self.image_path, loop=1, framerate=VIDEO_FRAMERATE)
+        audio_stream = ffmpeg.input(self.audio_path)
 
         try:
             ffmpeg.output(
                 image_stream,
                 audio_stream,
-                filename=self.video_output_path,
+                filename=self.video_path,
                 acodec="aac",
                 vcodec="libx264",
                 pix_fmt="yuv420p",
@@ -167,17 +137,15 @@ class SlideBuilder:
         print("Generating introduction slide for snapshot")
         month_name = self.snapshot.start_at.strftime("%B")
         return Slide(
-            audio_output_path=self.output_dir / "intro.mp3",
             context={
                 "formatted_start": self.snapshot.start_at.strftime("%b %d"),
                 "formatted_end": self.snapshot.end_at.strftime("%b %d, %Y"),
                 "month_name": month_name,
             },
-            image_output_path=self.output_dir / "intro.png",
             name="Intro Slide",
+            output_dir=self.output_dir,
             template_name="video/slides/intro.html",
             transcript=f"Hey everyone! Welcome to the OWASP Nest {month_name} Snapshot...",
-            video_output_path=self.output_dir / "intro.mp4",
         )
 
     def create_sponsors_slide(self) -> Slide:
@@ -187,16 +155,14 @@ class SlideBuilder:
         sponsors = Sponsor.objects.values("image_url", "name").order_by("name")
 
         return Slide(
-            audio_output_path=self.output_dir / "sponsors.mp3",
             context={
                 "sponsors": list(sponsors),
                 "title": "Our Sponsors",
             },
-            image_output_path=self.output_dir / "sponsors.png",
+            output_dir=self.output_dir,
             name="Sponsors Slide",
             template_name="video/slides/sponsors.html",
             transcript="A HUGE thanks to the sponsors who make our work possible...",
-            video_output_path=self.output_dir / "sponsors.mp4",
         )
 
     def create_projects_slide(self) -> Slide:
@@ -226,18 +192,16 @@ class SlideBuilder:
         )
 
         return Slide(
-            audio_output_path=self.output_dir / "projects.mp3",
             context={
                 "projects": projects_data,
                 "show_details": project_count <= MAX_DETAILED_PROJECTS,
                 "title": f"New Projects ({project_count})",
             },
-            image_output_path=self.output_dir / "projects.png",
+            output_dir=self.output_dir,
             name="Projects Slide",
             template_name="video/slides/projects.html",
             transcript=f"So... this time we've welcomed {project_count} new projects, "
             f"including OWASP {formatted_project_names}.",
-            video_output_path=self.output_dir / "projects.mp4",
         )
 
 
@@ -255,16 +219,15 @@ class Generator:
     def generate_video(self, output_path: Path) -> None:
         """Generate video."""
         for slide in self.slides:
-            slide.render_and_save()
-            slide.generate_transcript(self.open_ai)
-            slide.generate_audio(self.eleven_labs)
-            slide.generate_video()
+            slide.render_and_save_image()
+            slide.generate_and_save_audio(self.eleven_labs)
+            slide.generate_and_save_video()
 
-        self._combine_videos(output_path)
+        self.merge_videos(output_path)
 
-    def _combine_videos(self, output_path: Path) -> None:
+    def merge_videos(self, output_path: Path) -> None:
         """Combine all slide videos into final video."""
-        inputs = [ffmpeg.input(str(slide.video_output_path)) for slide in self.slides]
+        inputs = [ffmpeg.input(str(slide.video_path)) for slide in self.slides]
 
         video_streams = [inp.video for inp in inputs]
         audio_streams = [inp.audio for inp in inputs]
@@ -291,13 +254,13 @@ class Command(BaseCommand):
             "--output-dir",
             default=Path(tempfile.gettempdir()),
             type=Path,
-            help="Directory to save generated files",
+            help="Directory to save the generated video.",
         )
         parser.add_argument(
             "--snapshot-key",
             required=True,
             type=str,
-            help="Snapshot key (e.g., '2025-06' for month or '2025' for year)",
+            help="Snapshot key (e.g., '2025-06' for month or '2025' for year).",
         )
 
     def handle(self, *args, **options) -> None:
@@ -319,7 +282,7 @@ class Command(BaseCommand):
 
         print("Generating video for snapshot:", snapshot_key)
 
-        slide_builder = SlideBuilder(snapshot, output_dir)
+        slide_builder = SlideBuilder(snapshot, OUTPUT_DIR)
         generator = Generator()
 
         generator.append_slide(slide_builder.create_intro_slide())
