@@ -66,13 +66,6 @@ jest.mock('next/navigation', () => {
   }
 })
 
-if (!(globalThis as any).structuredClone) {
-  // Polyfill for environments where `structuredClone` is not available.
-  // JSON-based cloning is acceptable here because this is only used in tests.
-  (globalThis as any).structuredClone = (val: unknown) =>
-    JSON.parse(JSON.stringify(val)); // NOSONAR intentional polyfill fallback
-}
-
 beforeAll(() => {
   if (typeof globalThis !== 'undefined') {
     jest.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((cb) => {
