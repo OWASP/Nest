@@ -402,13 +402,11 @@ class Command(BaseCommand):
         while has_more:
             try:
                 retry_count = 0
-                latest_ts = conversation.latest_message.ts if conversation.latest_message else "0"
-
                 response = client.conversations_history(
                     channel=conversation.slack_channel_id,
                     cursor=cursor,
                     limit=batch_size,
-                    oldest=latest_ts,
+                    oldest=conversation.latest_message.ts if conversation.latest_message else "0",
                 )
 
                 self._handle_slack_response(response, "conversations_history")
