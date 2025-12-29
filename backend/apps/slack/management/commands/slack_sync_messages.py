@@ -408,7 +408,7 @@ class Command(BaseCommand):
                     limit=batch_size,
                     oldest=(
                         latest_message.ts
-                        if (latest_message := conversation.latest_message)
+                        if conversation.latest_message:
                         else "0"
                     ),
                 )
