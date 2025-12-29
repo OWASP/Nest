@@ -62,6 +62,8 @@ const getMilestoneIcon = (progress: number) => {
 }
 
 const About = () => {
+  const [roadmapExpanded, setRoadmapExpanded] = useState(false);
+  const [timelineExpanded, setTimelineExpanded] = useState(false);
   const { data: projectMetadataResponse, error: projectMetadataRequestError } = useQuery(
     GetProjectMetadataDocument,
     {
@@ -252,13 +254,27 @@ const About = () => {
           </SecondaryCard>
         )}
         <SecondaryCard icon={FaScroll} title={<AnchorTitle title="Our Story" />}>
-          {projectStory.map((text) => (
-            <div key={`story-${text.substring(0, 50).replaceAll(' ', '-')}`} className="mb-4">
-              <div>
-                <Markdown content={text} />
+          {projectStory
+            .slice(0, roadmapExpanded ? projectStory.length : 3)
+            .map((text) => (
+              <div
+                key={`story-${text.substring(0, 50).replaceAll(' ', '-')}`}
+                className="mb-4"
+              >
+                <div>
+                  <Markdown content={text} />
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+
+          {projectStory.length > 3 && (
+            <button
+              onClick={() => setRoadmapExpanded(!roadmapExpanded)}
+              className="mt-2 flex items-center bg-transparent px-0 text-blue-400"
+            >
+              {roadmapExpanded ? "Show less" : "Show more"}
+            </button>
+          )}
         </SecondaryCard>
         <SecondaryCard icon={FaClock} title={<AnchorTitle title="Project Timeline" />}>
           <div className="space-y-6">
