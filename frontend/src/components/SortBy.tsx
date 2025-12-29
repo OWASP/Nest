@@ -21,8 +21,7 @@ const SortBy = ({
           size="md"
           label="Sort By :"
           classNames={{
-            label:
-              'font-medium text-sm text-gray-700 dark:text-gray-300 w-auto select-none pe-0 hover',
+            label: 'font-medium text-sm text-gray-700 dark:text-gray-300 w-auto select-none pe-0',
             trigger:
               'bg-transparent data-[hover=true]:bg-transparent focus:outline-none focus:underline border-none shadow-none text-nowrap w-32 min-h-8 h-8 text-sm font-medium text-gray-800 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-0',
             value: 'text-gray-800 dark:text-gray-200 font-medium',
