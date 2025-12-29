@@ -26,6 +26,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
   const { data } = useSession()
   const pathname = usePathname()
 
+  // NOSONAR - NextAuth callback adds login property to session at runtime
   const currentUserLogin = (data as ExtendedSession)?.user?.login
 
   const isAdmin =

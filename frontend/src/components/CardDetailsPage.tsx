@@ -101,6 +101,7 @@ const DetailsCard = ({
               )}
               {type === 'module' &&
                 (() => {
+                  // NOSONAR - NextAuth callback adds login property to session at runtime
                   const currentUserLogin = (data as ExtendedSession)?.user?.login
                   const isAdmin =
                     accessLevel === 'admin' &&
