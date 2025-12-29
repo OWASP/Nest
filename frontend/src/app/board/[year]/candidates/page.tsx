@@ -676,7 +676,7 @@ const BoardCandidatesPage = () => {
     )
   }
   
-  if (!graphQLData?.boardOfDirectors) {
+  if (isLoading===false && !graphQLData?.boardOfDirectors) {
     return (
       <ErrorDisplay
         statusCode={404}
