@@ -62,7 +62,7 @@ const getMilestoneIcon = (progress: number) => {
 }
 
 const About = () => {
-  const [roadmapExpanded, setRoadmapExpanded] = useState(false);
+  const [storyExpanded, setStoryExpanded] = useState(false);
   const [timelineExpanded, setTimelineExpanded] = useState(false);
   const { data: projectMetadataResponse, error: projectMetadataRequestError } = useQuery(
     GetProjectMetadataDocument,
@@ -255,7 +255,7 @@ const About = () => {
         )}
         <SecondaryCard icon={FaScroll} title={<AnchorTitle title="Our Story" />}>
           {projectStory
-            .slice(0, roadmapExpanded ? projectStory.length : 3)
+            .slice(0, storyExpanded ? projectStory.length : 3)
             .map((text) => (
               <div
                 key={`story-${text.substring(0, 50).replaceAll(' ', '-')}`}
@@ -269,16 +269,16 @@ const About = () => {
 
           {projectStory.length > 3 && (
             <button
-              onClick={() => setRoadmapExpanded(!roadmapExpanded)}
+              onClick={() => setStoryExpanded(!storyExpanded)}
               className="mt-2 flex items-center bg-transparent px-0 text-blue-400"
             >
-              {roadmapExpanded ? "Show less" : "Show more"}
+              {storyExpanded ? "Show less" : "Show more"}
             </button>
           )}
         </SecondaryCard>
         <SecondaryCard icon={FaClock} title={<AnchorTitle title="Project Timeline" />}>
           <div className="space-y-6">
-            {[...projectTimeline].reverse().map((milestone, index) => (
+            {[...projectTimeline].reverse().slice(0, timelineExpanded ? projectTimeline.length : 6).map((milestone, index) => (
               <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
                 {index !== projectTimeline.length - 1 && (
                   <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-400"></div>
@@ -295,6 +295,14 @@ const About = () => {
               </div>
             ))}
           </div>
+          {projectTimeline.length > 6 && (
+            <button
+              onClick={() => setTimelineExpanded(!timelineExpanded)}
+              className="mt-4 flex items-center bg-transparent px-0 text-blue-400"
+            >
+              {timelineExpanded ? "Show less" : "Show more"}
+            </button>
+          )}
         </SecondaryCard>
 
         <div className="grid gap-0 md:grid-cols-4 md:gap-6">
