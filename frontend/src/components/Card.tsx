@@ -102,7 +102,7 @@ const Card = ({
   className="
     mt-2 w-full
     break-words
-    overflow-wrap-anywhere
+    [overflow-wrap:anywhere]
     [&_code]:break-all
     [&_a]:break-all
     text-gray-600
