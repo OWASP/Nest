@@ -10,6 +10,26 @@ updates:
     schedule:
       interval: daily
 
+  - package-ecosystem: docker-compose
+    directory: /docker-compose/local
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker-compose
+    directory: /docker-compose/production
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker-compose
+    directory: /docker-compose/proxy
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker-compose
+    directory: /docker-compose/staging
+    schedule:
+      interval: daily
+
   - package-ecosystem: docker
     directory: /docs/docker
     schedule:
