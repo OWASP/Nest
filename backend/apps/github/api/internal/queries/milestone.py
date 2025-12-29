@@ -1,11 +1,21 @@
 """Github Milestone Queries."""
 
+import enum
+
 import strawberry
-from django.core.exceptions import ValidationError
 from django.db.models import OuterRef, Subquery
 
 from apps.github.api.internal.nodes.milestone import MilestoneNode
+from apps.github.models.generic_issue_model import GenericIssueModel
 from apps.github.models.milestone import Milestone
+
+
+@strawberry.enum
+class MilestoneStateEnum(enum.Enum):
+    """Milestone state filter options."""
+
+    CLOSED = GenericIssueModel.State.CLOSED
+    OPEN = GenericIssueModel.State.OPEN
 
 
 @strawberry.type
@@ -20,7 +30,7 @@ class MilestoneQuery:
         limit: int = 5,
         login: str | None = None,
         organization: str | None = None,
-        state: str = "open",
+        state: MilestoneStateEnum | None = None,
     ) -> list[MilestoneNode]:
         """Resolve milestones.
 
@@ -29,22 +39,19 @@ class MilestoneQuery:
             limit (int): The maximum number of milestones to return.
             login (str, optional): The GitHub username to filter milestones.
             organization (str, optional): The GitHub organization to filter milestones.
-            state (str, optional): The state of the milestones to return.
+            state (MilestoneStateEnum, optional): The state filter. Returns all if not provided.
 
         Returns:
             list[MilestoneNode]: A list of milestones.
 
         """
-        match state.lower():
-            case "open":
+        match state:
+            case MilestoneStateEnum.OPEN:
                 milestones = Milestone.open_milestones.all()
-            case "closed":
+            case MilestoneStateEnum.CLOSED:
                 milestones = Milestone.closed_milestones.all()
-            case "all":
-                milestones = Milestone.objects.all()
             case _:
-                message = f"Invalid state: {state}. Valid states are 'open', 'closed', or 'all'."
-                raise ValidationError(message)
+                milestones = Milestone.objects.all()
 
         milestones = milestones.select_related(
             "author",

@@ -68,6 +68,7 @@ geocoders
 geoloc
 geopy
 graphiql
+graphqler
 gunicorn
 hackathon
 heroui
@@ -103,6 +104,7 @@ ngx
 noinput
 nosniff
 nspname
+openblas
 openstreetmap
 owasppcitoolkit
 owtf

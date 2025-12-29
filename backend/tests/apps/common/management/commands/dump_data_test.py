@@ -34,7 +34,7 @@ class TestDumpDataCommand:
         call_command(
             "dump_data",
             "--output",
-            "data/dump.sql.gz",
+            "data/dump.dump",
         )
 
         # Verify temp DB created from template
@@ -73,7 +73,10 @@ class TestDumpDataCommand:
             "-d",
             expected_temp_db,
             "--compress=9",
-            "--clean",
+            "--data-only",
+            "--no-owner",
+            "--no-privileges",
+            "--format=custom",
             "--table=public.owasp_*",
             "--table=public.github_*",
             "--table=public.slack_members",

@@ -2,7 +2,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from apps.common.index import IndexBase
 from apps.github.models.repository import Repository
 from apps.github.models.user import User
 from apps.owasp.models.committee import Committee
@@ -27,10 +26,11 @@ class TestCommitteeModel:
         ],
     )
     def test_active_committees_count(self, value):
-        with patch.object(IndexBase, "get_total_count", return_value=value) as mock_count:
+        with patch.object(Committee.objects, "filter") as mock_filter:
+            mock_filter.return_value.count.return_value = value
             count = Committee.active_committees_count()
             assert count == value
-            mock_count.assert_called_once_with("committees")
+            mock_filter.assert_called_once_with(has_active_repositories=True)
 
     @pytest.mark.parametrize(
         ("summary"),

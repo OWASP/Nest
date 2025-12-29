@@ -53,7 +53,7 @@ class RepositoryNode(strawberry.relay.Node):
         return list(self.languages.keys())
 
     @strawberry.field
-    def latest_release(self) -> str:
+    def latest_release(self) -> str | None:
         """Resolve latest release."""
         return self.latest_release
 
@@ -61,11 +61,6 @@ class RepositoryNode(strawberry.relay.Node):
     def organization(self) -> OrganizationNode | None:
         """Resolve organization."""
         return self.organization
-
-    @strawberry.field
-    def owner_key(self) -> str:
-        """Resolve owner key."""
-        return self.owner_key
 
     @strawberry.field
     def project(
@@ -88,7 +83,7 @@ class RepositoryNode(strawberry.relay.Node):
     @strawberry.field
     def top_contributors(self) -> list[RepositoryContributorNode]:
         """Resolve top contributors."""
-        return self.idx_top_contributors
+        return [RepositoryContributorNode(**tc) for tc in self.idx_top_contributors]
 
     @strawberry.field
     def topics(self) -> list[str]:
