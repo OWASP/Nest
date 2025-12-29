@@ -66,8 +66,9 @@ jest.mock('next/navigation', () => {
   }
 })
 
-if (!global.structuredClone) {
-  global.structuredClone = (val) => JSON.parse(JSON.stringify(val))
+if (!(globalThis as any).structuredClone) {
+  (globalThis as any).structuredClone = (val: any) =>
+    JSON.parse(JSON.stringify(val));
 }
 
 beforeAll(() => {
