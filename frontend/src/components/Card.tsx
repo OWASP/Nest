@@ -97,19 +97,10 @@ const Card = ({
         </Link>
       )}
 
-<Markdown
-  content={summary}
-  className="
-    mt-2 w-full
-    break-words
-    [overflow-wrap:anywhere]
-    [&_code]:break-all
-    [&_a]:break-all
-    text-gray-600
-    dark:text-gray-300
-  "
-/>
-
+      <Markdown
+        content={summary}
+        className="mt-2 w-full [overflow-wrap:anywhere] break-words text-gray-600 dark:text-gray-300 [&_a]:break-all [&_code]:break-all"
+      />
 
       <div className="mt-4 w-full">
         {/* Social icons section */}
