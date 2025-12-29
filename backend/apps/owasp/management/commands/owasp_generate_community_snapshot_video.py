@@ -347,9 +347,14 @@ class Generator:
         joined_video = ffmpeg.concat(*video_streams, v=1, a=0)
         joined_audio = ffmpeg.concat(*audio_streams, v=0, a=1)
 
-        ffmpeg.output(joined_video, joined_audio, str(output_path)).overwrite_output().run(
-            capture_stdout=True, capture_stderr=True
-        )
+        try:
+            ffmpeg.output(joined_video, joined_audio, str(output_path)).overwrite_output().run(
+                capture_stdout=True, capture_stderr=True
+            )
+            print(f"Successfully merged video to: {output_path}")
+        except ffmpeg.Error:
+            logger.exception("Error merging slide videos into final output")
+            raise
 
 
 class Command(BaseCommand):
