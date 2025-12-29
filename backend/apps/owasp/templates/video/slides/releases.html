@@ -1,0 +1,18 @@
+{% extends "video/base.html" %}
+{% block content %}
+    <div class="flex h-full flex-col p-12 px-24">
+        <h1 class="text-6xl font-bold mb-12 text-center">{{ title }}</h1>
+        <div class="flex flex-col gap-4 w-full mt-4">
+            {% for release in releases %}
+                <div class="flex items-center gap-4">
+                    <span class="text-2xl font-bold w-96 text-right">{{ release.name }}</span>
+                    <div class="flex items-center gap-4 flex-1">
+                        <div class="bg-bar rounded-lg h-12"
+                             style="width: {{ release.bar_width }}%"></div>
+                        <span class="text-2xl font-bold">{{ release.count }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

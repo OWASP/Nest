@@ -3,6 +3,7 @@
 import logging
 import os
 import tempfile
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -14,6 +15,7 @@ from django.template.loader import render_to_string
 from weasyprint import HTML
 
 from apps.common.eleven_labs import ElevenLabs
+from apps.owasp.models.project import Project
 from apps.owasp.models.snapshot import Snapshot
 from apps.owasp.models.sponsor import Sponsor
 
@@ -25,6 +27,7 @@ ELEVENLABS_STYLE = 0.1
 IMAGE_EXTENSION = ".png"
 IMAGE_FORMAT = "PNG"
 MAX_DETAILED_PROJECTS = 16
+RELEASES_LIMIT = 12
 OUTPUT_DIR = Path(tempfile.gettempdir())
 PDF_RENDER_SCALE = 2
 TRANSCRIPT_NAMES_LIMIT = 3
@@ -252,6 +255,55 @@ class SlideBuilder:
             f"including {formatted_names}.",
         )
 
+    def create_releases_slide(self) -> Slide:
+        """Create a releases slide."""
+        print("Generating releases slide for snapshot")
+
+        releases = self.snapshot.new_releases.select_related("repository")
+
+        project_counts: Counter = Counter()
+        for release in releases:
+            if not release.repository:
+                continue
+            project = Project.objects.filter(repositories=release.repository).first()
+            if project:
+                project_counts[project.name] += 1
+
+        top_projects = project_counts.most_common(RELEASES_LIMIT)
+        max_count = top_projects[0][1] if top_projects else 1
+        releases_data = [
+            {
+                "bar_width": int((count / max_count) * 100),
+                "count": count,
+                "name": name,
+            }
+            for name, count in top_projects
+        ]
+
+        release_count = releases.count()
+        top_names = [
+            name.replace("OWASP ", "") for name, _ in top_projects[:TRANSCRIPT_NAMES_LIMIT]
+        ]
+        formatted_names = (
+            f"{', '.join(top_names[:-1])}, and {top_names[-1]}"
+            if len(top_names) > 1
+            else top_names[0]
+            if top_names
+            else ""
+        )
+
+        return Slide(
+            context={
+                "releases": releases_data,
+                "title": f"New Releases ({release_count})",
+            },
+            output_dir=self.output_dir,
+            name="releases",
+            template_name="video/slides/releases.html",
+            transcript=f"We've had {release_count} new releases this time, "
+            f"with {formatted_names} leading the way.",
+        )
+
     def create_thank_you_slide(self) -> Slide:
         """Create a thank you slide."""
         print("Generating thank you slide")
@@ -356,6 +408,11 @@ class Command(BaseCommand):
             generator.append_slide(slide_builder.create_chapters_slide())
         else:
             print("Skipping chapters slide - No new chapters in snapshot.")
+
+        if snapshot.new_releases.exists():
+            generator.append_slide(slide_builder.create_releases_slide())
+        else:
+            print("Skipping releases slide - No new releases in snapshot.")
 
         generator.append_slide(slide_builder.create_thank_you_slide())
 
