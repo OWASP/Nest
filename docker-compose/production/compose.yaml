@@ -20,7 +20,7 @@ services:
 
   production-nest-cache:
     container_name: production-nest-cache
-    image: redis:7.2.7-alpine3.21
+    image: redis:8.0.5-alpine3.21
     command: >
       sh -c '
         redis-server --requirepass $$REDIS_PASSWORD --maxmemory 100mb --maxmemory-policy allkeys-lru

@@ -40,7 +40,15 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("Starting mentorship issue processing job..."))
 
-        for module in published_modules:
+        modules_with_labels = published_modules.exclude(labels=[]).select_related("project")
+
+        if not modules_with_labels.exists():
+            self.stdout.write(
+                self.style.WARNING("No published mentorship modules with labels found. Exiting.")
+            )
+            return
+
+        for module in modules_with_labels:
             self.stdout.write(f"\nProcessing module: {module.name}...")
             self.process_module(module)
 
