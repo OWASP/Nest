@@ -653,7 +653,7 @@ describe('ItemCardList Component', () => {
     })
 
     it('handles large datasets', () => {
-      const largeDataset = Array(100)
+      const largeDataset = Array.from({ length: 100 })
         .fill(null)
         .map((_, index) => ({
           ...mockIssue,
