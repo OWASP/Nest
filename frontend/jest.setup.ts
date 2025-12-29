@@ -69,9 +69,8 @@ jest.mock('next/navigation', () => {
 if (!(globalThis as any).structuredClone) {
   // Polyfill for environments where `structuredClone` is not available.
   // JSON-based cloning is acceptable here because this is only used in tests.
-  // NOSONAR: structuredClone is not available here; fallback is intentional.
   (globalThis as any).structuredClone = (val: unknown) =>
-    JSON.parse(JSON.stringify(val));
+    JSON.parse(JSON.stringify(val)); // NOSONAR intentional polyfill fallback
 }
 
 beforeAll(() => {
