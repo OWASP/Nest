@@ -27,7 +27,7 @@ const SearchBar: React.FC<SearchProps> = ({
   }, [initialValue])
 
   useEffect(() => {
-    if (!isLoaded && inputRef.current) {
+    if (isLoaded && inputRef.current) {
       inputRef.current.focus()
     }
   }, [pathname, isLoaded])
@@ -69,7 +69,7 @@ const SearchBar: React.FC<SearchProps> = ({
   return (
     <div className="w-full max-w-md p-4">
       <div className="relative">
-        {!isLoaded ? (
+        {isLoaded ? (
           <>
             <FaSearch
               data-testid="search-icon"
