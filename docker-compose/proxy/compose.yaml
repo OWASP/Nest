@@ -6,9 +6,11 @@ services:
     restart: unless-stopped
     volumes:
       - ./blocked_ips.conf:/etc/nginx/blocked_ips.conf
+      - ./cloudflare_realip.conf:/etc/nginx/cloudflare_realip.conf
       - ./headers.conf:/etc/nginx/headers.conf
       - ./letsencrypt:/etc/letsencrypt
       - ./production.conf:/etc/nginx/conf.d/production.conf
+      - ./proxy_cache.conf:/etc/nginx/conf.d/proxy_cache.conf
       - ./redirects.conf:/etc/nginx/redirects.conf
       - ./staging.conf:/etc/nginx/conf.d/staging.conf
       - nest-certbot-webroot:/var/www/certbot
@@ -25,12 +27,15 @@ services:
     restart: unless-stopped
     volumes:
       - ./blocked_ips.conf:/etc/nginx/blocked_ips.conf
+      - ./cloudflare_realip.conf:/etc/nginx/cloudflare_realip.conf
       - ./headers.conf:/etc/nginx/headers.conf
       - ./letsencrypt:/etc/letsencrypt
       - ./production.conf:/etc/nginx/conf.d/production.conf
+      - ./proxy_cache.conf:/etc/nginx/conf.d/proxy_cache.conf
       - ./redirects.conf:/etc/nginx/redirects.conf
       - ./staging.conf:/etc/nginx/conf.d/staging.conf
       - nest-certbot-webroot:/var/www/certbot
+      - nest-nginx-cache:/var/cache/nginx
 
 networks:
   production_nest-app-network:
@@ -40,3 +45,4 @@ networks:
 
 volumes:
   nest-certbot-webroot:
+  nest-nginx-cache:
