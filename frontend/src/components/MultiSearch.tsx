@@ -267,7 +267,13 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                       <button
                         type="button"
                         onClick={() => handleSuggestionClick(hit, suggestion.indexName)}
-                        className="flex w-full cursor-pointer items-center overflow-hidden border-none bg-transparent p-0 text-left"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            handleSuggestionClick(hit, suggestion.indexName)
+                          }
+                        }}
+                        className="flex w-full cursor-pointer items-center overflow-hidden border-none bg-transparent p-0 text-left focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
                       >
                         {getIconForIndex(suggestion.indexName)}
                         <span className="block max-w-full truncate">{hit.name || hit.login}</span>

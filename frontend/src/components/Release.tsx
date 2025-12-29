@@ -22,6 +22,12 @@ const Release: React.FC<ReleaseProps> = ({
   index = 0,
 }) => {
   const router = useRouter()
+  const handleClickRepository = () => {
+    const org = release.organizationName || ''
+    const repo = release.repositoryName || ''
+    if (!org || !repo) return
+    router.push(`/organizations/${org}/repositories/${repo}`)
+  }
 
   return (
     <div className={`mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700 ${className}`}>
@@ -76,11 +82,12 @@ const Release: React.FC<ReleaseProps> = ({
               type="button"
               className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
               disabled={!release.organizationName || !release.repositoryName}
-              onClick={() => {
-                const org = release.organizationName || ''
-                const repo = release.repositoryName || ''
-                if (!org || !repo) return
-                router.push(`/organizations/${org}/repositories/${repo}`)
+              onClick={handleClickRepository}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  handleClickRepository()
+                }
               }}
               aria-label={`View repository ${release.repositoryName}`}
             >

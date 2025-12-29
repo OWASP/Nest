@@ -6,6 +6,7 @@ import React, { ReactNode } from 'react'
 interface ActionButtonProps {
   url?: string
   onClick?: () => void
+  onKeyDown?: (e: React.KeyboardEvent<HTMLAnchorElement | HTMLButtonElement>) => void
   tooltipLabel?: string
   children: ReactNode
 }
@@ -24,6 +25,12 @@ const ActionButton: React.FC<ActionButtonProps> = ({ url, onClick, tooltipLabel,
         data-tooltip-id="button-tooltip"
         data-tooltip-content={tooltipLabel}
         onClick={onClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onClick?.()
+          }
+        }}
         aria-label={tooltipLabel}
       >
         {children}

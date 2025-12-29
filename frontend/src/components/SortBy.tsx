@@ -21,9 +21,10 @@ const SortBy = ({
           size="md"
           label="Sort By :"
           classNames={{
-            label: 'font-medium text-sm text-gray-700 dark:text-gray-300 w-auto select-none pe-0',
+            label:
+              'font-medium text-sm text-gray-700 dark:text-gray-300 w-auto select-none pe-0 hover',
             trigger:
-              'bg-transparent data-[hover=true]:bg-transparent focus:outline-none focus:ring-0 border-none shadow-none text-nowrap w-32 min-h-8 h-8 text-sm font-medium text-gray-800 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-0',
+              'bg-transparent data-[hover=true]:bg-transparent focus:outline-none focus:underline border-none shadow-none text-nowrap w-32 min-h-8 h-8 text-sm font-medium text-gray-800 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-0',
             value: 'text-gray-800 dark:text-gray-200 font-medium',
             selectorIcon: 'text-gray-500 dark:text-gray-400 transition-transform duration-200',
             popoverContent:
@@ -41,7 +42,7 @@ const SortBy = ({
             <SelectItem
               key={option.key}
               classNames={{
-                base: 'text-sm text-gray-700 dark:text-gray-300 hover:bg-transparent dark:hover:bg-transparent focus:bg-gray-100 dark:focus:bg-[#404040] focus:outline-none rounded-sm px-3 py-2 cursor-pointer transition-colors duration-150 data-[selected=true]:bg-blue-50 dark:data-[selected=true]:bg-blue-900/20 data-[selected=true]:text-blue-600 dark:data-[selected=true]:text-blue-400 data-[focus=true]:bg-gray-100 dark:data-[focus=true]:bg-[#404040]',
+                base: 'text-sm text-gray-700 dark:text-gray-300 hover:bg-transparent dark:hover:bg-transparent focus:bg-gray-100 dark:focus:bg-[#404040] focus:outline-none rounded-sm px-3 py-2 cursor-pointer data-[selected=true]:bg-blue-50 dark:data-[selected=true]:bg-blue-900/20 data-[selected=true]:text-blue-600 dark:data-[selected=true]:text-blue-400 data-[focus=true]:bg-gray-100 dark:data-[focus=true]:bg-[#404040]',
               }}
             >
               {option.label}
@@ -62,6 +63,12 @@ const SortBy = ({
           <button
             type="button"
             onClick={() => onOrderChange(selectedOrder === 'asc' ? 'desc' : 'asc')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onOrderChange(selectedOrder === 'asc' ? 'desc' : 'asc')
+              }
+            }}
             className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 bg-gray-100 p-0 shadow-sm transition-all duration-200 hover:bg-gray-200 hover:shadow-md focus:ring-2 focus:ring-gray-300 focus:ring-offset-1 focus:outline-none dark:border-gray-600 dark:bg-[#323232] dark:hover:bg-[#404040] dark:focus:ring-gray-500"
             aria-label={
               selectedOrder === 'asc' ? 'Sort in ascending order' : 'Sort in descending order'

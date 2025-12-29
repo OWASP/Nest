@@ -139,7 +139,12 @@ const Card = ({
 
           {/* Action Button */}
           <div className="flex sm:justify-end">
-            <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
+            <ActionButton
+              tooltipLabel={tooltipLabel}
+              url={button.url}
+              onClick={button.onclick}
+              onKeyDown={button.onkeydown}
+            >
               {button.icon}
               {button.label}
             </ActionButton>

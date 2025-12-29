@@ -38,7 +38,13 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
           <button
             type="button"
             onClick={() => setShowAllModule(!showAllModule)}
-            className="mt-4 flex items-center justify-center text-blue-400 hover:underline"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                setShowAllModule(!showAllModule)
+              }
+            }}
+            className="mt-4 flex items-center justify-center text-blue-400 hover:underline focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
           >
             {showAllModule ? (
               <>
