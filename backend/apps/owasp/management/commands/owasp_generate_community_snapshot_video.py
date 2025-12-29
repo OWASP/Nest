@@ -134,6 +134,16 @@ class SlideBuilder:
         self.snapshot = snapshot
         self.output_dir = output_dir
 
+    @staticmethod
+    def format_names_for_transcript(names: list[str]) -> str:
+        """Format a list of names for transcript, stripping 'OWASP ' prefix."""
+        cleaned = [name.replace("OWASP ", "") for name in names[:TRANSCRIPT_NAMES_LIMIT]]
+        if len(cleaned) > 1:
+            return f"{', '.join(cleaned[:-1])}, and {cleaned[-1]}"
+        if cleaned:
+            return cleaned[0]
+        return ""
+
     def create_intro_slide(self) -> Slide:
         """Create an introduction slide."""
         print("Generating introduction slide for snapshot")
@@ -197,14 +207,7 @@ class SlideBuilder:
             for project in new_projects
         ]
 
-        project_names = [
-            p.name.replace("OWASP ", "") for p in new_projects[:TRANSCRIPT_NAMES_LIMIT]
-        ]
-        formatted_project_names = (
-            f"{', '.join(project_names[:-1])}, and {project_names[-1]}"
-            if len(project_names) > 1
-            else project_names[0]
-        )
+        formatted_project_names = self.format_names_for_transcript([p.name for p in new_projects])
 
         return Slide(
             context={
@@ -234,14 +237,7 @@ class SlideBuilder:
             for c in new_chapters
         ]
 
-        chapter_names = [
-            c.name.replace("OWASP ", "") for c in new_chapters[:TRANSCRIPT_NAMES_LIMIT]
-        ]
-        formatted_names = (
-            f"{', '.join(chapter_names[:-1])}, and {chapter_names[-1]}"
-            if len(chapter_names) > 1
-            else chapter_names[0]
-        )
+        formatted_names = self.format_names_for_transcript([c.name for c in new_chapters])
 
         return Slide(
             context={
@@ -281,16 +277,7 @@ class SlideBuilder:
         ]
 
         release_count = releases.count()
-        top_names = [
-            name.replace("OWASP ", "") for name, _ in top_projects[:TRANSCRIPT_NAMES_LIMIT]
-        ]
-        formatted_names = (
-            f"{', '.join(top_names[:-1])}, and {top_names[-1]}"
-            if len(top_names) > 1
-            else top_names[0]
-            if top_names
-            else ""
-        )
+        formatted_names = self.format_names_for_transcript([name for name, _ in top_projects])
 
         return Slide(
             context={
