@@ -345,11 +345,13 @@ class ModuleMutation:
             try:
                 github_user = user.github_user
                 editor_as_mentor, _ = Mentor.objects.get_or_create(
-                    github_user=github_user,
-                    defaults={"nest_user": user}
+                    github_user=github_user, defaults={"nest_user": user}
                 )
             except Exception as err:
-                msg = f"User '{user.username}' is not registered as a mentor. Only mentors can edit modules."
+                msg = (
+                    f"User '{user.username}' is not registered as a mentor. "
+                    "Only mentors can edit modules."
+                )
                 logger.warning(
                     "Failed to find or create mentor for user '%s' (ID: %s): %s",
                     user.username,
@@ -363,12 +365,15 @@ class ModuleMutation:
         is_module_mentor = module.mentors.filter(id=editor_as_mentor.id).exists()
 
         if not (is_program_admin or is_module_mentor):
-            msg = "You do not have permission to edit this module. Only program admins and module mentors can edit modules."
+            msg = (
+                "You do not have permission to edit this module. "
+                "Only program admins and module mentors can edit modules."
+            )
             logger.warning(
-                "Unauthorized edit attempt: User '%s' is neither a program admin nor a module mentor for module '%s'.",
+                "Unauthorized edit attempt: User '%s' is neither a program admin "
+                "nor a module mentor for module '%s'.",
                 user.username,
                 module.name,
-                exc_info=True,
             )
             raise PermissionDenied(msg)
 
@@ -406,10 +411,10 @@ class ModuleMutation:
             if not is_program_admin:
                 msg = "Only program admins can modify mentor assignments."
                 logger.warning(
-                    "Unauthorized mentor assignment attempt: Non-admin mentor '%s' tried to modify mentors for module '%s'.",
+                    "Unauthorized mentor assignment attempt: Non-admin mentor '%s' "
+                    "tried to modify mentors for module '%s'.",
                     user.username,
                     module.name,
-                    exc_info=True,
                 )
                 raise PermissionDenied(msg)
             mentors_to_set = resolve_mentors_from_logins(input_data.mentor_logins)
@@ -474,7 +479,8 @@ class ModuleMutation:
             raise PermissionDenied(msg) from err
 
         if not module.program.admins.filter(id=admin_as_mentor.id).exists():
-            raise PermissionDenied
+            msg = "Only program admins can delete modules."
+            raise PermissionDenied(msg)
 
         program = module.program
         module_name = module.name

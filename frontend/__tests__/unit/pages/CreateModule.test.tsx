@@ -49,37 +49,35 @@ describe('CreateModulePage', () => {
     jest.clearAllMocks()
   })
 
-  it(
-    'submits the form and navigates to programs page',
-    async () => {
-      const user = userEvent.setup()
+  it('submits the form and navigates to programs page', async () => {
+    const user = userEvent.setup()
 
-      ;(useSession as jest.Mock).mockReturnValue({
-        data: { user: { login: 'admin-user' } },
-        status: 'authenticated',
-      })
-      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin-user' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin-user' }],
+        },
+      },
+      loading: false,
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([
+      mockCreateModule.mockResolvedValue({
         data: {
-          getProgram: {
-            admins: [{ login: 'admin-user' }],
+          createModule: {
+            key: 'my-test-module',
           },
         },
-        loading: false,
-      })
-      ;(useMutation as unknown as jest.Mock).mockReturnValue([
-        mockCreateModule.mockResolvedValue({
-          data: {
-            createModule: {
-              key: 'my-test-module',
-            },
-          },
-        }),
-        { loading: false },
-      ])
+      }),
+      { loading: false },
+    ])
 
-      render(<CreateModulePage />)
+    render(<CreateModulePage />)
 
-      // Fill all inputs
+    // Fill all inputs
     await user.type(screen.getByLabelText('Name'), 'My Test Module')
     await user.type(screen.getByLabelText(/Description/i), 'This is a test module')
     await user.type(screen.getByLabelText(/Start Date/i), '2025-07-15')
@@ -123,7 +121,5 @@ describe('CreateModulePage', () => {
       expect(mockCreateModule).toHaveBeenCalled()
       expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program')
     })
-    },
-    10000
-  )
+  }, 10000)
 })

@@ -135,7 +135,7 @@ jest.mock('@apollo/client/react', () => {
     jest.fn().mockResolvedValue({ data: { deleteModule: true } }),
     { data: null, loading: false, error: null, called: false },
   ])
-  
+
   return {
     ...actual,
     useMutation: mockUseMutation,

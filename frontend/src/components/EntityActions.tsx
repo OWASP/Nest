@@ -128,7 +128,8 @@ const EntityActions: React.FC<EntityActionsProps> = ({
 
       if (error instanceof Error) {
         if (error.message.includes('Permission') || error.message.includes('not have permission')) {
-          description = 'You do not have permission to delete this module. Only program admins can delete modules.'
+          description =
+            'You do not have permission to delete this module. Only program admins can delete modules.'
         } else if (error.message.includes('Unauthorized')) {
           description = 'Unauthorized: You must be a program admin to delete modules.'
         }

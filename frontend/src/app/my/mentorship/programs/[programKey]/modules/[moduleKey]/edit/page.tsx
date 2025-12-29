@@ -5,8 +5,8 @@ import { addToast } from '@heroui/toast'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
-import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { ExperienceLevelEnum } from 'types/__generated__/graphql'
+import { ErrorDisplay } from 'app/global-error'
+import { ExperienceLevelEnum, type UpdateModuleInput } from 'types/__generated__/graphql'
 import { UpdateModuleDocument } from 'types/__generated__/moduleMutations.generated'
 import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import type { ExtendedSession } from 'types/auth'
@@ -56,7 +56,6 @@ const EditModulePage = () => {
       (admin: { login: string }) => admin.login === currentUserLogin
     )
 
-    // Check if user is a module mentor
     const isMentor = data.getModule.mentors?.some(
       (mentor: { login: string }) => mentor.login === currentUserLogin
     )
@@ -105,7 +104,7 @@ const EditModulePage = () => {
         (admin: { login: string }) => admin.login === currentUserLogin
       )
 
-      const input: any = {
+      const input: UpdateModuleInput = {
         description: formData.description,
         domains: parseCommaSeparated(formData.domains),
         endedAt: formData.endedAt || null,
@@ -120,7 +119,6 @@ const EditModulePage = () => {
         tags: parseCommaSeparated(formData.tags),
       }
 
-      // Only include mentorLogins if user is an admin
       if (isAdmin) {
         input.mentorLogins = parseCommaSeparated(formData.mentorLogins)
       }
@@ -141,7 +139,8 @@ const EditModulePage = () => {
 
       if (err instanceof Error) {
         if (err.message.includes('Permission') || err.message.includes('not have permission')) {
-          errorMessage = 'You do not have permission to edit this module. Only program admins and assigned mentors can edit modules.'
+          errorMessage =
+            'You do not have permission to edit this module. Only program admins and assigned mentors can edit modules.'
         } else if (err.message.includes('mentor')) {
           errorMessage = err.message
         }

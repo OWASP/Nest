@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React from 'react'
 import { HiUserGroup } from 'react-icons/hi'
-import { ExtendedSession } from 'types/auth'
+import type { ExtendedSession } from 'types/auth'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import EntityActions from 'components/EntityActions'
@@ -26,11 +26,10 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
   const { data } = useSession()
   const pathname = usePathname()
 
-  const currentUserLogin = ((data as ExtendedSession)?.user?.login as string)
+  const currentUserLogin = (data as ExtendedSession)?.user?.login
 
   const isAdmin =
-    accessLevel === 'admin' &&
-    admins?.some((admin) => admin.login === currentUserLogin)
+    accessLevel === 'admin' && admins?.some((admin) => admin.login === currentUserLogin)
 
   const isMentor = module.mentors?.some((mentor) => mentor.login === currentUserLogin)
 
