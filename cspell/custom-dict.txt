@@ -69,6 +69,7 @@ gunicorn
 hackathon
 heroui
 hsl
+ics
 igoat
 inlinehilite
 isanori
@@ -95,6 +96,7 @@ millify
 mpim
 navlink
 nestbot
+ngx
 noinput
 nosniff
 openstreetmap
