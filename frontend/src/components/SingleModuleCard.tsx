@@ -26,9 +26,13 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
   const { data } = useSession()
   const pathname = usePathname()
 
+  const currentUserLogin = ((data as ExtendedSession)?.user?.login as string)
+
   const isAdmin =
     accessLevel === 'admin' &&
-    admins?.some((admin) => admin.login === ((data as ExtendedSession)?.user?.login as string))
+    admins?.some((admin) => admin.login === currentUserLogin)
+
+  const isMentor = module.mentors?.some((mentor) => mentor.login === currentUserLogin)
 
   // Extract programKey from pathname (e.g., /my/mentorship/programs/[programKey])
   const programKey = pathname?.split('/programs/')[1]?.split('/')[0] || ''
@@ -50,6 +54,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1"
+            data-testid="module-link"
           >
             <h1
               className="max-w-full text-base font-semibold break-words text-blue-400 hover:text-blue-600 sm:text-lg sm:break-normal lg:text-2xl"
@@ -62,7 +67,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
           </Link>
         </div>
 
-        {isAdmin && (
+        {(isAdmin || isMentor) && (
           <EntityActions
             type="module"
             programKey={programKey}

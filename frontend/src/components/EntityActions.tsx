@@ -124,10 +124,15 @@ const EntityActions: React.FC<EntityActionsProps> = ({
       setDeleteModalOpen(false)
       router.push(`/my/mentorship/programs/${programKey}`)
     } catch (error) {
-      const description =
-        error instanceof Error && error.message.includes('Permission')
-          ? 'You do not have permission to delete this module.'
-          : 'Failed to delete module. Please try again.'
+      let description = 'Failed to delete module. Please try again.'
+
+      if (error instanceof Error) {
+        if (error.message.includes('Permission') || error.message.includes('not have permission')) {
+          description = 'You do not have permission to delete this module. Only program admins can delete modules.'
+        } else if (error.message.includes('Unauthorized')) {
+          description = 'Unauthorized: You must be a program admin to delete modules.'
+        }
+      }
 
       addToast({
         title: 'Error',

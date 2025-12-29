@@ -320,7 +320,15 @@ class ModuleMutation:
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
     def update_module(self, info: strawberry.Info, input_data: UpdateModuleInput) -> ModuleNode:
-        """Update an existing mentorship module. User must be an admin of the program."""
+        """Update an existing mentorship module.
+
+        User must either be:
+        - An admin of the program, or
+        - A mentor explicitly assigned to this module
+
+        Admins can edit any field and manage mentor assignments.
+        Module mentors can edit module details but cannot modify mentor assignments.
+        """
         user = info.context.request.user
 
         try:
@@ -332,21 +340,37 @@ class ModuleMutation:
             raise ObjectDoesNotExist(msg) from e
 
         try:
-            creator_as_mentor = Mentor.objects.get(nest_user=user)
-        except Mentor.DoesNotExist as err:
-            msg = "Only mentors can edit modules."
-            logger.warning(
-                "User '%s' is not a mentor and cannot edit modules.",
-                user.username,
-                exc_info=True,
-            )
-            raise PermissionDenied(msg) from err
+            editor_as_mentor = Mentor.objects.get(nest_user=user)
+        except Mentor.DoesNotExist:
+            try:
+                github_user = user.github_user
+                editor_as_mentor, _ = Mentor.objects.get_or_create(
+                    github_user=github_user,
+                    defaults={"nest_user": user}
+                )
+            except Exception as err:
+                msg = f"User '{user.username}' is not registered as a mentor. Only mentors can edit modules."
+                logger.warning(
+                    "Failed to find or create mentor for user '%s' (ID: %s): %s",
+                    user.username,
+                    user.id,
+                    str(err),
+                    exc_info=True,
+                )
+                raise PermissionDenied(msg) from err
 
-        is_program_admin = module.program.admins.filter(id=creator_as_mentor.id).exists()
-        is_module_mentor = module.mentors.filter(id=creator_as_mentor.id).exists()
+        is_program_admin = module.program.admins.filter(id=editor_as_mentor.id).exists()
+        is_module_mentor = module.mentors.filter(id=editor_as_mentor.id).exists()
 
         if not (is_program_admin or is_module_mentor):
-            raise PermissionDenied
+            msg = "You do not have permission to edit this module. Only program admins and module mentors can edit modules."
+            logger.warning(
+                "Unauthorized edit attempt: User '%s' is neither a program admin nor a module mentor for module '%s'.",
+                user.username,
+                module.name,
+                exc_info=True,
+            )
+            raise PermissionDenied(msg)
 
         started_at, ended_at = _validate_module_dates(
             input_data.started_at,
@@ -379,6 +403,15 @@ class ModuleMutation:
             raise ObjectDoesNotExist(msg) from err
 
         if input_data.mentor_logins is not None:
+            if not is_program_admin:
+                msg = "Only program admins can modify mentor assignments."
+                logger.warning(
+                    "Unauthorized mentor assignment attempt: Non-admin mentor '%s' tried to modify mentors for module '%s'.",
+                    user.username,
+                    module.name,
+                    exc_info=True,
+                )
+                raise PermissionDenied(msg)
             mentors_to_set = resolve_mentors_from_logins(input_data.mentor_logins)
             module.mentors.set(mentors_to_set)
 
@@ -400,6 +433,13 @@ class ModuleMutation:
             module.program.experience_levels.remove(old_experience_level)
 
         module.program.save(update_fields=["experience_levels"])
+
+        logger.info(
+            "User '%s' successfully updated module '%s' in program '%s'.",
+            user.username,
+            module.name,
+            module.program.key,
+        )
 
         return module
 
