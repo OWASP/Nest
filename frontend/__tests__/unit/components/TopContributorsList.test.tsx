@@ -291,7 +291,7 @@ describe('TopContributorsList Component', () => {
     })
 
     it('respects custom maxInitialDisplay prop', () => {
-      const manyContributors =Array.from({ length: 10 }) 
+      const manyContributors = Array.from({ length: 10 })
         .fill(null)
         .map((_, index) => ({
           ...mockContributors[0],
