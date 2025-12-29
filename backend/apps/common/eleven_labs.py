@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from django.conf import settings
 from elevenlabs.client import ElevenLabs as ElevenLabsClient
+from elevenlabs.types.voice_settings import VoiceSettings
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -31,13 +32,16 @@ class ElevenLabs:
         """ElevenLabs constructor.
 
         Args:
-            model_id: The model to use.
-            output_format: Audio output format.
-            similarity_boost: Voice consistency (0.0-1.0).
-            stability: Voice stability (0.0-1.0).
-            style: Style exaggeration (0.0-1.0).
-            use_speaker_boost: Enable speaker clarity boost.
-            voice_id: The voice ID to use.
+            model_id (str): The model to use.
+            output_format (str): Audio output format.
+            similarity_boost (float): Voice consistency (0.0-1.0).
+            stability (float): Voice stability (0.0-1.0).
+            style (float): Style exaggeration (0.0-1.0).
+            use_speaker_boost (bool): Enable speaker clarity boost.
+            voice_id (str): The voice ID to use.
+
+        Raises:
+            ValueError: If ELEVENLABS_API_KEY is not configured in settings.
 
         """
         self.client = ElevenLabsClient(
@@ -178,12 +182,12 @@ class ElevenLabs:
                 output_format=self.output_format,
                 text=self.text,
                 voice_id=self.voice_id,
-                voice_settings={
-                    "similarity_boost": self.similarity_boost,
-                    "stability": self.stability,
-                    "style": self.style,
-                    "use_speaker_boost": self.use_speaker_boost,
-                },
+                voice_settings=VoiceSettings(
+                    similarity_boost=self.similarity_boost,
+                    stability=self.stability,
+                    style=self.style,
+                    use_speaker_boost=self.use_speaker_boost,
+                ),
             )
 
             return b"".join(audio_iterator)
