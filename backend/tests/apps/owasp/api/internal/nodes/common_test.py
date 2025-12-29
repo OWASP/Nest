@@ -29,9 +29,9 @@ class TestGenericEntityNode:
         assert result == ["leader1", "leader2"]
 
     def test_related_urls_resolver(self):
-        """Test related_urls returns indexed URLs list."""
+        """Test related_urls returns URLs list."""
         mock_entity = Mock()
-        mock_entity.idx_related_urls = ["https://example.com", "https://test.com"]
+        mock_entity.related_urls = ["https://example.com", "https://test.com"]
 
         result = GenericEntityNode.related_urls(mock_entity)
 

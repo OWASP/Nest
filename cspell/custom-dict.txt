@@ -75,6 +75,7 @@ geoloc
 geopy
 gha
 graphiql
+graphqler
 gunicorn
 hackathon
 heroui
@@ -117,6 +118,7 @@ noinput
 nosniff
 nspname
 numfmt
+openblas
 openstreetmap
 owasppcitoolkit
 owtf

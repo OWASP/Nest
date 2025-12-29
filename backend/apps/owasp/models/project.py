@@ -10,7 +10,6 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.utils import timezone
 
-from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import get_absolute_url
 from apps.core.models.prompt import Prompt
@@ -146,7 +145,7 @@ class Project(
         return f"{self.name or self.key}"
 
     @property
-    def entity_leaders(self) -> models.QuerySet[EntityMember]:
+    def entity_leaders(self) -> list[EntityMember]:
         """Return project leaders."""
         return super().entity_leaders[:MAX_LEADERS_COUNT]
 
@@ -360,7 +359,10 @@ class Project(
     @lru_cache
     def active_projects_count():
         """Return active projects count."""
-        return IndexBase.get_total_count("projects", search_filters="idx_is_active:true")
+        return Project.objects.filter(
+            has_active_repositories=True,
+            is_active=True,
+        ).count()
 
     @staticmethod
     def bulk_save(projects: list, fields: list | None = None) -> None:  # type: ignore[override]
