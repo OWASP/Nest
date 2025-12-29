@@ -24,10 +24,10 @@ ELEVENLABS_STABILITY = 0.4
 ELEVENLABS_STYLE = 0.1
 IMAGE_EXTENSION = ".png"
 IMAGE_FORMAT = "PNG"
-MAX_DETAILED_PROJECTS = 20
-MAX_TRANSCRIPT_PROJECTS = 4
+MAX_DETAILED_PROJECTS = 16
 OUTPUT_DIR = Path(tempfile.gettempdir())
 PDF_RENDER_SCALE = 2
+TRANSCRIPT_NAMES_LIMIT = 3
 VIDEO_EXTENSION = ".mp4"
 VIDEO_FRAMERATE = 60
 
@@ -195,7 +195,7 @@ class SlideBuilder:
         ]
 
         project_names = [
-            p.name.replace("OWASP ", "") for p in new_projects[:MAX_TRANSCRIPT_PROJECTS]
+            p.name.replace("OWASP ", "") for p in new_projects[:TRANSCRIPT_NAMES_LIMIT]
         ]
         formatted_project_names = (
             f"{', '.join(project_names[:-1])}, and {project_names[-1]}"
@@ -214,6 +214,42 @@ class SlideBuilder:
             template_name="video/slides/projects.html",
             transcript=f"So... this time we've welcomed {project_count} new projects, "
             f"including OWASP {formatted_project_names}.",
+        )
+
+    def create_chapters_slide(self) -> Slide:
+        """Create a chapters slide."""
+        print("Generating chapters slide for snapshot")
+
+        new_chapters = self.snapshot.new_chapters.all()
+        chapter_count = new_chapters.count()
+
+        chapters = [
+            {
+                "location": f"{c.region}, {c.country}" if c.region else c.country,
+                "name": c.name,
+            }
+            for c in new_chapters
+        ]
+
+        chapter_names = [
+            c.name.replace("OWASP ", "") for c in new_chapters[:TRANSCRIPT_NAMES_LIMIT]
+        ]
+        formatted_names = (
+            f"{', '.join(chapter_names[:-1])}, and {chapter_names[-1]}"
+            if len(chapter_names) > 1
+            else chapter_names[0]
+        )
+
+        return Slide(
+            context={
+                "chapters": chapters,
+                "title": f"New Chapters ({chapter_count})",
+            },
+            output_dir=self.output_dir,
+            name="chapters",
+            template_name="video/slides/chapters.html",
+            transcript=f"We've also welcomed {chapter_count} new chapters,"
+            f"including {formatted_names}.",
         )
 
     def create_thank_you_slide(self) -> Slide:
@@ -315,6 +351,11 @@ class Command(BaseCommand):
             generator.append_slide(slide_builder.create_projects_slide())
         else:
             print("Skipping projects slide - No new projects in snapshot.")
+
+        if snapshot.new_chapters.exists():
+            generator.append_slide(slide_builder.create_chapters_slide())
+        else:
+            print("Skipping chapters slide - No new chapters in snapshot.")
 
         generator.append_slide(slide_builder.create_thank_you_slide())
 
