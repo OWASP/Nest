@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import re
+from functools import cached_property
 from urllib.parse import urlparse
 
 import yaml
@@ -88,16 +89,18 @@ class RepositoryBasedEntityModel(models.Model):
         blank=True,
     )
 
-    @property
-    def entity_leaders(self) -> models.QuerySet[EntityMember]:
+    @cached_property
+    def entity_leaders(self) -> list[EntityMember]:
         """Return entity's leaders."""
-        return EntityMember.objects.filter(
-            entity_id=self.id,
-            entity_type=ContentType.objects.get_for_model(self.__class__),
-            is_active=True,
-            is_reviewed=True,
-            role=EntityMember.Role.LEADER,
-        ).order_by("order")
+        return list(
+            EntityMember.objects.filter(
+                entity_id=self.id,
+                entity_type=ContentType.objects.get_for_model(self.__class__),
+                is_active=True,
+                is_reviewed=True,
+                role=EntityMember.Role.LEADER,
+            ).order_by("order")
+        )
 
     @property
     def github_url(self) -> str:

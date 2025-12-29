@@ -4,10 +4,12 @@ __pycache__
 .cache
 .coverage
 .cursor/rules/snyk_rules.mdc
+backend/fuzzing_results/
 .DS_Store
 .env*
 !.env.example
 !.env.e2e.example
+!.env.fuzz.example
 .github/instructions/snyk_rules.instructions.md
 .idea
 .lighthouseci/
@@ -45,3 +47,6 @@ logs
 node_modules/
 TODO
 venv/
+
+# Snyk Security Extension - AI Rules (auto-generated)
+.cursor/rules/snyk_rules.mdc
