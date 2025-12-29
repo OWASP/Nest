@@ -49,21 +49,15 @@ class ProjectNode(GenericEntityNode):
     @strawberry.field
     def health_metrics_list(self, limit: int = 30) -> list[ProjectHealthMetricsNode]:
         """Resolve project health metrics."""
-        return ProjectHealthMetrics.objects.filter(
-            project=self,
-        ).order_by(
-            "nest_created_at",
-        )[:limit]
+        return ProjectHealthMetrics.objects.filter(project=self).order_by("nest_created_at")[
+            :limit
+        ]
 
     @strawberry.field
     def health_metrics_latest(self) -> ProjectHealthMetricsNode | None:
         """Resolve latest project health metrics."""
         return (
-            ProjectHealthMetrics.get_latest_health_metrics()
-            .filter(
-                project=self,
-            )
-            .first()
+            ProjectHealthMetrics.objects.filter(project=self).order_by("-nest_created_at").first()
         )
 
     @strawberry.field

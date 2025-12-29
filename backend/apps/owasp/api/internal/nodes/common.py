@@ -23,7 +23,7 @@ class GenericEntityNode(strawberry.relay.Node):
     @strawberry.field
     def related_urls(self) -> list[str]:
         """Resolve related URLs."""
-        return self.idx_related_urls
+        return self.related_urls
 
     @strawberry.field
     def top_contributors(self) -> list[RepositoryContributorNode]:

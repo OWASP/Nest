@@ -194,6 +194,7 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
             {
                 "avatar_url": tc["user__avatar_url"],
                 "contributions_count": tc["total_contributions"],
+                "id": tc["user__login"],
                 "login": tc["user__login"],
                 "name": tc["user__name"],
             }
