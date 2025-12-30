@@ -42,9 +42,6 @@ class ElevenLabs:
             use_speaker_boost (bool): Enable speaker clarity boost.
             voice_id (str): The voice ID to use.
 
-        Raises:
-            ValueError: If ELEVENLABS_API_KEY is not configured in settings.
-
         """
         self.client = ElevenLabsClient(
             api_key=settings.ELEVENLABS_API_KEY,
