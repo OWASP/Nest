@@ -136,7 +136,7 @@ run-backend-e2e:
 
 run-backend-fuzz:
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
-	docker compose --project-name nest-fuzz -f docker-compose/fuzz.yaml up --build --remove-orphans --abort-on-container-exit backend db
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz.yaml up --build --remove-orphans --abort-on-container-exit backend db cache
 
 save-backup:
 	@echo "Saving Nest backup"
