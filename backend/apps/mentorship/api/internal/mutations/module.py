@@ -80,7 +80,8 @@ class ModuleMutation:
             program = Program.objects.get(key=input_data.program_key)
             project = Project.objects.get(id=input_data.project_id)
             creator_as_mentor = Mentor.objects.get(nest_user=user)
-            new_position = Module.objects.filter(program__key=input_data.program_key).count()
+            program = Program.objects.select_for_update().get(key=input_data.program_key)
+            new_position = program.modules.count()
         except (Program.DoesNotExist, Project.DoesNotExist) as e:
             msg = f"{e.__class__.__name__} matching query does not exist."
             raise ObjectDoesNotExist(msg) from e
@@ -439,12 +440,27 @@ class ModuleMutation:
         existing_modules = Module.objects.filter(program=program)
         existing_module_keys = {m.key for m in existing_modules}
 
+        if len(input_data.module_keys) != len(set(input_data.module_keys)):
+            raise ValidationError(message="Duplicate module keys are not allowed in the ordering.")
+
+        if set(input_data.module_keys) != existing_module_keys:
+            raise ValidationError(
+                message="All modules in the program must be included in the ordering."
+            )
+
         if not all(mk in existing_module_keys for mk in input_data.module_keys):
             raise ValidationError(
                 message="One or more module keys are invalid or do not belong to this program."
             )
 
+        modules_by_key = {m.key: m for m in existing_modules}
+        modules_to_update = []
+
         for index, module_key in enumerate(input_data.module_keys):
-            existing_modules.filter(key=module_key).update(position=index)
+            module = modules_by_key[module_key]
+            module.position = index
+            modules_to_update.append(module)
+
+        Module.objects.bulk_update(modules_to_update, ["position"])
 
         return program
