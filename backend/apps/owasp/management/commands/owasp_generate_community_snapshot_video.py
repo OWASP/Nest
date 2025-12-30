@@ -11,10 +11,13 @@ from typing import Any
 import ffmpeg
 import pypdfium2 as pdfium
 from django.core.management.base import BaseCommand
+from django.db.models import QuerySet
 from django.template.loader import render_to_string
 from weasyprint import HTML
 
 from apps.common.eleven_labs import ElevenLabs
+from apps.github.models.release import Release
+from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.project import Project
 from apps.owasp.models.snapshot import Snapshot
 from apps.owasp.models.sponsor import Sponsor
@@ -124,9 +127,9 @@ class Slide:
 
 
 class SlideBuilder:
-    def __init__(self, snapshot: Snapshot, output_dir: Path) -> None:
+    def __init__(self, snapshots: QuerySet[Snapshot], output_dir: Path) -> None:
         """Initialize SlideBuilder."""
-        self.snapshot = snapshot
+        self.snapshots = snapshots
         self.output_dir = output_dir
 
     @staticmethod
@@ -141,17 +144,20 @@ class SlideBuilder:
 
     def create_intro_slide(self) -> Slide:
         """Create an introduction slide."""
-        month_name = self.snapshot.start_at.strftime("%B")
+        first = self.snapshots.first()
+        last = self.snapshots.last()
+        name = first.start_at.strftime("%B") if first == last else first.start_at.strftime("%Y")
+
         return Slide(
             context={
-                "formatted_start": self.snapshot.start_at.strftime("%b %d"),
-                "formatted_end": self.snapshot.end_at.strftime("%b %d, %Y"),
-                "month_name": month_name,
+                "formatted_start": first.start_at.strftime("%b %d"),
+                "formatted_end": last.end_at.strftime("%b %d, %Y"),
+                "name": name,
             },
             name="intro",
             output_dir=self.output_dir,
             template_name="video/slides/intro.html",
-            transcript=f"Hey everyone! Welcome to the OWASP Nest {month_name} Snapshot...",
+            transcript=f"Hey everyone! Welcome to the OWASP Nest {name} Snapshot...",
         )
 
     def create_sponsors_slide(self) -> Slide:
@@ -184,7 +190,11 @@ class SlideBuilder:
 
     def create_projects_slide(self) -> Slide:
         """Create a projects slide."""
-        new_projects = self.snapshot.new_projects.order_by("-stars_count")
+        new_projects = (
+            Project.objects.filter(snapshots__in=self.snapshots)
+            .distinct()
+            .order_by("-stars_count")
+        )
         project_count = new_projects.count()
 
         projects_data = [
@@ -214,7 +224,9 @@ class SlideBuilder:
 
     def create_chapters_slide(self) -> Slide:
         """Create a chapters slide."""
-        new_chapters = self.snapshot.new_chapters.all()
+        new_chapters = (
+            Chapter.objects.filter(snapshots__in=self.snapshots).distinct().order_by("name")
+        )
         chapter_count = new_chapters.count()
 
         chapters = [
@@ -241,7 +253,7 @@ class SlideBuilder:
 
     def create_releases_slide(self) -> Slide:
         """Create a releases slide."""
-        releases = self.snapshot.new_releases.select_related("repository")
+        releases = Release.objects.filter(snapshots__in=self.snapshots).distinct()
 
         project_counts: Counter = Counter()
         for release in releases:
@@ -359,36 +371,24 @@ class Command(BaseCommand):
         output_dir = options["output_dir"]
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        snapshot = Snapshot.objects.filter(
-            key__iexact=snapshot_key, status=Snapshot.Status.COMPLETED
-        ).first()
+        snapshots = Snapshot.objects.filter(
+            key__startswith=snapshot_key, status=Snapshot.Status.COMPLETED
+        ).order_by("start_at")
 
-        if not snapshot:
-            logger.error("No completed snapshot found for key: %s", snapshot_key)
+        if not snapshots:
+            logger.error("No completed snapshots found for key: %s", snapshot_key)
             return
 
         self.stdout.write(f"Generating a video for snapshot: {snapshot_key}")
 
-        slide_builder = SlideBuilder(snapshot, OUTPUT_DIR)
+        slide_builder = SlideBuilder(snapshots, OUTPUT_DIR)
         generator = Generator()
 
         generator.append_slide(slide_builder.create_intro_slide())
         generator.append_slide(slide_builder.create_sponsors_slide())
-        if snapshot.new_projects.exists():
-            generator.append_slide(slide_builder.create_projects_slide())
-        else:
-            self.stdout.write("Skipping projects slide - No new projects in snapshot.")
-
-        if snapshot.new_chapters.exists():
-            generator.append_slide(slide_builder.create_chapters_slide())
-        else:
-            self.stdout.write("Skipping chapters slide - No new chapters in snapshot.")
-
-        if snapshot.new_releases.exists():
-            generator.append_slide(slide_builder.create_releases_slide())
-        else:
-            self.stdout.write("Skipping releases slide - No new releases in snapshot.")
-
+        generator.append_slide(slide_builder.create_projects_slide())
+        generator.append_slide(slide_builder.create_chapters_slide())
+        generator.append_slide(slide_builder.create_releases_slide())
         generator.append_slide(slide_builder.create_thank_you_slide())
 
         video_path = output_dir / f"{snapshot_key}_snapshot.mp4"
