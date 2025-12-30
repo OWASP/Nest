@@ -4,34 +4,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('About Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/graphql/', async (route) => {
-      const request = route.request()
-      const postData = request.postDataJSON()
-
-      if (postData.query?.includes('user')) {
-        const username = postData.variables.key
-        const userData = mockAboutData.users[username]
-        await route.fulfill({ status: 200, json: { data: { user: userData } } })
-      } else if (postData.query?.includes('topContributors')) {
-        await route.fulfill({
-          status: 200,
-          json: { data: { topContributors: mockAboutData.topContributors } },
-        })
-      } else {
-        await route.fulfill({ status: 200, json: { data: { project: mockAboutData.project } } })
-      }
-    })
-
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-
-    await page.goto('/about')
+    await page.goto('/about', { timeout: 120000 })
   })
 
   test('renders main sections correctly', async ({ page }) => {

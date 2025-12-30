@@ -13,12 +13,11 @@ RUN --mount=type=cache,target=${NPM_CACHE} \
 
 WORKDIR /app
 
-COPY --chmod=444 package.json pnpm-lock.yaml ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    pnpm install --frozen-lockfile --ignore-scripts
+RUN pnpm add @playwright/test
 
+COPY .pnpmrc next.config.ts postcss.config.js playwright.config.ts tailwind.config.mjs tsconfig.json ./
+COPY src/utils src/utils
 COPY __tests__/e2e __tests__/e2e
 COPY __tests__/mockData __tests__/mockData
-COPY .pnpmrc next.config.ts postcss.config.js playwright.config.ts tailwind.config.mjs tsconfig.json ./
-COPY public public
-COPY src src
+
+EXPOSE 3800

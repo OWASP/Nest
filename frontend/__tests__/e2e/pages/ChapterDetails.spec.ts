@@ -1,23 +1,8 @@
-import { mockChapterDetailsData } from '@mockData/mockChapterDetailsData'
 import { test, expect } from '@playwright/test'
 
 test.describe('Chapter Details Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/graphql/', async (route) => {
-      await route.fulfill({
-        status: 200,
-        json: { data: mockChapterDetailsData },
-      })
-    })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('/chapters/test-chapter')
+    await page.goto('/chapters/rosario', { timeout: 120000 })
   })
 
   test('should have a heading and summary', async ({ page }) => {

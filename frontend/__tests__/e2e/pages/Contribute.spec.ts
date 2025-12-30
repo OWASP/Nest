@@ -13,15 +13,7 @@ test.describe('Contribute Page', () => {
         }),
       })
     })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('/contribute')
+    await page.goto('/contribute', { timeout: 120000 })
   })
 
   test('renders issue data correctly', async ({ page }) => {
