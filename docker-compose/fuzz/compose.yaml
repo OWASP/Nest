@@ -7,14 +7,14 @@ services:
         gunicorn wsgi:application --bind 0.0.0.0:9500
       '
     build:
-      context: ../backend
+      context: ../../backend
       dockerfile: docker/Dockerfile
     depends_on:
       db:
         condition: service_healthy
       cache:
         condition: service_healthy
-    env_file: ../backend/.env.fuzz.example
+    env_file: ../../backend/.env.fuzz.example
     networks:
       - fuzz-nest-network
     ports:
@@ -42,7 +42,7 @@ services:
       POSTGRES_USER: ${DJANGO_DB_USER:-nest_user_fuzz}
       POSTGRES_DB: ${DJANGO_DB_NAME:-nest_db_fuzz}
     volumes:
-      - ../backend/data:/data:ro
+      - ../../backend/data:/data:ro
     networks:
       - fuzz-nest-network
     command: >
@@ -92,7 +92,7 @@ services:
   graphql:
     container_name: fuzz-nest-graphql
     build:
-      context: ../backend/docker
+      context: ../../backend/docker
       dockerfile: Dockerfile.fuzz
     environment:
       BASE_URL: http://backend:9500
@@ -100,7 +100,7 @@ services:
       backend:
         condition: service_healthy
     volumes:
-      - ../backend/fuzzing_results:/home/owasp/fuzzing_results
+      - ../../backend/fuzzing_results:/home/owasp/fuzzing_results
     networks:
       - fuzz-nest-network
 

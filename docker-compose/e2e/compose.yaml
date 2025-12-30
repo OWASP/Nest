@@ -7,14 +7,14 @@ services:
         gunicorn wsgi:application --bind 0.0.0.0:9000
       '
     build:
-      context: ../backend
+      context: ../../backend
       dockerfile: docker/Dockerfile
     depends_on:
       db:
         condition: service_healthy
       cache:
         condition: service_healthy
-    env_file: ../backend/.env.e2e.example
+    env_file: ../../backend/.env.e2e.example
     networks:
       - e2e-nest-network
     ports:
@@ -42,7 +42,7 @@ services:
       POSTGRES_USER: ${DJANGO_DB_USER:-nest_user_e2e}
       POSTGRES_DB: ${DJANGO_DB_NAME:-nest_db_e2e}
     volumes:
-      - ../backend/data:/data:ro
+      - ../../backend/data:/data:ro
     networks:
       - e2e-nest-network
     command: >
@@ -92,7 +92,7 @@ services:
   e2e-tests:
     container_name: e2e-nest-tests
     build:
-      context: ../frontend
+      context: ../../frontend
       dockerfile: docker/Dockerfile.e2e.test
     command: >
       sh -c '
@@ -101,7 +101,7 @@ services:
     depends_on:
       backend:
         condition: service_healthy
-    env_file: ../frontend/.env.e2e.example
+    env_file: ../../frontend/.env.e2e.example
     networks:
       - e2e-nest-network
 
