@@ -1,4 +1,5 @@
 'use client'
+
 import { ApolloProvider } from '@apollo/client/react'
 import { HeroUIProvider, ToastProvider } from '@heroui/react'
 import { useDjangoSession } from 'hooks/useDjangoSession'
@@ -7,10 +8,26 @@ import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import React, { Suspense } from 'react'
 import apolloClient from 'utils/helpers/apolloClient'
 
-// <AppInitializer> is a component that initializes the Django session.
-// It ensures the session is synced with Django when the app starts.
-// AppInitializer is mounted once. Its job is to call useDjangoSession(),
-// which syncs the GitHub access token (stored in the NextAuth session) with the Django session.
+const VALID_THEMES = ['dark', 'light'] as const
+type ValidTheme = (typeof VALID_THEMES)[number]
+
+function getValidTheme(): ValidTheme {
+  if (typeof window === 'undefined') {
+    return 'dark'
+  }
+
+  try {
+    const stored = localStorage.getItem('__nest_theme__')
+    if (stored && VALID_THEMES.includes(stored as ValidTheme)) {
+      return stored as ValidTheme
+    }
+  } catch {
+
+  }
+
+  return 'dark'
+}
+
 
 function AppInitializer() {
   useDjangoSession()
@@ -18,16 +35,18 @@ function AppInitializer() {
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const [theme] = React.useState<ValidTheme>(getValidTheme)
+
   return (
     <Suspense>
       <SessionProvider>
         <HeroUIProvider>
           <NextThemesProvider
-              attribute="class"
-              forcedTheme="dark"
-              enableSystem={false}
-              storageKey="__nest_theme__"
-            >
+            attribute="class"
+            defaultTheme={theme}
+            themes={VALID_THEMES}
+            storageKey="__nest_theme__"
+          >
             <ToastProvider />
             <ApolloProvider client={apolloClient}>
               <AppInitializer />
