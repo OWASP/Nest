@@ -119,10 +119,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
       } else if (event.key === 'Enter' && highlightedIndex !== null) {
         const { index, subIndex } = highlightedIndex
         const suggestion = suggestions[index].hits[subIndex]
-        handleSuggestionClick(
-          suggestion as Chapter | Organization | Project | User | Event,
-          suggestions[index].indexName
-        )
+        handleSuggestionClick(suggestion, suggestions[index].indexName)
       } else if (event.key === 'ArrowDown') {
         event.preventDefault()
         if (highlightedIndex === null) {
@@ -268,21 +265,16 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                   {suggestion.hits.map((hit, subIndex) => (
                     <li
                       key={`${hit.key || hit.login || hit.url}-${subIndex}`}
-                      className={`flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${highlightedIndex?.index === index && highlightedIndex?.subIndex === subIndex
+                      className={`flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                        highlightedIndex?.index === index && highlightedIndex?.subIndex === subIndex
                           ? 'bg-gray-100 dark:bg-gray-700'
                           : ''
-                        }`}
+                      }`}
                     >
                       <button
                         type="button"
                         onClick={() => handleSuggestionClick(hit, suggestion.indexName)}
-                        onKeyDown={(e) =>
-                          handleSuggestionKeyDown(
-                            e,
-                            hit as Chapter | Organization | Project | User | Event,
-                            suggestion.indexName
-                          )
-                        }
+                        onKeyDown={(e) => handleSuggestionKeyDown(e, hit, suggestion.indexName)}
                         className="flex w-full cursor-pointer items-center overflow-hidden border-none bg-transparent p-0 text-left focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
                       >
                         {getIconForIndex(suggestion.indexName)}
