@@ -16,10 +16,11 @@ CACHE_VERSION_KEY = "graphql:cache_version"
 
 def get_cache_version() -> int:
     """Get the current cache version."""
-    try:
-        return cache.get(CACHE_VERSION_KEY)
-    except ValueError:
-        return cache.set(CACHE_VERSION_KEY, 1, timeout=None)
+    version = cache.get(CACHE_VERSION_KEY)
+    if version is None:
+        cache.set(CACHE_VERSION_KEY, 1, timeout=None)
+        return 1
+    return version
 
 
 def bump_cache_version() -> None:

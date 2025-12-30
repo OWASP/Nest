@@ -83,7 +83,9 @@ const ModuleCard = ({ modules, accessLevel, admins, setModuleOrder }: ModuleCard
     setActiveId(null)
   }
   const saveReorder = () => {
-    setModuleOrder(draftModules)
+    if (setModuleOrder && draftModules) {
+      setModuleOrder(draftModules)
+    }
     setIsReordering(false)
     setDraftModules(null)
 >>>>>>> d4b2b7ec (feat:draggable module ordering)
