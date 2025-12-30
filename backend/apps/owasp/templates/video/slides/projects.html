@@ -3,20 +3,18 @@
     <div class="flex h-full flex-col p-12 px-24">
         <h1 class="text-6xl font-bold mb-12 text-center">{{ title }}</h1>
         <div class="flex flex-wrap gap-4 justify-center w-full">
-            {% for project in projects %}
-                <div class="rounded-lg border-2 bg-card p-4 shrink-0 {% if show_details %}w-96{% else %}w-72{% endif %}">
-                    <div class="{% if show_details %}text-2xl{% else %}text-xl{% endif %} font-bold text-nest-blue {% if show_details %}mb-4{% endif %}">
-                        {{ project.name }}
+            {% for project in projects|slice:":16" %}
+                <div class="rounded-lg border-2 bg-card p-4 shrink-0 w-96 h-48">
+                    <div class="text-2xl font-bold text-nest-blue mb-2 line-clamp-2">{{ project.name }}</div>
+                    <div class="text-lg text-gray-300">
+                        Stars: {{ project.stars_count }} • Forks: {{ project.forks_count }} • Contributors: {{ project.contributors_count }}
                     </div>
-                    <div class="text-lg text-gray-300">Stars: {{ project.stars_count }}</div>
-                    {% if show_details and project.leaders %}
-                        <div class="text-lg text-gray-300">Leaders: {{ project.leaders }}</div>
-                    {% endif %}
-                    {% if show_details and project.created_at %}
-                        <div class="text-lg text-gray-300">Created: {{ project.created_at }}</div>
-                    {% endif %}
+                    {% if project.leaders %}<div class="text-lg text-gray-300 mt-1">Leaders: {{ project.leaders }}</div>{% endif %}
                 </div>
             {% endfor %}
         </div>
+        {% if projects|length > 16 %}
+            <p class="text-center text-gray-400 mt-8 text-xl">+ {{ projects|length|add:"-16" }} more projects not shown</p>
+        {% endif %}
     </div>
 {% endblock %}

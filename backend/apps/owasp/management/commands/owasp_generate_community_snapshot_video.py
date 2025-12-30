@@ -202,7 +202,8 @@ class SlideBuilder:
 
         projects_data = [
             {
-                "created_at": project.created_at.strftime("%b %d, %Y"),
+                "contributors_count": project.contributors_count,
+                "forks_count": project.forks_count,
                 "leaders": ", ".join(project.leaders_raw) if project.leaders_raw else None,
                 "name": project.name,
                 "stars_count": project.stars_count,
@@ -215,7 +216,6 @@ class SlideBuilder:
         return Slide(
             context={
                 "projects": projects_data,
-                "show_details": project_count <= MAX_DETAILED_PROJECTS,
                 "title": f"New Projects ({project_count})",
             },
             output_dir=self.output_dir,
