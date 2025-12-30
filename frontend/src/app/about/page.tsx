@@ -1,6 +1,5 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
-import ShowMoreButton from "components/ShowMoreButton";
 import { Tooltip } from '@heroui/tooltip'
 import upperFirst from 'lodash/upperFirst'
 import millify from 'millify'
@@ -31,6 +30,7 @@ import AnchorTitle from 'components/AnchorTitle'
 import Leaders from 'components/Leaders'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
+import ShowMoreButton from 'components/ShowMoreButton'
 import AboutSkeleton from 'components/skeletons/AboutSkeleton'
 import TopContributorsList from 'components/TopContributorsList'
 
@@ -63,8 +63,8 @@ const getMilestoneIcon = (progress: number) => {
 }
 
 const About = () => {
-  const [storyExpanded, setStoryExpanded] = useState(false);
-  const [timelineExpanded, setTimelineExpanded] = useState(false);
+  const [storyExpanded, setStoryExpanded] = useState(false)
+  const [timelineExpanded, setTimelineExpanded] = useState(false)
   const { data: projectMetadataResponse, error: projectMetadataRequestError } = useQuery(
     GetProjectMetadataDocument,
     {
@@ -255,48 +255,42 @@ const About = () => {
           </SecondaryCard>
         )}
         <SecondaryCard icon={FaScroll} title={<AnchorTitle title="Our Story" />}>
-          {projectStory
-            .slice(0, storyExpanded ? projectStory.length : 3)
-            .map((text) => (
-              <div
-                key={`story-${text.substring(0, 50).replaceAll(' ', '-')}`}
-                className="mb-4"
-              >
-                <div>
-                  <Markdown content={text} />
-                </div>
+          {projectStory.slice(0, storyExpanded ? projectStory.length : 3).map((text) => (
+            <div key={`story-${text.substring(0, 50).replaceAll(' ', '-')}`} className="mb-4">
+              <div>
+                <Markdown content={text} />
               </div>
-            ))}
+            </div>
+          ))}
 
           {projectStory.length > 3 && (
-            <ShowMoreButton
-              onToggle={() => setStoryExpanded(!storyExpanded)}
-            />
+            <ShowMoreButton onToggle={() => setStoryExpanded(!storyExpanded)} />
           )}
         </SecondaryCard>
         <SecondaryCard icon={FaClock} title={<AnchorTitle title="Project Timeline" />}>
           <div className="space-y-6">
-            {[...projectTimeline].reverse().slice(0, timelineExpanded ? projectTimeline.length : 6).map((milestone, index) => (
-              <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
-                {index !== projectTimeline.length - 1 && (
-                  <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-400"></div>
-                )}
-                <div
-                  aria-hidden="true"
-                  className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
-                ></div>
-                <div>
-                  <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
-                  <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
-                  <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
+            {[...projectTimeline]
+              .reverse()
+              .slice(0, timelineExpanded ? projectTimeline.length : 6)
+              .map((milestone, index) => (
+                <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
+                  {index !== projectTimeline.length - 1 && (
+                    <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-400"></div>
+                  )}
+                  <div
+                    aria-hidden="true"
+                    className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
+                  ></div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
+                    <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
+                    <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
           {projectTimeline.length > 6 && (
-            <ShowMoreButton
-              onToggle={() => setTimelineExpanded(!timelineExpanded)}
-            />
+            <ShowMoreButton onToggle={() => setTimelineExpanded(!timelineExpanded)} />
           )}
         </SecondaryCard>
 
