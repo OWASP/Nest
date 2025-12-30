@@ -22,7 +22,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <Suspense>
       <SessionProvider>
         <HeroUIProvider>
-          <NextThemesProvider attribute="class" defaultTheme="dark">
+          <NextThemesProvider
+              attribute="class"
+              forcedTheme="dark"
+              enableSystem={false}
+              storageKey="__nest_theme__"
+            >
             <ToastProvider />
             <ApolloProvider client={apolloClient}>
               <AppInitializer />
