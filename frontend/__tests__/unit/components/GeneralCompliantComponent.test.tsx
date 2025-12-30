@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import React from 'react'
+import { FaCertificate } from 'react-icons/fa6'
 import type { IconType } from 'react-icons'
-import { FaCertificate, FaAward } from 'react-icons/fa6'
 
 import '@testing-library/jest-dom'
 
@@ -12,19 +12,6 @@ jest.mock('@heroui/tooltip', () => ({
       {children}
     </div>
   ),
-}))
-
-jest.mock('wrappers/IconWrapper', () => ({
-  IconWrapper: ({
-    icon: IconComponent,
-    className,
-    ...props
-  }: {
-    icon: React.ComponentType<React.SVGProps<SVGSVGElement> & { className?: string }>
-    className?: string
-  }) => {
-    return <IconComponent className={className} {...props} />
-  },
 }))
 
 import GeneralCompliantComponent from 'components/GeneralCompliantComponent'
@@ -47,24 +34,30 @@ describe('GeneralCompliantComponent', () => {
     expect(container).toBeInTheDocument()
   })
 
-  it('applies correct color for compliant=true', () => {
-    const { container } = render(<GeneralCompliantComponent {...baseProps} compliant={true} />)
-    const svg = container.querySelector('svg')
-    expect(svg).toBeInTheDocument()
-    expect(svg).toHaveClass('text-green-400/80')
+  it('applies correct background color for compliant=true', () => {
+    render(<GeneralCompliantComponent {...baseProps} compliant={true} />)
+    
+    const badgeContainer = screen.getByTestId('tooltip').firstElementChild
+    
+    expect(badgeContainer).toBeInTheDocument()
+    expect(badgeContainer).toHaveClass('bg-green-400/80')
+    expect(badgeContainer).toHaveClass('text-green-900/90')
   })
 
-  it('applies correct color for compliant=false', () => {
-    const { container } = render(<GeneralCompliantComponent {...baseProps} compliant={false} />)
-    const svg = container.querySelector('svg')
-    expect(svg).toBeInTheDocument()
-    expect(svg).toHaveClass('text-red-400/80')
+  it('applies correct background color for compliant=false', () => {
+    render(<GeneralCompliantComponent {...baseProps} compliant={false} />)
+    
+    const badgeContainer = screen.getByTestId('tooltip').firstElementChild
+    
+    expect(badgeContainer).toBeInTheDocument()
+    expect(badgeContainer).toHaveClass('bg-red-400/80')
+    expect(badgeContainer).toHaveClass('text-red-900/90')
   })
 
-  it('renders the correct icon structure', () => {
+  it('renders exactly one icon (the inner symbol)', () => {
     const { container } = render(<GeneralCompliantComponent {...baseProps} />)
     const icons = container.querySelectorAll('svg')
-    expect(icons).toHaveLength(2)
+    expect(icons).toHaveLength(1)
   })
 
   it('renders tooltip wrapper with title attribute', () => {
@@ -77,19 +70,5 @@ describe('GeneralCompliantComponent', () => {
   it('handles edge case: empty title', () => {
     const { container } = render(<GeneralCompliantComponent {...baseProps} title="" />)
     expect(container).toBeInTheDocument()
-  })
-
-  it('has accessible SVG icons', () => {
-    const { container } = render(<GeneralCompliantComponent {...baseProps} />)
-    const icons = container.querySelectorAll('svg')
-    expect(icons).toHaveLength(2)
-    expect(icons[0]).toBeInTheDocument()
-    expect(icons[1]).toBeInTheDocument()
-  })
-
-  it('renders with custom icon', () => {
-    const customIcon = FaAward
-    const { container } = render(<GeneralCompliantComponent {...baseProps} icon={customIcon} />)
-    expect(container.querySelector('svg')).toBeInTheDocument()
   })
 })
