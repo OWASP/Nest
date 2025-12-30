@@ -1,8 +1,8 @@
-import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
+import React from 'react'
+import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import { Module } from 'types/mentorship'
 import ModuleCard, { getSimpleDuration } from 'components/ModuleCard'
-import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 
 // Mock necessary modules
 jest.mock('next/navigation', () => ({
