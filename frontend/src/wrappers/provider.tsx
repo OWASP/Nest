@@ -12,7 +12,7 @@ const VALID_THEMES = ['dark', 'light'] as const
 type ValidTheme = (typeof VALID_THEMES)[number]
 
 function getValidTheme(): ValidTheme {
-  if (typeof window === 'undefined') {
+  if (typeof globalThis.window === 'undefined') {
     return 'dark'
   }
 
