@@ -102,7 +102,7 @@ const ModuleCard = ({ modules, accessLevel, admins ,setModuleOrder}: ModuleCardP
         <SortableContext items={displayedModule.map((m) => m.id)} strategy={rectSortingStrategy}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {displayedModule.map((module) => {
-              return <ModuleItem key={module.key || module.id} module={module} isAdmin={isAdmin}  isReordering={isReordering} activeId={activeId} />
+              return <ModuleItem key={module.key} module={module} isAdmin={isAdmin}  isReordering={isReordering} activeId={activeId} />
             })}
           </div>
         </SortableContext>

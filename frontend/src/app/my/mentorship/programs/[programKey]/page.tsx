@@ -96,15 +96,17 @@ const ProgramDetailsPage = () => {
       return
     }
     const moduleKeys=moduleOrder.map(m => m.key);
+    const prevModuleOrder=modules
     try{
       const input={
         programKey:programKey,
         moduleKeys:moduleKeys,
       }
-      const result = await updateOrder({ variables: { input } })
       setModules(moduleOrder)
+      const result = await updateOrder({ variables: { input } })
     }
     catch(err){
+      setModules(prevModuleOrder)
       handleAppError(err)
     }
   }
