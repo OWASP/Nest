@@ -168,9 +168,9 @@ test-fuzz:
 	@docker container rm -f fuzz-nest-db >/dev/null 2>&1 || true
 	@docker volume rm -f nest-fuzz_fuzz-db-data >/dev/null 2>&1 || true
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
-	docker compose --project-name nest-fuzz -f docker-compose/fuzz.yaml up --build --remove-orphans --abort-on-container-exit db backend data-loader
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz.yaml up --build --remove-orphans --abort-on-container-exit db cache backend data-loader
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
-	docker compose --project-name nest-fuzz -f docker-compose/fuzz.yaml up --build --remove-orphans --abort-on-container-exit db backend graphql
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz.yaml up --build --remove-orphans --abort-on-container-exit db cache backend graphql
 
 update-backend-dependencies:
 	@cd backend && poetry update
