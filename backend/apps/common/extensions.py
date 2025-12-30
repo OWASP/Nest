@@ -12,6 +12,21 @@ from strawberry.schema import Schema
 from strawberry.utils.str_converters import to_camel_case
 
 
+
+
+CACHE_VERSION_KEY = "graphql:cache_version"
+
+def get_cache_version() -> int:
+    return cache.get_or_set(CACHE_VERSION_KEY, 1, timeout=None)
+
+
+def bump_cache_version() -> None:
+    try:
+        cache.incr(CACHE_VERSION_KEY)
+    except ValueError:
+        cache.set(CACHE_VERSION_KEY, 2)
+
+
 @lru_cache(maxsize=1)
 def get_protected_fields(schema: Schema) -> tuple[str, ...]:
     """Get protected field names.
@@ -46,7 +61,8 @@ class CacheExtension(SchemaExtension):
             str: The unique cache key.
 
         """
-        key = f"{field_name}:{json.dumps(field_args, sort_keys=True)}"
+        version = get_cache_version()
+        key = f"{field_name}:{json.dumps({"args":field_args,"version":version}, sort_keys=True)}"
         return (
             f"{settings.GRAPHQL_RESOLVER_CACHE_PREFIX}-{hashlib.sha256(key.encode()).hexdigest()}"
         )
@@ -65,3 +81,9 @@ class CacheExtension(SchemaExtension):
             lambda: _next(root, info, *args, **kwargs),
             settings.GRAPHQL_RESOLVER_CACHE_TIME_SECONDS,
         )
+
+class CacheInvalidationExtension(SchemaExtension):
+    def on_execute(self):
+        if str(self.execution_context.operation_type) == "OperationType.MUTATION":
+            bump_cache_version()
+
