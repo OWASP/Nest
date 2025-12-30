@@ -12,21 +12,27 @@ const VALID_THEMES = ['dark', 'light'] as const
 type ValidTheme = (typeof VALID_THEMES)[number]
 
 function getValidTheme(): ValidTheme {
-  if (typeof globalThis.window === 'undefined') {
+  if (typeof window === 'undefined') {
     return 'dark'
   }
 
   try {
     const stored = localStorage.getItem('__nest_theme__')
+
     if (stored && VALID_THEMES.includes(stored as ValidTheme)) {
       return stored as ValidTheme
     }
-  } catch {
 
+    if (stored) {
+      localStorage.removeItem('__nest_theme__')
+    }
+  } catch {
+    // Ignore errors when accessing localStorage
   }
 
   return 'dark'
 }
+
 
 
 function AppInitializer() {
