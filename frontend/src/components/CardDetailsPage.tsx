@@ -313,7 +313,12 @@ const DetailsCard = ({
             icon={FaFolderOpen}
             title={<AnchorTitle title={modules.length === 1 ? 'Module' : 'Modules'} />}
           >
-            <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} setModuleOrder={setModuleOrder}/>
+            <ModuleCard
+              modules={modules}
+              accessLevel={accessLevel}
+              admins={admins}
+              setModuleOrder={setModuleOrder}
+            />
           </SecondaryCard>
         )}
         {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (

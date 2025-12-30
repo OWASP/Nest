@@ -68,7 +68,7 @@ export interface DetailsCardProps {
   recentReleases?: Release[]
   repositories?: RepositoryCardProps[]
   modules?: Module[]
-  setModuleOrder?:(order:Module[])=>void
+  setModuleOrder?: (order: Module[]) => void
   showAvatar?: boolean
   socialLinks?: string[]
   stats?: Stats[]

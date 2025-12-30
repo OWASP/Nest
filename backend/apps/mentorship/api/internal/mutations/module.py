@@ -9,20 +9,18 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.github.models import User as GithubUser
-from apps.mentorship.api.internal.nodes.program import (ProgramNode)
 from apps.mentorship.api.internal.nodes.module import (
     CreateModuleInput,
     ModuleNode,
-    UpdateModuleInput,
     SetModuleOrderInput,
+    UpdateModuleInput,
 )
+from apps.mentorship.api.internal.nodes.program import ProgramNode
 from apps.mentorship.models import Mentor, Module, Program
 from apps.mentorship.models.issue_user_interest import IssueUserInterest
 from apps.mentorship.models.task import Task
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.models import Project
-
-
 
 logger = logging.getLogger(__name__)
 
@@ -404,11 +402,12 @@ class ModuleMutation:
 
         module.program.save(update_fields=["experience_levels"])
         return module
-    
+
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
     def set_module_order(
-        self, info: strawberry.Info,input_data:SetModuleOrderInput) -> ProgramNode:
+        self, info: strawberry.Info, input_data: SetModuleOrderInput
+    ) -> ProgramNode:
         """Set the order of modules within a program. User must be an admin of the program."""
         user = info.context.request.user
         try:
@@ -416,7 +415,7 @@ class ModuleMutation:
         except Program.DoesNotExist as e:
             msg = f"Program with key '{input_data.program_key}' not found."
             raise ObjectDoesNotExist(msg) from e
-        
+
         try:
             admin = Mentor.objects.get(nest_user=user)
         except Mentor.DoesNotExist as err:
@@ -427,7 +426,7 @@ class ModuleMutation:
                 exc_info=True,
             )
             raise PermissionDenied(msg) from err
-        
+
         if not program.admins.filter(id=admin.id).exists():
             msg = "You must be an admin of this program to update it."
             logger.warning(
@@ -436,15 +435,16 @@ class ModuleMutation:
                 program.key,
             )
             raise PermissionDenied(msg)
-        
+
         existing_modules = Module.objects.filter(program=program)
         existing_module_keys = {m.key for m in existing_modules}
-        
+
         if not all(mk in existing_module_keys for mk in input_data.module_keys):
-            raise ValidationError(message="One or more module keys are invalid or do not belong to this program.")
+            raise ValidationError(
+                message="One or more module keys are invalid or do not belong to this program."
+            )
 
         for index, module_key in enumerate(input_data.module_keys):
             existing_modules.filter(key=module_key).update(position=index)
 
         return program
-

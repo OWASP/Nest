@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mentorship', '0006_alter_menteemodule_ended_at'),
+        ("mentorship", "0006_alter_menteemodule_ended_at"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='module',
-            name='position',
-            field=models.IntegerField(default=0, verbose_name='Position'),
+            model_name="module",
+            name="position",
+            field=models.IntegerField(default=0, verbose_name="Position"),
         ),
     ]

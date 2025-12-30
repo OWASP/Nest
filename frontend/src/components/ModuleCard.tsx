@@ -1,5 +1,12 @@
-import {DndContext,DragOverlay,closestCorners} from '@dnd-kit/core'
-import {SortableContext,arrayMove,rectSortingStrategy,useSortable} from '@dnd-kit/sortable'
+import {
+  DndContext,
+  DragOverlay,
+  closestCorners,
+  DragStartEvent,
+  DragEndEvent,
+  UniqueIdentifier,
+} from '@dnd-kit/core'
+import { SortableContext, arrayMove, rectSortingStrategy, useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Button } from '@heroui/button'
 import upperFirst from 'lodash/upperFirst'
@@ -7,7 +14,14 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type React from 'react'
 import { useState } from 'react'
-import { FaChevronDown, FaChevronUp, FaTurnUp, FaCalendar, FaHourglassHalf, FaGripVertical} from 'react-icons/fa6'
+import {
+  FaChevronDown,
+  FaChevronUp,
+  FaTurnUp,
+  FaCalendar,
+  FaHourglassHalf,
+  FaGripVertical,
+} from 'react-icons/fa6'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import { TextInfoItem } from 'components/InfoItem'
@@ -19,16 +33,16 @@ interface ModuleCardProps {
   modules: Module[]
   accessLevel?: string
   admins?: { login: string }[]
-  setModuleOrder?:(order:Module[])=>void
+  setModuleOrder?: (order: Module[]) => void
 }
 
-const ModuleCard = ({ modules, accessLevel, admins ,setModuleOrder}: ModuleCardProps) => {
+const ModuleCard = ({ modules, accessLevel, admins, setModuleOrder }: ModuleCardProps) => {
   const [showAllModule, setShowAllModule] = useState(false)
   const [isReordering, setIsReordering] = useState(false)
   const [draftModules, setDraftModules] = useState<Module[] | null>(null)
-  const [activeId, setActiveId] = useState<string | null>(null)
+  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
 
-  const handleDragStart = (event: any) => {
+  const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id)
   }
 
@@ -56,7 +70,7 @@ const ModuleCard = ({ modules, accessLevel, admins ,setModuleOrder}: ModuleCardP
     setActiveId(null)
   }
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
     if (!over || active.id === over.id) return
 
@@ -70,9 +84,6 @@ const ModuleCard = ({ modules, accessLevel, admins ,setModuleOrder}: ModuleCardP
   }
   const saveReorder = () => {
     setModuleOrder(draftModules)
-    console.log(
-      'New order:'
-    )
     setIsReordering(false)
     setDraftModules(null)
 >>>>>>> d4b2b7ec (feat:draggable module ordering)
@@ -91,24 +102,47 @@ const ModuleCard = ({ modules, accessLevel, admins ,setModuleOrder}: ModuleCardP
               <Button type="button" onPress={saveReorder} color="primary" className="font-medium">
                 Save order
               </Button>
-              <Button type="button" variant="bordered" onPress={cancelReorder} className="font-medium">
+              <Button
+                type="button"
+                variant="bordered"
+                onPress={cancelReorder}
+                className="font-medium"
+              >
                 Cancel
               </Button>
             </>
           )}
         </div>
       )}
-      <DndContext collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={cancelReorder}>
+      <DndContext
+        collisionDetection={closestCorners}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={cancelReorder}
+      >
         <SortableContext items={displayedModule.map((m) => m.id)} strategy={rectSortingStrategy}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {displayedModule.map((module) => {
-              return <ModuleItem key={module.key} module={module} isAdmin={isAdmin}  isReordering={isReordering} activeId={activeId} />
+              return (
+                <ModuleItem
+                  key={module.key}
+                  module={module}
+                  isAdmin={isAdmin}
+                  isReordering={isReordering}
+                  activeId={activeId}
+                />
+              )
             })}
           </div>
         </SortableContext>
         <DragOverlay>
           {activeId ? (
-            <ModuleItem module={currentModules.find((m) => m.id === activeId)!} isAdmin={isAdmin} isReordering={isReordering} isOverlay />
+            <ModuleItem
+              module={currentModules.find((m) => m.id === activeId)!}
+              isAdmin={isAdmin}
+              isReordering={isReordering}
+              isOverlay
+            />
           ) : null}
         </DragOverlay>
       </DndContext>
@@ -136,16 +170,21 @@ const ModuleCard = ({ modules, accessLevel, admins ,setModuleOrder}: ModuleCardP
   )
 }
 
-const ModuleItem = ({ module, isAdmin, isReordering, activeId, isOverlay }: { module: Module; isAdmin: boolean; isReordering: boolean; activeId?: string | null; isOverlay?: boolean }) => {
+const ModuleItem = ({
+  module,
+  isAdmin,
+  isReordering,
+  activeId,
+  isOverlay,
+}: {
+  module: Module
+  isAdmin: boolean
+  isReordering: boolean
+  activeId?: UniqueIdentifier | null
+  isOverlay?: boolean
+}) => {
   const pathname = usePathname()
-  const {
-    setNodeRef,
-    transform,
-    transition,
-    attributes,
-    listeners,
-    isDragging,
-  } = useSortable({
+  const { setNodeRef, transform, transition, attributes, listeners, isDragging } = useSortable({
     id: module.id,
     disabled: !isReordering,
   })
@@ -168,7 +207,7 @@ const ModuleItem = ({ module, isAdmin, isReordering, activeId, isOverlay }: { mo
         <button
           {...attributes}
           {...listeners}
-          className="absolute right-2 top-2 cursor-grab text-gray-400"
+          className="absolute top-2 right-2 cursor-grab text-gray-400"
         >
           <FaGripVertical />
         </button>

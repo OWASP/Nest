@@ -4,7 +4,7 @@ import strawberry
 
 from apps.api.internal.mutations import ApiMutations
 from apps.api.internal.queries import ApiKeyQueries
-from apps.common.extensions import CacheExtension,CacheInvalidationExtension
+from apps.common.extensions import CacheExtension, CacheInvalidationExtension
 from apps.github.api.internal.queries import GithubQuery
 from apps.mentorship.api.internal.mutations import (
     ModuleMutation,
@@ -41,4 +41,6 @@ class Query(
     """Schema queries."""
 
 
-schema = strawberry.Schema(mutation=Mutation, query=Query, extensions=[CacheInvalidationExtension,CacheExtension])
+schema = strawberry.Schema(
+    mutation=Mutation, query=Query, extensions=[CacheInvalidationExtension, CacheExtension]
+)

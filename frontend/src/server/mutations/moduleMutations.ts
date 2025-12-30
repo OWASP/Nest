@@ -61,7 +61,7 @@ export const CREATE_MODULE = gql`
 `
 
 export const SET_MODULE_ORDER = gql`
-  mutation SetModuleOrder($input:SetModuleOrderInput!) {
+  mutation SetModuleOrder($input: SetModuleOrderInput!) {
     setModuleOrder(inputData: $input) {
       id
     }

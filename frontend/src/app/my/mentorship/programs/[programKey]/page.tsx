@@ -7,9 +7,9 @@ import { useSession } from 'next-auth/react'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
+import { SetModuleOrderDocument } from 'types/__generated__/moduleMutations.generated'
 import { UpdateProgramStatusDocument } from 'types/__generated__/programsMutations.generated'
 import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
-import {SetModuleOrderDocument} from 'types/__generated__/moduleMutations.generated'
 import type { ExtendedSession } from 'types/auth'
 import type { Module, Program } from 'types/mentorship'
 import { titleCaseWord } from 'utils/capitalize'
@@ -30,7 +30,7 @@ const ProgramDetailsPage = () => {
     onError: handleAppError,
   })
 
-  const [updateOrder,{loading:mutationLoading}]=useMutation(SetModuleOrderDocument)
+  const [updateOrder] = useMutation(SetModuleOrderDocument)
 
   const { data, loading: isQueryLoading } = useQuery(GetProgramAndModulesDocument, {
     variables: { programKey },
@@ -84,7 +84,7 @@ const ProgramDetailsPage = () => {
       handleAppError(err)
     }
   }
-  const setModuleOrder=async(moduleOrder:Module[])=>{
+  const setModuleOrder = async (moduleOrder: Module[]) => {
     if (!program || !isAdmin) {
       addToast({
         title: 'Permission Denied',
@@ -95,17 +95,16 @@ const ProgramDetailsPage = () => {
       })
       return
     }
-    const moduleKeys=moduleOrder.map(m => m.key);
-    const prevModuleOrder=modules
-    try{
-      const input={
-        programKey:programKey,
-        moduleKeys:moduleKeys,
+    const moduleKeys = moduleOrder.map((m) => m.key)
+    const prevModuleOrder = modules
+    try {
+      const input = {
+        programKey: programKey,
+        moduleKeys: moduleKeys,
       }
       setModules(moduleOrder)
-      const result = await updateOrder({ variables: { input } })
-    }
-    catch(err){
+      await updateOrder({ variables: { input } })
+    } catch (err) {
       setModules(prevModuleOrder)
       handleAppError(err)
     }

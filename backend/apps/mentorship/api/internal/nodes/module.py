@@ -195,7 +195,10 @@ class UpdateModuleInput:
     started_at: datetime
     tags: list[str] = strawberry.field(default_factory=list)
 
+
 @strawberry.input
 class SetModuleOrderInput:
-    program_key:str
-    module_keys:list[str]
+    """Input for setting the order of modules within a program."""
+
+    program_key: str
+    module_keys: list[str]
