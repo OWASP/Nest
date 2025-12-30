@@ -249,7 +249,7 @@ export default function Page() {
                         </tr>
                       </thead>
                       <tbody>
-                        {data.apiKeys.map((key: ApiKey) => (
+                        {(data?.apiKeys ?? []).map((key: ApiKey) => (
                           <tr
                             key={key.uuid}
                             className="border-b border-b-gray-200 dark:border-b-gray-700"
