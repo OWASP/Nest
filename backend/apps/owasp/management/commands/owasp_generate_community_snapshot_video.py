@@ -271,6 +271,9 @@ class SlideBuilder:
                 project_counts[project.name] += 1
 
         top_projects = project_counts.most_common(RELEASES_LIMIT)
+        if not top_projects:
+            return None
+
         max_count = top_projects[0][1] if top_projects else 1
         releases_data = [
             {
