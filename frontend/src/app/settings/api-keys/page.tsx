@@ -14,6 +14,7 @@ import {
   RevokeApiKeyDocument,
 } from 'types/__generated__/apiKeyQueries.generated'
 import type { ApiKey } from 'types/apiKey'
+import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
 import { ApiKeysSkeleton } from 'components/skeletons/ApiKeySkelton'
 
@@ -227,11 +228,7 @@ export default function Page() {
                   </div>
                 )
               case 'loading':
-                return (
-                  <div className="flex flex-col gap-4">
-                    <ApiKeysSkeleton />
-                  </div>
-                )
+                return <LoadingSpinner />
               case 'empty':
                 return (
                   <div className="rounded-md bg-gray-50 p-8 text-center text-gray-500 dark:bg-gray-800/50 dark:text-gray-400">
