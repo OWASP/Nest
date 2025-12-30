@@ -12,6 +12,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      cache:
+        condition: service_healthy
     env_file: ../backend/.env.fuzz.example
     networks:
       - fuzz-nest-network
