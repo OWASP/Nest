@@ -74,7 +74,6 @@ class Slide:
             self.image_path.parent.mkdir(parents=True, exist_ok=True)
             pil_image.save(self.image_path, IMAGE_FORMAT)
 
-            print("Saved image to path:", self.image_path)
         except Exception:
             logger.exception("Error rendering image for: %s", self.name)
             raise
@@ -99,9 +98,7 @@ class Slide:
             raise RuntimeError(msg)
 
         eleven_labs.set_text(self.transcript)
-        if eleven_labs.generate_to_file(self.audio_path):
-            print("Generated audio at path:", self.audio_path)
-        else:
+        if not eleven_labs.generate_to_file(self.audio_path):
             msg = f"Failed to generate audio for {self.name}"
             raise RuntimeError(msg)
 
@@ -120,8 +117,6 @@ class Slide:
                 pix_fmt="yuv420p",
                 shortest=None,
             ).run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
-
-            print("Generated video for:", self.name)
 
         except ffmpeg.Error:
             logger.exception("Error generating video for %s:", self.name)
@@ -146,7 +141,6 @@ class SlideBuilder:
 
     def create_intro_slide(self) -> Slide:
         """Create an introduction slide."""
-        print("Generating introduction slide for snapshot")
         month_name = self.snapshot.start_at.strftime("%B")
         return Slide(
             context={
@@ -162,8 +156,6 @@ class SlideBuilder:
 
     def create_sponsors_slide(self) -> Slide:
         """Create a sponsors slide."""
-        print("Generating sponsors slide for snapshot")
-
         sponsors = [
             {"image_url": s.image_url, "name": s.name}
             for s in sorted(
@@ -192,8 +184,6 @@ class SlideBuilder:
 
     def create_projects_slide(self) -> Slide:
         """Create a projects slide."""
-        print("Generating projects slide for snapshot")
-
         new_projects = self.snapshot.new_projects.order_by("-stars_count")
         project_count = new_projects.count()
 
@@ -224,8 +214,6 @@ class SlideBuilder:
 
     def create_chapters_slide(self) -> Slide:
         """Create a chapters slide."""
-        print("Generating chapters slide for snapshot")
-
         new_chapters = self.snapshot.new_chapters.all()
         chapter_count = new_chapters.count()
 
@@ -253,8 +241,6 @@ class SlideBuilder:
 
     def create_releases_slide(self) -> Slide:
         """Create a releases slide."""
-        print("Generating releases slide for snapshot")
-
         releases = self.snapshot.new_releases.select_related("repository")
 
         project_counts: Counter = Counter()
@@ -293,8 +279,6 @@ class SlideBuilder:
 
     def create_thank_you_slide(self) -> Slide:
         """Create a thank you slide."""
-        print("Generating thank you slide")
-
         return Slide(
             context={},
             output_dir=self.output_dir,
@@ -338,7 +322,6 @@ class Generator:
             ffmpeg.output(joined_video, joined_audio, str(output_path)).overwrite_output().run(
                 capture_stdout=True, capture_stderr=True
             )
-            print(f"Successfully merged video to: {output_path}")
         except ffmpeg.Error:
             logger.exception("Error merging slide videos into final output")
             raise
@@ -384,7 +367,7 @@ class Command(BaseCommand):
             logger.error("No completed snapshot found for key: %s", snapshot_key)
             return
 
-        print("Generating video for snapshot:", snapshot_key)
+        self.stdout.write(f"Generating a video for snapshot: {snapshot_key}")
 
         slide_builder = SlideBuilder(snapshot, OUTPUT_DIR)
         generator = Generator()
@@ -394,18 +377,20 @@ class Command(BaseCommand):
         if snapshot.new_projects.exists():
             generator.append_slide(slide_builder.create_projects_slide())
         else:
-            print("Skipping projects slide - No new projects in snapshot.")
+            self.stdout.write("Skipping projects slide - No new projects in snapshot.")
 
         if snapshot.new_chapters.exists():
             generator.append_slide(slide_builder.create_chapters_slide())
         else:
-            print("Skipping chapters slide - No new chapters in snapshot.")
+            self.stdout.write("Skipping chapters slide - No new chapters in snapshot.")
 
         if snapshot.new_releases.exists():
             generator.append_slide(slide_builder.create_releases_slide())
         else:
-            print("Skipping releases slide - No new releases in snapshot.")
+            self.stdout.write("Skipping releases slide - No new releases in snapshot.")
 
         generator.append_slide(slide_builder.create_thank_you_slide())
 
-        generator.generate_video(output_dir / f"{snapshot_key}_snapshot.mp4")
+        video_path = output_dir / f"{snapshot_key}_snapshot.mp4"
+        generator.generate_video(video_path)
+        self.stdout.write(f"Generated a video at {video_path}")
