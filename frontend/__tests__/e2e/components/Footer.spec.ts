@@ -69,7 +69,7 @@ test.describe('Footer - Mobile (iPhone 13)', () => {
   test('should show sub-menu when menu clicked', async ({ page }) => {
     await page.getByRole('button', { name: 'OWASP Nest' }).click()
     // only check if the sub-menu is visible
-    await expect(page.getByRole('link', { name: 'GSoC 2025' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'GSoC 2026' })).toBeVisible()
   })
   test('should have links', async ({ page }) => {
     await expect(page.getByRole('link', { name: 'OWASP Nest Bluesky' })).toBeVisible()
