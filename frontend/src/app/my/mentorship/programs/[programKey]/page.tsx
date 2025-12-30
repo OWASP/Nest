@@ -9,6 +9,7 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
 import { UpdateProgramStatusDocument } from 'types/__generated__/programsMutations.generated'
 import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
+import {SetModuleOrderDocument} from 'types/__generated__/moduleMutations.generated'
 import type { ExtendedSession } from 'types/auth'
 import type { Module, Program } from 'types/mentorship'
 import { titleCaseWord } from 'utils/capitalize'
@@ -28,6 +29,8 @@ const ProgramDetailsPage = () => {
   const [updateProgram] = useMutation(UpdateProgramStatusDocument, {
     onError: handleAppError,
   })
+
+  const [updateOrder,{loading:mutationLoading}]=useMutation(SetModuleOrderDocument)
 
   const { data, loading: isQueryLoading } = useQuery(GetProgramAndModulesDocument, {
     variables: { programKey },
@@ -81,7 +84,30 @@ const ProgramDetailsPage = () => {
       handleAppError(err)
     }
   }
-
+  const setModuleOrder=async(moduleOrder:Module[])=>{
+    if (!program || !isAdmin) {
+      addToast({
+        title: 'Permission Denied',
+        description: 'Only admins can update order of modules.',
+        variant: 'solid',
+        color: 'danger',
+        timeout: 3000,
+      })
+      return
+    }
+    const moduleKeys=moduleOrder.map(m => m.key);
+    try{
+      const input={
+        programKey:programKey,
+        moduleKeys:moduleKeys,
+      }
+      const result = await updateOrder({ variables: { input } })
+      setModules(moduleOrder)
+    }
+    catch(err){
+      handleAppError(err)
+    }
+  }
   useEffect(() => {
     if (data?.getProgram) {
       setProgram(data.getProgram)
@@ -126,6 +152,7 @@ const ProgramDetailsPage = () => {
       summary={program.description}
       tags={program.tags}
       title={program.name}
+      setModuleOrder={setModuleOrder}
       type="program"
     />
   )

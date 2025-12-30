@@ -367,6 +367,7 @@ export type Mutation = {
   githubAuth: GitHubAuthResult;
   logoutUser: LogoutResult;
   revokeApiKey: RevokeApiKeyResult;
+  setModuleOrder: ProgramNode;
   setTaskDeadline: ModuleNode;
   unassignIssueFromUser: ModuleNode;
   updateModule: ModuleNode;
@@ -413,6 +414,11 @@ export type MutationGithubAuthArgs = {
 
 export type MutationRevokeApiKeyArgs = {
   uuid: Scalars['UUID']['input'];
+};
+
+
+export type MutationSetModuleOrderArgs = {
+  inputData: SetModuleOrderInput;
 };
 
 
@@ -982,6 +988,11 @@ export type RevokeApiKeyResult = {
   code?: Maybe<Scalars['String']['output']>;
   message?: Maybe<Scalars['String']['output']>;
   ok: Scalars['Boolean']['output'];
+};
+
+export type SetModuleOrderInput = {
+  moduleKeys: Array<Scalars['String']['input']>;
+  programKey: Scalars['String']['input'];
 };
 
 export type SnapshotNode = Node & {

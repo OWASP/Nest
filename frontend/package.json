@@ -18,6 +18,9 @@
   },
   "dependencies": {
     "@apollo/client": "^4.0.11",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@heroui/button": "^2.2.29",
     "@heroui/modal": "^2.2.26",
@@ -44,6 +47,7 @@
     "framer-motion": "^12.23.26",
     "graphql": "^16.12.0",
     "ics": "^3.8.1",
+    "install": "^0.13.0",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "lodash": "^4.17.21",
