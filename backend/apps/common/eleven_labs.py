@@ -23,9 +23,10 @@ class ElevenLabs:
         model_id: str = "eleven_multilingual_v2",
         output_format: str = "mp3_44100_128",
         similarity_boost: float = 0.75,
+        speed: float = 1.0,
         stability: float = 0.5,
         style: float = 0.0,
-        voice_id: str = "Xb7hH8MSUJpSbSDYk0k2",  # cspell:disable-line
+        voice_id: str = "1SM7GgM6IMuvQlz2BwM3",  # cspell:disable-line
         *,
         use_speaker_boost: bool = True,
     ) -> None:
@@ -35,6 +36,7 @@ class ElevenLabs:
             model_id (str): The model to use.
             output_format (str): Audio output format.
             similarity_boost (float): Voice consistency (0.0-1.0).
+            speed (float): Speech speed (0.25-4.0, default 1.0).
             stability (float): Voice stability (0.0-1.0).
             style (float): Style exaggeration (0.0-1.0).
             use_speaker_boost (bool): Enable speaker clarity boost.
@@ -52,6 +54,7 @@ class ElevenLabs:
         self.model_id = model_id
         self.output_format = output_format
         self.similarity_boost = similarity_boost
+        self.speed = speed
         self.stability = stability
         self.style = style
         self.use_speaker_boost = use_speaker_boost
@@ -96,6 +99,20 @@ class ElevenLabs:
 
         """
         self.similarity_boost = similarity_boost
+
+        return self
+
+    def set_speed(self, speed: float) -> ElevenLabs:
+        """Set speech speed.
+
+        Args:
+            speed (float): Speech speed (0.25-4.0, default 1.0).
+
+        Returns:
+            ElevenLabs: The current instance.
+
+        """
+        self.speed = speed
 
         return self
 
@@ -184,6 +201,7 @@ class ElevenLabs:
                 voice_id=self.voice_id,
                 voice_settings=VoiceSettings(
                     similarity_boost=self.similarity_boost,
+                    speed=self.speed,
                     stability=self.stability,
                     style=self.style,
                     use_speaker_boost=self.use_speaker_boost,

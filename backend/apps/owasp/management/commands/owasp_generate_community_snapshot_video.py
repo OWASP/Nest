@@ -25,8 +25,7 @@ from apps.owasp.models.sponsor import Sponsor
 logger = logging.getLogger(__name__)
 
 AUDIO_EXTENSION = ".mp3"
-ELEVENLABS_STABILITY = 0.4
-ELEVENLABS_STYLE = 0.1
+ELEVENLABS_SPEED = 0.85
 IMAGE_EXTENSION = ".png"
 IMAGE_FORMAT = "PNG"
 MAX_DETAILED_PROJECTS = 16
@@ -157,7 +156,7 @@ class SlideBuilder:
             name="intro",
             output_dir=self.output_dir,
             template_name="video/slides/intro.html",
-            transcript=f"Hey everyone! Welcome to the OWASP Nest {name} Snapshot...",
+            transcript=f"Hey, everyone. Welcome to the O-WASP Nest {name} community snapshot...",
         )
 
     def create_sponsors_slide(self) -> Slide:
@@ -185,7 +184,7 @@ class SlideBuilder:
             output_dir=self.output_dir,
             name="sponsors",
             template_name="video/slides/sponsors.html",
-            transcript="A HUGE thanks to the sponsors who make our work possible...",
+            transcript="A HUGE thanks to the sponsors who make our work possible!",
         )
 
     def create_projects_slide(self) -> Slide | None:
@@ -221,8 +220,8 @@ class SlideBuilder:
             output_dir=self.output_dir,
             name="projects",
             template_name="video/slides/projects.html",
-            transcript=f"So... this time we've welcomed {project_count} new projects, "
-            f"including OWASP {formatted_project_names}.",
+            transcript=f"So... this time we've welcomed {project_count} new projects! "
+            f"including O-WASP {formatted_project_names}.",
         )
 
     def create_chapters_slide(self) -> Slide | None:
@@ -253,7 +252,7 @@ class SlideBuilder:
             output_dir=self.output_dir,
             name="chapters",
             template_name="video/slides/chapters.html",
-            transcript=f"We've also welcomed {chapter_count} new chapters,"
+            transcript=f"We've also welcomed {chapter_count} new chapters! "
             f"including {formatted_names}.",
         )
 
@@ -293,7 +292,7 @@ class SlideBuilder:
             output_dir=self.output_dir,
             name="releases",
             template_name="video/slides/releases.html",
-            transcript=f"We've had {release_count} new releases this time, "
+            transcript=f"There were {release_count} new releases across our projects this time... "
             f"with {formatted_names} leading the way.",
         )
 
@@ -304,15 +303,15 @@ class SlideBuilder:
             output_dir=self.output_dir,
             name="thank_you",
             template_name="video/slides/thank_you.html",
-            transcript="Thanks for tuning in!... Visit OWASP Nest at nest dot owasp dot org "
-            "for more community updates.... Until next time!",
+            transcript="Thanks for tuning in!... Visit Nest at Nest dot O-WASP dot org "
+            "for more community updates!... See you next time!!",
         )
 
 
 class Generator:
     def __init__(self) -> None:
         """Initialize Video Generator."""
-        self.eleven_labs = ElevenLabs(stability=ELEVENLABS_STABILITY, style=ELEVENLABS_STYLE)
+        self.eleven_labs = ElevenLabs(speed=ELEVENLABS_SPEED)
         self.slides: list[Slide] = []
 
     def append_slide(self, slide: Slide) -> None:
