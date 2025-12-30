@@ -196,6 +196,17 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     }
   }
 
+  const handleSuggestionKeyDown = (
+    e: React.KeyboardEvent,
+    hit: Chapter | Project | User | Event | Organization,
+    indexName: string
+  ) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handleSuggestionClick(hit, indexName)
+    }
+  }
+
   const getIconForIndex = (indexName: string) => {
     switch (indexName) {
       case 'chapters':
@@ -257,9 +268,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                     <li
                       key={`${hit.key || hit.login || hit.url}-${subIndex}`}
                       className={`flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                        highlightedIndex &&
-                        highlightedIndex.index === index &&
-                        highlightedIndex.subIndex === subIndex
+                        highlightedIndex?.index === index && highlightedIndex?.subIndex === subIndex
                           ? 'bg-gray-100 dark:bg-gray-700'
                           : ''
                       }`}
@@ -267,12 +276,13 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                       <button
                         type="button"
                         onClick={() => handleSuggestionClick(hit, suggestion.indexName)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault()
-                            handleSuggestionClick(hit, suggestion.indexName)
-                          }
-                        }}
+                        onKeyDown={(e) =>
+                          handleSuggestionKeyDown(
+                            e,
+                            hit as Chapter | Organization | Project | User | Event,
+                            suggestion.indexName
+                          )
+                        }
                         className="flex w-full cursor-pointer items-center overflow-hidden border-none bg-transparent p-0 text-left focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
                       >
                         {getIconForIndex(suggestion.indexName)}

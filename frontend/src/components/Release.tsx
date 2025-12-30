@@ -29,6 +29,13 @@ const Release: React.FC<ReleaseProps> = ({
     router.push(`/organizations/${org}/repositories/${repo}`)
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handleClickRepository()
+    }
+  }
+
   return (
     <div className={`mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700 ${className}`}>
       <div className="flex w-full flex-col justify-between">
@@ -83,12 +90,7 @@ const Release: React.FC<ReleaseProps> = ({
               className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
               disabled={!release.organizationName || !release.repositoryName}
               onClick={handleClickRepository}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  handleClickRepository()
-                }
-              }}
+              onKeyDown={handleKeyDown}
               aria-label={`View repository ${release.repositoryName}`}
             >
               <TruncatedText text={release.repositoryName} />

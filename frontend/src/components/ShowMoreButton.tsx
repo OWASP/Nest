@@ -16,7 +16,7 @@ const ShowMoreButton = ({ onToggle }: { onToggle: () => void }) => {
         type="button"
         disableAnimation
         onPress={handleToggle}
-        className="flex items-center bg-transparent px-2 text-blue-400 hover:underline focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
+        className="flex items-center bg-transparent px-0 text-blue-400 hover:underline focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
       >
         {isExpanded ? (
           <>
