@@ -53,13 +53,12 @@ const ModuleCard = ({ modules, accessLevel, admins, setModuleOrder }: ModuleCard
   const displayedModule = showAllModule ? currentModules : currentModules.slice(0, 4)
   const isAdmin = accessLevel === 'admin'
 
-<<<<<<< HEAD
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
       setShowAllModule(!showAllModule)
     }
-=======
+  }
   const startReorder = () => {
     setDraftModules(modules)
     setIsReordering(true)
@@ -88,7 +87,6 @@ const ModuleCard = ({ modules, accessLevel, admins, setModuleOrder }: ModuleCard
     }
     setIsReordering(false)
     setDraftModules(null)
->>>>>>> d4b2b7ec (feat:draggable module ordering)
   }
 
   return (
