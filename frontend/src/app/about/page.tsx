@@ -1,5 +1,6 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
+import ShowMoreButton from "components/ShowMoreButton";
 import { Tooltip } from '@heroui/tooltip'
 import upperFirst from 'lodash/upperFirst'
 import millify from 'millify'
@@ -268,12 +269,9 @@ const About = () => {
             ))}
 
           {projectStory.length > 3 && (
-            <button
-              onClick={() => setStoryExpanded(!storyExpanded)}
-              className="mt-2 flex items-center bg-transparent px-0 text-blue-400"
-            >
-              {storyExpanded ? "Show less" : "Show more"}
-            </button>
+            <ShowMoreButton
+              onToggle={() => setStoryExpanded(!storyExpanded)}
+            />
           )}
         </SecondaryCard>
         <SecondaryCard icon={FaClock} title={<AnchorTitle title="Project Timeline" />}>
@@ -296,12 +294,9 @@ const About = () => {
             ))}
           </div>
           {projectTimeline.length > 6 && (
-            <button
-              onClick={() => setTimelineExpanded(!timelineExpanded)}
-              className="mt-4 flex items-center bg-transparent px-0 text-blue-400"
-            >
-              {timelineExpanded ? "Show less" : "Show more"}
-            </button>
+            <ShowMoreButton
+              onToggle={() => setTimelineExpanded(!timelineExpanded)}
+            />
           )}
         </SecondaryCard>
 
