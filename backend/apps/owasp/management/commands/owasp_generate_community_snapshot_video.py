@@ -188,13 +188,16 @@ class SlideBuilder:
             transcript="A HUGE thanks to the sponsors who make our work possible...",
         )
 
-    def create_projects_slide(self) -> Slide:
+    def create_projects_slide(self) -> Slide | None:
         """Create a projects slide."""
         new_projects = (
             Project.objects.filter(snapshots__in=self.snapshots)
             .distinct()
             .order_by("-stars_count")
         )
+        if not new_projects.exists():
+            return None
+
         project_count = new_projects.count()
 
         projects_data = [
@@ -222,11 +225,14 @@ class SlideBuilder:
             f"including OWASP {formatted_project_names}.",
         )
 
-    def create_chapters_slide(self) -> Slide:
+    def create_chapters_slide(self) -> Slide | None:
         """Create a chapters slide."""
         new_chapters = (
             Chapter.objects.filter(snapshots__in=self.snapshots).distinct().order_by("name")
         )
+        if not new_chapters.exists():
+            return None
+
         chapter_count = new_chapters.count()
 
         chapters = [
@@ -251,9 +257,11 @@ class SlideBuilder:
             f"including {formatted_names}.",
         )
 
-    def create_releases_slide(self) -> Slide:
+    def create_releases_slide(self) -> Slide | None:
         """Create a releases slide."""
         releases = Release.objects.filter(snapshots__in=self.snapshots).distinct()
+        if not releases.exists():
+            return None
 
         project_counts: Counter = Counter()
         for release in releases:
@@ -384,12 +392,18 @@ class Command(BaseCommand):
         slide_builder = SlideBuilder(snapshots, OUTPUT_DIR)
         generator = Generator()
 
-        generator.append_slide(slide_builder.create_intro_slide())
-        generator.append_slide(slide_builder.create_sponsors_slide())
-        generator.append_slide(slide_builder.create_projects_slide())
-        generator.append_slide(slide_builder.create_chapters_slide())
-        generator.append_slide(slide_builder.create_releases_slide())
-        generator.append_slide(slide_builder.create_thank_you_slide())
+        slides_to_add = [
+            slide_builder.create_intro_slide(),
+            slide_builder.create_sponsors_slide(),
+            slide_builder.create_projects_slide(),
+            slide_builder.create_chapters_slide(),
+            slide_builder.create_releases_slide(),
+            slide_builder.create_thank_you_slide(),
+        ]
+
+        for slide in slides_to_add:
+            if slide is not None:
+                generator.append_slide(slide)
 
         video_path = output_dir / f"{snapshot_key}_snapshot.mp4"
         generator.generate_video(video_path)
