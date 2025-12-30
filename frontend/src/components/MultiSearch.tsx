@@ -203,6 +203,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   ) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
+      e.stopPropagation()
       handleSuggestionClick(hit, indexName)
     }
   }
@@ -267,11 +268,10 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                   {suggestion.hits.map((hit, subIndex) => (
                     <li
                       key={`${hit.key || hit.login || hit.url}-${subIndex}`}
-                      className={`flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                        highlightedIndex?.index === index && highlightedIndex?.subIndex === subIndex
+                      className={`flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${highlightedIndex?.index === index && highlightedIndex?.subIndex === subIndex
                           ? 'bg-gray-100 dark:bg-gray-700'
                           : ''
-                      }`}
+                        }`}
                     >
                       <button
                         type="button"
