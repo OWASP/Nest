@@ -78,7 +78,7 @@ export default function Page() {
       return 'error'
     } else if (loading) {
       return 'loading'
-    } else if (!data?.apiKeys?.length) {
+    } else if (data?.apiKeys && data.apiKeys.length === 0) {
       return 'empty'
     } else {
       return 'table'
