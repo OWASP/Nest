@@ -13,15 +13,7 @@ test.describe('Users Page', () => {
         }),
       })
     })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('/members')
+    await page.goto('/members', { timeout: 120000 })
   })
 
   test('renders user data correctly', async ({ page }) => {

@@ -12,8 +12,10 @@ class E2E(Base):
     SITE_URL = "http://localhost:9000"
 
     ALLOWED_ORIGINS = (
-        "http://frontend:3000",  # NOSONAR
+        "http://frontend:3500",  # NOSONAR
+        "http://frontend:3000",
         "http://localhost:3000",
+        "http://localhost:3500",
     )
 
     CORS_ALLOWED_ORIGINS = ALLOWED_ORIGINS

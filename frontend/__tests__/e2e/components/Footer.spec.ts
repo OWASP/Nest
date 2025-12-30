@@ -1,4 +1,3 @@
-import { mockHomeData } from '@e2e/data/mockHomeData'
 import { test, expect, devices } from '@playwright/test'
 
 // Desktop tests
@@ -9,21 +8,7 @@ test.describe('Footer - Desktop (Chrome)', () => {
   })
 
   test.beforeEach(async ({ page }) => {
-    await page.route('**/graphql/', async (route) => {
-      await route.fulfill({
-        status: 200,
-        json: mockHomeData,
-      })
-    })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('/')
+    await page.goto('/', { timeout: 120000 })
   })
   test('should have buttons', async ({ page }) => {
     await expect(page.getByRole('button', { name: 'OWASP Nest' })).toBeVisible()
@@ -45,20 +30,6 @@ test.use({
 
 test.describe('Footer - Mobile (iPhone 13)', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/graphql/', async (route) => {
-      await route.fulfill({
-        status: 200,
-        json: mockHomeData,
-      })
-    })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
     await page.goto('/')
   })
   test('should have buttons', async ({ page }) => {

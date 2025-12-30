@@ -1,23 +1,8 @@
-import { mockUserDetailsData } from '@mockData/mockUserDetails'
 import { test, expect } from '@playwright/test'
 
 test.describe('User Details Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/graphql/', async (route) => {
-      await route.fulfill({
-        status: 200,
-        json: { data: mockUserDetailsData },
-      })
-    })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('members/test-user')
+    await page.goto('members/arkid15r', { timeout: 120000 })
   })
   test('should have a heading and summary', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Test User' })).toBeVisible()

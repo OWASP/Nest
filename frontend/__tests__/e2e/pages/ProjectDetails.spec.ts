@@ -1,25 +1,8 @@
-import { mockProjectDetailsData } from '@mockData/mockProjectDetailsData'
 import { test, expect } from '@playwright/test'
 
 test.describe('Project Details Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/graphql/', async (route) => {
-      await route.fulfill({
-        status: 200,
-        json: {
-          data: mockProjectDetailsData,
-        },
-      })
-    })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('/projects/test-project', { timeout: 60000 })
+    await page.goto('/projects/nest', { timeout: 120000 })
   })
 
   test('should have a heading and summary', async ({ page }) => {

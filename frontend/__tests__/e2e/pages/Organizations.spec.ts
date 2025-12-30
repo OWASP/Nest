@@ -13,15 +13,7 @@ test.describe('Organization Page', () => {
         }),
       })
     })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('/organizations')
+    await page.goto('/organizations', { timeout: 120000 })
   })
 
   test('renders organization data correctly', async ({ page }) => {

@@ -1,0 +1,34 @@
+FROM node:24-alpine AS builder
+
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine
+# to understand why libc6-compat might be needed.
+ENV APK_CACHE_DIR="/app/.cache/apk" \
+    APK_SYMLINK_DIR="/etc/apk/cache" \
+    FORCE_COLOR=1 \
+    NPM_CACHE="/app/.npm" \
+    PNPM_HOME="/pnpm"
+
+ENV PATH="$PNPM_HOME:$PATH"
+
+RUN mkdir -p ${APK_CACHE_DIR} && \
+    ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
+
+RUN --mount=type=cache,target=${APK_CACHE_DIR} \
+    apk update && apk upgrade && apk add libc6-compat
+
+WORKDIR /app
+
+RUN --mount=type=cache,target=${NPM_CACHE} \
+    npm install --ignore-scripts -g npm@latest --cache ${NPM_CACHE} && \
+    npm install --ignore-scripts -g pnpm --cache ${NPM_CACHE}
+
+COPY --chmod=444 package.json pnpm-lock.yaml ./
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm install --frozen-lockfile --ignore-scripts
+
+COPY --chmod=444 .pnpmrc next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
+COPY --chmod=555 public public
+COPY --chmod=555 src src
+
+ENV NEXT_TELEMETRY_DISABLED=1
+EXPOSE 3000

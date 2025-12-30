@@ -1,25 +1,10 @@
 import fs from 'node:fs'
-import { mockHomeData } from '@e2e/data/mockHomeData'
 import { test, expect } from '@playwright/test'
 import slugify from 'utils/slugify'
 
 test.describe('Calendar Export Functionality', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/graphql/', async (route) => {
-      await route.fulfill({
-        status: 200,
-        json: mockHomeData,
-      })
-    })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('/')
+    await page.goto('/', { timeout: 120000 })
   })
 
   test('should download a valid ICS file when clicked', async ({ page }) => {

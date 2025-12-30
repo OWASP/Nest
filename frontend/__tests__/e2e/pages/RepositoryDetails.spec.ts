@@ -1,23 +1,8 @@
-import { mockRepositoryData } from '@mockData/mockRepositoryData'
 import { test, expect } from '@playwright/test'
 
 test.describe('Repository Details Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/graphql/', async (route) => {
-      await route.fulfill({
-        status: 200,
-        json: { data: mockRepositoryData },
-      })
-    })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('organizations/OWASP/repositories/test-repository')
+    await page.goto('organizations/OWASP/repositories/nest', { timeout: 120000 })
   })
 
   test('should have a heading and summary', async ({ page }) => {

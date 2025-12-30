@@ -25,14 +25,9 @@ export default defineConfig({
   testDir: './__tests__/e2e',
   timeout: 120_000,
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://frontend:3000',
     headless: true,
     trace: 'off',
-  },
-  webServer: {
-    command: 'pnpm run build && NEXT_SERVER_DISABLE_SSR=true pnpm run start',
-    timeout: 120_000,
-    url: 'http://localhost:3000',
   },
   workers: os.cpus().length,
 })
