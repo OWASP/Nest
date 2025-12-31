@@ -136,7 +136,7 @@ const ModuleCard = ({ modules, accessLevel, admins, setModuleOrder }: ModuleCard
           </div>
         </SortableContext>
         <DragOverlay>
-          {activeId ? (
+          {activeId && currentModules.find((m) => m.id === activeId) ? (
             <ModuleItem
               module={currentModules.find((m) => m.id === activeId)!}
               isAdmin={isAdmin}
