@@ -5,6 +5,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@herou
 import { Input } from '@heroui/react'
 import { addToast } from '@heroui/toast'
 import { format, addDays } from 'date-fns'
+import React from 'react'
 import { useState } from 'react'
 import { FaInfoCircle } from 'react-icons/fa'
 import { FaSpinner, FaKey, FaPlus, FaCopy, FaEye, FaEyeSlash, FaTrash } from 'react-icons/fa6'
@@ -19,6 +20,62 @@ import SecondaryCard from 'components/SecondaryCard'
 import { ApiKeysSkeleton } from 'components/skeletons/ApiKeySkelton'
 
 const MAX_ACTIVE_KEYS = 3
+
+// Content state components
+const ErrorState = () => (
+  <div className="rounded-md bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">
+    Error loading API keys
+  </div>
+)
+
+const EmptyState = () => (
+  <div className="rounded-md bg-gray-50 p-8 text-center text-gray-500 dark:bg-gray-800/50 dark:text-gray-400">
+    You don't have any API keys yet.
+  </div>
+)
+
+interface ApiKeysTableProps {
+  data: { apiKeys?: ApiKey[] } | undefined
+  onRevoke: (key: ApiKey) => void
+}
+
+const ApiKeysTable = ({ data, onRevoke }: ApiKeysTableProps) => (
+  <div className="overflow-x-auto">
+    <table className="w-full border-collapse">
+      <thead>
+        <tr className="border-b-1 border-b-gray-200 dark:border-b-gray-700">
+          <th className="py-3 text-left font-semibold">Name</th>
+          <th className="py-3 text-left font-semibold">ID</th>
+          <th className="py-3 text-left font-semibold">Created</th>
+          <th className="py-3 text-left font-semibold">Expires</th>
+          <th className="py-3 text-right font-semibold">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {(data?.apiKeys ?? []).map((key: ApiKey) => (
+          <tr key={key.uuid} className="border-b border-b-gray-200 dark:border-b-gray-700">
+            <td className="py-3">{key.name}</td>
+            <td className="py-3 font-mono text-sm">{key.uuid}</td>
+            <td className="py-3">{format(new Date(key.createdAt), 'PP')}</td>
+            <td className="py-3">
+              {key.expiresAt ? format(new Date(key.expiresAt), 'PP') : 'Never'}
+            </td>
+            <td className="py-3 text-right">
+              <Button
+                variant="light"
+                size="sm"
+                onPress={() => onRevoke(key)}
+                className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+              >
+                <FaTrash />
+              </Button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)
 
 export default function Page() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -86,6 +143,13 @@ export default function Page() {
   }
 
   const contentType = getContentType()
+
+  const contentComponents: Record<ContentType, () => React.ReactNode> = {
+    error: () => <ErrorState />,
+    loading: () => <LoadingSpinner />,
+    empty: () => <EmptyState />,
+    table: () => <ApiKeysTable data={data} onRevoke={setKeyToRevoke} />,
+  }
 
   const handleCreateKey = () => {
     if (!newKeyName.trim()) {
@@ -219,67 +283,7 @@ export default function Page() {
             </Button>
           </div>
 
-          {(() => {
-            switch (contentType) {
-              case 'error':
-                return (
-                  <div className="rounded-md bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">
-                    Error loading API keys
-                  </div>
-                )
-              case 'loading':
-                return <LoadingSpinner />
-              case 'empty':
-                return (
-                  <div className="rounded-md bg-gray-50 p-8 text-center text-gray-500 dark:bg-gray-800/50 dark:text-gray-400">
-                    You don't have any API keys yet.
-                  </div>
-                )
-              case 'table':
-                return (
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
-                      <thead>
-                        <tr className="border-b-1 border-b-gray-200 dark:border-b-gray-700">
-                          <th className="py-3 text-left font-semibold">Name</th>
-                          <th className="py-3 text-left font-semibold">ID</th>
-                          <th className="py-3 text-left font-semibold">Created</th>
-                          <th className="py-3 text-left font-semibold">Expires</th>
-                          <th className="py-3 text-right font-semibold">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(data?.apiKeys ?? []).map((key: ApiKey) => (
-                          <tr
-                            key={key.uuid}
-                            className="border-b border-b-gray-200 dark:border-b-gray-700"
-                          >
-                            <td className="py-3">{key.name}</td>
-                            <td className="py-3 font-mono text-sm">{key.uuid}</td>
-                            <td className="py-3">{format(new Date(key.createdAt), 'PP')}</td>
-                            <td className="py-3">
-                              {key.expiresAt ? format(new Date(key.expiresAt), 'PP') : 'Never'}
-                            </td>
-                            <td className="py-3 text-right">
-                              <Button
-                                variant="light"
-                                size="sm"
-                                onPress={() => setKeyToRevoke(key)}
-                                className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                              >
-                                <FaTrash />
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )
-              default:
-                return null
-            }
-          })()}
+          {contentComponents[contentType]()}
         </SecondaryCard>
 
         <SecondaryCard>
