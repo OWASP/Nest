@@ -1,34 +1,34 @@
 services:
   backend:
-    container_name: fuzz-nest-backend
+    container_name: e2e-nest-backend
     command: >
       sh -c '
         python manage.py migrate &&
-        gunicorn wsgi:application --bind 0.0.0.0:9500
+        gunicorn wsgi:application --bind 0.0.0.0:9000
       '
     build:
-      context: ../backend
+      context: ../../backend
       dockerfile: docker/Dockerfile
     depends_on:
       db:
         condition: service_healthy
-    env_file: ../backend/.env.fuzz.example
+    env_file: ../../backend/.env.e2e.example
     networks:
-      - fuzz-nest-network
+      - e2e-nest-network
     ports:
-      - 9500:9500
+      - 9000:9000
     healthcheck:
       interval: 10s
       retries: 10
       test: >
         sh -c '
-          wget --spider http://backend:9500/a/
+          wget --spider http://backend:9000/a/
         '
       timeout: 10s
       start_period: 5s
 
   data-loader:
-    container_name: fuzz-nest-data-loader
+    container_name: e2e-nest-data-loader
     image: pgvector/pgvector:pg16
     depends_on:
       db:
@@ -36,13 +36,13 @@ services:
       backend:
         condition: service_healthy
     environment:
-      PGPASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_fuzz_password}
-      POSTGRES_USER: ${DJANGO_DB_USER:-nest_user_fuzz}
-      POSTGRES_DB: ${DJANGO_DB_NAME:-nest_db_fuzz}
+      PGPASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_e2e_password}
+      POSTGRES_USER: ${DJANGO_DB_USER:-nest_user_e2e}
+      POSTGRES_DB: ${DJANGO_DB_NAME:-nest_db_e2e}
     volumes:
-      - ../backend/data:/data:ro
+      - ../../backend/data:/data:ro
     networks:
-      - fuzz-nest-network
+      - e2e-nest-network
     command: >
       sh -c '
         echo "Loading data from dump..." &&
@@ -50,40 +50,41 @@ services:
         echo "Data loading completed."
       '
   db:
-    container_name: fuzz-nest-db
+    container_name: e2e-nest-db
     image: pgvector/pgvector:pg16
     environment:
-      POSTGRES_DB: ${DJANGO_DB_NAME:-nest_db_fuzz}
-      POSTGRES_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_fuzz_password}
-      POSTGRES_USER: ${DJANGO_DB_USER:-nest_user_fuzz}
+      POSTGRES_DB: ${DJANGO_DB_NAME:-nest_db_e2e}
+      POSTGRES_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_e2e_password}
+      POSTGRES_USER: ${DJANGO_DB_USER:-nest_user_e2e}
     healthcheck:
       interval: 5s
       retries: 5
       test: [CMD-SHELL, pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h localhost -p 5432]
       timeout: 5s
     networks:
-      - fuzz-nest-network
+      - e2e-nest-network
     volumes:
-      - fuzz-db-data:/var/lib/postgresql/data
+      - e2e-db-data:/var/lib/postgresql/data
     ports:
-      - 5434:5432
-  graphql:
-    container_name: fuzz-nest-graphql
+      - 5433:5432
+
+  e2e-tests:
+    container_name: e2e-nest-tests
     build:
-      context: ../backend/docker
-      dockerfile: Dockerfile.fuzz
-    environment:
-      BASE_URL: http://backend:9500
+      context: ../../frontend
+      dockerfile: docker/Dockerfile.e2e.test
+    command: >
+      sh -c '
+        pnpm run test:e2e
+      '
     depends_on:
       backend:
         condition: service_healthy
-    volumes:
-      - ../backend/fuzzing_results:/home/owasp/fuzzing_results
+    env_file: ../../frontend/.env.e2e.example
     networks:
-      - fuzz-nest-network
+      - e2e-nest-network
 
 networks:
-  fuzz-nest-network:
-
+  e2e-nest-network:
 volumes:
-  fuzz-db-data:
+  e2e-db-data:
