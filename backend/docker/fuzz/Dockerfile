@@ -1,29 +1,29 @@
-FROM python:3.12.12-alpine AS builder
+FROM python:3.13.7-alpine AS builder
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 ENV PIP_CACHE_DIR="/home/owasp/.cache/pip" \
     PYTHONUNBUFFERED=1 \
     APK_CACHE_DIR="/home/owasp/.cache/apk-fuzz-stage" \
-    APK_SYMLINK_DIR="/etc/apk/cache" \
-    CFLAGS="-std=gnu99"
+    APK_SYMLINK_DIR="/etc/apk/cache"
 
 RUN mkdir -p ${APK_CACHE_DIR} && \
     ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     apk update && apk upgrade && \
-    apk add curl jq gcc musl-dev libffi-dev openblas && \
+    apk add curl jq && \
     addgroup -S owasp && \
     adduser -S -h /home/owasp -G owasp owasp
 
 RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
     python -m pip install --upgrade pip && \
-    pip install graphqler --cache-dir ${PIP_CACHE_DIR}
+    pip install schemathesis --cache-dir ${PIP_CACHE_DIR}
 
 WORKDIR /home/owasp
 
-COPY --chown=root:root --chmod=755 ./entrypoint.fuzz.sh ./entrypoint.sh
+COPY --chown=root:root --chmod=755 ./entrypoint.sh ./entrypoint.sh
+COPY --chown=root:root --chmod=755 tests tests
 
 RUN chmod +x ./entrypoint.sh && \
     chown -R owasp:owasp /home/owasp

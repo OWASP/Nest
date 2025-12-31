@@ -371,26 +371,21 @@ jobs:
           cache-to: |
             type=gha,compression=zstd
           context: backend/docker
-          file: backend/docker/Dockerfile.fuzz
+          file: backend/docker/fuzz/Dockerfile
           load: true
           platforms: linux/amd64
           tags: owasp/nest:test-fuzz-backend-latest
 
-      - name: Run backend fuzz tests
+      - name: Run backend GraphQL fuzz tests
         run: |
-          mkdir -p ${{ github.workspace }}/fuzzing_results &&
-          chmod -R 777 ${{ github.workspace }}/fuzzing_results &&
-          docker run -e BASE_URL=http://localhost:9500 --network host \
-          -v ${{ github.workspace }}/fuzzing_results:/home/owasp/fuzzing_results \
+          docker run -e BASE_URL=http://localhost:9500 -e TEST_FILE=test_graphql.py --network host \
           owasp/nest:test-fuzz-backend-latest
 
-      - name: Upload fuzzing results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
-        if: always()
-        with:
-          name: fuzzing-results
-          path: fuzzing_results/
-          retention-days: 30
+      - name: Run backend REST fuzz tests
+        run: |
+          docker run -e BASE_URL=http://localhost:9500 -e TEST_FILE=test_rest.py \
+          -e REST_URL=http://localhost:9500/api/v0 --network host \
+          owasp/nest:test-fuzz-backend-latest
 
   build-staging-images:
     name: Build Staging Images
