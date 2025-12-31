@@ -20,9 +20,22 @@ class ProgramQuery:
 
     @strawberry.field
     def get_program(self, program_key: str) -> ProgramNode | None:
-        """Get a program by Key."""
+        """Get a program by Key.
+
+        Only returns published programs for public access.
+        Unpublished programs return a 404 error.
+        """
         try:
             program = Program.objects.prefetch_related("admins__github_user").get(key=program_key)
+            if program.status != Program.ProgramStatus.PUBLISHED:
+                msg = f"Program with key '{program_key}' not found."
+                logger.warning(
+                    "Attempted public access to unpublished program '%s' (status: %s)",
+                    program_key,
+                    program.status,
+                )
+                raise ObjectDoesNotExist(msg)
+
         except Program.DoesNotExist:
             msg = f"Program with key '{program_key}' not found."
             logger.warning(msg, exc_info=True)
