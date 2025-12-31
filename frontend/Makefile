@@ -57,18 +57,42 @@ test-frontend: \
 	test-frontend-e2e
 
 test-frontend-e2e:
-	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
+	@DOCKER_BUILDKIT=1 docker build \
 		--cache-from nest-test-frontend-e2e \
-		-f docker/frontend/Dockerfile.e2e.test frontend \
+		-f docker/frontend/Dockerfile.e2e.test . \
 		-t nest-test-frontend-e2e
-	@docker run --env-file frontend/.env.example --rm nest-test-frontend-e2e pnpm run test:e2e
+	@docker run \
+		--env-file frontend/.env.example \
+		--rm \
+		-e NEXT_PUBLIC_ENVIRONMENT=local \
+		-v $$(pwd)/frontend/__tests__:/app/__tests__:ro \
+		-v $$(pwd)/frontend/.pnpmrc:/app/.pnpmrc:ro \
+		-v $$(pwd)/frontend/next.config.ts:/app/next.config.ts:ro \
+		-v $$(pwd)/frontend/playwright.config.ts:/app/playwright.config.ts:ro \
+		-v $$(pwd)/frontend/postcss.config.js:/app/postcss.config.js:ro \
+		-v $$(pwd)/frontend/public:/app/public:ro \
+		-v $$(pwd)/frontend/src:/app/src:ro \
+		-v $$(pwd)/frontend/tailwind.config.mjs:/app/tailwind.config.mjs:ro \
+		-v $$(pwd)/frontend/tsconfig.json:/app/tsconfig.json:ro \
+		nest-test-frontend-e2e pnpm run test:e2e
 
 test-frontend-unit:
-	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
+	@DOCKER_BUILDKIT=1 docker build \
 		--cache-from nest-test-frontend-unit \
-		-f docker/frontend/Dockerfile.unit.test frontend \
+		-f docker/frontend/Dockerfile.unit.test . \
 		-t nest-test-frontend-unit
-	@docker run --env-file frontend/.env.example --rm nest-test-frontend-unit pnpm run test:unit
+	@docker run \
+		--env-file frontend/.env.example \
+		--rm \
+		-e NEXT_PUBLIC_ENVIRONMENT=local \
+		-v $$(pwd)/frontend/__tests__:/app/__tests__:ro \
+		-v $$(pwd)/frontend/.pnpmrc:/app/.pnpmrc:ro \
+		-v $$(pwd)/frontend/jest.config.ts:/app/jest.config.ts:ro \
+		-v $$(pwd)/frontend/jest.setup.ts:/app/jest.setup.ts:ro \
+		-v $$(pwd)/frontend/public:/app/public:ro \
+		-v $$(pwd)/frontend/src:/app/src:ro \
+		-v $$(pwd)/frontend/tsconfig.json:/app/tsconfig.json:ro \
+		nest-test-frontend-unit pnpm run test:unit
 
 update-frontend-dependencies:
 	cd frontend && pnpm update

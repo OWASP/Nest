@@ -163,7 +163,8 @@ jobs:
             type=registry,ref=owasp/nest:test-backend-cache
           cache-to: |
             type=gha,compression=zstd
-          context: backend
+            type=registry,ref=owasp/nest:test-backend-cache
+          context: .
           file: docker/backend/Dockerfile.test
           load: true
           platforms: linux/amd64
@@ -171,7 +172,16 @@ jobs:
 
       - name: Run backend tests
         run: |
-          docker run -e DJANGO_SETTINGS_MODULE=settings.test --env-file backend/.env.example owasp/nest:test-backend-latest pytest
+          docker run \
+            --env-file backend/.env.example \
+            --mount type=bind,source=${{ github.workspace }}/backend/apps,target=/home/owasp/apps,readonly \
+            --mount type=bind,source=${{ github.workspace }}/backend/settings,target=/home/owasp/settings,readonly \
+            --mount type=bind,source=${{ github.workspace }}/backend/static,target=/home/owasp/static,readonly \
+            --mount type=bind,source=${{ github.workspace }}/backend/templates,target=/home/owasp/templates,readonly \
+            --mount type=bind,source=${{ github.workspace }}/backend/tests,target=/home/owasp/tests,readonly \
+            --rm \
+            -e DJANGO_SETTINGS_MODULE=settings.test \
+            owasp/nest:test-backend-latest pytest
 
   run-frontend-unit-tests:
     name: Run frontend unit tests
@@ -187,7 +197,7 @@ jobs:
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
-      - name: Build frontend unit-testing image
+      - name: Build frontend unit test image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           cache-from: |
@@ -195,7 +205,8 @@ jobs:
             type=registry,ref=owasp/nest:test-frontend-unit-cache
           cache-to: |
             type=gha,compression=zstd
-          context: frontend
+            type=registry,ref=owasp/nest:test-frontend-unit-cache
+          context: .
           file: docker/frontend/Dockerfile.unit.test
           load: true
           platforms: linux/amd64
@@ -203,7 +214,18 @@ jobs:
 
       - name: Run frontend unit tests
         run: |
-          docker run --env-file frontend/.env.example owasp/nest:test-frontend-unit-latest pnpm run test:unit
+          docker run \
+            --env-file frontend/.env.example \
+            --mount type=bind,source=${{ github.workspace }}/frontend/__tests__,target=/app/__tests__,readonly \
+            --mount type=bind,source=${{ github.workspace }}/frontend/.pnpmrc,target=/app/.pnpmrc,readonly \
+            --mount type=bind,source=${{ github.workspace }}/frontend/jest.config.ts,target=/app/jest.config.ts,readonly \
+            --mount type=bind,source=${{ github.workspace }}/frontend/jest.setup.ts,target=/app/jest.setup.ts,readonly \
+            --mount type=bind,source=${{ github.workspace }}/frontend/public,target=/app/public,readonly \
+            --mount type=bind,source=${{ github.workspace }}/frontend/src,target=/app/src,readonly \
+            --mount type=bind,source=${{ github.workspace }}/frontend/tsconfig.json,target=/app/tsconfig.json,readonly \
+            --rm \
+            -e NEXT_PUBLIC_ENVIRONMENT=local \
+            owasp/nest:test-frontend-unit-latest pnpm run test:unit
 
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
@@ -219,13 +241,16 @@ jobs:
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
-      - name: Build frontend end-to-end testing image
+      - name: Build frontend e2e test image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           cache-from: |
             type=gha
             type=registry,ref=owasp/nest:test-frontend-e2e-cache
-          context: frontend
+          cache-to: |
+            type=gha,compression=zstd
+            type=registry,ref=owasp/nest:test-frontend-e2e-cache
+          context: .
           file: docker/frontend/Dockerfile.e2e.test
           load: true
           platforms: linux/amd64
@@ -233,7 +258,20 @@ jobs:
 
       - name: Run frontend end-to-end tests
         run: |
-          docker run --env-file frontend/.env.example owasp/nest:test-frontend-e2e-latest pnpm run test:e2e
+          docker run \
+            --env-file frontend/.env.example \
+            --mount type=bind,source=${{ github.workspace }}/frontend/__tests__,target=/app/__tests__,readonly \
+            --mount type=bind,source=${{ github.workspace }}/frontend/.pnpmrc,target=/app/.pnpmrc,readonly \
+            --mount type=bind,source=${{ github.workspace }}/frontend/next.config.ts,target=/app/next.config.ts,readonly \
+            --mount type=bind,source=${{ github.workspace }}/frontend/playwright.config.ts,target=/app/playwright.config.ts,readonly \
+            --mount type=bind,source=${{ github.workspace }}/frontend/postcss.config.js,target=/app/postcss.config.js,readonly \
+            --mount type=bind,source=${{ github.workspace }}/frontend/public,target=/app/public,readonly \
+            --mount type=bind,source=${{ github.workspace }}/frontend/src,target=/app/src,readonly \
+            --mount type=bind,source=${{ github.workspace }}/frontend/tailwind.config.mjs,target=/app/tailwind.config.mjs,readonly \
+            --mount type=bind,source=${{ github.workspace }}/frontend/tsconfig.json,target=/app/tsconfig.json,readonly \
+            --rm \
+            -e NEXT_PUBLIC_ENVIRONMENT=local \
+            owasp/nest:test-frontend-e2e-latest pnpm run test:e2e
 
   set-release-version:
     name: Set release version

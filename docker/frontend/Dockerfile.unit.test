@@ -13,14 +13,9 @@ RUN --mount=type=cache,target=${NPM_CACHE} \
 
 WORKDIR /app
 
-COPY --chmod=444 --chown=root:root package.json pnpm-lock.yaml ./
+COPY --chmod=444 --chown=root:root frontend/package.json frontend/pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --ignore-scripts && \
     chown node:node /app
-
-COPY __tests__/unit __tests__/unit
-COPY .pnpmrc jest.config.ts jest.setup.ts tsconfig.json ./
-COPY public public
-COPY src src
 
 USER node
