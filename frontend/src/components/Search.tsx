@@ -66,6 +66,13 @@ const SearchBar: React.FC<SearchProps> = ({
     inputRef.current?.focus()
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handleClearSearch()
+    }
+  }
+
   return (
     <div className="w-full max-w-md p-4">
       <div className="relative">
@@ -89,6 +96,7 @@ const SearchBar: React.FC<SearchProps> = ({
                 type="button"
                 className="absolute top-1/2 right-2 h-8 w-8 -translate-y-1/2 rounded-md p-1 text-gray-400 hover:bg-gray-400 hover:text-gray-200 focus:ring-2 focus:ring-gray-300 focus:outline-hidden dark:hover:bg-gray-600"
                 onClick={handleClearSearch}
+                onKeyDown={handleKeyDown}
                 aria-label="Clear search"
               >
                 <FaTimes className="h-4 w-4" aria-hidden="true" />
