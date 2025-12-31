@@ -178,26 +178,30 @@ const ChapterMap = ({
         <MapZoomControl isMapActive={isMapActive} />
 
         <MarkerClusterGroup chunkedLoading>
-          {validGeoLocData.map((chapter) => (
-            <Marker
-              key={chapter.key}
-              position={[
-                chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
-                chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
-              ]}
-              icon={chapterIcon}
-            >
-              <Popup>
-                <button
-                  type="button"
-                  className="cursor-pointer font-medium hover:text-blue-600"
-                  onClick={() => router.push(`/chapters/${chapter.key}`)}
+          {useMemo(
+            () =>
+              validGeoLocData.map((chapter) => (
+                <Marker
+                  key={chapter.key}
+                  position={[
+                    chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
+                    chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
+                  ]}
+                  icon={chapterIcon}
                 >
-                  {chapter.name}
-                </button>
-              </Popup>
-            </Marker>
-          ))}
+                  <Popup>
+                    <button
+                      type="button"
+                      className="cursor-pointer font-medium hover:text-blue-600"
+                      onClick={() => router.push(`/chapters/${chapter.key}`)}
+                    >
+                      {chapter.name}
+                    </button>
+                  </Popup>
+                </Marker>
+              )),
+            [validGeoLocData, chapterIcon, router]
+          )}
         </MarkerClusterGroup>
 
         {userLocation && (
