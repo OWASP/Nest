@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.57.0-jammy
+FROM node:24-alpine AS builder
 
 ENV FORCE_COLOR=1 \
     NPM_CACHE="/app/.npm" \
@@ -16,3 +16,21 @@ WORKDIR /app
 COPY --chmod=444 --chown=root:root frontend/package.json frontend/pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --ignore-scripts
+
+FROM mcr.microsoft.com/playwright:v1.57.0-jammy
+
+ENV FORCE_COLOR=1 \
+    NPM_CACHE="/app/.npm" \
+    PNPM_HOME="/pnpm"
+
+ENV NPM_CONFIG_RETRY=5 \
+    NPM_CONFIG_TIMEOUT=30000 \
+    PATH="$PNPM_HOME:$PATH"
+
+RUN --mount=type=cache,target=${NPM_CACHE} \
+    npm install --ignore-scripts -g pnpm --cache ${NPM_CACHE}
+
+WORKDIR /app
+
+COPY --from=builder --chown=root:root /app/node_modules ./node_modules
+COPY --from=builder --chown=root:root /app/package.json ./package.json
