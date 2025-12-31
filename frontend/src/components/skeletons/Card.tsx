@@ -16,11 +16,11 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
   const NUM_CONTRIBUTORS = 8
 
   return (
-    <div 
+    <div
       role="status"
       aria-live="polite"
-      aria-busy="true" 
-      aria-label="Loading" 
+      aria-busy="true"
+      aria-label="Loading"
       className="flex w-full justify-center"
     >
       <div className="border-border bg-card hover:bg-accent/10 mb-6 w-full rounded-lg border-1 p-6 transition-colors duration-300 ease-linear md:max-w-6xl">
