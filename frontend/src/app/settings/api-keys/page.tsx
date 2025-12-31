@@ -5,8 +5,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@herou
 import { Input } from '@heroui/react'
 import { addToast } from '@heroui/toast'
 import { format, addDays } from 'date-fns'
-import React from 'react'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { FaInfoCircle } from 'react-icons/fa'
 import { FaSpinner, FaKey, FaPlus, FaCopy, FaEye, FaEyeSlash, FaTrash } from 'react-icons/fa6'
 import {
@@ -77,6 +76,18 @@ const ApiKeysTable = ({ data, onRevoke }: ApiKeysTableProps) => (
   </div>
 )
 
+type ContentType = 'error' | 'loading' | 'empty' | 'table'
+
+const getContentComponents = (
+  data: { apiKeys?: ApiKey[] } | undefined,
+  onRevoke: (key: ApiKey) => void
+): Record<ContentType, () => React.ReactNode> => ({
+  error: () => <ErrorState />,
+  loading: () => <LoadingSpinner />,
+  empty: () => <EmptyState />,
+  table: () => <ApiKeysTable data={data} onRevoke={onRevoke} />,
+})
+
 export default function Page() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [newKeyName, setNewKeyName] = useState('')
@@ -128,8 +139,6 @@ export default function Page() {
   const canCreateNewKey = activeKeyCount < MAX_ACTIVE_KEYS
   const defaultExpiryDate = format(addDays(new Date(), 30), 'yyyy-MM-dd')
 
-  type ContentType = 'error' | 'loading' | 'empty' | 'table'
-
   const getContentType = (): ContentType => {
     if (error) {
       return 'error'
@@ -143,13 +152,7 @@ export default function Page() {
   }
 
   const contentType = getContentType()
-
-  const contentComponents: Record<ContentType, () => React.ReactNode> = {
-    error: () => <ErrorState />,
-    loading: () => <LoadingSpinner />,
-    empty: () => <EmptyState />,
-    table: () => <ApiKeysTable data={data} onRevoke={setKeyToRevoke} />,
-  }
+  const contentComponents = getContentComponents(data, setKeyToRevoke)
 
   const handleCreateKey = () => {
     if (!newKeyName.trim()) {
