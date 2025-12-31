@@ -26,7 +26,16 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
         zoomControlRef.current = L.control.zoom({ position: 'topleft' })
         zoomControlRef.current.addTo(map)
       }
+    } else {
+      map.scrollWheelZoom.disable()
+      if (zoomControlRef.current) {
+        zoomControlRef.current.remove()
+        zoomControlRef.current = null
+      }
     }
+  }, [isMapActive, map])
+
+  useEffect(() => {
     return () => {
       if (!map) return
       map.scrollWheelZoom.disable()
@@ -35,7 +44,7 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
         zoomControlRef.current = null
       }
     }
-  }, [isMapActive, map])
+  }, [map])
   return null
 }
 
