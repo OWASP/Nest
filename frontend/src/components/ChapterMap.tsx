@@ -205,7 +205,11 @@ const ChapterMap = ({
         </MarkerClusterGroup>
 
         {userLocation && (
-          <Marker position={[userLocation.latitude, userLocation.longitude]} icon={userIcon}>
+          <Marker
+            position={[userLocation.latitude, userLocation.longitude]}
+            icon={userIcon}
+            alt="Your location"
+          >
             <Popup>Your Location</Popup>
           </Marker>
         )}
