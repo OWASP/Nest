@@ -64,7 +64,7 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
               {showContributors && (
                 <div className="mt-3 flex w-full flex-wrap items-center gap-2">
                   {/* # NOSONAR As safe to use index as key - static skeleton items with fixed length */}
-                  {[...Array(NUM_CONTRIBUTORS)].map((_, i) => (
+                  {Array.from({ length: NUM_CONTRIBUTORS }).map((_, i) => (
                     <Skeleton key={i} className="border-background h-8 w-8 rounded-full border-2" />
                   ))}
                 </div>

@@ -66,10 +66,6 @@ jest.mock('next/navigation', () => {
   }
 })
 
-if (!global.structuredClone) {
-  global.structuredClone = (val) => JSON.parse(JSON.stringify(val))
-}
-
 beforeAll(() => {
   if (typeof globalThis !== 'undefined') {
     jest.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((cb) => {
