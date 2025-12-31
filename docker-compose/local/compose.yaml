@@ -8,8 +8,8 @@ services:
       '
     image: nest-local-backend
     build:
-      context: ../../backend
-      dockerfile: docker/Dockerfile.local
+      context: ../../
+      dockerfile: docker/backend/Dockerfile.local
     depends_on:
       cache:
         condition: service_healthy
@@ -76,7 +76,7 @@ services:
       '
     build:
       context: ../../
-      dockerfile: docs/docker/Dockerfile.local
+      dockerfile: docker/docs/Dockerfile.local
     networks:
       - nest-network
     ports:
@@ -92,8 +92,8 @@ services:
         pnpm run dev
       '
     build:
-      context: ../../frontend
-      dockerfile: docker/Dockerfile.local
+      context: ../../
+      dockerfile: docker/frontend/Dockerfile.local
     depends_on:
       - backend
     environment:
