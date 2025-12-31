@@ -100,7 +100,9 @@ const EditModulePage = () => {
     if (!formData) return
 
     try {
-      // NOSONAR (typescript:S1525) - The 'login' property is added to the session object at runtime by NextAuth configuration callbacks. This is a safe type assertion as ExtendedSession explicitly defines the login property.
+      // NOSONAR (typescript:S1525)
+      // `login` is dynamically injected by NextAuth callbacks at runtime.
+      // The ExtendedSession type explicitly models this augmentation, so this assertion is intentional and safe.
       const currentUserLogin = (sessionData as ExtendedSession)?.user?.login
       const isAdmin = data?.getProgram?.admins?.some(
         (admin: { login: string }) => admin.login === currentUserLogin
