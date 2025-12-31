@@ -208,7 +208,7 @@ const ChapterMap = ({
           <Marker
             position={[userLocation.latitude, userLocation.longitude]}
             icon={userIcon}
-            alt="Your location"
+            title="Your location"
           >
             <Popup>Your Location</Popup>
           </Marker>
