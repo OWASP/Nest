@@ -5,7 +5,7 @@ import upperFirst from 'lodash/upperFirst'
 import millify from 'millify'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { FaMapSigns, FaTools } from 'react-icons/fa'
 import { FaCircleCheck, FaClock, FaScroll, FaBullseye, FaUser, FaUsersGear } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
@@ -16,8 +16,6 @@ import {
   GetTopContributorsDocument,
 } from 'types/__generated__/projectQueries.generated'
 import { GetLeaderDataDocument } from 'types/__generated__/userQueries.generated'
-import type { Contributor } from 'types/contributor'
-import type { Project } from 'types/project'
 import {
   technologies,
   missionContent,
@@ -62,14 +60,22 @@ const getMilestoneIcon = (progress: number) => {
 }
 
 const About = () => {
-  const { data: projectMetadataResponse, error: projectMetadataRequestError } = useQuery(
+  const { 
+    data: projectMetadataResponse, 
+    loading: projectMetadataLoading,
+    error: projectMetadataRequestError 
+  } = useQuery(
     GetProjectMetadataDocument,
     {
       variables: { key: projectKey },
     }
   )
 
-  const { data: topContributorsResponse, error: topContributorsRequestError } = useQuery(
+  const { 
+    data: topContributorsResponse, 
+    loading: topContributorsLoading,
+    error: topContributorsRequestError 
+  } = useQuery(
     GetTopContributorsDocument,
     {
       variables: {
@@ -83,34 +89,25 @@ const About = () => {
 
   const { leadersData, isLoading: leadersLoading } = useLeadersData()
 
-  const [projectMetadata, setProjectMetadata] = useState<Project | null>(null)
-  const [topContributors, setTopContributors] = useState<Contributor[]>([])
+  // Derive data directly from response to prevent race conditions
+  const projectMetadata = projectMetadataResponse?.project
+  const topContributors = topContributorsResponse?.topContributors
 
   useEffect(() => {
-    if (projectMetadataResponse?.project) {
-      setProjectMetadata(projectMetadataResponse.project)
-    }
-
     if (projectMetadataRequestError) {
       handleAppError(projectMetadataRequestError)
     }
-  }, [projectMetadataResponse, projectMetadataRequestError])
+  }, [projectMetadataRequestError])
 
   useEffect(() => {
-    if (topContributorsResponse?.topContributors) {
-      setTopContributors(topContributorsResponse.topContributors)
-    }
-
     if (topContributorsRequestError) {
       handleAppError(topContributorsRequestError)
     }
-  }, [topContributorsResponse, topContributorsRequestError])
+  }, [topContributorsRequestError])
 
   const isLoading =
-    !projectMetadataResponse ||
-    !topContributorsResponse ||
-    (projectMetadataRequestError && !projectMetadata) ||
-    (topContributorsRequestError && !topContributors) ||
+    projectMetadataLoading ||
+    topContributorsLoading ||
     leadersLoading
 
   if (isLoading) {
