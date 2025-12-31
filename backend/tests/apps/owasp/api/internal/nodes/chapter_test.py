@@ -55,9 +55,38 @@ class TestChapterNode:
     def test_resolve_contribution_data(self):
         field = self._get_field_by_name("contribution_data")
         assert field is not None
-        assert field.type.__class__.__name__ == "ScalarWrapper"
+        assert field.type.__class__.__name__ == "NewType"
 
     def test_resolve_contribution_stats(self):
         field = self._get_field_by_name("contribution_stats")
         assert field is not None
-        assert field.type.__class__.__name__ == "ScalarWrapper"
+        assert field.type.__class__.__name__ == "StrawberryOptional"
+
+    def test_contribution_stats_transforms_snake_case_to_camel_case(self):
+        """Test that contribution_stats resolver transforms snake_case keys to camelCase."""
+        from unittest.mock import Mock
+
+        mock_chapter = Mock()
+        mock_chapter.contribution_stats = {
+            "commits": 75,
+            "pull_requests": 30,
+            "issues": 15,
+            "releases": 5,
+            "total": 125,
+        }
+
+        instance = type("BoundNode", (), {})()
+        instance.contribution_stats = mock_chapter.contribution_stats
+
+        field = self._get_field_by_name("contribution_stats")
+        resolver = field.base_resolver.wrapped_func
+
+        result = resolver(instance)
+
+        assert result is not None
+        assert result["commits"] == 75
+        assert result["pullRequests"] == 30
+        assert result["issues"] == 15
+        assert result["releases"] == 5
+        assert result["total"] == 125
+        assert "pull_requests" not in result

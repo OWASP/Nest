@@ -117,6 +117,50 @@ jest.mock('components/HealthMetrics', () => ({
   ),
 }))
 
+jest.mock('components/ContributionHeatmap', () => ({
+  __esModule: true,
+  default: ({
+    contributionData,
+    startDate,
+    endDate,
+    ...props
+  }: {
+    contributionData: Record<string, number>
+    startDate: string
+    endDate: string
+    [key: string]: unknown
+  }) => (
+    <div data-testid="mock-heatmap-chart" {...props}>
+      Heatmap: {Object.keys(contributionData).length} days from {startDate} to {endDate}
+    </div>
+  ),
+}))
+
+jest.mock('components/ContributionStats', () => ({
+  __esModule: true,
+  default: ({
+    title,
+    stats,
+    ...props
+  }: {
+    title: string
+    stats?: { commits: number; pullRequests: number; issues: number; total: number }
+    [key: string]: unknown
+  }) => (
+    <div data-testid="contribution-stats" {...props}>
+      <h2>{title}</h2>
+      {stats && (
+        <>
+          <p>{stats.commits}</p>
+          <p>{stats.pullRequests}</p>
+          <p>{stats.issues}</p>
+          <p>{stats.total}</p>
+        </>
+      )}
+    </div>
+  ),
+}))
+
 jest.mock('components/InfoBlock', () => ({
   __esModule: true,
   default: ({
@@ -1502,6 +1546,139 @@ describe('CardDetailsPage', () => {
       render(<CardDetailsPage {...nullArchivedProps} />)
 
       expect(screen.queryByText('Archived')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Contribution Stats and Heatmap', () => {
+    const contributionData = {
+      '2024-01-01': 5,
+      '2024-01-02': 10,
+      '2024-01-03': 3,
+    }
+
+    const contributionStats = {
+      commits: 100,
+      pullRequests: 50,
+      issues: 25,
+      total: 175,
+    }
+
+    it('renders contribution stats and heatmap when data is provided', () => {
+      const propsWithContributions = {
+        ...defaultProps,
+        type: 'project',
+        contributionData,
+        contributionStats,
+        startDate: '2024-01-01',
+        endDate: '2024-12-31',
+      }
+
+      render(<CardDetailsPage {...propsWithContributions} />)
+
+      expect(screen.getByText('Project Contribution Activity')).toBeInTheDocument()
+      expect(screen.getByText('100')).toBeInTheDocument()
+      expect(screen.getByText('50')).toBeInTheDocument()
+      expect(screen.getByText('25')).toBeInTheDocument()
+      expect(screen.getByText('175')).toBeInTheDocument()
+    })
+
+    it('uses correct title for chapter type', () => {
+      const chapterPropsWithContributions = {
+        ...defaultProps,
+        type: 'chapter',
+        contributionStats,
+      }
+
+      render(<CardDetailsPage {...chapterPropsWithContributions} />)
+
+      expect(screen.getByText('Chapter Contribution Activity')).toBeInTheDocument()
+    })
+
+    it('does not render contribution section when no data is provided', () => {
+      render(<CardDetailsPage {...defaultProps} type="project" />)
+
+      expect(screen.queryByText('Project Contribution Activity')).not.toBeInTheDocument()
+      expect(screen.queryByText('Chapter Contribution Activity')).not.toBeInTheDocument()
+    })
+
+    it('renders only stats when contributionData is missing', () => {
+      const statsOnlyProps = {
+        ...defaultProps,
+        type: 'project',
+        contributionStats,
+      }
+
+      render(<CardDetailsPage {...statsOnlyProps} />)
+
+      expect(screen.getByText('Project Contribution Activity')).toBeInTheDocument()
+      expect(screen.getByText('100')).toBeInTheDocument()
+    })
+
+    it('renders heatmap when contributionData and dates are provided', () => {
+      const heatmapProps = {
+        ...defaultProps,
+        type: 'project',
+        contributionData,
+        startDate: '2024-01-01',
+        endDate: '2024-12-31',
+      }
+
+      render(<CardDetailsPage {...heatmapProps} />)
+
+      // Heatmap should be rendered (mocked in jest setup)
+      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+    })
+
+    it('does not render heatmap when dates are missing', () => {
+      const noDateProps = {
+        ...defaultProps,
+        type: 'project',
+        contributionData,
+      }
+
+      render(<CardDetailsPage {...noDateProps} />)
+
+      expect(screen.queryByTestId('mock-heatmap-chart')).not.toBeInTheDocument()
+    })
+
+    it('does not render heatmap when contributionData is empty', () => {
+      const emptyDataProps = {
+        ...defaultProps,
+        type: 'project',
+        contributionData: {},
+        startDate: '2024-01-01',
+        endDate: '2024-12-31',
+      }
+
+      render(<CardDetailsPage {...emptyDataProps} />)
+
+      expect(screen.queryByTestId('mock-heatmap-chart')).not.toBeInTheDocument()
+    })
+
+    it('renders contribution section before top contributors', () => {
+      const fullProps = {
+        ...defaultProps,
+        type: 'project',
+        contributionStats,
+        topContributors: [
+          {
+            id: '1',
+            login: 'user1',
+            name: 'User One',
+            avatarUrl: 'https://example.com/avatar1.png',
+          },
+        ],
+      }
+
+      render(<CardDetailsPage {...fullProps} />)
+
+      const contributionSection = screen.getByText('Project Contribution Activity')
+      const contributorsSection = screen.getByText(/Top Contributors/i)
+
+      // Check that contribution section appears before contributors
+      expect(contributionSection.compareDocumentPosition(contributorsSection)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      )
     })
   })
 })

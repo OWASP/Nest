@@ -6,7 +6,7 @@ export type GetChapterDataQueryVariables = Types.Exact<{
 }>;
 
 
-export type GetChapterDataQuery = { chapter: { __typename: 'ChapterNode', contributionData: any, contributionStats: any, id: string, isActive: boolean, key: string, name: string, region: string, relatedUrls: Array<string>, suggestedLocation: string | null, summary: string, updatedAt: number, url: string, entityLeaders: Array<{ __typename: 'EntityMemberNode', id: string, description: string, memberName: string, member: { __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string } | null }>, geoLocation: { __typename: 'GeoLocationType', lat: number, lng: number } | null } | null, topContributors: Array<{ __typename: 'RepositoryContributorNode', id: string, avatarUrl: string, login: string, name: string }> };
+export type GetChapterDataQuery = { chapter: { __typename: 'ChapterNode', contributionData: any, contributionStats: any | null, id: string, isActive: boolean, key: string, name: string, region: string, relatedUrls: Array<string>, suggestedLocation: string | null, summary: string, updatedAt: number, url: string, entityLeaders: Array<{ __typename: 'EntityMemberNode', id: string, description: string, memberName: string, member: { __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string } | null }>, geoLocation: { __typename: 'GeoLocationType', lat: number, lng: number } | null } | null, topContributors: Array<{ __typename: 'RepositoryContributorNode', id: string, avatarUrl: string, login: string, name: string }> };
 
 export type GetChapterMetadataQueryVariables = Types.Exact<{
   key: Types.Scalars['String']['input'];

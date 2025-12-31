@@ -637,8 +637,8 @@ describe('ContributionHeatmap', () => {
       const { container } = renderWithTheme(
         <ContributionHeatmap {...defaultProps} title="Compact" variant="compact" />
       )
-      // Verify compact variant uses inline-block and min-w-full classes
-      const chartContainer = container.querySelector('.inline-block.min-w-full')
+      // Verify compact variant uses inline-block class
+      const chartContainer = container.querySelector('.inline-block')
       expect(chartContainer).toBeInTheDocument()
     })
 
@@ -646,8 +646,8 @@ describe('ContributionHeatmap', () => {
       const { container } = renderWithTheme(
         <ContributionHeatmap {...defaultProps} title="Default" variant="default" />
       )
-      // Verify default variant uses inline-block and min-w-full classes
-      const chartContainer = container.querySelector('.inline-block.min-w-full')
+      // Verify default variant uses inline-block class
+      const chartContainer = container.querySelector('.inline-block')
       expect(chartContainer).toBeInTheDocument()
     })
 

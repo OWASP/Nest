@@ -16,6 +16,8 @@ import { scrollToAnchor } from 'utils/scrollToAnchor'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
+import ContributionHeatmap from 'components/ContributionHeatmap'
+import ContributionStats from 'components/ContributionStats'
 import EntityActions from 'components/EntityActions'
 import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
@@ -40,6 +42,10 @@ const DetailsCard = ({
   description,
   details,
   accessLevel,
+  contributionData,
+  contributionStats,
+  endDate,
+  startDate,
   status,
   setStatus,
   canUpdateStatus,
@@ -239,6 +245,33 @@ const DetailsCard = ({
           </>
         )}
         {entityLeaders && entityLeaders.length > 0 && <Leaders users={entityLeaders} />}
+        {(contributionData || contributionStats) && (
+          <div className="mb-8">
+            <div className="rounded-lg bg-gray-100 px-4 pt-6 shadow-md sm:px-6 lg:px-10 dark:bg-gray-800">
+              {contributionStats && (
+                <ContributionStats
+                  title={`${type === 'project' ? 'Project' : 'Chapter'} Contribution Activity`}
+                  stats={contributionStats}
+                />
+              )}
+              {contributionData &&
+                Object.keys(contributionData).length > 0 &&
+                startDate &&
+                endDate && (
+                  <div className="flex w-full items-center justify-center">
+                    <div className="w-full">
+                      <ContributionHeatmap
+                        contributionData={contributionData}
+                        startDate={startDate}
+                        endDate={endDate}
+                        unit="contribution"
+                      />
+                    </div>
+                  </div>
+                )}
+            </div>
+          </div>
+        )}
         {topContributors && (
           <TopContributorsList
             contributors={topContributors}

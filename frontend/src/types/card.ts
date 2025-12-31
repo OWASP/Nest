@@ -14,6 +14,7 @@ import type { Milestone } from 'types/milestone'
 import type { RepositoryCardProps } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
+import type { ContributionStats } from 'utils/contributionDataUtils'
 
 export type CardProps = {
   button: Button
@@ -42,15 +43,19 @@ type Stats = {
 }
 export interface DetailsCardProps {
   accessLevel?: string
+  contributionData?: Record<string, number>
+  contributionStats?: ContributionStats
   description?: string
   details?: { label: string; value: string | JSX.Element }[]
   domains?: string[]
+  endDate?: string
   entityLeaders?: Leader[]
   entityKey?: string
   geolocationData?: Chapter[]
   healthMetricsData?: HealthMetricsProps[]
   heatmap?: JSX.Element
   isActive?: boolean
+  startDate?: string
   isArchived?: boolean
   labels?: string[]
   languages?: string[]

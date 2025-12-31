@@ -14,8 +14,6 @@ import type { Project } from 'types/project'
 import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
-import ContributionHeatmap from 'components/ContributionHeatmap'
-import ContributionStats from 'components/ContributionStats'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProjectDetailsPage = () => {
@@ -99,58 +97,31 @@ const ProjectDetailsPage = () => {
     project.contributionStats,
     project.contributionData
   )
-  const hasHeatmapData =
-    !!project.contributionData && Object.keys(project.contributionData).length > 0
-  const hasContributionStats = !!contributionStats
 
   return (
-    <>
-      <DetailsCard
-        details={projectDetails}
-        entityKey={project.key}
-        entityLeaders={project.entityLeaders}
-        healthMetricsData={project.healthMetricsList}
-        isActive={project.isActive}
-        languages={project.languages}
-        pullRequests={project.recentPullRequests}
-        recentIssues={project.recentIssues}
-        recentMilestones={project.recentMilestones}
-        recentReleases={project.recentReleases}
-        repositories={project.repositories}
-        stats={projectStats}
-        summary={project.summary}
-        title={project.name}
-        topContributors={topContributors}
-        topics={project.topics}
-        type="project"
-      />
-      {(hasHeatmapData || hasContributionStats) && (
-        <div className="bg-white px-8 pb-10 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
-          <div className="mx-auto w-full max-w-6xl">
-            <div className="rounded-lg bg-gray-100 px-4 pt-6 shadow-md sm:px-6 lg:px-10 dark:bg-gray-800">
-              {hasContributionStats && (
-                <ContributionStats
-                  title="Project Contribution Activity"
-                  stats={contributionStats}
-                />
-              )}
-              <div className="flex w-full items-center justify-center">
-                <div className="w-full">
-                  {hasHeatmapData && (
-                    <ContributionHeatmap
-                      contributionData={project.contributionData!}
-                      startDate={startDate}
-                      endDate={endDate}
-                      unit="contribution"
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+    <DetailsCard
+      contributionData={project.contributionData}
+      contributionStats={contributionStats}
+      details={projectDetails}
+      endDate={endDate}
+      entityKey={project.key}
+      entityLeaders={project.entityLeaders}
+      healthMetricsData={project.healthMetricsList}
+      isActive={project.isActive}
+      languages={project.languages}
+      pullRequests={project.recentPullRequests}
+      recentIssues={project.recentIssues}
+      recentMilestones={project.recentMilestones}
+      recentReleases={project.recentReleases}
+      repositories={project.repositories}
+      startDate={startDate}
+      stats={projectStats}
+      summary={project.summary}
+      title={project.name}
+      topContributors={topContributors}
+      topics={project.topics}
+      type="project"
+    />
   )
 }
 

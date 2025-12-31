@@ -334,7 +334,7 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
           `}
         </style>
 
-        <div className="inline-block min-w-full">
+        <div className="inline-block">
           <Chart
             options={options}
             series={heatmapSeries}

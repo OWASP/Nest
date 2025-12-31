@@ -109,9 +109,38 @@ class TestProjectNode:
     def test_resolve_contribution_stats(self):
         field = self._get_field_by_name("contribution_stats")
         assert field is not None
-        assert field.type.__class__.__name__ == "ScalarWrapper"
+        assert field.type.__class__.__name__ == "StrawberryOptional"
 
     def test_resolve_contribution_data(self):
         field = self._get_field_by_name("contribution_data")
         assert field is not None
-        assert field.type.__class__.__name__ == "ScalarWrapper"
+        assert field.type.__class__.__name__ == "NewType"
+
+    def test_contribution_stats_transforms_snake_case_to_camel_case(self):
+        """Test that contribution_stats resolver transforms snake_case keys to camelCase."""
+        from unittest.mock import Mock
+
+        mock_project = Mock()
+        mock_project.contribution_stats = {
+            "commits": 100,
+            "pull_requests": 50,
+            "issues": 25,
+            "releases": 10,
+            "total": 185,
+        }
+
+        instance = type("BoundNode", (), {})()
+        instance.contribution_stats = mock_project.contribution_stats
+
+        field = self._get_field_by_name("contribution_stats")
+        resolver = field.base_resolver.wrapped_func
+
+        result = resolver(instance)
+
+        assert result is not None
+        assert result["commits"] == 100
+        assert result["pullRequests"] == 50
+        assert result["issues"] == 25
+        assert result["releases"] == 10
+        assert result["total"] == 185
+        assert "pull_requests" not in result
