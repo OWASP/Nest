@@ -49,7 +49,6 @@ class ModuleQuery:
         Returns an empty list if project is not found.
         Only returns modules from published programs for public access.
         """
-        # Use published_modules manager to only get modules from published programs
         return (
             Module.published_modules.filter(project__key=project_key)
             .select_related("program", "project")
