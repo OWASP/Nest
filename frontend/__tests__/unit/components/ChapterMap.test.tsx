@@ -532,6 +532,25 @@ describe('ChapterMap', () => {
       // Zoom control should be removed
       expect(mockZoomControl.remove).toHaveBeenCalled()
     })
+
+    it('cleans up Escape key listener on unmount', () => {
+      const addEventListenerSpy = jest.spyOn(window, 'addEventListener')
+      const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener')
+
+      const { unmount } = render(<ChapterMap {...defaultProps} />)
+
+      // Find the Escape key handler that was registered
+      const escapeHandler = addEventListenerSpy.mock.calls.find(
+        ([event]) => event === 'keydown'
+      )?.[1]
+
+      unmount()
+
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', escapeHandler)
+
+      addEventListenerSpy.mockRestore()
+      removeEventListenerSpy.mockRestore()
+    })
   })
 
   describe('Pointer Events Structure', () => {
