@@ -91,6 +91,5 @@ jobs:
         env:
           TEST_FILE: ${{ inputs.test-file }}
           REST_URL: ${{ inputs.rest-url }}
-          BASE_URL: ${{ inputs.base-url }}
         run: |
-          docker run --network host owasp/nest:test-fuzz-backend-latest
+          docker run -e BASE_URL=http://localhost:9500 --network host owasp/nest:test-fuzz-backend-latest
