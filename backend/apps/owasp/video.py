@@ -64,7 +64,12 @@ class Slide:
         return self.output_dir / f"{self.name}{VIDEO_EXTENSION}"
 
     def render_and_save_image(self) -> None:
-        """Render an HTML template as an image."""
+        """Render an HTML template as an image.
+
+        Raises:
+            Exception: If rendering the HTML template or saving the image fails.
+
+        """
         page = None
         pdf = None
         try:
@@ -105,7 +110,12 @@ class Slide:
             raise RuntimeError(msg)
 
     def generate_and_save_video(self) -> None:
-        """Generate video for the slide."""
+        """Generate video for the slide.
+
+        Raises:
+            ffmpeg.Error: If video generation fails.
+
+        """
         image_stream = ffmpeg.input(self.image_path, loop=1, framerate=VIDEO_FRAMERATE)
         audio_stream = ffmpeg.input(self.audio_path)
 
@@ -129,13 +139,28 @@ class SlideBuilder:
     """Slide builder for community snapshot video."""
 
     def __init__(self, snapshots: QuerySet[Snapshot], output_dir: Path) -> None:
-        """Initialize SlideBuilder."""
+        """Initialize SlideBuilder.
+
+        Args:
+            snapshots (QuerySet[Snapshot]): QuerySet of completed snapshots to process.
+            output_dir (Path): Directory where slide assets will be saved.
+
+        """
         self.snapshots = snapshots
         self.output_dir = output_dir
 
     @staticmethod
     def format_names_for_transcript(names: list[str]) -> str:
-        """Format a list of names for transcript, stripping 'OWASP ' prefix."""
+        """Format a list of names for transcript, stripping 'OWASP ' prefix.
+
+        Args:
+            names (list[str]): List of project/chapter names to format.
+
+        Returns:
+            str: Formatted string with comma-separated names and 'and' before the last name
+                 or empty string if list is empty.
+
+        """
         cleaned = [name.replace("OWASP ", "") for name in names[:TRANSCRIPT_NAMES_LIMIT]]
         if len(cleaned) > 1:
             return f"{', '.join(cleaned[:-1])}, and {cleaned[-1]}"
@@ -322,7 +347,12 @@ class VideoGenerator:
         self.slides: list[Slide] = []
 
     def append_slide(self, slide: Slide) -> None:
-        """Append a slide to list."""
+        """Append a slide to list.
+
+        Args:
+            slide (Slide): The slide to add to the video generation queue.
+
+        """
         self.slides.append(slide)
 
     def generate_video(self, output_dir: Path, filename: str) -> Path:
@@ -347,7 +377,15 @@ class VideoGenerator:
         return output_path
 
     def merge_videos(self, output_path: Path) -> None:
-        """Combine all slide videos into final video."""
+        """Concatenate video and audio streams from all slides into a single output file.
+
+        Args:
+            output_path (Path): Path where the final merged video will be saved.
+
+        Raises:
+            ffmpeg.Error: If video merging fails.
+
+        """
         inputs = [ffmpeg.input(str(slide.video_path)) for slide in self.slides]
 
         video_streams = [inp.video for inp in inputs]
