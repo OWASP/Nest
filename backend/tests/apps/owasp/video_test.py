@@ -67,20 +67,6 @@ class TestSlide:
         mock_page.close.assert_called_once()
         mock_pdf.close.assert_called_once()
 
-    def test_generate_and_save_audio_no_transcript(self, tmp_path):
-        """Test generate_and_save_audio raises error when no transcript."""
-        slide = Slide(
-            context={},
-            name="test",
-            output_dir=tmp_path,
-            template_name="test.html",
-            transcript=None,
-        )
-        eleven_labs = Mock()
-
-        with pytest.raises(RuntimeError, match="No transcript available"):
-            slide.generate_and_save_audio(eleven_labs)
-
     def test_generate_and_save_audio_generation_fails(self, slide):
         """Test generate_and_save_audio raises error when generation fails."""
         eleven_labs = Mock()

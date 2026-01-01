@@ -31,7 +31,6 @@ AUDIO_EXTENSION = ".mp3"
 ELEVENLABS_SPEED = 0.85
 IMAGE_EXTENSION = ".png"
 IMAGE_FORMAT = "PNG"
-MAX_DETAILED_PROJECTS = 16
 PDF_RENDER_SCALE = 2
 RELEASES_LIMIT = 12
 TRANSCRIPT_NAMES_LIMIT = 3
@@ -47,7 +46,7 @@ class Slide:
     name: str
     output_dir: Path
     template_name: str
-    transcript: str | None = None
+    transcript: str
 
     @property
     def audio_path(self) -> Path:
@@ -97,13 +96,9 @@ class Slide:
             eleven_labs (ElevenLabs): ElevenLabs client instance.
 
         Raises:
-            RuntimeError: If transcript is missing or audio generation fails.
+            RuntimeError: If transcript audio generation fails.
 
         """
-        if not self.transcript:
-            msg = f"No transcript available for {self.name}"
-            raise RuntimeError(msg)
-
         eleven_labs.set_text(self.transcript)
         if not eleven_labs.generate_to_file(self.audio_path):
             msg = f"Failed to generate audio for {self.name}"
