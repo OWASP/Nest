@@ -1,7 +1,6 @@
 """A command to generate OWASP community snapshot video."""
 
 import logging
-import os
 import tempfile
 from pathlib import Path
 
@@ -33,9 +32,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options) -> None:
         """Handle the command execution."""
-        # Required to cache fonts
-        os.environ["XDG_CACHE_HOME"] = str(Path(tempfile.gettempdir()) / "cache")
-
         snapshot_key = options["snapshot_key"]
 
         snapshots = Snapshot.objects.filter(
