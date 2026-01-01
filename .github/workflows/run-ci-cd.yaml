@@ -307,7 +307,6 @@ jobs:
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
       test-file: test_graphql.py
-      base-url: http://localhost:9500
 
   run-rest-fuzz-tests:
     name: Run REST fuzz tests
@@ -318,7 +317,6 @@ jobs:
     with:
       test-file: test_rest.py
       rest-url: http://localhost:9500/api/v0
-      base-url: http://localhost:9500
 
   build-staging-images:
     name: Build Staging Images
