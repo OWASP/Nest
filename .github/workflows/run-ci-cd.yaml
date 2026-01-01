@@ -304,8 +304,6 @@ jobs:
     needs:
       - scan-code
       - scan-ci-dependencies
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
       test-file: test_graphql.py
@@ -316,8 +314,6 @@ jobs:
     needs:
       - scan-code
       - scan-ci-dependencies
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
       test-file: test_rest.py
