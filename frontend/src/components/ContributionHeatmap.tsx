@@ -11,11 +11,12 @@ const generateHeatmapSeries = (
   endDate: string,
   contributionData: Record<string, number>
 ) => {
-  // Handle missing dates by using default range
   if (!startDate || !endDate) {
     const defaultEnd = new Date()
+    defaultEnd.setUTCHours(0, 0, 0, 0)
     const defaultStart = new Date()
-    defaultStart.setFullYear(defaultEnd.getFullYear() - 1)
+    defaultStart.setUTCHours(0, 0, 0, 0)
+    defaultStart.setUTCFullYear(defaultEnd.getUTCFullYear() - 1)
     return generateHeatmapSeries(
       defaultStart.toISOString().split('T')[0],
       defaultEnd.toISOString().split('T')[0],
@@ -26,11 +27,12 @@ const generateHeatmapSeries = (
   const start = new Date(startDate)
   const end = new Date(endDate)
 
-  // Handle invalid dates by using default range
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
     const defaultEnd = new Date()
+    defaultEnd.setUTCHours(0, 0, 0, 0)
     const defaultStart = new Date()
-    defaultStart.setFullYear(defaultEnd.getFullYear() - 1)
+    defaultStart.setUTCHours(0, 0, 0, 0)
+    defaultStart.setUTCFullYear(defaultEnd.getUTCFullYear() - 1)
     return generateHeatmapSeries(
       defaultStart.toISOString().split('T')[0],
       defaultEnd.toISOString().split('T')[0],
@@ -38,7 +40,6 @@ const generateHeatmapSeries = (
     )
   }
 
-  // Handle invalid range by swapping dates
   if (start > end) {
     const swappedStartDate = endDate
     const swappedEndDate = startDate

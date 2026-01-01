@@ -38,6 +38,13 @@ import StatusBadge from 'components/StatusBadge'
 import ToggleableList from 'components/ToggleableList'
 import TopContributorsList from 'components/TopContributorsList'
 
+const shouldShowStatistics = (type: string): boolean =>
+  type === 'project' ||
+  type === 'repository' ||
+  type === 'committee' ||
+  type === 'user' ||
+  type === 'organization'
+
 const DetailsCard = ({
   description,
   details,
@@ -152,11 +159,7 @@ const DetailsCard = ({
               <SocialLinks urls={socialLinks || []} />
             )}
           </SecondaryCard>
-          {(type === 'project' ||
-            type === 'repository' ||
-            type === 'committee' ||
-            type === 'user' ||
-            type === 'organization') && (
+          {shouldShowStatistics(type) && (
             <SecondaryCard
               icon={FaChartPie}
               title={<AnchorTitle title="Statistics" />}
@@ -245,7 +248,7 @@ const DetailsCard = ({
           </>
         )}
         {entityLeaders && entityLeaders.length > 0 && <Leaders users={entityLeaders} />}
-        {(contributionData || contributionStats) && (
+        {(type === 'project' || type === 'chapter') && (contributionData || contributionStats) && (
           <div className="mb-8">
             <div className="rounded-lg bg-gray-100 px-4 pt-6 shadow-md sm:px-6 lg:px-10 dark:bg-gray-800">
               {contributionStats && (
