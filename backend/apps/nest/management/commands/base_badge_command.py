@@ -12,16 +12,14 @@ from apps.nest.models.user_badge import UserBadge
 
 logger = logging.getLogger(__name__)
 
-class BaseBadgeCommand(BaseCommand, ABC):
-    """Base class for badge sync commands.
-    
-    Subclasses must define badge metadata and implement get_eligible_users().
-    """
 
-    badge_name: str = None
-    badge_description: str = None
-    badge_css_class: str = None
-    badge_weight: int = None
+class BaseBadgeCommand(BaseCommand, ABC):
+    """Base class for badge sync commands."""
+
+    badge_name: str | None = None
+    badge_description: str | None = None
+    badge_css_class: str | None = None
+    badge_weight: int | None = None
 
     @abstractmethod
     def get_eligible_users(self) -> QuerySet[User]:
@@ -33,7 +31,8 @@ class BaseBadgeCommand(BaseCommand, ABC):
 
     def handle(self, *args, **options):
         if not self.badge_name:
-            raise ValueError("badge_name must be set")
+            msg = "badge_name must be set"
+            raise ValueError(msg)
 
         self.stdout.write(f"Syncing {self.badge_name}...")
 
@@ -49,6 +48,11 @@ class BaseBadgeCommand(BaseCommand, ABC):
 
             if created:
                 self._log(f"Created badge: '{badge.name}'")
+            else:
+                badge.description = self.badge_description
+                badge.css_class = self.badge_css_class
+                badge.weight = self.badge_weight
+                badge.save(update_fields=["description", "css_class", "weight"])
 
             eligible_users = self.get_eligible_users()
             users_to_add = eligible_users.exclude(
@@ -58,8 +62,10 @@ class BaseBadgeCommand(BaseCommand, ABC):
 
             added_count = 0
             for user in users_to_add:
-                user_badge, _ = UserBadge.objects.get_or_create(user=user, badge=badge)
-                if not user_badge.is_active:
+                user_badge, created = UserBadge.objects.get_or_create(user=user, badge=badge)
+                if created:
+                    added_count += 1
+                elif not user_badge.is_active:
                     user_badge.is_active = True
                     user_badge.save(update_fields=["is_active"])
                     added_count += 1

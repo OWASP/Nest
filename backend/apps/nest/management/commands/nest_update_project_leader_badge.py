@@ -11,7 +11,7 @@ from apps.owasp.models.project import Project
 
 class Command(BaseBadgeCommand):
     help = "Sync OWASP Project Leader badges"
-    
+
     badge_name = "OWASP Project Leader"
     badge_description = "Official OWASP Project Leader"
     badge_css_class = "fa-user-shield"

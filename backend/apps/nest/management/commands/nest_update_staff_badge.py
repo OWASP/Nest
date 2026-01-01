@@ -8,7 +8,7 @@ from apps.nest.management.commands.base_badge_command import BaseBadgeCommand
 
 class Command(BaseBadgeCommand):
     help = "Sync OWASP Staff badges"
-    
+
     badge_name = "OWASP Staff"
     badge_description = "Official OWASP Staff"
     badge_css_class = "fa-user-shield"

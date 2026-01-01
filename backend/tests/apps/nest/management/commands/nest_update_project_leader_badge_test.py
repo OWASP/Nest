@@ -3,6 +3,7 @@
 from io import StringIO
 from unittest.mock import MagicMock, patch
 
+import pytest
 from django.core.management import call_command
 from django.test import SimpleTestCase
 
@@ -42,10 +43,17 @@ class TestProjectLeaderBadgeCommand(SimpleTestCase):
         call_command("nest_update_project_leader_badge", stdout=out)
         assert "Project Leader" in out.getvalue()
 
+    @patch("apps.nest.management.commands.nest_update_project_leader_badge.ContentType")
+    @patch("apps.nest.management.commands.base_badge_command.Badge")
     @patch(
         "apps.nest.management.commands.nest_update_project_leader_badge.EntityMember.objects.filter",
         side_effect=Exception("error"),
     )
-    def test_handles_errors(self, mock_filter):
-        with self.assertRaises(Exception):
+    def test_handles_errors(self, mock_filter, mock_badge, mock_content_type):
+        badge = MagicMock()
+        badge.name = "OWASP Project Leader"
+        mock_badge.objects.get_or_create.return_value = (badge, False)
+        mock_content_type.objects.get_for_model.return_value = MagicMock()
+
+        with pytest.raises(Exception, match="error"):
             call_command("nest_update_project_leader_badge", stdout=StringIO())

@@ -3,12 +3,13 @@
 from io import StringIO
 from unittest.mock import MagicMock, patch
 
+import pytest
 from django.test import SimpleTestCase
 
 from apps.nest.management.commands.base_badge_command import BaseBadgeCommand
 
 
-class TestCommand(BaseBadgeCommand):
+class MockCommand(BaseBadgeCommand):
     badge_name = "Test Badge"
     badge_description = "Test"
     badge_css_class = "fa-test"
@@ -24,9 +25,8 @@ class TestBaseBadgeCommand(SimpleTestCase):
             def get_eligible_users(self):
                 return MagicMock()
 
-        with self.assertRaises(ValueError) as e:
+        with pytest.raises(ValueError, match="badge_name"):
             NoName().handle()
-        assert "badge_name" in str(e.exception)
 
     @patch("apps.nest.management.commands.base_badge_command.UserBadge")
     @patch("apps.nest.management.commands.base_badge_command.Badge")
@@ -37,12 +37,12 @@ class TestBaseBadgeCommand(SimpleTestCase):
 
         qs = MagicMock()
         qs.exclude.return_value = []
-        TestCommand.get_eligible_users = MagicMock(return_value=qs)
+        MockCommand.get_eligible_users = MagicMock(return_value=qs)
 
         mock_user_badge.objects.filter.return_value.exclude.return_value.count.return_value = 0
 
         out = StringIO()
-        cmd = TestCommand()
+        cmd = MockCommand()
         cmd.stdout = out
         cmd.handle()
 
