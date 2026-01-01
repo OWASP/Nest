@@ -11,7 +11,27 @@ const mockMap = {
   getCenter: jest.fn(() => ({ lat: 20, lng: 0 })),
   getZoom: jest.fn(() => 2),
   getContainer: jest.fn(() => document.getElementById('chapter-map')),
+  dragging: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  touchZoom: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  doubleClickZoom: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
   scrollWheelZoom: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  boxZoom: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  keyboard: {
     enable: jest.fn(),
     disable: jest.fn(),
   },
@@ -160,16 +180,20 @@ describe('ChapterMap', () => {
       expect(mockTileLayer.addTo).toHaveBeenCalledWith(mockMap)
     })
 
+    it('disables all interaction handlers on initialization', () => {
+      render(<ChapterMap {...defaultProps} />)
+      expect(mockMap.dragging.disable).toHaveBeenCalled()
+      expect(mockMap.touchZoom.disable).toHaveBeenCalled()
+      expect(mockMap.doubleClickZoom.disable).toHaveBeenCalled()
+      expect(mockMap.scrollWheelZoom.disable).toHaveBeenCalled()
+      expect(mockMap.boxZoom.disable).toHaveBeenCalled()
+      expect(mockMap.keyboard.disable).toHaveBeenCalled()
+    })
+
     it('creates and adds marker cluster group', () => {
       render(<ChapterMap {...defaultProps} />)
       expect(L.markerClusterGroup).toHaveBeenCalled()
       expect(mockMap.addLayer).toHaveBeenCalledWith(mockMarkerClusterGroup)
-    })
-
-    it('sets up event listeners for map interaction', () => {
-      render(<ChapterMap {...defaultProps} />)
-      expect(mockMap.on).toHaveBeenCalledWith('click', expect.any(Function))
-      expect(mockMap.on).toHaveBeenCalledWith('mouseout', expect.any(Function))
     })
   })
 
@@ -283,48 +307,35 @@ describe('ChapterMap', () => {
       expect(getByText('Unlock map')).toBeInTheDocument()
     })
 
-    it('removes overlay when clicked', () => {
+    it('removes overlay when unlock button is clicked', () => {
       const { getByText, queryByText } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Unlock map').closest('button')
-      fireEvent.click(overlay!)
+      const button = getByText('Unlock map').closest('button')
+      fireEvent.click(button!)
 
       expect(queryByText('Unlock map')).not.toBeInTheDocument()
     })
 
-    it('enables scroll wheel zoom when overlay is clicked', () => {
+    it('enables all interaction handlers when unlock button is clicked', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Unlock map').closest('button')
-      fireEvent.click(overlay!)
+      const button = getByText('Unlock map').closest('button')
+      fireEvent.click(button!)
 
+      expect(mockMap.dragging.enable).toHaveBeenCalled()
+      expect(mockMap.touchZoom.enable).toHaveBeenCalled()
+      expect(mockMap.doubleClickZoom.enable).toHaveBeenCalled()
       expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
-    })
-
-    it('handles keyboard interaction with Enter key', () => {
-      const { getByText } = render(<ChapterMap {...defaultProps} />)
-
-      const overlay = getByText('Unlock map').closest('button')
-      fireEvent.keyDown(overlay!, { key: 'Enter' })
-
-      expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
-    })
-
-    it('handles keyboard interaction with Space key', () => {
-      const { getByText } = render(<ChapterMap {...defaultProps} />)
-
-      const overlay = getByText('Unlock map').closest('button')
-      fireEvent.keyDown(overlay!, { key: ' ' })
-
-      expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
+      expect(mockMap.boxZoom.enable).toHaveBeenCalled()
+      expect(mockMap.keyboard.enable).toHaveBeenCalled()
     })
 
     it('has proper accessibility attributes', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Unlock map').closest('button')
-      expect(overlay).toHaveAttribute('tabIndex', '0')
-      expect(overlay).toHaveAttribute('aria-label', 'Unlock map')
+      const button = getByText('Unlock map').closest('button')
+      expect(button).toHaveAttribute('type', 'button')
+      expect(button).toHaveAttribute('aria-label', 'Unlock map')
     })
   })
 
@@ -427,8 +438,8 @@ describe('ChapterMap', () => {
     it('shows zoom control when unlock button is clicked', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Unlock map').closest('button')
-      fireEvent.click(overlay)
+      const button = getByText('Unlock map').closest('button')
+      fireEvent.click(button!)
 
       expect(L.control.zoom).toHaveBeenCalledWith({ position: 'topleft' })
       expect(mockZoomControl.addTo).toHaveBeenCalledWith(mockMap)
@@ -466,6 +477,77 @@ describe('ChapterMap', () => {
       fireEvent.click(overlay)
 
       expect(queryByLabelText(/share location/i)).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Escape Key Re-lock', () => {
+    it('re-locks the map when Escape key is pressed', () => {
+      const { getByText, queryByText } = render(<ChapterMap {...defaultProps} />)
+
+      // First unlock the map
+      const unlockButton = getByText('Unlock map')
+      fireEvent.click(unlockButton)
+
+      // Verify map is unlocked
+      expect(queryByText('Unlock map')).not.toBeInTheDocument()
+      expect(mockMap.dragging.enable).toHaveBeenCalled()
+
+      // Press Escape to re-lock
+      fireEvent.keyDown(window, { key: 'Escape' })
+
+      // Verify map is locked again
+      expect(getByText('Unlock map')).toBeInTheDocument()
+      expect(mockMap.dragging.disable).toHaveBeenCalled()
+      expect(mockMap.scrollWheelZoom.disable).toHaveBeenCalled()
+    })
+
+    it('does nothing when Escape is pressed and map is already locked', () => {
+      const { getByText } = render(<ChapterMap {...defaultProps} />)
+
+      const disableCallsBefore = mockMap.dragging.disable.mock.calls.length
+
+      // Press Escape while map is locked
+      fireEvent.keyDown(window, { key: 'Escape' })
+
+      // Should still show unlock button
+      expect(getByText('Unlock map')).toBeInTheDocument()
+
+      // Disable should not be called again
+      expect(mockMap.dragging.disable.mock.calls.length).toBe(disableCallsBefore)
+    })
+
+    it('removes zoom control when Escape re-locks the map', () => {
+      const { getByText } = render(<ChapterMap {...defaultProps} />)
+
+      // Unlock the map
+      const unlockButton = getByText('Unlock map')
+      fireEvent.click(unlockButton)
+
+      // Zoom control should be added
+      expect(mockZoomControl.addTo).toHaveBeenCalled()
+
+      // Press Escape to re-lock
+      fireEvent.keyDown(window, { key: 'Escape' })
+
+      // Zoom control should be removed
+      expect(mockZoomControl.remove).toHaveBeenCalled()
+    })
+  })
+
+  describe('Pointer Events Structure', () => {
+    it('overlay wrapper has pointer-events-none class', () => {
+      const { container } = render(<ChapterMap {...defaultProps} />)
+
+      const overlay = container.querySelector('.pointer-events-none')
+      expect(overlay).toBeInTheDocument()
+      expect(overlay).toHaveClass('absolute', 'inset-0', 'z-[500]')
+    })
+
+    it('unlock button has pointer-events-auto class', () => {
+      const { getByText } = render(<ChapterMap {...defaultProps} />)
+
+      const button = getByText('Unlock map')
+      expect(button).toHaveClass('pointer-events-auto')
     })
   })
 })
