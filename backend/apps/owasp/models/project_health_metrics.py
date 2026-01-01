@@ -207,6 +207,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
             total_forks=Coalesce(models.Sum("forks_count"), 0),
             total_stars=Coalesce(models.Sum("stars_count"), 0),
         )
+        total = stats["projects_count_total"] or 1  # Avoid division by zero
         monthly_overall_metrics = (
             ProjectHealthMetrics.objects.annotate(month=ExtractMonth("nest_created_at"))
             .filter(
@@ -239,10 +240,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
             projects_percentage_need_attention=(
                 (stats["projects_count_need_attention"] / stats["projects_count_total"]) * 100
             ),
-            projects_percentage_unhealthy=(
-                stats["projects_count_unhealthy"] / stats["projects_count_total"]
-            )
-            * 100,
+            projects_percentage_unhealthy=(stats["projects_count_unhealthy"] / total) * 100,
             total_contributors=(stats.get("total_contributors", 0)),
             total_forks=(stats.get("total_forks", 0)),
             total_stars=(stats.get("total_stars", 0)),
