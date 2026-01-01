@@ -8,12 +8,14 @@ if [ -z "$BASE_URL" ]; then
 fi
 
 echo "Fetching CSRF token..."
-export CSRF_TOKEN=$(curl -fsSL "$BASE_URL/csrf" | jq -r '.csrftoken')
+CSRF_TOKEN=$(curl -fsSL "$BASE_URL/csrf" | jq -r '.csrftoken')
 
 if [ -z "$CSRF_TOKEN" ] || [ "$CSRF_TOKEN" = "null" ]; then
   echo "Error: Failed to retrieve CSRF token." >&2
   exit 1
 fi
+
+export CSRF_TOKEN
 
 echo "CSRF token retrieved: $CSRF_TOKEN"
 :> ./schemathesis.toml
@@ -21,4 +23,4 @@ echo "CSRF token retrieved: $CSRF_TOKEN"
 echo "generation.max-examples = 500" >> ./schemathesis.toml
 
 echo "Starting fuzzing process..."
-pytest ./tests/${TEST_FILE}
+pytest -s ./tests/${TEST_FILE}

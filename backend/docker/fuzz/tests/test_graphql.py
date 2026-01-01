@@ -14,7 +14,7 @@ schema = schemathesis.graphql.from_url(
 
 
 @schema.parametrize()
-def test_graphql_api(case):
+def test_graphql_api(case: schemathesis.Case) -> None:
     """Test GraphQL API endpoints."""
     case.call_and_validate(
         headers={"X-CSRFToken": CSRF_TOKEN, "Cookie": f"csrftoken={CSRF_TOKEN}"}

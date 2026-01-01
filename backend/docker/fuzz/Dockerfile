@@ -5,7 +5,8 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 ENV PIP_CACHE_DIR="/home/owasp/.cache/pip" \
     PYTHONUNBUFFERED=1 \
     APK_CACHE_DIR="/home/owasp/.cache/apk-fuzz-stage" \
-    APK_SYMLINK_DIR="/etc/apk/cache"
+    APK_SYMLINK_DIR="/etc/apk/cache" \
+    FORCE_COLOR=1
 
 RUN mkdir -p ${APK_CACHE_DIR} && \
     ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
