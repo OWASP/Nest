@@ -447,7 +447,6 @@ class ModuleMutation:
                 message="All modules in the program must be included in the ordering."
             )
 
-
         modules_by_key = {m.key: m for m in existing_modules}
         modules_to_update = []
 

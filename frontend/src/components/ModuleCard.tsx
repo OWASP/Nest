@@ -93,7 +93,7 @@ const ModuleCard = ({ modules, accessLevel, admins, setModuleOrder }: ModuleCard
     <div>
       {isAdmin && (
         <div className="mb-4 flex gap-2">
-          {isReordering ?(
+          {isReordering ? (
             <>
               <Button type="button" onPress={saveReorder} color="primary" className="font-medium">
                 Save order
@@ -107,7 +107,7 @@ const ModuleCard = ({ modules, accessLevel, admins, setModuleOrder }: ModuleCard
                 Cancel
               </Button>
             </>
-          ):(
+          ) : (
             <button onClick={startReorder} className="text-blue-400 hover:underline">
               Customize order
             </button>
