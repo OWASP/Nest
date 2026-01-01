@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import React from 'react'
-import { FaCertificate } from 'react-icons/fa6'
 import type { IconType } from 'react-icons'
+import { FaCertificate } from 'react-icons/fa6'
 
 import '@testing-library/jest-dom'
 
@@ -36,9 +36,9 @@ describe('GeneralCompliantComponent', () => {
 
   it('applies correct background color for compliant=true', () => {
     render(<GeneralCompliantComponent {...baseProps} compliant={true} />)
-    
+
     const badgeContainer = screen.getByTestId('tooltip').firstElementChild
-    
+
     expect(badgeContainer).toBeInTheDocument()
     expect(badgeContainer).toHaveClass('bg-green-400/80')
     expect(badgeContainer).toHaveClass('text-green-900/90')
@@ -46,9 +46,9 @@ describe('GeneralCompliantComponent', () => {
 
   it('applies correct background color for compliant=false', () => {
     render(<GeneralCompliantComponent {...baseProps} compliant={false} />)
-    
+
     const badgeContainer = screen.getByTestId('tooltip').firstElementChild
-    
+
     expect(badgeContainer).toBeInTheDocument()
     expect(badgeContainer).toHaveClass('bg-red-400/80')
     expect(badgeContainer).toHaveClass('text-red-900/90')
