@@ -93,11 +93,7 @@ const ModuleCard = ({ modules, accessLevel, admins, setModuleOrder }: ModuleCard
     <div>
       {isAdmin && (
         <div className="mb-4 flex gap-2">
-          {!isReordering ? (
-            <button onClick={startReorder} className="text-blue-400 hover:underline">
-              Customize order
-            </button>
-          ) : (
+          {isReordering ?(
             <>
               <Button type="button" onPress={saveReorder} color="primary" className="font-medium">
                 Save order
@@ -111,6 +107,10 @@ const ModuleCard = ({ modules, accessLevel, admins, setModuleOrder }: ModuleCard
                 Cancel
               </Button>
             </>
+          ):(
+            <button onClick={startReorder} className="text-blue-400 hover:underline">
+              Customize order
+            </button>
           )}
         </div>
       )}
@@ -136,9 +136,9 @@ const ModuleCard = ({ modules, accessLevel, admins, setModuleOrder }: ModuleCard
           </div>
         </SortableContext>
         <DragOverlay>
-          {activeId && currentModules.find((m) => m.id === activeId) ? (
+          {activeId && currentModules.some((m) => m.id === activeId) ? (
             <ModuleItem
-              module={currentModules.find((m) => m.id === activeId)!}
+              module={currentModules.find((m) => m.id === activeId)}
               isAdmin={isAdmin}
               isReordering={isReordering}
               isOverlay
