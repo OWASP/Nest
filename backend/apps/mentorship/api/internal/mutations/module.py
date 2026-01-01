@@ -77,10 +77,9 @@ class ModuleMutation:
         user = info.context.request.user
 
         try:
-            program = Program.objects.get(key=input_data.program_key)
+            program = Program.objects.select_for_update().get(key=input_data.program_key)
             project = Project.objects.get(id=input_data.project_id)
             creator_as_mentor = Mentor.objects.get(nest_user=user)
-            program = Program.objects.select_for_update().get(key=input_data.program_key)
             new_position = program.modules.count()
         except (Program.DoesNotExist, Project.DoesNotExist) as e:
             msg = f"{e.__class__.__name__} matching query does not exist."
