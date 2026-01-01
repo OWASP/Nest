@@ -60,36 +60,30 @@ const getMilestoneIcon = (progress: number) => {
 }
 
 const About = () => {
-  const { 
-    data: projectMetadataResponse, 
+  const {
+    data: projectMetadataResponse,
     loading: projectMetadataLoading,
-    error: projectMetadataRequestError 
-  } = useQuery(
-    GetProjectMetadataDocument,
-    {
-      variables: { key: projectKey },
-    }
-  )
+    error: projectMetadataRequestError,
+  } = useQuery(GetProjectMetadataDocument, {
+    variables: { key: projectKey },
+  })
 
-  const { 
-    data: topContributorsResponse, 
+  const {
+    data: topContributorsResponse,
     loading: topContributorsLoading,
-    error: topContributorsRequestError 
-  } = useQuery(
-    GetTopContributorsDocument,
-    {
-      variables: {
-        excludedUsernames: Object.keys(leaders),
-        hasFullName: true,
-        key: projectKey,
-        limit: 24,
-      },
-    }
-  )
+    error: topContributorsRequestError,
+  } = useQuery(GetTopContributorsDocument, {
+    variables: {
+      excludedUsernames: Object.keys(leaders),
+      hasFullName: true,
+      key: projectKey,
+      limit: 24,
+    },
+  })
 
   const { leadersData, isLoading: leadersLoading } = useLeadersData()
 
-  // Derive data directly from response to prevent race conditions
+  // Derive data directly from response to prevent race conditions.
   const projectMetadata = projectMetadataResponse?.project
   const topContributors = topContributorsResponse?.topContributors
 
@@ -105,10 +99,7 @@ const About = () => {
     }
   }, [topContributorsRequestError])
 
-  const isLoading =
-    projectMetadataLoading ||
-    topContributorsLoading ||
-    leadersLoading
+  const isLoading = leadersLoading || projectMetadataLoading || topContributorsLoading
 
   if (isLoading) {
     return <AboutSkeleton />
