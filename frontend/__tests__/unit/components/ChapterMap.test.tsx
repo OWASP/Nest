@@ -493,7 +493,7 @@ describe('ChapterMap', () => {
       expect(mockMap.dragging.enable).toHaveBeenCalled()
 
       // Press Escape to re-lock
-      fireEvent.keyDown(window, { key: 'Escape' })
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
 
       // Verify map is locked again
       expect(getByText('Unlock map')).toBeInTheDocument()
@@ -507,7 +507,7 @@ describe('ChapterMap', () => {
       const disableCallsBefore = mockMap.dragging.disable.mock.calls.length
 
       // Press Escape while map is locked
-      fireEvent.keyDown(window, { key: 'Escape' })
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
 
       // Should still show unlock button
       expect(getByText('Unlock map')).toBeInTheDocument()
@@ -527,7 +527,7 @@ describe('ChapterMap', () => {
       expect(mockZoomControl.addTo).toHaveBeenCalled()
 
       // Press Escape to re-lock
-      fireEvent.keyDown(window, { key: 'Escape' })
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
 
       // Zoom control should be removed
       expect(mockZoomControl.remove).toHaveBeenCalled()
