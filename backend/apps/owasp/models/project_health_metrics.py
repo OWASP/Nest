@@ -234,14 +234,14 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
             projects_count_need_attention=stats["projects_count_need_attention"],
             projects_count_unhealthy=stats["projects_count_unhealthy"],
             projects_percentage_healthy=(
-                stats["projects_count_healthy"] / stats["projects_count_total"]
+                stats["projects_count_healthy"] / total
             )
             * 100,
             projects_percentage_need_attention=(
-                (stats["projects_count_need_attention"] / stats["projects_count_total"]) * 100
+                (stats["projects_count_need_attention"] / total) * 100
             ),
             projects_percentage_unhealthy=(stats["projects_count_unhealthy"] / total) * 100,
-            total_contributors=(stats.get("total_contributors", 0)),
-            total_forks=(stats.get("total_forks", 0)),
-            total_stars=(stats.get("total_stars", 0)),
+            total_contributors=(stats["total_contributors"]),
+            total_forks=(stats["total_forks"]),
+            total_stars=(stats["total_stars"]),
         )
