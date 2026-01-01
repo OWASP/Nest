@@ -143,9 +143,9 @@ class TestSlideBuilder:
         return mock_qs
 
     @pytest.fixture
-    def slide_builder(self, mock_snapshots):
+    def slide_builder(self, mock_snapshots, tmp_path):
         """Fixture to provide a SlideBuilder instance."""
-        return SlideBuilder(mock_snapshots)
+        return SlideBuilder(mock_snapshots, output_dir=tmp_path)
 
     def test_init(self, slide_builder, mock_snapshots):
         """Test SlideBuilder initialization."""
@@ -175,7 +175,7 @@ class TestSlideBuilder:
         assert slide.template_name == "video/slides/intro.html"
         assert slide.transcript is not None
 
-    def test_create_intro_slide_multi_snapshot(self):
+    def test_create_intro_slide_multi_snapshot(self, tmp_path):
         """Test create_intro_slide with different first and last snapshots."""
         mock_qs = MagicMock()
         first_snapshot = Mock()
@@ -187,7 +187,7 @@ class TestSlideBuilder:
         mock_qs.first.return_value = first_snapshot
         mock_qs.last.return_value = last_snapshot
 
-        slide_builder = SlideBuilder(mock_qs)
+        slide_builder = SlideBuilder(mock_qs, output_dir=tmp_path)
         slide = slide_builder.create_intro_slide()
 
         assert isinstance(slide, Slide)
@@ -351,7 +351,7 @@ class TestVideoGenerator:
         generator.slides = [slide1, slide2]
 
         with patch.object(generator, "merge_videos"):
-            generator.generate_video(tmp_path / "output.mp4")
+            generator.generate_video(tmp_path, "output")
 
         slide1.render_and_save_image.assert_called_once()
         slide1.generate_and_save_audio.assert_called_once()

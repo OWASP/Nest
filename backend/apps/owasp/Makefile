@@ -24,7 +24,7 @@ owasp-enrich-projects:
 
 owasp-generate-community-snapshot-video:
 	@echo "Generating OWASP community snapshot video"
-	@CMD="python manage.py owasp_generate_community_snapshot_video --snapshot-key=$(snapshot_key)" $(MAKE) exec-backend-command
+	@CMD="python manage.py owasp_generate_community_snapshot_video $(snapshot_key)" $(MAKE) exec-backend-command
 
 owasp-process-snapshots:
 	@echo "Processing OWASP snapshots"

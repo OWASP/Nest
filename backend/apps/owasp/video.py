@@ -1,7 +1,6 @@
 """OWASP Community Snapshots Video Generator."""
 
 import logging
-import tempfile
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
@@ -27,11 +26,10 @@ ELEVENLABS_SPEED = 0.85
 IMAGE_EXTENSION = ".png"
 IMAGE_FORMAT = "PNG"
 MAX_DETAILED_PROJECTS = 16
-RELEASES_LIMIT = 12
-OUTPUT_DIR = Path(tempfile.gettempdir())
 PDF_RENDER_SCALE = 2
+RELEASES_LIMIT = 12
 TRANSCRIPT_NAMES_LIMIT = 3
-VIDEO_EXTENSION = ".mp4"
+VIDEO_EXTENSION = ".mkv"
 VIDEO_FRAMERATE = 60
 
 
@@ -115,7 +113,7 @@ class Slide:
                 image_stream,
                 audio_stream,
                 filename=self.video_path,
-                acodec="aac",
+                acodec="copy",
                 vcodec="libx264",
                 pix_fmt="yuv420p",
                 shortest=None,
@@ -129,10 +127,10 @@ class Slide:
 class SlideBuilder:
     """Slide builder for community snapshot video."""
 
-    def __init__(self, snapshots: QuerySet[Snapshot]) -> None:
+    def __init__(self, snapshots: QuerySet[Snapshot], output_dir: Path) -> None:
         """Initialize SlideBuilder."""
         self.snapshots = snapshots
-        self.output_dir = OUTPUT_DIR
+        self.output_dir = output_dir
 
     @staticmethod
     def format_names_for_transcript(names: list[str]) -> str:
@@ -326,14 +324,26 @@ class VideoGenerator:
         """Append a slide to list."""
         self.slides.append(slide)
 
-    def generate_video(self, output_path: Path) -> None:
-        """Generate video."""
+    def generate_video(self, output_dir: Path, filename: str) -> Path:
+        """Generate video.
+
+        Args:
+            output_dir (Path): The directory to save the video in.
+            filename (str): The filename without extension.
+
+        Returns:
+            Path: The full path to the generated video.
+
+        """
         for slide in self.slides:
             slide.render_and_save_image()
             slide.generate_and_save_audio(self.eleven_labs)
             slide.generate_and_save_video()
 
+        output_path = output_dir / f"{filename}{VIDEO_EXTENSION}"
         self.merge_videos(output_path)
+
+        return output_path
 
     def merge_videos(self, output_path: Path) -> None:
         """Combine all slide videos into final video."""
@@ -352,3 +362,10 @@ class VideoGenerator:
         except ffmpeg.Error:
             logger.exception("Error merging slide videos into final output")
             raise
+
+    def cleanup(self) -> None:
+        """Remove intermediate files for all slides (audio, images, per-slide videos)."""
+        for slide in self.slides:
+            for path in (slide.audio_path, slide.image_path, slide.video_path):
+                if path.exists():
+                    path.unlink()

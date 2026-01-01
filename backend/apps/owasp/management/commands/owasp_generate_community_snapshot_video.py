@@ -12,6 +12,8 @@ from apps.owasp.video import SlideBuilder, VideoGenerator
 
 logger = logging.getLogger(__name__)
 
+DOCKER_CONTAINER_NAME = "nest-backend"
+
 
 class Command(BaseCommand):
     help = "Generate OWASP community snapshot video."
@@ -24,14 +26,7 @@ class Command(BaseCommand):
 
         """
         parser.add_argument(
-            "--output-dir",
-            default=Path(tempfile.gettempdir()),
-            type=Path,
-            help="Directory to save the generated video.",
-        )
-        parser.add_argument(
-            "--snapshot-key",
-            required=True,
+            "snapshot_key",
             type=str,
             help="Snapshot key (e.g., '2025-06' for month or '2025' for year).",
         )
@@ -42,8 +37,6 @@ class Command(BaseCommand):
         os.environ["XDG_CACHE_HOME"] = str(Path(tempfile.gettempdir()) / "cache")
 
         snapshot_key = options["snapshot_key"]
-        output_dir = options["output_dir"]
-        output_dir.mkdir(parents=True, exist_ok=True)
 
         snapshots = Snapshot.objects.filter(
             key__startswith=snapshot_key, status=Snapshot.Status.COMPLETED
@@ -55,7 +48,9 @@ class Command(BaseCommand):
 
         self.stdout.write(f"Generating a video for snapshot: {snapshot_key}")
 
-        slide_builder = SlideBuilder(snapshots)
+        output_dir = Path(tempfile.gettempdir()) / f"community_snapshot_video_{snapshot_key}"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        slide_builder = SlideBuilder(snapshots, output_dir=output_dir)
         generator = VideoGenerator()
 
         slides_to_add = [
@@ -71,6 +66,11 @@ class Command(BaseCommand):
             if slide is not None:
                 generator.append_slide(slide)
 
-        video_path = output_dir / f"{snapshot_key}_snapshot.mp4"
-        generator.generate_video(video_path)
-        self.stdout.write(f"Generated a video at {video_path}")
+        video_path = generator.generate_video(output_dir, f"{snapshot_key}_snapshot")
+        generator.cleanup()
+
+        self.stdout.write(self.style.SUCCESS(f"Generated video at {video_path}"))
+        self.stdout.write(
+            "Run the following command to copy the video to your host: "
+            f"docker cp {DOCKER_CONTAINER_NAME}:{video_path} ./path/to/save/"
+        )
