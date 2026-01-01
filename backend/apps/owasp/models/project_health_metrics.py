@@ -4,7 +4,7 @@ from functools import cached_property
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models.functions import ExtractMonth, TruncDate
+from django.db.models.functions import Coalesce, ExtractMonth, TruncDate
 from django.utils import timezone
 
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -170,13 +170,11 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
             QuerySet[ProjectHealthMetrics]: QuerySet of project health metrics.
 
         """
-        return ProjectHealthMetrics.objects.filter(
-            nest_created_at=models.Subquery(
-                ProjectHealthMetrics.objects.filter(project=models.OuterRef("project"))
-                .order_by("-nest_created_at")
-                .values("nest_created_at")[:1]
-            ),
-            project__is_active=True,
+        return (
+            ProjectHealthMetrics.objects.filter(project__is_active=True)
+            .select_related("project")
+            .order_by("project_id", "-nest_created_at")
+            .distinct("project_id")
         )
 
     @staticmethod
@@ -187,26 +185,27 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
             ProjectHealthStatsNode: The overall health stats of all projects.
 
         """
-        metrics = ProjectHealthMetrics.get_latest_health_metrics()
-
-        projects_count_healthy = metrics.filter(
-            score__gte=HEALTH_SCORE_THRESHOLD_HEALTHY,
-        ).count()
-        projects_count_need_attention = metrics.filter(
-            score__lt=HEALTH_SCORE_THRESHOLD_HEALTHY,
-            score__gte=HEALTH_SCORE_THRESHOLD_NEED_ATTENTION,
-        ).count()
-        projects_count_unhealthy = metrics.filter(
-            score__lt=HEALTH_SCORE_THRESHOLD_NEED_ATTENTION
-        ).count()
-
-        projects_count_total = metrics.count() or 1  # Avoid division by zero
-
-        aggregation = metrics.aggregate(
-            average_score=models.Avg("score"),
-            total_contributors=models.Sum("contributors_count"),
-            total_forks=models.Sum("forks_count"),
-            total_stars=models.Sum("stars_count"),
+        stats = ProjectHealthMetrics.objects.filter(
+            id__in=ProjectHealthMetrics.get_latest_health_metrics().values_list("id", flat=True)
+        ).aggregate(
+            projects_count_healthy=models.Count(
+                "id", filter=models.Q(score__gte=HEALTH_SCORE_THRESHOLD_HEALTHY)
+            ),
+            projects_count_need_attention=models.Count(
+                "id",
+                filter=models.Q(
+                    score__lt=HEALTH_SCORE_THRESHOLD_HEALTHY,
+                    score__gte=HEALTH_SCORE_THRESHOLD_NEED_ATTENTION,
+                ),
+            ),
+            projects_count_unhealthy=models.Count(
+                "id", filter=models.Q(score__lt=HEALTH_SCORE_THRESHOLD_NEED_ATTENTION)
+            ),
+            projects_count_total=models.Count("id"),
+            average_score=Coalesce(models.Avg("score"), 0.0),
+            total_contributors=Coalesce(models.Sum("contributors_count"), 0),
+            total_forks=Coalesce(models.Sum("forks_count"), 0),
+            total_stars=Coalesce(models.Sum("stars_count"), 0),
         )
         monthly_overall_metrics = (
             ProjectHealthMetrics.objects.annotate(month=ExtractMonth("nest_created_at"))
@@ -220,22 +219,31 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
                 score=models.Avg("score"),
             )
         )
+        months = []
+        scores = []
+        for entry in monthly_overall_metrics:
+            months.append(entry["month"])
+            scores.append(entry["score"])
         return ProjectHealthStatsNode(
-            average_score=aggregation.get("average_score", 0.0),
+            average_score=stats["average_score"],
             # We use all metrics instead of latest metrics to get the monthly trend
-            monthly_overall_scores=list(monthly_overall_metrics.values_list("score", flat=True)),
-            monthly_overall_scores_months=list(
-                monthly_overall_metrics.values_list("month", flat=True)
-            ),
-            projects_count_healthy=projects_count_healthy,
-            projects_count_need_attention=projects_count_need_attention,
-            projects_count_unhealthy=projects_count_unhealthy,
-            projects_percentage_healthy=(projects_count_healthy / projects_count_total) * 100,
+            monthly_overall_scores=scores,
+            monthly_overall_scores_months=months,
+            projects_count_healthy=stats["projects_count_healthy"],
+            projects_count_need_attention=stats["projects_count_need_attention"],
+            projects_count_unhealthy=stats["projects_count_unhealthy"],
+            projects_percentage_healthy=(
+                stats["projects_count_healthy"] / stats["projects_count_total"]
+            )
+            * 100,
             projects_percentage_need_attention=(
-                (projects_count_need_attention / projects_count_total) * 100
+                (stats["projects_count_need_attention"] / stats["projects_count_total"]) * 100
             ),
-            projects_percentage_unhealthy=(projects_count_unhealthy / projects_count_total) * 100,
-            total_contributors=(aggregation.get("total_contributors", 0)),
-            total_forks=(aggregation.get("total_forks", 0)),
-            total_stars=(aggregation.get("total_stars", 0)),
+            projects_percentage_unhealthy=(
+                stats["projects_count_unhealthy"] / stats["projects_count_total"]
+            )
+            * 100,
+            total_contributors=(stats.get("total_contributors", 0)),
+            total_forks=(stats.get("total_forks", 0)),
+            total_stars=(stats.get("total_stars", 0)),
         )

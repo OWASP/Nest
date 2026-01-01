@@ -69,7 +69,6 @@ services:
       - 5434:5432
   graphql:
     container_name: fuzz-nest-graphql
-    image: nest-fuzz
     build:
       context: ../backend/docker/fuzz
       dockerfile: Dockerfile
@@ -84,7 +83,9 @@ services:
 
   rest:
     container_name: fuzz-nest-rest
-    image: nest-fuzz
+    build:
+      context: ../backend/docker/fuzz
+      dockerfile: Dockerfile
     environment:
       BASE_URL: http://backend:9500
       REST_URL: http://backend:9500/api/v0
@@ -92,8 +93,6 @@ services:
     depends_on:
       backend:
         condition: service_healthy
-      graphql:
-        condition: service_started
     networks:
       - fuzz-nest-network
 

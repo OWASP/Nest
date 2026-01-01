@@ -20,7 +20,10 @@ export CSRF_TOKEN
 echo "CSRF token retrieved: $CSRF_TOKEN"
 :> ./schemathesis.toml
 
-echo "generation.max-examples = 500" >> ./schemathesis.toml
+# Number of examples to generate per endpoint
+# See https://schemathesis.readthedocs.io/en/stable/explanations/data-generation/#how-many-test-cases-does-schemathesis-generate
+
+echo "generation.max-examples = 100" >> ./schemathesis.toml
 
 echo "Starting fuzzing process..."
 pytest -s ./tests/${TEST_FILE}

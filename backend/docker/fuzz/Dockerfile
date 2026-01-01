@@ -26,8 +26,7 @@ WORKDIR /home/owasp
 COPY --chown=root:root --chmod=755 ./entrypoint.sh ./entrypoint.sh
 COPY --chown=root:root --chmod=755 tests tests
 
-RUN chmod +x ./entrypoint.sh && \
-    chown -R owasp:owasp /home/owasp
+RUN chmod +x ./entrypoint.sh
 
 USER owasp
 ENTRYPOINT ["./entrypoint.sh"]
