@@ -83,18 +83,19 @@ class TestRetriever:
                 retriever.get_query_embedding("test query")
 
     def test_get_query_embedding_unexpected_error(self):
-        """Test query embedding with unexpected error."""
+        """Test that non-OpenAI errors propagate naturally without being caught."""
         with (
             patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
             patch("openai.OpenAI") as mock_openai,
         ):
             mock_client = MagicMock()
-            mock_client.embeddings.create.side_effect = Exception("Unexpected error")
+            mock_client.embeddings.create.side_effect = ValueError("Invalid input")
             mock_openai.return_value = mock_client
 
             retriever = Retriever()
 
-            with pytest.raises(Exception, match="Unexpected error"):
+            # Verify that unexpected exceptions are NOT caught and instead propagate
+            with pytest.raises(ValueError, match="Invalid input"):
                 retriever.get_query_embedding("test query")
 
     def test_get_source_name_with_name(self):

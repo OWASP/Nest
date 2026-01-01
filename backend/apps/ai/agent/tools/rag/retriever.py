@@ -62,11 +62,8 @@ class Retriever:
                 model=self.embedding_model,
             )
             return response.data[0].embedding
-        except openai.OpenAIError:
-            logger.exception("OpenAI API error")
-            raise
-        except Exception:
-            logger.exception("Unexpected error while generating embedding")
+        except openai.OpenAIError as e:
+            logger.exception("OpenAI API error when generating embedding for query: %s", query)
             raise
 
     def get_source_name(self, entity) -> str:
