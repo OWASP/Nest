@@ -68,5 +68,5 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f"Generated video at {video_path}"))
         self.stdout.write(
             "Run the following command to copy the video to your host: "
-            f"docker cp {DOCKER_CONTAINER_NAME}:{video_path} ./path/to/save/"
+            f"docker cp {DOCKER_CONTAINER_NAME}:{video_path} ./path/to/copy/"
         )
