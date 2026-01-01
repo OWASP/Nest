@@ -362,7 +362,7 @@ describe('<BarChart />', () => {
       title: 'Decimal Values',
       labels: ['Decimal'],
       days: [99.5],
-      requirements: [100.0],
+      requirements: [100],
     }
 
     renderWithTheme(<BarChart {...decimalProps} />)
@@ -370,7 +370,7 @@ describe('<BarChart />', () => {
     const series = JSON.parse(chartElement.dataset.series || '[]')
 
     expect(series[0].data[0].y).toBe(99.5)
-    expect(series[0].data[0].goals[0].value).toBe(100.0)
+    expect(series[0].data[0].goals[0].value).toBe(100)
   })
 
   it('handles large numbers in days array', () => {
