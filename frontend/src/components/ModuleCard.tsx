@@ -207,6 +207,7 @@ const ModuleItem = ({
         <button
           {...attributes}
           {...listeners}
+          aria-label="Drag to reorder module"
           className="absolute top-2 right-2 cursor-grab text-gray-400"
         >
           <FaGripVertical />

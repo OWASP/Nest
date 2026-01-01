@@ -411,7 +411,7 @@ class ModuleMutation:
         """Set the order of modules within a program. User must be an admin of the program."""
         user = info.context.request.user
         try:
-            program = Program.objects.get(key=input_data.program_key)
+            program = Program.objects.select_for_update().get(key=input_data.program_key)
         except Program.DoesNotExist as e:
             msg = f"Program with key '{input_data.program_key}' not found."
             raise ObjectDoesNotExist(msg) from e
@@ -447,10 +447,6 @@ class ModuleMutation:
                 message="All modules in the program must be included in the ordering."
             )
 
-        if not all(mk in existing_module_keys for mk in input_data.module_keys):
-            raise ValidationError(
-                message="One or more module keys are invalid or do not belong to this program."
-            )
 
         modules_by_key = {m.key: m for m in existing_modules}
         modules_to_update = []
