@@ -465,8 +465,10 @@ describe('About Component', () => {
     }
 
     ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      if (options?.variables?.key === 'nest') {
+      if (query === GetProjectMetadataDocument && options?.variables?.key === 'nest') {
         return mockProjectData
+      } else if (query === GetTopContributorsDocument && options?.variables?.key === 'nest') {
+        return mockTopContributorsData
       } else if (options?.variables?.key === 'arkid15r') {
         return partialUserData
       } else if (options?.variables?.key === 'kasya' || options?.variables?.key === 'mamicidal') {
