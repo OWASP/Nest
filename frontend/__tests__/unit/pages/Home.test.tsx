@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockAlgoliaData, mockGraphQLData } from '@unit/data/mockHomeData'
@@ -8,18 +8,13 @@ import { render } from 'wrappers/testUtil'
 import Home from 'app/page'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
 }))
 
 jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
-}))
-
-jest.mock('wrappers/FontAwesomeIconWrapper', () => ({
-  __esModule: true,
-  default: () => <span data-testid="mock-icon" />,
 }))
 
 jest.mock('@heroui/toast', () => ({
@@ -70,7 +65,7 @@ describe('Home', () => {
   let mockRouter: { push: jest.Mock }
 
   beforeEach(() => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockGraphQLData,
       loading: false,
       error: null,
@@ -85,7 +80,7 @@ describe('Home', () => {
   })
 
   test('renders loading state', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       loading: true,
       error: null,
@@ -110,7 +105,7 @@ describe('Home', () => {
   })
 
   test('renders error message when GraphQL request fails', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: { message: 'GraphQL error' },
     })
@@ -181,19 +176,8 @@ describe('Home', () => {
     })
   })
 
-  test('renders AnimatedCounter components', async () => {
-    render(<Home />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Active Projects')).toBeInTheDocument()
-      expect(screen.getByText('Contributors')).toBeInTheDocument()
-      expect(screen.getByText('Local Chapters')).toBeInTheDocument()
-      expect(screen.getByText('Countries')).toBeInTheDocument()
-    })
-  })
-
   test('handles missing data gracefully', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockGraphQLData,
       error: null,
     })
@@ -212,10 +196,10 @@ describe('Home', () => {
     render(<Home />)
     await waitFor(() => {
       expect(screen.getByText('Upcoming Events')).toBeInTheDocument()
-      mockGraphQLData.upcomingEvents.forEach((event) => {
+      for (const event of mockGraphQLData.upcomingEvents) {
         expect(screen.getByText(event.name)).toBeInTheDocument()
         expect(screen.getByText('Feb 27 — 28, 2025')).toBeInTheDocument()
-      })
+      }
     })
   })
 
@@ -224,10 +208,11 @@ describe('Home', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Recent Pull Requests')).toBeInTheDocument()
-      mockGraphQLData.recentPullRequests.forEach((pullRequest) => {
+
+      for (const pullRequest of mockGraphQLData.recentPullRequests) {
         expect(screen.getByText(pullRequest.title)).toBeInTheDocument()
         expect(screen.getByText(pullRequest.repositoryName)).toBeInTheDocument()
-      })
+      }
     })
   })
 
@@ -236,16 +221,16 @@ describe('Home', () => {
     await waitFor(() => {
       const recentMilestones = mockGraphQLData.recentMilestones
 
-      recentMilestones.forEach((milestone) => {
+      for (const milestone of recentMilestones) {
         expect(screen.getByText(milestone.title)).toBeInTheDocument()
         expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
         expect(screen.getByText(`${milestone.openIssuesCount} open`)).toBeInTheDocument()
         expect(screen.getByText(`${milestone.closedIssuesCount} closed`)).toBeInTheDocument()
-      })
+      }
     })
   })
   test('renders when no recent releases', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         ...mockGraphQLData,
         recentReleases: [],
@@ -270,15 +255,25 @@ describe('Home', () => {
     ]
     const stats = mockGraphQLData.statsOverview
 
-    await waitFor(() => {
-      headers.forEach((header) => expect(screen.getByText(header)).toBeInTheDocument())
-      // Wait for 2 seconds
-      setTimeout(() => {
-        Object.values(stats).forEach((value) =>
-          expect(screen.getByText(`${millify(value)}+`)).toBeInTheDocument()
-        )
-      }, 2000)
-    })
+    const statTexts = [
+      millify(stats.activeProjectsStats) + '+',
+      millify(stats.activeChaptersStats) + '+',
+      millify(stats.contributorsStats) + '+',
+      millify(stats.countriesStats) + '+',
+      millify(stats.slackWorkspaceStats) + '+',
+    ]
+
+    await waitFor(
+      () => {
+        for (const stat of statTexts) {
+          expect(screen.getByText(stat)).toBeInTheDocument()
+        }
+        for (const header of headers) {
+          expect(screen.getByText(header)).toBeInTheDocument()
+        }
+      },
+      { timeout: 3000 }
+    )
   })
 
   test('renders event details including date range and location', async () => {

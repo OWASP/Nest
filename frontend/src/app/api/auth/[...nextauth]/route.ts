@@ -1,7 +1,10 @@
 import NextAuth, { type AuthOptions } from 'next-auth'
 import GitHubProvider from 'next-auth/providers/github'
 import { apolloClient } from 'server/apolloClient'
-import { IS_PROJECT_LEADER_QUERY, IS_MENTOR_QUERY } from 'server/queries/mentorshipQueries'
+import {
+  IsMentorDocument,
+  IsProjectLeaderDocument,
+} from 'types/__generated__/mentorshipQueries.generated'
 import { ExtendedProfile, ExtendedSession } from 'types/auth'
 import { IS_GITHUB_AUTH_ENABLED } from 'utils/env.server'
 
@@ -9,7 +12,7 @@ async function checkIfProjectLeader(login: string): Promise<boolean> {
   try {
     const client = await apolloClient
     const { data } = await client.query({
-      query: IS_PROJECT_LEADER_QUERY,
+      query: IsProjectLeaderDocument,
       variables: { login },
       fetchPolicy: 'no-cache',
     })
@@ -23,7 +26,7 @@ async function checkIfMentor(login: string): Promise<boolean> {
   try {
     const client = await apolloClient
     const { data } = await client.query({
-      query: IS_MENTOR_QUERY,
+      query: IsMentorDocument,
       variables: { login },
       fetchPolicy: 'no-cache',
     })

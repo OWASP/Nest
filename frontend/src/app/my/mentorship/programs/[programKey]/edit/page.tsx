@@ -1,29 +1,30 @@
 'use client'
-import { useQuery, useMutation } from '@apollo/client'
+
+import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import type React from 'react'
 import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { UPDATE_PROGRAM } from 'server/mutations/programsMutations'
-import { GET_PROGRAM_DETAILS } from 'server/queries/programsQueries'
+import { ProgramStatusEnum } from 'types/__generated__/graphql'
+import { UpdateProgramDocument } from 'types/__generated__/programsMutations.generated'
+import { GetProgramDetailsDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
-import slugify from 'utils/slugify'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/ProgramForm'
 const EditProgramPage = () => {
   const router = useRouter()
-  const { programKey } = useParams() as { programKey: string }
+  const { programKey } = useParams<{ programKey: string }>()
   const { data: session, status: sessionStatus } = useSession()
-  const [updateProgram, { loading: mutationLoading }] = useMutation(UPDATE_PROGRAM)
+  const [updateProgram, { loading: mutationLoading }] = useMutation(UpdateProgramDocument)
   const {
     data,
     error,
     loading: queryLoading,
-  } = useQuery(GET_PROGRAM_DETAILS, {
+  } = useQuery(GetProgramDetailsDocument, {
     variables: { programKey },
     skip: !programKey,
     fetchPolicy: 'network-only',
@@ -31,13 +32,13 @@ const EditProgramPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    menteesLimit: 5,
+    menteesLimit: 0,
     startedAt: '',
     endedAt: '',
     tags: '',
     domains: '',
     adminLogins: '',
-    status: 'DRAFT',
+    status: ProgramStatusEnum.Draft,
   })
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
   useEffect(() => {
@@ -73,7 +74,7 @@ const EditProgramPage = () => {
       setFormData({
         name: program.name || '',
         description: program.description || '',
-        menteesLimit: program.menteesLimit ?? 5,
+        menteesLimit: program.menteesLimit ?? 0,
         startedAt: formatDateForInput(program.startedAt),
         endedAt: formatDateForInput(program.endedAt),
         tags: (program.tags || []).join(', '),
@@ -81,7 +82,7 @@ const EditProgramPage = () => {
         adminLogins: (program.admins || [])
           .map((admin: { login: string }) => admin.login)
           .join(', '),
-        status: program.status || 'DRAFT',
+        status: program.status || ProgramStatusEnum.Draft,
       })
     } else if (error) {
       handleAppError(error)
@@ -103,7 +104,8 @@ const EditProgramPage = () => {
         status: formData.status,
       }
 
-      await updateProgram({ variables: { input } })
+      const result = await updateProgram({ variables: { input } })
+      const updatedProgramKey = result.data?.updateProgram?.key || programKey
 
       addToast({
         title: 'Program Updated',
@@ -113,7 +115,7 @@ const EditProgramPage = () => {
         timeout: 3000,
       })
 
-      router.push(`/my/mentorship/programs/${slugify(formData.name)}?refresh=true`)
+      router.push(`/my/mentorship/programs/${updatedProgramKey}`)
     } catch (err) {
       addToast({
         title: 'Update Failed',
@@ -146,6 +148,7 @@ const EditProgramPage = () => {
       title="Edit Program"
       submitText="Save"
       isEdit={true}
+      currentProgramKey={programKey}
     />
   )
 }

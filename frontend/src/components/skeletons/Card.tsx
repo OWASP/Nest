@@ -31,6 +31,7 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
 
           {showIcons && (
             <div className="flex min-w-[30%] grow flex-row items-center justify-start gap-2 overflow-auto">
+              {/* # NOSONAR As safe to use index as key - static skeleton items with fixed length */}
               {Array.from({ length: numIcons }).map((_, i) => (
                 <Skeleton key={i} className="h-8 w-16" />
               ))}
@@ -56,7 +57,8 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
             <div className="flex flex-col justify-start gap-2">
               {showContributors && (
                 <div className="mt-3 flex w-full flex-wrap items-center gap-2">
-                  {[...Array(NUM_CONTRIBUTORS)].map((_, i) => (
+                  {/* # NOSONAR As safe to use index as key - static skeleton items with fixed length */}
+                  {Array.from({ length: NUM_CONTRIBUTORS }).map((_, i) => (
                     <Skeleton key={i} className="border-background h-8 w-8 rounded-full border-2" />
                   ))}
                 </div>

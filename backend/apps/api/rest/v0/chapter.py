@@ -4,62 +4,86 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
 
-from django.conf import settings
 from django.http import HttpRequest
-from django.views.decorators.cache import cache_page
-from ninja import Field, FilterSchema, Path, Query, Router, Schema
+from ninja import Field, Path, Query, Schema
 from ninja.decorators import decorate_view
-from ninja.pagination import PageNumberPagination, paginate
+from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
-from apps.owasp.models.chapter import Chapter
+from apps.api.decorators.cache import cache_response
+from apps.api.rest.v0.common import LocationFilter
+from apps.owasp.models.chapter import Chapter as ChapterModel
 
-router = Router()
+router = RouterPaginated(tags=["Chapters"])
 
 
-class ChapterErrorResponse(Schema):
-    """Chapter error response schema."""
+class ChapterBase(Schema):
+    """Base schema for Chapter (used in list endpoints)."""
+
+    created_at: datetime
+    key: str
+    latitude: float | None = None
+    longitude: float | None = None
+    name: str
+    updated_at: datetime
+
+    @staticmethod
+    def resolve_key(obj: ChapterModel) -> str:
+        """Resolve key."""
+        return obj.nest_key
+
+
+class Chapter(ChapterBase):
+    """Schema for Chapter (minimal fields for list display)."""
+
+
+class ChapterDetail(ChapterBase):
+    """Detail schema for Chapter (used in single item endpoints)."""
+
+    country: str
+    region: str
+
+
+class ChapterError(Schema):
+    """Chapter error schema."""
 
     message: str
 
 
-class ChapterFilterSchema(FilterSchema):
-    """Filter schema for Chapter."""
+class ChapterFilter(LocationFilter):
+    """Filter for Chapter."""
 
     country: str | None = Field(None, description="Country of the chapter")
-    region: str | None = Field(None, description="Region of the chapter")
-
-
-class ChapterSchema(Schema):
-    """Schema for Chapter."""
-
-    country: str
-    created_at: datetime
-    name: str
-    region: str
-    updated_at: datetime
 
 
 @router.get(
     "/",
     description="Retrieve a paginated list of OWASP chapters.",
     operation_id="list_chapters",
-    response={200: list[ChapterSchema]},
+    response=list[Chapter],
     summary="List chapters",
-    tags=["Chapters"],
 )
-@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
-@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
+@decorate_view(cache_response())
 def list_chapters(
     request: HttpRequest,
-    filters: ChapterFilterSchema = Query(...),
-    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
+    filters: ChapterFilter = Query(...),
+    ordering: Literal[
+        "created_at",
+        "-created_at",
+        "updated_at",
+        "-updated_at",
+        "latitude",
+        "-latitude",
+        "longitude",
+        "-longitude",
+    ]
+    | None = Query(
         None,
         description="Ordering field",
     ),
-) -> list[ChapterSchema]:
+) -> list[Chapter]:
     """Get chapters."""
-    return filters.filter(Chapter.active_chapters.order_by(ordering or "-created_at"))
+    return filters.filter(ChapterModel.active_chapters.order_by(ordering or "-created_at"))
 
 
 @router.get(
@@ -67,18 +91,18 @@ def list_chapters(
     description="Retrieve chapter details.",
     operation_id="get_chapter",
     response={
-        HTTPStatus.NOT_FOUND: ChapterErrorResponse,
-        HTTPStatus.OK: ChapterSchema,
+        HTTPStatus.NOT_FOUND: ChapterError,
+        HTTPStatus.OK: ChapterDetail,
     },
     summary="Get chapter",
-    tags=["Chapters"],
 )
+@decorate_view(cache_response())
 def get_chapter(
     request: HttpRequest,
     chapter_id: str = Path(example="London"),
-) -> ChapterSchema | ChapterErrorResponse:
+) -> ChapterDetail | ChapterError:
     """Get chapter."""
-    if chapter := Chapter.active_chapters.filter(
+    if chapter := ChapterModel.active_chapters.filter(
         key__iexact=(
             chapter_id if chapter_id.startswith("www-chapter-") else f"www-chapter-{chapter_id}"
         )

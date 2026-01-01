@@ -1,9 +1,11 @@
-import { useQuery, useMutation, useApolloClient } from '@apollo/client'
+import { useMutation, useQuery, useApolloClient } from '@apollo/client/react'
+import { addToast } from '@heroui/toast'
 import { screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import EditModulePage from 'app/my/mentorship/programs/[programKey]/modules/[moduleKey]/edit/page'
+import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 
 // Mocks
 jest.mock('next-auth/react', () => ({
@@ -16,16 +18,15 @@ jest.mock('next/navigation', () => ({
   useParams: jest.fn(),
 }))
 
-jest.mock('@apollo/client', () => {
-  const actual = jest.requireActual('@apollo/client')
-  return {
-    ...actual,
-    useQuery: jest.fn(),
-    useMutation: jest.fn(),
-    useApolloClient: jest.fn(),
-    gql: actual.gql,
-  }
-})
+jest.mock('@apollo/client/react', () => ({
+  useMutation: jest.fn(),
+  useQuery: jest.fn(),
+  useApolloClient: jest.fn(),
+}))
+
+jest.mock('@heroui/toast', () => ({
+  addToast: jest.fn(),
+}))
 
 describe('EditModulePage', () => {
   const mockPush = jest.fn()
@@ -59,7 +60,7 @@ describe('EditModulePage', () => {
       data: { user: { login: 'admin-user' } },
       status: 'authenticated',
     })
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
         getProgram: {
@@ -68,7 +69,7 @@ describe('EditModulePage', () => {
         getModule: {
           name: 'Existing Module',
           description: 'Old description',
-          experienceLevel: 'INTERMEDIATE',
+          experienceLevel: ExperienceLevelEnum.Intermediate,
           startedAt: '2025-07-01',
           endedAt: '2025-07-31',
           domains: ['AI'],
@@ -79,7 +80,7 @@ describe('EditModulePage', () => {
         },
       },
     })
-    ;(useMutation as jest.Mock).mockReturnValue([
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([
       mockUpdateModule.mockResolvedValue({}),
       { loading: false },
     ])
@@ -90,8 +91,8 @@ describe('EditModulePage', () => {
     expect(await screen.findByDisplayValue('Existing Module')).toBeInTheDocument()
 
     // Modify values
-    fireEvent.change(screen.getByLabelText(/Module Name/i), {
-      target: { value: 'Updated Module Name' },
+    fireEvent.change(screen.getByLabelText('Name'), {
+      target: { value: 'Updated Name' },
     })
     fireEvent.change(screen.getByLabelText(/Description/i), {
       target: { value: 'Updated description' },
@@ -102,7 +103,8 @@ describe('EditModulePage', () => {
     fireEvent.change(screen.getByLabelText(/Tags/i), {
       target: { value: 'graphql, react' },
     })
-    fireEvent.change(screen.getByLabelText(/Project Name/i), {
+    const projectInput = screen.getByPlaceholderText(/Start typing project name/i)
+    fireEvent.change(projectInput, {
       target: { value: 'Awesome Project' },
     })
 
@@ -114,7 +116,48 @@ describe('EditModulePage', () => {
 
     await waitFor(() => {
       expect(mockUpdateModule).toHaveBeenCalled()
-      expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program?refresh=true')
+      expect(mockPush).toHaveBeenCalledWith(
+        '/my/mentorship/programs/test-program/modules/test-module'
+      )
+    })
+  })
+
+  it('shows access denied and redirects if user is not an admin', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'non-admin-user' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin-user' }], // User is not in this list
+        },
+        getModule: {
+          name: 'Existing Module',
+        },
+      },
+    })
+
+    render(<EditModulePage />)
+
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalledWith({
+        title: 'Access Denied',
+        description: 'Only program admins can edit modules.',
+        color: 'danger',
+        variant: 'solid',
+        timeout: 4000,
+      })
+    })
+
+    // Advance timers to trigger the redirect
+    act(() => {
+      jest.advanceTimersByTime(1500)
+    })
+
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalledWith('/my/mentorship/programs/test-program')
     })
   })
 
@@ -123,7 +166,7 @@ describe('EditModulePage', () => {
       data: null,
       status: 'loading',
     })
-    ;(useQuery as jest.Mock).mockReturnValue({ loading: true })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({ loading: true })
 
     render(<EditModulePage />)
 

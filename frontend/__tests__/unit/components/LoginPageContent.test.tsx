@@ -3,27 +3,18 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
 import type { Session } from 'next-auth'
 import { useSession, signIn } from 'next-auth/react'
+import React from 'react'
 import { userAuthStatus } from 'utils/constants'
 import LoginPageContent from 'components/LoginPageContent'
 
-// Define types for mock props
-interface MockFontAwesomeIconProps {
-  icon: {
-    iconName?: string
-  }
-  spin?: boolean
-  height?: number
-  width?: number
-}
-
-interface MockRouterReturn {
-  push: jest.MockedFunction<(url: string) => void>
-  replace: jest.MockedFunction<(url: string) => void>
-  back: jest.MockedFunction<() => void>
-  forward: jest.MockedFunction<() => void>
-  refresh: jest.MockedFunction<() => void>
-  prefetch: jest.MockedFunction<(url: string) => void>
-}
+jest.mock('react-icons/fa', () => ({
+  FaGithub: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="fa-github-icon" {...props} />
+  ),
+  FaSpinner: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="fa-spinner-icon" {...props} />
+  ),
+}))
 
 // Mock dependencies
 jest.mock('next-auth/react', () => ({
@@ -37,19 +28,6 @@ jest.mock('next/navigation', () => ({
 
 jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
-}))
-
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, spin, ...props }: MockFontAwesomeIconProps) => (
-    <span
-      data-testid="font-awesome-icon"
-      data-icon={icon.iconName || 'unknown'}
-      data-spin={spin}
-      {...props}
-    >
-      {icon.iconName || 'icon'}
-    </span>
-  ),
 }))
 
 describe('LoginPageContent', () => {
@@ -68,7 +46,7 @@ describe('LoginPageContent', () => {
       forward: jest.fn(),
       refresh: jest.fn(),
       prefetch: jest.fn(),
-    } as MockRouterReturn)
+    })
   })
 
   describe('Renders successfully with minimal required props', () => {
@@ -111,8 +89,8 @@ describe('LoginPageContent', () => {
       render(<LoginPageContent isGitHubAuthEnabled={true} />)
 
       expect(screen.getByText('Checking session...')).toBeInTheDocument()
-      expect(screen.getByTestId('font-awesome-icon')).toHaveAttribute('data-icon', 'spinner')
-      expect(screen.getByTestId('font-awesome-icon')).toHaveAttribute('data-spin', 'true')
+      expect(screen.getByTestId('fa-spinner-icon')).toBeInTheDocument()
+      expect(screen.getByTestId('fa-spinner-icon')).toHaveClass('animate-spin')
     })
 
     it('shows redirecting state when user is authenticated', () => {
@@ -125,8 +103,8 @@ describe('LoginPageContent', () => {
       render(<LoginPageContent isGitHubAuthEnabled={true} />)
 
       expect(screen.getByText('Redirecting...')).toBeInTheDocument()
-      expect(screen.getByTestId('font-awesome-icon')).toHaveAttribute('data-icon', 'spinner')
-      expect(screen.getByTestId('font-awesome-icon')).toHaveAttribute('data-spin', 'true')
+      expect(screen.getByTestId('fa-spinner-icon')).toBeInTheDocument()
+      expect(screen.getByTestId('fa-spinner-icon')).toHaveClass('animate-spin')
     })
 
     it('shows login form when user is unauthenticated and GitHub auth is enabled', () => {
@@ -140,7 +118,7 @@ describe('LoginPageContent', () => {
 
       expect(screen.getByText('Welcome back')).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /sign in with github/i })).toBeInTheDocument()
-      expect(screen.getByTestId('font-awesome-icon')).toHaveAttribute('data-icon', 'github')
+      expect(screen.getByTestId('fa-github-icon')).toBeInTheDocument()
     })
 
     it('shows disabled message when GitHub auth is disabled regardless of session status', () => {
@@ -404,8 +382,8 @@ describe('LoginPageContent', () => {
 
       const button = screen.getByRole('button', { name: /sign in with github/i })
       expect(button).toBeInTheDocument()
-      // Button doesn't have explicit type attribute, defaults to submit for form buttons
-      expect(button).not.toHaveAttribute('type')
+      // Button has explicit type="button" to prevent form submission behavior
+      expect(button).toHaveAttribute('type', 'button')
     })
 
     it('provides meaningful text for screen readers in all states', () => {

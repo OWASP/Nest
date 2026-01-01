@@ -131,7 +131,7 @@ Before contributing, ensure you have the following installed:
     !!! note
         *Run this from the project root directory
         * Keep this terminal session running
-        *Wait for [Nest local](http://localhost:8000/api/v1) to respond
+        *Wait for [Nest local](http://localhost:8000/api/v0) to respond
         * Use separate terminal sessions for other commands
 
 6. **Initialize Data**
@@ -145,9 +145,9 @@ Before contributing, ensure you have the following installed:
 
     Check these endpoints:
     <br>
-    > [Projects Endpoint](http://localhost:8000/api/v1/owasp/search/project)
+    > [Projects Endpoint](http://localhost:8000/api/v0/projects/)
     <br>
-    > [Issues Endpoint](http://localhost:8000/api/v1/owasp/search/issue)
+    > [Issues Endpoint](http://localhost:8000/api/v0/issues/)
 
 ## Optional Setup
 

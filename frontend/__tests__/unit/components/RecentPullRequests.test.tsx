@@ -40,23 +40,29 @@ const mockUser = {
 
 const minimalData = [
   {
+    id: 'mock-pull-request',
     author: mockUser,
     createdAt: '2024-06-01T12:00:00Z',
     organizationName: 'test-org',
     repositoryName: 'test-repo',
     title: 'Test Pull Request',
     url: 'https://github.com/test-org/test-repo/pull/1',
+    state: 'open',
+    mergedAt: '2024-06-02T12:00:00Z',
   },
 ]
 
 const noRepoData = [
   {
+    id: 'mock-pull-request',
     author: mockUser,
     createdAt: '2024-06-01T12:00:00Z',
     organizationName: 'test-org',
     repositoryName: undefined,
     title: 'Test Pull Request',
     url: 'https://github.com/test-org/test-repo/pull/2',
+    state: 'open',
+    mergedAt: '2024-06-02T12:00:00Z',
   },
 ]
 

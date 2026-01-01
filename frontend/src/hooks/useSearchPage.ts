@@ -37,7 +37,9 @@ export function useSearchPage<T>({
   const searchParams = useSearchParams()
 
   const [items, setItems] = useState<T[]>([])
-  const [currentPage, setCurrentPage] = useState<number>(parseInt(searchParams.get('page') || '1'))
+  const [currentPage, setCurrentPage] = useState<number>(
+    Number.parseInt(searchParams.get('page') || '1')
+  )
   const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('q') || '')
   const [sortBy, setSortBy] = useState<string>(searchParams.get('sortBy') || defaultSortBy)
   const [order, setOrder] = useState<string>(searchParams.get('order') || defaultOrder)
@@ -50,12 +52,12 @@ export function useSearchPage<T>({
       const searchQueryParam = searchParams.get('q') || ''
       const sortByParam = searchParams.get('sortBy') || 'default'
       const orderParam = searchParams.get('order') || 'desc'
-      if (
-        indexName === 'projects' &&
-        (searchQuery !== searchQueryParam || sortBy !== sortByParam || order !== orderParam)
-      ) {
-        setCurrentPage(1)
-      } else if (searchQuery !== searchQueryParam) {
+
+      const searchQueryChanged = searchQuery !== searchQueryParam
+      const sortOrOrderChanged = sortBy !== sortByParam || order !== orderParam
+
+      // Reset page if search query changes (all indices) or if sort/order changes (projects only)
+      if (searchQueryChanged || (indexName === 'projects' && sortOrOrderChanged)) {
         setCurrentPage(1)
       }
     }
@@ -66,11 +68,11 @@ export function useSearchPage<T>({
     if (searchQuery) params.set('q', searchQuery)
     if (currentPage > 1) params.set('page', currentPage.toString())
 
-    if (sortBy && sortBy !== 'default' && sortBy[0] !== 'default' && sortBy !== '') {
+    if (sortBy && sortBy !== 'default' && sortBy !== '') {
       params.set('sortBy', sortBy)
     }
 
-    if (sortBy !== 'default' && sortBy[0] !== 'default' && order && order !== '') {
+    if (sortBy !== 'default' && order && order !== '') {
       params.set('order', order)
     }
 
@@ -82,10 +84,19 @@ export function useSearchPage<T>({
 
     const fetchData = async () => {
       try {
+        let computedIndexName = indexName
+
+        // Check if valid sort option is selected
+        const hasValidSort = sortBy && sortBy !== 'default'
+
+        if (hasValidSort) {
+          // if sorting is active then appends the sort field and order to the base index name.
+          const orderSuffix = order && order !== '' ? `_${order}` : ''
+          computedIndexName = `${indexName}_${sortBy}${orderSuffix}`
+        }
+
         const response = await fetchAlgoliaData<T>(
-          sortBy && sortBy !== 'default' && sortBy[0] !== 'default'
-            ? `${indexName}_${sortBy}${order && order !== '' ? `_${order}` : ''}`
-            : indexName,
+          computedIndexName,
           searchQuery,
           currentPage,
           hitsPerPage

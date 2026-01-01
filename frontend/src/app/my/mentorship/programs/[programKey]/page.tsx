@@ -1,49 +1,41 @@
 'use client'
-
-import { useQuery, useMutation } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
-import upperFirst from 'lodash/upperFirst'
-import { useParams, useSearchParams, useRouter } from 'next/navigation'
+import { capitalize } from 'lodash'
+import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { UPDATE_PROGRAM_STATUS_MUTATION } from 'server/mutations/programsMutations'
-import { GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
+import { ProgramStatusEnum } from 'types/__generated__/graphql'
+import { UpdateProgramStatusDocument } from 'types/__generated__/programsMutations.generated'
+import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import type { Module, Program } from 'types/mentorship'
-import { ProgramStatusEnum } from 'types/mentorship'
+import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProgramDetailsPage = () => {
-  const { programKey } = useParams() as { programKey: string }
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const shouldRefresh = searchParams.get('refresh') === 'true'
+  const { programKey } = useParams<{ programKey: string }>()
 
   const { data: session } = useSession()
   const username = (session as ExtendedSession)?.user?.login
 
   const [program, setProgram] = useState<Program | null>(null)
   const [modules, setModules] = useState<Module[]>([])
-  const [isRefetching, setIsRefetching] = useState(false)
 
-  const [updateProgram] = useMutation(UPDATE_PROGRAM_STATUS_MUTATION, {
+  const [updateProgram] = useMutation(UpdateProgramStatusDocument, {
     onError: handleAppError,
   })
 
-  const {
-    data,
-    refetch,
-    loading: isQueryLoading,
-  } = useQuery(GET_PROGRAM_AND_MODULES, {
+  const { data, loading: isQueryLoading } = useQuery(GetProgramAndModulesDocument, {
     variables: { programKey },
     skip: !programKey,
     notifyOnNetworkStatusChange: true,
   })
 
-  const isLoading = isQueryLoading || isRefetching
+  const isLoading = isQueryLoading
 
   const isAdmin = useMemo(
     () => !!program?.admins?.some((admin) => admin.login === username),
@@ -76,11 +68,10 @@ const ProgramDetailsPage = () => {
             status: newStatus,
           },
         },
-        refetchQueries: [{ query: GET_PROGRAM_AND_MODULES, variables: { programKey } }],
       })
 
       addToast({
-        title: `Program status updated to ${upperFirst(newStatus)}`,
+        title: `Program status updated to ${capitalize(newStatus)}`,
         description: 'The status has been successfully updated.',
         variant: 'solid',
         color: 'success',
@@ -92,28 +83,11 @@ const ProgramDetailsPage = () => {
   }
 
   useEffect(() => {
-    const processResult = async () => {
-      if (shouldRefresh) {
-        setIsRefetching(true)
-        try {
-          await refetch()
-        } finally {
-          setIsRefetching(false)
-          const params = new URLSearchParams(searchParams.toString())
-          params.delete('refresh')
-          const cleaned = params.toString()
-          router.replace(cleaned ? `?${cleaned}` : window.location.pathname, { scroll: false })
-        }
-      }
-
-      if (data?.getProgram) {
-        setProgram(data.getProgram)
-        setModules(data.getProgramModules || [])
-      }
+    if (data?.getProgram) {
+      setProgram(data.getProgram)
+      setModules(data.getProgramModules || [])
     }
-
-    processResult()
-  }, [shouldRefresh, data, refetch, router, searchParams])
+  }, [data])
 
   if (isLoading) return <LoadingSpinner />
 
@@ -128,29 +102,30 @@ const ProgramDetailsPage = () => {
   }
 
   const programDetails = [
-    { label: 'Status', value: upperFirst(program.status) },
+    { label: 'Status', value: titleCaseWord(program.status) },
     { label: 'Start Date', value: formatDate(program.startedAt) },
     { label: 'End Date', value: formatDate(program.endedAt) },
     { label: 'Mentees Limit', value: String(program.menteesLimit) },
     {
       label: 'Experience Levels',
-      value: program.experienceLevels?.join(', ') || 'N/A',
+      value: program.experienceLevels?.map((level) => titleCaseWord(level)).join(', ') || 'N/A',
     },
   ]
 
   return (
     <DetailsCard
-      modules={modules}
-      status={program.status}
-      setStatus={updateStatus}
+      accessLevel="admin"
+      admins={program.admins}
       canUpdateStatus={canUpdateStatus}
       details={programDetails}
-      admins={program.admins}
-      tags={program.tags}
       domains={program.domains}
+      modules={modules}
+      programKey={program.key}
+      setStatus={updateStatus}
+      status={program.status}
       summary={program.description}
+      tags={program.tags}
       title={program.name}
-      accessLevel="admin"
       type="program"
     />
   )

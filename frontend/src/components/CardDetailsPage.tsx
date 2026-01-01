@@ -1,16 +1,14 @@
-import {
-  faCircleInfo,
-  faChartPie,
-  faFolderOpen,
-  faCode,
-  faTags,
-  faUsers,
-  faRectangleList,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import upperFirst from 'lodash/upperFirst'
-import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import {
+  FaCircleInfo,
+  FaChartPie,
+  FaFolderOpen,
+  FaCode,
+  FaTags,
+  FaRectangleList,
+} from 'react-icons/fa6'
+import { HiUserGroup } from 'react-icons/hi'
 import type { ExtendedSession } from 'types/auth'
 import type { DetailsCardProps } from 'types/card'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
@@ -18,19 +16,23 @@ import { scrollToAnchor } from 'utils/scrollToAnchor'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
+import EntityActions from 'components/EntityActions'
 import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
+import Leaders from 'components/Leaders'
 import LeadersList from 'components/LeadersList'
+import Markdown from 'components/MarkdownWrapper'
+import MenteeContributorsList from 'components/MenteeContributorsList'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import Milestones from 'components/Milestones'
 import ModuleCard from 'components/ModuleCard'
-import ProgramActions from 'components/ProgramActions'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
-import RepositoriesCard from 'components/RepositoriesCard'
+import RepositoryCard from 'components/RepositoryCard'
 import SecondaryCard from 'components/SecondaryCard'
 import SponsorCard from 'components/SponsorCard'
+import StatusBadge from 'components/StatusBadge'
 import ToggleableList from 'components/ToggleableList'
 import TopContributorsList from 'components/TopContributorsList'
 
@@ -43,14 +45,19 @@ const DetailsCard = ({
   canUpdateStatus,
   tags,
   domains,
+  entityLeaders,
+  labels,
   modules,
   mentors,
+  mentees,
   admins,
   entityKey,
   geolocationData = null,
   healthMetricsData,
   isActive = true,
+  isArchived = false,
   languages,
+  programKey,
   projectName,
   pullRequests,
   recentIssues,
@@ -68,64 +75,60 @@ const DetailsCard = ({
   userSummary,
 }: DetailsCardProps) => {
   const { data } = useSession()
-  const router = useRouter()
+
+  // compute styles based on type prop
+  const typeStylesMap = {
+    chapter: 'gap-2 md:col-span-3',
+    module: 'gap-2 md:col-span-7',
+    program: 'gap-2 md:col-span-7',
+  }
+  const secondaryCardStyles = typeStylesMap[type] ?? 'gap-2 md:col-span-5'
+
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <div className="mt-4 flex flex-row items-center">
           <div className="flex w-full items-center justify-between">
             <h1 className="text-4xl font-bold">{title}</h1>
-            {type === 'program' && accessLevel === 'admin' && canUpdateStatus && (
-              <ProgramActions status={status} setStatus={setStatus} />
-            )}
-            {type === 'module' &&
-              accessLevel === 'admin' &&
-              admins?.some(
-                (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
-              ) && (
-                <button
-                  type="button"
-                  className="flex items-center justify-center gap-2 rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-nowrap text-[#0D6EFD] transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
-                  onClick={() => {
-                    router.push(`${window.location.pathname}/edit`)
-                  }}
-                >
-                  Edit Module
-                </button>
+            <div className="flex items-center gap-3">
+              {type === 'program' && accessLevel === 'admin' && canUpdateStatus && (
+                <EntityActions
+                  type="program"
+                  programKey={programKey}
+                  status={status}
+                  setStatus={setStatus}
+                />
               )}
-            {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
-              <MetricsScoreCircle
-                score={healthMetricsData[0].score}
-                clickable={true}
-                onClick={() => scrollToAnchor('issues-trend')}
-              />
-            )}
+              {type === 'module' &&
+                accessLevel === 'admin' &&
+                admins?.some(
+                  (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
+                ) && <EntityActions type="module" programKey={programKey} moduleKey={entityKey} />}
+              {!isActive && <StatusBadge status="inactive" size="md" />}
+              {isArchived && type === 'repository' && <StatusBadge status="archived" size="md" />}
+              {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
+                <MetricsScoreCircle
+                  score={healthMetricsData[0].score}
+                  clickable={true}
+                  onClick={() => scrollToAnchor('issues-trend')}
+                />
+              )}
+            </div>
           </div>
-          {!isActive && (
-            <span className="ml-4 justify-center rounded bg-red-200 px-2 py-1 text-sm text-red-800">
-              Inactive
-            </span>
-          )}
         </div>
         <p className="mb-6 text-xl">{description}</p>
         {summary && (
-          <SecondaryCard icon={faCircleInfo} title={<AnchorTitle title="Summary" />}>
-            <p>{summary}</p>
+          <SecondaryCard icon={FaCircleInfo} title={<AnchorTitle title="Summary" />}>
+            <Markdown content={summary} />
           </SecondaryCard>
         )}
 
         {userSummary && <SecondaryCard>{userSummary}</SecondaryCard>}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
-            icon={faRectangleList}
+            icon={FaRectangleList}
             title={<AnchorTitle title={`${upperFirst(type)} Details`} />}
-            className={
-              type === 'program' || type === 'module'
-                ? 'gap-2 md:col-span-7'
-                : type !== 'chapter'
-                  ? 'gap-2 md:col-span-5'
-                  : 'gap-2 md:col-span-3'
-            }
+            className={secondaryCardStyles}
           >
             {details?.map((detail) =>
               detail?.label === 'Leaders' ? (
@@ -149,12 +152,12 @@ const DetailsCard = ({
             type === 'user' ||
             type === 'organization') && (
             <SecondaryCard
-              icon={faChartPie}
+              icon={FaChartPie}
               title={<AnchorTitle title="Statistics" />}
               className="md:col-span-2"
             >
-              {stats.map((stat, index) => (
-                <div key={index}>
+              {stats.map((stat) => (
+                <div key={`${stat.unit}-${stat.value}`}>
                   <InfoBlock
                     className="pb-1"
                     icon={stat.icon}
@@ -171,6 +174,7 @@ const DetailsCard = ({
               <ChapterMapWrapper
                 geoLocData={geolocationData}
                 showLocal={true}
+                showLocationSharing={true}
                 style={{
                   borderRadius: '0.5rem',
                   boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
@@ -189,47 +193,62 @@ const DetailsCard = ({
             {languages.length !== 0 && (
               <ToggleableList
                 items={languages}
-                icon={faCode}
+                icon={FaCode}
                 label={<AnchorTitle title="Languages" />}
               />
             )}
             {topics.length !== 0 && (
-              <ToggleableList items={topics} icon={faTags} label={<AnchorTitle title="Topics" />} />
+              <ToggleableList items={topics} icon={FaTags} label={<AnchorTitle title="Topics" />} />
             )}
           </div>
         )}
         {(type === 'program' || type === 'module') && (
-          <div
-            className={`mb-8 grid grid-cols-1 gap-6 ${(tags?.length || 0) === 0 || (domains?.length || 0) === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
-          >
-            {tags?.length > 0 && (
-              <ToggleableList
-                items={tags}
-                icon={faTags}
-                label={<AnchorTitle title="Tags" />}
-                isDisabled={true}
-              />
+          <>
+            {((tags?.length || 0) > 0 || (domains?.length || 0) > 0) && (
+              <div
+                className={`mb-8 grid grid-cols-1 gap-6 ${(tags?.length || 0) === 0 || (domains?.length || 0) === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
+              >
+                {tags?.length > 0 && (
+                  <ToggleableList
+                    items={tags}
+                    icon={FaTags}
+                    label={<AnchorTitle title="Tags" />}
+                    isDisabled={true}
+                  />
+                )}
+                {domains?.length > 0 && (
+                  <ToggleableList
+                    items={domains}
+                    icon={FaChartPie}
+                    label={<AnchorTitle title="Domains" />}
+                    isDisabled={true}
+                  />
+                )}
+              </div>
             )}
-            {domains?.length > 0 && (
-              <ToggleableList
-                items={domains}
-                icon={faChartPie}
-                label={<AnchorTitle title="Domains" />}
-                isDisabled={true}
-              />
+            {labels?.length > 0 && (
+              <div className="mb-8">
+                <ToggleableList
+                  items={labels}
+                  icon={FaTags}
+                  label={<AnchorTitle title="Labels" />}
+                  isDisabled={true}
+                />
+              </div>
             )}
-          </div>
+          </>
         )}
+        {entityLeaders && entityLeaders.length > 0 && <Leaders users={entityLeaders} />}
         {topContributors && (
           <TopContributorsList
             contributors={topContributors}
-            icon={faUsers}
+            icon={HiUserGroup}
             maxInitialDisplay={12}
           />
         )}
         {admins && admins.length > 0 && type === 'program' && (
           <TopContributorsList
-            icon={faUsers}
+            icon={HiUserGroup}
             contributors={admins}
             maxInitialDisplay={6}
             label="Admins"
@@ -237,10 +256,20 @@ const DetailsCard = ({
         )}
         {mentors && mentors.length > 0 && (
           <TopContributorsList
-            icon={faUsers}
+            icon={HiUserGroup}
             contributors={mentors}
             maxInitialDisplay={6}
             label="Mentors"
+          />
+        )}
+        {mentees && mentees.length > 0 && (
+          <MenteeContributorsList
+            icon={HiUserGroup}
+            contributors={mentees}
+            maxInitialDisplay={6}
+            label="Mentees"
+            programKey={programKey || ''}
+            moduleKey={entityKey || ''}
           />
         )}
         {(type === 'project' ||
@@ -274,13 +303,13 @@ const DetailsCard = ({
         )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
-            <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
-              <RepositoriesCard maxInitialDisplay={4} repositories={repositories} />
+            <SecondaryCard icon={FaFolderOpen} title={<AnchorTitle title="Repositories" />}>
+              <RepositoryCard maxInitialDisplay={4} repositories={repositories} />
             </SecondaryCard>
           )}
         {type === 'program' && modules.length > 0 && (
           <SecondaryCard
-            icon={faFolderOpen}
+            icon={FaFolderOpen}
             title={<AnchorTitle title={modules.length === 1 ? 'Module' : 'Modules'} />}
           >
             <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
@@ -309,17 +338,20 @@ export const SocialLinks = ({ urls }) => {
     <div>
       <strong>Social Links</strong>
       <div className="mt-2 flex flex-wrap gap-3">
-        {urls.map((url, index) => (
-          <a
-            key={index}
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-400 transition-colors hover:text-gray-800 dark:hover:text-gray-200"
-          >
-            <FontAwesomeIcon icon={getSocialIcon(url)} className="h-5 w-5" />
-          </a>
-        ))}
+        {urls.map((url) => {
+          const SocialIcon = getSocialIcon(url)
+          return (
+            <a
+              key={url}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 transition-colors hover:text-gray-800 dark:hover:text-gray-200"
+            >
+              <SocialIcon className="h-5 w-5" />
+            </a>
+          )
+        })}
       </div>
     </div>
   )

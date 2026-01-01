@@ -27,10 +27,6 @@ jest.mock('components/Pagination', () =>
     </div>
   ))
 )
-jest.mock('wrappers/FontAwesomeIconWrapper', () => ({
-  __esModule: true,
-  default: () => <span data-testid="mock-icon" />,
-}))
 
 jest.mock('@/components/MarkdownWrapper', () => {
   return ({ content, className }: { content: string; className?: string }) => (
@@ -149,10 +145,10 @@ describe('ProjectPage Component', () => {
       const detailLinks = screen.getAllByRole('button', { name: /View Details/i })
       expect(detailLinks.length).toBeGreaterThan(0)
 
-      detailLinks.forEach((link, index) => {
+      for (const [index, link] of detailLinks.entries()) {
         fireEvent.click(link)
         expect(mockRouter.push).toHaveBeenCalledWith(`/projects/project_${index + 1}`)
-      })
+      }
     })
 
     jest.restoreAllMocks()

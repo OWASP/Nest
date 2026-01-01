@@ -50,6 +50,7 @@ class TestProjectMetadataCommand:
         assert metadata["audience"] == ["builder", "defender"]
         assert metadata["type"] == "tool"
         assert math.isclose(metadata["level"], 3.5)
+
         assert metadata["website"] == "https://owasp.org/www-project-awesome/"
 
         assert len(metadata["leaders"]) == 1

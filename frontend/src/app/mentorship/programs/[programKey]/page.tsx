@@ -1,18 +1,19 @@
 'use client'
 
-import { useQuery } from '@apollo/client'
-import upperFirst from 'lodash/upperFirst'
+import { useQuery } from '@apollo/client/react'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ErrorDisplay } from 'app/global-error'
-import { GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
+import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
+
 import type { Module, Program } from 'types/mentorship'
+import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProgramDetailsPage = () => {
-  const { programKey } = useParams() as { programKey: string }
+  const { programKey } = useParams<{ programKey: string }>()
   const searchParams = useSearchParams()
   const router = useRouter()
   const shouldRefresh = searchParams.get('refresh') === 'true'
@@ -20,7 +21,7 @@ const ProgramDetailsPage = () => {
     data,
     refetch,
     loading: isQueryLoading,
-  } = useQuery(GET_PROGRAM_AND_MODULES, {
+  } = useQuery(GetProgramAndModulesDocument, {
     variables: { programKey },
     skip: !programKey,
     notifyOnNetworkStatusChange: true,
@@ -44,7 +45,7 @@ const ProgramDetailsPage = () => {
           const params = new URLSearchParams(searchParams.toString())
           params.delete('refresh')
           const cleaned = params.toString()
-          router.replace(cleaned ? `?${cleaned}` : window.location.pathname, { scroll: false })
+          router.replace(cleaned ? `?${cleaned}` : globalThis.location.pathname, { scroll: false })
         }
       }
 
@@ -70,23 +71,23 @@ const ProgramDetailsPage = () => {
   }
 
   const programDetails = [
-    { label: 'Status', value: upperFirst(program.status) },
+    { label: 'Status', value: titleCaseWord(program.status) },
     { label: 'Start Date', value: formatDate(program.startedAt) },
     { label: 'End Date', value: formatDate(program.endedAt) },
     { label: 'Mentees Limit', value: String(program.menteesLimit) },
     {
       label: 'Experience Levels',
-      value: program.experienceLevels?.join(', ') || 'N/A',
+      value: program.experienceLevels?.map((level) => titleCaseWord(level)).join(', ') || 'N/A',
     },
   ]
 
   return (
     <DetailsCard
-      modules={modules}
       details={programDetails}
-      tags={program.tags}
       domains={program.domains}
+      modules={modules}
       summary={program.description}
+      tags={program.tags}
       title={program.name}
       type="program"
     />

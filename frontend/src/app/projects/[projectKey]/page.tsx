@@ -1,29 +1,26 @@
 'use client'
-import { useQuery } from '@apollo/client'
-import {
-  faCodeFork,
-  faExclamationCircle,
-  faFolderOpen,
-  faStar,
-  faUsers,
-} from '@fortawesome/free-solid-svg-icons'
+import { useQuery } from '@apollo/client/react'
 import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { FaExclamationCircle } from 'react-icons/fa'
+import { FaCodeFork, FaFolderOpen, FaStar } from 'react-icons/fa6'
+import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
+import { GetProjectDocument } from 'types/__generated__/projectQueries.generated'
 import type { Contributor } from 'types/contributor'
 import type { Project } from 'types/project'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+
 const ProjectDetailsPage = () => {
-  const { projectKey } = useParams()
+  const { projectKey } = useParams<{ projectKey: string }>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [project, setProject] = useState<Project | null>(null)
   const [topContributors, setTopContributors] = useState<Contributor[]>([])
-  const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_DATA, {
+  const { data, error: graphQLRequestError } = useQuery(GetProjectDocument, {
     variables: { key: projectKey },
   })
   useEffect(() => {
@@ -68,20 +65,20 @@ const ProjectDetailsPage = () => {
     },
   ]
   const projectStats = [
-    { icon: faStar, value: project.starsCount, unit: 'Star' },
-    { icon: faCodeFork, value: project.forksCount, unit: 'Fork' },
+    { icon: FaStar, value: project.starsCount, unit: 'Star' },
+    { icon: FaCodeFork, value: project.forksCount, unit: 'Fork' },
     {
-      icon: faUsers,
+      icon: HiUserGroup,
       value: project.contributorsCount,
       unit: 'Contributor',
     },
     {
-      icon: faExclamationCircle,
+      icon: FaExclamationCircle,
       value: project.issuesCount,
       unit: 'Issue',
     },
     {
-      icon: faFolderOpen,
+      icon: FaFolderOpen,
       value: project.repositoriesCount,
       unit: 'Repository',
       pluralizedName: 'Repositories',
@@ -92,6 +89,7 @@ const ProjectDetailsPage = () => {
     <DetailsCard
       details={projectDetails}
       entityKey={project.key}
+      entityLeaders={project.entityLeaders}
       healthMetricsData={project.healthMetricsList}
       isActive={project.isActive}
       languages={project.languages}

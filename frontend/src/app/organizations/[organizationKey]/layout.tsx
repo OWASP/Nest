@@ -3,10 +3,11 @@ import Script from 'next/script'
 import React from 'react'
 import { apolloClient } from 'server/apolloClient'
 import {
-  GET_ORGANIZATION_METADATA,
-  GET_ORGANIZATION_DATA,
-} from 'server/queries/organizationQueries'
+  GetOrganizationDataDocument,
+  GetOrganizationMetadataDocument,
+} from 'types/__generated__/organizationQueries.generated'
 import { generateSeoMetadata } from 'utils/metaconfig'
+import PageLayout from 'components/PageLayout'
 
 export async function generateMetadata({
   params,
@@ -15,7 +16,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { organizationKey } = await params
   const { data } = await apolloClient.query({
-    query: GET_ORGANIZATION_METADATA,
+    query: GetOrganizationMetadataDocument,
     variables: {
       login: organizationKey,
     },
@@ -36,7 +37,7 @@ async function generateOrganizationStructuredData(organizationKey: string) {
   // https://developers.google.com/search/docs/appearance/structured-data/organization#structured-data-type-definitions
 
   const { data } = await apolloClient.query({
-    query: GET_ORGANIZATION_DATA,
+    query: GetOrganizationDataDocument,
     variables: {
       login: organizationKey,
     },
@@ -99,8 +100,15 @@ export default async function OrganizationDetailsLayout({
   const { organizationKey } = await params
   const structuredData = await generateOrganizationStructuredData(organizationKey)
 
+  // Fetch organization name for breadcrumb
+  const { data } = await apolloClient.query({
+    query: GetOrganizationMetadataDocument,
+    variables: { login: organizationKey },
+  })
+  const orgName = data?.organization?.name || data?.organization?.login || organizationKey
+
   return (
-    <>
+    <PageLayout title={orgName} path={`/organizations/${organizationKey}`}>
       {structuredData && (
         <Script
           id="organization-structured-data"
@@ -111,6 +119,6 @@ export default async function OrganizationDetailsLayout({
         />
       )}
       {children}
-    </>
+    </PageLayout>
   )
 }

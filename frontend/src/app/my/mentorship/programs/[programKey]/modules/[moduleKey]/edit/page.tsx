@@ -1,35 +1,36 @@
 'use client'
 
-import { useMutation, useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { UPDATE_MODULE } from 'server/mutations/moduleMutations'
-import { GET_PROGRAM_ADMINS_AND_MODULES } from 'server/queries/moduleQueries'
+import { ExperienceLevelEnum } from 'types/__generated__/graphql'
+import { UpdateModuleDocument } from 'types/__generated__/moduleMutations.generated'
+import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import type { ExtendedSession } from 'types/auth'
-import { EXPERIENCE_LEVELS, type ModuleFormData } from 'types/mentorship'
+import type { ModuleFormData } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
 
 const EditModulePage = () => {
-  const { programKey, moduleKey } = useParams() as { programKey: string; moduleKey: string }
+  const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
   const router = useRouter()
   const { data: sessionData, status: sessionStatus } = useSession()
 
   const [formData, setFormData] = useState<ModuleFormData | null>(null)
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
 
-  const [updateModule, { loading: mutationLoading }] = useMutation(UPDATE_MODULE)
+  const [updateModule, { loading: mutationLoading }] = useMutation(UpdateModuleDocument)
 
   const {
     data,
     loading: queryLoading,
     error: queryError,
-  } = useQuery(GET_PROGRAM_ADMINS_AND_MODULES, {
+  } = useQuery(GetProgramAdminsAndModulesDocument, {
     variables: { programKey, moduleKey },
     skip: !programKey || !moduleKey,
     fetchPolicy: 'network-only',
@@ -76,12 +77,13 @@ const EditModulePage = () => {
       setFormData({
         name: m.name || '',
         description: m.description || '',
-        experienceLevel: m.experienceLevel || EXPERIENCE_LEVELS.BEGINNER,
+        experienceLevel: m.experienceLevel || ExperienceLevelEnum.Beginner,
         startedAt: formatDateForInput(m.startedAt),
         endedAt: formatDateForInput(m.endedAt),
         domains: (m.domains || []).join(', '),
         projectName: m.projectName,
         tags: (m.tags || []).join(', '),
+        labels: (m.labels || []).join(', '),
         projectId: m.projectId || '',
         mentorLogins: (m.mentors || []).map((mentor: { login: string }) => mentor.login).join(', '),
       })
@@ -94,21 +96,23 @@ const EditModulePage = () => {
 
     try {
       const input = {
-        key: moduleKey,
-        programKey: programKey,
-        name: formData.name,
         description: formData.description,
-        experienceLevel: formData.experienceLevel,
-        startedAt: formData.startedAt || null,
-        endedAt: formData.endedAt || null,
         domains: parseCommaSeparated(formData.domains),
-        tags: parseCommaSeparated(formData.tags),
-        projectName: formData.projectName,
-        projectId: formData.projectId,
+        endedAt: formData.endedAt || null,
+        experienceLevel: formData.experienceLevel as ExperienceLevelEnum,
+        key: moduleKey,
+        labels: parseCommaSeparated(formData.labels),
         mentorLogins: parseCommaSeparated(formData.mentorLogins),
+        name: formData.name,
+        programKey: programKey,
+        projectId: formData.projectId,
+        projectName: formData.projectName,
+        startedAt: formData.startedAt || null,
+        tags: parseCommaSeparated(formData.tags),
       }
 
-      await updateModule({ variables: { input } })
+      const result = await updateModule({ variables: { input } })
+      const updatedModuleKey = result.data?.updateModule?.key || moduleKey
 
       addToast({
         title: 'Module Updated',
@@ -117,7 +121,7 @@ const EditModulePage = () => {
         variant: 'solid',
         timeout: 3000,
       })
-      router.push(`/my/mentorship/programs/${programKey}?refresh=true`)
+      router.push(`/my/mentorship/programs/${programKey}/modules/${updatedModuleKey}`)
     } catch (err) {
       handleAppError(err)
     }

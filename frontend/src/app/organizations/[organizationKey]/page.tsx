@@ -1,22 +1,18 @@
 'use client'
-import { useQuery } from '@apollo/client'
-import {
-  faCodeFork,
-  faExclamationCircle,
-  faFolderOpen,
-  faStar,
-  faUsers,
-} from '@fortawesome/free-solid-svg-icons'
+import { useQuery } from '@apollo/client/react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { FaExclamationCircle } from 'react-icons/fa'
+import { FaCodeFork, FaFolderOpen, FaStar } from 'react-icons/fa6'
+import { HiUserGroup } from 'react-icons/hi'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
-import { GET_ORGANIZATION_DATA } from 'server/queries/organizationQueries'
+import { GetOrganizationDataDocument } from 'types/__generated__/organizationQueries.generated'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
-import LoadingSpinner from 'components/LoadingSpinner'
+import OrganizationDetailsPageSkeleton from 'components/skeletons/OrganizationDetailsPageSkeleton'
 const OrganizationDetailsPage = () => {
-  const { organizationKey } = useParams()
+  const { organizationKey } = useParams<{ organizationKey: string }>()
   const [organization, setOrganization] = useState(null)
   const [issues, setIssues] = useState(null)
   const [milestones, setMilestones] = useState(null)
@@ -25,7 +21,7 @@ const OrganizationDetailsPage = () => {
   const [repositories, setRepositories] = useState(null)
   const [topContributors, setTopContributors] = useState(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_ORGANIZATION_DATA, {
+  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetOrganizationDataDocument, {
     variables: { login: organizationKey },
   })
 
@@ -47,7 +43,11 @@ const OrganizationDetailsPage = () => {
   }, [graphQLData, graphQLRequestError, organizationKey])
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return (
+      <div data-testid="org-loading-skeleton">
+        <OrganizationDetailsPageSkeleton />
+      </div>
+    )
   }
 
   if (!isLoading && !graphQLData?.organization) {
@@ -85,27 +85,27 @@ const OrganizationDetailsPage = () => {
 
   const organizationStats = [
     {
-      icon: faStar,
+      icon: FaStar,
       value: organization.stats.totalStars,
       unit: 'Star',
     },
     {
-      icon: faCodeFork,
+      icon: FaCodeFork,
       value: organization.stats.totalForks,
       unit: 'Fork',
     },
     {
-      icon: faUsers,
+      icon: HiUserGroup,
       value: organization.stats.totalContributors,
       unit: 'Contributor',
     },
     {
-      icon: faExclamationCircle,
+      icon: FaExclamationCircle,
       value: organization.stats.totalIssues,
       unit: 'Issue',
     },
     {
-      icon: faFolderOpen,
+      icon: FaFolderOpen,
       value: organization.stats.totalRepositories,
       unit: 'Repository',
       pluralizedName: 'Repositories',

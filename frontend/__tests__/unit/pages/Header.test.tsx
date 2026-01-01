@@ -32,19 +32,17 @@ jest.mock('next/link', () => {
   }
 })
 
-// Mock FontAwesome components with proper icon mapping
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  FontAwesomeIcon: ({ icon, className }: any) => {
-    // Map icon names to test IDs based on the actual icons used
-    const iconMap: { [key: string]: string } = {
-      bars: 'icon-bars',
-      xmark: 'icon-xmark',
-      times: 'icon-times',
-    }
-    const testId = iconMap[icon.iconName] || `icon-${icon.iconName}`
-    return <span className={className} data-testid={testId} />
-  },
+jest.mock('react-icons/fa', () => ({
+  FaBars: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-bars" {...props} />,
+  FaTimes: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-xmark" {...props} />,
+  FaRegHeart: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-heart" {...props} />,
+  FaRegStar: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-star" {...props} />,
+  FaHeart: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="icon-solid-heart" {...props} />
+  ),
+  FaStar: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="icon-solid-star" {...props} />
+  ),
 }))
 
 // Mock HeroUI Button
@@ -81,8 +79,12 @@ jest.mock('components/NavDropDown', () => {
     return (
       <div data-testid="nav-dropdown">
         {link.text}
-        {link.submenu?.map((sub: { href: string; text: string }, i: number) => (
-          <a key={i} href={sub.href} className={pathname === sub.href ? 'active' : ''}>
+        {link.submenu?.map((sub: { href: string; text: string }) => (
+          <a
+            key={`${sub.text}-${sub.href}`}
+            href={sub.href}
+            className={pathname === sub.href ? 'active' : ''}
+          >
             {sub.text}
           </a>
         ))}
@@ -190,7 +192,7 @@ describe('Header Component', () => {
   beforeEach(() => {
     mockUsePathname.mockReturnValue('/')
     // Mock window.innerWidth
-    Object.defineProperty(window, 'innerWidth', {
+    Object.defineProperty(globalThis, 'innerWidth', {
       writable: true,
       configurable: true,
       value: 1024,
@@ -216,7 +218,7 @@ describe('Header Component', () => {
 
       // Use getAllByRole for multiple elements
       const logoImages = screen.getAllByRole('img', { name: /owasp logo/i })
-      expect(logoImages.length).toBe(4) // 2 in desktop header + 2 in mobile menu
+      expect(logoImages.length).toBe(2) // 1 in desktop header + 1 in mobile menu
 
       const brandTexts = screen.getAllByText('Nest')
       expect(brandTexts.length).toBe(2) // One in desktop header, one in mobile menu
@@ -231,7 +233,7 @@ describe('Header Component', () => {
       expect(screen.getByRole('banner')).toBeInTheDocument()
 
       const logoImages = screen.getAllByRole('img', { name: /owasp logo/i })
-      expect(logoImages.length).toBe(4)
+      expect(logoImages.length).toBe(2)
 
       const brandTexts = screen.getAllByText('Nest')
       expect(brandTexts.length).toBe(2)
@@ -246,13 +248,25 @@ describe('Header Component', () => {
       renderWithSession(<Header isGitHubAuthEnabled />)
 
       const logoImages = screen.getAllByRole('img', { name: /owasp logo/i })
-      expect(logoImages.length).toBe(4) // 2 in desktop header + 2 in mobile menu
+      expect(logoImages.length).toBe(2) // 1 in desktop header + 1 in mobile menu
 
-      logoImages.forEach((logo) => {
+      for (const logo of logoImages) {
         expect(logo).toHaveAttribute('width', '64')
         expect(logo).toHaveAttribute('height', '64')
         expect(logo).toHaveAttribute('src')
-      })
+      }
+    })
+
+    it('renders logo_dark.png image in both desktop and mobile header', () => {
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
+      const logoImages = screen.getAllByRole('img', { name: /owasp logo/i })
+      expect(logoImages.length).toBe(2)
+
+      for (const logo of logoImages) {
+        expect(logo).toHaveAttribute('src', '/img/logo_dark.png')
+        expect(logo).toBeInTheDocument()
+      }
     })
 
     it('renders Nest text branding', () => {
@@ -274,9 +288,10 @@ describe('Header Component', () => {
           (link) => link.getAttribute('href') === '/' && link.querySelector('img[alt="OWASP Logo"]')
         )
       expect(homeLinks.length).toBe(2) // Desktop and mobile
-      homeLinks.forEach((link) => {
+
+      for (const link of homeLinks) {
         expect(link).toHaveAttribute('href', '/')
-      })
+      }
     })
   })
 
@@ -486,7 +501,7 @@ describe('Header Component', () => {
 
       // Simulate resize event
       await act(async () => {
-        window.dispatchEvent(new Event('resize'))
+        globalThis.dispatchEvent(new Event('resize'))
       })
 
       // Test passes if no errors are thrown
@@ -684,7 +699,7 @@ describe('Header Component', () => {
 
     it('shows mobile menu button for mobile screens', () => {
       // Set window width to simulate mobile
-      Object.defineProperty(window, 'innerWidth', {
+      Object.defineProperty(globalThis, 'innerWidth', {
         writable: true,
         configurable: true,
         value: 400,

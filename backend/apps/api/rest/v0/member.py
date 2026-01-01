@@ -4,21 +4,54 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
 
-from django.conf import settings
 from django.http import HttpRequest
-from django.views.decorators.cache import cache_page
-from ninja import Field, FilterSchema, Path, Query, Router, Schema
+from ninja import Field, FilterSchema, Path, Query, Schema
 from ninja.decorators import decorate_view
-from ninja.pagination import PageNumberPagination, paginate
+from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
-from apps.github.models.user import User
+from apps.api.decorators.cache import cache_response
+from apps.github.models.user import User as UserModel
 
-router = Router()
+router = RouterPaginated(tags=["Community"])
 
 
-class MemberFilterSchema(FilterSchema):
-    """Filter schema for User."""
+class MemberBase(Schema):
+    """Base schema for Member (used in list endpoints)."""
+
+    avatar_url: str
+    created_at: datetime
+    login: str
+    name: str
+    updated_at: datetime
+    url: str
+
+
+class Member(MemberBase):
+    """Schema for Member (minimal fields for list display)."""
+
+
+class MemberDetail(MemberBase):
+    """Detail schema for Member (used in single item endpoints)."""
+
+    bio: str
+    company: str
+    followers_count: int
+    following_count: int
+    location: str
+    public_repositories_count: int
+    title: str
+    twitter_username: str
+
+
+class MemberError(Schema):
+    """Member error schema."""
+
+    message: str
+
+
+class MemberFilter(FilterSchema):
+    """Filter for User."""
 
     company: str | None = Field(
         None,
@@ -27,51 +60,24 @@ class MemberFilterSchema(FilterSchema):
     location: str | None = Field(None, description="Location of the member")
 
 
-class MemberSchema(Schema):
-    """Schema for Member."""
-
-    avatar_url: str
-    bio: str
-    company: str
-    created_at: datetime
-    followers_count: int
-    following_count: int
-    location: str
-    login: str
-    name: str
-    public_repositories_count: int
-    title: str
-    twitter_username: str
-    updated_at: datetime
-    url: str
-
-
-class MemberErrorResponse(Schema):
-    """Member error response schema."""
-
-    message: str
-
-
 @router.get(
     "/",
     description="Retrieve a paginated list of OWASP community members.",
     operation_id="list_members",
-    response={HTTPStatus.OK: list[MemberSchema]},
+    response=list[Member],
     summary="List members",
-    tags=["Community"],
 )
-@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
-@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
+@decorate_view(cache_response())
 def list_members(
     request: HttpRequest,
-    filters: MemberFilterSchema = Query(...),
+    filters: MemberFilter = Query(...),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None,
         description="Ordering field",
     ),
-) -> list[MemberSchema]:
+) -> list[Member]:
     """Get all members."""
-    return filters.filter(User.objects.order_by(ordering or "-created_at"))
+    return filters.filter(UserModel.objects.order_by(ordering or "-created_at"))
 
 
 @router.get(
@@ -79,18 +85,18 @@ def list_members(
     description="Retrieve member details.",
     operation_id="get_member",
     response={
-        HTTPStatus.NOT_FOUND: MemberErrorResponse,
-        HTTPStatus.OK: MemberSchema,
+        HTTPStatus.NOT_FOUND: MemberError,
+        HTTPStatus.OK: MemberDetail,
     },
     summary="Get member",
-    tags=["Community"],
 )
+@decorate_view(cache_response())
 def get_member(
     request: HttpRequest,
     member_id: str = Path(example="OWASP"),
-) -> MemberSchema | MemberErrorResponse:
+) -> MemberDetail | MemberError:
     """Get member."""
-    if user := User.objects.filter(login__iexact=member_id).first():
+    if user := UserModel.objects.filter(login__iexact=member_id).first():
         return user
 
     return Response({"message": "Member not found"}, status=HTTPStatus.NOT_FOUND)

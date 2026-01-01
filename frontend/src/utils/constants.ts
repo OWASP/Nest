@@ -1,4 +1,6 @@
-import { faGithub, faSlack, faBluesky, faLinkedin } from '@fortawesome/free-brands-svg-icons'
+import type { IconType } from 'react-icons'
+import { FaGithub, FaSlack, FaLinkedin } from 'react-icons/fa'
+import { FaBluesky } from 'react-icons/fa6'
 import type { Link } from 'types/link'
 import type { Section } from 'types/section'
 
@@ -9,7 +11,7 @@ export const headerLinks: Link[] = [
       { text: 'Chapters', href: '/chapters' },
       { text: 'Members', href: '/members' },
       { text: 'Organizations', href: '/organizations' },
-      { text: 'Snapshots', href: '/snapshots' },
+      { text: 'Snapshots', href: '/community/snapshots' },
     ],
   },
   {
@@ -26,24 +28,28 @@ export const headerLinks: Link[] = [
   },
 ]
 
-export const footerIcons = [
+export const footerIcons: Array<{
+  icon: IconType
+  href: string
+  label: string
+}> = [
   {
-    icon: faBluesky,
+    icon: FaBluesky,
     href: 'https://bsky.app/profile/nest.owasp.org',
     label: 'Bluesky',
   },
   {
-    icon: faGithub,
+    icon: FaGithub,
     href: 'https://github.com/owasp/nest',
     label: 'GitHub',
   },
   {
-    icon: faLinkedin,
+    icon: FaLinkedin,
     href: 'https://www.linkedin.com/groups/14656108/',
     label: 'LinkedIn',
   },
   {
-    icon: faSlack,
+    icon: FaSlack,
     href: 'https://owasp.slack.com/archives/project-nest',
     label: 'Slack',
   },
@@ -56,8 +62,8 @@ export const footerSections: Section[] = [
       { text: 'About', href: '/about' },
       { text: 'Contribute', href: 'https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md' },
       {
-        text: 'GSoC 2025',
-        href: 'https://owasp.org/www-community/initiatives/gsoc/gsoc2025ideas#owasp-nest',
+        text: 'GSoC 2026',
+        href: 'https://owasp.org/www-community/initiatives/gsoc/gsoc2026ideas#owasp-nest',
       },
       {
         text: 'Sponsor',
@@ -84,11 +90,11 @@ export const footerSections: Section[] = [
       { text: 'Google Summer of Code', href: 'https://owasp.org/gsoc' },
       {
         text: 'Start a Local Chapter',
-        href: 'https://owasporg.atlassian.net/servicedesk/customer/portal/8/group/20/create/90?src=-1419759666',
+        href: 'https://owasporg.atlassian.net/servicedesk/customer/portal/8/group/20/create/90',
       },
       {
         text: 'Start a New Project',
-        href: 'https://owasporg.atlassian.net/servicedesk/customer/portal/7/create/70?src=-1419759666',
+        href: 'https://owasporg.atlassian.net/servicedesk/customer/portal/43/group/55/create/209',
       },
     ],
   },

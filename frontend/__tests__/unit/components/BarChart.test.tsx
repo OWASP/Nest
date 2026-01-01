@@ -1,11 +1,7 @@
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faFire } from '@fortawesome/free-solid-svg-icons'
 import { render, screen } from '@testing-library/react'
-import '@testing-library/jest-dom'
 import React from 'react'
-
-// Register FontAwesome icon
-library.add(faFire)
+import { FaFire } from 'react-icons/fa'
+import '@testing-library/jest-dom'
 
 // Mock react-apexcharts completely
 jest.mock('react-apexcharts', () => {
@@ -170,8 +166,7 @@ describe('<BarChart />', () => {
   })
 
   it('renders with custom icon when provided', () => {
-    // cspell:ignore fas
-    renderWithTheme(<BarChart {...mockProps} icon={['fas', 'fire']} />)
+    renderWithTheme(<BarChart {...mockProps} icon={FaFire} />)
     expect(screen.getByTestId('anchor-title')).toHaveTextContent('Calories Burned')
     expect(screen.getByTestId('card-icon')).toBeInTheDocument()
   })
@@ -222,7 +217,7 @@ describe('<BarChart />', () => {
     const chartElement = screen.getByTestId('mock-chart')
 
     expect(chartElement.dataset.type).toBe('bar')
-    expect(chartElement.datasset.height).toBe('300')
+    expect(chartElement.dataset.height).toBe('300')
   })
 
   it('creates correct series data structure', () => {
@@ -234,32 +229,16 @@ describe('<BarChart />', () => {
     expect(series[0].name).toBe('Actual')
     expect(series[0].data).toHaveLength(3)
 
-    series[0].data.forEach(
-      (
-        dataPoint: {
-          x: string
-          y: number
-          goals: Array<{
-            name: string
-            value: number
-            strokeWidth: number
-            strokeHeight: number
-            strokeLineCap: string
-            strokeColor: string
-          }>
-        },
-        index: number
-      ) => {
-        expect(dataPoint.x).toBe(mockProps.labels[index])
-        expect(dataPoint.y).toBe(mockProps.days[index])
-        expect(dataPoint.goals).toHaveLength(1)
-        expect(dataPoint.goals[0].name).toBe('Requirement')
-        expect(dataPoint.goals[0].value).toBe(mockProps.requirements[index])
-        expect(dataPoint.goals[0].strokeWidth).toBe(5)
-        expect(dataPoint.goals[0].strokeHeight).toBe(15)
-        expect(dataPoint.goals[0].strokeLineCap).toBe('round')
-      }
-    )
+    for (const [index, dataPoint] of series[0].data.entries()) {
+      expect(dataPoint.x).toBe(mockProps.labels[index])
+      expect(dataPoint.y).toBe(mockProps.days[index])
+      expect(dataPoint.goals).toHaveLength(1)
+      expect(dataPoint.goals[0].name).toBe('Requirement')
+      expect(dataPoint.goals[0].value).toBe(mockProps.requirements[index])
+      expect(dataPoint.goals[0].strokeWidth).toBe(5)
+      expect(dataPoint.goals[0].strokeHeight).toBe(15)
+      expect(dataPoint.goals[0].strokeLineCap).toBe('round')
+    }
   })
 
   it('configures colors array correctly', () => {
@@ -404,7 +383,7 @@ describe('<BarChart />', () => {
 
     renderWithTheme(<BarChart {...largeProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const series = JSON.parse(chartElement.dataset.series|| '[]')
+    const series = JSON.parse(chartElement.dataset.series || '[]')
 
     expect(series[0].data[0].y).toBe(999999)
     expect(series[0].data[0].goals[0].value).toBe(1000000)

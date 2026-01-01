@@ -1,21 +1,21 @@
 'use client'
-import { useQuery } from '@apollo/client'
-import type { IconProp } from '@fortawesome/fontawesome-svg-core'
-import {
-  faCheck,
-  faWarning,
-  faRectangleXmark,
-  faChartLine,
-  faUsers,
-  faStar,
-  faCodeBranch,
-  faChartColumn,
-  faHeart,
-} from '@fortawesome/free-solid-svg-icons'
+import { useQuery } from '@apollo/client/react'
 import millify from 'millify'
 import { useState, useEffect, FC } from 'react'
+import type { IconType } from 'react-icons'
+import {
+  FaCheck,
+  FaTriangleExclamation,
+  FaRectangleXmark,
+  FaChartLine,
+  FaStar,
+  FaCodeBranch,
+  FaChartColumn,
+  FaHeart,
+} from 'react-icons/fa6'
+import { HiUserGroup } from 'react-icons/hi'
 import { handleAppError } from 'app/global-error'
-import { GET_PROJECT_HEALTH_STATS } from 'server/queries/projectsHealthDashboardQueries'
+import { GetProjectHealthStatsDocument } from 'types/__generated__/projectsHealthDashboardQueries.generated'
 import type { ProjectHealthStats } from 'types/projectHealthStats'
 import DashboardCard from 'components/DashboardCard'
 import DonutBarChart from 'components/DonutBarChart'
@@ -27,7 +27,7 @@ import ProjectTypeDashboardCard from 'components/ProjectTypeDashboardCard'
 const ProjectsDashboardPage: FC = () => {
   const [stats, setStats] = useState<ProjectHealthStats>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_HEALTH_STATS)
+  const { data, error: graphQLRequestError } = useQuery(GetProjectHealthStatsDocument)
 
   useEffect(() => {
     if (data) {
@@ -51,46 +51,51 @@ const ProjectsDashboardPage: FC = () => {
       </div>
     )
   }
+
   const projectsCardsItems: {
     type: 'healthy' | 'needsAttention' | 'unhealthy'
     count: number
-    icon: IconProp
+    icon: IconType
   }[] = [
     {
       type: 'healthy',
       count: stats.projectsCountHealthy,
-      icon: faCheck,
+      icon: FaCheck,
     },
     {
       type: 'needsAttention',
       count: stats.projectsCountNeedAttention,
-      icon: faWarning,
+      icon: FaTriangleExclamation,
     },
     {
       type: 'unhealthy',
       count: stats.projectsCountUnhealthy,
-      icon: faRectangleXmark,
+      icon: FaRectangleXmark,
     },
   ]
-  const dashboardCardsItems = [
+  const dashboardCardsItems: {
+    title: string
+    icon: IconType
+    stats?: string
+  }[] = [
     {
       title: 'Average Score',
-      icon: faChartLine,
+      icon: FaChartLine,
       stats: `${stats.averageScore.toFixed(1)}`,
     },
     {
       title: 'Contributors',
-      icon: faUsers,
+      icon: HiUserGroup,
       stats: millify(stats.totalContributors),
     },
     {
       title: 'Forks',
-      icon: faCodeBranch,
+      icon: FaCodeBranch,
       stats: millify(stats.totalForks),
     },
     {
       title: 'Stars',
-      icon: faStar,
+      icon: FaStar,
       stats: millify(stats.totalStars),
     },
   ]
@@ -118,7 +123,7 @@ const ProjectsDashboardPage: FC = () => {
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-[2fr_1fr]">
         <LineChart
           title="Overall Project Health Monthly Trend"
-          icon={faChartColumn}
+          icon={FaChartColumn}
           series={[
             {
               name: 'Project Health Score',
@@ -132,7 +137,7 @@ const ProjectsDashboardPage: FC = () => {
         />
         <DonutBarChart
           title="Project Health Distribution"
-          icon={faHeart}
+          icon={FaHeart}
           series={[
             stats.projectsPercentageHealthy,
             stats.projectsPercentageNeedAttention,

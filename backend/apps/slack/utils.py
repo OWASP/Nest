@@ -22,7 +22,7 @@ from apps.common.constants import NL, OWASP_NEWS_URL
 logger: logging.Logger = logging.getLogger(__name__)
 
 
-def escape(content) -> str:
+def escape(content: str) -> str:
     """Escape HTML content.
 
     Args:
@@ -33,6 +33,23 @@ def escape(content) -> str:
 
     """
     return escape_html(content, quote=False)
+
+
+def format_links_for_slack(text: str) -> str:
+    """Convert Markdown links to Slack markdown link format.
+
+    Args:
+        text (str): The input text that may include Markdown links.
+
+    Returns:
+        str: Text with Markdown links converted to Slack markdown links.
+
+    """
+    if not text:
+        return text
+
+    markdown_link_pattern = re.compile(r"\[([^\]]+)\]\((https?://[^\s)]+)\)")
+    return markdown_link_pattern.sub(r"<\2|\1>", text)
 
 
 @lru_cache
@@ -66,7 +83,7 @@ def get_news_data(limit: int = 10, timeout: float | None = 30) -> list[dict[str,
 
     Args:
         limit (int, optional): The maximum number of news items to fetch.
-        timeout (int, optional): The request timeout in seconds.
+        timeout (float, optional): The request timeout in seconds.
 
     Returns:
         list: A list of dictionaries containing news data (author, title, and URL).
@@ -101,7 +118,7 @@ def get_staff_data(timeout: float | None = 30) -> list | None:
     """Get staff data.
 
     Args:
-        timeout (int, optional): The request timeout in seconds.
+        timeout (float, optional): The request timeout in seconds.
 
     Returns:
         list or None: A sorted list of staff data dictionaries, or None if an error occurs.

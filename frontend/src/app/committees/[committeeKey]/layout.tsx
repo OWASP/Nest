@@ -1,8 +1,21 @@
 import { Metadata } from 'next'
-import React from 'react'
+import React, { cache } from 'react'
 import { apolloClient } from 'server/apolloClient'
-import { GET_COMMITTEE_METADATA } from 'server/queries/committeeQueries'
+import { GetCommitteeMetadataDocument } from 'types/__generated__/committeeQueries.generated'
 import { generateSeoMetadata } from 'utils/metaconfig'
+import PageLayout from 'components/PageLayout'
+
+const getCommitteeMetadata = cache(async (committeeKey: string) => {
+  try {
+    const { data } = await apolloClient.query({
+      query: GetCommitteeMetadataDocument,
+      variables: { key: committeeKey },
+    })
+    return data
+  } catch {
+    return null
+  }
+})
 
 export async function generateMetadata({
   params,
@@ -10,12 +23,7 @@ export async function generateMetadata({
   params: Promise<{ committeeKey: string }>
 }): Promise<Metadata> {
   const { committeeKey } = await params
-  const { data } = await apolloClient.query({
-    query: GET_COMMITTEE_METADATA,
-    variables: {
-      key: committeeKey,
-    },
-  })
+  const data = await getCommitteeMetadata(committeeKey)
   const committee = data?.committee
 
   return committee
@@ -28,10 +36,19 @@ export async function generateMetadata({
     : null
 }
 
-export default function CommitteeDetailsLayout({
+export default async function CommitteeDetailsLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode
+  params: Promise<{ committeeKey: string }>
 }>) {
-  return children
+  const { committeeKey } = await params
+  const data = await getCommitteeMetadata(committeeKey)
+
+  if (!data?.committee) {
+    return children
+  }
+
+  return <PageLayout title={data.committee.name}>{children}</PageLayout>
 }
