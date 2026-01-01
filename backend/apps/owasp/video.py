@@ -26,6 +26,7 @@ from apps.owasp.models.sponsor import Sponsor
 
 logger = logging.getLogger(__name__)
 
+AUDIO_CODEC = "copy"
 AUDIO_EXTENSION = ".mp3"
 ELEVENLABS_SPEED = 0.85
 IMAGE_EXTENSION = ".png"
@@ -118,7 +119,7 @@ class Slide:
                 image_stream,
                 audio_stream,
                 filename=self.video_path,
-                acodec="copy",
+                acodec=AUDIO_CODEC,
                 vcodec="libx264",
                 pix_fmt="yuv420p",
                 shortest=None,
