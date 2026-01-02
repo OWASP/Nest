@@ -183,33 +183,28 @@ class ElevenLabs:
 
         return self
 
-    def generate(self) -> bytes | None:
+    def generate(self) -> bytes:
         """Generate audio from text.
 
         Returns:
-            bytes | None: The audio bytes or None on error.
+            bytes: The audio bytes.
 
         """
-        try:
-            audio_iterator = self.client.text_to_speech.convert(
-                model_id=self.model_id,
-                output_format=self.output_format,
-                text=self.text,
-                voice_id=self.voice_id,
-                voice_settings=VoiceSettings(
-                    similarity_boost=self.similarity_boost,
-                    speed=self.speed,
-                    stability=self.stability,
-                    style=self.style,
-                    use_speaker_boost=self.use_speaker_boost,
-                ),
-            )
+        audio_iterator = self.client.text_to_speech.convert(
+            model_id=self.model_id,
+            output_format=self.output_format,
+            text=self.text,
+            voice_id=self.voice_id,
+            voice_settings=VoiceSettings(
+                similarity_boost=self.similarity_boost,
+                speed=self.speed,
+                stability=self.stability,
+                style=self.style,
+                use_speaker_boost=self.use_speaker_boost,
+            ),
+        )
 
-            return b"".join(audio_iterator)
-        except Exception:
-            logger.exception("An error occurred during ElevenLabs API request.")
-
-        return None
+        return b"".join(audio_iterator)
 
     def save(self, contents: bytes, file_path: Path) -> None:
         """Save audio contents to file.

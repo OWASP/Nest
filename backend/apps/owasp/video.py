@@ -64,12 +64,7 @@ class Slide:
         return self.output_dir / f"{self.name}{VIDEO_EXTENSION}"
 
     def render_and_save_image(self) -> None:
-        """Render an HTML template as an image.
-
-        Raises:
-            Exception: If rendering the HTML template or saving the image fails.
-
-        """
+        """Render an HTML template as an image."""
         page = None
         pdf = None
         try:
@@ -84,10 +79,6 @@ class Slide:
 
             self.image_path.parent.mkdir(parents=True, exist_ok=True)
             pil_image.save(self.image_path, IMAGE_FORMAT)
-
-        except Exception:
-            logger.exception("Error rendering image for: %s", self.name)
-            raise
         finally:
             if page is not None:
                 page.close()
@@ -100,15 +91,9 @@ class Slide:
         Args:
             eleven_labs (ElevenLabs): ElevenLabs client instance.
 
-        Raises:
-            RuntimeError: If transcript audio generation fails.
-
         """
         eleven_labs.set_text(self.transcript)
         audio = eleven_labs.generate()
-        if audio is None:
-            msg = f"Failed to generate audio for {self.name}"
-            raise RuntimeError(msg)
         eleven_labs.save(audio, self.audio_path)
 
     def generate_and_save_video(self) -> None:

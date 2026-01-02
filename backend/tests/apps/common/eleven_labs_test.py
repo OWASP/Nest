@@ -117,21 +117,18 @@ class TestElevenLabs:
         result = elevenlabs_instance.set_voice_id(voice_id)
         assert result.voice_id == expected_voice_id
 
-    @patch("apps.common.eleven_labs.logger")
     @patch("apps.common.eleven_labs.ElevenLabsClient")
     @patch("apps.common.eleven_labs.settings")
-    def test_generate_general_exception(self, mock_settings, mock_client, mock_logger):
+    def test_generate_raises_on_api_error(self, mock_settings, mock_client):
+        """Test generate raises exception on API error."""
         mock_settings.ELEVENLABS_API_KEY = DEFAULT_API_KEY
-        mock_client.return_value.text_to_speech.convert.side_effect = Exception()
+        mock_client.return_value.text_to_speech.convert.side_effect = Exception("API Error")
 
         instance = ElevenLabs()
         instance.set_text("Test text")
-        response = instance.generate()
 
-        assert response is None
-        mock_logger.exception.assert_called_once_with(
-            "An error occurred during ElevenLabs API request."
-        )
+        with pytest.raises(Exception, match="API Error"):
+            instance.generate()
 
     @patch("apps.common.eleven_labs.VoiceSettings")
     @patch("apps.common.eleven_labs.ElevenLabsClient")

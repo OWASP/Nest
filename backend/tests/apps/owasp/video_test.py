@@ -70,9 +70,9 @@ class TestSlide:
     def test_generate_and_save_audio_generation_fails(self, slide):
         """Test generate_and_save_audio raises error when generation fails."""
         eleven_labs = Mock()
-        eleven_labs.generate.return_value = None
+        eleven_labs.generate.side_effect = Exception("API Error")
 
-        with pytest.raises(RuntimeError, match="Failed to generate audio"):
+        with pytest.raises(Exception, match="API Error"):
             slide.generate_and_save_audio(eleven_labs)
 
     def test_generate_and_save_audio_success(self, slide):
