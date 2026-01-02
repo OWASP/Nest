@@ -55,28 +55,26 @@ class BaseBadgeCommand(BaseCommand, ABC):
                 badge.save(update_fields=["css_class", "description", "weight"])
 
             eligible_users = self.get_eligible_users()
-            users_to_add = eligible_users.exclude(
+            users_to_add_ids = eligible_users.exclude(
                 user_badges__badge=badge,
                 user_badges__is_active=True,
             )
 
             new_badges = [
-                UserBadge(user=user, badge=badge, is_active=True) for user in users_to_add
+                UserBadge(user=user, badge=badge, is_active=True) for user in users_to_add_ids
             ]
 
+            added_count = 0
             if new_badges:
-                UserBadge.objects.bulk_create(
+                added_count = UserBadge.bulk_save(
+                    UserBadge,
                     new_badges,
-                    update_conflicts=True,
-                    update_fields=["is_active"],
-                    unique_fields=["user", "badge"],
+                    fields=["is_active"],
                 )
+                added_count = len(new_badges)
 
-            added_count = len(new_badges)
-
-            if added_count > 0:
-                user_word = "user" if added_count == 1 else "users"
-                self._log(f"Added '{self.badge_name}' badge to {added_count} {user_word}")
+            user_word = "user" if added_count == 1 else "users"
+            self._log(f"Added '{self.badge_name}' badge to {added_count} {user_word}")
 
             users_to_remove = UserBadge.objects.filter(
                 badge=badge,
