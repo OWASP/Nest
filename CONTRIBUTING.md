@@ -223,28 +223,16 @@ Follow these steps to set up the OWASP Nest application:
 
 1. **Create Environment Files**:
 
-   - Create a local environment file in the `backend` directory:
+   - Copy the contents from the template file into your new backend local environment file:
 
      ```bash
-     touch backend/.env
+     cp backend/.env.example backend/.env
      ```
 
-   - Copy the contents from the template file into your new local environment file:
+   - Copy the contents from the template file into your new frontend local environment file:
 
      ```bash
-     cat backend/.env.example > backend/.env
-     ```
-
-   - Create a local environment file in the `frontend` directory:
-
-     ```bash
-     touch frontend/.env
-     ```
-
-   - Copy the contents from the template file into your new local environment file:
-
-     ```bash
-     cat frontend/.env.example > frontend/.env
+     cp frontend/.env.example frontend/.env
      ```
 
 Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order Mark)**. This is crucial to prevent "Unexpected character" errors during application execution or Docker image building.
@@ -262,7 +250,8 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 1. **Set Up Algolia**:
 
    - Go to [Algolia](https://www.algolia.com/) and create a free account.
-   - After creating an account, create an Algolia app.
+   - An Algolia app is automatically created for you when you sign up.
+   - During the sign up process, you may be asked to import data. You can skip this step.
    - Update your `backend/.env` file with the following keys from your Algolia app (use **write** API key for backend):
 
    ```plaintext
@@ -270,7 +259,7 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
    DJANGO_ALGOLIA_WRITE_API_KEY=<your-algolia-write-api-key>
    ```
 
-   - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
+   - Note: The default write API key should have index write permissions (addObject permission). If you do not use the default write API key, ensure that your API key has this permission.
    - If you encounter any issues, you can refer directly to Algolia's [documentation](https://www.algolia.com/doc/guides/getting-started/quick-start/)
 
 1. **Run the Application**:
