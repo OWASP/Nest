@@ -23,9 +23,9 @@ from apps.owasp.models.chapter import Chapter as ChapterModel
 from apps.owasp.models.project import Project as ProjectModel
 from apps.owasp.models.snapshot import Snapshot as SnapshotModel
 
-router = RouterPaginated(tags=["Community"])
-
 ORDERING_FIELD_DESCRIPTION = "Ordering field"
+
+router = RouterPaginated(tags=["Community"])
 
 
 class SnapshotBase(Schema):
