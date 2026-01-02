@@ -45,6 +45,12 @@ const shouldShowStatistics = (type: string): boolean =>
   type === 'user' ||
   type === 'organization'
 
+const shouldShowIssuesAndMilestones = (type: string): boolean =>
+  type === 'project' || type === 'repository' || type === 'user' || type === 'organization'
+
+const shouldShowPullRequestsAndReleases = (type: string): boolean =>
+  type === 'project' || type === 'repository' || type === 'organization' || type === 'user'
+
 const DetailsCard = ({
   description,
   details,
@@ -308,10 +314,7 @@ const DetailsCard = ({
             moduleKey={entityKey || ''}
           />
         )}
-        {(type === 'project' ||
-          type === 'repository' ||
-          type === 'user' ||
-          type === 'organization') && (
+        {shouldShowIssuesAndMilestones(type) && (
           <div className="grid-cols-2 gap-4 lg:grid">
             <RecentIssues data={recentIssues} showAvatar={showAvatar} />
             {type === 'user' ||
@@ -328,10 +331,7 @@ const DetailsCard = ({
             )}
           </div>
         )}
-        {(type === 'project' ||
-          type === 'repository' ||
-          type === 'organization' ||
-          type === 'user') && (
+        {shouldShowPullRequestsAndReleases(type) && (
           <div className="grid-cols-2 gap-4 lg:grid">
             <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />
             <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />
