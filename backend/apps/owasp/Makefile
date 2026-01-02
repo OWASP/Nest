@@ -25,6 +25,7 @@ owasp-enrich-projects:
 owasp-generate-community-snapshot-video:
 	@docker build -f backend/docker/Dockerfile.video backend/ \
 		-t nest-video-backend
+	@mkdir -p backend/generated_videos
 	@docker run \
 		--env-file backend/.env \
 		--network nest-local_nest-network \
