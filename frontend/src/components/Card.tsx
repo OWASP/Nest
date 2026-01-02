@@ -26,6 +26,13 @@ const Card = ({
   timeline,
   tags
 }: CardProps) => {
+  const filteredTags = tags?.filter(tag => {
+    const lowerTag = tag.toLowerCase()
+    return lowerTag.includes('good first issue') || lowerTag.includes('help wanted')
+  }) || []
+  // If no filtered tags, use tags prop directly
+  const displayTags = filteredTags.length > 0 ? filteredTags : (tags || [])
+
   return (
     <div className="mx-auto mt-4 mb-2 flex w-full max-w-[95%] flex-col items-start rounded-md border-1 border-gray-200 bg-white p-4 md:max-w-6xl dark:border-gray-700 dark:bg-[#212529]">
       {/* Card Header with Badge and Title */}
@@ -127,15 +134,18 @@ const Card = ({
           </div>
         )}
 
-        {/* Flexible bottom row with contributors and action button */}
+        {/* Flexible bottom row with tags, contributors and action button */}
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
-          {/* Tags section */}
-          {tags && tags.length > 0 && (
+
+          {/* Tags Section */}
+          {displayTags && displayTags.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-2">
-              {tags.map((tag, index) => (
+              {displayTags.slice(0, 3).map((tag, index) => (
                 <span
-                  key={`tag-${index}`}
-                  className="flex items-center gap-2 px-2 py-1 rounded-md border border-1 transition-all whitespace-nowrap justify-center bg-transparent text-zinc-300 hover:text-white"
+                  key={`tag-${index}`} //key =tag-1 ,2, 3 ... 
+                  className={`flex items-center gap-2 px-2 py-1 rounded-md border border-1 transition-all whitespace-nowrap justify-center bg-transparent text-zinc-300 hover:text-white
+                 ${index >= 2 ? 'hidden sm:flex' : ''
+                    }`}
                 >
                   {tag}
                 </span>
@@ -163,7 +173,7 @@ const Card = ({
           </div>
         </div>
       </div>
-    </div>
+    </div >
   )
 }
 
