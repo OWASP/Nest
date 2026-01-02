@@ -11,12 +11,6 @@ class Fuzz(Base):
     APP_NAME = "OWASP Nest Fuzz Testing"
     SITE_URL = "http://localhost:9500"
 
-    CACHES = {
-        "default": {
-            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        }
-    }
-
     IS_FUZZ_ENVIRONMENT = True
     LOGGING = {}
     PUBLIC_IP_ADDRESS = values.Value()
