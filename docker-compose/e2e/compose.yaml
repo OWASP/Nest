@@ -7,12 +7,14 @@ services:
         gunicorn wsgi:application --bind 0.0.0.0:9000
       '
     build:
-      context: ../backend
+      context: ../../backend
       dockerfile: docker/Dockerfile
     depends_on:
       db:
         condition: service_healthy
-    env_file: ../backend/.env.e2e.example
+      cache:
+        condition: service_healthy
+    env_file: ../../backend/.env.e2e.example
     networks:
       - e2e-nest-network
     ports:
@@ -40,7 +42,7 @@ services:
       POSTGRES_USER: ${DJANGO_DB_USER:-nest_user_e2e}
       POSTGRES_DB: ${DJANGO_DB_NAME:-nest_db_e2e}
     volumes:
-      - ../backend/data:/data:ro
+      - ../../backend/data:/data:ro
     networks:
       - e2e-nest-network
     command: >
@@ -68,10 +70,29 @@ services:
     ports:
       - 5433:5432
 
+  cache:
+    command: >
+      sh -c '
+        redis-server --requirepass $$REDIS_PASSWORD --maxmemory 100mb --maxmemory-policy allkeys-lru
+      '
+    container_name: e2e-nest-cache
+    image: redis:8.0.5-alpine3.21
+    environment:
+      REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-cache-e2e-password}
+    healthcheck:
+      interval: 5s
+      retries: 5
+      test: [CMD, redis-cli, -a, $$REDIS_PASSWORD, ping]
+      timeout: 5s
+    networks:
+      - e2e-nest-network
+    volumes:
+      - e2e-cache-data:/data
+
   e2e-tests:
     container_name: e2e-nest-tests
     build:
-      context: ../frontend
+      context: ../../frontend
       dockerfile: docker/Dockerfile.e2e.test
     command: >
       sh -c '
@@ -80,7 +101,7 @@ services:
     depends_on:
       backend:
         condition: service_healthy
-    env_file: ../frontend/.env.e2e.example
+    env_file: ../../frontend/.env.e2e.example
     networks:
       - e2e-nest-network
 
@@ -88,3 +109,4 @@ networks:
   e2e-nest-network:
 volumes:
   e2e-db-data:
+  e2e-cache-data:

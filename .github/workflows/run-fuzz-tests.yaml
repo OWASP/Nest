@@ -31,6 +31,17 @@ jobs:
           --health-retries=5
         ports:
           - 5432:5432
+      cache:
+        image: redis:8.0.5-alpine3.21
+        env:
+          REDIS_PASSWORD: nest-fuzz-cache-password
+        options: >-
+          --health-cmd="redis-cli -a $$REDIS_PASSWORD ping"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=5
+        ports:
+          - 6379:6379
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
