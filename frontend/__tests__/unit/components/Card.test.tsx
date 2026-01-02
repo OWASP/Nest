@@ -488,4 +488,42 @@ describe('Card', () => {
     expect(screen.getByTestId('social-icon')).toBeInTheDocument()
     expect(screen.getByTestId('contributor-avatar')).toBeInTheDocument()
   })
+  it('render tags when provided', () => {
+    const propsWithTags = {
+      ...baseProps,
+      tags: ['good first issue', 'help wanted'],
+    }
+    render(<Card {...propsWithTags} />)
+    expect(screen.getByText('good first issue')).toBeInTheDocument()
+    expect(screen.getByText('help wanted')).toBeInTheDocument()
+  })
+
+  it('filters and displays only priority tags when mixed with non-priority tags', () => {
+    const propsWithMixedTags = {
+      ...baseProps,
+      tags: ['good first issue', 'help wanted', 'frontend', 'documentation', 'tag-4'],
+    }
+    render(<Card {...propsWithMixedTags} />)
+    expect(screen.getByText('good first issue')).toBeInTheDocument()
+    expect(screen.getByText('help wanted')).toBeInTheDocument()
+    expect(screen.getByText('tag-4')).toBeInTheDocument()
+
+    expect(screen.queryByText('frontend')).not.toBeInTheDocument()
+    expect(screen.queryByText('documentation')).not.toBeInTheDocument()
+  })
+
+  it('displays only first 3 tags when more than 3 tags are provided', () => {
+    const propsWithManyTags = {
+      ...baseProps,
+      tags: ['good first issue', 'help wanted', 'tag-4', 'backend', 'frontend'],
+    }
+    render(<Card {...propsWithManyTags} />)
+    expect(screen.getByText('good first issue')).toBeInTheDocument()
+    expect(screen.getByText('help wanted')).toBeInTheDocument()
+    expect(screen.getByText('tag-4')).toBeInTheDocument()
+
+    expect(screen.queryByText('backend')).not.toBeInTheDocument()
+    expect(screen.queryByText('frontend')).not.toBeInTheDocument()
+  })
+
 })
