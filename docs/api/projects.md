@@ -18,23 +18,23 @@ In non-local environments (staging and production), this endpoint is protected b
   X-API-Key: YOUR_API_KEY_VALUE
 
 - If the `X-API-Key` header is missing or invalid, the API returns `401 Unauthorized` with a message indicating a missing or invalid API key.
-- Authenticated requests are subject to an auth-based rate limit of **10 requests per second**.
+- Authenticated requests are subject to a rate limit of **10 requests per second**.
 
 In local development (`IS_LOCAL_ENVIRONMENT`):
 
-- auth is disabled and this endpoint is publicly accessible without authentication.
-- throttling is disabled.
+- Authentication is disabled and this endpoint is locally accessible without authentication.
+- Throttling is disabled.
 
 ---
 
 ## Request
 
-Method: GET  
+Method: GET
 Path: /api/v0/projects/
 
 ### Query parameters
 
-- level (string, query, optional)  
+- level (string, query, optional)
   Level of the project. Must be one of:
   - other
   - incubator
@@ -42,7 +42,7 @@ Path: /api/v0/projects/
   - production
   - flagship
 
-- ordering (string, query, optional)  
+- ordering (string, query, optional)
   Ordering field. Must be one of:
   - created_at
   - -created_at
@@ -51,24 +51,28 @@ Path: /api/v0/projects/
 
   If ordering is not provided, the API applies a default ordering in code.
 
-- page (integer, query, optional, default: 1)  
+- page (integer, query, optional, default: 1)
   Page number (must be >= 1). If page is less than 1 (for example page=0), the API returns 422 Unprocessable Content.
 
-- page_size (integer, query, optional, default: 100)  
+- page_size (integer, query, optional, default: 100)
   Number of items per page.
 
 ### Example request (from OpenAPI “Try it out”, local dev)
 
+  ``` shell
   curl -X 'GET' \
     'http://localhost:8000/api/v0/projects/?level=flagship&ordering=created_at&page=1&page_size=100' \
     -H 'accept: application/json'
+  ```
 
 In a non-local environment, you would also include the API key header:
 
+  ``` shell
   curl -X 'GET' \
     'https://<nest-base-url>/api/v0/projects/?level=flagship&ordering=created_at&page=1&page_size=100' \
     -H 'accept: application/json' \
     -H 'X-API-Key: YOUR_API_KEY_VALUE'
+  ```
 
 ---
 
@@ -82,6 +86,7 @@ Media type: application/json
 
 Note: The items array below is intentionally truncated to keep the example readable.
 
+  ``` json
   {
     "current_page": 1,
     "has_next": true,
@@ -105,6 +110,7 @@ Note: The items array below is intentionally truncated to keep the example reada
       }
     ]
   }
+  ```
 
 Field overview (based on the schema):
 
@@ -130,6 +136,7 @@ In a fresh local development environment (before syncing data), the API may retu
 
 Example response (pre-sync):
 
+  ``` json
   {
     "current_page": 1,
     "has_next": false,
@@ -138,6 +145,7 @@ Example response (pre-sync):
     "total_count": 0,
     "total_pages": 1
   }
+  ```
 
 ---
 
@@ -145,9 +153,11 @@ Example response (pre-sync):
 
 Happens when page is greater than total_pages
 
+  ``` json
   {
     "detail": "Not Found: Page 3000 not found. Valid pages are 1 to 3."
   }
+  ```
 
 ---
 
@@ -155,6 +165,7 @@ Happens when page is greater than total_pages
 
 Returned when query parameters do not match the expected values. For example, sending level=1 or ordering=1 results in a response similar to:
 
+  ``` json
   {
     "detail": [
       {
@@ -181,11 +192,13 @@ Returned when query parameters do not match the expected values. For example, se
       }
     ]
   }
+  ```
 
 To fix, update level and ordering to one of the valid values listed above.
 
 #### Example – Invalid page (e.g., page=0)
 
+  ``` json
   {
     "detail": [
       {
@@ -201,5 +214,6 @@ To fix, update level and ordering to one of the valid values listed above.
       }
     ]
   }
+```
 
 To fix ensure page is >= 1.
