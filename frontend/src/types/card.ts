@@ -15,6 +15,7 @@ import type { RepositoryCardProps } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
 import type { ContributionStats } from 'utils/contributionDataUtils'
+import type { CardType } from 'components/CardDetailsPage'
 
 export type CardProps = {
   button: Button
@@ -81,7 +82,7 @@ export interface DetailsCardProps {
   topContributors?: Contributor[]
   topics?: string[]
   tags?: string[]
-  type: string
+  type: CardType
   userSummary?: JSX.Element
 }
 

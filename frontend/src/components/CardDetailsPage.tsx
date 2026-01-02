@@ -38,17 +38,27 @@ import StatusBadge from 'components/StatusBadge'
 import ToggleableList from 'components/ToggleableList'
 import TopContributorsList from 'components/TopContributorsList'
 
-const shouldShowStatistics = (type: string): boolean =>
+export type CardType =
+  | 'chapter'
+  | 'committee'
+  | 'module'
+  | 'organization'
+  | 'program'
+  | 'project'
+  | 'repository'
+  | 'user'
+
+export const shouldShowStatistics = (type: CardType): boolean =>
   type === 'project' ||
   type === 'repository' ||
   type === 'committee' ||
   type === 'user' ||
   type === 'organization'
 
-const shouldShowIssuesAndMilestones = (type: string): boolean =>
+export const shouldShowIssuesAndMilestones = (type: CardType): boolean =>
   type === 'project' || type === 'repository' || type === 'user' || type === 'organization'
 
-const shouldShowPullRequestsAndReleases = (type: string): boolean =>
+export const shouldShowPullRequestsAndReleases = (type: CardType): boolean =>
   type === 'project' || type === 'repository' || type === 'organization' || type === 'user'
 
 const DetailsCard = ({

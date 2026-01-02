@@ -3,7 +3,7 @@ import React from 'react'
 import '@testing-library/jest-dom'
 import { FaCode, FaTags } from 'react-icons/fa6'
 import type { DetailsCardProps } from 'types/card'
-import CardDetailsPage from 'components/CardDetailsPage'
+import CardDetailsPage, { type CardType } from 'components/CardDetailsPage'
 jest.mock('next/link', () => {
   const MockLink = ({
     children,
@@ -738,7 +738,13 @@ describe('CardDetailsPage', () => {
       expect(detailsCard).toHaveClass('md:col-span-5')
     })
 
-    const supportedTypes = ['project', 'repository', 'committee', 'user', 'organization']
+    const supportedTypes: CardType[] = [
+      'project',
+      'repository',
+      'committee',
+      'user',
+      'organization',
+    ]
 
     test.each(supportedTypes)('renders statistics section for %s type', (entityType) => {
       render(<CardDetailsPage {...defaultProps} type={entityType} />)
@@ -994,7 +1000,14 @@ describe('CardDetailsPage', () => {
       expect(screen.getByTestId('recent-releases')).toBeInTheDocument()
     })
 
-    const entityTypes = ['project', 'repository', 'user', 'organization', 'committee', 'chapter']
+    const entityTypes: CardType[] = [
+      'project',
+      'repository',
+      'user',
+      'organization',
+      'committee',
+      'chapter',
+    ]
 
     test.each(entityTypes)('renders all expected sections for %s type', (entityType) => {
       render(
@@ -1013,7 +1026,13 @@ describe('CardDetailsPage', () => {
       ).toBeInTheDocument()
     })
 
-    const supportedTypes = ['project', 'repository', 'committee', 'user', 'organization']
+    const supportedTypes: CardType[] = [
+      'project',
+      'repository',
+      'committee',
+      'user',
+      'organization',
+    ]
 
     test.each(supportedTypes)('renders statistics section for supported %s type', (entityType) => {
       render(<CardDetailsPage {...defaultProps} type={entityType} />)
@@ -1196,8 +1215,8 @@ describe('CardDetailsPage', () => {
     })
 
     it('handles unsupported entity types gracefully', () => {
-      render(<CardDetailsPage {...defaultProps} type="unsupported-type" />)
-
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render(<CardDetailsPage {...defaultProps} type={'unsupported-type' as any} />)
       expect(screen.getByText('Unsupported-type Details')).toBeInTheDocument()
     })
 
@@ -1238,7 +1257,7 @@ describe('CardDetailsPage', () => {
 
     it('validates required vs optional props correctly', () => {
       const minimalValidProps: DetailsCardProps = {
-        type: 'project',
+        type: 'project' as const,
         stats: [],
         healthMetricsData: [],
         languages: [],
@@ -1291,15 +1310,15 @@ describe('CardDetailsPage', () => {
 
   describe('Advanced Integration Tests', () => {
     it('handles multiple rapid prop changes', () => {
-      const { rerender } = render(<CardDetailsPage {...defaultProps} type="project" />)
+      const { rerender } = render(<CardDetailsPage {...defaultProps} type={'project' as const} />)
 
-      rerender(<CardDetailsPage {...defaultProps} type="chapter" />)
+      rerender(<CardDetailsPage {...defaultProps} type={'chapter' as const} />)
       expect(screen.getByText('Chapter Details')).toBeInTheDocument()
 
-      rerender(<CardDetailsPage {...defaultProps} type="user" />)
+      rerender(<CardDetailsPage {...defaultProps} type={'user' as const} />)
       expect(screen.getByText('User Details')).toBeInTheDocument()
 
-      rerender(<CardDetailsPage {...defaultProps} type="organization" />)
+      rerender(<CardDetailsPage {...defaultProps} type={'organization' as const} />)
       expect(screen.getByText('Organization Details')).toBeInTheDocument()
     })
 
@@ -1337,9 +1356,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('renders correctly with all optional sections enabled', () => {
-      const fullPropsAllSections = {
+      const fullPropsAllSections: DetailsCardProps = {
         ...defaultProps,
-        type: 'project',
+        type: 'project' as const,
         summary: 'Project summary text',
         userSummary: <div>User summary content</div>,
         socialLinks: ['https://github.com/test', 'https://twitter.com/test'],
@@ -1440,9 +1459,9 @@ describe('CardDetailsPage', () => {
 
   describe('Archived Badge Functionality', () => {
     it('displays archived badge for archived repository', () => {
-      const archivedProps = {
+      const archivedProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'repository',
+        type: 'repository' as const,
         isArchived: true,
       }
 
@@ -1452,9 +1471,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('does not display archived badge for non-archived repository', () => {
-      const activeProps = {
+      const activeProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'repository',
+        type: 'repository' as const,
         isArchived: false,
       }
 
@@ -1464,9 +1483,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('does not display archived badge when isArchived is undefined', () => {
-      const undefinedProps = {
+      const undefinedProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'repository',
+        type: 'repository' as const,
       }
 
       render(<CardDetailsPage {...undefinedProps} />)
@@ -1475,9 +1494,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('does not display archived badge for non-repository types', () => {
-      const projectProps = {
+      const projectProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'project',
+        type: 'project' as const,
         isArchived: true,
       }
 
@@ -1487,9 +1506,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('displays archived badge alongside inactive badge', () => {
-      const bothBadgesProps = {
+      const bothBadgesProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'repository',
+        type: 'repository' as const,
         isArchived: true,
         isActive: false,
       }
@@ -1501,9 +1520,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('displays archived badge independently of active status', () => {
-      const archivedAndActiveProps = {
+      const archivedAndActiveProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'repository',
+        type: 'repository' as const,
         isArchived: true,
         isActive: true,
       }
@@ -1515,9 +1534,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('archived badge has correct positioning with flex container', () => {
-      const archivedProps = {
+      const archivedProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'repository',
+        type: 'repository' as const,
         isArchived: true,
       }
 
@@ -1529,9 +1548,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('archived badge renders with medium size', () => {
-      const archivedProps = {
+      const archivedProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'repository',
+        type: 'repository' as const,
         isArchived: true,
       }
 
@@ -1542,9 +1561,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('handles null isArchived gracefully', () => {
-      const nullArchivedProps = {
+      const nullArchivedProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'repository',
+        type: 'repository' as const,
         isArchived: null,
       }
 
@@ -1569,9 +1588,9 @@ describe('CardDetailsPage', () => {
     }
 
     it('renders contribution stats and heatmap when data is provided', () => {
-      const propsWithContributions = {
+      const propsWithContributions: DetailsCardProps = {
         ...defaultProps,
-        type: 'project',
+        type: 'project' as const,
         contributionData,
         contributionStats,
         startDate: '2024-01-01',
@@ -1588,9 +1607,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('uses correct title for chapter type', () => {
-      const chapterPropsWithContributions = {
+      const chapterPropsWithContributions: DetailsCardProps = {
         ...defaultProps,
-        type: 'chapter',
+        type: 'chapter' as const,
         contributionStats,
       }
 
@@ -1600,16 +1619,16 @@ describe('CardDetailsPage', () => {
     })
 
     it('does not render contribution section when no data is provided', () => {
-      render(<CardDetailsPage {...defaultProps} type="project" />)
+      render(<CardDetailsPage {...defaultProps} type={'project' as const} />)
 
       expect(screen.queryByText('Project Contribution Activity')).not.toBeInTheDocument()
       expect(screen.queryByText('Chapter Contribution Activity')).not.toBeInTheDocument()
     })
 
     it('renders only stats when contributionData is missing', () => {
-      const statsOnlyProps = {
+      const statsOnlyProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'project',
+        type: 'project' as const,
         contributionStats,
       }
 
@@ -1620,9 +1639,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('renders heatmap when contributionData and dates are provided', () => {
-      const heatmapProps = {
+      const heatmapProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'project',
+        type: 'project' as const,
         contributionData,
         startDate: '2024-01-01',
         endDate: '2024-12-31',
@@ -1635,9 +1654,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('does not render heatmap when dates are missing', () => {
-      const noDateProps = {
+      const noDateProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'project',
+        type: 'project' as const,
         contributionData,
       }
 
@@ -1647,9 +1666,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('does not render heatmap when contributionData is empty', () => {
-      const emptyDataProps = {
+      const emptyDataProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'project',
+        type: 'project' as const,
         contributionData: {},
         startDate: '2024-01-01',
         endDate: '2024-12-31',
@@ -1661,13 +1680,12 @@ describe('CardDetailsPage', () => {
     })
 
     it('renders contribution section before top contributors', () => {
-      const fullProps = {
+      const fullProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'project',
+        type: 'project' as const,
         contributionStats,
         topContributors: [
           {
-            id: '1',
             login: 'user1',
             name: 'User One',
             avatarUrl: 'https://example.com/avatar1.png',
