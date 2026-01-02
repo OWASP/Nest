@@ -21,7 +21,6 @@ class SnapshotUserManager(models.Manager):
         return (
             super()
             .get_queryset()
-            .select_related("organization")
             .filter(is_bot=False)
             .exclude(
                 login__in=[
