@@ -28,9 +28,9 @@ owasp-generate-community-snapshot-video:
 	@mkdir -p backend/generated_videos
 	@docker run \
 		--env-file backend/.env \
+		--mount type=bind,src="$(PWD)/backend/generated_videos",dst=/home/owasp/generated_videos \
 		--network nest-local_nest-network \
 		--rm \
-		--volume "$(PWD)/backend/generated_videos:/home/owasp/generated_videos" \
 		nest-video-backend \
 		python manage.py owasp_generate_community_snapshot_video $(snapshot_key) /home/owasp/generated_videos
 
