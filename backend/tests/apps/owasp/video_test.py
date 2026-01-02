@@ -244,8 +244,7 @@ class TestSlideBuilder:
         """Test add_chapters_slide returns Slide when chapters exist."""
         mock_chapter = Mock()
         mock_chapter.name = "Test Chapter"
-        mock_chapter.country = "USA"
-        mock_chapter.region = "California"
+        mock_chapter.suggested_location = "California, USA"
 
         mock_qs = MagicMock()
         mock_qs.exists.return_value = True

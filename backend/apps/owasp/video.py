@@ -206,7 +206,7 @@ class SlideBuilder:
         return Slide(
             context={
                 "sponsors": sponsors,
-                "title": "Our Sponsors",
+                "title": "OWASP Foundation Sponsors",
             },
             output_dir=self.output_dir,
             name="sponsors",
@@ -242,7 +242,7 @@ class SlideBuilder:
         return Slide(
             context={
                 "projects": projects_data,
-                "title": f"New Projects ({project_count})",
+                "title": f"{project_count} New Projects",
             },
             output_dir=self.output_dir,
             name="projects",
@@ -263,7 +263,7 @@ class SlideBuilder:
 
         chapters = [
             {
-                "location": f"{c.region}, {c.country}" if c.region else c.country,
+                "location": c.suggested_location,
                 "name": c.name,
             }
             for c in new_chapters
@@ -274,7 +274,7 @@ class SlideBuilder:
         return Slide(
             context={
                 "chapters": chapters,
-                "title": f"New Chapters ({chapter_count})",
+                "title": f"{chapter_count} New Chapters",
             },
             output_dir=self.output_dir,
             name="chapters",
@@ -317,7 +317,7 @@ class SlideBuilder:
         return Slide(
             context={
                 "releases": releases_data,
-                "title": f"New Releases ({release_count})",
+                "title": f"{release_count} New Releases",
             },
             output_dir=self.output_dir,
             name="releases",
@@ -333,7 +333,7 @@ class SlideBuilder:
             output_dir=self.output_dir,
             name="thank_you",
             template_name="video/slides/thank_you.html",
-            transcript="Thanks for tuning in!... Visit Nest at Nest dot O-WASP dot org "
+            transcript="Thanks for tuning in!... Visit Nest dot O-WASP dot org "
             "for more community updates!... See you next time!!",
         )
 
