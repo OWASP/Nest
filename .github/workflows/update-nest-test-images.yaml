@@ -8,13 +8,12 @@ on:
 env:
   FORCE_COLOR: 1
 
-permissions:
-  contents: read
-
 jobs:
   update-nest-test-images:
     name: Update Nest test images
     if: ${{ github.repository == 'OWASP/Nest' }}
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
