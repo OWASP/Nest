@@ -1,15 +1,10 @@
 """OWASP Community Snapshots Video Generator."""
 
 import logging
-import os
-import tempfile
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-
-# Required to cache fonts, must be set before weasyprint is imported
-os.environ["XDG_CACHE_HOME"] = str(Path(tempfile.gettempdir()) / "cache")
 
 import ffmpeg
 import pypdfium2 as pdfium

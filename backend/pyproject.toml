@@ -50,11 +50,6 @@ strawberry-graphql = { extras = [ "django" ], version = "^0.288.1" }
 strawberry-graphql-django = "^0.72.0"
 thefuzz = "^0.22.1"
 pyparsing = "^3.2.3"
-weasyprint = "^67.0"
-pillow = "^12.0.0"
-pypdfium2 = "^5.2.0"
-ffmpeg-python = "^0.2.0"
-elevenlabs = "^2.27.0"
 
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.36.4"
@@ -68,6 +63,13 @@ pytest-django = "^4.5"
 pytest-mock = "^3.0"
 pytest-xdist = "^3.0"
 python-dotenv = "^1.0.1"
+
+[tool.poetry.group.video.dependencies]
+elevenlabs = "^2.27.0"
+ffmpeg-python = "^0.2.0"
+pillow = "^12.1.0"
+pypdfium2 = "^5.2.0"
+weasyprint = "^67.0"
 
 [tool.ruff]
 target-version = "py313"

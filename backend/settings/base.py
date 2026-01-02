@@ -218,7 +218,6 @@ class Base(Configuration):
 
     STATIC_ROOT = BASE_DIR / "staticfiles"
 
-    ELEVENLABS_API_KEY = values.SecretValue(environ_name="ELEVENLABS_API_KEY")
     OPEN_AI_SECRET_KEY = values.SecretValue(environ_name="OPEN_AI_SECRET_KEY")
 
     SLACK_BOT_TOKEN = values.SecretValue()

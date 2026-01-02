@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import logging
+import os
 from typing import TYPE_CHECKING
 
-from django.conf import settings
 from elevenlabs.client import ElevenLabs as ElevenLabsClient
 from elevenlabs.types.voice_settings import VoiceSettings
 
@@ -42,9 +42,16 @@ class ElevenLabs:
             use_speaker_boost (bool): Enable speaker clarity boost.
             voice_id (str): The voice ID to use.
 
+        Raises:
+            ValueError: If the ElevenLabs API key is not set.
+
         """
+        if not (api_key := os.getenv("DJANGO_ELEVENLABS_API_KEY")):
+            error_msg = "DJANGO_ELEVENLABS_API_KEY environment variable not set"
+            raise ValueError(error_msg)
+
         self.client = ElevenLabsClient(
-            api_key=settings.ELEVENLABS_API_KEY,
+            api_key=api_key,
             timeout=30,
         )
 

@@ -28,6 +28,7 @@ __pycache__
 *.pem
 backend/data/backup*
 backend/staticfiles
+community_snapshot_video_*
 design/
 frontend/blob-report/
 frontend/coverage

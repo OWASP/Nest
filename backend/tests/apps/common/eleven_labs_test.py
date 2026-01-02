@@ -19,17 +19,16 @@ DEFAULT_VOICE_ID = "1SM7GgM6IMuvQlz2BwM3"  # cspell:disable-line
 class TestElevenLabs:
     @pytest.fixture
     def elevenlabs_instance(self):
-        with patch("apps.common.eleven_labs.settings") as mock_settings:
-            mock_settings.ELEVENLABS_API_KEY = DEFAULT_API_KEY
-            with patch("apps.common.eleven_labs.ElevenLabsClient"):
-                return ElevenLabs()
+        with (
+            patch.dict("os.environ", {"DJANGO_ELEVENLABS_API_KEY": DEFAULT_API_KEY}),
+            patch("apps.common.eleven_labs.ElevenLabsClient"),
+        ):
+            return ElevenLabs()
 
-    @patch("apps.common.eleven_labs.settings")
     @patch("apps.common.eleven_labs.ElevenLabsClient")
-    def test_init(self, mock_client, mock_settings):
-        mock_settings.ELEVENLABS_API_KEY = DEFAULT_API_KEY
-
-        instance = ElevenLabs()
+    def test_init(self, mock_client):
+        with patch.dict("os.environ", {"DJANGO_ELEVENLABS_API_KEY": DEFAULT_API_KEY}):
+            instance = ElevenLabs()
 
         mock_client.assert_called_once_with(api_key=DEFAULT_API_KEY, timeout=DEFAULT_TIMEOUT)
         assert instance.model_id == DEFAULT_MODEL_ID
@@ -40,6 +39,14 @@ class TestElevenLabs:
         assert instance.style == DEFAULT_STYLE
         assert instance.use_speaker_boost == DEFAULT_USE_SPEAKER_BOOST
         assert instance.voice_id == DEFAULT_VOICE_ID
+
+    def test_init_raises_without_api_key(self):
+        """Test init raises ValueError when API key not set."""
+        with (
+            patch.dict("os.environ", {}, clear=True),
+            pytest.raises(ValueError, match="DJANGO_ELEVENLABS_API_KEY"),
+        ):
+            ElevenLabs()
 
     @pytest.mark.parametrize(
         ("model_id", "expected_model_id"),
@@ -118,13 +125,12 @@ class TestElevenLabs:
         assert result.voice_id == expected_voice_id
 
     @patch("apps.common.eleven_labs.ElevenLabsClient")
-    @patch("apps.common.eleven_labs.settings")
-    def test_generate_raises_on_api_error(self, mock_settings, mock_client):
+    def test_generate_raises_on_api_error(self, mock_client):
         """Test generate raises exception on API error."""
-        mock_settings.ELEVENLABS_API_KEY = DEFAULT_API_KEY
         mock_client.return_value.text_to_speech.convert.side_effect = Exception("API Error")
 
-        instance = ElevenLabs()
+        with patch.dict("os.environ", {"DJANGO_ELEVENLABS_API_KEY": DEFAULT_API_KEY}):
+            instance = ElevenLabs()
         instance.set_text("Test text")
 
         with pytest.raises(Exception, match="API Error"):
@@ -132,12 +138,11 @@ class TestElevenLabs:
 
     @patch("apps.common.eleven_labs.VoiceSettings")
     @patch("apps.common.eleven_labs.ElevenLabsClient")
-    @patch("apps.common.eleven_labs.settings")
-    def test_generate_success(self, mock_settings, mock_client, mock_voice_settings):
-        mock_settings.ELEVENLABS_API_KEY = DEFAULT_API_KEY
+    def test_generate_success(self, mock_client, mock_voice_settings):
         mock_client.return_value.text_to_speech.convert.return_value = [b"audio", b"data"]
 
-        instance = ElevenLabs()
+        with patch.dict("os.environ", {"DJANGO_ELEVENLABS_API_KEY": DEFAULT_API_KEY}):
+            instance = ElevenLabs()
         instance.set_text("Test text")
         response = instance.generate()
 
@@ -145,12 +150,10 @@ class TestElevenLabs:
         mock_client.return_value.text_to_speech.convert.assert_called_once()
 
     @patch("apps.common.eleven_labs.ElevenLabsClient")
-    @patch("apps.common.eleven_labs.settings")
-    def test_save_creates_file(self, mock_settings, mock_client, tmp_path):
+    def test_save_creates_file(self, mock_client, tmp_path):
         """Test save writes contents to file."""
-        mock_settings.ELEVENLABS_API_KEY = DEFAULT_API_KEY
-
-        instance = ElevenLabs()
+        with patch.dict("os.environ", {"DJANGO_ELEVENLABS_API_KEY": DEFAULT_API_KEY}):
+            instance = ElevenLabs()
         file_path = tmp_path / "output.mp3"
         contents = b"audio_data"
 
@@ -160,12 +163,10 @@ class TestElevenLabs:
         assert file_path.read_bytes() == b"audio_data"
 
     @patch("apps.common.eleven_labs.ElevenLabsClient")
-    @patch("apps.common.eleven_labs.settings")
-    def test_save_creates_parent_directories(self, mock_settings, mock_client, tmp_path):
+    def test_save_creates_parent_directories(self, mock_client, tmp_path):
         """Test save creates parent directories if they don't exist."""
-        mock_settings.ELEVENLABS_API_KEY = DEFAULT_API_KEY
-
-        instance = ElevenLabs()
+        with patch.dict("os.environ", {"DJANGO_ELEVENLABS_API_KEY": DEFAULT_API_KEY}):
+            instance = ElevenLabs()
         file_path = tmp_path / "nested" / "dir" / "output.mp3"
         contents = b"audio_data"
 
