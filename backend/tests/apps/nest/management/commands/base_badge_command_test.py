@@ -10,9 +10,9 @@ from apps.nest.management.commands.base_badge_command import BaseBadgeCommand
 
 
 class MockCommand(BaseBadgeCommand):
-    badge_name = "Test Badge"
-    badge_description = "Test"
     badge_css_class = "fa-test"
+    badge_description = "Test"
+    badge_name = "Test Badge"
     badge_weight = 50
 
     def get_eligible_users(self):
@@ -25,7 +25,7 @@ class TestBaseBadgeCommand(SimpleTestCase):
             def get_eligible_users(self):
                 return MagicMock()
 
-        with pytest.raises(ValueError, match="badge_name"):
+        with pytest.raises(ValueError, match="Badge name"):
             NoName().handle()
 
     @patch("apps.nest.management.commands.base_badge_command.UserBadge")

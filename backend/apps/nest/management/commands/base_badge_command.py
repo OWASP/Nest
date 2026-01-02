@@ -16,9 +16,9 @@ logger = logging.getLogger(__name__)
 class BaseBadgeCommand(BaseCommand, ABC):
     """Base class for badge sync commands."""
 
-    badge_name: str | None = None
-    badge_description: str | None = None
     badge_css_class: str | None = None
+    badge_description: str | None = None
+    badge_name: str | None = None
     badge_weight: int | None = None
 
     @abstractmethod
@@ -31,7 +31,7 @@ class BaseBadgeCommand(BaseCommand, ABC):
 
     def handle(self, *args, **options):
         if not self.badge_name:
-            msg = "badge_name must be set"
+            msg = "Badge name must be set"
             raise ValueError(msg)
 
         self.stdout.write(f"Syncing {self.badge_name}...")
@@ -40,8 +40,8 @@ class BaseBadgeCommand(BaseCommand, ABC):
             badge, created = Badge.objects.get_or_create(
                 name=self.badge_name,
                 defaults={
-                    "description": self.badge_description,
                     "css_class": self.badge_css_class,
+                    "description": self.badge_description,
                     "weight": self.badge_weight,
                 },
             )
@@ -52,7 +52,7 @@ class BaseBadgeCommand(BaseCommand, ABC):
                 badge.description = self.badge_description
                 badge.css_class = self.badge_css_class
                 badge.weight = self.badge_weight
-                badge.save(update_fields=["description", "css_class", "weight"])
+                badge.save(update_fields=["css_class", "description", "weight"])
 
             eligible_users = self.get_eligible_users()
             users_to_add = eligible_users.exclude(
