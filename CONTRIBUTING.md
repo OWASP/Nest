@@ -452,13 +452,16 @@ flowchart TD
     CheckCI -->|Yes| ReadyMerge([PR Ready for Merge])
     CheckCI -->|No| MarkDraft
 
-    style Start fill:#e1f5e1
-    style ReadyMerge fill:#e1f5e1
-    style ResolveIssue fill:#fff4e1
-    style RunChecks fill:#e1f0ff
-    style CheckAutoTools fill:#e1f0ff
-    style HasMaintainerComments fill:#e1f0ff
-    style CheckCI fill:#e1f0ff
+    style Start fill:#4caf50,stroke:#2e7d32,stroke-width:2px,color:#ffffff
+    style ReadyMerge fill:#4caf50,stroke:#2e7d32,stroke-width:2px,color:#ffffff
+    style ResolveIssue fill:#ff9800,stroke:#f57c00,stroke-width:2px,color:#000000
+    style RunChecks fill:#2196f3,stroke:#1565c0,stroke-width:2px,color:#ffffff
+    style CheckAutoTools fill:#2196f3,stroke:#1565c0,stroke-width:2px,color:#ffffff
+    style HasMaintainerComments fill:#2196f3,stroke:#1565c0,stroke-width:2px,color:#ffffff
+    style CheckCI fill:#2196f3,stroke:#1565c0,stroke-width:2px,color:#ffffff
+    style MarkDraft fill:#ff9800,stroke:#f57c00,stroke-width:2px,color:#000000
+    style MarkReady fill:#4caf50,stroke:#2e7d32,stroke-width:2px,color:#ffffff
+    style CreateDraftPR fill:#9e9e9e,stroke:#616161,stroke-width:2px,color:#ffffff
     style WP1 fill:transparent,stroke:transparent,color:transparent,width:0px,height:0px
     style WP2 fill:transparent,stroke:transparent,color:transparent,width:0px,height:0px
 
