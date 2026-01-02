@@ -50,7 +50,7 @@ prune:
 	@docker volume prune -f
 
 run:
-	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
+	@DOCKER_BUILDKIT=1 \
 	docker compose -f docker-compose/local/compose.yaml --project-name nest-local build && \
 	docker compose -f docker-compose/local/compose.yaml --project-name nest-local up --remove-orphans
 

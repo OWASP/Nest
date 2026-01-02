@@ -119,12 +119,18 @@ sync-data: \
 test-backend:
 	@DOCKER_BUILDKIT=1 docker build \
 		--cache-from nest-test-backend \
-		-f backend/docker/Dockerfile.test backend \
+		-f docker/backend/Dockerfile.test . \
 		-t nest-test-backend
 	@docker run \
-		-e DJANGO_SETTINGS_MODULE=settings.test \
 		--env-file backend/.env.example \
-		--rm nest-test-backend pytest
+		--rm \
+		-e DJANGO_SETTINGS_MODULE=settings.test \
+		-v $$(pwd)/backend/apps:/home/owasp/apps:ro \
+		-v $$(pwd)/backend/settings:/home/owasp/settings:ro \
+		-v $$(pwd)/backend/static:/home/owasp/static:ro \
+		-v $$(pwd)/backend/templates:/home/owasp/templates:ro \
+		-v $$(pwd)/backend/tests:/home/owasp/tests:ro \
+		nest-test-backend pytest
 
 update-backend-dependencies:
 	@cd backend && poetry update

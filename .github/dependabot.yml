@@ -1,12 +1,12 @@
 version: 2
 updates:
   - package-ecosystem: docker
-    directory: /backend/docker
+    directory: /docker/backend
     schedule:
       interval: daily
 
   - package-ecosystem: docker
-    directory: /cspell
+    directory: /docker/cspell
     schedule:
       interval: daily
 
@@ -31,12 +31,12 @@ updates:
       interval: daily
 
   - package-ecosystem: docker
-    directory: /docs/docker
+    directory: /docker/docs
     schedule:
       interval: daily
 
   - package-ecosystem: docker
-    directory: /frontend/docker
+    directory: /docker/frontend
     schedule:
       interval: daily
 
