@@ -8,7 +8,7 @@ services:
       '
     build:
       context: ../../backend
-      dockerfile: docker/Dockerfile
+      dockerfile: ../docker/backend/Dockerfile
     depends_on:
       db:
         condition: service_healthy
@@ -92,7 +92,7 @@ services:
   graphql:
     container_name: fuzz-nest-graphql
     build:
-      context: ../../backend/docker
+      context: ../../docker/backend
       dockerfile: Dockerfile.fuzz
     environment:
       BASE_URL: http://backend:9500
