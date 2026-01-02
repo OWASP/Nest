@@ -75,4 +75,8 @@ class Command(BaseCommand):
         video_path = generator.generate_video(video_output_dir, f"{snapshot_key}_snapshot")
         generator.cleanup()
 
-        self.stdout.write(self.style.SUCCESS(f"Generated video at {dir_name}/{video_path.name}"))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Generated video at backend/generated_videos/{dir_name}/{video_path.name}"
+            )
+        )
