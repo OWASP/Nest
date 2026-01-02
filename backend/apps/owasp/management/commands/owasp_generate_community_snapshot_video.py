@@ -50,12 +50,12 @@ class Command(BaseCommand):
         generator = VideoGenerator()
 
         slides_to_add = [
-            slide_builder.create_intro_slide(),
-            slide_builder.create_sponsors_slide(),
-            slide_builder.create_projects_slide(),
-            slide_builder.create_chapters_slide(),
-            slide_builder.create_releases_slide(),
-            slide_builder.create_thank_you_slide(),
+            slide_builder.add_intro_slide(),
+            slide_builder.add_sponsors_slide(),
+            slide_builder.add_projects_slide(),
+            slide_builder.add_chapters_slide(),
+            slide_builder.add_releases_slide(),
+            slide_builder.add_thank_you_slide(),
         ]
 
         for slide in slides_to_add:

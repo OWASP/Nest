@@ -95,12 +95,12 @@ class TestHandleMethod:
         mock_releases_slide = None
         mock_thank_you_slide = Mock()
 
-        mock_builder_instance.create_intro_slide.return_value = mock_intro_slide
-        mock_builder_instance.create_sponsors_slide.return_value = mock_sponsors_slide
-        mock_builder_instance.create_projects_slide.return_value = mock_projects_slide
-        mock_builder_instance.create_chapters_slide.return_value = mock_chapters_slide
-        mock_builder_instance.create_releases_slide.return_value = mock_releases_slide
-        mock_builder_instance.create_thank_you_slide.return_value = mock_thank_you_slide
+        mock_builder_instance.add_intro_slide.return_value = mock_intro_slide
+        mock_builder_instance.add_sponsors_slide.return_value = mock_sponsors_slide
+        mock_builder_instance.add_projects_slide.return_value = mock_projects_slide
+        mock_builder_instance.add_chapters_slide.return_value = mock_chapters_slide
+        mock_builder_instance.add_releases_slide.return_value = mock_releases_slide
+        mock_builder_instance.add_thank_you_slide.return_value = mock_thank_you_slide
 
         mock_generator_instance = MagicMock()
         mock_generator.return_value = mock_generator_instance
@@ -133,12 +133,12 @@ class TestHandleMethod:
         mock_builder_instance = MagicMock()
         mock_slide_builder.return_value = mock_builder_instance
 
-        mock_builder_instance.create_intro_slide.return_value = Mock()
-        mock_builder_instance.create_sponsors_slide.return_value = None
-        mock_builder_instance.create_projects_slide.return_value = None
-        mock_builder_instance.create_chapters_slide.return_value = None
-        mock_builder_instance.create_releases_slide.return_value = None
-        mock_builder_instance.create_thank_you_slide.return_value = Mock()
+        mock_builder_instance.add_intro_slide.return_value = Mock()
+        mock_builder_instance.add_sponsors_slide.return_value = None
+        mock_builder_instance.add_projects_slide.return_value = None
+        mock_builder_instance.add_chapters_slide.return_value = None
+        mock_builder_instance.add_releases_slide.return_value = None
+        mock_builder_instance.add_thank_you_slide.return_value = Mock()
 
         mock_generator_instance = MagicMock()
         mock_generator.return_value = mock_generator_instance
@@ -161,12 +161,12 @@ class TestHandleMethod:
 
         mock_builder_instance = MagicMock()
         mock_slide_builder.return_value = mock_builder_instance
-        mock_builder_instance.create_intro_slide.return_value = Mock()
-        mock_builder_instance.create_sponsors_slide.return_value = Mock()
-        mock_builder_instance.create_projects_slide.return_value = Mock()
-        mock_builder_instance.create_chapters_slide.return_value = Mock()
-        mock_builder_instance.create_releases_slide.return_value = Mock()
-        mock_builder_instance.create_thank_you_slide.return_value = Mock()
+        mock_builder_instance.add_intro_slide.return_value = Mock()
+        mock_builder_instance.add_sponsors_slide.return_value = Mock()
+        mock_builder_instance.add_projects_slide.return_value = Mock()
+        mock_builder_instance.add_chapters_slide.return_value = Mock()
+        mock_builder_instance.add_releases_slide.return_value = Mock()
+        mock_builder_instance.add_thank_you_slide.return_value = Mock()
 
         mock_generator_instance = MagicMock()
         mock_generator_instance.generate_video.return_value = Path("/path/to/video.mp4")

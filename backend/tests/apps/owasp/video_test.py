@@ -152,17 +152,17 @@ class TestSlideBuilder:
         result = SlideBuilder.format_names_for_transcript(names)
         assert result == expected
 
-    def test_create_intro_slide(self, slide_builder):
-        """Test create_intro_slide returns a Slide."""
-        slide = slide_builder.create_intro_slide()
+    def test_add_intro_slide(self, slide_builder):
+        """Test add_intro_slide returns a Slide."""
+        slide = slide_builder.add_intro_slide()
 
         assert isinstance(slide, Slide)
         assert slide.name == "intro"
         assert slide.template_name == "video/slides/intro.html"
         assert slide.transcript is not None
 
-    def test_create_intro_slide_multi_snapshot(self, tmp_path):
-        """Test create_intro_slide with different first and last snapshots."""
+    def test_add_intro_slide_multi_snapshot(self, tmp_path):
+        """Test add_intro_slide with different first and last snapshots."""
         mock_qs = MagicMock()
         first_snapshot = Mock()
         first_snapshot.start_at.strftime.side_effect = (
@@ -174,38 +174,38 @@ class TestSlideBuilder:
         mock_qs.last.return_value = last_snapshot
 
         slide_builder = SlideBuilder(mock_qs, output_dir=tmp_path)
-        slide = slide_builder.create_intro_slide()
+        slide = slide_builder.add_intro_slide()
 
         assert isinstance(slide, Slide)
         assert slide.transcript
         assert "2024" in slide.transcript
 
     @patch("apps.owasp.video.Sponsor.objects")
-    def test_create_sponsors_slide(self, mock_sponsor_objects, slide_builder):
-        """Test create_sponsors_slide returns a Slide."""
+    def test_add_sponsors_slide(self, mock_sponsor_objects, slide_builder):
+        """Test add_sponsors_slide returns a Slide."""
         mock_sponsor_objects.all.return_value = []
 
-        slide = slide_builder.create_sponsors_slide()
+        slide = slide_builder.add_sponsors_slide()
 
         assert isinstance(slide, Slide)
         assert slide.name == "sponsors"
 
     @patch("apps.owasp.video.Project.objects")
-    def test_create_projects_slide_no_projects(self, mock_project_objects, slide_builder):
-        """Test create_projects_slide returns None when no projects."""
+    def test_add_projects_slide_no_projects(self, mock_project_objects, slide_builder):
+        """Test add_projects_slide returns None when no projects."""
         mock_qs = MagicMock()
         mock_qs.exists.return_value = False
         mock_project_objects.filter.return_value.distinct.return_value.order_by.return_value = (
             mock_qs
         )
 
-        result = slide_builder.create_projects_slide()
+        result = slide_builder.add_projects_slide()
 
         assert result is None
 
     @patch("apps.owasp.video.Project.objects")
-    def test_create_projects_slide_with_projects(self, mock_project_objects, slide_builder):
-        """Test create_projects_slide returns Slide when projects exist."""
+    def test_add_projects_slide_with_projects(self, mock_project_objects, slide_builder):
+        """Test add_projects_slide returns Slide when projects exist."""
         mock_project = Mock()
         mock_project.name = "Test Project"
         mock_project.stars_count = 100
@@ -221,27 +221,27 @@ class TestSlideBuilder:
             mock_qs
         )
 
-        result = slide_builder.create_projects_slide()
+        result = slide_builder.add_projects_slide()
 
         assert isinstance(result, Slide)
         assert result.name == "projects"
 
     @patch("apps.owasp.video.Chapter.objects")
-    def test_create_chapters_slide_no_chapters(self, mock_chapter_objects, slide_builder):
-        """Test create_chapters_slide returns None when no chapters."""
+    def test_add_chapters_slide_no_chapters(self, mock_chapter_objects, slide_builder):
+        """Test add_chapters_slide returns None when no chapters."""
         mock_qs = MagicMock()
         mock_qs.exists.return_value = False
         mock_chapter_objects.filter.return_value.distinct.return_value.order_by.return_value = (
             mock_qs
         )
 
-        result = slide_builder.create_chapters_slide()
+        result = slide_builder.add_chapters_slide()
 
         assert result is None
 
     @patch("apps.owasp.video.Chapter.objects")
-    def test_create_chapters_slide_with_chapters(self, mock_chapter_objects, slide_builder):
-        """Test create_chapters_slide returns Slide when chapters exist."""
+    def test_add_chapters_slide_with_chapters(self, mock_chapter_objects, slide_builder):
+        """Test add_chapters_slide returns Slide when chapters exist."""
         mock_chapter = Mock()
         mock_chapter.name = "Test Chapter"
         mock_chapter.country = "USA"
@@ -255,31 +255,31 @@ class TestSlideBuilder:
             mock_qs
         )
 
-        result = slide_builder.create_chapters_slide()
+        result = slide_builder.add_chapters_slide()
 
         assert isinstance(result, Slide)
         assert result.name == "chapters"
 
     @patch("apps.owasp.video.Project.objects")
     @patch("apps.owasp.video.Release.objects")
-    def test_create_releases_slide_no_releases(
+    def test_add_releases_slide_no_releases(
         self, mock_release_objects, mock_project_objects, slide_builder
     ):
-        """Test create_releases_slide returns None when no releases."""
+        """Test add_releases_slide returns None when no releases."""
         mock_qs = MagicMock()
         mock_qs.exists.return_value = False
         mock_release_objects.filter.return_value.distinct.return_value = mock_qs
 
-        result = slide_builder.create_releases_slide()
+        result = slide_builder.add_releases_slide()
 
         assert result is None
 
     @patch("apps.owasp.video.Project.objects")
     @patch("apps.owasp.video.Release.objects")
-    def test_create_releases_slide_with_releases(
+    def test_add_releases_slide_with_releases(
         self, mock_release_objects, mock_project_objects, slide_builder
     ):
-        """Test create_releases_slide returns Slide when releases exist."""
+        """Test add_releases_slide returns Slide when releases exist."""
         mock_release = Mock()
         mock_repository = Mock()
         mock_release.repository = mock_repository
@@ -297,14 +297,14 @@ class TestSlideBuilder:
         mock_project_qs.first.return_value = mock_project
         mock_project_objects.filter.return_value = mock_project_qs
 
-        result = slide_builder.create_releases_slide()
+        result = slide_builder.add_releases_slide()
 
         assert isinstance(result, Slide)
         assert result.name == "releases"
 
-    def test_create_thank_you_slide(self, slide_builder):
-        """Test create_thank_you_slide returns a Slide."""
-        slide = slide_builder.create_thank_you_slide()
+    def test_add_thank_you_slide(self, slide_builder):
+        """Test add_thank_you_slide returns a Slide."""
+        slide = slide_builder.add_thank_you_slide()
 
         assert isinstance(slide, Slide)
         assert slide.name == "thank_you"

@@ -168,8 +168,8 @@ class SlideBuilder:
             return cleaned[0]
         return ""
 
-    def create_intro_slide(self) -> Slide:
-        """Create an introduction slide."""
+    def add_intro_slide(self) -> Slide:
+        """Add an introduction slide."""
         first = self.snapshots.first()
         last = self.snapshots.last()
         name = first.start_at.strftime("%B") if first == last else first.start_at.strftime("%Y")
@@ -186,8 +186,8 @@ class SlideBuilder:
             transcript=f"Hey, everyone. Welcome to the O-WASP Nest {name} community snapshot...",
         )
 
-    def create_sponsors_slide(self) -> Slide:
-        """Create a sponsors slide."""
+    def add_sponsors_slide(self) -> Slide:
+        """Add a sponsors slide."""
         sponsors = [
             {"image_url": s.image_url, "name": s.name}
             for s in sorted(
@@ -214,8 +214,8 @@ class SlideBuilder:
             transcript="A HUGE thanks to the sponsors who make our work possible!",
         )
 
-    def create_projects_slide(self) -> Slide | None:
-        """Create a projects slide."""
+    def add_projects_slide(self) -> Slide | None:
+        """Add a projects slide."""
         new_projects = (
             Project.objects.filter(snapshots__in=self.snapshots)
             .distinct()
@@ -251,8 +251,8 @@ class SlideBuilder:
             f"including O-WASP {formatted_project_names}.",
         )
 
-    def create_chapters_slide(self) -> Slide | None:
-        """Create a chapters slide."""
+    def add_chapters_slide(self) -> Slide | None:
+        """Add a chapters slide."""
         new_chapters = (
             Chapter.objects.filter(snapshots__in=self.snapshots).distinct().order_by("name")
         )
@@ -283,8 +283,8 @@ class SlideBuilder:
             f"including {formatted_names}.",
         )
 
-    def create_releases_slide(self) -> Slide | None:
-        """Create a releases slide."""
+    def add_releases_slide(self) -> Slide | None:
+        """Add a releases slide."""
         releases = Release.objects.filter(snapshots__in=self.snapshots).distinct()
         if not releases.exists():
             return None
@@ -326,8 +326,8 @@ class SlideBuilder:
             f"with {formatted_names} leading the way.",
         )
 
-    def create_thank_you_slide(self) -> Slide:
-        """Create a thank you slide."""
+    def add_thank_you_slide(self) -> Slide:
+        """Add a thank you slide."""
         return Slide(
             context={},
             output_dir=self.output_dir,
