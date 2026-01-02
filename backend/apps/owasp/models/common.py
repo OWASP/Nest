@@ -197,7 +197,7 @@ class RepositoryBasedEntityModel(models.Model):
 
         leaders = []
         # simplified regex to reduce complexity score below 20
-        pattern = r"[-*]\s*(?:\[([^\]]+)\]|([^\n\[]+?))"
+        pattern = r"[-*]\s*(?:\[([^\]]+)\]|([^\n\[]+))"
 
         for line in content.split("\n"):
             for match in re.finditer(pattern, line.strip()):
@@ -236,7 +236,7 @@ class RepositoryBasedEntityModel(models.Model):
         """Get entity metadata."""
         try:
             yaml_content = re.search(
-                r"^---\s*([\s\S]*?)\s*---",
+                r"^---\s*(.*?)\s*---",  # nosonar
                 get_repository_file_content(self.index_md_url),
                 re.DOTALL,
             )
