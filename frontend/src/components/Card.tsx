@@ -140,7 +140,7 @@ const Card = ({
 
           {/* Tags Section */}
           {displayTags && displayTags.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className=" flex flex-wrap gap-2">
               {displayTags.slice(0, 3).map((tag, index) => (
                 <span
                   key={`tag-${index}`} //key =tag-1 ,2, 3 ... 
