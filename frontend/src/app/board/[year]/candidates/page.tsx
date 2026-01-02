@@ -87,20 +87,21 @@ type CandidateWithSnapshot = Candidate & {
 const BoardCandidatesPage = () => {
   const { year } = useParams<{ year: string }>()
   const [candidates, setCandidates] = useState<CandidateWithSnapshot[]>([])
-  const [isLoading, setIsLoading] = useState(true)
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetBoardCandidatesDocument, {
+  const {
+    data: graphQLData,
+    error: graphQLRequestError,
+    loading,
+  } = useQuery(GetBoardCandidatesDocument, {
     variables: { year: Number.parseInt(year) },
   })
 
   useEffect(() => {
     if (graphQLData?.boardOfDirectors) {
       setCandidates(graphQLData.boardOfDirectors.candidates || [])
-      setIsLoading(false)
     }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
   }, [graphQLData, graphQLRequestError])
 
@@ -678,7 +679,7 @@ const BoardCandidatesPage = () => {
     )
   }
 
-  if (isLoading) {
+  if (loading) {
     return <LoadingSpinner />
   }
 

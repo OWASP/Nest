@@ -205,11 +205,16 @@ jest.mock('components/MetricsScoreCircle', () => ({
     clickable?: boolean
     onClick?: () => void
     [key: string]: unknown
-  }) => (
-    <div data-testid="metrics-score-circle" role={clickable ? 'button' : undefined} {...props}>
-      Score: {score}
-    </div>
-  ),
+  }) =>
+    clickable ? (
+      <button data-testid="metrics-score-circle" onClick={_onClick} {...props}>
+        Score: {score}
+      </button>
+    ) : (
+      <div data-testid="metrics-score-circle" {...props}>
+        Score: {score}
+      </div>
+    ),
 }))
 
 jest.mock('components/Milestones', () => ({
