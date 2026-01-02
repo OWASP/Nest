@@ -416,6 +416,79 @@ If you are adding new functionality, include relevant test cases.
 
 ## Contributing Workflow
 
+The following diagram illustrates the complete contribution workflow:
+
+```mermaid
+flowchart TD
+    Start([Start]) --> CreateIssue[Create New Issue]
+    Start --> FindIssue[Find Existing Issue]
+    CreateIssue --> GetAssigned["**Get Assigned to Issue**<br/>PRs will be automatically<br/>closed if you're not assigned"]
+    FindIssue --> GetAssigned
+    GetAssigned --> ResolveIssue[**Resolve Issue**<br/>work on code/docs/tests updates]
+
+    ResolveIssue --> RunChecks{**Run `make check-test`**<br/>locally! This is a required step -- you will not be assigned to new issues if you ignore this}
+    RunChecks -->|Fails| WP1[ ]
+    RunChecks -->|Passes| PushChanges[**Push Changes to<br/>GitHub Fork Branch**]
+    WP1 -.-> ResolveIssue
+
+    PushChanges --> HasPR{PR Exists?}
+    HasPR -->|No| CreateDraftPR[Create Draft PR]
+    HasPR -->|Yes| WaitAutoChecks[**Wait for Automated<br/>Checks to Finish**]
+    CreateDraftPR --> WaitAutoChecks
+
+    WaitAutoChecks --> CheckAutoTools{All **CodeRabbit and <br/>SonarQube** Comments<br/>Resolved?}
+    CheckAutoTools -->|No| MarkDraft[Make Sure PR Is **Marked as a Draft**]
+    CheckAutoTools -->|Yes| MarkReady[Mark PR as Ready<br/>for Review]
+    MarkDraft --> WP2[ ]
+    WP2 -.-> ResolveIssue
+
+    MarkReady --> RequestReview[Request Review from<br/>Project Maintainers]
+    RequestReview --> WaitMaintainer[Wait for Maintainers'<br/>Comments]
+
+    WaitMaintainer --> HasMaintainerComments{**Maintainers' Comments<br/>Resolved**?}
+    HasMaintainerComments -->|No| MarkDraft
+    HasMaintainerComments -->|Yes| CheckCI{**CI/CD<br/>Passing?**}
+
+    CheckCI -->|Yes| ReadyMerge([PR Ready for Merge])
+    CheckCI -->|No| MarkDraft
+
+    style Start fill:#e1f5e1
+    style ReadyMerge fill:#e1f5e1
+    style ResolveIssue fill:#fff4e1
+    style RunChecks fill:#e1f0ff
+    style CheckAutoTools fill:#e1f0ff
+    style HasMaintainerComments fill:#e1f0ff
+    style CheckCI fill:#e1f0ff
+    style WP1 fill:transparent,stroke:transparent,color:transparent,width:0px,height:0px
+    style WP2 fill:transparent,stroke:transparent,color:transparent,width:0px,height:0px
+
+    linkStyle 0 stroke:#4caf50,stroke-width:2px
+    linkStyle 1 stroke:#4caf50,stroke-width:2px
+    linkStyle 2 stroke:#4caf50,stroke-width:2px
+    linkStyle 3 stroke:#4caf50,stroke-width:2px
+    linkStyle 4 stroke:#4caf50,stroke-width:2px
+    linkStyle 5 stroke:#4caf50,stroke-width:2px
+    linkStyle 6 stroke:#f44336,stroke-width:2px
+    linkStyle 7 stroke:#4caf50,stroke-width:2px
+    linkStyle 8 stroke:#f44336,stroke-width:2px
+    linkStyle 9 stroke:#4caf50,stroke-width:2px
+    linkStyle 10 stroke:#9e9e9e,stroke-width:2px
+    linkStyle 11 stroke:#4caf50,stroke-width:2px
+    linkStyle 12 stroke:#4caf50,stroke-width:2px
+    linkStyle 13 stroke:#4caf50,stroke-width:2px
+    linkStyle 14 stroke:#f44336,stroke-width:2px
+    linkStyle 15 stroke:#4caf50,stroke-width:2px
+    linkStyle 16 stroke:#f44336,stroke-width:2px
+    linkStyle 17 stroke:#f44336,stroke-width:2px
+    linkStyle 18 stroke:#4caf50,stroke-width:2px
+    linkStyle 19 stroke:#4caf50,stroke-width:2px
+    linkStyle 20 stroke:#4caf50,stroke-width:2px
+    linkStyle 21 stroke:#f44336,stroke-width:2px
+    linkStyle 22 stroke:#4caf50,stroke-width:2px
+    linkStyle 23 stroke:#4caf50,stroke-width:2px
+    linkStyle 24 stroke:#f44336,stroke-width:2px
+```
+
 ### 1. Find Something to Work On
 
 - Check the **Issues** tab for open issues: [https://github.com/owasp/nest/issues](https://github.com/owasp/nest/issues)

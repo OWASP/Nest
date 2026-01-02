@@ -56,6 +56,10 @@ markdown_extensions:
   - attr_list
   - def_list
   - abbr
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
 
 plugins:
   - search
