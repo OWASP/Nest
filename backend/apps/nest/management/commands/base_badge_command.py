@@ -60,17 +60,23 @@ class BaseBadgeCommand(BaseCommand, ABC):
                 user_badges__is_active=True,
             )
 
-            added_count = 0
-            for user in users_to_add:
-                user_badge, created = UserBadge.objects.get_or_create(user=user, badge=badge)
-                if created:
-                    added_count += 1
-                elif not user_badge.is_active:
-                    user_badge.is_active = True
-                    user_badge.save(update_fields=["is_active"])
-                    added_count += 1
+            new_badges = [
+                UserBadge(user=user, badge=badge, is_active=True) for user in users_to_add
+            ]
 
-            self._log(f"Added '{self.badge_name}' badge to {added_count} users")
+            if new_badges:
+                UserBadge.objects.bulk_create(
+                    new_badges,
+                    update_conflicts=True,
+                    update_fields=["is_active"],
+                    unique_fields=["user", "badge"],
+                )
+
+            added_count = len(new_badges)
+
+            if added_count > 0:
+                user_word = "user" if added_count == 1 else "users"
+                self._log(f"Added '{self.badge_name}' badge to {added_count} {user_word}")
 
             users_to_remove = UserBadge.objects.filter(
                 badge=badge,
@@ -80,7 +86,8 @@ class BaseBadgeCommand(BaseCommand, ABC):
             removed_count = users_to_remove.count()
             if removed_count:
                 users_to_remove.update(is_active=False)
-                self._log(f"Removed '{self.badge_name}' badge from {removed_count} users")
+                user_word = "user" if removed_count == 1 else "users"
+                self._log(f"Removed '{self.badge_name}' badge from {removed_count} {user_word}")
 
             self.stdout.write(self.style.SUCCESS(f"{self.badge_name} synced successfully"))
         except Exception:
