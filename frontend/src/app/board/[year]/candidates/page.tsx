@@ -88,7 +88,11 @@ const BoardCandidatesPage = () => {
   const { year } = useParams<{ year: string }>()
   const [candidates, setCandidates] = useState<CandidateWithSnapshot[]>([])
 
-  const { data: graphQLData, error: graphQLRequestError, loading } = useQuery(GetBoardCandidatesDocument, {
+  const {
+    data: graphQLData,
+    error: graphQLRequestError,
+    loading,
+  } = useQuery(GetBoardCandidatesDocument, {
     variables: { year: Number.parseInt(year) },
   })
 
