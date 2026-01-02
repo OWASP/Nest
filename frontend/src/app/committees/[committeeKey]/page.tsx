@@ -2,7 +2,7 @@
 import { useQuery } from '@apollo/client/react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { FaExclamationCircle } from 'react-icons/fa'
 import { FaCode, FaCodeFork, FaStar } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
@@ -16,31 +16,21 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 export default function CommitteeDetailsPage() {
   const { committeeKey } = useParams<{ committeeKey: string }>()
-  const [committee, setCommittee] = useState<Committee | null>(null)
-  const [topContributors, setTopContributors] = useState<Contributor[]>([])
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-
-  const { data, error: graphQLRequestError } = useQuery(GetCommitteeDataDocument, {
+  const { data, loading, error: graphQLRequestError } = useQuery(GetCommitteeDataDocument, {
     variables: { key: committeeKey },
   })
 
   useEffect(() => {
-    if (data?.committee) {
-      setCommittee(data.committee)
-      setTopContributors(data.topContributors)
-      setIsLoading(false)
-    }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
-  }, [data, graphQLRequestError, committeeKey])
+  }, [graphQLRequestError, committeeKey])
 
-  if (isLoading) {
+  if (loading) {
     return <LoadingSpinner />
   }
 
-  if (!committee && !isLoading)
+  if (!data?.committee && !loading)
     return (
       <ErrorDisplay
         statusCode={404}
@@ -49,6 +39,7 @@ export default function CommitteeDetailsPage() {
       />
     )
 
+  const committee = data.committee
   const details = [
     { label: 'Last Updated', value: formatDate(committee.updatedAt) },
     { label: 'Leaders', value: committee.leaders.join(', ') },
@@ -82,7 +73,7 @@ export default function CommitteeDetailsPage() {
       stats={committeeStats}
       summary={committee.summary}
       title={committee.name}
-      topContributors={topContributors}
+      topContributors={data.topContributors}
       type="committee"
     />
   )

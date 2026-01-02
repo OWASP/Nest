@@ -2,7 +2,7 @@
 import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { FaRightToBracket } from 'react-icons/fa6'
 import { GetCommunitySnapshotsDocument } from 'types/__generated__/snapshotQueries.generated'
 import type { Snapshot } from 'types/snapshot'
@@ -10,16 +10,9 @@ import SnapshotSkeleton from 'components/skeletons/SnapshotSkeleton'
 import SnapshotCard from 'components/SnapshotCard'
 
 const SnapshotsPage: React.FC = () => {
-  const [snapshots, setSnapshots] = useState<Snapshot[] | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetCommunitySnapshotsDocument)
+  const { data, loading, error: graphQLRequestError } = useQuery(GetCommunitySnapshotsDocument)
 
   useEffect(() => {
-    if (graphQLData) {
-      setSnapshots(graphQLData.snapshots)
-      setIsLoading(false)
-    }
     if (graphQLRequestError) {
       addToast({
         description: 'Unable to complete the requested operation.',
@@ -29,9 +22,8 @@ const SnapshotsPage: React.FC = () => {
         color: 'danger',
         variant: 'solid',
       })
-      setIsLoading(false)
     }
-  }, [graphQLData, graphQLRequestError])
+  }, [graphQLRequestError])
 
   const router = useRouter()
 
@@ -60,7 +52,7 @@ const SnapshotsPage: React.FC = () => {
   return (
     <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5">
-        {isLoading ? (
+        {loading ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 12 }, (_, index) => (
               <SnapshotSkeleton key={`snapshot-skeleton-${index}`} />
@@ -68,8 +60,8 @@ const SnapshotsPage: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {snapshots?.length ? (
-              snapshots.map((snapshot: Snapshot) => (
+            {data?.snapshots?.length ? (
+              data.snapshots.map((snapshot: Snapshot) => (
                 <div key={snapshot.key}>{renderSnapshotCard(snapshot)}</div>
               ))
             ) : (

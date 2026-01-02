@@ -24,36 +24,19 @@ import MemberDetailsPageSkeleton from 'components/skeletons/MemberDetailsPageSke
 
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams<{ memberKey: string }>()
-  const [user, setUser] = useState<User | null>()
-  const [issues, setIssues] = useState<Issue[]>([])
-  const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
-  const [milestones, setMilestones] = useState<Milestone[]>([])
-  const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
-  const [releases, setReleases] = useState<Release[]>([])
   const [data, setData] = useState<HeatmapData>({} as HeatmapData)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
   const [username, setUsername] = useState('')
   const [isPrivateContributor, setIsPrivateContributor] = useState(false)
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetUserDataDocument, {
+  const { data: graphQLData, loading, error: graphQLRequestError } = useQuery(GetUserDataDocument, {
     variables: { key: memberKey },
   })
 
   useEffect(() => {
-    if (graphQLData) {
-      setUser(graphQLData.user)
-      setIssues(graphQLData.recentIssues)
-      setMilestones(graphQLData.recentMilestones)
-      setPullRequests(graphQLData.recentPullRequests)
-      setReleases(graphQLData.recentReleases)
-      setTopRepositories(graphQLData.topContributedRepositories)
-      setIsLoading(false)
-    }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
-  }, [graphQLData, graphQLRequestError, memberKey])
+  }, [graphQLRequestError, memberKey])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -68,8 +51,9 @@ const UserDetailsPage: React.FC = () => {
       }
     }
     fetchData()
-  }, [memberKey, user])
+  }, [memberKey, graphQLData?.user])
 
+  const user = graphQLData?.user
   const formattedBio = user?.bio?.split(' ').map((word, index) => {
     const mentionMatch = word.match(/^@([\w-]+(?:\.[\w-]+)*)([^\w@])?$/)
     if (mentionMatch && mentionMatch.length > 1) {
@@ -93,7 +77,7 @@ const UserDetailsPage: React.FC = () => {
     return <span key={`word-${word}-${index}`}>{word} </span>
   })
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div data-testid="user-loading-skeleton">
         <MemberDetailsPageSkeleton />
@@ -101,7 +85,7 @@ const UserDetailsPage: React.FC = () => {
     )
   }
 
-  if (!isLoading && user == null) {
+  if (!loading && user == null) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -231,11 +215,11 @@ const UserDetailsPage: React.FC = () => {
   return (
     <DetailsCard
       details={userDetails}
-      pullRequests={pullRequests}
-      recentIssues={issues}
-      recentMilestones={milestones}
-      recentReleases={releases}
-      repositories={topRepositories}
+      pullRequests={graphQLData.recentPullRequests}
+      recentIssues={graphQLData.recentIssues}
+      recentMilestones={graphQLData.recentMilestones}
+      recentReleases={graphQLData.recentReleases}
+      repositories={graphQLData.topContributedRepositories}
       showAvatar={false}
       stats={userStats}
       title={user?.name || user?.login}

@@ -2,7 +2,7 @@
 import { useQuery } from '@apollo/client/react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { FaExclamationCircle } from 'react-icons/fa'
 import { FaCodeCommit, FaCodeFork, FaStar } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
@@ -18,31 +18,20 @@ const RepositoryDetailsPage = () => {
     repositoryKey: string
     organizationKey: string
   }>()
-  const [repository, setRepository] = useState(null)
-  const [topContributors, setTopContributors] = useState<Contributor[]>([])
-  const [recentPullRequests, setRecentPullRequests] = useState(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const { data, error: graphQLRequestError } = useQuery(GetRepositoryDataDocument, {
+  const { data, loading, error: graphQLRequestError } = useQuery(GetRepositoryDataDocument, {
     variables: { repositoryKey: repositoryKey, organizationKey: organizationKey },
   })
   useEffect(() => {
-    if (data) {
-      setRepository(data.repository)
-      setTopContributors(data.topContributors)
-      setRecentPullRequests(data.recentPullRequests)
-      setIsLoading(false)
-    }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
-  }, [data, graphQLRequestError, repositoryKey])
+  }, [graphQLRequestError, repositoryKey])
 
-  if (isLoading) {
+  if (loading) {
     return <LoadingSpinner />
   }
 
-  if (!isLoading && !repository) {
+  if (!loading && !data?.repository) {
     return (
       <ErrorDisplay
         message="Sorry, the Repository you're looking for doesn't exist"
@@ -52,6 +41,7 @@ const RepositoryDetailsPage = () => {
     )
   }
 
+  const repository = data.repository
   const repositoryDetails = [
     {
       label: 'Last Updated',
@@ -109,14 +99,14 @@ const RepositoryDetailsPage = () => {
       isArchived={repository.isArchived}
       languages={repository.languages}
       projectName={repository.project?.name}
-      pullRequests={recentPullRequests}
+      pullRequests={data.recentPullRequests}
       recentIssues={repository.issues}
       recentMilestones={repository.recentMilestones}
       recentReleases={repository.releases}
       stats={RepositoryStats}
       summary={repository.description}
       title={repository.name}
-      topContributors={topContributors}
+      topContributors={data.topContributors}
       topics={repository.topics}
       type="repository"
     />

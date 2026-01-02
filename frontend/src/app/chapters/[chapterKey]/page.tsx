@@ -2,7 +2,7 @@
 import { useQuery } from '@apollo/client/react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetChapterDataDocument } from 'types/__generated__/chapterQueries.generated'
 import type { Chapter } from 'types/chapter'
@@ -13,31 +13,21 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams<{ chapterKey: string }>()
-  const [chapter, setChapter] = useState<Chapter>({} as Chapter)
-  const [topContributors, setTopContributors] = useState<Contributor[]>([])
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-
-  const { data, error: graphQLRequestError } = useQuery(GetChapterDataDocument, {
+  const { data, loading, error: graphQLRequestError } = useQuery(GetChapterDataDocument, {
     variables: { key: chapterKey },
   })
 
   useEffect(() => {
-    if (data) {
-      setChapter(data.chapter)
-      setTopContributors(data.topContributors)
-      setIsLoading(false)
-    }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
-  }, [data, graphQLRequestError, chapterKey])
+  }, [graphQLRequestError, chapterKey])
 
-  if (isLoading) {
+  if (loading) {
     return <LoadingSpinner />
   }
 
-  if (!chapter && !isLoading)
+  if (!data?.chapter && !loading)
     return (
       <ErrorDisplay
         statusCode={404}
@@ -46,6 +36,7 @@ export default function ChapterDetailsPage() {
       />
     )
 
+  const chapter = data.chapter
   const details = [
     { label: 'Last Updated', value: formatDate(chapter.updatedAt) },
     { label: 'Location', value: chapter.suggestedLocation },
@@ -69,7 +60,7 @@ export default function ChapterDetailsPage() {
       socialLinks={chapter.relatedUrls}
       summary={chapter.summary}
       title={chapter.name}
-      topContributors={topContributors}
+      topContributors={data.topContributors}
       type="chapter"
     />
   )
