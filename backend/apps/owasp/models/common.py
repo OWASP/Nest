@@ -189,8 +189,6 @@ class RepositoryBasedEntityModel(models.Model):
 
         return sorted(found_keywords)
 
-    import re
-
     def get_leaders(self):
         """Get leaders from leaders.md file on GitHub."""
         content = get_repository_file_content(self.leaders_md_url)
@@ -199,7 +197,7 @@ class RepositoryBasedEntityModel(models.Model):
 
         leaders = []
         # simplified regex to reduce complexity score below 20
-        pattern = r"[-*]\s*(?:\[([^\]]+)\]|([\w\s]+))"
+        pattern = r"[-*]\s*(?:\[([^\]]+)\]|([^\n\[]+?))"
 
         for line in content.split("\n"):
             for match in re.finditer(pattern, line.strip()):
