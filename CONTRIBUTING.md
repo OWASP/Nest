@@ -461,7 +461,7 @@ flowchart TD
     style CheckCI fill:#2196f3,stroke:#1565c0,stroke-width:2px,color:#ffffff
     style MarkDraft fill:#ff9800,stroke:#f57c00,stroke-width:2px,color:#000000
     style MarkReady fill:#4caf50,stroke:#2e7d32,stroke-width:2px,color:#ffffff
-    style CreateDraftPR fill:#9e9e9e,stroke:#616161,stroke-width:2px,color:#ffffff
+    style CreateDraftPR fill:#ff9800,stroke:#f57c00,stroke-width:2px,color:#000000
     style WP1 fill:transparent,stroke:transparent,color:transparent,width:0px,height:0px
     style WP2 fill:transparent,stroke:transparent,color:transparent,width:0px,height:0px
 
