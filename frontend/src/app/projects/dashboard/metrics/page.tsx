@@ -1,10 +1,11 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
-import { faFilter, faSort, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Pagination } from '@heroui/react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
+import type { IconType } from 'react-icons'
+import { FaFilter, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa6'
+import { IconWrapper } from 'wrappers/IconWrapper'
 import { handleAppError } from 'app/global-error'
 import { Ordering } from 'types/__generated__/graphql'
 import { GetProjectHealthMetricsDocument } from 'types/__generated__/projectsHealthDashboardQueries.generated'
@@ -77,14 +78,35 @@ const SortableColumnHeader: FC<{
     }
   }
 
-  const alignmentClass =
-    align === 'center' ? 'justify-center' : align === 'right' ? 'justify-end' : 'justify-start'
-  const textAlignClass =
-    align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left'
+  const justifyMap = {
+    left: 'justify-start',
+    center: 'justify-center',
+    right: 'justify-end',
+  }
+
+  const alignmentClass = justifyMap[align] || justifyMap.left
+
+  const textAlignMap = {
+    left: 'text-left',
+    center: 'text-center',
+    right: 'text-right',
+  }
+
+  const textAlignClass = textAlignMap[align] || textAlignMap.left
+
+  let iconType: IconType
+  if (isActiveSortDesc) {
+    iconType = FaSortDown
+  } else if (isActiveSortAsc) {
+    iconType = FaSortUp
+  } else {
+    iconType = FaSort
+  }
 
   return (
     <div className={`flex items-center gap-1 ${alignmentClass}`}>
       <button
+        type="button"
         onClick={handleClick}
         className={`flex items-center gap-1 font-semibold transition-colors hover:text-blue-600 ${textAlignClass}`}
         title={`Sort by ${label}`}
@@ -92,8 +114,8 @@ const SortableColumnHeader: FC<{
         aria-pressed={isActive}
       >
         <span className="truncate">{label}</span>
-        <FontAwesomeIcon
-          icon={isActiveSortDesc ? faSortDown : isActiveSortAsc ? faSortUp : faSort}
+        <IconWrapper
+          icon={iconType}
           className={`h-3 w-3 ${isActive ? 'text-blue-600' : 'text-gray-400'}`}
         />
       </button>
@@ -250,7 +272,7 @@ const MetricsPage: FC = () => {
         <div className="flex flex-row items-center gap-2">
           <ProjectsDashboardDropDown
             buttonDisplayName="Filter By"
-            icon={faFilter}
+            icon={FaFilter}
             sections={filteringSections}
             selectionMode="multiple"
             selectedKeys={activeFilters}

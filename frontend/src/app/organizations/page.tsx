@@ -1,7 +1,7 @@
 'use client'
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import { FaRightToBracket } from 'react-icons/fa6'
 import type { Organization } from 'types/organization'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/UserCard'
@@ -30,7 +30,7 @@ const OrganizationPage = () => {
 
     const submitButton = {
       label: 'View Profile',
-      icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
+      icon: <FaRightToBracket className="h-4 w-4" />,
       onclick: handleButtonClick,
     }
 

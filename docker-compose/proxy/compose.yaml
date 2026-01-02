@@ -1,0 +1,48 @@
+services:
+  nest-certbot:
+    container_name: nest-certbot
+    entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done;'
+    image: certbot/certbot
+    restart: unless-stopped
+    volumes:
+      - ./blocked_ips.conf:/etc/nginx/blocked_ips.conf
+      - ./cloudflare_realip.conf:/etc/nginx/cloudflare_realip.conf
+      - ./headers.conf:/etc/nginx/headers.conf
+      - ./letsencrypt:/etc/letsencrypt
+      - ./production.conf:/etc/nginx/conf.d/production.conf
+      - ./proxy_cache.conf:/etc/nginx/conf.d/proxy_cache.conf
+      - ./redirects.conf:/etc/nginx/redirects.conf
+      - ./staging.conf:/etc/nginx/conf.d/staging.conf
+      - nest-certbot-webroot:/var/www/certbot
+
+  nest-nginx:
+    container_name: nest-nginx
+    image: nginx:latest
+    networks:
+      - production_nest-app-network
+      - staging_nest-app-network
+    ports:
+      - 80:80
+      - 443:443
+    restart: unless-stopped
+    volumes:
+      - ./blocked_ips.conf:/etc/nginx/blocked_ips.conf
+      - ./cloudflare_realip.conf:/etc/nginx/cloudflare_realip.conf
+      - ./headers.conf:/etc/nginx/headers.conf
+      - ./letsencrypt:/etc/letsencrypt
+      - ./production.conf:/etc/nginx/conf.d/production.conf
+      - ./proxy_cache.conf:/etc/nginx/conf.d/proxy_cache.conf
+      - ./redirects.conf:/etc/nginx/redirects.conf
+      - ./staging.conf:/etc/nginx/conf.d/staging.conf
+      - nest-certbot-webroot:/var/www/certbot
+      - nest-nginx-cache:/var/cache/nginx
+
+networks:
+  production_nest-app-network:
+    external: true
+  staging_nest-app-network:
+    external: true
+
+volumes:
+  nest-certbot-webroot:
+  nest-nginx-cache:

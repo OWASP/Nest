@@ -27,6 +27,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // https://nextjs.org/docs/app/api-reference/config/next-config-js/poweredByHeader
+  poweredByHeader: false,
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/productionBrowserSourceMaps
   productionBrowserSourceMaps: true,
   serverExternalPackages: ['import-in-the-middle', 'require-in-the-middle'],

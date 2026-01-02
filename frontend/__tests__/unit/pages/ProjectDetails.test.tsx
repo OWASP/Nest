@@ -14,10 +14,6 @@ jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
-}))
-
 jest.mock('react-apexcharts', () => {
   return {
     __esModule: true,
@@ -35,6 +31,10 @@ jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(() => mockRouter),
   useParams: () => ({ projectKey: 'test-project' }),
+}))
+
+jest.mock('utils/env.client', () => ({
+  IS_PROJECT_HEALTH_ENABLED: true,
 }))
 
 const mockError = {
@@ -87,8 +87,9 @@ describe('ProjectDetailsPage', () => {
 
   test('renders error message when GraphQL request fails', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: { repository: null },
+      data: { project: null },
       error: mockError,
+      loading: false,
     })
 
     render(<ProjectDetailsPage />)
@@ -159,18 +160,19 @@ describe('ProjectDetailsPage', () => {
     })
     render(<ProjectDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('Issues Trend')).toBeInTheDocument()
-      expect(screen.getByText('Pull Requests Trend')).toBeInTheDocument()
-      expect(screen.getByText('Stars Trend')).toBeInTheDocument()
-      expect(screen.getByText('Forks Trend')).toBeInTheDocument()
-      expect(screen.getByText('Days Since Last Commit and Release')).toBeInTheDocument()
+      expect(screen.getByText(/Issues Trend/)).toBeInTheDocument()
+      expect(screen.getByText(/Pull Requests Trend/)).toBeInTheDocument()
+      expect(screen.getByText(/Stars Trend/)).toBeInTheDocument()
+      expect(screen.getByText(/Forks Trend/)).toBeInTheDocument()
+      expect(screen.getByText(/Days Since Last Commit and Release/)).toBeInTheDocument()
     })
   })
 
   test('Handles case when no data is available', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: { repository: null },
+      data: { project: null },
       error: null,
+      loading: false,
     })
     render(<ProjectDetailsPage />)
     await waitFor(() => {
@@ -269,11 +271,11 @@ describe('ProjectDetailsPage', () => {
     render(<ProjectDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText(`2.2K Stars`)).toBeInTheDocument()
-      expect(screen.getByText(`10 Forks`)).toBeInTheDocument()
-      expect(screen.getByText(`1.2K Contributors`)).toBeInTheDocument()
-      expect(screen.getByText(`3 Repositories`)).toBeInTheDocument()
-      expect(screen.getByText(`10 Issues`)).toBeInTheDocument()
+      expect(screen.getByText('2.2K Stars')).toBeInTheDocument()
+      expect(screen.getByText('10 Forks')).toBeInTheDocument()
+      expect(screen.getByText('1.2K Contributors')).toBeInTheDocument()
+      expect(screen.getByText('3 Repositories')).toBeInTheDocument()
+      expect(screen.getByText('10 Issues')).toBeInTheDocument()
     })
   })
   test('renders project sponsor block correctly', async () => {
@@ -285,7 +287,7 @@ describe('ProjectDetailsPage', () => {
     render(<ProjectDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText(`Want to become a sponsor?`)).toBeInTheDocument()
+      expect(screen.getByText('Want to become a sponsor?')).toBeInTheDocument()
       expect(screen.getByText(`Sponsor ${mockProjectDetailsData.project.name}`)).toBeInTheDocument()
     })
   })

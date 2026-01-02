@@ -20,14 +20,11 @@ jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
-}))
-
 jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(() => mockRouter),
   useParams: () => ({ repositoryKey: 'test-org' }),
+  usePathname: jest.fn(() => '/organizations/test-org'),
 }))
 
 const mockError = {
@@ -50,14 +47,15 @@ describe('OrganizationDetailsPage', () => {
   test('renders loading state', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
+      loading: true,
       error: null,
     })
 
     render(<OrganizationDetailsPage />)
 
-    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+    // Use semantic role query instead of CSS selectors for better stability
     await waitFor(() => {
-      expect(loadingSpinner.length).toBeGreaterThan(0)
+      expect(screen.getByTestId('org-loading-skeleton')).toBeInTheDocument()
     })
   })
 
@@ -70,7 +68,7 @@ describe('OrganizationDetailsPage', () => {
     render(<OrganizationDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Test Organization')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Test Organization' })).toBeInTheDocument()
     })
 
     expect(screen.getByText('@test-org')).toBeInTheDocument()
@@ -200,6 +198,7 @@ describe('OrganizationDetailsPage', () => {
       })
     })
   })
+
   test('does not render sponsor block', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockOrganizationDetailsData,
@@ -207,7 +206,7 @@ describe('OrganizationDetailsPage', () => {
     })
     render(<OrganizationDetailsPage />)
     await waitFor(() => {
-      expect(screen.queryByText(`Want to become a sponsor?`)).toBeNull()
+      expect(screen.queryByText('Want to become a sponsor?')).toBeNull()
     })
   })
 })

@@ -13,22 +13,6 @@ jest.mock('@apollo/client/react', () => ({
   useQuery: jest.fn(),
 }))
 
-// Mock FontAwesome
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({
-    icon,
-    className,
-    ...props
-  }: {
-    icon: string[] | { iconName: string }
-    className?: string
-    [key: string]: unknown
-  }) => {
-    const iconName = Array.isArray(icon) ? icon[1] : icon.iconName
-    return <span data-testid={`icon-${iconName}`} className={className} {...props} />
-  },
-}))
-
 // Mock Badges component
 jest.mock('components/Badges', () => {
   const MockBadges = ({
@@ -96,16 +80,33 @@ describe('UserDetailsPage', () => {
     jest.clearAllMocks()
   })
 
+  // Helper functions to reduce nesting depth
+  const getBadgeElements = () => {
+    return screen.getAllByTestId(/^badge-/)
+  }
+
+  const getBadgeTestIds = () => {
+    const badgeElements = getBadgeElements()
+    return badgeElements.map((element) => element.dataset.testid)
+  }
+
+  const expectBadgesInCorrectOrder = (expectedOrder: string[]) => {
+    const badgeTestIds = getBadgeTestIds()
+    expect(badgeTestIds).toEqual(expectedOrder)
+  }
+
   test('renders loading state', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
+      loading: true,
       error: null,
     })
 
     render(<UserDetailsPage />)
-    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+
+    // Use semantic role query instead of CSS selectors for better stability
     await waitFor(() => {
-      expect(loadingSpinner.length).toBeGreaterThan(0)
+      expect(screen.getByTestId('user-loading-skeleton')).toBeInTheDocument()
     })
   })
 
@@ -122,10 +123,9 @@ describe('UserDetailsPage', () => {
     render(<UserDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
+      expect(screen.getByText('Test User')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Test User')).toBeInTheDocument()
     expect(screen.getByText('Statistics')).toBeInTheDocument()
     expect(screen.getByText('Test Company')).toBeInTheDocument()
     expect(screen.getByText('Test Location')).toBeInTheDocument()
@@ -525,6 +525,7 @@ describe('UserDetailsPage', () => {
       expect(bioContainer).toHaveClass('lg:text-left')
     })
   })
+
   test('does not render sponsor block', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
@@ -532,7 +533,7 @@ describe('UserDetailsPage', () => {
     })
     render(<UserDetailsPage />)
     await waitFor(() => {
-      expect(screen.queryByText(`Want to become a sponsor?`)).toBeNull()
+      expect(screen.queryByText('Want to become a sponsor?')).toBeNull()
     })
   })
 
@@ -640,7 +641,7 @@ describe('UserDetailsPage', () => {
       render(<UserDetailsPage />)
       await waitFor(() => {
         const badge = screen.getByTestId('badge-test-badge')
-        expect(badge).toHaveAttribute('data-css-class', 'fa-medal')
+        expect(badge).toHaveAttribute('data-css-class', 'medal')
       })
     })
 
@@ -670,7 +671,7 @@ describe('UserDetailsPage', () => {
       render(<UserDetailsPage />)
       await waitFor(() => {
         const badge = screen.getByTestId('badge-test-badge')
-        expect(badge).toHaveAttribute('data-css-class', 'fa-medal')
+        expect(badge).toHaveAttribute('data-css-class', 'medal')
       })
     })
 
@@ -733,6 +734,7 @@ describe('UserDetailsPage', () => {
       })
     })
 
+    // eslint-disable-next-line jest/expect-expect
     test('renders badges in correct order as returned by backend (weight ASC then name ASC)', async () => {
       // Backend returns badges sorted by weight ASC, then name ASC
       // This test verifies the frontend preserves the backend ordering
@@ -759,7 +761,7 @@ describe('UserDetailsPage', () => {
             {
               id: '1',
               name: 'Contributor',
-              cssClass: 'fa-medal',
+              cssClass: 'medal',
               description: 'Active contributor',
               weight: 1,
             },
@@ -790,9 +792,6 @@ describe('UserDetailsPage', () => {
 
       render(<UserDetailsPage />)
       await waitFor(() => {
-        const badgeElements = screen.getAllByTestId(/^badge-/)
-        const badgeTestIds = badgeElements.map((element) => element.dataset.testid)
-
         // Expected order matches backend contract: weight ASC (1, 1, 1, 2, 3), then name ASC for equal weights
         const expectedOrder = [
           'badge-alpha-badge', // weight 1, name ASC
@@ -801,8 +800,7 @@ describe('UserDetailsPage', () => {
           'badge-security-expert', // weight 2
           'badge-top-contributor', // weight 3
         ]
-
-        expect(badgeTestIds).toEqual(expectedOrder)
+        expectBadgesInCorrectOrder(expectedOrder)
       })
     })
   })

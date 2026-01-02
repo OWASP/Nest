@@ -9,10 +9,6 @@ jest.mock('@apollo/client/react', () => ({
   useQuery: jest.fn(),
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
-}))
-
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({
@@ -28,6 +24,7 @@ jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(() => mockRouter),
   useParams: () => ({ chapterKey: 'test-chapter' }),
+  usePathname: jest.fn(() => '/chapters/test-chapter'),
 }))
 
 describe('chapterDetailsPage Component', () => {
@@ -104,7 +101,8 @@ describe('chapterDetailsPage Component', () => {
       ...mockChapterDetailsData,
       topContributors: [
         {
-          name: 'Contributor 1',
+          login: 'contributor1',
+          name: '',
           avatarUrl: 'https://example.com/avatar1.jpg',
         },
       ],
@@ -116,7 +114,7 @@ describe('chapterDetailsPage Component', () => {
     render(<ChapterDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Contributor 1')).toBeInTheDocument()
+      expect(screen.getByText('Contributor1')).toBeInTheDocument()
     })
   })
   test('renders chapter sponsor block correctly', async () => {
@@ -126,7 +124,7 @@ describe('chapterDetailsPage Component', () => {
     })
     render(<ChapterDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText(`Want to become a sponsor?`)).toBeInTheDocument()
+      expect(screen.getByText('Want to become a sponsor?')).toBeInTheDocument()
       expect(screen.getByText(`Sponsor ${mockChapterDetailsData.chapter.name}`)).toBeInTheDocument()
     })
   })

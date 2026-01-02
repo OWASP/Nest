@@ -1,5 +1,5 @@
-import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons'
 import React from 'react'
+import { FaCircleExclamation } from 'react-icons/fa6'
 import { render, screen, cleanup } from 'wrappers/testUtil'
 import type { Issue } from 'types/issue'
 import type { Milestone } from 'types/milestone'
@@ -148,6 +148,7 @@ const mockMilestone: Milestone = {
 }
 
 const mockPullRequest: PullRequest = {
+  id: 'mock-pull-request-id',
   author: {
     ...mockUser,
     login: 'author3',
@@ -161,6 +162,8 @@ const mockPullRequest: PullRequest = {
   repositoryName: 'test-repo',
   title: 'Add new feature',
   url: 'https://github.com/test-org/test-repo/pull/456',
+  state: 'open',
+  mergedAt: '2022-01-02T00:00:00Z',
 }
 
 const mockRelease: Release = {
@@ -222,7 +225,7 @@ describe('ItemCardList Component', () => {
         <ItemCardList
           title="Complete List"
           data={[mockIssue]}
-          icon={faCircleExclamation}
+          icon={FaCircleExclamation}
           renderDetails={defaultProps.renderDetails}
           showAvatar={true}
           showSingleColumn={false}
@@ -304,7 +307,7 @@ describe('ItemCardList Component', () => {
         <ItemCardList
           title="With Icon"
           data={[mockIssue]}
-          icon={faCircleExclamation}
+          icon={FaCircleExclamation}
           renderDetails={defaultProps.renderDetails}
         />
       )
@@ -650,7 +653,7 @@ describe('ItemCardList Component', () => {
     })
 
     it('handles large datasets', () => {
-      const largeDataset = Array(100)
+      const largeDataset = Array.from({ length: 100 })
         .fill(null)
         .map((_, index) => ({
           ...mockIssue,
@@ -683,7 +686,74 @@ describe('ItemCardList Component', () => {
       )
 
       const avatarImage = screen.getByTestId('avatar-image')
-      expect(avatarImage).toHaveAttribute('alt', mockIssue.author.name)
+      expect(avatarImage).toHaveAttribute(
+        'alt',
+        `${mockIssue.author.name || mockIssue.author.login}'s avatar`
+      )
+    })
+
+    it('uses fallback alt text when author name is missing', () => {
+      const issueWithoutAuthor = {
+        ...mockIssue,
+        author: {
+          ...mockIssue.author,
+          name: null,
+        },
+      }
+
+      render(
+        <ItemCardList
+          title="Fallback Alt Text Test"
+          data={[issueWithoutAuthor]}
+          renderDetails={defaultProps.renderDetails}
+          showAvatar={true}
+        />
+      )
+
+      const avatarImage = screen.getByTestId('avatar-image')
+      expect(avatarImage).toHaveAttribute('alt', `${issueWithoutAuthor.author.login}'s avatar`)
+    })
+
+    it('uses generic fallback alt text when author is missing', () => {
+      const issueWithoutAuthor = {
+        ...mockIssue,
+        author: null,
+      }
+
+      render(
+        <ItemCardList
+          title="Missing Author Test"
+          data={[issueWithoutAuthor]}
+          renderDetails={defaultProps.renderDetails}
+          showAvatar={true}
+        />
+      )
+
+      const avatarImage = screen.getByTestId('avatar-image')
+      expect(avatarImage).toHaveAttribute('alt', "Author's avatar")
+    })
+
+    it('uses generic fallback alt text when author name and login are missing', () => {
+      const issueWithEmptyAuthor = {
+        ...mockIssue,
+        author: {
+          ...mockIssue.author,
+          name: '',
+          login: '',
+        },
+      }
+
+      render(
+        <ItemCardList
+          title="Empty Author Test"
+          data={[issueWithEmptyAuthor]}
+          renderDetails={defaultProps.renderDetails}
+          showAvatar={true}
+        />
+      )
+
+      const avatarImage = screen.getByTestId('avatar-image')
+      expect(avatarImage).toHaveAttribute('alt', "Author's avatar")
     })
 
     it('opens external links in new tab', () => {

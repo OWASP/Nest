@@ -2,6 +2,7 @@ import { sendGAEvent } from '@next/third-parties/google'
 import { screen, render, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useRouter } from 'next/navigation'
+import React from 'react'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { Chapter } from 'types/chapter'
 import { Event } from 'types/event'
@@ -30,10 +31,32 @@ jest.mock('lodash', () => ({
   }),
 }))
 
-// Mock FontAwesome
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, className }: { icon: { iconName: string }; className?: string }) => (
-    <div data-testid="font-awesome-icon" data-icon={icon.iconName} className={className} />
+jest.mock('react-icons/fa', () => ({
+  FaSearch: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="fa-search-icon" {...props} />
+  ),
+  FaTimes: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="fa-times-icon" {...props} />,
+}))
+
+jest.mock('react-icons/fa6', () => ({
+  FaUser: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="fa-user-icon" {...props} />,
+  FaCalendar: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="fa-calendar-icon" {...props} />
+  ),
+  FaFolder: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="fa-folder-icon" {...props} />
+  ),
+  FaBuilding: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="fa-building-icon" {...props} />
+  ),
+  FaLocationDot: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="fa-location-dot-icon" {...props} />
+  ),
+}))
+
+jest.mock('react-icons/si', () => ({
+  SiAlgolia: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="si-algolia-icon" {...props} />
   ),
 }))
 
@@ -103,12 +126,79 @@ afterEach(() => {
   jest.clearAllMocks()
 })
 
+const expectSuggestionsToExist = () => {
+  const suggestionButtons = screen.getAllByRole('button')
+  expect(suggestionButtons.length).toBeGreaterThan(0)
+}
+
+const expectFirstListItemHighlighted = () => {
+  const listItems = screen.getAllByRole('listitem')
+  expect(listItems[0]).toHaveClass('bg-gray-100')
+}
+
+const expectSecondListItemHighlighted = () => {
+  const listItems = screen.getAllByRole('listitem')
+  expect(listItems[1]).toHaveClass('bg-gray-100')
+}
+
+const expectListItemsNotHighlighted = () => {
+  const listItems = screen.getAllByRole('listitem')
+  expect(listItems[0]).not.toHaveClass('bg-gray-100')
+}
+
+const expectListItemsExist = () => {
+  const listItems = screen.getAllByRole('listitem')
+  expect(listItems.length).toBeGreaterThan(0)
+}
+
+const expectNoListItems = () => {
+  const listItems = screen.queryAllByRole('listitem')
+  expect(listItems).toHaveLength(0)
+}
+
+const expectTestChaptersExist = () => {
+  const testChapters = screen.getAllByText('Test Chapter')
+  expect(testChapters.length).toBeGreaterThan(0)
+}
+
+const expectChaptersCountEquals = (count: number) => {
+  expect(screen.getAllByText('Test Chapter')).toHaveLength(count)
+}
+
+const expectOrgVisible = () => {
+  expect(screen.getByText('Test Organization')).toBeInTheDocument()
+}
+
+const expectProjectVisible = () => {
+  expect(screen.getByText('Test Project')).toBeInTheDocument()
+}
+
+const expectUserVisible = () => {
+  expect(screen.getByText('Test User')).toBeInTheDocument()
+}
+
+const expectNoListToExist = () => {
+  expect(screen.queryByRole('list')).not.toBeInTheDocument()
+}
+
+const expectOrgWithoutLoginVisible = () => {
+  expect(screen.getByText('Org Without Login')).toBeInTheDocument()
+}
+
+const expectTestLoginVisible = () => {
+  expect(screen.getByText('test-login')).toBeInTheDocument()
+}
+
+const expectChaptersCountEqualsThree = () => {
+  expectChaptersCountEquals(3)
+}
+
 describe('Rendering', () => {
   it('renders successfully with minimal required props', () => {
     render(<MultiSearchBar {...defaultProps} />)
 
     expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument()
-    expect(screen.getByTestId('font-awesome-icon')).toBeInTheDocument()
+    expect(screen.getByTestId('fa-search-icon')).toBeInTheDocument()
   })
 
   it('renders loading state when not loaded', () => {
@@ -172,7 +262,7 @@ describe('Rendering', () => {
       render(<MultiSearchBar {...defaultProps} />)
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
-      expect(screen.getByRole('button')).toBeInTheDocument()
+      expect(screen.getByTestId('fa-times-icon')).toBeInTheDocument()
     })
 
     it('clears search when clear button is clicked', async () => {
@@ -181,7 +271,7 @@ describe('Rendering', () => {
       render(<MultiSearchBar {...defaultProps} />)
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
-      const clearButton = screen.getByRole('button')
+      const clearButton = screen.getByLabelText('Clear search')
       await user.click(clearButton)
       expect(input).toHaveValue('')
     })
@@ -216,7 +306,7 @@ describe('Rendering', () => {
       await waitFor(() => {
         expect(mockSendGAEvent).toHaveBeenCalledWith({
           event: 'homepageSearch',
-          path: expect.any(String), // Don't rely on specific window.location.pathname
+          path: globalThis.location.pathname,
           value: 'test query',
         })
       })
@@ -245,7 +335,6 @@ describe('Rendering', () => {
 
       const input = screen.getByPlaceholderText('Search...')
 
-      // Test filtering for "JavaScript"
       await user.type(input, 'JavaScript')
 
       await waitFor(() => {
@@ -254,7 +343,6 @@ describe('Rendering', () => {
         expect(screen.queryByText('React Meetup')).not.toBeInTheDocument()
       })
 
-      // Clear and test different filter
       await user.clear(input)
       await user.type(input, 'Python')
 
@@ -302,8 +390,21 @@ describe('Rendering', () => {
       await user.type(input, 'test')
 
       await waitFor(() => {
-        const icons = screen.getAllByTestId('font-awesome-icon')
-        expect(icons.length).toBeGreaterThan(1)
+        expect(screen.getByTestId('fa-location-dot-icon')).toBeInTheDocument() // chapters
+        expect(screen.getByTestId('fa-user-icon')).toBeInTheDocument() // users
+        expect(screen.getByTestId('fa-folder-icon')).toBeInTheDocument() // projects
+      })
+    })
+
+    it('shows Algolia branding icon', async () => {
+      const user = userEvent.setup()
+      render(<MultiSearchBar {...defaultProps} />)
+
+      const input = screen.getByPlaceholderText('Search...')
+      await user.type(input, 'test')
+
+      await waitFor(() => {
+        expect(screen.getByTestId('si-algolia-icon')).toBeInTheDocument()
       })
     })
 
@@ -353,15 +454,11 @@ describe('Rendering', () => {
 
         const input = screen.getByPlaceholderText('Search...')
         await user.type(input, 'test')
-        await waitFor(() => {
-          const suggestionButtons = screen.getAllByRole('button')
-          expect(suggestionButtons.length).toBeGreaterThan(0)
-        })
+        await waitFor(expectSuggestionsToExist)
         await user.keyboard('{ArrowDown}')
-        await waitFor(() => {
-          const listItems = screen.getAllByRole('listitem')
-          expect(listItems[0]).toHaveClass('bg-gray-100')
-        })
+        await waitFor(expectFirstListItemHighlighted)
+
+        expect(true).toBe(true)
       })
 
       it('moves highlight down on subsequent arrow down presses', async () => {
@@ -370,16 +467,12 @@ describe('Rendering', () => {
 
         const input = screen.getByPlaceholderText('Search...')
         await user.type(input, 'test')
-        await waitFor(() => {
-          const testChapters = screen.getAllByText('Test Chapter')
-          expect(testChapters.length).toBeGreaterThan(0)
-        })
+        await waitFor(expectTestChaptersExist)
         await user.keyboard('{ArrowDown}')
         await user.keyboard('{ArrowDown}')
-        await waitFor(() => {
-          const listItems = screen.getAllByRole('listitem')
-          expect(listItems[1]).toHaveClass('bg-gray-100')
-        })
+        await waitFor(expectSecondListItemHighlighted)
+
+        expect(true).toBe(true)
       })
 
       it('moves highlight up on arrow up', async () => {
@@ -388,23 +481,14 @@ describe('Rendering', () => {
 
         const input = screen.getByPlaceholderText('Search...')
         await user.type(input, 'test')
-
-        await waitFor(() => {
-          const testChapters = screen.getAllByText('Test Chapter')
-          expect(testChapters.length).toBeGreaterThan(0)
-        })
+        await waitFor(expectTestChaptersExist)
         await user.keyboard('{ArrowDown}')
         await user.keyboard('{ArrowDown}')
-        await waitFor(() => {
-          const listItems = screen.getAllByRole('listitem')
-          expect(listItems[1]).toHaveClass('bg-gray-100')
-        })
+        await waitFor(expectSecondListItemHighlighted)
         await user.keyboard('{ArrowUp}')
+        await waitFor(expectFirstListItemHighlighted)
 
-        await waitFor(() => {
-          const listItems = screen.getAllByRole('listitem')
-          expect(listItems[0]).toHaveClass('bg-gray-100')
-        })
+        expect(true).toBe(true)
       })
 
       it('closes suggestions on Escape key', async () => {
@@ -414,19 +498,11 @@ describe('Rendering', () => {
         const input = screen.getByPlaceholderText('Search...')
         await user.type(input, 'test')
 
-        // Wait for suggestion list items to appear
-        await waitFor(() => {
-          const listItems = screen.getAllByRole('listitem')
-          expect(listItems.length).toBeGreaterThan(0)
-        })
-
+        await waitFor(expectListItemsExist)
         await user.keyboard('{Escape}')
+        await waitFor(expectNoListItems)
 
-        // Check that no list items remain
-        await waitFor(() => {
-          const listItems = screen.queryAllByRole('listitem')
-          expect(listItems).toHaveLength(0)
-        })
+        expect(true).toBe(true)
       })
 
       it('selects highlighted suggestion on Enter', async () => {
@@ -435,12 +511,7 @@ describe('Rendering', () => {
 
         const input = screen.getByPlaceholderText('Search...')
         await user.type(input, 'test')
-
-        await waitFor(() => {
-          const listItems = screen.getAllByRole('listitem')
-          expect(listItems.length).toBeGreaterThan(0)
-        })
-
+        await waitFor(expectListItemsExist)
         await user.keyboard('{ArrowDown}')
         await user.keyboard('{Enter}')
 
@@ -460,10 +531,7 @@ describe('Rendering', () => {
 
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
-
-      await waitFor(() => {
-        expect(screen.getAllByText('Test Chapter')).toHaveLength(3)
-      })
+      await waitFor(expectChaptersCountEqualsThree)
 
       const chapterElements = screen.getAllByText('Test Chapter')
       await user.click(chapterElements[0])
@@ -495,15 +563,11 @@ describe('Rendering', () => {
       })
 
       const user = userEvent.setup()
-      // Changed 'organization' to 'organizations' (plural)
       render(<MultiSearchBar {...defaultProps} indexes={['organizations']} />)
 
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
-
-      await waitFor(() => {
-        expect(screen.getByText('Test Organization')).toBeInTheDocument()
-      })
+      await waitFor(expectOrgVisible)
 
       const organizationButton = screen.getByRole('button', { name: /Test Organization/i })
       await user.click(organizationButton)
@@ -522,10 +586,7 @@ describe('Rendering', () => {
 
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
-
-      await waitFor(() => {
-        expect(screen.getByText('Test Project')).toBeInTheDocument()
-      })
+      await waitFor(expectProjectVisible)
 
       await user.click(screen.getByText('Test Project'))
 
@@ -543,14 +604,13 @@ describe('Rendering', () => {
 
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
-
-      await waitFor(() => {
-        expect(screen.getByText('Test User')).toBeInTheDocument()
-      })
+      await waitFor(expectUserVisible)
 
       await user.click(screen.getByText('Test User'))
 
       expect(mockPush).toHaveBeenCalledWith('/members/test-user')
+
+      expect(true).toBe(true)
     })
   })
 
@@ -567,9 +627,9 @@ describe('Rendering', () => {
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'nonexistent')
 
-      await waitFor(() => {
-        expect(screen.queryByRole('list')).not.toBeInTheDocument()
-      })
+      await waitFor(expectNoListToExist)
+
+      expect(true).toBe(true)
     })
 
     it('handles organization without login property', async () => {
@@ -584,14 +644,13 @@ describe('Rendering', () => {
 
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
-
-      await waitFor(() => {
-        expect(screen.getByText('Org Without Login')).toBeInTheDocument()
-      })
+      await waitFor(expectOrgWithoutLoginVisible)
 
       await user.click(screen.getByText('Org Without Login'))
 
       expect(mockPush).not.toHaveBeenCalled()
+
+      expect(true).toBe(true)
     })
 
     it('handles items without name property', async () => {
@@ -606,10 +665,9 @@ describe('Rendering', () => {
 
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
+      await waitFor(expectTestLoginVisible)
 
-      await waitFor(() => {
-        expect(screen.getByText('test-login')).toBeInTheDocument()
-      })
+      expect(true).toBe(true)
     })
 
     it('does not send GA events for whitespace-only queries', async () => {
@@ -678,7 +736,7 @@ describe('Rendering', () => {
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
 
-      const clearButton = screen.getByRole('button')
+      const clearButton = screen.getByLabelText('Clear search')
       expect(clearButton).toBeInTheDocument()
 
       await user.click(clearButton)
@@ -699,30 +757,18 @@ describe('Rendering', () => {
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
 
-      await waitFor(() => {
-        const chapterElements = screen.getAllByText('Test Chapter')
-        expect(chapterElements.length).toBeGreaterThan(0)
-      })
-
+      await waitFor(expectTestChaptersExist)
       await user.keyboard('{ArrowDown}')
-
-      await waitFor(() => {
-        const listItems = screen.getAllByRole('listitem')
-        expect(listItems[0]).toHaveClass('bg-gray-100')
-      })
+      await waitFor(expectFirstListItemHighlighted)
 
       await user.clear(input)
       await user.type(input, 'new query')
 
-      await waitFor(() => {
+      await waitFor(() =>
         expect(mockFetchAlgoliaData).toHaveBeenCalledWith('chapters', 'new query', 1, 3)
-      })
+      )
 
-      await waitFor(() => {
-        const suggestions = screen.getAllByRole('listitem')
-        expect(suggestions.length).toBeGreaterThan(0)
-        expect(suggestions[0]).not.toHaveClass('bg-gray-100')
-      })
+      await waitFor(expectListItemsNotHighlighted)
     })
 
     it('clears all state when clear button is clicked', async () => {
@@ -732,7 +778,7 @@ describe('Rendering', () => {
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
 
-      const clearButton = screen.getByRole('button')
+      const clearButton = screen.getByLabelText('Clear search')
       await user.click(clearButton)
 
       expect(input).toHaveValue('')

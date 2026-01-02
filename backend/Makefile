@@ -1,5 +1,6 @@
 include backend/apps/ai/Makefile
 include backend/apps/github/Makefile
+include backend/apps/mentorship/Makefile
 include backend/apps/nest/Makefile
 include backend/apps/owasp/Makefile
 include backend/apps/slack/Makefile
@@ -15,8 +16,10 @@ clean-backend-docker:
 	@docker container rm -f nest-backend >/dev/null 2>&1 || true
 	@docker container rm -f nest-cache >/dev/null 2>&1 || true
 	@docker container rm -f nest-db >/dev/null 2>&1 || true
+	@docker container rm -f nest-worker >/dev/null 2>&1 || true
 	@docker image rm -f nest-local-backend >/dev/null 2>&1 || true
 	@docker volume rm -f nest-local_backend-venv >/dev/null 2>&1 || true
+	@docker volume rm -f nest-local_cache-data >/dev/null 2>&1 || true
 
 create-superuser:
 	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it

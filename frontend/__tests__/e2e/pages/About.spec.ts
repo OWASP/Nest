@@ -36,7 +36,7 @@ test.describe('About Page', () => {
 
   test('renders main sections correctly', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'About' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Project Timeline', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Project Timeline' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Our Story' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Leaders' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Roadmap' })).toBeVisible()
@@ -77,7 +77,7 @@ test.describe('About Page', () => {
     }
   })
 
-  test('displays animated counters with correct values', async ({ page }) => {
+  test('displays project statistics with correct values', async ({ page }) => {
     await expect(page.getByText('1.2K+Contributors')).toBeVisible()
     await expect(page.getByText('40+Open Issues')).toBeVisible()
     await expect(page.getByText('60+Forks')).toBeVisible()

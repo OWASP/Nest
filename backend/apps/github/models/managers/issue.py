@@ -10,7 +10,7 @@ from django.utils import timezone
 class OpenIssueManager(models.Manager):
     """Open issues."""
 
-    def get_queryset(self):
+    def get_queryset(self) -> models.QuerySet:
         """Get queryset."""
         return (
             super()
@@ -29,7 +29,7 @@ class OpenIssueManager(models.Manager):
         )
 
     @property
-    def assignable(self):
+    def assignable(self) -> models.QuerySet:
         """Return assignable issues.
 
         Includes all unassigned issues and assigned issues with no activity within 90 days.
@@ -43,6 +43,6 @@ class OpenIssueManager(models.Manager):
         )
 
     @property
-    def without_summary(self):
+    def without_summary(self) -> models.QuerySet:
         """Return issues without summary."""
         return self.get_queryset().filter(summary="")
