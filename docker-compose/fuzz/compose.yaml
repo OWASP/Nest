@@ -12,6 +12,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      cache:
+        condition: service_healthy
     env_file: ../../backend/.env.fuzz.example
     networks:
       - fuzz-nest-network
@@ -67,6 +69,26 @@ services:
       - fuzz-db-data:/var/lib/postgresql/data
     ports:
       - 5434:5432
+
+  cache:
+    command: >
+      sh -c '
+        redis-server --requirepass $$REDIS_PASSWORD --maxmemory 100mb --maxmemory-policy allkeys-lru
+      '
+    container_name: fuzz-nest-cache
+    image: redis:8.0.5-alpine3.21
+    environment:
+      REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-fuzz-cache-password}
+    healthcheck:
+      interval: 5s
+      retries: 5
+      test: [CMD, redis-cli, -a, $$REDIS_PASSWORD, ping]
+      timeout: 5s
+    networks:
+      - fuzz-nest-network
+    volumes:
+      - fuzz-cache-data:/data
+
   graphql:
     container_name: fuzz-nest-graphql
     build:
@@ -87,3 +109,4 @@ networks:
 
 volumes:
   fuzz-db-data:
+  fuzz-cache-data:
