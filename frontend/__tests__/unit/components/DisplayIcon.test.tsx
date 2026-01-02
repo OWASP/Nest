@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
+import { FaStar, FaCodeFork, FaUser, FaClock, FaComment, FaQuestion } from 'react-icons/fa6'
 import type { Icon } from 'types/icon'
 import DisplayIcon from 'components/DisplayIcon'
-
 interface TooltipProps {
   children: React.ReactNode
   content: string
@@ -11,11 +11,6 @@ interface TooltipProps {
   closeDelay: number
   showArrow: boolean
   placement: string
-}
-
-interface IconWrapperProps {
-  className?: string
-  icon: string
 }
 
 jest.mock('@heroui/tooltip', () => ({
@@ -42,21 +37,44 @@ jest.mock('millify', () => ({
   }),
 }))
 
-jest.mock('wrappers/FontAwesomeIconWrapper', () => {
-  return function MockFontAwesomeIconWrapper({ className, icon }: IconWrapperProps) {
-    return <span data-testid="font-awesome-icon" data-icon={icon} className={className} />
-  }
-})
+jest.mock('wrappers/IconWrapper', () => ({
+  IconWrapper: ({
+    className,
+    icon: IconComponent,
+  }: {
+    className?: string
+    icon: React.ComponentType<{ className?: string }>
+  }) => {
+    // This derives a data-icon attribute from the react-icon component name
+    let iconName = ''
+    const toKebab = (name: string) =>
+      name
+        .replaceAll('Fa', '')
+        .replaceAll(/([a-z0-9])([A-Z])/g, '$1-$2')
+        .toLowerCase()
+
+    if (IconComponent?.displayName) {
+      iconName = 'fa-' + toKebab(IconComponent.displayName)
+    } else if (IconComponent?.name) {
+      iconName = 'fa-' + toKebab(IconComponent.name)
+    }
+
+    return IconComponent ? (
+      <span data-testid="font-awesome-icon" data-icon={iconName} className={className}>
+        <IconComponent />
+      </span>
+    ) : null
+  },
+}))
 
 jest.mock('utils/data', () => ({
   ICONS: {
-    starsCount: { label: 'Stars', icon: 'fa-star' },
-    forksCount: { label: 'Forks', icon: 'fa-code-fork' },
-    contributorsCount: { label: 'Contributors', icon: 'fa-users' },
-    contributionCount: { label: 'Contributors', icon: 'fa-users' },
-    issuesCount: { label: 'Issues', icon: 'fa-exclamation-circle' },
-    license: { label: 'License', icon: 'fa-balance-scale' },
-    unknownItem: { label: 'Unknown', icon: 'fa-question' },
+    starsCount: { label: 'Stars', icon: FaStar },
+    forksCount: { label: 'Forks', icon: FaCodeFork },
+    contributorsCount: { label: 'Contributors', icon: FaUser },
+    createdAt: { label: 'Creation date', icon: FaClock },
+    commentsCount: { label: 'Comments count', icon: FaComment },
+    unknownItem: { label: 'Unknown', icon: FaQuestion },
   },
 }))
 
@@ -117,7 +135,7 @@ describe('DisplayIcon', () => {
       expect(screen.getByTestId('font-awesome-icon')).toHaveAttribute('data-icon', 'fa-code-fork')
 
       rerender(<DisplayIcon item="contributorsCount" icons={mockIcons} />)
-      expect(screen.getByTestId('font-awesome-icon')).toHaveAttribute('data-icon', 'fa-users')
+      expect(screen.getByTestId('font-awesome-icon')).toHaveAttribute('data-icon', 'fa-user')
     })
 
     it('applies different container classes based on item type', () => {

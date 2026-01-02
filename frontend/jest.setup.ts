@@ -50,9 +50,21 @@ jest.mock('next-auth/react', () => {
   }
 })
 
-if (!globalThis.structuredClone) {
-  globalThis.structuredClone = (val) => JSON.parse(JSON.stringify(val))
-}
+jest.mock('next/navigation', () => {
+  const actual = jest.requireActual('next/navigation')
+  const push = jest.fn()
+  const replace = jest.fn()
+  const prefetch = jest.fn()
+  const back = jest.fn()
+  const forward = jest.fn()
+  const mockRouter = { push, replace, prefetch, back, forward }
+  return {
+    ...actual,
+    useRouter: jest.fn(() => mockRouter),
+    useSearchParams: jest.fn(() => new URLSearchParams()),
+    useParams: jest.fn(() => ({})),
+  }
+})
 
 beforeAll(() => {
   if (typeof globalThis !== 'undefined') {
@@ -104,4 +116,11 @@ beforeEach(() => {
 
   globalThis.runAnimationFrameCallbacks = jest.fn()
   globalThis.removeAnimationFrameCallbacks = jest.fn()
+})
+
+jest.mock('ics', () => {
+  return {
+    __esModule: true,
+    createEvent: jest.fn(),
+  }
 })

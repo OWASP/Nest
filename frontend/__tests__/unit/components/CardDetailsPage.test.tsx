@@ -1,10 +1,9 @@
-import { faCode, faTags } from '@fortawesome/free-solid-svg-icons'
 import { render, screen, cleanup } from '@testing-library/react'
 import React from 'react'
 import '@testing-library/jest-dom'
+import { FaCode, FaTags } from 'react-icons/fa6'
 import type { DetailsCardProps } from 'types/card'
 import CardDetailsPage from 'components/CardDetailsPage'
-
 jest.mock('next/link', () => {
   const MockLink = ({
     children,
@@ -56,31 +55,16 @@ jest.mock('next/image', () => ({
   ),
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({
-    icon,
-    className,
-    ...props
-  }: {
-    icon: { iconName: string }
-    className?: string
-    [key: string]: unknown
-  }) => <span data-testid={`icon-${icon.iconName}`} className={className} {...props} />,
-}))
-
 jest.mock('utils/env.client', () => ({
   IS_PROJECT_HEALTH_ENABLED: true,
 }))
 
 jest.mock('utils/urlIconMappings', () => ({
   getSocialIcon: (url: string) => {
-    if (url?.includes('github')) {
-      return { iconName: 'github' }
+    const safe = encodeURIComponent(url)
+    return function MockSocialIcon(props: { className?: string }) {
+      return <span data-testid={`mock-social-icon-${safe}`} className={props.className} />
     }
-    if (url?.includes('twitter')) {
-      return { iconName: 'twitter' }
-    }
-    return { iconName: 'link' }
   },
 }))
 
@@ -107,11 +91,13 @@ jest.mock('components/ChapterMapWrapper', () => ({
     geoLocData: _geoLocData,
     showLocal,
     style,
+    showLocationSharing: _showLocationSharing,
     ...otherProps
   }: {
     geoLocData?: unknown
     showLocal: boolean
     style: React.CSSProperties
+    showLocationSharing?: boolean
     [key: string]: unknown
   }) => {
     return (
@@ -134,6 +120,7 @@ jest.mock('components/HealthMetrics', () => ({
 jest.mock('components/InfoBlock', () => ({
   __esModule: true,
   default: ({
+    icon: _icon,
     pluralizedName,
     unit,
     value,
@@ -174,11 +161,16 @@ jest.mock('components/MetricsScoreCircle', () => ({
     clickable?: boolean
     onClick?: () => void
     [key: string]: unknown
-  }) => (
-    <div data-testid="metrics-score-circle" role={clickable ? 'button' : undefined} {...props}>
-      Score: {score}
-    </div>
-  ),
+  }) =>
+    clickable ? (
+      <button data-testid="metrics-score-circle" onClick={_onClick} {...props}>
+        Score: {score}
+      </button>
+    ) : (
+      <div data-testid="metrics-score-circle" {...props}>
+        Score: {score}
+      </div>
+    ),
 }))
 
 jest.mock('components/Milestones', () => ({
@@ -276,9 +268,10 @@ jest.mock('components/SecondaryCard', () => ({
     title,
     children,
     className,
+    icon: _icon,
     ...props
   }: {
-    _icon: unknown
+    _icon?: unknown
     title: React.ReactNode
     children: React.ReactNode
     className?: string
@@ -314,6 +307,7 @@ jest.mock('components/ToggleableList', () => ({
   __esModule: true,
   default: ({
     items,
+    icon: _icon,
     label,
     ...props
   }: {
@@ -412,13 +406,13 @@ describe('CardDetailsPage', () => {
 
   const mockStats = [
     {
-      icon: faCode,
+      icon: FaCode,
       pluralizedName: 'repositories',
       unit: '',
       value: 10,
     },
     {
-      icon: faTags,
+      icon: FaTags,
       pluralizedName: 'stars',
       unit: '',
       value: 100,
@@ -494,7 +488,7 @@ describe('CardDetailsPage', () => {
       organizationName: 'test-org',
       projectName: 'Test Project',
       projectUrl: 'https://github.com/test/project',
-      summary: 'Issue summary',
+      body: 'Issue summary',
       title: 'Test Issue',
       updatedAt: Date.now(),
       url: 'https://github.com/test/project/issues/123',
@@ -518,11 +512,14 @@ describe('CardDetailsPage', () => {
 
   const mockPullRequests = [
     {
+      id: 'mock-pull-request-1',
       author: mockUser,
       createdAt: new Date(Date.now() - 172800000).toISOString(),
       organizationName: 'test-org',
       title: 'Add new feature',
       url: 'https://github.com/test/project/pull/456',
+      state: 'merged',
+      mergedAt: new Date(Date.now() - 86400000).toISOString(),
     },
   ]
 
@@ -1326,9 +1323,9 @@ describe('CardDetailsPage', () => {
 
     it('handles zero and negative values in stats', () => {
       const statsWithZeroValues = [
-        { icon: faCode, value: 0, unit: 'Star' },
-        { icon: faTags, value: invalidValues.negativeNumber, unit: 'Issue' },
-        { icon: faCode, value: invalidValues.nullValue, unit: 'Fork' },
+        { icon: FaCode, value: 0, unit: 'Star' },
+        { icon: FaTags, value: -10, unit: 'Issue' },
+        { icon: FaCode, value: null, unit: 'Fork' },
       ]
 
       expect(() =>

@@ -66,8 +66,10 @@ geoloc
 geopy
 graphiql
 gunicorn
+hackathon
 heroui
 hsl
+ics
 igoat
 inlinehilite
 isanori
@@ -87,12 +89,14 @@ mastg
 mcr
 mdfile
 mentee
+menteemodule_set
 mentees
 mern
 millify
 mpim
 navlink
 nestbot
+ngx
 noinput
 nosniff
 openstreetmap
@@ -125,7 +129,7 @@ speakerdeck
 superfences
 tiktok
 tsc
-turbopack
+unassigning
 unhover
 usefixtures
 webgoat

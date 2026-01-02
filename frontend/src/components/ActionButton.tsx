@@ -6,13 +6,20 @@ import React, { ReactNode } from 'react'
 interface ActionButtonProps {
   url?: string
   onClick?: () => void
+  onKeyDown?: (e: React.KeyboardEvent<HTMLAnchorElement | HTMLButtonElement>) => void
   tooltipLabel?: string
   children: ReactNode
 }
 
-const ActionButton: React.FC<ActionButtonProps> = ({ url, onClick, tooltipLabel, children }) => {
+const ActionButton: React.FC<ActionButtonProps> = ({
+  url,
+  onClick,
+  onKeyDown,
+  tooltipLabel,
+  children,
+}) => {
   const baseStyles =
-    'flex items-center gap-2 px-2 py-2 rounded-md border border-[#1D7BD7] transition-all whitespace-nowrap justify-center bg-transparent text-blue-600 hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white'
+    'flex items-center gap-2 px-2 py-2 rounded-md border border-[#1D7BD7] transition-all whitespace-nowrap justify-center bg-transparent text-[#1D7BD7] hover:bg-[#1D7BD7] hover:text-white dark:hover:text-white'
 
   return url ? (
     <TooltipWrapper tooltipLabel={tooltipLabel}>
@@ -24,6 +31,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({ url, onClick, tooltipLabel,
         data-tooltip-id="button-tooltip"
         data-tooltip-content={tooltipLabel}
         onClick={onClick}
+        onKeyDown={onKeyDown}
         aria-label={tooltipLabel}
       >
         {children}
@@ -31,7 +39,12 @@ const ActionButton: React.FC<ActionButtonProps> = ({ url, onClick, tooltipLabel,
     </TooltipWrapper>
   ) : (
     <TooltipWrapper tooltipLabel={tooltipLabel}>
-      <Button onPress={onClick} className={baseStyles} aria-label={tooltipLabel}>
+      <Button
+        onPress={onClick}
+        onKeyDown={onKeyDown}
+        className={baseStyles}
+        aria-label={tooltipLabel}
+      >
         {children}
       </Button>
     </TooltipWrapper>

@@ -1,9 +1,11 @@
-import { useQuery } from '@apollo/client/react'
-import { screen, waitFor } from '@testing-library/react'
+import { useQuery, useMutation } from '@apollo/client/react'
+import { screen, waitFor, fireEvent } from '@testing-library/react'
 import mockProgramDetailsData from '@unit/data/mockProgramData'
+import { useSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import ProgramDetailsPage from 'app/my/mentorship/programs/[programKey]/page'
 import '@testing-library/jest-dom'
+import { ProgramStatusEnum } from 'types/__generated__/graphql'
 
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
@@ -18,12 +20,21 @@ jest.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }))
 
+jest.mock('next-auth/react', () => ({
+  ...jest.requireActual('next-auth/react'),
+  useSession: jest.fn(),
+}))
+
 describe('ProgramDetailsPage', () => {
   beforeEach(() => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockProgramDetailsData,
       loading: false,
       refetch: jest.fn(),
+    })
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'test-user' } },
+      status: 'authenticated',
     })
   })
 
@@ -36,6 +47,7 @@ describe('ProgramDetailsPage', () => {
       loading: true,
       data: null,
     })
+    ;(useSession as jest.Mock).mockReturnValue({ data: null, status: 'loading' })
 
     render(<ProgramDetailsPage />)
 
@@ -67,7 +79,73 @@ describe('ProgramDetailsPage', () => {
       expect(screen.getByText('Jan 1, 2025')).toBeInTheDocument()
       expect(screen.getByText('Dec 31, 2025')).toBeInTheDocument()
       expect(screen.getByText('20')).toBeInTheDocument()
-      expect(screen.getByText('beginner, intermediate')).toBeInTheDocument()
+      expect(screen.getByText('Beginner, Intermediate')).toBeInTheDocument()
+    })
+  })
+
+  test('renders program details correctly for a non-admin', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'non-admin' } },
+      status: 'authenticated',
+    })
+    render(<ProgramDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Test Program')).toBeInTheDocument()
+      expect(screen.getByText('Sample summary')).toBeInTheDocument()
+      expect(screen.getByText('Draft')).toBeInTheDocument()
+      expect(screen.queryByTestId('program-actions-button')).not.toBeInTheDocument()
+    })
+  })
+
+  test('renders N/A if experienceLevels is null', async () => {
+    const mockDataWithoutLevels = {
+      getProgram: { ...mockProgramDetailsData.getProgram, experienceLevels: null },
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: mockDataWithoutLevels,
+    })
+    render(<ProgramDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('N/A')).toBeInTheDocument()
+    })
+  })
+
+  describe('Admin Functionality', () => {
+    const mockUpdateProgram = jest.fn()
+
+    beforeEach(() => {
+      ;(useSession as jest.Mock).mockReturnValue({
+        data: { user: { login: 'admin-user' } }, // Matches admin in mock data
+        status: 'authenticated',
+      })
+      ;(useMutation as unknown as jest.Mock).mockReturnValue([
+        mockUpdateProgram,
+        { loading: false },
+      ])
+    })
+
+    test('successfully updates status from Draft to Published', async () => {
+      mockUpdateProgram.mockResolvedValue({})
+      render(<ProgramDetailsPage />)
+
+      const actionsButton = await screen.findByTestId('program-actions-button')
+      fireEvent.click(actionsButton)
+
+      const publishButton = await screen.findByRole('menuitem', { name: 'Publish' })
+      fireEvent.click(publishButton)
+
+      await waitFor(() => {
+        expect(mockUpdateProgram).toHaveBeenCalledWith({
+          variables: {
+            inputData: {
+              key: 'test-program',
+              name: 'Test Program',
+              status: ProgramStatusEnum.Published,
+            },
+          },
+        })
+      })
     })
   })
 })

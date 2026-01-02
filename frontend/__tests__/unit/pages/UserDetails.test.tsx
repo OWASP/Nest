@@ -13,22 +13,6 @@ jest.mock('@apollo/client/react', () => ({
   useQuery: jest.fn(),
 }))
 
-// Mock FontAwesome
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({
-    icon,
-    className,
-    ...props
-  }: {
-    icon: string[] | { iconName: string }
-    className?: string
-    [key: string]: unknown
-  }) => {
-    const iconName = Array.isArray(icon) ? icon[1] : icon.iconName
-    return <span data-testid={`icon-${iconName}`} className={className} {...props} />
-  },
-}))
-
 // Mock Badges component
 jest.mock('components/Badges', () => {
   const MockBadges = ({
@@ -114,13 +98,15 @@ describe('UserDetailsPage', () => {
   test('renders loading state', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
+      loading: true,
       error: null,
     })
 
     render(<UserDetailsPage />)
-    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+
+    // Use semantic role query instead of CSS selectors for better stability
     await waitFor(() => {
-      expect(loadingSpinner.length).toBeGreaterThan(0)
+      expect(screen.getByTestId('user-loading-skeleton')).toBeInTheDocument()
     })
   })
 
@@ -137,10 +123,9 @@ describe('UserDetailsPage', () => {
     render(<UserDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
+      expect(screen.getByText('Test User')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Test User')).toBeInTheDocument()
     expect(screen.getByText('Statistics')).toBeInTheDocument()
     expect(screen.getByText('Test Company')).toBeInTheDocument()
     expect(screen.getByText('Test Location')).toBeInTheDocument()
@@ -540,6 +525,7 @@ describe('UserDetailsPage', () => {
       expect(bioContainer).toHaveClass('lg:text-left')
     })
   })
+
   test('does not render sponsor block', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
@@ -547,7 +533,7 @@ describe('UserDetailsPage', () => {
     })
     render(<UserDetailsPage />)
     await waitFor(() => {
-      expect(screen.queryByText(`Want to become a sponsor?`)).toBeNull()
+      expect(screen.queryByText('Want to become a sponsor?')).toBeNull()
     })
   })
 
@@ -655,7 +641,7 @@ describe('UserDetailsPage', () => {
       render(<UserDetailsPage />)
       await waitFor(() => {
         const badge = screen.getByTestId('badge-test-badge')
-        expect(badge).toHaveAttribute('data-css-class', 'fa-medal')
+        expect(badge).toHaveAttribute('data-css-class', 'medal')
       })
     })
 
@@ -685,7 +671,7 @@ describe('UserDetailsPage', () => {
       render(<UserDetailsPage />)
       await waitFor(() => {
         const badge = screen.getByTestId('badge-test-badge')
-        expect(badge).toHaveAttribute('data-css-class', 'fa-medal')
+        expect(badge).toHaveAttribute('data-css-class', 'medal')
       })
     })
 
@@ -775,7 +761,7 @@ describe('UserDetailsPage', () => {
             {
               id: '1',
               name: 'Contributor',
-              cssClass: 'fa-medal',
+              cssClass: 'medal',
               description: 'Active contributor',
               weight: 1,
             },

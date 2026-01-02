@@ -1,16 +1,11 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
-import {
-  faCodeMerge,
-  faFolderOpen,
-  faPersonWalkingArrowRight,
-  faUserPlus,
-} from '@fortawesome/free-solid-svg-icons'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import React, { useState, useEffect, useRef } from 'react'
+import { FaCodeMerge, FaFolderOpen, FaPersonWalkingArrowRight, FaUserPlus } from 'react-icons/fa6'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 import { GetUserDataDocument } from 'types/__generated__/userQueries.generated'
@@ -25,7 +20,7 @@ import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
 import Badges from 'components/Badges'
 import DetailsCard from 'components/CardDetailsPage'
-import LoadingSpinner from 'components/LoadingSpinner'
+import MemberDetailsPageSkeleton from 'components/skeletons/MemberDetailsPageSkeleton'
 
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams<{ memberKey: string }>()
@@ -76,7 +71,6 @@ const UserDetailsPage: React.FC = () => {
   }, [memberKey, user])
 
   const formattedBio = user?.bio?.split(' ').map((word, index) => {
-    // Regex to match GitHub usernames, but if last character is not a word character or @, it's a punctuation
     const mentionMatch = word.match(/^@([\w-]+(?:\.[\w-]+)*)([^\w@])?$/)
     if (mentionMatch && mentionMatch.length > 1) {
       const username = mentionMatch[1]
@@ -100,7 +94,11 @@ const UserDetailsPage: React.FC = () => {
   })
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return (
+      <div data-testid="user-loading-skeleton">
+        <MemberDetailsPageSkeleton />
+      </div>
+    )
   }
 
   if (!isLoading && user == null) {
@@ -121,15 +119,15 @@ const UserDetailsPage: React.FC = () => {
   ]
 
   const userStats = [
-    { icon: faPersonWalkingArrowRight, value: user?.followersCount || 0, unit: 'Follower' },
-    { icon: faUserPlus, value: user?.followingCount || 0, unit: 'Following' },
+    { icon: FaPersonWalkingArrowRight, value: user?.followersCount || 0, unit: 'Follower' },
+    { icon: FaUserPlus, value: user?.followingCount || 0, unit: 'Following' },
     {
-      icon: faFolderOpen,
+      icon: FaFolderOpen,
       pluralizedName: 'Repositories',
       unit: 'Repository',
       value: user?.publicRepositoriesCount ?? 0,
     },
-    { icon: faCodeMerge, value: user?.contributionsCount || 0, unit: 'Contribution' },
+    { icon: FaCodeMerge, value: user?.contributionsCount || 0, unit: 'Contribution' },
   ]
 
   const Heatmap = () => {
@@ -211,7 +209,7 @@ const UserDetailsPage: React.FC = () => {
                   <React.Fragment key={badge.id}>
                     <Badges
                       name={badge.name}
-                      cssClass={badge.cssClass || 'fa-medal'}
+                      cssClass={badge.cssClass || 'medal'}
                       showTooltip={true}
                     />
                   </React.Fragment>

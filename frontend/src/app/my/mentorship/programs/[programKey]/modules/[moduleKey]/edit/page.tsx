@@ -1,4 +1,5 @@
 'use client'
+
 import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useParams, useRouter } from 'next/navigation'
@@ -16,7 +17,7 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
 
 const EditModulePage = () => {
-  const { programKey, moduleKey } = useParams() as { programKey: string; moduleKey: string }
+  const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
   const router = useRouter()
   const { data: sessionData, status: sessionStatus } = useSession()
 
@@ -82,6 +83,7 @@ const EditModulePage = () => {
         domains: (m.domains || []).join(', '),
         projectName: m.projectName,
         tags: (m.tags || []).join(', '),
+        labels: (m.labels || []).join(', '),
         projectId: m.projectId || '',
         mentorLogins: (m.mentors || []).map((mentor: { login: string }) => mentor.login).join(', '),
       })
@@ -94,21 +96,23 @@ const EditModulePage = () => {
 
     try {
       const input = {
-        key: moduleKey,
-        programKey: programKey,
-        name: formData.name,
         description: formData.description,
-        experienceLevel: formData.experienceLevel as ExperienceLevelEnum,
-        startedAt: formData.startedAt || null,
-        endedAt: formData.endedAt || null,
         domains: parseCommaSeparated(formData.domains),
-        tags: parseCommaSeparated(formData.tags),
-        projectName: formData.projectName,
-        projectId: formData.projectId,
+        endedAt: formData.endedAt || null,
+        experienceLevel: formData.experienceLevel as ExperienceLevelEnum,
+        key: moduleKey,
+        labels: parseCommaSeparated(formData.labels),
         mentorLogins: parseCommaSeparated(formData.mentorLogins),
+        name: formData.name,
+        programKey: programKey,
+        projectId: formData.projectId,
+        projectName: formData.projectName,
+        startedAt: formData.startedAt || null,
+        tags: parseCommaSeparated(formData.tags),
       }
 
-      await updateModule({ variables: { input } })
+      const result = await updateModule({ variables: { input } })
+      const updatedModuleKey = result.data?.updateModule?.key || moduleKey
 
       addToast({
         title: 'Module Updated',
@@ -117,7 +121,7 @@ const EditModulePage = () => {
         variant: 'solid',
         timeout: 3000,
       })
-      router.push(`/my/mentorship/programs/${programKey}?refresh=true`)
+      router.push(`/my/mentorship/programs/${programKey}/modules/${updatedModuleKey}`)
     } catch (err) {
       handleAppError(err)
     }

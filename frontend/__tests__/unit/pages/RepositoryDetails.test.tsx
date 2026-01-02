@@ -10,10 +10,6 @@ jest.mock('@apollo/client/react', () => ({
   useQuery: jest.fn(),
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
-}))
-
 jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))
@@ -226,7 +222,7 @@ describe('RepositoryDetailsPage', () => {
     render(<RepositoryDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText(`Want to become a sponsor?`)).toBeInTheDocument()
+      expect(screen.getByText('Want to become a sponsor?')).toBeInTheDocument()
       expect(
         screen.getByText(`Sponsor ${mockRepositoryData.repository.project.name}`)
       ).toBeInTheDocument()

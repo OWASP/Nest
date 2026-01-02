@@ -1,13 +1,5 @@
 'use client'
 import { useQuery, useApolloClient } from '@apollo/client/react'
-import { faLinkedin } from '@fortawesome/free-brands-svg-icons'
-import {
-  faCode,
-  faCodeBranch,
-  faCodeMerge,
-  faExclamationCircle,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -16,6 +8,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { FaCode, FaExclamationCircle } from 'react-icons/fa'
+import { FaLinkedin, FaCodeBranch, FaCodeMerge } from 'react-icons/fa6'
 
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import {
@@ -93,20 +87,21 @@ type CandidateWithSnapshot = Candidate & {
 const BoardCandidatesPage = () => {
   const { year } = useParams<{ year: string }>()
   const [candidates, setCandidates] = useState<CandidateWithSnapshot[]>([])
-  const [isLoading, setIsLoading] = useState(true)
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetBoardCandidatesDocument, {
+  const {
+    data: graphQLData,
+    error: graphQLRequestError,
+    loading,
+  } = useQuery(GetBoardCandidatesDocument, {
     variables: { year: Number.parseInt(year) },
   })
 
   useEffect(() => {
     if (graphQLData?.boardOfDirectors) {
       setCandidates(graphQLData.boardOfDirectors.candidates || [])
-      setIsLoading(false)
     }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
   }, [graphQLData, graphQLRequestError])
 
@@ -346,7 +341,7 @@ const BoardCandidatesPage = () => {
                   className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                   aria-label={`${candidate.memberName}'s LinkedIn profile`}
                 >
-                  <FontAwesomeIcon icon={faLinkedin} className="h-5 w-5" />
+                  <FaLinkedin className="h-5 w-5" />
                 </a>
               )}
             </h3>
@@ -426,10 +421,7 @@ const BoardCandidatesPage = () => {
             </h4>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div className="flex items-center gap-2">
-                <FontAwesomeIcon
-                  icon={faCode}
-                  className="h-4 w-4 text-gray-600 dark:text-gray-400"
-                />
+                <FaCode className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Commits</p>
                   <p className="font-semibold text-gray-900 dark:text-white">
@@ -438,10 +430,7 @@ const BoardCandidatesPage = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <FontAwesomeIcon
-                  icon={faCodeBranch}
-                  className="h-4 w-4 text-gray-600 dark:text-gray-400"
-                />
+                <FaCodeBranch className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">PRs</p>
                   <p className="font-semibold text-gray-900 dark:text-white">
@@ -450,10 +439,7 @@ const BoardCandidatesPage = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <FontAwesomeIcon
-                  icon={faExclamationCircle}
-                  className="h-4 w-4 text-gray-600 dark:text-gray-400"
-                />
+                <FaExclamationCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Issues</p>
                   <p className="font-semibold text-gray-900 dark:text-white">
@@ -462,10 +448,7 @@ const BoardCandidatesPage = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <FontAwesomeIcon
-                  icon={faCodeMerge}
-                  className="h-4 w-4 text-gray-600 dark:text-gray-400"
-                />
+                <FaCodeMerge className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
                   <p className="font-semibold text-gray-900 dark:text-white">
@@ -694,7 +677,7 @@ const BoardCandidatesPage = () => {
     )
   }
 
-  if (isLoading) {
+  if (loading) {
     return <LoadingSpinner />
   }
 
