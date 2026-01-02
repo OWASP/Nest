@@ -22,12 +22,11 @@ on:
 env:
   FORCE_COLOR: 1
 
-permissions:
-  contents: read
-
 jobs:
   pre-commit:
     name: Run pre-commit checks
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -61,6 +60,8 @@ jobs:
 
   check-frontend:
     name: Run frontend checks
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -94,6 +95,8 @@ jobs:
 
   spellcheck:
     name: Run spell check
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -109,6 +112,8 @@ jobs:
       - check-frontend
       - pre-commit
       - spellcheck
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -128,6 +133,8 @@ jobs:
       - check-frontend
       - pre-commit
       - spellcheck
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -146,8 +153,9 @@ jobs:
     needs:
       - scan-code
       - scan-ci-dependencies
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -172,14 +180,16 @@ jobs:
       - name: Run backend tests
         run: |
           docker run -e DJANGO_SETTINGS_MODULE=settings.test --env-file backend/.env.example owasp/nest:test-backend-latest pytest
+    timeout-minutes: 10
 
   run-frontend-unit-tests:
     name: Run frontend unit tests
     needs:
       - scan-code
       - scan-ci-dependencies
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -204,14 +214,16 @@ jobs:
       - name: Run frontend unit tests
         run: |
           docker run --env-file frontend/.env.example owasp/nest:test-frontend-unit-latest pnpm run test:unit
+    timeout-minutes: 10
 
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
     needs:
       - scan-code
       - scan-ci-dependencies
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -234,12 +246,13 @@ jobs:
       - name: Run frontend end-to-end tests
         run: |
           docker run --env-file frontend/.env.example owasp/nest:test-frontend-e2e-latest pnpm run test:e2e
+    timeout-minutes: 10
 
   set-release-version:
     name: Set release version
-    runs-on: ubuntu-latest
     outputs:
       release_version: ${{ steps.set.outputs.release_version }}
+    runs-on: ubuntu-latest
     steps:
       - name: Set release version
         id: set
@@ -263,8 +276,9 @@ jobs:
       - run-frontend-e2e-tests
       - run-frontend-unit-tests
       - set-release-version
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -366,11 +380,14 @@ jobs:
             echo "**Backend:** ${{ steps.backend-size.outputs.human_readable }}"
             echo "**Frontend:** ${{ steps.frontend-size.outputs.human_readable }}"
           } >> $GITHUB_STEP_SUMMARY
+    timeout-minutes: 10
 
   scan-staging-images:
     name: Scan Staging Images
     needs:
       - build-staging-images
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -412,6 +429,8 @@ jobs:
     needs:
       - scan-staging-images
       - set-release-version
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -526,6 +545,8 @@ jobs:
       github.ref == 'refs/heads/main'
     needs:
       - deploy-staging-nest
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -551,6 +572,8 @@ jobs:
     name: Run Lighthouse CI
     needs:
       - deploy-staging-nest-proxy
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -590,8 +613,9 @@ jobs:
       - run-frontend-e2e-tests
       - run-frontend-unit-tests
       - set-release-version
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -689,11 +713,14 @@ jobs:
             echo "**Backend:** ${{ steps.backend-size.outputs.human_readable }}"
             echo "**Frontend:** ${{ steps.frontend-size.outputs.human_readable }}"
           } >> $GITHUB_STEP_SUMMARY
+    timeout-minutes: 10
 
   scan-production-images:
     name: Scan Production Images
     needs:
       - build-production-images
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -739,6 +766,8 @@ jobs:
     needs:
       - scan-production-images
       - set-release-version
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -864,6 +893,8 @@ jobs:
       github.event.action == 'published'
     needs:
       - deploy-production-nest
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository

@@ -50,22 +50,27 @@ const ProgramDetailsPage = () => {
           const cleaned = params.toString()
           router.replace(cleaned ? `?${cleaned}` : globalThis.location.pathname, { scroll: false })
         }
+        return
       }
 
       if (error) {
-        setHasError(true)
-        setProgram(null)
-        setModules([])
-        setHasAttemptedLoad(true)
+        if (!hasError) {
+          setHasError(true)
+          setProgram(null)
+          setModules([])
+          setHasAttemptedLoad(true)
+        }
         return
       }
 
       if (data?.getProgram) {
-        setProgram(data.getProgram)
-        setModules(data.getProgramModules || [])
-        setHasError(false)
-        setHasAttemptedLoad(true)
-      } else if (data && !data.getProgram) {
+        if (!hasAttemptedLoad || program?.key !== data.getProgram.key) {
+          setProgram(data.getProgram)
+          setModules(data.getProgramModules || [])
+          setHasError(false)
+          setHasAttemptedLoad(true)
+        }
+      } else if (data && !data.getProgram && !hasError) {
         setHasError(true)
         setProgram(null)
         setModules([])
@@ -74,7 +79,18 @@ const ProgramDetailsPage = () => {
     }
 
     processResult()
-  }, [shouldRefresh, data, error, refetch, router, searchParams, programKey])
+  }, [
+    shouldRefresh,
+    data,
+    error,
+    refetch,
+    router,
+    searchParams,
+    programKey,
+    hasError,
+    hasAttemptedLoad,
+    program,
+  ])
 
   if (isLoading || !hasAttemptedLoad) {
     return <LoadingSpinner />
