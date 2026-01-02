@@ -83,9 +83,9 @@ test-frontend-e2e:
 	@docker container rm -f e2e-nest-db >/dev/null 2>&1 || true
 	@docker volume rm -f nest-e2e_e2e-db-data >/dev/null 2>&1 || true
 	@DOCKER_BUILDKIT=1 \
-	docker compose --project-name nest-e2e -f docker-compose/e2e.yaml up --build --remove-orphans --abort-on-container-exit db backend data-loader
+	docker compose --project-name nest-e2e -f docker-compose/e2e/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend data-loader
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local \
-	docker compose --project-name nest-e2e -f docker-compose/e2e.yaml up --build --remove-orphans --abort-on-container-exit db backend e2e-tests
+	docker compose --project-name nest-e2e -f docker-compose/e2e/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend e2e-tests
 
 
 test-frontend-unit:
