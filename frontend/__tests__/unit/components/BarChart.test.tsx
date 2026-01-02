@@ -1,11 +1,7 @@
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faFire } from '@fortawesome/free-solid-svg-icons'
 import { render, screen } from '@testing-library/react'
-import '@testing-library/jest-dom'
 import React from 'react'
-
-// Register FontAwesome icon
-library.add(faFire)
+import { FaFire } from 'react-icons/fa'
+import '@testing-library/jest-dom'
 
 // Mock react-apexcharts completely
 jest.mock('react-apexcharts', () => {
@@ -170,8 +166,7 @@ describe('<BarChart />', () => {
   })
 
   it('renders with custom icon when provided', () => {
-    // cspell:ignore fas
-    renderWithTheme(<BarChart {...mockProps} icon={['fas', 'fire']} />)
+    renderWithTheme(<BarChart {...mockProps} icon={FaFire} />)
     expect(screen.getByTestId('anchor-title')).toHaveTextContent('Calories Burned')
     expect(screen.getByTestId('card-icon')).toBeInTheDocument()
   })
@@ -367,7 +362,7 @@ describe('<BarChart />', () => {
       title: 'Decimal Values',
       labels: ['Decimal'],
       days: [99.5],
-      requirements: [100.0],
+      requirements: [100],
     }
 
     renderWithTheme(<BarChart {...decimalProps} />)
@@ -375,7 +370,7 @@ describe('<BarChart />', () => {
     const series = JSON.parse(chartElement.dataset.series || '[]')
 
     expect(series[0].data[0].y).toBe(99.5)
-    expect(series[0].data[0].goals[0].value).toBe(100.0)
+    expect(series[0].data[0].goals[0].value).toBe(100)
   })
 
   it('handles large numbers in days array', () => {

@@ -1,15 +1,9 @@
-import {
-  faChevronDown,
-  faChevronUp,
-  faLevelUpAlt,
-  faCalendarAlt,
-  faHourglassHalf,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import type React from 'react'
 import { useState } from 'react'
+import { FaChevronDown, FaChevronUp, FaTurnUp, FaCalendar, FaHourglassHalf } from 'react-icons/fa6'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import { TextInfoItem } from 'components/InfoItem'
@@ -33,6 +27,13 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
   const displayedModule = showAllModule ? modules : modules.slice(0, 4)
   const isAdmin = accessLevel === 'admin'
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      setShowAllModule(!showAllModule)
+    }
+  }
+
   return (
     <div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -45,15 +46,16 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
           <button
             type="button"
             onClick={() => setShowAllModule(!showAllModule)}
-            className="mt-4 flex items-center justify-center text-blue-400 hover:underline"
+            onKeyDown={handleKeyDown}
+            className="mt-4 flex items-center justify-center text-blue-400 hover:underline focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
           >
             {showAllModule ? (
               <>
-                Show less <FontAwesomeIcon icon={faChevronUp} className="ml-1" />
+                Show less <FaChevronUp className="ml-1" />
               </>
             ) : (
               <>
-                Show more <FontAwesomeIcon icon={faChevronDown} className="ml-1" />
+                Show more <FaChevronDown className="ml-1" />
               </>
             )}
           </button>
@@ -73,10 +75,10 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
       >
         <TruncatedText text={module?.name} />
       </Link>
-      <TextInfoItem icon={faLevelUpAlt} label="Level" value={upperFirst(module.experienceLevel)} />
-      <TextInfoItem icon={faCalendarAlt} label="Start" value={formatDate(module.startedAt)} />
+      <TextInfoItem icon={FaTurnUp} label="Level" value={upperFirst(module.experienceLevel)} />
+      <TextInfoItem icon={FaCalendar} label="Start" value={formatDate(module.startedAt)} />
       <TextInfoItem
-        icon={faHourglassHalf}
+        icon={FaHourglassHalf}
         label="Duration"
         value={getSimpleDuration(module.startedAt, module.endedAt)}
       />

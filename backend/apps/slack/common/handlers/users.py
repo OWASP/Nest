@@ -72,7 +72,6 @@ def get_blocks(
         ),
     ]
 
-    blocks = []
     for idx, user in enumerate(users):
         user_name_raw = user.get("idx_name") or user.get("idx_login", "")
         user_name = truncate(escape(user_name_raw), presentation.name_truncation)

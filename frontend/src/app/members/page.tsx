@@ -1,7 +1,7 @@
 'use client'
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import { FaRightToBracket } from 'react-icons/fa6'
 import type { User } from 'types/user'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/UserCard'
@@ -29,7 +29,7 @@ const UsersPage = () => {
   const renderUserCard = (user: User) => {
     const submitButton = {
       label: 'View Details',
-      icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
+      icon: <FaRightToBracket className="h-4 w-4" />,
       onclick: () => handleButtonClick(user),
     }
 
@@ -65,7 +65,9 @@ const UsersPage = () => {
       totalPages={totalPages}
     >
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {users && users.map((user) => <div key={user.key}>{renderUserCard(user)}</div>)}
+        {users?.map((user) => (
+          <div key={user.key}>{renderUserCard(user)}</div>
+        ))}
       </div>
     </SearchPageLayout>
   )

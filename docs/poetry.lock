@@ -475,14 +475,14 @@ pyyaml = ">=5.1"
 
 [[package]]
 name = "mkdocs-material"
-version = "9.7.0"
+version = "9.7.1"
 description = "Documentation that simply works"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "mkdocs_material-9.7.0-py3-none-any.whl", hash = "sha256:da2866ea53601125ff5baa8aa06404c6e07af3c5ce3d5de95e3b52b80b442887"},
-    {file = "mkdocs_material-9.7.0.tar.gz", hash = "sha256:602b359844e906ee402b7ed9640340cf8a474420d02d8891451733b6b02314ec"},
+    {file = "mkdocs_material-9.7.1-py3-none-any.whl", hash = "sha256:3f6100937d7d731f87f1e3e3b021c97f7239666b9ba1151ab476cabb96c60d5c"},
+    {file = "mkdocs_material-9.7.1.tar.gz", hash = "sha256:89601b8f2c3e6c6ee0a918cc3566cb201d40bf37c3cd3c2067e26fadb8cce2b8"},
 ]
 
 [package.dependencies]
@@ -496,7 +496,7 @@ mkdocs-material-extensions = ">=1.3"
 paginate = ">=0.5"
 pygments = ">=2.16"
 pymdown-extensions = ">=10.2"
-requests = ">=2.26"
+requests = ">=2.30"
 
 [package.extras]
 git = ["mkdocs-git-committers-plugin-2 (>=1.1,<3)", "mkdocs-git-revision-date-localized-plugin (>=1.2.4,<2.0)"]
@@ -632,14 +632,14 @@ windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
 name = "pymdown-extensions"
-version = "10.17.2"
+version = "10.20"
 description = "Extension pack for Python Markdown."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "pymdown_extensions-10.17.2-py3-none-any.whl", hash = "sha256:bffae79a2e8b9e44aef0d813583a8fea63457b7a23643a43988055b7b79b4992"},
-    {file = "pymdown_extensions-10.17.2.tar.gz", hash = "sha256:26bb3d7688e651606260c90fb46409fbda70bf9fdc3623c7868643a1aeee4713"},
+    {file = "pymdown_extensions-10.20-py3-none-any.whl", hash = "sha256:ea9e62add865da80a271d00bfa1c0fa085b20d133fb3fc97afdc88e682f60b2f"},
+    {file = "pymdown_extensions-10.20.tar.gz", hash = "sha256:5c73566ab0cf38c6ba084cb7c5ea64a119ae0500cce754ccb682761dfea13a52"},
 ]
 
 [package.dependencies]
@@ -798,14 +798,14 @@ files = [
 
 [[package]]
 name = "urllib3"
-version = "2.6.0"
+version = "2.6.2"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "urllib3-2.6.0-py3-none-any.whl", hash = "sha256:c90f7a39f716c572c4e3e58509581ebd83f9b59cced005b7db7ad2d22b0db99f"},
-    {file = "urllib3-2.6.0.tar.gz", hash = "sha256:cb9bcef5a4b345d5da5d145dc3e30834f58e8018828cbc724d30b4cb7d4d49f1"},
+    {file = "urllib3-2.6.2-py3-none-any.whl", hash = "sha256:ec21cddfe7724fc7cb4ba4bea7aa8e2ef36f607a4bab81aa6ce42a13dc3f03dd"},
+    {file = "urllib3-2.6.2.tar.gz", hash = "sha256:016f9c98bb7e98085cb2b4b17b87d2c702975664e4f060c6532e64d1c1a5e797"},
 ]
 
 [package.extras]
@@ -860,4 +860,4 @@ watchmedo = ["PyYAML (>=3.10)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "dce53c87af4a69cea61523b945917d6b03815c403c5f0196a5a87983b321f25c"
+content-hash = "f565d79d95768ab65837d4b113b14539048a2d177a2a1c90b720d8c10172ce0c"

@@ -1,7 +1,9 @@
-import { faCodeFork, faStar, faUsers, faExclamationCircle } from '@fortawesome/free-solid-svg-icons'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState } from 'react'
+import { FaExclamationCircle } from 'react-icons/fa'
+import { FaCodeFork, FaStar } from 'react-icons/fa6'
+import { HiUserGroup } from 'react-icons/hi'
 import type { RepositoryCardListProps, RepositoryCardProps } from 'types/project'
 import InfoItem from 'components/InfoItem'
 import ShowMoreButton from 'components/ShowMoreButton'
@@ -23,7 +25,12 @@ const RepositoryCard: React.FC<RepositoryCardListProps> = ({
     <div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {displayedRepositories.map((repository) => {
-          return <RepositoryItem key={repository.key} details={repository} />
+          return (
+            <RepositoryItem
+              key={`${repository.organization?.login ?? 'unknown'}-${repository.key}`}
+              details={repository}
+            />
+          )
         })}
       </div>
       {repositories.length > maxInitialDisplay && <ShowMoreButton onToggle={toggleRepositories} />}
@@ -34,7 +41,14 @@ const RepositoryCard: React.FC<RepositoryCardListProps> = ({
 const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
   const router = useRouter()
   const handleClick = () => {
-    router.push(`/organizations/${details.organization.login}/repositories/${details.key}`)
+    router.push(`/organizations/${details.organization?.login}/repositories/${details.key}`)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handleClick()
+    }
   }
 
   return (
@@ -43,7 +57,8 @@ const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
         <button
           type="button"
           onClick={handleClick}
-          className="min-w-0 flex-1 cursor-pointer text-start font-semibold text-blue-400 hover:underline"
+          onKeyDown={handleKeyDown}
+          className="min-w-0 flex-1 cursor-pointer text-start font-semibold text-blue-400 hover:underline focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
         >
           <TruncatedText text={details?.name} />
         </button>
@@ -55,16 +70,16 @@ const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
       </div>
 
       <div className="flex flex-col gap-2 text-sm">
-        <InfoItem icon={faStar} pluralizedName="Stars" unit="Star" value={details.starsCount} />
-        <InfoItem icon={faCodeFork} pluralizedName="Forks" unit="Fork" value={details.forksCount} />
+        <InfoItem icon={FaStar} pluralizedName="Stars" unit="Star" value={details.starsCount} />
+        <InfoItem icon={FaCodeFork} pluralizedName="Forks" unit="Fork" value={details.forksCount} />
         <InfoItem
-          icon={faUsers}
+          icon={HiUserGroup}
           pluralizedName="Contributors"
           unit="Contributor"
           value={details.contributorsCount}
         />
         <InfoItem
-          icon={faExclamationCircle}
+          icon={FaExclamationCircle}
           pluralizedName="Issues"
           unit="Issue"
           value={details.openIssuesCount}
