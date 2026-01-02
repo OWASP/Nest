@@ -22,7 +22,7 @@ jest.mock('@heroui/modal', () => {
   const Stub = ({ children }: { children: React.ReactNode }) => <>{children}</>
   return {
     Modal: ({ isOpen, children }: { isOpen: boolean; children: React.ReactNode }) =>
-      isOpen ? <div role="dialog">{children}</div> : null,
+      isOpen ? <dialog open>{children}</dialog> : null,
     ModalContent: Stub,
     ModalHeader: Stub,
     ModalBody: Stub,
