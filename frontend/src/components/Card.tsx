@@ -28,7 +28,8 @@ const Card = ({
 }: CardProps) => {
   const filteredTags = tags?.filter(tag => {
     const lowerTag = tag.toLowerCase()
-    return lowerTag.includes('good first issue') || lowerTag.includes('help wanted')
+    //tag priority to be set by the devs
+    return lowerTag.includes('good first issue') || lowerTag.includes('help wanted') || lowerTag.includes('tag-4') || lowerTag.includes('backend')
   }) || []
   // If no filtered tags, use tags prop directly
   const displayTags = filteredTags.length > 0 ? filteredTags : (tags || [])
