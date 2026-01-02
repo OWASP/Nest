@@ -101,19 +101,7 @@ const Card = ({
       {/* Project summary */}
       <Markdown content={summary} className="mt-2 w-full text-gray-600 dark:text-gray-300" />
 
-      {/* Tags section */}
-      {tags && tags.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {tags.map((tag, index) => (
-            <span
-              key={`tag-${index}`}
-              className="inline-flex items-center rounded-full border border-gray-300 bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
+
 
       <div className="mt-4 w-full">
         {/* Social icons section */}
@@ -141,6 +129,19 @@ const Card = ({
 
         {/* Flexible bottom row with contributors and action button */}
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
+          {/* Tags section */}
+          {tags && tags.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {tags.map((tag, index) => (
+                <span
+                  key={`tag-${index}`}
+                  className="flex items-center gap-2 px-2 py-1 rounded-md border border-1 transition-all whitespace-nowrap justify-center bg-transparent text-zinc-300 hover:text-white"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
           {/* Contributors section */}
           <div className="flex flex-wrap items-center gap-2">
             {topContributors?.map((contributor, index) => (
@@ -151,6 +152,7 @@ const Card = ({
               />
             ))}
           </div>
+
 
           {/* Action Button */}
           <div className="flex sm:justify-end">
