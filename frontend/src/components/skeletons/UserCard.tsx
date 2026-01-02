@@ -10,6 +10,9 @@ const UserCardSkeleton: React.FC<UserCardSkeletonProps> = ({
   return (
     <div
       role="status"
+      aria-live="polite"
+      aria-busy="true"
+      aria-label="Loading"
       className="group flex h-64 w-80 flex-col items-center rounded-lg bg-white p-6 text-left shadow-lg dark:bg-gray-800 dark:shadow-gray-900/30"
     >
       <div className="flex w-full flex-col items-center gap-4">

@@ -368,7 +368,13 @@ export const ProjectSelector = ({
         const projects = data.searchProjects || []
         const filtered = projects.filter((proj) => proj.id !== value)
         setItems(filtered.slice(0, 5))
-      } catch {
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(
+          'Error fetching project suggestions:',
+          err instanceof Error ? err.message : String(err),
+          err
+        )
         setItems([])
       } finally {
         setIsLoading(false)
