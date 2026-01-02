@@ -149,29 +149,30 @@ class TestElevenLabs:
 
     @patch("apps.common.eleven_labs.ElevenLabsClient")
     @patch("apps.common.eleven_labs.settings")
-    def test_generate_to_file_success(self, mock_settings, mock_client, tmp_path):
+    def test_save_creates_file(self, mock_settings, mock_client, tmp_path):
+        """Test save writes contents to file."""
         mock_settings.ELEVENLABS_API_KEY = DEFAULT_API_KEY
-        mock_client.return_value.text_to_speech.convert.return_value = [b"audio", b"data"]
 
         instance = ElevenLabs()
-        instance.set_text("Test text")
         file_path = tmp_path / "output.mp3"
-        result = instance.generate_to_file(file_path)
+        contents = b"audio_data"
 
-        assert result is True
+        instance.save(contents, file_path)
+
         assert file_path.exists()
-        assert file_path.read_bytes() == b"audiodata"
+        assert file_path.read_bytes() == b"audio_data"
 
     @patch("apps.common.eleven_labs.ElevenLabsClient")
     @patch("apps.common.eleven_labs.settings")
-    def test_generate_to_file_failure(self, mock_settings, mock_client, tmp_path):
+    def test_save_creates_parent_directories(self, mock_settings, mock_client, tmp_path):
+        """Test save creates parent directories if they don't exist."""
         mock_settings.ELEVENLABS_API_KEY = DEFAULT_API_KEY
-        mock_client.return_value.text_to_speech.convert.side_effect = Exception()
 
         instance = ElevenLabs()
-        instance.set_text("Test text")
-        file_path = tmp_path / "output.mp3"
-        result = instance.generate_to_file(file_path)
+        file_path = tmp_path / "nested" / "dir" / "output.mp3"
+        contents = b"audio_data"
 
-        assert result is False
-        assert not file_path.exists()
+        instance.save(contents, file_path)
+
+        assert file_path.exists()
+        assert file_path.read_bytes() == b"audio_data"

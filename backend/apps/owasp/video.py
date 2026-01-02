@@ -105,9 +105,11 @@ class Slide:
 
         """
         eleven_labs.set_text(self.transcript)
-        if not eleven_labs.generate_to_file(self.audio_path):
+        audio = eleven_labs.generate()
+        if audio is None:
             msg = f"Failed to generate audio for {self.name}"
             raise RuntimeError(msg)
+        eleven_labs.save(audio, self.audio_path)
 
     def generate_and_save_video(self) -> None:
         """Generate video for the slide.

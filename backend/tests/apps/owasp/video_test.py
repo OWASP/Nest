@@ -70,7 +70,7 @@ class TestSlide:
     def test_generate_and_save_audio_generation_fails(self, slide):
         """Test generate_and_save_audio raises error when generation fails."""
         eleven_labs = Mock()
-        eleven_labs.generate_to_file.return_value = False
+        eleven_labs.generate.return_value = None
 
         with pytest.raises(RuntimeError, match="Failed to generate audio"):
             slide.generate_and_save_audio(eleven_labs)
@@ -78,12 +78,13 @@ class TestSlide:
     def test_generate_and_save_audio_success(self, slide):
         """Test generate_and_save_audio succeeds."""
         eleven_labs = Mock()
-        eleven_labs.generate_to_file.return_value = True
+        eleven_labs.generate.return_value = b"audio_data"
 
         slide.generate_and_save_audio(eleven_labs)
 
         eleven_labs.set_text.assert_called_once_with(slide.transcript)
-        eleven_labs.generate_to_file.assert_called_once_with(slide.audio_path)
+        eleven_labs.generate.assert_called_once()
+        eleven_labs.save.assert_called_once_with(b"audio_data", slide.audio_path)
 
     @patch("apps.owasp.video.ffmpeg")
     def test_generate_and_save_video_success(self, mock_ffmpeg, slide):

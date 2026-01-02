@@ -211,21 +211,13 @@ class ElevenLabs:
 
         return None
 
-    def generate_to_file(self, file_path: Path) -> bool:
-        """Generate audio and save to file.
+    def save(self, contents: bytes, file_path: Path) -> None:
+        """Save audio contents to file.
 
         Args:
+            contents (bytes): The audio content to save.
             file_path (Path): Path to save the audio file.
 
-        Returns:
-            bool: True if successful, False otherwise.
-
         """
-        audio = self.generate()
-        if audio is None:
-            return False
-
         file_path.parent.mkdir(parents=True, exist_ok=True)
-        file_path.write_bytes(audio)
-
-        return True
+        file_path.write_bytes(contents)
