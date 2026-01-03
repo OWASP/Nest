@@ -6,16 +6,15 @@ import strawberry
 from django.db.models import OuterRef, Subquery
 
 from apps.github.api.internal.nodes.milestone import MilestoneNode
-from apps.github.models.generic_issue_model import GenericIssueModel
 from apps.github.models.milestone import Milestone
 
 
 @strawberry.enum
-class MilestoneStateEnum(enum.Enum):
+class MilestoneStateEnum(str, enum.Enum):
     """Milestone state filter options."""
 
-    CLOSED = GenericIssueModel.State.CLOSED
-    OPEN = GenericIssueModel.State.OPEN
+    CLOSED = "closed"
+    OPEN = "open"
 
 
 @strawberry.type
@@ -82,6 +81,10 @@ class MilestoneQuery:
                 id__in=Subquery(latest_milestone_per_author),
             )
 
-        return milestones.order_by(
-            "-created_at",
-        )[:limit]
+        return (
+            milestones.order_by(
+                "-created_at",
+            )[:limit]
+            if limit > 0
+            else []
+        )

@@ -88,4 +88,4 @@ class PullRequestQuery:
                 "-created_at",
             )
 
-        return queryset[:limit]
+        return queryset[:limit] if limit > 0 else []
