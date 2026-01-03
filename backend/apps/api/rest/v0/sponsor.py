@@ -99,7 +99,7 @@ def get_sponsor(
     sponsor_id: str = Path(..., example="adobe"),
 ) -> SponsorDetail | SponsorError:
     """Get sponsor."""
-    if sponsor := SponsorModel.objects.filter(key__iexact=sponsor_id).first():
+    if sponsor := SponsorModel.objects.filter(key__iexact=sponsor_id.replace()).first():
         return sponsor
 
     return Response({"message": "Sponsor not found"}, status=HTTPStatus.NOT_FOUND)
