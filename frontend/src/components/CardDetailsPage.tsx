@@ -49,17 +49,13 @@ export type CardType =
   | 'user'
 
 export const shouldShowStatistics = (type: CardType): boolean =>
-  type === 'project' ||
-  type === 'repository' ||
-  type === 'committee' ||
-  type === 'user' ||
-  type === 'organization'
+  ['project', 'repository', 'committee', 'user', 'organization'].includes(type)
 
 export const shouldShowIssuesAndMilestones = (type: CardType): boolean =>
-  type === 'project' || type === 'repository' || type === 'user' || type === 'organization'
+  ['project', 'repository', 'user', 'organization'].includes(type)
 
 export const shouldShowPullRequestsAndReleases = (type: CardType): boolean =>
-  type === 'project' || type === 'repository' || type === 'organization' || type === 'user'
+  ['project', 'repository', 'organization', 'user'].includes(type)
 
 const DetailsCard = ({
   description,
@@ -327,18 +323,7 @@ const DetailsCard = ({
         {shouldShowIssuesAndMilestones(type) && (
           <div className="grid-cols-2 gap-4 lg:grid">
             <RecentIssues data={recentIssues} showAvatar={showAvatar} />
-            {type === 'user' ||
-            type === 'organization' ||
-            type === 'repository' ||
-            type === 'project' ? (
-              <Milestones data={recentMilestones} showAvatar={showAvatar} />
-            ) : (
-              <RecentReleases
-                data={recentReleases}
-                showAvatar={showAvatar}
-                showSingleColumn={true}
-              />
-            )}
+            <Milestones data={recentMilestones} showAvatar={showAvatar} />
           </div>
         )}
         {shouldShowPullRequestsAndReleases(type) && (

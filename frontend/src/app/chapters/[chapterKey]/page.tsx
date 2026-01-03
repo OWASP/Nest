@@ -8,7 +8,7 @@ import { GetChapterDataDocument } from 'types/__generated__/chapterQueries.gener
 import type { Chapter } from 'types/chapter'
 import type { Contributor } from 'types/contributor'
 import { getContributionStats } from 'utils/contributionDataUtils'
-import { formatDate } from 'utils/dateFormatter'
+import { formatDate, getDateRange } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
@@ -61,11 +61,7 @@ export default function ChapterDetailsPage() {
     },
   ]
 
-  const today = new Date()
-  const oneYearAgo = new Date(today)
-  oneYearAgo.setFullYear(today.getFullYear() - 1)
-  const startDate = oneYearAgo.toISOString().split('T')[0]
-  const endDate = today.toISOString().split('T')[0]
+  const { startDate, endDate } = getDateRange({ years: 1 })
 
   const contributionStats = getContributionStats(
     chapter.contributionStats,

@@ -1,6 +1,7 @@
 import dynamic from 'next/dynamic'
 import { useTheme } from 'next-themes'
 import React, { useMemo } from 'react'
+import { pluralize } from 'utils/pluralize'
 
 const Chart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
@@ -195,7 +196,7 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
       const bgColor = isDarkMode ? '#1F2937' : '#FFFFFF'
       const textColor = isDarkMode ? '#F3F4F6' : '#111827'
       const secondaryColor = isDarkMode ? '#9CA3AF' : '#6B7280'
-      const unitLabel = count !== 1 ? `${unit}s` : unit
+      const unitLabel = pluralize(count, unit)
 
       return `
         <div style="
@@ -295,7 +296,7 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
       )}
 
       {/* scroll wrapper for small screens */}
-      <div className="scrollbar-hide hover:scrollbar-default w-full overflow-x-auto overflow-y-hidden">
+      <div className="scrollbar-default w-full overflow-x-auto overflow-y-hidden">
         <style>
           {`
             .apexcharts-tooltip {
@@ -306,32 +307,10 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
             .apexcharts-tooltip * {
               border: none !important;
             }
-            .scrollbar-hide {
-              scrollbar-width: none;
-              -ms-overflow-style: none;
-            }
-            .scrollbar-hide::-webkit-scrollbar {
-              display: none;
-            }
-            .scrollbar-hide:hover {
+            .scrollbar-default {
               scrollbar-width: thin;
-              -ms-overflow-style: auto;
             }
-            .scrollbar-hide:hover::-webkit-scrollbar {
-              display: block;
-              height: 8px;
-            }
-            .scrollbar-hide:hover::-webkit-scrollbar-track {
-              background: ${isDarkMode ? '#374151' : '#F3F4F6'};
-              border-radius: 4px;
-            }
-            .scrollbar-hide:hover::-webkit-scrollbar-thumb {
-              background: ${isDarkMode ? '#6B7280' : '#D1D5DB'};
-              border-radius: 4px;
-            }
-            .scrollbar-hide:hover::-webkit-scrollbar-thumb:hover {
-              background: '#9CA3AF';
-            }
+
           `}
         </style>
 

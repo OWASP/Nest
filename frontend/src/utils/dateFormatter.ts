@@ -68,3 +68,42 @@ export const formatDateForInput = (dateStr: string | number) => {
   }
   return date.toISOString().slice(0, 10)
 }
+
+export interface DateRangeOptions {
+  years?: number
+  months?: number
+  days?: number
+  useUTC?: boolean
+}
+
+export interface DateRangeResult {
+  startDate: string
+  endDate: string
+}
+
+export function getDateRange(options: DateRangeOptions = {}): DateRangeResult {
+  const { years = 0, months = 0, days = 0, useUTC = false } = options
+
+  const today = new Date()
+  if (useUTC) {
+    today.setUTCHours(0, 0, 0, 0)
+  } else {
+    today.setHours(0, 0, 0, 0)
+  }
+
+  const startDate = new Date(today)
+  if (useUTC) {
+    startDate.setUTCFullYear(today.getUTCFullYear() - years)
+    startDate.setUTCMonth(today.getUTCMonth() - months)
+    startDate.setUTCDate(today.getUTCDate() - days)
+  } else {
+    startDate.setFullYear(today.getFullYear() - years)
+    startDate.setMonth(today.getMonth() - months)
+    startDate.setDate(today.getDate() - days)
+  }
+
+  return {
+    startDate: startDate.toISOString().split('T')[0],
+    endDate: today.toISOString().split('T')[0],
+  }
+}
