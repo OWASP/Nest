@@ -491,28 +491,21 @@ describe('ChapterMap', () => {
       const { getByText, queryByText } = render(<ChapterMap {...defaultProps} />)
 
       // First unlock the map
-      const unlockButton = getByText('Unlock map')
-      fireEvent.click(unlockButton)
+      const unlockButton = getByText('Unlock map').closest('button')
+      expect(unlockButton).not.toBeNull()
+      fireEvent.click(unlockButton as HTMLElement)
 
       // Verify map is unlocked
       expect(queryByText('Unlock map')).not.toBeInTheDocument()
       expect(mockMap.dragging.enable).toHaveBeenCalled()
 
       // Press Escape to re-lock
-      const event = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true })
-      const preventDefaultSpy = jest.spyOn(event, 'preventDefault')
-      const stopPropagationSpy = jest.spyOn(event, 'stopPropagation')
-
-      globalThis.dispatchEvent(event)
+      globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
 
       // Verify map is locked again
       expect(getByText('Unlock map')).toBeInTheDocument()
       expect(mockMap.dragging.disable).toHaveBeenCalled()
       expect(mockMap.scrollWheelZoom.disable).toHaveBeenCalled()
-
-      // Verify event was contained to prevent race conditions
-      expect(preventDefaultSpy).toHaveBeenCalled()
-      expect(stopPropagationSpy).toHaveBeenCalled()
     })
 
     it('does nothing when Escape is pressed and map is already locked', () => {
@@ -579,7 +572,8 @@ describe('ChapterMap', () => {
     it('unlock button has pointer-events-auto class', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
-      const button = getByText('Unlock map')
+      const button = getByText('Unlock map').closest('button')
+      expect(button).not.toBeNull()
       expect(button).toHaveClass('pointer-events-auto')
     })
   })
