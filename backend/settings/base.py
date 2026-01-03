@@ -142,7 +142,10 @@ class Base(Configuration):
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:6379",
+            "LOCATION": f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:6379"
+            # GH actions does not support authenticated redis connections.
+            if REDIS_PASSWORD
+            else f"redis://{REDIS_HOST}:6379",
             "OPTIONS": {
                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
             },
