@@ -74,7 +74,7 @@ test-frontend-unit:
 test-frontend-a11y:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
 		--cache-from nest-test-frontend-a11y \
-		-f frontend/docker/Dockerfile.unit.test frontend \
+		-f frontend/docker/Dockerfile.a11y.test frontend \
 		-t nest-test-frontend-a11y
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-a11y pnpm run test:a11y
 

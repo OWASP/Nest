@@ -18,6 +18,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --ignore-scripts && \
     chown node:node /app
 
+COPY __tests__/accessibility __tests__/accessibility
 COPY __tests__/unit __tests__/unit
 COPY .pnpmrc jest.config.ts jest.setup.ts tsconfig.json ./
 COPY public public

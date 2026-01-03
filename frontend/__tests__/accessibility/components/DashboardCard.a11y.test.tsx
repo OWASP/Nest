@@ -12,7 +12,7 @@ const baseProps = {
   stats: undefined,
 }
 
-describe('Dashboard a11y', () => {
+describe('DashboardCard a11y', () => {
   it('should not have any accessibility violations', async () => {
     const { container } = render(<DashboardCard {...baseProps} />)
 

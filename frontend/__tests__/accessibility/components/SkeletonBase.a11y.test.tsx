@@ -9,7 +9,7 @@ const defaultProps = {
   loadingImageUrl: 'https://example.com/loading.gif',
 }
 
-describe('SkeletonBase a11y =', () => {
+describe('SkeletonBase a11y', () => {
   it('should not have any accessibility violations', async () => {
     const { container } = render(<SkeletonBase {...defaultProps} />)
 
