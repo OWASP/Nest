@@ -5,7 +5,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@herou
 import { Input } from '@heroui/react'
 import { addToast } from '@heroui/toast'
 import { format, addDays } from 'date-fns'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { FaInfoCircle } from 'react-icons/fa'
 import { FaSpinner, FaKey, FaPlus, FaCopy, FaEye, FaEyeSlash, FaTrash } from 'react-icons/fa6'
 import {
@@ -14,10 +14,79 @@ import {
   RevokeApiKeyDocument,
 } from 'types/__generated__/apiKeyQueries.generated'
 import type { ApiKey } from 'types/apiKey'
+import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
 import { ApiKeysSkeleton } from 'components/skeletons/ApiKeySkelton'
 
 const MAX_ACTIVE_KEYS = 3
+
+// Content state components
+const ErrorState = () => (
+  <div className="rounded-md bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">
+    Error loading API keys
+  </div>
+)
+
+const EmptyState = () => (
+  <div className="rounded-md bg-gray-50 p-8 text-center text-gray-500 dark:bg-gray-800/50 dark:text-gray-400">
+    You don't have any API keys yet.
+  </div>
+)
+
+interface ApiKeysTableProps {
+  data: { apiKeys?: ApiKey[] } | undefined
+  onRevoke: (key: ApiKey) => void
+}
+
+const ApiKeysTable = ({ data, onRevoke }: ApiKeysTableProps) => (
+  <div className="overflow-x-auto">
+    <table className="w-full border-collapse">
+      <thead>
+        <tr className="border-b-1 border-b-gray-200 dark:border-b-gray-700">
+          <th className="py-3 text-left font-semibold">Name</th>
+          <th className="py-3 text-left font-semibold">ID</th>
+          <th className="py-3 text-left font-semibold">Created</th>
+          <th className="py-3 text-left font-semibold">Expires</th>
+          <th className="py-3 text-right font-semibold">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {(data?.apiKeys ?? []).map((key: ApiKey) => (
+          <tr key={key.uuid} className="border-b border-b-gray-200 dark:border-b-gray-700">
+            <td className="py-3">{key.name}</td>
+            <td className="py-3 font-mono text-sm">{key.uuid}</td>
+            <td className="py-3">{format(new Date(key.createdAt), 'PP')}</td>
+            <td className="py-3">
+              {key.expiresAt ? format(new Date(key.expiresAt), 'PP') : 'Never'}
+            </td>
+            <td className="py-3 text-right">
+              <Button
+                variant="light"
+                size="sm"
+                onPress={() => onRevoke(key)}
+                className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+              >
+                <FaTrash />
+              </Button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)
+
+type ContentType = 'error' | 'loading' | 'empty' | 'table'
+
+const getContentComponents = (
+  data: { apiKeys?: ApiKey[] } | undefined,
+  onRevoke: (key: ApiKey) => void
+): Record<ContentType, () => React.ReactNode> => ({
+  error: () => <ErrorState />,
+  loading: () => <LoadingSpinner />,
+  empty: () => <EmptyState />,
+  table: () => <ApiKeysTable data={data} onRevoke={onRevoke} />,
+})
 
 export default function Page() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -69,6 +138,21 @@ export default function Page() {
   const activeKeyCount = data?.activeApiKeyCount || 0
   const canCreateNewKey = activeKeyCount < MAX_ACTIVE_KEYS
   const defaultExpiryDate = format(addDays(new Date(), 30), 'yyyy-MM-dd')
+
+  const getContentType = (): ContentType => {
+    if (error) {
+      return 'error'
+    } else if (loading) {
+      return 'loading'
+    } else if (data?.apiKeys?.length === 0) {
+      return 'empty'
+    } else {
+      return 'table'
+    }
+  }
+
+  const contentType = getContentType()
+  const contentComponents = getContentComponents(data, setKeyToRevoke)
 
   const handleCreateKey = () => {
     if (!newKeyName.trim()) {
@@ -202,58 +286,7 @@ export default function Page() {
             </Button>
           </div>
 
-          {error ? (
-            <div className="rounded-md bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">
-              Error loading API keys
-            </div>
-          ) : loading ? (
-            <div className="flex flex-col gap-4">
-              <ApiKeysSkeleton />
-            </div>
-          ) : !data?.apiKeys?.length ? (
-            <div className="rounded-md bg-gray-50 p-8 text-center text-gray-500 dark:bg-gray-800/50 dark:text-gray-400">
-              You don't have any API keys yet.
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b-1 border-b-gray-200 dark:border-b-gray-700">
-                    <th className="py-3 text-left font-semibold">Name</th>
-                    <th className="py-3 text-left font-semibold">ID</th>
-                    <th className="py-3 text-left font-semibold">Created</th>
-                    <th className="py-3 text-left font-semibold">Expires</th>
-                    <th className="py-3 text-right font-semibold">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.apiKeys.map((key: ApiKey) => (
-                    <tr
-                      key={key.uuid}
-                      className="border-b border-b-gray-200 dark:border-b-gray-700"
-                    >
-                      <td className="py-3">{key.name}</td>
-                      <td className="py-3 font-mono text-sm">{key.uuid}</td>
-                      <td className="py-3">{format(new Date(key.createdAt), 'PP')}</td>
-                      <td className="py-3">
-                        {key.expiresAt ? format(new Date(key.expiresAt), 'PP') : 'Never'}
-                      </td>
-                      <td className="py-3 text-right">
-                        <Button
-                          variant="light"
-                          size="sm"
-                          onPress={() => setKeyToRevoke(key)}
-                          className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                        >
-                          <FaTrash />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          {contentComponents[contentType]()}
         </SecondaryCard>
 
         <SecondaryCard>
