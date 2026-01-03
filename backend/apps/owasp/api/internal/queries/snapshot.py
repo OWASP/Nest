@@ -24,8 +24,12 @@ class SnapshotQuery:
     @strawberry.field
     def snapshots(self, limit: int = 12) -> list[SnapshotNode]:
         """Resolve snapshots."""
-        return Snapshot.objects.filter(
-            status=Snapshot.Status.COMPLETED,
-        ).order_by(
-            "-created_at",
-        )[:limit]
+        return (
+            Snapshot.objects.filter(
+                status=Snapshot.Status.COMPLETED,
+            ).order_by(
+                "-created_at",
+            )[:limit]
+            if limit > 0
+            else []
+        )

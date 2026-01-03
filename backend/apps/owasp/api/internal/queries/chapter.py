@@ -21,4 +21,4 @@ class ChapterQuery:
     @strawberry.field
     def recent_chapters(self, limit: int = 8) -> list[ChapterNode]:
         """Resolve recent chapters."""
-        return Chapter.active_chapters.order_by("-created_at")[:limit]
+        return Chapter.active_chapters.order_by("-created_at")[:limit] if limit > 0 else []

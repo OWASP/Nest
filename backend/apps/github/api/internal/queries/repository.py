@@ -52,11 +52,15 @@ class RepositoryQuery:
 
         """
         return (
-            Repository.objects.select_related(
-                "organization",
+            (
+                Repository.objects.select_related(
+                    "organization",
+                )
+                .filter(
+                    organization__login__iexact=organization,
+                )
+                .order_by("-stars_count")[:limit]
             )
-            .filter(
-                organization__login__iexact=organization,
-            )
-            .order_by("-stars_count")[:limit]
+            if limit > 0
+            else []
         )

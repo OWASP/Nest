@@ -61,4 +61,4 @@ class MemberSnapshotQuery:
             except User.DoesNotExist:
                 return []
 
-        return query.order_by("-start_at")[:limit]
+        return query.order_by("-start_at")[:limit] if limit > 0 else []

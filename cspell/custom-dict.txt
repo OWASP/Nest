@@ -127,6 +127,7 @@ rsc
 saft
 sakanashi
 samm
+schemathesis
 seo
 skillstruck
 slackbot

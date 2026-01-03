@@ -37,4 +37,4 @@ class BoardOfDirectorsQuery:
             List of BoardOfDirectorsNode objects.
 
         """
-        return BoardOfDirectors.objects.order_by("-year")[:limit]
+        return BoardOfDirectors.objects.order_by("-year")[:limit] if limit > 0 else []
