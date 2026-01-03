@@ -527,8 +527,9 @@ describe('ChapterMap', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
       // Unlock the map
-      const unlockButton = getByText('Unlock map')
-      fireEvent.click(unlockButton)
+      const unlockButton = getByText('Unlock map').closest('button')
+      expect(unlockButton).not.toBeNull()
+      fireEvent.click(unlockButton as HTMLElement)
 
       // Zoom control should be added
       expect(mockZoomControl.addTo).toHaveBeenCalled()
