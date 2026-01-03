@@ -36,6 +36,7 @@ jobs:
         env:
           REDIS_PASSWORD: nest-fuzz-cache-password
         options: >-
+          --require-pass nest-fuzz-cache-password
           --health-cmd="redis-cli -a $$REDIS_PASSWORD ping"
           --health-interval=5s
           --health-timeout=5s
@@ -62,7 +63,7 @@ jobs:
             --network host \
             -e DJANGO_DB_HOST=localhost \
             -e DJANGO_REDIS_HOST=localhost \
-            -e DJANGO_REDIS_PASSWORD=None \
+            -e DJANGO_REDIS_PASSWORD= \
             -p 9500:9500 \
             owasp/nest:test-backend-latest \
             sh -c '
