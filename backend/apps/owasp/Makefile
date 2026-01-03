@@ -22,6 +22,18 @@ owasp-enrich-projects:
 	@echo "Enriching OWASP projects"
 	@CMD="python manage.py owasp_enrich_projects" $(MAKE) exec-backend-command
 
+owasp-generate-community-snapshot-video:
+	@docker build -f backend/docker/Dockerfile.video backend/ \
+		-t nest-video-backend
+	@mkdir -p backend/generated_videos
+	@docker run \
+		--env-file backend/.env \
+		--mount type=bind,src="$(PWD)/backend/generated_videos",dst=/home/owasp/generated_videos \
+		--network nest-local_nest-network \
+		--rm \
+		nest-video-backend \
+		python manage.py owasp_generate_community_snapshot_video $(snapshot_key) /home/owasp/generated_videos
+
 owasp-process-snapshots:
 	@echo "Processing OWASP snapshots"
 	@CMD="python manage.py owasp_process_snapshots" $(MAKE) exec-backend-command
