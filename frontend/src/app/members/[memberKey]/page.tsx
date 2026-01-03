@@ -1,11 +1,17 @@
 'use client'
+
 import { useQuery } from '@apollo/client/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useTheme } from 'next-themes'
-import React, { useState, useEffect, useRef } from 'react'
-import { FaCodeMerge, FaFolderOpen, FaPersonWalkingArrowRight, FaUserPlus } from 'react-icons/fa6'
+import React, { useEffect, useRef, useState } from 'react'
+import {
+  FaCodeMerge,
+  FaFolderOpen,
+  FaPersonWalkingArrowRight,
+  FaUserPlus,
+} from 'react-icons/fa6'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 import { GetUserDataDocument } from 'types/__generated__/userQueries.generated'
@@ -17,43 +23,31 @@ import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
 import type { User } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
-import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
+import {
+  drawContributions,
+  fetchHeatmapData,
+  HeatmapData,
+} from 'utils/helpers/githubHeatmap'
 import Badges from 'components/Badges'
 import DetailsCard from 'components/CardDetailsPage'
 import MemberDetailsPageSkeleton from 'components/skeletons/MemberDetailsPageSkeleton'
 
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams<{ memberKey: string }>()
-  const [user, setUser] = useState<User | null>()
-  const [issues, setIssues] = useState<Issue[]>([])
-  const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
-  const [milestones, setMilestones] = useState<Milestone[]>([])
-  const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
-  const [releases, setReleases] = useState<Release[]>([])
-  const [data, setData] = useState<HeatmapData>({} as HeatmapData)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [username, setUsername] = useState('')
-  const [isPrivateContributor, setIsPrivateContributor] = useState(false)
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetUserDataDocument, {
+  const { data, error, loading } = useQuery(GetUserDataDocument, {
     variables: { key: memberKey },
   })
 
+  const [heatmapData, setHeatmapData] = useState<HeatmapData>({} as HeatmapData)
+  const [username, setUsername] = useState('')
+  const [isPrivateContributor, setIsPrivateContributor] = useState(false)
+
   useEffect(() => {
-    if (graphQLData) {
-      setUser(graphQLData.user)
-      setIssues(graphQLData.recentIssues)
-      setMilestones(graphQLData.recentMilestones)
-      setPullRequests(graphQLData.recentPullRequests)
-      setReleases(graphQLData.recentReleases)
-      setTopRepositories(graphQLData.topContributedRepositories)
-      setIsLoading(false)
+    if (error) {
+      handleAppError(error)
     }
-    if (graphQLRequestError) {
-      handleAppError(graphQLRequestError)
-      setIsLoading(false)
-    }
-  }, [graphQLData, graphQLRequestError, memberKey])
+  }, [error])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,13 +58,40 @@ const UserDetailsPage: React.FC = () => {
       }
       if (result?.contributions) {
         setUsername(memberKey as string)
-        setData(result as HeatmapData)
+        setHeatmapData(result as HeatmapData)
       }
     }
     fetchData()
-  }, [memberKey, user])
+  }, [memberKey])
 
-  const formattedBio = user?.bio?.split(' ').map((word, index) => {
+  if (loading) {
+    return (
+      <div data-testid="user-loading-skeleton">
+        <MemberDetailsPageSkeleton />
+      </div>
+    )
+  }
+
+  if (!data?.user) {
+    return (
+      <ErrorDisplay
+        statusCode={404}
+        title="User not found"
+        message="Sorry, the user you're looking for doesn't exist"
+      />
+    )
+  }
+
+  const {
+    user,
+    recentIssues,
+    recentMilestones,
+    recentPullRequests,
+    recentReleases,
+    topContributedRepositories,
+  } = data
+
+  const formattedBio = user.bio?.split(' ').map((word, index) => {
     const mentionMatch = word.match(/^@([\w-]+(?:\.[\w-]+)*)([^\w@])?$/)
     if (mentionMatch && mentionMatch.length > 1) {
       const username = mentionMatch[1]
@@ -93,41 +114,23 @@ const UserDetailsPage: React.FC = () => {
     return <span key={`word-${word}-${index}`}>{word} </span>
   })
 
-  if (isLoading) {
-    return (
-      <div data-testid="user-loading-skeleton">
-        <MemberDetailsPageSkeleton />
-      </div>
-    )
-  }
-
-  if (!isLoading && user == null) {
-    return (
-      <ErrorDisplay
-        statusCode={404}
-        title="User not found"
-        message="Sorry, the user you're looking for doesn't exist"
-      />
-    )
-  }
-
   const userDetails = [
-    { label: 'Joined', value: user?.createdAt ? formatDate(user.createdAt) : 'Not available' },
-    { label: 'Email', value: user?.email || 'N/A' },
-    { label: 'Company', value: user?.company || 'N/A' },
-    { label: 'Location', value: user?.location || 'N/A' },
+    { label: 'Joined', value: user.createdAt ? formatDate(user.createdAt) : 'Not available' },
+    { label: 'Email', value: user.email || 'N/A' },
+    { label: 'Company', value: user.company || 'N/A' },
+    { label: 'Location', value: user.location || 'N/A' },
   ]
 
   const userStats = [
-    { icon: FaPersonWalkingArrowRight, value: user?.followersCount || 0, unit: 'Follower' },
-    { icon: FaUserPlus, value: user?.followingCount || 0, unit: 'Following' },
+    { icon: FaPersonWalkingArrowRight, value: user.followersCount, unit: 'Follower' },
+    { icon: FaUserPlus, value: user.followingCount, unit: 'Following' },
     {
       icon: FaFolderOpen,
       pluralizedName: 'Repositories',
       unit: 'Repository',
-      value: user?.publicRepositoriesCount ?? 0,
+      value: user.publicRepositoriesCount,
     },
-    { icon: FaCodeMerge, value: user?.contributionsCount || 0, unit: 'Contribution' },
+    { icon: FaCodeMerge, value: user.contributionsCount, unit: 'Contribution' },
   ]
 
   const Heatmap = () => {
@@ -137,23 +140,22 @@ const UserDetailsPage: React.FC = () => {
     const isDarkMode = (resolvedTheme ?? 'light') === 'dark'
 
     useEffect(() => {
-      if (canvasRef.current && data?.years?.length) {
+      if (canvasRef.current && heatmapData?.years?.length) {
         drawContributions(canvasRef.current, {
-          data,
+          data: heatmapData,
           username,
           themeName: isDarkMode ? 'dark' : 'light',
         })
-        const imageURL = canvasRef.current.toDataURL()
-        setImgSrc(imageURL)
+        setImgSrc(canvasRef.current.toDataURL())
       } else {
         setImgSrc('')
       }
-    }, [isDarkMode])
+    }, [isDarkMode, heatmapData, username])
 
     return (
       <div className="overflow-hidden rounded-lg bg-white dark:bg-gray-800">
         <div className="relative">
-          <canvas ref={canvasRef} style={{ display: 'none' }} aria-hidden="true"></canvas>
+          <canvas ref={canvasRef} style={{ display: 'none' }} aria-hidden="true" />
           {imgSrc ? (
             <div className="h-32">
               <Image
@@ -165,7 +167,7 @@ const UserDetailsPage: React.FC = () => {
               />
             </div>
           ) : (
-            <div className="relative h-32 items-center justify-center">
+            <div className="relative h-32">
               <Image
                 height={100}
                 width={100}
@@ -174,10 +176,10 @@ const UserDetailsPage: React.FC = () => {
                     ? '/img/heatmap-background-dark.png'
                     : '/img/heatmap-background-light.png'
                 }
-                className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
+                className="h-full w-full object-cover object-[54%_60%]"
                 alt="Heatmap Background"
               />
-              <div className="heatmap-loader"></div>
+              <div className="heatmap-loader" />
             </div>
           )}
         </div>
@@ -191,28 +193,24 @@ const UserDetailsPage: React.FC = () => {
         width={200}
         height={200}
         className="mr-4 h-[200px] w-[200px] rounded-full border-2 border-white bg-white object-cover shadow-md dark:border-gray-800 dark:bg-gray-600/60"
-        src={user?.avatarUrl || '/placeholder.svg'}
-        alt={user?.name || user?.login || 'User Avatar'}
+        src={user.avatarUrl || '/placeholder.svg'}
+        alt={user.name || user.login || 'User Avatar'}
       />
       <div className="w-full text-center lg:text-left">
         <div className="pl-0 lg:pl-4">
-          <div className="flex items-center justify-center gap-3 text-center text-sm text-gray-500 lg:justify-start lg:text-left dark:text-gray-400">
-            <Link
-              href={user?.url || '#'}
-              className="text-xl font-bold text-blue-400 hover:underline"
-            >
-              @{user?.login}
+          <div className="flex items-center justify-center gap-3 text-sm text-gray-500 lg:justify-start dark:text-gray-400">
+            <Link href={user.url || '#'} className="text-xl font-bold text-blue-400 hover:underline">
+              @{user.login}
             </Link>
-            {user?.badges && user.badges.length > 0 && (
+            {user.badges?.length > 0 && (
               <div className="flex flex-wrap gap-2">
-                {user.badges.slice().map((badge: Badge) => (
-                  <React.Fragment key={badge.id}>
-                    <Badges
-                      name={badge.name}
-                      cssClass={badge.cssClass || 'medal'}
-                      showTooltip={true}
-                    />
-                  </React.Fragment>
+                {user.badges.map((badge: Badge) => (
+                  <Badges
+                    key={badge.id}
+                    name={badge.name}
+                    cssClass={badge.cssClass || 'medal'}
+                    showTooltip
+                  />
                 ))}
               </div>
             )}
@@ -231,14 +229,14 @@ const UserDetailsPage: React.FC = () => {
   return (
     <DetailsCard
       details={userDetails}
-      pullRequests={pullRequests}
-      recentIssues={issues}
-      recentMilestones={milestones}
-      recentReleases={releases}
-      repositories={topRepositories}
+      pullRequests={recentPullRequests}
+      recentIssues={recentIssues}
+      recentMilestones={recentMilestones}
+      recentReleases={recentReleases}
+      repositories={topContributedRepositories as RepositoryCardProps[]}
       showAvatar={false}
       stats={userStats}
-      title={user?.name || user?.login}
+      title={user.name || user.login}
       type="user"
       userSummary={<UserSummary />}
     />

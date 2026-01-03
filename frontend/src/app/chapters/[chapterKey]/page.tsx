@@ -1,43 +1,30 @@
 'use client'
+
 import { useQuery } from '@apollo/client/react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useState, useEffect } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetChapterDataDocument } from 'types/__generated__/chapterQueries.generated'
-import type { Chapter } from 'types/chapter'
-import type { Contributor } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams<{ chapterKey: string }>()
-  const [chapter, setChapter] = useState<Chapter>({} as Chapter)
-  const [topContributors, setTopContributors] = useState<Contributor[]>([])
-  const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const { data, error: graphQLRequestError } = useQuery(GetChapterDataDocument, {
+  const { data, error, loading } = useQuery(GetChapterDataDocument, {
     variables: { key: chapterKey },
   })
 
-  useEffect(() => {
-    if (data) {
-      setChapter(data.chapter)
-      setTopContributors(data.topContributors)
-      setIsLoading(false)
-    }
-    if (graphQLRequestError) {
-      handleAppError(graphQLRequestError)
-      setIsLoading(false)
-    }
-  }, [data, graphQLRequestError, chapterKey])
+  if (error) {
+    handleAppError(error)
+  }
 
-  if (isLoading) {
+  if (loading) {
     return <LoadingSpinner />
   }
 
-  if (!chapter && !isLoading)
+  if (!data?.chapter) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -45,6 +32,9 @@ export default function ChapterDetailsPage() {
         message="Sorry, the chapter you're looking for doesn't exist"
       />
     )
+  }
+
+  const { chapter, topContributors } = data
 
   const details = [
     { label: 'Last Updated', value: formatDate(chapter.updatedAt) },
@@ -59,6 +49,7 @@ export default function ChapterDetailsPage() {
       ),
     },
   ]
+
   return (
     <DetailsCard
       details={details}

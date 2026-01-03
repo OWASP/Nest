@@ -1,4 +1,5 @@
 'use client'
+
 import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import upperFirst from 'lodash/upperFirst'
@@ -45,9 +46,7 @@ import TopContributorsList from 'components/TopContributorsList'
 import { TruncatedText } from 'components/TruncatedText'
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [data, setData] = useState<MainPageData>(null)
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetMainPageDataDocument, {
+  const { data, error, loading } = useQuery(GetMainPageDataDocument, {
     variables: { distinct: true },
   })
 
@@ -55,11 +54,7 @@ export default function Home() {
   const [modalOpenIndex, setModalOpenIndex] = useState<number | null>(null)
 
   useEffect(() => {
-    if (graphQLData) {
-      setData(graphQLData)
-      setIsLoading(false)
-    }
-    if (graphQLRequestError) {
+    if (error) {
       addToast({
         description: 'Unable to complete the requested operation.',
         title: 'GraphQL Request Failed',
@@ -68,9 +63,8 @@ export default function Home() {
         color: 'danger',
         variant: 'solid',
       })
-      setIsLoading(false)
     }
-  }, [graphQLData, graphQLRequestError])
+  }, [error])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -80,18 +74,18 @@ export default function Home() {
         currentPage: 1,
         hitsPerPage: 1000,
       }
-      const data: AlgoliaResponse<Chapter> = await fetchAlgoliaData(
+      const algoliaData: AlgoliaResponse<Chapter> = await fetchAlgoliaData(
         searchParams.indexName,
         searchParams.query,
         searchParams.currentPage,
         searchParams.hitsPerPage
       )
-      setGeoLocData(data.hits)
+      setGeoLocData(algoliaData.hits)
     }
     fetchData()
   }, [])
 
-  if (isLoading || !graphQLData || !geoLocData) {
+  if (loading || !data || geoLocData.length === 0) {
     return <LoadingSpinner />
   }
 
@@ -111,26 +105,11 @@ export default function Home() {
   }
 
   const counterData = [
-    {
-      label: 'Active Projects',
-      value: data.statsOverview.activeProjectsStats,
-    },
-    {
-      label: 'Contributors',
-      value: data.statsOverview.contributorsStats,
-    },
-    {
-      label: 'Local Chapters',
-      value: data.statsOverview.activeChaptersStats,
-    },
-    {
-      label: 'Countries',
-      value: data.statsOverview.countriesStats,
-    },
-    {
-      label: 'Slack Community',
-      value: data.statsOverview.slackWorkspaceStats,
-    },
+    { label: 'Active Projects', value: data.statsOverview.activeProjectsStats },
+    { label: 'Contributors', value: data.statsOverview.contributorsStats },
+    { label: 'Local Chapters', value: data.statsOverview.activeChaptersStats },
+    { label: 'Countries', value: data.statsOverview.countriesStats },
+    { label: 'Slack Community', value: data.statsOverview.slackWorkspaceStats },
   ]
 
   return (
