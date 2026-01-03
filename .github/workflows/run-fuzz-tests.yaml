@@ -61,6 +61,7 @@ jobs:
             --env-file backend/.env.fuzz.example \
             --network host \
             -e DJANGO_DB_HOST=localhost \
+            -e DJANGO_REDIS_HOST=localhost \
             -p 9500:9500 \
             owasp/nest:test-backend-latest \
             sh -c '
