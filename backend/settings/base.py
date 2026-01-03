@@ -139,12 +139,13 @@ class Base(Configuration):
 
     REDIS_HOST = values.SecretValue(environ_name="REDIS_HOST")
     REDIS_PASSWORD = values.SecretValue(environ_name="REDIS_PASSWORD")
+    REDIS_AUTH_ENABLED = values.BooleanValue(environ_name="REDIS_AUTH_ENABLED", default=False)
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
             "LOCATION": f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:6379"
             # GH actions does not support authenticated redis connections.
-            if REDIS_PASSWORD
+            if REDIS_AUTH_ENABLED
             else f"redis://{REDIS_HOST}:6379",
             "OPTIONS": {
                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
