@@ -33,11 +33,8 @@ jobs:
           - 5432:5432
       cache:
         image: redis:8.0.5-alpine3.21
-        env:
-          REDIS_PASSWORD: nest-fuzz-cache-password
         options: >-
-          --requirepass nest-fuzz-cache-password
-          --health-cmd="redis-cli -a $$REDIS_PASSWORD ping"
+          --health-cmd="redis-cli ping"
           --health-interval=5s
           --health-timeout=5s
           --health-retries=5
@@ -63,7 +60,7 @@ jobs:
             --network host \
             -e DJANGO_DB_HOST=localhost \
             -e DJANGO_REDIS_HOST=localhost \
-            -e DJANGO_REDIS_PASSWORD= \
+            -e DJANGO_REDIS_PASSWORD=None \
             -p 9500:9500 \
             owasp/nest:test-backend-latest \
             sh -c '
