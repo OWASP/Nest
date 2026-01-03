@@ -62,6 +62,7 @@ jobs:
             --network host \
             -e DJANGO_DB_HOST=localhost \
             -e DJANGO_REDIS_HOST=localhost \
+            -e DJANGO_REDIS_PASSWORD= \
             -p 9500:9500 \
             owasp/nest:test-backend-latest \
             sh -c '
@@ -104,4 +105,9 @@ jobs:
           TEST_FILE: ${{ inputs.test-file }}
           REST_URL: ${{ inputs.rest-url }}
         run: |
-          docker run -e BASE_URL=http://localhost:9500 -e TEST_FILE="$TEST_FILE" -e REST_URL="$REST_URL" --network host owasp/nest:test-fuzz-backend-latest
+          docker run \
+          -e BASE_URL=http://localhost:9500 \
+          -e TEST_FILE="$TEST_FILE" \
+          -e REST_URL="$REST_URL" \
+          --network host \
+          owasp/nest:test-fuzz-backend-latest
