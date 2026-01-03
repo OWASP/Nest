@@ -199,8 +199,8 @@ const ChapterMap = ({
         setIsMapActive(false)
       }
     }
-    window.addEventListener('keydown', handleEscape)
-    return () => window.removeEventListener('keydown', handleEscape)
+    globalThis.addEventListener('keydown', handleEscape)
+    return () => globalThis.removeEventListener('keydown', handleEscape)
   }, [isMapActive])
 
   useEffect(() => {
@@ -232,7 +232,7 @@ const ChapterMap = ({
         <div className="pointer-events-none absolute inset-0 z-[500] flex items-center justify-center bg-black/10">
           <button
             type="button"
-            className="pointer-events-auto flex items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white"
+            className="pointer-events-auto flex items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white"
             onClick={unlockMap}
             aria-label="Unlock map"
           >

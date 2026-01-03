@@ -493,7 +493,7 @@ describe('ChapterMap', () => {
       expect(mockMap.dragging.enable).toHaveBeenCalled()
 
       // Press Escape to re-lock
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+      globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
 
       // Verify map is locked again
       expect(getByText('Unlock map')).toBeInTheDocument()
@@ -507,7 +507,7 @@ describe('ChapterMap', () => {
       const disableCallsBefore = mockMap.dragging.disable.mock.calls.length
 
       // Press Escape while map is locked
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+      globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
 
       // Should still show unlock button
       expect(getByText('Unlock map')).toBeInTheDocument()
@@ -527,15 +527,15 @@ describe('ChapterMap', () => {
       expect(mockZoomControl.addTo).toHaveBeenCalled()
 
       // Press Escape to re-lock
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+      globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
 
       // Zoom control should be removed
       expect(mockZoomControl.remove).toHaveBeenCalled()
     })
 
     it('cleans up Escape key listener on unmount', () => {
-      const addEventListenerSpy = jest.spyOn(window, 'addEventListener')
-      const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener')
+      const addEventListenerSpy = jest.spyOn(globalThis, 'addEventListener')
+      const removeEventListenerSpy = jest.spyOn(globalThis, 'removeEventListener')
 
       const { unmount } = render(<ChapterMap {...defaultProps} />)
 
