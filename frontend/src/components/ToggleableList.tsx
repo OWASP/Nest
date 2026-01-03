@@ -5,18 +5,20 @@ import type { IconType } from 'react-icons'
 import { IconWrapper } from 'wrappers/IconWrapper'
 import ShowMoreButton from 'components/ShowMoreButton'
 
-const ToggleableList = ({
+const ToggleableList = <T,>({
   items,
   label,
   icon,
   limit = 10,
   isDisabled = false,
+  renderItem,
 }: {
-  items: string[]
-  label: React.ReactNode
+  items: T[]
+  label?: React.ReactNode
   limit?: number
   icon?: IconType
   isDisabled?: boolean
+  renderItem: (item: T, index: number, items: T[]) => React.ReactNode
 }) => {
   const [showAll, setShowAll] = useState(false)
   const router = useRouter()
@@ -36,18 +38,7 @@ const ToggleableList = ({
         </div>
       </h2>
       <div className="flex flex-wrap gap-2">
-        {(showAll ? items : items.slice(0, limit)).map((item, index) => (
-          <button
-            type="button"
-            key={`${item}-${index}`}
-            className={`rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700 ${isDisabled ? 'cursor-default' : 'cursor-pointer'}`}
-            onClick={() => !isDisabled && handleButtonClick({ item })}
-            aria-label={`Search for projects with ${item}`}
-            disabled={isDisabled}
-          >
-            {item}
-          </button>
-        ))}
+      {(showAll ? items : items.slice(0, limit)).map(renderItem)}
       </div>
       {items.length > limit && <ShowMoreButton onToggle={toggleShowAll} />}
     </div>
