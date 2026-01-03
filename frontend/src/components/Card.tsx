@@ -24,7 +24,16 @@ const Card = ({
   social,
   tooltipLabel,
   timeline,
+  tags
 }: CardProps) => {
+  const filteredTags = tags?.filter(tag => {
+    const lowerTag = tag.toLowerCase()
+    //tag priority to be set by the devs
+    return lowerTag.includes('good first issue') || lowerTag.includes('help wanted') || lowerTag.includes('tag-4') || lowerTag.includes('backend')
+  }) || []
+  // If no filtered tags, use tags prop directly
+  const displayTags = filteredTags.length > 0 ? filteredTags : (tags || [])
+
   return (
     <div className="mx-auto mt-4 mb-2 flex w-full max-w-[95%] flex-col items-start rounded-md border-1 border-gray-200 bg-white p-4 md:max-w-6xl dark:border-gray-700 dark:bg-[#212529]">
       {/* Card Header with Badge and Title */}
@@ -102,6 +111,8 @@ const Card = ({
         className="mt-2 w-full [overflow-wrap:anywhere] break-words text-gray-600 dark:text-gray-300 [&_a]:break-all [&_code]:break-all"
       />
 
+
+
       <div className="mt-4 w-full">
         {/* Social icons section */}
         {social && social.length > 0 && (
@@ -126,8 +137,24 @@ const Card = ({
           </div>
         )}
 
-        {/* Flexible bottom row with contributors and action button */}
+        {/* Flexible bottom row with tags, contributors and action button */}
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
+
+          {/* Tags Section */}
+          {displayTags && displayTags.length > 0 && (
+            <div className=" flex flex-wrap gap-2">
+              {displayTags.slice(0, 3).map((tag, index) => (
+                <span
+                  key={`tag-${index}`} //key =tag-1 ,2, 3 ... 
+                  className={`flex items-center gap-2 px-2 py-1 rounded-md border border-1 transition-all whitespace-nowrap justify-center bg-transparent text-zinc-300 hover:text-white
+                 ${index >= 2 ? 'hidden sm:flex' : ''
+                    }`}
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
           {/* Contributors section */}
           <div className="flex flex-wrap items-center gap-2">
             {topContributors?.map((contributor, index) => (
@@ -138,6 +165,7 @@ const Card = ({
               />
             ))}
           </div>
+
 
           {/* Action Button */}
           <div className="flex sm:justify-end">
@@ -153,7 +181,7 @@ const Card = ({
           </div>
         </div>
       </div>
-    </div>
+    </div >
   )
 }
 
