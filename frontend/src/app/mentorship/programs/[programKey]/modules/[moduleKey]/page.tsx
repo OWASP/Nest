@@ -17,6 +17,7 @@ const ModuleDetailsPage = () => {
   const [module, setModule] = useState<Module | null>(null)
   const [admins, setAdmins] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [hasError, setHasError] = useState(false)
 
   const { data, error } = useQuery(GetProgramAdminsAndModulesDocument, {
     variables: {
@@ -26,24 +27,36 @@ const ModuleDetailsPage = () => {
   })
 
   useEffect(() => {
+    if (error) {
+      handleAppError(error)
+      setHasError(true)
+      setModule(null)
+      setAdmins(null)
+      setIsLoading(false)
+      return
+    }
+
     if (data?.getModule) {
       setModule(data.getModule)
-      setAdmins(data.getProgram.admins)
+      setAdmins(data.getProgram?.admins || null)
+      setHasError(false)
       setIsLoading(false)
-    } else if (error) {
-      handleAppError(error)
+    } else if (data && !data.getModule) {
+      setHasError(true)
+      setModule(null)
+      setAdmins(null)
       setIsLoading(false)
     }
-  }, [data, error])
+  }, [data, error, moduleKey, programKey])
 
   if (isLoading) return <LoadingSpinner />
 
-  if (!module) {
+  if (hasError || !module) {
     return (
       <ErrorDisplay
         statusCode={404}
         title="Module Not Found"
-        message="Sorry, the module you're looking for doesn't exist."
+        message="Sorry, the module you're looking for doesn't exist or is not available."
       />
     )
   }

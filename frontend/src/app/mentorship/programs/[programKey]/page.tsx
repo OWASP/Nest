@@ -19,6 +19,7 @@ const ProgramDetailsPage = () => {
   const shouldRefresh = searchParams.get('refresh') === 'true'
   const {
     data,
+    error,
     refetch,
     loading: isQueryLoading,
   } = useQuery(GetProgramAndModulesDocument, {
@@ -30,6 +31,8 @@ const ProgramDetailsPage = () => {
   const [program, setProgram] = useState<Program | null>(null)
   const [modules, setModules] = useState<Module[]>([])
   const [isRefetching, setIsRefetching] = useState(false)
+  const [hasError, setHasError] = useState(false)
+  const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false)
 
   const isLoading = isQueryLoading || isRefetching
 
@@ -47,25 +50,58 @@ const ProgramDetailsPage = () => {
           const cleaned = params.toString()
           router.replace(cleaned ? `?${cleaned}` : globalThis.location.pathname, { scroll: false })
         }
+        return
+      }
+
+      if (error) {
+        if (!hasError) {
+          setHasError(true)
+          setProgram(null)
+          setModules([])
+          setHasAttemptedLoad(true)
+        }
+        return
       }
 
       if (data?.getProgram) {
-        setProgram(data.getProgram)
-        setModules(data.getProgramModules || [])
+        if (!hasAttemptedLoad || program?.key !== data.getProgram.key) {
+          setProgram(data.getProgram)
+          setModules(data.getProgramModules || [])
+          setHasError(false)
+          setHasAttemptedLoad(true)
+        }
+      } else if (data && !data.getProgram && !hasError) {
+        setHasError(true)
+        setProgram(null)
+        setModules([])
+        setHasAttemptedLoad(true)
       }
     }
 
     processResult()
-  }, [shouldRefresh, data, refetch, router, searchParams])
+  }, [
+    shouldRefresh,
+    data,
+    error,
+    refetch,
+    router,
+    searchParams,
+    programKey,
+    hasError,
+    hasAttemptedLoad,
+    program,
+  ])
 
-  if (isLoading) return <LoadingSpinner />
+  if (isLoading || !hasAttemptedLoad) {
+    return <LoadingSpinner />
+  }
 
-  if (!program && !isLoading) {
+  if (hasError || !program) {
     return (
       <ErrorDisplay
         statusCode={404}
         title="Program Not Found"
-        message="Sorry, the program you're looking for doesn't exist."
+        message="Sorry, the program you're looking for doesn't exist or is not available."
       />
     )
   }

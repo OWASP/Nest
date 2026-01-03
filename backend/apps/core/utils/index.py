@@ -1,11 +1,14 @@
 """Index utils."""
 
 import contextlib
+import hashlib
+import json
 import logging
 
 from algoliasearch_django import register, unregister
 from algoliasearch_django.registration import RegistrationError
 from django.apps import apps
+from django.conf import settings
 from django.core.cache import cache
 
 from apps.common.utils import convert_to_camel_case
@@ -260,3 +263,24 @@ def clear_index_cache(index_name: str) -> None:
     for key in keys_to_delete:
         logger.info("Deleting key: %s", key)
         cache.delete(key)
+
+
+def invalidate_program_graphql_cache(program_key: str) -> None:
+    """Invalidate GraphQL cache for a specific program.
+
+    Args:
+        program_key: The program's unique key.
+
+    """
+    queries_to_invalidate = [
+        ("getProgram", {"programKey": program_key}),
+        ("getProgramModules", {"programKey": program_key}),
+    ]
+
+    for field_name, field_args in queries_to_invalidate:
+        key = f"{field_name}:{json.dumps(field_args, sort_keys=True)}"
+        cache_key = (
+            f"{settings.GRAPHQL_RESOLVER_CACHE_PREFIX}-{hashlib.sha256(key.encode()).hexdigest()}"
+        )
+        cache.delete(cache_key)
+        logger.info("Invalidated GraphQL cache for %s with key: %s", field_name, program_key)
