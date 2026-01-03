@@ -11,7 +11,6 @@ import 'leaflet.markercluster'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
-import 'leaflet.markercluster'
 
 const ChapterMap = ({
   geoLocData,
@@ -32,6 +31,22 @@ const ChapterMap = ({
   const zoomControlRef = useRef<L.Control.Zoom | null>(null)
   const initialViewRef = useRef<{ center: L.LatLngExpression; zoom: number } | null>(null)
   const [isMapActive, setIsMapActive] = useState(false)
+
+  const setMapInteractivity = (map: L.Map, enabled: boolean) => {
+    const action = enabled ? 'enable' : 'disable'
+    map.dragging[action]()
+    map.touchZoom[action]()
+    map.doubleClickZoom[action]()
+    map.scrollWheelZoom[action]()
+    map.boxZoom[action]()
+    map.keyboard[action]()
+  }
+
+  const unlockMap = () => {
+    if (!mapRef.current) return
+    setMapInteractivity(mapRef.current, true)
+    setIsMapActive(true)
+  }
 
   useEffect(() => {
     if (!mapRef.current) {
@@ -56,25 +71,7 @@ const ChapterMap = ({
         className: 'map-tiles',
       }).addTo(mapRef.current)
 
-      mapRef.current.on('click', () => {
-        mapRef.current?.scrollWheelZoom.enable()
-        setIsMapActive(true)
-      })
-
-      mapRef.current.on('mouseout', (e: L.LeafletMouseEvent) => {
-        const originalEvent = e.originalEvent as MouseEvent
-        const relatedTarget = originalEvent.relatedTarget as Node | null
-        const container = mapRef.current?.getContainer()
-        const mapParent = container?.parentElement
-        if (
-          relatedTarget &&
-          (container?.contains(relatedTarget) || mapParent?.contains(relatedTarget))
-        )
-          return
-
-        mapRef.current?.scrollWheelZoom.disable()
-        setIsMapActive(false)
-      })
+      setMapInteractivity(mapRef.current, false)
     }
 
     const map = mapRef.current
@@ -195,6 +192,22 @@ const ChapterMap = ({
   }, [geoLocData, showLocal, userLocation])
 
   useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (!isMapActive || !mapRef.current) return
+
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        e.stopPropagation()
+
+        setMapInteractivity(mapRef.current, false)
+        setIsMapActive(false)
+      }
+    }
+    globalThis.addEventListener('keydown', handleEscape)
+    return () => globalThis.removeEventListener('keydown', handleEscape)
+  }, [isMapActive])
+
+  useEffect(() => {
     const map = mapRef.current
     if (!map) return
 
@@ -220,28 +233,17 @@ const ChapterMap = ({
     <div className="relative" style={style}>
       <div id="chapter-map" className="h-full w-full" />
       {!isMapActive && (
-        <button
-          type="button"
-          tabIndex={0}
-          className="pointer-events-none absolute inset-0 z-[500] flex cursor-pointer items-center justify-center rounded-[inherit] bg-black/10"
-          onClick={() => {
-            mapRef.current?.scrollWheelZoom.enable()
-            setIsMapActive(true)
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              mapRef.current?.scrollWheelZoom.enable()
-              setIsMapActive(true)
-            }
-          }}
-          aria-label="Unlock map"
-        >
-          <p className="pointer-events-auto flex items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white">
+        <div className="pointer-events-none absolute inset-0 z-[500] flex items-center justify-center bg-black/10">
+          <button
+            type="button"
+            className="pointer-events-auto flex items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white"
+            onClick={unlockMap}
+            aria-label="Unlock map"
+          >
             <FaUnlock aria-hidden="true" />
             Unlock map
-          </p>
-        </button>
+          </button>
+        </div>
       )}
       {isMapActive && (
         <div className="absolute top-20 left-3 z-[999] w-fit">
