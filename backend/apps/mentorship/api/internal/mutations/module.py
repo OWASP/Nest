@@ -320,7 +320,15 @@ class ModuleMutation:
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
     def update_module(self, info: strawberry.Info, input_data: UpdateModuleInput) -> ModuleNode:
-        """Update an existing mentorship module. User must be an admin of the program."""
+        """Update an existing mentorship module.
+
+        User must either be:
+        - An admin of the program, or
+        - A mentor explicitly assigned to this module
+
+        Admins can edit any field and manage mentor assignments.
+        Module mentors can edit module details but cannot modify mentor assignments.
+        """
         user = info.context.request.user
 
         try:
@@ -332,18 +340,42 @@ class ModuleMutation:
             raise ObjectDoesNotExist(msg) from e
 
         try:
-            creator_as_mentor = Mentor.objects.get(nest_user=user)
-        except Mentor.DoesNotExist as err:
-            msg = "Only mentors can edit modules."
-            logger.warning(
-                "User '%s' is not a mentor and cannot edit modules.",
-                user.username,
-                exc_info=True,
-            )
-            raise PermissionDenied(msg) from err
+            editor_as_mentor = Mentor.objects.get(nest_user=user)
+        except Mentor.DoesNotExist:
+            try:
+                github_user = user.github_user
+                editor_as_mentor, _ = Mentor.objects.get_or_create(
+                    github_user=github_user, defaults={"nest_user": user}
+                )
+            except Exception as err:
+                msg = (
+                    f"User '{user.username}' is not registered as a mentor. "
+                    "Only mentors can edit modules."
+                )
+                logger.warning(
+                    "Failed to find or create mentor for user '%s' (ID: %s): %s",
+                    user.username,
+                    user.id,
+                    str(err),
+                    exc_info=True,
+                )
+                raise PermissionDenied(msg) from err
 
-        if not module.program.admins.filter(id=creator_as_mentor.id).exists():
-            raise PermissionDenied
+        is_program_admin = module.program.admins.filter(id=editor_as_mentor.id).exists()
+        is_module_mentor = module.mentors.filter(id=editor_as_mentor.id).exists()
+
+        if not (is_program_admin or is_module_mentor):
+            msg = (
+                "You do not have permission to edit this module. "
+                "Only program admins and module mentors can edit modules."
+            )
+            logger.warning(
+                "Unauthorized edit attempt: User '%s' is neither a program admin "
+                "nor a module mentor for module '%s'.",
+                user.username,
+                module.name,
+            )
+            raise PermissionDenied(msg)
 
         started_at, ended_at = _validate_module_dates(
             input_data.started_at,
@@ -376,6 +408,15 @@ class ModuleMutation:
             raise ObjectDoesNotExist(msg) from err
 
         if input_data.mentor_logins is not None:
+            if not is_program_admin:
+                msg = "Only program admins can modify mentor assignments."
+                logger.warning(
+                    "Unauthorized mentor assignment attempt: Non-admin mentor '%s' "
+                    "tried to modify mentors for module '%s'.",
+                    user.username,
+                    module.name,
+                )
+                raise PermissionDenied(msg)
             mentors_to_set = resolve_mentors_from_logins(input_data.mentor_logins)
             module.mentors.set(mentors_to_set)
 
@@ -398,4 +439,73 @@ class ModuleMutation:
 
         module.program.save(update_fields=["experience_levels"])
 
+        logger.info(
+            "User '%s' successfully updated module '%s' in program '%s'.",
+            user.username,
+            module.name,
+            module.program.key,
+        )
+
         return module
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
+    def delete_module(
+        self,
+        info: strawberry.Info,
+        program_key: str,
+        module_key: str,
+    ) -> str:
+        """Delete a mentorship module. User must be an admin of the program."""
+        user = info.context.request.user
+
+        try:
+            module = Module.objects.select_related("program").get(
+                key=module_key, program__key=program_key
+            )
+        except Module.DoesNotExist as e:
+            msg = "Module not found."
+            raise ObjectDoesNotExist(msg) from e
+
+        try:
+            admin_as_mentor = Mentor.objects.get(nest_user=user)
+        except Mentor.DoesNotExist as err:
+            msg = "Only mentors can delete modules."
+            logger.warning(
+                "User '%s' is not a mentor and cannot delete modules.",
+                user.username,
+                exc_info=True,
+            )
+            raise PermissionDenied(msg) from err
+
+        if not module.program.admins.filter(id=admin_as_mentor.id).exists():
+            msg = "Only program admins can delete modules."
+            raise PermissionDenied(msg)
+
+        program = module.program
+        module_name = module.name
+
+        # Clean up experience levels if this module is the only one using it
+        experience_level_to_remove = module.experience_level
+        if (
+            experience_level_to_remove in program.experience_levels
+            and not Module.objects.filter(
+                program=program, experience_level=experience_level_to_remove
+            )
+            .exclude(id=module.id)
+            .exists()
+        ):
+            program.experience_levels.remove(experience_level_to_remove)
+            program.save(update_fields=["experience_levels"])
+
+        # Delete the module
+        module.delete()
+
+        logger.info(
+            "User '%s' deleted module '%s' from program '%s'.",
+            user.username,
+            module_name,
+            program_key,
+        )
+
+        return f"Module '{module_name}' has been deleted successfully."

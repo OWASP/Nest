@@ -100,10 +100,22 @@ const DetailsCard = ({
                 />
               )}
               {type === 'module' &&
-                accessLevel === 'admin' &&
-                admins?.some(
-                  (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
-                ) && <EntityActions type="module" programKey={programKey} moduleKey={entityKey} />}
+                (() => {
+                  // NOSONAR - NextAuth callback adds login property to session at runtime
+                  const currentUserLogin = (data as ExtendedSession)?.user?.login
+                  const isAdmin =
+                    accessLevel === 'admin' &&
+                    admins?.some((admin) => admin.login === currentUserLogin)
+                  const isMentor = mentors?.some((mentor) => mentor.login === currentUserLogin)
+                  return isAdmin || isMentor ? (
+                    <EntityActions
+                      type="module"
+                      programKey={programKey}
+                      moduleKey={entityKey}
+                      isAdmin={isAdmin}
+                    />
+                  ) : null
+                })()}
               {!isActive && <StatusBadge status="inactive" size="md" />}
               {isArchived && type === 'repository' && <StatusBadge status="archived" size="md" />}
               {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
