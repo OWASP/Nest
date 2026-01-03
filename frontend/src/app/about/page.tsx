@@ -5,6 +5,7 @@ import upperFirst from 'lodash/upperFirst'
 import millify from 'millify'
 import Image from 'next/image'
 import Link from 'next/link'
+import ToggleableList from "components/ToggleableList"
 import { useEffect, useState } from 'react'
 import { FaMapSigns, FaTools } from 'react-icons/fa'
 import { FaCircleCheck, FaClock, FaScroll, FaBullseye, FaUser, FaUsersGear } from 'react-icons/fa6'
@@ -64,7 +65,6 @@ const getMilestoneIcon = (progress: number) => {
 
 const About = () => {
   const [storyExpanded, setStoryExpanded] = useState(false)
-  const [timelineExpanded, setTimelineExpanded] = useState(false)
   const { data: projectMetadataResponse, error: projectMetadataRequestError } = useQuery(
     GetProjectMetadataDocument,
     {
@@ -268,31 +268,37 @@ const About = () => {
           )}
         </SecondaryCard>
         <SecondaryCard icon={FaClock} title={<AnchorTitle title="Project Timeline" />}>
-          <div className="space-y-6">
-            {[...projectTimeline]
-              .reverse()
-              .slice(0, timelineExpanded ? projectTimeline.length : 6)
-              .map((milestone, index) => (
-                <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
-                  {index !== projectTimeline.length - 1 && (
-                    <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-400"></div>
-                  )}
-                  <div
-                    aria-hidden="true"
-                    className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
-                  ></div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
-                    <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
-                    <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
-                  </div>
-                </div>
-              ))}
-          </div>
-          {projectTimeline.length > 6 && (
-            <ShowMoreButton onToggle={() => setTimelineExpanded(!timelineExpanded)} />
-          )}
+          <ToggleableList
+            items={[...projectTimeline].reverse()}
+            limit={6}
+            renderItem={(milestone, index, items) => (
+              <div
+                key={`${milestone.year}-${milestone.title}`}
+                className="relative pl-10"
+              >
+                {index !== items.length - 1 && (
+                  <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-400" />
+                )}
+
+                <div
+                  aria-hidden="true"
+                  className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
+                />
+
+                <h3 className="text-lg font-semibold text-blue-400">
+                  {milestone.title}
+                </h3>
+                <h4 className="mb-1 font-medium text-gray-400">
+                  {milestone.year}
+                </h4>
+                <p className="text-gray-600 dark:text-gray-300">
+                  {milestone.description}
+                </p>
+              </div>
+            )}
+          />
         </SecondaryCard>
+
 
         <div className="grid gap-0 md:grid-cols-4 md:gap-6">
           {[
