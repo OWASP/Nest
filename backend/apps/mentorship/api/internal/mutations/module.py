@@ -12,8 +12,10 @@ from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.nodes.module import (
     CreateModuleInput,
     ModuleNode,
+    SetModuleOrderInput,
     UpdateModuleInput,
 )
+from apps.mentorship.api.internal.nodes.program import ProgramNode
 from apps.mentorship.models import Mentor, Module, Program
 from apps.mentorship.models.issue_user_interest import IssueUserInterest
 from apps.mentorship.models.task import Task
@@ -75,9 +77,10 @@ class ModuleMutation:
         user = info.context.request.user
 
         try:
-            program = Program.objects.get(key=input_data.program_key)
+            program = Program.objects.select_for_update().get(key=input_data.program_key)
             project = Project.objects.get(id=input_data.project_id)
             creator_as_mentor = Mentor.objects.get(nest_user=user)
+            new_position = program.modules.count()
         except (Program.DoesNotExist, Project.DoesNotExist) as e:
             msg = f"{e.__class__.__name__} matching query does not exist."
             raise ObjectDoesNotExist(msg) from e
@@ -106,6 +109,7 @@ class ModuleMutation:
             tags=input_data.tags,
             program=program,
             project=project,
+            position=new_position,
         )
 
         if module.experience_level not in program.experience_levels:
@@ -397,5 +401,60 @@ class ModuleMutation:
             module.program.experience_levels.remove(old_experience_level)
 
         module.program.save(update_fields=["experience_levels"])
-
         return module
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
+    def set_module_order(
+        self, info: strawberry.Info, input_data: SetModuleOrderInput
+    ) -> ProgramNode:
+        """Set the order of modules within a program. User must be an admin of the program."""
+        user = info.context.request.user
+        try:
+            program = Program.objects.select_for_update().get(key=input_data.program_key)
+        except Program.DoesNotExist as e:
+            msg = f"Program with key '{input_data.program_key}' not found."
+            raise ObjectDoesNotExist(msg) from e
+
+        try:
+            admin = Mentor.objects.get(nest_user=user)
+        except Mentor.DoesNotExist as err:
+            msg = "You must be a mentor to update a program."
+            logger.warning(
+                "User '%s' is not a mentor and cannot update programs.",
+                user.username,
+                exc_info=True,
+            )
+            raise PermissionDenied(msg) from err
+
+        if not program.admins.filter(id=admin.id).exists():
+            msg = "You must be an admin of this program to update it."
+            logger.warning(
+                "Permission denied for user '%s' to update program '%s'.",
+                user.username,
+                program.key,
+            )
+            raise PermissionDenied(msg)
+
+        existing_modules = Module.objects.filter(program=program)
+        existing_module_keys = {m.key for m in existing_modules}
+
+        if len(input_data.module_keys) != len(set(input_data.module_keys)):
+            raise ValidationError(message="Duplicate module keys are not allowed in the ordering.")
+
+        if set(input_data.module_keys) != existing_module_keys:
+            raise ValidationError(
+                message="All modules in the program must be included in the ordering."
+            )
+
+        modules_by_key = {m.key: m for m in existing_modules}
+        modules_to_update = []
+
+        for index, module_key in enumerate(input_data.module_keys):
+            module = modules_by_key[module_key]
+            module.position = index
+            modules_to_update.append(module)
+
+        Module.objects.bulk_update(modules_to_update, ["position"])
+
+        return program

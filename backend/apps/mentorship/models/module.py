@@ -45,6 +45,10 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         blank=True,
         default="",
     )
+    position = models.IntegerField(
+        verbose_name="Position",
+        default=0,
+    )
 
     # FKs.
     labels = models.JSONField(

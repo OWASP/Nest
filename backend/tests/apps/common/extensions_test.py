@@ -143,6 +143,7 @@ class TestResolve:
     @patch("apps.common.extensions.cache")
     def test_returns_cached_result_on_hit(self, mock_cache, extension, mock_info, mock_next):
         """Test that cached result is returned on cache hit."""
+        mock_cache.get.return_value = 1
         cached_result = {"name": "Cached OWASP"}
         mock_cache.get_or_set.return_value = cached_result
 
@@ -155,6 +156,7 @@ class TestResolve:
     @patch("apps.common.extensions.cache")
     def test_caches_result_on_miss(self, mock_cache, extension, mock_info, mock_next):
         """Test that result is cached on cache miss."""
+        mock_cache.get.return_value = 1
         mock_cache.get_or_set.side_effect = lambda _key, default, _timeout: default()
 
         extension.resolve(mock_next, None, mock_info, key="germany")

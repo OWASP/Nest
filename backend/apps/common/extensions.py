@@ -11,6 +11,25 @@ from strawberry.permission import PermissionExtension
 from strawberry.schema import Schema
 from strawberry.utils.str_converters import to_camel_case
 
+CACHE_VERSION_KEY = "graphql:cache_version"
+
+
+def get_cache_version() -> int:
+    """Get the current cache version."""
+    version = cache.get(CACHE_VERSION_KEY)
+    if version is None:
+        cache.set(CACHE_VERSION_KEY, 1, timeout=None)
+        return 1
+    return version
+
+
+def bump_cache_version() -> None:
+    """Bump the cache version."""
+    try:
+        cache.incr(CACHE_VERSION_KEY)
+    except ValueError:
+        cache.set(CACHE_VERSION_KEY, 2)
+
 
 @lru_cache(maxsize=1)
 def get_protected_fields(schema: Schema) -> tuple[str, ...]:
@@ -46,7 +65,10 @@ class CacheExtension(SchemaExtension):
             str: The unique cache key.
 
         """
-        key = f"{field_name}:{json.dumps(field_args, sort_keys=True)}"
+        version = get_cache_version()
+        key = (
+            f"{field_name}:{json.dumps({'args': field_args, 'version': version}, sort_keys=True)}"
+        )
         return (
             f"{settings.GRAPHQL_RESOLVER_CACHE_PREFIX}-{hashlib.sha256(key.encode()).hexdigest()}"
         )
@@ -65,3 +87,12 @@ class CacheExtension(SchemaExtension):
             lambda: _next(root, info, *args, **kwargs),
             settings.GRAPHQL_RESOLVER_CACHE_TIME_SECONDS,
         )
+
+
+class CacheInvalidationExtension(SchemaExtension):
+    """CacheInvalidationExtension class."""
+
+    def on_execute(self):
+        """Invalidate cache on mutation."""
+        if str(self.execution_context.operation_type) == "OperationType.MUTATION":
+            bump_cache_version()
