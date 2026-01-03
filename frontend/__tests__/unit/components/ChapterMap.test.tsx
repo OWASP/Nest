@@ -502,14 +502,14 @@ describe('ChapterMap', () => {
       const event = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true })
       const preventDefaultSpy = jest.spyOn(event, 'preventDefault')
       const stopPropagationSpy = jest.spyOn(event, 'stopPropagation')
-      
+
       globalThis.dispatchEvent(event)
 
       // Verify map is locked again
       expect(getByText('Unlock map')).toBeInTheDocument()
       expect(mockMap.dragging.disable).toHaveBeenCalled()
       expect(mockMap.scrollWheelZoom.disable).toHaveBeenCalled()
-      
+
       // Verify event was contained to prevent race conditions
       expect(preventDefaultSpy).toHaveBeenCalled()
       expect(stopPropagationSpy).toHaveBeenCalled()
