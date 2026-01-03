@@ -217,7 +217,7 @@ const ChapterMap = ({
   }, [isMapActive])
 
   return (
-    <div className="relative" style={style}>
+    <section className="relative" style={style} aria-label="chapters location map">
       <div id="chapter-map" className="h-full w-full" />
       {!isMapActive && (
         <button
@@ -269,7 +269,7 @@ const ChapterMap = ({
           )}
         </div>
       )}
-    </div>
+    </section>
   )
 }
 export default ChapterMap

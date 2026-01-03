@@ -251,7 +251,7 @@ export default function Page() {
           <div className="flex items-start gap-3">
             <FaInfoCircle className="mt-0.5 text-blue-600 dark:text-blue-400" />
             <div>
-              <h3 className="font-semibold text-blue-800 dark:text-blue-300">API Key Limits</h3>
+              <h2 className="font-semibold text-blue-800 dark:text-blue-300">API Key Limits</h2>
               <p className="mt-1 text-sm text-blue-700 dark:text-blue-400">
                 You can have a maximum of <strong>{MAX_ACTIVE_KEYS} active API keys</strong> at any
                 time. Currently:{' '}

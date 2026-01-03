@@ -63,6 +63,23 @@ jest.mock('next/navigation', () => {
     useRouter: jest.fn(() => mockRouter),
     useSearchParams: jest.fn(() => new URLSearchParams()),
     useParams: jest.fn(() => ({})),
+    usePathname: jest.fn(() => '/'),
+  }
+})
+
+jest.mock('next/link', () => {
+  return function MockedLink({
+    children,
+    href,
+    className,
+    ...props
+  }: {
+    children: React.ReactNode
+    href: string
+    className?: string
+    [key: string]: unknown
+  }) {
+    return React.createElement('a', { href, className, ...props }, children)
   }
 })
 
