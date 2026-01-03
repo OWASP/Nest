@@ -11,7 +11,6 @@ import 'leaflet.markercluster'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
-import 'leaflet.markercluster'
 
 const ChapterMap = ({
   geoLocData,
@@ -194,7 +193,12 @@ const ChapterMap = ({
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isMapActive && mapRef.current) {
+      if (!isMapActive || !mapRef.current) return
+
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        e.stopPropagation()
+
         setMapInteractivity(mapRef.current, false)
         setIsMapActive(false)
       }

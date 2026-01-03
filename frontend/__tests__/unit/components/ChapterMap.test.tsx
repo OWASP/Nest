@@ -311,7 +311,8 @@ describe('ChapterMap', () => {
       const { getByText, queryByText } = render(<ChapterMap {...defaultProps} />)
 
       const button = getByText('Unlock map').closest('button')
-      fireEvent.click(button!)
+      expect(button).not.toBeNull()
+      fireEvent.click(button as HTMLElement)
 
       expect(queryByText('Unlock map')).not.toBeInTheDocument()
     })
@@ -320,7 +321,8 @@ describe('ChapterMap', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
       const button = getByText('Unlock map').closest('button')
-      fireEvent.click(button!)
+      expect(button).not.toBeNull()
+      fireEvent.click(button as HTMLElement)
 
       expect(mockMap.dragging.enable).toHaveBeenCalled()
       expect(mockMap.touchZoom.enable).toHaveBeenCalled()
@@ -334,6 +336,7 @@ describe('ChapterMap', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
       const button = getByText('Unlock map').closest('button')
+      expect(button).not.toBeNull()
       expect(button).toHaveAttribute('type', 'button')
       expect(button).toHaveAttribute('aria-label', 'Unlock map')
     })
@@ -439,7 +442,8 @@ describe('ChapterMap', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
       const button = getByText('Unlock map').closest('button')
-      fireEvent.click(button!)
+      expect(button).not.toBeNull()
+      fireEvent.click(button as HTMLElement)
 
       expect(L.control.zoom).toHaveBeenCalledWith({ position: 'topleft' })
       expect(mockZoomControl.addTo).toHaveBeenCalledWith(mockMap)
@@ -465,7 +469,8 @@ describe('ChapterMap', () => {
       expect(getByText('Unlock map')).toBeInTheDocument()
 
       const overlay = getByText('Unlock map').closest('button')
-      fireEvent.click(overlay)
+      expect(overlay).not.toBeNull()
+      fireEvent.click(overlay as HTMLElement)
 
       expect(getByLabelText(/share location to find nearby chapters/i)).toBeInTheDocument()
     })
@@ -474,7 +479,8 @@ describe('ChapterMap', () => {
       const { getByText, queryByLabelText } = render(<ChapterMap {...defaultProps} />)
 
       const overlay = getByText('Unlock map').closest('button')
-      fireEvent.click(overlay)
+      expect(overlay).not.toBeNull()
+      fireEvent.click(overlay as HTMLElement)
 
       expect(queryByLabelText(/share location/i)).not.toBeInTheDocument()
     })
@@ -493,12 +499,20 @@ describe('ChapterMap', () => {
       expect(mockMap.dragging.enable).toHaveBeenCalled()
 
       // Press Escape to re-lock
-      globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+      const event = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true })
+      const preventDefaultSpy = jest.spyOn(event, 'preventDefault')
+      const stopPropagationSpy = jest.spyOn(event, 'stopPropagation')
+      
+      globalThis.dispatchEvent(event)
 
       // Verify map is locked again
       expect(getByText('Unlock map')).toBeInTheDocument()
       expect(mockMap.dragging.disable).toHaveBeenCalled()
       expect(mockMap.scrollWheelZoom.disable).toHaveBeenCalled()
+      
+      // Verify event was contained to prevent race conditions
+      expect(preventDefaultSpy).toHaveBeenCalled()
+      expect(stopPropagationSpy).toHaveBeenCalled()
     })
 
     it('does nothing when Escape is pressed and map is already locked', () => {
