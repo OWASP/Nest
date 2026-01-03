@@ -189,7 +189,6 @@ class RepositoryBasedEntityModel(models.Model):
                     found_keywords.add(lower_kw)
 
         return sorted(found_keywords)
-
     def get_leaders(self):
         """Get leaders from leaders.md file on GitHub."""
         content = get_repository_file_content(self.leaders_md_url)
@@ -197,21 +196,33 @@ class RepositoryBasedEntityModel(models.Model):
             return []
 
         leaders = []
+
         for line in content.split("\n"):
-            leaders.extend(
-                [
-                    name
-                    for name in itertools.chain(
-                        *re.findall(
-                            r"[-*]\s*\[\s*([^(]+?)\s*(?:\([^)]*\))?\]|\*\s*([\w\s]+)", line.strip()
-                        )
-                    )
-                    if name.strip()
-                ]
+            line = line.strip()
+
+            # Markdown list items:
+            # - [Name]
+            # - [Name](link)
+            markdown_matches = re.findall(
+                r"^[-*]\s*\[\s*([^\]]+)\s*(?:\([^)]*\))?\]",
+                line,
             )
 
-        return leaders
+            # Plain list items:
+            # * Name
+            plain_matches = re.findall(
+                 r"^\*\s+([A-Za-z][A-Za-z\s]+)$",
+                 line,
+            )
 
+
+            for raw_name in itertools.chain(markdown_matches, plain_matches):
+                # Remove role annotations like "(Chapter Lead)"
+                name = re.sub(r"\s*\([^)]*\)", "", raw_name).strip()
+                if name:
+                    leaders.append(name)
+
+        return leaders
     def get_leaders_emails(self):
         """Get leaders emails from leaders.md file on GitHub."""
         content = get_repository_file_content(self.leaders_md_url)
@@ -219,16 +230,18 @@ class RepositoryBasedEntityModel(models.Model):
             return {}
 
         leaders = {}
+
         for line in content.split("\n"):
-            matches = re.findall(
-                r"^[-*]\s*\[([^\]]+)\]\((?:mailto:)?([^)]+)(\)|([^[<\n]))", line.strip()
+            line = line.strip()
+
+            markdown_matches = re.findall(
+                r"^[-*]\s*\[\s*([^\]]+?)\s*\]\(\s*(?:mailto:)?\s*([^) ]+)\s*\)",
+                line,
             )
 
-            for match in matches:
-                if match[0] and match[1]:  # Name with email
-                    leaders[match[0].strip()] = match[1].strip()
-                elif match[2]:  # Name without email
-                    leaders[match[2].strip()] = None
+            for name, email in markdown_matches:
+                clean_name = re.sub(r"\s*\([^)]*\)", "", name).strip()
+                leaders[clean_name] = email.strip()
 
         return leaders
 
@@ -240,30 +253,67 @@ class RepositoryBasedEntityModel(models.Model):
                 get_repository_file_content(self.index_md_url),
                 re.DOTALL,
             )
+
             return (
                 yaml.safe_load(content)
                 if yaml_content and (content := yaml_content.group(1))
                 else {}
             )
+
         except (AttributeError, yaml.scanner.ScannerError):
             logger.exception(
                 "Unable to parse entity metadata",
-                extra={"repository": getattr(self.owasp_repository, "name", None)},
+                extra={
+                    "repository": getattr(self.owasp_repository, "name", None),
+                },
             )
             return {}
+    def get_urls(self, domain=None):
+        """Get URLs from info.md file on GitHub."""
+        content = get_repository_file_content(self.info_md_url)
+        if not content:
+            return []
 
-    def get_related_url(self, url, exclude_domains=(), include_domains=()) -> str | None:
+        urls = set()
+
+        # Markdown links: [text](url)
+        markdown_links = re.findall(
+            r"\[([^\]]*)\]\((https?://[^\s\)]+)\)",
+            content,
+        )
+        for _text, url in markdown_links:
+            cleaned = clean_url(url)
+            if cleaned and validate_url(cleaned):
+                urls.add(cleaned)
+
+        # Standalone URLs
+        standalone_urls = re.findall(
+           r"(?<!\()\bhttps?://[^\s\),!]+",
+           content,
+
+            
+        )
+        for url in standalone_urls:
+            cleaned = clean_url(url)
+            if cleaned and validate_url(cleaned):
+                urls.add(cleaned)
+
+        if domain:
+            urls = {
+                url
+                for url in urls
+                if urlparse(url).netloc == domain
+            }
+
+        return sorted(urls)
+    def get_related_url(self, url, exclude_domains=(), include_domains=()):
         """Get OWASP entity related URL."""
-        if (
-            not url
-            or url.startswith("/cdn-cgi/l/email-protection")
-            or any(urlparse(url).netloc == domain for domain in exclude_domains)
-        ):
+        if not url:
             return None
 
-        if include_domains and not any(
-            urlparse(url).netloc == domain for domain in include_domains
-        ):
+        parsed = urlparse(url)
+
+        if include_domains and parsed.netloc not in include_domains:
             return None
 
         if match := GITHUB_REPOSITORY_RE.match(url):
@@ -274,59 +324,42 @@ class RepositoryBasedEntityModel(models.Model):
 
         return url
 
-    def get_urls(self, domain=None):
-        """Get URLs from info.md file on GitHub."""
-        content = get_repository_file_content(self.info_md_url)
-        if not content:
-            return []
+    
+       
 
-        urls = set()
+    
+       
 
-        markdown_links = re.findall(r"\[([^\]]*)\]\((https?://[^\s\)]+)\)", content)
-        for _text, url in markdown_links:
-            cleaned_url = clean_url(url)
-            if cleaned_url and validate_url(cleaned_url):
-                urls.add(cleaned_url)
 
-        standalone_urls = re.findall(r"(?<!\]\()https?://[^\s\)]+", content)
-        for url in standalone_urls:
-            cleaned_url = clean_url(url)
-            if cleaned_url and validate_url(cleaned_url):
-                urls.add(cleaned_url)
 
-        if domain:
-            domain_urls = set()
-            for url in urls:
-                try:
-                    if urlparse(url).netloc == domain:
-                        domain_urls.add(url)
-                except ValueError:
-                    pass
-            urls = domain_urls
 
-        return sorted(urls)
 
-    def parse_tags(self, tags) -> list[str]:
+
+
+    def parse_tags(self, tags):
         """Parse entity tags."""
         if not tags:
             return []
 
-        return (
-            [tag.strip(", ") for tag in tags.split("," if "," in tags else " ")]
-            if isinstance(tags, str)
-            else tags
-        )
+        if isinstance(tags, str):
+           return [t.strip() for t in re.split(r"[,\s]+", tags) if t.strip()]
 
+        return tags
     def sync_leaders(self, leaders_emails):
-        """Sync Leaders data.
+        """Sync Leaders data."""
+        if not leaders_emails:
+            return
 
-        Args:
-            leaders_emails (dict[str, str | None]): A dictionary
-            where keys are the full names of the leaders
-            and values are their corresponding email addresses (or None if no email is provided).
-
-        """
         content_type = ContentType.objects.get_for_model(self.__class__)
+
+        existing_members = {
+            member.member_name: member
+            for member in EntityMember.objects.filter(
+                entity_id=self.id,
+                entity_type=content_type,
+                role=EntityMember.Role.LEADER,
+            )
+        }
 
         leaders = []
         for order, (name, email) in enumerate(leaders_emails.items()):
@@ -340,9 +373,11 @@ class RepositoryBasedEntityModel(models.Model):
                         "order": (order + 1) * 100,
                         "role": EntityMember.Role.LEADER,
                     },
+                    instance=existing_members.get(name),
                     save=False,
                 )
             )
 
         if leaders:
             BulkSaveModel.bulk_save(EntityMember, leaders)
+
