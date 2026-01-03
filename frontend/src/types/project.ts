@@ -46,6 +46,7 @@ export type Project = {
   recentReleases?: Release[]
   repositories?: RepositoryCardProps[]
   recentMilestones?: Milestone[]
+  socialUrls?: string[]
 }
 
 export type RepositoryCardListProps = {

@@ -115,3 +115,18 @@ class ProjectNode(GenericEntityNode):
     def topics(self) -> list[str]:
         """Resolve topics."""
         return self.idx_topics
+
+    @strawberry.field
+    def social_urls(self) -> list[str]:
+        """Resolve social URLs."""
+        urls = []
+        for ec in self.social_channels.filter(is_active=True):
+            channel = ec.channel
+            if (
+                ec.platform == "slack"
+                and hasattr(channel, "slack_channel_id")
+                and channel.slack_channel_id
+            ):
+                urls.append(f"https://slack.com/app_redirect?channel={channel.slack_channel_id}")
+
+        return urls

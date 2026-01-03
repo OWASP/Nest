@@ -24,6 +24,7 @@ export const GET_PROJECT_DATA = gql`
       leaders
       level
       name
+      socialUrls
       healthMetricsList(limit: 30) {
         id
         createdAt
