@@ -11,7 +11,7 @@ on:
         description: 'The REST API URL to test against'
         required: false
         type: string
-        default: ''
+        default: 'http://localhost:9500/api/v0'
 
 jobs:
   run-fuzz-tests:
