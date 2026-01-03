@@ -14,7 +14,8 @@
     "lint:check": "eslint . --config eslint.config.mjs --max-warnings=0",
     "start": "next start",
     "test:e2e": "npx playwright test",
-    "test:unit": "tsc --noEmit && NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest"
+    "test:unit": "tsc --noEmit && NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest",
+    "test:a11y": "NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest __tests__/accessibility/components --coverage=false"
   },
   "dependencies": {
     "@apollo/client": "^4.0.11",

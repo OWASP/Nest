@@ -1,0 +1,31 @@
+import { render } from '@testing-library/react'
+import { axe, toHaveNoViolations } from 'jest-axe'
+import type { Link as LinkType } from 'types/link'
+import NavDropDown from 'components/NavDropDown'
+
+expect.extend(toHaveNoViolations)
+
+const mockLink: LinkType = {
+  text: 'Documentation',
+  href: '/docs',
+  submenu: [
+    { text: 'Getting Started', href: '/docs/getting-started' },
+    { text: 'API Reference', href: '/docs/api' },
+    { text: 'Examples', href: '/docs/examples' },
+  ],
+}
+
+const defaultProps = {
+  pathname: '/current-page',
+  link: mockLink,
+}
+
+describe('NavDropDown a11y', () => {
+  it('should not have any accessibility violations', async () => {
+    const { container } = render(<NavDropDown {...defaultProps} />)
+
+    const results = await axe(container)
+
+    expect(results).toHaveNoViolations()
+  })
+})
