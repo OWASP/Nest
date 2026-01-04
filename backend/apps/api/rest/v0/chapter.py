@@ -11,7 +11,7 @@ from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
-from apps.api.rest.v0.common import LocationFilter
+from apps.api.rest.v0.common import Leader, LocationFilter
 from apps.owasp.models.chapter import Chapter as ChapterModel
 
 router = RouterPaginated(tags=["Chapters"])
@@ -41,13 +41,16 @@ class ChapterDetail(ChapterBase):
     """Detail schema for Chapter (used in single item endpoints)."""
 
     country: str
-    leader_names: list[str]
+    leaders: list[Leader]
     region: str
 
     @staticmethod
-    def resolve_leader_names(obj):
-        """Resolve leader names."""
-        return [leader.member_name for leader in obj.entity_leaders]
+    def resolve_leaders(obj):
+        """Resolve leaders."""
+        return [
+            Leader(key=leader.member.login if leader.member else None, name=leader.member_name)
+            for leader in obj.entity_leaders
+        ]
 
 
 class ChapterError(Schema):

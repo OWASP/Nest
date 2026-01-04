@@ -31,8 +31,13 @@ from apps.api.rest.v0.chapter import ChapterDetail
     ],
 )
 def test_chapter_serializer_validation(chapter_data):
+    class MockMember:
+        def __init__(self, login):
+            self.login = login
+
     class MockEntityMember:
-        def __init__(self, name):
+        def __init__(self, name, login=None):
+            self.member = MockMember(login) if login else None
             self.member_name = name
 
     class MockChapter:
@@ -40,7 +45,10 @@ def test_chapter_serializer_validation(chapter_data):
             for key, value in data.items():
                 setattr(self, key, value)
             self.nest_key = data["key"]
-            self.entity_leaders = [MockEntityMember("Alice"), MockEntityMember("Bob")]
+            self.entity_leaders = [
+                MockEntityMember("Alice", "alice"),
+                MockEntityMember("Bob"),
+            ]
 
     chapter = ChapterDetail.from_orm(MockChapter(chapter_data))
 
@@ -49,7 +57,11 @@ def test_chapter_serializer_validation(chapter_data):
     assert chapter.key == chapter_data["key"]
     assert chapter.latitude == chapter_data["latitude"]
     assert chapter.longitude == chapter_data["longitude"]
-    assert chapter.leader_names == ["Alice", "Bob"]
+    assert len(chapter.leaders) == 2
+    assert chapter.leaders[0].key == "alice"
+    assert chapter.leaders[0].name == "Alice"
+    assert chapter.leaders[1].key is None
+    assert chapter.leaders[1].name == "Bob"
     assert chapter.name == chapter_data["name"]
     assert chapter.region == chapter_data["region"]
     assert chapter.updated_at == datetime.fromisoformat(chapter_data["updated_at"])
