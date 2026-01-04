@@ -2,8 +2,10 @@
 import { useQuery } from '@apollo/client/react'
 import { Tooltip } from '@heroui/tooltip'
 import upperFirst from 'lodash/upperFirst'
+import { useState } from 'react'
 import millify from 'millify'
 import Image from 'next/image'
+import ToggleableList from 'components/ToggleableList'
 import Link from 'next/link'
 import { useEffect } from 'react'
 import { FaMapSigns, FaTools } from 'react-icons/fa'
@@ -61,6 +63,8 @@ const getMilestoneIcon = (progress: number) => {
 }
 
 const About = () => {
+  const [storyExpanded, setStoryExpanded] = useState(false)
+
   const {
     data: projectMetadataResponse,
     loading: projectMetadataLoading,

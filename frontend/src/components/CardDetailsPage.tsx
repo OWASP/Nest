@@ -195,10 +195,11 @@ const DetailsCard = ({
                 items={languages}
                 icon={FaCode}
                 label={<AnchorTitle title="Languages" />}
+                renderItem={(item) => <span>{item}</span>}
               />
             )}
             {topics.length !== 0 && (
-              <ToggleableList items={topics} icon={FaTags} label={<AnchorTitle title="Topics" />} />
+              <ToggleableList items={topics} icon={FaTags} label={<AnchorTitle title="Topics"  />} renderItem={(item) => <span>{item}</span>}/>
             )}
           </div>
         )}
@@ -214,6 +215,7 @@ const DetailsCard = ({
                     icon={FaTags}
                     label={<AnchorTitle title="Tags" />}
                     isDisabled={true}
+                    renderItem={(item) => <span>{item}</span>}
                   />
                 )}
                 {domains?.length > 0 && (
@@ -222,6 +224,7 @@ const DetailsCard = ({
                     icon={FaChartPie}
                     label={<AnchorTitle title="Domains" />}
                     isDisabled={true}
+                    renderItem={(item) => <span>{item}</span>}
                   />
                 )}
               </div>
@@ -233,6 +236,7 @@ const DetailsCard = ({
                   icon={FaTags}
                   label={<AnchorTitle title="Labels" />}
                   isDisabled={true}
+                  renderItem={(item) => <span>{item}</span>}
                 />
               </div>
             )}
