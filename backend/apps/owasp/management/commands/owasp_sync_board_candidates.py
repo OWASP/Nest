@@ -158,7 +158,7 @@ class Command(BaseCommand):
                     for item in items
                     if item.get("type") == "dir" and item.get("name", "").isdigit()
                 ]
-            except (KeyError, ValueError) as e:
+            except (json.JSONDecodeError, KeyError, ValueError) as e:
                 self.stderr.write(self.style.ERROR(f"Could not fetch repository structure: {e}"))
                 return
 
