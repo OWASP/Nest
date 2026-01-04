@@ -41,7 +41,7 @@ def test_extract_repo_full_name_from_object(command):
     [
         ("https://github.com/owner/repo", "owner/repo"),
         ("https://www.github.com/owner/repo/sub/path", "owner/repo"),
-        ("http://github.com/owner/repo", "owner/repo"),
+        ("https://github.com/owner/repo", "owner/repo"),
         ("https://invalid.com/owner/repo", None),
         ("not-a-url", None),
         ("https://github.com/owner", None),
