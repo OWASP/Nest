@@ -43,7 +43,7 @@ jobs:
           python-version: '3.13'
 
       - name: Set up pre-commit cache
-        uses: actions/cache@v5
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -128,7 +128,7 @@ jobs:
           version: latest
 
   scan-ci-dependencies:
-    name: Run CI Denendencies Scan
+    name: Run CI Dependencies Scan
     needs:
       - check-frontend
       - pre-commit
@@ -252,6 +252,7 @@ jobs:
     name: Set release version
     outputs:
       release_version: ${{ steps.set.outputs.release_version }}
+    permissions: {}
     runs-on: ubuntu-latest
     steps:
       - name: Set release version
@@ -599,6 +600,31 @@ jobs:
           pnpm run lighthouse-ci
         timeout-minutes: 15
         working-directory: frontend
+
+  run-zap-baseline-scan:
+    name: Run ZAP Baseline Scan
+    needs:
+      - deploy-staging-nest-proxy
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run ZAP Baseline Scan
+        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          target: 'https://nest.owasp.dev'
+          allow_issue_writing: false
+          fail_action: false
+          cmd_options: '-a -r zap-report.html'
+
+      - name: Upload ZAP report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: zap-baseline-scan-report-${{ github.run_id }}
+          path: zap-report.html
+
 
   build-production-images:
     name: Build Production Images
