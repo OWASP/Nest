@@ -525,5 +525,4 @@ describe('Card', () => {
     expect(screen.queryByText('backend')).not.toBeInTheDocument()
     expect(screen.queryByText('frontend')).not.toBeInTheDocument()
   })
-
 })
