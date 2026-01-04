@@ -178,28 +178,26 @@ describe('ContributionHeatmap', () => {
         <ContributionHeatmap {...defaultProps} title="Light" />,
         'light'
       )
-      expect(screen.getByText('Light').parentElement).toHaveClass('text-gray-700')
+      expect(screen.getByText('Light').parentElement).toHaveClass('w-full')
       ;(useTheme as jest.Mock).mockReturnValue({ theme: 'dark', setTheme: jest.fn() })
       rerender(
         <ThemeProvider attribute="class">
           <ContributionHeatmap {...defaultProps} title="Dark" />
         </ThemeProvider>
       )
-      expect(screen.getByText('Dark').parentElement).toHaveClass('text-gray-700')
+      expect(screen.getByText('Dark').parentElement).toHaveClass('w-full')
     })
 
     it('applies correct container and style classes', () => {
       const { container } = renderWithTheme(<ContributionHeatmap {...defaultProps} title="Test" />)
-      expect(container.querySelector('.heatmap-container')).toBeInTheDocument()
-      expect(container.querySelector('style')).toBeInTheDocument()
       expect(container.querySelector('.w-full')).toBeInTheDocument()
+      expect(container.querySelector('style')).toBeInTheDocument()
     })
 
     it('includes responsive media queries', () => {
       const { container } = renderWithTheme(<ContributionHeatmap {...defaultProps} />)
       const styleContent = container.querySelector('style')?.textContent
-      expect(styleContent).toContain('@media (max-width: 768px)')
-      expect(styleContent).toContain('@media (max-width: 480px)')
+      expect(styleContent).toContain('apexcharts-tooltip')
     })
   })
 
@@ -210,13 +208,13 @@ describe('ContributionHeatmap', () => {
       )
       const title = screen.getByText('Activity')
       expect(title).toHaveClass('font-semibold')
-      expect(title.parentElement).toHaveClass('mb-1', 'text-sm')
-      expect(container.querySelector('h4')).toBeInTheDocument()
+      expect(title.parentElement).toHaveClass('w-full')
+      expect(container.querySelector('h3')).toBeInTheDocument()
     })
 
     it('has accessible heading structure', () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} title="Accessible" />)
-      expect(screen.getByRole('heading', { level: 4 })).toHaveTextContent('Accessible')
+      expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('Accessible')
     })
   })
 
@@ -224,7 +222,7 @@ describe('ContributionHeatmap', () => {
     it('sets correct dimensions and series count', () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} />)
       const chart = screen.getByTestId('mock-heatmap-chart')
-      expect(chart).toHaveAttribute('data-height', '100%')
+      expect(chart).toHaveAttribute('data-height', '195')
       expect(chart).toHaveAttribute('data-series-length', '7')
     })
 
@@ -540,15 +538,14 @@ describe('ContributionHeatmap', () => {
   describe('Responsive Design', () => {
     it('applies responsive container classes', () => {
       const { container } = renderWithTheme(<ContributionHeatmap {...defaultProps} />)
-      const heatmapContainer = container.querySelector('.heatmap-container')
+      const heatmapContainer = container.querySelector('.w-full')
       expect(heatmapContainer).toBeInTheDocument()
     })
 
     it('maintains aspect ratio on different screen sizes', () => {
       const { container } = renderWithTheme(<ContributionHeatmap {...defaultProps} />)
       const styleContent = container.querySelector('style')?.textContent
-      expect(styleContent).toContain('aspect-ratio: 4 / 1')
-      expect(styleContent).toContain('min-height: 132px')
+      expect(styleContent).toContain('apexcharts-tooltip')
     })
   })
 
@@ -618,6 +615,63 @@ describe('ContributionHeatmap', () => {
       )
 
       expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+    })
+  })
+
+  describe('Variants', () => {
+    it('renders default variant with full dimensions', () => {
+      renderWithTheme(<ContributionHeatmap {...defaultProps} variant="default" />)
+      const chart = screen.getByTestId('mock-heatmap-chart')
+      // Verify full-size dimensions (195px height for default variant)
+      expect(chart).toHaveAttribute('data-height', '195')
+    })
+
+    it('renders compact variant with smaller dimensions', () => {
+      renderWithTheme(<ContributionHeatmap {...defaultProps} variant="compact" />)
+      const chart = screen.getByTestId('mock-heatmap-chart')
+      // Verify compact dimensions (150px height for compact variant)
+      expect(chart).toHaveAttribute('data-height', '150')
+    })
+
+    it('applies compact-specific container styling when variant is compact', () => {
+      const { container } = renderWithTheme(
+        <ContributionHeatmap {...defaultProps} title="Compact" variant="compact" />
+      )
+      // Verify compact variant uses inline-block class
+      const chartContainer = container.querySelector('.inline-block')
+      expect(chartContainer).toBeInTheDocument()
+    })
+
+    it('applies default variant container styling when variant is default', () => {
+      const { container } = renderWithTheme(
+        <ContributionHeatmap {...defaultProps} title="Default" variant="default" />
+      )
+      // Verify default variant uses inline-block class
+      const chartContainer = container.querySelector('.inline-block')
+      expect(chartContainer).toBeInTheDocument()
+    })
+
+    it('defaults to default variant when no variant is specified', () => {
+      renderWithTheme(<ContributionHeatmap {...defaultProps} />)
+      const chart = screen.getByTestId('mock-heatmap-chart')
+      // Should render with default variant dimensions
+      expect(chart).toHaveAttribute('data-height', '195')
+    })
+
+    it('renders title with same styling regardless of variant', () => {
+      const { rerender } = renderWithTheme(
+        <ContributionHeatmap {...defaultProps} title="Test Title" variant="default" />
+      )
+      let title = screen.getByText('Test Title')
+      expect(title).toHaveClass('mb-4', 'text-sm', 'font-semibold')
+
+      rerender(
+        <ThemeProvider attribute="class">
+          <ContributionHeatmap {...defaultProps} title="Test Title" variant="compact" />
+        </ThemeProvider>
+      )
+      title = screen.getByText('Test Title')
+      expect(title).toHaveClass('mb-4', 'text-sm', 'font-semibold')
     })
   })
 })

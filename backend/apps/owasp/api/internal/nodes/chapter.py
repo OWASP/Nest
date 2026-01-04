@@ -3,6 +3,7 @@
 import strawberry
 import strawberry_django
 
+from apps.core.utils.index import deep_camelize
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
 from apps.owasp.models.chapter import Chapter
 
@@ -18,6 +19,7 @@ class GeoLocationType:
 @strawberry_django.type(
     Chapter,
     fields=[
+        "contribution_data",
         "country",
         "is_active",
         "meetup_group",
@@ -30,6 +32,11 @@ class GeoLocationType:
 )
 class ChapterNode(GenericEntityNode):
     """Chapter node."""
+
+    @strawberry.field
+    def contribution_stats(self) -> strawberry.scalars.JSON | None:
+        """Resolve contribution stats with camelCase keys."""
+        return deep_camelize(self.contribution_stats)
 
     @strawberry.field
     def created_at(self) -> float:
