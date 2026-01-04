@@ -145,7 +145,7 @@ const ChapterMap = ({
   const userIcon = useMemo(
     () =>
       L.divIcon({
-        html: '<img src="/img/marker-icon.png" style="filter: hue-rotate(150deg) saturate(1.5) brightness(0.9); width: 25px; height: 41px;" alt="User location" />',
+        html: ' <div aria-label="User location" role="img"><img src="/img/marker-icon.png" style="filter: hue-rotate(150deg) saturate(1.5) brightness(0.9); width: 25px; height: 41px;" alt="" aria-hidden="true" />  </div> ',
         className: 'user-location-marker',
         iconSize: [25, 41],
         iconAnchor: [12, 41],
