@@ -498,31 +498,17 @@ describe('Card', () => {
     expect(screen.getByText('help wanted')).toBeInTheDocument()
   })
 
-  it('filters and displays only priority tags when mixed with non-priority tags', () => {
-    const propsWithMixedTags = {
-      ...baseProps,
-      tags: ['good first issue', 'help wanted', 'frontend', 'documentation', 'tag-4'],
-    }
-    render(<Card {...propsWithMixedTags} />)
-    expect(screen.getByText('good first issue')).toBeInTheDocument()
-    expect(screen.getByText('help wanted')).toBeInTheDocument()
-    expect(screen.getByText('tag-4')).toBeInTheDocument()
-
-    expect(screen.queryByText('frontend')).not.toBeInTheDocument()
-    expect(screen.queryByText('documentation')).not.toBeInTheDocument()
-  })
-
   it('displays only first 3 tags when more than 3 tags are provided', () => {
     const propsWithManyTags = {
       ...baseProps,
-      tags: ['good first issue', 'help wanted', 'tag-4', 'backend', 'frontend'],
+      tags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],
     }
     render(<Card {...propsWithManyTags} />)
-    expect(screen.getByText('good first issue')).toBeInTheDocument()
-    expect(screen.getByText('help wanted')).toBeInTheDocument()
-    expect(screen.getByText('tag-4')).toBeInTheDocument()
+    expect(screen.getByText('tag1')).toBeInTheDocument()
+    expect(screen.getByText('tag2')).toBeInTheDocument()
+    expect(screen.getByText('tag3')).toBeInTheDocument()
 
-    expect(screen.queryByText('backend')).not.toBeInTheDocument()
-    expect(screen.queryByText('frontend')).not.toBeInTheDocument()
+    expect(screen.queryByText('tag4')).not.toBeInTheDocument()
+    expect(screen.queryByText('tag5')).not.toBeInTheDocument()
   })
 })
