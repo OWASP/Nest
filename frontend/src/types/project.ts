@@ -20,6 +20,14 @@ export type ProjectStats = {
 export type Project = {
   createdAt?: string
   contributorsCount?: number
+  contributionData?: Record<string, number>
+  contributionStats?: {
+    commits: number
+    issues: number
+    pullRequests: number
+    releases: number
+    total: number
+  }
   description?: string
   entityLeaders?: Leader[]
   forksCount?: number
