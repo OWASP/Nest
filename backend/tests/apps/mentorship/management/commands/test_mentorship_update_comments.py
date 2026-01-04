@@ -15,12 +15,10 @@ def make_qs(iterable, exists=True):
     qs.__iter__.return_value = iter(items)
     qs.all.return_value = items
     qs.count.return_value = len(items)
-    # .distinct() should return itself in our usage
     qs.distinct.return_value = qs
     return qs
 
 
-# Helper factories (not pytest fixtures) — these are called from tests
 def make_user(user_id, login):
     user = MagicMock()
     user.id = user_id
@@ -51,9 +49,7 @@ def command():
 def mock_module():
     m = MagicMock()
     m.name = "Test Module"
-    # project.repositories.filter().values_list(...).distinct() -> we only need .exists() on the result
     vlist_qs = make_qs([1, 2], exists=True)
-    # chain: filter(...).values_list(...).distinct() -> return vlist_qs
     m.project.repositories.filter.return_value.values_list.return_value.distinct.return_value = vlist_qs
     return m
 
@@ -63,7 +59,6 @@ def mock_issue():
     issue = MagicMock()
     issue.number = 123
     issue.title = "Test Issue Title"
-    # comments.select_related().filter().order_by() should be iterable
     empty_comments_qs = make_qs([], exists=False)
     issue.comments.select_related.return_value.filter.return_value.order_by.return_value = empty_comments_qs
     return issue
@@ -92,7 +87,6 @@ def test_process_mentorship_modules_no_modules_with_labels(MockModule, command):
 @patch("apps.mentorship.management.commands.mentorship_update_comments.Issue")
 def test_process_module(MockIssue, mock_process_issue_interests, mock_sync_issue_comments, mock_get_github_client, command, mock_module, mock_issue):
     """Test process_module orchestrates issue syncing and interest processing."""
-    # one relevant issue returned
     mock_issue.id = 1
     mock_issue.title = "Test Issue 1"
     mock_issue.number = 123
@@ -100,7 +94,6 @@ def test_process_module(MockIssue, mock_process_issue_interests, mock_sync_issue
     issues_qs = make_qs([mock_issue], exists=True)
     MockIssue.objects.filter.return_value.distinct.return_value = issues_qs
 
-    # comments for the issue: include one comment to ensure the command calls process_issue_interests
     author = make_user(1, "login")
     comment = make_comment("body", author, created_at="now")
     comments_qs = make_qs([comment], exists=True)
@@ -121,10 +114,8 @@ def test_process_issue_interests_new_interest(MockIssueUserInterest, command, mo
     comments_qs = make_qs([comment1], exists=True)
     mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = comments_qs
 
-    # Simulate no existing interests
     MockIssueUserInterest.objects.filter.return_value.values_list.return_value = []
 
-    # Make constructor return a SimpleNamespace so attributes are inspectable
     MockIssueUserInterest.side_effect = lambda **kwargs: SimpleNamespace(**kwargs)
     MockIssueUserInterest.objects.bulk_create = MagicMock()
 
@@ -132,7 +123,6 @@ def test_process_issue_interests_new_interest(MockIssueUserInterest, command, mo
 
     MockIssueUserInterest.objects.bulk_create.assert_called_once()
     created_interest = MockIssueUserInterest.objects.bulk_create.call_args[0][0][0]
-    # created_interest is a SimpleNamespace built with module, issue, user
     assert created_interest.module == mock_module
     assert created_interest.issue == mock_issue
     assert created_interest.user == user1
@@ -150,18 +140,15 @@ def test_process_issue_interests_remove_interest(MockIssueUserInterest, command,
     comments_qs = make_qs([comment1], exists=True)
     mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = comments_qs
 
-    # Simulate existing interest by user id 1
     MockIssueUserInterest.objects.filter.return_value.values_list.return_value = [1]
     MockIssueUserInterest.objects.filter.return_value.delete.return_value = (1, {})
 
-    # Keep constructor harmless
     MockIssueUserInterest.side_effect = lambda **kwargs: SimpleNamespace(**kwargs)
     MockIssueUserInterest.objects.bulk_create = MagicMock()
 
     command.process_issue_interests(mock_issue, mock_module)
 
     MockIssueUserInterest.objects.bulk_create.assert_not_called()
-    # The code will call filter(...).delete()
     MockIssueUserInterest.objects.filter.assert_any_call(module=mock_module, issue=mock_issue, user_id__in=[1])
     MockIssueUserInterest.objects.filter.return_value.delete.assert_called_once()
     command.stdout.write.assert_any_call(
@@ -174,7 +161,6 @@ def test_process_issue_interests_existing_interest_removed(
     MockIssueUserInterest, command, mock_issue, mock_module
 ):
     """Existing interest should be removed when user no longer shows interest."""
-    # ensure issue.number used in log matches expectation
     mock_issue.number = 1
 
     user1 = make_user(1, "user1")
@@ -183,24 +169,17 @@ def test_process_issue_interests_existing_interest_removed(
     comments_qs = make_qs([comment1], exists=True)
     mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = comments_qs
 
-    # Simulate existing interest by user id 1
     MockIssueUserInterest.objects.filter.return_value.values_list.return_value = [1]
-    # Ensure delete() returns (count, details) so formatting in f-string yields '1'
     MockIssueUserInterest.objects.filter.return_value.delete.return_value = (1, {})
 
-    # Keep constructor harmless and allow bulk_create to be inspected
     MockIssueUserInterest.side_effect = lambda **kwargs: SimpleNamespace(**kwargs)
     MockIssueUserInterest.objects.bulk_create = MagicMock()
 
     command.process_issue_interests(mock_issue, mock_module)
 
-    # No new interests created
     MockIssueUserInterest.objects.bulk_create.assert_not_called()
 
-    # Existing interest removed
     MockIssueUserInterest.objects.filter.return_value.delete.assert_called_once()
-
-    # Log contains the expected line (uses module.issue.number and removed count from delete())
     command.stdout.write.assert_any_call(
         command.style.WARNING("Unregistered 1 interest(s) for issue #1: user1")
     )
