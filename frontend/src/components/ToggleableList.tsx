@@ -24,6 +24,7 @@ const ToggleableList = <T,>({
   const [showAll, setShowAll] = useState(false)
 
   const toggleShowAll = () => setShowAll((prev) => !prev)
+  const visibleItems = showAll ? items : items.slice(0, limit)
 
   return (
     <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
@@ -41,19 +42,21 @@ const ToggleableList = <T,>({
       )}
 
     <div className="flex flex-wrap gap-2">
-      {(showAll ? items : items.slice(0, limit)).map((item, index, arr) => (
+      {visibleItems.map((item, index) => (
         <div
-            key={index}
-            className={isDisabled ? 'pointer-events-none opacity-60' : undefined}
-            aria-disabled={isDisabled}
+          key={index}
+          className={isDisabled ? 'pointer-events-none opacity-60' : undefined}
+          aria-disabled={isDisabled}
         >
-          {renderItem(item, index, arr)}
+          {renderItem(item, index, items)}
         </div>
       ))}
     </div>
-      {items.length > limit && !isDisabled && (
-        <ShowMoreButton onToggle={toggleShowAll} />
-      )}
+
+    {items.length > limit && !isDisabled && (
+      <ShowMoreButton onToggle={toggleShowAll} />
+    )}
+
     </div>
   )
 }

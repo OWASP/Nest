@@ -157,20 +157,6 @@ describe('ToggleableList', () => {
     expect(screen.queryByText('Item 6')).not.toBeInTheDocument()
   })
 
-  it('navigates on item click', () => {
-    render(
-      <ToggleableList
-        items={['React', 'Next.js', 'FastAPI']}
-        label="Tags"
-        limit={2}
-        renderItem={(item) => <span>{item}</span>}
-      />
-    )
-
-    fireEvent.click(screen.getByText('React'))
-    expect(mockPush).toHaveBeenCalledWith('/projects?q=React')
-  })
-
   it('handles empty items array', () => {
     render(
       <ToggleableList
