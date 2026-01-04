@@ -24,6 +24,7 @@ export type CardProps = {
   projectName?: string
   social?: { title: string; icon: IconType; url: string }[]
   summary: string
+  tags?: string[]
   title: string
   timeline?: {
     start: string
@@ -32,7 +33,6 @@ export type CardProps = {
   tooltipLabel?: string
   topContributors?: Contributor[]
   url: string
-  tags?: string[]
 }
 
 type Stats = {
