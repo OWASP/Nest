@@ -133,8 +133,9 @@ const Card = ({
               {tags.slice(0, 3).map((tag, index) => (
                 <span
                   key={tag}
-                  className={`flex items-center justify-center gap-2 rounded-md border border-1 bg-transparent px-2 py-1 whitespace-nowrap text-zinc-300 transition-all hover:text-white ${index >= 2 ? 'hidden sm:flex' : ''
-                    }`}
+                  className={`flex items-center justify-center gap-2 rounded-md border border-1 bg-transparent px-2 py-1 whitespace-nowrap text-zinc-300 transition-all hover:text-white ${
+                    index >= 2 ? 'hidden sm:flex' : ''
+                  }`}
                 >
                   {tag}
                 </span>
