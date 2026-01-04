@@ -73,7 +73,6 @@ export interface DateRangeOptions {
   years?: number
   months?: number
   days?: number
-  useUTC?: boolean
 }
 
 export interface DateRangeResult {
@@ -81,29 +80,43 @@ export interface DateRangeResult {
   endDate: string
 }
 
+function calculateDaysToSubtract(dayOfWeek: number): number {
+  return dayOfWeek === 0 ? -1 : -(dayOfWeek + 1)
+}
+
+function adjustDateForYearOnly(today: Date, endDate: Date, startDate: Date): void {
+  const todayDayOfWeek = today.getDay()
+  const daysToSubtract = calculateDaysToSubtract(todayDayOfWeek)
+
+  endDate.setDate(endDate.getDate() + daysToSubtract)
+  startDate.setTime(endDate.getTime())
+  startDate.setDate(startDate.getDate() - 363) // 364 days including start day
+}
+
+function calculateStartDate(today: Date, years: number, months: number, days: number): Date {
+  const startDate = new Date(today)
+  startDate.setFullYear(today.getFullYear() - years)
+  startDate.setMonth(today.getMonth() - months)
+  startDate.setDate(today.getDate() - days)
+  return startDate
+}
+
 export function getDateRange(options: DateRangeOptions = {}): DateRangeResult {
-  const { years = 0, months = 0, days = 0, useUTC = false } = options
+  const { years = 0, months = 0, days = 0 } = options
 
   const today = new Date()
-  if (useUTC) {
-    today.setUTCHours(0, 0, 0, 0)
-  } else {
-    today.setHours(0, 0, 0, 0)
-  }
+  today.setHours(0, 0, 0, 0)
 
-  const startDate = new Date(today)
-  if (useUTC) {
-    startDate.setUTCFullYear(today.getUTCFullYear() - years)
-    startDate.setUTCMonth(today.getUTCMonth() - months)
-    startDate.setUTCDate(today.getUTCDate() - days)
-  } else {
-    startDate.setFullYear(today.getFullYear() - years)
-    startDate.setMonth(today.getMonth() - months)
-    startDate.setDate(today.getDate() - days)
+  const endDate = new Date(today)
+  const startDate = calculateStartDate(today, years, months, days)
+
+  const isYearOnly = years > 0 && months === 0 && days === 0
+  if (isYearOnly) {
+    adjustDateForYearOnly(today, endDate, startDate)
   }
 
   return {
     startDate: startDate.toISOString().split('T')[0],
-    endDate: today.toISOString().split('T')[0],
+    endDate: endDate.toISOString().split('T')[0],
   }
 }

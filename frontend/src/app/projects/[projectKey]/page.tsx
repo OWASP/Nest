@@ -86,7 +86,7 @@ const ProjectDetailsPage = () => {
     },
   ]
 
-  const { startDate, endDate } = getDateRange({ years: 1, useUTC: true })
+  const { startDate, endDate } = getDateRange({ years: 1 })
 
   const contributionStats = getContributionStats(
     project.contributionStats,
