@@ -1,4 +1,4 @@
-from apps.core.utils.index import get_params_for_index
+aafrom apps.core.utils.index import get_params_for_index
 
 
 class TestParamsMapping:
@@ -18,6 +18,7 @@ class TestParamsMapping:
                 "idx_project_url",
                 "idx_repository_languages",
                 "idx_summary",
+                "idx_tags",
                 "idx_title",
                 "idx_updated_at",
                 "idx_url",
