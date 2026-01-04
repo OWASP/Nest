@@ -1,4 +1,4 @@
-aafrom apps.core.utils.index import get_params_for_index
+from apps.core.utils.index import get_params_for_index
 
 
 class TestParamsMapping:
