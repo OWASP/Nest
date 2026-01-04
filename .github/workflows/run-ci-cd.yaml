@@ -294,7 +294,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Build backend image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
@@ -567,6 +566,30 @@ jobs:
       - name: Run proxy deploy
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml staging/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+
+  zap-baseline-scan:
+    name: ZAP Baseline Scan
+    needs:
+      - deploy-staging-nest-proxy
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.15.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          target: 'https://nest.owasp.dev'
+          allow_issue_writing: false
+          fail_action: false
+          cmd_options: '-a -r zap-report.html'
+
+      - name: Upload ZAP report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-baseline-scan-report-${{ github.run_id }}
+          path: zap-report.html
 
   run-lighthouse-ci:
     name: Run Lighthouse CI
