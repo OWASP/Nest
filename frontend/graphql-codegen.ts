@@ -56,7 +56,6 @@ export default (async (): Promise<CodegenConfig> => {
             Date: 'string | number',
             // eslint-disable-next-line @typescript-eslint/naming-convention
             DateTime: 'string | number',
-
             JSON: 'Record<string, unknown>',
           },
         },

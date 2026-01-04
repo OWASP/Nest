@@ -605,7 +605,7 @@ export type ProjectHealthStatsNode = {
 
 export type ProjectNode = Node & {
   __typename?: 'ProjectNode';
-  contributionData: Scalars['JSON']['output'];
+  contributionData?: Maybe<Scalars['JSON']['output']>;
   contributionStats?: Maybe<Scalars['JSON']['output']>;
   contributorsCount: Scalars['Int']['output'];
   createdAt?: Maybe<Scalars['DateTime']['output']>;

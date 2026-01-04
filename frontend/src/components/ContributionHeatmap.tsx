@@ -316,10 +316,10 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
 
         <div className="inline-block">
           <Chart
+            height={isCompact ? 150 : 195}
             options={options}
             series={heatmapSeries}
             type="heatmap"
-            height={isCompact ? 150 : 195}
             width={chartWidth}
           />
         </div>

@@ -22,22 +22,22 @@ class TestProjectNode:
             "created_at",
             "forks_count",
             "is_active",
-            "level",
-            "name",
-            "open_issues_count",
-            "stars_count",
-            "summary",
-            "type",
             "issues_count",
             "key",
             "languages",
+            "level",
+            "name",
+            "open_issues_count",
             "recent_issues",
             "recent_milestones",
             "recent_pull_requests",
             "recent_releases",
-            "repositories",
             "repositories_count",
+            "repositories",
+            "stars_count",
+            "summary",
             "topics",
+            "type",
         }
         assert expected_field_names.issubset(field_names)
 
@@ -114,7 +114,7 @@ class TestProjectNode:
     def test_resolve_contribution_data(self):
         field = self._get_field_by_name("contribution_data")
         assert field is not None
-        assert field.type.__class__.__name__ == "NewType"
+        assert field.type.__class__.__name__ == "StrawberryOptional"
 
     def test_contribution_stats_transforms_snake_case_to_camel_case(self):
         """Test that contribution_stats resolver transforms snake_case keys to camelCase."""
@@ -123,8 +123,8 @@ class TestProjectNode:
         mock_project = Mock()
         mock_project.contribution_stats = {
             "commits": 100,
-            "pull_requests": 50,
             "issues": 25,
+            "pull_requests": 50,
             "releases": 10,
             "total": 185,
         }

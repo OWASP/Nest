@@ -36,8 +36,6 @@ class ChapterNode(GenericEntityNode):
     @strawberry.field
     def contribution_stats(self) -> strawberry.scalars.JSON | None:
         """Resolve contribution stats with camelCase keys."""
-        if not self.contribution_stats:
-            return None
         return deep_camelize(self.contribution_stats)
 
     @strawberry.field

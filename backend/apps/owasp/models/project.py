@@ -101,12 +101,14 @@ class Project(
         verbose_name="Contribution Data",
         default=dict,
         blank=True,
+        null=True,
         help_text="Daily contribution counts (YYYY-MM-DD -> count mapping)",
     )
     contribution_stats = models.JSONField(
         verbose_name="Contribution Statistics",
         default=dict,
         blank=True,
+        null=True,
         help_text="Detailed contribution breakdown (commits, issues, pull requests, releases)",
     )
 

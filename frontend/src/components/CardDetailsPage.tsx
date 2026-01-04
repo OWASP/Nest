@@ -48,14 +48,14 @@ export type CardType =
   | 'repository'
   | 'user'
 
-export const shouldShowStatistics = (type: CardType): boolean =>
-  ['project', 'repository', 'committee', 'user', 'organization'].includes(type)
+const showStatistics = (type: CardType): boolean =>
+  ['committee', 'organization', 'project', 'repository', 'user'].includes(type)
 
-export const shouldShowIssuesAndMilestones = (type: CardType): boolean =>
-  ['project', 'repository', 'user', 'organization'].includes(type)
+const showIssuesAndMilestones = (type: CardType): boolean =>
+  ['organization', 'project', 'repository', 'user'].includes(type)
 
-export const shouldShowPullRequestsAndReleases = (type: CardType): boolean =>
-  ['project', 'repository', 'organization', 'user'].includes(type)
+const showPullRequestsAndReleases = (type: CardType): boolean =>
+  ['organization', 'project', 'repository', 'user'].includes(type)
 
 const DetailsCard = ({
   description,
@@ -171,7 +171,7 @@ const DetailsCard = ({
               <SocialLinks urls={socialLinks || []} />
             )}
           </SecondaryCard>
-          {shouldShowStatistics(type) && (
+          {showStatistics(type) && (
             <SecondaryCard
               icon={FaChartPie}
               title={<AnchorTitle title="Statistics" />}
@@ -320,13 +320,13 @@ const DetailsCard = ({
             moduleKey={entityKey || ''}
           />
         )}
-        {shouldShowIssuesAndMilestones(type) && (
+        {showIssuesAndMilestones(type) && (
           <div className="grid-cols-2 gap-4 lg:grid">
             <RecentIssues data={recentIssues} showAvatar={showAvatar} />
             <Milestones data={recentMilestones} showAvatar={showAvatar} />
           </div>
         )}
-        {shouldShowPullRequestsAndReleases(type) && (
+        {showPullRequestsAndReleases(type) && (
           <div className="grid-cols-2 gap-4 lg:grid">
             <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />
             <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />

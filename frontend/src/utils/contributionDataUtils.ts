@@ -18,8 +18,8 @@ export function getContributionStats(
 
     return {
       commits: 0,
-      pullRequests: 0,
       issues: 0,
+      pullRequests: 0,
       releases: 0,
       total,
     }
