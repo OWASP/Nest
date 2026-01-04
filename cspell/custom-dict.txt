@@ -8,6 +8,7 @@ CCSP
 CISSP
 Cañón
 DRF
+aquasecurity
 GBP
 GFKs
 GSOC
@@ -16,11 +17,16 @@ Héllo
 Kateryna
 NETTACKER
 NOASSERTION
+trivyignores
 NOSONAR
 Nadu
 Nominatim
+gha
+dockerhub
 PLR
+zaproxy
 PYTHONUNBUFFERED
+numfmt
 RUF
 SEO
 SLF
