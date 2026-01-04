@@ -294,7 +294,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          
+
       - name: Build backend image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
@@ -568,30 +568,6 @@ jobs:
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml staging/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
 
-  zap-baseline-scan:
-    name: ZAP Baseline Scan
-    needs:
-      - deploy-staging-nest-proxy
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Run ZAP Baseline Scan
-        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          target: 'https://nest.owasp.dev'
-          allow_issue_writing: false
-          fail_action: false
-          cmd_options: '-a -r zap-report.html'
-
-      - name: Upload ZAP report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: zap-baseline-scan-report-${{ github.run_id }}
-          path: zap-report.html
-
   run-lighthouse-ci:
     name: Run Lighthouse CI
     needs:
@@ -623,6 +599,31 @@ jobs:
           pnpm run lighthouse-ci
         timeout-minutes: 15
         working-directory: frontend
+
+  run-zap-baseline-scan:
+    name: Run ZAP Baseline Scan
+    needs:
+      - deploy-staging-nest-proxy
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run ZAP Baseline Scan
+        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          target: 'https://nest.owasp.dev'
+          allow_issue_writing: false
+          fail_action: false
+          cmd_options: '-a -r zap-report.html'
+
+      - name: Upload ZAP report
+        if: always()
+        uses: actions/upload-artifact@vb7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: zap-baseline-scan-report-${{ github.run_id }}
+          path: zap-report.html
+
 
   build-production-images:
     name: Build Production Images
