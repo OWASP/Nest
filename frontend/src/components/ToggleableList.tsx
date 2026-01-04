@@ -27,6 +27,12 @@ const ToggleableList = <T,>({
   const handleButtonClick = ({ item }: { item: string }) => {
     router.push(`/projects?q=${encodeURIComponent(item)}`)
   }
+  const handleKeyDown = (e: React.KeyboardEvent, item: string) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handleButtonClick({ item })
+    }
+  }
   return (
     <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
       <h2 className="mb-4 text-2xl font-semibold">

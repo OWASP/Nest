@@ -406,12 +406,9 @@ class Command(BaseCommand):
                     channel=conversation.slack_channel_id,
                     cursor=cursor,
                     limit=batch_size,
-                    oldest=(
-                        latest_message.ts
-                        if (latest_message := conversation.latest_message)
-                        else "0"
-                    ),
+                    oldest=conversation.latest_message.ts if conversation.latest_message else "0",
                 )
+
                 self._handle_slack_response(response, "conversations_history")
 
                 messages = [
