@@ -49,6 +49,10 @@ class ApiKeyMutations:
         if len(name.strip()) > MAX_WORD_LENGTH:
             return CreateApiKeyResult(ok=False, code="INVALID_NAME", message="Name too long")
 
+        # Ensure expires_at is timezone-aware for safe comparison
+        if timezone.is_naive(expires_at):
+            expires_at = timezone.make_aware(expires_at)
+
         if expires_at <= timezone.now():
             return CreateApiKeyResult(
                 ok=False, code="INVALID_DATE", message="Expiry date must be in future"

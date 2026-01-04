@@ -97,6 +97,44 @@ class TestApiKeyMutations:
         assert result.api_key is None
         assert result.raw_key is None
 
+    @patch("apps.api.internal.mutations.api_key.ApiKey.create")
+    def test_create_api_key_naive_datetime_future(self, mock_api_key_create, api_key_mutations):
+        """Test creating an API key with a naive datetime in the future."""
+        from datetime import datetime
+
+        info = mock_info()
+        name = "Key with naive datetime"
+        # Create a naive datetime (no timezone info) in the future
+        naive_expires_at = datetime(2099, 12, 31, 12, 0, 0)  # noqa: DTZ001
+        raw_key = "naive_datetime_key"
+
+        mock_instance = MagicMock(spec=ApiKey)
+        mock_api_key_create.return_value = (mock_instance, raw_key)
+
+        result = api_key_mutations.create_api_key(info, name=name, expires_at=naive_expires_at)
+
+        # The mutation should convert naive to aware and succeed
+        mock_api_key_create.assert_called_once()
+        assert isinstance(result, CreateApiKeyResult)
+        assert result.ok
+        assert result.code == "SUCCESS"
+
+    def test_create_api_key_naive_datetime_past(self, api_key_mutations):
+        """Test creating an API key with a naive datetime in the past fails."""
+        from datetime import datetime
+
+        info = mock_info()
+        name = "Key with past naive datetime"
+        # Create a naive datetime in the past
+        naive_expires_at = datetime(2020, 1, 1, 12, 0, 0)  # noqa: DTZ001
+
+        result = api_key_mutations.create_api_key(info, name=name, expires_at=naive_expires_at)
+
+        assert isinstance(result, CreateApiKeyResult)
+        assert not result.ok
+        assert result.code == "INVALID_DATE"
+        assert result.message == "Expiry date must be in future"
+
     @patch("apps.api.internal.mutations.api_key.ApiKey.objects.get")
     def test_revoke_api_key_success(self, mock_objects_get, api_key_mutations):
         """Test the successful revocation of an existing API key."""
