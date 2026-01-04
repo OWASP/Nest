@@ -109,8 +109,6 @@ const Card = ({
       {/* Project summary */}
       <Markdown content={summary} className="mt-2 w-full text-gray-600 dark:text-gray-300" />
 
-
-
       <div className="mt-4 w-full">
         {/* Social icons section */}
         {social && social.length > 0 && (
