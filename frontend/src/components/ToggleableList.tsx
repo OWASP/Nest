@@ -1,9 +1,17 @@
-import { useRouter } from 'next/navigation'
-import type React from 'react'
 import { useState } from 'react'
+import type React from 'react'
 import type { IconType } from 'react-icons'
 import { IconWrapper } from 'wrappers/IconWrapper'
 import ShowMoreButton from 'components/ShowMoreButton'
+
+type ToggleableListProps<T> = {
+  items: T[]
+  label?: React.ReactNode
+  icon?: IconType
+  limit?: number
+  isDisabled?: boolean
+  renderItem: (item: T, index: number, items: T[]) => React.ReactNode
+}
 
 const ToggleableList = <T,>({
   items,
@@ -12,41 +20,33 @@ const ToggleableList = <T,>({
   limit = 10,
   isDisabled = false,
   renderItem,
-}: {
-  items: T[]
-  label?: React.ReactNode
-  limit?: number
-  icon?: IconType
-  isDisabled?: boolean
-  renderItem: (item: T, index: number, items: T[]) => React.ReactNode
-}) => {
+}: ToggleableListProps<T>) => {
   const [showAll, setShowAll] = useState(false)
-  const router = useRouter()
 
-  const toggleShowAll = () => setShowAll(!showAll)
-  const handleButtonClick = ({ item }: { item: string }) => {
-    router.push(`/projects?q=${encodeURIComponent(item)}`)
-  }
-  const handleKeyDown = (e: React.KeyboardEvent, item: string) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      handleButtonClick({ item })
-    }
-  }
+  const visibleItems = showAll ? items : items.slice(0, limit)
+
   return (
     <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
-      <h2 className="mb-4 text-2xl font-semibold">
-        <div className="flex items-center">
-          <div className="flex flex-row items-center gap-2">
-            {icon && <IconWrapper icon={icon} className="mr-2 h-5 w-5" />}
+      {label && (
+        <h2 className="mb-4 text-2xl font-semibold">
+          <div className="flex items-center">
+            {icon && (
+              <div className="flex flex-row items-center gap-2">
+                <IconWrapper icon={icon} className="mr-2 h-5 w-5" />
+              </div>
+            )}
+            <span>{label}</span>
           </div>
-          <span>{label}</span>
-        </div>
-      </h2>
+        </h2>
+      )}
+
       <div className="flex flex-wrap gap-2">
-      {(showAll ? items : items.slice(0, limit)).map(renderItem)}
+        {visibleItems.map((item, index) => renderItem(item, index, items))}
       </div>
-      {items.length > limit && <ShowMoreButton onToggle={toggleShowAll} />}
+
+      {items.length > limit && (
+        <ShowMoreButton onToggle={() => setShowAll(!showAll)} />
+      )}
     </div>
   )
 }
