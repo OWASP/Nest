@@ -162,7 +162,6 @@ const Card = ({
             ))}
           </div>
 
-
           {/* Action Button */}
           <div className="flex sm:justify-end">
             <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
