@@ -569,7 +569,7 @@ jobs:
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml staging/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
 
-  run-lighthouse-ci:
+  run-staging-lighthouse-ci:
     name: Run Lighthouse CI
     needs:
       - deploy-staging-nest-proxy
@@ -601,7 +601,7 @@ jobs:
         timeout-minutes: 15
         working-directory: frontend
 
-  run-zap-baseline-scan:
+  run-staging-zap-baseline-scan:
     name: Run ZAP Baseline Scan
     needs:
       - deploy-staging-nest-proxy
@@ -941,3 +941,27 @@ jobs:
       - name: Run proxy deploy
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml production/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+
+  run-production-zap-baseline-scan:
+    name: Run ZAP Baseline Scan
+    needs:
+      - deploy-production-nest-proxy
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run ZAP Baseline Scan
+        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          target: 'https://nest.owasp.org'
+          allow_issue_writing: false
+          fail_action: false
+          cmd_options: '-a -r zap-report.html'
+
+      - name: Upload ZAP report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: zap-baseline-scan-report-${{ github.run_id }}
+          path: zap-report.html

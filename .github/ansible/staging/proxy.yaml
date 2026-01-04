@@ -22,7 +22,7 @@
 
     - name: Restart services
       shell:
-        cmd: docker compose up -d --pull always
+        cmd: docker compose up -d --pull always && docker compose restart
 
     - name: Prune docker images
       shell:
