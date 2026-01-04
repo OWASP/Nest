@@ -250,9 +250,9 @@ jobs:
 
   set-release-version:
     name: Set release version
-    permissions: {}
     outputs:
       release_version: ${{ steps.set.outputs.release_version }}
+    permissions: {}
     runs-on: ubuntu-latest
     steps:
       - name: Set release version
