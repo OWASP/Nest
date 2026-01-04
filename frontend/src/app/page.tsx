@@ -179,7 +179,7 @@ export default function Home() {
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-2 flex items-center">
                       <CalendarButton
-                        className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                        className="cursor-pointer text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
                         event={{
                           title: event.name,
                           description: event.summary || '',
@@ -188,14 +188,14 @@ export default function Home() {
                           endDate: event.endDate,
                           url: event.url,
                         }}
-                        iconClassName="h-4 w-4 mr-1"
+                        iconClassName="h-4 w-4 mr-2"
                         label={formatDateRange(event.startDate, event.endDate)}
                         showLabel
                       />
                     </div>
                     {event.suggestedLocation && (
                       <div className="flex flex-1 items-center overflow-hidden">
-                        <FaMapMarkerAlt className="mr-1 h-4 w-4 shrink-0" />
+                        <FaMapMarkerAlt className="mr-2 h-4 w-4 shrink-0" />
                         <TruncatedText text={event.suggestedLocation} />
                       </div>
                     )}
@@ -250,8 +250,7 @@ export default function Home() {
 
                   {chapter.leaders.length > 0 && (
                     <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
-                      {' '}
-                      <HiUserGroup className="mr-2 h-4 w-4 shrink-0" />
+                      <HiUserGroup className="h-4 w-4 shrink-0" />
                       <LeadersList leaders={String(chapter.leaders)} />
                     </div>
                   )}
