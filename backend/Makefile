@@ -157,7 +157,7 @@ sync-data: \
 test-backend:
 	@DOCKER_BUILDKIT=1 docker build \
 		--cache-from nest-test-backend \
-		-f backend/docker/Dockerfile.test backend \
+		-f docker/backend/Dockerfile.test backend \
 		-t nest-test-backend
 	@docker run \
 		-e DJANGO_SETTINGS_MODULE=settings.test \
@@ -184,6 +184,7 @@ update-data: \
 	github-update-related-organizations \
 	github-update-users \
 	owasp-aggregate-projects \
+	owasp-aggregate-contributions \
 	owasp-update-events \
 	owasp-sync-posts \
 	owasp-update-sponsors \
