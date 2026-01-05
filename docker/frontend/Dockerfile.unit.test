@@ -1,4 +1,4 @@
-FROM node:24-alpine
+FROM node:25-alpine
 
 ENV FORCE_COLOR=1 \
     NPM_CACHE="/app/.npm" \
