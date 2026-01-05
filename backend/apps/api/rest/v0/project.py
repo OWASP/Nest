@@ -11,6 +11,7 @@ from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
+from apps.api.rest.v0.common import Leader
 from apps.owasp.models.enums.project import ProjectLevel
 from apps.owasp.models.project import Project as ProjectModel
 
@@ -40,6 +41,15 @@ class ProjectDetail(ProjectBase):
     """Detail schema for Project (used in single item endpoints)."""
 
     description: str
+    leaders: list[Leader]
+
+    @staticmethod
+    def resolve_leaders(obj):
+        """Resolve leaders."""
+        return [
+            Leader(key=leader.member.login if leader.member else None, name=leader.member_name)
+            for leader in obj.entity_leaders
+        ]
 
 
 class ProjectError(Schema):

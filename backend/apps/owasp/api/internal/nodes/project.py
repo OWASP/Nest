@@ -3,6 +3,7 @@
 import strawberry
 import strawberry_django
 
+from apps.core.utils.index import deep_camelize
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
@@ -23,6 +24,7 @@ RECENT_PULL_REQUESTS_LIMIT = 5
 @strawberry_django.type(
     Project,
     fields=[
+        "contribution_data",
         "contributors_count",
         "created_at",
         "forks_count",
@@ -38,6 +40,11 @@ RECENT_PULL_REQUESTS_LIMIT = 5
 )
 class ProjectNode(GenericEntityNode):
     """Project node."""
+
+    @strawberry.field
+    def contribution_stats(self) -> strawberry.scalars.JSON | None:
+        """Resolve contribution stats with camelCase keys."""
+        return deep_camelize(self.contribution_stats)
 
     @strawberry.field
     def health_metrics_list(self, limit: int = 30) -> list[ProjectHealthMetricsNode]:
@@ -99,7 +106,12 @@ class ProjectNode(GenericEntityNode):
     @strawberry.field
     def repositories(self) -> list[RepositoryNode]:
         """Resolve repositories."""
-        return self.repositories.order_by("-pushed_at", "-updated_at")
+        return self.repositories.filter(
+            organization__isnull=False,
+        ).order_by(
+            "-pushed_at",
+            "-updated_at",
+        )
 
     @strawberry.field
     def repositories_count(self) -> int:

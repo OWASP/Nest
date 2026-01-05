@@ -1,12 +1,5 @@
 <div align="center">
 
-<picture>
-  <source srcset="https://nest.owasp.org/img/owasp_icon_white_sm.png" media="(prefers-color-scheme: dark)">
-  <img src="https://nest.owasp.org/img/owasp_icon_black_sm.png" alt="OWASP Logo" width="200">
-</picture>
-
-# [OWASP Nest](https://nest.owasp.org/)
-
 [![OWASP](https://img.shields.io/badge/Lab-blue?&label=owasp%20level&style=for-the-badge)](https://owasp.org/www-project-nest/) [![OWASP](https://img.shields.io/badge/Code-blue?label=OWASP%20Type&style=for-the-badge)](https://owasp.org/www-project-nest/) [![project-nest](https://img.shields.io/badge/%23project--nest-blue?label=OWASP%20Slack&logoColor=white&style=for-the-badge)](https://owasp.slack.com/messages/project-nest)
 
 [![License](https://img.shields.io/github/license/owasp/nest?color=blue&label=License&style=for-the-badge)](https://github.com/OWASP/Nest/blob/main/LICENSE) [![Last Commit](https://img.shields.io/github/last-commit/owasp/nest/main?color=blue&style=for-the-badge&label=Last%20commit)](https://github.com/OWASP/Nest/commits/main/) [![Contributors](https://img.shields.io/github/contributors/owasp/nest?style=for-the-badge&label=Contributors&color=blue)](https://github.com/OWASP/Nest/graphs/contributors)
@@ -21,9 +14,16 @@
 
 [![CREATED](https://img.shields.io/badge/created-aug,%202024-blue?style=for-the-badge)](https://github.com/OWASP/Nest/commit/2a213c2efcfc2f8889c2f1d330da0d2e6f649fc1)
 
+<picture>
+  <source srcset="https://raw.githubusercontent.com/OWASP/Nest/refs/heads/main/frontend/public/img/logo_dark.png" media="(prefers-color-scheme: dark)">
+  <img src="https://raw.githubusercontent.com/OWASP/Nest/refs/heads/main/frontend/public/img/logo_light.png" alt="OWASP Nest Logo" width="200">
+</picture>
+
+# [OWASP Nest](https://nest.owasp.org/)
+
 </div>
 
-**OWASP Nest** is a comprehensive platform designed to enhance collaboration and contribution within the OWASP community. The application serves as a central hub for exploring OWASP projects and ways to contribute to them, empowering contributors to find opportunities that align with their interests and expertise.
+**OWASP Nest** is a comprehensive, community-first platform built to enhance collaboration and contribution across the OWASP community. The application serves as a central hub for exploring OWASP projects and ways to contribute to them, empowering contributors to find opportunities that align with their interests and expertise.
 
 Key features of the platform include:
 

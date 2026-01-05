@@ -1,4 +1,5 @@
 'use client'
+
 import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useRouter, useParams } from 'next/navigation'
@@ -12,12 +13,11 @@ import { GetProgramDetailsDocument } from 'types/__generated__/programsQueries.g
 import type { ExtendedSession } from 'types/auth'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
-import slugify from 'utils/slugify'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/ProgramForm'
 const EditProgramPage = () => {
   const router = useRouter()
-  const { programKey } = useParams() as { programKey: string }
+  const { programKey } = useParams<{ programKey: string }>()
   const { data: session, status: sessionStatus } = useSession()
   const [updateProgram, { loading: mutationLoading }] = useMutation(UpdateProgramDocument)
   const {
@@ -32,7 +32,7 @@ const EditProgramPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    menteesLimit: 5,
+    menteesLimit: 0,
     startedAt: '',
     endedAt: '',
     tags: '',
@@ -74,7 +74,7 @@ const EditProgramPage = () => {
       setFormData({
         name: program.name || '',
         description: program.description || '',
-        menteesLimit: program.menteesLimit ?? 5,
+        menteesLimit: program.menteesLimit ?? 0,
         startedAt: formatDateForInput(program.startedAt),
         endedAt: formatDateForInput(program.endedAt),
         tags: (program.tags || []).join(', '),
@@ -104,7 +104,8 @@ const EditProgramPage = () => {
         status: formData.status,
       }
 
-      await updateProgram({ variables: { input } })
+      const result = await updateProgram({ variables: { input } })
+      const updatedProgramKey = result.data?.updateProgram?.key || programKey
 
       addToast({
         title: 'Program Updated',
@@ -114,7 +115,7 @@ const EditProgramPage = () => {
         timeout: 3000,
       })
 
-      router.push(`/my/mentorship/programs/${slugify(formData.name)}`)
+      router.push(`/my/mentorship/programs/${updatedProgramKey}`)
     } catch (err) {
       addToast({
         title: 'Update Failed',
@@ -147,6 +148,7 @@ const EditProgramPage = () => {
       title="Edit Program"
       submitText="Save"
       isEdit={true}
+      currentProgramKey={programKey}
     />
   )
 }

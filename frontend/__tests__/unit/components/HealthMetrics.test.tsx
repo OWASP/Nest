@@ -1,8 +1,7 @@
-import { faCodeCommit } from '@fortawesome/free-solid-svg-icons'
 import { render, screen } from '@testing-library/react'
+import { IconType } from 'react-icons'
 import { HealthMetricsProps } from 'types/healthMetrics'
 import HealthMetrics from 'components/HealthMetrics'
-
 const getMockHealthMetric = (): HealthMetricsProps[] => [
   {
     createdAt: '2025-07-23T00:00:00Z',
@@ -52,8 +51,14 @@ const getMockIncompleteHealthMetric = (): any[] => [
   },
 ]
 
-jest.mock('components/BarChart', () => (props: { title: string }) => (
-  <div data-testid="BarChart" data-props={JSON.stringify(props)}>
+jest.mock('components/BarChart', () => (props: { title: string; icon?: IconType }) => (
+  <div
+    data-testid="BarChart"
+    data-props={JSON.stringify({
+      ...props,
+      icon: props.icon?.name || null,
+    })}
+  >
     {props.title}
   </div>
 ))
@@ -80,7 +85,7 @@ describe('HealthMetrics', () => {
       render(<HealthMetrics data={getMockHealthMetric()} />)
       const barChart = screen.getByTestId('BarChart')
       const props = JSON.parse(barChart.dataset.props || '{}')
-      expect(props.icon).toEqual(faCodeCommit)
+      expect(props.icon).toEqual('FaCodeCommit')
       expect(props.labels).toEqual(['Days Since Last Commit', 'Days Since Last Release'])
       expect(props.days).toEqual([1, 7])
       expect(props.requirements).toEqual([10, 14])

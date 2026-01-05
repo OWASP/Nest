@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import React from 'react'
 import '@testing-library/jest-dom'
 import type { Link as LinkType } from 'types/link'
 import NavDropdown from 'components/NavDropDown'
@@ -22,9 +23,10 @@ jest.mock('next/link', () => {
   }
 })
 
-// Mock FontAwesome icons
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ className }) => <span data-testid="chevron-icon" className={className} />,
+jest.mock('react-icons/fa', () => ({
+  FaChevronDown: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="chevron-icon" className={props.className} {...props} />
+  ),
 }))
 
 // Mock utility function
@@ -537,7 +539,13 @@ describe('NavDropdown Component', () => {
       render(<NavDropdown {...defaultProps} />)
 
       const button = screen.getByRole('button')
-      expect(button).toHaveClass('flex', 'items-center', 'gap-2', 'whitespace-nowrap')
+      expect(button).toHaveClass(
+        'flex',
+        'items-center',
+        'gap-2',
+        'whitespace-nowrap',
+        'cursor-pointer'
+      )
     })
 
     it('applies correct classes to dropdown menu when open', async () => {

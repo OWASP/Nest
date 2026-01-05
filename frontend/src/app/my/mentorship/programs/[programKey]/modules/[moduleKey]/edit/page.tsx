@@ -1,4 +1,5 @@
 'use client'
+
 import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useParams, useRouter } from 'next/navigation'
@@ -16,7 +17,7 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
 
 const EditModulePage = () => {
-  const { programKey, moduleKey } = useParams() as { programKey: string; moduleKey: string }
+  const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
   const router = useRouter()
   const { data: sessionData, status: sessionStatus } = useSession()
 
@@ -110,7 +111,8 @@ const EditModulePage = () => {
         tags: parseCommaSeparated(formData.tags),
       }
 
-      await updateModule({ variables: { input } })
+      const result = await updateModule({ variables: { input } })
+      const updatedModuleKey = result.data?.updateModule?.key || moduleKey
 
       addToast({
         title: 'Module Updated',
@@ -119,7 +121,7 @@ const EditModulePage = () => {
         variant: 'solid',
         timeout: 3000,
       })
-      router.push(`/my/mentorship/programs/${programKey}`)
+      router.push(`/my/mentorship/programs/${programKey}/modules/${updatedModuleKey}`)
     } catch (err) {
       handleAppError(err)
     }
