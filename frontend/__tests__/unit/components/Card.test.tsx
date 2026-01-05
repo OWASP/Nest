@@ -21,10 +21,7 @@ interface MockTooltipProps {
   children: ReactNode
   content: string
   id?: string
-  closeDelay?: number
-  delay?: number
   placement?: string
-  showArrow?: boolean
 }
 
 interface MockActionButtonProps {
