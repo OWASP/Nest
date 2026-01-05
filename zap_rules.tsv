@@ -1,5 +1,5 @@
 # rule_id<TAB>ACTION<TAB>(optional description)
-10010	IGNORE	(Cookie No HttpOnly Flag) 
+10010	IGNORE	(Cookie No HttpOnly Flag)
 10011	IGNORE	(Cookie Without Secure Flag)
 10015	IGNORE	(Re-examine Cache-control Directives)
 10019	IGNORE	(Content-Type Header Missing)
