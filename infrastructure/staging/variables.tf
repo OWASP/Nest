@@ -10,10 +10,22 @@ variable "availability_zones" {
   default     = ["us-east-2a", "us-east-2b", "us-east-2c"]
 }
 
+variable "create_nat_gateway" {
+  description = "Whether to create a NAT Gateway for private subnet internet access."
+  type        = bool
+  default     = false
+}
+
 variable "create_rds_proxy" {
   description = "Whether to create an RDS proxy."
   type        = bool
-  default     = true
+  default     = false
+}
+
+variable "create_vpc_endpoints" {
+  description = "Whether to create VPC Endpoints for AWS services."
+  type        = bool
+  default     = false
 }
 
 variable "db_allocated_storage" {
@@ -103,6 +115,12 @@ variable "environment" {
   }
 }
 
+variable "ecs_use_public_subnets" {
+  description = "Whether to run ECS tasks in public subnets (requires assign_public_ip)."
+  type        = bool
+  default     = true
+}
+
 variable "fixtures_bucket_name" {
   description = "The name of the S3 bucket for fixtures."
   type        = string
@@ -143,6 +161,12 @@ variable "frontend_min_count" {
   description = "The minimum number of tasks for auto scaling."
   type        = number
   default     = 2
+}
+
+variable "frontend_use_fargate_spot" {
+  description = "Whether to use Fargate Spot for frontend tasks."
+  type        = bool
+  default     = true
 }
 
 variable "private_subnet_cidrs" {
@@ -215,6 +239,12 @@ variable "secret_recovery_window_in_days" {
   description = "The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately."
   type        = number
   default     = 7
+}
+
+variable "use_fargate_spot" {
+  description = "Whether to use Fargate Spot for backend ECS tasks."
+  type        = bool
+  default     = true
 }
 
 variable "vpc_cidr" {

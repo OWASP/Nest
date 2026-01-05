@@ -57,15 +57,17 @@ module "database" {
 module "ecs" {
   source = "../modules/ecs"
 
+  assign_public_ip              = var.ecs_use_public_subnets
   aws_region                    = var.aws_region
   common_tags                   = local.common_tags
   container_parameters_arns     = module.parameters.django_ssm_parameter_arns
   ecs_sg_id                     = module.security.ecs_sg_id
   environment                   = var.environment
-  fixtures_read_only_policy_arn = module.storage.fixtures_read_only_policy_arn
   fixtures_bucket_name          = module.storage.fixtures_s3_bucket_name
-  subnet_ids                    = module.networking.private_subnet_ids
+  fixtures_read_only_policy_arn = module.storage.fixtures_read_only_policy_arn
   project_name                  = var.project_name
+  subnet_ids                    = var.ecs_use_public_subnets ? module.networking.public_subnet_ids : module.networking.private_subnet_ids
+  use_fargate_spot              = var.use_fargate_spot
 }
 
 module "frontend" {
@@ -86,6 +88,7 @@ module "frontend" {
   private_subnet_ids       = module.networking.private_subnet_ids
   project_name             = var.project_name
   public_subnet_ids        = module.networking.public_subnet_ids
+  use_fargate_spot         = var.frontend_use_fargate_spot
   vpc_id                   = module.networking.vpc_id
 }
 
@@ -95,6 +98,8 @@ module "networking" {
   aws_region           = var.aws_region
   availability_zones   = var.availability_zones
   common_tags          = local.common_tags
+  create_nat_gateway   = var.create_nat_gateway
+  create_vpc_endpoints = var.create_vpc_endpoints
   environment          = var.environment
   private_subnet_cidrs = var.private_subnet_cidrs
   project_name         = var.project_name
