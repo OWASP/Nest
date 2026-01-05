@@ -110,6 +110,12 @@ variable "public_subnet_ids" {
   type        = list(string)
 }
 
+variable "use_fargate_spot" {
+  description = "Use Fargate Spot capacity provider for frontend tasks."
+  type        = bool
+  default     = false
+}
+
 variable "vpc_id" {
   description = "The VPC ID."
   type        = string

@@ -124,12 +124,17 @@ resource "aws_ecs_service" "frontend" {
   cluster                           = aws_ecs_cluster.frontend.id
   desired_count                     = var.desired_count
   health_check_grace_period_seconds = 60
-  launch_type                       = "FARGATE"
   name                              = "${var.project_name}-${var.environment}-frontend-service"
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-frontend-service"
   })
   task_definition = aws_ecs_task_definition.frontend.arn
+
+  capacity_provider_strategy {
+    base              = 0
+    capacity_provider = var.use_fargate_spot ? "FARGATE_SPOT" : "FARGATE"
+    weight            = 1
+  }
 
   load_balancer {
     container_name   = "frontend"
