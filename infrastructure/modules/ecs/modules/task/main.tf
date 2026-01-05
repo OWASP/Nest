@@ -72,11 +72,18 @@ resource "aws_cloudwatch_event_target" "task" {
 
   ecs_target {
     task_definition_arn = aws_ecs_task_definition.task.arn
-    launch_type         = "FARGATE"
+    launch_type         = null
+
+    capacity_provider_strategy {
+      capacity_provider = var.use_fargate_spot ? "FARGATE_SPOT" : "FARGATE"
+      weight            = 1
+      base              = 0
+    }
+
     network_configuration {
-      subnets          = var.private_subnet_ids
+      subnets          = var.subnet_ids
       security_groups  = var.security_group_ids
-      assign_public_ip = false
+      assign_public_ip = var.assign_public_ip
     }
   }
 }
