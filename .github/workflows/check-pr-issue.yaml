@@ -5,6 +5,11 @@ on:
     types:
       - opened
 
+permissions:
+  contents: read
+  issues: read
+  pull-requests: write
+
 jobs:
   check-pr-issue:
     permissions:

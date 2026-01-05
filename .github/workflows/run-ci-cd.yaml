@@ -19,6 +19,9 @@ on:
       - published
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 env:
   FORCE_COLOR: 1
 

@@ -5,6 +5,9 @@ on:
     - cron: 30 0 * * *
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 env:
   FORCE_COLOR: 1
 

@@ -12,6 +12,10 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   code-ql:
     name: CodeQL

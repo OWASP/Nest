@@ -3,6 +3,10 @@ name: Label Pull Requests
 on:
   - pull_request_target
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   labeler:
     permissions:

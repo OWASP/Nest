@@ -6,6 +6,9 @@ on:
       - edited
       - opened
 
+permissions:
+  issues: write
+
 jobs:
   label:
     permissions:
