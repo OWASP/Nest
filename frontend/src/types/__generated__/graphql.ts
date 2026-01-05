@@ -516,7 +516,7 @@ export type PostNode = Node & {
 
 export type ProgramNode = {
   __typename?: 'ProgramNode';
-  admins?: Maybe<Array<MentorNode>>;
+  admins?: Maybe<Array<UserNode>>;
   description: Scalars['String']['output'];
   domains?: Maybe<Array<Scalars['String']['output']>>;
   endedAt: Scalars['DateTime']['output'];
