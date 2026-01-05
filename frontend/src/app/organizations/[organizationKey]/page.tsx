@@ -21,16 +21,6 @@ const OrganizationDetailsPage = () => {
     variables: { login: organizationKey },
   })
 
-  const {
-    organization,
-    recentIssues,
-    recentMilestones,
-    recentPullRequests,
-    recentReleases,
-    repositories,
-    topContributors,
-  } = graphQLData
-
   useEffect(() => {
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
@@ -45,7 +35,17 @@ const OrganizationDetailsPage = () => {
     )
   }
 
-  if (!isLoading && !organization) {
+  const {
+    organization,
+    recentIssues,
+    recentMilestones,
+    recentPullRequests,
+    recentReleases,
+    repositories,
+    topContributors,
+  } = graphQLData ?? {}
+
+  if (!organization) {
     return (
       <ErrorDisplay
         message="Sorry, the organization you're looking for doesn't exist"

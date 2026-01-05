@@ -43,6 +43,7 @@ describe('chapterDetailsPage Component', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: null,
+      loading: true,
     })
     render(<ChapterDetailsPage />)
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
