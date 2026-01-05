@@ -165,7 +165,7 @@ class SlideBuilder:
             name="intro",
             output_dir=self.output_dir,
             template_name="video/slides/intro.html",
-            transcript=f"Hey, everyone. Welcome to the O-WASP Nest {name} community snapshot...",
+            transcript=f"Hey, everyone... Welcome to the Owasp Nest {name} community snapshot...",
         )
 
     def add_sponsors_slide(self) -> Slide:
@@ -230,7 +230,7 @@ class SlideBuilder:
             name="projects",
             template_name="video/slides/projects.html",
             transcript=f"So... this time we've welcomed {project_count} new projects! "
-            f"including O-WASP {formatted_project_names}.",
+            f"including Owasp {formatted_project_names}.",
         )
 
     def add_chapters_slide(self) -> Slide | None:
@@ -315,7 +315,7 @@ class SlideBuilder:
             output_dir=self.output_dir,
             name="thank_you",
             template_name="video/slides/thank_you.html",
-            transcript="Thanks for tuning in!... Visit Nest dot O-WASP dot org "
+            transcript="Thanks for tuning in!... Visit Nest dot Owasp dot org "
             "for more community updates!... See you next time!!",
         )
 
