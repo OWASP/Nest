@@ -11,7 +11,8 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetProjectDocument } from 'types/__generated__/projectQueries.generated'
 import type { Contributor } from 'types/contributor'
 import type { Project } from 'types/project'
-import { formatDate } from 'utils/dateFormatter'
+import { getContributionStats } from 'utils/contributionDataUtils'
+import { formatDate, getDateRange } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
@@ -85,9 +86,19 @@ const ProjectDetailsPage = () => {
     },
   ]
 
+  const { startDate, endDate } = getDateRange({ years: 1 })
+
+  const contributionStats = getContributionStats(
+    project.contributionStats,
+    project.contributionData
+  )
+
   return (
     <DetailsCard
+      contributionData={project.contributionData}
+      contributionStats={contributionStats}
       details={projectDetails}
+      endDate={endDate}
       entityKey={project.key}
       entityLeaders={project.entityLeaders}
       healthMetricsData={project.healthMetricsList}
@@ -98,6 +109,7 @@ const ProjectDetailsPage = () => {
       recentMilestones={project.recentMilestones}
       recentReleases={project.recentReleases}
       repositories={project.repositories}
+      startDate={startDate}
       stats={projectStats}
       summary={project.summary}
       title={project.name}
