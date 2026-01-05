@@ -1,6 +1,5 @@
 """Event API."""
 
-from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
 
@@ -20,13 +19,23 @@ router = RouterPaginated(tags=["Events"])
 class EventBase(Schema):
     """Base schema for Event (used in list endpoints)."""
 
-    end_date: datetime | None = None
+    end_date: str | None = None
     key: str
     latitude: float | None = None
     longitude: float | None = None
     name: str
-    start_date: datetime
+    start_date: str
     url: str | None = None
+
+    @staticmethod
+    def resolve_end_date(event: EventModel) -> str | None:
+        """Resolve end date."""
+        return event.end_date.isoformat() if event.end_date else None
+
+    @staticmethod
+    def resolve_start_date(event: EventModel) -> str:
+        """Resolve start date."""
+        return event.start_date.isoformat()
 
 
 class Event(EventBase):

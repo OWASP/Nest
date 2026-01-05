@@ -88,12 +88,12 @@ class Base(Configuration):
     }
 
     MIDDLEWARE = [
-        "apps.common.middlewares.block_null_characters.BlockNullCharactersMiddleware",
         "corsheaders.middleware.CorsMiddleware",
         "django.middleware.security.SecurityMiddleware",
         "django.contrib.sessions.middleware.SessionMiddleware",
         "django.middleware.common.CommonMiddleware",
         "django.middleware.csrf.CsrfViewMiddleware",
+        "apps.common.middlewares.block_null_characters.BlockNullCharactersMiddleware",
         "django.contrib.auth.middleware.AuthenticationMiddleware",
         "django.contrib.messages.middleware.MessageMiddleware",
     ]

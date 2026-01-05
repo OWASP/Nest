@@ -24,8 +24,14 @@ echo "CSRF token retrieved successfully."
 # See https://schemathesis.readthedocs.io/en/stable/explanations/data-generation/#how-many-test-cases-does-schemathesis-generate
 
 echo "generation.max-examples = 100" >> ./schemathesis.toml
+
+# Enable specific checks
+# See https://schemathesis.readthedocs.io/en/stable/reference/checks/
+
 echo "[checks]" >> ./schemathesis.toml
 echo "enabled = false" >> ./schemathesis.toml
+
+# Schemathesis raises errors for bad requests, so we need to explicitly enable the checks we want
 echo "not_a_server_error.enabled = true" >> ./schemathesis.toml
 echo "response_schema_conformance.enabled = true" >> ./schemathesis.toml
 
@@ -37,4 +43,4 @@ else
 fi
 
 echo "Starting fuzzing process..."
-pytest -s ./tests/${TEST_FILE}
+pytest --log-cli-level=INFO -s ./tests/${TEST_FILE}

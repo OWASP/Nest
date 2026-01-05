@@ -20,8 +20,8 @@ class BlockNullCharactersMiddleware:
         if (
             "\x00" in request.path
             or "\x00" in request.path_info
-            or any("\x00" in value for value in request.GET.values())
-            or any("\x00" in value for value in request.POST.values())
+            or any("\x00" in value for values in request.GET.lists() for value in values[1])
+            or any("\x00" in value for values in request.POST.lists() for value in values[1])
         ):
             logger.warning("Blocked request with null character in URL or parameters.")
             return error_response

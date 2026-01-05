@@ -7,6 +7,7 @@ class ValidationErrorSchema(Schema):
     """Schema for validation errors."""
 
     message: str
+    errors: list[dict] | dict
 
 
 class LocationFilter(FilterSchema):
