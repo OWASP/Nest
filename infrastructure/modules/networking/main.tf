@@ -43,6 +43,7 @@ module "nacl" {
 }
 
 module "vpc_endpoint" {
+  count  = var.create_vpc_endpoints ? 1 : 0
   source = "./modules/vpc-endpoint"
 
   aws_region             = var.aws_region
@@ -129,6 +130,7 @@ resource "aws_subnet" "private" {
 }
 
 resource "aws_eip" "nat" {
+  count      = var.create_nat_gateway ? 1 : 0
   depends_on = [aws_internet_gateway.main]
   domain     = "vpc"
   tags = merge(var.common_tags, {
@@ -137,7 +139,8 @@ resource "aws_eip" "nat" {
 }
 
 resource "aws_nat_gateway" "main" {
-  allocation_id = aws_eip.nat.id
+  count         = var.create_nat_gateway ? 1 : 0
+  allocation_id = aws_eip.nat[0].id
   depends_on    = [aws_internet_gateway.main]
   subnet_id     = aws_subnet.public[0].id
   tags = merge(var.common_tags, {
@@ -157,9 +160,12 @@ resource "aws_route_table" "public" {
 }
 
 resource "aws_route_table" "private" {
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.main.id
+  dynamic "route" {
+    for_each = var.create_nat_gateway ? [1] : []
+    content {
+      cidr_block     = "0.0.0.0/0"
+      nat_gateway_id = aws_nat_gateway.main[0].id
+    }
   }
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-private-rt"

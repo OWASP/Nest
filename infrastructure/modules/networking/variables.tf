@@ -14,6 +14,18 @@ variable "common_tags" {
   default     = {}
 }
 
+variable "create_nat_gateway" {
+  description = "Whether to create a NAT Gateway for private subnet internet access."
+  type        = bool
+  default     = true
+}
+
+variable "create_vpc_endpoints" {
+  description = "Whether to create VPC Endpoints for AWS services."
+  type        = bool
+  default     = true
+}
+
 variable "environment" {
   description = "The environment (e.g., staging, production)."
   type        = string
