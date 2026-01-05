@@ -616,14 +616,13 @@ jobs:
           target: 'https://nest.owasp.dev'
           allow_issue_writing: false
           fail_action: false
-          cmd_options: '-a -r zap-report.html'
 
       - name: Upload ZAP report
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: zap-baseline-scan-report-${{ github.run_id }}
-          path: zap-report.html
+          path: report_html.html
 
 
   build-production-images:
