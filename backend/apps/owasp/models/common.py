@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import itertools
 import logging
 import re
 from urllib.parse import urlparse
@@ -198,17 +197,22 @@ class RepositoryBasedEntityModel(models.Model):
 
         leaders = []
         for line in content.split("\n"):
-            leaders.extend(
-                [
-                    name
-                    for name in itertools.chain(
-                        *re.findall(
-                            r"[-*]\s*\[\s*([^(]+?)\s*(?:\([^)]*\))?\]|\*\s*([\w\s]+)", line.strip()
-                        )
-                    )
-                    if name.strip()
-                ]
-            )
+            stripped = line.strip()
+
+            # Try bracket-style first: - [Name] or * [Name (Role)]
+            bracket_matches = re.findall(r"[-*]\s*\[\s*([^(\]]+)", stripped)
+            if bracket_matches:
+                name = bracket_matches[0].strip()
+                if name:
+                    leaders.append(name)
+                continue
+
+            # Try plain asterisk-style: * Name (words separated by spaces)
+            plain_matches = re.findall(r"^\*\s+(\w+(?:\s+\w+)*)$", stripped)
+            if plain_matches:
+                name = plain_matches[0].strip()
+                if name:
+                    leaders.append(name)
 
         return leaders
 
