@@ -172,7 +172,7 @@ jobs:
           cache-to: |
             type=gha,compression=zstd
           context: backend
-          file: backend/docker/Dockerfile.test
+          file: docker/backend/Dockerfile.test
           load: true
           platforms: linux/amd64
           tags: owasp/nest:test-backend-latest
@@ -206,7 +206,7 @@ jobs:
           cache-to: |
             type=gha,compression=zstd
           context: frontend
-          file: frontend/docker/Dockerfile.unit.test
+          file: docker/frontend/Dockerfile.unit.test
           load: true
           platforms: linux/amd64
           tags: owasp/nest:test-frontend-unit-latest
@@ -238,7 +238,7 @@ jobs:
             type=gha
             type=registry,ref=owasp/nest:test-frontend-e2e-cache
           context: frontend
-          file: frontend/docker/Dockerfile.e2e.test
+          file: docker/frontend/Dockerfile.e2e.test
           load: true
           platforms: linux/amd64
           tags: owasp/nest:test-frontend-e2e-latest
@@ -308,7 +308,7 @@ jobs:
           cache-to: |
             type=registry,ref=owasp/nest:backend-staging-cache
           context: backend
-          file: backend/docker/Dockerfile
+          file: docker/backend/Dockerfile
           load: true
           platforms: linux/amd64
           push: true
@@ -356,7 +356,7 @@ jobs:
           cache-to: |
             type=registry,ref=owasp/nest:frontend-staging-cache
           context: frontend
-          file: frontend/docker/Dockerfile
+          file: docker/frontend/Dockerfile
           load: true
           platforms: linux/amd64
           push: true
@@ -668,7 +668,7 @@ jobs:
             type=gha
             type=registry,ref=owasp/nest:backend-staging-cache
           context: backend
-          file: backend/docker/Dockerfile
+          file: docker/backend/Dockerfile
           load: true
           platforms: linux/amd64
           push: true
@@ -714,7 +714,7 @@ jobs:
             type=gha
             type=registry,ref=owasp/nest:frontend-staging-cache
           context: frontend
-          file: frontend/docker/Dockerfile
+          file: docker/frontend/Dockerfile
           load: true
           platforms: linux/amd64
           push: true
