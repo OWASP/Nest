@@ -31,7 +31,7 @@ services:
       - 8000:8000
     volumes:
       - ../../backend:/home/owasp
-      - backend-venv:/home/owasp/.venv
+      - backend-venv-zappa:/home/owasp/.venv
 
   cache:
     command: >
@@ -50,7 +50,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - cache-data:/data
+      - cache-data-zappa:/data
 
   db:
     container_name: nest-db
@@ -67,7 +67,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - db-data-zappa:/var/lib/postgresql/data
 
   docs:
     container_name: nest-docs
@@ -84,7 +84,7 @@ services:
       - 8001:8001
     volumes:
       - ../../docs:/home/owasp/docs
-      - docs-venv:/home/owasp/.venv
+      - docs-venv-zappa:/home/owasp/.venv
 
   frontend:
     container_name: nest-frontend
@@ -106,8 +106,8 @@ services:
       - 3000:3000
     volumes:
       - ../../frontend:/home/owasp
-      - frontend-next:/home/owasp/.next
-      - frontend-node-modules:/home/owasp/node_modules
+      - frontend-next-zappa:/home/owasp/.next
+      - frontend-node-modules-zappa:/home/owasp/node_modules
 
   worker:
     container_name: nest-worker
@@ -136,15 +136,15 @@ services:
       - nest-network
     volumes:
       - ../../backend:/home/owasp
-      - backend-venv:/home/owasp/.venv
+      - backend-venv-zappa:/home/owasp/.venv
 
 networks:
   nest-network:
 
 volumes:
-  backend-venv:
-  cache-data:
-  db-data:
-  docs-venv:
-  frontend-next:
-  frontend-node-modules:
+  backend-venv-zappa:
+  cache-data-zappa:
+  db-data-zappa:
+  docs-venv-zappa:
+  frontend-next-zappa:
+  frontend-node-modules-zappa:
