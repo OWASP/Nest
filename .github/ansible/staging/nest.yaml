@@ -3,7 +3,7 @@
     tasks:
       - name: Copy docker-compose.yaml
         ansible.builtin.copy:
-          src: '{{ github_workspace }}/docker-compose/staging.yaml'
+          src: '{{ github_workspace }}/docker-compose/staging/compose.yaml'
           dest: ~/docker-compose.yaml
           mode: '0644'
 
@@ -67,7 +67,7 @@
         ansible.builtin.command:
           cmd: crontab /tmp/staging_crontab
 
-      - name: Retart services
+      - name: Restart services
         shell:
           cmd: docker compose up -d --pull always
 

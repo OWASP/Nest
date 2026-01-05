@@ -1,19 +1,12 @@
 'use client'
 
 import { useQuery } from '@apollo/client/react'
-import {
-  faCodeBranch,
-  faLink,
-  faPlus,
-  faTags,
-  faUsers,
-  faXmark,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useIssueMutations } from 'hooks/useIssueMutations'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { FaCodeBranch, FaLink, FaPlus, FaTags, FaXmark } from 'react-icons/fa6'
+import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay } from 'app/global-error'
 import { GetModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
 import ActionButton from 'components/ActionButton'
@@ -24,7 +17,7 @@ import SecondaryCard from 'components/SecondaryCard'
 import { TruncatedText } from 'components/TruncatedText'
 
 const ModuleIssueDetailsPage = () => {
-  const params = useParams() as { programKey: string; moduleKey: string; issueId: string }
+  const params = useParams<{ programKey: string; moduleKey: string; issueId: string }>()
   const { programKey, moduleKey, issueId } = params
 
   const formatDeadline = (deadline: string | null) => {
@@ -43,21 +36,29 @@ const ModuleIssueDetailsPage = () => {
     const isOverdue = deadlineUTC < todayUTC
     const daysLeft = Math.ceil((deadlineUTC.getTime() - todayUTC.getTime()) / (1000 * 60 * 60 * 24))
 
-    const statusText = isOverdue
-      ? '(overdue)'
-      : daysLeft === 0
-        ? '(today)'
-        : `(${daysLeft} days left)`
+    let statusText: string
+    if (isOverdue) {
+      statusText = '(overdue)'
+    } else if (daysLeft === 0) {
+      statusText = '(today)'
+    } else {
+      statusText = `(${daysLeft} days left)`
+    }
 
     const displayDate = deadlineDate.toLocaleDateString()
 
+    let color: string
+    if (isOverdue) {
+      color = 'text-[#DA3633]'
+    } else if (daysLeft <= 3) {
+      color = 'text-[#F59E0B]'
+    } else {
+      color = 'text-gray-600 dark:text-gray-300'
+    }
+
     return {
       text: `${displayDate} ${statusText}`,
-      color: isOverdue
-        ? 'text-[#DA3633]'
-        : daysLeft <= 3
-          ? 'text-[#F59E0B]'
-          : 'text-gray-600 dark:text-gray-300',
+      color,
     }
   }
   const { data, loading, error } = useQuery(GetModuleIssueViewDocument, {
@@ -108,6 +109,47 @@ const ModuleIssueDetailsPage = () => {
   const remainingLabels = labels.length - visibleLabels.length
   const canEditDeadline = assignees.length > 0
 
+  let issueStatusClass: string
+  let issueStatusLabel: string
+  if (issue.state === 'open') {
+    issueStatusClass = 'bg-[#238636] text-white'
+    issueStatusLabel = 'Open'
+  } else if (issue.isMerged) {
+    issueStatusClass = 'bg-[#8657E5] text-white'
+    issueStatusLabel = 'Merged'
+  } else {
+    issueStatusClass = 'bg-[#DA3633] text-white'
+    issueStatusLabel = 'Closed'
+  }
+
+  const getPRStatus = (pr: Exclude<typeof issue.pullRequests, undefined>[0]) => {
+    let backgroundColor: string
+    let label: string
+    if (pr.state === 'closed' && pr.mergedAt) {
+      backgroundColor = '#8657E5'
+      label = 'Merged'
+    } else if (pr.state === 'closed') {
+      backgroundColor = '#DA3633'
+      label = 'Closed'
+    } else {
+      backgroundColor = '#238636'
+      label = 'Open'
+    }
+    return { backgroundColor, label }
+  }
+
+  const getAssignButtonTitle = (assigning: boolean) => {
+    let title: string
+    if (!issueId) {
+      title = 'Loading issue…'
+    } else if (assigning) {
+      title = 'Assigning…'
+    } else {
+      title = 'Assign to this user'
+    }
+    return title
+  }
+
   return (
     <div className="min-h-screen bg-white p-8 text-gray-700 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-5xl">
@@ -121,20 +163,14 @@ const ModuleIssueDetailsPage = () => {
                 {issue.organizationName}/{issue.repositoryName} • #{issue.number}
               </span>
               <span
-                className={`inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium ${
-                  issue.state === 'open'
-                    ? 'bg-[#238636] text-white'
-                    : issue.isMerged
-                      ? 'bg-[#8657E5] text-white'
-                      : 'bg-[#DA3633] text-white'
-                }`}
+                className={`inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium ${issueStatusClass}`}
               >
-                {issue.state === 'open' ? 'Open' : issue.isMerged ? 'Merged' : 'Closed'}
+                {issueStatusLabel}
               </span>
             </div>
           </div>
           <ActionButton url={issue.url} tooltipLabel="View on GitHub">
-            <FontAwesomeIcon icon={faLink} /> View on GitHub
+            <FaLink className="mr-2 inline-block" /> View on GitHub
           </ActionButton>
         </div>
 
@@ -232,7 +268,7 @@ const ModuleIssueDetailsPage = () => {
           <h2 className="mb-4 text-2xl font-semibold">
             <div className="flex items-center">
               <div className="flex flex-row items-center gap-2">
-                <FontAwesomeIcon icon={faTags} className="mr-2 h-5 w-5" />
+                <FaTags className="mr-2 h-5 w-5" />
               </div>
               <span>Labels</span>
             </div>
@@ -254,7 +290,7 @@ const ModuleIssueDetailsPage = () => {
             <h2 className="mb-4 text-2xl font-semibold">
               <div className="flex items-center">
                 <div className="flex flex-row items-center gap-2">
-                  <FontAwesomeIcon icon={faUsers} className="mr-2 h-5 w-5" />
+                  <HiUserGroup className="mr-2 h-5 w-5" />
                 </div>
                 <span>Assignees</span>
               </div>
@@ -266,7 +302,7 @@ const ModuleIssueDetailsPage = () => {
                   className="flex items-center justify-between gap-2 rounded-lg bg-gray-200 p-3 dark:bg-gray-700"
                 >
                   <Link
-                    href={`/members/${a.login}`}
+                    href={`/my/mentorship/programs/${programKey}/modules/${moduleKey}/mentees/${a.login}`}
                     className="inline-flex items-center gap-2 text-blue-600 hover:underline dark:text-blue-400"
                   >
                     {a.avatarUrl ? (
@@ -300,7 +336,7 @@ const ModuleIssueDetailsPage = () => {
                     className={getButtonClassName(!issueId || unassigning)}
                     title={unassigning ? 'Unassigning…' : `Unassign @${a.login}`}
                   >
-                    <FontAwesomeIcon icon={faXmark} />
+                    <FaXmark />
                   </button>
                 </div>
               ))}
@@ -308,7 +344,7 @@ const ModuleIssueDetailsPage = () => {
           </div>
         )}
 
-        <SecondaryCard icon={faCodeBranch} title="Pull Requests">
+        <SecondaryCard icon={FaCodeBranch} title="Pull Requests">
           <div className="grid grid-cols-1 gap-3">
             {issue.pullRequests?.length ? (
               issue.pullRequests.map((pr) => (
@@ -347,28 +383,17 @@ const ModuleIssueDetailsPage = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {pr.state === 'closed' && pr.mergedAt ? (
-                      <span
-                        className="inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium text-white"
-                        style={{ backgroundColor: '#8657E5' }}
-                      >
-                        Merged
-                      </span>
-                    ) : pr.state === 'closed' ? (
-                      <span
-                        className="inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium text-white"
-                        style={{ backgroundColor: '#DA3633' }}
-                      >
-                        Closed
-                      </span>
-                    ) : (
-                      <span
-                        className="inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium text-white"
-                        style={{ backgroundColor: '#238636' }}
-                      >
-                        Open
-                      </span>
-                    )}
+                    {(() => {
+                      const { backgroundColor, label } = getPRStatus(pr)
+                      return (
+                        <span
+                          className="inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium text-white"
+                          style={{ backgroundColor }}
+                        >
+                          {label}
+                        </span>
+                      )
+                    })()}
                   </div>
                 </div>
               ))
@@ -382,7 +407,7 @@ const ModuleIssueDetailsPage = () => {
           <h2 className="mb-4 text-2xl font-semibold">
             <div className="flex items-center">
               <div className="flex flex-row items-center gap-2">
-                <FontAwesomeIcon icon={faUsers} className="mr-2 h-5 w-5" />
+                <HiUserGroup className="mr-2 h-5 w-5" />
               </div>
               <span>Interested Users</span>
             </div>
@@ -422,11 +447,9 @@ const ModuleIssueDetailsPage = () => {
                     })
                   }}
                   className={`${getButtonClassName(!issueId || assigning)} px-3 py-1`}
-                  title={
-                    !issueId ? 'Loading issue…' : assigning ? 'Assigning…' : 'Assign to this user'
-                  }
+                  title={getAssignButtonTitle(assigning)}
                 >
-                  <FontAwesomeIcon icon={faPlus} className="text-gray-500" />
+                  <FaPlus className="text-gray-500" />
                   <span>Assign</span>
                 </button>
               </div>

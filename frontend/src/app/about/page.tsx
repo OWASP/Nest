@@ -1,30 +1,21 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
-import {
-  faCircleCheck,
-  faClock,
-  faMapSigns,
-  faScroll,
-  faUsers,
-  faTools,
-  faBullseye,
-  faUser,
-  faUsersGear,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from '@heroui/tooltip'
 import upperFirst from 'lodash/upperFirst'
+import millify from 'millify'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { FaMapSigns, FaTools } from 'react-icons/fa'
+import { FaCircleCheck, FaClock, FaScroll, FaBullseye, FaUser, FaUsersGear } from 'react-icons/fa6'
+import { HiUserGroup } from 'react-icons/hi'
+import { IconWrapper } from 'wrappers/IconWrapper'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import {
   GetProjectMetadataDocument,
   GetTopContributorsDocument,
 } from 'types/__generated__/projectQueries.generated'
 import { GetLeaderDataDocument } from 'types/__generated__/userQueries.generated'
-import type { Contributor } from 'types/contributor'
-import type { Project } from 'types/project'
 import {
   technologies,
   missionContent,
@@ -33,13 +24,11 @@ import {
   projectTimeline,
   projectStory,
 } from 'utils/aboutData'
-import { getMilestoneProgressIcon, getMilestoneProgressText } from 'utils/milestoneProgress'
 import AnchorTitle from 'components/AnchorTitle'
-import AnimatedCounter from 'components/AnimatedCounter'
 import Leaders from 'components/Leaders'
-import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
+import AboutSkeleton from 'components/skeletons/AboutSkeleton'
 import TopContributorsList from 'components/TopContributorsList'
 
 const leaders = {
@@ -50,60 +39,70 @@ const leaders = {
 
 const projectKey = 'nest'
 
-const About = () => {
-  const { data: projectMetadataResponse, error: projectMetadataRequestError } = useQuery(
-    GetProjectMetadataDocument,
-    {
-      variables: { key: projectKey },
-    }
-  )
+const getMilestoneStatus = (progress: number): string => {
+  if (progress === 100) {
+    return 'Completed'
+  }
+  if (progress > 0) {
+    return 'In Progress'
+  }
+  return 'Not Started'
+}
 
-  const { data: topContributorsResponse, error: topContributorsRequestError } = useQuery(
-    GetTopContributorsDocument,
-    {
-      variables: {
-        excludedUsernames: Object.keys(leaders),
-        hasFullName: true,
-        key: projectKey,
-        limit: 24,
-      },
-    }
-  )
+const getMilestoneIcon = (progress: number) => {
+  if (progress === 100) {
+    return FaCircleCheck
+  }
+  if (progress > 0) {
+    return FaUsersGear
+  }
+  return FaClock
+}
+
+const About = () => {
+  const {
+    data: projectMetadataResponse,
+    loading: projectMetadataLoading,
+    error: projectMetadataRequestError,
+  } = useQuery(GetProjectMetadataDocument, {
+    variables: { key: projectKey },
+  })
+
+  const {
+    data: topContributorsResponse,
+    loading: topContributorsLoading,
+    error: topContributorsRequestError,
+  } = useQuery(GetTopContributorsDocument, {
+    variables: {
+      excludedUsernames: Object.keys(leaders),
+      hasFullName: true,
+      key: projectKey,
+      limit: 24,
+    },
+  })
 
   const { leadersData, isLoading: leadersLoading } = useLeadersData()
 
-  const [projectMetadata, setProjectMetadata] = useState<Project | null>(null)
-  const [topContributors, setTopContributors] = useState<Contributor[]>([])
+  // Derive data directly from response to prevent race conditions.
+  const projectMetadata = projectMetadataResponse?.project
+  const topContributors = topContributorsResponse?.topContributors
 
   useEffect(() => {
-    if (projectMetadataResponse?.project) {
-      setProjectMetadata(projectMetadataResponse.project)
-    }
-
     if (projectMetadataRequestError) {
       handleAppError(projectMetadataRequestError)
     }
-  }, [projectMetadataResponse, projectMetadataRequestError])
+  }, [projectMetadataRequestError])
 
   useEffect(() => {
-    if (topContributorsResponse?.topContributors) {
-      setTopContributors(topContributorsResponse.topContributors)
-    }
-
     if (topContributorsRequestError) {
       handleAppError(topContributorsRequestError)
     }
-  }, [topContributorsResponse, topContributorsRequestError])
+  }, [topContributorsRequestError])
 
-  const isLoading =
-    !projectMetadataResponse ||
-    !topContributorsResponse ||
-    (projectMetadataRequestError && !projectMetadata) ||
-    (topContributorsRequestError && !topContributors) ||
-    leadersLoading
+  const isLoading = leadersLoading || projectMetadataLoading || topContributorsLoading
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return <AboutSkeleton />
   }
 
   if (!projectMetadata || !topContributors) {
@@ -121,16 +120,16 @@ const About = () => {
       <div className="mx-auto max-w-6xl">
         <h1 className="mt-4 mb-6 text-4xl font-bold">About</h1>
         <div className="grid gap-0 md:grid-cols-2 md:gap-6">
-          <SecondaryCard icon={faBullseye} title={<AnchorTitle title="Our Mission" />}>
+          <SecondaryCard icon={FaBullseye} title={<AnchorTitle title="Our Mission" />}>
             <p className="text-gray-600 dark:text-gray-300">{missionContent.mission}</p>
           </SecondaryCard>
 
-          <SecondaryCard icon={faUser} title={<AnchorTitle title="Who It's For" />}>
+          <SecondaryCard icon={FaUser} title={<AnchorTitle title="Who It's For" />}>
             <p className="text-gray-600 dark:text-gray-300">{missionContent.whoItsFor}</p>
           </SecondaryCard>
         </div>
 
-        <SecondaryCard icon={faCircleCheck} title={<AnchorTitle title="Key Features" />}>
+        <SecondaryCard icon={FaCircleCheck} title={<AnchorTitle title="Key Features" />}>
           <div className="grid gap-4 md:grid-cols-2">
             {keyFeatures.map((feature) => (
               <div key={feature.title} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
@@ -146,13 +145,13 @@ const About = () => {
         {topContributors && (
           <TopContributorsList
             contributors={topContributors}
-            icon={faUsers}
+            icon={HiUserGroup}
             label="Wall of Fame"
             maxInitialDisplay={12}
           />
         )}
 
-        <SecondaryCard icon={faTools} title={<AnchorTitle title="Technologies & Tools" />}>
+        <SecondaryCard icon={FaTools} title={<AnchorTitle title="Technologies & Tools" />}>
           <div className="w-full">
             <div className="grid w-full grid-cols-1 justify-center sm:grid-cols-2 lg:grid-cols-4 lg:pl-8">
               {technologies.map((tech) => (
@@ -185,7 +184,7 @@ const About = () => {
           </div>
         </SecondaryCard>
 
-        <SecondaryCard icon={faUsersGear} title={<AnchorTitle title="Get Involved" />}>
+        <SecondaryCard icon={FaUsersGear} title={<AnchorTitle title="Get Involved" />}>
           <p className="mb-2 text-gray-600 dark:text-gray-300">{getInvolvedContent.description}</p>
           <ul className="mb-6 list-inside list-disc space-y-2 pl-4">
             {getInvolvedContent.ways.map((way) => (
@@ -198,7 +197,7 @@ const About = () => {
         </SecondaryCard>
 
         {projectMetadata.recentMilestones.length > 0 && (
-          <SecondaryCard icon={faMapSigns} title={<AnchorTitle title="Roadmap" />}>
+          <SecondaryCard icon={FaMapSigns} title={<AnchorTitle title="Roadmap" />}>
             <div className="grid gap-4">
               {[...projectMetadata.recentMilestones]
                 .filter((milestone) => milestone.state !== 'closed')
@@ -222,14 +221,14 @@ const About = () => {
                         </Link>
                         <Tooltip
                           closeDelay={100}
-                          content={getMilestoneProgressText(milestone.progress)}
+                          content={getMilestoneStatus(milestone.progress)}
                           id={`tooltip-state-${index}`}
                           delay={100}
                           placement="top"
                           showArrow
                         >
                           <span className="absolute top-0 right-0 text-xl text-gray-400">
-                            <FontAwesomeIcon icon={getMilestoneProgressIcon(milestone.progress)} />
+                            <IconWrapper icon={getMilestoneIcon(milestone.progress)} />
                           </span>
                         </Tooltip>
                       </div>
@@ -240,23 +239,16 @@ const About = () => {
             </div>
           </SecondaryCard>
         )}
-        <SecondaryCard icon={faScroll} title={<AnchorTitle title="Our Story" />}>
+        <SecondaryCard icon={FaScroll} title={<AnchorTitle title="Our Story" />}>
           {projectStory.map((text) => (
-            <div
-              key={text
-                .slice(0, 40)
-                .trim()
-                .replaceAll(' ', '-')
-                .replaceAll(/[^\w-]/g, '')}
-              className="mb-4"
-            >
+            <div key={`story-${text.substring(0, 50).replaceAll(' ', '-')}`} className="mb-4">
               <div>
                 <Markdown content={text} />
               </div>
             </div>
           ))}
         </SecondaryCard>
-        <SecondaryCard icon={faClock} title={<AnchorTitle title="Project Timeline" />}>
+        <SecondaryCard icon={FaClock} title={<AnchorTitle title="Project Timeline" />}>
           <div className="space-y-6">
             {[...projectTimeline].reverse().map((milestone, index) => (
               <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
@@ -265,7 +257,7 @@ const About = () => {
                 )}
                 <div
                   aria-hidden="true"
-                  className="absolute top-[10px] left-0 h-3 w-3 rounded-full bg-gray-400"
+                  className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
                 ></div>
                 <div>
                   <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
@@ -287,7 +279,7 @@ const About = () => {
             <div key={stat.label}>
               <SecondaryCard className="text-center">
                 <div className="mb-2 text-3xl font-bold text-blue-400">
-                  <AnimatedCounter end={Math.floor(stat.value / 10) * 10} duration={2} />+
+                  {millify(Math.floor(stat.value / 10 || 0) * 10)}+
                 </div>
                 <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
               </SecondaryCard>

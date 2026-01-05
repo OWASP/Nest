@@ -1,15 +1,15 @@
 'use client'
 
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import clsx from 'clsx'
 import Link from 'next/link'
 import { FC } from 'react'
+import type { IconType } from 'react-icons'
 import SecondaryCard from 'components/SecondaryCard'
 
 const ProjectTypeDashboardCard: FC<{
   type: 'healthy' | 'needsAttention' | 'unhealthy'
   count: number
-  icon: IconProp
+  icon: IconType
 }> = ({ type, count, icon }) => {
   const titleMapping = {
     healthy: 'Healthy',

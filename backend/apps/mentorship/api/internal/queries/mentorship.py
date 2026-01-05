@@ -48,15 +48,13 @@ class MentorshipQuery:
         return Mentor.objects.filter(github_user=github_user).exists()
 
     @strawberry.field
-    def get_mentee_details(
-        self, program_key: str, module_key: str, mentee_handle: str
-    ) -> MenteeNode:
+    def get_mentee_details(self, program_key: str, module_key: str, mentee_key: str) -> MenteeNode:
         """Get detailed information about a mentee in a specific module."""
         try:
             module = Module.objects.only("id").get(key=module_key, program__key=program_key)
 
             github_user = GithubUser.objects.only("login", "name", "avatar_url", "bio").get(
-                login=mentee_handle
+                login=mentee_key
             )
 
             mentee = Mentee.objects.only("id", "experience_level", "domains", "tags").get(
@@ -65,7 +63,7 @@ class MentorshipQuery:
             is_enrolled = MenteeModule.objects.filter(mentee=mentee, module=module).exists()
 
             if not is_enrolled:
-                message = f"Mentee {mentee_handle} is not enrolled in module {module_key}"
+                message = f"Mentee {mentee_key} is not enrolled in module {module_key}"
                 raise ObjectDoesNotExist(message)
 
             return MenteeNode(
@@ -88,7 +86,7 @@ class MentorshipQuery:
         self,
         program_key: str,
         module_key: str,
-        mentee_handle: str,
+        mentee_key: str,
         limit: int = 20,
         offset: int = 0,
     ) -> list[IssueNode]:
@@ -96,13 +94,13 @@ class MentorshipQuery:
         try:
             module = Module.objects.only("id").get(key=module_key, program__key=program_key)
 
-            github_user = GithubUser.objects.only("id").get(login=mentee_handle)
+            github_user = GithubUser.objects.only("id").get(login=mentee_key)
 
             mentee = Mentee.objects.only("id").get(github_user=github_user)
             is_enrolled = MenteeModule.objects.filter(mentee=mentee, module=module).exists()
 
             if not is_enrolled:
-                message = f"Mentee {mentee_handle} is not enrolled in module {module_key}"
+                message = f"Mentee {mentee_key} is not enrolled in module {module_key}"
                 raise ObjectDoesNotExist(message)
 
             issues_qs = (

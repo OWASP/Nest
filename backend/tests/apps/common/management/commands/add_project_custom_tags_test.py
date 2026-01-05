@@ -96,7 +96,7 @@ class TestAddProjectCustomTags:
                 self.key = key
                 self.custom_tags = projects[key]
 
-            def save(self, update_fields=None):
+            def save(self, update_fields=None):  # NOSONAR unused parameter.
                 projects[self.key] = self.custom_tags
 
         mock_get.side_effect = lambda key: MockProject(key)
