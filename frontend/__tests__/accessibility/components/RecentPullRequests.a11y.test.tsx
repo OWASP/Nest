@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
-import { CSSProperties, ReactNode } from 'react'
+import React from 'react'
 import RecentPullRequests from 'components/RecentPullRequests'
 
 expect.extend(toHaveNoViolations)
@@ -18,38 +18,13 @@ jest.mock('next/link', () => ({
     href,
     ...props
   }: {
-    children: ReactNode
+    children: React.ReactNode
     href: string
     [key: string]: unknown
   }) => (
     <a href={href} {...props}>
       {children}
     </a>
-  ),
-}))
-
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: ({
-    src,
-    alt,
-    fill,
-    objectFit,
-    ...props
-  }: {
-    src: string
-    alt: string
-    fill?: boolean
-    objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down'
-    [key: string]: unknown
-  }) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt={alt}
-      style={fill && { objectFit: objectFit as CSSProperties['objectFit'] }}
-      {...props}
-    />
   ),
 }))
 

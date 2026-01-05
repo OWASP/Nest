@@ -1,36 +1,9 @@
 import { render } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
-import { CSSProperties } from 'react'
 import { UserCardProps } from 'types/card'
 import UserCard from 'components/UserCard'
 
 expect.extend(toHaveNoViolations)
-
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: ({
-    src,
-    alt,
-    fill,
-    objectFit,
-    ...props
-  }: {
-    src: string
-    alt: string
-    fill?: boolean
-    objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down'
-    [key: string]: unknown
-  }) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt={alt}
-      style={fill ? { objectFit: objectFit as CSSProperties['objectFit'] } : undefined}
-      data-testid="user-avatar"
-      {...props}
-    />
-  ),
-}))
 
 const defaultProps: UserCardProps = {
   name: 'John Doe',

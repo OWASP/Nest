@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
-import { CSSProperties, ReactNode } from 'react'
+import React from 'react'
 import { ExperienceLevelEnum, ProgramStatusEnum } from 'types/__generated__/graphql'
 import { Module } from 'types/mentorship'
 import SingleModuleCard from 'components/SingleModuleCard'
@@ -37,7 +37,7 @@ jest.mock('next/link', () => ({
     className,
     ...props
   }: {
-    children: ReactNode
+    children: React.ReactNode
     href: string
     target?: string
     rel?: string
@@ -54,31 +54,6 @@ jest.mock('next/link', () => ({
     >
       {children}
     </a>
-  ),
-}))
-
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: ({
-    src,
-    alt,
-    fill,
-    objectFit,
-    ...props
-  }: {
-    src: string
-    alt: string
-    fill?: boolean
-    objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down'
-    [key: string]: unknown
-  }) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt={alt}
-      style={fill && { objectFit: objectFit as CSSProperties['objectFit'] }}
-      {...props}
-    />
   ),
 }))
 

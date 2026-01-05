@@ -5,33 +5,6 @@ import Leaders from 'components/Leaders'
 
 expect.extend(toHaveNoViolations)
 
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: ({
-    src,
-    alt,
-    width,
-    height,
-    className,
-  }: {
-    src: string
-    alt: string
-    width: number
-    height: number
-    className?: string
-  }) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt={alt}
-      width={width}
-      height={height}
-      className={className}
-      data-testid="avatar-image"
-    />
-  ),
-}))
-
 describe('Leaders a11y', () => {
   it('should not have any accessibility violations', async () => {
     const { container } = render(<Leaders users={mockProjectDetailsData.project.entityLeaders} />)

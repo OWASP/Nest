@@ -6,12 +6,6 @@ import Release from 'components/Release'
 
 expect.extend(toHaveNoViolations)
 
-interface MockImageProps {
-  alt?: string
-  src?: string
-  [key: string]: unknown
-}
-
 const mockRouterPush = jest.fn()
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -33,14 +27,6 @@ jest.mock('next/link', () => ({
     <a href={href} {...props}>
       {children}
     </a>
-  ),
-}))
-
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: (props: MockImageProps) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img alt={props.alt || ''} {...props} />
   ),
 }))
 

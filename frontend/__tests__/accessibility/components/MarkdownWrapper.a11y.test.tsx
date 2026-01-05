@@ -7,10 +7,8 @@ expect.extend(toHaveNoViolations)
 jest.mock('markdown-it/index.mjs', () => {
   return jest.fn().mockImplementation(() => ({
     render: (content: string) => {
-      // Very simple mock: replace **bold** and [link](url)
-      return content
-        .replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replaceAll(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
+      // Very simple mock: replace **bold**
+      return content.replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     },
     use: jest.fn().mockReturnThis(),
   }))

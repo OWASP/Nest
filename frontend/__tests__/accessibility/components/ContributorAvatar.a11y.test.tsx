@@ -32,32 +32,6 @@ jest.mock('next/link', () => {
   )
 })
 
-jest.mock('next/image', () => {
-  return ({
-    src,
-    alt,
-    width,
-    height,
-    className,
-  }: {
-    src: string
-    alt: string
-    width: number
-    height: number
-    className?: string
-  }) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt={alt}
-      width={width}
-      height={height}
-      className={className}
-      data-testid="contributor-avatar"
-    />
-  )
-})
-
 const mockGitHubContributor: Contributor = {
   login: 'jane-doe',
   name: 'Jane Doe',

@@ -26,33 +26,6 @@ jest.mock('next/link', () => {
   }
 })
 
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: ({
-    src,
-    alt,
-    width,
-    height,
-    ...props
-  }: {
-    src: string
-    alt: string
-    width: number
-    height: number
-    [key: string]: unknown
-  }) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt={alt}
-      width={width}
-      height={height}
-      data-testid="contributor-avatar"
-      {...props}
-    />
-  ),
-}))
-
 const mockContributors: Contributor[] = [
   {
     avatarUrl: 'https://github.com/developer1.avatar',

@@ -83,6 +83,32 @@ jest.mock('next/link', () => {
   }
 })
 
+
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: ({
+    src,
+    alt,
+    fill,
+    objectFit,
+    ...props
+  }: {
+    src: string
+    alt: string
+    fill?: boolean
+    objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down'
+    [key: string]: unknown
+  }) => (
+    React.createElement('img', {
+      src,
+      alt,
+      style: fill && { objectFit: objectFit as React.CSSProperties['objectFit'] },
+      ...props
+    }) 
+  ),
+}))
+
+
 beforeAll(() => {
   if (typeof globalThis !== 'undefined') {
     jest.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((cb) => {

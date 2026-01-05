@@ -1,27 +1,10 @@
 import { render } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
-import { CSSProperties, ReactNode } from 'react'
+import React from 'react'
 import { Sponsor } from 'types/home'
 import LogoCarousel from 'components/LogoCarousel'
 
 expect.extend(toHaveNoViolations)
-
-jest.mock('next/image', () => {
-  return function MockImage({
-    src,
-    alt,
-    style,
-    fill,
-  }: {
-    src: string
-    alt: string
-    style?: CSSProperties
-    fill?: boolean
-  }) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={src} alt={alt} style={style} data-testid="sponsor-image" data-fill={fill} />
-  }
-})
 
 jest.mock('next/link', () => {
   return function MockLink({
@@ -32,7 +15,7 @@ jest.mock('next/link', () => {
     className,
   }: {
     href: string
-    children: ReactNode
+    children: React.ReactNode
     target?: string
     rel?: string
     className?: string

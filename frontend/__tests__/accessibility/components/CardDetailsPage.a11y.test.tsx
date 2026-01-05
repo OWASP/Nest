@@ -25,31 +25,6 @@ jest.mock('next/link', () => {
   }
 })
 
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: ({
-    src,
-    alt,
-    fill,
-    objectFit,
-    ...props
-  }: {
-    src: string
-    alt: string
-    fill?: boolean
-    objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down'
-    [key: string]: unknown
-  }) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt={alt}
-      style={fill && { objectFit: objectFit as React.CSSProperties['objectFit'] }}
-      {...props}
-    />
-  ),
-}))
-
 jest.mock('components/ChapterMapWrapper', () => ({
   __esModule: true,
   default: ({
