@@ -28,7 +28,7 @@ owasp-enrich-projects:
 	@CMD="python manage.py owasp_enrich_projects" $(MAKE) exec-backend-command
 
 owasp-generate-community-snapshot-video:
-	@docker build -f backend/docker/Dockerfile.video backend/ \
+	@docker build -f docker/backend/Dockerfile.video backend/ \
 		-t nest-video-backend
 	@mkdir -p backend/generated_videos
 	@docker run \
