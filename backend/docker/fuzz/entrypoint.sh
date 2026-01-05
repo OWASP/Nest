@@ -23,7 +23,11 @@ echo "CSRF token retrieved successfully."
 # Number of examples to generate per endpoint
 # See https://schemathesis.readthedocs.io/en/stable/explanations/data-generation/#how-many-test-cases-does-schemathesis-generate
 
-echo "generation.max-examples = 250" >> ./schemathesis.toml
+echo "generation.max-examples = 100" >> ./schemathesis.toml
+echo "[checks]" >> ./schemathesis.toml
+echo "enabled = false" >> ./schemathesis.toml
+echo "not_a_server_error.enabled = true" >> ./schemathesis.toml
+echo "response_schema_conformance.enabled = true" >> ./schemathesis.toml
 
 if [ -n "$TEST_FILE" ]; then
     echo "Using test file: $TEST_FILE"

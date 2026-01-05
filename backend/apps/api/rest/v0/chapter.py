@@ -11,7 +11,7 @@ from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
-from apps.api.rest.v0.common import LocationFilter
+from apps.api.rest.v0.common import LocationFilter, ValidationErrorSchema
 from apps.owasp.models.chapter import Chapter as ChapterModel
 
 router = RouterPaginated(tags=["Chapters"])
@@ -93,6 +93,7 @@ def list_chapters(
     response={
         HTTPStatus.NOT_FOUND: ChapterError,
         HTTPStatus.OK: ChapterDetail,
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
     },
     summary="Get chapter",
 )

@@ -1,6 +1,12 @@
 """Common schemas and filters for the API."""
 
-from ninja import Field, FilterSchema
+from ninja import Field, FilterSchema, Schema
+
+
+class ValidationErrorSchema(Schema):
+    """Schema for validation errors."""
+
+    message: str
 
 
 class LocationFilter(FilterSchema):

@@ -11,6 +11,7 @@ from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
+from apps.api.rest.v0.common import ValidationErrorSchema
 from apps.github.models.generic_issue_model import GenericIssueModel
 from apps.github.models.issue import Issue as IssueModel
 
@@ -99,6 +100,7 @@ def list_issues(
     response={
         HTTPStatus.NOT_FOUND: IssueError,
         HTTPStatus.OK: IssueDetail,
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
     },
     summary="Get issue",
 )

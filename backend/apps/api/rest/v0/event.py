@@ -11,7 +11,7 @@ from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
-from apps.api.rest.v0.common import LocationFilter
+from apps.api.rest.v0.common import LocationFilter, ValidationErrorSchema
 from apps.owasp.models.event import Event as EventModel
 
 router = RouterPaginated(tags=["Events"])
@@ -92,6 +92,7 @@ def list_events(
     response={
         HTTPStatus.NOT_FOUND: EventError,
         HTTPStatus.OK: EventDetail,
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
     },
     summary="Get event",
 )
