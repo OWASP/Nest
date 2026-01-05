@@ -616,6 +616,7 @@ jobs:
           target: 'https://nest.owasp.dev'
           allow_issue_writing: false
           fail_action: false
+          rules_file_name: 'zap_rules.tsv'
           cmd_options: '-a'
 
       - name: Upload ZAP report
@@ -957,6 +958,7 @@ jobs:
           target: 'https://nest.owasp.org'
           allow_issue_writing: false
           fail_action: false
+          rules_file_name: 'zap_rules.tsv'
           cmd_options: '-a'
 
       - name: Upload ZAP report
