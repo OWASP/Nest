@@ -5,23 +5,6 @@ import RecentIssues from 'components/RecentIssues'
 
 expect.extend(toHaveNoViolations)
 
-jest.mock('next/link', () => ({
-  __esModule: true,
-  default: ({
-    children,
-    href,
-    ...props
-  }: {
-    children: React.ReactNode
-    href: string
-    [key: string]: unknown
-  }) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
-}))
-
 const baseIssue = {
   author: {
     avatarUrl: 'https://example.com/avatar.png',

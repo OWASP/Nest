@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
 import CalendarButton from 'components/CalendarButton'
+import { FaCalendarAlt } from 'react-icons/fa'
 
 expect.extend(toHaveNoViolations)
 
@@ -33,11 +34,7 @@ describe('CalendarButton Accessibility', () => {
     const { container } = render(
       <CalendarButton
         event={mockEvent}
-        icon={
-          <span role="img" aria-label="calendar">
-            📅
-          </span>
-        }
+        icon={<FaCalendarAlt aria-label="calendar"/>}
       />
     )
     const results = await axe(container)

@@ -8,8 +8,13 @@ expect.extend(toHaveNoViolations)
 
 jest.mock('@heroui/tooltip', () => ({
   Tooltip: ({ children, content, id }: { children: ReactNode; content: string; id: string }) => (
-    <div data-testid={id} title={content}>
-      {children}
+    <div data-testid={id}>
+      <div aria-describedby={`${id}-tooltip`}>
+        {children}
+      </div>
+      <div id={`${id}-tooltip`} role="tooltip">
+        {content}
+      </div>
     </div>
   ),
 }))
