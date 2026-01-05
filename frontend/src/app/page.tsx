@@ -25,7 +25,6 @@ import { GetMainPageDataDocument } from 'types/__generated__/homeQueries.generat
 import type { AlgoliaResponse } from 'types/algolia'
 import type { Chapter } from 'types/chapter'
 import type { Event } from 'types/event'
-import type { MainPageData } from 'types/home'
 
 import { formatDate, formatDateRange } from 'utils/dateFormatter'
 import AnchorTitle from 'components/AnchorTitle'
