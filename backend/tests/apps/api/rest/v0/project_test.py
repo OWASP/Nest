@@ -27,17 +27,35 @@ from apps.api.rest.v0.project import ProjectDetail
     ],
 )
 def test_project_serializer_validation(project_data):
+    class MockMember:
+        def __init__(self, login):
+            self.login = login
+
+    class MockEntityMember:
+        def __init__(self, name, login=None):
+            self.member = MockMember(login) if login else None
+            self.member_name = name
+
     class MockProject:
         def __init__(self, data):
             for key, value in data.items():
                 setattr(self, key, value)
             self.nest_key = data["key"]
+            self.entity_leaders = [
+                MockEntityMember("Alice", "alice"),
+                MockEntityMember("Bob"),
+            ]
 
     project = ProjectDetail.from_orm(MockProject(project_data))
 
     assert project.created_at == datetime.fromisoformat(project_data["created_at"])
     assert project.description == project_data["description"]
     assert project.key == project_data["key"]
+    assert len(project.leaders) == 2
+    assert project.leaders[0].key == "alice"
+    assert project.leaders[0].name == "Alice"
+    assert project.leaders[1].key is None
+    assert project.leaders[1].name == "Bob"
     assert project.level == project_data["level"]
     assert project.name == project_data["name"]
     assert project.updated_at == datetime.fromisoformat(project_data["updated_at"])
