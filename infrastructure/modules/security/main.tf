@@ -114,6 +114,7 @@ resource "aws_security_group_rule" "ecs_egress_all" {
 }
 
 resource "aws_security_group_rule" "ecs_to_vpc_endpoints" {
+  count                    = var.vpc_endpoint_sg_id != null ? 1 : 0
   description              = "Allow HTTPS to VPC endpoints"
   from_port                = 443
   protocol                 = "tcp"
@@ -164,6 +165,7 @@ resource "aws_security_group_rule" "lambda_egress_all" {
 }
 
 resource "aws_security_group_rule" "lambda_to_vpc_endpoints" {
+  count                    = var.vpc_endpoint_sg_id != null ? 1 : 0
   description              = "Allow HTTPS to VPC endpoints"
   from_port                = 443
   protocol                 = "tcp"

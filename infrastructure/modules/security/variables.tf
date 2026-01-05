@@ -37,8 +37,9 @@ variable "redis_port" {
 }
 
 variable "vpc_endpoint_sg_id" {
-  description = "Security group ID for VPC endpoints."
+  description = "Security group ID for VPC endpoints (null if VPC endpoints disabled)."
   type        = string
+  default     = null
 }
 
 variable "vpc_id" {
