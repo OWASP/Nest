@@ -11,6 +11,7 @@ import {
 import { HiUserGroup } from 'react-icons/hi'
 import type { ExtendedSession } from 'types/auth'
 import type { DetailsCardProps } from 'types/card'
+import { RepositoryCardProps } from 'types/project'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
 import { scrollToAnchor } from 'utils/scrollToAnchor'
 import { getSocialIcon } from 'utils/urlIconMappings'
@@ -304,7 +305,10 @@ const DetailsCard = ({
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
             <SecondaryCard icon={FaFolderOpen} title={<AnchorTitle title="Repositories" />}>
-              <RepositoryCard maxInitialDisplay={4} repositories={repositories} />
+              <RepositoryCard
+                maxInitialDisplay={4}
+                repositories={repositories as RepositoryCardProps[]}
+              />
             </SecondaryCard>
           )}
         {type === 'program' && modules.length > 0 && (

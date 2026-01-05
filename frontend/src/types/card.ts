@@ -66,7 +66,7 @@ export interface DetailsCardProps {
   recentIssues?: Issue[]
   recentMilestones?: Milestone[]
   recentReleases?: Release[]
-  repositories?: RepositoryCardProps[]
+  repositories?: Partial<RepositoryCardProps>[]
   modules?: Module[]
   showAvatar?: boolean
   socialLinks?: string[]

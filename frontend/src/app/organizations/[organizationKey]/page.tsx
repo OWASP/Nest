@@ -21,13 +21,15 @@ const OrganizationDetailsPage = () => {
     variables: { login: organizationKey },
   })
 
-  const organization = graphQLData?.organization
-  const milestones = graphQLData?.recentMilestones
-  const issues = graphQLData?.recentIssues
-  const pullRequests = graphQLData?.recentPullRequests
-  const releases = graphQLData?.recentReleases
-  const repositories = graphQLData?.repositories as any
-  const topContributors = graphQLData?.topContributors
+  const {
+    organization,
+    recentIssues,
+    recentMilestones,
+    recentPullRequests,
+    recentReleases,
+    repositories,
+    topContributors,
+  } = graphQLData
 
   useEffect(() => {
     if (graphQLRequestError) {
@@ -108,10 +110,10 @@ const OrganizationDetailsPage = () => {
   return (
     <DetailsCard
       details={organizationDetails}
-      recentIssues={issues}
-      recentReleases={releases}
-      recentMilestones={milestones}
-      pullRequests={pullRequests}
+      recentIssues={recentIssues}
+      recentReleases={recentReleases}
+      recentMilestones={recentMilestones}
+      pullRequests={recentPullRequests}
       repositories={repositories}
       stats={organizationStats}
       summary={organization.description}
