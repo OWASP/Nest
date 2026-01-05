@@ -1,7 +1,7 @@
 export const METADATA_CONFIG = {
   home: {
     description:
-      'OWASP Nest is a comprehensive platform designed to enhance collaboration and contribution within the OWASP community.',
+      'OWASP Nest is a comprehensive, community-first platform built to enhance collaboration and contribution across the OWASP community.',
     keywords: ['OWASP', 'security', 'open source', 'web security', 'application security'],
     pageTitle: 'Home',
     type: 'website',

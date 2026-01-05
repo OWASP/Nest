@@ -5,7 +5,8 @@ import { useParams } from 'next/navigation'
 import { useEffect } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetChapterDataDocument } from 'types/__generated__/chapterQueries.generated'
-import { formatDate } from 'utils/dateFormatter'
+import { getContributionStats } from 'utils/contributionDataUtils'
+import { formatDate, getDateRange } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
@@ -55,14 +56,26 @@ export default function ChapterDetailsPage() {
       ),
     },
   ]
+
+  const { startDate, endDate } = getDateRange({ years: 1 })
+
+  const contributionStats = getContributionStats(
+    chapter.contributionStats,
+    chapter.contributionData
+  )
+
   return (
     <DetailsCard
+      contributionData={chapter.contributionData}
+      contributionStats={contributionStats}
       details={details}
+      endDate={endDate}
       entityKey={chapter.key}
       entityLeaders={chapter.entityLeaders}
       geolocationData={[chapter]}
       isActive={chapter.isActive}
       socialLinks={chapter.relatedUrls}
+      startDate={startDate}
       summary={chapter.summary}
       title={chapter.name}
       topContributors={topContributors}

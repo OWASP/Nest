@@ -37,8 +37,9 @@
     "win32"
   ],
   "enabled": true,
-  "files": ["**/*"],
+  "files": ["**/*", ".github/**/*"],
   "ignorePaths": [
+    ".github/workflows/check-pr-issue-skip-usernames.txt",
     "backend/**/migrations/*.py",
     "backend/data/project-custom-tags/*.json",
     "backend/static/**",

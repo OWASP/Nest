@@ -37,7 +37,7 @@ jobs:
             type=gha,compression=zstd
             type=registry,ref=owasp/nest:test-backend-cache
           context: backend
-          file: backend/docker/Dockerfile.test
+          file: docker/backend/Dockerfile.test
           platforms: linux/amd64
           push: true
           tags: owasp/nest:test-backend-latest
@@ -52,7 +52,7 @@ jobs:
             type=gha,compression=zstd
             type=registry,ref=owasp/nest:test-frontend-unit-cache
           context: frontend
-          file: frontend/docker/Dockerfile.unit.test
+          file: docker/frontend/Dockerfile.unit.test
           platforms: linux/amd64
           push: true
           tags: owasp/nest:test-frontend-unit-latest
@@ -67,7 +67,7 @@ jobs:
             type=gha,compression=zstd
             type=registry,ref=owasp/nest:test-frontend-e2e-cache
           context: frontend
-          file: frontend/docker/Dockerfile.e2e.test
+          file: docker/frontend/Dockerfile.e2e.test
           platforms: linux/amd64
           push: true
           tags: owasp/nest:test-frontend-e2e-latest

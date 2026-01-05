@@ -23,7 +23,7 @@
 
 </div>
 
-**OWASP Nest** is a comprehensive platform designed to enhance collaboration and contribution within the OWASP community. The application serves as a central hub for exploring OWASP projects and ways to contribute to them, empowering contributors to find opportunities that align with their interests and expertise.
+**OWASP Nest** is a comprehensive, community-first platform built to enhance collaboration and contribution across the OWASP community. The application serves as a central hub for exploring OWASP projects and ways to contribute to them, empowering contributors to find opportunities that align with their interests and expertise.
 
 Key features of the platform include:
 
