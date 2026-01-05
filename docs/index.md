@@ -14,7 +14,7 @@ title: OWASP Nest
 
 ## What is OWASP Nest?
 
-**OWASP Nest** is a comprehensive platform designed to enhance collaboration and contribution within the OWASP community. It serves as a central hub for exploring OWASP projects, finding contribution opportunities, and fostering community engagement in software security.
+**OWASP Nest** is a comprehensive, community-first platform built to enhance collaboration and contribution across the OWASP community. It serves as a central hub for exploring OWASP projects, finding contribution opportunities, and fostering community engagement in software security.
 
 ### **Key Features**
 

@@ -19,6 +19,7 @@ clean-backend-docker:
 	@docker container rm -f nest-worker >/dev/null 2>&1 || true
 	@docker image rm -f nest-local-backend >/dev/null 2>&1 || true
 	@docker volume rm -f nest-local_backend-venv >/dev/null 2>&1 || true
+	@docker volume rm -f nest-local_cache-data >/dev/null 2>&1 || true
 
 create-superuser:
 	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
@@ -126,7 +127,7 @@ sync-data: \
 test-backend:
 	@DOCKER_BUILDKIT=1 docker build \
 		--cache-from nest-test-backend \
-		-f backend/docker/Dockerfile.test backend \
+		-f docker/backend/Dockerfile.test backend \
 		-t nest-test-backend
 	@docker run \
 		-e DJANGO_SETTINGS_MODULE=settings.test \
@@ -145,6 +146,7 @@ update-data: \
 	github-update-related-organizations \
 	github-update-users \
 	owasp-aggregate-projects \
+	owasp-aggregate-contributions \
 	owasp-update-events \
 	owasp-sync-posts \
 	owasp-update-sponsors \

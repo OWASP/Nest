@@ -1,13 +1,12 @@
 'use client'
 
 import { useQuery } from '@apollo/client/react'
-import { faPlus, faGraduationCap } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToast } from '@heroui/toast'
 import { debounce } from 'lodash'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useMemo, useState } from 'react'
+import { FaPlus, FaGraduationCap } from 'react-icons/fa6'
 
 import { GetMyProgramsDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
@@ -81,7 +80,6 @@ const MyMentorshipPage: React.FC = () => {
   }, [error])
 
   const handleCreate = () => router.push('/my/mentorship/programs/create')
-  const handleView = (key: string) => router.push(`/my/mentorship/programs/${key}`)
 
   if (!username) {
     return <LoadingSpinner />
@@ -90,7 +88,7 @@ const MyMentorshipPage: React.FC = () => {
   if (!isProjectLeader) {
     return (
       <div className="flex min-h-[80vh] flex-col items-center justify-center px-4 text-center">
-        <FontAwesomeIcon icon={faGraduationCap} className="mb-4 text-6xl text-red-400" />
+        <FaGraduationCap className="mb-4 text-6xl text-red-400" />
         <h2 className="mb-2 text-2xl font-bold text-gray-600 dark:text-white">Access Denied</h2>
         <p className="text-gray-600 dark:text-gray-400">
           Only project leaders can access this page.
@@ -107,7 +105,7 @@ const MyMentorshipPage: React.FC = () => {
           <p className="text-gray-600 dark:text-gray-400">Programs you've created or joined</p>
         </div>
         <ActionButton onClick={handleCreate}>
-          <FontAwesomeIcon icon={faPlus} className="mr-2" />
+          <FaPlus className="mr-2" />
           {'Create Program'}
         </ActionButton>
       </div>
@@ -139,7 +137,7 @@ const MyMentorshipPage: React.FC = () => {
                 accessLevel="admin"
                 isAdmin={p?.userRole === 'admin'}
                 key={p.id}
-                onView={handleView}
+                href={`/my/mentorship/programs/${p.key}`}
                 program={p}
               />
             ))

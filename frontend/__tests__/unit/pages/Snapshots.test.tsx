@@ -3,7 +3,7 @@ import { addToast } from '@heroui/toast'
 import { screen, waitFor, fireEvent } from '@testing-library/react'
 import { act } from 'react'
 import { render } from 'wrappers/testUtil'
-import SnapshotsPage from 'app/snapshots/page'
+import SnapshotsPage from 'app/community/snapshots/page'
 
 const mockRouter = {
   push: jest.fn(),
@@ -59,8 +59,8 @@ describe('SnapshotsPage', () => {
     render(<SnapshotsPage />)
 
     await waitFor(() => {
-      const loadingSpinners = screen.getAllByAltText('Loading indicator')
-      expect(loadingSpinners.length).toBe(2)
+      const loadingSkeletons = screen.getAllByRole('status')
+      expect(loadingSkeletons.length).toBeGreaterThan(0)
     })
   })
 
@@ -117,7 +117,7 @@ describe('SnapshotsPage', () => {
 
     // Check if navigate was called with the correct argument
     await waitFor(() => {
-      expect(mockRouter.push).toHaveBeenCalledWith('/snapshots/2024-12')
+      expect(mockRouter.push).toHaveBeenCalledWith('/community/snapshots/2024-12')
     })
   })
 })

@@ -77,7 +77,7 @@ test.describe('About Page', () => {
     }
   })
 
-  test('displays animated counters with correct values', async ({ page }) => {
+  test('displays project statistics with correct values', async ({ page }) => {
     await expect(page.getByText('1.2K+Contributors')).toBeVisible()
     await expect(page.getByText('40+Open Issues')).toBeVisible()
     await expect(page.getByText('60+Forks')).toBeVisible()

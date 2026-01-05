@@ -18,7 +18,7 @@ import ModuleForm from 'components/ModuleForm'
 
 const CreateModulePage = () => {
   const router = useRouter()
-  const { programKey } = useParams() as { programKey: string }
+  const { programKey } = useParams<{ programKey: string }>()
   const { data: sessionData, status: sessionStatus } = useSession()
 
   const [createModule, { loading: mutationLoading }] = useMutation(CreateModuleDocument)

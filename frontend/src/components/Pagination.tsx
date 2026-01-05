@@ -1,7 +1,6 @@
-import { faEllipsisH } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
 import React from 'react'
+import { FaEllipsis } from 'react-icons/fa6'
 
 interface PaginationProps {
   currentPage: number
@@ -72,13 +71,12 @@ const Pagination: React.FC<PaginationProps> = ({
         {pageNumbers.map((number, index) => (
           <React.Fragment key={`${number}-${index}`}>
             {number === '...' ? (
-              <span
+              <div
                 className="flex h-10 w-10 items-center justify-center text-gray-600 dark:text-gray-400"
-                role="presentation"
                 aria-label="More pages"
               >
-                <FontAwesomeIcon icon={faEllipsisH} className="h-5 w-5"></FontAwesomeIcon>
-              </span>
+                <FaEllipsis className="h-5 w-5" aria-hidden="true" />
+              </div>
             ) : (
               <Button
                 type="button"

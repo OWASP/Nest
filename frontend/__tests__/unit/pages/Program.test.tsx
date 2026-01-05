@@ -61,7 +61,7 @@ describe('ProgramsPage Component', () => {
     })
 
     expect(screen.getByText('This is a summary of Program 1.')).toBeInTheDocument()
-    expect(screen.getByText('View Details')).toBeInTheDocument()
+    // Card is now clickable, no separate "View Details" button
   })
 
   test('shows empty message when no programs found', async () => {
@@ -91,14 +91,14 @@ describe('ProgramsPage Component', () => {
     })
   })
 
-  test('navigates to program detail page on View Details click', async () => {
+  test('navigates to program detail page on card click', async () => {
     render(<ProgramsPage />)
 
     await waitFor(() => {
-      const viewButton = screen.getByText('View Details')
-      fireEvent.click(viewButton)
+      expect(screen.getByText('Program 1')).toBeInTheDocument()
     })
 
-    expect(mockRouter.push).toHaveBeenCalledWith('/mentorship/programs/program_1')
+    const card = screen.getByRole('link', { name: /Program 1/i })
+    expect(card).toHaveAttribute('href', '/mentorship/programs/program_1')
   })
 })
