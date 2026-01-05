@@ -18,9 +18,12 @@ export default function CommitteeDetailsPage() {
   const { committeeKey } = useParams<{ committeeKey: string }>()
   const [committee, setCommittee] = useState<Committee | null>(null)
   const [topContributors, setTopContributors] = useState<Contributor[]>([])
-  const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const { data, error: graphQLRequestError } = useQuery(GetCommitteeDataDocument, {
+  const {
+    data,
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetCommitteeDataDocument, {
     variables: { key: committeeKey },
   })
 
@@ -28,11 +31,9 @@ export default function CommitteeDetailsPage() {
     if (data?.committee) {
       setCommittee(data.committee)
       setTopContributors(data.topContributors)
-      setIsLoading(false)
     }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
   }, [data, graphQLRequestError, committeeKey])
 

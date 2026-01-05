@@ -17,21 +17,22 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams<{ projectKey: string }>()
-  const [isLoading, setIsLoading] = useState<boolean>(true)
   const [project, setProject] = useState<Project | null>(null)
   const [topContributors, setTopContributors] = useState<Contributor[]>([])
-  const { data, error: graphQLRequestError } = useQuery(GetProjectDocument, {
+  const {
+    data,
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetProjectDocument, {
     variables: { key: projectKey },
   })
   useEffect(() => {
     if (data) {
       setProject(data.project)
       setTopContributors(data.topContributors)
-      setIsLoading(false)
     }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
   }, [data, graphQLRequestError, projectKey])
 

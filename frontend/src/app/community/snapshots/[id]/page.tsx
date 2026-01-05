@@ -19,21 +19,22 @@ import Release from 'components/Release'
 const SnapshotDetailsPage: React.FC = () => {
   const { id: snapshotKey } = useParams<{ id: string }>()
   const [snapshot, setSnapshot] = useState<SnapshotDetails | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
   const router = useRouter()
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetSnapshotDetailsDocument, {
+  const {
+    data: graphQLData,
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetSnapshotDetailsDocument, {
     variables: { key: snapshotKey },
   })
 
   useEffect(() => {
     if (graphQLData) {
       setSnapshot(graphQLData.snapshot)
-      setIsLoading(false)
     }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
   }, [graphQLData, graphQLRequestError, snapshotKey])
 

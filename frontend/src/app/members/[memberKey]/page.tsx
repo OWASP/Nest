@@ -31,11 +31,14 @@ const UserDetailsPage: React.FC = () => {
   const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
   const [releases, setReleases] = useState<Release[]>([])
   const [data, setData] = useState<HeatmapData>({} as HeatmapData)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
   const [username, setUsername] = useState('')
   const [isPrivateContributor, setIsPrivateContributor] = useState(false)
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetUserDataDocument, {
+  const {
+    data: graphQLData,
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetUserDataDocument, {
     variables: { key: memberKey },
   })
 
@@ -47,11 +50,9 @@ const UserDetailsPage: React.FC = () => {
       setPullRequests(graphQLData.recentPullRequests)
       setReleases(graphQLData.recentReleases)
       setTopRepositories(graphQLData.topContributedRepositories)
-      setIsLoading(false)
     }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
   }, [graphQLData, graphQLRequestError, memberKey])
 
