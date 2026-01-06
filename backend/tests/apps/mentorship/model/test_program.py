@@ -1,13 +1,6 @@
-from datetime import datetime
-from unittest.mock import MagicMock, patch
 import pytest
 
-
-class MockIntegrityError(Exception):
-    pass
-
-from apps.mentorship.models import Program, Mentor
-from apps.github.models import User as GithubUser
+from apps.mentorship.models import Program
 
 
 class TestProgram:
