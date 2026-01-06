@@ -15,8 +15,8 @@ jobs:
     name: Update Nest test images
     if: ${{ github.repository == 'OWASP/Nest' }}
     permissions:
-      contents: read
       actions: write
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
