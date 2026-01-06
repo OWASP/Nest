@@ -1,10 +1,11 @@
-"""Pytest for mentorship program nodes."""
+"""Pytest for mentorship program nodes (fixed fixture: use a FakeProgramNode so
+admins() resolver actually runs and we only mock the manager)."""
 
 from datetime import datetime
 from unittest.mock import MagicMock
 
-import pytest
 import strawberry
+import pytest
 
 from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum, ProgramStatusEnum
 from apps.mentorship.api.internal.nodes.program import (
@@ -16,28 +17,44 @@ from apps.mentorship.api.internal.nodes.program import (
 )
 
 
+class FakeProgramNode:
+    """Minimal ProgramNode-like object that implements the admins() resolver
+    while letting tests control the underlying admins manager.
+    """
+
+    def __init__(self):
+        self.id = strawberry.ID("prog-1")
+        self.key = "test-program"
+        self.name = "Test Program"
+        self.description = "A test mentorship program."
+        self.domains = ["backend", "frontend"]
+        self.ended_at = datetime(2026, 6, 30)
+        self.experience_levels = [ExperienceLevelEnum.BEGINNER, ExperienceLevelEnum.INTERMEDIATE]
+        self.mentees_limit = 10
+        self.started_at = datetime(2026, 1, 1)
+        self.status = ProgramStatusEnum.PUBLISHED
+        self.user_role = "admin"
+        self.tags = ["python", "javascript"]
+
+        # internal manager that tests will set up
+        self._admins_manager = MagicMock()
+
+    # the real resolver code should behave similarly: return the manager's .all()
+    def admins(self):
+        return self._admins_manager.all()
+
+
 @pytest.fixture
 def mock_program_node():
-    """Fixture for a mock ProgramNode instance."""
-    mock_program = MagicMock(spec=ProgramNode)
-    mock_program.id = strawberry.ID("prog-1")
-    mock_program.key = "test-program"
-    mock_program.name = "Test Program"
-    mock_program.description = "A test mentorship program."
-    mock_program.domains = ["backend", "frontend"]
-    mock_program.ended_at = datetime(2026, 6, 30)
-    mock_program.experience_levels = [ExperienceLevelEnum.BEGINNER, ExperienceLevelEnum.INTERMEDIATE]
-    mock_program.mentees_limit = 10
-    mock_program.started_at = datetime(2026, 1, 1)
-    mock_program.status = ProgramStatusEnum.PUBLISHED
-    mock_program.user_role = "admin"
-    mock_program.tags = ["python", "javascript"]
+    """Fixture returning a FakeProgramNode with a mocked admins manager."""
+    node = FakeProgramNode()
 
-    # Mock properties/methods that access database
-    mock_program.admins.all.return_value = [MagicMock(), MagicMock()]  # Return two mock mentors
-    mock_program.admins = mock_program.admins.all
+    node._admins_manager.all.return_value = [
+        MagicMock(name="admin1"),
+        MagicMock(name="admin2"),
+    ]
 
-    return mock_program
+    return node
 
 
 def test_program_node_fields(mock_program_node):
