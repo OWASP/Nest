@@ -1,7 +1,0 @@
-# rule_id<TAB>ACTION<TAB>(optional description)
-10019	IGNORE	(Content-Type Header Missing)
-10027	IGNORE	(Information Disclosure - Suspicious Comments)
-10094	IGNORE	(Base64 Disclosure in static assets)
-90003	IGNORE	(Sub Resource Integrity Attribute Missing)
-90004	IGNORE	(Insufficient Site Isolation Against Spectre Vulnerability)
-90005	IGNORE	(Sec-Fetch-Dest Header Missing)
