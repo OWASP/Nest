@@ -36,11 +36,19 @@ class ReleaseQuery:
 
         """
         limit = min(limit, MAX_LIMIT)
-        queryset = Release.objects.filter(
-            is_draft=False,
-            is_pre_release=False,
-            published_at__isnull=False,
-        ).order_by("-published_at")
+        queryset = (
+            Release.objects.select_related(
+                "author",
+                "repository",
+                "repository__organization",
+            )
+            .filter(
+                is_draft=False,
+                is_pre_release=False,
+                published_at__isnull=False,
+            )
+            .order_by("-published_at")
+        )
 
         if login:
             queryset = queryset.select_related(

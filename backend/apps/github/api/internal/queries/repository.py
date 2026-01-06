@@ -58,6 +58,7 @@ class RepositoryQuery:
             (
                 Repository.objects.select_related(
                     "organization",
+                    "owner",
                 )
                 .filter(
                     organization__login__iexact=organization,

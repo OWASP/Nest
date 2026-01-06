@@ -28,9 +28,13 @@ class SnapshotQuery:
         """Resolve snapshots."""
         limit = min(limit, MAX_LIMIT)
         return (
-            Snapshot.objects.filter(
+            Snapshot.objects.prefetch_related(
+                "new_chapters", "new_issues", "new_projects", "new_releases", "new_users"
+            )
+            .filter(
                 status=Snapshot.Status.COMPLETED,
-            ).order_by(
+            )
+            .order_by(
                 "-created_at",
             )[:limit]
             if limit > 0

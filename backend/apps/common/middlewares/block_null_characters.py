@@ -2,7 +2,7 @@
 
 import logging
 
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, JsonResponse
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,10 @@ class BlockNullCharactersMiddleware:
 
     def __call__(self, request: HttpRequest):
         """Process the request to block null characters."""
-        error_response = HttpResponse("Null characters are not allowed.", status=400)
+        error_response = JsonResponse(
+            {"error": "Request contains null characters which are not allowed."},
+            status=400,
+        )
         if (
             "\x00" in request.path
             or "\x00" in request.path_info

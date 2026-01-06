@@ -45,8 +45,14 @@ class PullRequestQuery:
         queryset = (
             PullRequest.objects.select_related(
                 "author",
+                "milestone",
                 "repository",
                 "repository__organization",
+            )
+            .prefetch_related(
+                "assignees",
+                "labels",
+                "related_issues",
             )
             .exclude(
                 author__is_bot=True,

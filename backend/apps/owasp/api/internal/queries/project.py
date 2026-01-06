@@ -43,7 +43,10 @@ class ProjectQuery:
         """
         limit = min(limit, MAX_LIMIT)
         return (
-            Project.objects.filter(is_active=True).order_by("-created_at")[:limit]
+            Project.objects.select_related("owasp_repository")
+            .prefetch_related("organizations", "owners", "repositories")
+            .filter(is_active=True)
+            .order_by("-created_at")[:limit]
             if limit > 0
             else []
         )
@@ -54,10 +57,15 @@ class ProjectQuery:
         if not query.strip():
             return []
 
-        return Project.objects.filter(
-            is_active=True,
-            name__icontains=query.strip(),
-        ).order_by("name")[:3]
+        return (
+            Project.objects.select_related("owasp_repository")
+            .prefetch_related("organizations", "owners", "repositories")
+            .filter(
+                is_active=True,
+                name__icontains=query.strip(),
+            )
+            .order_by("name")[:3]
+        )
 
     @strawberry.field
     def is_project_leader(self, info: strawberry.Info, login: str) -> bool:

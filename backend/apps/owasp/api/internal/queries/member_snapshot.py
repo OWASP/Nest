@@ -30,7 +30,11 @@ class MemberSnapshotQuery:
         try:
             user = User.objects.get(login=user_login)
 
-            query = MemberSnapshot.objects.filter(github_user=user)
+            query = (
+                MemberSnapshot.objects.select_related("github_user")
+                .prefetch_related("issues", "pull_requests", "messages")
+                .filter(github_user=user)
+            )
 
             if start_year:
                 query = query.filter(start_at__year=start_year)
@@ -55,7 +59,11 @@ class MemberSnapshotQuery:
 
         """
         limit = min(limit, MAX_LIMIT)
-        query = MemberSnapshot.objects.all()
+        query = (
+            MemberSnapshot.objects.all()
+            .select_related("github_user")
+            .prefetch_related("issues", "pull_requests", "messages")
+        )
 
         if user_login:
             try:

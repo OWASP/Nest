@@ -36,12 +36,19 @@ class IssueQuery:
 
         """
         limit = min(limit, MAX_LIMIT)
-        queryset = Issue.objects.select_related(
-            "author",
-            "repository",
-            "repository__organization",
-        ).order_by(
-            "-created_at",
+        queryset = (
+            Issue.objects.select_related(
+                "author",
+                "repository",
+                "milestone",
+                "level",
+                "repository",
+                "repository__organization",
+            )
+            .prefetch_related("labels", "assignees")
+            .order_by(
+                "-created_at",
+            )
         )
 
         filters = {}
