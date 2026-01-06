@@ -25,7 +25,7 @@ output "frontend_ecr_repository_url" {
 
 output "frontend_url" {
   description = "The URL to access the frontend."
-  value       = var.frontend_enable_https && var.frontend_domain_name != null ? "https://${var.frontend_domain_name}" : "http://${module.frontend.alb_dns_name}"
+  value       = var.frontend_domain_name != null ? "https://${var.frontend_domain_name}" : "http://${module.frontend.alb_dns_name}"
 }
 
 output "private_subnet_ids" {

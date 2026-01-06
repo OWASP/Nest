@@ -38,7 +38,7 @@ resource "aws_ssm_parameter" "django_algolia_write_api_key" {
 }
 
 resource "aws_ssm_parameter" "django_allowed_hosts" {
-  description = "The allowed hosts."
+  description = "Django allowed hosts - hostname only, no protocol (e.g., nest.owasp.dev)."
   name        = "/${var.project_name}/${var.environment}/DJANGO_ALLOWED_HOSTS"
   tags        = var.common_tags
   type        = "String"
@@ -50,11 +50,11 @@ resource "aws_ssm_parameter" "django_allowed_hosts" {
 }
 
 resource "aws_ssm_parameter" "django_allowed_origins" {
-  description = "A Comma-separated list of allowed CORS origins for Django."
+  description = "Django allowed CORS origins - full URL with protocol (e.g., https://nest.owasp.dev)."
   name        = "/${var.project_name}/${var.environment}/DJANGO_ALLOWED_ORIGINS"
   tags        = var.common_tags
   type        = "String"
-  value       = "to-be-set-in-aws-console"
+  value       = var.allowed_origins
 
   lifecycle {
     ignore_changes = [value]
@@ -286,11 +286,11 @@ resource "aws_ssm_parameter" "nextauth_secret" {
 }
 
 resource "aws_ssm_parameter" "nextauth_url" {
-  description = "NextAuth URL (frontend base URL)."
+  description = "NextAuth base URL - full URL with protocol (e.g., https://nest.owasp.dev)."
   name        = "/${var.project_name}/${var.environment}/NEXTAUTH_URL"
   tags        = var.common_tags
   type        = "String"
-  value       = "to-be-set-in-aws-console"
+  value       = var.nextauth_url
 
   lifecycle {
     ignore_changes = [value]

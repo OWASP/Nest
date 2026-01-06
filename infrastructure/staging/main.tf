@@ -79,7 +79,7 @@ module "frontend" {
   desired_count            = var.frontend_desired_count
   domain_name              = var.frontend_domain_name
   enable_auto_scaling      = var.frontend_enable_auto_scaling
-  enable_https             = var.frontend_enable_https
+  enable_https             = var.frontend_domain_name != null
   environment              = var.environment
   frontend_parameters_arns = module.parameters.frontend_ssm_parameter_arns
   frontend_sg_id           = module.security.frontend_sg_id
@@ -110,6 +110,8 @@ module "networking" {
 module "parameters" {
   source = "../modules/parameters"
 
+  allowed_hosts      = var.frontend_domain_name != null ? var.frontend_domain_name : module.frontend.alb_dns_name
+  allowed_origins    = var.frontend_domain_name != null ? "https://${var.frontend_domain_name}" : "http://${module.frontend.alb_dns_name}"
   common_tags        = local.common_tags
   db_host            = module.database.db_proxy_endpoint
   db_name            = var.db_name
@@ -117,6 +119,7 @@ module "parameters" {
   db_port            = var.db_port
   db_user            = var.db_user
   environment        = var.environment
+  nextauth_url       = var.frontend_domain_name != null ? "https://${var.frontend_domain_name}" : "http://${module.frontend.alb_dns_name}"
   project_name       = var.project_name
   redis_host         = module.cache.redis_primary_endpoint
   redis_password_arn = module.cache.redis_password_arn

@@ -1,7 +1,11 @@
 variable "allowed_hosts" {
-  description = "The Django allowed hosts."
+  description = "The Django allowed hosts - hostname only, no protocol (e.g., nest.owasp.dev)."
   type        = string
-  default     = "*"
+}
+
+variable "allowed_origins" {
+  description = "The Django allowed CORS origins (comma-separated URLs with protocol)."
+  type        = string
 }
 
 variable "common_tags" {
@@ -44,6 +48,11 @@ variable "db_user" {
 
 variable "environment" {
   description = "The environment (e.g., staging, production)."
+  type        = string
+}
+
+variable "nextauth_url" {
+  description = "The NextAuth base URL (frontend URL with protocol)."
   type        = string
 }
 

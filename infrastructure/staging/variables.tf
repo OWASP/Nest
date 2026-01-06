@@ -134,19 +134,13 @@ variable "frontend_desired_count" {
 }
 
 variable "frontend_domain_name" {
-  description = "The domain name for frontend (required for HTTPS)"
+  description = "The domain name for frontend. When set, HTTPS is auto-enabled via ACM."
   type        = string
   default     = null
 }
 
 variable "frontend_enable_auto_scaling" {
   description = "Whether to enable auto scaling for frontend."
-  type        = bool
-  default     = false
-}
-
-variable "frontend_enable_https" {
-  description = "Whether to enable HTTPS listener on ALB."
   type        = bool
   default     = false
 }

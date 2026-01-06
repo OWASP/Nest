@@ -5,6 +5,7 @@ create_rds_proxy               = false
 create_vpc_endpoints           = false
 ecs_use_public_subnets         = true
 environment                    = "staging"
+frontend_domain_name           = https://nest.owasp.dev
 frontend_use_fargate_spot      = true
 project_name                   = "owasp-nest"
 use_fargate_spot               = true

@@ -145,6 +145,7 @@ resource "aws_security_group_rule" "frontend_https" {
 }
 
 resource "aws_security_group_rule" "frontend_to_vpc_endpoints" {
+  count                    = var.vpc_endpoint_sg_id != null ? 1 : 0
   description              = "Allow HTTPS to VPC endpoints"
   from_port                = 443
   protocol                 = "tcp"
