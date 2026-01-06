@@ -187,11 +187,11 @@ describe('ApiKeysPage Component', () => {
       await openCreateModal()
 
       fireEvent.click(screen.getByRole('button', { name: /90 days/i }))
-      let expiryInput = screen.getByLabelText('Expiration Date') as HTMLInputElement
+      let expiryInput = screen.getByLabelText('Expiration Date')
       expect(expiryInput.value).toBe(format(addDays(new Date(), 90), 'yyyy-MM-dd'))
 
       fireEvent.click(screen.getByRole('button', { name: /1 year/i }))
-      expiryInput = screen.getByLabelText('Expiration Date') as HTMLInputElement
+      expiryInput = screen.getByLabelText('Expiration Date')
       expect(expiryInput.value).toBe(format(addDays(new Date(), 365), 'yyyy-MM-dd'))
     })
   })
@@ -233,7 +233,7 @@ describe('ApiKeysPage Component', () => {
       render(<ApiKeysPage />)
       await openCreateModal()
 
-      const expiryInput = screen.getByLabelText('Expiration Date') as HTMLInputElement
+      const expiryInput = screen.getByLabelText('Expiration Date')
       fireEvent.change(expiryInput, { target: { value: '' } })
       fireEvent.change(screen.getByLabelText('API Key Name'), { target: { value: 'Valid Name' } })
       fireEvent.click(screen.getByRole('button', { name: /create api key/i }))
@@ -336,7 +336,7 @@ describe('ApiKeysPage Component', () => {
       fireEvent.click(screen.getByText(/Create New Key/))
       await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
 
-      const nameInput = screen.getByLabelText('API Key Name') as HTMLInputElement
+      const nameInput = screen.getByLabelText('API Key Name')
       expect(nameInput.value).toBe('')
     })
 

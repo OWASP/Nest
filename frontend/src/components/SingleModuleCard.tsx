@@ -28,7 +28,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
 
   const isAdmin =
     accessLevel === 'admin' &&
-    admins?.some((admin) => admin.login === ((data as ExtendedSession)?.user?.login as string))
+    admins?.some((admin) => admin.login === ((data as ExtendedSession)?.user?.login))
 
   // Extract programKey from pathname (e.g., /my/mentorship/programs/[programKey])
   const programKey = pathname?.split('/programs/')[1]?.split('/')[0] || ''

@@ -35,6 +35,9 @@ const eslintConfig = [
       'dist',
       'next-env.d.ts',
       'src/types/__generated__/**/*',
+      'tailwind.config.js',
+      'lighthouserc.js',
+      'postcss.config.js',
     ],
   },
   js.configs.recommended,
@@ -48,6 +51,10 @@ const eslintConfig = [
         ...globals.es2023,
         ...globals.jest,
         ...globals.node,
+      },
+      parserOptions: {
+        project: './tsconfig.json',
+        tsconfigRootDir: __dirname,
       },
     },
     plugins: {
@@ -86,6 +93,11 @@ const eslintConfig = [
       ...jest.configs.recommended.rules,
       ...prettierConfig.rules,
       ...nextPlugin.configs.recommended.rules,
+      
+      "@typescript-eslint/no-unnecessary-type-assertion": "error",
+      "@typescript-eslint/no-non-null-assertion": "error",
+"@typescript-eslint/no-unnecessary-condition": "off",
+
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
@@ -145,7 +157,7 @@ const eslintConfig = [
       'no-restricted-imports': [
         'error',
         {
-          patterns: ['.*'], // Disable relative imports.
+          patterns: ['.*'],
         },
       ],
       'no-unused-vars': 'off',
@@ -169,6 +181,12 @@ const eslintConfig = [
       'no-console': 'off',
     },
   },
+  {
+  files: ['**/*.test.ts', '**/*.test.tsx'],
+  rules: {
+    '@typescript-eslint/no-non-null-assertion': 'off',
+  },
+},
 ]
 
 export default eslintConfig

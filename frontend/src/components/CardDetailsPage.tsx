@@ -127,7 +127,7 @@ const DetailsCard = ({
               {type === 'module' &&
                 accessLevel === 'admin' &&
                 admins?.some(
-                  (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
+                  (admin) => admin.login === ((data as ExtendedSession)?.user?.login)
                 ) && <EntityActions type="module" programKey={programKey} moduleKey={entityKey} />}
               {!isActive && <StatusBadge status="inactive" size="md" />}
               {isArchived && type === 'repository' && <StatusBadge status="archived" size="md" />}
