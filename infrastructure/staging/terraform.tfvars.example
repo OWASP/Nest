@@ -6,5 +6,7 @@ ecs_use_public_subnets        = true
 environment                   = "staging"
 frontend_domain_name          = "https://nest.owasp.dev"
 frontend_use_fargate_spot     = true
+lambda_arn                    = null
+lambda_function_name          = null
 project_name                  = "owasp-nest"
 use_fargate_spot              = true

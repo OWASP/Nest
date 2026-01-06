@@ -165,7 +165,7 @@ resource "aws_lambda_permission" "alb" {
   statement_id  = "AllowALBInvoke"
 }
 
-resource "aws_lb_listener_rule" "backend_https" {
+resource "aws_lb_listener_rule" "backend_https_1" {
   count        = var.lambda_arn != null && var.enable_https ? 1 : 0
   listener_arn = aws_lb_listener.https[0].arn
   priority     = 100
@@ -178,23 +178,30 @@ resource "aws_lb_listener_rule" "backend_https" {
 
   condition {
     path_pattern {
-      values = [
-        "/a/*",
-        "/api/*",
-        "/csrf/*",
-        "/graphql",
-        "/graphql/*",
-        "/idx/*",
-        "/integrations/*",
-        "/sitemap",
-        "/sitemap.xml",
-        "/status/*"
-      ]
+      values = ["/a/*", "/api/*", "/csrf/*", "/graphql", "/graphql/*"]
     }
   }
 }
 
-resource "aws_lb_listener_rule" "backend_http" {
+resource "aws_lb_listener_rule" "backend_https_2" {
+  count        = var.lambda_arn != null && var.enable_https ? 1 : 0
+  listener_arn = aws_lb_listener.https[0].arn
+  priority     = 101
+  tags         = var.common_tags
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.lambda[0].arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/idx/*", "/integrations/*", "/sitemap", "/sitemap.xml", "/status/*"]
+    }
+  }
+}
+
+resource "aws_lb_listener_rule" "backend_http_1" {
   count        = var.lambda_arn != null && !var.enable_https ? 1 : 0
   listener_arn = aws_lb_listener.http[0].arn
   priority     = 100
@@ -207,18 +214,25 @@ resource "aws_lb_listener_rule" "backend_http" {
 
   condition {
     path_pattern {
-      values = [
-        "/a/*",
-        "/api/*",
-        "/csrf/*",
-        "/graphql",
-        "/graphql/*",
-        "/idx/*",
-        "/integrations/*",
-        "/sitemap",
-        "/sitemap.xml",
-        "/status/*"
-      ]
+      values = ["/a/*", "/api/*", "/csrf/*", "/graphql", "/graphql/*"]
+    }
+  }
+}
+
+resource "aws_lb_listener_rule" "backend_http_2" {
+  count        = var.lambda_arn != null && !var.enable_https ? 1 : 0
+  listener_arn = aws_lb_listener.http[0].arn
+  priority     = 101
+  tags         = var.common_tags
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.lambda[0].arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/idx/*", "/integrations/*", "/sitemap", "/sitemap.xml", "/status/*"]
     }
   }
 }

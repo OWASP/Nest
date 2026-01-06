@@ -101,7 +101,7 @@ Follow these steps to set up the infrastructure:
 
 ## Setting up Zappa
 
-The Django backend deployment is managed by Zappa. This includes the API Gateway, IAM roles, and Lambda Function provision.
+The Django backend deployment is managed by Zappa. This includes the IAM roles, and Lambda Function provision.
 
 1. **Change Directory**:
 
@@ -151,7 +151,21 @@ The Django backend deployment is managed by Zappa. This includes the API Gateway
   > [!NOTE]
   > If the deployment is successful but returns a `5xx` error, resolve the issues and use `zappa undeploy staging` & `zappa deploy staging`. The command `zappa update staging` may not work.
 
-  Once deployed, use the URL provided by Zappa to test the API.
+6. **Configure ALB Routing**:
+  - Run `zappa status staging` to get Zappa details.
+  - Update `terraform.tfvars` with the Lambda details:
+
+    ```hcl
+    lambda_arn           = "arn:aws:lambda:us-east-2:000000000000:function:nest-backend-staging"
+    lambda_function_name = "nest-backend-staging"
+    ```
+
+  - Apply the changes to create ALB routing:
+
+    ```bash
+    cd ../infrastructure/staging/
+    terraform apply
+    ```
 
 ## Populate ECR Repositories
 ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)

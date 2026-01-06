@@ -3,6 +3,11 @@ output "acm_certificate_domain_validation_options" {
   value       = module.alb.acm_certificate_domain_validation_options
 }
 
+output "acm_certificate_status" {
+  description = "The status of the ACM certificate."
+  value       = module.alb.acm_certificate_status
+}
+
 output "alb_dns_name" {
   description = "The DNS name of the ALB."
   value       = module.alb.alb_dns_name

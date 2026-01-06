@@ -8,6 +8,11 @@ output "acm_certificate_domain_validation_options" {
   value       = var.enable_https && var.domain_name != null ? aws_acm_certificate.main[0].domain_validation_options : []
 }
 
+output "acm_certificate_status" {
+  description = "The status of the ACM certificate."
+  value       = var.enable_https && var.domain_name != null ? aws_acm_certificate.main[0].status : null
+}
+
 output "alb_arn" {
   description = "The ARN of the ALB."
   value       = aws_lb.main.arn

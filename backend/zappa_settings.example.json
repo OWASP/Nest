@@ -1,5 +1,6 @@
 {
   "staging": {
+    "apigateway_enabled": false,
     "app_function": "wsgi.application",
     "aws_environment_variables": {
       "AWS_SYSTEMS_MANAGER_PARAM_STORE_PATH": "/owasp-nest/staging"
