@@ -2,7 +2,7 @@
 
 import logging
 from collections import defaultdict
-from datetime import UTC, datetime , timedelta
+from datetime import UTC, datetime, timedelta
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
@@ -41,7 +41,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--start-at",
             type=str,
-            help="Start date (YYYY-MM-DD). Defaults to  365 days ago.",
+            help="Start date (YYYY-MM-DD). Defaults to 365 days ago.",
         )
         parser.add_argument(
             "--end-at",
