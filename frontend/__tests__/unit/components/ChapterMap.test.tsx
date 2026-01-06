@@ -141,7 +141,7 @@ describe('ChapterMap', () => {
           [-90, -180],
           [90, 180],
         ],
-        maxBoundsViscosity: 1.0,
+        maxBoundsViscosity: 1,
         scrollWheelZoom: false,
         zoomControl: false,
       })
