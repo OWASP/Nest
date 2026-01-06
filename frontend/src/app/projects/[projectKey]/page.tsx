@@ -31,7 +31,7 @@ const ProjectDetailsPage = () => {
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
     }
-  }, [graphQLRequestError, projectKey])
+  }, [graphQLRequestError])
 
   if (isLoading) {
     return <LoadingSpinner />
