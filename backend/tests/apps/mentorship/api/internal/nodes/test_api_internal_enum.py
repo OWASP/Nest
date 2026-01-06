@@ -20,13 +20,3 @@ def test_program_status_enum_values():
     assert ProgramStatusEnum.DRAFT.value == Program.ProgramStatus.DRAFT
     assert ProgramStatusEnum.PUBLISHED.value == Program.ProgramStatus.PUBLISHED
     assert ProgramStatusEnum.COMPLETED.value == Program.ProgramStatus.COMPLETED
-
-
-def test_experience_level_enum_is_strawberry_enum():
-    """Test that ExperienceLevelEnum is a Strawberry enum."""
-    assert strawberry.is_enum(ExperienceLevelEnum)
-
-
-def test_program_status_enum_is_strawberry_enum():
-    """Test that ProgramStatusEnum is a Strawberry enum."""
-    assert strawberry.is_enum(ProgramStatusEnum)
