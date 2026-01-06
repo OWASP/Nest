@@ -5,6 +5,8 @@ import strawberry
 from apps.owasp.api.internal.nodes.snapshot import SnapshotNode
 from apps.owasp.models.snapshot import Snapshot
 
+MAX_LIMIT = 1000
+
 
 @strawberry.type
 class SnapshotQuery:
@@ -24,6 +26,7 @@ class SnapshotQuery:
     @strawberry.field
     def snapshots(self, limit: int = 12) -> list[SnapshotNode]:
         """Resolve snapshots."""
+        limit = min(limit, MAX_LIMIT)
         return (
             Snapshot.objects.filter(
                 status=Snapshot.Status.COMPLETED,

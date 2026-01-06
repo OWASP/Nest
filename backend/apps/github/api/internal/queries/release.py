@@ -1,10 +1,13 @@
 """GraphQL queries for handling OWASP releases."""
 
 import strawberry
-from django.db.models import OuterRef, Subquery
+from django.db.models import F, Window
+from django.db.models.functions import Rank
 
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.models.release import Release
+
+MAX_LIMIT = 1000
 
 
 @strawberry.type
@@ -32,6 +35,7 @@ class ReleaseQuery:
             list[ReleaseNode]: List of release nodes containing the filtered list of releases.
 
         """
+        limit = min(limit, MAX_LIMIT)
         queryset = Release.objects.filter(
             is_draft=False,
             is_pre_release=False,
@@ -53,15 +57,16 @@ class ReleaseQuery:
             )
 
         if distinct:
-            latest_release_per_author = (
-                queryset.filter(author_id=OuterRef("author_id"))
+            queryset = (
+                queryset.annotate(
+                    rank=Window(
+                        expression=Rank(),
+                        partition_by=[F("author_id")],
+                        order_by=F("published_at").desc(),
+                    )
+                )
+                .filter(rank=1)
                 .order_by("-published_at")
-                .values("id")[:1]
-            )
-            queryset = queryset.filter(
-                id__in=Subquery(latest_release_per_author),
-            ).order_by(
-                "-published_at",
             )
 
         return queryset[:limit] if limit > 0 else []

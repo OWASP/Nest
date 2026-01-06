@@ -5,6 +5,8 @@ import strawberry
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.github.models.repository_contributor import RepositoryContributor
 
+MAX_LIMIT = 100
+
 
 @strawberry.type
 class RepositoryContributorQuery:
@@ -41,6 +43,7 @@ class RepositoryContributorQuery:
         """
         if limit <= 0:
             return []
+        limit = min(limit, MAX_LIMIT)
         top_contributors = RepositoryContributor.get_top_contributors(
             chapter=chapter,
             committee=committee,

@@ -3,7 +3,6 @@
 import logging
 
 import strawberry
-from django.core.exceptions import ObjectDoesNotExist
 
 from apps.mentorship.api.internal.nodes.module import ModuleNode
 from apps.mentorship.models import Module
@@ -44,7 +43,7 @@ class ModuleQuery:
                 .prefetch_related("mentors__github_user")
                 .get(key=module_key, program__key=program_key)
             )
-        except Module.DoesNotExist as err:
+        except Module.DoesNotExist:
             msg = f"Module with key '{module_key}' under program '{program_key}' not found."
             logger.warning(msg, exc_info=True)
-            raise ObjectDoesNotExist(msg) from err
+            return None

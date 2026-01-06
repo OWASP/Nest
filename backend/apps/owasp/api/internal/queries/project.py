@@ -7,6 +7,8 @@ from apps.github.models.user import User as GithubUser
 from apps.owasp.api.internal.nodes.project import ProjectNode
 from apps.owasp.models.project import Project
 
+MAX_LIMIT = 1000
+
 
 @strawberry.type
 class ProjectQuery:
@@ -39,6 +41,7 @@ class ProjectQuery:
             list[ProjectNode]: A list of recent active projects.
 
         """
+        limit = min(limit, MAX_LIMIT)
         return (
             Project.objects.filter(is_active=True).order_by("-created_at")[:limit]
             if limit > 0

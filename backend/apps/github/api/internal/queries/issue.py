@@ -7,6 +7,8 @@ from django.db.models.functions import Rank
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.models.issue import Issue
 
+MAX_LIMIT = 1000
+
 
 @strawberry.type
 class IssueQuery:
@@ -33,6 +35,7 @@ class IssueQuery:
             list[IssueNode]: List of issue nodes.
 
         """
+        limit = min(limit, MAX_LIMIT)
         queryset = Issue.objects.select_related(
             "author",
             "repository",

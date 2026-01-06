@@ -8,6 +8,8 @@ from django.db.models import OuterRef, Subquery
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.models.milestone import Milestone
 
+MAX_LIMIT = 1000
+
 
 @strawberry.enum
 class MilestoneStateEnum(str, enum.Enum):
@@ -52,6 +54,7 @@ class MilestoneQuery:
             case _:
                 milestones = Milestone.objects.all()
 
+        limit = min(limit, MAX_LIMIT)
         milestones = milestones.select_related(
             "author",
             "repository",

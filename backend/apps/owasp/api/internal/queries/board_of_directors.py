@@ -5,6 +5,8 @@ import strawberry
 from apps.owasp.api.internal.nodes.board_of_directors import BoardOfDirectorsNode
 from apps.owasp.models.board_of_directors import BoardOfDirectors
 
+MAX_LIMIT = 1000
+
 
 @strawberry.type
 class BoardOfDirectorsQuery:
@@ -37,4 +39,5 @@ class BoardOfDirectorsQuery:
             List of BoardOfDirectorsNode objects.
 
         """
+        limit = min(limit, MAX_LIMIT)
         return BoardOfDirectors.objects.order_by("-year")[:limit] if limit > 0 else []

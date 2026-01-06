@@ -6,6 +6,8 @@ from apps.github.models.user import User
 from apps.owasp.api.internal.nodes.member_snapshot import MemberSnapshotNode
 from apps.owasp.models.member_snapshot import MemberSnapshot
 
+MAX_LIMIT = 1000
+
 
 @strawberry.type
 class MemberSnapshotQuery:
@@ -52,6 +54,7 @@ class MemberSnapshotQuery:
             List of MemberSnapshotNode objects
 
         """
+        limit = min(limit, MAX_LIMIT)
         query = MemberSnapshot.objects.all()
 
         if user_login:

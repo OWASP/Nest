@@ -1,11 +1,14 @@
 """Github pull requests GraphQL queries."""
 
 import strawberry
-from django.db.models import OuterRef, Subquery
+from django.db.models import F, Window
+from django.db.models.functions import Rank
 
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.models.pull_request import PullRequest
 from apps.owasp.models.project import Project
+
+MAX_LIMIT = 1000
 
 
 @strawberry.type
@@ -38,6 +41,7 @@ class PullRequestQuery:
             filtered list of pull requests.
 
         """
+        limit = min(limit, MAX_LIMIT)
         queryset = (
             PullRequest.objects.select_related(
                 "author",
@@ -52,13 +56,14 @@ class PullRequestQuery:
             )
         )
 
+        filters = {}
         if login:
-            queryset = queryset.filter(author__login=login)
+            filters["author__login"] = login
 
         if organization:
-            queryset = queryset.filter(
-                repository__organization__login=organization,
-            )
+            filters["repository__organization__login"] = organization
+
+        queryset = queryset.filter(**filters)
 
         if project:
             project_instance = Project.objects.filter(key__iexact=f"www-project-{project}").first()
@@ -73,19 +78,16 @@ class PullRequestQuery:
             queryset = queryset.filter(repository__key__iexact=repository)
 
         if distinct:
-            latest_pull_request_per_author = (
-                queryset.filter(
-                    author_id=OuterRef("author_id"),
+            queryset = (
+                queryset.annotate(
+                    rank=Window(
+                        expression=Rank(),
+                        partition_by=[F("author_id")],
+                        order_by=F("created_at").desc(),
+                    )
                 )
-                .order_by(
-                    "-created_at",
-                )
-                .values("id")[:1]
-            )
-            queryset = queryset.filter(
-                id__in=Subquery(latest_pull_request_per_author),
-            ).order_by(
-                "-created_at",
+                .filter(rank=1)
+                .order_by("-created_at")
             )
 
         return queryset[:limit] if limit > 0 else []

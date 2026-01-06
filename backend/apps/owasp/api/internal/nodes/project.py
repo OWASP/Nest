@@ -20,6 +20,8 @@ RECENT_ISSUES_LIMIT = 5
 RECENT_RELEASES_LIMIT = 5
 RECENT_PULL_REQUESTS_LIMIT = 5
 
+MAX_LIMIT = 1000
+
 
 @strawberry_django.type(
     Project,
@@ -49,6 +51,7 @@ class ProjectNode(GenericEntityNode):
     @strawberry.field
     def health_metrics_list(self, limit: int = 30) -> list[ProjectHealthMetricsNode]:
         """Resolve project health metrics."""
+        limit = min(limit, MAX_LIMIT)
         return (
             ProjectHealthMetrics.objects.filter(project=self).order_by("nest_created_at")[:limit]
             if limit > 0
@@ -85,7 +88,12 @@ class ProjectNode(GenericEntityNode):
     @strawberry.field
     def recent_milestones(self, limit: int = 5) -> list[MilestoneNode]:
         """Resolve recent milestones."""
-        return self.recent_milestones.select_related("author").order_by("-created_at")[:limit]
+        limit = min(limit, MAX_LIMIT)
+        return (
+            self.recent_milestones.select_related("author").order_by("-created_at")[:limit]
+            if limit > 0
+            else []
+        )
 
     @strawberry.field
     def recent_pull_requests(self) -> list[PullRequestNode]:

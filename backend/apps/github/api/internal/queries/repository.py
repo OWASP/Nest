@@ -5,6 +5,8 @@ import strawberry
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.github.models.repository import Repository
 
+MAX_LIMIT = 1000
+
 
 @strawberry.type
 class RepositoryQuery:
@@ -51,6 +53,7 @@ class RepositoryQuery:
             list[RepositoryNode]: A list of repositories.
 
         """
+        limit = min(limit, MAX_LIMIT)
         return (
             (
                 Repository.objects.select_related(
