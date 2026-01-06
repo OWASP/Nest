@@ -92,8 +92,8 @@ jobs:
             type=registry,ref=owasp/nest:test-fuzz-backend-cache
           cache-to: |
             type=gha,compression=zstd
-          context: backend/docker/fuzz
-          file: backend/docker/fuzz/Dockerfile
+          context: docker/backend/fuzz
+          file: docker/backend/fuzz/Dockerfile
           load: true
           platforms: linux/amd64
           tags: owasp/nest:test-fuzz-backend-latest

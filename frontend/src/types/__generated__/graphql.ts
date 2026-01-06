@@ -14,7 +14,7 @@ export type Scalars = {
   Float: { input: number; output: number; }
   Date: { input: string | number; output: string | number; }
   DateTime: { input: string | number; output: string | number; }
-  JSON: { input: any; output: any; }
+  JSON: { input: Record<string, unknown>; output: Record<string, unknown>; }
   UUID: { input: any; output: any; }
 };
 
@@ -60,6 +60,8 @@ export type BoardOfDirectorsNode = Node & {
 
 export type ChapterNode = Node & {
   __typename?: 'ChapterNode';
+  contributionData: Scalars['JSON']['output'];
+  contributionStats?: Maybe<Scalars['JSON']['output']>;
   country: Scalars['String']['output'];
   createdAt: Scalars['Float']['output'];
   entityLeaders: Array<EntityMemberNode>;
@@ -608,6 +610,8 @@ export type ProjectHealthStatsNode = {
 
 export type ProjectNode = Node & {
   __typename?: 'ProjectNode';
+  contributionData?: Maybe<Scalars['JSON']['output']>;
+  contributionStats?: Maybe<Scalars['JSON']['output']>;
   contributorsCount: Scalars['Int']['output'];
   createdAt?: Maybe<Scalars['DateTime']['output']>;
   entityLeaders: Array<EntityMemberNode>;

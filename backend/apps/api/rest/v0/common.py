@@ -3,8 +3,15 @@
 from ninja import Field, FilterSchema, Schema
 
 
+class Leader(Schema):
+    """Schema for Leader."""
+
+    key: str | None = None
+    name: str
+
+
 class ValidationErrorSchema(Schema):
-    """Schema for validation errors."""
+    """Schema for validation error."""
 
     message: str
     errors: list[dict] | dict
