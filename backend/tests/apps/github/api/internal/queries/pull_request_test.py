@@ -24,6 +24,7 @@ class TestPullRequestQuery:
         """Mock queryset with all necessary methods."""
         queryset = MagicMock()
         queryset.select_related.return_value = queryset
+        queryset.prefetch_related.return_value = queryset
         queryset.exclude.return_value = queryset
         queryset.order_by.return_value = queryset
         queryset.filter.return_value = queryset
@@ -41,7 +42,10 @@ class TestPullRequestQuery:
 
         assert result == [mock_pull_request]
         mock_objects.select_related.assert_called_once_with(
-            "author", "repository", "repository__organization"
+            "author", "milestone", "repository", "repository__organization"
+        )
+        mock_queryset.prefetch_related.assert_called_once_with(
+            "assignees", "labels", "related_issues"
         )
         mock_queryset.exclude.assert_called_once_with(author__is_bot=True)
         mock_queryset.order_by.assert_called_once_with("-created_at")

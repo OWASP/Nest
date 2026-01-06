@@ -78,6 +78,6 @@ class TestRepositoryQuery:
 
             assert isinstance(result, list)
             assert result[0] == mock_repository
-            mock_select_related.assert_called_once_with("organization")
+            mock_select_related.assert_called_once_with("organization", "owner")
             mock_queryset.filter.assert_called_once_with(organization__login__iexact="test-org")
             mock_queryset.filter.return_value.order_by.assert_called_once_with("-stars_count")
