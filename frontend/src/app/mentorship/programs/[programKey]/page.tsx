@@ -1,12 +1,10 @@
 'use client'
 
 import { useQuery } from '@apollo/client/react'
-import { useParams, useSearchParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
 import { ErrorDisplay } from 'app/global-error'
 import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 
-import type { Module, Program } from 'types/mentorship'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
@@ -14,53 +12,17 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProgramDetailsPage = () => {
   const { programKey } = useParams<{ programKey: string }>()
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const shouldRefresh = searchParams.get('refresh') === 'true'
-  const {
-    data,
-    refetch,
-    loading: isQueryLoading,
-  } = useQuery(GetProgramAndModulesDocument, {
+  const { data, loading: isLoading } = useQuery(GetProgramAndModulesDocument, {
     variables: { programKey },
     skip: !programKey,
-    notifyOnNetworkStatusChange: true,
   })
 
-  const [program, setProgram] = useState<Program | null>(null)
-  const [modules, setModules] = useState<Module[]>([])
-  const [isRefetching, setIsRefetching] = useState(false)
-
-  const isLoading = isQueryLoading || isRefetching
-
-  useEffect(() => {
-    const processResult = async () => {
-      if (shouldRefresh) {
-        setIsRefetching(true)
-        try {
-          await refetch()
-        } finally {
-          setIsRefetching(false)
-
-          const params = new URLSearchParams(searchParams.toString())
-          params.delete('refresh')
-          const cleaned = params.toString()
-          router.replace(cleaned ? `?${cleaned}` : globalThis.location.pathname, { scroll: false })
-        }
-      }
-
-      if (data?.getProgram) {
-        setProgram(data.getProgram)
-        setModules(data.getProgramModules || [])
-      }
-    }
-
-    processResult()
-  }, [shouldRefresh, data, refetch, router, searchParams])
+  const program = data?.getProgram
+  const modules = data?.getProgramModules || []
 
   if (isLoading) return <LoadingSpinner />
 
-  if (!program && !isLoading) {
+  if (!data || !program) {
     return (
       <ErrorDisplay
         statusCode={404}

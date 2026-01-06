@@ -3,14 +3,12 @@ import { useQuery } from '@apollo/client/react'
 import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { FaExclamationCircle } from 'react-icons/fa'
 import { FaCodeFork, FaFolderOpen, FaStar } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetProjectDocument } from 'types/__generated__/projectQueries.generated'
-import type { Contributor } from 'types/contributor'
-import type { Project } from 'types/project'
 import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate, getDateRange } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
@@ -18,8 +16,6 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams<{ projectKey: string }>()
-  const [project, setProject] = useState<Project | null>(null)
-  const [topContributors, setTopContributors] = useState<Contributor[]>([])
   const {
     data,
     error: graphQLRequestError,
@@ -27,21 +23,21 @@ const ProjectDetailsPage = () => {
   } = useQuery(GetProjectDocument, {
     variables: { key: projectKey },
   })
+
+  const project = data?.project
+  const topContributors = data?.topContributors || []
+
   useEffect(() => {
-    if (data) {
-      setProject(data.project)
-      setTopContributors(data.topContributors)
-    }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
     }
-  }, [data, graphQLRequestError, projectKey])
+  }, [graphQLRequestError, projectKey])
 
   if (isLoading) {
     return <LoadingSpinner />
   }
 
-  if (!project)
+  if (!data || !project) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -49,6 +45,7 @@ const ProjectDetailsPage = () => {
         message="Sorry, the project you're looking for doesn't exist"
       />
     )
+  }
   const projectDetails = [
     { label: 'Last Updated', value: formatDate(project.updatedAt) },
     { label: 'Leaders', value: project.leaders.join(', ') },

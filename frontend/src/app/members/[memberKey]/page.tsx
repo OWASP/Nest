@@ -10,12 +10,6 @@ import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 import { GetUserDataDocument } from 'types/__generated__/userQueries.generated'
 import { Badge } from 'types/badge'
-import type { Issue } from 'types/issue'
-import type { Milestone } from 'types/milestone'
-import type { RepositoryCardProps } from 'types/project'
-import type { PullRequest } from 'types/pullRequest'
-import type { Release } from 'types/release'
-import type { User } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
 import Badges from 'components/Badges'
@@ -24,12 +18,6 @@ import MemberDetailsPageSkeleton from 'components/skeletons/MemberDetailsPageSke
 
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams<{ memberKey: string }>()
-  const [user, setUser] = useState<User | null>()
-  const [issues, setIssues] = useState<Issue[]>([])
-  const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
-  const [milestones, setMilestones] = useState<Milestone[]>([])
-  const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
-  const [releases, setReleases] = useState<Release[]>([])
   const [data, setData] = useState<HeatmapData>({} as HeatmapData)
   const [username, setUsername] = useState('')
   const [isPrivateContributor, setIsPrivateContributor] = useState(false)
@@ -42,19 +30,18 @@ const UserDetailsPage: React.FC = () => {
     variables: { key: memberKey },
   })
 
+  const user = graphQLData?.user
+  const issues = graphQLData?.recentIssues || []
+  const topRepositories = graphQLData?.topContributedRepositories || []
+  const milestones = graphQLData?.recentMilestones || []
+  const pullRequests = graphQLData?.recentPullRequests || []
+  const releases = graphQLData?.recentReleases || []
+
   useEffect(() => {
-    if (graphQLData) {
-      setUser(graphQLData.user)
-      setIssues(graphQLData.recentIssues)
-      setMilestones(graphQLData.recentMilestones)
-      setPullRequests(graphQLData.recentPullRequests)
-      setReleases(graphQLData.recentReleases)
-      setTopRepositories(graphQLData.topContributedRepositories)
-    }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
     }
-  }, [graphQLData, graphQLRequestError, memberKey])
+  }, [graphQLRequestError, memberKey])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -102,7 +89,7 @@ const UserDetailsPage: React.FC = () => {
     )
   }
 
-  if (!isLoading && user == null) {
+  if (!graphQLData || !user) {
     return (
       <ErrorDisplay
         statusCode={404}
