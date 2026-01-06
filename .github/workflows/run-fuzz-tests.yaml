@@ -103,6 +103,7 @@ jobs:
         env:
           TEST_FILE: ${{ inputs.test-file }}
           REST_URL: ${{ inputs.rest-url }}
+          CI: true
         run: |
           docker run \
           -e BASE_URL=http://localhost:9500 \

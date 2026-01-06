@@ -35,7 +35,7 @@ class ModuleQuery:
         )
 
     @strawberry.field
-    def get_module(self, module_key: str, program_key: str) -> ModuleNode:
+    def get_module(self, module_key: str, program_key: str) -> ModuleNode | None:
         """Get a single module by its key within a specific program."""
         try:
             return (

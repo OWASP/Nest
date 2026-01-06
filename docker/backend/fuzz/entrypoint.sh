@@ -27,13 +27,16 @@ echo "generation.max-examples = 100" >> ./schemathesis.toml
 
 # Enable specific checks
 # See https://schemathesis.readthedocs.io/en/stable/reference/checks/
-
+# Schemathesis raises errors for bad requests, so we need to explicitly enable the checks we want
 echo "[checks]" >> ./schemathesis.toml
 echo "enabled = false" >> ./schemathesis.toml
-
-# Schemathesis raises errors for bad requests, so we need to explicitly enable the checks we want
-echo "not_a_server_error.enabled = true" >> ./schemathesis.toml
 echo "response_schema_conformance.enabled = true" >> ./schemathesis.toml
+
+# Schemathesis raises GraphQL errors for invalid queries like invalid enums.
+# We need to explicitly enable the not_a_server_error in REST API only to avoid GraphQL false positives.
+if [ -n "$REST_URL" ]; then
+  echo "not_a_server_error.enabled = true" >> ./schemathesis.toml
+fi
 
 if [ -n "$TEST_FILE" ]; then
     echo "Using test file: $TEST_FILE"
@@ -43,4 +46,9 @@ else
 fi
 
 echo "Starting fuzzing process..."
-pytest --log-cli-level=INFO -s ./tests/${TEST_FILE}
+
+if [ -n "$CI" ]; then
+    pytest -s ./tests/${TEST_FILE}
+else
+    pytest --log-cli-level=INFO -s ./tests/${TEST_FILE}
+fi
