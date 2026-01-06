@@ -34,7 +34,17 @@ export default function ChapterDetailsPage() {
     return <LoadingSpinner />
   }
 
-  if (!chapter && !isLoading)
+  if (graphQLRequestError) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading chapter"
+        message="An error occurred while loading the chapter data"
+      />
+    )
+  }
+
+  if (!data || !chapter) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -42,6 +52,7 @@ export default function ChapterDetailsPage() {
         message="Sorry, the chapter you're looking for doesn't exist"
       />
     )
+  }
 
   const details = [
     { label: 'Last Updated', value: formatDate(chapter.updatedAt) },

@@ -89,6 +89,16 @@ const UserDetailsPage: React.FC = () => {
     )
   }
 
+  if (graphQLRequestError) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading user"
+        message="An error occurred while loading the user data"
+      />
+    )
+  }
+
   if (!graphQLData || !user) {
     return (
       <ErrorDisplay

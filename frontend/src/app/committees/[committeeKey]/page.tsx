@@ -36,6 +36,16 @@ export default function CommitteeDetailsPage() {
     return <LoadingSpinner />
   }
 
+  if (graphQLRequestError) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading committee"
+        message="An error occurred while loading the committee data"
+      />
+    )
+  }
+
   if (!data || !committee) {
     return (
       <ErrorDisplay

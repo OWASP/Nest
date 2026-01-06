@@ -37,6 +37,16 @@ const ProjectDetailsPage = () => {
     return <LoadingSpinner />
   }
 
+  if (graphQLRequestError) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading project"
+        message="An error occurred while loading the project data"
+      />
+    )
+  }
+
   if (!data || !project) {
     return (
       <ErrorDisplay

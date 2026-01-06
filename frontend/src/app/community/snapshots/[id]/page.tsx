@@ -95,6 +95,16 @@ const SnapshotDetailsPage: React.FC = () => {
     return <LoadingSpinner />
   }
 
+  if (graphQLRequestError) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading snapshot"
+        message="An error occurred while loading the snapshot data"
+      />
+    )
+  }
+
   if (!data || !snapshot) {
     return (
       <ErrorDisplay
