@@ -20,8 +20,10 @@ from apps.mentorship.models.task import Task
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.models import Project
 
-logger = logging.getLogger(__name__)
+ISSUS_NOT_FOUND_MSG = "Issue not found in this module."
 MODULE_NOT_FOUND_MSG = "Module not found."
+
+logger = logging.getLogger(__name__)
 
 
 def resolve_mentors_from_logins(logins: list[str]) -> set[Mentor]:
@@ -153,7 +155,7 @@ class ModuleMutation:
 
         issue = module.issues.filter(number=issue_number).first()
         if issue is None:
-            raise ObjectDoesNotExist(msg="Issue not found in this module.")
+            raise ObjectDoesNotExist(msg=ISSUS_NOT_FOUND_MSG)
 
         issue.assignees.add(gh_user)
 
@@ -236,7 +238,7 @@ class ModuleMutation:
             .first()
         )
         if issue is None:
-            raise ObjectDoesNotExist(msg="Issue not found in this module.")
+            raise ObjectDoesNotExist(msg=ISSUS_NOT_FOUND_MSG)
 
         assignees = issue.assignees.all()
         if not assignees.exists():
@@ -298,7 +300,7 @@ class ModuleMutation:
             .first()
         )
         if issue is None:
-            raise ObjectDoesNotExist(msg="Issue not found in this module.")
+            raise ObjectDoesNotExist(msg=ISSUS_NOT_FOUND_MSG)
 
         assignees = issue.assignees.all()
         if not assignees.exists():
