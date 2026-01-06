@@ -19,4 +19,8 @@ class ProjectHealthMetricsFilter:
     # Q is the return type for the filter
     def level(self, value: str, prefix: str):
         """Filter by project level."""
-        return Q(project__level=ProjectLevel(value)) if value else Q()
+        return (
+            Q(project__level=ProjectLevel(value))
+            if value and ProjectLevel.choices.__contains__(value)
+            else Q()
+        )

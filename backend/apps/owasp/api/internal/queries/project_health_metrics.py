@@ -11,6 +11,7 @@ from apps.owasp.api.internal.permissions.project_health_metrics import HasDashbo
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 MAX_LIMIT = 1000
+MAX_OFFSET = 10000
 
 
 @strawberry.type
@@ -41,10 +42,14 @@ class ProjectHealthMetricsQuery:
             list[ProjectHealthMetricsNode]: List of project health metrics.
 
         """
-        if pagination and pagination.limit:
-            if pagination.limit <= 0:
+        if pagination:
+            if pagination.offset <= 0:
                 return []
-            pagination.limit = min(pagination.limit, MAX_LIMIT)
+            pagination.offset = min(pagination.offset, MAX_OFFSET)
+            if pagination.limit is not None:
+                if pagination.limit <= 0:
+                    return []
+                pagination.limit = min(pagination.limit, MAX_LIMIT)
         return ProjectHealthMetrics.get_latest_health_metrics()
 
     @strawberry.field(
