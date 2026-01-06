@@ -1,4 +1,5 @@
-# False positive findings.
+# Information Disclosure - Suspicious Comments: source map and debug ID comments.
+10027 IGNORE https://nest.owasp.(dev|org)/_next/static/chunks/[a-f0-9]{16}.js
 
-# PII disclosure.
-10062	IGNORE	https://nest.owasp.(dev|org)/sitemap.xml
+# PII disclosure: false positive credicard number.
+10062 IGNORE https://nest.owasp.(dev|org)/sitemap.xml
