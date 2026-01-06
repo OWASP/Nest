@@ -1,1 +1,0 @@
-"""Pytest for mentorship queries."""
