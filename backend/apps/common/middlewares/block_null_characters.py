@@ -17,7 +17,7 @@ class BlockNullCharactersMiddleware:
     def __call__(self, request: HttpRequest):
         """Process the request to block null characters."""
         error_response = JsonResponse(
-            {"error": "Request contains null characters which are not allowed."},
+            {"message": "Request contains null characters which are not allowed.", "errors": {}},
             status=400,
         )
         if (
