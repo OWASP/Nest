@@ -1,45 +1,44 @@
-name: Auto Label Issues
+  name: Auto Label Issues
 
-on:
-  issues:
-    types:
-      - edited
-      - opened
+  on:
+    issues:
+      types:
+        - edited
+        - opened
 
-permissions:
-  issues: write
+  permissions: {}
 
-jobs:
-  label:
-    permissions:
-      issues: write
-    runs-on: ubuntu-latest
-    steps:
-      - name: Apply Labels to Issues
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
-        with:
-          script: |
-            const issue = context.payload.issue;
-            if (!issue || (!issue.title && !issue.body)) return;
+  jobs:
+    label:
+      permissions:
+        issues: write
+      runs-on: ubuntu-latest
+      steps:
+        - name: Apply Labels to Issues
+          uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
+          with:
+            script: |
+              const issue = context.payload.issue;
+              if (!issue || (!issue.title && !issue.body)) return;
 
-            const title = issue.title?.toLowerCase() || "";
-            const body = issue.body?.toLowerCase() || "";
+              const title = issue.title?.toLowerCase() || "";
+              const body = issue.body?.toLowerCase() || "";
 
-            const keywordMapping = {
-              "bug": ["error", "failure", "not working", "crash", "unexpected"],
-              "enhancement": ["add", "feature request", "improve", "suggestion"],
-              "question": ["clarification", "help", "how to", "guidance"]
-            };
+              const keywordMapping = {
+                "bug": ["error", "failure", "not working", "crash", "unexpected"],
+                "enhancement": ["add", "feature request", "improve", "suggestion"],
+                "question": ["clarification", "help", "how to", "guidance"]
+              };
 
-            const labels = Object.entries(keywordMapping)
-              .filter(([_, words]) => words.some(word => title.includes(word) || body.includes(word)))
-              .map(([label, _]) => label);
+              const labels = Object.entries(keywordMapping)
+                .filter(([_, words]) => words.some(word => title.includes(word) || body.includes(word)))
+                .map(([label, _]) => label);
 
-            if (labels.length > 0) {
-              github.rest.issues.addLabels({
-                issue_number: context.issue.number,
-                labels: labels,
-                owner: context.repo.owner,
-                repo: context.repo.repo
-              });
-            }
+              if (labels.length > 0) {
+                github.rest.issues.addLabels({
+                  issue_number: context.issue.number,
+                  labels: labels,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo
+                });
+              }
