@@ -21,6 +21,7 @@ from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.models import Project
 
 logger = logging.getLogger(__name__)
+MODULE_NOT_FOUND_MSG = "Module not found."
 
 
 def resolve_mentors_from_logins(logins: list[str]) -> set[Mentor]:
@@ -138,7 +139,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg="Module not found.")
+            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
@@ -220,7 +221,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg="Module not found.")
+            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
@@ -282,7 +283,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg="Module not found.")
+            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
@@ -328,8 +329,7 @@ class ModuleMutation:
                 key=input_data.key, program__key=input_data.program_key
             )
         except Module.DoesNotExist as e:
-            msg = "Module not found."
-            raise ObjectDoesNotExist(msg) from e
+            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e
 
         try:
             creator_as_mentor = Mentor.objects.get(nest_user=user)
