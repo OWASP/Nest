@@ -26,6 +26,7 @@ class TestReleaseQuery:
         queryset.filter.return_value = queryset
         queryset.order_by.return_value = queryset
         queryset.select_related.return_value = queryset
+        queryset.annotate.return_value = queryset
         queryset.__getitem__.return_value = []
         return queryset
 
@@ -70,23 +71,18 @@ class TestReleaseQuery:
         assert result == [mock_release]
         mock_queryset.filter.assert_called_with(repository__organization__login="owasp")
 
-    @patch("apps.github.api.internal.queries.release.Subquery")
     @patch("apps.github.models.release.Release.objects")
-    def test_recent_releases_distinct(
-        self, mock_objects, mock_subquery, mock_queryset, mock_release
-    ):
-        """Test distinct filtering with Subquery for releases."""
+    def test_recent_releases_distinct(self, mock_objects, mock_queryset, mock_release):
+        """Test distinct filtering with Window/Rank for releases."""
         mock_objects.filter.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_release]
-
-        mock_subquery_instance = Mock()
-        mock_subquery.return_value = mock_subquery_instance
 
         result = ReleaseQuery().recent_releases(distinct=True)
 
         assert result == [mock_release]
+        mock_queryset.annotate.assert_called_once()
         mock_queryset.filter.assert_called()
-        mock_subquery.assert_called_once()
+        assert mock_queryset.order_by.call_count == 2  # Once initially, once after filter
 
     @patch("apps.github.models.release.Release.objects")
     def test_recent_releases_with_limit(self, mock_objects, mock_queryset, mock_release):
@@ -118,65 +114,43 @@ class TestReleaseQuery:
         assert len(filter_calls) >= 2
         mock_queryset.__getitem__.assert_called_with(slice(None, 2))
 
-    @patch("apps.github.api.internal.queries.release.OuterRef")
-    @patch("apps.github.api.internal.queries.release.Subquery")
     @patch("apps.github.models.release.Release.objects")
-    def test_recent_releases_distinct_with_login(
-        self, mock_objects, mock_subquery, mock_outer_ref, mock_queryset, mock_release
-    ):
+    def test_recent_releases_distinct_with_login(self, mock_objects, mock_queryset, mock_release):
         """Test distinct filtering with login filter."""
         mock_objects.filter.return_value = mock_queryset
         mock_queryset.select_related.return_value = mock_queryset
         mock_queryset.filter.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_release]
 
-        mock_subquery_instance = Mock()
-        mock_subquery.return_value = mock_subquery_instance
-        mock_outer_ref_instance = Mock()
-        mock_outer_ref.return_value = mock_outer_ref_instance
-
         result = ReleaseQuery().recent_releases(distinct=True, login="alice")
 
         assert result == [mock_release]
-        mock_subquery.assert_called_once()
-        mock_outer_ref.assert_called_once_with("author_id")
+        mock_queryset.annotate.assert_called_once()
         mock_queryset.select_related.assert_called_once_with(
             "author", "repository", "repository__organization"
         )
+        # One filter for login, one for rank=1
+        assert mock_queryset.filter.call_count == 2
 
-    @patch("apps.github.api.internal.queries.release.OuterRef")
-    @patch("apps.github.api.internal.queries.release.Subquery")
     @patch("apps.github.models.release.Release.objects")
     def test_recent_releases_distinct_with_organization(
-        self, mock_objects, mock_subquery, mock_outer_ref, mock_queryset, mock_release
+        self, mock_objects, mock_queryset, mock_release
     ):
         """Test distinct filtering with organization filter."""
         mock_objects.filter.return_value = mock_queryset
         mock_queryset.filter.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_release]
 
-        mock_subquery_instance = Mock()
-        mock_subquery.return_value = mock_subquery_instance
-        mock_outer_ref_instance = Mock()
-        mock_outer_ref.return_value = mock_outer_ref_instance
-
         result = ReleaseQuery().recent_releases(distinct=True, organization="owasp")
 
         assert result == [mock_release]
-        mock_subquery.assert_called_once()
-        mock_outer_ref.assert_called_once_with("author_id")
-        # Verify organization filter was applied
-        filter_calls = mock_queryset.filter.call_args_list
-        organization_filter_found = any(
-            "repository__organization__login" in str(call) for call in filter_calls
-        )
-        assert organization_filter_found, "Organization filter should be applied"
+        mock_queryset.annotate.assert_called_once()
+        # One filter for organization, one for rank=1
+        assert mock_queryset.filter.call_count == 2
 
-    @patch("apps.github.api.internal.queries.release.OuterRef")
-    @patch("apps.github.api.internal.queries.release.Subquery")
     @patch("apps.github.models.release.Release.objects")
     def test_recent_releases_distinct_with_all_filters(
-        self, mock_objects, mock_subquery, mock_outer_ref, mock_queryset, mock_release
+        self, mock_objects, mock_queryset, mock_release
     ):
         """Test distinct filtering with all filters."""
         mock_objects.filter.return_value = mock_queryset
@@ -184,23 +158,18 @@ class TestReleaseQuery:
         mock_queryset.filter.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_release]
 
-        mock_subquery_instance = Mock()
-        mock_subquery.return_value = mock_subquery_instance
-        mock_outer_ref_instance = Mock()
-        mock_outer_ref.return_value = mock_outer_ref_instance
-
         result = ReleaseQuery().recent_releases(
             distinct=True, login="alice", organization="owasp", limit=5
         )
 
         assert result == [mock_release]
-        mock_subquery.assert_called_once()
-        mock_outer_ref.assert_called_once_with("author_id")
+        mock_queryset.annotate.assert_called_once()
         mock_queryset.select_related.assert_called_once_with(
             "author", "repository", "repository__organization"
         )
-        # Verify both login and organization filters were applied
-        assert mock_queryset.filter.call_count >= 3  # base filter, login, organization
+        # One filter for login, one for organization, one for rank=1
+        assert mock_queryset.filter.call_count == 3
+        mock_queryset.__getitem__.assert_called_with(slice(None, 5))
 
     @patch("apps.github.models.release.Release.objects")
     def test_recent_releases_login_only(self, mock_objects, mock_queryset, mock_release):
