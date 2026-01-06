@@ -1,6 +1,7 @@
 variable "allowed_hosts" {
-  description = "The Django allowed hosts - hostname only, no protocol (e.g., nest.owasp.dev)."
+  description = "Django allowed hosts for API Gateway - hostname only, no protocol (e.g., xxx.execute-api.region.amazonaws.com)."
   type        = string
+  default     = "*"
 }
 
 variable "allowed_origins" {

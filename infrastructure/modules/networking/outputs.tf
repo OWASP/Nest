@@ -15,5 +15,5 @@ output "private_subnet_ids" {
 
 output "vpc_endpoint_security_group_id" {
   description = "Security group ID for VPC endpoints (null if disabled)."
-  value       = var.create_vpc_endpoints ? module.vpc_endpoint[0].security_group_id : null
+  value       = length(module.vpc_endpoint) > 0 ? module.vpc_endpoint[0].security_group_id : null
 }

@@ -38,7 +38,7 @@ resource "aws_ssm_parameter" "django_algolia_write_api_key" {
 }
 
 resource "aws_ssm_parameter" "django_allowed_hosts" {
-  description = "Django allowed hosts - hostname only, no protocol (e.g., nest.owasp.dev)."
+  description = "Django allowed hosts for API Gateway - hostname only, no protocol (e.g., xxx.execute-api.region.amazonaws.com)."
   name        = "/${var.project_name}/${var.environment}/DJANGO_ALLOWED_HOSTS"
   tags        = var.common_tags
   type        = "String"

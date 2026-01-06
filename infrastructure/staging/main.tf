@@ -95,22 +95,26 @@ module "frontend" {
 module "networking" {
   source = "../modules/networking"
 
-  aws_region           = var.aws_region
-  availability_zones   = var.availability_zones
-  common_tags          = local.common_tags
-  create_nat_gateway   = var.create_nat_gateway
-  create_vpc_endpoints = var.create_vpc_endpoints
-  environment          = var.environment
-  private_subnet_cidrs = var.private_subnet_cidrs
-  project_name         = var.project_name
-  public_subnet_cidrs  = var.public_subnet_cidrs
-  vpc_cidr             = var.vpc_cidr
+  aws_region                          = var.aws_region
+  availability_zones                  = var.availability_zones
+  common_tags                         = local.common_tags
+  create_nat_gateway                  = var.create_nat_gateway
+  create_vpc_cloudwatch_logs_endpoint = var.create_vpc_cloudwatch_logs_endpoint
+  create_vpc_ecr_api_endpoint         = var.create_vpc_ecr_api_endpoint
+  create_vpc_ecr_dkr_endpoint         = var.create_vpc_ecr_dkr_endpoint
+  create_vpc_s3_endpoint              = var.create_vpc_s3_endpoint
+  create_vpc_secretsmanager_endpoint  = var.create_vpc_secretsmanager_endpoint
+  create_vpc_ssm_endpoint             = var.create_vpc_ssm_endpoint
+  environment                         = var.environment
+  private_subnet_cidrs                = var.private_subnet_cidrs
+  project_name                        = var.project_name
+  public_subnet_cidrs                 = var.public_subnet_cidrs
+  vpc_cidr                            = var.vpc_cidr
 }
 
 module "parameters" {
   source = "../modules/parameters"
 
-  allowed_hosts      = var.frontend_domain_name != null ? var.frontend_domain_name : module.frontend.alb_dns_name
   allowed_origins    = var.frontend_domain_name != null ? "https://${var.frontend_domain_name}" : "http://${module.frontend.alb_dns_name}"
   common_tags        = local.common_tags
   db_host            = module.database.db_proxy_endpoint
@@ -128,14 +132,15 @@ module "parameters" {
 module "security" {
   source = "../modules/security"
 
-  common_tags        = local.common_tags
-  create_rds_proxy   = var.create_rds_proxy
-  db_port            = var.db_port
-  environment        = var.environment
-  project_name       = var.project_name
-  redis_port         = var.redis_port
-  vpc_endpoint_sg_id = module.networking.vpc_endpoint_security_group_id
-  vpc_id             = module.networking.vpc_id
+  common_tags               = local.common_tags
+  create_rds_proxy          = var.create_rds_proxy
+  create_vpc_endpoint_rules = var.create_vpc_ssm_endpoint || var.create_vpc_cloudwatch_logs_endpoint || var.create_vpc_ecr_api_endpoint || var.create_vpc_ecr_dkr_endpoint || var.create_vpc_secretsmanager_endpoint
+  db_port                   = var.db_port
+  environment               = var.environment
+  project_name              = var.project_name
+  redis_port                = var.redis_port
+  vpc_endpoint_sg_id        = module.networking.vpc_endpoint_security_group_id
+  vpc_id                    = module.networking.vpc_id
 }
 
 module "storage" {
