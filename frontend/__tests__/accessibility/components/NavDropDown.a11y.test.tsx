@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
 import type { Link as LinkType } from 'types/link'
 import NavDropDown from 'components/NavDropDown'
@@ -23,6 +23,17 @@ const defaultProps = {
 describe('NavDropDown a11y', () => {
   it('should not have any accessibility violations', async () => {
     const { container } = render(<NavDropDown {...defaultProps} />)
+
+    const results = await axe(container)
+
+    expect(results).toHaveNoViolations()
+  })
+
+  it('should not have any accessibility violations when open', async () => {
+    const { container } = render(<NavDropDown {...defaultProps} />)
+
+    const button = screen.getByRole('button')
+    fireEvent.click(button)
 
     const results = await axe(container)
 

@@ -5,8 +5,8 @@ import Pagination from 'components/Pagination'
 expect.extend(toHaveNoViolations)
 
 const props = {
-  currentPage: 1,
-  totalPages: 5,
+  currentPage: 6,
+  totalPages: 10,
   isLoaded: true,
   onPageChange: jest.fn(),
 }

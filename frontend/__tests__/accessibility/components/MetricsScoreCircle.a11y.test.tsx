@@ -12,4 +12,12 @@ describe('MetricsScoreCircle a11y', () => {
 
     expect(results).toHaveNoViolations()
   })
+
+  it('should not have any accessibility violations when clickable', async () => {
+    const { container } = render(<MetricsScoreCircle score={20} clickable />)
+
+    const results = await axe(container)
+
+    expect(results).toHaveNoViolations()
+  })
 })

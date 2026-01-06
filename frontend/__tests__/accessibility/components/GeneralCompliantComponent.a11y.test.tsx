@@ -20,9 +20,9 @@ const baseProps: GeneralCompliantComponentProps = {
 
 describe('GeneralCompliantComponent Accessibility', () => {
   it('should not have any accessibility violations', async () => {
-    const { container } = render(<GeneralCompliantComponent {...baseProps} />)
+    const { baseElement } = render(<GeneralCompliantComponent {...baseProps} />)
 
-    const results = await axe(container)
+    const results = await axe(baseElement)
 
     expect(results).toHaveNoViolations()
   })

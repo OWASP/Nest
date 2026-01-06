@@ -1,6 +1,5 @@
 import { render } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
-import { ReactNode } from 'react'
 import { Milestone } from 'types/milestone'
 import { User } from 'types/user'
 import Milestones from 'components/Milestones'
@@ -11,61 +10,6 @@ jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(),
 }))
-
-jest.mock('components/ItemCardList', () => {
-  const MockItemCardList = ({
-    title,
-    data,
-    showAvatar,
-    icon,
-    showSingleColumn,
-    renderDetails,
-  }: {
-    title: ReactNode
-    data: Milestone[]
-    showAvatar: boolean
-    icon: unknown
-    showSingleColumn: boolean
-    renderDetails: (item: Milestone) => ReactNode
-  }) => {
-    const getIconLabel = (iconProp: unknown): string => {
-      if (!iconProp) return 'no-icon'
-      if (typeof iconProp === 'function' && iconProp.name) return iconProp.name
-      if (typeof iconProp === 'string') return iconProp
-      return typeof iconProp
-    }
-
-    return (
-      <div data-testid="item-card-list">
-        <div data-testid="title">{title}</div>
-        <div data-testid="show-avatar">{showAvatar.toString()}</div>
-        <div data-testid="show-single-column">{showSingleColumn.toString()}</div>
-        <div data-testid="icon">{getIconLabel(icon)}</div>
-        {data.map((item, index) => {
-          // Avoid nested template literals by constructing fallback separately
-          const fallbackKey = [
-            item.organizationName || 'org',
-            item.repositoryName || 'repo',
-            item.title || 'milestone',
-          ].join('-')
-
-          const uniqueKey = `milestone-${index}-${item.url || fallbackKey}`
-
-          return (
-            <div key={uniqueKey} data-testid={`milestone-${index}`}>
-              {renderDetails(item)}
-            </div>
-          )
-        })}
-      </div>
-    )
-  }
-
-  return {
-    __esModule: true,
-    default: MockItemCardList,
-  }
-})
 
 const createMockUser = (): User => ({
   login: 'testuser',

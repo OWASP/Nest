@@ -21,15 +21,9 @@ const DonutBarChart: React.FC<{
   const redColor = '#f94e0e'
   const orangeColor = '#f9b90e'
 
-
   return (
     <SecondaryCard title={<AnchorTitle title={title} />} icon={icon}>
-      <svg
-        role="img"
-        aria-label="Donut chart showing healthy, needs attention, and unhealthy statuses"
-        viewBox="0 0 100 100"
-      >
-        <title>Donut chart depicting health statuses</title>
+      <div aria-label="Donut chart depicting health statuses">
         <Chart
           key={theme}
           options={{
@@ -56,7 +50,7 @@ const DonutBarChart: React.FC<{
           height={250}
           type="donut"
         />
-      </svg>
+      </div>
     </SecondaryCard>
   )
 }

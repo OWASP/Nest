@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
 import { Organization } from 'types/organization'
 import { RepositoryCardProps } from 'types/project'
@@ -34,6 +34,28 @@ const createMockRepository = (index: number): RepositoryCardProps => ({
 describe('RepositoryCard a11y', () => {
   it('should not have any accessibility violations', async () => {
     const repositories = Array.from({ length: 6 }, (_, i) => createMockRepository(i))
+    const { container } = render(<RepositoryCard repositories={repositories} />)
+
+    const results = await axe(container)
+
+    expect(results).toHaveNoViolations()
+  })
+
+  it('should not have any accessibility violations when expanded', async () => {
+    const repositories = Array.from({ length: 6 }, (_, i) => createMockRepository(i))
+    const { container } = render(<RepositoryCard repositories={repositories} />)
+
+    const showMoreButton = screen.getByTestId('show-more-button')
+    fireEvent.click(showMoreButton)
+
+    const results = await axe(container)
+
+    expect(results).toHaveNoViolations()
+  })
+
+  it('should not have any accessibility violations when containing atleast one archived repository', async () => {
+    const repositories = Array.from({ length: 6 }, (_, i) => createMockRepository(i))
+    repositories[2].isArchived = true
     const { container } = render(<RepositoryCard repositories={repositories} />)
 
     const results = await axe(container)

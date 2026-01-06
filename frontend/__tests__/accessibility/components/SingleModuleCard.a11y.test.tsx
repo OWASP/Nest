@@ -83,13 +83,9 @@ const mockModule: Module = {
   labels: ['good first issue', 'bug'],
 }
 
-const mockAdmins = [{ login: 'admin1' }, { login: 'admin2' }]
-
 describe('SingleModuleCard a11y', () => {
   it('should not have any accessibility violations', async () => {
-    const { container } = render(
-      <SingleModuleCard module={mockModule} accessLevel="admin" admins={mockAdmins} />
-    )
+    const { container } = render(<SingleModuleCard module={mockModule} />)
 
     const results = await axe(container)
 

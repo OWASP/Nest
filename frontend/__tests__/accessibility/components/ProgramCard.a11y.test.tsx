@@ -30,10 +30,12 @@ const baseMockProgram: Program = {
 
 describe('ProgramCard Accessibility', () => {
   it('should not have any accessibility violations', async () => {
-    const { container } = render(
-      <ProgramCard program={baseMockProgram} href="/test/path" isAdmin={false} accessLevel="user" />
+    const { baseElement } = render(
+      <main>
+        <ProgramCard program={baseMockProgram} href="/test/path" isAdmin accessLevel="admin" />
+      </main>
     )
-    const results = await axe(container)
+    const results = await axe(baseElement)
 
     expect(results).toHaveNoViolations()
   })

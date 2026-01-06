@@ -53,9 +53,13 @@ const release: ReleaseType = {
 
 describe('Release a11y', () => {
   it('should not have any accessibility violations', async () => {
-    const { container } = render(<Release release={release} />)
+    const { baseElement } = render(
+      <main>
+        <Release release={release} />
+      </main>
+    )
 
-    const results = await axe(container)
+    const results = await axe(baseElement)
 
     expect(results).toHaveNoViolations()
   })

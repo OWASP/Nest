@@ -7,7 +7,7 @@ expect.extend(toHaveNoViolations)
 describe('PageLayout a11y', () => {
   it('should not have any accessibility violations', async () => {
     const { container } = render(
-      <PageLayout title="OWASP ZAP">
+      <PageLayout title="OWASP ZAP" path="/projects/zap">
         <div>Child Content</div>
       </PageLayout>
     )

@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
-import CalendarButton from 'components/CalendarButton'
 import { FaCalendarAlt } from 'react-icons/fa'
+import CalendarButton from 'components/CalendarButton'
 
 expect.extend(toHaveNoViolations)
 
@@ -32,10 +32,7 @@ describe('CalendarButton Accessibility', () => {
 
   it('should not have any accessibility violations when custom icon is provided', async () => {
     const { container } = render(
-      <CalendarButton
-        event={mockEvent}
-        icon={<FaCalendarAlt aria-label="calendar"/>}
-      />
+      <CalendarButton event={mockEvent} icon={<FaCalendarAlt aria-label="calendar" />} />
     )
     const results = await axe(container)
     expect(results).toHaveNoViolations()

@@ -17,9 +17,13 @@ const defaultProps = {
 
 describe('SortBy a11y', () => {
   it('should not have any accessibility violations', async () => {
-    const { container } = render(<SortBy {...defaultProps} />)
+    const { baseElement } = render(
+      <main>
+        <SortBy {...defaultProps} />
+      </main>
+    )
 
-    const results = await axe(container)
+    const results = await axe(baseElement)
 
     expect(results).toHaveNoViolations()
   })

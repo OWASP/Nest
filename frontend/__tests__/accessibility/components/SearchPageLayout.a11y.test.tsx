@@ -4,26 +4,60 @@ import SearchPageLayout from 'components/SearchPageLayout'
 
 expect.extend(toHaveNoViolations)
 
+const baseProps = {
+  currentPage: 1,
+  searchQuery: '',
+  onSearch: () => {},
+  onPageChange: () => {},
+  searchPlaceholder: 'Search...',
+  empty: 'No results',
+  indexName: 'chapters',
+}
+
 describe('SearchPageLayout Accessibility', () => {
-  it('should not have any accessibility violations', async () => {
-    const { container } = render(
-      <SearchPageLayout
-        isLoaded={true}
-        totalPages={1}
-        currentPage={1}
-        searchQuery=""
-        onSearch={() => {}}
-        onPageChange={() => {}}
-        searchPlaceholder="Search..."
-        empty="No results"
-        indexName="chapters"
-      >
-        <div>Mock Content</div>
-      </SearchPageLayout>
-    )
+  describe('should not have any accessibility violations when isLoaded is true', () => {
+    it('has more than one total pages', async () => {
+      const { container } = render(
+        <SearchPageLayout {...baseProps} totalPages={2} isLoaded={true}>
+          <div>Mock Content</div>
+        </SearchPageLayout>
+      )
 
-    const results = await axe(container)
+      const results = await axe(container)
 
-    expect(results).toHaveNoViolations()
+      expect(results).toHaveNoViolations()
+    })
+
+    it('has 0 total page', async () => {
+      const { container } = render(
+        <SearchPageLayout {...baseProps} totalPages={0} isLoaded={true}>
+          <div>Mock Content</div>
+        </SearchPageLayout>
+      )
+
+      const results = await axe(container)
+
+      expect(results).toHaveNoViolations()
+    })
+  })
+
+  describe('should not have any accessibility violations when isLoaded is false', () => {
+    it('has more than one total pages', async () => {
+      const { container } = render(
+        <SearchPageLayout isLoaded={false} {...baseProps} totalPages={2} />
+      )
+      const results = await axe(container)
+
+      expect(results).toHaveNoViolations()
+    })
+
+    it('has 0 total page', async () => {
+      const { container } = render(
+        <SearchPageLayout isLoaded={false} {...baseProps} totalPages={0} />
+      )
+      const results = await axe(container)
+
+      expect(results).toHaveNoViolations()
+    })
   })
 })

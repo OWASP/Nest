@@ -19,6 +19,7 @@ const defaultProps: NavButtonProps & { defaultIcon: typeof FaHome; hoverIcon: ty
 describe('NavButton a11y', () => {
   it('should not have any accessibility violations', async () => {
     const { container } = render(<NavButton {...defaultProps} />)
+
     const results = await axe(container)
 
     expect(results).toHaveNoViolations()

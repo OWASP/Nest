@@ -6,7 +6,8 @@ expect.extend(toHaveNoViolations)
 
 describe('TruncatedText Accessibility', () => {
   it('should not have any accessibility violations', async () => {
-    const { container } = render(<TruncatedText />)
+    const longText = 'This is a long text that should be truncated'
+    const { container } = render(<TruncatedText text={longText} />)
 
     const results = await axe(container)
 

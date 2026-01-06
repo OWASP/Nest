@@ -14,19 +14,19 @@ const defaultProps: UserCardProps = {
   },
   className: '',
   company: '',
-  description: '',
-  email: '',
-  followersCount: 0,
+  description: 'This is a sample description',
+  email: 'test@test.com',
+  followersCount: 100,
   location: '',
-  repositoriesCount: 0,
-  badgeCount: 0,
+  repositoriesCount: 12,
+  badgeCount: 3,
 }
 
 describe('UserCard Accessibility', () => {
   it('should not have any accessibility violations', async () => {
-    const { container } = render(<UserCard {...defaultProps} />)
+    const { baseElement } = render(<UserCard {...defaultProps} />)
 
-    const results = await axe(container)
+    const results = await axe(baseElement)
 
     expect(results).toHaveNoViolations()
   })

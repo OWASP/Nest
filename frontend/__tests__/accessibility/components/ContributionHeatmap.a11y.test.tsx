@@ -83,4 +83,12 @@ describe('ContributionHeatmap Accessibility', () => {
 
     expect(results).toHaveNoViolations()
   })
+
+  it('should not have any accessibility violations when title is provided', async () => {
+    const { container } = render(<ContributionHeatmap {...defaultProps} title="Test Title" />)
+
+    const results = await axe(container)
+
+    expect(results).toHaveNoViolations()
+  })
 })

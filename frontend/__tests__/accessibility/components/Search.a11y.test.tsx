@@ -12,11 +12,32 @@ const defaultProps = {
 }
 
 describe('SearchBar a11y', () => {
-  it('should not have any accessibility violations', async () => {
-    const { container } = render(<SearchBar {...defaultProps} />)
+  describe('when not loaded', () => {
+    it('should not have any accessibility violations', async () => {
+      const { container } = render(<SearchBar {...defaultProps} />)
 
-    const results = await axe(container)
+      const results = await axe(container)
 
-    expect(results).toHaveNoViolations()
+      expect(results).toHaveNoViolations()
+    })
+  })
+
+  describe('when loaded', () => {
+    it('should not have any accessibility violations when searchQuery is empty', async () => {
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
+
+      const results = await axe(container)
+
+      expect(results).toHaveNoViolations()
+    })
+    it('should not have any accessibility violations when searchQuery has value', async () => {
+      const { container } = render(
+        <SearchBar {...defaultProps} isLoaded={true} initialValue="test search" />
+      )
+
+      const results = await axe(container)
+
+      expect(results).toHaveNoViolations()
+    })
   })
 })

@@ -1,6 +1,5 @@
 import { render } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
-import React from 'react'
 import RecentIssues from 'components/RecentIssues'
 
 expect.extend(toHaveNoViolations)

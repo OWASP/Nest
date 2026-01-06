@@ -83,7 +83,6 @@ jest.mock('next/link', () => {
   }
 })
 
-
 jest.mock('next/image', () => ({
   __esModule: true,
   default: ({
@@ -98,16 +97,14 @@ jest.mock('next/image', () => ({
     fill?: boolean
     objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down'
     [key: string]: unknown
-  }) => (
+  }) =>
     React.createElement('img', {
       src,
       alt,
       style: fill && { objectFit: objectFit as React.CSSProperties['objectFit'] },
-      ...props
-    }) 
-  ),
+      ...props,
+    }),
 }))
-
 
 beforeAll(() => {
   if (typeof globalThis !== 'undefined') {
