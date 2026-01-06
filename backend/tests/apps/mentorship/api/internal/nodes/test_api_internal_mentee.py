@@ -54,7 +54,7 @@ def test_mentee_node_resolve_experience_level_none():
         name="No Experience Mentee",
         avatar_url="https://example.com/noexp.jpg",
         bio=None,
-        experience_level=None,  # type: ignore
+        experience_level=None,  # type: ignore[assignment]
         domains=None,
         tags=None,
     )

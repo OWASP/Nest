@@ -41,7 +41,6 @@ def test_extract_repo_full_name_from_object(command):
     [
         ("https://github.com/owner/repo", "owner/repo"),
         ("https://www.github.com/owner/repo/sub/path", "owner/repo"),
-        ("https://github.com/owner/repo", "owner/repo"),
         ("https://invalid.com/owner/repo", None),
         ("not-a-url", None),
         ("https://github.com/owner", None),
@@ -156,6 +155,7 @@ def test_process_module_links_and_creates_tasks(MockIssue, MockTask, command):
                 repo_cache={},
                 verbosity=1,
             )
+    assert num_linked == 3
 
     mock_module.issues.set.assert_called_once_with({1, 2, 3})
 
@@ -182,7 +182,7 @@ def test_process_module_links_and_creates_tasks(MockIssue, MockTask, command):
     ))
 
 
-def test_process_module_no_matches(command, mock_module=None, mock_repository=None):
+def test_process_module_no_matches():
     mock_repo = MagicMock(); mock_repo.id = 7; mock_repo.name = "r"
     mock_module = MagicMock()
     mock_module.project.repositories.all.return_value = [mock_repo]
