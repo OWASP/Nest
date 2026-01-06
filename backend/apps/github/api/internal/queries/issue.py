@@ -1,7 +1,8 @@
 """GraphQL queries for handling GitHub issues."""
 
 import strawberry
-from django.db.models import OuterRef, Subquery
+from django.db.models import F, Window
+from django.db.models.functions import Rank
 
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.models.issue import Issue
@@ -40,26 +41,26 @@ class IssueQuery:
             "-created_at",
         )
 
-        if login:
-            queryset = queryset.filter(
-                author__login=login,
-            )
+        filters = {}
 
+        if login:
+            filters["author__login"] = login
         if organization:
-            queryset = queryset.filter(
-                repository__organization__login=organization,
-            )
+            filters["repository__organization__login"] = organization
+
+        queryset = queryset.filter(**filters)
 
         if distinct:
-            latest_issue_per_author = (
-                queryset.filter(author_id=OuterRef("author_id"))
+            queryset = (
+                queryset.annotate(
+                    rank=Window(
+                        expression=Rank(),
+                        partition_by=[F("author_id")],
+                        order_by=F("created_at").desc(),
+                    )
+                )
+                .filter(rank=1)
                 .order_by("-created_at")
-                .values("id")[:1]
-            )
-            queryset = queryset.filter(
-                id__in=Subquery(latest_issue_per_author),
-            ).order_by(
-                "-created_at",
             )
 
         return queryset[:limit] if limit > 0 else []
