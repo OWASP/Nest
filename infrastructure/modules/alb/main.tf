@@ -130,6 +130,99 @@ resource "aws_lb_target_group" "frontend" {
   }
 }
 
+resource "aws_lb_target_group" "lambda" {
+  count       = var.lambda_arn != null ? 1 : 0
+  name        = "${var.project_name}-${var.environment}-lambda-tg"
+  target_type = "lambda"
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-${var.environment}-lambda-tg"
+  })
+
+  health_check {
+    enabled             = true
+    healthy_threshold   = 2
+    interval            = 35
+    matcher             = "200-299"
+    path                = "/status/"
+    timeout             = 30
+    unhealthy_threshold = 3
+  }
+}
+
+resource "aws_lb_target_group_attachment" "lambda" {
+  count            = var.lambda_arn != null ? 1 : 0
+  target_group_arn = aws_lb_target_group.lambda[0].arn
+  target_id        = var.lambda_arn
+  depends_on       = [aws_lambda_permission.alb]
+}
+
+resource "aws_lambda_permission" "alb" {
+  count         = var.lambda_arn != null ? 1 : 0
+  action        = "lambda:InvokeFunction"
+  function_name = var.lambda_function_name
+  principal     = "elasticloadbalancing.amazonaws.com"
+  source_arn    = aws_lb_target_group.lambda[0].arn
+  statement_id  = "AllowALBInvoke"
+}
+
+resource "aws_lb_listener_rule" "backend_https" {
+  count        = var.lambda_arn != null && var.enable_https ? 1 : 0
+  listener_arn = aws_lb_listener.https[0].arn
+  priority     = 100
+  tags         = var.common_tags
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.lambda[0].arn
+  }
+
+  condition {
+    path_pattern {
+      values = [
+        "/a/*",
+        "/api/*",
+        "/csrf/*",
+        "/graphql",
+        "/graphql/*",
+        "/idx/*",
+        "/integrations/*",
+        "/sitemap",
+        "/sitemap.xml",
+        "/status/*"
+      ]
+    }
+  }
+}
+
+resource "aws_lb_listener_rule" "backend_http" {
+  count        = var.lambda_arn != null && !var.enable_https ? 1 : 0
+  listener_arn = aws_lb_listener.http[0].arn
+  priority     = 100
+  tags         = var.common_tags
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.lambda[0].arn
+  }
+
+  condition {
+    path_pattern {
+      values = [
+        "/a/*",
+        "/api/*",
+        "/csrf/*",
+        "/graphql",
+        "/graphql/*",
+        "/idx/*",
+        "/integrations/*",
+        "/sitemap",
+        "/sitemap.xml",
+        "/status/*"
+      ]
+    }
+  }
+}
+
 resource "aws_s3_bucket" "alb_logs" { # NOSONAR
   bucket = "${var.project_name}-${var.environment}-alb-logs-${random_id.suffix.hex}"
   tags = merge(var.common_tags, {

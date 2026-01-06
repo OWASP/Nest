@@ -16,6 +16,18 @@ variable "create_nat_gateway" {
   default     = true
 }
 
+variable "lambda_arn" {
+  description = "The ARN of the Zappa Lambda function for backend routing."
+  type        = string
+  default     = null
+}
+
+variable "lambda_function_name" {
+  description = "The name of the Zappa Lambda function."
+  type        = string
+  default     = null
+}
+
 variable "create_rds_proxy" {
   description = "Whether to create an RDS proxy."
   type        = bool

@@ -27,6 +27,8 @@ module "alb" {
   environment                = var.environment
   frontend_health_check_path = "/"
   frontend_port              = 3000
+  lambda_arn                 = var.lambda_arn
+  lambda_function_name       = var.lambda_function_name
   project_name               = var.project_name
   public_subnet_ids          = module.networking.public_subnet_ids
   vpc_id                     = module.networking.vpc_id
