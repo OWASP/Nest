@@ -101,7 +101,7 @@ jest.mock('next/image', () => ({
     React.createElement('img', {
       src,
       alt,
-      style: fill && { objectFit: objectFit as React.CSSProperties['objectFit'] },
+      style: fill ? { objectFit: objectFit as React.CSSProperties['objectFit'] } : undefined,
       ...props,
     }),
 }))

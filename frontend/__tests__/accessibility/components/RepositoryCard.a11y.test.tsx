@@ -53,7 +53,7 @@ describe('RepositoryCard a11y', () => {
     expect(results).toHaveNoViolations()
   })
 
-  it('should not have any accessibility violations when containing atleast one archived repository', async () => {
+  it('should not have any accessibility violations when containing at least one archived repository', async () => {
     const repositories = Array.from({ length: 6 }, (_, i) => createMockRepository(i))
     repositories[2].isArchived = true
     const { container } = render(<RepositoryCard repositories={repositories} />)

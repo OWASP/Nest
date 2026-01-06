@@ -31,9 +31,7 @@ describe('CalendarButton Accessibility', () => {
   })
 
   it('should not have any accessibility violations when custom icon is provided', async () => {
-    const { container } = render(
-      <CalendarButton event={mockEvent} icon={<FaCalendarAlt aria-label="calendar" />} />
-    )
+    const { container } = render(<CalendarButton event={mockEvent} icon={<FaCalendarAlt />} />)
     const results = await axe(container)
     expect(results).toHaveNoViolations()
   })
