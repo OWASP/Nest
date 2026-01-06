@@ -111,9 +111,6 @@ The Django backend deployment is managed by Zappa. This includes the API Gateway
     cd ../../backend/
     ```
 
-  > [!NOTE]
-  > The following steps assume the current working directory is `backend/`
-
 2. **Setup Dependencies**:
 
   - This step may differ for different operating systems.
@@ -156,11 +153,10 @@ The Django backend deployment is managed by Zappa. This includes the API Gateway
 
   Once deployed, use the URL provided by Zappa to test the API.
 
-## Setup Database
+## Populate ECR Repositories
+ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
 
-Migrate and load data into the new database.
-
-1. **Setup ECR Image**:
+1. **Login to ECR**:
 
   - Login to the Elastic Container Registry using the following command:
 
@@ -174,10 +170,12 @@ Migrate and load data into the new database.
     aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 000000000000.dkr.ecr.us-east-2.amazonaws.com
     ```
 
+2. **Uplaod backend image to ECR**:
+
   - Build the backend image using the following command:
 
     ```bash
-    docker build -t owasp-nest-staging-backend:latest -f docker/Dockerfile .
+    docker build -t owasp-nest-staging-backend:latest -f docker/backend/Dockerfile backend/
     ```
 
   - Tag the image:
@@ -198,48 +196,16 @@ Migrate and load data into the new database.
     docker push 000000000000.dkr.ecr.us-east-2.amazonaws.com/owasp-nest-staging-backend:latest
     ```
 
-2. **Upload Fixture to S3**:
-
-  - Upload the fixture present in `backend/data` to `nest-fixtures` bucket using the following command:
-
-    ```bash
-    aws s3 cp data/nest.json.gz s3://owasp-nest-fixtures-<id>/
-    ```
-
-3. **Run ECS Tasks**:
-
-  - Head over to Elastic Container Service in the AWS Console.
-  - Click on `owasp-nest-staging-migrate` in `Task Definitions` section.
-  - Select the task definition revision.
-  - Click Deploy > Run Task.
-  - Use the following configuration:
-    - Environment: Cluster: owasp-nest-staging-tasks-cluster
-    - Networking:
-      - VPC: owasp-nest-staging-vpc
-      - Subnets: subnets will be auto-selected due to VPC selection.
-      - Security group name: select the ECS security group (e.g. `owasp-nest-staging-ecs-sg`).
-  - Click "Create"
-  - The task is now running... Click on the task ID to view Logs, Status, etc.
-  - Follow the same steps for `owasp-nest-staging-load-data` and `owasp-nest-staging-index-data`.
-
-### Setup Frontend
-
-1. **Setup Frontend Image**:
-
-  - Change the directory to `frontend/` using the following command:
-
-    ```bash
-    cd frontend/
-    ```
+3. **Uplaod frontend image to ECR**:
 
   - Build the frontend image using the following command:
 
     > [!NOTE]
-    > Make sure to update the `.env` file with correct `NEXT_PUBLIC_*` variables.
+    > Make sure to update the frontend `.env` file with correct `NEXT_PUBLIC_*` variables.
     > These are injected at build time.
 
     ```bash
-    docker build -t owasp-nest-staging-frontend:latest -f docker/Dockerfile .
+    docker build -t owasp-nest-staging-frontend:latest -f docker/frontend/Dockerfile frontend/
     ```
 
   - Tag the image:
@@ -260,21 +226,36 @@ Migrate and load data into the new database.
     docker push 000000000000.dkr.ecr.us-east-2.amazonaws.com/owasp-nest-staging-frontend:latest
     ```
 
-2. **Deploy Frontend Infrastructure**:
+## Setup Database
+Migrate and load data into the new database.
 
-  > [!IMPORTANT]
-  > Make sure to push the frontend Docker image before running `terraform apply`, as it runs frontend ECS tasks.
+1. **Upload Fixture to S3**:
 
-  - Run Terraform apply:
+  - Upload the fixture present in `backend/data` to `nest-fixtures` bucket using the following command:
 
     ```bash
-    terraform apply
+    aws s3 cp data/nest.json.gz s3://owasp-nest-fixtures-<id>/
     ```
 
-  > [!NOTE]
-  > On first apply, there may be an error 400 when creating the HTTPS Listener for ALB. This is expected because the ACM certificate is not yet validated.
+2. **Run ECS Tasks**:
 
-3. **Validate ACM Certificate**:
+  - Head over to Elastic Container Service in the AWS Console.
+  - Click on `owasp-nest-staging-migrate` in `Task Definitions` section.
+  - Select the task definition revision.
+  - Click Deploy > Run Task.
+  - Use the following configuration:
+    - Environment: Cluster: owasp-nest-staging-tasks-cluster
+    - Networking:
+      - VPC: owasp-nest-staging-vpc
+      - Subnets: subnets will be auto-selected due to VPC selection.
+      - Security group name: select the ECS security group (e.g. `owasp-nest-staging-ecs-sg`).
+  - Click "Create"
+  - The task is now running... Click on the task ID to view Logs, Status, etc.
+  - Follow the same steps for `owasp-nest-staging-load-data` and `owasp-nest-staging-index-data`.
+
+## Configure Domain and Frontend
+
+1. **Validate ACM Certificate**:
 
   - Get the DNS validation records:
 
@@ -290,11 +271,13 @@ Migrate and load data into the new database.
     terraform apply
     ```
 
-4. **Configure Frontend Parameters**:
+  - Add a CNAME record and point the domain to the frontend ALB.
 
-  - Update the frontend server parameters using the Lambda URL from Terraform outputs.
+2. **Configure Frontend Parameters**:
 
-5. **Restart Frontend ECS Tasks**:
+  - Update the frontend server (`NEXT_SERVER_*`) parameters using the Lambda URL from Terraform outputs.
+
+3. **Restart Frontend ECS Tasks**:
 
   - Force a new deployment to pick up the updated configuration:
 
