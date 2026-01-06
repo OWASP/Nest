@@ -260,7 +260,7 @@ Migrate and load data into the new database.
   - Get the DNS validation records:
 
     ```bash
-    terraform output frontend_acm_validation_records
+    terraform output acm_certificate_domain_validation_options
     ```
 
   - Add the CNAME records to your DNS provider.

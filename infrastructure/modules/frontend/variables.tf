@@ -1,15 +1,10 @@
-variable "alb_sg_id" {
-  description = "The security group ID for the ALB."
-  type        = string
-}
-
 variable "aws_region" {
   description = "The AWS region for resources."
   type        = string
 }
 
 variable "common_tags" {
-  description = "The common tags to apply to all resources."
+  description = "A map of common tags to apply to all resources."
   type        = map(string)
   default     = {}
 }
@@ -32,26 +27,14 @@ variable "desired_count" {
   default     = 2
 }
 
-variable "domain_name" {
-  description = "The domain name for the frontend (required for HTTPS)."
-  type        = string
-  default     = null
-}
-
 variable "enable_auto_scaling" {
   description = "Whether to enable auto scaling for the frontend."
   type        = bool
   default     = false
 }
 
-variable "enable_https" {
-  description = "Whether to enable the HTTPS listener on the ALB."
-  type        = bool
-  default     = false
-}
-
 variable "environment" {
-  description = "The environment name (staging, production)."
+  description = "The environment name (e.g., staging, production)."
   type        = string
 }
 
@@ -63,12 +46,6 @@ variable "frontend_parameters_arns" {
 variable "frontend_sg_id" {
   description = "The security group ID for the frontend ECS tasks."
   type        = string
-}
-
-variable "health_check_path" {
-  description = "The health check path for the frontend."
-  type        = string
-  default     = "/"
 }
 
 variable "image_tag" {
@@ -96,27 +73,22 @@ variable "min_count" {
 }
 
 variable "private_subnet_ids" {
-  description = "The list of private subnet IDs for ECS tasks."
+  description = "A list of private subnet IDs for ECS tasks."
   type        = list(string)
 }
 
 variable "project_name" {
-  description = "The project name."
+  description = "The name of the project."
   type        = string
 }
 
-variable "public_subnet_ids" {
-  description = "The list of public subnet IDs for the ALB."
-  type        = list(string)
+variable "target_group_arn" {
+  description = "The ARN of the ALB target group for the frontend."
+  type        = string
 }
 
 variable "use_fargate_spot" {
-  description = "Use Fargate Spot capacity provider for frontend tasks."
+  description = "Whether to use Fargate Spot capacity provider for frontend tasks."
   type        = bool
   default     = false
-}
-
-variable "vpc_id" {
-  description = "The VPC ID."
-  type        = string
 }

@@ -10,7 +10,6 @@ terraform {
 }
 
 locals {
-  # Check if any interface endpoints are enabled (need security group)
   any_interface_endpoint = var.create_cloudwatch_logs || var.create_ecr_api || var.create_ecr_dkr || var.create_secretsmanager || var.create_ssm
 }
 
