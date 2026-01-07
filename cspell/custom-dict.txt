@@ -139,6 +139,7 @@ slideshare
 speakerdeck
 superfences
 tiktok
+trgm
 trivyignores
 tsc
 unassigning

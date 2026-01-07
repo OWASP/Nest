@@ -6,19 +6,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('github', '0040_merge_20251117_0136'),
-        ('owasp', '0071_trigram_extension'),
+        ("github", "0040_merge_20251117_0136"),
+        ("owasp", "0071_trigram_extension"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='project',
-            index=django.contrib.postgres.indexes.GinIndex(condition=models.Q(('is_active', True)), fields=['name'], name='project_name_gin_idx', opclasses=['gin_trgm_ops']),
+            model_name="project",
+            index=django.contrib.postgres.indexes.GinIndex(
+                condition=models.Q(("is_active", True)),
+                fields=["name"],
+                name="project_name_gin_idx",
+                opclasses=["gin_trgm_ops"],
+            ),
         ),
         migrations.AddIndex(
-            model_name='project',
-            index=django.contrib.postgres.indexes.GinIndex(django.contrib.postgres.indexes.OpClass(django.db.models.functions.comparison.Cast('leaders_raw', models.TextField()), name='gin_trgm_ops'), name='project_leaders_raw_gin_idx'),
+            model_name="project",
+            index=django.contrib.postgres.indexes.GinIndex(
+                django.contrib.postgres.indexes.OpClass(
+                    django.db.models.functions.comparison.Cast("leaders_raw", models.TextField()),
+                    name="gin_trgm_ops",
+                ),
+                name="project_leaders_raw_gin_idx",
+            ),
         ),
     ]
