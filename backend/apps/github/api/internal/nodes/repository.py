@@ -41,56 +41,56 @@ RECENT_RELEASES_LIMIT = 5
 class RepositoryNode(strawberry.relay.Node):
     """Repository node."""
 
-    @strawberry.field
+    @strawberry_django.field(select_related=["author"])
     def issues(self) -> list[IssueNode]:
         """Resolve recent issues."""
         # TODO(arkid15r): rename this to recent_issues.
-        return self.issues.select_related("author").order_by("-created_at")[:RECENT_ISSUES_LIMIT]
+        return self.issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
 
-    @strawberry.field
+    @strawberry_django.field
     def languages(self) -> list[str]:
         """Resolve languages."""
         return list(self.languages.keys())
 
-    @strawberry.field
+    @strawberry_django.field
     def latest_release(self) -> str | None:
         """Resolve latest release."""
         return self.latest_release
 
-    @strawberry.field
+    @strawberry_django.field
     def organization(self) -> OrganizationNode | None:
         """Resolve organization."""
         return self.organization
 
-    @strawberry.field
+    @strawberry_django.field
     def project(
         self,
     ) -> Annotated["ProjectNode", strawberry.lazy("apps.owasp.api.internal.nodes.project")] | None:
         """Resolve project."""
         return self.project
 
-    @strawberry.field
+    @strawberry_django.field(select_related=["repository"])
     def recent_milestones(self, limit: int = 5) -> list[MilestoneNode]:
         """Resolve recent milestones."""
-        return self.recent_milestones.select_related("repository").order_by("-created_at")[:limit]
+        return self.recent_milestones.order_by("-created_at")[:limit]
 
-    @strawberry.field
+    @strawberry_django.field
     def releases(self) -> list[ReleaseNode]:
         """Resolve recent releases."""
         # TODO(arkid15r): rename this to recent_releases.
         return self.published_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT]
 
-    @strawberry.field
+    @strawberry_django.field
     def top_contributors(self) -> list[RepositoryContributorNode]:
         """Resolve top contributors."""
         return [RepositoryContributorNode(**tc) for tc in self.idx_top_contributors]
 
-    @strawberry.field
+    @strawberry_django.field
     def topics(self) -> list[str]:
         """Resolve topics."""
         return self.topics
 
-    @strawberry.field
+    @strawberry_django.field
     def url(self) -> str:
         """Resolve URL."""
         return self.url

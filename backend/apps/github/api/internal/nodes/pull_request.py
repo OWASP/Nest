@@ -19,7 +19,7 @@ from apps.github.models.pull_request import PullRequest
 class PullRequestNode(strawberry.relay.Node):
     """GitHub pull request node."""
 
-    @strawberry.field
+    @strawberry_django.field
     def author(self) -> UserNode | None:
         """Resolve author."""
         return self.author

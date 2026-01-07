@@ -28,7 +28,7 @@ class MemberSnapshotNode(strawberry.relay.Node):
         """Resolve commits count."""
         return self.commits_count
 
-    @strawberry.field
+    @strawberry_django.field
     def github_user(self) -> UserNode:
         """Resolve GitHub user."""
         return self.github_user

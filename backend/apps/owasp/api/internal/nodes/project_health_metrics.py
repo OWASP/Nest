@@ -76,22 +76,22 @@ class ProjectHealthMetricsNode(strawberry.relay.Node):
         """Resolve last release age requirement in days."""
         return self.last_release_days_requirement
 
-    @strawberry.field
+    @strawberry_django.field
     def project_key(self) -> str:
         """Resolve project key."""
         return self.project.nest_key
 
-    @strawberry.field
+    @strawberry_django.field
     def project_name(self) -> str:
         """Resolve project name."""
         return self.project.name
 
-    @strawberry.field
+    @strawberry_django.field
     def owasp_page_last_update_days(self) -> int:
         """Resolve OWASP page last update age in days."""
         return self.owasp_page_last_update_days
 
-    @strawberry.field
+    @strawberry_django.field
     def owasp_page_last_update_days_requirement(self) -> int:
         """Resolve OWASP page last update age requirement in days."""
         return self.owasp_page_last_update_days_requirement

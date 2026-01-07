@@ -22,7 +22,7 @@ from apps.github.models.milestone import Milestone
 class MilestoneNode(strawberry.relay.Node):
     """Github Milestone Node."""
 
-    @strawberry.field
+    @strawberry_django.field
     def author(self) -> UserNode | None:
         """Resolve author."""
         return self.author

@@ -22,12 +22,12 @@ from apps.github.models.issue import Issue
 class IssueNode(strawberry.relay.Node):
     """GitHub issue node."""
 
-    @strawberry.field
+    @strawberry_django.field
     def author(self) -> UserNode | None:
         """Resolve author."""
         return self.author
 
-    @strawberry.field
+    @strawberry_django.field
     def organization_name(self) -> str | None:
         """Resolve organization name."""
         return (
@@ -41,22 +41,22 @@ class IssueNode(strawberry.relay.Node):
         """Resolve the repository name."""
         return self.repository.name if self.repository else None
 
-    @strawberry.field
+    @strawberry_django.field
     def assignees(self) -> list[UserNode]:
         """Resolve assignees list."""
         return list(self.assignees.all())
 
-    @strawberry.field
+    @strawberry_django.field
     def labels(self) -> list[str]:
         """Resolve label names for the issue."""
         return list(self.labels.values_list("name", flat=True))
 
-    @strawberry.field
+    @strawberry_django.field
     def is_merged(self) -> bool:
         """Return True if this issue has at least one merged pull request."""
         return self.pull_requests.filter(state="closed", merged_at__isnull=False).exists()
 
-    @strawberry.field
+    @strawberry_django.field
     def interested_users(self) -> list[UserNode]:
         """Return all users who have expressed interest in this issue."""
         return [
@@ -66,7 +66,7 @@ class IssueNode(strawberry.relay.Node):
             )
         ]
 
-    @strawberry.field
+    @strawberry_django.field
     def pull_requests(self) -> list[PullRequestNode]:
         """Return all pull requests linked to this issue."""
         return list(self.pull_requests.select_related("author", "repository").all())

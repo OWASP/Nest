@@ -48,26 +48,21 @@ class ProjectNode(GenericEntityNode):
         """Resolve contribution stats with camelCase keys."""
         return deep_camelize(self.contribution_stats)
 
-    @strawberry.field
+    @strawberry_django.field(select_related=["project"])
     def health_metrics_list(self, limit: int = 30) -> list[ProjectHealthMetricsNode]:
         """Resolve project health metrics."""
         limit = min(limit, MAX_LIMIT)
         return (
-            ProjectHealthMetrics.objects.select_related("project")
-            .filter(project=self)
-            .order_by("nest_created_at")[:limit]
+            ProjectHealthMetrics.objects.filter(project=self).order_by("nest_created_at")[:limit]
             if limit > 0
             else []
         )
 
-    @strawberry.field
+    @strawberry_django.field(select_related=["project"])
     def health_metrics_latest(self) -> ProjectHealthMetricsNode | None:
         """Resolve latest project health metrics."""
         return (
-            ProjectHealthMetrics.objects.select_related("project")
-            .filter(project=self)
-            .order_by("-nest_created_at")
-            .first()
+            ProjectHealthMetrics.objects.filter(project=self).order_by("-nest_created_at").first()
         )
 
     @strawberry.field
@@ -85,84 +80,44 @@ class ProjectNode(GenericEntityNode):
         """Resolve languages."""
         return self.idx_languages
 
-    @strawberry.field
+    @strawberry_django.field(
+        select_related=["author", "repository", "milestone", "level", "repository__organization"],
+        prefetch_related=["labels", "assignees"],
+    )
     def recent_issues(self) -> list[IssueNode]:
         """Resolve recent issues."""
-        return (
-            self.issues.select_related(
-                "author",
-                "repository",
-                "milestone",
-                "level",
-                "repository",
-                "repository__organization",
-            )
-            .prefetch_related("labels", "assignees")
-            .order_by("-created_at")[:RECENT_ISSUES_LIMIT]
-        )
+        return self.issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
 
-    @strawberry.field
+    @strawberry_django.field(
+        select_related=["author", "repository", "organization"],
+        prefetch_related=["labels", "pull_requests", "issues"],
+    )
     def recent_milestones(self, limit: int = 5) -> list[MilestoneNode]:
         """Resolve recent milestones."""
         limit = min(limit, MAX_LIMIT)
-        return (
-            self.recent_milestones.select_related(
-                "author",
-                "repository",
-                "repository__organization",
-            )
-            .prefetch_related(
-                "issues",
-                "labels",
-                "pull_requests",
-            )
-            .order_by("-created_at")[:limit]
-            if limit > 0
-            else []
-        )
+        return self.recent_milestones.order_by("-created_at")[:limit] if limit > 0 else []
 
-    @strawberry.field
+    @strawberry_django.field(
+        select_related=["author", "milestone", "repository", "repository__organization"],
+        prefetch_related=["assignees", "labels", "related_issues"],
+    )
     def recent_pull_requests(self) -> list[PullRequestNode]:
         """Resolve recent pull requests."""
-        return (
-            self.pull_requests.select_related(
-                "author",
-                "milestone",
-                "repository",
-                "repository__organization",
-            )
-            .prefetch_related(
-                "assignees",
-                "labels",
-                "related_issues",
-            )
-            .order_by("-created_at")[:RECENT_PULL_REQUESTS_LIMIT]
-        )
+        return self.pull_requests.order_by("-created_at")[:RECENT_PULL_REQUESTS_LIMIT]
 
-    @strawberry.field
+    @strawberry_django.field(select_related=["author", "repository", "repository__organization"])
     def recent_releases(self) -> list[ReleaseNode]:
         """Resolve recent releases."""
-        return self.published_releases.select_related(
-            "author",
-            "repository",
-            "repository__organization",
-        ).order_by("-published_at")[:RECENT_RELEASES_LIMIT]
+        return self.published_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT]
 
-    @strawberry.field
+    @strawberry_django.field(select_related=["organization", "owner"])
     def repositories(self) -> list[RepositoryNode]:
         """Resolve repositories."""
-        return (
-            self.repositories.select_related(
-                "organization",
-                "owner",
-            )
-            .filter(
-                organization__isnull=False,
-            )
-            .order_by(
-                "-pushed_at",
-                "-updated_at",
-            )
+        return self.repositories.filter(
+            organization__isnull=False,
+        ).order_by(
+            "-pushed_at",
+            "-updated_at",
         )
 
     @strawberry.field

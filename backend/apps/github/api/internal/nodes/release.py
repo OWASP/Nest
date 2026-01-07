@@ -20,12 +20,12 @@ from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 class ReleaseNode(strawberry.relay.Node):
     """GitHub release node."""
 
-    @strawberry.field
+    @strawberry_django.field
     def author(self) -> UserNode | None:
         """Resolve author."""
         return self.author
 
-    @strawberry.field
+    @strawberry_django.field
     def organization_name(self) -> str | None:
         """Resolve organization name."""
         return (
@@ -34,7 +34,7 @@ class ReleaseNode(strawberry.relay.Node):
             else None
         )
 
-    @strawberry.field
+    @strawberry_django.field
     def project_name(self) -> str | None:
         """Resolve project name."""
         return (
@@ -43,12 +43,12 @@ class ReleaseNode(strawberry.relay.Node):
             else None
         )
 
-    @strawberry.field
+    @strawberry_django.field
     def repository_name(self) -> str | None:
         """Resolve repository name."""
         return self.repository.name if self.repository else None
 
-    @strawberry.field
+    @strawberry_django.field
     def url(self) -> str:
         """Resolve URL."""
         return self.url
