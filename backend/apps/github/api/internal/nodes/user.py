@@ -33,14 +33,18 @@ class UserNode:
         """Resolve badge count."""
         return self.user_badges.filter(is_active=True).count()
 
-    @strawberry_django.field(select_related=["badge"])
+    @strawberry_django.field
     def badges(self) -> list[BadgeNode]:
         """Return user badges."""
-        user_badges = self.user_badges.filter(
-            is_active=True,
-        ).order_by(
-            "badge__weight",
-            "badge__name",
+        user_badges = (
+            self.user_badges.filter(
+                is_active=True,
+            )
+            .select_related("badge")
+            .order_by(
+                "badge__weight",
+                "badge__name",
+            )
         )
         return [user_badge.badge for user_badge in user_badges]
 

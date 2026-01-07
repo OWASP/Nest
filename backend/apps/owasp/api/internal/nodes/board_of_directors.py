@@ -18,17 +18,17 @@ from apps.owasp.models.board_of_directors import BoardOfDirectors
 class BoardOfDirectorsNode(strawberry.relay.Node):
     """Board of Directors node."""
 
-    @strawberry.field
+    @strawberry_django.field
     def candidates(self) -> list[EntityMemberNode]:
         """Resolve board election candidates."""
         return self.get_candidates()  # type: ignore[call-arg]
 
-    @strawberry.field
+    @strawberry_django.field
     def members(self) -> list[EntityMemberNode]:
         """Resolve board members."""
         return self.get_members()  # type: ignore[call-arg]
 
-    @strawberry.field
+    @strawberry_django.field
     def owasp_url(self) -> str:
         """Resolve OWASP board election URL."""
         return self.owasp_url

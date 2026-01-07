@@ -41,7 +41,7 @@ RECENT_RELEASES_LIMIT = 5
 class RepositoryNode(strawberry.relay.Node):
     """Repository node."""
 
-    @strawberry_django.field(select_related=["author"])
+    @strawberry_django.field(select_related=["issues__author"])
     def issues(self) -> list[IssueNode]:
         """Resolve recent issues."""
         # TODO(arkid15r): rename this to recent_issues.
