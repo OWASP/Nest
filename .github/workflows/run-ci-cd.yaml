@@ -250,6 +250,39 @@ jobs:
           docker run --env-file frontend/.env.example owasp/nest:test-frontend-e2e-latest pnpm run test:e2e
     timeout-minutes: 10
 
+  run-frontend-a11y-tests:
+    name: Run frontend accessibility tests
+    needs:
+      - scan-code
+      - scan-ci-dependencies
+    permissions:
+      contents: read 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+
+      - name: Build frontend a11y-testing image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        with:
+          cache-from: |
+            type=gha
+            type=registry,ref=owasp/nest:test-frontend-a11y-cache
+          cache-to: |
+            type=gha,compression=zstd
+          context: frontend
+          file: docker/frontend/Dockerfile.a11y.test
+          load: true
+          platforms: linux/amd64
+          tags: owasp/nest:test-frontend-a11y-latest
+      - name: Run frontend a11y tests
+        run: |
+          docker run --env-file frontend/.env.example owasp/nest:test-frontend-a11y-latest pnpm run test:a11y
+    timeout-minutes: 10
+    
   set-release-version:
     name: Set release version
     outputs:
