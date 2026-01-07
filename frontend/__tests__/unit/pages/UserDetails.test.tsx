@@ -281,7 +281,7 @@ describe('UserDetailsPage', () => {
     await waitFor(() => {
       const heatmapContainer = screen
         .getByAltText('Heatmap Background')
-        .closest('div.hidden.lg\\:block')
+        .closest(String.raw`div.hidden.lg\:block`)
       expect(heatmapContainer).toBeInTheDocument()
       expect(heatmapContainer).toHaveClass('hidden')
       expect(heatmapContainer).toHaveClass('lg:block')
