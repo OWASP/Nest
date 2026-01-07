@@ -1,11 +1,12 @@
 """Fixed tests for ModuleNode resolvers: use a small fake ModuleNode object
-so resolver methods actually run (instead of calling MagicMock methods)."""
+so resolver methods actually run (instead of calling MagicMock methods).
+"""
 
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
-import strawberry
 import pytest
+import strawberry
 
 from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum
 from apps.mentorship.api.internal.nodes.module import CreateModuleInput, UpdateModuleInput
@@ -13,7 +14,8 @@ from apps.mentorship.api.internal.nodes.module import CreateModuleInput, UpdateM
 
 class FakeModuleNode:
     """A minimal object that implements ModuleNode resolver behavior by delegating
-    to attributes that tests can set (e.g. ._issues_qs, .menteemodule_set, managers)."""
+    to attributes that tests can set (e.g. ._issues_qs, .menteemodule_set, managers).
+    """
 
     def __init__(self):
         # basic scalar attrs
@@ -64,8 +66,8 @@ class FakeModuleNode:
         issue_ids = list(self._issues_qs.filter(number=issue_number).values_list("id", flat=True))
         if not issue_ids:
             return []
-        from apps.mentorship.models.task import Task  # tests patch Task.objects
         from apps.github.models.user import User as GithubUser
+        from apps.mentorship.models.task import Task  # tests patch Task.objects
 
         mentee_users = (
             Task.objects.filter(module=self, issue_id__in=issue_ids, assignee__isnull=False)
@@ -81,10 +83,12 @@ class FakeModuleNode:
 
     # keep method name 'issues' (so tests call mock_module_node.issues())
     def issues(self, limit: int = 20, offset: int = 0, label: str | None = None):
-        queryset = self._issues_qs.select_related("repository", "author").prefetch_related("assignees", "labels")
+        queryset = self._issues_qs.select_related("repository", "author").prefetch_related(
+            "assignees", "labels"
+        )
         if label and label != "all":
             queryset = queryset.filter(labels__name=label)
-        return list(queryset.order_by("-updated_at")[offset: offset + limit])
+        return list(queryset.order_by("-updated_at")[offset : offset + limit])
 
     def issues_count(self, label: str | None = None):
         queryset = self._issues_qs
@@ -204,15 +208,20 @@ def test_module_node_mentees(mock_module_node):
 
         mentees = mock_module_node.mentees()
         assert len(mentees) == 2
-        mock_module_node.menteemodule_set.select_related.assert_called_once_with("mentee__github_user")
-        mock_user_objects.filter.assert_called_once_with(id__in=["github_user_id_1", "github_user_id_2"])
+        mock_module_node.menteemodule_set.select_related.assert_called_once_with(
+            "mentee__github_user"
+        )
+        mock_user_objects.filter.assert_called_once_with(
+            id__in=["github_user_id_1", "github_user_id_2"]
+        )
         mock_user_objects.filter.return_value.order_by.assert_called_once_with("login")
 
 
 def test_module_node_issue_mentees(mock_module_node):
-    with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects, patch(
-        "apps.github.models.user.User.objects"
-    ) as mock_user_objects:
+    with (
+        patch("apps.mentorship.models.task.Task.objects") as mock_task_objects,
+        patch("apps.github.models.user.User.objects") as mock_user_objects,
+    ):
         mock_task_objects.filter.return_value.select_related.return_value.values_list.return_value.distinct.return_value = [
             "assignee_id_1"
         ]
@@ -267,28 +276,42 @@ def test_module_node_issues_count_with_label(mock_module_node):
 
 def test_module_node_available_labels(mock_module_node):
     with patch("apps.github.models.Label.objects") as mock_label_objects:
-        mock_label_objects.filter.return_value.values_list.return_value.distinct.return_value = ["label1", "label2"]
+        mock_label_objects.filter.return_value.values_list.return_value.distinct.return_value = [
+            "label1",
+            "label2",
+        ]
 
         labels = mock_module_node.available_labels()
         assert labels == ["label1", "label2"]
-        mock_label_objects.filter.assert_called_once_with(issue__mentorship_modules=mock_module_node)
+        mock_label_objects.filter.assert_called_once_with(
+            issue__mentorship_modules=mock_module_node
+        )
 
 
 def test_module_node_issue_by_number(mock_module_node):
     issue = mock_module_node.issue_by_number(number=456)
     assert issue is not None
     mock_module_node._issues_qs.select_related.assert_called_once_with("repository", "author")
-    mock_module_node._issues_qs.select_related.return_value.prefetch_related.assert_called_once_with("assignees", "labels")
-    mock_module_node._issues_qs.select_related.return_value.prefetch_related.return_value.filter.assert_called_once_with(number=456)
+    mock_module_node._issues_qs.select_related.return_value.prefetch_related.assert_called_once_with(
+        "assignees", "labels"
+    )
+    mock_module_node._issues_qs.select_related.return_value.prefetch_related.return_value.filter.assert_called_once_with(
+        number=456
+    )
     mock_module_node._issues_qs.select_related.return_value.prefetch_related.return_value.filter.return_value.first.assert_called_once()
 
 
 def test_module_node_interested_users(mock_module_node):
-    with patch("apps.mentorship.models.issue_user_interest.IssueUserInterest.objects") as mock_issue_user_interest_objects:
-        mock_interest1 = MagicMock(); mock_interest1.user = MagicMock(login="user1")
-        mock_interest2 = MagicMock(); mock_interest2.user = MagicMock(login="user2")
+    with patch(
+        "apps.mentorship.models.issue_user_interest.IssueUserInterest.objects"
+    ) as mock_issue_user_interest_objects:
+        mock_interest1 = MagicMock()
+        mock_interest1.user = MagicMock(login="user1")
+        mock_interest2 = MagicMock()
+        mock_interest2.user = MagicMock(login="user2")
         mock_issue_user_interest_objects.select_related.return_value.filter.return_value.order_by.return_value = [
-            mock_interest1, mock_interest2
+            mock_interest1,
+            mock_interest2,
         ]
 
         users = mock_module_node.interested_users(issue_number=789)
@@ -310,7 +333,9 @@ def test_module_node_interested_users_no_issue(mock_module_node):
 
 def test_module_node_task_deadline(mock_module_node):
     with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
-        mock_task_objects.filter.return_value.order_by.return_value.values_list.return_value.first.return_value = datetime(2025, 10, 26)
+        mock_task_objects.filter.return_value.order_by.return_value.values_list.return_value.first.return_value = datetime(
+            2025, 10, 26
+        )
 
         deadline = mock_module_node.task_deadline(issue_number=101)
         assert deadline == datetime(2025, 10, 26)
@@ -329,7 +354,9 @@ def test_module_node_task_deadline_none(mock_module_node):
 
 def test_module_node_task_assigned_at(mock_module_node):
     with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
-        mock_task_objects.filter.return_value.order_by.return_value.values_list.return_value.first.return_value = datetime(2025, 9, 15)
+        mock_task_objects.filter.return_value.order_by.return_value.values_list.return_value.first.return_value = datetime(
+            2025, 9, 15
+        )
 
         assigned_at = mock_module_node.task_assigned_at(issue_number=202)
         assert assigned_at == datetime(2025, 9, 15)
@@ -349,18 +376,29 @@ def test_module_node_task_assigned_at_none(mock_module_node):
 def test_create_update_input_defaults():
     # CreateModuleInput / UpdateModuleInput defaults sanity checks
     create_input = CreateModuleInput(
-        name="Test", description="Desc", ended_at=datetime.now(),
-        experience_level=ExperienceLevelEnum.BEGINNER, program_key="key",
-        project_name="Project", project_id="id", started_at=datetime.now()
+        name="Test",
+        description="Desc",
+        ended_at=datetime.now(),
+        experience_level=ExperienceLevelEnum.BEGINNER,
+        program_key="key",
+        project_name="Project",
+        project_id="id",
+        started_at=datetime.now(),
     )
     assert create_input.domains == []
     assert create_input.labels == []
     assert create_input.tags == []
 
     update_input = UpdateModuleInput(
-        key="test-key", program_key="key", name="Test", description="Desc",
-        ended_at=datetime.now(), experience_level=ExperienceLevelEnum.BEGINNER,
-        project_id="id", project_name="Project", started_at=datetime.now()
+        key="test-key",
+        program_key="key",
+        name="Test",
+        description="Desc",
+        ended_at=datetime.now(),
+        experience_level=ExperienceLevelEnum.BEGINNER,
+        project_id="id",
+        project_name="Project",
+        started_at=datetime.now(),
     )
     assert update_input.domains == []
     assert update_input.labels == []

@@ -1,10 +1,10 @@
 """Pytest for mentorship module queries."""
+
 from unittest.mock import MagicMock, patch
 
 import pytest
 from django.core.exceptions import ObjectDoesNotExist
 
-from apps.mentorship.api.internal.nodes.module import ModuleNode
 from apps.mentorship.api.internal.queries.module import ModuleQuery
 from apps.mentorship.models import Module
 
@@ -66,7 +66,9 @@ class TestModuleQuery:
     def test_get_module_success(self, mock_module_select_related: MagicMock) -> None:
         """Test successful retrieval of a single module."""
         mock_module = MagicMock(spec=Module)
-        mock_module_select_related.return_value.prefetch_related.return_value.get.return_value = mock_module
+        mock_module_select_related.return_value.prefetch_related.return_value.get.return_value = (
+            mock_module
+        )
 
         query = ModuleQuery()
         result = query.get_module(module_key="module1", program_key="program1")
@@ -80,11 +82,14 @@ class TestModuleQuery:
     @patch("apps.mentorship.api.internal.queries.module.Module.objects.select_related")
     def test_get_module_does_not_exist(self, mock_module_select_related: MagicMock) -> None:
         """Test when the module does not exist."""
-        mock_module_select_related.return_value.prefetch_related.return_value.get.side_effect = Module.DoesNotExist
+        mock_module_select_related.return_value.prefetch_related.return_value.get.side_effect = (
+            Module.DoesNotExist
+        )
 
         query = ModuleQuery()
         with pytest.raises(
-            ObjectDoesNotExist, match="Module with key 'nonexistent' under program 'program1' not found."
+            ObjectDoesNotExist,
+            match="Module with key 'nonexistent' under program 'program1' not found.",
         ):
             query.get_module(module_key="nonexistent", program_key="program1")
 
@@ -92,6 +97,3 @@ class TestModuleQuery:
         mock_module_select_related.return_value.prefetch_related.return_value.get.assert_called_once_with(
             key="nonexistent", program__key="program1"
         )
-
-
-

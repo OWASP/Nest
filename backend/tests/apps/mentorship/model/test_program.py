@@ -1,10 +1,7 @@
-import pytest
-
 from apps.mentorship.models import Program
 
 
 class TestProgram:
-    
     def test_program_status_choices(self):
         assert Program.ProgramStatus.DRAFT == "draft"
         assert Program.ProgramStatus.PUBLISHED == "published"

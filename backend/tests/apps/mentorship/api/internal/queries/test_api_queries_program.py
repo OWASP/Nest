@@ -1,4 +1,5 @@
 """Pytest for mentorship program queries."""
+
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -6,7 +7,7 @@ import strawberry
 from django.core.exceptions import ObjectDoesNotExist
 
 from apps.github.models import User as GithubUser
-from apps.mentorship.api.internal.nodes.program import PaginatedPrograms, ProgramNode
+from apps.mentorship.api.internal.nodes.program import PaginatedPrograms
 from apps.mentorship.api.internal.queries.program import ProgramQuery
 from apps.mentorship.models import Mentor, Program
 
@@ -57,7 +58,9 @@ class TestMyPrograms:
 
     @patch("apps.mentorship.api.internal.queries.program.Mentor.objects.select_related")
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
-    def test_my_programs_success(self, mock_program_prefetch: MagicMock, mock_mentor_select: MagicMock, mock_info: MagicMock) -> None:
+    def test_my_programs_success(
+        self, mock_program_prefetch: MagicMock, mock_mentor_select: MagicMock, mock_info: MagicMock
+    ) -> None:
         """Test successful retrieval of user's programs as admin and mentor."""
         mock_mentor = MagicMock(spec=Mentor, id=1)
         mock_mentor_select.return_value.get.return_value = mock_mentor
@@ -73,11 +76,14 @@ class TestMyPrograms:
         mock_queryset = MagicMock()
         mock_queryset.count.return_value = 2
         mock_queryset.order_by.return_value.__getitem__.return_value = [
-            mock_mentor_program, mock_admin_program
+            mock_mentor_program,
+            mock_admin_program,
         ]
-        mock_queryset.filter.return_value = mock_queryset # For search chain
+        mock_queryset.filter.return_value = mock_queryset  # For search chain
 
-        mock_program_prefetch.return_value.filter.return_value.distinct.return_value = mock_queryset
+        mock_program_prefetch.return_value.filter.return_value.distinct.return_value = (
+            mock_queryset
+        )
 
         query = ProgramQuery()
         result = query.my_programs(info=mock_info)
@@ -97,7 +103,9 @@ class TestMyPrograms:
         mock_queryset.order_by.assert_called_once_with("-nest_created_at")
 
     @patch("apps.mentorship.api.internal.queries.program.Mentor.objects.select_related")
-    def test_my_programs_mentor_does_not_exist(self, mock_mentor_select: MagicMock, mock_info: MagicMock) -> None:
+    def test_my_programs_mentor_does_not_exist(
+        self, mock_mentor_select: MagicMock, mock_info: MagicMock
+    ) -> None:
         """Test when the current user is not a mentor."""
         mock_mentor_select.return_value.get.side_effect = Mentor.DoesNotExist
 
@@ -112,7 +120,9 @@ class TestMyPrograms:
 
     @patch("apps.mentorship.api.internal.queries.program.Mentor.objects.select_related")
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
-    def test_my_programs_no_programs_found(self, mock_program_prefetch: MagicMock, mock_mentor_select: MagicMock, mock_info: MagicMock) -> None:
+    def test_my_programs_no_programs_found(
+        self, mock_program_prefetch: MagicMock, mock_mentor_select: MagicMock, mock_info: MagicMock
+    ) -> None:
         """Test when no programs are found for the mentor."""
         mock_mentor = MagicMock(spec=Mentor, id=1)
         mock_mentor_select.return_value.get.return_value = mock_mentor
@@ -122,7 +132,9 @@ class TestMyPrograms:
         mock_queryset.order_by.return_value.__getitem__.return_value = []
         mock_queryset.filter.return_value = mock_queryset
 
-        mock_program_prefetch.return_value.filter.return_value.distinct.return_value = mock_queryset
+        mock_program_prefetch.return_value.filter.return_value.distinct.return_value = (
+            mock_queryset
+        )
 
         query = ProgramQuery()
         result = query.my_programs(info=mock_info)
@@ -134,7 +146,9 @@ class TestMyPrograms:
 
     @patch("apps.mentorship.api.internal.queries.program.Mentor.objects.select_related")
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
-    def test_my_programs_with_search(self, mock_program_prefetch: MagicMock, mock_mentor_select: MagicMock, mock_info: MagicMock) -> None:
+    def test_my_programs_with_search(
+        self, mock_program_prefetch: MagicMock, mock_mentor_select: MagicMock, mock_info: MagicMock
+    ) -> None:
         """Test my_programs with a search query."""
         mock_mentor = MagicMock(spec=Mentor, id=1)
         mock_mentor_select.return_value.get.return_value = mock_mentor
@@ -148,18 +162,24 @@ class TestMyPrograms:
         mock_queryset_filtered.order_by.return_value.__getitem__.return_value = [mock_program]
 
         mock_queryset_initial = MagicMock()
-        mock_queryset_initial.filter.return_value.distinct.return_value.filter.return_value = mock_queryset_filtered
+        mock_queryset_initial.filter.return_value.distinct.return_value.filter.return_value = (
+            mock_queryset_filtered
+        )
         mock_program_prefetch.return_value = mock_queryset_initial
 
         query = ProgramQuery()
         result = query.my_programs(info=mock_info, search="test")
 
         assert len(result.programs) == 1
-        mock_program_prefetch.return_value.filter.return_value.distinct.return_value.filter.assert_called_once_with(name__icontains="test")
+        mock_program_prefetch.return_value.filter.return_value.distinct.return_value.filter.assert_called_once_with(
+            name__icontains="test"
+        )
 
     @patch("apps.mentorship.api.internal.queries.program.Mentor.objects.select_related")
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
-    def test_my_programs_pagination(self, mock_program_prefetch: MagicMock, mock_mentor_select: MagicMock, mock_info: MagicMock) -> None:
+    def test_my_programs_pagination(
+        self, mock_program_prefetch: MagicMock, mock_mentor_select: MagicMock, mock_info: MagicMock
+    ) -> None:
         """Test pagination for my_programs query."""
         mock_mentor = MagicMock(spec=Mentor, id=1)
         mock_mentor_select.return_value.get.return_value = mock_mentor
@@ -181,7 +201,9 @@ class TestMyPrograms:
         mock_queryset.order_by.return_value.__getitem__.return_value = [mock_program2]
         mock_queryset.filter.return_value = mock_queryset
 
-        mock_program_prefetch.return_value.filter.return_value.distinct.return_value = mock_queryset
+        mock_program_prefetch.return_value.filter.return_value.distinct.return_value = (
+            mock_queryset
+        )
 
         query = ProgramQuery()
         result = query.my_programs(info=mock_info, page=2, limit=1)
@@ -190,4 +212,3 @@ class TestMyPrograms:
         assert result.programs[0].id == 2
         assert result.total_pages == 3
         assert result.current_page == 2
-
