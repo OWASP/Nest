@@ -8,11 +8,11 @@ from apps.mentorship.management.commands.mentorship_update_comments import (
 )
 
 
-def make_qs(iterable, exists=True):
-    """Return a queryset-like MagicMock that is iterable and supports .exists(), .count(), .distinct()."""
+def make_qs(iterable, exist):
+    """Return a queryset-like MagicMock that is iterable and supports."""
     qs = MagicMock(name="QuerySet")
     items = list(iterable)
-    qs.exists.return_value = exists
+    qs.exists.return_value = exist
     qs.__iter__.return_value = iter(items)
     qs.all.return_value = items
     qs.count.return_value = len(items)
@@ -50,7 +50,7 @@ def command():
 def mock_module():
     m = MagicMock()
     m.name = "Test Module"
-    vlist_qs = make_qs([1, 2], exists=True)
+    vlist_qs = make_qs([1, 2], exist=True)
     m.project.repositories.filter.return_value.values_list.return_value.distinct.return_value = (
         vlist_qs
     )
@@ -62,7 +62,7 @@ def mock_issue():
     issue = MagicMock()
     issue.number = 123
     issue.title = "Test Issue Title"
-    empty_comments_qs = make_qs([], exists=False)
+    empty_comments_qs = make_qs([], exist=False)
     issue.comments.select_related.return_value.filter.return_value.order_by.return_value = (
         empty_comments_qs
     )
@@ -106,12 +106,12 @@ def test_process_module(
     mock_issue.title = "Test Issue 1"
     mock_issue.number = 123
 
-    issues_qs = make_qs([mock_issue], exists=True)
+    issues_qs = make_qs([mock_issue], exist=True)
     mock_issue_1.objects.filter.return_value.distinct.return_value = issues_qs
 
     author = make_user(1, "login")
     comment = make_comment("body", author, created_at="now")
-    comments_qs = make_qs([comment], exists=True)
+    comments_qs = make_qs([comment], exist=True)
     mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = (
         comments_qs
     )
@@ -132,7 +132,7 @@ def test_process_issue_interests_new_interest(
     user1 = make_user(1, "user1")
     comment1 = make_comment(body="I am /interested", author=user1, created_at="2023-01-01")
 
-    comments_qs = make_qs([comment1], exists=True)
+    comments_qs = make_qs([comment1], exist=True)
     mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = (
         comments_qs
     )
@@ -162,7 +162,7 @@ def test_process_issue_interests_remove_interest(
     user1 = make_user(1, "user1")
     comment1 = make_comment(body="Not interested anymore", author=user1, created_at="2023-01-01")
 
-    comments_qs = make_qs([comment1], exists=True)
+    comments_qs = make_qs([comment1], exist=True)
     mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = (
         comments_qs
     )
@@ -195,7 +195,7 @@ def test_process_issue_interests_existing_interest_removed(
     user1 = make_user(1, "user1")
     comment1 = make_comment(body="Just a regular comment", author=user1, created_at="2023-01-01")
 
-    comments_qs = make_qs([comment1], exists=True)
+    comments_qs = make_qs([comment1], exist=True)
     mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = (
         comments_qs
     )
@@ -226,7 +226,7 @@ def test_process_issue_interests_multiple_comments_single_user(
     comment2 = make_comment(body="/interested in this", author=user1, created_at="2023-01-02")
     comment3 = make_comment(body="Another comment", author=user1, created_at="2023-01-03")
 
-    comments_qs = make_qs([comment1, comment2, comment3], exists=True)
+    comments_qs = make_qs([comment1, comment2, comment3], exist=True)
     mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = (
         comments_qs
     )
@@ -263,7 +263,7 @@ def test_process_issue_interests_multiple_users(
 
     comments_qs = make_qs(
         [comment1_user1, comment2_user2, comment3_user3, comment4_user2],
-        exists=True,
+        exist=True,
     )
     mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = (
         comments_qs
