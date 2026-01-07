@@ -10,10 +10,10 @@ from apps.mentorship.management.commands.mentorship_sync_module_issues import Co
 from apps.mentorship.models.task import Task
 
 
-def make_qs(iterable, exists=True):
-    """Return a queryset-like MagicMock that is iterable and supports .exists()."""
+def make_qs(iterable, exist=True):
+    """Return a queryset-like MagicMock that is iterable"""
     qs = MagicMock(name="QuerySet")
-    qs.exists.return_value = exists
+    qs.exists.return_value = exist
     qs.__iter__.return_value = iter(iterable)
     qs.all.return_value = list(iterable)
     return qs
@@ -155,7 +155,7 @@ def test_process_module_links_and_creates_tasks(mock_issue, mock_task, command):
     issue2.assignees.first.return_value = assignee
     issue3.assignees.first.return_value = None
 
-    issues_qs = make_qs([issue1, issue2], exists=True)
+    issues_qs = make_qs([issue1, issue2], exist=True)
     mock_issue.objects.filter.return_value.select_related.return_value.prefetch_related.return_value.distinct.return_value = issues_qs
 
     created_task1 = MagicMock(module=None, status=None, assigned_at=None)

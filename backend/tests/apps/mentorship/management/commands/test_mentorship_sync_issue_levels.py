@@ -15,10 +15,10 @@ def command():
     return cmd
 
 
-def make_qs(iterable, exists=True):
-    """Helper: return a queryset-like MagicMock that is iterable and supports .exists()."""
+def make_qs(iterable, exist=True):
+    """Helper: return a queryset-like MagicMock that is iterable"""
     qs = MagicMock(name="QuerySet")
-    qs.exists.return_value = exists
+    qs.exists.return_value = exist
     qs.__iter__.return_value = iter(iterable)
     qs.all.return_value = list(iterable)
     return qs
@@ -27,7 +27,7 @@ def make_qs(iterable, exists=True):
 @patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.TaskLevel")
 def test_handle_no_task_levels(mock_task_level, command):
     """When no TaskLevel objects exist, command should exit early with a warning."""
-    empty_qs = make_qs([], exists=False)
+    empty_qs = make_qs([], exist=False)
     mock_task_level.objects.select_related.return_value.order_by.return_value = empty_qs
 
     command.handle()
@@ -45,7 +45,7 @@ def test_handle_updates_issues(mock_task_level, mock_issue, command):
     mock_level_1 = MagicMock(module_id=mock_module.id, name="Beginner", labels=["label-a"])
     mock_level_2 = MagicMock(module_id=mock_module.id, name="Intermediate", labels=["label-b"])
 
-    levels_qs = make_qs([mock_level_1, mock_level_2], exists=True)
+    levels_qs = make_qs([mock_level_1, mock_level_2], exist=True)
     mock_task_level.objects.select_related.return_value.order_by.return_value = levels_qs
 
     label_a = MagicMock()
@@ -77,7 +77,7 @@ def test_handle_updates_issues(mock_task_level, mock_issue, command):
 
     issues_qs = make_qs(
         [issue_with_label_a, issue_with_label_b, issue_no_match, issue_already_up_to_date],
-        exists=True,
+        exist=True,
     )
     mock_issue.objects.prefetch_related.return_value.select_related.return_value = issues_qs
 
@@ -96,12 +96,12 @@ def test_handle_updates_issues(mock_task_level, mock_issue, command):
 @patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.Issue")
 @patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.TaskLevel")
 def test_handle_no_updates_needed(mock_task_level, mock_issue, command):
-    """When all issues already have the correct level, bulk_update is not called."""
+    """When all issues already have the correct level, bulk_update is not called"""
     mock_module = MagicMock()
     mock_module.id = 1
 
     mock_level_1 = MagicMock(module_id=mock_module.id, name="Beginner", labels=["label-a"])
-    levels_qs = make_qs([mock_level_1], exists=True)
+    levels_qs = make_qs([mock_level_1], exist=True)
     mock_task_level.objects.select_related.return_value.order_by.return_value = levels_qs
 
     label_a = MagicMock()
@@ -112,7 +112,7 @@ def test_handle_no_updates_needed(mock_task_level, mock_issue, command):
     issue_already_up_to_date.mentorship_modules.all.return_value = [mock_module]
     issue_already_up_to_date.level = mock_level_1
 
-    issues_qs = make_qs([issue_already_up_to_date], exists=True)
+    issues_qs = make_qs([issue_already_up_to_date], exist=True)
     mock_issue.objects.prefetch_related.return_value.select_related.return_value = issues_qs
 
     command.handle()
