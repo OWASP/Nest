@@ -73,6 +73,7 @@ gha
 graphiql
 gunicorn
 hackathon
+hcl
 heroui
 hsl
 ics

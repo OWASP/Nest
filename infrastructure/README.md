@@ -184,7 +184,7 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
     aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 000000000000.dkr.ecr.us-east-2.amazonaws.com
     ```
 
-2. **Uplaod backend image to ECR**:
+2. **Upload backend image to ECR**:
 
   - Build the backend image using the following command:
 
@@ -210,7 +210,7 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
     docker push 000000000000.dkr.ecr.us-east-2.amazonaws.com/owasp-nest-staging-backend:latest
     ```
 
-3. **Uplaod frontend image to ECR**:
+3. **Upload frontend image to ECR**:
 
   - Build the frontend image using the following command:
 
