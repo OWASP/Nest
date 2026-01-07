@@ -14,7 +14,7 @@ from apps.mentorship.api.internal.nodes.module import CreateModuleInput, UpdateM
 
 
 class FakeModuleNode:
-    """A minimal object that implements ModuleNode resolver behavior by delegating to attributes that tests can set."""
+    """Minimal ModuleNode-like object for testing."""
 
     def __init__(self):
         # basic scalar attrs
@@ -33,19 +33,12 @@ class FakeModuleNode:
         self.started_at = datetime(2025, 1, 1, tzinfo=UTC)
         self.tags = ["backend", "frontend"]
 
-        # attributes that resolver methods will use (tests can replace these)
-        # mentors manager must expose .all()
         self._mentors_manager = MagicMock()
-        # mentee-module relationship manager chain used in mentees()
         self.menteemodule_set = MagicMock()
-        # issues queryset-like object (tests will set return values on chains)
         self._issues_qs = MagicMock()
-        # project object
         self.project = MagicMock()
         self.project.name = "Test Project"
 
-    # Implement resolver methods by delegating to the attributes above,
-    # matching original ModuleNode logic but acting on attributes tests control.
     def mentors(self):
         return self._mentors_manager.all()
 
@@ -55,8 +48,6 @@ class FakeModuleNode:
             .filter(mentee__github_user__isnull=False)
             .values_list("mentee__github_user", flat=True)
         )
-
-        # The tests patch apps.github.models.user.User.objects
         from apps.github.models.user import User as GithubUser
 
         return list(GithubUser.objects.filter(id__in=mentee_users).order_by("login"))
@@ -80,7 +71,6 @@ class FakeModuleNode:
     def project_name(self):
         return self.project.name if self.project else None
 
-    # keep method name 'issues' (so tests call mock_module_node.issues())
     def issues(self, limit: int = 20, offset: int = 0, label: str | None = None):
         queryset = self._issues_qs.select_related("repository", "author").prefetch_related(
             "assignees", "labels"
@@ -159,24 +149,17 @@ class FakeModuleNode:
 def mock_module_node():
     m = FakeModuleNode()
 
-    # prepare sensible default returns for chains used by tests
     m._mentors_manager.all.return_value = [MagicMock(), MagicMock()]
-    # mentee module set -> values_list returns two ids by default
     m.menteemodule_set.select_related.return_value.filter.return_value.values_list.return_value = [
         "github_user_id_1",
         "github_user_id_2",
     ]
-    # issues.filter(...).values_list(...) used by issue_mentees default
     m._issues_qs.filter.return_value.values_list.return_value = ["issue_id_1"]
-    # issues.select_related(...).prefetch_related(...).filter(...).order_by(...) 
-    # returns list of 1 mock issue
-    m._issues_qs.select_related.return_value.prefetch_related.return_value.filter.return_value\
-        .order_by.return_value = [
+    m._issues_qs.select_related.return_value.prefetch_related.return_value.filter.return_value.order_by.return_value = [
         MagicMock()
     ]
     m._issues_qs.count.return_value = 5
-    m._issues_qs.select_related.return_value.prefetch_related.return_value.filter.return_value\
-        .first.return_value = MagicMock()
+    m._issues_qs.select_related.return_value.prefetch_related.return_value.filter.return_value.first.return_value = MagicMock()
 
     return m
 
@@ -204,7 +187,6 @@ def test_module_node_mentors(mock_module_node):
 
 
 def test_module_node_mentees(mock_module_node):
-    # patch the User manager used inside the resolver to return two mock users
     with patch("apps.github.models.user.User.objects") as mock_user_objects:
         mock_user_objects.filter.return_value.order_by.return_value = [MagicMock(), MagicMock()]
 
@@ -224,8 +206,7 @@ def test_module_node_issue_mentees(mock_module_node):
         patch("apps.mentorship.models.task.Task.objects") as mock_task_objects,
         patch("apps.github.models.user.User.objects") as mock_user_objects,
     ):
-        mock_task_objects.filter.return_value.select_related.return_value.values_list\
-            .return_value.distinct.return_value = [
+        mock_task_objects.filter.return_value.select_related.return_value.values_list.return_value.distinct.return_value = [
             "assignee_id_1"
         ]
         mock_user_objects.filter.return_value.order_by.return_value = [MagicMock()]
@@ -312,8 +293,7 @@ def test_module_node_interested_users(mock_module_node):
         mock_interest1.user = MagicMock(login="user1")
         mock_interest2 = MagicMock()
         mock_interest2.user = MagicMock(login="user2")
-        mock_issue_user_interest_objects.select_related.return_value.filter.return_value\
-            .order_by.return_value = [
+        mock_issue_user_interest_objects.select_related.return_value.filter.return_value.order_by.return_value = [
             mock_interest1,
             mock_interest2,
         ]
@@ -334,11 +314,8 @@ def test_module_node_interested_users_no_issue(mock_module_node):
     users = mock_module_node.interested_users(issue_number=789)
     assert users == []
 
-
-def test_module_node_task_deadline(mock_module_node):
     with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
-        mock_task_objects.filter.return_value.order_by.return_value.values_list.return_value\
-            .first.return_value = datetime(
+        mock_task_objects.filter.return_value.order_by.return_value.values_list.return_value.first.return_value = datetime(
             2025, 10, 26, tzinfo=UTC
         )
 
@@ -379,7 +356,6 @@ def test_module_node_task_assigned_at_none(mock_module_node):
 
 
 def test_create_update_input_defaults():
-    # CreateModuleInput / UpdateModuleInput defaults sanity checks
     create_input = CreateModuleInput(
         name="Test",
         description="Desc",
@@ -388,7 +364,7 @@ def test_create_update_input_defaults():
         program_key="key",
         project_name="Project",
         project_id="id",
-        started_at=datetime.now(),
+        started_at=datetime.now(UTC),
     )
     assert create_input.domains == []
     assert create_input.labels == []
@@ -399,11 +375,11 @@ def test_create_update_input_defaults():
         program_key="key",
         name="Test",
         description="Desc",
-        ended_at=datetime.now(),
+        ended_at=datetime.now(UTC),
         experience_level=ExperienceLevelEnum.BEGINNER,
         project_id="id",
         project_name="Project",
-        started_at=datetime.now(),
+        started_at=datetime.now(UTC),
     )
     assert update_input.domains == []
     assert update_input.labels == []
