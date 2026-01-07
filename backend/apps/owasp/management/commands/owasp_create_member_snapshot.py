@@ -2,7 +2,7 @@
 
 import logging
 from collections import defaultdict
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
@@ -41,12 +41,12 @@ class Command(BaseCommand):
         parser.add_argument(
             "--start-at",
             type=str,
-            help="Start date (YYYY-MM-DD). Defaults to January 1st of current year.",
+            help="Start date (YYYY-MM-DD). Defaults to 365 days ago.",
         )
         parser.add_argument(
             "--end-at",
             type=str,
-            help="End date (YYYY-MM-DD). Defaults to October 1st of current year.",
+            help="End date (YYYY-MM-DD). Defaults to today.",
         )
 
     def parse_date(self, date_str: str | None, default: datetime) -> datetime:
@@ -320,10 +320,9 @@ class Command(BaseCommand):
         """
         username = options["username"]
 
-        # Default to current year: Jan 1 to Oct 1
-        current_year = datetime.now(UTC).year
-        default_start = datetime(current_year, 1, 1, tzinfo=UTC)
-        default_end = datetime(current_year, 10, 1, tzinfo=UTC)
+        # Default to last 365 days
+        default_end = datetime.now(UTC)
+        default_start = default_end - timedelta(days=365)
 
         end_at = self.parse_date(options.get("end_at"), default_end)
         start_at = self.parse_date(options.get("start_at"), default_start)
