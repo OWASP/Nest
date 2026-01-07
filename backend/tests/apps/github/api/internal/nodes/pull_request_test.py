@@ -8,6 +8,11 @@ from apps.github.api.internal.nodes.pull_request import PullRequestNode
 class TestPullRequestNode:
     """Test cases for PullRequestNode class."""
 
+    def _get_field_by_name(self, name):
+        return next(
+            (f for f in PullRequestNode.__strawberry_definition__.fields if f.name == name), None
+        )
+
     def test_pull_request_node_type(self):
         assert hasattr(PullRequestNode, "__strawberry_definition__")
 
@@ -32,7 +37,9 @@ class TestPullRequestNode:
         mock_author = Mock()
         mock_pr.author = mock_author
 
-        result = PullRequestNode.author(mock_pr)
+        field = self._get_field_by_name("author")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_pr)
         assert result == mock_author
 
     def test_organization_name_with_organization(self):

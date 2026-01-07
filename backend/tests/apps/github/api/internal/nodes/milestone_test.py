@@ -9,6 +9,11 @@ from apps.github.api.internal.nodes.milestone import MilestoneNode
 class TestMilestoneNode:
     """Test cases for MilestoneNode class."""
 
+    def _get_field_by_name(self, name):
+        return next(
+            (f for f in MilestoneNode.__strawberry_definition__.fields if f.name == name), None
+        )
+
     def test_milestone_node_type(self):
         assert hasattr(MilestoneNode, "__strawberry_definition__")
 
@@ -36,7 +41,9 @@ class TestMilestoneNode:
         mock_author = Mock()
         mock_milestone.author = mock_author
 
-        result = MilestoneNode.author(mock_milestone)
+        field = self._get_field_by_name("author")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_milestone)
         assert result == mock_author
 
     def test_organization_name_with_organization(self):

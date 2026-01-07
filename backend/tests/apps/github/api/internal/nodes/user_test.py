@@ -1,6 +1,7 @@
 """Test cases for UserNode."""
 
 import math
+from datetime import UTC, datetime
 from unittest.mock import Mock
 
 from apps.github.api.internal.nodes.user import UserNode
@@ -9,6 +10,9 @@ from apps.nest.api.internal.nodes.badge import BadgeNode
 
 class TestUserNode:
     """Test cases for UserNode class."""
+
+    def _get_field_by_name(self, name):
+        return next((f for f in UserNode.__strawberry_definition__.fields if f.name == name), None)
 
     def test_user_node_inheritance(self):
         """Test if UserNode inherits from BaseNode."""
@@ -94,7 +98,9 @@ class TestUserNode:
         mock_badges_queryset.filter.return_value.count.return_value = 3
         mock_user.user_badges = mock_badges_queryset
 
-        result = UserNode.badge_count(mock_user)
+        field = self._get_field_by_name("badge_count")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_user)
         assert result == 3
         mock_badges_queryset.filter.assert_called_once_with(is_active=True)
         mock_badges_queryset.filter.return_value.count.assert_called_once()
@@ -104,15 +110,15 @@ class TestUserNode:
         mock_user = Mock()
         mock_badges_queryset = Mock()
         mock_filter = mock_badges_queryset.filter.return_value
-        mock_select_related = mock_filter.select_related.return_value
-        mock_select_related.order_by.return_value = []
+        mock_filter.order_by.return_value = []
         mock_user.user_badges = mock_badges_queryset
 
-        result = UserNode.badges(mock_user)
+        field = self._get_field_by_name("badges")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_user)
         assert result == []
         mock_badges_queryset.filter.assert_called_once_with(is_active=True)
-        mock_filter.select_related.assert_called_once_with("badge")
-        mock_select_related.order_by.assert_called_once_with("badge__weight", "badge__name")
+        mock_filter.order_by.assert_called_once_with("badge__weight", "badge__name")
 
     def test_badges_field_single_badge(self):
         """Test badges field resolution with single badge."""
@@ -123,15 +129,15 @@ class TestUserNode:
 
         mock_badges_queryset = Mock()
         mock_filter = mock_badges_queryset.filter.return_value
-        mock_select_related = mock_filter.select_related.return_value
-        mock_select_related.order_by.return_value = [mock_user_badge]
+        mock_filter.order_by.return_value = [mock_user_badge]
         mock_user.user_badges = mock_badges_queryset
 
-        result = UserNode.badges(mock_user)
+        field = self._get_field_by_name("badges")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_user)
         assert result == [mock_badge]
         mock_badges_queryset.filter.assert_called_once_with(is_active=True)
-        mock_filter.select_related.assert_called_once_with("badge")
-        mock_select_related.order_by.assert_called_once_with("badge__weight", "badge__name")
+        mock_filter.order_by.assert_called_once_with("badge__weight", "badge__name")
 
     def test_badges_field_sorted_by_weight_and_name(self):
         """Test badges field resolution with multiple badges sorted by weight and name."""
@@ -169,8 +175,7 @@ class TestUserNode:
         # (lowest weight first, then by name for same weight)
         mock_badges_queryset = Mock()
         mock_filter = mock_badges_queryset.filter.return_value
-        mock_select_related = mock_filter.select_related.return_value
-        mock_select_related.order_by.return_value = [
+        mock_filter.order_by.return_value = [
             mock_user_badge_low,  # weight 10
             mock_user_badge_medium_a,  # weight 50, name "Medium Weight A"
             mock_user_badge_medium_b,  # weight 50, name "Medium Weight B"
@@ -179,7 +184,9 @@ class TestUserNode:
         mock_user = Mock()
         mock_user.user_badges = mock_badges_queryset
 
-        result = UserNode.badges(mock_user)
+        field = self._get_field_by_name("badges")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_user)
 
         # Verify the badges are returned in the correct order
         expected_badges = [
@@ -192,20 +199,19 @@ class TestUserNode:
 
         # Verify the queryset was called with correct ordering
         mock_badges_queryset.filter.assert_called_once_with(is_active=True)
-        mock_filter.select_related.assert_called_once_with("badge")
-        mock_select_related.order_by.assert_called_once_with("badge__weight", "badge__name")
+        mock_filter.order_by.assert_called_once_with("badge__weight", "badge__name")
 
     def test_first_owasp_contribution_at_with_profile(self):
         """Test first_owasp_contribution_at returns timestamp when profile exists."""
-        from datetime import UTC, datetime
-
         mock_profile = Mock()
         mock_profile.first_contribution_at = datetime(2025, 1, 15, tzinfo=UTC)
 
         mock_user = Mock()
         mock_user.owasp_profile = mock_profile
 
-        result = UserNode.first_owasp_contribution_at(mock_user)
+        field = self._get_field_by_name("first_owasp_contribution_at")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_user)
 
         assert result == mock_profile.first_contribution_at.timestamp()
 
@@ -213,7 +219,9 @@ class TestUserNode:
         """Test first_owasp_contribution_at returns None when no profile."""
         mock_user = Mock(spec=[])
 
-        result = UserNode.first_owasp_contribution_at(mock_user)
+        field = self._get_field_by_name("first_owasp_contribution_at")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_user)
 
         assert result is None
 
@@ -225,7 +233,9 @@ class TestUserNode:
         mock_user = Mock()
         mock_user.owasp_profile = mock_profile
 
-        result = UserNode.is_owasp_board_member(mock_user)
+        field = self._get_field_by_name("is_owasp_board_member")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_user)
 
         assert result is True
 
@@ -233,7 +243,9 @@ class TestUserNode:
         """Test is_owasp_board_member returns False when no profile."""
         mock_user = Mock(spec=[])
 
-        result = UserNode.is_owasp_board_member(mock_user)
+        field = self._get_field_by_name("is_owasp_board_member")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_user)
 
         assert result is False
 
@@ -245,7 +257,9 @@ class TestUserNode:
         mock_user = Mock()
         mock_user.owasp_profile = mock_profile
 
-        result = UserNode.is_former_owasp_staff(mock_user)
+        field = self._get_field_by_name("is_former_owasp_staff")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_user)
 
         assert result is True
 
@@ -253,7 +267,9 @@ class TestUserNode:
         """Test is_former_owasp_staff returns False when no profile."""
         mock_user = Mock(spec=[])
 
-        result = UserNode.is_former_owasp_staff(mock_user)
+        field = self._get_field_by_name("is_former_owasp_staff")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_user)
 
         assert result is False
 
@@ -265,7 +281,9 @@ class TestUserNode:
         mock_user = Mock()
         mock_user.owasp_profile = mock_profile
 
-        result = UserNode.is_gsoc_mentor(mock_user)
+        field = self._get_field_by_name("is_gsoc_mentor")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_user)
 
         assert result is True
 
@@ -273,7 +291,9 @@ class TestUserNode:
         """Test is_gsoc_mentor returns False when no profile."""
         mock_user = Mock(spec=[])
 
-        result = UserNode.is_gsoc_mentor(mock_user)
+        field = self._get_field_by_name("is_gsoc_mentor")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_user)
 
         assert result is False
 

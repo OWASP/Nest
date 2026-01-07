@@ -8,6 +8,11 @@ from apps.github.api.internal.nodes.issue import IssueNode
 class TestIssueNode:
     """Test cases for IssueNode class."""
 
+    def _get_field_by_name(self, name):
+        return next(
+            (f for f in IssueNode.__strawberry_definition__.fields if f.name == name), None
+        )
+
     def test_issue_node_type(self):
         assert hasattr(IssueNode, "__strawberry_definition__")
 
@@ -38,7 +43,9 @@ class TestIssueNode:
         mock_author = Mock()
         mock_issue.author = mock_author
 
-        result = IssueNode.author(mock_issue)
+        field = self._get_field_by_name("author")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_issue)
         assert result == mock_author
 
     def test_organization_name_with_organization(self):
@@ -50,7 +57,9 @@ class TestIssueNode:
         mock_repository.organization = mock_organization
         mock_issue.repository = mock_repository
 
-        result = IssueNode.organization_name(mock_issue)
+        field = self._get_field_by_name("organization_name")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_issue)
         assert result == "test-org"
 
     def test_organization_name_without_organization(self):
@@ -60,7 +69,9 @@ class TestIssueNode:
         mock_repository.organization = None
         mock_issue.repository = mock_repository
 
-        result = IssueNode.organization_name(mock_issue)
+        field = self._get_field_by_name("organization_name")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_issue)
         assert result is None
 
     def test_organization_name_without_repository(self):
@@ -68,7 +79,9 @@ class TestIssueNode:
         mock_issue = Mock()
         mock_issue.repository = None
 
-        result = IssueNode.organization_name(mock_issue)
+        field = self._get_field_by_name("organization_name")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_issue)
         assert result is None
 
     def test_repository_name_with_repository(self):

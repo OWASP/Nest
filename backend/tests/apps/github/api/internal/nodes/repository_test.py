@@ -99,21 +99,22 @@ class TestRepositoryNode:
         """Test issues method resolution."""
         mock_repository = Mock()
         mock_issues = Mock()
-        mock_issues.select_related.return_value.order_by.return_value.__getitem__ = Mock(
-            return_value=[]
-        )
+        mock_issues.order_by.return_value.__getitem__ = Mock(return_value=[])
         mock_repository.issues = mock_issues
 
-        RepositoryNode.issues(mock_repository)
-        mock_issues.select_related.assert_called_with("author")
-        mock_issues.select_related.return_value.order_by.assert_called_with("-created_at")
+        field = self._get_field_by_name("issues")
+        resolver = field.base_resolver.wrapped_func
+        resolver(mock_repository)
+        mock_issues.order_by.assert_called_with("-created_at")
 
     def test_languages_method(self):
         """Test languages method resolution."""
         mock_repository = Mock()
         mock_repository.languages = {"Python": 1000, "JavaScript": 500}
 
-        result = RepositoryNode.languages(mock_repository)
+        field = self._get_field_by_name("languages")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_repository)
         assert result == ["Python", "JavaScript"]
 
     def test_latest_release_method(self):
@@ -121,7 +122,9 @@ class TestRepositoryNode:
         mock_repository = Mock()
         mock_repository.latest_release = "v1.0.0"
 
-        result = RepositoryNode.latest_release(mock_repository)
+        field = self._get_field_by_name("latest_release")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_repository)
         assert result == "v1.0.0"
 
     def test_organization_method(self):
@@ -130,7 +133,9 @@ class TestRepositoryNode:
         mock_organization = Mock()
         mock_repository.organization = mock_organization
 
-        result = RepositoryNode.organization(mock_repository)
+        field = self._get_field_by_name("organization")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_repository)
         assert result == mock_organization
 
     def test_project_method(self):
@@ -139,21 +144,22 @@ class TestRepositoryNode:
         mock_project = Mock()
         mock_repository.project = mock_project
 
-        result = RepositoryNode.project(mock_repository)
+        field = self._get_field_by_name("project")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_repository)
         assert result == mock_project
 
     def test_recent_milestones_method(self):
         """Test recent_milestones method resolution."""
         mock_repository = Mock()
         mock_milestones = Mock()
-        mock_milestones.select_related.return_value.order_by.return_value.__getitem__ = Mock(
-            return_value=[]
-        )
+        mock_milestones.order_by.return_value.__getitem__ = Mock(return_value=[])
         mock_repository.recent_milestones = mock_milestones
 
-        RepositoryNode.recent_milestones(mock_repository, limit=3)
-        mock_milestones.select_related.assert_called_with("repository")
-        mock_milestones.select_related.return_value.order_by.assert_called_with("-created_at")
+        field = self._get_field_by_name("recent_milestones")
+        resolver = field.base_resolver.wrapped_func
+        resolver(mock_repository, limit=3)
+        mock_milestones.order_by.assert_called_with("-created_at")
 
     def test_releases_method(self):
         """Test releases method resolution."""
@@ -162,7 +168,9 @@ class TestRepositoryNode:
         mock_releases.order_by.return_value.__getitem__ = Mock(return_value=[])
         mock_repository.published_releases = mock_releases
 
-        RepositoryNode.releases(mock_repository)
+        field = self._get_field_by_name("releases")
+        resolver = field.base_resolver.wrapped_func
+        resolver(mock_repository)
         mock_releases.order_by.assert_called_with("-published_at")
 
     def test_top_contributors_method(self):
@@ -185,7 +193,9 @@ class TestRepositoryNode:
             },
         ]
 
-        result = RepositoryNode.top_contributors(mock_repository)
+        field = self._get_field_by_name("top_contributors")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_repository)
         assert len(result) == 2
         assert all(isinstance(c, RepositoryContributorNode) for c in result)
 
@@ -194,7 +204,9 @@ class TestRepositoryNode:
         mock_repository = Mock()
         mock_repository.topics = ["security", "python", "django"]
 
-        result = RepositoryNode.topics(mock_repository)
+        field = self._get_field_by_name("topics")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_repository)
         assert result == ["security", "python", "django"]
 
     def test_url_method(self):
@@ -202,7 +214,9 @@ class TestRepositoryNode:
         mock_repository = Mock()
         mock_repository.url = "https://github.com/test-org/test-repo"
 
-        result = RepositoryNode.url(mock_repository)
+        field = self._get_field_by_name("url")
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(mock_repository)
         assert result == "https://github.com/test-org/test-repo"
 
     def test_is_archived_field_exists(self):
