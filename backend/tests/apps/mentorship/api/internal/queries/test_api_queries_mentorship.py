@@ -241,7 +241,6 @@ class TestGetMenteeModuleIssues:
         mock_issues_qs = MagicMock()
         mock_issues_qs.__getitem__.return_value = [mock_issue1, mock_issue2]
 
-        # chain mocks to simulate module.issues.filter().only().prefetch_related().order_by()
         mock_module.issues.filter.return_value.only.return_value.prefetch_related.return_value.order_by.return_value = mock_issues_qs
 
         query = MentorshipQuery()
