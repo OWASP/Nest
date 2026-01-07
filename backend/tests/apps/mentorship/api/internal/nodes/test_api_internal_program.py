@@ -1,5 +1,6 @@
 """Pytest for mentorship program nodes (fixed fixture: use a FakeProgramNode so
 admins() resolver actually runs and we only mock the manager).
+
 """
 
 from datetime import datetime
@@ -21,6 +22,7 @@ from apps.mentorship.api.internal.nodes.program import (
 class FakeProgramNode:
     """Minimal ProgramNode-like object that implements the admins() resolver
     while letting tests control the underlying admins manager.
+
     """
 
     def __init__(self):
