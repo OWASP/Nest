@@ -4,14 +4,8 @@ import pytest
 import django.utils.timezone
 
 from apps.mentorship.models import Module
-from apps.mentorship.models.managers import PublishedModuleManager
-from apps.mentorship.models import Program, Mentor
-from apps.github.models import Issue, User as GithubUser
+from apps.mentorship.models import Program
 from apps.owasp.models import Project
-
-
-class MockIntegrityError(Exception):
-    pass
 
 
 class TestModulePureMocks:
@@ -59,9 +53,9 @@ class TestModulePureMocks:
         def simulate_save_for_inheritance(*args, **kwargs):
             mock_module.key = "date-module"  
             if not mock_module.started_at:
-                mock_module.started_at = mock_module.started_at or mock_module.program.started_at
+                mock_module.started_at = mock_module.program.started_at
             if not mock_module.ended_at:
-                mock_module.ended_at = mock_module.ended_at or mock_module.program.ended_at
+                mock_module.ended_at = mock_module.program.ended_at
 
         mock_module.save.side_effect = simulate_save_for_inheritance
         mock_create_module.return_value = mock_module
