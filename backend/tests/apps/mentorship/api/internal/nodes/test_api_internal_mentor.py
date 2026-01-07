@@ -13,7 +13,7 @@ def mock_github_user():
     mock = MagicMock()
     mock.avatar_url = "https://example.com/mentor_avatar.jpg"
     mock.name = "Mentor Name"
-    mock.login = "mentorlogin"
+    mock.login = "mentor_login"
     return mock
 
 
@@ -60,7 +60,7 @@ def test_mentor_node_name_no_github_user(mock_mentor_node_no_github_user):
 
 def test_mentor_node_login(mock_mentor_node):
     """Test the login field resolver."""
-    assert mock_mentor_node.login() == "mentorlogin"
+    assert mock_mentor_node.login() == "mentor_login"
 
 
 def test_mentor_node_login_no_github_user(mock_mentor_node_no_github_user):

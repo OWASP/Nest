@@ -1,11 +1,12 @@
 """Pytest for mentorship program nodes (fixed fixture: use a FakeProgramNode so
-admins() resolver actually runs and we only mock the manager)."""
+admins() resolver actually runs and we only mock the manager).
+"""
 
 from datetime import datetime
 from unittest.mock import MagicMock
 
-import strawberry
 import pytest
+import strawberry
 
 from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum, ProgramStatusEnum
 from apps.mentorship.api.internal.nodes.program import (
@@ -66,7 +67,8 @@ def test_program_node_fields(mock_program_node):
     assert mock_program_node.domains == ["backend", "frontend"]
     assert mock_program_node.ended_at == datetime(2026, 6, 30)
     assert mock_program_node.experience_levels == [
-        ExperienceLevelEnum.BEGINNER, ExperienceLevelEnum.INTERMEDIATE
+        ExperienceLevelEnum.BEGINNER,
+        ExperienceLevelEnum.INTERMEDIATE,
     ]
     assert mock_program_node.mentees_limit == 10
     assert mock_program_node.started_at == datetime(2026, 1, 1)

@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from apps.mentorship.models import TaskLevel, Module
+from apps.mentorship.models import Module, TaskLevel
 
 
 class TestTaskLevelUnit:

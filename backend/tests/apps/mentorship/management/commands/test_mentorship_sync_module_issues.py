@@ -1,12 +1,13 @@
-import pytest
-from unittest.mock import MagicMock, patch
-from datetime import datetime
 import datetime as dt
+from datetime import datetime
+from unittest.mock import MagicMock, patch
+
+import pytest
 from django.utils import timezone
+from github.GithubException import GithubException
 
 from apps.mentorship.management.commands.mentorship_sync_module_issues import Command
 from apps.mentorship.models.task import Task
-from github.GithubException import GithubException
 
 
 def make_qs(iterable, exists=True):
@@ -52,7 +53,8 @@ def test_extract_repo_full_name_from_url(command, repo_url, expected):
 
 
 def test_get_status_variants(command):
-    issue = MagicMock(); issue.state = "closed"
+    issue = MagicMock()
+    issue.state = "closed"
     assert command._get_status(issue, MagicMock()) == Task.Status.COMPLETED
 
     issue.state = "open"
@@ -65,20 +67,32 @@ def test_get_last_assigned_date_found_and_not_found_and_exception(command):
     mock_issue_gh = MagicMock()
     mock_repo.get_issue.return_value = mock_issue_gh
 
-    e1 = MagicMock(event="commented", created_at=datetime(2023, 1, 1, tzinfo=dt.timezone.utc))
-    e2 = MagicMock(event="assigned", assignee=MagicMock(login="other"), created_at=datetime(2023, 1, 2, tzinfo=dt.timezone.utc))
-    e3 = MagicMock(event="assigned", assignee=MagicMock(login="target"), created_at=datetime(2023, 1, 3, tzinfo=dt.timezone.utc))
-    e4 = MagicMock(event="assigned", assignee=MagicMock(login="target"), created_at=datetime(2023, 1, 5, tzinfo=dt.timezone.utc))
+    e1 = MagicMock(event="commented", created_at=datetime(2023, 1, 1, tzinfo=dt.UTC))
+    e2 = MagicMock(
+        event="assigned",
+        assignee=MagicMock(login="other"),
+        created_at=datetime(2023, 1, 2, tzinfo=dt.UTC),
+    )
+    e3 = MagicMock(
+        event="assigned",
+        assignee=MagicMock(login="target"),
+        created_at=datetime(2023, 1, 3, tzinfo=dt.UTC),
+    )
+    e4 = MagicMock(
+        event="assigned",
+        assignee=MagicMock(login="target"),
+        created_at=datetime(2023, 1, 5, tzinfo=dt.UTC),
+    )
     mock_issue_gh.get_events.return_value = [e1, e2, e3, e4]
 
     res = command._get_last_assigned_date(mock_repo, 123, "target")
-    assert res == datetime(2023, 1, 5, tzinfo=dt.timezone.utc)
+    assert res == datetime(2023, 1, 5, tzinfo=dt.UTC)
 
     # not found
     mock_issue_gh.get_events.return_value = [e1, e2]
     res2 = command._get_last_assigned_date(mock_repo, 123, "target")
     assert res2 is None
-    
+
     mock_repo.get_issue.side_effect = GithubException("some gh error")
     r3 = command._get_last_assigned_date(mock_repo, 1, "target")
     assert r3 is None
@@ -93,8 +107,12 @@ def test_build_repo_label_to_issue_map_iterable():
         (4, 10, "label-a"),
     ]
 
-    with patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Issue") as mock_issue:
-        mock_issue.objects.filter.return_value.values_list.return_value.iterator.return_value = iter(rows)
+    with patch(
+        "apps.mentorship.management.commands.mentorship_sync_module_issues.Issue"
+    ) as mock_issue:
+        mock_issue.objects.filter.return_value.values_list.return_value.iterator.return_value = (
+            iter(rows)
+        )
 
         cmd = Command()
         cmd.stdout = MagicMock()
@@ -112,19 +130,23 @@ def test_build_repo_label_to_issue_map_iterable():
 @patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Task")
 @patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Issue")
 def test_process_module_links_and_creates_tasks(mock_issue, mock_task, command):
-    mock_repo = MagicMock(); mock_repo.id = 77; mock_repo.name = "repo-name"
+    mock_repo = MagicMock()
+    mock_repo.id = 77
+    mock_repo.name = "repo-name"
     mock_module = MagicMock()
     mock_module.id = 11
     mock_module.name = "Test Module"
     mock_module.labels = ["module-label-1"]
-    mock_project_repo = MagicMock(); mock_project_repo.id = mock_repo.id; mock_project_repo.name = mock_repo.name
+    mock_project_repo = MagicMock()
+    mock_project_repo.id = mock_repo.id
+    mock_project_repo.name = mock_repo.name
     mock_module.project.repositories.all.return_value = [mock_project_repo]
     mock_task.Status = Task.Status
 
-
     repo_label_to_issue_ids = {(mock_repo.id, "module-label-1"): {1, 2, 3}}
 
-    assignee = MagicMock(); assignee.login = "assignee1"
+    assignee = MagicMock()
+    assignee.login = "assignee1"
     issue1 = MagicMock(id=1, number=1, state="open", repository=mock_project_repo)
     issue2 = MagicMock(id=2, number=2, state="closed", repository=mock_project_repo)
     issue3 = MagicMock(id=3, number=3, state="open", repository=mock_project_repo)
@@ -143,7 +165,9 @@ def test_process_module_links_and_creates_tasks(mock_issue, mock_task, command):
         (created_task2, True),
     ]
 
-    with patch("apps.mentorship.management.commands.mentorship_sync_module_issues.transaction.atomic") as mock_atomic:
+    with patch(
+        "apps.mentorship.management.commands.mentorship_sync_module_issues.transaction.atomic"
+    ) as mock_atomic:
         mock_atomic.return_value.__enter__.return_value = None
         mock_atomic.return_value.__exit__.return_value = None
 
@@ -172,26 +196,39 @@ def test_process_module_links_and_creates_tasks(mock_issue, mock_task, command):
 
     found = False
     for c in calls:
-        if c.kwargs["issue"] is issue1 and c.kwargs["defaults"]["status"] == Task.Status.IN_PROGRESS:
+        if (
+            c.kwargs["issue"] is issue1
+            and c.kwargs["defaults"]["status"] == Task.Status.IN_PROGRESS
+        ):
             found = True
             break
     assert found, "expected a get_or_create call for issue1 with IN_PROGRESS status"
 
-    command.stdout.write.assert_any_call(command.style.SUCCESS(
-        f"Updated module '{mock_module.name}': set 3 issues from repos: [{mock_project_repo.name}] and created 2 tasks."
-    ))
+    command.stdout.write.assert_any_call(
+        command.style.SUCCESS(
+            f"Updated module '{mock_module.name}': set 3 issues from repos: [{mock_project_repo.name}] and created 2 tasks."
+        )
+    )
 
 
 def test_process_module_no_matches():
-    mock_repo = MagicMock(); mock_repo.id = 7; mock_repo.name = "r"
+    mock_repo = MagicMock()
+    mock_repo.id = 7
+    mock_repo.name = "r"
     mock_module = MagicMock()
     mock_module.project.repositories.all.return_value = [mock_repo]
     mock_module.labels = ["some-label"]
 
     repo_label_to_issue_ids = {}
 
-    with patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Task") as mock_task, \
-         patch("apps.mentorship.management.commands.mentorship_sync_module_issues.transaction.atomic") as mock_atomic:
+    with (
+        patch(
+            "apps.mentorship.management.commands.mentorship_sync_module_issues.Task"
+        ) as mock_task,
+        patch(
+            "apps.mentorship.management.commands.mentorship_sync_module_issues.transaction.atomic"
+        ) as mock_atomic,
+    ):
         mock_atomic.return_value.__enter__.return_value = None
         mock_atomic.return_value.__exit__.return_value = None
 

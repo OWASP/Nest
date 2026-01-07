@@ -1,7 +1,8 @@
 from unittest.mock import MagicMock
 
+from apps.github.models import Issue
+from apps.github.models import User as GithubUser
 from apps.mentorship.models import Task
-from apps.github.models import Issue, User as GithubUser
 
 
 class TestTaskUnit:
@@ -10,7 +11,7 @@ class TestTaskUnit:
         issue.title = "Task Issue Title"
 
         assignee = MagicMock(spec=GithubUser)
-        assignee.login = "taskassignee"
+        assignee.login = "task_assignee"
 
         task = MagicMock(spec=Task)
         task.issue = issue

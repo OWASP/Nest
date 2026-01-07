@@ -1,10 +1,11 @@
-import pytest
-from unittest.mock import MagicMock, patch
 from types import SimpleNamespace
-from datetime import datetime
-import datetime as dt
+from unittest.mock import MagicMock, patch
 
-from apps.mentorship.management.commands.mentorship_update_comments import Command, INTEREST_PATTERNS
+import pytest
+
+from apps.mentorship.management.commands.mentorship_update_comments import (
+    Command,
+)
 
 
 def make_qs(iterable, exists=True):
@@ -50,7 +51,9 @@ def mock_module():
     m = MagicMock()
     m.name = "Test Module"
     vlist_qs = make_qs([1, 2], exists=True)
-    m.project.repositories.filter.return_value.values_list.return_value.distinct.return_value = vlist_qs
+    m.project.repositories.filter.return_value.values_list.return_value.distinct.return_value = (
+        vlist_qs
+    )
     return m
 
 
@@ -60,7 +63,9 @@ def mock_issue():
     issue.number = 123
     issue.title = "Test Issue Title"
     empty_comments_qs = make_qs([], exists=False)
-    issue.comments.select_related.return_value.filter.return_value.order_by.return_value = empty_comments_qs
+    issue.comments.select_related.return_value.filter.return_value.order_by.return_value = (
+        empty_comments_qs
+    )
     return issue
 
 
@@ -78,14 +83,24 @@ def test_process_mentorship_modules_no_modules_with_labels(mock_module, command)
     mock_module.published_modules.all.return_value.exists.return_value = True
     mock_module.published_modules.all.return_value.exclude.return_value.select_related.return_value.exists.return_value = False
     command.process_mentorship_modules()
-    command.stdout.write.assert_called_with("No published mentorship modules with labels found. Exiting.")
+    command.stdout.write.assert_called_with(
+        "No published mentorship modules with labels found. Exiting."
+    )
 
 
 @patch("apps.mentorship.management.commands.mentorship_update_comments.get_github_client")
 @patch("apps.mentorship.management.commands.mentorship_update_comments.sync_issue_comments")
 @patch.object(Command, "process_issue_interests")
 @patch("apps.mentorship.management.commands.mentorship_update_comments.Issue")
-def test_process_module(mock_issue_1, mock_process_issue_interests, mock_sync_issue_comments, mock_get_github_client, command, mock_module, mock_issue):
+def test_process_module(
+    mock_issue_1,
+    mock_process_issue_interests,
+    mock_sync_issue_comments,
+    mock_get_github_client,
+    command,
+    mock_module,
+    mock_issue,
+):
     """Test process_module orchestrates issue syncing and interest processing."""
     mock_issue.id = 1
     mock_issue.title = "Test Issue 1"
@@ -97,22 +112,30 @@ def test_process_module(mock_issue_1, mock_process_issue_interests, mock_sync_is
     author = make_user(1, "login")
     comment = make_comment("body", author, created_at="now")
     comments_qs = make_qs([comment], exists=True)
-    mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = comments_qs
+    mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = (
+        comments_qs
+    )
 
     command.process_module(mock_module)
 
-    mock_sync_issue_comments.assert_called_once_with(mock_get_github_client.return_value, mock_issue)
+    mock_sync_issue_comments.assert_called_once_with(
+        mock_get_github_client.return_value, mock_issue
+    )
     mock_process_issue_interests.assert_called_once_with(mock_issue, mock_module)
 
 
 @patch("apps.mentorship.management.commands.mentorship_update_comments.IssueUserInterest")
-def test_process_issue_interests_new_interest(mock_issue_user_interest, command, mock_issue, mock_module):
+def test_process_issue_interests_new_interest(
+    mock_issue_user_interest, command, mock_issue, mock_module
+):
     """Test process_issue_interests correctly registers new interests."""
     user1 = make_user(1, "user1")
     comment1 = make_comment(body="I am /interested", author=user1, created_at="2023-01-01")
 
     comments_qs = make_qs([comment1], exists=True)
-    mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = comments_qs
+    mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = (
+        comments_qs
+    )
 
     mock_issue_user_interest.objects.filter.return_value.values_list.return_value = []
 
@@ -132,13 +155,17 @@ def test_process_issue_interests_new_interest(mock_issue_user_interest, command,
 
 
 @patch("apps.mentorship.management.commands.mentorship_update_comments.IssueUserInterest")
-def test_process_issue_interests_remove_interest(mock_issue_user_interest, command, mock_issue, mock_module):
+def test_process_issue_interests_remove_interest(
+    mock_issue_user_interest, command, mock_issue, mock_module
+):
     """Test process_issue_interests correctly removes interests."""
     user1 = make_user(1, "user1")
     comment1 = make_comment(body="Not interested anymore", author=user1, created_at="2023-01-01")
 
     comments_qs = make_qs([comment1], exists=True)
-    mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = comments_qs
+    mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = (
+        comments_qs
+    )
 
     mock_issue_user_interest.objects.filter.return_value.values_list.return_value = [1]
     mock_issue_user_interest.objects.filter.return_value.delete.return_value = (1, {})
@@ -149,7 +176,9 @@ def test_process_issue_interests_remove_interest(mock_issue_user_interest, comma
     command.process_issue_interests(mock_issue, mock_module)
 
     mock_issue_user_interest.objects.bulk_create.assert_not_called()
-    mock_issue_user_interest.objects.filter.assert_any_call(module=mock_module, issue=mock_issue, user_id__in=[1])
+    mock_issue_user_interest.objects.filter.assert_any_call(
+        module=mock_module, issue=mock_issue, user_id__in=[1]
+    )
     mock_issue_user_interest.objects.filter.return_value.delete.assert_called_once()
     command.stdout.write.assert_any_call(
         command.style.WARNING("Unregistered 1 interest(s) for issue #123: user1")
@@ -167,7 +196,9 @@ def test_process_issue_interests_existing_interest_removed(
     comment1 = make_comment(body="Just a regular comment", author=user1, created_at="2023-01-01")
 
     comments_qs = make_qs([comment1], exists=True)
-    mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = comments_qs
+    mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = (
+        comments_qs
+    )
 
     mock_issue_user_interest.objects.filter.return_value.values_list.return_value = [1]
     mock_issue_user_interest.objects.filter.return_value.delete.return_value = (1, {})
@@ -186,7 +217,9 @@ def test_process_issue_interests_existing_interest_removed(
 
 
 @patch("apps.mentorship.management.commands.mentorship_update_comments.IssueUserInterest")
-def test_process_issue_interests_multiple_comments_single_user(mock_issue_user_interest, command, mock_issue, mock_module):
+def test_process_issue_interests_multiple_comments_single_user(
+    mock_issue_user_interest, command, mock_issue, mock_module
+):
     """Test process_issue_interests with multiple comments from a single user."""
     user1 = make_user(1, "user1")
     comment1 = make_comment(body="Some text", author=user1, created_at="2023-01-01")
@@ -194,7 +227,9 @@ def test_process_issue_interests_multiple_comments_single_user(mock_issue_user_i
     comment3 = make_comment(body="Another comment", author=user1, created_at="2023-01-03")
 
     comments_qs = make_qs([comment1, comment2, comment3], exists=True)
-    mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = comments_qs
+    mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = (
+        comments_qs
+    )
 
     mock_issue_user_interest.objects.filter.return_value.values_list.return_value = []
 
@@ -212,7 +247,9 @@ def test_process_issue_interests_multiple_comments_single_user(mock_issue_user_i
 
 
 @patch("apps.mentorship.management.commands.mentorship_update_comments.IssueUserInterest")
-def test_process_issue_interests_multiple_users(mock_issue_user_interest, command, mock_issue, mock_module):
+def test_process_issue_interests_multiple_users(
+    mock_issue_user_interest, command, mock_issue, mock_module
+):
     """Test mixed user interest changes: some created, some removed."""
     mock_issue.number = 123
 
@@ -228,7 +265,9 @@ def test_process_issue_interests_multiple_users(mock_issue_user_interest, comman
         [comment1_user1, comment2_user2, comment3_user3, comment4_user2],
         exists=True,
     )
-    mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = comments_qs
+    mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = (
+        comments_qs
+    )
     mock_issue_user_interest.objects.filter.return_value.values_list.return_value = [1]
     mock_issue_user_interest.objects.filter.return_value.delete.return_value = (1, {})
 
@@ -245,10 +284,11 @@ def test_process_issue_interests_multiple_users(mock_issue_user_interest, comman
     assert created_users == {2, 3}
     filter_calls = mock_issue_user_interest.objects.filter.call_args_list
     found_user_id_in_call = any(
-        ("user_id__in" in c.kwargs and c.kwargs["user_id__in"] == [1])
-        for c in filter_calls
+        ("user_id__in" in c.kwargs and c.kwargs["user_id__in"] == [1]) for c in filter_calls
     )
-    assert found_user_id_in_call, f"expected filter(..., user_id__in=[1]) in filter calls: {filter_calls}"
+    assert found_user_id_in_call, (
+        f"expected filter(..., user_id__in=[1]) in filter calls: {filter_calls}"
+    )
     mock_issue_user_interest.objects.filter.return_value.delete.assert_called_once()
 
     command.stdout.write.assert_any_call(
