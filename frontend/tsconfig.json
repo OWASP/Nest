@@ -16,9 +16,7 @@
     "sourceMap": true,
     "inlineSources": true,
     
-    "strict": true, 
-    // OR if you don't want full strict mode:
-    "strictNullChecks": true,
+   "strictNullChecks": true,
     
     "baseUrl": ".",
     "plugins": [
