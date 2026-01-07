@@ -110,6 +110,9 @@ migrate:
 migrations:
 	@CMD="python manage.py makemigrations" $(MAKE) exec-backend-command
 
+migrations-empty:
+	@CMD="python manage.py makemigrations --empty $(APP_NAME)" $(MAKE) exec-backend-command
+
 purge-data:
 	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command
 

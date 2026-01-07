@@ -7,6 +7,7 @@ from functools import lru_cache
 from typing import TYPE_CHECKING
 
 from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.postgres.indexes import GinIndex, OpClass
 from django.db import models
 from django.utils import timezone
 
@@ -49,6 +50,18 @@ class Project(
         indexes = [
             models.Index(fields=["-created_at"], name="project_created_at_desc_idx"),
             models.Index(fields=["-updated_at"], name="project_updated_at_desc_idx"),
+            GinIndex(
+                fields=["name"],
+                name="project_name_gin_idx",
+                opclasses=["gin_trgm_ops"],
+                condition=models.Q(is_active=True),
+            ),
+            GinIndex(
+                OpClass(
+                    models.functions.Cast("leaders_raw", models.TextField()), name="gin_trgm_ops"
+                ),
+                name="project_leaders_raw_gin_idx",
+            ),
         ]
         verbose_name_plural = "Projects"
 

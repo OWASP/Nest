@@ -7,7 +7,10 @@ from apps.github.models.user import User as GithubUser
 from apps.owasp.api.internal.nodes.project import ProjectNode
 from apps.owasp.models.project import Project
 
-MAX_LIMIT = 1000
+MAX_RECENT_PROJECTS_LIMIT = 1000
+MAX_SEARCH_QUERY_LENGTH = 100
+MIN_SEARCH_QUERY_LENGTH = 3
+SEARCH_PROJECTS_LIMIT = 3
 
 
 @strawberry.type
@@ -41,7 +44,7 @@ class ProjectQuery:
             list[ProjectNode]: A list of recent active projects.
 
         """
-        limit = min(limit, MAX_LIMIT)
+        limit = min(limit, MAX_RECENT_PROJECTS_LIMIT)
         return (
             Project.objects.select_related("owasp_repository")
             .prefetch_related("organizations", "owners", "repositories")
@@ -54,7 +57,11 @@ class ProjectQuery:
     @strawberry.field
     def search_projects(self, query: str) -> list[ProjectNode]:
         """Search active projects by name (case-insensitive, partial match)."""
-        if not query.strip():
+        cleaned_query = query.strip()
+        if (
+            len(cleaned_query) < MIN_SEARCH_QUERY_LENGTH
+            or len(cleaned_query) > MAX_SEARCH_QUERY_LENGTH
+        ):
             return []
 
         return (
@@ -62,9 +69,9 @@ class ProjectQuery:
             .prefetch_related("organizations", "owners", "repositories")
             .filter(
                 is_active=True,
-                name__icontains=query.strip(),
+                name__icontains=cleaned_query,
             )
-            .order_by("name")[:3]
+            .order_by("name")[:SEARCH_PROJECTS_LIMIT]
         )
 
     @strawberry.field
