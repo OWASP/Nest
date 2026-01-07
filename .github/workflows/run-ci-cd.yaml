@@ -256,7 +256,7 @@ jobs:
       - scan-code
       - scan-ci-dependencies
     permissions:
-      contents: read 
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -282,7 +282,7 @@ jobs:
         run: |
           docker run --env-file frontend/.env.example owasp/nest:test-frontend-a11y-latest pnpm run test:a11y
     timeout-minutes: 10
-    
+
   set-release-version:
     name: Set release version
     outputs:
