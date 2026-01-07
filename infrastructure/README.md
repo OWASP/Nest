@@ -338,3 +338,9 @@ Migrate and load data into the new database.
   ```bash
   zappa update staging
   ```
+
+## Known Issues
+There's a known issue with Zappa removing permissions and disconnecting the externally managed
+API Gateway on each `update` or `deploy` action.
+The temporary fix is to run `terraform apply` right after these actions.
+Reference: https://github.com/zappa/Zappa/issues/939

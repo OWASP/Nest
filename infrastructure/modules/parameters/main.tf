@@ -38,7 +38,7 @@ resource "aws_ssm_parameter" "django_algolia_write_api_key" {
 }
 
 resource "aws_ssm_parameter" "django_allowed_hosts" {
-  description = "Django allowed hosts for API Gateway - hostname only, no protocol (e.g., xxx.execute-api.region.amazonaws.com)."
+  description = "Django allowed hosts - hostname only, no protocol (e.g., nest.owasp.dev)."
   name        = "/${var.project_name}/${var.environment}/DJANGO_ALLOWED_HOSTS"
   tags        = var.common_tags
   type        = "String"
@@ -73,29 +73,6 @@ resource "aws_ssm_parameter" "django_configuration" {
   }
 }
 
-resource "aws_ssm_parameter" "django_csrf_cookie_httponly" {
-  description = "Whether CSRF cookies should be HTTPOnly (false allows JavaScript to read for AJAX)."
-  name        = "/${var.project_name}/${var.environment}/DJANGO_CSRF_COOKIE_HTTPONLY"
-  tags        = var.common_tags
-  type        = "String"
-  value       = "False"
-
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
-
-resource "aws_ssm_parameter" "django_csrf_cookie_samesite" {
-  description = "The SameSite attribute for CSRF cookies (Lax, Strict, or None for cross-domain)."
-  name        = "/${var.project_name}/${var.environment}/DJANGO_CSRF_COOKIE_SAMESITE"
-  tags        = var.common_tags
-  type        = "String"
-  value       = "Lax"
-
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
 
 resource "aws_ssm_parameter" "django_db_host" {
   description = "The hostname of the database."
@@ -181,17 +158,6 @@ resource "aws_ssm_parameter" "django_sentry_dsn" {
   }
 }
 
-resource "aws_ssm_parameter" "django_session_cookie_samesite" {
-  description = "The SameSite attribute for session cookies (Lax, Strict, or None for cross-domain)."
-  name        = "/${var.project_name}/${var.environment}/DJANGO_SESSION_COOKIE_SAMESITE"
-  tags        = var.common_tags
-  type        = "String"
-  value       = "Lax"
-
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
 
 resource "aws_ssm_parameter" "django_slack_bot_token" {
   description = "The bot token for the Slack integration."

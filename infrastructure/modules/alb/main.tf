@@ -13,6 +13,27 @@ terraform {
   }
 }
 
+locals {
+  backend_paths = [
+    "/a",
+    "/a/*",
+    "/api/*",
+    "/csrf",
+    "/csrf/*",
+    "/graphql",
+    "/graphql/*",
+    "/idx",
+    "/idx/*",
+    "/integrations",
+    "/integrations/*",
+    "/sitemap",
+    "/sitemap.xml",
+    "/status",
+    "/status/*",
+  ]
+  backend_path_chunks = chunklist(local.backend_paths, 5)
+}
+
 data "aws_elb_service_account" "main" {}
 
 data "aws_iam_policy_document" "alb_logs" {
@@ -137,16 +158,6 @@ resource "aws_lb_target_group" "lambda" {
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-lambda-tg"
   })
-
-  health_check {
-    enabled             = true
-    healthy_threshold   = 2
-    interval            = 35
-    matcher             = "200-299"
-    path                = "/status/"
-    timeout             = 30
-    unhealthy_threshold = 3
-  }
 }
 
 resource "aws_lb_target_group_attachment" "lambda" {
@@ -165,74 +176,38 @@ resource "aws_lambda_permission" "alb" {
   statement_id  = "AllowALBInvoke"
 }
 
-resource "aws_lb_listener_rule" "backend_https_1" {
-  count        = var.lambda_arn != null && var.enable_https ? 1 : 0
+resource "aws_lb_listener_rule" "backend_https" {
+  for_each     = var.lambda_arn != null && var.enable_https ? { for idx, chunk in local.backend_path_chunks : idx => chunk } : {}
   listener_arn = aws_lb_listener.https[0].arn
-  priority     = 100
+  priority     = 100 + each.key
   tags         = var.common_tags
 
   action {
-    type             = "forward"
     target_group_arn = aws_lb_target_group.lambda[0].arn
+    type             = "forward"
   }
 
   condition {
     path_pattern {
-      values = ["/a/*", "/api/*", "/csrf/*", "/graphql", "/graphql/*"]
+      values = each.value
     }
   }
 }
 
-resource "aws_lb_listener_rule" "backend_https_2" {
-  count        = var.lambda_arn != null && var.enable_https ? 1 : 0
-  listener_arn = aws_lb_listener.https[0].arn
-  priority     = 101
-  tags         = var.common_tags
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.lambda[0].arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/idx/*", "/integrations/*", "/sitemap", "/sitemap.xml", "/status/*"]
-    }
-  }
-}
-
-resource "aws_lb_listener_rule" "backend_http_1" {
-  count        = var.lambda_arn != null && !var.enable_https ? 1 : 0
+resource "aws_lb_listener_rule" "backend_http" {
+  for_each     = var.lambda_arn != null && !var.enable_https ? { for idx, chunk in local.backend_path_chunks : idx => chunk } : {}
   listener_arn = aws_lb_listener.http[0].arn
-  priority     = 100
+  priority     = 100 + each.key
   tags         = var.common_tags
 
   action {
-    type             = "forward"
     target_group_arn = aws_lb_target_group.lambda[0].arn
+    type             = "forward"
   }
 
   condition {
     path_pattern {
-      values = ["/a/*", "/api/*", "/csrf/*", "/graphql", "/graphql/*"]
-    }
-  }
-}
-
-resource "aws_lb_listener_rule" "backend_http_2" {
-  count        = var.lambda_arn != null && !var.enable_https ? 1 : 0
-  listener_arn = aws_lb_listener.http[0].arn
-  priority     = 101
-  tags         = var.common_tags
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.lambda[0].arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/idx/*", "/integrations/*", "/sitemap", "/sitemap.xml", "/status/*"]
+      values = each.value
     }
   }
 }

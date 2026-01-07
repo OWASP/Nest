@@ -128,6 +128,7 @@ module "networking" {
 module "parameters" {
   source = "../modules/parameters"
 
+  allowed_hosts      = var.frontend_domain_name != null ? var.frontend_domain_name : module.alb.alb_dns_name
   allowed_origins    = var.frontend_domain_name != null ? "https://${var.frontend_domain_name}" : "http://${module.alb.alb_dns_name}"
   common_tags        = local.common_tags
   db_host            = module.database.db_proxy_endpoint
