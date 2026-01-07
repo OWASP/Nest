@@ -1,8 +1,9 @@
-"""Fixed tests for ModuleNode resolvers: use a small fake ModuleNode object
+"""Fixed tests for ModuleNode resolvers: use a small fake ModuleNode object.
+
 so resolver methods actually run (instead of calling MagicMock methods).
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -13,9 +14,7 @@ from apps.mentorship.api.internal.nodes.module import CreateModuleInput, UpdateM
 
 
 class FakeModuleNode:
-    """A minimal object that implements ModuleNode resolver behavior by delegating
-    to attributes that tests can set (e.g. ._issues_qs, .menteemodule_set, managers).
-    """
+    """A minimal object that implements ModuleNode resolver behavior by delegating to attributes that tests can set."""
 
     def __init__(self):
         # basic scalar attrs
@@ -24,14 +23,14 @@ class FakeModuleNode:
         self.name = "Test Module"
         self.description = "A test mentorship module."
         self.domains = ["web", "mobile"]
-        self.ended_at = datetime(2025, 12, 31)
+        self.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
         self.experience_level = ExperienceLevelEnum.INTERMEDIATE
         self.labels = ["django", "react"]
         self.program = MagicMock()
         self.program.id = strawberry.ID("program-1")
         self.program.key = "test-program"
         self.project_id = strawberry.ID("project-1")
-        self.started_at = datetime(2025, 1, 1)
+        self.started_at = datetime(2025, 1, 1, tzinfo=UTC)
         self.tags = ["backend", "frontend"]
 
         # attributes that resolver methods will use (tests can replace these)
@@ -169,12 +168,15 @@ def mock_module_node():
     ]
     # issues.filter(...).values_list(...) used by issue_mentees default
     m._issues_qs.filter.return_value.values_list.return_value = ["issue_id_1"]
-    # issues.select_related(...).prefetch_related(...).filter(...).order_by(...) returns list of 1 mock issue
-    m._issues_qs.select_related.return_value.prefetch_related.return_value.filter.return_value.order_by.return_value = [
+    # issues.select_related(...).prefetch_related(...).filter(...).order_by(...) 
+    # returns list of 1 mock issue
+    m._issues_qs.select_related.return_value.prefetch_related.return_value.filter.return_value\
+        .order_by.return_value = [
         MagicMock()
     ]
     m._issues_qs.count.return_value = 5
-    m._issues_qs.select_related.return_value.prefetch_related.return_value.filter.return_value.first.return_value = MagicMock()
+    m._issues_qs.select_related.return_value.prefetch_related.return_value.filter.return_value\
+        .first.return_value = MagicMock()
 
     return m
 
@@ -185,13 +187,13 @@ def test_module_node_fields(mock_module_node):
     assert mock_module_node.name == "Test Module"
     assert mock_module_node.description == "A test mentorship module."
     assert mock_module_node.domains == ["web", "mobile"]
-    assert mock_module_node.ended_at == datetime(2025, 12, 31)
+    assert mock_module_node.ended_at == datetime(2025, 12, 31, tzinfo=UTC)
     assert mock_module_node.experience_level == ExperienceLevelEnum.INTERMEDIATE
     assert mock_module_node.labels == ["django", "react"]
     assert str(mock_module_node.program.id) == "program-1"
     assert mock_module_node.program.key == "test-program"
     assert str(mock_module_node.project_id) == "project-1"
-    assert mock_module_node.started_at == datetime(2025, 1, 1)
+    assert mock_module_node.started_at == datetime(2025, 1, 1, tzinfo=UTC)
     assert mock_module_node.tags == ["backend", "frontend"]
 
 
@@ -222,7 +224,8 @@ def test_module_node_issue_mentees(mock_module_node):
         patch("apps.mentorship.models.task.Task.objects") as mock_task_objects,
         patch("apps.github.models.user.User.objects") as mock_user_objects,
     ):
-        mock_task_objects.filter.return_value.select_related.return_value.values_list.return_value.distinct.return_value = [
+        mock_task_objects.filter.return_value.select_related.return_value.values_list\
+            .return_value.distinct.return_value = [
             "assignee_id_1"
         ]
         mock_user_objects.filter.return_value.order_by.return_value = [MagicMock()]
@@ -309,7 +312,8 @@ def test_module_node_interested_users(mock_module_node):
         mock_interest1.user = MagicMock(login="user1")
         mock_interest2 = MagicMock()
         mock_interest2.user = MagicMock(login="user2")
-        mock_issue_user_interest_objects.select_related.return_value.filter.return_value.order_by.return_value = [
+        mock_issue_user_interest_objects.select_related.return_value.filter.return_value\
+            .order_by.return_value = [
             mock_interest1,
             mock_interest2,
         ]
@@ -333,12 +337,13 @@ def test_module_node_interested_users_no_issue(mock_module_node):
 
 def test_module_node_task_deadline(mock_module_node):
     with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
-        mock_task_objects.filter.return_value.order_by.return_value.values_list.return_value.first.return_value = datetime(
-            2025, 10, 26
+        mock_task_objects.filter.return_value.order_by.return_value.values_list.return_value\
+            .first.return_value = datetime(
+            2025, 10, 26, tzinfo=UTC
         )
 
         deadline = mock_module_node.task_deadline(issue_number=101)
-        assert deadline == datetime(2025, 10, 26)
+        assert deadline == datetime(2025, 10, 26, tzinfo=UTC)
         mock_task_objects.filter.assert_called_once_with(
             module=mock_module_node, issue__number=101, deadline_at__isnull=False
         )
@@ -355,11 +360,11 @@ def test_module_node_task_deadline_none(mock_module_node):
 def test_module_node_task_assigned_at(mock_module_node):
     with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
         mock_task_objects.filter.return_value.order_by.return_value.values_list.return_value.first.return_value = datetime(
-            2025, 9, 15
+            2025, 9, 15, tzinfo=UTC
         )
 
         assigned_at = mock_module_node.task_assigned_at(issue_number=202)
-        assert assigned_at == datetime(2025, 9, 15)
+        assert assigned_at == datetime(2025, 9, 15, tzinfo=UTC)
         mock_task_objects.filter.assert_called_once_with(
             module=mock_module_node, issue__number=202, assigned_at__isnull=False
         )
@@ -378,7 +383,7 @@ def test_create_update_input_defaults():
     create_input = CreateModuleInput(
         name="Test",
         description="Desc",
-        ended_at=datetime.now(),
+        ended_at=datetime.now(UTC),
         experience_level=ExperienceLevelEnum.BEGINNER,
         program_key="key",
         project_name="Project",

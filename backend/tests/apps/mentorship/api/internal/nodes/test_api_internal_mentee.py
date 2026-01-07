@@ -9,7 +9,7 @@ from apps.mentorship.api.internal.nodes.mentee import MenteeNode
 @pytest.fixture
 def mock_mentee_node():
     """Fixture for a mock MenteeNode instance."""
-    mentee_node = MenteeNode(
+    return MenteeNode(
         id="1",
         login="test_mentee",
         name="Test Mentee",
@@ -19,7 +19,6 @@ def mock_mentee_node():
         domains=["python"],
         tags=["backend"],
     )
-    return mentee_node
 
 
 def test_mentee_node_fields(mock_mentee_node):
