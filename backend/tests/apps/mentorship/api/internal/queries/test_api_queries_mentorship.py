@@ -25,9 +25,7 @@ class TestIsMentor:
 
         assert result is True
         mock_github_user_get.assert_called_once_with(login="testuser")
-        # check that the filter was called with the github_user from get()
         mock_mentor_filter.assert_called_once()
-        # ensure exists() was called on the filter QuerySet
         mock_mentor_filter.return_value.exists.assert_called_once()
 
     @patch("apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.get")
