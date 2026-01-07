@@ -1,6 +1,5 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { screen } from '@testing-library/react'
-import { render } from '@testing-library/react'
+import { screen,render } from '@testing-library/react'
 import { useTheme } from 'next-themes'
 import DonutBarChart from 'components/DonutBarChart'
 
