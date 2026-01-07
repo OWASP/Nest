@@ -166,7 +166,6 @@ omit = [
   "**/admin.py",
   "**/apps.py",
   "**/migrations/*",
-  "**/mentorship/*", # TODO: work in progress
   "manage.py",
   "settings/*",
   "tests/*",
