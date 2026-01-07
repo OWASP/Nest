@@ -69,13 +69,13 @@ describe('LeadersList Component', () => {
     })
 
     it('renders "Unknown" when leaders prop is null', () => {
-      render(<LeadersList leaders={null} />)
+      render(<LeadersList leaders={null as unknown as string} />)
       expect(screen.getByText('Unknown')).toBeInTheDocument()
       expect(screen.queryByTestId('truncated-text')).not.toBeInTheDocument()
     })
 
     it('renders "Unknown" when leaders prop is undefined', () => {
-      render(<LeadersList leaders={undefined} />)
+      render(<LeadersList leaders={undefined as unknown as string } />)
       expect(screen.getByText('Unknown')).toBeInTheDocument()
       expect(screen.queryByTestId('truncated-text')).not.toBeInTheDocument()
     })
@@ -250,12 +250,12 @@ describe('LeadersList Component', () => {
     })
 
     it('handles undefined gracefully', () => {
-      render(<LeadersList leaders={undefined} />)
+      render(<LeadersList leaders={undefined as unknown as string} />)
       expect(screen.getByText('Unknown')).toBeInTheDocument()
     })
 
     it('handles null gracefully', () => {
-      render(<LeadersList leaders={null} />)
+      render(<LeadersList leaders={null as unknown as string} />)
       expect(screen.getByText('Unknown')).toBeInTheDocument()
     })
   })

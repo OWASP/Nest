@@ -162,13 +162,13 @@ describe('DialogComp', () => {
       description: '',
       button: {
         label: 'Minimal Action',
-        icon: null,
+        icon: undefined,
         url: '',
         onPress: mockOnClick,
       },
     }
 
-    render(<DialogComp {...minimalProps} />)
+    render(<DialogComp {...minimalProps as unknown as Parameters<typeof DialogComp>[0]} />)
     expect(screen.getByText('Minimal Title')).toBeInTheDocument()
     expect(screen.getByText('Summary')).toBeInTheDocument()
     expect(screen.getByText('Minimal Action')).toBeInTheDocument()
@@ -197,7 +197,7 @@ describe('DialogComp', () => {
   })
 
   it('handles null hint prop', () => {
-    render(<DialogComp {...defaultProps} hint={null} />)
+    render(<DialogComp {...defaultProps} hint={null as unknown as string} />)
     expect(screen.getByText('Summary')).toBeInTheDocument()
     expect(screen.queryByText('How to tackle it')).not.toBeInTheDocument()
   })

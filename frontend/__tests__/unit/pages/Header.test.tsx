@@ -406,7 +406,7 @@ describe('Header Component', () => {
       // Assert that mobileLogoLink is not null before clicking
       expect(mobileLogoLink).not.toBeNull()
       await act(async () => {
-        fireEvent.click(mobileLogoLink)
+        fireEvent.click(mobileLogoLink!)
       })
       expect(isMobileMenuClosed()).toBe(true)
     })

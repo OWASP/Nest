@@ -254,7 +254,7 @@ const ModuleIssueDetailsPage = () => {
                     }`}
                   >
                     {(() => {
-                      const { text, color } = formatDeadline(taskDeadline)
+                      const { text, color } = formatDeadline(taskDeadline ?? null)
                       return <span className={`font-normal ${color}`}>{text}</span>
                     })()}
                   </button>

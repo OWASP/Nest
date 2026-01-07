@@ -2,7 +2,20 @@ import clsx from 'clsx'
 import Link from 'next/link'
 import { FC } from 'react'
 import { HealthMetricsProps } from 'types/healthMetrics'
+
 const MetricsCard: FC<{ metric: HealthMetricsProps }> = ({ metric }) => {
+  // Defensive check for date validity
+  const formattedDate = metric.createdAt 
+    ? new Date(metric.createdAt).toLocaleString('default', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    : 'N/A'
+
+  // Normalize score for comparison to handle undefined/null
+  const score = metric.score ?? 0
+
   return (
     <Link
       href={`/projects/dashboard/metrics/${metric.projectKey}`}
@@ -20,34 +33,28 @@ const MetricsCard: FC<{ metric: HealthMetricsProps }> = ({ metric }) => {
           </p>
         </div>
         <div className="truncate text-center">
-          <p className="text-md">{metric.starsCount}</p>
+          <p className="text-md">{metric.starsCount ?? 0}</p>
         </div>
         <div className="truncate text-center">
-          <p className="text-md">{metric.forksCount}</p>
+          <p className="text-md">{metric.forksCount ?? 0}</p>
         </div>
         <div className="truncate text-center">
-          <p className="text-md">{metric.contributorsCount}</p>
+          <p className="text-md">{metric.contributorsCount ?? 0}</p>
         </div>
         <div className="truncate text-center">
-          <p className="text-md">
-            {new Date(metric.createdAt).toLocaleString('default', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            })}
-          </p>
+          <p className="text-md">{formattedDate}</p>
         </div>
         <div
           className={clsx(
             'truncate rounded border-l-1 border-l-gray-200 bg-linear-to-br from-white/20 to-transparent dark:border-l-gray-600',
             {
-              'bg-green-500 text-green-900': metric.score >= 75,
-              'bg-orange-500 text-orange-900': metric.score >= 50 && metric.score < 75,
-              'bg-red-500 text-red-900': metric.score < 50,
+              'bg-green-500 text-green-900': score >= 75,
+              'bg-orange-500 text-orange-900': score >= 50 && score < 75,
+              'bg-red-500 text-red-900': score < 50,
             }
           )}
         >
-          <p className="text-center text-xl font-semibold">{metric.score}</p>
+          <p className="text-center text-xl font-semibold">{score}</p>
         </div>
       </div>
     </Link>

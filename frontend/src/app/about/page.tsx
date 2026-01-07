@@ -31,7 +31,8 @@ import SecondaryCard from 'components/SecondaryCard'
 import AboutSkeleton from 'components/skeletons/AboutSkeleton'
 import TopContributorsList from 'components/TopContributorsList'
 
-const leaders = {
+// Define explicit type for leaders dictionary
+const leaders: Record<string, string> = {
   arkid15r: 'CCSP, CISSP, CSSLP',
   kasya: 'CC',
   mamicidal: 'CISSP',
@@ -40,22 +41,14 @@ const leaders = {
 const projectKey = 'nest'
 
 const getMilestoneStatus = (progress: number): string => {
-  if (progress === 100) {
-    return 'Completed'
-  }
-  if (progress > 0) {
-    return 'In Progress'
-  }
+  if (progress === 100) return 'Completed'
+  if (progress > 0) return 'In Progress'
   return 'Not Started'
 }
 
 const getMilestoneIcon = (progress: number) => {
-  if (progress === 100) {
-    return FaCircleCheck
-  }
-  if (progress > 0) {
-    return FaUsersGear
-  }
+  if (progress === 100) return FaCircleCheck
+  if (progress > 0) return FaUsersGear
   return FaClock
 }
 
@@ -88,22 +81,16 @@ const About = () => {
   const topContributors = topContributorsResponse?.topContributors
 
   useEffect(() => {
-    if (projectMetadataRequestError) {
-      handleAppError(projectMetadataRequestError)
-    }
+    if (projectMetadataRequestError) handleAppError(projectMetadataRequestError)
   }, [projectMetadataRequestError])
 
   useEffect(() => {
-    if (topContributorsRequestError) {
-      handleAppError(topContributorsRequestError)
-    }
+    if (topContributorsRequestError) handleAppError(topContributorsRequestError)
   }, [topContributorsRequestError])
 
   const isLoading = leadersLoading || projectMetadataLoading || topContributorsLoading
 
-  if (isLoading) {
-    return <AboutSkeleton />
-  }
+  if (isLoading) return <AboutSkeleton />
 
   if (!projectMetadata || !topContributors) {
     return (
@@ -142,14 +129,12 @@ const About = () => {
 
         <Leaders users={leadersData} />
 
-        {topContributors && (
-          <TopContributorsList
-            contributors={topContributors}
-            icon={HiUserGroup}
-            label="Wall of Fame"
-            maxInitialDisplay={12}
-          />
-        )}
+        <TopContributorsList
+          contributors={topContributors}
+          icon={HiUserGroup}
+          label="Wall of Fame"
+          maxInitialDisplay={12}
+        />
 
         <SecondaryCard icon={FaTools} title={<AnchorTitle title="Technologies & Tools" />}>
           <div className="w-full">
@@ -196,12 +181,12 @@ const About = () => {
           <Markdown content={getInvolvedContent.callToAction} />
         </SecondaryCard>
 
-        {projectMetadata.recentMilestones.length > 0 && (
+        {(projectMetadata.recentMilestones?.length ?? 0) > 0 && (
           <SecondaryCard icon={FaMapSigns} title={<AnchorTitle title="Roadmap" />}>
             <div className="grid gap-4">
-              {[...projectMetadata.recentMilestones]
-                .filter((milestone) => milestone.state !== 'closed')
-                .sort((a, b) => (a.title > b.title ? 1 : -1))
+              {[...(projectMetadata.recentMilestones || [])]
+                .filter((milestone) => milestone && milestone.state !== 'closed')
+                .sort((a, b) => ((a?.title || '') > (b?.title || '') ? 1 : -1))
                 .map((milestone, index) => (
                   <div
                     key={milestone.url || milestone.title || index}
@@ -210,7 +195,7 @@ const About = () => {
                     <div className="flex-1">
                       <div className="relative">
                         <Link
-                          href={milestone.url}
+                          href={milestone.url || '#'}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="block"
@@ -221,14 +206,14 @@ const About = () => {
                         </Link>
                         <Tooltip
                           closeDelay={100}
-                          content={getMilestoneStatus(milestone.progress)}
+                          content={getMilestoneStatus(milestone.progress ?? 0)}
                           id={`tooltip-state-${index}`}
                           delay={100}
                           placement="top"
                           showArrow
                         >
                           <span className="absolute top-0 right-0 text-xl text-gray-400">
-                            <IconWrapper icon={getMilestoneIcon(milestone.progress)} />
+                            <IconWrapper icon={getMilestoneIcon(milestone.progress ?? 0)} />
                           </span>
                         </Tooltip>
                       </div>
@@ -242,9 +227,7 @@ const About = () => {
         <SecondaryCard icon={FaScroll} title={<AnchorTitle title="Our Story" />}>
           {projectStory.map((text) => (
             <div key={`story-${text.substring(0, 50).replaceAll(' ', '-')}`} className="mb-4">
-              <div>
-                <Markdown content={text} />
-              </div>
+              <Markdown content={text} />
             </div>
           ))}
         </SecondaryCard>
@@ -271,15 +254,15 @@ const About = () => {
 
         <div className="grid gap-0 md:grid-cols-4 md:gap-6">
           {[
-            { label: 'Forks', value: projectMetadata.forksCount },
-            { label: 'Stars', value: projectMetadata.starsCount },
-            { label: 'Contributors', value: projectMetadata.contributorsCount },
-            { label: 'Open Issues', value: projectMetadata.issuesCount },
+            { label: 'Forks', value: projectMetadata.forksCount ?? 0 },
+            { label: 'Stars', value: projectMetadata.starsCount ?? 0 },
+            { label: 'Contributors', value: projectMetadata.contributorsCount ?? 0 },
+            { label: 'Open Issues', value: projectMetadata.issuesCount ?? 0 },
           ].map((stat) => (
             <div key={stat.label}>
               <SecondaryCard className="text-center">
                 <div className="mb-2 text-3xl font-bold text-blue-400">
-                  {millify(Math.floor(stat.value / 10 || 0) * 10)}+
+                  {millify(Math.floor((stat.value || 0) / 10) * 10)}+
                 </div>
                 <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
               </SecondaryCard>
@@ -292,25 +275,13 @@ const About = () => {
 }
 
 const useLeadersData = () => {
-  const {
-    data: leader1Data,
-    loading: loading1,
-    error: error1,
-  } = useQuery(GetLeaderDataDocument, {
+  const { data: leader1Data, loading: loading1, error: error1 } = useQuery(GetLeaderDataDocument, {
     variables: { key: 'arkid15r' },
   })
-  const {
-    data: leader2Data,
-    loading: loading2,
-    error: error2,
-  } = useQuery(GetLeaderDataDocument, {
+  const { data: leader2Data, loading: loading2, error: error2 } = useQuery(GetLeaderDataDocument, {
     variables: { key: 'kasya' },
   })
-  const {
-    data: leader3Data,
-    loading: loading3,
-    error: error3,
-  } = useQuery(GetLeaderDataDocument, {
+  const { data: leader3Data, loading: loading3, error: error3 } = useQuery(GetLeaderDataDocument, {
     variables: { key: 'mamicidal' },
   })
 
@@ -322,13 +293,18 @@ const useLeadersData = () => {
     if (error3) handleAppError(error3)
   }, [error1, error2, error3])
 
-  const leadersData = [leader1Data?.user, leader2Data?.user, leader3Data?.user]
-    .filter(Boolean)
-    .map((user) => ({
-      description: leaders[user.login],
-      memberName: user.name || user.login,
-      member: user,
-    }))
+  const rawLeaders = [leader1Data?.user, leader2Data?.user, leader3Data?.user].filter(Boolean)
+  
+  const leadersData = rawLeaders.map((user) => ({
+    avatar: user?.avatarUrl || '',
+    description: leaders[user?.login || ''] || '',
+    memberName: user?.name || user?.login || '',
+   member: user ? {
+      login: user.login,
+      name: user.name,
+      avatarUrl: user.avatarUrl,
+    } : null,
+  }))
 
   return { leadersData, isLoading }
 }

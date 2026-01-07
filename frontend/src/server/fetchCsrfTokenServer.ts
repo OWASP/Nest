@@ -1,5 +1,10 @@
 export const fetchCsrfTokenServer = async (): Promise<string> => {
-  const response = await fetch(process.env.NEXT_SERVER_CSRF_URL, {
+  const url = process.env.NEXT_SERVER_CSRF_URL
+
+  if (!url) {
+    throw new Error('NEXT_SERVER_CSRF_URL is not defined in the environment variables.')
+  }
+  const response = await fetch(url, {
     credentials: 'include',
     method: 'GET',
   })

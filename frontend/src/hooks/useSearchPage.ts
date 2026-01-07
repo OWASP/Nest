@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
+
 interface UseSearchPageOptions {
   indexName: string
   pageTitle: string
@@ -35,14 +36,19 @@ export function useSearchPage<T>({
 }: UseSearchPageOptions): UseSearchPageReturn<T> {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const pageParam = searchParams?.get('page')
 
   const [items, setItems] = useState<T[]>([])
-  const [currentPage, setCurrentPage] = useState<number>(
-    Number.parseInt(searchParams.get('page') || '1')
-  )
-  const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('q') || '')
-  const [sortBy, setSortBy] = useState<string>(searchParams.get('sortBy') || defaultSortBy)
-  const [order, setOrder] = useState<string>(searchParams.get('order') || defaultOrder)
+  // Safety: handle null searchParams
+  const initialPage = pageParam ? Number.parseInt(pageParam, 10) : 1 
+ const initialQuery = searchParams?.get('q') || ''
+  const initialSortBy = searchParams?.get('sortBy') || defaultSortBy
+  const initialOrder = searchParams?.get('order') || defaultOrder
+
+  const [currentPage, setCurrentPage] = useState<number>(initialPage)
+  const [searchQuery, setSearchQuery] = useState<string>(initialQuery)
+  const [sortBy, setSortBy] = useState<string>(initialSortBy)
+  const [order, setOrder] = useState<string>(initialOrder)
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
 
@@ -62,6 +68,7 @@ export function useSearchPage<T>({
       }
     }
   }, [searchParams, order, searchQuery, sortBy, indexName])
+
   // Sync URL with state changes
   useEffect(() => {
     const params = new URLSearchParams()
@@ -102,9 +109,10 @@ export function useSearchPage<T>({
           hitsPerPage
         )
 
-        if ('hits' in response) {
-          setItems(response.hits)
-          setTotalPages(response.totalPages)
+        // Fixed TS2345: Strict check on response properties
+        if (response && 'hits' in response) {
+          setItems(response.hits || [])
+          setTotalPages(response.totalPages ?? 0)
         } else {
           handleAppError(response)
         }
@@ -123,7 +131,9 @@ export function useSearchPage<T>({
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
-    window.scrollTo({ top: 0, behavior: 'auto' })
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'auto' })
+    }
   }
 
   const handleSortChange = (sort: string) => {

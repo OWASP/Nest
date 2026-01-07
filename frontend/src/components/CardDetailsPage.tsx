@@ -68,34 +68,34 @@ const DetailsCard = ({
   status,
   setStatus,
   canUpdateStatus,
-  tags,
-  domains,
+  tags = [],
+  domains = [],
   entityLeaders,
-  labels,
-  modules,
+  labels = [],
+  modules = [],
   mentors,
   mentees,
   admins,
   entityKey,
-  geolocationData = null,
-  healthMetricsData,
+  geolocationData = [],
+  healthMetricsData = [],
   isActive = true,
   isArchived = false,
-  languages,
+  languages = [],
   programKey,
   projectName,
-  pullRequests,
-  recentIssues,
-  recentMilestones,
-  recentReleases,
+  pullRequests = [],
+  recentIssues = [],
+  recentMilestones = [],
+  recentReleases = [],
   repositories = [],
   showAvatar = true,
   socialLinks,
-  stats,
+  stats = [],
   summary,
   title,
   topContributors,
-  topics,
+  topics = [],
   type,
   userSummary,
 }: DetailsCardProps) => {
@@ -119,7 +119,7 @@ const DetailsCard = ({
               {type === 'program' && accessLevel === 'admin' && canUpdateStatus && (
                 <EntityActions
                   type="program"
-                  programKey={programKey}
+                  programKey={programKey || ''}
                   status={status}
                   setStatus={setStatus}
                 />
@@ -128,12 +128,12 @@ const DetailsCard = ({
                 accessLevel === 'admin' &&
                 admins?.some(
                   (admin) => admin.login === ((data as ExtendedSession)?.user?.login)
-                ) && <EntityActions type="module" programKey={programKey} moduleKey={entityKey} />}
+                ) && <EntityActions type="module" programKey={programKey || ''} moduleKey={entityKey || ''} />}
               {!isActive && <StatusBadge status="inactive" size="md" />}
               {isArchived && type === 'repository' && <StatusBadge status="archived" size="md" />}
               {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
                 <MetricsScoreCircle
-                  score={healthMetricsData[0].score}
+                  score={healthMetricsData[0]?.score ?? 0}
                   clickable={true}
                   onClick={() => scrollToAnchor('issues-trend')}
                 />
@@ -162,8 +162,8 @@ const DetailsCard = ({
                   <LeadersList leaders={detail?.value != null ? String(detail.value) : 'Unknown'} />
                 </div>
               ) : (
-                <div key={detail.label} className="pb-1">
-                  <strong>{detail.label}:</strong> {detail?.value || 'Unknown'}
+                <div key={detail?.label} className="pb-1">
+                  <strong>{detail?.label}:</strong> {detail?.value || 'Unknown'}
                 </div>
               )
             )}
@@ -177,7 +177,7 @@ const DetailsCard = ({
               title={<AnchorTitle title="Statistics" />}
               className="md:col-span-2"
             >
-              {stats.map((stat) => (
+              {(stats || []).map((stat) => (
                 <div key={`${stat.unit}-${stat.value}`}>
                   <InfoBlock
                     className="pb-1"
@@ -190,7 +190,7 @@ const DetailsCard = ({
               ))}
             </SecondaryCard>
           )}
-          {type === 'chapter' && geolocationData && (
+          {type === 'chapter' && geolocationData && geolocationData.length > 0 && (
             <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
               <ChapterMapWrapper
                 geoLocData={geolocationData}
@@ -209,17 +209,17 @@ const DetailsCard = ({
         </div>
         {(type === 'project' || type === 'repository') && (
           <div
-            className={`mb-8 grid grid-cols-1 gap-6 ${topics.length === 0 || languages.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
+            className={`mb-8 grid grid-cols-1 gap-6 ${(topics || []).length === 0 || (languages || []).length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
           >
-            {languages.length !== 0 && (
+            {(languages || []).length !== 0 && (
               <ToggleableList
-                items={languages}
+                items={languages || []}
                 icon={FaCode}
                 label={<AnchorTitle title="Languages" />}
               />
             )}
-            {topics.length !== 0 && (
-              <ToggleableList items={topics} icon={FaTags} label={<AnchorTitle title="Topics" />} />
+            {(topics || []).length !== 0 && (
+              <ToggleableList items={topics || []} icon={FaTags} label={<AnchorTitle title="Topics" />} />
             )}
           </div>
         )}
@@ -229,17 +229,17 @@ const DetailsCard = ({
               <div
                 className={`mb-8 grid grid-cols-1 gap-6 ${(tags?.length || 0) === 0 || (domains?.length || 0) === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
               >
-                {tags?.length > 0 && (
+                {(tags?.length || 0) > 0 && (
                   <ToggleableList
-                    items={tags}
+                    items={tags || []}
                     icon={FaTags}
                     label={<AnchorTitle title="Tags" />}
                     isDisabled={true}
                   />
                 )}
-                {domains?.length > 0 && (
+                {(domains?.length || 0) > 0 && (
                   <ToggleableList
-                    items={domains}
+                    items={domains || []}
                     icon={FaChartPie}
                     label={<AnchorTitle title="Domains" />}
                     isDisabled={true}
@@ -247,10 +247,10 @@ const DetailsCard = ({
                 )}
               </div>
             )}
-            {labels?.length > 0 && (
+            {(labels?.length || 0) > 0 && (
               <div className="mb-8">
                 <ToggleableList
-                  items={labels}
+                  items={labels || []}
                   icon={FaTags}
                   label={<AnchorTitle title="Labels" />}
                   isDisabled={true}
@@ -322,14 +322,14 @@ const DetailsCard = ({
         )}
         {showIssuesAndMilestones(type) && (
           <div className="grid-cols-2 gap-4 lg:grid">
-            <RecentIssues data={recentIssues} showAvatar={showAvatar} />
-            <Milestones data={recentMilestones} showAvatar={showAvatar} />
+            <RecentIssues data={recentIssues || []} showAvatar={showAvatar} />
+            <Milestones data={recentMilestones || []} showAvatar={showAvatar} />
           </div>
         )}
         {showPullRequestsAndReleases(type) && (
           <div className="grid-cols-2 gap-4 lg:grid">
-            <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />
-            <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />
+            <RecentPullRequests data={pullRequests || []} showAvatar={showAvatar} />
+            <RecentReleases data={recentReleases || []} showAvatar={showAvatar} showSingleColumn={true} />
           </div>
         )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
@@ -352,7 +352,7 @@ const DetailsCard = ({
         {entityKey && ['chapter', 'project', 'repository'].includes(type) && (
           <SponsorCard
             target={entityKey}
-            title={projectName || title}
+            title={projectName || title || ''}
             type={type === 'chapter' ? 'chapter' : 'project'}
           />
         )}
@@ -363,7 +363,7 @@ const DetailsCard = ({
 
 export default DetailsCard
 
-export const SocialLinks = ({ urls }) => {
+export const SocialLinks = ({ urls }: { urls: string[] }) => {
   if (!urls || urls.length === 0) return null
   return (
     <div>

@@ -35,7 +35,7 @@ export async function generateMetadata({
         keywords: ['owasp', 'project', projectKey, project.name],
         title: project.name,
       })
-    : null
+    :  {}
 }
 
 export default async function ProjectDetailsLayout({

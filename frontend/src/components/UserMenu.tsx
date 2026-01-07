@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { signIn } from 'next-auth/react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { FaGithub } from 'react-icons/fa'
-// import { ExtendedSession } from 'types/auth'
+import { ExtendedSession } from 'types/auth'
 
 export default function UserMenu({
   isGitHubAuthEnabled,
@@ -19,8 +19,11 @@ export default function UserMenu({
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const dropdownId = useId()
-  const isProjectLeader = (session)?.user?.isLeader
-  const isOwaspStaff = session?.user?.isOwaspStaff
+
+  // Use type casting to access extended properties safely
+  const extendedSession = session as ExtendedSession | null
+  const isProjectLeader = extendedSession?.user?.isLeader
+  const isOwaspStaff = extendedSession?.user?.isOwaspStaff
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -42,7 +45,8 @@ export default function UserMenu({
     )
   }
 
-  if (status === 'unauthenticated') {
+  // Guard clause for unauthenticated state
+  if (status === 'unauthenticated' || !session) {
     return (
       <button
         type="button"

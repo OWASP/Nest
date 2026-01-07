@@ -1,3 +1,4 @@
+'use client'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState } from 'react'
@@ -12,15 +13,17 @@ import { TruncatedText } from 'components/TruncatedText'
 
 const RepositoryCard: React.FC<RepositoryCardListProps> = ({
   maxInitialDisplay = 4,
-  repositories,
+  repositories = [], // Fixed: Default to empty array to handle 'undefined'
 }) => {
   const [showAllRepositories, setShowAllRepositories] = useState(false)
 
   const toggleRepositories = () => setShowAllRepositories(!showAllRepositories)
 
+  // Safe check for repositories length/existence
   const displayedRepositories = showAllRepositories
     ? repositories
-    : repositories.slice(0, maxInitialDisplay)
+    : (repositories || []).slice(0, maxInitialDisplay)
+
   return (
     <div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -33,7 +36,9 @@ const RepositoryCard: React.FC<RepositoryCardListProps> = ({
           )
         })}
       </div>
-      {repositories.length > maxInitialDisplay && <ShowMoreButton onToggle={toggleRepositories} />}
+      {(repositories?.length || 0) > maxInitialDisplay && (
+        <ShowMoreButton onToggle={toggleRepositories} />
+      )}
     </div>
   )
 }
@@ -41,7 +46,9 @@ const RepositoryCard: React.FC<RepositoryCardListProps> = ({
 const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
   const router = useRouter()
   const handleClick = () => {
-    router.push(`/organizations/${details.organization?.login}/repositories/${details.key}`)
+    // Fixed: Added fallback for organization login to prevent malformed URLs
+    const orgLogin = details.organization?.login || 'unknown'
+    router.push(`/organizations/${orgLogin}/repositories/${details.key}`)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -60,7 +67,8 @@ const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
           onKeyDown={handleKeyDown}
           className="min-w-0 flex-1 cursor-pointer text-start font-semibold text-blue-400 hover:underline focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
         >
-          <TruncatedText text={details?.name} />
+          {/* Fixed: Guaranteed string fallback */}
+          <TruncatedText text={details?.name || ''} />
         </button>
         {details.isArchived && (
           <div className="flex-shrink-0">
@@ -70,19 +78,20 @@ const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
       </div>
 
       <div className="flex flex-col gap-2 text-sm">
-        <InfoItem icon={FaStar} pluralizedName="Stars" unit="Star" value={details.starsCount} />
-        <InfoItem icon={FaCodeFork} pluralizedName="Forks" unit="Fork" value={details.forksCount} />
+        {/* Fixed: Ensured values are numbers (handled null/undefined with 0) */}
+        <InfoItem icon={FaStar} pluralizedName="Stars" unit="Star" value={details.starsCount ?? 0} />
+        <InfoItem icon={FaCodeFork} pluralizedName="Forks" unit="Fork" value={details.forksCount ?? 0} />
         <InfoItem
           icon={HiUserGroup}
           pluralizedName="Contributors"
           unit="Contributor"
-          value={details.contributorsCount}
+          value={details.contributorsCount ?? 0}
         />
         <InfoItem
           icon={FaExclamationCircle}
           pluralizedName="Issues"
           unit="Issue"
-          value={details.openIssuesCount}
+          value={details.openIssuesCount ?? 0}
         />
       </div>
     </div>

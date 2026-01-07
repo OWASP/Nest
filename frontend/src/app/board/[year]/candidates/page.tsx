@@ -32,7 +32,7 @@ type Candidate = {
   member?: {
     avatarUrl: string
     bio?: string
-    createdAt?: number
+    createdAt?: number | string
     firstOwaspContributionAt?: number
     id: string
     isFormerOwaspStaff?: boolean
@@ -85,7 +85,8 @@ type CandidateWithSnapshot = Candidate & {
 }
 
 const BoardCandidatesPage = () => {
-  const { year } = useParams<{ year: string }>()
+  const params = useParams()
+  const year = params?.year as string
   const [candidates, setCandidates] = useState<CandidateWithSnapshot[]>([])
 
   const {
@@ -93,12 +94,13 @@ const BoardCandidatesPage = () => {
     error: graphQLRequestError,
     loading,
   } = useQuery(GetBoardCandidatesDocument, {
-    variables: { year: Number.parseInt(year) },
+    variables: { year: Number.parseInt(year || '2024') },
+    skip: !year,
   })
 
   useEffect(() => {
     if (graphQLData?.boardOfDirectors) {
-      setCandidates(graphQLData.boardOfDirectors.candidates || [])
+      setCandidates((graphQLData.boardOfDirectors.candidates as CandidateWithSnapshot[]) || [])
     }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
@@ -112,7 +114,7 @@ const BoardCandidatesPage = () => {
     const [ledProjects, setLedProjects] = useState<Project[]>([])
 
     const sortByName = <T extends { name: string }>(items: T[]): T[] => {
-      return [...items].sort((a, b) => a.name.localeCompare(b.name))
+      return [...items].sort((a, b) => (a.name || '').localeCompare(b.name || ''))
     }
 
     const sortByContributionCount = (entries: Array<[string, number]>): Array<[string, number]> => {
@@ -148,7 +150,7 @@ const BoardCandidatesPage = () => {
       return (
         <a
           key={repoName}
-          href={`https://github.com/${repoName}/commits?author=${candidate.member?.login}`}
+          href={`https://github.com/${repoName}/commits?author=${candidate.member?.login || ''}`}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30"
@@ -233,7 +235,7 @@ const BoardCandidatesPage = () => {
 
     useEffect(() => {
       if (snapshotData?.memberSnapshot) {
-        setSnapshot(snapshotData.memberSnapshot)
+        setSnapshot(snapshotData.memberSnapshot as MemberSnapshot)
       }
     }, [snapshotData])
 
@@ -253,7 +255,7 @@ const BoardCandidatesPage = () => {
             })
 
             if (data?.chapter) {
-              chapters.push(data.chapter)
+              chapters.push(data.chapter as Chapter)
             }
           } catch {
             // Silently skip chapters that fail to fetch
@@ -282,7 +284,7 @@ const BoardCandidatesPage = () => {
             })
 
             if (data?.project) {
-              projects.push(data.project)
+              projects.push(data.project as Project)
             }
           } catch {
             // Silently skip projects that fail to fetch
@@ -316,14 +318,14 @@ const BoardCandidatesPage = () => {
               <Image
                 fill
                 src={`${candidate.member.avatarUrl}&s=160`}
-                alt={candidate.memberName}
+                alt={candidate.memberName || 'Avatar'}
                 className="object-cover"
               />
             </div>
           )}
           <div className="min-w-0 flex-1">
             <h3 className="flex items-center gap-2 truncate text-xl font-bold text-gray-900 dark:text-white">
-              {candidate.memberName}
+              {candidate.memberName || 'Unknown Candidate'}
               {candidate.member?.linkedinPageId && (
                 <a
                   href={`https://linkedin.com/in/${candidate.member.linkedinPageId}`}
@@ -333,7 +335,7 @@ const BoardCandidatesPage = () => {
                     e.stopPropagation()
                     e.preventDefault()
                     window.open(
-                      `https://linkedin.com/in/${candidate.member.linkedinPageId}`,
+                      `https://linkedin.com/in/${candidate.member?.linkedinPageId}`,
                       '_blank',
                       'noopener,noreferrer'
                     )
@@ -425,7 +427,7 @@ const BoardCandidatesPage = () => {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Commits</p>
                   <p className="font-semibold text-gray-900 dark:text-white">
-                    {millify(snapshot.commitsCount, { precision: 1 })}
+                    {millify(snapshot.commitsCount || 0, { precision: 1 })}
                   </p>
                 </div>
               </div>
@@ -434,7 +436,7 @@ const BoardCandidatesPage = () => {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">PRs</p>
                   <p className="font-semibold text-gray-900 dark:text-white">
-                    {millify(snapshot.pullRequestsCount, { precision: 1 })}
+                    {millify(snapshot.pullRequestsCount || 0, { precision: 1 })}
                   </p>
                 </div>
               </div>
@@ -443,7 +445,7 @@ const BoardCandidatesPage = () => {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Issues</p>
                   <p className="font-semibold text-gray-900 dark:text-white">
-                    {millify(snapshot.issuesCount, { precision: 1 })}
+                    {millify(snapshot.issuesCount || 0, { precision: 1 })}
                   </p>
                 </div>
               </div>
@@ -452,7 +454,7 @@ const BoardCandidatesPage = () => {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
                   <p className="font-semibold text-gray-900 dark:text-white">
-                    {millify(snapshot.totalContributions, { precision: 1 })}
+                    {millify(snapshot.totalContributions || 0, { precision: 1 })}
                   </p>
                 </div>
               </div>
@@ -578,7 +580,7 @@ const BoardCandidatesPage = () => {
               Object.keys(snapshot.repositoryContributions).length > 0 &&
               (() => {
                 const sortedRepos = sortByContributionCount(
-                  Object.entries(snapshot.repositoryContributions)
+                  Object.entries(snapshot.repositoryContributions || {})
                 )
                 const topRepo = sortedRepos[0]
                 const [topRepoName, topRepoCount] = topRepo
@@ -590,7 +592,7 @@ const BoardCandidatesPage = () => {
                         Top 5 Active Repositories
                       </h4>
                       <a
-                        href={`https://github.com/${topRepoName}/commits?author=${candidate.member?.login}`}
+                        href={`https://github.com/${topRepoName}/commits?author=${candidate.member?.login || ''}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-700/10 ring-inset hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-400/30 dark:hover:bg-green-900/30"
@@ -606,7 +608,7 @@ const BoardCandidatesPage = () => {
                       <div>
                         <div className="flex flex-wrap gap-2">
                           {sortedRepos
-                            .slice(1)
+                            .slice(1, 5)
                             .map(([repoName, count]) => renderRepositoryLink(repoName, count))}
                         </div>
                       </div>

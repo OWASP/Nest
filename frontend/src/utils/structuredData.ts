@@ -1,9 +1,9 @@
 import { ProfilePageStructuredData } from 'types/profilePageStructuredData'
 import type { User } from 'types/user'
 
-export const formatISODate = (input?: number | string): string => {
+export const formatISODate = (input?: number | string | null): string => {
   if (input == null) {
-    return undefined
+    return '' // Fixed: Return empty string instead of undefined to satisfy 'string' return type
   }
 
   const date =
@@ -31,29 +31,33 @@ export function generateProfilePageStructuredData(
   user: User,
   baseUrl = 'https://nest.owasp.org'
 ): ProfilePageStructuredData {
+  const dateCreated = formatISODate(user.createdAt)
+  const dateModified = formatISODate(user.updatedAt)
+  const followersCount = user.followersCount ?? 0 // Fixed: Ensure it's a number
+
   return {
     '@context': 'https://schema.org',
     '@type': 'ProfilePage',
-    ...(formatISODate(user.createdAt) && {
-      dateCreated: formatISODate(user.createdAt),
+    ...(dateCreated && {
+      dateCreated,
     }),
-    ...(formatISODate(user.updatedAt) && {
-      dateModified: formatISODate(user.updatedAt),
+    ...(dateModified && {
+      dateModified,
     }),
     mainEntity: {
       '@type': 'Person',
       ...(user.location && {
         address: user.location,
       }),
-      description: user.bio,
-      identifier: user.login,
-      image: user.avatarUrl,
-      ...(user.followersCount > 0 && {
+      description: user.bio || '',
+      identifier: user.login || 'unknown',
+      image: user.avatarUrl || '',
+      ...(followersCount > 0 && {
         interactionStatistic: [
           {
             '@type': 'InteractionCounter',
             interactionType: 'https://schema.org/FollowAction',
-            userInteractionCount: user.followersCount,
+            userInteractionCount: followersCount,
           },
         ],
       }),
@@ -62,9 +66,9 @@ export function generateProfilePageStructuredData(
         name: 'OWASP Community',
         url: 'https://nest.owasp.org/members',
       },
-      name: user.name || user.login,
-      sameAs: [user.url],
-      url: `${baseUrl}/members/${user.login}`,
+      name: user.name || user.login || 'OWASP Member',
+      sameAs: user.url ? [user.url] : [], // Fixed: Handle possibly undefined url
+      url: `${baseUrl}/members/${user.login || ''}`,
       ...(user.company && {
         worksFor: {
           '@type': 'Organization',

@@ -13,8 +13,8 @@ describe('pluralize function', () => {
 
   test('returns plural form when count is 0 or falsy', () => {
     expect(pluralize(0, 'issue', 'issues')).toBe('issues')
-    expect(pluralize(null, 'count')).toBe('counts')
-    expect(pluralize(undefined, 'issue', 'issues')).toBe('issues')
+    expect(pluralize(null as unknown as number, 'count')).toBe('counts')
+    expect(pluralize(undefined as unknown as number, 'issue', 'issues')).toBe('issues')
   })
 
   test('handles non-standard pluralization correctly', () => {

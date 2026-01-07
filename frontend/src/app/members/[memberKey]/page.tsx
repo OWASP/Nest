@@ -24,7 +24,7 @@ import MemberDetailsPageSkeleton from 'components/skeletons/MemberDetailsPageSke
 
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams<{ memberKey: string }>()
-  const [user, setUser] = useState<User | null>()
+  const [user, setUser] = useState<User | null>(null)
   const [issues, setIssues] = useState<Issue[]>([])
   const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
   const [milestones, setMilestones] = useState<Milestone[]>([])
@@ -36,17 +36,18 @@ const UserDetailsPage: React.FC = () => {
   const [isPrivateContributor, setIsPrivateContributor] = useState(false)
 
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GetUserDataDocument, {
-    variables: { key: memberKey },
+    variables: { key: memberKey || '' },
+    skip: !memberKey,
   })
 
   useEffect(() => {
-    if (graphQLData) {
-      setUser(graphQLData.user)
-      setIssues(graphQLData.recentIssues)
-      setMilestones(graphQLData.recentMilestones)
-      setPullRequests(graphQLData.recentPullRequests)
-      setReleases(graphQLData.recentReleases)
-      setTopRepositories(graphQLData.topContributedRepositories)
+    if (graphQLData?.user) {
+      setUser(graphQLData.user as User)
+      setIssues((graphQLData.recentIssues as Issue[]) || [])
+      setMilestones((graphQLData.recentMilestones as Milestone[]) || [])
+      setPullRequests((graphQLData.recentPullRequests as PullRequest[]) || [])
+      setReleases((graphQLData.recentReleases as Release[]) || [])
+      setTopRepositories((graphQLData.topContributedRepositories as RepositoryCardProps[]) || [])
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -57,6 +58,7 @@ const UserDetailsPage: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!memberKey) return
       const result = await fetchHeatmapData(memberKey)
       if (!result) {
         setIsPrivateContributor(true)
@@ -70,20 +72,20 @@ const UserDetailsPage: React.FC = () => {
     fetchData()
   }, [memberKey, user])
 
-  const formattedBio = user?.bio?.split(' ').map((word, index) => {
+  const formattedBio = (user?.bio || '').split(' ').map((word, index) => {
     const mentionMatch = word.match(/^@([\w-]+(?:\.[\w-]+)*)([^\w@])?$/)
     if (mentionMatch && mentionMatch.length > 1) {
-      const username = mentionMatch[1]
+      const mentionUsername = mentionMatch[1]
       const punctuation = mentionMatch[2] || ''
       return (
-        <React.Fragment key={`mention-${username}-${index}`}>
+        <React.Fragment key={`mention-${mentionUsername}-${index}`}>
           <Link
-            href={`https://github.com/${username}`}
+            href={`https://github.com/${mentionUsername}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-400 hover:underline"
           >
-            @{username}
+            @{mentionUsername}
           </Link>
           {punctuation}
           <span> </span>
@@ -101,7 +103,7 @@ const UserDetailsPage: React.FC = () => {
     )
   }
 
-  if (!isLoading && user == null) {
+  if (!user) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -112,22 +114,22 @@ const UserDetailsPage: React.FC = () => {
   }
 
   const userDetails = [
-    { label: 'Joined', value: user?.createdAt ? formatDate(user.createdAt) : 'Not available' },
-    { label: 'Email', value: user?.email || 'N/A' },
-    { label: 'Company', value: user?.company || 'N/A' },
-    { label: 'Location', value: user?.location || 'N/A' },
+    { label: 'Joined', value: user.createdAt ? formatDate(user.createdAt) : 'Not available' },
+    { label: 'Email', value: user.email || 'N/A' },
+    { label: 'Company', value: user.company || 'N/A' },
+    { label: 'Location', value: user.location || 'N/A' },
   ]
 
   const userStats = [
-    { icon: FaPersonWalkingArrowRight, value: user?.followersCount || 0, unit: 'Follower' },
-    { icon: FaUserPlus, value: user?.followingCount || 0, unit: 'Following' },
+    { icon: FaPersonWalkingArrowRight, value: user.followersCount || 0, unit: 'Follower' },
+    { icon: FaUserPlus, value: user.followingCount || 0, unit: 'Following' },
     {
       icon: FaFolderOpen,
       pluralizedName: 'Repositories',
       unit: 'Repository',
-      value: user?.publicRepositoriesCount ?? 0,
+      value: user.publicRepositoriesCount ?? 0,
     },
-    { icon: FaCodeMerge, value: user?.contributionsCount || 0, unit: 'Contribution' },
+    { icon: FaCodeMerge, value: user.contributionsCount || 0, unit: 'Contribution' },
   ]
 
   const Heatmap = () => {
@@ -191,21 +193,21 @@ const UserDetailsPage: React.FC = () => {
         width={200}
         height={200}
         className="mr-4 h-[200px] w-[200px] rounded-full border-2 border-white bg-white object-cover shadow-md dark:border-gray-800 dark:bg-gray-600/60"
-        src={user?.avatarUrl || '/placeholder.svg'}
-        alt={user?.name || user?.login || 'User Avatar'}
+        src={user.avatarUrl || '/placeholder.svg'}
+        alt={user.name || user.login || 'User Avatar'}
       />
       <div className="w-full text-center lg:text-left">
         <div className="pl-0 lg:pl-4">
           <div className="flex items-center justify-center gap-3 text-center text-sm text-gray-500 lg:justify-start lg:text-left dark:text-gray-400">
             <Link
-              href={user?.url || '#'}
+              href={user.url || '#'}
               className="text-xl font-bold text-blue-400 hover:underline"
             >
-              @{user?.login}
+              @{user.login || 'unknown'}
             </Link>
-            {user?.badges && user.badges.length > 0 && (
+            {user.badges && user.badges.length > 0 && (
               <div className="flex flex-wrap gap-2">
-                {user.badges.slice().map((badge: Badge) => (
+                {[...user.badges].map((badge: Badge) => (
                   <React.Fragment key={badge.id}>
                     <Badges
                       name={badge.name}
@@ -217,7 +219,7 @@ const UserDetailsPage: React.FC = () => {
               </div>
             )}
           </div>
-          <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
+          <div className="text-gray-600 dark:text-gray-400">{formattedBio}</div>
         </div>
         {!isPrivateContributor && (
           <div className="hidden w-full lg:block">
@@ -238,7 +240,7 @@ const UserDetailsPage: React.FC = () => {
       repositories={topRepositories}
       showAvatar={false}
       stats={userStats}
-      title={user?.name || user?.login}
+      title={user.name || user.login || 'User Profile'}
       type="user"
       userSummary={<UserSummary />}
     />

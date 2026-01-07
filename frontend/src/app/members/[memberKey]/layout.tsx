@@ -23,8 +23,7 @@ export async function generateMetadata({
     },
   })
   const user = data?.user
-  const title = user?.name || user?.login
-
+const title = user?.name || user?.login || 'Member Profile'
   return user
     ? generateSeoMetadata({
         canonicalPath: `/members/${memberKey}`,
@@ -32,7 +31,7 @@ export async function generateMetadata({
         keywords: [user.login, user.name, 'owasp', 'owasp community member'],
         title: title,
       })
-    : null
+    :  {}
 }
 
 export default async function UserDetailsLayout({

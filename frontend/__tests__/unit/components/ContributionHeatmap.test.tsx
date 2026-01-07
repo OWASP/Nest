@@ -115,34 +115,35 @@ describe('ContributionHeatmap', () => {
 
   describe('Data Processing & Edge Cases', () => {
     it('handles empty, zero, and high values', () => {
-      const testCases = [
-        { data: {}, desc: 'empty' },
-        { data: { '2024-01-01': 0, '2024-01-02': 0 }, desc: 'zero' },
-        { data: { '2024-01-01': 1000, '2024-01-02': 9999 }, desc: 'high' },
-      ]
-      testCases.forEach(({ data }) => {
-        const { unmount } = renderWithTheme(
-          <ContributionHeatmap {...defaultProps} contributionData={data} />
-        )
-        expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
-        unmount()
-      })
-    })
-
-    it('handles various date ranges', () => {
-      const ranges = [
-        { start: '2024-01-01', end: '2024-01-01', data: { '2024-01-01': 5 } },
-        { start: '2024-01-25', end: '2024-02-05', data: { '2024-01-25': 5, '2024-02-05': 10 } },
-        { start: '2023-12-25', end: '2024-01-05', data: { '2023-12-25': 5, '2024-01-05': 10 } },
-      ]
-      ranges.forEach(({ start, end, data }) => {
-        const { unmount } = renderWithTheme(
-          <ContributionHeatmap contributionData={data} startDate={start} endDate={end} />
-        )
-        expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
-        unmount()
-      })
-    })
+  const testCases: { data: Record<string, number>; desc: string }[] = [
+    { data: {}, desc: 'empty' },
+    { data: { '2024-01-01': 0, '2024-01-02': 0 }, desc: 'zero' },
+    { data: { '2024-01-01': 1000, '2024-01-02': 9999 }, desc: 'high' },
+  ]
+  
+  testCases.forEach(({ data }) => {
+    const { unmount } = renderWithTheme(
+      <ContributionHeatmap {...defaultProps} contributionData={data} />
+    )
+    expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+    unmount()
+  })
+})
+   it('handles various date ranges', () => {
+  const ranges: { start: string; end: string; data: Record<string, number> }[] = [
+    { start: '2024-01-01', end: '2024-01-01', data: { '2024-01-01': 5 } },
+    { start: '2024-01-25', end: '2024-02-05', data: { '2024-01-25': 5, '2024-02-05': 10 } },
+    { start: '2023-12-25', end: '2024-01-05', data: { '2023-12-25': 5, '2024-01-05': 10 } },
+  ]
+  
+  ranges.forEach(({ start, end, data }) => {
+    const { unmount } = renderWithTheme(
+      <ContributionHeatmap contributionData={data} startDate={start} endDate={end} />
+    )
+    expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+    unmount()
+  })
+})
 
     it('handles mid-week start and sparse data', () => {
       const props = {

@@ -103,7 +103,8 @@ describe('RecentPullRequests', () => {
   })
 
   it('handles undefined data prop gracefully', () => {
-    render(<RecentPullRequests data={undefined} />)
+    // This maintains strict linting compliance while allowing the test case
+    render(<RecentPullRequests data={undefined as unknown as []} />)
     expect(screen.getByText('Recent Pull Requests')).toBeInTheDocument()
   })
 

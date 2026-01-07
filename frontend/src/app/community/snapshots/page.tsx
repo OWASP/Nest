@@ -16,8 +16,8 @@ const SnapshotsPage: React.FC = () => {
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GetCommunitySnapshotsDocument)
 
   useEffect(() => {
-    if (graphQLData) {
-      setSnapshots(graphQLData.snapshots)
+    if (graphQLData?.snapshots) {
+      setSnapshots(graphQLData.snapshots as Snapshot[])
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -49,7 +49,7 @@ const SnapshotsPage: React.FC = () => {
     return (
       <SnapshotCard
         key={snapshot.key}
-        title={snapshot.title}
+        title={snapshot.title || ''}
         button={SubmitButton}
         startAt={snapshot.startAt}
         endAt={snapshot.endAt}
@@ -68,7 +68,7 @@ const SnapshotsPage: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {snapshots?.length ? (
+            {snapshots && snapshots.length > 0 ? (
               snapshots.map((snapshot: Snapshot) => (
                 <div key={snapshot.key}>{renderSnapshotCard(snapshot)}</div>
               ))

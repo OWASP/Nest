@@ -2,6 +2,9 @@ import { AppError } from 'app/global-error'
 import { CSRF_URL } from 'utils/env.client'
 
 export const fetchCsrfToken = async (): Promise<string> => {
+  if (!CSRF_URL) {
+    throw new AppError(500, 'CSRF URL is not defined in environment variables')
+  }
   try {
     const response = await fetch(CSRF_URL, {
       credentials: 'include',

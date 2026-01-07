@@ -121,7 +121,7 @@ jest.mock('components/SecondaryCard', () => {
     children,
   }: {
     title: React.ReactNode
-    icon?: unknown
+    icon?: React.ReactNode
     children: React.ReactNode
   }) {
     return (

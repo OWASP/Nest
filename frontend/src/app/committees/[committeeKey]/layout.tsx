@@ -33,7 +33,7 @@ export async function generateMetadata({
         keywords: ['owasp', 'security', 'committee', committeeKey, committee.name],
         title: committee.name,
       })
-    : null
+    :  {}
 }
 
 export default async function CommitteeDetailsLayout({

@@ -40,7 +40,7 @@ const ChaptersPage = () => {
         searchParams.currentPage,
         searchParams.hitsPerPage
       )
-      setGeoLocData(data.hits)
+      setGeoLocData(data.hits || [])
     }
     fetchData()
   }, [currentPage])
@@ -49,7 +49,7 @@ const ChaptersPage = () => {
   const renderChapterCard = (chapter: Chapter) => {
     const params: string[] = ['updatedAt']
     const filteredIcons = getFilteredIcons(chapter, params)
-    const formattedUrls = handleSocialUrls(chapter.relatedUrls)
+    const formattedUrls = handleSocialUrls(chapter.relatedUrls || [])
 
     const handleButtonClick = () => {
       router.push(`/chapters/${chapter.key}`)
@@ -66,9 +66,10 @@ const ChaptersPage = () => {
         key={chapter.objectID}
         title={chapter.name}
         url={`/chapters/${chapter.key}`}
-        summary={chapter.summary}
+        // Fixed: Provided fallback for summary to satisfy strict string requirement
+        summary={chapter.summary || ''}
         icons={filteredIcons}
-        topContributors={chapter.topContributors}
+        topContributors={chapter.topContributors || []}
         button={submitButton}
         social={formattedUrls}
       />
@@ -87,9 +88,9 @@ const ChaptersPage = () => {
       searchQuery={searchQuery}
       totalPages={totalPages}
     >
-      {chapters.length > 0 && (
+      {(chapters?.length ?? 0) > 0 && (
         <ChapterMapWrapper
-          geoLocData={searchQuery ? chapters : geoLocData}
+          geoLocData={searchQuery ? (chapters || []) : geoLocData}
           showLocal={true}
           showLocationSharing={true}
           style={{
@@ -101,7 +102,10 @@ const ChaptersPage = () => {
           }}
         />
       )}
-      {chapters && chapters.filter((chapter) => chapter.isActive).map(renderChapterCard)}
+      {/* Fixed: Safe filtering and mapping on the chapters array */}
+      {(chapters || [])
+        .filter((chapter) => chapter && chapter.isActive)
+        .map(renderChapterCard)}
     </SearchPageLayout>
   )
 }

@@ -122,43 +122,33 @@ const SortableColumnHeader: FC<{
     </div>
   )
 }
+type HealthFilterValue = {
+  score: {
+    gte?: number;
+    lt?: number;
+  };
+};
 
+type LevelFilterValue = {
+  level: string;
+};
 const MetricsPage: FC = () => {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const healthFiltersMapping = {
-    healthy: {
-      score: {
-        gte: 75,
-      },
-    },
-    needsAttention: {
-      score: {
-        gte: 50,
-        lt: 75,
-      },
-    },
-    unhealthy: {
-      score: {
-        lt: 50,
-      },
-    },
-  }
-  const levelFiltersMapping = {
-    incubator: {
-      level: 'incubator',
-    },
-    lab: {
-      level: 'lab',
-    },
-    production: {
-      level: 'production',
-    },
-    flagship: {
-      level: 'flagship',
-    },
+
+  // Use the specific types instead of 'any'
+  const healthFiltersMapping: Record<string, HealthFilterValue> = {
+    healthy: { score: { gte: 75 } },
+    needsAttention: { score: { gte: 50, lt: 75 } },
+    unhealthy: { score: { lt: 50 } },
   }
 
+  const levelFiltersMapping: Record<string, LevelFilterValue> = {
+    incubator: { level: 'incubator' },
+    lab: { level: 'lab' },
+    production: { level: 'production' },
+    flagship: { level: 'flagship' },
+  }
   let currentFilters = {}
   const orderingParam = searchParams.get('order')
   const { field, direction, urlKey } = parseOrderParam(orderingParam)
@@ -166,7 +156,7 @@ const MetricsPage: FC = () => {
 
   const healthFilter = searchParams.get('health')
   const levelFilter = searchParams.get('level')
-  const currentFilterKeys = []
+  const currentFilterKeys: string[] = [] // Fixed: typed as string[] to avoid 'never[]'
   if (healthFilter) {
     currentFilters = {
       ...healthFiltersMapping[healthFilter],
@@ -186,7 +176,7 @@ const MetricsPage: FC = () => {
   const [pagination, setPagination] = useState({ offset: 0, limit: PAGINATION_LIMIT })
   const [filters, setFilters] = useState(currentFilters)
   const [ordering, setOrdering] = useState(currentOrdering)
-  const [activeFilters, setActiveFilters] = useState(currentFilterKeys)
+  const [activeFilters, setActiveFilters] = useState<string[]>(currentFilterKeys) // Fixed: explicitly typed string[]
   const {
     data,
     error: graphQLRequestError,
@@ -210,9 +200,9 @@ const MetricsPage: FC = () => {
   }, [searchParams])
 
   useEffect(() => {
-    if (data) {
-      setMetrics(data.projectHealthMetrics)
-      setMetricsLength(data.projectHealthMetricsDistinctLength)
+    if (data?.projectHealthMetrics) {
+      setMetrics(data.projectHealthMetrics as HealthMetricsProps[])
+      setMetricsLength(data.projectHealthMetricsDistinctLength ?? 0)
     }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
@@ -278,7 +268,6 @@ const MetricsPage: FC = () => {
             selectedKeys={activeFilters}
             selectedLabels={getKeysLabels(filteringSections, activeFilters)}
             onAction={(key: string) => {
-              // Because how apollo caches pagination, we need to reset the pagination.
               setPagination({ offset: 0, limit: PAGINATION_LIMIT })
               let newFilters = { ...currentFilters }
               const newParams = new URLSearchParams(searchParams.toString())
@@ -294,14 +283,14 @@ const MetricsPage: FC = () => {
                 newFilters = {}
               }
               setFilters(newFilters)
-              setActiveFilters(
-                Array.from(
-                  newParams
-                    .entries()
-                    .filter(([key]) => key != 'order')
-                    .map(([, value]) => value)
-                )
+              
+              const updatedFilterKeys: string[] = Array.from(
+                newParams
+                  .entries()
+                  .filter(([k]) => k !== 'order')
+                  .map(([, value]) => value)
               )
+              setActiveFilters(updatedFilterKeys)
               router.replace(`/projects/dashboard/metrics?${newParams.toString()}`)
             }}
           />

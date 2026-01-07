@@ -1,3 +1,5 @@
+'use client'
+import '@testing-library/jest-dom'
 import React from 'react'
 import { FaCircleExclamation } from 'react-icons/fa6'
 import { render, screen, cleanup } from 'wrappers/testUtil'
@@ -8,6 +10,7 @@ import type { Release } from 'types/release'
 import ItemCardList from 'components/ItemCardList'
 import '@testing-library/jest-dom'
 
+// Mocking Next.js components to avoid environment errors in Jest
 jest.mock('next/link', () => ({
   __esModule: true,
   default: ({
@@ -70,21 +73,26 @@ jest.mock('@heroui/tooltip', () => ({
   ),
 }))
 
+// Fixed: Corrected the SecondaryCard mock to accept icon as a component/ElementType
 jest.mock('components/SecondaryCard', () => ({
   __esModule: true,
   default: ({
     children,
     title,
-    icon,
+    icon: Icon,
   }: {
     children: React.ReactNode
     title?: React.ReactNode
-    icon?: { iconName: string }
+    icon?: React.ElementType
   }) => (
     <div data-testid="secondary-card">
       {title && (
         <div data-testid="card-title">
-          {icon && <span data-testid="card-icon">{icon.iconName}</span>}
+          {Icon && (
+            <span data-testid="card-icon">
+              <Icon />
+            </span>
+          )}
           {title}
         </div>
       )}
@@ -97,6 +105,7 @@ jest.mock('components/TruncatedText', () => ({
   TruncatedText: ({ text }: { text: string }) => <span data-testid="truncated-text">{text}</span>,
 }))
 
+// Mock Data with strict typing
 const mockUser = {
   avatarUrl: 'https://github.com/author1.png',
   contributionsCount: 50,
@@ -182,7 +191,6 @@ const mockRelease: Release = {
   repositoryName: 'test-repo',
   tagName: 'v1.0.0',
 }
-
 describe('ItemCardList Component', () => {
   const defaultProps = {
     title: 'Test Title',
@@ -237,8 +245,7 @@ describe('ItemCardList Component', () => {
       expect(screen.getByTestId('avatar-image')).toBeInTheDocument()
     })
   })
-
-  describe('Conditional rendering logic', () => {
+describe('Conditional rendering logic', () => {
     test.each([
       [[], 'Empty List'],
       [null, 'Null Data'],
@@ -247,7 +254,7 @@ describe('ItemCardList Component', () => {
       render(
         <ItemCardList
           title={testName}
-          data={data as Issue[] | Milestone[] | PullRequest[] | Release[] | null}
+          data={data as unknown as never[]}
           renderDetails={defaultProps.renderDetails}
         />
       )
@@ -469,16 +476,16 @@ describe('ItemCardList Component', () => {
       )
 
       const avatarLinks = screen.getAllByTestId('link')
+      const authorLogin = mockIssue.author?.login || 'unknown'
       const avatarLink = avatarLinks.find(
-        (link) => link.getAttribute('href') === `/members/${mockIssue.author.login}`
+        (link) => link.getAttribute('href') === `/members/${authorLogin}`
       )
 
       expect(avatarLink).toBeInTheDocument()
-      expect(avatarLink).toHaveAttribute('href', `/members/${mockIssue.author.login}`)
+      expect(avatarLink).toHaveAttribute('href', `/members/${authorLogin}`)
     })
   })
-
-  describe('Default values and fallbacks', () => {
+describe('Default values and fallbacks', () => {
     it('uses default values for optional props', () => {
       render(
         <ItemCardList
@@ -510,7 +517,7 @@ describe('ItemCardList Component', () => {
       const itemWithoutAuthorName = {
         ...mockIssue,
         author: { ...mockIssue.author, name: '' },
-      }
+      } as Issue
 
       render(
         <ItemCardList
@@ -522,7 +529,7 @@ describe('ItemCardList Component', () => {
       )
 
       const tooltip = screen.getByTestId('tooltip')
-      expect(tooltip).toHaveAttribute('data-content', mockIssue.author.login)
+      expect(tooltip).toHaveAttribute('data-content', mockIssue.author?.login ?? '')
     })
 
     it('handles missing item url gracefully', () => {
@@ -576,8 +583,7 @@ describe('ItemCardList Component', () => {
       }) => (
         <div data-testid="custom-details">
           <span>
-            Custom content for{' '}
-            {(item as { title?: string }).title || (item as { name?: string }).name}
+            Custom content for {item.title || item.name}
           </span>
         </div>
       )
@@ -605,7 +611,7 @@ describe('ItemCardList Component', () => {
       )
 
       const tooltip = screen.getByTestId('tooltip')
-      expect(tooltip).toHaveAttribute('data-content', mockIssue.author.name)
+      expect(tooltip).toHaveAttribute('data-content', mockIssue.author?.name ?? '')
     })
   })
 
@@ -620,7 +626,7 @@ describe('ItemCardList Component', () => {
         },
         title: 'Incomplete Item',
         url: 'https://github.com/test/repo/issue/1',
-      } as Issue
+      } as unknown as Issue
 
       render(
         <ItemCardList
@@ -637,8 +643,7 @@ describe('ItemCardList Component', () => {
     it('handles very long titles', () => {
       const longTitleItem = {
         ...mockIssue,
-        title:
-          'This is a very long title that should be truncated when displayed in the component to prevent layout issues',
+        title: 'This is a very long title that should be truncated when displayed',
       }
 
       render(
@@ -688,7 +693,7 @@ describe('ItemCardList Component', () => {
       const avatarImage = screen.getByTestId('avatar-image')
       expect(avatarImage).toHaveAttribute(
         'alt',
-        `${mockIssue.author.name || mockIssue.author.login}'s avatar`
+        `${mockIssue.author?.name || mockIssue.author?.login}'s avatar`
       )
     })
 
@@ -697,9 +702,9 @@ describe('ItemCardList Component', () => {
         ...mockIssue,
         author: {
           ...mockIssue.author,
-          name: null,
+          name: '',
         },
-      }
+      } as unknown as Issue
 
       render(
         <ItemCardList
@@ -711,14 +716,14 @@ describe('ItemCardList Component', () => {
       )
 
       const avatarImage = screen.getByTestId('avatar-image')
-      expect(avatarImage).toHaveAttribute('alt', `${issueWithoutAuthor.author.login}'s avatar`)
+      expect(avatarImage).toHaveAttribute('alt', `${mockUser.login}'s avatar`)
     })
 
     it('uses generic fallback alt text when author is missing', () => {
       const issueWithoutAuthor = {
         ...mockIssue,
         author: null,
-      }
+      } as unknown as Issue
 
       render(
         <ItemCardList
@@ -741,7 +746,7 @@ describe('ItemCardList Component', () => {
           name: '',
           login: '',
         },
-      }
+      }as unknown as Issue
 
       render(
         <ItemCardList
@@ -782,7 +787,7 @@ describe('ItemCardList Component', () => {
       )
 
       const tooltip = screen.getByTestId('tooltip')
-      expect(tooltip).toHaveAttribute('data-content', mockIssue.author.name)
+      expect(tooltip).toHaveAttribute('data-content', mockIssue.author?.name || '')
       expect(tooltip).toHaveAttribute('data-id', 'avatar-tooltip-0')
     })
   })

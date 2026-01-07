@@ -220,27 +220,27 @@ describe('LineChart', () => {
       render(<LineChart {...defaultProps} />)
 
       expect(mockFormatter).toBeDefined()
-      expect(mockFormatter(1000)).toBe('1.0K')
-      expect(mockFormatter(1500)).toBe('1.5K')
-      expect(mockFormatter(10000)).toBe('10.0K')
+      expect(mockFormatter!(1000)).toBe('1.0K')
+      expect(mockFormatter!(1500)).toBe('1.5K')
+      expect(mockFormatter!(10000)).toBe('10.0K')
     })
 
     it('formats values < 1000 with 2 decimal places by default', () => {
       render(<LineChart {...defaultProps} />)
 
       expect(mockFormatter).toBeDefined()
-      expect(mockFormatter(999)).toBe('999.00')
-      expect(mockFormatter(50.5)).toBe('50.50')
-      expect(mockFormatter(0)).toBe('0.00')
+      expect(mockFormatter!(999)).toBe('999.00')
+      expect(mockFormatter!(50.5)).toBe('50.50')
+      expect(mockFormatter!(0)).toBe('0.00')
     })
 
     it('formats values < 1000 with 0 decimal places when round is true', () => {
       render(<LineChart {...defaultProps} round={true} />)
 
       expect(mockFormatter).toBeDefined()
-      expect(mockFormatter(999)).toBe('999')
-      expect(mockFormatter(50.5)).toBe('51')
-      expect(mockFormatter(0.7)).toBe('1')
+      expect(mockFormatter!(999)).toBe('999')
+      expect(mockFormatter!(50.5)).toBe('51')
+      expect(mockFormatter!(0.7)).toBe('1')
     })
   })
 
@@ -261,7 +261,7 @@ describe('LineChart', () => {
       render(<LineChart title="Test" series={defaultProps.series} />)
 
       expect(mockFormatter).toBeDefined()
-      expect(mockFormatter(50.5)).toBe('50.50') // 2 decimal places when round is falsy
+      expect(mockFormatter!(50.5)).toBe('50.50') // 2 decimal places when round is falsy
     })
   })
 

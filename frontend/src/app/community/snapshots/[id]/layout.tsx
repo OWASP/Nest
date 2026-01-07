@@ -23,7 +23,7 @@ export async function generateMetadata({
         keywords: ['owasp', 'snapshot', snapshotKey, snapshot?.title],
         title: snapshot?.title,
       })
-    : null
+    :  {}
 }
 export default function SnapshotDetailsLayout({ children }: { children: React.ReactNode }) {
   return children

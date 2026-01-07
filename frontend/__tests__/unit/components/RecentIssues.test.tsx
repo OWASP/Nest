@@ -43,7 +43,7 @@ jest.mock('next/image', () => ({
     <img
       src={src}
       alt={alt}
-      style={fill && { objectFit: objectFit as React.CSSProperties['objectFit'] }}
+      style={fill ? { objectFit: objectFit as React.CSSProperties['objectFit'] } : {}}
       {...props}
     />
   ),
@@ -113,7 +113,7 @@ describe('<RecentIssues />', () => {
   })
 
   it('does not render repositoryName button if missing', () => {
-    const issue = { ...baseIssue }
+    const issue = { ...baseIssue } as unknown as Issue
     delete issue.repositoryName
     render(<RecentIssues data={[issue]} />)
     expect(screen.queryByText('repo')).not.toBeInTheDocument()
@@ -136,7 +136,7 @@ describe('<RecentIssues />', () => {
   })
 
   it('handles edge case: missing title', () => {
-    const issue: Issue = { ...baseIssue, title: undefined }
+    const issue: Issue = { ...baseIssue, title: undefined } as unknown as Issue
     render(<RecentIssues data={[issue]} />)
     expect(screen.getByText('Recent Issues')).toBeInTheDocument()
     expect(screen.getByText('repo')).toBeInTheDocument()

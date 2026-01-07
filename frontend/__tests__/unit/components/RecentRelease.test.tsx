@@ -171,8 +171,9 @@ describe('RecentReleases Component', () => {
       const result = render(<RecentReleases data={mockReleases} showSingleColumn={true} />)
       container = result.container
     })
-    const gridContainer = container.querySelector('.grid')
-
+    const gridContainer = container!.querySelector('.grid');
+    expect(gridContainer).toHaveClass('grid-cols-1');
+    
     expect(gridContainer).toHaveClass('grid-cols-1')
     expect(gridContainer).not.toHaveClass('md:grid-cols-2')
   })
@@ -183,8 +184,9 @@ describe('RecentReleases Component', () => {
       const result = render(<RecentReleases data={mockReleases} />)
       container = result.container
     })
-    const gridContainer = container.querySelector('.grid')
-
+    const gridContainer = container!.querySelector('.grid');
+    expect(gridContainer).toHaveClass('grid-cols-1');
+    
     expect(gridContainer).not.toHaveClass('grid-cols-1')
     expect(gridContainer).toHaveClass('md:grid-cols-2', 'lg:grid-cols-3')
   })
@@ -200,7 +202,7 @@ describe('RecentReleases Component', () => {
           name: '',
         },
       },
-    ]
+    ]as unknown as Release[]
 
     act(() => {
       render(<RecentReleases data={releasesWithMissingAuthor} />)
@@ -222,7 +224,7 @@ describe('RecentReleases Component', () => {
           login: '',
         },
       },
-    ]
+    ] as unknown as Release[]
 
     act(() => {
       render(<RecentReleases data={releasesWithEmptyAuthor} />)
@@ -241,7 +243,7 @@ describe('RecentReleases Component', () => {
         repositoryName: undefined,
         organizationName: undefined,
       },
-    ]
+    ]as unknown as Release[]
 
     act(() => {
       render(<RecentReleases data={releasesWithMissingRepo} />)
@@ -281,8 +283,9 @@ describe('RecentReleases Component', () => {
     })
     // Should show avatars by default
     expect(screen.getByRole('link', { name: /Test User/i })).toBeInTheDocument()
-    const gridContainer = container.querySelector('.grid')
-    expect(gridContainer).toHaveClass('md:grid-cols-2', 'lg:grid-cols-3')
+    const gridContainer = container!.querySelector('.grid')
+      expect(gridContainer).toHaveClass('md:grid-cols-2', 'lg:grid-cols-3')
+    
   })
 
   it('should handle null/undefined data gracefully', () => {
@@ -355,7 +358,7 @@ describe('RecentReleases Component', () => {
         ...mockReleases[0],
         repositoryName: undefined,
       },
-    ]
+    ]as unknown as Release[]
 
     act(() => {
       render(<RecentReleases data={releasesWithMissingRepoName} />)
@@ -380,18 +383,21 @@ describe('RecentReleases Component', () => {
     })
 
     // Check for main card structure - look for the card wrapper
-    const cardElement = container.querySelector(
+    const cardElement = container!.querySelector(
       '.mb-4.w-full.rounded-lg.bg-gray-200.p-4.dark\\:bg-gray-700'
     )
-    expect(cardElement).toBeInTheDocument()
+      expect(cardElement).toBeInTheDocument()
+    
 
     // Check for proper grid layout
-    const gridElement = container.querySelector('.grid')
-    expect(gridElement).toBeInTheDocument()
+    const gridElement = container!.querySelector('.grid')
+      expect(gridElement).toBeInTheDocument()
+    
 
     // Check for proper text styling - look for the title
-    const titleElement = container.querySelector('.text-2xl.font-semibold')
-    expect(titleElement).toBeInTheDocument()
+    const titleElement = container!.querySelector('.text-2xl.font-semibold')
+     expect(titleElement).toBeInTheDocument()
+    
   })
 
   it('should handle releases with very long names gracefully', () => {

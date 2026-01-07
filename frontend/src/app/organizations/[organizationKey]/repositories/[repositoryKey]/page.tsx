@@ -9,27 +9,57 @@ import { HiUserGroup } from 'react-icons/hi'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetRepositoryDataDocument } from 'types/__generated__/repositoryQueries.generated'
 import type { Contributor } from 'types/contributor'
+import type { Issue } from 'types/issue'
+import type { Milestone } from 'types/milestone'
+import type { PullRequest } from 'types/pullRequest'
+import type { Release } from 'types/release'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+
+interface RepositoryData {
+  updatedAt?: string | number
+  license?: string
+  size?: number
+  url: string
+  starsCount?: number
+  forksCount?: number
+  contributorsCount?: number
+  openIssuesCount?: number
+  commitsCount?: number
+  isArchived?: boolean
+  languages?: string[]
+  description?: string
+  name: string
+  topics?: string[]
+  project?: {
+    key: string
+    name: string
+  }
+  issues?: Issue[]
+  recentMilestones?: Milestone[]
+  releases?: Release[]
+}
 
 const RepositoryDetailsPage = () => {
   const { repositoryKey, organizationKey } = useParams<{
     repositoryKey: string
     organizationKey: string
   }>()
-  const [repository, setRepository] = useState(null)
+  const [repository, setRepository] = useState<RepositoryData | null>(null)
   const [topContributors, setTopContributors] = useState<Contributor[]>([])
-  const [recentPullRequests, setRecentPullRequests] = useState(null)
+  const [recentPullRequests, setRecentPullRequests] = useState<PullRequest[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
+
   const { data, error: graphQLRequestError } = useQuery(GetRepositoryDataDocument, {
     variables: { repositoryKey: repositoryKey, organizationKey: organizationKey },
   })
+
   useEffect(() => {
     if (data) {
-      setRepository(data.repository)
-      setTopContributors(data.topContributors)
-      setRecentPullRequests(data.recentPullRequests)
+      setRepository(data.repository as unknown as RepositoryData)
+      setTopContributors((data.topContributors as Contributor[]) || [])
+      setRecentPullRequests((data.recentPullRequests as PullRequest[]) || [])
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -42,7 +72,7 @@ const RepositoryDetailsPage = () => {
     return <LoadingSpinner />
   }
 
-  if (!isLoading && !repository) {
+  if (!repository) {
     return (
       <ErrorDisplay
         message="Sorry, the Repository you're looking for doesn't exist"
@@ -55,21 +85,21 @@ const RepositoryDetailsPage = () => {
   const repositoryDetails = [
     {
       label: 'Last Updated',
-      value: formatDate(repository.updatedAt),
+      value: formatDate(repository.updatedAt ?? ''),
     },
     {
       label: 'License',
-      value: repository.license,
+      value: repository.license || 'N/A',
     },
     {
       label: 'Size',
-      value: `${repository.size} KB`,
+      value: `${repository.size ?? 0} KB`,
     },
     {
       label: 'URL',
       value: (
-        <Link href={repository.url} className="text-blue-400 hover:underline">
-          {repository.url}
+        <Link href={repository.url || '#'} className="text-blue-400 hover:underline">
+          {repository.url || ''}
         </Link>
       ),
     },
@@ -78,48 +108,50 @@ const RepositoryDetailsPage = () => {
   const RepositoryStats = [
     {
       icon: FaStar,
-      value: repository.starsCount,
+      value: repository.starsCount ?? 0,
       unit: 'Star',
     },
     {
       icon: FaCodeFork,
-      value: repository.forksCount,
+      value: repository.forksCount ?? 0,
       unit: 'Fork',
     },
     {
       icon: HiUserGroup,
-      value: repository.contributorsCount,
+      value: repository.contributorsCount ?? 0,
       unit: 'Contributor',
     },
     {
       icon: FaExclamationCircle,
-      value: repository.openIssuesCount,
+      value: repository.openIssuesCount ?? 0,
       unit: 'Issue',
     },
     {
       icon: FaCodeCommit,
-      value: repository.commitsCount,
+      value: repository.commitsCount ?? 0,
       unit: 'Commit',
     },
   ]
+
   return (
     <DetailsCard
       details={repositoryDetails}
-      entityKey={repository.project?.key}
-      isArchived={repository.isArchived}
-      languages={repository.languages}
-      projectName={repository.project?.name}
+      entityKey={repository.project?.key || ''}
+      isArchived={repository.isArchived ?? false}
+      languages={repository.languages || []}
+      projectName={repository.project?.name || ''}
       pullRequests={recentPullRequests}
-      recentIssues={repository.issues}
-      recentMilestones={repository.recentMilestones}
-      recentReleases={repository.releases}
+      recentIssues={repository.issues || []}
+      recentMilestones={repository.recentMilestones || []}
+      recentReleases={repository.releases || []}
       stats={RepositoryStats}
-      summary={repository.description}
-      title={repository.name}
+      summary={repository.description || ''}
+      title={repository.name || ''}
       topContributors={topContributors}
-      topics={repository.topics}
+      topics={repository.topics || []}
       type="repository"
     />
   )
 }
+
 export default RepositoryDetailsPage

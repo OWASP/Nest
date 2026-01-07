@@ -105,17 +105,15 @@ const ChapterMap = ({
         shadowUrl: '/img/marker-shadow.png',
       })
 
-      const marker = L.marker(
-        [
-          chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
-          chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
-        ],
-        { icon: markerIcon }
-      )
+      // Fixed: Guaranteed number type for latitude and longitude via filter above
+      const lat = (chapter._geoloc?.lat ?? chapter.geoLocation?.lat) as number
+      const lng = (chapter._geoloc?.lng ?? chapter.geoLocation?.lng) as number
+
+      const marker = L.marker([lat, lng], { icon: markerIcon })
       const popup = L.popup()
       const popupContent = document.createElement('div')
       popupContent.className = 'popup-content'
-      popupContent.textContent = chapter.name
+      popupContent.textContent = chapter.name || 'Unknown Chapter'
       popupContent.addEventListener('click', () => {
         globalThis.location.href = `/chapters/${chapter.key}`
       })
@@ -162,9 +160,9 @@ const ChapterMap = ({
         ...localChapters.map(
           (chapter) =>
             [
-              chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
-              chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
-            ] as L.LatLngExpression
+              (chapter._geoloc?.lat ?? chapter.geoLocation?.lat) as number,
+              (chapter._geoloc?.lng ?? chapter.geoLocation?.lng) as number,
+            ] as L.LatLngTuple
         ),
       ]
       const localBounds = L.latLngBounds(locationsForBounds)
@@ -175,19 +173,16 @@ const ChapterMap = ({
       const localChapters = validGeoLocData.slice(0, maxNearestChapters - 1)
       const localBounds = L.latLngBounds(
         localChapters.map((chapter) => [
-          chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
-          chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
-        ])
+          (chapter._geoloc?.lat ?? chapter.geoLocation?.lat) as number,
+          (chapter._geoloc?.lng ?? chapter.geoLocation?.lng) as number,
+        ] as L.LatLngTuple)
       )
       const maxZoom = 7
       const nearestChapter = validGeoLocData[0]
-      map.setView(
-        [
-          nearestChapter._geoloc?.lat ?? nearestChapter.geoLocation?.lat,
-          nearestChapter._geoloc?.lng ?? nearestChapter.geoLocation?.lng,
-        ],
-        maxZoom
-      )
+      const nLat = (nearestChapter._geoloc?.lat ?? nearestChapter.geoLocation?.lat) as number
+      const nLng = (nearestChapter._geoloc?.lng ?? nearestChapter.geoLocation?.lng) as number
+      
+      map.setView([nLat, nLng], maxZoom)
       map.fitBounds(localBounds, { maxZoom: maxZoom })
     } else if (initialViewRef.current) {
       map.setView(initialViewRef.current.center, initialViewRef.current.zoom)
@@ -223,7 +218,7 @@ const ChapterMap = ({
         <button
           type="button"
           tabIndex={0}
-          className="pointer-events-none absolute inset-0 z-[500] flex cursor-pointer items-center justify-center rounded-[inherit] bg-black/10"
+          className="absolute inset-0 z-[500] flex cursor-pointer items-center justify-center rounded-[inherit] bg-black/10"
           onClick={() => {
             mapRef.current?.scrollWheelZoom.enable()
             setIsMapActive(true)
@@ -237,7 +232,7 @@ const ChapterMap = ({
           }}
           aria-label="Unlock map"
         >
-          <p className="pointer-events-auto flex items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white">
+          <p className="flex items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white">
             <FaUnlock aria-hidden="true" />
             Unlock map
           </p>

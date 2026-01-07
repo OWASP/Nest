@@ -14,18 +14,20 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams<{ chapterKey: string }>()
-  const [chapter, setChapter] = useState<Chapter>({} as Chapter)
+  // Fixed: Initialize as null instead of an empty object assertion to satisfy strict checks
+  const [chapter, setChapter] = useState<Chapter | null>(null)
   const [topContributors, setTopContributors] = useState<Contributor[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const { data, error: graphQLRequestError } = useQuery(GetChapterDataDocument, {
-    variables: { key: chapterKey },
+    variables: { key: chapterKey || '' },
+    skip: !chapterKey,
   })
 
   useEffect(() => {
-    if (data) {
-      setChapter(data.chapter)
-      setTopContributors(data.topContributors)
+    if (data?.chapter) {
+      setChapter(data.chapter as Chapter)
+      setTopContributors((data.topContributors as Contributor[]) || [])
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -38,7 +40,8 @@ export default function ChapterDetailsPage() {
     return <LoadingSpinner />
   }
 
-  if (!chapter && !isLoading)
+  // Fixed: Now that chapter is nullable, this check correctly guards all property access below
+  if (!chapter) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -46,16 +49,17 @@ export default function ChapterDetailsPage() {
         message="Sorry, the chapter you're looking for doesn't exist"
       />
     )
+  }
 
   const details = [
-    { label: 'Last Updated', value: formatDate(chapter.updatedAt) },
-    { label: 'Location', value: chapter.suggestedLocation },
-    { label: 'Region', value: chapter.region },
+    { label: 'Last Updated', value: formatDate(chapter.updatedAt ?? '') },
+    { label: 'Location', value: chapter.suggestedLocation || 'Not Specified' },
+    { label: 'Region', value: chapter.region || 'Not Specified' },
     {
       label: 'URL',
       value: (
-        <Link href={chapter.url} className="text-blue-400 hover:underline">
-          {chapter.url}
+        <Link href={chapter.url || '#'} className="text-blue-400 hover:underline">
+          {chapter.url || ''}
         </Link>
       ),
     },
@@ -74,14 +78,14 @@ export default function ChapterDetailsPage() {
       contributionStats={contributionStats}
       details={details}
       endDate={endDate}
-      entityKey={chapter.key}
-      entityLeaders={chapter.entityLeaders}
+      entityKey={chapter.key || ''}
+      entityLeaders={chapter.entityLeaders || []}
       geolocationData={[chapter]}
-      isActive={chapter.isActive}
-      socialLinks={chapter.relatedUrls}
+      isActive={chapter.isActive ?? false}
+      socialLinks={chapter.relatedUrls || []}
       startDate={startDate}
-      summary={chapter.summary}
-      title={chapter.name}
+      summary={chapter.summary || ''}
+      title={chapter.name || ''}
       topContributors={topContributors}
       type="chapter"
     />

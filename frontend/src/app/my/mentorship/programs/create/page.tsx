@@ -14,8 +14,7 @@ import ProgramForm from 'components/ProgramForm'
 const CreateProgramPage = () => {
   const router = useRouter()
   const { data: session, status } = useSession()
-  const isProjectLeader = (session as ExtendedSession)?.user.isLeader
-
+  const isProjectLeader = (session as ExtendedSession)?.user?.isLeader || false
   const [redirected, setRedirected] = useState(false)
 
   const [createProgram, { loading }] = useMutation(CreateProgramDocument)

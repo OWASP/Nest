@@ -197,7 +197,7 @@ describe('Release Component', () => {
   it('renders author login when name is not available', () => {
     const releaseWithLoginOnly = {
       ...mockReleases[0],
-      author: { ...mockReleases[0].author, name: undefined },
+      author: { ...mockReleases[0].author, name: undefined as unknown as string} as ReleaseType['author'],
     }
     render(<Release release={releaseWithLoginOnly} />)
 
@@ -209,7 +209,7 @@ describe('Release Component', () => {
   it('renders fallback alt text when author exists but name and login are missing', () => {
     const releaseWithEmptyAuthor = {
       ...mockReleases[0],
-      author: { ...mockReleases[0].author, name: '', login: '' },
+      author: { ...mockReleases[0].author, name: undefined as unknown as string, login: '' } as ReleaseType['author'],
     }
     render(<Release release={releaseWithEmptyAuthor} />)
 
@@ -218,7 +218,7 @@ describe('Release Component', () => {
   })
 
   it('renders tag name when release name is not available', () => {
-    const releaseWithoutName = { ...mockReleases[0], name: undefined }
+    const releaseWithoutName = { ...mockReleases[0], name: undefined as unknown as string}
     render(<Release release={releaseWithoutName} />)
 
     expect(screen.getByText('v1.0')).toBeInTheDocument()
@@ -256,7 +256,7 @@ describe('Release Component', () => {
   })
 
   it('handles releases with missing repository name gracefully', () => {
-    const releaseWithoutRepo = { ...mockReleases[0], repositoryName: undefined }
+    const releaseWithoutRepo = { ...mockReleases[0], repositoryName: undefined as unknown as string}
     render(<Release release={releaseWithoutRepo} />)
 
     // When repository name is undefined, the button should be disabled

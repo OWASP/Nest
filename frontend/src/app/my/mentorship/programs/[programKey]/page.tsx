@@ -84,8 +84,8 @@ const ProgramDetailsPage = () => {
 
   useEffect(() => {
     if (data?.getProgram) {
-      setProgram(data.getProgram)
-      setModules(data.getProgramModules || [])
+      setProgram(data.getProgram as Program)
+      setModules((data.getProgramModules as Module[]) || [])
     }
   }, [data])
 
@@ -101,31 +101,34 @@ const ProgramDetailsPage = () => {
     )
   }
 
+  // Double check program exists for type safety in the render block
+  if (!program) return null
+
   const programDetails = [
-    { label: 'Status', value: titleCaseWord(program.status) },
+    { label: 'Status', value: titleCaseWord(program.status || '') },
     { label: 'Start Date', value: formatDate(program.startedAt) },
     { label: 'End Date', value: formatDate(program.endedAt) },
-    { label: 'Mentees Limit', value: String(program.menteesLimit) },
+    { label: 'Mentees Limit', value: String(program.menteesLimit ?? 0) },
     {
       label: 'Experience Levels',
-      value: program.experienceLevels?.map((level) => titleCaseWord(level)).join(', ') || 'N/A',
+      value: program.experienceLevels?.map((level) => titleCaseWord(level || '')).join(', ') || 'N/A',
     },
   ]
 
   return (
     <DetailsCard
       accessLevel="admin"
-      admins={program.admins}
+      admins={program.admins || []}
       canUpdateStatus={canUpdateStatus}
       details={programDetails}
-      domains={program.domains}
+      domains={program.domains || []}
       modules={modules}
       programKey={program.key}
       setStatus={updateStatus}
-      status={program.status}
-      summary={program.description}
-      tags={program.tags}
-      title={program.name}
+      status={program.status as ProgramStatusEnum}
+      summary={program.description || ''}
+      tags={program.tags || []}
+      title={program.name || ''}
       type="program"
     />
   )

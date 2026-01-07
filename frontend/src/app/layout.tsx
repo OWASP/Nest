@@ -83,8 +83,9 @@ export default function RootLayout({
             </div>
           </BreadcrumbRoot>
         </Providers>
+        {/* Fixed: Guaranteed string value for GoogleAnalytics to satisfy strict typing */}
+        <GoogleAnalytics gaId={GTM_ID || ''} />
       </body>
-      <GoogleAnalytics gaId={GTM_ID} />
     </html>
   )
 }

@@ -298,7 +298,8 @@ describe('RepositoryCard', () => {
     it('handles null isArchived gracefully', () => {
       const repo: RepositoryCardProps = {
         ...createMockRepository(0),
-        isArchived: null,
+        //Use unknown as a bridge or cast directly to boolean
+        isArchived: null as unknown as boolean,
       }
 
       render(<RepositoryCard repositories={[repo]} />)

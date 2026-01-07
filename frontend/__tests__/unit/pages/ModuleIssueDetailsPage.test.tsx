@@ -228,7 +228,7 @@ describe('ModuleIssueDetailsPage', () => {
       'renders deadline text "$expectedText" for deadline with offset $dayOffset',
       ({ dayOffset, expectedText, expectedColor }) => {
         const today = new Date()
-        let deadline = null
+        let deadline: string | null = null
         if (dayOffset !== null) {
           const deadlineDate = new Date(today)
           deadlineDate.setDate(today.getDate() + dayOffset)

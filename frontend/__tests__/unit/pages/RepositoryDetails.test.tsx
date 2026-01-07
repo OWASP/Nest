@@ -157,8 +157,16 @@ describe('RepositoryDetailsPage', () => {
     const setRecentIssuesMock = jest.fn()
 
     act(() => {
-      const data = undefined
+     // Define a proper type without 'any'
+  type MockData = { 
+    project?: { 
+      recentReleases?: unknown[]; 
+      recentIssues?: unknown[] 
+    } 
+  };
 
+  // Explicitly type the variable and initialize as undefined
+  const data = undefined as MockData | undefined;
       setRecentReleasesMock(data?.project?.recentReleases)
       setRecentIssuesMock(data?.project?.recentIssues)
     })

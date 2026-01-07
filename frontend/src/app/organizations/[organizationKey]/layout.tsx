@@ -22,7 +22,7 @@ export async function generateMetadata({
     },
   })
   const organization = data?.organization
-  const title = organization?.name ?? organization?.login
+  const title = organization?.name ?? organization?.login ?? 'Organization Profile'
 
   return organization
     ? generateSeoMetadata({
@@ -30,7 +30,7 @@ export async function generateMetadata({
         description: organization?.description ?? `${title} organization details`,
         title: title,
       })
-    : null
+    :  {}
 }
 
 async function generateOrganizationStructuredData(organizationKey: string) {

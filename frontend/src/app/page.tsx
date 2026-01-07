@@ -46,7 +46,7 @@ import { TruncatedText } from 'components/TruncatedText'
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [data, setData] = useState<MainPageData>(null)
+  const [data, setData] = useState<MainPageData | null>(null)
   const { data: graphQLData, error: graphQLRequestError } = useQuery(GetMainPageDataDocument, {
     variables: { distinct: true },
   })
@@ -56,7 +56,7 @@ export default function Home() {
 
   useEffect(() => {
     if (graphQLData) {
-      setData(graphQLData)
+      setData(graphQLData as MainPageData)
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -80,23 +80,23 @@ export default function Home() {
         currentPage: 1,
         hitsPerPage: 1000,
       }
-      const data: AlgoliaResponse<Chapter> = await fetchAlgoliaData(
+      const algoliaData: AlgoliaResponse<Chapter> = await fetchAlgoliaData(
         searchParams.indexName,
         searchParams.query,
         searchParams.currentPage,
         searchParams.hitsPerPage
       )
-      setGeoLocData(data.hits)
+      setGeoLocData(algoliaData.hits)
     }
     fetchData()
   }, [])
 
-  if (isLoading || !graphQLData || !geoLocData) {
+  if (isLoading || !data || !geoLocData) {
     return <LoadingSpinner />
   }
 
-  const getProjectIcon = (projectType: string): IconType => {
-    switch (projectType.toLowerCase()) {
+  const getProjectIcon = (projectType: string | undefined): IconType => {
+    switch (projectType?.toLowerCase()) {
       case 'code':
         return FaCode
       case 'documentation':
@@ -113,23 +113,23 @@ export default function Home() {
   const counterData = [
     {
       label: 'Active Projects',
-      value: data.statsOverview.activeProjectsStats,
+      value: data.statsOverview?.activeProjectsStats ?? 0,
     },
     {
       label: 'Contributors',
-      value: data.statsOverview.contributorsStats,
+      value: data.statsOverview?.contributorsStats ?? 0,
     },
     {
       label: 'Local Chapters',
-      value: data.statsOverview.activeChaptersStats,
+      value: data.statsOverview?.activeChaptersStats ?? 0,
     },
     {
       label: 'Countries',
-      value: data.statsOverview.countriesStats,
+      value: data.statsOverview?.countriesStats ?? 0,
     },
     {
       label: 'Slack Community',
-      value: data.statsOverview.slackWorkspaceStats,
+      value: data.statsOverview?.slackWorkspaceStats ?? 0,
     },
   ]
 
@@ -147,7 +147,7 @@ export default function Home() {
           </div>
           <div className="mx-auto mb-8 flex max-w-2xl justify-center">
             <MultiSearchBar
-              eventData={data.upcomingEvents}
+              eventData={data.upcomingEvents || []}
               isLoaded={true}
               placeholder="Search the OWASP community"
               indexes={['chapters', 'organizations', 'projects', 'users']}
@@ -164,7 +164,7 @@ export default function Home() {
           className="overflow-hidden"
         >
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {data.upcomingEvents.map((event: Event, index: number) => (
+            {(data.upcomingEvents || []).map((event: Event, index: number) => (
               <div key={`card-${event.name}`} className="overflow-hidden">
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <div className="mb-2 flex items-center justify-between gap-2">
@@ -173,7 +173,7 @@ export default function Home() {
                       type="button"
                       onClick={() => setModalOpenIndex(index)}
                     >
-                      <TruncatedText text={event.name} />
+                      <TruncatedText text={event.name || ''} />
                     </button>
                   </div>
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
@@ -181,15 +181,15 @@ export default function Home() {
                       <CalendarButton
                         className="cursor-pointer text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
                         event={{
-                          title: event.name,
+                          title: event.name || '',
                           description: event.summary || '',
                           location: event.suggestedLocation || '',
-                          startDate: event.startDate,
-                          endDate: event.endDate,
-                          url: event.url,
+                          startDate: event.startDate || '',
+                          endDate: event.endDate || '',
+                          url: event.url || '#',
                         }}
                         iconClassName="h-4 w-4 mr-2"
-                        label={formatDateRange(event.startDate, event.endDate)}
+                        label={formatDateRange(event.startDate || '', event.endDate || '')}
                         showLabel
                       />
                     </div>
@@ -205,9 +205,9 @@ export default function Home() {
                   key={`modal-${event.name}`}
                   isOpen={modalOpenIndex === index}
                   onClose={() => setModalOpenIndex(null)}
-                  title={event.name}
-                  summary={event.summary}
-                  button={{ label: 'View Event', url: event.url }}
+                  title={event.name || ''}
+                  summary={event.summary || ''}
+                  button={{ label: 'View Event', url: event.url || '#' }}
                   description="The event summary has been generated by AI"
                 ></DialogComp>
               </div>
@@ -225,20 +225,20 @@ export default function Home() {
             className="overflow-hidden"
           >
             <div className="flex flex-col gap-4">
-              {data.recentChapters?.map((chapter) => (
+              {(data.recentChapters || []).map((chapter) => (
                 <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <h3 className="mb-2 text-lg font-semibold">
                     <Link
                       href={`/chapters/${chapter.key}`}
                       className="text-blue-400 hover:underline"
                     >
-                      <TruncatedText text={chapter.name} />
+                      <TruncatedText text={chapter.name || ''} />
                     </Link>
                   </h3>
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-4 flex items-center">
                       <FaCalendar className="mr-2 h-4 w-4" />
-                      <span>{formatDate(chapter.createdAt)}</span>
+                      <span>{formatDate(chapter.createdAt ?? '')}</span>
                     </div>
                     {chapter.suggestedLocation && (
                       <div className="flex flex-1 items-center overflow-hidden">
@@ -248,7 +248,7 @@ export default function Home() {
                     )}
                   </div>
 
-                  {chapter.leaders.length > 0 && (
+                  {(chapter.leaders || []).length > 0 && (
                     <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
                       <HiUserGroup className="h-4 w-4 shrink-0" />
                       <LeadersList leaders={String(chapter.leaders)} />
@@ -268,27 +268,27 @@ export default function Home() {
             className="overflow-hidden"
           >
             <div className="flex flex-col gap-4">
-              {data.recentProjects?.map((project) => (
+              {(data.recentProjects || []).map((project) => (
                 <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <Link href={`/projects/${project.key}`} className="text-blue-400 hover:underline">
                     <h3 className="mb-2 truncate text-lg font-semibold text-wrap md:text-nowrap">
-                      <TruncatedText text={project.name} />
+                      <TruncatedText text={project.name || ''} />
                     </h3>
                   </Link>
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-4 flex items-center">
                       <FaCalendar className="mr-2 h-4 w-4" />
-                      <span>{formatDate(project.createdAt)}</span>
+                      <span>{formatDate(project.createdAt ?? '')}</span>
                     </div>
                     <div className="mr-4 flex flex-1 items-center overflow-hidden">
                       <IconWrapper
                         icon={getProjectIcon(project.type)}
                         className="mr-2 h-4 w-4 shrink-0"
                       />
-                      <TruncatedText text={upperFirst(project.type)} />
+                      <TruncatedText text={upperFirst(project.type || '')} />
                     </div>
                   </div>
-                  {project.leaders.length > 0 && (
+                  {(project.leaders || []).length > 0 && (
                     <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
                       <HiUserGroup className="h-4 w-4 shrink-0" />
                       <LeadersList leaders={String(project.leaders)} />
@@ -318,17 +318,17 @@ export default function Home() {
           />
         </div>
         <TopContributorsList
-          contributors={data?.topContributors}
+          contributors={data.topContributors || []}
           icon={HiUserGroup}
           maxInitialDisplay={20}
         />
         <div className="grid-cols-2 gap-4 lg:grid">
-          <RecentIssues data={data?.recentIssues} />
-          <Milestones data={data?.recentMilestones} />
+          <RecentIssues data={data.recentIssues || []} />
+          <Milestones data={data.recentMilestones || []} />
         </div>
         <div className="grid-cols-2 gap-4 lg:grid">
-          <RecentPullRequests data={data?.recentPullRequests} />
-          <RecentReleases data={data?.recentReleases} showSingleColumn={true} />
+          <RecentPullRequests data={data.recentPullRequests || []} />
+          <RecentReleases data={data.recentReleases || []} showSingleColumn={true} />
         </div>
         <SecondaryCard
           icon={FaNewspaper}
@@ -340,29 +340,29 @@ export default function Home() {
           className="overflow-hidden"
         >
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
-            {data?.recentPosts.map((post) => (
+            {(data.recentPosts || []).map((post) => (
               <div
                 key={post.title}
                 className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
               >
                 <h3 className="mb-1 text-lg font-semibold">
                   <Link
-                    href={post.url}
+                    href={post.url || '#'}
                     className="text-blue-400 hover:underline"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <TruncatedText text={post.title} />
+                    <TruncatedText text={post.title || ''} />
                   </Link>
                 </h3>
                 <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                   <div className="mr-4 flex items-center">
                     <FaCalendar className="mr-2 h-4 w-4" />
-                    <span>{formatDate(post.publishedAt)}</span>
+                    <span>{formatDate(post.publishedAt || '')}</span>
                   </div>
                   <div className="flex flex-1 items-center overflow-hidden">
                     <FaUser className="mr-2 h-4 w-4 shrink-0" />
-                    <LeadersList leaders={post.authorName} />
+                    <LeadersList leaders={post.authorName || 'Anonymous'} />
                   </div>
                 </div>
               </div>
@@ -396,7 +396,7 @@ export default function Home() {
             </Link>
           </SecondaryCard>
           <SecondaryCard>
-            <MovingLogos sponsors={data?.sponsors} />
+            <MovingLogos sponsors={data.sponsors || []} />
           </SecondaryCard>
         </div>
       </div>

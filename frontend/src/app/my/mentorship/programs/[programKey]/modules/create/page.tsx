@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { ExperienceLevelEnum } from 'types/__generated__/graphql'
+import { CreateModuleInput , ExperienceLevelEnum } from 'types/__generated__/graphql'
 import { CreateModuleDocument } from 'types/__generated__/moduleMutations.generated'
 import {
   GetProgramAdminDetailsDocument,
@@ -83,20 +83,21 @@ const CreateModulePage = () => {
     e.preventDefault()
 
     try {
-      const input = {
-        description: formData.description,
-        domains: parseCommaSeparated(formData.domains),
-        endedAt: formData.endedAt || null,
-        experienceLevel: formData.experienceLevel,
-        labels: parseCommaSeparated(formData.labels),
-        mentorLogins: parseCommaSeparated(formData.mentorLogins),
-        name: formData.name,
-        programKey: programKey,
-        projectId: formData.projectId,
-        projectName: formData.projectName,
-        startedAt: formData.startedAt || null,
-        tags: parseCommaSeparated(formData.tags),
-      }
+    // 2. Explicitly type the input object
+    const input: CreateModuleInput = {
+      description: formData.description,
+      domains: parseCommaSeparated(formData.domains),
+      endedAt: formData.endedAt || '',
+      experienceLevel: formData.experienceLevel,
+      labels: parseCommaSeparated(formData.labels),
+      mentorLogins: parseCommaSeparated(formData.mentorLogins),
+      name: formData.name,
+      programKey: programKey,
+      projectId: formData.projectId || '',
+      projectName: formData.projectName || '',
+      startedAt: formData.startedAt || '',
+      tags: parseCommaSeparated(formData.tags),
+    }
 
       await createModule({
         variables: { input },

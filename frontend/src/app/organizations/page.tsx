@@ -36,16 +36,16 @@ const OrganizationPage = () => {
 
     return (
       <UserCard
-        avatar={organization.avatarUrl}
+        avatar={organization.avatarUrl || ''} // Error fix: provided empty string fallback
         button={submitButton}
         className="h-64 w-80 bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
         company={organization.company || ''}
         email={organization.email || ''}
-        followersCount={organization.followersCount}
+        followersCount={organization.followersCount ?? 0} // Strict mode fallback
         key={organization.objectID}
         location={organization.location || `@${organization.login}`}
-        name={organization.name}
-        repositoriesCount={organization.publicRepositoriesCount}
+        name={organization.name || organization.login || 'Unknown Organization'}
+        repositoriesCount={organization.publicRepositoriesCount ?? 0} // Strict mode fallback
       />
     )
   }

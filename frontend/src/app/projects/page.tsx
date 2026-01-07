@@ -50,7 +50,7 @@ const ProjectsPage = () => {
         icons={filteredIcons}
         key={project.key}
         level={level[`${project.level as keyof typeof level}`]}
-        summary={project.summary}
+        summary={project.summary || ''}    
         title={project.name}
         topContributors={project.topContributors}
         url={`/projects/${project.key}`}

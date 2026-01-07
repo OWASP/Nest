@@ -4,7 +4,7 @@ import { ENVIRONMENT, RELEASE_VERSION, SENTRY_DSN } from 'utils/env.client'
 Sentry.init({
   debug: false,
   dsn: SENTRY_DSN,
-  environment: ENVIRONMENT.toLowerCase(),
+  environment: (ENVIRONMENT ?? 'development').toLowerCase(),
   integrations: [Sentry.browserTracingIntegration, Sentry.replayIntegration],
   release: RELEASE_VERSION,
   replaysOnErrorSampleRate: 0.5,

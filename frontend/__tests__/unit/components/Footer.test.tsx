@@ -25,6 +25,14 @@ interface MockButtonProps {
   'aria-controls'?: string
 }
 
+interface FooterLink {
+  text: string;
+  href?: string;
+  isSpan?: boolean;
+}
+
+
+
 jest.mock('next/link', () => {
   return function MockedLink({ children, href, ...props }: MockLinkProps) {
     return (
@@ -99,8 +107,8 @@ jest.mock('utils/env.client', () => ({
 import { FaGithub, FaSlack } from 'react-icons/fa6'
 import { footerSections, footerIcons } from 'utils/constants'
 import Footer from 'components/Footer'
-;(footerIcons as unknown)[0].icon = FaGithub
-;(footerIcons as unknown)[1].icon = FaSlack
+(footerIcons as unknown as { icon: React.ElementType }[])[0].icon = FaGithub;
+(footerIcons as unknown as { icon: React.ElementType }[])[1].icon = FaSlack
 
 describe('Footer', () => {
   // Use the imported mocked constants
@@ -140,11 +148,11 @@ describe('Footer', () => {
     test('renders all section links correctly', () => {
       renderFooter()
 
-      const regularLinks = []
-      const spanElements = []
+    const regularLinks: FooterLink[] = [];
+    const spanElements: FooterLink[] = [];
 
       for (const section of mockFooterSections) {
-        for (const link of section.links) {
+        for (const link of section.links as FooterLink[]) {
           if (link.isSpan) {
             spanElements.push(link)
           } else {
@@ -155,7 +163,7 @@ describe('Footer', () => {
       for (const link of regularLinks) {
         const linkElement = screen.getByRole('link', { name: link.text })
         expect(linkElement).toBeInTheDocument()
-        expect(linkElement).toHaveAttribute('href', link.href)
+        expect(linkElement).toHaveAttribute('href', link.href || '')
         expect(linkElement).toHaveAttribute('target', '_blank')
       }
 

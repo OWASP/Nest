@@ -49,7 +49,7 @@ jest.mock('next/image', () => ({
     <img
       src={src}
       alt={alt}
-      style={fill && { objectFit: objectFit as React.CSSProperties['objectFit'] }}
+      style={fill ? { objectFit: objectFit as React.CSSProperties['objectFit'] } : {}}
       {...props}
     />
   ),
@@ -882,8 +882,7 @@ describe('CardDetailsPage', () => {
         { label: 'Undefined Value', value: invalidValues.undefinedValue },
       ]
 
-      render(<CardDetailsPage {...defaultProps} details={detailsWithMissingValues} />)
-
+      render(<CardDetailsPage {...defaultProps} details={detailsWithMissingValues as DetailsCardProps['details']} />)
       expect(screen.getAllByText('Unknown')).toHaveLength(3)
     })
 
@@ -1215,10 +1214,11 @@ describe('CardDetailsPage', () => {
     })
 
     it('handles unsupported entity types gracefully', () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      render(<CardDetailsPage {...defaultProps} type={'unsupported-type' as any} />)
-      expect(screen.getByText('Unsupported-type Details')).toBeInTheDocument()
-    })
+       
+      render(<CardDetailsPage {...defaultProps} type={'unsupported-type' as CardType} />)
+  
+     expect(screen.getByText('Unsupported-type Details')).toBeInTheDocument()
+})
 
     it('handles extremely large contributor arrays', () => {
       const largeContributors = Array.from({ length: 1000 }, (_, i) => ({
@@ -1267,17 +1267,24 @@ describe('CardDetailsPage', () => {
       expect(() => render(<CardDetailsPage {...minimalValidProps} />)).not.toThrow()
     })
 
-    it('handles undefined and null values in arrays', () => {
-      const propsWithUndefinedArrays = {
-        ...defaultProps,
-        recentIssues: undefined,
-        recentMilestones: null,
-        topContributors: undefined,
-      }
+  it('handles undefined and null values in arrays', () => {
+    const propsWithUndefinedArrays = {
+      ...defaultProps,
+      recentIssues: undefined,
+      recentMilestones: null,
+      topContributors: undefined,
+    };
 
-      expect(() => render(<CardDetailsPage {...propsWithUndefinedArrays} />)).not.toThrow()
-    })
-
+    // 1. Wrap in expect().not.toThrow() to satisfy jest/expect-expect
+    // 2. Use 'unknown' bridge to satisfy @typescript-eslint/no-explicit-any
+    expect(() => {
+      render(
+        <CardDetailsPage 
+          {...propsWithUndefinedArrays as unknown as DetailsCardProps} 
+        />
+      );
+    }).not.toThrow();
+  });
     it('handles malformed repository data', () => {
       const malformedRepositories = createMalformedArray(mockRepositories, [
         {
@@ -1303,8 +1310,13 @@ describe('CardDetailsPage', () => {
       ]
 
       expect(() =>
-        render(<CardDetailsPage {...defaultProps} details={detailsWithEmptyStrings} />)
-      ).not.toThrow()
+  render(
+    <CardDetailsPage 
+      {...defaultProps} 
+      details={detailsWithEmptyStrings as DetailsCardProps['details']} 
+    />
+  )
+).not.toThrow()
     })
   })
 
@@ -1391,10 +1403,14 @@ describe('CardDetailsPage', () => {
         { icon: FaCode, value: null, unit: 'Fork' },
       ]
 
-      expect(() =>
-        render(<CardDetailsPage {...defaultProps} stats={statsWithZeroValues} />)
-      ).not.toThrow()
-
+     expect(() =>
+  render(
+    <CardDetailsPage 
+      {...defaultProps} 
+      stats={statsWithZeroValues as DetailsCardProps['stats']} 
+    />
+  )
+).not.toThrow()
       expect(screen.getByText('Statistics')).toBeInTheDocument()
     })
 
@@ -1410,8 +1426,10 @@ describe('CardDetailsPage', () => {
         topics: ['web', invalidValues.undefinedValue, 'frontend', invalidValues.emptyString],
       }
 
-      expect(() => render(<CardDetailsPage {...mixedValidInvalidData} />)).not.toThrow()
-    })
+    expect(() => 
+      render(<CardDetailsPage {...mixedValidInvalidData as unknown as DetailsCardProps} />)
+    ).not.toThrow();
+      })
   })
 
   describe('Accessibility Edge Cases', () => {
@@ -1564,7 +1582,7 @@ describe('CardDetailsPage', () => {
       const nullArchivedProps: DetailsCardProps = {
         ...defaultProps,
         type: 'repository' as const,
-        isArchived: null,
+        isArchived: undefined,
       }
 
       render(<CardDetailsPage {...nullArchivedProps} />)

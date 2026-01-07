@@ -47,8 +47,8 @@ const MenteeProfilePage = () => {
 
   useEffect(() => {
     if (data) {
-      setMenteeDetails(data.getMenteeDetails ?? null)
-      setMenteeIssuesData(data.getMenteeModuleIssues ?? [])
+      setMenteeDetails(data.getMenteeDetails as MenteeDetails || null)
+      setMenteeIssuesData(data.getMenteeModuleIssues || [])
     }
     if (error) {
       handleAppError(error)
@@ -59,7 +59,7 @@ const MenteeProfilePage = () => {
   }, [data, error])
 
   const menteeIssues: IssueRow[] = useMemo(() => {
-    return menteeIssuesData.map((issue) => ({
+    return (menteeIssuesData || []).map((issue) => ({
       objectID: issue.id,
       number: issue.number,
       title: issue.title,
@@ -115,13 +115,12 @@ const MenteeProfilePage = () => {
   return (
     <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl space-y-6">
-        {/* Header */}
         <SecondaryCard>
           <div className="flex items-center space-x-6">
             <Image
               width={80}
               height={80}
-              src={menteeDetails.avatarUrl}
+              src={menteeDetails.avatarUrl || '/default-avatar.png'}
               alt={`${menteeDetails.name || menteeDetails.login} avatar`}
               className="h-20 w-20 rounded-full"
             />
@@ -137,7 +136,6 @@ const MenteeProfilePage = () => {
           </div>
         </SecondaryCard>
 
-        {/* Mentee Information */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <SecondaryCard title="Completed Levels">
             <p className="text-gray-500 italic dark:text-gray-400">
@@ -152,8 +150,7 @@ const MenteeProfilePage = () => {
           </SecondaryCard>
         </div>
 
-        {/* Domains and Skills */}
-        {(menteeDetails.domains?.length > 0 || menteeDetails.tags?.length > 0) && (
+        {((menteeDetails.domains?.length || 0) > 0 || (menteeDetails.tags?.length || 0) > 0) && (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {menteeDetails.domains && menteeDetails.domains.length > 0 && (
               <SecondaryCard title="Domains">
@@ -169,7 +166,6 @@ const MenteeProfilePage = () => {
           </div>
         )}
 
-        {/* Issues */}
         <SecondaryCard>
           <div className="w-full">
             <div className="flex justify-between">
@@ -214,7 +210,6 @@ const MenteeProfilePage = () => {
               emptyMessage="No issues found for the selected filter."
             />
 
-            {/* Pagination Controls */}
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}

@@ -157,7 +157,7 @@ describe('CreateProgramPage (comprehensive tests)', () => {
       target: { value: 'domain1, domain2' },
     })
 
-    fireEvent.submit(screen.getByText('Save').closest('form'))
+    fireEvent.submit(screen.getByText('Save').closest('form')!)
 
     await waitFor(() => {
       expect(mockCreateProgram).toHaveBeenCalledWith({
@@ -210,7 +210,7 @@ describe('CreateProgramPage (comprehensive tests)', () => {
       target: { value: '2025-12-31' },
     })
 
-    fireEvent.submit(screen.getByText('Save').closest('form'))
+    fireEvent.submit(screen.getByText('Save').closest('form')!)
 
     await waitFor(() => {
       expect(addToast).toHaveBeenCalledWith(

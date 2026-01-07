@@ -185,8 +185,8 @@ describe('ProjectDetailsPage', () => {
     const setRecentIssuesMock = jest.fn()
 
     act(() => {
-      const data = undefined
-
+      //Type as a partial structure instead of 'any'
+      const data = undefined as { project?: { recentReleases?: unknown[]; recentIssues?: unknown[] } } | undefined
       setRecentReleasesMock(data?.project?.recentReleases)
       setRecentIssuesMock(data?.project?.recentIssues)
     })
@@ -206,12 +206,12 @@ describe('ProjectDetailsPage', () => {
     await waitFor(() => {
       const levelElement = screen.getByText(/Level:/)
       expect(levelElement).toBeInTheDocument()
-      const levelValueElement = within(levelElement.parentElement).getByText('Lab')
+      const levelValueElement = within(levelElement.parentElement!).getByText('Lab')
       expect(levelValueElement).toBeInTheDocument()
 
       const typeElement = screen.getByText(/Type:/)
       expect(typeElement).toBeInTheDocument()
-      const typeValueElement = within(typeElement.parentElement).getByText('Tool')
+      const typeValueElement = within(typeElement.parentElement!).getByText('Tool')
       expect(typeValueElement).toBeInTheDocument()
     })
   })

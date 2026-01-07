@@ -18,6 +18,9 @@ function AppInitializer() {
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  if (!apolloClient) {
+    return <>{children}</> 
+   }
   return (
     <Suspense>
       <SessionProvider>

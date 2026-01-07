@@ -17,12 +17,13 @@ const ProgramDetailsPage = () => {
   const searchParams = useSearchParams()
   const router = useRouter()
   const shouldRefresh = searchParams.get('refresh') === 'true'
+  
   const {
     data,
     refetch,
     loading: isQueryLoading,
   } = useQuery(GetProgramAndModulesDocument, {
-    variables: { programKey },
+    variables: { programKey: programKey || '' },
     skip: !programKey,
     notifyOnNetworkStatusChange: true,
   })
@@ -50,8 +51,8 @@ const ProgramDetailsPage = () => {
       }
 
       if (data?.getProgram) {
-        setProgram(data.getProgram)
-        setModules(data.getProgramModules || [])
+        setProgram(data.getProgram as Program)
+        setModules((data.getProgramModules as Module[]) || [])
       }
     }
 
@@ -60,7 +61,8 @@ const ProgramDetailsPage = () => {
 
   if (isLoading) return <LoadingSpinner />
 
-  if (!program && !isLoading) {
+  // Fixed: Comprehensive guard to ensure 'program' is not null for the rest of the render
+  if (!program) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -71,24 +73,24 @@ const ProgramDetailsPage = () => {
   }
 
   const programDetails = [
-    { label: 'Status', value: titleCaseWord(program.status) },
+    { label: 'Status', value: titleCaseWord(program.status || '') },
     { label: 'Start Date', value: formatDate(program.startedAt) },
     { label: 'End Date', value: formatDate(program.endedAt) },
-    { label: 'Mentees Limit', value: String(program.menteesLimit) },
+    { label: 'Mentees Limit', value: String(program.menteesLimit ?? 0) },
     {
       label: 'Experience Levels',
-      value: program.experienceLevels?.map((level) => titleCaseWord(level)).join(', ') || 'N/A',
+      value: program.experienceLevels?.map((level) => titleCaseWord(level || '')).join(', ') || 'N/A',
     },
   ]
 
   return (
     <DetailsCard
       details={programDetails}
-      domains={program.domains}
+      domains={program.domains || []}
       modules={modules}
-      summary={program.description}
-      tags={program.tags}
-      title={program.name}
+      summary={program.description || ''}
+      tags={program.tags || []}
+      title={program.name || ''}
       type="program"
     />
   )

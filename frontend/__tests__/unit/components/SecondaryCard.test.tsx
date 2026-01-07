@@ -89,10 +89,10 @@ describe('SecondaryCard Component', () => {
 
     it('handles null children gracefully by rendering nothing for the children', () => {
       const { container } = render(<SecondaryCard title="Title">{null}</SecondaryCard>)
-      const cardElement = container.firstChild
+      const cardElement = container.firstChild as HTMLElement
       const titleElement = screen.getByRole('heading', { name: 'Title' })
       expect(titleElement).toBeInTheDocument()
-      expect(cardElement.childNodes.length).toBe(1)
+      expect(cardElement?.childNodes.length).toBe(1)
     })
   })
 

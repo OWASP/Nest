@@ -73,3 +73,4 @@ export type RepositoryCardProps = {
   subscribersCount: number
   url: string
 }
+

@@ -65,21 +65,15 @@ const ModuleForm = ({
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSelectChange = (keys: React.Key | Set<React.Key> | 'all') => {
-    let keySet: Set<React.Key>
-    if (keys instanceof Set) {
-      keySet = keys
-    } else if (keys === 'all') {
-      keySet = new Set()
-    } else {
-      keySet = new Set([keys])
-    }
-    const [value] = Array.from(keySet as Set<string>)
-    if (value) {
-      setFormData((prev) => ({ ...prev, experienceLevel: value }))
-      setTouched((prev) => ({ ...prev, experienceLevel: true }))
-    }
+const handleSelectChange = (keys: React.Key | Set<React.Key> | 'all') => {
+  const keySet = keys instanceof Set ? keys : new Set(keys === 'all' ? [] : [keys]);
+  const value = Array.from(keySet)[0] as string; 
+  
+  if (value) {
+    setFormData((prev) => ({ ...prev, experienceLevel: value }));
+    setTouched((prev) => ({ ...prev, experienceLevel: true }));
   }
+};
 
   const validateNameLocal = (value: string): string | undefined => {
     return validateName(value)
@@ -281,20 +275,20 @@ const ModuleForm = ({
                   onValueChange={(value) => handleInputChange('labels', value)}
                 />
                 <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
-                  <ProjectSelector
-                    value={formData.projectId}
-                    defaultName={formData.projectName}
-                    onProjectChange={(id, name) => {
-                      setFormData((prev) => ({
-                        ...prev,
-                        projectId: id ?? '',
-                        projectName: name,
-                      }))
-                      setTouched((prev) => ({ ...prev, projectId: true }))
-                    }}
-                    isInvalid={touched.projectId && !!errors.projectId}
-                    errorMessage={touched.projectId ? errors.projectId : undefined}
-                  />
+               <ProjectSelector
+  value={formData.projectId}
+  defaultName={formData.projectName}
+  onProjectChange={(id, name) => {
+    setFormData((prev) => ({
+      ...prev,
+      projectId: id ?? '',
+      projectName: name,
+    }));
+    setTouched((prev) => ({ ...prev, projectId: true }));
+  }}
+  isInvalid={touched.projectId && !!errors.projectId}
+  errorMessage={touched.projectId ? errors.projectId : undefined}
+/>
                 </div>
                 {isEdit && (
                   <FormTextInput
@@ -365,7 +359,7 @@ export const ProjectSelector = ({
           variables: { query: trimmedQuery },
         })
 
-        const projects = data.searchProjects || []
+        const projects = data?.searchProjects || []
         const filtered = projects.filter((proj) => proj.id !== value)
         setItems(filtered.slice(0, 5))
       } catch (err) {
@@ -391,29 +385,20 @@ export const ProjectSelector = ({
     }
   }, [inputValue, fetchSuggestions])
 
-  const handleSelectionChange = (keys: React.Key | Set<React.Key> | 'all') => {
-    let keySet: Set<React.Key>
-    if (keys instanceof Set) {
-      keySet = keys
-    } else if (keys === 'all') {
-      keySet = new Set()
-    } else {
-      keySet = new Set([keys])
+const handleSelectionChange = (key: React.Key | null) => {
+  if (key) {
+    const selectedKey = String(key);
+    const selectedProject = items.find((item) => item.id === selectedKey);
+    if (selectedProject) {
+      setInputValue(selectedProject.name);
+      onProjectChange(selectedProject.id, selectedProject.name);
     }
-    const selectedKey = Array.from(keySet as Set<string>)[0]
-    if (selectedKey) {
-      const selectedProject = items.find((item) => item.id === selectedKey)
-      if (selectedProject) {
-        setInputValue(selectedProject.name)
-        onProjectChange(selectedProject.id, selectedProject.name)
-      }
-    } else {
-      // Selection cleared
-      setInputValue('')
-      onProjectChange(null, '')
-    }
+  } else {
+    // Selection cleared
+    setInputValue('');
+    onProjectChange(null, '');
   }
-
+};
   const handleInputChange = (newValue: string) => {
     setInputValue(newValue)
     onProjectChange(null, newValue)

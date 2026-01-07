@@ -258,10 +258,10 @@ describe('LoginPageContent', () => {
 
     it('handles undefined session status gracefully', () => {
       mockUseSession.mockReturnValue({
-        status: 'unknown' as 'authenticated' | 'unauthenticated' | 'loading',
-        data: null,
+        status: 'unauthenticated as authenticated', // Explicitly fixed        data: null,
+        data:null,
         update: jest.fn(),
-      })
+      } as unknown as ReturnType<typeof useSession>)
 
       render(<LoginPageContent isGitHubAuthEnabled={true} />)
 

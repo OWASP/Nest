@@ -1,11 +1,11 @@
-import NextAuth, { type AuthOptions } from 'next-auth'
-import GitHubProvider from 'next-auth/providers/github'
+import NextAuth, { type AuthOptions, type Profile } from 'next-auth'
+import GitHubProvider, { type GithubProfile } from 'next-auth/providers/github'
 import { apolloClient } from 'server/apolloClient'
 import {
   IsMentorDocument,
   IsProjectLeaderDocument,
 } from 'types/__generated__/mentorshipQueries.generated'
-import { ExtendedProfile, ExtendedSession } from 'types/auth'
+import { ExtendedSession } from 'types/auth'
 import { IS_GITHUB_AUTH_ENABLED } from 'utils/env.server'
 
 async function checkIfProjectLeader(login: string): Promise<boolean> {
@@ -42,14 +42,15 @@ async function checkIfMentor(login: string): Promise<boolean> {
   }
 }
 
-const providers = []
+// Fixed: Explicitly typed the providers array to avoid 'never' or 'any' issues
+const providers: AuthOptions['providers'] = []
 
 if (IS_GITHUB_AUTH_ENABLED) {
   providers.push(
     GitHubProvider({
-      clientId: process.env.NEXT_SERVER_GITHUB_CLIENT_ID,
-      clientSecret: process.env.NEXT_SERVER_GITHUB_CLIENT_SECRET,
-      profile(profile) {
+      clientId: process.env.NEXT_SERVER_GITHUB_CLIENT_ID || '',
+      clientSecret: process.env.NEXT_SERVER_GITHUB_CLIENT_SECRET || '',
+      profile(profile: GithubProfile) {
         return {
           email: profile.email,
           id: profile.id.toString(),
@@ -77,8 +78,9 @@ const authOptions: AuthOptions = {
         token.accessToken = account.access_token
       }
 
-      if ((profile as ExtendedProfile)?.login) {
-        const login = (profile as ExtendedProfile).login
+      const extendedProfile = profile as (Profile & { login?: string })
+      if (extendedProfile?.login) {
+        const login = extendedProfile.login
         token.login = login
 
         const isLeader = await checkIfProjectLeader(login)
@@ -88,21 +90,23 @@ const authOptions: AuthOptions = {
       }
 
       if (trigger === 'update' && session) {
-        token.isOwaspStaff = (session as ExtendedSession).user.isOwaspStaff || false
+        const extendedSession = session as ExtendedSession
+        token.isOwaspStaff = extendedSession.user?.isOwaspStaff || false
       }
       return token
     },
 
     async session({ session, token }) {
-      ;(session as ExtendedSession).accessToken = token.accessToken as string
+      const extendedSession = session as ExtendedSession
+      extendedSession.accessToken = token.accessToken as string
 
-      if (session.user) {
-        ;(session as ExtendedSession).user.login = token.login as string
-        ;(session as ExtendedSession).user.isMentor = token.isMentor as boolean
-        ;(session as ExtendedSession).user.isLeader = token.isLeader as boolean
-        ;(session as ExtendedSession).user.isOwaspStaff = token.isOwaspStaff as boolean
+      if (extendedSession.user) {
+        extendedSession.user.login = token.login as string
+        extendedSession.user.isMentor = token.isMentor as boolean
+        extendedSession.user.isLeader = token.isLeader as boolean
+        extendedSession.user.isOwaspStaff = token.isOwaspStaff as boolean
       }
-      return session
+      return extendedSession
     },
   },
   secret: process.env.NEXTAUTH_SECRET,

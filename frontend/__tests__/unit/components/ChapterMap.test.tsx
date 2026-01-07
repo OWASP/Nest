@@ -203,8 +203,8 @@ describe('ChapterMap', () => {
         {
           // A virtual chapter with no location data
           ...mockChapterData[1],
-          _geoloc: null,
-          geoLocation: null,
+          _geoloc: null as unknown as { lat: number; lng: number },
+          geoLocation: null as unknown as { lat: number; lng: number },
         },
       ]
 
@@ -428,7 +428,7 @@ describe('ChapterMap', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
       const overlay = getByText('Unlock map').closest('button')
-      fireEvent.click(overlay)
+      fireEvent.click(overlay!)
 
       expect(L.control.zoom).toHaveBeenCalledWith({ position: 'topleft' })
       expect(mockZoomControl.addTo).toHaveBeenCalledWith(mockMap)
@@ -454,7 +454,7 @@ describe('ChapterMap', () => {
       expect(getByText('Unlock map')).toBeInTheDocument()
 
       const overlay = getByText('Unlock map').closest('button')
-      fireEvent.click(overlay)
+      fireEvent.click(overlay!)
 
       expect(getByLabelText(/share location to find nearby chapters/i)).toBeInTheDocument()
     })
@@ -463,7 +463,7 @@ describe('ChapterMap', () => {
       const { getByText, queryByLabelText } = render(<ChapterMap {...defaultProps} />)
 
       const overlay = getByText('Unlock map').closest('button')
-      fireEvent.click(overlay)
+      fireEvent.click(overlay!)
 
       expect(queryByLabelText(/share location/i)).not.toBeInTheDocument()
     })

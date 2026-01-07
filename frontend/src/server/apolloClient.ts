@@ -5,7 +5,7 @@ import { fetchCsrfTokenServer } from 'server/fetchCsrfTokenServer'
 
 async function createApolloClient() {
   const authLink = setContext(async (_, { headers }) => {
-    let csrfToken = null
+    let csrfToken: string | null = null
     const cookieValue = await getCsrfTokenOnServer()
     csrfToken = cookieValue
     return {

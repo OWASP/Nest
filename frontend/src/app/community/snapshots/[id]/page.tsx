@@ -8,7 +8,7 @@ import { GetSnapshotDetailsDocument } from 'types/__generated__/snapshotQueries.
 import type { Chapter } from 'types/chapter'
 import type { Project } from 'types/project'
 import type { SnapshotDetails } from 'types/snapshot'
-import { level } from 'utils/data'
+import { level as levelMapping } from 'utils/data'
 import { formatDate } from 'utils/dateFormatter'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import Card from 'components/Card'
@@ -27,8 +27,8 @@ const SnapshotDetailsPage: React.FC = () => {
   })
 
   useEffect(() => {
-    if (graphQLData) {
-      setSnapshot(graphQLData.snapshot)
+    if (graphQLData?.snapshot) {
+      setSnapshot(graphQLData.snapshot as SnapshotDetails)
       setIsLoading(false)
     }
     if (graphQLRequestError) {
@@ -51,15 +51,17 @@ const SnapshotDetailsPage: React.FC = () => {
       onclick: handleButtonClick,
     }
 
+    const projectLevelKey = (project.level?.toLowerCase() || 'incubating') as keyof typeof levelMapping
+
     return (
       <Card
         button={submitButton}
         icons={filteredIcons}
         key={project.key}
-        level={level[`${project.level.toLowerCase() as keyof typeof level}`]}
-        summary={project.summary}
-        title={project.name}
-        topContributors={project.topContributors}
+        level={levelMapping[projectLevelKey]}
+        summary={project.summary || ''}
+        title={project.name || ''}
+        topContributors={project.topContributors || []}
         url={`/projects/${project.key}`}
       />
     )
@@ -68,7 +70,7 @@ const SnapshotDetailsPage: React.FC = () => {
   const renderChapterCard = (chapter: Chapter) => {
     const params: string[] = ['updatedAt']
     const filteredIcons = getFilteredIcons(chapter, params)
-    const formattedUrls = handleSocialUrls(chapter.relatedUrls)
+    const formattedUrls = handleSocialUrls(chapter.relatedUrls || [])
 
     const handleButtonClick = () => {
       router.push(`/chapters/${chapter.key}`)
@@ -86,8 +88,8 @@ const SnapshotDetailsPage: React.FC = () => {
         icons={filteredIcons}
         key={chapter.key}
         social={formattedUrls}
-        summary={chapter.summary}
-        title={chapter.name}
+        summary={chapter.summary || ''}
+        title={chapter.name || ''}
         url={`/chapters/${chapter.key}`}
       />
     )
@@ -97,7 +99,7 @@ const SnapshotDetailsPage: React.FC = () => {
     return <LoadingSpinner />
   }
 
-  if (!isLoading && snapshot == null) {
+  if (!snapshot) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -113,13 +115,13 @@ const SnapshotDetailsPage: React.FC = () => {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="mb-2 text-3xl font-bold text-gray-700 dark:text-gray-200">
-              {snapshot.title}
+              {snapshot.title || 'Untitled Snapshot'}
             </h1>
             <div className="flex flex-wrap items-center gap-2 text-gray-600 dark:text-gray-300">
               <div className="flex items-center">
                 <FaCalendar className="mr-1 h-4 w-4" />
                 <span>
-                  {formatDate(snapshot.startAt)} - {formatDate(snapshot.endAt)}
+                  {formatDate(snapshot.startAt || '')} - {formatDate(snapshot.endAt || '')}
                 </span>
               </div>
             </div>

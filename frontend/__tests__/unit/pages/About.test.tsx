@@ -388,7 +388,7 @@ describe('About Component', () => {
     const roadmapSection = screen.getByRole('heading', { name: /Roadmap/ }).closest('div')
     expect(roadmapSection).toBeInTheDocument()
     const roadmapData = mockAboutData.project.recentMilestones
-    const links = within(roadmapSection)
+    const links = within(roadmapSection!)
       .getAllByRole('link')
       .filter((link) => link.getAttribute('href') !== '#roadmap')
 

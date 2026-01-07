@@ -8,18 +8,20 @@ import type { UserCardProps } from 'types/card'
 
 const UserCard = ({
   avatar,
-  badgeCount,
+  badgeCount = 0,
   button,
   className,
   company,
   description,
   email,
-  followersCount,
+  followersCount = 0,
   location,
   login,
   name,
-  repositoriesCount,
+  repositoriesCount = 0,
 }: UserCardProps) => {
+  const hasStats = (followersCount ?? 0) > 0 || (repositoriesCount ?? 0) > 0 || (badgeCount ?? 0) > 0
+
   return (
     <Button
       onPress={button.onclick}
@@ -32,14 +34,13 @@ const UserCard = ({
               fill
               src={`${avatar}&s=160`}
               alt={name ? `${name}'s profile picture` : 'User profile picture'}
-              style={{ objectFit: 'cover' }}
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gray-200 dark:bg-gray-700">
-              <FaUser className="h-12 w-12 text-gray-400 dark:text-gray-500" />
-            </div>
-          )}
-        </div>
+              style={{ objectFit: 'cover' }}/>
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-gray-200 dark:bg-gray-700">
+                <FaUser className="h-12 w-12 text-gray-400 dark:text-gray-500" />
+              </div>
+            )}
+          </div>
 
         <div className="w-full max-w-[250px] min-w-0 text-center">
           <Tooltip content={name} delay={100} closeDelay={100} showArrow placement="top">
@@ -59,24 +60,24 @@ const UserCard = ({
           )}
         </div>
 
-        {(followersCount > 0 || repositoriesCount > 0 || badgeCount > 0) && (
+        {hasStats && (
           <div className="flex flex-wrap justify-center gap-3 px-2">
-            {followersCount > 0 && (
+            {(followersCount ?? 0) > 0 && (
               <div className="flex items-center gap-1 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
                 <HiUserGroup className="h-4 w-4" />
-                <span>{millify(followersCount, { precision: 1 })}</span>
+                <span>{millify(followersCount ?? 0, { precision: 1 })}</span>
               </div>
             )}
-            {repositoriesCount > 0 && (
+            {(repositoriesCount ?? 0) > 0 && (
               <div className="flex items-center gap-1 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
                 <FaFolderOpen className="h-3.5 w-3.5" />
-                <span>{millify(repositoriesCount, { precision: 1 })}</span>
+                <span>{millify(repositoriesCount ?? 0, { precision: 1 })}</span>
               </div>
             )}
-            {badgeCount > 0 && (
+            {(badgeCount ?? 0) > 0 && (
               <div className="flex items-center gap-1 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
                 <FaMedal className="h-3.5 w-3.5" aria-label="badges" />
-                <span>{millify(badgeCount, { precision: 1 })}</span>
+                <span>{millify(badgeCount ?? 0, { precision: 1 })}</span>
               </div>
             )}
           </div>

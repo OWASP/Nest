@@ -77,7 +77,7 @@ describe('UserMenu Component', () => {
   describe('Renders successfully with minimal required props', () => {
     it('renders nothing when GitHub auth is disabled', () => {
       mockUseSession.mockReturnValue({
-        session: null,
+        session: { user: null, expires: '2024-12-31' } as unknown as ExtendedSession,      
         isSyncing: false,
         status: 'authenticated',
       })
@@ -88,7 +88,7 @@ describe('UserMenu Component', () => {
 
     it('renders with GitHub auth enabled', () => {
       mockUseSession.mockReturnValue({
-        session: { user: null, expires: '2024-12-31' },
+        session: { user: null, expires: '2024-12-31' } as unknown as ExtendedSession,
         isSyncing: false,
         status: 'authenticated',
       })
@@ -102,7 +102,7 @@ describe('UserMenu Component', () => {
     it('renders loading state when session status is loading', () => {
       mockUseSession.mockReturnValue({
         isSyncing: true,
-        session: null,
+        session: { user: null, expires: '2024-12-31' } as unknown as ExtendedSession,      
         status: 'loading',
       })
 
@@ -115,7 +115,7 @@ describe('UserMenu Component', () => {
 
     it('renders sign in button when user is not authenticated', () => {
       mockUseSession.mockReturnValue({
-        session: null,
+        session: { user: null, expires: '2024-12-31' } as unknown as ExtendedSession,      
         isSyncing: false,
         status: 'unauthenticated',
       })
@@ -141,7 +141,7 @@ describe('UserMenu Component', () => {
       expect(avatarButton).toHaveAttribute('aria-haspopup', 'true')
 
       const avatar = screen.getByAltText('User avatar')
-      expect(avatar).toHaveAttribute('src', mockSession.user.image)
+      expect(avatar).toHaveAttribute('src', mockSession.user?.image)
     })
 
     it('shows dropdown menu when user avatar is clicked', async () => {
@@ -179,7 +179,7 @@ describe('UserMenu Component', () => {
     it('shows different UI based on authentication status', () => {
       // Test unauthenticated state
       mockUseSession.mockReturnValue({
-        session: null,
+        session: { user: null, expires: '2024-12-31' } as unknown as ExtendedSession,      
         isSyncing: false,
         status: 'unauthenticated',
       })
@@ -203,7 +203,7 @@ describe('UserMenu Component', () => {
   describe('Event handling', () => {
     it('calls signIn when sign in button is clicked', async () => {
       mockUseSession.mockReturnValue({
-        session: null,
+        session: { user: null, expires: '2024-12-31' } as unknown as ExtendedSession,      
         isSyncing: false,
         status: 'unauthenticated',
       })
@@ -390,7 +390,7 @@ describe('UserMenu Component', () => {
       }
 
       mockUseSession.mockReturnValue({
-        session: sessionWithoutImage,
+        session: sessionWithoutImage as unknown as ExtendedSession,
         isSyncing: false,
         status: 'authenticated',
       })
@@ -426,7 +426,7 @@ describe('UserMenu Component', () => {
   describe('Text and content rendering', () => {
     it('renders correct sign in button text and icon', () => {
       mockUseSession.mockReturnValue({
-        session: null,
+        session: { user: null, expires: '2024-12-31' } as unknown as ExtendedSession,      
         isSyncing: false,
         status: 'unauthenticated',
       })
@@ -497,7 +497,7 @@ describe('UserMenu Component', () => {
   describe('Handles edge cases and invalid inputs', () => {
     it('handles null session gracefully', () => {
       mockUseSession.mockReturnValue({
-        session: null,
+        session: { user: null, expires: '2024-12-31' } as unknown as ExtendedSession,      
         isSyncing: false,
         status: 'unauthenticated',
       })
@@ -519,7 +519,7 @@ describe('UserMenu Component', () => {
 
     it('handles session with null user gracefully', () => {
       mockUseSession.mockReturnValue({
-        session: { user: null, expires: '2024-12-31' },
+        session: { user: null, expires: '2024-12-31' } as unknown as ExtendedSession,
         isSyncing: false,
         status: 'authenticated',
       })
@@ -622,7 +622,7 @@ describe('UserMenu Component', () => {
       await waitFor(() => {
         const dropdownId = avatarButton.getAttribute('aria-controls')
         expect(dropdownId).not.toBeNull()
-        const dropdown = document.getElementById(dropdownId)
+        const dropdown = document.getElementById(dropdownId!)
         expect(dropdown).toBeInTheDocument()
       })
     })
@@ -631,8 +631,7 @@ describe('UserMenu Component', () => {
   describe('DOM structure / classNames / styles', () => {
     it('applies correct CSS classes to sign in button', () => {
       mockUseSession.mockReturnValue({
-        session: null,
-        isSyncing: false,
+        session: { user: null, expires: '2024-12-31' } as unknown as ExtendedSession,        isSyncing: false,
         status: 'unauthenticated',
       })
 
@@ -665,7 +664,7 @@ describe('UserMenu Component', () => {
 
     it('applies correct CSS classes to loading state', () => {
       mockUseSession.mockReturnValue({
-        session: null,
+        session: { user: null, expires: '2024-12-31' } as unknown as ExtendedSession,      
         isSyncing: true,
         status: 'unauthenticated',
       })
@@ -710,7 +709,7 @@ describe('UserMenu Component', () => {
       await waitFor(() => {
         const dropdownId = avatarButton.getAttribute('aria-controls')
         expect(dropdownId).not.toBeNull()
-        const dropdown = document.getElementById(dropdownId)
+        const dropdown = document.getElementById(dropdownId!)
         expect(dropdown).toHaveClass(
           'absolute',
           'right-0',

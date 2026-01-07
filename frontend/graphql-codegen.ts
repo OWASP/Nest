@@ -12,7 +12,7 @@ export default (async (): Promise<CodegenConfig> => {
   } catch {
     /* eslint-disable no-console */
     console.log('Failed to fetch CSRF token: make sure the backend is running.')
-    return
+    throw new Error('Codegen aborted: Backend connection failed.')
   }
 
   if (!response.ok) {

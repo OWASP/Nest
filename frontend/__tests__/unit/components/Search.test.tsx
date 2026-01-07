@@ -146,7 +146,7 @@ describe('SearchBar Component', () => {
       fireEvent.change(input, { target: { value: 'test' } })
       expect(input).toHaveValue('test')
       const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
-      fireEvent.click(clearButton)
+      fireEvent.click(clearButton!)
       expect(input).toHaveValue('')
     })
 
@@ -313,7 +313,7 @@ describe('SearchBar Component', () => {
       expect(mockOnSearch).not.toHaveBeenCalled()
 
       const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
-      fireEvent.click(clearButton)
+      fireEvent.click(clearButton!)
 
       jest.advanceTimersByTime(750)
 
