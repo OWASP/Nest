@@ -16,7 +16,9 @@ class TestModuleQuery:
     def test_get_program_modules_success(self, mock_module_filter: MagicMock) -> None:
         """Test successful retrieval of modules by program key."""
         mock_module = MagicMock(spec=Module)
-        mock_module_filter.return_value.select_related.return_value.prefetch_related.return_value.order_by.return_value = [
+        mock_module_filter.return_value\
+            .select_related.return_value.prefetch_related.return_value\
+                .order_by.return_value = [
             mock_module
         ]
 
@@ -29,7 +31,9 @@ class TestModuleQuery:
     @patch("apps.mentorship.api.internal.queries.module.Module.objects.filter")
     def test_get_program_modules_empty(self, mock_module_filter: MagicMock) -> None:
         """Test retrieval of modules by program key returns empty list if no modules found."""
-        mock_module_filter.return_value.select_related.return_value.prefetch_related.return_value.order_by.return_value = []
+        mock_module_filter.return_value\
+            .select_related.return_value.prefetch_related.return_value\
+                .order_by.return_value = []
 
         query = ModuleQuery()
         result = query.get_program_modules(program_key="nonexistent_program")
@@ -41,7 +45,9 @@ class TestModuleQuery:
     def test_get_project_modules_success(self, mock_module_filter: MagicMock) -> None:
         """Test successful retrieval of modules by project key."""
         mock_module = MagicMock(spec=Module)
-        mock_module_filter.return_value.select_related.return_value.prefetch_related.return_value.order_by.return_value = [
+        mock_module_filter.return_value\
+            .select_related.return_value.prefetch_related.return_value\
+                .order_by.return_value = [
             mock_module
         ]
 
@@ -54,7 +60,9 @@ class TestModuleQuery:
     @patch("apps.mentorship.api.internal.queries.module.Module.objects.filter")
     def test_get_project_modules_empty(self, mock_module_filter: MagicMock) -> None:
         """Test retrieval of modules by project key returns empty list if no modules found."""
-        mock_module_filter.return_value.select_related.return_value.prefetch_related.return_value.order_by.return_value = []
+        mock_module_filter.return_value\
+            .select_related.return_value.prefetch_related.return_value\
+                .order_by.return_value = []
 
         query = ModuleQuery()
         result = query.get_project_modules(project_key="nonexistent_project")
