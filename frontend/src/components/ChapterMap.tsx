@@ -41,7 +41,7 @@ const ChapterMap = ({
           [-90, -180],
           [90, 180],
         ],
-        maxBoundsViscosity: 1.0,
+        maxBoundsViscosity: 1,
         scrollWheelZoom: false,
         zoomControl: false,
       }).setView([20, 0], 2)
