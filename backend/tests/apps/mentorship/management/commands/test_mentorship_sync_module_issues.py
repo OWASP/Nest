@@ -10,7 +10,7 @@ from apps.mentorship.management.commands.mentorship_sync_module_issues import Co
 from apps.mentorship.models.task import Task
 
 
-def make_qs(iterable, exist=True):
+def make_qs(iterable, exist):
     """Return a queryset-like MagicMock that is iterable"""
     qs = MagicMock(name="QuerySet")
     qs.exists.return_value = exist
@@ -38,7 +38,7 @@ def test_extract_repo_full_name_from_object(command):
 
 
 @pytest.mark.parametrize(
-    "repo_url, expected",
+    ("repo_url, expected"),
     [
         ("https://github.com/owner/repo", "owner/repo"),
         ("https://www.github.com/owner/repo/sub/path", "owner/repo"),
@@ -206,7 +206,9 @@ def test_process_module_links_and_creates_tasks(mock_issue, mock_task, command):
 
     command.stdout.write.assert_any_call(
         command.style.SUCCESS(
-            f"Updated module '{mock_module.name}': set 3 issues from repos: [{mock_project_repo.name}] and created 2 tasks."
+            f"Updated module '{mock_module.name}': set 3 issues from repos: [{
+                mock_project_repo.name
+            }] and created 2 tasks."
         )
     )
 

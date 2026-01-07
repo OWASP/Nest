@@ -15,8 +15,8 @@ def command():
     return cmd
 
 
-def make_qs(iterable, exist=True):
-    """Helper: return a queryset-like MagicMock that is iterable"""
+def make_qs(iterable, exist):
+    """Return a queryset-like MagicMock that is iterable."""
     qs = MagicMock(name="QuerySet")
     qs.exists.return_value = exist
     qs.__iter__.return_value = iter(iterable)
@@ -96,7 +96,7 @@ def test_handle_updates_issues(mock_task_level, mock_issue, command):
 @patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.Issue")
 @patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.TaskLevel")
 def test_handle_no_updates_needed(mock_task_level, mock_issue, command):
-    """When all issues already have the correct level, bulk_update is not called"""
+    """When all issues already have the correct level, bulk_update is not called."""
     mock_module = MagicMock()
     mock_module.id = 1
 
