@@ -89,7 +89,7 @@ class TestModuleQuery:
         query = ModuleQuery()
         with pytest.raises(
             ObjectDoesNotExist,
-            match="Module with key 'nonexistent' under program 'program1' not found.",
+            match=r"Module with key 'nonexistent' under program 'program1' not found\.",
         ):
             query.get_module(module_key="nonexistent", program_key="program1")
 

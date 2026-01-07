@@ -1,9 +1,4 @@
-"""Pytest for mentorship program nodes (fixed fixture: use a FakeProgramNode so
-admins() resolver actually runs and we only mock the manager).
-
-"""
-
-from datetime import datetime
+from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
 import pytest
@@ -20,21 +15,16 @@ from apps.mentorship.api.internal.nodes.program import (
 
 
 class FakeProgramNode:
-    """Minimal ProgramNode-like object that implements the admins() resolver
-    while letting tests control the underlying admins manager.
-
-    """
-
     def __init__(self):
         self.id = strawberry.ID("prog-1")
         self.key = "test-program"
         self.name = "Test Program"
         self.description = "A test mentorship program."
         self.domains = ["backend", "frontend"]
-        self.ended_at = datetime(2026, 6, 30)
+        self.ended_at = datetime(2026, 6, 30, tzinfo=UTC)
         self.experience_levels = [ExperienceLevelEnum.BEGINNER, ExperienceLevelEnum.INTERMEDIATE]
         self.mentees_limit = 10
-        self.started_at = datetime(2026, 1, 1)
+        self.started_at = datetime(2026, 1, 1, tzinfo=UTC)
         self.status = ProgramStatusEnum.PUBLISHED
         self.user_role = "admin"
         self.tags = ["python", "javascript"]
@@ -67,13 +57,13 @@ def test_program_node_fields(mock_program_node):
     assert mock_program_node.name == "Test Program"
     assert mock_program_node.description == "A test mentorship program."
     assert mock_program_node.domains == ["backend", "frontend"]
-    assert mock_program_node.ended_at == datetime(2026, 6, 30)
+    assert mock_program_node.ended_at == datetime(2026, 6, 30, tzinfo=UTC)
     assert mock_program_node.experience_levels == [
         ExperienceLevelEnum.BEGINNER,
         ExperienceLevelEnum.INTERMEDIATE,
     ]
     assert mock_program_node.mentees_limit == 10
-    assert mock_program_node.started_at == datetime(2026, 1, 1)
+    assert mock_program_node.started_at == datetime(2026, 1, 1, tzinfo=UTC)
     assert mock_program_node.status == ProgramStatusEnum.PUBLISHED
     assert mock_program_node.user_role == "admin"
     assert mock_program_node.tags == ["python", "javascript"]
@@ -97,20 +87,20 @@ def test_paginated_programs_fields():
 
 def test_create_program_input_fields():
     """Test that CreateProgramInput fields are correctly defined."""
-    assert CreateProgramInput.__annotations__["name"] == str
-    assert CreateProgramInput.__annotations__["description"] == str
+    assert CreateProgramInput.__annotations__["name"] is str
+    assert CreateProgramInput.__annotations__["description"] is str
     assert CreateProgramInput.__annotations__["domains"] == list[str]
-    assert CreateProgramInput.__annotations__["ended_at"] == datetime
-    assert CreateProgramInput.__annotations__["mentees_limit"] == int
-    assert CreateProgramInput.__annotations__["started_at"] == datetime
+    assert CreateProgramInput.__annotations__["ended_at"] is datetime
+    assert CreateProgramInput.__annotations__["mentees_limit"] is int
+    assert CreateProgramInput.__annotations__["started_at"] is datetime
     assert CreateProgramInput.__annotations__["tags"] == list[str]
 
     create_input = CreateProgramInput(
         name="New Program",
         description="Description for new program",
-        ended_at=datetime.now(),
+        ended_at=datetime.now(UTC),
         mentees_limit=5,
-        started_at=datetime.now(),
+        started_at=datetime.now(UTC),
     )
     assert create_input.domains == []
     assert create_input.tags == []
@@ -118,24 +108,24 @@ def test_create_program_input_fields():
 
 def test_update_program_input_fields():
     """Test that UpdateProgramInput fields are correctly defined."""
-    assert UpdateProgramInput.__annotations__["key"] == str
-    assert UpdateProgramInput.__annotations__["name"] == str
-    assert UpdateProgramInput.__annotations__["description"] == str
+    assert UpdateProgramInput.__annotations__["key"] is str
+    assert UpdateProgramInput.__annotations__["name"] is str
+    assert UpdateProgramInput.__annotations__["description"] is str
     assert UpdateProgramInput.__annotations__["admin_logins"] == list[str] | None
     assert UpdateProgramInput.__annotations__["domains"] == list[str] | None
-    assert UpdateProgramInput.__annotations__["ended_at"] == datetime
-    assert UpdateProgramInput.__annotations__["mentees_limit"] == int
-    assert UpdateProgramInput.__annotations__["started_at"] == datetime
-    assert UpdateProgramInput.__annotations__["status"] == ProgramStatusEnum
+    assert UpdateProgramInput.__annotations__["ended_at"] is datetime
+    assert UpdateProgramInput.__annotations__["mentees_limit"] is int
+    assert UpdateProgramInput.__annotations__["started_at"] is datetime
+    assert UpdateProgramInput.__annotations__["status"] is ProgramStatusEnum
     assert UpdateProgramInput.__annotations__["tags"] == list[str] | None
 
     update_input = UpdateProgramInput(
         key="update-program-key",
         name="Updated Program",
         description="Updated description",
-        ended_at=datetime.now(),
+        ended_at=datetime.now(UTC),
         mentees_limit=12,
-        started_at=datetime.now(),
+        started_at=datetime.now(UTC),
         status=ProgramStatusEnum.COMPLETED,
     )
     assert update_input.domains is None
@@ -145,6 +135,6 @@ def test_update_program_input_fields():
 
 def test_update_program_status_input_fields():
     """Test that UpdateProgramStatusInput fields are correctly defined."""
-    assert UpdateProgramStatusInput.__annotations__["key"] == str
-    assert UpdateProgramStatusInput.__annotations__["name"] == str
-    assert UpdateProgramStatusInput.__annotations__["status"] == ProgramStatusEnum
+    assert UpdateProgramStatusInput.__annotations__["key"] is str
+    assert UpdateProgramStatusInput.__annotations__["name"] is str
+    assert UpdateProgramStatusInput.__annotations__["status"] is ProgramStatusEnum
