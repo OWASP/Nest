@@ -93,8 +93,8 @@ def test_build_repo_label_to_issue_map_iterable():
         (4, 10, "label-a"),
     ]
 
-    with patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Issue") as MockIssue:
-        MockIssue.objects.filter.return_value.values_list.return_value.iterator.return_value = iter(rows)
+    with patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Issue") as mock_issue:
+        mock_issue.objects.filter.return_value.values_list.return_value.iterator.return_value = iter(rows)
 
         cmd = Command()
         cmd.stdout = MagicMock()
@@ -111,7 +111,7 @@ def test_build_repo_label_to_issue_map_iterable():
 
 @patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Task")
 @patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Issue")
-def test_process_module_links_and_creates_tasks(MockIssue, MockTask, command):
+def test_process_module_links_and_creates_tasks(mock_issue, mock_task, command):
     mock_repo = MagicMock(); mock_repo.id = 77; mock_repo.name = "repo-name"
     mock_module = MagicMock()
     mock_module.id = 11
@@ -119,7 +119,7 @@ def test_process_module_links_and_creates_tasks(MockIssue, MockTask, command):
     mock_module.labels = ["module-label-1"]
     mock_project_repo = MagicMock(); mock_project_repo.id = mock_repo.id; mock_project_repo.name = mock_repo.name
     mock_module.project.repositories.all.return_value = [mock_project_repo]
-    MockTask.Status = Task.Status
+    mock_task.Status = Task.Status
 
 
     repo_label_to_issue_ids = {(mock_repo.id, "module-label-1"): {1, 2, 3}}
@@ -134,11 +134,11 @@ def test_process_module_links_and_creates_tasks(MockIssue, MockTask, command):
     issue3.assignees.first.return_value = None
 
     issues_qs = make_qs([issue1, issue2], exists=True)
-    MockIssue.objects.filter.return_value.select_related.return_value.prefetch_related.return_value.distinct.return_value = issues_qs
+    mock_issue.objects.filter.return_value.select_related.return_value.prefetch_related.return_value.distinct.return_value = issues_qs
 
     created_task1 = MagicMock(module=None, status=None, assigned_at=None)
     created_task2 = MagicMock(module=None, status=None, assigned_at=None)
-    MockTask.objects.get_or_create.side_effect = [
+    mock_task.objects.get_or_create.side_effect = [
         (created_task1, True),
         (created_task2, True),
     ]
@@ -159,9 +159,9 @@ def test_process_module_links_and_creates_tasks(MockIssue, MockTask, command):
 
     mock_module.issues.set.assert_called_once_with({1, 2, 3})
 
-    assert MockTask.objects.get_or_create.call_count == 2
+    assert mock_task.objects.get_or_create.call_count == 2
 
-    calls = MockTask.objects.get_or_create.call_args_list
+    calls = mock_task.objects.get_or_create.call_args_list
     called_issues = {c.kwargs["issue"] for c in calls}
     called_statuses = {c.kwargs["defaults"]["status"] for c in calls}
 
@@ -190,7 +190,7 @@ def test_process_module_no_matches():
 
     repo_label_to_issue_ids = {}
 
-    with patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Task") as MockTask, \
+    with patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Task") as mock_task, \
          patch("apps.mentorship.management.commands.mentorship_sync_module_issues.transaction.atomic") as mock_atomic:
         mock_atomic.return_value.__enter__.return_value = None
         mock_atomic.return_value.__exit__.return_value = None
@@ -204,5 +204,5 @@ def test_process_module_no_matches():
         )
 
     mock_module.issues.set.assert_called_once_with(set())
-    MockTask.objects.get_or_create.assert_not_called()
+    mock_task.objects.get_or_create.assert_not_called()
     assert num_linked == 0

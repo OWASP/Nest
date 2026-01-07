@@ -343,9 +343,8 @@ class TestGetMenteeModuleIssues:
 
         mock_mentee_module_filter.return_value.exists.return_value = True
 
-        mock_issue1 = MagicMock(id=1, number=1, title="Issue 1", state="open", created_at="", url="")
         mock_issue2 = MagicMock(id=2, number=2, title="Issue 2", state="closed", created_at="", url="")
-        mock_issue3 = MagicMock(id=3, number=3, title="Issue 3", state="open", created_at="", url="")
+        
 
         mock_issues_qs_slice = [mock_issue2]
 
