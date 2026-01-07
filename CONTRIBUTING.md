@@ -492,14 +492,52 @@ flowchart TD
     linkStyle 24 stroke:#f44336,stroke-width:2px
 ```
 
-### 1. Find Something to Work On
+### Keep Your Fork in Sync with Upstream
+
+To avoid working on an outdated copy of Nest (and to reduce merge conflicts), contributors may find it helpful to keep their fork synchronized with the main OWASP repository.
+
+#### 1. Add the upstream remote (one-time setup)
+
+After cloning your fork locally and moving into the project directory:
+
+```bash
+git remote -v
+```
+
+If you do not see a remote named `upstream`, add the official OWASP Nest repository as `upstream`:
+
+```bash
+git remote add upstream https://github.com/OWASP/Nest.git
+```
+
+You can verify the remotes again:
+
+```bash
+git remote -v
+```
+
+You should now see both `origin` (your fork) and `upstream` (OWASP/Nest).
+
+#### 2. Sync your local main and your fork before starting new work
+
+Before starting a **new** feature or issue, you may want to update your local `main` from `upstream/main`:
+
+```bash
+git checkout main
+git fetch upstream
+git merge upstream/main
+```
+
+Following this flow ensures that new branches start from the latest `upstream/main`, which helps avoid unnecessary rebases during review.
+
+### Find Something to Work On
 
 - Check the **Issues** tab for open issues: [https://github.com/owasp/nest/issues](https://github.com/owasp/nest/issues)
 - Found a bug or have a feature request? Open a new issue.
 - Want to work on an existing issue? Ask the maintainers to assign it to you before submitting a pull request.
 - New to the project? Start with issues labeled `good first issue` for an easier onboarding experience.
 
-### 2. Create a Branch
+### Create a Branch
 
 Always create a feature branch for your work:
 
