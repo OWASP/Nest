@@ -20,6 +20,9 @@ from apps.mentorship.models.task import Task
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.models import Project
 
+ISSUE_NOT_FOUND_MSG = "Issue not found in this module."
+MODULE_NOT_FOUND_MSG = "Module not found."
+
 logger = logging.getLogger(__name__)
 
 
@@ -155,7 +158,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg="Module not found.")
+            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
 
         if not Mentor.objects.filter(nest_user=user, modules=module).exists():
             raise PermissionDenied(msg="Only mentors of this module can assign issues.")
@@ -166,7 +169,7 @@ class ModuleMutation:
 
         issue = module.issues.filter(number=issue_number).first()
         if issue is None:
-            raise ObjectDoesNotExist(msg="Issue not found in this module.")
+            raise ObjectDoesNotExist(msg=ISSUE_NOT_FOUND_MSG)
 
         issue.assignees.add(gh_user)
 
@@ -194,7 +197,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist
+            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
 
         if not Mentor.objects.filter(nest_user=user, modules=module).exists():
             raise PermissionDenied(msg="Only mentors of this module can unassign issues.")
@@ -231,7 +234,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg="Module not found.")
+            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
 
         if not Mentor.objects.filter(nest_user=user, modules=module).exists():
             raise PermissionDenied(msg="Only mentors of this module can set deadlines.")
@@ -243,7 +246,7 @@ class ModuleMutation:
             .first()
         )
         if issue is None:
-            raise ObjectDoesNotExist(msg="Issue not found in this module.")
+            raise ObjectDoesNotExist(msg=ISSUE_NOT_FOUND_MSG)
 
         assignees = issue.assignees.all()
         if not assignees.exists():
@@ -290,7 +293,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg="Module not found.")
+            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
 
         if not Mentor.objects.filter(nest_user=user, modules=module).exists():
             raise PermissionDenied(msg="Only mentors of this module can clear deadlines.")
@@ -302,7 +305,7 @@ class ModuleMutation:
             .first()
         )
         if issue is None:
-            raise ObjectDoesNotExist(msg="Issue not found in this module.")
+            raise ObjectDoesNotExist(msg=ISSUE_NOT_FOUND_MSG)
 
         assignees = issue.assignees.all()
         if not assignees.exists():
@@ -333,8 +336,7 @@ class ModuleMutation:
                 key=input_data.key, program__key=input_data.program_key
             )
         except Module.DoesNotExist as e:
-            msg = "Module not found."
-            raise ObjectDoesNotExist(msg) from e
+            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG) from e
 
         is_admin = module.program.admins.filter(id=user.id).exists()
         is_mentor = Mentor.objects.filter(nest_user=user, modules=module).exists()

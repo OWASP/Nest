@@ -119,7 +119,7 @@ sync-data: \
 test-backend:
 	@DOCKER_BUILDKIT=1 docker build \
 		--cache-from nest-test-backend \
-		-f backend/docker/Dockerfile.test backend \
+		-f docker/backend/Dockerfile.test backend \
 		-t nest-test-backend
 	@docker run \
 		-e DJANGO_SETTINGS_MODULE=settings.test \
