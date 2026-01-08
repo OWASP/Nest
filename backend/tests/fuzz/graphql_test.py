@@ -8,7 +8,8 @@ import schemathesis
 CSRF_TOKEN = os.getenv("CSRF_TOKEN")
 BASE_URL = os.getenv("BASE_URL")
 if not CSRF_TOKEN or not BASE_URL:
-    raise EnvironmentError("CSRF_TOKEN and BASE_URL must be set in the environment.")
+    message = "CSRF_TOKEN and BASE_URL must be set in the environment."
+    raise OSError(message)
 
 HEADERS = {
     "X-CSRFToken": CSRF_TOKEN,

@@ -331,7 +331,7 @@ jobs:
       - scan-ci-dependencies
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
-      test-file: test_graphql.py
+      test-file: graphql_test.py
 
   run-rest-fuzz-tests:
     name: Run REST fuzz tests
@@ -340,7 +340,7 @@ jobs:
       - scan-ci-dependencies
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
-      test-file: test_rest.py
+      test-file: rest_test.py
       rest-url: http://localhost:9500/api/v0
 
   build-staging-images:

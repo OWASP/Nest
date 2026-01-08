@@ -9,7 +9,8 @@ CSRF_TOKEN = os.getenv("CSRF_TOKEN")
 REST_URL = os.getenv("REST_URL")
 
 if not CSRF_TOKEN or not REST_URL:
-    raise EnvironmentError("CSRF_TOKEN and REST_URL must be set in the environment.")
+    message = "CSRF_TOKEN and REST_URL must be set in the environment."
+    raise OSError(message)
 
 HEADERS = {
     "X-CSRFToken": CSRF_TOKEN,

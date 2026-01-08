@@ -23,8 +23,8 @@ RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
 
 WORKDIR /home/owasp
 
-COPY --chown=root:root --chmod=755 ./entrypoint.sh ./entrypoint.sh
-COPY --chown=root:root --chmod=755 tests tests
+COPY --chown=root:root --chmod=755 ./entrypoint.fuzz.sh ./entrypoint.sh
+COPY --chown=root:root --chmod=755 tests/fuzz tests
 
 RUN chmod +x ./entrypoint.sh
 
