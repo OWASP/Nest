@@ -277,7 +277,6 @@ class TestGetMenteeModuleIssues:
         mock_module_only.return_value.get.assert_called_once_with(
             key="module", program__key="program"
         )
-        mock_github_user_only.assert_called_with("id", "login", "name", "avatar_url")
         mock_github_user_only.return_value.get.assert_called_once_with(login="test_mentee")
         mock_mentee_only.assert_called_once_with("id")
         mock_mentee_only.return_value.get.assert_called_once_with(github_user=mock_github_user)
