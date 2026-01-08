@@ -1,17 +1,16 @@
-import { faUsers } from '@fortawesome/free-solid-svg-icons'
-import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { useRouter } from 'next/navigation'
+import { screen } from '@testing-library/react'
+import { usePathname, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
-import type { ExtendedSession } from 'types/auth'
+import { ExperienceLevelEnum, ProgramStatusEnum } from 'types/__generated__/graphql'
 import type { Module } from 'types/mentorship'
-import { ExperienceLevelEnum, ProgramStatusEnum } from 'types/mentorship'
 import SingleModuleCard from 'components/SingleModuleCard'
 
 // Mock dependencies
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
+  usePathname: jest.fn(),
 }))
 
 jest.mock('next-auth/react', () => ({
@@ -48,9 +47,9 @@ jest.mock('next/link', () => ({
   ),
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, className }: { icon: unknown; className?: string }) => (
-    <span data-testid={`icon-${icon === faUsers ? 'users' : 'ellipsis'}`} className={className} />
+jest.mock('react-icons/hi', () => ({
+  HiUserGroup: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="icon-users" {...props} />
   ),
 }))
 
@@ -81,6 +80,7 @@ jest.mock('components/TopContributorsList', () => ({
 
 const mockPush = jest.fn()
 const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>
+const mockUsePathname = usePathname as jest.MockedFunction<typeof usePathname>
 const mockUseSession = useSession as jest.MockedFunction<typeof useSession>
 
 // Test data
@@ -89,8 +89,8 @@ const mockModule: Module = {
   key: 'test-module',
   name: 'Test Module',
   description: 'This is a test module description',
-  status: ProgramStatusEnum.PUBLISHED,
-  experienceLevel: ExperienceLevelEnum.INTERMEDIATE,
+  status: ProgramStatusEnum.Published,
+  experienceLevel: ExperienceLevelEnum.Intermediate,
   mentors: [
     {
       name: 'user1',
@@ -107,19 +107,10 @@ const mockModule: Module = {
   endedAt: '2024-12-31T23:59:59Z',
   domains: ['frontend', 'backend'],
   tags: ['react', 'nodejs'],
+  labels: ['good first issue', 'bug'],
 }
 
 const mockAdmins = [{ login: 'admin1' }, { login: 'admin2' }]
-
-const mockSessionData: ExtendedSession = {
-  user: {
-    login: 'admin1',
-    isLeader: true,
-    email: 'admin@example.com',
-    image: 'https://example.com/admin-avatar.jpg',
-  },
-  expires: '2024-12-31T23:59:59Z',
-}
 
 describe('SingleModuleCard', () => {
   beforeEach(() => {
@@ -132,6 +123,7 @@ describe('SingleModuleCard', () => {
       replace: jest.fn(),
       prefetch: jest.fn(),
     })
+    mockUsePathname.mockReturnValue('/my/mentorship/programs/test-program')
     mockUseSession.mockReturnValue({
       data: null,
       status: 'unauthenticated',
@@ -146,7 +138,6 @@ describe('SingleModuleCard', () => {
       expect(screen.getByText('Test Module')).toBeInTheDocument()
       expect(screen.getByText('This is a test module description')).toBeInTheDocument()
       expect(screen.getByTestId('icon-users')).toBeInTheDocument()
-      expect(screen.getByTestId('icon-ellipsis')).toBeInTheDocument()
     })
 
     it('renders module details correctly', () => {
@@ -177,150 +168,46 @@ describe('SingleModuleCard', () => {
       render(<SingleModuleCard module={mockModule} />)
 
       const moduleLink = screen.getByTestId('module-link')
-      expect(moduleLink).toHaveAttribute('href', '//modules/test-module')
+      expect(moduleLink).toHaveAttribute(
+        'href',
+        '/my/mentorship/programs/test-program/modules/test-module'
+      )
       expect(moduleLink).toHaveAttribute('target', '_blank')
       expect(moduleLink).toHaveAttribute('rel', 'noopener noreferrer')
     })
   })
 
-  describe('Dropdown Menu', () => {
-    it('opens dropdown when ellipsis button is clicked', () => {
+  describe('Simplified Interface', () => {
+    it('focuses on content display only', () => {
       render(<SingleModuleCard module={mockModule} />)
 
-      const ellipsisButton = screen.getByRole('button')
-      fireEvent.click(ellipsisButton)
+      // Should display core content
+      expect(screen.getByText('Test Module')).toBeInTheDocument()
+      expect(screen.getByText('This is a test module description')).toBeInTheDocument()
+      expect(screen.getByText('Experience Level:')).toBeInTheDocument()
 
-      expect(screen.getByText('View Module')).toBeInTheDocument()
-    })
-
-    it('closes dropdown when clicking outside', async () => {
-      render(<SingleModuleCard module={mockModule} />)
-
-      const ellipsisButton = screen.getByRole('button')
-      fireEvent.click(ellipsisButton)
-
-      expect(screen.getByText('View Module')).toBeInTheDocument()
-
-      // Click outside the dropdown
-      fireEvent.mouseDown(document.body)
-
-      await waitFor(() => {
-        expect(screen.queryByText('View Module')).not.toBeInTheDocument()
-      })
-    })
-
-    it('navigates to view module when View Module is clicked', () => {
-      render(<SingleModuleCard module={mockModule} />)
-
-      const ellipsisButton = screen.getByRole('button')
-      fireEvent.click(ellipsisButton)
-
-      const viewButton = screen.getByText('View Module')
-      fireEvent.click(viewButton)
-
-      expect(mockPush).toHaveBeenCalledWith('//modules/test-module')
-    })
-
-    it('shows only View Module option for non-admin users', () => {
-      render(
-        <SingleModuleCard
-          module={mockModule}
-          showEdit={true}
-          accessLevel="user"
-          admins={mockAdmins}
-        />
+      // Should have clickable title for navigation
+      const moduleLink = screen.getByTestId('module-link')
+      expect(moduleLink).toHaveAttribute(
+        'href',
+        '/my/mentorship/programs/test-program/modules/test-module'
       )
-
-      const ellipsisButton = screen.getByRole('button')
-      fireEvent.click(ellipsisButton)
-
-      expect(screen.getByText('View Module')).toBeInTheDocument()
-      expect(screen.queryByText('Edit Module')).not.toBeInTheDocument()
-      expect(screen.queryByText('Create Module')).not.toBeInTheDocument()
     })
   })
 
-  describe('Admin Functionality', () => {
-    beforeEach(() => {
-      mockUseSession.mockReturnValue({
-        data: mockSessionData,
-        status: 'authenticated',
-        update: jest.fn(),
-      })
+  describe('Props Handling', () => {
+    it('renders correctly with minimal props', () => {
+      render(<SingleModuleCard module={mockModule} />)
+
+      expect(screen.getByText('Test Module')).toBeInTheDocument()
+      expect(screen.getByText('This is a test module description')).toBeInTheDocument()
     })
 
-    it('shows Edit Module option for admin users when showEdit is true', () => {
-      render(
-        <SingleModuleCard
-          module={mockModule}
-          showEdit={true}
-          accessLevel="admin"
-          admins={mockAdmins}
-        />
-      )
+    it('ignores admin-related props since menu is removed', () => {
+      // These props are now ignored but should not cause errors
+      render(<SingleModuleCard module={mockModule} accessLevel="admin" admins={mockAdmins} />)
 
-      const ellipsisButton = screen.getByRole('button')
-      fireEvent.click(ellipsisButton)
-
-      expect(screen.getByText('View Module')).toBeInTheDocument()
-      expect(screen.getByText('Edit Module')).toBeInTheDocument()
-      expect(screen.getByText('Create Module')).toBeInTheDocument()
-    })
-
-    it('does not show Edit Module option when showEdit is false', () => {
-      render(
-        <SingleModuleCard
-          module={mockModule}
-          showEdit={false}
-          accessLevel="admin"
-          admins={mockAdmins}
-        />
-      )
-
-      const ellipsisButton = screen.getByRole('button')
-      fireEvent.click(ellipsisButton)
-
-      expect(screen.getByText('View Module')).toBeInTheDocument()
-      expect(screen.queryByText('Edit Module')).not.toBeInTheDocument()
-      expect(screen.getByText('Create Module')).toBeInTheDocument()
-    })
-
-    it('navigates to edit module when Edit Module is clicked', () => {
-      render(
-        <SingleModuleCard
-          module={mockModule}
-          showEdit={true}
-          accessLevel="admin"
-          admins={mockAdmins}
-        />
-      )
-
-      const ellipsisButton = screen.getByRole('button')
-      fireEvent.click(ellipsisButton)
-
-      const editButton = screen.getByText('Edit Module')
-      fireEvent.click(editButton)
-
-      expect(mockPush).toHaveBeenCalledWith('//modules/test-module/edit')
-    })
-
-    it('navigates to create module when Create Module is clicked', () => {
-      render(
-        <SingleModuleCard
-          module={mockModule}
-          showEdit={true}
-          accessLevel="admin"
-          admins={mockAdmins}
-        />
-      )
-
-      const ellipsisButton = screen.getByRole('button')
-      fireEvent.click(ellipsisButton)
-
-      const createButton = screen.getByText('Create Module')
-      fireEvent.click(createButton)
-
-      expect(mockPush).toHaveBeenCalledWith('//modules/create')
+      expect(screen.getByText('Test Module')).toBeInTheDocument()
     })
   })
 
@@ -338,67 +225,34 @@ describe('SingleModuleCard', () => {
       expect(screen.queryByTestId('top-contributors-list')).not.toBeInTheDocument()
     })
 
-    it('handles undefined admins array', () => {
-      render(<SingleModuleCard module={mockModule} showEdit={true} accessLevel="admin" />)
+    it('handles undefined admins array gracefully', () => {
+      render(<SingleModuleCard module={mockModule} accessLevel="admin" />)
 
-      const ellipsisButton = screen.getByRole('button')
-      fireEvent.click(ellipsisButton)
-
-      expect(screen.getByText('View Module')).toBeInTheDocument()
-      expect(screen.queryByText('Edit Module')).not.toBeInTheDocument()
-    })
-
-    it('handles null session data', () => {
-      mockUseSession.mockReturnValue({
-        data: null,
-        status: 'unauthenticated',
-        update: jest.fn(),
-      })
-
-      render(
-        <SingleModuleCard
-          module={mockModule}
-          showEdit={true}
-          accessLevel="admin"
-          admins={mockAdmins}
-        />
-      )
-
-      const ellipsisButton = screen.getByRole('button')
-      fireEvent.click(ellipsisButton)
-
-      expect(screen.getByText('View Module')).toBeInTheDocument()
-      expect(screen.queryByText('Edit Module')).not.toBeInTheDocument()
+      // Should render without errors even with admin props
+      expect(screen.getByText('Test Module')).toBeInTheDocument()
     })
   })
 
   describe('Accessibility', () => {
-    it('has proper button roles and interactions', () => {
+    it('has accessible link for module navigation', () => {
       render(<SingleModuleCard module={mockModule} />)
 
-      const ellipsisButton = screen.getByRole('button')
-      expect(ellipsisButton).toBeInTheDocument()
-
-      fireEvent.click(ellipsisButton)
-
-      const viewButton = screen.getByText('View Module')
-      expect(viewButton.closest('button')).toBeInTheDocument()
+      const moduleLink = screen.getByTestId('module-link')
+      expect(moduleLink).toBeInTheDocument()
+      expect(moduleLink).toHaveAttribute(
+        'href',
+        '/my/mentorship/programs/test-program/modules/test-module'
+      )
+      expect(moduleLink).toHaveAttribute('target', '_blank')
+      expect(moduleLink).toHaveAttribute('rel', 'noopener noreferrer')
     })
 
-    it('supports keyboard navigation', () => {
+    it('has proper heading structure', () => {
       render(<SingleModuleCard module={mockModule} />)
 
-      const ellipsisButton = screen.getByRole('button')
-
-      // Focus the button
-      ellipsisButton.focus()
-      expect(ellipsisButton).toHaveFocus()
-
-      // Press Enter to open dropdown
-      fireEvent.keyDown(ellipsisButton, { key: 'Enter', code: 'Enter' })
-      fireEvent.click(ellipsisButton) // Simulate the click that would happen
-
-      expect(screen.getByText('View Module')).toBeInTheDocument()
+      const moduleTitle = screen.getByRole('heading', { level: 1 })
+      expect(moduleTitle).toBeInTheDocument()
+      expect(moduleTitle).toHaveTextContent('Test Module')
     })
   })
 

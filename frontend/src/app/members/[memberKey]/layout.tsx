@@ -1,9 +1,13 @@
 import { Metadata } from 'next'
 import React from 'react'
 import { apolloClient } from 'server/apolloClient'
-import { GET_USER_METADATA, GET_USER_DATA } from 'server/queries/userQueries'
+import {
+  GetUserDataDocument,
+  GetUserMetadataDocument,
+} from 'types/__generated__/userQueries.generated'
 import { generateSeoMetadata } from 'utils/metaconfig'
 import { generateProfilePageStructuredData } from 'utils/structuredData'
+import PageLayout from 'components/PageLayout'
 import StructuredDataScript from 'components/StructuredDataScript'
 
 export async function generateMetadata({
@@ -13,7 +17,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { memberKey } = await params
   const { data } = await apolloClient.query({
-    query: GET_USER_METADATA,
+    query: GetUserMetadataDocument,
     variables: {
       key: memberKey,
     },
@@ -41,7 +45,7 @@ export default async function UserDetailsLayout({
   const { memberKey } = await params
 
   const { data } = await apolloClient.query({
-    query: GET_USER_DATA,
+    query: GetUserDataDocument,
     variables: {
       key: memberKey,
     },
@@ -52,9 +56,9 @@ export default async function UserDetailsLayout({
   }
 
   return (
-    <>
+    <PageLayout title={data?.user?.name || data?.user?.login || ''}>
       <StructuredDataScript data={generateProfilePageStructuredData(data.user)} />
       {children}
-    </>
+    </PageLayout>
   )
 }

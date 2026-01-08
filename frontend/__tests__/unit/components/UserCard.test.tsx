@@ -53,16 +53,21 @@ jest.mock('@heroui/button', () => {
   }
 })
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({
-    icon,
-    className,
-    ...props
-  }: {
-    icon: { iconName: string }
-    className?: string
-    [key: string]: unknown
-  }) => <span data-testid={`icon-${icon.iconName}`} className={className} {...props} />,
+jest.mock('react-icons/fa6', () => ({
+  FaChevronRight: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="icon-chevron-right" {...props} />
+  ),
+  FaFolderOpen: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="icon-folder-open" {...props} />
+  ),
+  FaMedal: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-medal" {...props} />,
+  FaUser: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-user" {...props} />,
+}))
+
+jest.mock('react-icons/hi', () => ({
+  HiUserGroup: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="icon-users" {...props} />
+  ),
 }))
 
 jest.mock('millify', () => ({
@@ -90,6 +95,7 @@ describe('UserCard', () => {
     followersCount: 0,
     location: '',
     repositoriesCount: 0,
+    badgeCount: 0,
   }
 
   beforeEach(() => {
@@ -120,6 +126,7 @@ describe('UserCard', () => {
         followersCount: 1500,
         location: 'San Francisco, CA',
         repositoriesCount: 25,
+        badgeCount: 5,
         button: {
           label: 'View Profile',
           onclick: mockButtonClick,
@@ -129,7 +136,7 @@ describe('UserCard', () => {
       render(<UserCard {...fullProps} />)
 
       expect(screen.getByText('John Doe')).toBeInTheDocument()
-      expect(screen.getByText('Tech Corp')).toBeInTheDocument()
+      expect(screen.getByText(/Tech Corp/)).toBeInTheDocument()
       expect(screen.getByText('Software Developer')).toBeInTheDocument()
       expect(screen.getByTestId('user-avatar')).toHaveAttribute(
         'src',
@@ -147,7 +154,7 @@ describe('UserCard', () => {
       const avatarImage = screen.getByTestId('user-avatar')
       expect(avatarImage).toBeInTheDocument()
       expect(avatarImage).toHaveAttribute('src', 'https://example.com/avatar.jpg&s=160')
-      expect(avatarImage).toHaveAttribute('alt', 'John Doe')
+      expect(avatarImage).toHaveAttribute('alt', "John Doe's profile picture")
     })
 
     it('renders default user icon when avatar is empty string', () => {
@@ -160,7 +167,7 @@ describe('UserCard', () => {
     it('renders company information when provided', () => {
       render(<UserCard {...defaultProps} company="Tech Corp" />)
 
-      expect(screen.getByText('Tech Corp')).toBeInTheDocument()
+      expect(screen.getByText(/Tech Corp/)).toBeInTheDocument()
     })
 
     it('renders location when company is not provided', () => {
@@ -173,6 +180,12 @@ describe('UserCard', () => {
       render(<UserCard {...defaultProps} email="john@example.com" />)
 
       expect(screen.getByText('john@example.com')).toBeInTheDocument()
+    })
+
+    it('renders login  when company and location and email are not provided', () => {
+      render(<UserCard {...defaultProps} login="login" />)
+
+      expect(screen.getByText('login')).toBeInTheDocument()
     })
 
     it('prioritizes company over location and email', () => {
@@ -261,13 +274,16 @@ describe('UserCard', () => {
         <UserCard {...defaultProps} name="Jane Smith" avatar="https://example.com/avatar.jpg" />
       )
 
-      expect(screen.getByTestId('user-avatar')).toHaveAttribute('alt', 'Jane Smith')
+      expect(screen.getByTestId('user-avatar')).toHaveAttribute(
+        'alt',
+        "Jane Smith's profile picture"
+      )
     })
 
     it('uses fallback alt text when name is not provided', () => {
       render(<UserCard {...defaultProps} name="" avatar="https://example.com/avatar.jpg" />)
 
-      expect(screen.getByTestId('user-avatar')).toHaveAttribute('alt', 'user')
+      expect(screen.getByTestId('user-avatar')).toHaveAttribute('alt', 'User profile picture')
     })
 
     it('displays View Profile text', () => {
@@ -315,7 +331,7 @@ describe('UserCard', () => {
       render(<UserCard {...defaultProps} name="John Doe" avatar="https://example.com/avatar.jpg" />)
 
       const avatar = screen.getByTestId('user-avatar')
-      expect(avatar).toHaveAttribute('alt', 'John Doe')
+      expect(avatar).toHaveAttribute('alt', "John Doe's profile picture")
     })
 
     it('maintains semantic heading structure', () => {
@@ -338,7 +354,15 @@ describe('UserCard', () => {
       render(<UserCard {...defaultProps} />)
 
       const button = screen.getByRole('button')
-      expect(button).toHaveClass('group', 'flex', 'flex-col', 'items-center', 'rounded-lg', 'p-6')
+      expect(button).toHaveClass(
+        'group',
+        'flex',
+        'flex-col',
+        'items-center',
+        'rounded-lg',
+        'px-6',
+        'py-6'
+      )
     })
   })
 
@@ -377,6 +401,43 @@ describe('UserCard', () => {
 
       expect(screen.getByText('1.2k')).toBeInTheDocument()
       expect(screen.getByText('5.7k')).toBeInTheDocument()
+    })
+  })
+
+  describe('Badge Count Display', () => {
+    it('renders badge count when greater than 0', () => {
+      render(<UserCard {...defaultProps} badgeCount={5} />)
+
+      expect(screen.getByTestId('icon-medal')).toBeInTheDocument()
+      expect(screen.getByText('5')).toBeInTheDocument()
+    })
+
+    it('does not render badge count when 0', () => {
+      render(<UserCard {...defaultProps} badgeCount={0} />)
+
+      expect(screen.queryByTestId('icon-medal')).not.toBeInTheDocument()
+    })
+
+    it('renders all three metrics when all are greater than 0', () => {
+      render(
+        <UserCard {...defaultProps} followersCount={100} repositoriesCount={50} badgeCount={3} />
+      )
+
+      expect(screen.getByTestId('icon-users')).toBeInTheDocument()
+      expect(screen.getByTestId('icon-folder-open')).toBeInTheDocument()
+      expect(screen.getByTestId('icon-medal')).toBeInTheDocument()
+    })
+
+    it('formats badge count with millify for large numbers', () => {
+      render(<UserCard {...defaultProps} badgeCount={1500} />)
+
+      expect(screen.getByText('1.5k')).toBeInTheDocument()
+    })
+
+    it('handles negative badge count', () => {
+      render(<UserCard {...defaultProps} badgeCount={-1} />)
+
+      expect(screen.queryByTestId('icon-medal')).not.toBeInTheDocument()
     })
   })
 })

@@ -3,11 +3,24 @@ import { gql } from '@apollo/client'
 export const GET_PROJECT_DATA = gql`
   query GetProject($key: String!) {
     project(key: $key) {
-      id
+      contributionData
+      contributionStats
       contributorsCount
+      entityLeaders {
+        description
+        id
+        memberName
+        member {
+          avatarUrl
+          id
+          login
+          name
+        }
+      }
       forksCount
-      issuesCount
+      id
       isActive
+      issuesCount
       key
       languages
       leaders
@@ -60,6 +73,7 @@ export const GET_PROJECT_DATA = gql`
         id
         contributorsCount
         forksCount
+        isArchived
         key
         name
         openIssuesCount

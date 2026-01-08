@@ -31,8 +31,7 @@ export default (async (): Promise<CodegenConfig> => {
             // Allow nullable input fields to remain unspecified
             inputValue: false,
           },
-          // Use `unknown` instead of `any` for unconfigured scalars
-          defaultScalarType: 'unknown',
+          defaultScalarType: 'any',
           // Apollo Client always includes `__typename` fields
           nonOptionalTypename: true,
           // Apollo Client doesn't add the `__typename` field to root types so
@@ -51,6 +50,15 @@ export default (async (): Promise<CodegenConfig> => {
         },
       },
       './src/types/__generated__/graphql.ts': {
+        config: {
+          scalars: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            Date: 'string | number',
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            DateTime: 'string | number',
+            JSON: 'Record<string, unknown>',
+          },
+        },
         plugins: ['typescript'],
       },
     },

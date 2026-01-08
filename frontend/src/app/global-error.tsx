@@ -40,7 +40,8 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ statusCode, title, m
           <p className="font-inter mt-2 text-lg text-black dark:text-white">{message}</p>
           <Button
             onPress={() => router.push('/')}
-            className="font-inter bg-owasp-blue mt-8 h-12 w-40 rounded-lg text-base font-medium text-white transition-colors hover:bg-blue-400"
+            className="font-inter bg-owasp-blue mt-8 h-12 w-40 rounded-lg text-base font-medium transition-colors hover:bg-blue-400 dark:bg-slate-800"
+            aria-label="Return to Home"
           >
             Return To Home
           </Button>
@@ -64,10 +65,14 @@ export class AppError extends Error {
 }
 
 export const handleAppError = (error: unknown) => {
-  const appError =
-    error instanceof AppError
-      ? error
-      : new AppError(500, error instanceof Error ? error.message : ERROR_CONFIGS['500'].message)
+  let appError: AppError
+
+  if (error instanceof AppError) {
+    appError = error
+  } else {
+    const message = error instanceof Error ? error.message : ERROR_CONFIGS['500'].message
+    appError = new AppError(500, message)
+  }
 
   if (appError.statusCode >= 500) {
     Sentry.captureException(error instanceof Error ? error : appError)

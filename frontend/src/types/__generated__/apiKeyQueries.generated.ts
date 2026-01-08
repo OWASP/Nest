@@ -4,7 +4,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
 export type GetApiKeysQueryVariables = Types.Exact<{ [key: string]: never; }>;
 
 
-export type GetApiKeysQuery = { activeApiKeyCount: number, apiKeys: Array<{ __typename: 'ApiKeyNode', id: string, createdAt: unknown, expiresAt: unknown, isRevoked: boolean, name: string, uuid: unknown }> };
+export type GetApiKeysQuery = { activeApiKeyCount: number, apiKeys: Array<{ __typename: 'ApiKeyNode', id: string, createdAt: any, expiresAt: any, isRevoked: boolean, name: string, uuid: any }> };
 
 export type CreateApiKeyMutationVariables = Types.Exact<{
   name: Types.Scalars['String']['input'];
@@ -12,7 +12,7 @@ export type CreateApiKeyMutationVariables = Types.Exact<{
 }>;
 
 
-export type CreateApiKeyMutation = { createApiKey: { __typename: 'CreateApiKeyResult', code: string | null, message: string | null, ok: boolean, rawKey: string | null, apiKey: { __typename: 'ApiKeyNode', id: string, createdAt: unknown, expiresAt: unknown, isRevoked: boolean, name: string, uuid: unknown } | null } };
+export type CreateApiKeyMutation = { createApiKey: { __typename: 'CreateApiKeyResult', code: string | null, message: string | null, ok: boolean, rawKey: string | null, apiKey: { __typename: 'ApiKeyNode', id: string, createdAt: any, expiresAt: any, isRevoked: boolean, name: string, uuid: any } | null } };
 
 export type RevokeApiKeyMutationVariables = Types.Exact<{
   uuid: Types.Scalars['UUID']['input'];

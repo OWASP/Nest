@@ -29,6 +29,7 @@ class Event(BulkSaveModel, TimestampedModel):
         db_table = "owasp_events"
         indexes = [
             models.Index(fields=["-start_date"], name="event_start_date_desc_idx"),
+            models.Index(fields=["-end_date"], name="event_end_date_desc_idx"),
         ]
         verbose_name_plural = "Events"
 

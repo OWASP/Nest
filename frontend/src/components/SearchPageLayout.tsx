@@ -29,7 +29,7 @@ const SearchPageLayout = ({
   searchPlaceholder,
   empty,
   indexName,
-  loadingImageUrl = '/img/owasp_icon_white_sm.png',
+  loadingImageUrl = '/img/spinner_light.png',
   sortChildren,
   children,
 }: SearchPageLayoutProps) => {
@@ -43,7 +43,7 @@ const SearchPageLayout = ({
     <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5">
       <div className="flex w-full items-center justify-center">
         <SearchBar
-          isLoaded={isFirstLoad}
+          isLoaded={!isFirstLoad}
           onSearch={onSearch}
           placeholder={searchPlaceholder}
           initialValue={searchQuery}

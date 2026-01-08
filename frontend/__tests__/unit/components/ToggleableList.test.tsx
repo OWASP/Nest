@@ -1,11 +1,7 @@
-import { faUser } from '@fortawesome/free-solid-svg-icons'
 import { render, screen, fireEvent } from '@testing-library/react'
+import React from 'react'
+import { FaUser } from 'react-icons/fa'
 import ToggleableList from 'components/ToggleableList'
-
-interface MockFontAwesomeIconProps {
-  icon: unknown
-  className?: string
-}
 
 const mockPush = jest.fn()
 jest.mock('next/navigation', () => ({
@@ -23,11 +19,13 @@ jest.mock('components/ShowMoreButton', () => ({
   ),
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, className }: MockFontAwesomeIconProps) => (
-    <span data-testid="font-awesome-icon" className={className}>
-      {String(icon)}
-    </span>
+jest.mock('wrappers/IconWrapper', () => ({
+  IconWrapper: ({
+    icon: Icon,
+    className,
+    ...props
+  }: { icon: React.ComponentType<{ className?: string }> } & React.SVGProps<SVGSVGElement>) => (
+    <Icon className={className} data-testid="react-icon" {...props} />
   ),
 }))
 
@@ -42,20 +40,20 @@ describe('ToggleableList', () => {
     render(<ToggleableList items={mockItems} label="test-label" />)
 
     // First 10 items should be visible
-    mockItems.slice(0, 10).forEach((item) => {
+    for (const item of mockItems.slice(0, 10)) {
       expect(screen.getByText(item)).toBeInTheDocument()
-    })
+    }
 
     // Remaining items should be hidden
-    mockItems.slice(10).forEach((item) => {
+    for (const item of mockItems.slice(10)) {
       expect(screen.queryByText(item)).not.toBeInTheDocument()
-    })
+    }
   })
 
   it('renders with an icon', () => {
-    render(<ToggleableList items={mockItems} label="test-label" icon={faUser} />)
+    render(<ToggleableList items={mockItems} label="test-label" icon={FaUser} />)
 
-    const iconElement = screen.getByTestId('font-awesome-icon')
+    const iconElement = screen.getByTestId('react-icon')
     expect(iconElement).toBeInTheDocument()
     expect(iconElement).toHaveClass('mr-2', 'h-5', 'w-5')
   })
@@ -143,9 +141,9 @@ describe('ToggleableList', () => {
     render(<ToggleableList items={mockItems} label="test-label" limit={0} />)
     // Should show ShowMoreButton since limit is exceeded
     expect(screen.getByTestId('show-more-button')).toBeInTheDocument()
-    mockItems.forEach((item) => {
+    for (const item of mockItems) {
       expect(screen.queryByText(item)).not.toBeInTheDocument()
-    })
+    }
   })
 
   it('properly encodes special character in item names', () => {

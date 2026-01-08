@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { useLogout } from 'hooks/useLogout'
 import { signIn } from 'next-auth/react'
+import React from 'react'
 import { ExtendedSession } from 'types/auth'
 import UserMenu from 'components/UserMenu'
 
@@ -41,11 +42,9 @@ jest.mock('next/image', () => ({
   ),
 }))
 
-// Mock FontAwesome icons
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon }: { icon: unknown }) => (
-    <span data-testid="github-icon" data-icon={String(icon)} />
-  ),
+// Add this react-icons mock for FaGithub:
+jest.mock('react-icons/fa', () => ({
+  FaGithub: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="github-icon" {...props} />,
 }))
 
 describe('UserMenu Component', () => {
@@ -622,7 +621,8 @@ describe('UserMenu Component', () => {
 
       await waitFor(() => {
         const dropdownId = avatarButton.getAttribute('aria-controls')
-        const dropdown = document.getElementById(dropdownId!)
+        expect(dropdownId).not.toBeNull()
+        const dropdown = document.getElementById(dropdownId)
         expect(dropdown).toBeInTheDocument()
       })
     })
@@ -709,7 +709,8 @@ describe('UserMenu Component', () => {
 
       await waitFor(() => {
         const dropdownId = avatarButton.getAttribute('aria-controls')
-        const dropdown = document.getElementById(dropdownId!)
+        expect(dropdownId).not.toBeNull()
+        const dropdown = document.getElementById(dropdownId)
         expect(dropdown).toHaveClass(
           'absolute',
           'right-0',

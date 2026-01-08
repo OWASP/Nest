@@ -1,12 +1,12 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { mockSnapshotDetailsData } from '@unit/data/mockSnapshotData'
 import { render } from 'wrappers/testUtil'
-import SnapshotDetailsPage from 'app/snapshots/[id]/page'
+import SnapshotDetailsPage from 'app/community/snapshots/[id]/page'
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
 }))
 
@@ -36,7 +36,7 @@ jest.mock('@/components/MarkdownWrapper', () => {
 
 describe('SnapshotDetailsPage', () => {
   beforeEach(() => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockSnapshotDetailsData,
       loading: false,
       error: null,
@@ -48,7 +48,7 @@ describe('SnapshotDetailsPage', () => {
   })
 
   test('renders loading state', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       loading: true,
       error: null,
@@ -63,7 +63,7 @@ describe('SnapshotDetailsPage', () => {
   })
 
   test('renders snapshot details when data is available', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockSnapshotDetailsData,
       error: null,
     })
@@ -80,15 +80,16 @@ describe('SnapshotDetailsPage', () => {
   })
 
   test('renders error message when GraphQL request fails', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: mockError,
+      loading: false,
     })
 
     render(<SnapshotDetailsPage />)
 
-    await waitFor(() => screen.getByText('Snapshot not found'))
-    expect(screen.getByText('Snapshot not found')).toBeInTheDocument()
+    await waitFor(() => screen.getByText('Error loading snapshot'))
+    expect(screen.getByText('Error loading snapshot')).toBeInTheDocument()
     expect(addToast).toHaveBeenCalledWith({
       description: 'An unexpected server error occurred.',
       title: 'Server Error',
@@ -99,8 +100,21 @@ describe('SnapshotDetailsPage', () => {
     })
   })
 
+  test('displays "Snapshot not found" when data is null without error', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: null,
+      error: null,
+      loading: false,
+    })
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => screen.getByText('Snapshot not found'))
+    expect(screen.getByText('Snapshot not found')).toBeInTheDocument()
+  })
+
   test('navigates to project page when project card is clicked', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockSnapshotDetailsData,
     })
 
@@ -119,7 +133,7 @@ describe('SnapshotDetailsPage', () => {
   })
 
   test('navigates to chapter page when chapter card is clicked', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockSnapshotDetailsData,
     })
 
@@ -138,7 +152,7 @@ describe('SnapshotDetailsPage', () => {
   })
 
   test('renders new releases correctly', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockSnapshotDetailsData,
     })
 
@@ -154,7 +168,7 @@ describe('SnapshotDetailsPage', () => {
   })
 
   test('handles missing data gracefully', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         snapshot: {
           ...mockSnapshotDetailsData.snapshot,

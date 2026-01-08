@@ -1,27 +1,58 @@
 """Repository API."""
 
 from datetime import datetime
+from http import HTTPStatus
 from typing import Literal
 
-from django.conf import settings
 from django.http import HttpRequest
-from django.views.decorators.cache import cache_page
-from ninja import Query, Router, Schema
+from ninja import Field, FilterSchema, Path, Query, Schema
 from ninja.decorators import decorate_view
-from ninja.pagination import PageNumberPagination, paginate
+from ninja.pagination import RouterPaginated
+from ninja.responses import Response
 
-from apps.github.models.repository import Repository
+from apps.api.decorators.cache import cache_response
+from apps.github.models.repository import Repository as RepositoryModel
 
-router = Router()
+router = RouterPaginated(tags=["Repositories"])
 
 
-class RepositorySchema(Schema):
-    """Schema for Repository."""
+class RepositoryBase(Schema):
+    """Base schema for Repository (used in list endpoints)."""
 
     created_at: datetime
-    description: str
     name: str
     updated_at: datetime
+
+
+class Repository(RepositoryBase):
+    """Schema for Repository (minimal fields for list display)."""
+
+
+class RepositoryDetail(RepositoryBase):
+    """Detail schema for Repository (used in single item endpoints)."""
+
+    commits_count: int
+    contributors_count: int
+    description: str | None = None
+    forks_count: int
+    open_issues_count: int
+    stars_count: int
+
+
+class RepositoryError(Schema):
+    """Repository error schema."""
+
+    message: str
+
+
+class RepositoryFilter(FilterSchema):
+    """Filter for Repository."""
+
+    organization_id: str | None = Field(
+        None,
+        description="Organization that repositories belong to",
+        example="OWASP",
+    )
 
 
 @router.get(
@@ -29,21 +60,47 @@ class RepositorySchema(Schema):
     description="Retrieve a paginated list of GitHub repositories.",
     operation_id="list_repositories",
     summary="List repositories",
-    tags=["Repositories"],
-    response={200: list[RepositorySchema]},
+    response=list[Repository],
 )
-@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
-@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
+@decorate_view(cache_response())
 def list_repository(
     request: HttpRequest,
+    filters: RepositoryFilter = Query(...),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None,
         description="Ordering field",
     ),
-) -> list[RepositorySchema]:
+) -> list[Repository]:
     """Get all repositories."""
-    repositories = Repository.objects.all()
+    repositories = RepositoryModel.objects.select_related("organization")
 
-    if ordering:
-        repositories = repositories.order_by(ordering)
-    return repositories
+    if filters.organization_id:
+        repositories = repositories.filter(organization__login__iexact=filters.organization_id)
+
+    return repositories.order_by(ordering or "-created_at", "-updated_at")
+
+
+@router.get(
+    "/{str:organization_id}/{str:repository_id}",
+    description="Retrieve a specific GitHub repository by organization and repository name.",
+    operation_id="get_repository",
+    response={
+        HTTPStatus.NOT_FOUND: RepositoryError,
+        HTTPStatus.OK: RepositoryDetail,
+    },
+    summary="Get repository",
+)
+@decorate_view(cache_response())
+def get_repository(
+    request: HttpRequest,
+    organization_id: str = Path(example="OWASP"),
+    repository_id: str = Path(example="Nest"),
+) -> RepositoryDetail | RepositoryError:
+    """Get a specific repository by organization and repository name."""
+    try:
+        return RepositoryModel.objects.select_related("organization").get(
+            organization__login__iexact=organization_id,
+            name__iexact=repository_id,
+        )
+    except RepositoryModel.DoesNotExist:
+        return Response({"message": "Repository not found"}, status=HTTPStatus.NOT_FOUND)

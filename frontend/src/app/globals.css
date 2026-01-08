@@ -16,6 +16,50 @@
   .dark ::selection {
     @apply bg-blue-500 text-white;
   }
+
+  .module-form-container [data-slot='base'],
+  .program-form-container [data-slot='base'] {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  .module-form-container [data-slot='helperWrapper'],
+  .program-form-container [data-slot='helperWrapper'] {
+    max-width: 100% !important;
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+  .module-form-container [data-slot='errorMessage'],
+  .program-form-container [data-slot='errorMessage'] {
+    max-width: 100% !important;
+    word-wrap: break-word !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .module-config-grid,
+  .config-grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+  @media (min-width: 768px) {
+    .module-config-grid,
+    .config-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+  }
+  @media (min-width: 1024px) {
+    .module-config-grid,
+    .config-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+  }
+  .module-config-grid > *,
+  .config-grid > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
 }
 
 @layer base {
@@ -32,8 +76,8 @@
     --card-foreground: 0 0% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
+    --primary: 210 76% 48%;
+    --primary-foreground: 0 0% 100%;
     --secondary: 0 0% 96.1%;
     --secondary-foreground: 0 0% 9%;
     --muted: 0 0% 96.1%;
@@ -65,8 +109,8 @@
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
+    --primary: 210 76% 48%;
+    --primary-foreground: 0 0% 100%;
     --secondary: 0 0% 14.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 14.9%;
@@ -129,6 +173,28 @@
 
   a {
     color: #1d7bd7;
+  }
+
+  a .md-wrapper {
+    color: rgb(75 85 99); /* gray-600 */
+  }
+
+  .dark a .md-wrapper {
+    color: rgb(156 163 175); /* gray-400 */
+  }
+
+  a .md-wrapper a {
+    color: #1d7bd7;
+  }
+
+  .dark a .md-wrapper a {
+    color: #1d7bd7;
+  }
+
+  a .md-wrapper ul,
+  a .md-wrapper ol,
+  a .md-wrapper li {
+    color: inherit;
   }
 
   .navlink {
@@ -194,6 +260,20 @@
   .md-wrapper ol {
     list-style: decimal;
   }
+
+  .md-wrapper code {
+    background-color: #e5e5e5;
+    color: oklch(58.8% 0.158 241.966);
+    padding: 0.2em 0.4em;
+    margin: 0 0.2em;
+    border-radius: 5px;
+    font-family: 'Courier New', Courier, monospace;
+  }
+
+  .dark .md-wrapper code {
+    color: oklch(74.6% 0.16 232.661);
+    background-color: #333539;
+  }
 }
 
 @layer base {
@@ -237,6 +317,24 @@
 
   .icon-flip {
     transition: transform 1s ease;
+  }
+
+  .md-wrapper ul,
+  .md-wrapper ol {
+    margin: 0 0 1em 1.5em;
+    padding-left: 1.5em;
+  }
+
+  .md-wrapper ul {
+    list-style-type: disc;
+  }
+
+  .md-wrapper ol {
+    list-style-type: decimal;
+  }
+
+  .md-wrapper li {
+    margin: 0.25em 0;
   }
 
   .flip-container:hover .icon-flip {

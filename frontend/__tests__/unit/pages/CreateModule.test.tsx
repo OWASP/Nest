@@ -1,61 +1,62 @@
-import { useApolloClient, useMutation, useQuery } from '@apollo/client'
-import { screen, fireEvent, waitFor, act } from '@testing-library/react'
+import { useMutation, useQuery, useApolloClient } from '@apollo/client/react'
+import { screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import CreateModulePage from 'app/my/mentorship/programs/[programKey]/modules/create/page'
 
+// Mock dependencies to isolate the component
+jest.mock('@heroui/toast', () => ({ addToast: jest.fn() }))
+jest.mock('app/global-error', () => ({
+  handleAppError: jest.fn(),
+  ErrorDisplay: ({ title }: { title: string }) => <div>{title}</div>,
+}))
 jest.mock('next-auth/react', () => ({
   ...jest.requireActual('next-auth/react'),
   useSession: jest.fn(),
 }))
-
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
   useParams: jest.fn(),
 }))
-
-jest.mock('@apollo/client', () => {
-  const actual = jest.requireActual('@apollo/client')
-  return {
-    ...actual,
-    useMutation: jest.fn(),
-    useQuery: jest.fn(),
-    useApolloClient: jest.fn(),
-    gql: actual.gql,
-  }
-})
+jest.mock('@apollo/client/react', () => ({
+  useMutation: jest.fn(),
+  useQuery: jest.fn(),
+  useApolloClient: jest.fn(),
+}))
 
 describe('CreateModulePage', () => {
   const mockPush = jest.fn()
   const mockReplace = jest.fn()
   const mockCreateModule = jest.fn()
 
+  const mockQuery = jest.fn().mockResolvedValue({
+    data: {
+      searchProjects: [{ id: '123', name: 'Awesome Project' }],
+    },
+  })
+
   beforeEach(() => {
-    jest.useFakeTimers()
     ;(useRouter as jest.Mock).mockReturnValue({ push: mockPush, replace: mockReplace })
     ;(useParams as jest.Mock).mockReturnValue({ programKey: 'test-program' })
     ;(useApolloClient as jest.Mock).mockReturnValue({
-      query: jest.fn().mockResolvedValue({
-        data: {
-          searchProjects: [{ id: '123', name: 'Awesome Project' }],
-        },
-      }),
+      query: mockQuery,
     })
   })
 
   afterEach(() => {
-    jest.runOnlyPendingTimers()
-    jest.useRealTimers()
     jest.clearAllMocks()
   })
 
   it('submits the form and navigates to programs page', async () => {
+    const user = userEvent.setup()
+
     ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { login: 'admin-user' } },
       status: 'authenticated',
     })
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         getProgram: {
           admins: [{ login: 'admin-user' }],
@@ -63,55 +64,62 @@ describe('CreateModulePage', () => {
       },
       loading: false,
     })
-    ;(useMutation as jest.Mock).mockReturnValue([
-      mockCreateModule.mockResolvedValue({}),
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([
+      mockCreateModule.mockResolvedValue({
+        data: {
+          createModule: {
+            key: 'my-test-module',
+          },
+        },
+      }),
       { loading: false },
     ])
 
     render(<CreateModulePage />)
 
     // Fill all inputs
-    fireEvent.change(screen.getByLabelText(/Module Name/i), {
-      target: { value: 'My Test Module' },
-    })
-    fireEvent.change(screen.getByLabelText(/Description/i), {
-      target: { value: 'This is a test module' },
-    })
-    fireEvent.change(screen.getByLabelText(/Start Date/i), {
-      target: { value: '2025-07-15' },
-    })
-    fireEvent.change(screen.getByLabelText(/End Date/i), {
-      target: { value: '2025-08-15' },
-    })
-    fireEvent.change(screen.getByLabelText(/Domains/i), {
-      target: { value: 'AI, ML' },
-    })
-    fireEvent.change(screen.getByLabelText(/Tags/i), {
-      target: { value: 'react, graphql' },
+    await user.type(screen.getByLabelText('Name'), 'My Test Module')
+    await user.type(screen.getByLabelText(/Description/i), 'This is a test module')
+    await user.type(screen.getByLabelText(/Start Date/i), '2025-07-15')
+    await user.type(screen.getByLabelText(/End Date/i), '2025-08-15')
+    await user.type(screen.getByLabelText(/Domains/i), 'AI, ML')
+    await user.type(screen.getByLabelText(/Tags/i), 'react, graphql')
+
+    const projectInput = await waitFor(() => {
+      return screen.getByPlaceholderText('Start typing project name...')
     })
 
-    // Simulate project typing and suggestion click
-    fireEvent.change(screen.getByLabelText(/Project Name/i), {
-      target: { value: 'Awesome Project' },
-    })
+    await user.type(projectInput, 'Aw')
 
-    // Run debounce
-    await act(async () => {
-      jest.runAllTimers()
-    })
+    await waitFor(
+      () => {
+        expect(mockQuery).toHaveBeenCalled()
+      },
+      { timeout: 2000 }
+    )
 
-    const suggestionButton = await screen.findByRole('button', {
-      name: /Awesome Project/i,
-    })
+    const projectOption = await waitFor(
+      () => {
+        return (
+          screen.queryByRole('option', { name: /Awesome Project/i }) ||
+          screen.queryByText('Awesome Project') ||
+          document.querySelector('[data-key="123"]')
+        )
+      },
+      { timeout: 2000 }
+    )
 
-    fireEvent.click(suggestionButton)
+    if (projectOption) {
+      await user.click(projectOption)
+    } else {
+      await user.type(projectInput, '{ArrowDown}{Enter}')
+    }
 
-    // Now the form should be valid → submit
-    fireEvent.click(screen.getByRole('button', { name: /Create Module/i }))
+    await user.click(screen.getByRole('button', { name: /Create Module/i }))
 
     await waitFor(() => {
       expect(mockCreateModule).toHaveBeenCalled()
-      expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program?refresh=true')
+      expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program')
     })
   })
 })

@@ -28,11 +28,6 @@ jest.mock('components/Pagination', () =>
   ))
 )
 
-jest.mock('wrappers/FontAwesomeIconWrapper', () => ({
-  __esModule: true,
-  default: () => <span data-testid="mock-icon" />,
-}))
-
 describe('UsersPage Component', () => {
   let mockRouter: { push: jest.Mock }
 
@@ -88,7 +83,7 @@ describe('UsersPage Component', () => {
       expect(screen.getByText('Security Co')).toBeInTheDocument()
     })
 
-    const viewButtons = screen.getAllByText('View Profile')
+    const viewButtons = screen.getAllByText('View Details')
     expect(viewButtons).toHaveLength(2)
   })
 
@@ -121,11 +116,11 @@ describe('UsersPage Component', () => {
     })
   })
 
-  test('navigates to user details on View Profile button click', async () => {
+  test('navigates to user details on View Details button click', async () => {
     render(<UsersPage />)
 
     await waitFor(() => {
-      const viewDetailsButtons = screen.getAllByText('View Profile')
+      const viewDetailsButtons = screen.getAllByText('View Details')
       expect(viewDetailsButtons[0]).toBeInTheDocument()
       fireEvent.click(viewDetailsButtons[0])
     })

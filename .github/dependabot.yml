@@ -1,22 +1,42 @@
 version: 2
 updates:
   - package-ecosystem: docker
-    directory: /backend/docker
+    directory: /docker/backend
     schedule:
       interval: daily
 
   - package-ecosystem: docker
-    directory: /cspell
+    directory: /docker/cspell
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker-compose
+    directory: /docker-compose/local
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker-compose
+    directory: /docker-compose/production
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker-compose
+    directory: /docker-compose/proxy
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker-compose
+    directory: /docker-compose/staging
     schedule:
       interval: daily
 
   - package-ecosystem: docker
-    directory: /docs/docker
+    directory: /docker/docs
     schedule:
       interval: daily
 
   - package-ecosystem: docker
-    directory: /frontend/docker
+    directory: /docker/frontend
     schedule:
       interval: daily
 

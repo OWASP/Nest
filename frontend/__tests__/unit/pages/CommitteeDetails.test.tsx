@@ -1,17 +1,13 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 
 import { screen, waitFor } from '@testing-library/react'
 import { mockCommitteeDetailsData } from '@unit/data/mockCommitteeDetailsData'
 import { render } from 'wrappers/testUtil'
 import CommitteeDetailsPage from 'app/committees/[committeeKey]/page'
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
-}))
-
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
 }))
 
 const mockRouter = {
@@ -22,11 +18,12 @@ jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(() => mockRouter),
   useParams: () => ({ committeeKey: 'test-committee' }),
+  usePathname: jest.fn(() => '/committees/test-committee'),
 }))
 
 describe('CommitteeDetailsPage Component', () => {
   beforeEach(() => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockCommitteeDetailsData,
       error: null,
     })
@@ -37,7 +34,7 @@ describe('CommitteeDetailsPage Component', () => {
   })
 
   test('renders loading spinner initially', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       loading: true,
       error: null,
@@ -52,7 +49,7 @@ describe('CommitteeDetailsPage Component', () => {
   test('renders committee data correctly', async () => {
     render(<CommitteeDetailsPage />)
     await waitFor(() => {
-      expect(screen.getByText('Test Committee')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Test Committee' })).toBeInTheDocument()
     })
     expect(screen.getByText('This is a test committee summary.')).toBeInTheDocument()
     expect(screen.getByText('Leader 1')).toBeInTheDocument()
@@ -60,10 +57,11 @@ describe('CommitteeDetailsPage Component', () => {
     expect(screen.getByText('https://owasp.org/test-committee')).toBeInTheDocument()
   })
 
-  test('displays "Committee not found" when there is no committee', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+  test('displays "Committee not found" when data is null without error', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
-      error: { message: 'Committee not found' },
+      error: null,
+      loading: false,
     })
     render(<CommitteeDetailsPage />)
     await waitFor(() => {
@@ -91,7 +89,7 @@ describe('CommitteeDetailsPage Component', () => {
         },
       ],
     }
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: committeeDataWithIncompleteContributors,
       error: null,
     })
@@ -111,7 +109,7 @@ describe('CommitteeDetailsPage Component', () => {
   })
 
   test('renders error message when GraphQL request fails', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: null,
       error: { message: 'GraphQL error' },
@@ -119,18 +117,18 @@ describe('CommitteeDetailsPage Component', () => {
     render(<CommitteeDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Committee not found')).toBeInTheDocument()
+      expect(screen.getByText('Error loading committee')).toBeInTheDocument()
     })
   })
 
   test('does not render sponsor block', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockCommitteeDetailsData,
       error: null,
     })
     render(<CommitteeDetailsPage />)
     await waitFor(() => {
-      expect(screen.queryByText(`Want to become a sponsor?`)).toBeNull()
+      expect(screen.queryByText('Want to become a sponsor?')).toBeNull()
     })
   })
 })

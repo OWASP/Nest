@@ -1,8 +1,9 @@
-import { useQuery } from '@apollo/client'
+import { useQuery, useApolloClient } from '@apollo/client/react'
 import { render, screen, waitFor } from '@testing-library/react'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import EditProgramPage from 'app/my/mentorship/programs/[programKey]/edit/page'
+import { ProgramStatusEnum } from 'types/__generated__/graphql'
 
 jest.mock('next-auth/react', () => ({
   useSession: jest.fn(),
@@ -11,12 +12,13 @@ jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
   useParams: jest.fn(),
 }))
-jest.mock('@apollo/client', () => {
-  const actual = jest.requireActual('@apollo/client')
+jest.mock('@apollo/client/react', () => {
+  const actual = jest.requireActual('@apollo/client/react')
   return {
     ...actual,
     useMutation: jest.fn(() => [jest.fn(), { loading: false }]),
     useQuery: jest.fn(),
+    useApolloClient: jest.fn(),
   }
 })
 jest.mock('@heroui/toast', () => ({
@@ -26,16 +28,26 @@ jest.mock('@heroui/toast', () => ({
 describe('EditProgramPage', () => {
   const mockPush = jest.fn()
   const mockReplace = jest.fn()
+  const mockQuery = jest.fn().mockResolvedValue({
+    data: {
+      myPrograms: {
+        programs: [],
+      },
+    },
+  })
 
   beforeEach(() => {
     ;(useRouter as jest.Mock).mockReturnValue({ push: mockPush, replace: mockReplace })
     ;(useParams as jest.Mock).mockReturnValue({ programKey: 'program_1' })
+    ;(useApolloClient as jest.Mock).mockReturnValue({
+      query: mockQuery,
+    })
     jest.clearAllMocks()
   })
 
   test('shows loading spinner while checking access', () => {
     ;(useSession as jest.Mock).mockReturnValue({ status: 'loading' })
-    ;(useQuery as jest.Mock).mockReturnValue({ loading: true })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({ loading: true })
 
     render(<EditProgramPage />)
 
@@ -47,7 +59,7 @@ describe('EditProgramPage', () => {
       data: { user: { login: 'nonadmin' } },
       status: 'authenticated',
     })
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
         getProgram: {
@@ -68,7 +80,7 @@ describe('EditProgramPage', () => {
       data: { user: { login: 'admin1' } },
       status: 'authenticated',
     })
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
         getProgram: {
@@ -80,14 +92,14 @@ describe('EditProgramPage', () => {
           tags: ['react', 'js'],
           domains: ['web'],
           admins: [{ login: 'admin1' }],
-          status: 'DRAFT',
+          status: ProgramStatusEnum.Draft,
         },
       },
     })
 
     render(<EditProgramPage />)
 
-    expect(await screen.findByLabelText('Program Name *')).toBeInTheDocument()
+    expect(await screen.findByLabelText('Name')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Test')).toBeInTheDocument()
   })
 })

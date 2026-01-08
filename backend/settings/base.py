@@ -38,14 +38,16 @@ class Base(Configuration):
         "django.contrib.admin",
         "django.contrib.auth",
         "django.contrib.contenttypes",
-        "django.contrib.sessions",
         "django.contrib.messages",
+        "django.contrib.postgres",
+        "django.contrib.sessions",
         "django.contrib.staticfiles",
     )
 
     THIRD_PARTY_APPS = (
         "algoliasearch_django",
         "corsheaders",
+        "django_rq",
         "ninja",
         "storages",
     )
@@ -126,7 +128,12 @@ class Base(Configuration):
     }
 
     API_PAGE_SIZE = 100
+    API_CACHE_PREFIX = "api-response"
     API_CACHE_TIME_SECONDS = 86400  # 24 hours.
+    GRAPHQL_RESOLVER_CACHE_PREFIX = "graphql-resolver"
+    GRAPHQL_RESOLVER_CACHE_TIME_SECONDS = 86400  # 24 hours.
+    NINJA_PAGINATION_CLASS = "apps.api.rest.v0.pagination.CustomPagination"
+    NINJA_PAGINATION_PER_PAGE = API_PAGE_SIZE
 
     REDIS_HOST = values.SecretValue(environ_name="REDIS_HOST")
     REDIS_PASSWORD = values.SecretValue(environ_name="REDIS_PASSWORD")
@@ -138,6 +145,16 @@ class Base(Configuration):
                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
             },
             "TIMEOUT": 300,
+        }
+    }
+
+    RQ_QUEUES = {
+        "ai": {
+            "HOST": REDIS_HOST,
+            "PORT": 6379,
+            "PASSWORD": REDIS_PASSWORD,
+            "DB": 1,
+            "DEFAULT_TIMEOUT": 300,
         }
     }
 

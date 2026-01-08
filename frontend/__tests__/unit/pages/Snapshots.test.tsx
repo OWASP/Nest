@@ -1,9 +1,9 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { screen, waitFor, fireEvent } from '@testing-library/react'
 import { act } from 'react'
 import { render } from 'wrappers/testUtil'
-import SnapshotsPage from 'app/snapshots/page'
+import SnapshotsPage from 'app/community/snapshots/page'
 
 const mockRouter = {
   push: jest.fn(),
@@ -14,8 +14,8 @@ jest.mock('next/navigation', () => ({
   useRouter: jest.fn(() => mockRouter),
 }))
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
 }))
 
@@ -40,7 +40,7 @@ const mockSnapshots = [
 
 describe('SnapshotsPage', () => {
   beforeEach(() => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: { snapshots: mockSnapshots },
       error: null,
     })
@@ -51,16 +51,17 @@ describe('SnapshotsPage', () => {
   })
 
   it('renders loading spinner initially', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: null,
+      loading: true,
     })
 
     render(<SnapshotsPage />)
 
     await waitFor(() => {
-      const loadingSpinners = screen.getAllByAltText('Loading indicator')
-      expect(loadingSpinners.length).toBe(2)
+      const loadingSkeletons = screen.getAllByRole('status')
+      expect(loadingSkeletons.length).toBeGreaterThan(0)
     })
   })
 
@@ -74,7 +75,7 @@ describe('SnapshotsPage', () => {
   })
 
   it('renders "No Snapshots found" when no snapshots are available', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: { snapshots: [] },
       error: null,
     })
@@ -87,7 +88,7 @@ describe('SnapshotsPage', () => {
   })
 
   it('shows an error toaster when GraphQL request fails', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: new Error('GraphQL error'),
     })
@@ -117,7 +118,7 @@ describe('SnapshotsPage', () => {
 
     // Check if navigate was called with the correct argument
     await waitFor(() => {
-      expect(mockRouter.push).toHaveBeenCalledWith('/snapshots/2024-12')
+      expect(mockRouter.push).toHaveBeenCalledWith('/community/snapshots/2024-12')
     })
   })
 })

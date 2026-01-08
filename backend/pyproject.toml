@@ -14,11 +14,12 @@ packages = [ { include = "apps" } ]
 [tool.poetry.dependencies]
 algoliasearch = "^4.13.2"
 algoliasearch-django = "^4.0.0"
-django = "^5.1"
+django = "^6.0"
 django-configurations = "^2.5.1"
 django-cors-headers = "^4.7.0"
 django-ninja = "^1.4.3"
 django-redis = "^6.0.0"
+django-rq = "^3.1"
 django-storages = { extras = [ "s3" ], version = "^1.14.4" }
 emoji = "^2.14.1"
 geopy = "^2.4.1"
@@ -27,10 +28,11 @@ humanize = "^4.11.0"
 jinja2 = "^3.1.6"
 langchain = "^0.3.26"
 langchain-community = "^0.3.26"
+langgraph = "^1.0.1"
 lxml = "^6.0.0"
 markdown = "^3.7"
-openai = "^1.60.1"
-owasp-schema = "^0.1.10"
+openai = "^2.0.1"
+owasp-schema = "^0.1.46"
 pgvector = "^0.4.1"
 psycopg2-binary = "^2.9.9"
 pydantic = "^2.11.1"
@@ -43,19 +45,19 @@ reportlab = "^4.4.2"
 requests = "^2.32.5"
 sentry-sdk = { extras = [ "django" ], version = "^2.20.0" }
 slack-bolt = "^1.22.0"
-slack-sdk = "^3.35.0"
-strawberry-graphql = { extras = [ "django" ], version = "^0.282.0" }
-strawberry-graphql-django = "^0.65.1"
+slack-sdk = "^3.37.0"
+strawberry-graphql = { extras = [ "django" ], version = "^0.288.1" }
+strawberry-graphql-django = "^0.73.0"
 thefuzz = "^0.22.1"
 pyparsing = "^3.2.3"
 
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.36.4"
 pre-commit = "^4.1.0"
-ruff = "^0.13.0"
+ruff = "^0.14.2"
 
 [tool.poetry.group.test.dependencies]
-pytest = "^8.3.4"
+pytest = "^9.0.1"
 pytest-cov = "^7.0"
 pytest-django = "^4.5"
 pytest-mock = "^3.0"
@@ -88,9 +90,10 @@ lint.per-file-ignores."**/__init__.py" = [
   "F401", # https://docs.astral.sh/ruff/rules/unused-import/
 ]
 lint.per-file-ignores."**/management/commands/*.py" = [
-  "D101", # https://docs.astral.sh/ruff/rules/undocumented-public-class/
-  "D102", # https://docs.astral.sh/ruff/rules/undocumented-public-method/
-  "T201", # https://docs.astral.sh/ruff/rules/print/
+  "D101",   # https://docs.astral.sh/ruff/rules/undocumented-public-class/
+  "D102",   # https://docs.astral.sh/ruff/rules/undocumented-public-method/
+  "SLF001", # https://docs.astral.sh/ruff/rules/private-member-access/
+  "T201",   # https://docs.astral.sh/ruff/rules/print/
 ]
 lint.per-file-ignores."**/migrations/*.py" = [
   "D100",   # https://docs.astral.sh/ruff/rules/undocumented-public-module/
@@ -140,7 +143,6 @@ addopts = [
 filterwarnings = [
   "ignore::DeprecationWarning:pytest_cov",
   "ignore::DeprecationWarning:xdist",
-  "ignore::django.conf.RemovedInDjango60Warning:django",
   "ignore::pydantic.warnings.PydanticDeprecatedSince20",
 ]
 log_level = "INFO"
