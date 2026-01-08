@@ -27,7 +27,7 @@ class MilestoneNode(strawberry.relay.Node):
         """Resolve author."""
         return self.author
 
-    @strawberry.field
+    @strawberry_django.field
     def organization_name(self) -> str | None:
         """Resolve organization name."""
         return (
@@ -36,7 +36,7 @@ class MilestoneNode(strawberry.relay.Node):
             else None
         )
 
-    @strawberry.field
+    @strawberry_django.field
     def progress(self) -> float:
         """Resolve milestone progress."""
         total_issues_count = self.closed_issues_count + self.open_issues_count
@@ -44,7 +44,7 @@ class MilestoneNode(strawberry.relay.Node):
             return 0.0
         return round((self.closed_issues_count / total_issues_count) * 100, 2)
 
-    @strawberry.field
+    @strawberry_django.field
     def repository_name(self) -> str | None:
         """Resolve repository name."""
         return self.repository.name if self.repository else None

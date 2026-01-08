@@ -43,7 +43,7 @@ class ProjectHealthMetricsQuery:
 
         """
         if pagination:
-            if pagination.offset <= 0:
+            if pagination.offset < 0:
                 return []
             pagination.offset = min(pagination.offset, MAX_OFFSET)
             if pagination.limit is not None:
@@ -52,7 +52,7 @@ class ProjectHealthMetricsQuery:
                 pagination.limit = min(pagination.limit, MAX_LIMIT)
         return ProjectHealthMetrics.get_latest_health_metrics()
 
-    @strawberry.field(
+    @strawberry_django.field(
         permission_classes=[HasDashboardAccess],
     )
     def project_health_stats(self) -> ProjectHealthStatsNode:

@@ -33,17 +33,17 @@ class GeoLocationType:
 class ChapterNode(GenericEntityNode):
     """Chapter node."""
 
-    @strawberry.field
+    @strawberry_django.field
     def contribution_stats(self) -> strawberry.scalars.JSON | None:
         """Resolve contribution stats with camelCase keys."""
         return deep_camelize(self.contribution_stats)
 
-    @strawberry.field
+    @strawberry_django.field
     def created_at(self) -> float:
         """Resolve created at."""
         return self.idx_created_at
 
-    @strawberry.field
+    @strawberry_django.field
     def geo_location(self) -> GeoLocationType | None:
         """Resolve geographic location."""
         return (
@@ -52,12 +52,12 @@ class ChapterNode(GenericEntityNode):
             else None
         )
 
-    @strawberry.field
+    @strawberry_django.field
     def key(self) -> str:
         """Resolve key."""
         return self.idx_key
 
-    @strawberry.field
+    @strawberry_django.field
     def suggested_location(self) -> str | None:
         """Resolve suggested location."""
         return self.idx_suggested_location

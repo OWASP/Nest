@@ -171,10 +171,15 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
 
         """
         return (
-            ProjectHealthMetrics.objects.filter(project__is_active=True)
-            .select_related("project")
-            .order_by("project_id", "-nest_created_at")
-            .distinct("project_id")
+            # To have a queryset that supports further filtering/ordering,
+            # we use a subquery to get the latest metrics per project
+            ProjectHealthMetrics.objects.filter(
+                id__in=ProjectHealthMetrics.objects.filter(project__is_active=True)
+                .select_related("project")
+                .order_by("project_id", "-nest_created_at")
+                .distinct("project_id")
+                .values_list("id", flat=True)
+            )
         )
 
     @staticmethod
@@ -185,9 +190,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
             ProjectHealthStatsNode: The overall health stats of all projects.
 
         """
-        stats = ProjectHealthMetrics.objects.filter(
-            id__in=ProjectHealthMetrics.get_latest_health_metrics().values_list("id", flat=True)
-        ).aggregate(
+        stats = ProjectHealthMetrics.get_latest_health_metrics().aggregate(
             projects_count_healthy=models.Count(
                 "id", filter=models.Q(score__gte=HEALTH_SCORE_THRESHOLD_HEALTHY)
             ),

@@ -23,7 +23,7 @@ from apps.owasp.models.member_snapshot import MemberSnapshot
 class MemberSnapshotNode(strawberry.relay.Node):
     """Member snapshot node."""
 
-    @strawberry.field
+    @strawberry_django.field
     def commits_count(self) -> int:
         """Resolve commits count."""
         return self.commits_count
@@ -33,22 +33,22 @@ class MemberSnapshotNode(strawberry.relay.Node):
         """Resolve GitHub user."""
         return self.github_user
 
-    @strawberry.field
+    @strawberry_django.field
     def issues_count(self) -> int:
         """Resolve issues count."""
         return self.issues_count
 
-    @strawberry.field
+    @strawberry_django.field
     def pull_requests_count(self) -> int:
         """Resolve pull requests count."""
         return self.pull_requests_count
 
-    @strawberry.field
+    @strawberry_django.field
     def messages_count(self) -> int:
         """Resolve Slack messages count."""
         return self.messages_count
 
-    @strawberry.field
+    @strawberry_django.field
     def total_contributions(self) -> int:
         """Resolve total contributions."""
         return self.total_contributions

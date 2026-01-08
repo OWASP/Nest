@@ -31,47 +31,47 @@ from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 class ProjectHealthMetricsNode(strawberry.relay.Node):
     """Project health metrics node."""
 
-    @strawberry.field
+    @strawberry_django.field
     def age_days(self) -> int:
         """Resolve project age in days."""
         return self.age_days
 
-    @strawberry.field
+    @strawberry_django.field
     def age_days_requirement(self) -> int:
         """Resolve project age requirement in days."""
         return self.age_days_requirement
 
-    @strawberry.field
+    @strawberry_django.field
     def created_at(self) -> datetime:
         """Resolve metrics creation date."""
         return self.nest_created_at
 
-    @strawberry.field
+    @strawberry_django.field
     def last_commit_days(self) -> int:
         """Resolve last commit age in days."""
         return self.last_commit_days
 
-    @strawberry.field
+    @strawberry_django.field
     def last_commit_days_requirement(self) -> int:
         """Resolve last commit age requirement in days."""
         return self.last_commit_days_requirement
 
-    @strawberry.field
+    @strawberry_django.field
     def last_pull_request_days(self) -> int:
         """Resolve last pull request age in days."""
         return self.last_pull_request_days
 
-    @strawberry.field
+    @strawberry_django.field
     def last_pull_request_days_requirement(self) -> int:
         """Resolve last pull request age requirement in days."""
         return self.last_pull_request_days_requirement
 
-    @strawberry.field
+    @strawberry_django.field
     def last_release_days(self) -> int:
         """Resolve last release age in days."""
         return self.last_release_days
 
-    @strawberry.field
+    @strawberry_django.field
     def last_release_days_requirement(self) -> int:
         """Resolve last release age requirement in days."""
         return self.last_release_days_requirement

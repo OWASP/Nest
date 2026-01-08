@@ -1,6 +1,5 @@
 """GitHub user GraphQL node."""
 
-import strawberry
 import strawberry_django
 
 from apps.github.models.user import User
@@ -48,7 +47,7 @@ class UserNode:
         )
         return [user_badge.badge for user_badge in user_badges]
 
-    @strawberry.field
+    @strawberry_django.field
     def created_at(self) -> float:
         """Resolve created at."""
         return self.idx_created_at
@@ -81,29 +80,29 @@ class UserNode:
             return self.owasp_profile.is_gsoc_mentor
         return False
 
-    @strawberry.field
+    @strawberry_django.field
     def issues_count(self) -> int:
         """Resolve issues count."""
         return self.idx_issues_count
 
-    @strawberry.field
+    @strawberry_django.field
     def linkedin_page_id(self) -> str:
         """Resolve LinkedIn page ID."""
         if hasattr(self, "owasp_profile") and self.owasp_profile.linkedin_page_id:
             return self.owasp_profile.linkedin_page_id
         return ""
 
-    @strawberry.field
+    @strawberry_django.field
     def releases_count(self) -> int:
         """Resolve releases count."""
         return self.idx_releases_count
 
-    @strawberry.field
+    @strawberry_django.field
     def updated_at(self) -> float:
         """Resolve updated at."""
         return self.idx_updated_at
 
-    @strawberry.field
+    @strawberry_django.field
     def url(self) -> str:
         """Resolve URL."""
         return self.url

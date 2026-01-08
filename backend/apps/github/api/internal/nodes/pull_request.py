@@ -24,7 +24,7 @@ class PullRequestNode(strawberry.relay.Node):
         """Resolve author."""
         return self.author
 
-    @strawberry.field
+    @strawberry_django.field
     def organization_name(self) -> str | None:
         """Resolve organization name."""
         return (
@@ -33,12 +33,12 @@ class PullRequestNode(strawberry.relay.Node):
             else None
         )
 
-    @strawberry.field
+    @strawberry_django.field
     def repository_name(self) -> str | None:
         """Resolve repository name."""
         return self.repository.name if self.repository else None
 
-    @strawberry.field
+    @strawberry_django.field
     def url(self) -> str:
         """Resolve URL."""
         return str(self.url) if self.url else ""

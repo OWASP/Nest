@@ -25,27 +25,30 @@ RECENT_ISSUES_LIMIT = 100
 class SnapshotNode(strawberry.relay.Node):
     """Snapshot node."""
 
-    @strawberry.field
+    new_chapters: list[ChapterNode] = strawberry_django.field()
+
+    @strawberry_django.field
     def key(self) -> str:
         """Resolve key."""
         return self.key
 
-    @strawberry_django.field
-    def new_chapters(self) -> list[ChapterNode]:
-        """Resolve new chapters."""
-        return self.new_chapters.all()
-
-    @strawberry_django.field
+    @strawberry_django.field(
+        select_related=["author", "repository", "level", "milestone"],
+        prefetch_related=["labels", "assignees"],
+    )
     def new_issues(self) -> list[IssueNode]:
         """Resolve new issues."""
         return self.new_issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
 
-    @strawberry_django.field
+    @strawberry_django.field(
+        select_related=["owasp_repository"],
+        prefetch_related=["owners", "organizations", "repositories"],
+    )
     def new_projects(self) -> list[ProjectNode]:
         """Resolve new projects."""
         return self.new_projects.order_by("-created_at")
 
-    @strawberry_django.field
+    @strawberry_django.field(select_related=["author", "repository", "repository__organization"])
     def new_releases(self) -> list[ReleaseNode]:
         """Resolve new releases."""
         return self.new_releases.order_by("-published_at")

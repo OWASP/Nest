@@ -51,18 +51,21 @@ class ProjectNode(GenericEntityNode):
     @strawberry_django.field(select_related=["project"])
     def health_metrics_list(self, limit: int = 30) -> list[ProjectHealthMetricsNode]:
         """Resolve project health metrics."""
-        limit = min(limit, MAX_LIMIT)
         return (
             ProjectHealthMetrics.objects.filter(project=self).order_by("nest_created_at")[:limit]
-            if limit > 0
+            if (limit := min(limit, MAX_LIMIT)) > 0
             else []
         )
 
-    @strawberry_django.field(select_related=["project"])
+    @strawberry_django.field
     def health_metrics_latest(self) -> ProjectHealthMetricsNode | None:
         """Resolve latest project health metrics."""
+        # strawberry_django.field optimization works with QuerySets only.
         return (
-            ProjectHealthMetrics.objects.filter(project=self).order_by("-nest_created_at").first()
+            ProjectHealthMetrics.objects.select_related("project")
+            .filter(project=self)
+            .order_by("-nest_created_at")
+            .first()
         )
 
     @strawberry.field

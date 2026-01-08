@@ -36,7 +36,7 @@ class IssueNode(strawberry.relay.Node):
             else None
         )
 
-    @strawberry.field
+    @strawberry_django.field
     def repository_name(self) -> str | None:
         """Resolve the repository name."""
         return self.repository.name if self.repository else None
@@ -44,7 +44,7 @@ class IssueNode(strawberry.relay.Node):
     @strawberry_django.field
     def assignees(self) -> list[UserNode]:
         """Resolve assignees list."""
-        return list(self.assignees.all())
+        return self.assignees.all()
 
     @strawberry_django.field
     def labels(self) -> list[str]:
@@ -66,7 +66,7 @@ class IssueNode(strawberry.relay.Node):
             )
         ]
 
-    @strawberry_django.field
+    @strawberry_django.field(select_related=["author", "repository"])
     def pull_requests(self) -> list[PullRequestNode]:
         """Return all pull requests linked to this issue."""
-        return list(self.pull_requests.select_related("author", "repository").all())
+        return self.pull_requests.all()
