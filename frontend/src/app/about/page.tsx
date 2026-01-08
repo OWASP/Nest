@@ -2,11 +2,10 @@
 import { useQuery } from '@apollo/client/react'
 import { Tooltip } from '@heroui/tooltip'
 import upperFirst from 'lodash/upperFirst'
-import { useState } from 'react'
 import millify from 'millify'
 import Image from 'next/image'
-import ToggleableList from 'components/ToggleableList'
 import Link from 'next/link'
+import { useState } from 'react'
 import { useEffect } from 'react'
 import { FaMapSigns, FaTools } from 'react-icons/fa'
 import { FaCircleCheck, FaClock, FaScroll, FaBullseye, FaUser, FaUsersGear } from 'react-icons/fa6'
@@ -32,6 +31,7 @@ import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
 import ShowMoreButton from 'components/ShowMoreButton'
 import AboutSkeleton from 'components/skeletons/AboutSkeleton'
+import ToggleableList from 'components/ToggleableList'
 import TopContributorsList from 'components/TopContributorsList'
 
 const leaders = {
@@ -257,38 +257,28 @@ const About = () => {
             <ShowMoreButton onToggle={() => setStoryExpanded(!storyExpanded)} />
           )}
         </SecondaryCard>
-        <SecondaryCard icon={FaClock} title={<AnchorTitle title="Project Timeline" />}>
-          <ToggleableList
-            items={[...projectTimeline].reverse()}
-            limit={6}
-            renderItem={(milestone, index, items) => (
+        <ToggleableList
+          items={[...projectTimeline].reverse()}
+          limit={4}
+          label={<AnchorTitle title="Project Timeline" />}
+          icon={FaClock}
+          renderItem={(milestone, index, items) => (
+            <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
+              {index !== items.length - 1 && (
+                <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-400" />
+              )}
+
               <div
-                key={`${milestone.year}-${milestone.title}`}
-                className="relative pl-10"
-              >
-                {index !== items.length - 1 && (
-                  <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-400" />
-                )}
+                aria-hidden="true"
+                className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
+              />
 
-                <div
-                  aria-hidden="true"
-                  className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
-                />
-
-                <h3 className="text-lg font-semibold text-blue-400">
-                  {milestone.title}
-                </h3>
-                <h4 className="mb-1 font-medium text-gray-400">
-                  {milestone.year}
-                </h4>
-                <p className="text-gray-600 dark:text-gray-300">
-                  {milestone.description}
-                </p>
-              </div>
-            )}
-          />
-        </SecondaryCard>
-
+              <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
+              <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
+              <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
+            </div>
+          )}
+        />
 
         <div className="grid gap-0 md:grid-cols-4 md:gap-6">
           {[

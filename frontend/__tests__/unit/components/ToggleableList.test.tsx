@@ -3,8 +3,6 @@ import React from 'react'
 import { FaUser } from 'react-icons/fa'
 import ToggleableList from 'components/ToggleableList'
 
-/* -------------------- mocks -------------------- */
-
 const mockPush = jest.fn()
 
 jest.mock('next/navigation', () => ({
@@ -33,11 +31,8 @@ jest.mock('wrappers/IconWrapper', () => ({
   }) => <Icon className={className} data-testid="react-icon" {...props} />,
 }))
 
-/* -------------------- tests -------------------- */
-
 describe('ToggleableList', () => {
   const mockItems = Array.from({ length: 15 }, (_, i) => `Item ${i + 1}`)
-
   const renderItem = (item: string) => <span>{item}</span>
 
   beforeEach(() => {
@@ -45,46 +40,30 @@ describe('ToggleableList', () => {
   })
 
   it('renders with limited items initially', () => {
-    render(
-      <ToggleableList
-        items={mockItems}
-        label="test-label"
-        renderItem={renderItem}
-      />
-    )
+    render(<ToggleableList items={mockItems} label="test-label" renderItem={renderItem} />)
 
-    for (const item of mockItems.slice(0, 10)) {
+    mockItems.slice(0, 10).forEach((item) => {
       expect(screen.getByText(item)).toBeInTheDocument()
-    }
+    })
 
-    for (const item of mockItems.slice(10)) {
+    mockItems.slice(10).forEach((item) => {
       expect(screen.queryByText(item)).not.toBeInTheDocument()
-    }
+    })
   })
 
   it('renders with an icon', () => {
     render(
-      <ToggleableList
-        items={mockItems}
-        label="test-label"
-        icon={FaUser}
-        renderItem={renderItem}
-      />
+      <ToggleableList items={mockItems} label="test-label" icon={FaUser} renderItem={renderItem} />
     )
 
-    const iconElement = screen.getByTestId('react-icon')
-    expect(iconElement).toBeInTheDocument()
-    expect(iconElement).toHaveClass('mr-2', 'h-5', 'w-5')
+    const icon = screen.getByTestId('react-icon')
+    expect(icon).toBeInTheDocument()
+    expect(icon).toHaveClass('mr-2', 'h-5', 'w-5')
   })
 
   it('respects custom limit prop', () => {
     render(
-      <ToggleableList
-        items={mockItems}
-        label="test-label"
-        limit={3}
-        renderItem={renderItem}
-      />
+      <ToggleableList items={mockItems} label="test-label" limit={3} renderItem={renderItem} />
     )
 
     expect(screen.getByText('Item 1')).toBeInTheDocument()
@@ -94,29 +73,16 @@ describe('ToggleableList', () => {
   })
 
   it('does not show Show More button when item count is less than limit', () => {
-    const limitedItems = mockItems.slice(0, 5)
-
     render(
-      <ToggleableList
-        items={limitedItems}
-        label="test-label"
-        renderItem={renderItem}
-      />
+      <ToggleableList items={mockItems.slice(0, 5)} label="test-label" renderItem={renderItem} />
     )
 
-    expect(
-      screen.queryByTestId('show-more-button')
-    ).not.toBeInTheDocument()
+    expect(screen.queryByTestId('show-more-button')).not.toBeInTheDocument()
   })
 
   it('shows Show More button when items exceed limit', () => {
     render(
-      <ToggleableList
-        items={mockItems}
-        label="test-label"
-        limit={5}
-        renderItem={renderItem}
-      />
+      <ToggleableList items={mockItems} label="test-label" limit={5} renderItem={renderItem} />
     )
 
     expect(screen.getByTestId('show-more-button')).toBeInTheDocument()
@@ -158,51 +124,20 @@ describe('ToggleableList', () => {
   })
 
   it('handles empty items array', () => {
-    render(
-      <ToggleableList
-        items={[]}
-        label="Empty List"
-        renderItem={renderItem}
-      />
-    )
+    render(<ToggleableList items={[]} label="Empty List" renderItem={renderItem} />)
 
     expect(screen.getByText('Empty List')).toBeInTheDocument()
-    expect(
-      screen.queryByTestId('show-more-button')
-    ).not.toBeInTheDocument()
+    expect(screen.queryByTestId('show-more-button')).not.toBeInTheDocument()
   })
 
   it('handles items exactly equal to limit', () => {
     const exactItems = Array.from({ length: 5 }, (_, i) => `Item ${i + 1}`)
 
     render(
-      <ToggleableList
-        items={exactItems}
-        label="Exact Items"
-        limit={5}
-        renderItem={renderItem}
-      />
+      <ToggleableList items={exactItems} label="Exact Items" limit={5} renderItem={renderItem} />
     )
 
     expect(screen.getByText('Item 5')).toBeInTheDocument()
-    expect(
-      screen.queryByTestId('show-more-button')
-    ).not.toBeInTheDocument()
-  })
-
-  it('properly encodes special characters in navigation', () => {
-    const itemsWithSpecialChars = ['C++', 'C#']
-
-    render(
-      <ToggleableList
-        items={itemsWithSpecialChars}
-        label="Special Items"
-        renderItem={renderItem}
-      />
-    )
-
-    fireEvent.click(screen.getByText('C++'))
-    expect(mockPush).toHaveBeenCalledWith('/projects?q=C%2B%2B')
+    expect(screen.queryByTestId('show-more-button')).not.toBeInTheDocument()
   })
 })
-

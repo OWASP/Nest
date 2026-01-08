@@ -682,12 +682,11 @@ describe('About Component', () => {
     })
   })
   test('limits project timeline milestones to 6 items by default', async () => {
-  render(<About />)
+    render(<About />)
 
-  // Timeline milestones contain years like 2020, 2021, etc.
-  const milestoneYears = await screen.findAllByText(/20\d{2}/)
+    // Timeline milestones contain years like 2020, 2021, etc.
+    const milestoneYears = await screen.findAllByText(/20\d{2}/)
 
-  expect(milestoneYears.length).toBeLessThanOrEqual(6)
+    expect(milestoneYears.length).toBeLessThanOrEqual(6)
   })
-
 })

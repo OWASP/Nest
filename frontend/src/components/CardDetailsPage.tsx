@@ -199,7 +199,12 @@ const DetailsCard = ({
               />
             )}
             {topics.length !== 0 && (
-              <ToggleableList items={topics} icon={FaTags} label={<AnchorTitle title="Topics"  />} renderItem={(item) => <span>{item}</span>}/>
+              <ToggleableList
+                items={topics}
+                icon={FaTags}
+                label={<AnchorTitle title="Topics" />}
+                renderItem={(item) => <span>{item}</span>}
+              />
             )}
           </div>
         )}
