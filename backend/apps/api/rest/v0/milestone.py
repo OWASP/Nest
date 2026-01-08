@@ -102,9 +102,9 @@ def list_milestones(
     ),
     operation_id="get_milestone",
     response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
         HTTPStatus.NOT_FOUND: MilestoneError,
         HTTPStatus.OK: MilestoneDetail,
-        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
     },
     summary="Get milestone",
 )

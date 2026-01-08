@@ -6,6 +6,7 @@ import strawberry
 from django.db.models import OuterRef, Subquery
 
 from apps.github.api.internal.nodes.milestone import MilestoneNode
+from apps.github.models.generic_issue_model import GenericIssueModel
 from apps.github.models.milestone import Milestone
 
 MAX_LIMIT = 1000
@@ -15,8 +16,8 @@ MAX_LIMIT = 1000
 class MilestoneStateEnum(str, enum.Enum):
     """Milestone state filter options."""
 
-    CLOSED = "closed"
-    OPEN = "open"
+    CLOSED = GenericIssueModel.State.CLOSED.value
+    OPEN = GenericIssueModel.State.OPEN.value
 
 
 @strawberry.type

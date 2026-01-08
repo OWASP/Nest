@@ -86,9 +86,9 @@ def list_members(
     description="Retrieve member details.",
     operation_id="get_member",
     response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
         HTTPStatus.NOT_FOUND: MemberError,
         HTTPStatus.OK: MemberDetail,
-        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
     },
     summary="Get member",
 )

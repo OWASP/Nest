@@ -100,9 +100,9 @@ def list_chapters(
     description="Retrieve chapter details.",
     operation_id="get_chapter",
     response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
         HTTPStatus.NOT_FOUND: ChapterError,
         HTTPStatus.OK: ChapterDetail,
-        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
     },
     summary="Get chapter",
 )

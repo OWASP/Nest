@@ -99,9 +99,9 @@ def list_events(
     description="Retrieve an event details.",
     operation_id="get_event",
     response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
         HTTPStatus.NOT_FOUND: EventError,
         HTTPStatus.OK: EventDetail,
-        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
     },
     summary="Get event",
 )

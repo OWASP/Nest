@@ -89,9 +89,9 @@ def list_sponsors(
     description="Retrieve a sponsor details.",
     operation_id="get_sponsor",
     response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
         HTTPStatus.NOT_FOUND: SponsorError,
         HTTPStatus.OK: SponsorDetail,
-        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
     },
     summary="Get sponsor",
 )

@@ -82,9 +82,9 @@ def list_organization(
     description="Retrieve project details.",
     operation_id="get_organization",
     response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
         HTTPStatus.NOT_FOUND: OrganizationError,
         HTTPStatus.OK: OrganizationDetail,
-        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
     },
     summary="Get organization",
 )

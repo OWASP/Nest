@@ -98,9 +98,9 @@ def list_issues(
     description="Retrieve a specific GitHub issue by organization, repository, and issue number.",
     operation_id="get_issue",
     response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
         HTTPStatus.NOT_FOUND: IssueError,
         HTTPStatus.OK: IssueDetail,
-        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
     },
     summary="Get issue",
 )
