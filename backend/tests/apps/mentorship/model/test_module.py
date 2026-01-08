@@ -48,7 +48,7 @@ class TestModulePureMocks:
         mock_module.started_at = None
         mock_module.ended_at = None
 
-        def simulate_save_for_inheritance(*args, **kwargs):
+        def simulate_save_for_inheritance():
             mock_module.key = "date-module"
             if not mock_module.started_at:
                 mock_module.started_at = mock_module.program.started_at

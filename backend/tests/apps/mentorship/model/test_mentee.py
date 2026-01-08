@@ -4,7 +4,7 @@ from apps.github.models import User as GithubUser
 from apps.mentorship.models import Mentee
 
 
-class test_mentee:
+class TestMentee:
     def test_str_returns_github_login(self):
         github_user = MagicMock(spec=GithubUser, login="test_mentee")
 
