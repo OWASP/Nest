@@ -495,39 +495,32 @@ flowchart TD
 
 To avoid working on an outdated copy of Nest (and to reduce merge conflicts), contributors may find it helpful to keep their fork synchronized with the main OWASP repository.
 
-#### 1. Add the upstream remote (one-time setup)
+<details>
+<summary>Setting up the upstream remote</summary>
 
-After cloning your fork locally and moving into the project directory:
-
-```bash
-git remote -v
-```
-
-If you do not see a remote named `upstream`, add the official OWASP Nest repository as `upstream`:
+If you haven't added the upstream remote yet, you can add it using:
 
 ```bash
 git remote add upstream https://github.com/OWASP/Nest.git
 ```
 
-You can verify the remotes again:
+You can verify that the upstream remote has been added by running:
 
 ```bash
 git remote -v
 ```
 
-You should now see both `origin` (your fork) and `upstream` (OWASP/Nest).
+This will show both your `origin` (your fork) and `upstream` (the main repository) remotes.
 
-#### 2. Sync your local main and your fork before starting new work
+</details>
 
-Before starting a **new** feature or issue, you may want to update your local `main` from `upstream/main`:
+Before working on a **new** feature or issue, update your local `main` branch from `upstream/main`:
 
 ```bash
 git checkout main
 git fetch upstream
 git merge upstream/main
 ```
-
-Following this flow ensures that new branches start from the latest `upstream/main`, which helps avoid unnecessary rebases during review.
 
 ### 1. Find Something to Work On
 
