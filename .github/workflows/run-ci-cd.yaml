@@ -109,7 +109,7 @@ jobs:
           make check-spelling
 
   generate-django-model-graphs:
-    name: Generate Django model diagrams (non-blocking)
+    name: Generate Django model diagrams
     if: |
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'push' &&
@@ -141,7 +141,7 @@ jobs:
 
       - name: Install backend dependencies
         working-directory: backend
-        run: poetry install --with dev
+        run: poetry install --with dev --no-root
 
       - name: Prepare minimal Django environment
         working-directory: backend
