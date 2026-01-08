@@ -28,11 +28,11 @@ class FakeProgramNode:
         self.status = ProgramStatusEnum.PUBLISHED
         self.user_role = "admin"
         self.tags = ["python", "javascript"]
-        self._admins_manager = MagicMock()
+        self.admins = MagicMock()
 
     # the real resolver code should behave similarly: return the manager's .all()
-    def admins(self):
-        return self._admins_manager.all()
+    def mock_admins(self):
+        return ProgramNode.admins(self)
 
 
 @pytest.fixture
@@ -40,7 +40,7 @@ def mock_program_node():
     """Fixture returning a FakeProgramNode with a mocked admins manager."""
     node = FakeProgramNode()
 
-    node._admins_manager.all.return_value = [
+    node.admins.all.return_value = [
         MagicMock(name="admin1"),
         MagicMock(name="admin2"),
     ]
@@ -69,7 +69,7 @@ def test_program_node_fields(mock_program_node):
 
 def test_program_node_admins(mock_program_node):
     """Test the admins resolver."""
-    admins = mock_program_node.admins()
+    admins = mock_program_node.mock_admins()
     assert len(admins) == 2
 
 
