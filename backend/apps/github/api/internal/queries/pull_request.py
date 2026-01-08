@@ -1,6 +1,7 @@
 """Github pull requests GraphQL queries."""
 
 import strawberry
+import strawberry_django
 from django.db.models import F, Window
 from django.db.models.functions import Rank
 
@@ -15,7 +16,19 @@ MAX_LIMIT = 1000
 class PullRequestQuery:
     """Pull request queries."""
 
-    @strawberry.field
+    @strawberry_django.field(
+        select_related=[
+            "author",
+            "milestone",
+            "repository",
+            "repository__organization",
+        ],
+        prefetch_related=[
+            "assignees",
+            "labels",
+            "related_issues",
+        ],
+    )
     def recent_pull_requests(
         self,
         *,
@@ -41,24 +54,10 @@ class PullRequestQuery:
             filtered list of pull requests.
 
         """
-        queryset = (
-            PullRequest.objects.select_related(
-                "author",
-                "milestone",
-                "repository",
-                "repository__organization",
-            )
-            .prefetch_related(
-                "assignees",
-                "labels",
-                "related_issues",
-            )
-            .exclude(
-                author__is_bot=True,
-            )
-            .order_by(
-                "-created_at",
-            )
+        queryset = PullRequest.objects.exclude(
+            author__is_bot=True,
+        ).order_by(
+            "-created_at",
         )
 
         filters = {}

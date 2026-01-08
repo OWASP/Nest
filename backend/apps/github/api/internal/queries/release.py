@@ -1,6 +1,7 @@
 """GraphQL queries for handling OWASP releases."""
 
 import strawberry
+import strawberry_django
 from django.db.models import F, Window
 from django.db.models.functions import Rank
 
@@ -14,7 +15,13 @@ MAX_LIMIT = 1000
 class ReleaseQuery:
     """GraphQL query class for retrieving recent GitHub releases."""
 
-    @strawberry.field
+    @strawberry_django.field(
+        select_related=[
+            "author",
+            "repository",
+            "repository__organization",
+        ]
+    )
     def recent_releases(
         self,
         *,
@@ -35,26 +42,14 @@ class ReleaseQuery:
             list[ReleaseNode]: List of release nodes containing the filtered list of releases.
 
         """
-        queryset = (
-            Release.objects.select_related(
-                "author",
-                "repository",
-                "repository__organization",
-            )
-            .filter(
-                is_draft=False,
-                is_pre_release=False,
-                published_at__isnull=False,
-            )
-            .order_by("-published_at")
-        )
+        queryset = Release.objects.filter(
+            is_draft=False,
+            is_pre_release=False,
+            published_at__isnull=False,
+        ).order_by("-published_at")
 
         if login:
-            queryset = queryset.select_related(
-                "author",
-                "repository",
-                "repository__organization",
-            ).filter(
+            queryset = queryset.filter(
                 author__login=login,
             )
 

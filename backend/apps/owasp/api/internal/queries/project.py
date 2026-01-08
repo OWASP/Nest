@@ -1,6 +1,7 @@
 """OWASP project GraphQL queries."""
 
 import strawberry
+import strawberry_django
 from django.db.models import Q
 
 from apps.github.models.user import User as GithubUser
@@ -17,7 +18,7 @@ SEARCH_PROJECTS_LIMIT = 3
 class ProjectQuery:
     """Project queries."""
 
-    @strawberry.field
+    @strawberry_django.field
     def project(self, key: str) -> ProjectNode | None:
         """Resolve project.
 
@@ -33,7 +34,10 @@ class ProjectQuery:
         except Project.DoesNotExist:
             return None
 
-    @strawberry.field
+    @strawberry_django.field(
+        select_related=["owasp_repository"],
+        prefetch_related=["organizations", "owners", "repositories"],
+    )
     def recent_projects(self, limit: int = 8) -> list[ProjectNode]:
         """Resolve recent projects.
 
@@ -45,15 +49,15 @@ class ProjectQuery:
 
         """
         return (
-            Project.objects.select_related("owasp_repository")
-            .prefetch_related("organizations", "owners", "repositories")
-            .filter(is_active=True)
-            .order_by("-created_at")[:limit]
+            Project.objects.filter(is_active=True).order_by("-created_at")[:limit]
             if (limit := min(limit, MAX_RECENT_PROJECTS_LIMIT)) > 0
             else []
         )
 
-    @strawberry.field
+    @strawberry_django.field(
+        select_related=["owasp_repository"],
+        prefetch_related=["organizations", "owners", "repositories"],
+    )
     def search_projects(self, query: str) -> list[ProjectNode]:
         """Search active projects by name (case-insensitive, partial match)."""
         cleaned_query = query.strip()
@@ -63,17 +67,12 @@ class ProjectQuery:
         ):
             return []
 
-        return (
-            Project.objects.select_related("owasp_repository")
-            .prefetch_related("organizations", "owners", "repositories")
-            .filter(
-                is_active=True,
-                name__icontains=cleaned_query,
-            )
-            .order_by("name")[:SEARCH_PROJECTS_LIMIT]
-        )
+        return Project.objects.filter(
+            is_active=True,
+            name__icontains=cleaned_query,
+        ).order_by("name")[:SEARCH_PROJECTS_LIMIT]
 
-    @strawberry.field
+    @strawberry_django.field
     def is_project_leader(self, info: strawberry.Info, login: str) -> bool:
         """Check if a GitHub login or name is listed as a project leader."""
         try:

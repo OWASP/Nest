@@ -1,6 +1,7 @@
 """GraphQL queries for handling GitHub issues."""
 
 import strawberry
+import strawberry_django
 from django.db.models import F, Window
 from django.db.models.functions import Rank
 
@@ -14,7 +15,17 @@ MAX_LIMIT = 1000
 class IssueQuery:
     """GraphQL query class for retrieving GitHub issues."""
 
-    @strawberry.field
+    @strawberry_django.field(
+        select_related=[
+            "author",
+            "repository",
+            "milestone",
+            "level",
+            "repository",
+            "repository__organization",
+        ],
+        prefetch_related=["labels", "assignees"],
+    )
     def recent_issues(
         self,
         *,
@@ -35,19 +46,8 @@ class IssueQuery:
             list[IssueNode]: List of issue nodes.
 
         """
-        queryset = (
-            Issue.objects.select_related(
-                "author",
-                "repository",
-                "milestone",
-                "level",
-                "repository",
-                "repository__organization",
-            )
-            .prefetch_related("labels", "assignees")
-            .order_by(
-                "-created_at",
-            )
+        queryset = Issue.objects.order_by(
+            "-created_at",
         )
 
         filters = {}

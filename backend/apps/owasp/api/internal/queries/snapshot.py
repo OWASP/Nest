@@ -1,6 +1,7 @@
 """OWASP snapshot GraphQL queries."""
 
 import strawberry
+import strawberry_django
 
 from apps.owasp.api.internal.nodes.snapshot import SnapshotNode
 from apps.owasp.models.snapshot import Snapshot
@@ -12,7 +13,7 @@ MAX_LIMIT = 1000
 class SnapshotQuery:
     """Snapshot queries."""
 
-    @strawberry.field
+    @strawberry_django.field
     def snapshot(self, key: str) -> SnapshotNode | None:
         """Resolve snapshot by key."""
         try:
@@ -23,17 +24,21 @@ class SnapshotQuery:
         except Snapshot.DoesNotExist:
             return None
 
-    @strawberry.field
+    @strawberry_django.field(
+        prefetch_related=[
+            "new_chapters",
+            "new_issues",
+            "new_projects",
+            "new_releases",
+            "new_users",
+        ]
+    )
     def snapshots(self, limit: int = 12) -> list[SnapshotNode]:
         """Resolve snapshots."""
         return (
-            Snapshot.objects.prefetch_related(
-                "new_chapters", "new_issues", "new_projects", "new_releases", "new_users"
-            )
-            .filter(
+            Snapshot.objects.filter(
                 status=Snapshot.Status.COMPLETED,
-            )
-            .order_by(
+            ).order_by(
                 "-created_at",
             )[:limit]
             if (limit := min(limit, MAX_LIMIT)) > 0

@@ -1,6 +1,7 @@
 """OWASP repository contributor GraphQL queries."""
 
 import strawberry
+import strawberry_django
 
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.github.models.repository_contributor import RepositoryContributor
@@ -12,7 +13,7 @@ MAX_LIMIT = 100
 class RepositoryContributorQuery:
     """Repository contributor queries."""
 
-    @strawberry.field
+    @strawberry_django.field
     def top_contributors(
         self,
         *,

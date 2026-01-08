@@ -1,6 +1,7 @@
 """OWASP member snapshot GraphQL queries."""
 
 import strawberry
+import strawberry_django
 
 from apps.github.models.user import User
 from apps.owasp.api.internal.nodes.member_snapshot import MemberSnapshotNode
@@ -13,7 +14,7 @@ MAX_LIMIT = 1000
 class MemberSnapshotQuery:
     """GraphQL queries for MemberSnapshot model."""
 
-    @strawberry.field
+    @strawberry_django.field
     def member_snapshot(
         self, user_login: str, start_year: int | None = None
     ) -> MemberSnapshotNode | None:
@@ -44,7 +45,9 @@ class MemberSnapshotQuery:
         except User.DoesNotExist:
             return None
 
-    @strawberry.field
+    @strawberry_django.field(
+        select_related=["github_user"], prefetch_related=["issues", "pull_requests", "messages"]
+    )
     def member_snapshots(
         self, user_login: str | None = None, limit: int = 10
     ) -> list[MemberSnapshotNode]:
@@ -58,11 +61,7 @@ class MemberSnapshotQuery:
             List of MemberSnapshotNode objects
 
         """
-        query = (
-            MemberSnapshot.objects.all()
-            .select_related("github_user")
-            .prefetch_related("issues", "pull_requests", "messages")
-        )
+        query = MemberSnapshot.objects.all()
 
         if user_login:
             try:

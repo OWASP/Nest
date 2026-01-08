@@ -3,6 +3,7 @@
 import enum
 
 import strawberry
+import strawberry_django
 from django.db.models import OuterRef, Subquery
 
 from apps.github.api.internal.nodes.milestone import MilestoneNode
@@ -24,7 +25,10 @@ class MilestoneStateEnum(str, enum.Enum):
 class MilestoneQuery:
     """Github Milestone Queries."""
 
-    @strawberry.field
+    @strawberry_django.field(
+        select_related=["author", "repository", "repository__organization"],
+        prefetch_related=["issues", "labels", "pull_requests"],
+    )
     def recent_milestones(
         self,
         *,
@@ -55,15 +59,6 @@ class MilestoneQuery:
             case _:
                 milestones = Milestone.objects.all()
 
-        milestones = milestones.select_related(
-            "author",
-            "repository",
-            "repository__organization",
-        ).prefetch_related(
-            "issues",
-            "labels",
-            "pull_requests",
-        )
         if login:
             milestones = milestones.filter(
                 author__login=login,
