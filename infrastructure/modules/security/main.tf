@@ -9,6 +9,13 @@ terraform {
   }
 }
 
+check "vpc_endpoint_rules_require_sg" {
+  assert {
+    condition     = var.create_vpc_endpoint_rules ? var.vpc_endpoint_sg_id != null : true
+    error_message = "vpc_endpoint_sg_id must be provided when create_vpc_endpoint_rules is true."
+  }
+}
+
 resource "aws_security_group" "alb" {
   description = "Security group for Application Load Balancer"
   name        = "${var.project_name}-${var.environment}-alb-sg"

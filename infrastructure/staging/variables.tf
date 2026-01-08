@@ -1,31 +1,19 @@
-variable "aws_region" {
-  description = "The AWS region to deploy resources in."
-  type        = string
-  default     = "us-east-2"
-}
-
 variable "availability_zones" {
   description = "A list of availability zones for the VPC."
   type        = list(string)
   default     = ["us-east-2a", "us-east-2b", "us-east-2c"]
 }
 
+variable "aws_region" {
+  description = "The AWS region to deploy resources in."
+  type        = string
+  default     = "us-east-2"
+}
+
 variable "create_nat_gateway" {
   description = "Whether to create a NAT Gateway for private subnet internet access."
   type        = bool
   default     = true
-}
-
-variable "lambda_arn" {
-  description = "The ARN of the Zappa Lambda function for backend routing."
-  type        = string
-  default     = null
-}
-
-variable "lambda_function_name" {
-  description = "The name of the Zappa Lambda function."
-  type        = string
-  default     = null
 }
 
 variable "create_rds_proxy" {
@@ -147,6 +135,12 @@ variable "db_user" {
   default     = "owasp_nest_db_user"
 }
 
+variable "ecs_use_public_subnets" {
+  description = "Whether to run ECS tasks in public subnets (requires assign_public_ip)."
+  type        = bool
+  default     = true
+}
+
 variable "environment" {
   description = "The environment (e.g., staging, production)."
   type        = string
@@ -155,12 +149,6 @@ variable "environment" {
     condition     = contains(["staging", "production"], var.environment)
     error_message = "Environment must be either 'staging' or 'production'."
   }
-}
-
-variable "ecs_use_public_subnets" {
-  description = "Whether to run ECS tasks in public subnets (requires assign_public_ip)."
-  type        = bool
-  default     = true
 }
 
 variable "fixtures_bucket_name" {
@@ -203,6 +191,18 @@ variable "frontend_use_fargate_spot" {
   description = "Whether to use Fargate Spot for frontend tasks."
   type        = bool
   default     = true
+}
+
+variable "lambda_arn" {
+  description = "The ARN of the Zappa Lambda function for backend routing."
+  type        = string
+  default     = null
+}
+
+variable "lambda_function_name" {
+  description = "The name of the Zappa Lambda function."
+  type        = string
+  default     = null
 }
 
 variable "private_subnet_cidrs" {

@@ -26,18 +26,6 @@ variable "environment" {
   type        = string
 }
 
-variable "lambda_arn" {
-  description = "The ARN of the Lambda function for backend routing (null to skip Lambda routing)."
-  type        = string
-  default     = null
-}
-
-variable "lambda_function_name" {
-  description = "The name of the Lambda function for backend routing."
-  type        = string
-  default     = null
-}
-
 variable "frontend_health_check_path" {
   description = "The health check path for the frontend target group."
   type        = string
@@ -48,6 +36,18 @@ variable "frontend_port" {
   description = "The port for the frontend target group."
   type        = number
   default     = 3000
+}
+
+variable "lambda_arn" {
+  description = "The ARN of the Lambda function for backend routing (null to skip Lambda routing)."
+  type        = string
+  default     = null
+}
+
+variable "lambda_function_name" {
+  description = "The name of the Lambda function for backend routing."
+  type        = string
+  default     = null
 }
 
 variable "log_retention_days" {

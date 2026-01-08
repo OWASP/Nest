@@ -34,6 +34,13 @@ locals {
   backend_path_chunks = chunklist(local.backend_paths, 5)
 }
 
+check "https_requires_domain" {
+  assert {
+    condition     = var.enable_https ? var.domain_name != null : true
+    error_message = "domain_name must be provided when enable_https is true."
+  }
+}
+
 data "aws_elb_service_account" "main" {}
 
 data "aws_iam_policy_document" "alb_logs" {
@@ -61,6 +68,15 @@ resource "aws_acm_certificate" "main" {
   lifecycle {
     create_before_destroy = true
   }
+}
+
+resource "aws_lambda_permission" "alb" {
+  count         = var.lambda_arn != null ? 1 : 0
+  action        = "lambda:InvokeFunction"
+  function_name = var.lambda_function_name
+  principal     = "elasticloadbalancing.amazonaws.com"
+  source_arn    = aws_lb_target_group.lambda[0].arn
+  statement_id  = "AllowALBInvoke"
 }
 
 resource "aws_lb" "main" {
@@ -128,6 +144,42 @@ resource "aws_lb_listener" "https" {
   }
 }
 
+resource "aws_lb_listener_rule" "backend_http" {
+  for_each     = var.lambda_arn != null && !var.enable_https ? { for idx, chunk in local.backend_path_chunks : idx => chunk } : {}
+  listener_arn = aws_lb_listener.http[0].arn
+  priority     = 100 + each.key
+  tags         = var.common_tags
+
+  action {
+    target_group_arn = aws_lb_target_group.lambda[0].arn
+    type             = "forward"
+  }
+
+  condition {
+    path_pattern {
+      values = each.value
+    }
+  }
+}
+
+resource "aws_lb_listener_rule" "backend_https" {
+  for_each     = var.lambda_arn != null && var.enable_https ? { for idx, chunk in local.backend_path_chunks : idx => chunk } : {}
+  listener_arn = aws_lb_listener.https[0].arn
+  priority     = 100 + each.key
+  tags         = var.common_tags
+
+  action {
+    target_group_arn = aws_lb_target_group.lambda[0].arn
+    type             = "forward"
+  }
+
+  condition {
+    path_pattern {
+      values = each.value
+    }
+  }
+}
+
 resource "aws_lb_target_group" "frontend" {
   deregistration_delay = 30
   name                 = "${var.project_name}-${var.environment}-frontend-tg"
@@ -165,51 +217,6 @@ resource "aws_lb_target_group_attachment" "lambda" {
   target_group_arn = aws_lb_target_group.lambda[0].arn
   target_id        = var.lambda_arn
   depends_on       = [aws_lambda_permission.alb]
-}
-
-resource "aws_lambda_permission" "alb" {
-  count         = var.lambda_arn != null ? 1 : 0
-  action        = "lambda:InvokeFunction"
-  function_name = var.lambda_function_name
-  principal     = "elasticloadbalancing.amazonaws.com"
-  source_arn    = aws_lb_target_group.lambda[0].arn
-  statement_id  = "AllowALBInvoke"
-}
-
-resource "aws_lb_listener_rule" "backend_https" {
-  for_each     = var.lambda_arn != null && var.enable_https ? { for idx, chunk in local.backend_path_chunks : idx => chunk } : {}
-  listener_arn = aws_lb_listener.https[0].arn
-  priority     = 100 + each.key
-  tags         = var.common_tags
-
-  action {
-    target_group_arn = aws_lb_target_group.lambda[0].arn
-    type             = "forward"
-  }
-
-  condition {
-    path_pattern {
-      values = each.value
-    }
-  }
-}
-
-resource "aws_lb_listener_rule" "backend_http" {
-  for_each     = var.lambda_arn != null && !var.enable_https ? { for idx, chunk in local.backend_path_chunks : idx => chunk } : {}
-  listener_arn = aws_lb_listener.http[0].arn
-  priority     = 100 + each.key
-  tags         = var.common_tags
-
-  action {
-    target_group_arn = aws_lb_target_group.lambda[0].arn
-    type             = "forward"
-  }
-
-  condition {
-    path_pattern {
-      values = each.value
-    }
-  }
 }
 
 resource "aws_s3_bucket" "alb_logs" { # NOSONAR
