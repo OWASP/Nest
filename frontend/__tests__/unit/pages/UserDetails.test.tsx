@@ -350,12 +350,13 @@ describe('UserDetailsPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: mockError,
+      loading: false,
     })
 
     render(<UserDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('User not found')).toBeInTheDocument()
+      expect(screen.getByText('Error loading user')).toBeInTheDocument()
     })
 
     expect(addToast).toHaveBeenCalledWith({
