@@ -67,7 +67,7 @@
         ansible.builtin.command:
           cmd: crontab /tmp/staging_crontab
 
-      - name: Retart services
+      - name: Restart services
         shell:
           cmd: docker compose up -d --pull always
 

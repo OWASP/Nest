@@ -47,7 +47,7 @@ sentry-sdk = { extras = [ "django" ], version = "^2.20.0" }
 slack-bolt = "^1.22.0"
 slack-sdk = "^3.37.0"
 strawberry-graphql = { extras = [ "django" ], version = "^0.288.1" }
-strawberry-graphql-django = "^0.72.0"
+strawberry-graphql-django = "^0.73.0"
 thefuzz = "^0.22.1"
 pyparsing = "^3.2.3"
 
@@ -90,9 +90,10 @@ lint.per-file-ignores."**/__init__.py" = [
   "F401", # https://docs.astral.sh/ruff/rules/unused-import/
 ]
 lint.per-file-ignores."**/management/commands/*.py" = [
-  "D101", # https://docs.astral.sh/ruff/rules/undocumented-public-class/
-  "D102", # https://docs.astral.sh/ruff/rules/undocumented-public-method/
-  "T201", # https://docs.astral.sh/ruff/rules/print/
+  "D101",   # https://docs.astral.sh/ruff/rules/undocumented-public-class/
+  "D102",   # https://docs.astral.sh/ruff/rules/undocumented-public-method/
+  "SLF001", # https://docs.astral.sh/ruff/rules/private-member-access/
+  "T201",   # https://docs.astral.sh/ruff/rules/print/
 ]
 lint.per-file-ignores."**/migrations/*.py" = [
   "D100",   # https://docs.astral.sh/ruff/rules/undocumented-public-module/

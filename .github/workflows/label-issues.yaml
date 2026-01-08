@@ -6,6 +6,8 @@ on:
       - edited
       - opened
 
+permissions: {}
+
 jobs:
   label:
     permissions:
