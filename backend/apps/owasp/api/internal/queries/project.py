@@ -44,13 +44,12 @@ class ProjectQuery:
             list[ProjectNode]: A list of recent active projects.
 
         """
-        limit = min(limit, MAX_RECENT_PROJECTS_LIMIT)
         return (
             Project.objects.select_related("owasp_repository")
             .prefetch_related("organizations", "owners", "repositories")
             .filter(is_active=True)
             .order_by("-created_at")[:limit]
-            if limit > 0
+            if (limit := min(limit, MAX_RECENT_PROJECTS_LIMIT)) > 0
             else []
         )
 

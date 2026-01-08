@@ -35,7 +35,6 @@ class ReleaseQuery:
             list[ReleaseNode]: List of release nodes containing the filtered list of releases.
 
         """
-        limit = min(limit, MAX_LIMIT)
         queryset = (
             Release.objects.select_related(
                 "author",
@@ -77,4 +76,4 @@ class ReleaseQuery:
                 .order_by("-published_at")
             )
 
-        return queryset[:limit] if limit > 0 else []
+        return queryset[:limit] if (limit := min(limit, MAX_LIMIT)) > 0 else []

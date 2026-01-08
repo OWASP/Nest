@@ -15,5 +15,4 @@ class PostQuery:
     @strawberry.field
     def recent_posts(self, limit: int = 5) -> list[PostNode]:
         """Return the 5 most recent posts."""
-        limit = min(limit, MAX_LIMIT)
-        return Post.recent_posts()[:limit] if limit > 0 else []
+        return Post.recent_posts()[:limit] if (limit := min(limit, MAX_LIMIT)) > 0 else []

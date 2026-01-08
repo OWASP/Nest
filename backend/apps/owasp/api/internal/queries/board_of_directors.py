@@ -39,5 +39,8 @@ class BoardOfDirectorsQuery:
             List of BoardOfDirectorsNode objects.
 
         """
-        limit = min(limit, MAX_LIMIT)
-        return BoardOfDirectors.objects.order_by("-year")[:limit] if limit > 0 else []
+        return (
+            BoardOfDirectors.objects.order_by("-year")[:limit]
+            if (limit := min(limit, MAX_LIMIT)) > 0
+            else []
+        )

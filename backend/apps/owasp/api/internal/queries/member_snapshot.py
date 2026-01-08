@@ -58,7 +58,6 @@ class MemberSnapshotQuery:
             List of MemberSnapshotNode objects
 
         """
-        limit = min(limit, MAX_LIMIT)
         query = (
             MemberSnapshot.objects.all()
             .select_related("github_user")
@@ -72,4 +71,4 @@ class MemberSnapshotQuery:
             except User.DoesNotExist:
                 return []
 
-        return query.order_by("-start_at")[:limit] if limit > 0 else []
+        return query.order_by("-start_at")[:limit] if (limit := min(limit, MAX_LIMIT)) > 0 else []

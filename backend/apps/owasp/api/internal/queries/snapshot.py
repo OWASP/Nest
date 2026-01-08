@@ -26,7 +26,6 @@ class SnapshotQuery:
     @strawberry.field
     def snapshots(self, limit: int = 12) -> list[SnapshotNode]:
         """Resolve snapshots."""
-        limit = min(limit, MAX_LIMIT)
         return (
             Snapshot.objects.prefetch_related(
                 "new_chapters", "new_issues", "new_projects", "new_releases", "new_users"
@@ -37,6 +36,6 @@ class SnapshotQuery:
             .order_by(
                 "-created_at",
             )[:limit]
-            if limit > 0
+            if (limit := min(limit, MAX_LIMIT)) > 0
             else []
         )

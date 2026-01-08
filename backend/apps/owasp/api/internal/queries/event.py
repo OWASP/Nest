@@ -15,5 +15,4 @@ class EventQuery:
     @strawberry.field
     def upcoming_events(self, limit: int = 6) -> list[EventNode]:
         """Resolve upcoming events."""
-        limit = min(limit, MAX_LIMIT)
-        return Event.upcoming_events()[:limit] if limit > 0 else []
+        return Event.upcoming_events()[:limit] if (limit := min(limit, MAX_LIMIT)) > 0 else []

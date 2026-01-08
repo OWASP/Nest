@@ -53,7 +53,6 @@ class RepositoryQuery:
             list[RepositoryNode]: A list of repositories.
 
         """
-        limit = min(limit, MAX_LIMIT)
         return (
             (
                 Repository.objects.select_related(
@@ -65,6 +64,6 @@ class RepositoryQuery:
                 )
                 .order_by("-stars_count")[:limit]
             )
-            if limit > 0
+            if (limit := min(limit, MAX_LIMIT)) > 0
             else []
         )

@@ -35,7 +35,6 @@ class IssueQuery:
             list[IssueNode]: List of issue nodes.
 
         """
-        limit = min(limit, MAX_LIMIT)
         queryset = (
             Issue.objects.select_related(
                 "author",
@@ -73,4 +72,4 @@ class IssueQuery:
                 .order_by("-created_at")
             )
 
-        return queryset[:limit] if limit > 0 else []
+        return queryset[:limit] if (limit := min(limit, MAX_LIMIT)) > 0 else []

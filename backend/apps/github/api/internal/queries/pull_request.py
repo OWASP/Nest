@@ -41,7 +41,6 @@ class PullRequestQuery:
             filtered list of pull requests.
 
         """
-        limit = min(limit, MAX_LIMIT)
         queryset = (
             PullRequest.objects.select_related(
                 "author",
@@ -96,4 +95,4 @@ class PullRequestQuery:
                 .order_by("-created_at")
             )
 
-        return queryset[:limit] if limit > 0 else []
+        return queryset[:limit] if (limit := min(limit, MAX_LIMIT)) > 0 else []

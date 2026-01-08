@@ -54,7 +54,6 @@ class MilestoneQuery:
             case _:
                 milestones = Milestone.objects.all()
 
-        limit = min(limit, MAX_LIMIT)
         milestones = milestones.select_related(
             "author",
             "repository",
@@ -88,6 +87,6 @@ class MilestoneQuery:
             milestones.order_by(
                 "-created_at",
             )[:limit]
-            if limit > 0
+            if (limit := min(limit, MAX_LIMIT)) > 0
             else []
         )

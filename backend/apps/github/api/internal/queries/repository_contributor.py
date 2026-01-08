@@ -41,9 +41,9 @@ class RepositoryContributorQuery:
             list: List of top contributors with their details.
 
         """
-        if limit <= 0:
+        if (limit := min(limit, MAX_LIMIT)) <= 0:
             return []
-        limit = min(limit, MAX_LIMIT)
+
         top_contributors = RepositoryContributor.get_top_contributors(
             chapter=chapter,
             committee=committee,
