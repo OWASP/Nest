@@ -610,9 +610,10 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
+
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@v4
 
       - name: Run baseline scan
         uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25
@@ -621,14 +622,7 @@ jobs:
           target: 'https://nest.owasp.dev'
           allow_issue_writing: false
           fail_action: false
-          cmd_options: '-a -c .zapconfig -r report.html '
-
-      - name: Upload report
-        if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
-        with:
-          name: zap-baseline-scan-report-${{ github.run_id }}
-          path: report.html
+          cmd_options: '-a -c .zapconfig'
 
 
   build-production-images:
@@ -946,7 +940,7 @@ jobs:
       - name: Run proxy deploy
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml production/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
-
+        
   run-production-zap-baseline-scan:
     name: Run production ZAP baseline scan
     needs:
@@ -954,9 +948,10 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
+
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@v4
 
       - name: Run baseline scan
         uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25
@@ -965,11 +960,4 @@ jobs:
           target: 'https://nest.owasp.org'
           allow_issue_writing: false
           fail_action: false
-          cmd_options: '-a -c .zapconfig -r report.html '
-
-      - name: Upload report
-        if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
-        with:
-          name: zap-baseline-scan-report-${{ github.run_id }}
-          path: report.html
+          cmd_options: '-a -c .zapconfig'
