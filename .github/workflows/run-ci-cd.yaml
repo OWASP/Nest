@@ -938,7 +938,7 @@ jobs:
       - name: Run proxy deploy
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml production/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
-        
+
   run-production-zap-baseline-scan:
     name: Run production ZAP baseline scan
     needs:
@@ -946,7 +946,6 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
