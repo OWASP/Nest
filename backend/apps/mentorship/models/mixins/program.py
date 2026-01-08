@@ -11,24 +11,24 @@ class ProgramIndexMixin:
         """Determine if the program should be indexed.
 
         Returns:
-            bool: True if the program is published, False otherwise.
+            bool: True if the program meets indexing criteria, False otherwise.
 
         """
         return self.status == self.__class__.ProgramStatus.PUBLISHED
 
     @property
     def idx_name(self) -> str:
-        """Return name for Algolia indexing.
+        """Return name for indexing.
 
         Returns:
-            str: The program name.
+            str: The name of the program.
 
         """
         return self.name
 
     @property
     def idx_key(self) -> str:
-        """Return unique key for Algolia indexing.
+        """Return unique key for indexing.
 
         Returns:
             str: The program key.
@@ -38,27 +38,27 @@ class ProgramIndexMixin:
 
     @property
     def idx_status(self) -> str:
-        """Return status for Algolia indexing.
+        """Return status for indexing.
 
         Returns:
-            str: The program status.
+            str: The status of the program.
 
         """
         return self.status
 
     @property
     def idx_description(self) -> str:
-        """Return description for Algolia indexing.
+        """Return description for indexing.
 
         Returns:
-            str: The program description.
+            str: The description of the program.
 
         """
         return self.description or ""
 
     @property
     def idx_experience_levels(self) -> list[str]:
-        """Return experience levels for Algolia filtering.
+        """Return experience levels for filtering.
 
         Returns:
             list[str]: A list of experience levels.

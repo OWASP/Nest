@@ -9,7 +9,7 @@ class RepositoryBasedEntityModelMixin:
         """Determine if the entity should be indexed.
 
         Returns:
-            bool: True if the entity has active repositories, False otherwise.
+            bool: True if the entity meets indexing criteria, False otherwise.
 
         """
         return self.has_active_repositories
@@ -19,7 +19,7 @@ class RepositoryBasedEntityModelMixin:
         """Return description for indexing.
 
         Returns:
-            str: The entity description.
+            str: The description fo the entity.
 
         """
         return self.description
@@ -29,7 +29,7 @@ class RepositoryBasedEntityModelMixin:
         """Return leaders for indexing.
 
         Returns:
-            list: A list of leader names, excluding those starting with '@'.
+            list: A list of leader names.
 
         """
         return [leader for leader in self.leaders_raw if not leader.startswith("@")]
@@ -39,7 +39,7 @@ class RepositoryBasedEntityModelMixin:
         """Return name for indexing.
 
         Returns:
-            str: The entity name.
+            str: The name of the entity.
 
         """
         return self.name
@@ -49,7 +49,7 @@ class RepositoryBasedEntityModelMixin:
         """Return summary for indexing.
 
         Returns:
-            str: The entity summary.
+            str: The summary of the entity.
 
         """
         return self.summary
@@ -79,7 +79,7 @@ class RepositoryBasedEntityModelMixin:
         """Return URL for indexing.
 
         Returns:
-            str: The OWASP URL for the entity.
+            str: The URL for the entity.
 
         """
         return self.owasp_url

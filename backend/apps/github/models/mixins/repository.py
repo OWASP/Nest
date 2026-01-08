@@ -62,7 +62,7 @@ class RepositoryIndexMixin:
         """Return description for indexing.
 
         Returns:
-            str: The repository description.
+            str: The description of the repository.
 
         """
         return self.description
@@ -92,7 +92,7 @@ class RepositoryIndexMixin:
         """Return key for indexing.
 
         Returns:
-            str: The nest key of the repository.
+            str: The repository key.
 
         """
         return self.nest_key
@@ -142,7 +142,7 @@ class RepositoryIndexMixin:
         """Return project key for indexing.
 
         Returns:
-            str: The nest key of the associated project, or empty string.
+            str: The key of the associated project, or empty string.
 
         """
         return self.project.nest_key if self.project else ""
@@ -185,7 +185,7 @@ class RepositoryIndexMixin:
             int: The number of subscribers to the repository.
 
         """
-        return self.subscribers_count 
+        return self.subscribers_count
 
     @property
     def idx_top_contributors(self) -> list[dict[str, Any]]:

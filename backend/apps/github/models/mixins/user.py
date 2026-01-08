@@ -49,7 +49,7 @@ class UserIndexMixin:
         """Return bio for indexing.
 
         Returns:
-            str: The user's biography.
+            str: The biography of the user.
 
         """
         return self.bio
@@ -89,7 +89,7 @@ class UserIndexMixin:
         """Return key for indexing.
 
         Returns:
-            str: The user's login as the index key.
+            str: The index key.
 
         """
         return self.login
@@ -119,7 +119,7 @@ class UserIndexMixin:
         """Return location for indexing.
 
         Returns:
-            str: The user's location.
+            str: The location of the user.
 
         """
         return self.location
@@ -129,7 +129,7 @@ class UserIndexMixin:
         """Return login for indexing.
 
         Returns:
-            str: The user's login name.
+            str: The login name of the user.
 
         """
         return self.login
@@ -139,7 +139,7 @@ class UserIndexMixin:
         """Return name for indexing.
 
         Returns:
-            str: The user's display name.
+            str: The display name of the user.
 
         """
         return self.name
@@ -159,7 +159,7 @@ class UserIndexMixin:
         """Return title for indexing.
 
         Returns:
-            str: The user's title.
+            str: The title of the user.
 
         """
         return self.title

@@ -15,7 +15,7 @@ class ReleaseIndexMixin:
         """Determine if the release should be indexed.
 
         Returns:
-            bool: True if the release is not a draft, False otherwise.
+            bool: True if the release meets indexing criteria, False otherwise.
 
         """
         return not self.is_draft

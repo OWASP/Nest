@@ -68,7 +68,7 @@ class ChapterIndexMixin(RepositoryBasedEntityModelMixin):
         """Return key for indexing.
 
         Returns:
-            str: The chapter key without the 'www-chapter-' prefix.
+            str: The chapter key.
 
         """
         return self.key.replace("www-chapter-", "")
@@ -78,7 +78,7 @@ class ChapterIndexMixin(RepositoryBasedEntityModelMixin):
         """Return meetup group for indexing.
 
         Returns:
-            str: The chapter's Meetup group identifier.
+            str: The meetup group of the chapter.
 
         """
         return self.meetup_group

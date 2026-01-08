@@ -67,7 +67,7 @@ class OrganizationIndexMixin:
         """Return description for indexing.
 
         Returns:
-            str: The organization description.
+            str: The description of the organization.
 
         """
         return self.description or ""
@@ -87,7 +87,7 @@ class OrganizationIndexMixin:
         """Return location for indexing.
 
         Returns:
-            str: The organization's location.
+            str: The location of the organization.
 
         """
         return self.location or ""
@@ -97,7 +97,7 @@ class OrganizationIndexMixin:
         """Return login for indexing.
 
         Returns:
-            str: The organization's login name.
+            str: The login name of the organization.
 
         """
         return self.login
@@ -107,7 +107,7 @@ class OrganizationIndexMixin:
         """Return name for indexing.
 
         Returns:
-            str: The organization's display name.
+            str: The display name of the organization.
 
         """
         return self.name or ""

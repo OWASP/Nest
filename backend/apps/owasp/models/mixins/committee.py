@@ -24,7 +24,7 @@ class CommitteeIndexMixin(RepositoryBasedEntityModelMixin):
         """Return key for indexing.
 
         Returns:
-            str: The committee key without the 'www-committee-' prefix.
+            str: The committee key.
 
         """
         return self.key.replace("www-committee-", "")

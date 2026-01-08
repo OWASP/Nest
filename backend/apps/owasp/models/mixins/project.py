@@ -64,8 +64,7 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
         """Return health score for indexing.
 
         Returns:
-            float | None: DEFAULT_HEALTH_SCORE when settings.IS_PRODUCTION_ENVIRONMENT is True,
-                otherwise the actual health score.
+            float | None: The health score or None.
 
         """
         # TODO(arkid15r): Enable real health score in production when ready.
@@ -96,7 +95,7 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
         """Return key for indexing.
 
         Returns:
-            str: The project key without the 'www-project-' prefix.
+            str: The project key.
 
         """
         return self.key.replace("www-project-", "")
@@ -136,7 +135,7 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
         """Return name for indexing.
 
         Returns:
-            str: The project name or a formatted version of the key.
+            str: The name of the project.
 
         """
         return self.name or " ".join(self.key.replace("www-project-", "").capitalize().split("-"))
@@ -219,7 +218,8 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
         """Return updated at timestamp for indexing.
 
         Returns:
-            str | float: The project's last update timestamp as a float, or empty string if unavailable.
+            str | float: The project's last update timestamp as a float,
+            or empty string if unavailable.
 
         """
         return self.updated_at.timestamp() if self.updated_at else ""
