@@ -111,7 +111,6 @@ module "networking" {
   aws_region                          = var.aws_region
   availability_zones                  = var.availability_zones
   common_tags                         = local.common_tags
-  create_nat_gateway                  = var.create_nat_gateway
   create_vpc_cloudwatch_logs_endpoint = var.create_vpc_cloudwatch_logs_endpoint
   create_vpc_ecr_api_endpoint         = var.create_vpc_ecr_api_endpoint
   create_vpc_ecr_dkr_endpoint         = var.create_vpc_ecr_dkr_endpoint
@@ -128,7 +127,10 @@ module "networking" {
 module "parameters" {
   source = "../modules/parameters"
 
-  allowed_hosts      = var.frontend_domain_name != null ? var.frontend_domain_name : module.alb.alb_dns_name
+  allowed_hosts = join(",", [
+    var.frontend_domain_name != null ? var.frontend_domain_name : module.alb.alb_dns_name,
+    "zappa",
+  ])
   allowed_origins    = var.frontend_domain_name != null ? "https://${var.frontend_domain_name}" : "http://${module.alb.alb_dns_name}"
   common_tags        = local.common_tags
   db_host            = module.database.db_proxy_endpoint

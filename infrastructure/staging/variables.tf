@@ -10,12 +10,6 @@ variable "aws_region" {
   default     = "us-east-2"
 }
 
-variable "create_nat_gateway" {
-  description = "Whether to create a NAT Gateway for private subnet internet access."
-  type        = bool
-  default     = true
-}
-
 variable "create_rds_proxy" {
   description = "Whether to create an RDS proxy."
   type        = bool

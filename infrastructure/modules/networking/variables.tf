@@ -14,12 +14,6 @@ variable "common_tags" {
   default     = {}
 }
 
-variable "create_nat_gateway" {
-  description = "Whether to create a NAT Gateway for private subnet internet access."
-  type        = bool
-  default     = true
-}
-
 variable "create_vpc_cloudwatch_logs_endpoint" {
   description = "Whether to create CloudWatch Logs VPC endpoint."
   type        = bool
