@@ -345,7 +345,7 @@ module "load_data_task" {
   subnet_ids                   = var.subnet_ids
   task_name                    = "load-data"
   task_role_arn                = aws_iam_role.ecs_task_role.arn
-  use_fargate_spot             = var.use_fargate_spot
+  use_fargate_spot             = false
 }
 
 module "index_data_task" {
@@ -366,5 +366,5 @@ module "index_data_task" {
   security_group_ids           = [var.ecs_sg_id]
   subnet_ids                   = var.subnet_ids
   task_name                    = "index-data"
-  use_fargate_spot             = var.use_fargate_spot
+  use_fargate_spot             = false
 }
