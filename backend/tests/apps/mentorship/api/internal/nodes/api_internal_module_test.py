@@ -300,6 +300,7 @@ def test_module_node_task_assigned_at(mock_module_node):
 
 
 def test_module_node_task_assigned_at_none(mock_module_node):
+    """Test task_assigned_at when no assignment timestamp is found."""
     with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
         mock_task_order_by = mock_task_objects.filter.return_value.order_by.return_value
         mock_task_order_by.values_list.return_value.first.return_value = None
