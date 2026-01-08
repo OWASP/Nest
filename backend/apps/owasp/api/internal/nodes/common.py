@@ -11,7 +11,7 @@ from apps.owasp.api.internal.nodes.entity_member import EntityMemberNode
 class GenericEntityNode(strawberry.relay.Node):
     """Base node class for OWASP entities with common fields and resolvers."""
 
-    @strawberry_django.field(select_related="member")
+    @strawberry_django.field
     def entity_leaders(self) -> list[EntityMemberNode]:
         """Resolve entity leaders."""
         return self.entity_leaders

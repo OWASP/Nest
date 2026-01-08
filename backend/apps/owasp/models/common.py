@@ -100,7 +100,9 @@ class RepositoryBasedEntityModel(models.Model):
                 is_active=True,
                 is_reviewed=True,
                 role=EntityMember.Role.LEADER,
-            ).order_by("order")
+            )
+            .select_related("member")
+            .order_by("order")
         )
 
     @property
