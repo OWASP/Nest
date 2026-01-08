@@ -1,7 +1,7 @@
 export const mockCommitteeDetailsData = {
   committee: {
     name: 'Test Committee',
-    updatedAt: 1734103212.0,
+    updatedAt: 1734103212,
     leaders: ['Leader 1', 'Leader 2'],
     url: 'https://owasp.org/test-committee',
     summary: 'This is a test committee summary.',

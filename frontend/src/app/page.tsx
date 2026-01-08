@@ -25,7 +25,6 @@ import { GetMainPageDataDocument } from 'types/__generated__/homeQueries.generat
 import type { AlgoliaResponse } from 'types/algolia'
 import type { Chapter } from 'types/chapter'
 import type { Event } from 'types/event'
-import type { MainPageData } from 'types/home'
 
 import { formatDate, formatDateRange } from 'utils/dateFormatter'
 import AnchorTitle from 'components/AnchorTitle'
@@ -45,20 +44,19 @@ import TopContributorsList from 'components/TopContributorsList'
 import { TruncatedText } from 'components/TruncatedText'
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [data, setData] = useState<MainPageData>(null)
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetMainPageDataDocument, {
+  const {
+    data: graphQLData,
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetMainPageDataDocument, {
     variables: { distinct: true },
   })
 
+  const data = graphQLData
   const [geoLocData, setGeoLocData] = useState<Chapter[]>([])
   const [modalOpenIndex, setModalOpenIndex] = useState<number | null>(null)
 
   useEffect(() => {
-    if (graphQLData) {
-      setData(graphQLData)
-      setIsLoading(false)
-    }
     if (graphQLRequestError) {
       addToast({
         description: 'Unable to complete the requested operation.',
@@ -68,9 +66,8 @@ export default function Home() {
         color: 'danger',
         variant: 'solid',
       })
-      setIsLoading(false)
     }
-  }, [graphQLData, graphQLRequestError])
+  }, [graphQLRequestError])
 
   useEffect(() => {
     const fetchData = async () => {

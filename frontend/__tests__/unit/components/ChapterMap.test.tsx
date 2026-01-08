@@ -141,7 +141,7 @@ describe('ChapterMap', () => {
           [-90, -180],
           [90, 180],
         ],
-        maxBoundsViscosity: 1.0,
+        maxBoundsViscosity: 1,
         scrollWheelZoom: false,
         zoomControl: false,
       })
@@ -287,7 +287,7 @@ describe('ChapterMap', () => {
       const { getByText, queryByText } = render(<ChapterMap {...defaultProps} />)
 
       const overlay = getByText('Unlock map').closest('button')
-      fireEvent.click(overlay!)
+      fireEvent.click(overlay)
 
       expect(queryByText('Unlock map')).not.toBeInTheDocument()
     })
@@ -296,7 +296,7 @@ describe('ChapterMap', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
       const overlay = getByText('Unlock map').closest('button')
-      fireEvent.click(overlay!)
+      fireEvent.click(overlay)
 
       expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
     })
