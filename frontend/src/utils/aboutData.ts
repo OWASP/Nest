@@ -2,7 +2,7 @@ import type { KeyFeature, ProjectTimeline, GetInvolved, MissionContent } from 't
 
 export const missionContent: MissionContent = {
   mission:
-    'OWASP Nest is a comprehensive platform built to enhance collaboration and streamline contributions across the OWASP community. Acting as a central hub, it helps users discover chapters and projects, find contribution opportunities, and connect with like-minded individuals based on their interests and expertise.',
+    'OWASP Nest is a comprehensive, community-first platform built to enhance collaboration and contribution across the OWASP community. Acting as a central hub, it helps users discover chapters and projects, find contribution opportunities, and connect with like-minded individuals based on their interests and expertise.',
   whoItsFor:
     "OWASP Nest is designed for developers, designers, technical writers, students, security professionals, and contributors of all backgrounds. Whether you're just starting out or a seasoned OSS veteran, OWASP Nest provides intuitive tools to help you engage meaningfully in the OWASP ecosystem.",
 } as const

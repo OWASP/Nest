@@ -51,23 +51,28 @@ class DisableIndexing:
                     unregister(model)
 
 
-def deep_camelize(obj) -> dict | list:
+def deep_camelize(obj) -> dict | list | None:
     """Deep camelize.
 
     Args:
         obj: The object to camelize.
 
     Returns:
-        The camelize object.
+        The camelize object or None.
 
     """
+    if not obj:
+        return obj
+
     if isinstance(obj, dict):
         return {
             convert_to_camel_case(key.removeprefix("idx_")): deep_camelize(value)
             for key, value in obj.items()
         }
+
     if isinstance(obj, list):
         return [deep_camelize(item) for item in obj]
+
     return obj
 
 
