@@ -1,8 +1,22 @@
 import { Metadata } from 'next'
-import React from 'react'
+import React, { cache } from 'react'
 import { apolloClient } from 'server/apolloClient'
-import { GET_REPOSITORY_METADATA } from 'server/queries/repositoryQueries'
+import { GetRepositoryMetadataDocument } from 'types/__generated__/repositoryQueries.generated'
+import { formatBreadcrumbTitle } from 'utils/breadcrumb'
 import { generateSeoMetadata } from 'utils/metaconfig'
+import PageLayout from 'components/PageLayout'
+
+const getRepositoryMetadata = cache(async (organizationKey: string, repositoryKey: string) => {
+  try {
+    const { data } = await apolloClient.query({
+      query: GetRepositoryMetadataDocument,
+      variables: { organizationKey, repositoryKey },
+    })
+    return data
+  } catch {
+    return null
+  }
+})
 
 export async function generateMetadata({
   params,
@@ -13,10 +27,7 @@ export async function generateMetadata({
   }>
 }): Promise<Metadata> {
   const { repositoryKey, organizationKey } = await params
-  const { data } = await apolloClient.query({
-    query: GET_REPOSITORY_METADATA,
-    variables: { organizationKey: organizationKey, repositoryKey: repositoryKey },
-  })
+  const data = await getRepositoryMetadata(organizationKey, repositoryKey)
   const repository = data?.repository
 
   return repository
@@ -29,6 +40,25 @@ export async function generateMetadata({
     : null
 }
 
-export default function RepositoryDetailsLayout({ children }: { children: React.ReactNode }) {
-  return children
+export default async function RepositoryDetailsLayout({
+  children,
+  params,
+}: Readonly<{
+  children: React.ReactNode
+  params: Promise<{ repositoryKey: string; organizationKey: string }>
+}>) {
+  const { repositoryKey, organizationKey } = await params
+  const data = await getRepositoryMetadata(organizationKey, repositoryKey)
+  const repoName = data?.repository?.name
+    ? formatBreadcrumbTitle(data.repository.name)
+    : formatBreadcrumbTitle(repositoryKey)
+
+  return (
+    <PageLayout
+      title={repoName}
+      path={`/organizations/${organizationKey}/repositories/${repositoryKey}`}
+    >
+      {children}
+    </PageLayout>
+  )
 }

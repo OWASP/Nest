@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client'
+import { useMutation, useApolloClient } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { useRouter as mockUseRouter } from 'next/navigation'
@@ -6,9 +6,10 @@ import { useSession as mockUseSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import CreateProgramPage from 'app/my/mentorship/programs/create/page'
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useMutation: jest.fn(),
+  useApolloClient: jest.fn(),
 }))
 
 jest.mock('next/navigation', () => ({
@@ -29,12 +30,22 @@ jest.mock('@heroui/toast', () => ({
 
 const mockRouterPush = jest.fn()
 const mockCreateProgram = jest.fn()
+const mockQuery = jest.fn().mockResolvedValue({
+  data: {
+    myPrograms: {
+      programs: [],
+    },
+  },
+})
 
 describe('CreateProgramPage (comprehensive tests)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(mockUseRouter as jest.Mock).mockReturnValue({ push: mockRouterPush })
-    ;(useMutation as jest.Mock).mockReturnValue([mockCreateProgram, { loading: false }])
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([mockCreateProgram, { loading: false }])
+    ;(useApolloClient as jest.Mock).mockReturnValue({
+      query: mockQuery,
+    })
   })
 
   test('redirects if unauthenticated', async () => {
@@ -60,7 +71,7 @@ describe('CreateProgramPage (comprehensive tests)', () => {
 
     render(<CreateProgramPage />)
 
-    expect(screen.queryByLabelText('Program Name *')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Name')).not.toBeInTheDocument()
   })
 
   test('redirects with toast if not a project leader', async () => {
@@ -103,7 +114,7 @@ describe('CreateProgramPage (comprehensive tests)', () => {
 
     render(<CreateProgramPage />)
 
-    expect(await screen.findByLabelText('Program Name *')).toBeInTheDocument()
+    expect(await screen.findByLabelText('Name')).toBeInTheDocument()
   })
 
   test('submits form and redirects on success', async () => {
@@ -127,16 +138,16 @@ describe('CreateProgramPage (comprehensive tests)', () => {
 
     render(<CreateProgramPage />)
 
-    fireEvent.change(screen.getByLabelText('Program Name *'), {
+    fireEvent.change(screen.getByLabelText('Name'), {
       target: { value: 'Test Program' },
     })
-    fireEvent.change(screen.getByLabelText('Description *'), {
+    fireEvent.change(screen.getByLabelText(/^Description/), {
       target: { value: 'A description' },
     })
-    fireEvent.change(screen.getByLabelText('Start Date *'), {
+    fireEvent.change(screen.getByLabelText('Start Date'), {
       target: { value: '2025-01-01' },
     })
-    fireEvent.change(screen.getByLabelText('End Date *'), {
+    fireEvent.change(screen.getByLabelText('End Date'), {
       target: { value: '2025-12-31' },
     })
     fireEvent.change(screen.getByLabelText('Tags'), {
@@ -146,7 +157,7 @@ describe('CreateProgramPage (comprehensive tests)', () => {
       target: { value: 'domain1, domain2' },
     })
 
-    fireEvent.submit(screen.getByText('Save').closest('form')!)
+    fireEvent.submit(screen.getByText('Save').closest('form'))
 
     await waitFor(() => {
       expect(mockCreateProgram).toHaveBeenCalledWith({
@@ -154,7 +165,7 @@ describe('CreateProgramPage (comprehensive tests)', () => {
           input: {
             name: 'Test Program',
             description: 'A description',
-            menteesLimit: 5,
+            menteesLimit: 0,
             startedAt: '2025-01-01',
             endedAt: '2025-12-31',
             tags: ['tag1', 'tag2'],
@@ -186,20 +197,20 @@ describe('CreateProgramPage (comprehensive tests)', () => {
 
     render(<CreateProgramPage />)
 
-    fireEvent.change(screen.getByLabelText('Program Name *'), {
+    fireEvent.change(screen.getByLabelText('Name'), {
       target: { value: 'Test Program' },
     })
-    fireEvent.change(screen.getByLabelText('Description *'), {
+    fireEvent.change(screen.getByLabelText(/^Description/), {
       target: { value: 'A description' },
     })
-    fireEvent.change(screen.getByLabelText('Start Date *'), {
+    fireEvent.change(screen.getByLabelText('Start Date'), {
       target: { value: '2025-01-01' },
     })
-    fireEvent.change(screen.getByLabelText('End Date *'), {
+    fireEvent.change(screen.getByLabelText('End Date'), {
       target: { value: '2025-12-31' },
     })
 
-    fireEvent.submit(screen.getByText('Save').closest('form')!)
+    fireEvent.submit(screen.getByText('Save').closest('form'))
 
     await waitFor(() => {
       expect(addToast).toHaveBeenCalledWith(

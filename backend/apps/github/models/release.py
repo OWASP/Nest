@@ -13,8 +13,9 @@ class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
     class Meta:
         db_table = "github_releases"
         indexes = [
-            models.Index(fields=["-created_at"]),
+            models.Index(fields=["-created_at"], name="release_created_at_desc_idx"),
             models.Index(fields=["-published_at"], name="release_published_at_desc_idx"),
+            models.Index(fields=["tag_name"], name="release_tag_name_idx"),
         ]
         verbose_name_plural = "Releases"
 

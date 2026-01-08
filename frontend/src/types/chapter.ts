@@ -1,21 +1,31 @@
 import type { Contributor } from 'types/contributor'
+import type { Leader } from 'types/leader'
 
 export type Chapter = {
   _geoloc?: GeoLocation
-  createdAt: number
+  contributionData?: Record<string, number>
+  contributionStats?: {
+    commits: number
+    issues: number
+    pullRequests: number
+    releases: number
+    total: number
+  }
+  createdAt?: number
+  entityLeaders?: Leader[]
   geoLocation?: GeoLocation
-  isActive: boolean
+  isActive?: boolean
   key: string
-  leaders: string[]
+  leaders?: string[]
   name: string
-  objectID: string
-  region: string
-  relatedUrls: string[]
+  objectID?: string
+  region?: string
+  relatedUrls?: string[]
   suggestedLocation: string
-  summary: string
-  topContributors: Contributor[]
-  updatedAt: number
-  url: string
+  summary?: string
+  topContributors?: Contributor[]
+  updatedAt?: number
+  url?: string
 }
 
 export type GeoLocation = {

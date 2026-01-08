@@ -1,6 +1,6 @@
 import pytest
 
-from apps.api.rest.v0.label import LabelSchema
+from apps.api.rest.v0.label import LabelDetail
 
 
 class TestLabelSchema:
@@ -20,7 +20,8 @@ class TestLabelSchema:
         ],
     )
     def test_label_schema(self, label_data):
-        label = LabelSchema(**label_data)
-        assert label.name == label_data["name"]
-        assert label.description == label_data["description"]
+        label = LabelDetail(**label_data)
+
         assert label.color == label_data["color"]
+        assert label.description == label_data["description"]
+        assert label.name == label_data["name"]

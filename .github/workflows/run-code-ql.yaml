@@ -12,13 +12,13 @@ on:
       - main
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   code-ql:
     name: CodeQL
     permissions:
+      contents: read
       security-events: write
     runs-on: ubuntu-latest
     strategy:
@@ -28,24 +28,24 @@ jobs:
           - python
     steps:
       - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@192325c86100d080feab897ff886c34abd4c83a3
+        uses: github/codeql-action/init@5d4e8d1aca955e8d8589aabd499c5cae939e33c7
         with:
           languages: ${{ matrix.language }}
 
       - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
         with:
           version: 10
           run_install: false
 
       - name: Set up Node
         if: matrix.language == 'javascript-typescript'
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f
         with:
-          node-version: 22
+          node-version: 24
           cache: 'pnpm'
           cache-dependency-path: frontend/pnpm-lock.yaml
 
@@ -55,6 +55,6 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@192325c86100d080feab897ff886c34abd4c83a3
+        uses: github/codeql-action/analyze@5d4e8d1aca955e8d8589aabd499c5cae939e33c7
         with:
           category: /language:${{ matrix.language }}

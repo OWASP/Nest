@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { screen, waitFor } from '@testing-library/react'
 import { mockOrganizationDetailsData } from '@unit/data/mockOrganizationData'
@@ -7,8 +7,8 @@ import OrganizationDetailsPage from 'app/organizations/[organizationKey]/page'
 import { formatDate } from 'utils/dateFormatter'
 import '@testing-library/jest-dom'
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
 }))
 
@@ -20,14 +20,11 @@ jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
-}))
-
 jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(() => mockRouter),
   useParams: () => ({ repositoryKey: 'test-org' }),
+  usePathname: jest.fn(() => '/organizations/test-org'),
 }))
 
 const mockError = {
@@ -36,7 +33,7 @@ const mockError = {
 
 describe('OrganizationDetailsPage', () => {
   beforeEach(() => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockOrganizationDetailsData,
       loading: false,
       error: null,
@@ -48,21 +45,22 @@ describe('OrganizationDetailsPage', () => {
   })
 
   test('renders loading state', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
+      loading: true,
       error: null,
     })
 
     render(<OrganizationDetailsPage />)
 
-    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+    // Use semantic role query instead of CSS selectors for better stability
     await waitFor(() => {
-      expect(loadingSpinner.length).toBeGreaterThan(0)
+      expect(screen.getByTestId('org-loading-skeleton')).toBeInTheDocument()
     })
   })
 
   test('renders organization details when data is available', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockOrganizationDetailsData,
       error: null,
     })
@@ -70,7 +68,7 @@ describe('OrganizationDetailsPage', () => {
     render(<OrganizationDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Test Organization')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Test Organization' })).toBeInTheDocument()
     })
 
     expect(screen.getByText('@test-org')).toBeInTheDocument()
@@ -116,12 +114,12 @@ describe('OrganizationDetailsPage', () => {
     await waitFor(() => {
       const recentMilestones = mockOrganizationDetailsData.recentMilestones
 
-      recentMilestones.forEach((milestone) => {
+      for (const milestone of recentMilestones) {
         expect(screen.getByText(milestone.title)).toBeInTheDocument()
         expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
         expect(screen.getByText(`${milestone.openIssuesCount} open`)).toBeInTheDocument()
         expect(screen.getByText(`${milestone.closedIssuesCount} closed`)).toBeInTheDocument()
-      })
+      }
     })
   })
 
@@ -130,7 +128,7 @@ describe('OrganizationDetailsPage', () => {
       ...mockOrganizationDetailsData,
       recentReleases: [],
     }
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: noReleasesData,
       loading: false,
       error: null,
@@ -148,7 +146,7 @@ describe('OrganizationDetailsPage', () => {
       recentMilestones: [],
     }
 
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: noMilestones,
       loading: false,
       error: null,
@@ -181,9 +179,10 @@ describe('OrganizationDetailsPage', () => {
   })
 
   test('displays error message when there is a GraphQL error', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: undefined,
       error: mockError,
+      loading: false,
     })
 
     render(<OrganizationDetailsPage />)
@@ -200,14 +199,15 @@ describe('OrganizationDetailsPage', () => {
       })
     })
   })
+
   test('does not render sponsor block', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockOrganizationDetailsData,
       error: null,
     })
     render(<OrganizationDetailsPage />)
     await waitFor(() => {
-      expect(screen.queryByText(`Want to become a sponsor?`)).toBeNull()
+      expect(screen.queryByText('Want to become a sponsor?')).toBeNull()
     })
   })
 })

@@ -1,16 +1,14 @@
 import '@testing-library/jest-dom'
-import { TextEncoder } from 'util'
 import React from 'react'
 import 'core-js/actual/structured-clone'
 
-global.React = React
-global.TextEncoder = TextEncoder
+globalThis.React = React
 
 // Add fetch polyfill for jsdom test environment
 // Node.js 18+ has native fetch, but jsdom doesn't include it
-if (typeof global.fetch === 'undefined') {
+if (typeof globalThis.fetch === 'undefined') {
   // Use a simple mock fetch for testing
-  global.fetch = jest.fn().mockResolvedValue({
+  globalThis.fetch = jest.fn().mockResolvedValue({
     ok: true,
     status: 200,
     statusText: 'OK',
@@ -29,6 +27,15 @@ if (typeof global.fetch === 'undefined') {
   } as Response)
 }
 
+// Mock framer-motion due to how Jest 30 ESM resolution treats
+// motion-dom's internal .mjs imports as "outside test scope".
+jest.mock('framer-motion', () => {
+  return {
+    ...jest.requireActual('framer-motion'),
+    LazyMotion: ({ children }) => children,
+  }
+})
+
 jest.mock('next-auth/react', () => {
   return {
     ...jest.requireActual('next-auth/react'),
@@ -43,24 +50,36 @@ jest.mock('next-auth/react', () => {
   }
 })
 
-if (!global.structuredClone) {
-  global.structuredClone = (val) => JSON.parse(JSON.stringify(val))
-}
+jest.mock('next/navigation', () => {
+  const actual = jest.requireActual('next/navigation')
+  const push = jest.fn()
+  const replace = jest.fn()
+  const prefetch = jest.fn()
+  const back = jest.fn()
+  const forward = jest.fn()
+  const mockRouter = { push, replace, prefetch, back, forward }
+  return {
+    ...actual,
+    useRouter: jest.fn(() => mockRouter),
+    useSearchParams: jest.fn(() => new URLSearchParams()),
+    useParams: jest.fn(() => ({})),
+  }
+})
 
 beforeAll(() => {
-  if (typeof window !== 'undefined') {
-    jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+  if (typeof globalThis !== 'undefined') {
+    jest.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((cb) => {
       return setTimeout(cb, 0)
     })
 
-    Object.defineProperty(window, 'runAnimationFrameCallbacks', {
+    Object.defineProperty(globalThis, 'runAnimationFrameCallbacks', {
       value: () => {},
       configurable: true,
       writable: true,
     })
   }
 
-  global.ResizeObserver = class {
+  globalThis.ResizeObserver = class {
     disconnect() {}
     observe() {}
     unobserve() {}
@@ -72,7 +91,7 @@ beforeEach(() => {
     throw new Error(`Console error: ${args.join(' ')}`)
   })
 
-  jest.spyOn(global.console, 'warn').mockImplementation((message) => {
+  jest.spyOn(globalThis.console, 'warn').mockImplementation((message) => {
     if (
       typeof message === 'string' &&
       message.includes('[@zag-js/dismissable] node is `null` or `undefined`')
@@ -81,7 +100,7 @@ beforeEach(() => {
     }
   })
 
-  Object.defineProperty(window, 'matchMedia', {
+  Object.defineProperty(globalThis, 'matchMedia', {
     writable: true,
     value: jest.fn().mockImplementation((query) => ({
       matches: false,
@@ -95,6 +114,13 @@ beforeEach(() => {
     })),
   })
 
-  global.runAnimationFrameCallbacks = jest.fn()
-  global.removeAnimationFrameCallbacks = jest.fn()
+  globalThis.runAnimationFrameCallbacks = jest.fn()
+  globalThis.removeAnimationFrameCallbacks = jest.fn()
+})
+
+jest.mock('ics', () => {
+  return {
+    __esModule: true,
+    createEvent: jest.fn(),
+  }
 })

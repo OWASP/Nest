@@ -17,6 +17,12 @@ export const GET_MODULES_BY_PROGRAM = gql`
         login
         avatarUrl
       }
+      mentees {
+        id
+        login
+        name
+        avatarUrl
+      }
     }
   }
 `
@@ -34,6 +40,12 @@ export const GET_MODULE_BY_ID = gql`
       startedAt
       endedAt
       mentors {
+        id
+        login
+        name
+        avatarUrl
+      }
+      mentees {
         id
         login
         name
@@ -60,6 +72,7 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
       name
       description
       tags
+      labels
       projectId
       projectName
       domains
@@ -71,6 +84,41 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
         login
         name
         avatarUrl
+      }
+      mentees {
+        id
+        login
+        name
+        avatarUrl
+      }
+    }
+  }
+`
+
+export const GET_MODULE_ISSUES = gql`
+  query GetModuleIssues(
+    $programKey: String!
+    $moduleKey: String!
+    $limit: Int = 20
+    $offset: Int = 0
+    $label: String
+  ) {
+    getModule(moduleKey: $moduleKey, programKey: $programKey) {
+      name
+      issuesCount(label: $label)
+      availableLabels
+      issues(limit: $limit, offset: $offset, label: $label) {
+        id
+        number
+        title
+        state
+        isMerged
+        labels
+        assignees {
+          avatarUrl
+          login
+          name
+        }
       }
     }
   }

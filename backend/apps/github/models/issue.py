@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from apps.common.index import IndexBase
@@ -25,6 +26,7 @@ class Issue(GenericIssueModel):
         db_table = "github_issues"
         indexes = [
             models.Index(fields=["-created_at"]),
+            models.Index(fields=["number"]),
         ]
         ordering = ("-updated_at", "-state")
         verbose_name_plural = "Issues"
@@ -45,6 +47,9 @@ class Issue(GenericIssueModel):
 
     comments_count = models.PositiveIntegerField(verbose_name="Comments", default=0)
 
+    # GRs.
+    comments = GenericRelation("github.Comment", related_query_name="issue")
+
     # FKs.
     author = models.ForeignKey(
         "github.User",
@@ -53,6 +58,14 @@ class Issue(GenericIssueModel):
         blank=True,
         null=True,
         related_name="created_issues",
+    )
+    level = models.ForeignKey(
+        "mentorship.TaskLevel",
+        blank=True,
+        help_text="The difficulty level of this issue.",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="issues",
     )
     milestone = models.ForeignKey(
         "github.Milestone",
@@ -82,6 +95,16 @@ class Issue(GenericIssueModel):
         related_name="issue",
         blank=True,
     )
+
+    @property
+    def latest_comment(self):
+        """Get the latest comment for this issue.
+
+        Returns:
+            Comment | None: The most recently created comment, or None if no comments exist.
+
+        """
+        return self.comments.order_by("-nest_created_at").first()
 
     def from_github(self, gh_issue, *, author=None, milestone=None, repository=None):
         """Update the instance based on GitHub issue data.

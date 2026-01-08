@@ -3,9 +3,9 @@ import ScrollToTop from 'components/ScrollToTop'
 
 describe('ScrollToTop component test', () => {
   beforeEach(() => {
-    window.scrollTo = jest.fn()
-    Object.defineProperty(window, 'scrollY', { value: 0, writable: true })
-    Object.defineProperty(window, 'innerHeight', { value: 1000, writable: true })
+    globalThis.scrollTo = jest.fn()
+    Object.defineProperty(globalThis, 'scrollY', { value: 0, writable: true })
+    Object.defineProperty(globalThis, 'innerHeight', { value: 1000, writable: true })
   })
 
   afterEach(() => {
@@ -24,8 +24,8 @@ describe('ScrollToTop component test', () => {
     const { getByLabelText } = render(<ScrollToTop />)
     const button = getByLabelText(/scroll to top/i)
 
-    Object.defineProperty(window, 'scrollY', { value: 400, writable: true })
-    window.dispatchEvent(new Event('scroll'))
+    Object.defineProperty(globalThis, 'scrollY', { value: 400, writable: true })
+    globalThis.dispatchEvent(new Event('scroll'))
 
     await waitFor(() => {
       expect(button).toHaveClass('opacity-100')
@@ -33,18 +33,18 @@ describe('ScrollToTop component test', () => {
     })
   })
 
-  test('Clicking the button should call window.scrollTo with smooth behavior', async () => {
+  test('Clicking the button should call globalThis.scrollTo with smooth behavior', async () => {
     const { getByLabelText } = render(<ScrollToTop />)
     const button = getByLabelText(/scroll to top/i)
 
-    Object.defineProperty(window, 'scrollY', { value: 400, writable: true })
-    window.dispatchEvent(new Event('scroll'))
+    Object.defineProperty(globalThis, 'scrollY', { value: 400, writable: true })
+    globalThis.dispatchEvent(new Event('scroll'))
 
     await waitFor(() => {
       expect(button).toHaveClass('opacity-100')
     })
 
     fireEvent.click(button)
-    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' })
+    expect(globalThis.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' })
   })
 })

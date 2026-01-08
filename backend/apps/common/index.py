@@ -22,6 +22,8 @@ EXCLUDED_LOCAL_INDEX_NAMES = (
     "projects_contributors_count_desc",
     "projects_forks_count_asc",
     "projects_forks_count_desc",
+    "projects_level_raw_asc",
+    "projects_level_raw_desc",
     "projects_name_asc",
     "projects_name_desc",
     "projects_stars_count_asc",
