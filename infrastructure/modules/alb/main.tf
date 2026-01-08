@@ -34,13 +34,6 @@ locals {
   backend_path_chunks = chunklist(local.backend_paths, 5)
 }
 
-check "https_requires_domain" {
-  assert {
-    condition     = var.enable_https ? var.domain_name != null : true
-    error_message = "domain_name must be provided when enable_https is true."
-  }
-}
-
 data "aws_elb_service_account" "main" {}
 
 data "aws_iam_policy_document" "alb_logs" {
@@ -95,6 +88,17 @@ resource "aws_lb" "main" {
     bucket  = aws_s3_bucket.alb_logs.id
     enabled = true
     prefix  = "alb"
+  }
+
+  lifecycle {
+    precondition {
+      condition     = var.enable_https ? var.domain_name != null : true
+      error_message = "domain_name must be provided when enable_https is true."
+    }
+    precondition {
+      condition     = var.lambda_arn != null ? var.lambda_function_name != null : true
+      error_message = "lambda_function_name must be provided when lambda_arn is set."
+    }
   }
 }
 
