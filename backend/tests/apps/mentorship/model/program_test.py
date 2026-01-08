@@ -1,3 +1,4 @@
+from unittest.mock import MagicMock
 from apps.mentorship.models import Program
 
 
@@ -8,5 +9,6 @@ class TestProgram:
         assert Program.ProgramStatus.COMPLETED == "completed"
 
     def test_str_returns_name(self):
-        mock_program_instance = Program(name="Security Program")
+        mock_program_instance = MagicMock(spec=Program)
+        mock_program_instance.name = "Security Program"
         assert Program.__str__(mock_program_instance) == "Security Program"
