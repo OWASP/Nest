@@ -7,7 +7,6 @@ import Link from 'next/link'
 import { signIn } from 'next-auth/react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { FaGithub } from 'react-icons/fa'
-import { ExtendedSession } from 'types/auth'
 
 export default function UserMenu({
   isGitHubAuthEnabled,
@@ -19,7 +18,7 @@ export default function UserMenu({
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const dropdownId = useId()
-  const isProjectLeader = (session as ExtendedSession)?.user?.isLeader
+  const isProjectLeader = (session)?.user?.isLeader
   const isOwaspStaff = session?.user?.isOwaspStaff
 
   useEffect(() => {

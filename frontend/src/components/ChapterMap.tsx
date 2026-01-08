@@ -62,7 +62,7 @@ const ChapterMap = ({
       })
 
       mapRef.current.on('mouseout', (e: L.LeafletMouseEvent) => {
-        const originalEvent = e.originalEvent as MouseEvent
+        const originalEvent = e.originalEvent
         const relatedTarget = originalEvent.relatedTarget as Node | null
         const container = mapRef.current?.getContainer()
         const mapParent = container?.parentElement
