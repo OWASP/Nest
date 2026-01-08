@@ -314,6 +314,9 @@ def test_module_node_interested_users_no_issue(mock_module_node):
     users = mock_module_node.interested_users(issue_number=789)
     assert users == []
 
+
+def test_module_node_task_deadline(mock_module_node):
+    """Test task_deadline method."""
     with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
         mock_task_order_by = mock_task_objects.filter.return_value.order_by.return_value
         mock_task_order_by.values_list.return_value.first.return_value = datetime(
