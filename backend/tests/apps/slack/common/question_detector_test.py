@@ -176,7 +176,8 @@ class TestQuestionDetector:
             detector = QuestionDetector()
 
             # Test that detector initializes properly
-            assert detector is not None
+            assert isinstance(detector, QuestionDetector)
+
             assert hasattr(detector, "openai_client")
             assert hasattr(detector, "retriever")
 
