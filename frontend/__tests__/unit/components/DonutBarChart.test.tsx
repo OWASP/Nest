@@ -1,5 +1,4 @@
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { screen, render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { useTheme } from 'next-themes'
 import { FaChartPie, FaChartBar, FaChartLine, FaTachometerAlt, FaHeart } from 'react-icons/fa'
 import DonutBarChart from 'components/DonutBarChart'
@@ -103,7 +102,7 @@ describe('DonutBarChart Component Test Suite', () => {
       render(<DonutBarChart icon={FaChartPie} title="Balanced Data" series={series} />)
 
       const chart = screen.getByTestId('apex-chart')
-      const chartSeries = JSON.parse(chart.dataset.series|| '[]')
+      const chartSeries = JSON.parse(chart.dataset.series || '[]')
 
       // Should be rounded to 1 decimal place
       expect(chartSeries).toEqual([33.3, 33.3, 33.3])
