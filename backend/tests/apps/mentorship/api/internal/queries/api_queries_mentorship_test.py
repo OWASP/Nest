@@ -1,5 +1,3 @@
-"""Pytest for mentorship queries (fixed patch targets)."""
-
 from unittest.mock import MagicMock, patch
 
 import pytest

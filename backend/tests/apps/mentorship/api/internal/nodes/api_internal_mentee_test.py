@@ -1,5 +1,3 @@
-"""Pytest for mentorship mentee nodes."""
-
 import pytest
 
 from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum
