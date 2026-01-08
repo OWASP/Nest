@@ -12,7 +12,7 @@ class FakeModuleNode:
     """Minimal ModuleNode-like object for testing."""
 
     def __init__(self):
-        # basic scalar attrs
+        
         self.id = strawberry.ID("1")
         self.key = "test-module"
         self.name = "Test Module"
