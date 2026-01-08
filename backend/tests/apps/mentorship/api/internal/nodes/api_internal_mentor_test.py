@@ -1,5 +1,3 @@
-"""Pytest for mentorship mentor nodes."""
-
 from unittest.mock import MagicMock
 
 import pytest
