@@ -35,11 +35,9 @@ class FakeModuleNode:
         self.project.name = "Test Project"
 
     def mentors(self):
-        """Retrieves mentors within a module."""
         return self._mentors_manager.all()
 
     def mentees(self):
-        """Retrieves mentees associated with the module."""
         mentee_users = (
             self.menteemodule_set.select_related("mentee__github_user")
             .filter(mentee__github_user__isnull=False)
@@ -50,7 +48,6 @@ class FakeModuleNode:
         return list(GithubUser.objects.filter(id__in=mentee_users).order_by("login"))
 
     def issue_mentees(self, issue_number: int):
-        """Retrieves mentees assigned to a issue within module."""
         issue_ids = list(self._issues_qs.filter(number=issue_number).values_list("id", flat=True))
         if not issue_ids:
             return []
@@ -78,7 +75,6 @@ class FakeModuleNode:
         return list(queryset.order_by("-updated_at")[offset : offset + limit])
 
     def issues_count(self, label: str | None = None):
-        """Returns the count of issues associated with the module."""
         queryset = self._issues_qs
         if label and label != "all":
             queryset = queryset.filter(labels__name=label)
