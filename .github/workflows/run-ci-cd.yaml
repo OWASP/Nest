@@ -150,7 +150,7 @@ jobs:
           DJANGO_CONFIGURATION=Local
           DJANGO_SETTINGS_MODULE=settings.local
           EOF
-      
+
       - name: Prepare minimal Django environment (CI-safe)
         working-directory: backend
         run: |
@@ -247,6 +247,100 @@ jobs:
           trivy-config: trivy.yaml
           trivyignores: trivyignore.yaml
           version: latest
+
+  generate-backend-model-graphs:
+    name: Generate Backend Model Graphs
+    permissions:
+      contents: read
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+
+      - name: Set up Python
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
+        with:
+          python-version: '3.13'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: |
+          pip install poetry
+          poetry install --no-interaction --no-root
+
+      - name: Prepare output directories
+        working-directory: backend
+        run: |
+          mkdir -p model-graphs/apps
+          mkdir -p model-graphs/inter-app
+
+      - name: Set backend environment variables
+        run: |
+          echo "DJANGO_SETTINGS_MODULE=settings.local" >> $GITHUB_ENV
+          echo "DJANGO_CONFIGURATION=Local" >> $GITHUB_ENV
+          echo "DJANGO_SECRET_KEY=dummy" >> $GITHUB_ENV
+          echo "DJANGO_ALGOLIA_APPLICATION_ID=None" >> $GITHUB_ENV
+          echo "DJANGO_ALGOLIA_WRITE_API_KEY=None" >> $GITHUB_ENV
+          echo "DJANGO_REDIS_HOST=None" >> $GITHUB_ENV
+          echo "DJANGO_REDIS_PASSWORD=None" >> $GITHUB_ENV
+          echo "DJANGO_DB_NAME=None" >> $GITHUB_ENV
+          echo "DJANGO_DB_USER=None" >> $GITHUB_ENV
+          echo "DJANGO_DB_PASSWORD=None" >> $GITHUB_ENV
+          echo "DJANGO_DB_HOST=None" >> $GITHUB_ENV
+          echo "DJANGO_DB_PORT=None" >> $GITHUB_ENV
+          echo "DJANGO_OPEN_AI_SECRET_KEY=None" >> $GITHUB_ENV
+          echo "DJANGO_SLACK_BOT_TOKEN=None" >> $GITHUB_ENV
+          echo "DJANGO_SLACK_SIGNING_SECRET=None" >> $GITHUB_ENV
+
+      - name: Generate per-app model graphs
+        working-directory: backend
+        run: |
+          set +e
+
+          APPS=$(poetry run python manage.py showmigrations | awk '{print $1}' | sort -u)
+
+          for app in $APPS; do
+            poetry run python manage.py graph_models "$app" \
+              --output "model-graphs/apps/${app}_inheritance.svg" \
+              --format svg || true
+
+            poetry run python manage.py graph_models "$app" \
+              --disable-inheritance \
+              --output "model-graphs/apps/${app}_relations.svg" \
+              --format svg || true
+          done
+
+          set -e
+
+      - name: Generate inter-app model graphs
+        working-directory: backend
+        run: |
+          set +e
+
+          poetry run python manage.py graph_models \
+            --all-applications \
+            --output "model-graphs/inter-app/backend_inheritance.svg" \
+            --format svg || true
+
+          poetry run python manage.py graph_models \
+            --all-applications \
+            --disable-inheritance \
+            --output "model-graphs/inter-app/backend_relations.svg" \
+            --format svg || true
+
+          set -e
+
+      - name: Upload model graphs as artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: backend-model-graphs
+          path: backend/model-graphs
 
   run-backend-tests:
     name: Run backend tests
