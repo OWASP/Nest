@@ -2,6 +2,7 @@
 
 import strawberry
 import strawberry_django
+from strawberry.types.unset import UNSET
 
 from apps.owasp.api.internal.filters.project_health_metrics import ProjectHealthMetricsFilter
 from apps.owasp.api.internal.nodes.project_health_metrics import ProjectHealthMetricsNode
@@ -46,7 +47,7 @@ class ProjectHealthMetricsQuery:
             if pagination.offset < 0:
                 return []
             pagination.offset = min(pagination.offset, MAX_OFFSET)
-            if pagination.limit is not None:
+            if pagination.limit is not None and pagination.limit != UNSET:
                 if pagination.limit <= 0:
                     return []
                 pagination.limit = min(pagination.limit, MAX_LIMIT)
