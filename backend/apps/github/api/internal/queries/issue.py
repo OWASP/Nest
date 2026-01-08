@@ -18,7 +18,6 @@ class IssueQuery:
     @strawberry_django.field(
         select_related=[
             "author",
-            "repository",
             "milestone",
             "level",
             "repository",

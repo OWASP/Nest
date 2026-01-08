@@ -3,15 +3,11 @@
 from unittest.mock import Mock
 
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
+from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
-class TestPullRequestNode:
+class TestPullRequestNode(GraphQLNodeBaseTest):
     """Test cases for PullRequestNode class."""
-
-    def _get_field_by_name(self, name):
-        return next(
-            (f for f in PullRequestNode.__strawberry_definition__.fields if f.name == name), None
-        )
 
     def test_pull_request_node_type(self):
         assert hasattr(PullRequestNode, "__strawberry_definition__")
@@ -37,9 +33,8 @@ class TestPullRequestNode:
         mock_author = Mock()
         mock_pr.author = mock_author
 
-        field = self._get_field_by_name("author")
-        resolver = field.base_resolver.wrapped_func
-        result = resolver(mock_pr)
+        field = self._get_field_by_name("author", PullRequestNode)
+        result = field.base_resolver.wrapped_func(mock_pr)
         assert result == mock_author
 
     def test_organization_name_with_organization(self):
@@ -51,7 +46,8 @@ class TestPullRequestNode:
         mock_repository.organization = mock_organization
         mock_pr.repository = mock_repository
 
-        result = PullRequestNode.organization_name(mock_pr)
+        field = self._get_field_by_name("organization_name", PullRequestNode)
+        result = field.base_resolver.wrapped_func(mock_pr)
         assert result == "test-org"
 
     def test_organization_name_without_organization(self):
@@ -61,7 +57,8 @@ class TestPullRequestNode:
         mock_repository.organization = None
         mock_pr.repository = mock_repository
 
-        result = PullRequestNode.organization_name(mock_pr)
+        field = self._get_field_by_name("organization_name", PullRequestNode)
+        result = field.base_resolver.wrapped_func(mock_pr)
         assert result is None
 
     def test_organization_name_without_repository(self):
@@ -69,7 +66,8 @@ class TestPullRequestNode:
         mock_pr = Mock()
         mock_pr.repository = None
 
-        result = PullRequestNode.organization_name(mock_pr)
+        field = self._get_field_by_name("organization_name", PullRequestNode)
+        result = field.base_resolver.wrapped_func(mock_pr)
         assert result is None
 
     def test_repository_name_with_repository(self):
@@ -79,7 +77,8 @@ class TestPullRequestNode:
         mock_repository.name = "test-repo"
         mock_pr.repository = mock_repository
 
-        result = PullRequestNode.repository_name(mock_pr)
+        field = self._get_field_by_name("repository_name", PullRequestNode)
+        result = field.base_resolver.wrapped_func(mock_pr)
         assert result == "test-repo"
 
     def test_repository_name_without_repository(self):
@@ -87,7 +86,8 @@ class TestPullRequestNode:
         mock_pr = Mock()
         mock_pr.repository = None
 
-        result = PullRequestNode.repository_name(mock_pr)
+        field = self._get_field_by_name("repository_name", PullRequestNode)
+        result = field.base_resolver.wrapped_func(mock_pr)
         assert result is None
 
     def test_url_with_url(self):
@@ -95,7 +95,8 @@ class TestPullRequestNode:
         mock_pr = Mock()
         mock_pr.url = "https://github.com/test-org/test-repo/pull/123"
 
-        result = PullRequestNode.url(mock_pr)
+        field = self._get_field_by_name("url", PullRequestNode)
+        result = field.base_resolver.wrapped_func(mock_pr)
         assert result == "https://github.com/test-org/test-repo/pull/123"
 
     def test_url_without_url(self):
@@ -103,5 +104,6 @@ class TestPullRequestNode:
         mock_pr = Mock()
         mock_pr.url = None
 
-        result = PullRequestNode.url(mock_pr)
+        field = self._get_field_by_name("url", PullRequestNode)
+        result = field.base_resolver.wrapped_func(mock_pr)
         assert result == ""

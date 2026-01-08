@@ -8,9 +8,10 @@ from apps.github.api.internal.nodes.organization import OrganizationNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
+from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
-class TestRepositoryNode:
+class TestRepositoryNode(GraphQLNodeBaseTest):
     def test_repository_node_inheritance(self):
         assert hasattr(RepositoryNode, "__strawberry_definition__")
 
@@ -45,53 +46,48 @@ class TestRepositoryNode:
         }
         assert expected_field_names.issubset(field_names)
 
-    def _get_field_by_name(self, name):
-        return next(
-            (f for f in RepositoryNode.__strawberry_definition__.fields if f.name == name), None
-        )
-
     def test_resolve_issues(self):
-        field = self._get_field_by_name("issues")
+        field = self._get_field_by_name("issues", RepositoryNode)
         assert field is not None
         assert field.type.of_type is IssueNode
 
     def test_resolve_languages(self):
-        field = self._get_field_by_name("languages")
+        field = self._get_field_by_name("languages", RepositoryNode)
         assert field is not None
         assert field.type == list[str]
 
     def test_resolve_latest_release(self):
-        field = self._get_field_by_name("latest_release")
+        field = self._get_field_by_name("latest_release", RepositoryNode)
         assert field is not None
         assert field.type.of_type is str
 
     def test_resolve_organization(self):
-        field = self._get_field_by_name("organization")
+        field = self._get_field_by_name("organization", RepositoryNode)
         assert field is not None
         assert field.type.of_type is OrganizationNode
 
     def test_resolve_recent_milestones(self):
-        field = self._get_field_by_name("recent_milestones")
+        field = self._get_field_by_name("recent_milestones", RepositoryNode)
         assert field is not None
         assert field.type.of_type is MilestoneNode
 
     def test_resolve_releases(self):
-        field = self._get_field_by_name("releases")
+        field = self._get_field_by_name("releases", RepositoryNode)
         assert field is not None
         assert field.type.of_type is ReleaseNode
 
     def test_resolve_top_contributors(self):
-        field = self._get_field_by_name("top_contributors")
+        field = self._get_field_by_name("top_contributors", RepositoryNode)
         assert field is not None
         assert field.type.of_type is RepositoryContributorNode
 
     def test_resolve_topics(self):
-        field = self._get_field_by_name("topics")
+        field = self._get_field_by_name("topics", RepositoryNode)
         assert field is not None
         assert field.type == list[str]
 
     def test_resolve_url(self):
-        field = self._get_field_by_name("url")
+        field = self._get_field_by_name("url", RepositoryNode)
         assert field is not None
         assert field.type is str
 
@@ -102,9 +98,8 @@ class TestRepositoryNode:
         mock_issues.order_by.return_value.__getitem__ = Mock(return_value=[])
         mock_repository.issues = mock_issues
 
-        field = self._get_field_by_name("issues")
-        resolver = field.base_resolver.wrapped_func
-        resolver(mock_repository)
+        field = self._get_field_by_name("issues", RepositoryNode)
+        field.base_resolver.wrapped_func(mock_repository)
         mock_issues.order_by.assert_called_with("-created_at")
 
     def test_languages_method(self):
@@ -112,9 +107,8 @@ class TestRepositoryNode:
         mock_repository = Mock()
         mock_repository.languages = {"Python": 1000, "JavaScript": 500}
 
-        field = self._get_field_by_name("languages")
-        resolver = field.base_resolver.wrapped_func
-        result = resolver(mock_repository)
+        field = self._get_field_by_name("languages", RepositoryNode)
+        result = field.base_resolver.wrapped_func(mock_repository)
         assert result == ["Python", "JavaScript"]
 
     def test_latest_release_method(self):
@@ -122,9 +116,8 @@ class TestRepositoryNode:
         mock_repository = Mock()
         mock_repository.latest_release = "v1.0.0"
 
-        field = self._get_field_by_name("latest_release")
-        resolver = field.base_resolver.wrapped_func
-        result = resolver(mock_repository)
+        field = self._get_field_by_name("latest_release", RepositoryNode)
+        result = field.base_resolver.wrapped_func(mock_repository)
         assert result == "v1.0.0"
 
     def test_organization_method(self):
@@ -133,9 +126,8 @@ class TestRepositoryNode:
         mock_organization = Mock()
         mock_repository.organization = mock_organization
 
-        field = self._get_field_by_name("organization")
-        resolver = field.base_resolver.wrapped_func
-        result = resolver(mock_repository)
+        field = self._get_field_by_name("organization", RepositoryNode)
+        result = field.base_resolver.wrapped_func(mock_repository)
         assert result == mock_organization
 
     def test_project_method(self):
@@ -144,9 +136,8 @@ class TestRepositoryNode:
         mock_project = Mock()
         mock_repository.project = mock_project
 
-        field = self._get_field_by_name("project")
-        resolver = field.base_resolver.wrapped_func
-        result = resolver(mock_repository)
+        field = self._get_field_by_name("project", RepositoryNode)
+        result = field.base_resolver.wrapped_func(mock_repository)
         assert result == mock_project
 
     def test_recent_milestones_method(self):
@@ -156,7 +147,7 @@ class TestRepositoryNode:
         mock_milestones.order_by.return_value.__getitem__ = Mock(return_value=[])
         mock_repository.recent_milestones = mock_milestones
 
-        field = self._get_field_by_name("recent_milestones")
+        field = self._get_field_by_name("recent_milestones", RepositoryNode)
         resolver = field.base_resolver.wrapped_func
         resolver(mock_repository, limit=3)
         mock_milestones.order_by.assert_called_with("-created_at")
@@ -168,7 +159,7 @@ class TestRepositoryNode:
         mock_releases.order_by.return_value.__getitem__ = Mock(return_value=[])
         mock_repository.published_releases = mock_releases
 
-        field = self._get_field_by_name("releases")
+        field = self._get_field_by_name("releases", RepositoryNode)
         resolver = field.base_resolver.wrapped_func
         resolver(mock_repository)
         mock_releases.order_by.assert_called_with("-published_at")
@@ -193,9 +184,8 @@ class TestRepositoryNode:
             },
         ]
 
-        field = self._get_field_by_name("top_contributors")
-        resolver = field.base_resolver.wrapped_func
-        result = resolver(mock_repository)
+        field = self._get_field_by_name("top_contributors", RepositoryNode)
+        result = field.base_resolver.wrapped_func(mock_repository)
         assert len(result) == 2
         assert all(isinstance(c, RepositoryContributorNode) for c in result)
 
@@ -204,9 +194,8 @@ class TestRepositoryNode:
         mock_repository = Mock()
         mock_repository.topics = ["security", "python", "django"]
 
-        field = self._get_field_by_name("topics")
-        resolver = field.base_resolver.wrapped_func
-        result = resolver(mock_repository)
+        field = self._get_field_by_name("topics", RepositoryNode)
+        result = field.base_resolver.wrapped_func(mock_repository)
         assert result == ["security", "python", "django"]
 
     def test_url_method(self):
@@ -214,9 +203,8 @@ class TestRepositoryNode:
         mock_repository = Mock()
         mock_repository.url = "https://github.com/test-org/test-repo"
 
-        field = self._get_field_by_name("url")
-        resolver = field.base_resolver.wrapped_func
-        result = resolver(mock_repository)
+        field = self._get_field_by_name("url", RepositoryNode)
+        result = field.base_resolver.wrapped_func(mock_repository)
         assert result == "https://github.com/test-org/test-repo"
 
     def test_is_archived_field_exists(self):
@@ -228,6 +216,6 @@ class TestRepositoryNode:
 
     def test_resolve_is_archived(self):
         """Test is_archived field type."""
-        field = self._get_field_by_name("is_archived")
+        field = self._get_field_by_name("is_archived", RepositoryNode)
         assert field is not None
         assert field.type is bool

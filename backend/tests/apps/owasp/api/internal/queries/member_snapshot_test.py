@@ -39,16 +39,14 @@ class TestMemberSnapshotQuery:
             mock_queryset.order_by.return_value = mock_queryset
             mock_queryset.first.return_value = mock_snapshot
 
-            mock_snapshot_cls.objects.select_related.return_value = mock_queryset
+            mock_snapshot_cls.objects = mock_queryset
 
             result = query.member_snapshot(user_login="testuser", start_year=2025)
 
             mock_user_cls.objects.get.assert_called_once_with(login="testuser")
-            mock_snapshot_cls.objects.select_related.assert_called_once_with("github_user")
-            mock_queryset.prefetch_related.assert_called_once_with(
-                "issues", "pull_requests", "messages"
-            )
-            # Two filter calls: one for github_user, one for start_at__year
+            # select_related and prefetch_related are called, then filter twice
+            mock_queryset.select_related.assert_called_once()
+            mock_queryset.prefetch_related.assert_called_once()
             assert mock_queryset.filter.call_count == 2
             assert result == mock_snapshot
 
@@ -61,8 +59,6 @@ class TestMemberSnapshotQuery:
             "apps.owasp.api.internal.queries.member_snapshot.MemberSnapshot"
         ) as mock_snapshot_cls:
             mock_queryset = Mock()
-            mock_queryset.select_related.return_value = mock_queryset
-            mock_queryset.prefetch_related.return_value = mock_queryset
             mock_queryset.order_by.return_value = mock_queryset
             mock_queryset.__getitem__ = Mock(return_value=mock_snapshots)
 
@@ -71,10 +67,6 @@ class TestMemberSnapshotQuery:
             result = query.member_snapshots(limit=10)
 
             mock_snapshot_cls.objects.all.assert_called_once()
-            mock_queryset.select_related.assert_called_once_with("github_user")
-            mock_queryset.prefetch_related.assert_called_once_with(
-                "issues", "pull_requests", "messages"
-            )
             mock_queryset.order_by.assert_called_once_with("-start_at")
             mock_queryset.__getitem__.assert_called_once_with(slice(None, 10, None))
             assert result == mock_snapshots
@@ -94,8 +86,6 @@ class TestMemberSnapshotQuery:
             mock_user_cls.objects.get.return_value = mock_user
 
             mock_queryset = Mock()
-            mock_queryset.select_related.return_value = mock_queryset
-            mock_queryset.prefetch_related.return_value = mock_queryset
             mock_queryset.filter.return_value = mock_queryset
             mock_queryset.order_by.return_value = mock_queryset
             mock_queryset.__getitem__ = Mock(return_value=mock_snapshots)

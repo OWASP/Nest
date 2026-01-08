@@ -23,8 +23,6 @@ class TestPullRequestQuery:
     def mock_queryset(self):
         """Mock queryset with all necessary methods."""
         queryset = MagicMock()
-        queryset.select_related.return_value = queryset
-        queryset.prefetch_related.return_value = queryset
         queryset.exclude.return_value = queryset
         queryset.order_by.return_value = queryset
         queryset.filter.return_value = queryset
@@ -35,25 +33,19 @@ class TestPullRequestQuery:
     @patch("apps.github.models.pull_request.PullRequest.objects")
     def test_recent_pull_requests_basic(self, mock_objects, mock_queryset, mock_pull_request):
         """Test fetching recent pull requests with default parameters."""
-        mock_objects.select_related.return_value = mock_queryset
+        mock_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
 
         result = PullRequestQuery().recent_pull_requests()
 
         assert result == [mock_pull_request]
-        mock_objects.select_related.assert_called_once_with(
-            "author", "milestone", "repository", "repository__organization"
-        )
-        mock_queryset.prefetch_related.assert_called_once_with(
-            "assignees", "labels", "related_issues"
-        )
-        mock_queryset.exclude.assert_called_once_with(author__is_bot=True)
+        mock_objects.exclude.assert_called_once_with(author__is_bot=True)
         mock_queryset.order_by.assert_called_once_with("-created_at")
 
     @patch("apps.github.models.pull_request.PullRequest.objects")
     def test_recent_pull_requests_with_login(self, mock_objects, mock_queryset, mock_pull_request):
         """Test filtering pull requests by login."""
-        mock_objects.select_related.return_value = mock_queryset
+        mock_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
 
         result = PullRequestQuery().recent_pull_requests(login="alice")
@@ -66,7 +58,7 @@ class TestPullRequestQuery:
         self, mock_objects, mock_queryset, mock_pull_request
     ):
         """Test filtering pull requests by organization."""
-        mock_objects.select_related.return_value = mock_queryset
+        mock_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
 
         result = PullRequestQuery().recent_pull_requests(organization="owasp")
@@ -84,7 +76,7 @@ class TestPullRequestQuery:
         mock_project.repositories.values_list.return_value = [1, 2, 3]
         mock_project_objects.filter.return_value.first.return_value = mock_project
 
-        mock_pr_objects.select_related.return_value = mock_queryset
+        mock_pr_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
 
         result = PullRequestQuery().recent_pull_requests(project="test-project")
@@ -98,7 +90,7 @@ class TestPullRequestQuery:
         self, mock_objects, mock_queryset, mock_pull_request
     ):
         """Test filtering pull requests by repository."""
-        mock_objects.select_related.return_value = mock_queryset
+        mock_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
 
         result = PullRequestQuery().recent_pull_requests(repository="test-repo")
@@ -109,7 +101,7 @@ class TestPullRequestQuery:
     @patch("apps.github.models.pull_request.PullRequest.objects")
     def test_recent_pull_requests_distinct(self, mock_objects, mock_queryset, mock_pull_request):
         """Test distinct filtering with Window/Rank for pull requests."""
-        mock_objects.select_related.return_value = mock_queryset
+        mock_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
 
         result = PullRequestQuery().recent_pull_requests(distinct=True)
@@ -122,7 +114,7 @@ class TestPullRequestQuery:
     @patch("apps.github.models.pull_request.PullRequest.objects")
     def test_recent_pull_requests_with_limit(self, mock_objects, mock_queryset, mock_pull_request):
         """Test limiting the number of pull requests returned."""
-        mock_objects.select_related.return_value = mock_queryset
+        mock_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
 
         result = PullRequestQuery().recent_pull_requests(limit=3)
@@ -135,7 +127,7 @@ class TestPullRequestQuery:
         self, mock_objects, mock_queryset, mock_pull_request
     ):
         """Test pull requests with multiple filters applied."""
-        mock_objects.select_related.return_value = mock_queryset
+        mock_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
 
         result = PullRequestQuery().recent_pull_requests(
@@ -152,7 +144,7 @@ class TestPullRequestQuery:
         self, mock_objects, mock_queryset, mock_pull_request
     ):
         """Test distinct filtering with additional filters."""
-        mock_objects.select_related.return_value = mock_queryset
+        mock_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
 
         result = PullRequestQuery().recent_pull_requests(
@@ -169,7 +161,7 @@ class TestPullRequestQuery:
         self, mock_objects, mock_queryset, mock_pull_request
     ):
         """Test pull requests with multiple filters (no project to avoid DB issues)."""
-        mock_objects.select_related.return_value = mock_queryset
+        mock_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
 
         result = PullRequestQuery().recent_pull_requests(
@@ -185,7 +177,7 @@ class TestPullRequestQuery:
         self, mock_objects, mock_queryset, mock_pull_request
     ):
         """Test distinct filtering with multiple filters."""
-        mock_objects.select_related.return_value = mock_queryset
+        mock_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
 
         result = PullRequestQuery().recent_pull_requests(

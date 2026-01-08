@@ -2,10 +2,9 @@
 
 from unittest.mock import Mock
 
-from common.graphql_node_base_test import GraphQLNodeBaseTest
-
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.user import UserNode
+from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
 class TestReleaseNode(GraphQLNodeBaseTest):
@@ -43,8 +42,7 @@ class TestReleaseNode(GraphQLNodeBaseTest):
         mock_release.author = mock_author
 
         field = self._get_field_by_name("author", ReleaseNode)
-        resolver = field.base_resolver.wrapped_func
-        result = resolver(mock_release)
+        result = field.base_resolver.wrapped_func(mock_release)
         assert result == mock_author
 
     def test_organization_name_with_organization(self):
