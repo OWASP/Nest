@@ -1,13 +1,12 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
 import { useRouter, useParams } from 'next/navigation'
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { FaCalendar, FaRightToBracket } from 'react-icons/fa6'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetSnapshotDetailsDocument } from 'types/__generated__/snapshotQueries.generated'
 import type { Chapter } from 'types/chapter'
 import type { Project } from 'types/project'
-import type { SnapshotDetails } from 'types/snapshot'
 import { level } from 'utils/data'
 import { formatDate } from 'utils/dateFormatter'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
@@ -18,24 +17,23 @@ import Release from 'components/Release'
 
 const SnapshotDetailsPage: React.FC = () => {
   const { id: snapshotKey } = useParams<{ id: string }>()
-  const [snapshot, setSnapshot] = useState<SnapshotDetails | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
   const router = useRouter()
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetSnapshotDetailsDocument, {
+  const {
+    data,
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetSnapshotDetailsDocument, {
     variables: { key: snapshotKey },
   })
 
+  const snapshot = data?.snapshot
+
   useEffect(() => {
-    if (graphQLData) {
-      setSnapshot(graphQLData.snapshot)
-      setIsLoading(false)
-    }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
-  }, [graphQLData, graphQLRequestError, snapshotKey])
+  }, [graphQLRequestError, snapshotKey])
 
   const renderProjectCard = (project: Project) => {
     const params: string[] = ['forksCount', 'starsCount', 'contributorsCount']
@@ -97,7 +95,17 @@ const SnapshotDetailsPage: React.FC = () => {
     return <LoadingSpinner />
   }
 
-  if (!isLoading && snapshot == null) {
+  if (graphQLRequestError) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading snapshot"
+        message="An error occurred while loading the snapshot data"
+      />
+    )
+  }
+
+  if (!data || !snapshot) {
     return (
       <ErrorDisplay
         statusCode={404}

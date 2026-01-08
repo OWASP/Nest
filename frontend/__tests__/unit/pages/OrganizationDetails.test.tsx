@@ -182,6 +182,7 @@ describe('OrganizationDetailsPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: undefined,
       error: mockError,
+      loading: false,
     })
 
     render(<OrganizationDetailsPage />)

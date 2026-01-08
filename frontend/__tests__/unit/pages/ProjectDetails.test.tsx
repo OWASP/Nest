@@ -58,6 +58,7 @@ describe('ProjectDetailsPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: null,
+      loading: true,
     })
 
     render(<ProjectDetailsPage />)
@@ -87,15 +88,15 @@ describe('ProjectDetailsPage', () => {
 
   test('renders error message when GraphQL request fails', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: { project: null },
+      data: null,
       error: mockError,
       loading: false,
     })
 
     render(<ProjectDetailsPage />)
 
-    await waitFor(() => screen.getByText('Project not found'))
-    expect(screen.getByText('Project not found')).toBeInTheDocument()
+    await waitFor(() => screen.getByText('Error loading project'))
+    expect(screen.getByText('Error loading project')).toBeInTheDocument()
     expect(addToast).toHaveBeenCalledWith({
       description: 'An unexpected server error occurred.',
       title: 'Server Error',
