@@ -431,7 +431,7 @@ describe('ItemCardList Component', () => {
         />
       )
 
-      const titleLinks = screen.getAllByTestId('link')
+      const titleLinks = screen.getAllByTestId('item-title-link')
       const titleLink = titleLinks.find((link) => link.getAttribute('href') === mockIssue.url)
 
       expect(titleLink).toBeInTheDocument()
@@ -449,7 +449,7 @@ describe('ItemCardList Component', () => {
         />
       )
 
-      const avatarLinks = screen.getAllByTestId('link')
+      const avatarLinks = screen.getAllByTestId('item-avatar-link')
       const avatarLink = avatarLinks.find(
         (link) => link.getAttribute('href') === `/members/${mockIssue.author.login}`
       )
@@ -517,7 +517,7 @@ describe('ItemCardList Component', () => {
         />
       )
 
-      const titleLinks = screen.getAllByTestId('link')
+      const titleLinks = screen.getAllByTestId('item-title-link')
       const titleLink = titleLinks.find((link) => link.textContent?.includes('Test Issue Title'))
 
       expect(titleLink).toHaveAttribute('href', '')
@@ -746,7 +746,7 @@ describe('ItemCardList Component', () => {
         />
       )
 
-      const titleLinks = screen.getAllByTestId('link')
+      const titleLinks = screen.getAllByTestId('item-title-link')
       const externalLink = titleLinks.find((link) => link.getAttribute('href') === mockIssue.url)
 
       expect(externalLink).toHaveAttribute('target', '_blank')

@@ -67,9 +67,13 @@ const defaultProps = {
 
 describe('ItemCardList a11y', () => {
   it('should not have any accessibility violations', async () => {
-    const { container } = render(<ItemCardList {...defaultProps} />)
+    const { baseElement } = render(
+      <main>
+        <ItemCardList {...defaultProps} />
+      </main>
+    )
 
-    const results = await axe(container)
+    const results = await axe(baseElement)
 
     expect(results).toHaveNoViolations()
   })
