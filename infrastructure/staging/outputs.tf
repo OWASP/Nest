@@ -25,7 +25,7 @@ output "frontend_ecr_repository_url" {
 
 output "frontend_url" {
   description = "The URL to access the frontend."
-  value       = var.frontend_domain_name != null ? "https://${var.frontend_domain_name}" : "http://${module.alb.alb_dns_name}"
+  value       = var.domain_name != null ? "https://${var.domain_name}" : "http://${module.alb.alb_dns_name}"
 }
 
 output "lambda_security_group_id" {

@@ -129,6 +129,12 @@ variable "db_user" {
   default     = "owasp_nest_db_user"
 }
 
+variable "domain_name" {
+  description = "The domain name for the site."
+  type        = string
+  default     = null
+}
+
 variable "ecs_use_fargate_spot" {
   description = "Whether to use Fargate Spot for backend ECS tasks."
   type        = bool
@@ -161,12 +167,6 @@ variable "frontend_desired_count" {
   description = "The desired number of frontend tasks."
   type        = number
   default     = 2
-}
-
-variable "frontend_domain_name" {
-  description = "The domain name for frontend. When set, HTTPS is auto-enabled via ACM."
-  type        = string
-  default     = null
 }
 
 variable "frontend_enable_auto_scaling" {
