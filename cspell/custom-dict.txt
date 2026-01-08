@@ -64,6 +64,7 @@ dismissable
 dockerhub
 dsn
 env
+euo
 facebookexternalhit
 gamesec
 geocoders
