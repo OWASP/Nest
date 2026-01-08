@@ -11,7 +11,7 @@ from apps.mentorship.models.task import Task
 
 
 def make_qs(iterable, exist):
-    """Return a queryset-like MagicMock that is iterable"""
+    """Return a queryset like MagicMock that is iterable."""
     qs = MagicMock(name="QuerySet")
     qs.exists.return_value = exist
     qs.__iter__.return_value = iter(iterable)
@@ -38,7 +38,7 @@ def test_extract_repo_full_name_from_object(command):
 
 
 @pytest.mark.parametrize(
-    ("repo_url, expected"),
+    ("repo_url", "expected"),
     [
         ("https://github.com/owner/repo", "owner/repo"),
         ("https://www.github.com/owner/repo/sub/path", "owner/repo"),
@@ -156,7 +156,8 @@ def test_process_module_links_and_creates_tasks(mock_issue, mock_task, command):
     issue3.assignees.first.return_value = None
 
     issues_qs = make_qs([issue1, issue2], exist=True)
-    mock_issue.objects.filter.return_value.select_related.return_value.prefetch_related.return_value.distinct.return_value = issues_qs
+    mock_issue_filter_related = mock_issue.objects.filter.return_value.select_related.return_value
+    mock_issue_filter_related.prefetch_related.return_value.distinct.return_value = issues_qs
 
     created_task1 = MagicMock(module=None, status=None, assigned_at=None)
     created_task2 = MagicMock(module=None, status=None, assigned_at=None)

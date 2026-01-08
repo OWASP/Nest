@@ -81,7 +81,8 @@ def test_process_mentorship_modules_no_published_modules(mock_module, command):
 def test_process_mentorship_modules_no_modules_with_labels(mock_module, command):
     """Test process_mentorship_modules when no modules with labels exist."""
     mock_module.published_modules.all.return_value.exists.return_value = True
-    mock_module.published_modules.all.return_value.exclude.return_value.select_related.return_value.exists.return_value = False
+    mock_excluded_modules = mock_module.published_modules.all.return_value.exclude.return_value
+    mock_excluded_modules.select_related.return_value.exists.return_value = False
     command.process_mentorship_modules()
     command.stdout.write.assert_called_with(
         "No published mentorship modules with labels found. Exiting."

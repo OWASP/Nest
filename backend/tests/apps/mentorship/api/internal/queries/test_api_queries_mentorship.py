@@ -11,20 +11,29 @@ from apps.mentorship.api.internal.queries.mentorship import MentorshipQuery
 from apps.mentorship.models import Mentee, Module
 
 
+@pytest.fixture
+def api_mentorship_queries() -> MentorshipQuery:
+    """Pytest fixture to return an instance of the query resolver class."""
+    return MentorshipQuery()
+
+
 class TestIsMentor:
     """Tests for the is_mentor query."""
 
     @patch("apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.get")
     @patch("apps.mentorship.api.internal.queries.mentorship.Mentor.objects.filter")
     def test_is_mentor_true(
-        self, mock_mentor_filter: MagicMock, mock_github_user_get: MagicMock
+        self,
+        mock_mentor_filter: MagicMock,
+        mock_github_user_get: MagicMock,
+        api_mentorship_queries,
     ) -> None:
         """Test that is_mentor returns True when the user is a mentor."""
         mock_github_user_get.return_value = MagicMock(spec=GithubUser)
         mock_mentor_filter.return_value.exists.return_value = True
 
-        query = MentorshipQuery()
-        result = query.is_mentor(login="testuser")
+        is_mentor = api_mentorship_queries.is_mentor
+        result = is_mentor(login="testuser")
 
         assert result is True
         mock_github_user_get.assert_called_once_with(login="testuser")
@@ -34,14 +43,17 @@ class TestIsMentor:
     @patch("apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.get")
     @patch("apps.mentorship.api.internal.queries.mentorship.Mentor.objects.filter")
     def test_is_mentor_false_not_mentor(
-        self, mock_mentor_filter: MagicMock, mock_github_user_get: MagicMock
+        self,
+        mock_mentor_filter: MagicMock,
+        mock_github_user_get: MagicMock,
+        api_mentorship_queries,
     ) -> None:
         """Test that is_mentor returns False when the user is not a mentor."""
         mock_github_user_get.return_value = MagicMock(spec=GithubUser)
         mock_mentor_filter.return_value.exists.return_value = False
 
-        query = MentorshipQuery()
-        result = query.is_mentor(login="testuser")
+        is_mentor = api_mentorship_queries.is_mentor
+        result = is_mentor(login="testuser")
 
         assert result is False
         mock_github_user_get.assert_called_once_with(login="testuser")
@@ -49,21 +61,23 @@ class TestIsMentor:
         mock_mentor_filter.return_value.exists.assert_called_once()
 
     @patch("apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.get")
-    def test_is_mentor_false_no_github_user(self, mock_github_user_get: MagicMock) -> None:
+    def test_is_mentor_false_no_github_user(
+        self, mock_github_user_get: MagicMock, api_mentorship_queries
+    ) -> None:
         """Test that is_mentor returns False when the GitHub user does not exist."""
         mock_github_user_get.side_effect = GithubUser.DoesNotExist
 
-        query = MentorshipQuery()
-        result = query.is_mentor(login="non_existent_user")
+        is_mentor = api_mentorship_queries.is_mentor
+        result = is_mentor(login="non_existent_user")
 
         assert result is False
         mock_github_user_get.assert_called_once_with(login="non_existent_user")
 
     @pytest.mark.parametrize("login", ["", "   ", None])
-    def test_is_mentor_false_empty_login(self, login: str | None) -> None:
+    def test_is_mentor_false_empty_login(self, login: str | None, api_mentorship_queries) -> None:
         """Test that is_mentor returns False for empty or whitespace login."""
-        query = MentorshipQuery()
-        result = query.is_mentor(login=login)
+        is_mentor = api_mentorship_queries.is_mentor
+        result = is_mentor(login=login)
 
         assert result is False
 
@@ -81,6 +95,7 @@ class TestGetMenteeDetails:
         mock_mentee_only: MagicMock,
         mock_github_user_only: MagicMock,
         mock_module_only: MagicMock,
+        api_mentorship_queries,
     ) -> None:
         """Test successful retrieval of mentee details."""
         mock_module = MagicMock(spec=Module)
@@ -104,8 +119,8 @@ class TestGetMenteeDetails:
 
         mock_mentee_module_filter.return_value.exists.return_value = True
 
-        query = MentorshipQuery()
-        result = query.get_mentee_details(
+        get_mentee_details = api_mentorship_queries.get_mentee_details
+        result = get_mentee_details(
             program_key="program", module_key="module", mentee_key="test_mentee"
         )
 
@@ -127,28 +142,30 @@ class TestGetMenteeDetails:
         mock_mentee_module_filter.return_value.exists.assert_called_once()
 
     @patch("apps.mentorship.api.internal.queries.mentorship.Module.objects.only")
-    def test_get_mentee_details_module_does_not_exist(self, mock_module_only: MagicMock) -> None:
+    def test_get_mentee_details_module_does_not_exist(
+        self, mock_module_only: MagicMock, api_mentorship_queries
+    ) -> None:
         """Test when the module does not exist."""
         mock_module_only.return_value.get.side_effect = Module.DoesNotExist
 
-        query = MentorshipQuery()
+        get_mentee_details = api_mentorship_queries.get_mentee_details
         with pytest.raises(ObjectDoesNotExist, match="Mentee details not found: "):
-            query.get_mentee_details(
+            get_mentee_details(
                 program_key="program", module_key="nonexistent", mentee_key="test_mentee"
             )
 
     @patch("apps.mentorship.api.internal.queries.mentorship.Module.objects.only")
     @patch("apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.only")
     def test_get_mentee_details_github_user_does_not_exist(
-        self, mock_github_user_only: MagicMock, mock_module_only: MagicMock
+        self, mock_github_user_only: MagicMock, mock_module_only: MagicMock, api_mentorship_queries
     ) -> None:
         """Test when the GitHub user does not exist."""
         mock_module_only.return_value.get.return_value = MagicMock(spec=Module, id=1)
         mock_github_user_only.return_value.get.side_effect = GithubUser.DoesNotExist
 
-        query = MentorshipQuery()
+        get_mentee_details = api_mentorship_queries.get_mentee_details
         with pytest.raises(ObjectDoesNotExist, match="Mentee details not found: "):
-            query.get_mentee_details(
+            get_mentee_details(
                 program_key="program", module_key="module", mentee_key="nonexistent"
             )
 
@@ -160,6 +177,7 @@ class TestGetMenteeDetails:
         mock_mentee_only: MagicMock,
         mock_github_user_only: MagicMock,
         mock_module_only: MagicMock,
+        api_mentorship_queries,
     ) -> None:
         """Test when the mentee does not exist."""
         mock_module_only.return_value.get.return_value = MagicMock(spec=Module, id=1)
@@ -168,9 +186,9 @@ class TestGetMenteeDetails:
         )
         mock_mentee_only.return_value.get.side_effect = Mentee.DoesNotExist
 
-        query = MentorshipQuery()
+        get_mentee_details = api_mentorship_queries.get_mentee_details
         with pytest.raises(ObjectDoesNotExist, match="Mentee details not found: "):
-            query.get_mentee_details(
+            get_mentee_details(
                 program_key="program", module_key="module", mentee_key="test_mentee"
             )
 
@@ -184,6 +202,7 @@ class TestGetMenteeDetails:
         mock_mentee_only: MagicMock,
         mock_github_user_only: MagicMock,
         mock_module_only: MagicMock,
+        api_mentorship_queries,
     ) -> None:
         """Test when the mentee is not enrolled in the module."""
         mock_module_only.return_value.get.return_value = MagicMock(spec=Module, id=1)
@@ -193,11 +212,11 @@ class TestGetMenteeDetails:
         mock_mentee_only.return_value.get.return_value = MagicMock(spec=Mentee, id=2)
         mock_mentee_module_filter.return_value.exists.return_value = False
 
-        query = MentorshipQuery()
+        get_mentee_details = api_mentorship_queries.get_mentee_details
         with pytest.raises(
             ObjectDoesNotExist, match="Mentee test_mentee is not enrolled in module module"
         ):
-            query.get_mentee_details(
+            get_mentee_details(
                 program_key="program", module_key="module", mentee_key="test_mentee"
             )
 
@@ -217,6 +236,7 @@ class TestGetMenteeModuleIssues:
         mock_github_user_only: MagicMock,
         mock_module_only: MagicMock,
         mock_prefetch: MagicMock,
+        api_mentorship_queries,
     ) -> None:
         """Test successful retrieval of mentee module issues."""
         mock_prefetch.return_value = MagicMock()
@@ -241,10 +261,13 @@ class TestGetMenteeModuleIssues:
         mock_issues_qs = MagicMock()
         mock_issues_qs.__getitem__.return_value = [mock_issue1, mock_issue2]
 
-        mock_module.issues.filter.return_value.only.return_value.prefetch_related.return_value.order_by.return_value = mock_issues_qs
+        mock_module_filter = (
+            mock_module.issues.filter.return_value.only.return_value.prefetch_related
+        )
+        mock_module_filter.return_value.order_by.return_value = mock_issues_qs
 
-        query = MentorshipQuery()
-        result = query.get_mentee_module_issues(
+        get_mentee_module_issues = api_mentorship_queries.get_mentee_module_issues
+        result = get_mentee_module_issues(
             program_key="program", module_key="module", mentee_key="test_mentee"
         )
 
@@ -266,29 +289,29 @@ class TestGetMenteeModuleIssues:
 
     @patch("apps.mentorship.api.internal.queries.mentorship.Module.objects.only")
     def test_get_mentee_module_issues_module_does_not_exist(
-        self, mock_module_only: MagicMock
+        self, mock_module_only: MagicMock, api_mentorship_queries
     ) -> None:
         """Test when the module does not exist."""
         mock_module_only.return_value.get.side_effect = Module.DoesNotExist
 
-        query = MentorshipQuery()
+        get_mentee_module_issues = api_mentorship_queries.get_mentee_module_issues
         with pytest.raises(ObjectDoesNotExist, match="Mentee issues not found: "):
-            query.get_mentee_module_issues(
+            get_mentee_module_issues(
                 program_key="program", module_key="nonexistent", mentee_key="test_mentee"
             )
 
     @patch("apps.mentorship.api.internal.queries.mentorship.Module.objects.only")
     @patch("apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.only")
     def test_get_mentee_module_issues_github_user_does_not_exist(
-        self, mock_github_user_only: MagicMock, mock_module_only: MagicMock
+        self, mock_github_user_only: MagicMock, mock_module_only: MagicMock, api_mentorship_queries
     ) -> None:
         """Test when the GitHub user does not exist."""
         mock_module_only.return_value.get.return_value = MagicMock(spec=Module, id=1)
         mock_github_user_only.return_value.get.side_effect = GithubUser.DoesNotExist
 
-        query = MentorshipQuery()
+        get_mentee_module_issues = api_mentorship_queries.get_mentee_module_issues
         with pytest.raises(ObjectDoesNotExist, match="Mentee issues not found: "):
-            query.get_mentee_module_issues(
+            get_mentee_module_issues(
                 program_key="program", module_key="module", mentee_key="nonexistent"
             )
 
@@ -300,6 +323,7 @@ class TestGetMenteeModuleIssues:
         mock_mentee_only: MagicMock,
         mock_github_user_only: MagicMock,
         mock_module_only: MagicMock,
+        api_mentorship_queries,
     ) -> None:
         """Test when the mentee does not exist."""
         mock_module_only.return_value.get.return_value = MagicMock(spec=Module, id=1)
@@ -308,9 +332,9 @@ class TestGetMenteeModuleIssues:
         )
         mock_mentee_only.return_value.get.side_effect = Mentee.DoesNotExist
 
-        query = MentorshipQuery()
+        get_mentee_module_issues = api_mentorship_queries.get_mentee_module_issues
         with pytest.raises(ObjectDoesNotExist, match="Mentee issues not found: "):
-            query.get_mentee_module_issues(
+            get_mentee_module_issues(
                 program_key="program", module_key="module", mentee_key="test_mentee"
             )
 
@@ -324,6 +348,7 @@ class TestGetMenteeModuleIssues:
         mock_mentee_only: MagicMock,
         mock_github_user_only: MagicMock,
         mock_module_only: MagicMock,
+        api_mentorship_queries,
     ) -> None:
         """Test when the mentee is not enrolled in the module."""
         mock_module_only.return_value.get.return_value = MagicMock(spec=Module, id=1)
@@ -333,11 +358,11 @@ class TestGetMenteeModuleIssues:
         mock_mentee_only.return_value.get.return_value = MagicMock(spec=Mentee, id=2)
         mock_mentee_module_filter.return_value.exists.return_value = False
 
-        query = MentorshipQuery()
+        get_mentee_module_issues = api_mentorship_queries.get_mentee_module_issues
         with pytest.raises(
             ObjectDoesNotExist, match="Mentee test_mentee is not enrolled in module module"
         ):
-            query.get_mentee_module_issues(
+            get_mentee_module_issues(
                 program_key="program", module_key="module", mentee_key="test_mentee"
             )
 
@@ -353,6 +378,7 @@ class TestGetMenteeModuleIssues:
         mock_github_user_only: MagicMock,
         mock_module_only: MagicMock,
         mock_prefetch: MagicMock,
+        api_mentorship_queries,
     ) -> None:
         """Test pagination for mentee module issues."""
         mock_prefetch.return_value = MagicMock()
@@ -376,11 +402,18 @@ class TestGetMenteeModuleIssues:
         mock_issues_qs = MagicMock()
         mock_issues_qs.__getitem__.return_value = mock_issues_qs_slice
 
-        mock_module.issues.filter.return_value.only.return_value.prefetch_related.return_value.order_by.return_value = mock_issues_qs
+        mock_module_filter = (
+            mock_module.issues.filter.return_value.only.return_value.prefetch_related
+        )
+        mock_module_filter.return_value.order_by.return_value = mock_issues_qs
 
-        query = MentorshipQuery()
-        result = query.get_mentee_module_issues(
-            program_key="program", module_key="module", mentee_key="test_mentee", limit=1, offset=1
+        get_mentee_module_issues = api_mentorship_queries.get_mentee_module_issues
+        result = get_mentee_module_issues(
+            program_key="program",
+            module_key="module",
+            mentee_key="test_mentee",
+            limit=1,
+            offset=1,
         )
 
         assert len(result) == 1
@@ -400,6 +433,7 @@ class TestGetMenteeModuleIssues:
         mock_github_user_only: MagicMock,
         mock_module_only: MagicMock,
         mock_prefetch: MagicMock,
+        api_mentorship_queries,
     ) -> None:
         """If offset is beyond available issues, expect an empty list (current behavior)."""
         mock_prefetch.return_value = MagicMock()
@@ -417,10 +451,13 @@ class TestGetMenteeModuleIssues:
         mock_issues_qs = MagicMock()
         mock_issues_qs.__getitem__.return_value = []
 
-        mock_module.issues.filter.return_value.only.return_value.prefetch_related.return_value.order_by.return_value = mock_issues_qs
+        mock_module_filter = (
+            mock_module.issues.filter.return_value.only.return_value.prefetch_related
+        )
+        mock_module_filter.return_value.order_by.return_value = mock_issues_qs
 
-        query = MentorshipQuery()
-        result = query.get_mentee_module_issues(
+        get_mentee_module_issues = api_mentorship_queries.get_mentee_module_issues
+        result = get_mentee_module_issues(
             program_key="program",
             module_key="module",
             mentee_key="test_mentee",
