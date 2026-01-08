@@ -493,24 +493,24 @@ flowchart TD
 ```
 ### Keep Your Fork in Sync with Upstream
 
-To avoid working on an outdated copy of Nest (and to reduce merge conflicts), contributors may find it helpful to keep their fork synchronized with the main OWASP repository.
+To avoid working on an outdated copy of Nest (and to reduce merge conflicts), contributors may find it helpful to keep their fork synchronized with the main OWASP Nest repository.
 
 <details>
 <summary>Setting up the upstream remote</summary>
 
-If you haven't added the upstream remote yet, you can add it using:
+If you haven't added the upstream remote yet, add it using:
 
 ```bash
 git remote add upstream https://github.com/OWASP/Nest.git
 ```
 
-You can verify that the upstream remote has been added by running:
+Verify that the upstream remote has been added by running:
 
 ```bash
 git remote -v
 ```
 
-This will show both your `origin` (your fork) and `upstream` (the main repository) remotes.
+This should show both `origin` (your fork) and `upstream` (the main repository) remotes.
 
 </details>
 
