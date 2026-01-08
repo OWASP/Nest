@@ -150,6 +150,22 @@ jobs:
           DJANGO_CONFIGURATION=Local
           DJANGO_SETTINGS_MODULE=settings.local
           EOF
+      
+      - name: Prepare minimal Django environment (CI-safe)
+        working-directory: backend
+        run: |
+          cat > .env <<EOF
+          DJANGO_CONFIGURATION=Local
+          DJANGO_SETTINGS_MODULE=settings.local
+
+          DJANGO_SECRET_KEY=dummy
+          DJANGO_ALGOLIA_APPLICATION_ID=dummy
+          DJANGO_ALGOLIA_WRITE_API_KEY=dummy
+          DJANGO_SLACK_SIGNING_SECRET=dummy
+          DJANGO_SLACK_BOT_TOKEN=dummy
+
+          DATABASE_URL=sqlite:///db.sqlite3
+          EOF
 
       - name: Generate per-app diagrams
         working-directory: backend
