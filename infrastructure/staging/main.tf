@@ -84,7 +84,7 @@ module "ecs" {
   fixtures_read_only_policy_arn = module.storage.fixtures_read_only_policy_arn
   project_name                  = var.project_name
   subnet_ids                    = var.ecs_use_public_subnets ? module.networking.public_subnet_ids : module.networking.private_subnet_ids
-  use_fargate_spot              = var.use_fargate_spot
+  use_fargate_spot              = var.ecs_use_fargate_spot
 }
 
 module "frontend" {

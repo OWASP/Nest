@@ -129,6 +129,12 @@ variable "db_user" {
   default     = "owasp_nest_db_user"
 }
 
+variable "ecs_use_fargate_spot" {
+  description = "Whether to use Fargate Spot for backend ECS tasks."
+  type        = bool
+  default     = true
+}
+
 variable "ecs_use_public_subnets" {
   description = "Whether to run ECS tasks in public subnets (requires assign_public_ip)."
   type        = bool
@@ -269,12 +275,6 @@ variable "secret_recovery_window_in_days" {
   description = "The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately."
   type        = number
   default     = 7
-}
-
-variable "use_fargate_spot" {
-  description = "Whether to use Fargate Spot for backend ECS tasks."
-  type        = bool
-  default     = true
 }
 
 variable "vpc_cidr" {
