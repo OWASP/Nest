@@ -9,7 +9,7 @@ from apps.mentorship.management.commands.mentorship_update_comments import (
 
 
 def make_qs(iterable, exist):
-    """Return a queryset-like MagicMock that is iterable and supports."""
+    """Return a queryset-like MagicMock that is iterable."""
     qs = MagicMock(name="QuerySet")
     items = list(iterable)
     qs.exists.return_value = exist
