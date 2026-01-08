@@ -1,6 +1,3 @@
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faArrowDownWideShort, faArrowUpShortWide } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Dropdown,
   DropdownItem,
@@ -11,13 +8,17 @@ import {
 } from '@heroui/react'
 
 import { FC } from 'react'
+import type { IconType } from 'react-icons'
+import { FaArrowDownWideShort, FaArrowUpShortWide } from 'react-icons/fa6'
+import { IconWrapper } from 'wrappers/IconWrapper'
 import { DropDownSectionProps } from 'types/DropDownSectionProps'
+
 const ProjectsDashboardDropDown: FC<{
   onAction: (key: string) => void
   selectedKeys?: string[]
   selectedLabels?: string[]
   selectionMode: 'single' | 'multiple'
-  icon?: IconProp
+  icon?: IconType
   isOrdering?: boolean
   buttonDisplayName: string
   sections: DropDownSectionProps[]
@@ -32,14 +33,22 @@ const ProjectsDashboardDropDown: FC<{
   selectedLabels,
 }) => {
   const orderingIconsMapping = {
-    desc: faArrowDownWideShort,
-    asc: faArrowUpShortWide,
+    desc: FaArrowDownWideShort,
+    asc: FaArrowUpShortWide,
   }
+
   return (
     <Dropdown>
       <DropdownTrigger>
         <Button variant="solid">
-          <FontAwesomeIcon icon={isOrdering ? orderingIconsMapping[selectedKeys[0]] : icon} />
+          <IconWrapper
+            icon={
+              isOrdering
+                ? orderingIconsMapping[selectedKeys?.[0] as keyof typeof orderingIconsMapping] ||
+                  FaArrowDownWideShort
+                : icon || FaArrowDownWideShort
+            }
+          />
           <div className="flex flex-col items-center">
             <span className="text-md">{buttonDisplayName}</span>
             {selectedLabels && selectedLabels.length > 0 && (

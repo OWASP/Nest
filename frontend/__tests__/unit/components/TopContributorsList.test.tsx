@@ -1,6 +1,6 @@
-import { faUsers } from '@fortawesome/free-solid-svg-icons'
 import { fireEvent, screen } from '@testing-library/react'
 import React from 'react'
+import { FaUsers } from 'react-icons/fa6'
 import { render } from 'wrappers/testUtil'
 import type { Contributor } from 'types/contributor'
 import TopContributorsList from 'components/TopContributorsList'
@@ -49,23 +49,6 @@ jest.mock('next/image', () => ({
   ),
 }))
 
-// Mock FontAwesome icons
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({
-    icon,
-    className,
-    ...props
-  }: {
-    icon: { iconName: string }
-    className?: string
-    [key: string]: unknown
-  }) => (
-    <span data-testid={`icon-${icon.iconName}`} className={className} {...props}>
-      {icon.iconName}
-    </span>
-  ),
-}))
-
 // Mock utility functions
 jest.mock('utils/urlFormatter', () => ({
   getMemberUrl: (login: string) => `/members/${login}`,
@@ -94,22 +77,22 @@ jest.mock('components/SecondaryCard', () => ({
   default: ({
     children,
     title,
-    icon,
+    icon: Icon,
     className,
     ...props
   }: {
     children: React.ReactNode
     title?: React.ReactNode
-    icon?: { iconName: string }
+    icon?: React.ComponentType
     className?: string
     [key: string]: unknown
   }) => (
     <div className={className} data-testid="secondary-card" {...props}>
       {title && (
         <h2 className="mb-4 flex flex-row items-center gap-2 text-2xl font-semibold">
-          {icon && (
+          {Icon && (
             <span data-testid="card-icon" className="h-5 w-5">
-              {icon.iconName}
+              <Icon />
             </span>
           )}
           {title}
@@ -118,6 +101,57 @@ jest.mock('components/SecondaryCard', () => ({
       {children}
     </div>
   ),
+}))
+
+jest.mock('components/ShowMoreButton', () => ({
+  __esModule: true,
+  default: function ShowMoreButtonMock({ onToggle }: { onToggle: () => void }) {
+    const [isExpanded, setIsExpanded] = React.useState(false)
+
+    const handleClick = () => {
+      setIsExpanded(!isExpanded)
+      onToggle()
+    }
+
+    return (
+      <div className="mt-4 flex justify-start">
+        <button
+          onClick={handleClick}
+          className="flex items-center bg-transparent px-0 text-blue-400"
+        >
+          {isExpanded ? (
+            <>
+              Show less{' '}
+              <span data-testid="icon-chevron-up" aria-hidden="true">
+                chevron-up
+              </span>
+            </>
+          ) : (
+            <>
+              Show more{' '}
+              <span data-testid="icon-chevron-down" aria-hidden="true">
+                chevron-down
+              </span>
+            </>
+          )}
+        </button>
+      </div>
+    )
+  },
+}))
+
+jest.mock('react-icons/fa6', () => ({
+  FaChevronUp: (props: React.HTMLAttributes<HTMLSpanElement>) => (
+    <span data-testid="icon-chevron-up" {...props}>
+      chevron-up
+    </span>
+  ),
+  FaChevronDown: (props: React.HTMLAttributes<HTMLSpanElement>) => (
+    <span data-testid="icon-chevron-down" {...props}>
+      chevron-down
+    </span>
+  ),
+  FaUsers: (props: React.HTMLAttributes<HTMLSpanElement>) => <span {...props}>users</span>,
 }))
 
 const mockContributors: Contributor[] = [
@@ -190,7 +224,7 @@ describe('TopContributorsList Component', () => {
       expect(screen.queryByRole('button')).not.toBeInTheDocument()
 
       // Test with many contributors (should show button)
-      const manyContributors = Array(15)
+      const manyContributors = Array.from({ length: 15 })
         .fill(null)
         .map((_, index) => ({
           ...mockContributors[0],
@@ -204,7 +238,7 @@ describe('TopContributorsList Component', () => {
     })
 
     it('displays correct number of contributors based on maxInitialDisplay', () => {
-      const manyContributors = Array(15)
+      const manyContributors = Array.from({ length: 15 })
         .fill(null)
         .map((_, index) => ({
           ...mockContributors[0],
@@ -257,7 +291,7 @@ describe('TopContributorsList Component', () => {
     })
 
     it('respects custom maxInitialDisplay prop', () => {
-      const manyContributors = Array(10)
+      const manyContributors = Array.from({ length: 10 })
         .fill(null)
         .map((_, index) => ({
           ...mockContributors[0],
@@ -272,21 +306,19 @@ describe('TopContributorsList Component', () => {
     })
 
     it('displays icon when provided', () => {
-      render(<TopContributorsList {...defaultProps} icon={faUsers} />)
-
+      render(<TopContributorsList {...defaultProps} icon={FaUsers} />)
       expect(screen.getByTestId('card-icon')).toBeInTheDocument()
     })
 
     it('does not display icon when not provided', () => {
       render(<TopContributorsList {...defaultProps} />)
-
       expect(screen.queryByTestId('card-icon')).not.toBeInTheDocument()
     })
   })
 
   describe('Event handling', () => {
     it('toggles contributors display when show more/less button is clicked', () => {
-      const manyContributors = Array(15)
+      const manyContributors = Array.from({ length: 15 })
         .fill(null)
         .map((_, index) => ({
           ...mockContributors[0],
@@ -319,7 +351,7 @@ describe('TopContributorsList Component', () => {
     })
 
     it('calls toggle function correctly on multiple clicks', () => {
-      const manyContributors = Array(10)
+      const manyContributors = Array.from({ length: 10 })
         .fill(null)
         .map((_, index) => ({
           ...mockContributors[0],
@@ -345,7 +377,7 @@ describe('TopContributorsList Component', () => {
 
   describe('State changes / internal logic', () => {
     it('manages showAllContributors state correctly', () => {
-      const manyContributors = Array(10)
+      const manyContributors = Array.from({ length: 10 })
         .fill(null)
         .map((_, index) => ({
           ...mockContributors[0],
@@ -368,7 +400,7 @@ describe('TopContributorsList Component', () => {
     })
 
     it('correctly slices contributors array based on state', () => {
-      const contributors = Array(8)
+      const contributors = Array.from({ length: 8 })
         .fill(null)
         .map((_, index) => ({
           ...mockContributors[0],
@@ -388,7 +420,7 @@ describe('TopContributorsList Component', () => {
 
   describe('Default values and fallbacks', () => {
     it('uses default maxInitialDisplay value when not provided', () => {
-      const contributors = Array(15)
+      const contributors = Array.from({ length: 15 })
         .fill(null)
         .map((_, index) => ({
           ...mockContributors[0],
@@ -445,7 +477,7 @@ describe('TopContributorsList Component', () => {
     })
 
     it('renders correct button text based on state', () => {
-      const manyContributors = Array(15)
+      const manyContributors = Array.from({ length: 15 })
         .fill(null)
         .map((_, index) => ({
           ...mockContributors[0],
@@ -521,11 +553,11 @@ describe('TopContributorsList Component', () => {
       render(<TopContributorsList {...defaultProps} />)
 
       const avatars = screen.getAllByTestId('contributor-avatar')
-      expect(avatars[0]).toHaveAttribute('alt', 'Alex Developer')
+      expect(avatars[0]).toHaveAttribute('alt', "Alex Developer's avatar")
       expect(avatars[0]).toHaveAttribute('title', 'Alex Developer')
-      expect(avatars[1]).toHaveAttribute('alt', 'Jane Developer')
+      expect(avatars[1]).toHaveAttribute('alt', "Jane Developer's avatar")
       expect(avatars[1]).toHaveAttribute('title', 'Jane Developer')
-      expect(avatars[2]).toHaveAttribute('alt', '')
+      expect(avatars[2]).toHaveAttribute('alt', 'Contributor avatar')
       expect(avatars[2]).toHaveAttribute('title', 'user3')
     })
 
@@ -542,7 +574,7 @@ describe('TopContributorsList Component', () => {
     })
 
     it('renders button with proper role', () => {
-      const manyContributors = Array(15)
+      const manyContributors = Array.from({ length: 15 })
         .fill(null)
         .map((_, index) => ({
           ...mockContributors[0],
@@ -565,7 +597,8 @@ describe('TopContributorsList Component', () => {
       const contributorItems = screen
         .getAllByTestId('contributor-avatar')
         .map((avatar) => avatar.parentElement?.parentElement)
-      contributorItems.forEach((item) => {
+
+      for (const item of contributorItems) {
         expect(item).toHaveClass(
           'overflow-hidden',
           'rounded-lg',
@@ -573,7 +606,7 @@ describe('TopContributorsList Component', () => {
           'p-4',
           'dark:bg-gray-700'
         )
-      })
+      }
     })
 
     it('renders proper grid structure', () => {
@@ -592,18 +625,19 @@ describe('TopContributorsList Component', () => {
       render(<TopContributorsList {...defaultProps} />)
 
       const avatars = screen.getAllByTestId('contributor-avatar')
-      avatars.forEach((avatar) => {
+      for (const avatar of avatars) {
         expect(avatar).toHaveAttribute('width', '24')
         expect(avatar).toHaveAttribute('height', '24')
         expect(avatar).toHaveClass('rounded-full')
-      })
+      }
     })
 
     it('renders contributor links with proper styling', () => {
       render(<TopContributorsList {...defaultProps} />)
 
       const links = screen.getAllByTestId('contributor-link')
-      links.forEach((link) => {
+
+      for (const link of links) {
         expect(link).toHaveClass(
           'cursor-pointer',
           'overflow-hidden',
@@ -613,7 +647,7 @@ describe('TopContributorsList Component', () => {
           'text-blue-400',
           'hover:underline'
         )
-      })
+      }
     })
   })
 })

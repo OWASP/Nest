@@ -8,7 +8,7 @@ export const formatDate = (input: number | string) => {
       ? new Date(input * 1000) // Unix timestamp in seconds
       : new Date(input) // ISO date string
 
-  if (isNaN(date.getTime())) {
+  if (Number.isNaN(date.getTime())) {
     throw new Error('Invalid date')
   }
 
@@ -23,7 +23,7 @@ export const formatDateRange = (startDate: number | string, endDate: number | st
   const start = typeof startDate === 'number' ? new Date(startDate * 1000) : new Date(startDate)
   const end = typeof endDate === 'number' ? new Date(endDate * 1000) : new Date(endDate)
 
-  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
     throw new Error('Invalid date')
   }
 
@@ -60,11 +60,63 @@ export const formatDateRange = (startDate: number | string, endDate: number | st
   }
 }
 
-export const formatDateForInput = (dateStr: string) => {
+export const formatDateForInput = (dateStr: string | number) => {
   if (!dateStr) return ''
-  const date = new Date(dateStr)
-  if (isNaN(date.getTime())) {
+  const date = typeof dateStr === 'number' ? new Date(dateStr * 1000) : new Date(dateStr)
+  if (Number.isNaN(date.getTime())) {
     throw new Error('Invalid date')
   }
   return date.toISOString().slice(0, 10)
+}
+
+export interface DateRangeOptions {
+  years?: number
+  months?: number
+  days?: number
+}
+
+export interface DateRangeResult {
+  startDate: string
+  endDate: string
+}
+
+function calculateDaysToSubtract(dayOfWeek: number): number {
+  return dayOfWeek === 0 ? -1 : -(dayOfWeek + 1)
+}
+
+function adjustDateForYearOnly(today: Date, endDate: Date, startDate: Date): void {
+  const todayDayOfWeek = today.getDay()
+  const daysToSubtract = calculateDaysToSubtract(todayDayOfWeek)
+
+  endDate.setDate(endDate.getDate() + daysToSubtract)
+  startDate.setTime(endDate.getTime())
+  startDate.setDate(startDate.getDate() - 363) // 364 days including start day
+}
+
+function calculateStartDate(today: Date, years: number, months: number, days: number): Date {
+  const startDate = new Date(today)
+  startDate.setFullYear(today.getFullYear() - years)
+  startDate.setMonth(today.getMonth() - months)
+  startDate.setDate(today.getDate() - days)
+  return startDate
+}
+
+export function getDateRange(options: DateRangeOptions = {}): DateRangeResult {
+  const { years = 0, months = 0, days = 0 } = options
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const endDate = new Date(today)
+  const startDate = calculateStartDate(today, years, months, days)
+
+  const isYearOnly = years > 0 && months === 0 && days === 0
+  if (isYearOnly) {
+    adjustDateForYearOnly(today, endDate, startDate)
+  }
+
+  return {
+    startDate: startDate.toISOString().split('T')[0],
+    endDate: endDate.toISOString().split('T')[0],
+  }
 }

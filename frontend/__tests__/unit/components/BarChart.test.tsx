@@ -1,11 +1,7 @@
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faFire } from '@fortawesome/free-solid-svg-icons'
 import { render, screen } from '@testing-library/react'
-import '@testing-library/jest-dom'
 import React from 'react'
-
-// Register FontAwesome icon
-library.add(faFire)
+import { FaFire } from 'react-icons/fa'
+import '@testing-library/jest-dom'
 
 // Mock react-apexcharts completely
 jest.mock('react-apexcharts', () => {
@@ -170,8 +166,7 @@ describe('<BarChart />', () => {
   })
 
   it('renders with custom icon when provided', () => {
-    // cspell:ignore fas
-    renderWithTheme(<BarChart {...mockProps} icon={['fas', 'fire']} />)
+    renderWithTheme(<BarChart {...mockProps} icon={FaFire} />)
     expect(screen.getByTestId('anchor-title')).toHaveTextContent('Calories Burned')
     expect(screen.getByTestId('card-icon')).toBeInTheDocument()
   })
@@ -185,7 +180,7 @@ describe('<BarChart />', () => {
   it('renders correctly in light mode with proper theme colors', () => {
     renderWithTheme(<BarChart {...mockProps} />, 'light')
     const chartElement = screen.getByTestId('mock-chart')
-    const options = JSON.parse(chartElement.getAttribute('data-options') || '{}')
+    const options = JSON.parse(chartElement.dataset.options || '{}')
 
     expect(options.chart.foreColor).toBe('#1E1E2C')
     expect(options.tooltip.theme).toBe('light')
@@ -195,7 +190,7 @@ describe('<BarChart />', () => {
   it('renders correctly in dark mode with proper theme colors', () => {
     renderWithTheme(<BarChart {...mockProps} />, 'dark')
     const chartElement = screen.getByTestId('mock-chart')
-    const options = JSON.parse(chartElement.getAttribute('data-options') || '{}')
+    const options = JSON.parse(chartElement.dataset.options || '{}')
 
     expect(options.chart.foreColor).toBe('#ECECEC')
     expect(options.tooltip.theme).toBe('dark')
@@ -205,7 +200,7 @@ describe('<BarChart />', () => {
   it('configures chart options correctly', () => {
     renderWithTheme(<BarChart {...mockProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const options = JSON.parse(chartElement.getAttribute('data-options') || '{}')
+    const options = JSON.parse(chartElement.dataset.options || '{}')
 
     expect(options.chart.animations.enabled).toBe(true)
     expect(options.chart.animations.speed).toBe(1000)
@@ -221,51 +216,35 @@ describe('<BarChart />', () => {
     renderWithTheme(<BarChart {...mockProps} />)
     const chartElement = screen.getByTestId('mock-chart')
 
-    expect(chartElement.getAttribute('data-type')).toBe('bar')
-    expect(chartElement.getAttribute('data-height')).toBe('300')
+    expect(chartElement.dataset.type).toBe('bar')
+    expect(chartElement.dataset.height).toBe('300')
   })
 
   it('creates correct series data structure', () => {
     renderWithTheme(<BarChart {...mockProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const series = JSON.parse(chartElement.getAttribute('data-series') || '[]')
+    const series = JSON.parse(chartElement.dataset.series || '[]')
 
     expect(series).toHaveLength(1)
     expect(series[0].name).toBe('Actual')
     expect(series[0].data).toHaveLength(3)
 
-    series[0].data.forEach(
-      (
-        dataPoint: {
-          x: string
-          y: number
-          goals: Array<{
-            name: string
-            value: number
-            strokeWidth: number
-            strokeHeight: number
-            strokeLineCap: string
-            strokeColor: string
-          }>
-        },
-        index: number
-      ) => {
-        expect(dataPoint.x).toBe(mockProps.labels[index])
-        expect(dataPoint.y).toBe(mockProps.days[index])
-        expect(dataPoint.goals).toHaveLength(1)
-        expect(dataPoint.goals[0].name).toBe('Requirement')
-        expect(dataPoint.goals[0].value).toBe(mockProps.requirements[index])
-        expect(dataPoint.goals[0].strokeWidth).toBe(5)
-        expect(dataPoint.goals[0].strokeHeight).toBe(15)
-        expect(dataPoint.goals[0].strokeLineCap).toBe('round')
-      }
-    )
+    for (const [index, dataPoint] of series[0].data.entries()) {
+      expect(dataPoint.x).toBe(mockProps.labels[index])
+      expect(dataPoint.y).toBe(mockProps.days[index])
+      expect(dataPoint.goals).toHaveLength(1)
+      expect(dataPoint.goals[0].name).toBe('Requirement')
+      expect(dataPoint.goals[0].value).toBe(mockProps.requirements[index])
+      expect(dataPoint.goals[0].strokeWidth).toBe(5)
+      expect(dataPoint.goals[0].strokeHeight).toBe(15)
+      expect(dataPoint.goals[0].strokeLineCap).toBe('round')
+    }
   })
 
   it('configures colors array correctly', () => {
     renderWithTheme(<BarChart {...mockProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const options = JSON.parse(chartElement.getAttribute('data-options') || '{}')
+    const options = JSON.parse(chartElement.dataset.options || '{}')
 
     expect(options.colors).toBeDefined()
     expect(Array.isArray(options.colors)).toBe(true)
@@ -275,7 +254,7 @@ describe('<BarChart />', () => {
   it('configures dataLabels correctly', () => {
     renderWithTheme(<BarChart {...mockProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const options = JSON.parse(chartElement.getAttribute('data-options') || '{}')
+    const options = JSON.parse(chartElement.dataset.options || '{}')
 
     expect(options.dataLabels).toBeDefined()
   })
@@ -302,7 +281,7 @@ describe('<BarChart />', () => {
     renderWithTheme(<BarChart {...mismatchedProps} />)
 
     const chartElement = screen.getByTestId('mock-chart')
-    const series = JSON.parse(chartElement.getAttribute('data-series') || '[]')
+    const series = JSON.parse(chartElement.dataset.series || '[]')
 
     expect(series[0].data).toHaveLength(2)
   })
@@ -312,7 +291,7 @@ describe('<BarChart />', () => {
     const { rerender } = render(<BarChart {...mockProps} />)
 
     let chartElement = screen.getByTestId('mock-chart')
-    let options = JSON.parse(chartElement.getAttribute('data-options') || '{}')
+    let options = JSON.parse(chartElement.dataset.options || '{}')
     expect(options.chart.foreColor).toBe('#1E1E2C')
     expect(options.tooltip.theme).toBe('light')
 
@@ -320,7 +299,7 @@ describe('<BarChart />', () => {
     rerender(<BarChart {...mockProps} />)
 
     chartElement = screen.getByTestId('mock-chart')
-    options = JSON.parse(chartElement.getAttribute('data-options') || '{}')
+    options = JSON.parse(chartElement.dataset.options || '{}')
     expect(options.chart.foreColor).toBe('#ECECEC')
     expect(options.tooltip.theme).toBe('dark')
   })
@@ -328,7 +307,7 @@ describe('<BarChart />', () => {
   it('includes strokeColor in goals data', () => {
     renderWithTheme(<BarChart {...mockProps} />, 'light')
     const chartElement = screen.getByTestId('mock-chart')
-    const series = JSON.parse(chartElement.getAttribute('data-series') || '[]')
+    const series = JSON.parse(chartElement.dataset.series || '[]')
 
     expect(series[0].data[0].goals[0].strokeColor).toBe('#FF7875')
   })
@@ -336,7 +315,7 @@ describe('<BarChart />', () => {
   it('includes strokeColor in goals data for dark mode', () => {
     renderWithTheme(<BarChart {...mockProps} />, 'dark')
     const chartElement = screen.getByTestId('mock-chart')
-    const series = JSON.parse(chartElement.getAttribute('data-series') || '[]')
+    const series = JSON.parse(chartElement.dataset.series || '[]')
 
     expect(series[0].data[0].goals[0].strokeColor).toBe('#FF4D4F')
   })
@@ -358,7 +337,7 @@ describe('<BarChart />', () => {
 
     renderWithTheme(<BarChart {...zeroProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const series = JSON.parse(chartElement.getAttribute('data-series') || '[]')
+    const series = JSON.parse(chartElement.dataset.series || '[]')
 
     expect(series[0].data[0].y).toBe(0)
   })
@@ -373,7 +352,7 @@ describe('<BarChart />', () => {
 
     renderWithTheme(<BarChart {...negativeProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const series = JSON.parse(chartElement.getAttribute('data-series') || '[]')
+    const series = JSON.parse(chartElement.dataset.series || '[]')
 
     expect(series[0].data[0].y).toBe(-50)
   })
@@ -383,15 +362,15 @@ describe('<BarChart />', () => {
       title: 'Decimal Values',
       labels: ['Decimal'],
       days: [99.5],
-      requirements: [100.0],
+      requirements: [100],
     }
 
     renderWithTheme(<BarChart {...decimalProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const series = JSON.parse(chartElement.getAttribute('data-series') || '[]')
+    const series = JSON.parse(chartElement.dataset.series || '[]')
 
     expect(series[0].data[0].y).toBe(99.5)
-    expect(series[0].data[0].goals[0].value).toBe(100.0)
+    expect(series[0].data[0].goals[0].value).toBe(100)
   })
 
   it('handles large numbers in days array', () => {
@@ -404,7 +383,7 @@ describe('<BarChart />', () => {
 
     renderWithTheme(<BarChart {...largeProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const series = JSON.parse(chartElement.getAttribute('data-series') || '[]')
+    const series = JSON.parse(chartElement.dataset.series || '[]')
 
     expect(series[0].data[0].y).toBe(999999)
     expect(series[0].data[0].goals[0].value).toBe(1000000)
@@ -415,7 +394,7 @@ describe('<BarChart />', () => {
     renderWithTheme(<BarChart {...mockProps} />)
 
     const chartElement = screen.getByTestId('mock-chart')
-    const options = JSON.parse(chartElement.getAttribute('data-options') || '{}')
+    const options = JSON.parse(chartElement.dataset.options || '{}')
 
     expect(options.chart.foreColor).toBe('#1E1E2C')
   })
@@ -430,7 +409,7 @@ describe('<BarChart />', () => {
 
     renderWithTheme(<BarChart {...zeroReqProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const series = JSON.parse(chartElement.getAttribute('data-series') || '[]')
+    const series = JSON.parse(chartElement.dataset.series || '[]')
 
     expect(series[0].data[0].goals[0].value).toBe(0)
   })
@@ -445,7 +424,7 @@ describe('<BarChart />', () => {
 
     renderWithTheme(<BarChart {...mixedProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const series = JSON.parse(chartElement.getAttribute('data-series') || '[]')
+    const series = JSON.parse(chartElement.dataset.series || '[]')
 
     expect(series[0].data[0].y).toBe(-50)
     expect(series[0].data[1].y).toBe(150)
@@ -461,7 +440,7 @@ describe('<BarChart />', () => {
 
     renderWithTheme(<BarChart {...smallProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const series = JSON.parse(chartElement.getAttribute('data-series') || '[]')
+    const series = JSON.parse(chartElement.dataset.series || '[]')
 
     expect(series[0].data[0].y).toBe(0.001)
     expect(series[0].data[0].goals[0].value).toBe(0.002)
@@ -470,7 +449,7 @@ describe('<BarChart />', () => {
   it('configures dataLabels formatter with proper structure', () => {
     renderWithTheme(<BarChart {...mockProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const options = JSON.parse(chartElement.getAttribute('data-options') || '{}')
+    const options = JSON.parse(chartElement.dataset.options || '{}')
 
     expect(options.dataLabels).toBeDefined()
   })
@@ -478,7 +457,7 @@ describe('<BarChart />', () => {
   it('configures colors function with proper structure and parameters', () => {
     renderWithTheme(<BarChart {...mockProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const options = JSON.parse(chartElement.getAttribute('data-options') || '{}')
+    const options = JSON.parse(chartElement.dataset.options || '{}')
 
     expect(options.colors).toBeDefined()
     expect(Array.isArray(options.colors)).toBe(true)
@@ -489,7 +468,7 @@ describe('<BarChart />', () => {
   it('configures legend with proper structure and values', () => {
     renderWithTheme(<BarChart {...mockProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const options = JSON.parse(chartElement.getAttribute('data-options') || '{}')
+    const options = JSON.parse(chartElement.dataset.options || '{}')
 
     expect(options.legend).toBeDefined()
     expect(options.legend.show).toBe(true)
@@ -512,7 +491,7 @@ describe('<BarChart />', () => {
 
     renderWithTheme(<BarChart {...reverseProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const options = JSON.parse(chartElement.getAttribute('data-options') || '{}')
+    const options = JSON.parse(chartElement.dataset.options || '{}')
 
     expect(options.colors).toBeDefined()
     expect(Array.isArray(options.colors)).toBe(true)
@@ -530,7 +509,7 @@ describe('<BarChart />', () => {
 
     renderWithTheme(<BarChart {...noReverseProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const options = JSON.parse(chartElement.getAttribute('data-options') || '{}')
+    const options = JSON.parse(chartElement.dataset.options || '{}')
 
     expect(options.colors).toBeDefined()
     expect(Array.isArray(options.colors)).toBe(true)
@@ -541,7 +520,7 @@ describe('<BarChart />', () => {
   it('configures chart options with proper structure for all properties', () => {
     renderWithTheme(<BarChart {...mockProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const options = JSON.parse(chartElement.getAttribute('data-options') || '{}')
+    const options = JSON.parse(chartElement.dataset.options || '{}')
 
     // Test chart configuration
     expect(options.chart).toBeDefined()
@@ -583,7 +562,7 @@ describe('<BarChart />', () => {
 
     renderWithTheme(<BarChart {...edgeCaseProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const options = JSON.parse(chartElement.getAttribute('data-options') || '{}')
+    const options = JSON.parse(chartElement.dataset.options || '{}')
 
     expect(options.chart).toBeDefined()
     expect(options.dataLabels).toBeDefined()
@@ -601,7 +580,7 @@ describe('<BarChart />', () => {
 
     renderWithTheme(<BarChart {...singleProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const series = JSON.parse(chartElement.getAttribute('data-series') || '[]')
+    const series = JSON.parse(chartElement.dataset.series || '[]')
 
     expect(series[0].data).toHaveLength(1)
     expect(series[0].data[0].x).toBe('Single')
@@ -619,7 +598,7 @@ describe('<BarChart />', () => {
 
     renderWithTheme(<BarChart {...largeProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const series = JSON.parse(chartElement.getAttribute('data-series') || '[]')
+    const series = JSON.parse(chartElement.dataset.series || '[]')
 
     expect(series[0].data[0].y).toBe(Number.MAX_SAFE_INTEGER)
     expect(series[0].data[0].goals[0].value).toBe(Number.MAX_SAFE_INTEGER)
@@ -635,7 +614,7 @@ describe('<BarChart />', () => {
 
     renderWithTheme(<BarChart {...specialProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const series = JSON.parse(chartElement.getAttribute('data-series') || '[]')
+    const series = JSON.parse(chartElement.dataset.series || '[]')
 
     expect(series[0].data).toHaveLength(3)
     expect(series[0].data[0].x).toBe('Test & More')
@@ -654,7 +633,7 @@ describe('<BarChart />', () => {
 
     renderWithTheme(<BarChart {...mixedReverseProps} />)
     const chartElement = screen.getByTestId('mock-chart')
-    const options = JSON.parse(chartElement.getAttribute('data-options') || '{}')
+    const options = JSON.parse(chartElement.dataset.options || '{}')
 
     expect(options.colors).toBeDefined()
     expect(Array.isArray(options.colors)).toBe(true)

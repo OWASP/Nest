@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime
 from functools import lru_cache
+from typing import TYPE_CHECKING
 
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
@@ -26,6 +27,11 @@ from apps.owasp.models.enums.project import (
 from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins.project import ProjectIndexMixin
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
+
+if TYPE_CHECKING:
+    from apps.owasp.models.entity_member import EntityMember
+
+MAX_LEADERS_COUNT = 5
 
 
 class Project(
@@ -91,6 +97,21 @@ class Project(
     custom_tags = models.JSONField(verbose_name="Custom tags", default=list, blank=True)
     track_issues = models.BooleanField(verbose_name="Track issues", default=True)
 
+    contribution_data = models.JSONField(
+        verbose_name="Contribution Data",
+        default=dict,
+        blank=True,
+        null=True,
+        help_text="Daily contribution counts (YYYY-MM-DD -> count mapping)",
+    )
+    contribution_stats = models.JSONField(
+        verbose_name="Contribution Statistics",
+        default=dict,
+        blank=True,
+        null=True,
+        help_text="Detailed contribution breakdown (commits, issues, pull requests, releases)",
+    )
+
     # GKs.
     members = GenericRelation("owasp.EntityMember")
 
@@ -123,6 +144,11 @@ class Project(
     def __str__(self) -> str:
         """Project human readable representation."""
         return f"{self.name or self.key}"
+
+    @property
+    def entity_leaders(self) -> models.QuerySet[EntityMember]:
+        """Return project leaders."""
+        return super().entity_leaders[:MAX_LEADERS_COUNT]
 
     @property
     def health_score(self) -> float | None:

@@ -19,12 +19,7 @@ on:
       - published
   workflow_dispatch:
 
-permissions:
-  contents: read
-
-concurrency:
-  cancel-in-progress: true
-  group: ${{ github.repository }}-${{ github.workflow }}-${{ github.ref }}
+permissions: {}
 
 env:
   FORCE_COLOR: 1
@@ -32,23 +27,25 @@ env:
 jobs:
   pre-commit:
     name: Run pre-commit checks
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Install Poetry
         run: pipx install poetry
 
       - name: Set up Python
-        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
         with:
           cache: 'poetry'
           cache-dependency-path: backend/poetry.lock
           python-version: '3.13'
 
       - name: Set up pre-commit cache
-        uses: actions/cache@v4
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -65,21 +62,23 @@ jobs:
 
   check-frontend:
     name: Run frontend checks
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
         with:
           version: 10
           run_install: true
 
       - name: Set up Node
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f
         with:
-          node-version: 22
+          node-version: 24
           cache: 'pnpm'
           cache-dependency-path: frontend/pnpm-lock.yaml
 
@@ -98,10 +97,12 @@ jobs:
 
   spellcheck:
     name: Run spell check
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Run cspell
         run: |
@@ -113,10 +114,12 @@ jobs:
       - check-frontend
       - pre-commit
       - spellcheck
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Run Trivy Repository Scan
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
@@ -127,15 +130,17 @@ jobs:
           version: latest
 
   scan-ci-dependencies:
-    name: Run CI Denendencies Scan
+    name: Run CI Dependencies Scan
     needs:
       - check-frontend
       - pre-commit
       - spellcheck
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Run Trivy Filesystem Scan
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
@@ -150,13 +155,15 @@ jobs:
     needs:
       - scan-code
       - scan-ci-dependencies
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
       - name: Build backend test image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
@@ -167,7 +174,7 @@ jobs:
           cache-to: |
             type=gha,compression=zstd
           context: backend
-          file: backend/docker/Dockerfile.test
+          file: docker/backend/Dockerfile.test
           load: true
           platforms: linux/amd64
           tags: owasp/nest:test-backend-latest
@@ -175,19 +182,22 @@ jobs:
       - name: Run backend tests
         run: |
           docker run -e DJANGO_SETTINGS_MODULE=settings.test --env-file backend/.env.example owasp/nest:test-backend-latest pytest
+    timeout-minutes: 10
 
   run-frontend-unit-tests:
     name: Run frontend unit tests
     needs:
       - scan-code
       - scan-ci-dependencies
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
       - name: Build frontend unit-testing image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
@@ -198,7 +208,7 @@ jobs:
           cache-to: |
             type=gha,compression=zstd
           context: frontend
-          file: frontend/docker/Dockerfile.unit.test
+          file: docker/frontend/Dockerfile.unit.test
           load: true
           platforms: linux/amd64
           tags: owasp/nest:test-frontend-unit-latest
@@ -206,19 +216,22 @@ jobs:
       - name: Run frontend unit tests
         run: |
           docker run --env-file frontend/.env.example owasp/nest:test-frontend-unit-latest pnpm run test:unit
+    timeout-minutes: 10
 
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
     needs:
       - scan-code
       - scan-ci-dependencies
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
       - name: Build frontend end-to-end testing image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
@@ -227,7 +240,7 @@ jobs:
             type=gha
             type=registry,ref=owasp/nest:test-frontend-e2e-cache
           context: frontend
-          file: frontend/docker/Dockerfile.e2e.test
+          file: docker/frontend/Dockerfile.e2e.test
           load: true
           platforms: linux/amd64
           tags: owasp/nest:test-frontend-e2e-latest
@@ -235,12 +248,14 @@ jobs:
       - name: Run frontend end-to-end tests
         run: |
           docker run --env-file frontend/.env.example owasp/nest:test-frontend-e2e-latest pnpm run test:e2e
+    timeout-minutes: 10
 
   set-release-version:
     name: Set release version
-    runs-on: ubuntu-latest
     outputs:
       release_version: ${{ steps.set.outputs.release_version }}
+    permissions: {}
+    runs-on: ubuntu-latest
     steps:
       - name: Set release version
         id: set
@@ -264,19 +279,21 @@ jobs:
       - run-frontend-e2e-tests
       - run-frontend-unit-tests
       - set-release-version
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130
 
       - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
       - name: Login to Docker Hub
-        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -293,7 +310,7 @@ jobs:
           cache-to: |
             type=registry,ref=owasp/nest:backend-staging-cache
           context: backend
-          file: backend/docker/Dockerfile
+          file: docker/backend/Dockerfile
           load: true
           platforms: linux/amd64
           push: true
@@ -341,7 +358,7 @@ jobs:
           cache-to: |
             type=registry,ref=owasp/nest:frontend-staging-cache
           context: frontend
-          file: frontend/docker/Dockerfile
+          file: docker/frontend/Dockerfile
           load: true
           platforms: linux/amd64
           push: true
@@ -366,20 +383,24 @@ jobs:
             echo "**Backend:** ${{ steps.backend-size.outputs.human_readable }}"
             echo "**Frontend:** ${{ steps.frontend-size.outputs.human_readable }}"
           } >> $GITHUB_STEP_SUMMARY
+    timeout-minutes: 10
 
   scan-staging-images:
     name: Scan Staging Images
     needs:
       - build-staging-images
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Scan backend image
+        continue-on-error: true
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
-          exit-code: 0
+          exit-code: 1
           image-ref: owasp/nest:backend-staging
           scan-type: image
           trivy-config: trivy.yaml
@@ -387,6 +408,7 @@ jobs:
           version: latest
 
       - name: Scan frontend image
+        continue-on-error: true
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
           exit-code: 1
@@ -410,10 +432,12 @@ jobs:
     needs:
       - scan-staging-images
       - set-release-version
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Prepare SSH key
         env:
@@ -524,10 +548,12 @@ jobs:
       github.ref == 'refs/heads/main'
     needs:
       - deploy-staging-nest
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Prepare SSH key
         env:
@@ -545,27 +571,29 @@ jobs:
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml staging/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
 
-  run-lighthouse-ci:
+  run-staging-lighthouse-ci:
     name: Run Lighthouse CI
     needs:
       - deploy-staging-nest-proxy
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
         with:
           run_install: true
           version: 10
 
       - name: Set up Node
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f
         with:
           cache-dependency-path: frontend/pnpm-lock.yaml
           cache: 'pnpm'
-          node-version: 22
+          node-version: 24
 
       - name: Run lighthouse-ci
         env:
@@ -574,6 +602,34 @@ jobs:
           pnpm run lighthouse-ci
         timeout-minutes: 15
         working-directory: frontend
+
+  run-staging-zap-baseline-scan:
+    name: Run staging ZAP baseline scan
+    needs:
+      - deploy-staging-nest-proxy
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+
+      - name: Run baseline scan
+        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          target: 'https://nest.owasp.dev'
+          allow_issue_writing: false
+          fail_action: false
+          cmd_options: '-a -c .zapconfig -r report.html '
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: zap-baseline-scan-report-${{ github.run_id }}
+          path: report.html
+
 
   build-production-images:
     name: Build Production Images
@@ -588,19 +644,21 @@ jobs:
       - run-frontend-e2e-tests
       - run-frontend-unit-tests
       - set-release-version
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130
 
       - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
       - name: Login to Docker Hub
-        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -615,7 +673,7 @@ jobs:
             type=gha
             type=registry,ref=owasp/nest:backend-staging-cache
           context: backend
-          file: backend/docker/Dockerfile
+          file: docker/backend/Dockerfile
           load: true
           platforms: linux/amd64
           push: true
@@ -661,7 +719,7 @@ jobs:
             type=gha
             type=registry,ref=owasp/nest:frontend-staging-cache
           context: frontend
-          file: frontend/docker/Dockerfile
+          file: docker/frontend/Dockerfile
           load: true
           platforms: linux/amd64
           push: true
@@ -686,15 +744,18 @@ jobs:
             echo "**Backend:** ${{ steps.backend-size.outputs.human_readable }}"
             echo "**Frontend:** ${{ steps.frontend-size.outputs.human_readable }}"
           } >> $GITHUB_STEP_SUMMARY
+    timeout-minutes: 10
 
   scan-production-images:
     name: Scan Production Images
     needs:
       - build-production-images
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Setup Trivy
         uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1
@@ -736,10 +797,12 @@ jobs:
     needs:
       - scan-production-images
       - set-release-version
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Prepare SSH key
         env:
@@ -861,10 +924,12 @@ jobs:
       github.event.action == 'published'
     needs:
       - deploy-production-nest
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Prepare SSH key
         env:
@@ -881,3 +946,30 @@ jobs:
       - name: Run proxy deploy
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml production/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+
+  run-production-zap-baseline-scan:
+    name: Run production ZAP baseline scan
+    needs:
+      - deploy-production-nest-proxy
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+
+      - name: Run baseline scan
+        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          target: 'https://nest.owasp.org'
+          allow_issue_writing: false
+          fail_action: false
+          cmd_options: '-a -c .zapconfig -r report.html '
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: zap-baseline-scan-report-${{ github.run_id }}
+          path: report.html

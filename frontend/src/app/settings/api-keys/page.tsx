@@ -1,29 +1,92 @@
 'use client'
-
-import { useMutation, useQuery } from '@apollo/client'
-import {
-  faSpinner,
-  faKey,
-  faPlus,
-  faCopy,
-  faEye,
-  faEyeSlash,
-  faInfoCircle,
-  faTrash,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { Button } from '@heroui/button'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal'
 import { Input } from '@heroui/react'
 import { addToast } from '@heroui/toast'
 import { format, addDays } from 'date-fns'
-import { useState } from 'react'
-import { CREATE_API_KEY, GET_API_KEYS, REVOKE_API_KEY } from 'server/queries/apiKeyQueries'
+import React, { useState } from 'react'
+import { FaInfoCircle } from 'react-icons/fa'
+import { FaSpinner, FaKey, FaPlus, FaCopy, FaEye, FaEyeSlash, FaTrash } from 'react-icons/fa6'
+import {
+  CreateApiKeyDocument,
+  GetApiKeysDocument,
+  RevokeApiKeyDocument,
+} from 'types/__generated__/apiKeyQueries.generated'
 import type { ApiKey } from 'types/apiKey'
+import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
 import { ApiKeysSkeleton } from 'components/skeletons/ApiKeySkelton'
 
 const MAX_ACTIVE_KEYS = 3
+
+// Content state components
+const ErrorState = () => (
+  <div className="rounded-md bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">
+    Error loading API keys
+  </div>
+)
+
+const EmptyState = () => (
+  <div className="rounded-md bg-gray-50 p-8 text-center text-gray-500 dark:bg-gray-800/50 dark:text-gray-400">
+    You don't have any API keys yet.
+  </div>
+)
+
+interface ApiKeysTableProps {
+  data: { apiKeys?: ApiKey[] } | undefined
+  onRevoke: (key: ApiKey) => void
+}
+
+const ApiKeysTable = ({ data, onRevoke }: ApiKeysTableProps) => (
+  <div className="overflow-x-auto">
+    <table className="w-full border-collapse">
+      <thead>
+        <tr className="border-b-1 border-b-gray-200 dark:border-b-gray-700">
+          <th className="py-3 text-left font-semibold">Name</th>
+          <th className="py-3 text-left font-semibold">ID</th>
+          <th className="py-3 text-left font-semibold">Created</th>
+          <th className="py-3 text-left font-semibold">Expires</th>
+          <th className="py-3 text-right font-semibold">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {(data?.apiKeys ?? []).map((key: ApiKey) => (
+          <tr key={key.uuid} className="border-b border-b-gray-200 dark:border-b-gray-700">
+            <td className="py-3">{key.name}</td>
+            <td className="py-3 font-mono text-sm">{key.uuid}</td>
+            <td className="py-3">{format(new Date(key.createdAt), 'PP')}</td>
+            <td className="py-3">
+              {key.expiresAt ? format(new Date(key.expiresAt), 'PP') : 'Never'}
+            </td>
+            <td className="py-3 text-right">
+              <Button
+                variant="light"
+                size="sm"
+                onPress={() => onRevoke(key)}
+                className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+              >
+                <FaTrash />
+              </Button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)
+
+type ContentType = 'error' | 'loading' | 'empty' | 'table'
+
+const getContentComponents = (
+  data: { apiKeys?: ApiKey[] } | undefined,
+  onRevoke: (key: ApiKey) => void
+): Record<ContentType, () => React.ReactNode> => ({
+  error: () => <ErrorState />,
+  loading: () => <LoadingSpinner />,
+  empty: () => <EmptyState />,
+  table: () => <ApiKeysTable data={data} onRevoke={onRevoke} />,
+})
 
 export default function Page() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -33,12 +96,12 @@ export default function Page() {
   const [newlyCreatedKey, setNewlyCreatedKey] = useState<string | null>(null)
   const [keyToRevoke, setKeyToRevoke] = useState<ApiKey | null>(null)
 
-  const { loading, error, data, refetch } = useQuery(GET_API_KEYS, {
+  const { loading, error, data, refetch } = useQuery(GetApiKeysDocument, {
     notifyOnNetworkStatusChange: true,
     errorPolicy: 'all',
   })
 
-  const [createApiKey, { loading: createLoading }] = useMutation(CREATE_API_KEY, {
+  const [createApiKey, { loading: createLoading }] = useMutation(CreateApiKeyDocument, {
     onCompleted: (data) => {
       const result = data.createApiKey
       if (!result?.ok) {
@@ -62,7 +125,7 @@ export default function Page() {
     },
   })
 
-  const [revokeApiKey] = useMutation(REVOKE_API_KEY, {
+  const [revokeApiKey] = useMutation(RevokeApiKeyDocument, {
     onCompleted: () => {
       addToast({ title: 'Success', description: 'API key revoked', color: 'success' })
       refetch()
@@ -75,6 +138,21 @@ export default function Page() {
   const activeKeyCount = data?.activeApiKeyCount || 0
   const canCreateNewKey = activeKeyCount < MAX_ACTIVE_KEYS
   const defaultExpiryDate = format(addDays(new Date(), 30), 'yyyy-MM-dd')
+
+  const getContentType = (): ContentType => {
+    if (error) {
+      return 'error'
+    } else if (loading) {
+      return 'loading'
+    } else if (data?.apiKeys?.length === 0) {
+      return 'empty'
+    } else {
+      return 'table'
+    }
+  }
+
+  const contentType = getContentType()
+  const contentComponents = getContentComponents(data, setKeyToRevoke)
 
   const handleCreateKey = () => {
     if (!newKeyName.trim()) {
@@ -103,9 +181,9 @@ export default function Page() {
       addToast({ title: 'Error', description: 'Please select an expiration date', color: 'danger' })
       return
     }
-    const variables: { name: string; expiresAt: Date } = {
+    const variables: { name: string; expiresAt: string } = {
       name: newKeyName.trim(),
-      expiresAt: new Date(newKeyExpiry),
+      expiresAt: new Date(newKeyExpiry).toISOString(),
     }
     createApiKey({ variables })
   }
@@ -171,10 +249,7 @@ export default function Page() {
 
         <SecondaryCard>
           <div className="flex items-start gap-3">
-            <FontAwesomeIcon
-              icon={faInfoCircle}
-              className="mt-0.5 text-blue-600 dark:text-blue-400"
-            />
+            <FaInfoCircle className="mt-0.5 text-blue-600 dark:text-blue-400" />
             <div>
               <h3 className="font-semibold text-blue-800 dark:text-blue-300">API Key Limits</h3>
               <p className="mt-1 text-sm text-blue-700 dark:text-blue-400">
@@ -198,7 +273,7 @@ export default function Page() {
         <SecondaryCard>
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <FontAwesomeIcon icon={faKey} className="text-gray-600 dark:text-gray-400" />
+              <FaKey className="text-gray-600 dark:text-gray-400" />
               <h2 className="text-xl font-semibold">Your API Keys</h2>
             </div>
             <Button
@@ -206,63 +281,12 @@ export default function Page() {
               isDisabled={!canCreateNewKey}
               className="rounded bg-black font-medium text-white transition-colors hover:bg-gray-900/90 disabled:bg-gray-300 disabled:text-gray-500"
             >
-              <FontAwesomeIcon icon={faPlus} className="mr-1" />
+              <FaPlus className="mr-1" />
               Create New Key ({activeKeyCount}/{MAX_ACTIVE_KEYS})
             </Button>
           </div>
 
-          {error ? (
-            <div className="rounded-md bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">
-              Error loading API keys
-            </div>
-          ) : loading ? (
-            <div className="flex flex-col gap-4">
-              <ApiKeysSkeleton />
-            </div>
-          ) : !data?.apiKeys?.length ? (
-            <div className="rounded-md bg-gray-50 p-8 text-center text-gray-500 dark:bg-gray-800/50 dark:text-gray-400">
-              You don't have any API keys yet.
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b-1 border-b-gray-200 dark:border-b-gray-700">
-                    <th className="py-3 text-left font-semibold">Name</th>
-                    <th className="py-3 text-left font-semibold">ID</th>
-                    <th className="py-3 text-left font-semibold">Created</th>
-                    <th className="py-3 text-left font-semibold">Expires</th>
-                    <th className="py-3 text-right font-semibold">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.apiKeys.map((key: ApiKey) => (
-                    <tr
-                      key={key.uuid}
-                      className="border-b border-b-gray-200 dark:border-b-gray-700"
-                    >
-                      <td className="py-3">{key.name}</td>
-                      <td className="py-3 font-mono text-sm">{key.uuid}</td>
-                      <td className="py-3">{format(new Date(key.createdAt), 'PP')}</td>
-                      <td className="py-3">
-                        {key.expiresAt ? format(new Date(key.expiresAt), 'PP') : 'Never'}
-                      </td>
-                      <td className="py-3 text-right">
-                        <Button
-                          variant="light"
-                          size="sm"
-                          onPress={() => setKeyToRevoke(key)}
-                          className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                        >
-                          <FontAwesomeIcon icon={faTrash} />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          {contentComponents[contentType]()}
         </SecondaryCard>
 
         <SecondaryCard>
@@ -320,10 +344,10 @@ export default function Page() {
                       onPress={() => setShowNewKey(!showNewKey)}
                       isIconOnly
                     >
-                      <FontAwesomeIcon icon={showNewKey ? faEyeSlash : faEye} />
+                      {showNewKey ? <FaEyeSlash /> : <FaEye />}
                     </Button>
                     <Button variant="bordered" onPress={handleCopyKey} size="sm">
-                      <FontAwesomeIcon icon={faCopy} className="mr-2" />
+                      <FaCopy className="mr-2" />
                       Copy
                     </Button>
                   </div>
@@ -396,7 +420,7 @@ export default function Page() {
                   onPress={handleCreateKey}
                   isDisabled={createLoading || !newKeyName.trim()}
                 >
-                  {createLoading && <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />}
+                  {createLoading && <FaSpinner className="mr-2 animate-spin" />}
                   Create API Key
                 </Button>
               </>
@@ -415,7 +439,7 @@ export default function Page() {
             </p>
             <div className="mt-3 rounded-md bg-yellow-50 p-3 dark:bg-yellow-900/20">
               <p className="text-sm text-yellow-800 dark:text-yellow-400">
-                <FontAwesomeIcon icon={faInfoCircle} className="mr-2" />
+                <FaInfoCircle className="mr-2 inline align-middle" />
                 After revoking this key, you'll be able to create a new one if needed.
               </p>
             </div>

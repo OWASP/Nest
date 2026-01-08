@@ -17,6 +17,7 @@ cspell-run:
 
 update-cspell-dependencies: cspell-install
 	@-docker run \
+		-it \
 		--mount type=bind,src="$(PWD)",dst=/nest \
 		--entrypoint=/bin/sh \
 		--workdir=/nest/cspell \

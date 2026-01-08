@@ -1,56 +1,51 @@
 'use client'
-import { useQuery } from '@apollo/client'
-import {
-  faCodeFork,
-  faExclamationCircle,
-  faFolderOpen,
-  faStar,
-  faUsers,
-} from '@fortawesome/free-solid-svg-icons'
+import { useQuery } from '@apollo/client/react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
+import { FaExclamationCircle } from 'react-icons/fa'
+import { FaCodeFork, FaFolderOpen, FaStar } from 'react-icons/fa6'
+import { HiUserGroup } from 'react-icons/hi'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
-import { GET_ORGANIZATION_DATA } from 'server/queries/organizationQueries'
+import { GetOrganizationDataDocument } from 'types/__generated__/organizationQueries.generated'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
-import LoadingSpinner from 'components/LoadingSpinner'
+import OrganizationDetailsPageSkeleton from 'components/skeletons/OrganizationDetailsPageSkeleton'
 const OrganizationDetailsPage = () => {
-  const { organizationKey } = useParams()
-  const [organization, setOrganization] = useState(null)
-  const [issues, setIssues] = useState(null)
-  const [milestones, setMilestones] = useState(null)
-  const [pullRequests, setPullRequests] = useState(null)
-  const [releases, setReleases] = useState(null)
-  const [repositories, setRepositories] = useState(null)
-  const [topContributors, setTopContributors] = useState(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_ORGANIZATION_DATA, {
+  const { organizationKey } = useParams<{ organizationKey: string }>()
+  const {
+    data: graphQLData,
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetOrganizationDataDocument, {
     variables: { login: organizationKey },
   })
 
   useEffect(() => {
-    if (graphQLData) {
-      setMilestones(graphQLData.recentMilestones)
-      setOrganization(graphQLData.organization)
-      setIssues(graphQLData.recentIssues)
-      setPullRequests(graphQLData.recentPullRequests)
-      setReleases(graphQLData.recentReleases)
-      setRepositories(graphQLData.repositories)
-      setTopContributors(graphQLData.topContributors)
-      setIsLoading(false)
-    }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
-  }, [graphQLData, graphQLRequestError, organizationKey])
+  }, [graphQLRequestError, organizationKey])
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return (
+      <div data-testid="org-loading-skeleton">
+        <OrganizationDetailsPageSkeleton />
+      </div>
+    )
   }
 
-  if (!isLoading && !graphQLData?.organization) {
+  const {
+    organization,
+    recentIssues,
+    recentMilestones,
+    recentPullRequests,
+    recentReleases,
+    repositories,
+    topContributors,
+  } = graphQLData ?? {}
+
+  if (!organization) {
     return (
       <ErrorDisplay
         message="Sorry, the organization you're looking for doesn't exist"
@@ -75,7 +70,7 @@ const OrganizationDetailsPage = () => {
     },
     {
       label: 'Followers',
-      value: organization.followersCount,
+      value: String(organization.followersCount),
     },
     {
       label: 'Location',
@@ -85,27 +80,27 @@ const OrganizationDetailsPage = () => {
 
   const organizationStats = [
     {
-      icon: faStar,
+      icon: FaStar,
       value: organization.stats.totalStars,
       unit: 'Star',
     },
     {
-      icon: faCodeFork,
+      icon: FaCodeFork,
       value: organization.stats.totalForks,
       unit: 'Fork',
     },
     {
-      icon: faUsers,
+      icon: HiUserGroup,
       value: organization.stats.totalContributors,
       unit: 'Contributor',
     },
     {
-      icon: faExclamationCircle,
+      icon: FaExclamationCircle,
       value: organization.stats.totalIssues,
       unit: 'Issue',
     },
     {
-      icon: faFolderOpen,
+      icon: FaFolderOpen,
       value: organization.stats.totalRepositories,
       unit: 'Repository',
       pluralizedName: 'Repositories',
@@ -115,10 +110,10 @@ const OrganizationDetailsPage = () => {
   return (
     <DetailsCard
       details={organizationDetails}
-      recentIssues={issues}
-      recentReleases={releases}
-      recentMilestones={milestones}
-      pullRequests={pullRequests}
+      recentIssues={recentIssues}
+      recentReleases={recentReleases}
+      recentMilestones={recentMilestones}
+      pullRequests={recentPullRequests}
       repositories={repositories}
       stats={organizationStats}
       summary={organization.description}

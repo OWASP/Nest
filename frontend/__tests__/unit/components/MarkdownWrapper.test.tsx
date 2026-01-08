@@ -6,14 +6,15 @@ jest.mock('dompurify', () => ({
   sanitize: (html: string) => html,
 }))
 
-jest.mock('markdown-it/index.mjs', () => {
+jest.mock('markdown-it', () => {
   return jest.fn().mockImplementation(() => ({
     render: (content: string) => {
       // Very simple mock: replace **bold** and [link](url)
       return content
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
+        .replaceAll(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replaceAll(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
     },
+    use: jest.fn().mockReturnThis(),
   }))
 })
 

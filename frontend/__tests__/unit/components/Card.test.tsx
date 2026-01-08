@@ -1,5 +1,6 @@
 import { screen, render, fireEvent } from '@testing-library/react'
-import { ReactNode } from 'react'
+import React, { ReactNode } from 'react'
+import { FaLeaf, FaFire, FaCrown, FaStar, FaGithub, FaTwitter } from 'react-icons/fa6'
 import type { CardProps } from 'types/card'
 import Card from 'components/Card'
 
@@ -9,11 +10,6 @@ interface MockLinkProps {
   href: string
   target?: string
   rel?: string
-  className?: string
-}
-
-interface MockFontAwesomeIconProps {
-  icon: unknown
   className?: string
 }
 
@@ -60,14 +56,6 @@ jest.mock('next/link', () => {
   }
 })
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, className }: MockFontAwesomeIconProps) => (
-    <span data-testid="font-awesome-icon" className={className}>
-      {String(icon)}
-    </span>
-  ),
-}))
-
 jest.mock('@heroui/tooltip', () => ({
   Tooltip: ({ children, content, id }: MockTooltipProps) => (
     <div data-testid="tooltip" title={content} id={id}>
@@ -76,15 +64,22 @@ jest.mock('@heroui/tooltip', () => ({
   ),
 }))
 
-jest.mock('wrappers/FontAwesomeIconWrapper', () => {
-  return function FontAwesomeIconWrapper({ icon, className }: MockFontAwesomeIconProps) {
+jest.mock('wrappers/IconWrapper', () => ({
+  IconWrapper: ({
+    icon,
+    className,
+  }: {
+    icon: React.ComponentType<{ className?: string }>
+    className?: string
+  }) => {
+    const iconName = icon?.name?.toLowerCase().replace('fa', '') || 'icon'
     return (
-      <span data-testid="font-awesome-wrapper" className={className}>
-        {String(icon)}
+      <span data-testid="icon-wrapper" data-icon={iconName} className={className}>
+        <svg />
       </span>
     )
-  }
-})
+  },
+}))
 
 jest.mock('components/ActionButton', () => {
   return function ActionButton({ children, onClick, tooltipLabel, url }: MockActionButtonProps) {
@@ -128,7 +123,11 @@ jest.mock('components/MarkdownWrapper', () => {
 })
 
 jest.mock('utils/urlIconMappings', () => ({
-  getSocialIcon: jest.fn().mockReturnValue('mocked-social-icon'),
+  getSocialIcon: jest.fn().mockReturnValue(({ className }: { className?: string }) => (
+    <span data-testid="social-icon" className={className}>
+      <svg />
+    </span>
+  )),
 }))
 
 jest.mock('utils/data', () => ({
@@ -176,12 +175,12 @@ describe('Card', () => {
   it('conditionally renders level badge when provided', () => {
     const propsWithLevel = {
       ...baseProps,
-      level: { level: 'Beginner', color: '#4CAF50', icon: 'leaf-icon' },
+      level: { level: 'Beginner', color: '#4CAF50', icon: FaLeaf },
     }
 
     render(<Card {...propsWithLevel} />)
     expect(screen.getByTestId('tooltip')).toBeInTheDocument()
-    expect(screen.getByTestId('font-awesome-wrapper')).toBeInTheDocument()
+    expect(screen.getByTestId('icon-wrapper')).toBeInTheDocument()
   })
 
   it('does not render level badge when not provided', () => {
@@ -226,12 +225,12 @@ describe('Card', () => {
     const propsWithSocial = {
       ...baseProps,
       social: [
-        { title: 'GitHub', url: 'https://github.com/test', icon: 'github' },
-        { title: 'Twitter', url: 'https://twitter.com/test', icon: 'twitter' },
+        { title: 'GitHub', url: 'https://github.com/test', icon: FaGithub },
+        { title: 'Twitter', url: 'https://twitter.com/test', icon: FaTwitter },
       ],
     }
     render(<Card {...propsWithSocial} />)
-    expect(screen.getAllByTestId('font-awesome-icon')).toHaveLength(2)
+    expect(screen.getAllByTestId('social-icon')).toHaveLength(2)
 
     const allLinks = screen.getAllByRole('link')
     expect(allLinks.length).toBeGreaterThan(1)
@@ -293,7 +292,7 @@ describe('Card', () => {
   it('applies different level badge colors based on props', () => {
     const propsWithLevel = {
       ...baseProps,
-      level: { level: 'Advanced', color: '#FF5722', icon: 'fire-icon' },
+      level: { level: 'Advanced', color: '#FF5722', icon: FaFire },
     }
 
     render(<Card {...propsWithLevel} />)
@@ -397,7 +396,7 @@ describe('Card', () => {
   it('has proper accessibility attributes', () => {
     const propsWithTooltip = {
       ...baseProps,
-      level: { level: 'Intermediate', color: '#2196F3', icon: 'star-icon' },
+      level: { level: 'Intermediate', color: '#2196F3', icon: FaStar },
       tooltipLabel: 'Click to contribute',
     }
 
@@ -463,11 +462,11 @@ describe('Card', () => {
   it('renders complete card with all optional props', () => {
     const fullProps = {
       ...baseProps,
-      level: { level: 'Expert', color: '#9C27B0', icon: 'crown-icon' },
+      level: { level: 'Expert', color: '#9C27B0', icon: FaCrown },
       icons: { react: 'active', typescript: 'active' },
       projectName: 'Full Stack Project',
       projectLink: 'https://fullstack.com',
-      social: [{ title: 'GitHub', url: 'https://github.com/full', icon: 'active' }],
+      social: [{ title: 'GitHub', url: 'https://github.com/full', icon: FaGithub }],
       topContributors: [
         {
           login: 'expert',
@@ -483,7 +482,7 @@ describe('Card', () => {
     expect(screen.getByTestId('tooltip')).toBeInTheDocument()
     expect(screen.getAllByTestId('display-icon')).toHaveLength(2)
     expect(screen.getByRole('link', { name: 'Full Stack Project' })).toBeInTheDocument()
-    expect(screen.getByTestId('font-awesome-icon')).toBeInTheDocument()
+    expect(screen.getByTestId('social-icon')).toBeInTheDocument()
     expect(screen.getByTestId('contributor-avatar')).toBeInTheDocument()
   })
 })

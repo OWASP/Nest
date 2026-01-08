@@ -1,7 +1,7 @@
-import { faUser } from '@fortawesome/free-solid-svg-icons'
 import { render, screen } from '@testing-library/react'
 import millify from 'millify'
 import React from 'react'
+import { FaUser } from 'react-icons/fa'
 import { pluralize } from 'utils/pluralize'
 import InfoItem from 'components/InfoItem'
 
@@ -30,18 +30,18 @@ describe('InfoItem', () => {
     mockMillify.mockReturnValue('1k')
     mockPluralize.mockReturnValue('1 user')
 
-    render(<InfoItem icon={faUser} unit="user" value={1000} />)
+    render(<InfoItem icon={FaUser} unit="user" value={1000} />)
 
     expect(screen.getByText('1k')).toBeInTheDocument()
     expect(screen.getByText('1 user')).toBeInTheDocument()
-    expect(screen.getByRole('img', { hidden: true })).toBeInTheDocument()
+    expect(document.querySelector('svg')).toBeInTheDocument()
   })
 
   it('uses pluralizedName if provided', () => {
     mockMillify.mockReturnValue('2k')
     mockPluralize.mockReturnValue('2 contributors')
 
-    render(<InfoItem icon={faUser} unit="contributor" value={2000} pluralizedName="contributors" />)
+    render(<InfoItem icon={FaUser} unit="contributor" value={2000} pluralizedName="contributors" />)
 
     expect(mockPluralize).toHaveBeenCalledWith(2000, 'contributor', 'contributors')
     expect(screen.getByText('2 contributors')).toBeInTheDocument()
@@ -51,7 +51,7 @@ describe('InfoItem', () => {
     mockMillify.mockReturnValue('15.4k')
     mockPluralize.mockReturnValue('15430 views')
 
-    render(<InfoItem icon={faUser} unit="view" value={15430} precision={3} />)
+    render(<InfoItem icon={FaUser} unit="view" value={15430} precision={3} />)
 
     expect(mockMillify).toHaveBeenCalledWith(15430, { precision: 3 })
     expect(screen.getByText('15.4k')).toBeInTheDocument()
@@ -61,7 +61,7 @@ describe('InfoItem', () => {
     mockMillify.mockReturnValue('0')
     mockPluralize.mockReturnValue('0 views')
 
-    render(<InfoItem icon={faUser} unit="view" value={0} />)
+    render(<InfoItem icon={FaUser} unit="view" value={0} />)
 
     expect(screen.getByText('0')).toBeInTheDocument()
     expect(screen.getByText('0 views')).toBeInTheDocument()
@@ -71,7 +71,7 @@ describe('InfoItem', () => {
     mockMillify.mockReturnValue('5')
     mockPluralize.mockReturnValue('5 likes')
 
-    render(<InfoItem icon={faUser} unit="like" value={5} />)
+    render(<InfoItem icon={FaUser} unit="like" value={5} />)
 
     const container = screen.getByText('5 likes').closest('div')
     expect(container).toHaveClass('flex', 'items-center', 'justify-between')
@@ -79,7 +79,8 @@ describe('InfoItem', () => {
     const nameSpan = screen.getByText('5 likes').closest('span')
     expect(nameSpan).toHaveClass('flex', 'items-center')
 
-    const icon = screen.getByRole('img', { hidden: true })
+    const icon = document.querySelector('svg')
+    expect(icon).toBeInTheDocument()
     expect(icon).toHaveClass('mr-2', 'h-4', 'w-4')
 
     const valueSpan = screen.getByText('5').closest('span')
@@ -90,7 +91,7 @@ describe('InfoItem', () => {
     mockMillify.mockReturnValue('1k')
     mockPluralize.mockReturnValue('1010 stars')
 
-    render(<InfoItem icon={faUser} unit="star" value={1010} />)
+    render(<InfoItem icon={FaUser} unit="star" value={1010} />)
 
     expect(mockMillify).toHaveBeenCalledWith(1010, { precision: 1 })
   })
@@ -99,7 +100,7 @@ describe('InfoItem', () => {
     mockMillify.mockReturnValue('7.5k')
     mockPluralize.mockReturnValue('7.5k stars')
 
-    render(<InfoItem icon={faUser} unit="star" value={7500} />)
+    render(<InfoItem icon={FaUser} unit="star" value={7500} />)
 
     const tooltip = screen.getByTestId('tooltip')
     expect(tooltip).toHaveAttribute('title', '7,500 7.5k stars')
@@ -110,7 +111,7 @@ describe('InfoItem', () => {
     mockMillify.mockReturnValue('0')
     mockPluralize.mockReturnValue('0 items')
 
-    render(<InfoItem icon={faUser} unit="item" value={0} />)
+    render(<InfoItem icon={FaUser} unit="item" value={0} />)
 
     const tooltip = screen.getByTestId('tooltip')
     expect(tooltip).toHaveAttribute('title', 'No 0 items')
