@@ -35,11 +35,11 @@ class FakeModuleNode:
         self.project.name = "Test Project"
 
     def mentors(self):
-        """Retrieves all mentors associated with the module."""
+        """Retrieves mentors within a module."""
         return self._mentors_manager.all()
 
     def mentees(self):
-        """Retrieves all mentees associated with the module."""
+        """Retrieves mentees associated with the module."""
         mentee_users = (
             self.menteemodule_set.select_related("mentee__github_user")
             .filter(mentee__github_user__isnull=False)
@@ -50,7 +50,7 @@ class FakeModuleNode:
         return list(GithubUser.objects.filter(id__in=mentee_users).order_by("login"))
 
     def issue_mentees(self, issue_number: int):
-        """Retrieves mentees assigned to a specific issue within the module."""
+        """Retrieves mentees assigned to a issue within module."""
         issue_ids = list(self._issues_qs.filter(number=issue_number).values_list("id", flat=True))
         if not issue_ids:
             return []
@@ -67,11 +67,9 @@ class FakeModuleNode:
         return list(GithubUser.objects.filter(id__in=mentee_users).order_by("login"))
 
     def project_name(self):
-        """Returns the name of the associated project."""
         return self.project.name if self.project else None
 
     def issues(self, limit: int = 20, offset: int = 0, label: str | None = None):
-        """Retrieves issues associated with the module, with filtering and pagination."""
         queryset = self._issues_qs.select_related("repository", "author").prefetch_related(
             "assignees", "labels"
         )
@@ -87,7 +85,6 @@ class FakeModuleNode:
         return queryset.count()
 
     def available_labels(self):
-        """Retrieves a sorted list of unique labels used across issues in the module."""
         from apps.github.models import Label
 
         label_names = (
@@ -98,7 +95,6 @@ class FakeModuleNode:
         return sorted(label_names)
 
     def issue_by_number(self, number: int):
-        """Retrieves a single issue by its number within the module."""
         return (
             self._issues_qs.select_related("repository", "author")
             .prefetch_related("assignees", "labels")
@@ -107,7 +103,6 @@ class FakeModuleNode:
         )
 
     def interested_users(self, issue_number: int):
-        """Retrieves users who have expressed interest in a specific issue within the module."""
         issue_ids = list(self._issues_qs.filter(number=issue_number).values_list("id", flat=True))
         if not issue_ids:
             return []
@@ -121,7 +116,6 @@ class FakeModuleNode:
         return [i.user for i in interests]
 
     def task_deadline(self, issue_number: int):
-        """Retrieves the deadline for a task associated with a specific issue."""
         from apps.mentorship.models.task import Task
 
         return (
@@ -136,7 +130,6 @@ class FakeModuleNode:
         )
 
     def task_assigned_at(self, issue_number: int):
-        """Retrieves the assignment timestamp for a task associated with a specific issue."""
         from apps.mentorship.models.task import Task
 
         return (
@@ -248,7 +241,7 @@ def test_module_node_project_name(mock_module_node):
 def test_module_node_project_name_no_project():
     """Test project_name when no project is associated."""
     mock = FakeModuleNode()
-    mock.project = None 
+    mock.project = None
     assert mock.project_name() is None
 
 
