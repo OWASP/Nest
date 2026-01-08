@@ -5,14 +5,17 @@ import pytest
 import strawberry
 
 from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum
-from apps.mentorship.api.internal.nodes.module import CreateModuleInput, UpdateModuleInput,ModuleNode
+from apps.mentorship.api.internal.nodes.module import (
+    CreateModuleInput,
+    ModuleNode,
+    UpdateModuleInput,
+)
 
 
 class FakeModuleNode:
     """Minimal ModuleNode-like object for testing."""
 
     def __init__(self):
-        
         self.id = strawberry.ID("1")
         self.key = "test-module"
         self.name = "Test Module"
@@ -35,38 +38,37 @@ class FakeModuleNode:
         self.project.name = "Test Project"
 
     def mock_mentors(self):
-        return ModuleNode.mentors(self)
+        return ModuleNode.mentors(self)  # type: ignore[call-arg, arg-type]
 
     def mock_mentees(self):
-        return ModuleNode.mentees(self)
+        return ModuleNode.mentees(self)  # type: ignore[call-arg, arg-type]
 
     def mock_issue_mentees(self, issue_number: int):
-        return ModuleNode.issue_mentees(self,issue_number)
+        return ModuleNode.issue_mentees(self, issue_number)  # type: ignore[call-arg, arg-type]
 
     def mock_project_name(self):
-        return ModuleNode.project_name(self)
+        return ModuleNode.project_name(self)  # type: ignore[call-arg, arg-type]
 
     def mock_issues(self, limit: int = 20, offset: int = 0, label: str | None = None):
-        return ModuleNode.issues(self,limit=limit,offset=offset,label=label)
+        return ModuleNode.issues(self, limit, offset, label)  # type: ignore[call-arg, arg-type]
 
     def mock_issues_count(self, label: str | None = None):
-        return ModuleNode.issues_count(self,label=label)
+        return ModuleNode.issues_count(self, label)  # type: ignore[call-arg, arg-type]
 
     def mock_available_labels(self):
-        return ModuleNode.available_labels(self)
+        return ModuleNode.available_labels(self)  # type: ignore[call-arg, arg-type]
 
     def mock_issue_by_number(self, number: int):
-        return ModuleNode.issue_by_number(self,number=number)
+        return ModuleNode.issue_by_number(self, number)  # type: ignore[call-arg, arg-type]
 
     def mock_interested_users(self, issue_number: int):
-        return ModuleNode.interested_users(self,issue_number=issue_number)
-
+        return ModuleNode.interested_users(self, issue_number)  # type: ignore[call-arg, arg-type]
 
     def mock_task_deadline(self, issue_number: int):
-        return ModuleNode.task_deadline(self,issue_number=issue_number)
+        return ModuleNode.task_deadline(self, issue_number)  # type: ignore[call-arg, arg-type]
 
     def mock_task_assigned_at(self, issue_number: int):
-        return ModuleNode.task_assigned_at(self,issue_number=issue_number)
+        return ModuleNode.task_assigned_at(self, issue_number)  # type: ignore[call-arg, arg-type]
 
 
 @pytest.fixture

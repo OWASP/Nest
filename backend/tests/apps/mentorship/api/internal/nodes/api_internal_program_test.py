@@ -28,8 +28,6 @@ class FakeProgramNode:
         self.status = ProgramStatusEnum.PUBLISHED
         self.user_role = "admin"
         self.tags = ["python", "javascript"]
-
-        # internal manager that tests will set up
         self._admins_manager = MagicMock()
 
     # the real resolver code should behave similarly: return the manager's .all()
