@@ -19,24 +19,6 @@ jest.mock('@heroui/tooltip', () => ({
   ),
 }))
 
-jest.mock('next/link', () => {
-  return ({
-    children,
-    href,
-    target,
-    rel,
-  }: {
-    children: React.ReactNode
-    href: string
-    target?: string
-    rel?: string
-  }) => (
-    <a href={href} target={target} rel={rel} data-testid="contributor-link">
-      {children}
-    </a>
-  )
-})
-
 jest.mock('next/image', () => {
   return ({
     src,

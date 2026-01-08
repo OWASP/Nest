@@ -43,7 +43,12 @@ const ContributorAvatar = memo(({ contributor, uniqueKey }: ContributorProps) =>
       showArrow
       placement="bottom"
     >
-      <Link href={`/members/${login}`} target="_blank" rel="noopener noreferrer">
+      <Link
+        href={`/members/${login}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-testid="contributor-link"
+      >
         <Image
           height={30}
           width={30}

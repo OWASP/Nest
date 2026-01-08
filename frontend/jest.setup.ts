@@ -67,21 +67,36 @@ jest.mock('next/navigation', () => {
   }
 })
 
-jest.mock('next/link', () => {
-  return function MockedLink({
+jest.mock('next/link', () => ({
+  __esModule: true,
+  default: function MockedLink({
     children,
     href,
     className,
+    onClick,
     ...props
   }: {
     children: React.ReactNode
-    href: string
+    href?: string
     className?: string
+    onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void
     [key: string]: unknown
   }) {
-    return React.createElement('a', { href, className, ...props }, children)
-  }
-})
+    return React.createElement(
+      'a',
+      {
+        href,
+        className,
+        ...props,
+        onClick: (e) => {
+          e.preventDefault()
+          onClick?.(e as React.MouseEvent<HTMLAnchorElement>)
+        },
+      },
+      children
+    )
+  },
+}))
 
 jest.mock('next/image', () => ({
   __esModule: true,

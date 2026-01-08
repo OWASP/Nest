@@ -60,6 +60,7 @@ const TopContributorsList = ({
                 className="cursor-pointer overflow-hidden font-semibold text-ellipsis whitespace-nowrap text-blue-400 hover:underline"
                 href={getMemberUrl(item?.login)}
                 title={item?.name || item?.login}
+                data-testid="contributor-link"
               >
                 {upperFirst(item.name) || upperFirst(item.login)}
               </Link>

@@ -9,10 +9,6 @@ jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 
-jest.mock('next/link', () => {
-  return ({ children }) => <div>{children}</div>
-})
-
 jest.mock('components/Pagination', () =>
   jest.fn(({ currentPage, onPageChange, totalPages }) =>
     totalPages > 1 ? (

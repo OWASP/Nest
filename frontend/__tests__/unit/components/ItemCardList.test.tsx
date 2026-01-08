@@ -8,25 +8,6 @@ import type { Release } from 'types/release'
 import ItemCardList from 'components/ItemCardList'
 import '@testing-library/jest-dom'
 
-jest.mock('next/link', () => ({
-  __esModule: true,
-  default: ({
-    children,
-    href,
-    target,
-    className,
-  }: {
-    children: React.ReactNode
-    href: string
-    target?: string
-    className?: string
-  }) => (
-    <a href={href} target={target} className={className} data-testid="link">
-      {children}
-    </a>
-  ),
-}))
-
 jest.mock('next/image', () => ({
   __esModule: true,
   default: ({

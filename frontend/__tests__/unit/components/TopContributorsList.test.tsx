@@ -5,23 +5,6 @@ import { render } from 'wrappers/testUtil'
 import type { Contributor } from 'types/contributor'
 import TopContributorsList from 'components/TopContributorsList'
 
-jest.mock('next/link', () => ({
-  __esModule: true,
-  default: ({
-    children,
-    href,
-    ...props
-  }: {
-    children: React.ReactNode
-    href: string
-    [key: string]: unknown
-  }) => (
-    <a href={href} {...props} data-testid="contributor-link">
-      {children}
-    </a>
-  ),
-}))
-
 jest.mock('next/image', () => ({
   __esModule: true,
   default: ({

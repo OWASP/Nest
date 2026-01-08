@@ -20,27 +20,6 @@ jest.mock('next/image', () => {
   }
 })
 
-jest.mock('next/link', () => {
-  return function MockLink({
-    href,
-    children,
-    target,
-    rel,
-    className,
-  }: {
-    href: string
-    children: React.ReactNode
-    target?: string
-    rel?: string
-    className?: string
-  }) {
-    return (
-      <a href={href} target={target} rel={rel} className={className} data-testid="sponsor-link">
-        {children}
-      </a>
-    )
-  }
-})
 const mockSponsors: Sponsor[] = [
   {
     name: 'Test Sponsor 1',

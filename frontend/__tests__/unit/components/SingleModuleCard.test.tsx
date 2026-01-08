@@ -17,36 +17,6 @@ jest.mock('next-auth/react', () => ({
   useSession: jest.fn(),
 }))
 
-jest.mock('next/link', () => ({
-  __esModule: true,
-  default: ({
-    children,
-    href,
-    target,
-    rel,
-    className,
-    ...props
-  }: {
-    children: React.ReactNode
-    href: string
-    target?: string
-    rel?: string
-    className?: string
-    [key: string]: unknown
-  }) => (
-    <a
-      href={href}
-      target={target}
-      rel={rel}
-      className={className}
-      {...props}
-      data-testid="module-link"
-    >
-      {children}
-    </a>
-  ),
-}))
-
 jest.mock('react-icons/hi', () => ({
   HiUserGroup: (props: React.SVGProps<SVGSVGElement>) => (
     <svg data-testid="icon-users" {...props} />
