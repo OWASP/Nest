@@ -140,7 +140,7 @@ class Base(Configuration):
 
     REDIS_HOST = values.SecretValue(environ_name="REDIS_HOST")
     REDIS_PASSWORD = values.SecretValue(environ_name="REDIS_PASSWORD")
-    REDIS_AUTH_ENABLED = values.BooleanValue(environ_name="REDIS_AUTH_ENABLED", default=False)
+    REDIS_AUTH_ENABLED = values.BooleanValue(environ_name="REDIS_AUTH_ENABLED", default=True)
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
