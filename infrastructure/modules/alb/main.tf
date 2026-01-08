@@ -74,6 +74,7 @@ resource "aws_lambda_permission" "alb" {
 
 resource "aws_lb" "main" {
   depends_on                 = [aws_s3_bucket_policy.alb_logs]
+  drop_invalid_header_fields = true
   enable_deletion_protection = false
   internal                   = false
   load_balancer_type         = "application"
