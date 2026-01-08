@@ -311,7 +311,7 @@ module "migrate_task" {
   security_group_ids           = [var.ecs_sg_id]
   subnet_ids                   = var.subnet_ids
   task_name                    = "migrate"
-  use_fargate_spot             = var.use_fargate_spot
+  use_fargate_spot             = false
 }
 
 module "load_data_task" {
