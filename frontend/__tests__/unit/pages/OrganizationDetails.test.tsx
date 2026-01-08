@@ -47,14 +47,15 @@ describe('OrganizationDetailsPage', () => {
   test('renders loading state', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
+      loading: true,
       error: null,
     })
 
     render(<OrganizationDetailsPage />)
 
-    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+    // Use semantic role query instead of CSS selectors for better stability
     await waitFor(() => {
-      expect(loadingSpinner.length).toBeGreaterThan(0)
+      expect(screen.getByTestId('org-loading-skeleton')).toBeInTheDocument()
     })
   })
 
@@ -181,6 +182,7 @@ describe('OrganizationDetailsPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: undefined,
       error: mockError,
+      loading: false,
     })
 
     render(<OrganizationDetailsPage />)
@@ -197,6 +199,7 @@ describe('OrganizationDetailsPage', () => {
       })
     })
   })
+
   test('does not render sponsor block', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockOrganizationDetailsData,

@@ -1,16 +1,23 @@
 'use client'
 
 import { useQuery } from '@apollo/client/react'
+import { Select, SelectItem } from '@heroui/select'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GetModuleMenteeDetailsDocument } from 'types/__generated__/menteeQueries.generated'
-import { Issue } from 'types/issue'
+import {
+  GetModuleMenteeDetailsDocument,
+  type GetModuleMenteeDetailsQuery,
+} from 'types/__generated__/menteeQueries.generated'
 import { MenteeDetails } from 'types/mentorship'
+import IssuesTable, { type IssueRow } from 'components/IssuesTable'
 import { LabelList } from 'components/LabelList'
 import LoadingSpinner from 'components/LoadingSpinner'
+import Pagination from 'components/Pagination'
 import SecondaryCard from 'components/SecondaryCard'
+
+const ITEMS_PER_PAGE = 20
 
 const MenteeProfilePage = () => {
   const { programKey, moduleKey, menteeKey } = useParams<{
@@ -20,12 +27,18 @@ const MenteeProfilePage = () => {
   }>()
 
   const [menteeDetails, setMenteeDetails] = useState<MenteeDetails | null>(null)
-  const [menteeIssues, setMenteeIssues] = useState<Issue[]>([])
+  const [menteeIssuesData, setMenteeIssuesData] = useState<
+    GetModuleMenteeDetailsQuery['getMenteeModuleIssues']
+  >([])
 
-  const [isLoading, setIsLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [currentPage, setCurrentPage] = useState(1)
 
-  const { data, error } = useQuery(GetModuleMenteeDetailsDocument, {
+  const {
+    data,
+    error,
+    loading: isLoading,
+  } = useQuery(GetModuleMenteeDetailsDocument, {
     variables: {
       programKey,
       moduleKey,
@@ -38,15 +51,25 @@ const MenteeProfilePage = () => {
   useEffect(() => {
     if (data) {
       setMenteeDetails(data.getMenteeDetails ?? null)
-      setMenteeIssues(data.getMenteeModuleIssues ?? [])
+      setMenteeIssuesData(data.getMenteeModuleIssues ?? [])
     }
     if (error) {
       handleAppError(error)
     }
-    if (data || error) {
-      setIsLoading(false)
-    }
   }, [data, error])
+
+  const menteeIssues: IssueRow[] = useMemo(() => {
+    return menteeIssuesData.map((issue) => ({
+      objectID: issue.id,
+      number: issue.number,
+      title: issue.title,
+      state: issue.state,
+      isMerged: issue.isMerged,
+      labels: issue.labels || [],
+      assignees: issue.assignees || [],
+      url: issue.url,
+    }))
+  }, [menteeIssuesData])
 
   if (isLoading) return <LoadingSpinner />
 
@@ -63,12 +86,31 @@ const MenteeProfilePage = () => {
   const openIssues = menteeIssues.filter((issue) => issue.state.toLowerCase() === 'open')
   const closedIssues = menteeIssues.filter((issue) => issue.state.toLowerCase() === 'closed')
 
-  const issueMap: Record<string, Issue[]> = {
+  const issueMap: Record<string, IssueRow[]> = {
     all: menteeIssues,
     open: openIssues,
     closed: closedIssues,
   }
-  const filteredIssues = issueMap[statusFilter] || closedIssues
+  const filteredIssues = issueMap[statusFilter] || menteeIssues
+
+  const totalPages = Math.ceil(filteredIssues.length / ITEMS_PER_PAGE)
+  const paginatedIssues = filteredIssues.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  )
+
+  const statusFilterOptions = [
+    { key: 'all', label: 'All', count: menteeIssues.length },
+    { key: 'open', label: 'Open', count: openIssues.length },
+    { key: 'closed', label: 'Closed', count: closedIssues.length },
+  ]
+
+  const handleIssueClick = (issueNumber: number) => {
+    const issue = menteeIssues.find((i) => i.number === issueNumber)
+    if (issue?.url) {
+      window.open(issue.url, '_blank', 'noopener,noreferrer')
+    }
+  }
 
   return (
     <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
@@ -94,33 +136,6 @@ const MenteeProfilePage = () => {
             </div>
           </div>
         </SecondaryCard>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <SecondaryCard title="Total Issues">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                {menteeIssues.length}
-              </div>
-            </div>
-          </SecondaryCard>
-
-          <SecondaryCard title="Open Issues">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 dark:text-green-400">
-                {openIssues.length}
-              </div>
-            </div>
-          </SecondaryCard>
-
-          <SecondaryCard title="Closed Issues">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-gray-600 dark:text-gray-400">
-                {closedIssues.length}
-              </div>
-            </div>
-          </SecondaryCard>
-        </div>
 
         {/* Mentee Information */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -154,54 +169,59 @@ const MenteeProfilePage = () => {
           </div>
         )}
 
-        {/* Issues - moved to the end */}
-        <SecondaryCard title="Issues Assigned">
-          {menteeIssues.length === 0 ? (
-            <p className="py-8 text-center text-gray-500 italic dark:text-gray-400">
-              No issues assigned to this mentee in this module
-            </p>
-          ) : (
-            <div>
-              {/* Filter Dropdown */}
-              <div className="mb-4">
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                >
-                  <option value="all">All Issues ({menteeIssues.length})</option>
-                  <option value="open">Open Issues ({openIssues.length})</option>
-                  <option value="closed">Closed Issues ({closedIssues.length})</option>
-                </select>
-              </div>
-
-              <div className="space-y-4">
-                {filteredIssues.map((issue) => (
-                  <div
-                    key={issue.number}
-                    className="rounded-lg border border-gray-200 p-4 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
+        {/* Issues */}
+        <SecondaryCard>
+          <div className="w-full">
+            <div className="flex justify-between">
+              <h1 className="text-3xl font-bold">Assigned Issues</h1>
+              <div className="mb-4 flex justify-end">
+                <div className="inline-flex h-12 items-center rounded-lg bg-gray-200 dark:bg-[#323232]">
+                  <Select
+                    size="md"
+                    aria-label="Filter by status"
+                    selectedKeys={new Set([statusFilter])}
+                    onSelectionChange={(keys) => {
+                      const [key] = Array.from(keys as Set<string>)
+                      if (key) {
+                        setStatusFilter(key)
+                        setCurrentPage(1)
+                      }
+                    }}
+                    classNames={{
+                      trigger: 'bg-gray-200 dark:bg-[#323232] pl-4 text-nowrap w-32',
+                      popoverContent: 'text-md min-w-32 dark:bg-[#323232] rounded-none p-0',
+                    }}
                   >
-                    <div className="flex items-center pb-4">
-                      <a
-                        href={issue.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-medium text-gray-900 transition-colors hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
+                    {statusFilterOptions.map((option) => (
+                      <SelectItem
+                        key={option.key}
+                        classNames={{
+                          base: 'text-sm hover:bg-[#D1DBE6] dark:hover:bg-[#454545] rounded-none px-3 py-0.5',
+                        }}
                       >
-                        {issue.title}
-                      </a>
-                    </div>
-
-                    {issue.labels && issue.labels.length > 0 && (
-                      <div className="mb-2">
-                        <LabelList labels={issue.labels} maxVisible={3} />
-                      </div>
-                    )}
-                  </div>
-                ))}
+                        {option.key === 'all' ? option.label : `${option.label} (${option.count})`}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </div>
               </div>
             </div>
-          )}
+
+            <IssuesTable
+              issues={paginatedIssues}
+              showAssignee={false}
+              onIssueClick={handleIssueClick}
+              emptyMessage="No issues found for the selected filter."
+            />
+
+            {/* Pagination Controls */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              isLoaded={!isLoading}
+            />
+          </div>
         </SecondaryCard>
       </div>
     </div>

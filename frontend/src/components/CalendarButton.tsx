@@ -1,30 +1,71 @@
+'use client'
+
+import { addToast } from '@heroui/toast'
 import { useState } from 'react'
 import { FaCalendar, FaCalendarPlus } from 'react-icons/fa6'
 import type { CalendarButtonProps } from 'types/calendar'
-import getGoogleCalendarUrl from 'utils/getGoogleCalendarUrl'
+import getIcsFileUrl from 'utils/getIcsFileUrl'
+import slugify from 'utils/slugify'
 
 export default function CalendarButton(props: Readonly<CalendarButtonProps>) {
   const [isHovered, setIsHovered] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false)
   const {
     event,
     className = '',
     iconClassName = 'h-4 w-4',
     icon,
     showLabel = false,
-    label = 'Add to Google Calendar',
+    label = 'Add to Calendar',
   } = props
-  const href = getGoogleCalendarUrl(event)
   const safeTitle = event.title || 'event'
-  const ariaLabel = `Add ${safeTitle} to Google Calendar`
+  const ariaLabel = `Add ${safeTitle} to Calendar`
+
+  const handleDownload = async () => {
+    let url: string | null = null
+    let link: HTMLAnchorElement | null = null
+    try {
+      setIsDownloading(true)
+      url = await getIcsFileUrl(event)
+      link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `${slugify(safeTitle)}.ics`)
+      document.body.appendChild(link)
+      link.click()
+      addToast({
+        description: 'Successfully downloaded ICS file',
+        title: `${event.title}`,
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'success',
+        variant: 'solid',
+      })
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to download ICS file:', err)
+      addToast({
+        description: 'Failed to download ICS file',
+        title: 'Download Failed',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+        variant: 'solid',
+      })
+    } finally {
+      if (link) link.remove()
+      if (url) URL.revokeObjectURL(url)
+      setIsDownloading(false)
+    }
+  }
 
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
+    <button
+      type="button"
+      onClick={handleDownload}
+      disabled={isDownloading}
       aria-label={ariaLabel}
       title={ariaLabel}
-      className={`flex items-center ${className}`}
+      className={`${className} flex items-center`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -35,6 +76,6 @@ export default function CalendarButton(props: Readonly<CalendarButtonProps>) {
           <FaCalendar className={iconClassName} />
         ))}
       {showLabel && <span>{label}</span>}
-    </a>
+    </button>
   )
 }

@@ -41,6 +41,7 @@ algoliasearch
 ansa
 apexcharts
 apk
+aquasecurity
 arithmatex
 arkid15r
 askowasp
@@ -57,6 +58,7 @@ cva
 defectdojo
 demojize
 dismissable
+dockerhub
 dsn
 env
 facebookexternalhit
@@ -64,11 +66,13 @@ gamesec
 geocoders
 geoloc
 geopy
+gha
 graphiql
 gunicorn
 hackathon
 heroui
 hsl
+ics
 igoat
 inlinehilite
 isanori
@@ -95,8 +99,10 @@ millify
 mpim
 navlink
 nestbot
+ngx
 noinput
 nosniff
+numfmt
 openstreetmap
 owasppcitoolkit
 owtf
@@ -126,6 +132,7 @@ slideshare
 speakerdeck
 superfences
 tiktok
+trivyignores
 tsc
 unassigning
 unhover
@@ -138,5 +145,7 @@ xdg
 xdist
 xoxb
 xsser
+zapconfig
+zaproxy
 zsc
 éàëîôû

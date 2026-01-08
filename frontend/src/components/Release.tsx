@@ -22,6 +22,19 @@ const Release: React.FC<ReleaseProps> = ({
   index = 0,
 }) => {
   const router = useRouter()
+  const handleClickRepository = () => {
+    const org = release.organizationName || ''
+    const repo = release.repositoryName || ''
+    if (!org || !repo) return
+    router.push(`/organizations/${org}/repositories/${repo}`)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handleClickRepository()
+    }
+  }
 
   return (
     <div className={`mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700 ${className}`}>
@@ -71,17 +84,13 @@ const Release: React.FC<ReleaseProps> = ({
             <span>{formatDate(release.publishedAt)}</span>
           </div>
           <div className="flex flex-1 items-center overflow-hidden">
-            <FaFolderOpen className="mr-2 h-5 w-4" aria-hidden="true" />
+            <FaFolderOpen className="mr-2 h-5 w-4 shrink-0" aria-hidden="true" />
             <button
               type="button"
               className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
               disabled={!release.organizationName || !release.repositoryName}
-              onClick={() => {
-                const org = release.organizationName || ''
-                const repo = release.repositoryName || ''
-                if (!org || !repo) return
-                router.push(`/organizations/${org}/repositories/${repo}`)
-              }}
+              onClick={handleClickRepository}
+              onKeyDown={handleKeyDown}
               aria-label={`View repository ${release.repositoryName}`}
             >
               <TruncatedText text={release.repositoryName} />

@@ -98,13 +98,15 @@ describe('UserDetailsPage', () => {
   test('renders loading state', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
+      loading: true,
       error: null,
     })
 
     render(<UserDetailsPage />)
-    const loadingSpinner = screen.getAllByAltText('Loading indicator')
+
+    // Use semantic role query instead of CSS selectors for better stability
     await waitFor(() => {
-      expect(loadingSpinner.length).toBeGreaterThan(0)
+      expect(screen.getByTestId('user-loading-skeleton')).toBeInTheDocument()
     })
   })
 
@@ -121,10 +123,9 @@ describe('UserDetailsPage', () => {
     render(<UserDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
+      expect(screen.getByText('Test User')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Test User')).toBeInTheDocument()
     expect(screen.getByText('Statistics')).toBeInTheDocument()
     expect(screen.getByText('Test Company')).toBeInTheDocument()
     expect(screen.getByText('Test Location')).toBeInTheDocument()
@@ -280,7 +281,7 @@ describe('UserDetailsPage', () => {
     await waitFor(() => {
       const heatmapContainer = screen
         .getByAltText('Heatmap Background')
-        .closest('div.hidden.lg\\:block')
+        .closest(String.raw`div.hidden.lg\:block`)
       expect(heatmapContainer).toBeInTheDocument()
       expect(heatmapContainer).toHaveClass('hidden')
       expect(heatmapContainer).toHaveClass('lg:block')
@@ -349,12 +350,13 @@ describe('UserDetailsPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: mockError,
+      loading: false,
     })
 
     render(<UserDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('User not found')).toBeInTheDocument()
+      expect(screen.getByText('Error loading user')).toBeInTheDocument()
     })
 
     expect(addToast).toHaveBeenCalledWith({
@@ -524,6 +526,7 @@ describe('UserDetailsPage', () => {
       expect(bioContainer).toHaveClass('lg:text-left')
     })
   })
+
   test('does not render sponsor block', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
