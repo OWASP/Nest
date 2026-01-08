@@ -344,7 +344,7 @@ describe('DonutBarChart Component Test Suite', () => {
       const chartSeries = JSON.parse(chart.dataset.series || '[]')
 
       // Should be rounded to 1 decimal place
-      expect(chartSeries).toEqual([1000000.0, 1000000.0, 2000000.5])
+      expect(chartSeries).toEqual([1000000, 1000000, 2000000.5])
     })
 
     it('handles negative values', () => {
