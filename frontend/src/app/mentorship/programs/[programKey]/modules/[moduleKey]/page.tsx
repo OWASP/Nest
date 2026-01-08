@@ -36,6 +36,16 @@ const ModuleDetailsPage = () => {
 
   if (isLoading) return <LoadingSpinner />
 
+  if (error) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading module"
+        message="An error occurred while loading the module data"
+      />
+    )
+  }
+
   if (!data || !programModule) {
     return (
       <ErrorDisplay

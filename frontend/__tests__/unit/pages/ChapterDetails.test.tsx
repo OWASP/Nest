@@ -66,10 +66,23 @@ describe('chapterDetailsPage Component', () => {
     expect(screen.getByText('This is a test chapter summary.')).toBeInTheDocument()
   })
 
-  test('displays "No chapters found" when there are no chapters', async () => {
+  test('displays error message when GraphQL request fails', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: { chapter: null },
-      error: true,
+      data: null,
+      error: { message: 'GraphQL error' },
+      loading: false,
+    })
+    render(<ChapterDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Error loading chapter')).toBeInTheDocument()
+    })
+  })
+
+  test('displays "Chapter not found" when data is null', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: null,
+      error: null,
+      loading: false,
     })
     render(<ChapterDetailsPage />)
     await waitFor(() => {
