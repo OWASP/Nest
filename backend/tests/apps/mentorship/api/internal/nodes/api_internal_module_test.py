@@ -35,9 +35,11 @@ class FakeModuleNode:
         self.project.name = "Test Project"
 
     def mentors(self):
+        """Retrieves all mentors associated with the module."""
         return self._mentors_manager.all()
 
     def mentees(self):
+        """Retrieves all mentees associated with the module."""
         mentee_users = (
             self.menteemodule_set.select_related("mentee__github_user")
             .filter(mentee__github_user__isnull=False)
@@ -48,6 +50,7 @@ class FakeModuleNode:
         return list(GithubUser.objects.filter(id__in=mentee_users).order_by("login"))
 
     def issue_mentees(self, issue_number: int):
+        """Retrieves mentees assigned to a specific issue within the module."""
         issue_ids = list(self._issues_qs.filter(number=issue_number).values_list("id", flat=True))
         if not issue_ids:
             return []
@@ -64,9 +67,11 @@ class FakeModuleNode:
         return list(GithubUser.objects.filter(id__in=mentee_users).order_by("login"))
 
     def project_name(self):
+        """Returns the name of the associated project."""
         return self.project.name if self.project else None
 
     def issues(self, limit: int = 20, offset: int = 0, label: str | None = None):
+        """Retrieves issues associated with the module, with filtering and pagination."""
         queryset = self._issues_qs.select_related("repository", "author").prefetch_related(
             "assignees", "labels"
         )
@@ -75,12 +80,14 @@ class FakeModuleNode:
         return list(queryset.order_by("-updated_at")[offset : offset + limit])
 
     def issues_count(self, label: str | None = None):
+        """Returns the count of issues associated with the module."""
         queryset = self._issues_qs
         if label and label != "all":
             queryset = queryset.filter(labels__name=label)
         return queryset.count()
 
     def available_labels(self):
+        """Retrieves a sorted list of unique labels used across issues in the module."""
         from apps.github.models import Label
 
         label_names = (
@@ -91,6 +98,7 @@ class FakeModuleNode:
         return sorted(label_names)
 
     def issue_by_number(self, number: int):
+        """Retrieves a single issue by its number within the module."""
         return (
             self._issues_qs.select_related("repository", "author")
             .prefetch_related("assignees", "labels")
@@ -99,6 +107,7 @@ class FakeModuleNode:
         )
 
     def interested_users(self, issue_number: int):
+        """Retrieves users who have expressed interest in a specific issue within the module."""
         issue_ids = list(self._issues_qs.filter(number=issue_number).values_list("id", flat=True))
         if not issue_ids:
             return []
@@ -112,6 +121,7 @@ class FakeModuleNode:
         return [i.user for i in interests]
 
     def task_deadline(self, issue_number: int):
+        """Retrieves the deadline for a task associated with a specific issue."""
         from apps.mentorship.models.task import Task
 
         return (
@@ -126,6 +136,7 @@ class FakeModuleNode:
         )
 
     def task_assigned_at(self, issue_number: int):
+        """Retrieves the assignment timestamp for a task associated with a specific issue."""
         from apps.mentorship.models.task import Task
 
         return (
@@ -142,6 +153,7 @@ class FakeModuleNode:
 
 @pytest.fixture
 def mock_module_node():
+    """Fixture for a mock ModuleNode instance."""
     m = FakeModuleNode()
 
     m._mentors_manager.all.return_value = [MagicMock(), MagicMock()]
@@ -160,6 +172,7 @@ def mock_module_node():
 
 
 def test_module_node_fields(mock_module_node):
+    """Test that ModuleNode fields are correctly assigned."""
     assert mock_module_node.id == "1"
     assert mock_module_node.key == "test-module"
     assert mock_module_node.name == "Test Module"
@@ -176,12 +189,14 @@ def test_module_node_fields(mock_module_node):
 
 
 def test_module_node_mentors(mock_module_node):
+    """Test the mentors resolver."""
     mentors = mock_module_node.mentors()
     assert len(mentors) == 2
     mock_module_node._mentors_manager.all.assert_called_once()
 
 
 def test_module_node_mentees(mock_module_node):
+    """Test the mentees resolver."""
     with patch("apps.github.models.user.User.objects") as mock_user_objects:
         mock_user_objects.filter.return_value.order_by.return_value = [MagicMock(), MagicMock()]
 
@@ -197,6 +212,7 @@ def test_module_node_mentees(mock_module_node):
 
 
 def test_module_node_issue_mentees(mock_module_node):
+    """Test the issue_mentees resolver."""
     with (
         patch("apps.mentorship.models.task.Task.objects") as mock_task_objects,
         patch("apps.github.models.user.User.objects") as mock_user_objects,
@@ -218,22 +234,26 @@ def test_module_node_issue_mentees(mock_module_node):
 
 
 def test_module_node_issue_mentees_no_issue(mock_module_node):
+    """Test issue_mentees when no issue is found."""
     mock_module_node._issues_qs.filter.return_value.values_list.return_value = []
     mentees = mock_module_node.issue_mentees(issue_number=123)
     assert mentees == []
 
 
 def test_module_node_project_name(mock_module_node):
+    """Test the project_name resolver."""
     assert mock_module_node.project_name() == "Test Project"
 
 
 def test_module_node_project_name_no_project():
+    """Test project_name when no project is associated."""
     mock = FakeModuleNode()
-    mock.project = None
+    mock.project = None 
     assert mock.project_name() is None
 
 
 def test_module_node_issues_with_label(mock_module_node):
+    """Test the issues resolver with a label filter."""
     issues_list = mock_module_node.issues(label="bug")
     assert len(issues_list) == 1
     mock_module_node_qs_related = mock_module_node._issues_qs.select_related.return_value
@@ -243,12 +263,14 @@ def test_module_node_issues_with_label(mock_module_node):
 
 
 def test_module_node_issues_count(mock_module_node):
+    """Test the issues_count resolver."""
     count = mock_module_node.issues_count()
     assert count == 5
     mock_module_node._issues_qs.count.assert_called_once()
 
 
 def test_module_node_issues_count_with_label(mock_module_node):
+    """Test issues_count with a label filter."""
     mock_module_node._issues_qs.filter.return_value.count.return_value = 2
     count = mock_module_node.issues_count(label="feature")
     assert count == 2
@@ -256,6 +278,7 @@ def test_module_node_issues_count_with_label(mock_module_node):
 
 
 def test_module_node_available_labels(mock_module_node):
+    """Test the available_labels resolver."""
     with patch("apps.github.models.Label.objects") as mock_label_objects:
         mock_label_objects.filter.return_value.values_list.return_value.distinct.return_value = [
             "label1",
@@ -270,6 +293,7 @@ def test_module_node_available_labels(mock_module_node):
 
 
 def test_module_node_issue_by_number(mock_module_node):
+    """Test the issue_by_number resolver."""
     issue = mock_module_node.issue_by_number(number=456)
     assert issue is not None
     mock_module_node._issues_qs.select_related.assert_called_once_with("repository", "author")
@@ -285,6 +309,7 @@ def test_module_node_issue_by_number(mock_module_node):
 
 
 def test_module_node_interested_users(mock_module_node):
+    """Test the interested_users resolver."""
     with patch(
         "apps.mentorship.models.issue_user_interest.IssueUserInterest.objects"
     ) as mock_issue_user_interest_objects:
@@ -310,6 +335,7 @@ def test_module_node_interested_users(mock_module_node):
 
 
 def test_module_node_interested_users_no_issue(mock_module_node):
+    """Test interested_users when no issue is found."""
     mock_module_node._issues_qs.filter.return_value.values_list.return_value = []
     users = mock_module_node.interested_users(issue_number=789)
     assert users == []
@@ -331,6 +357,7 @@ def test_module_node_task_deadline(mock_module_node):
 
 
 def test_module_node_task_deadline_none(mock_module_node):
+    """Test task_deadline when no deadline is found."""
     with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
         mock_task_order_by = mock_task_objects.filter.return_value.order_by
         mock_task_order_by.return_value.values_list.return_value.first.return_value = None
@@ -340,6 +367,7 @@ def test_module_node_task_deadline_none(mock_module_node):
 
 
 def test_module_node_task_assigned_at(mock_module_node):
+    """Test task_assigned_at method."""
     with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
         mock_task_order_by = mock_task_objects.filter.return_value.order_by
         mock_task_order_by.return_value.values_list.return_value.first.return_value = datetime(
