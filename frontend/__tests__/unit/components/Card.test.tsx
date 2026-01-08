@@ -21,7 +21,6 @@ interface MockTooltipProps {
   children: ReactNode
   content: string
   id?: string
-  placement?: string
 }
 
 interface MockActionButtonProps {
