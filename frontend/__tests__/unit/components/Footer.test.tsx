@@ -356,7 +356,7 @@ describe('Footer', () => {
       renderFooter()
 
       const footer = screen.getByRole('contentinfo')
-      const gridContainer = footer.querySelector('.grid.w-full.sm\\:grid-cols-2')
+      const gridContainer = footer.querySelector(String.raw`.grid.w-full.sm\:grid-cols-2`)
       expect(gridContainer).toBeInTheDocument()
     })
 
