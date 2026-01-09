@@ -23,6 +23,7 @@ const ToggleableList = <T,>({
   const [showAll, setShowAll] = useState(false)
 
   const visibleItems = showAll ? items : items.slice(0, limit)
+  const visibleCount = visibleItems.length
 
   return (
     <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
@@ -42,7 +43,7 @@ const ToggleableList = <T,>({
             aria-disabled={isDisabled}
             className={isDisabled ? 'pointer-events-none opacity-60' : undefined}
           >
-            {renderItem(item, index, visibleItems.length)}
+            {renderItem(item, index, visibleCount)}
           </div>
         ))}
       </div>
@@ -55,4 +56,3 @@ const ToggleableList = <T,>({
 }
 
 export default ToggleableList
-
