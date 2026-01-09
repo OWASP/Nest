@@ -160,7 +160,8 @@ class ModuleMutation:
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
-            raise ObjectDoesNotExist("Assignee not found.")
+            msg = "Assignee not found."
+            raise ObjectDoesNotExist(msg)
 
         issue = module.issues.filter(number=issue_number).first()
         if issue is None:
@@ -202,11 +203,13 @@ class ModuleMutation:
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
-            raise ObjectDoesNotExist("Assignee not found.")
+            msg = "Assignee not found."
+            raise ObjectDoesNotExist(msg)
 
         issue = module.issues.filter(number=issue_number).first()
         if issue is None:
-            raise ObjectDoesNotExist(f"Issue {issue_number} not found in this module.")
+            msg = f"Issue {issue_number} not found in this module."
+            raise ObjectDoesNotExist(msg)
 
         issue.assignees.remove(gh_user)
 
