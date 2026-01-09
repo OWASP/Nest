@@ -240,13 +240,14 @@ const DetailsCard = ({
           </>
         )}
         {entityLeaders && entityLeaders.length > 0 && <Leaders users={entityLeaders} />}
-        {topContributors && (
-          <TopContributorsList
-            contributors={topContributors}
-            icon={HiUserGroup}
-            maxInitialDisplay={12}
-          />
-        )}
+        {topContributors && topContributors.length > 0 && (
+        <TopContributorsList
+         contributors={topContributors}
+         icon={HiUserGroup}
+         maxInitialDisplay={12}
+       />
+      )}
+
         {admins && admins.length > 0 && type === 'program' && (
           <TopContributorsList
             icon={HiUserGroup}
