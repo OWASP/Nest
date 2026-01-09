@@ -8,6 +8,25 @@ import type { Release } from 'types/release'
 import ItemCardList from 'components/ItemCardList'
 import '@testing-library/jest-dom'
 
+jest.mock('next/link', () => ({
+  __esModule: true,
+  default: ({
+    children,
+    href,
+    target,
+    className,
+  }: {
+    children: React.ReactNode
+    href: string
+    target?: string
+    className?: string
+  }) => (
+    <a href={href} target={target} className={className} data-testid="link">
+      {children}
+    </a>
+  ),
+}))
+
 jest.mock('next/image', () => ({
   __esModule: true,
   default: ({
@@ -431,7 +450,7 @@ describe('ItemCardList Component', () => {
         />
       )
 
-      const titleLinks = screen.getAllByTestId('item-title-link')
+      const titleLinks = screen.getAllByTestId('link')
       const titleLink = titleLinks.find((link) => link.getAttribute('href') === mockIssue.url)
 
       expect(titleLink).toBeInTheDocument()
@@ -449,7 +468,7 @@ describe('ItemCardList Component', () => {
         />
       )
 
-      const avatarLinks = screen.getAllByTestId('item-avatar-link')
+      const avatarLinks = screen.getAllByTestId('link')
       const avatarLink = avatarLinks.find(
         (link) => link.getAttribute('href') === `/members/${mockIssue.author.login}`
       )
@@ -517,7 +536,7 @@ describe('ItemCardList Component', () => {
         />
       )
 
-      const titleLinks = screen.getAllByTestId('item-title-link')
+      const titleLinks = screen.getAllByTestId('link')
       const titleLink = titleLinks.find((link) => link.textContent?.includes('Test Issue Title'))
 
       expect(titleLink).toHaveAttribute('href', '')
@@ -746,7 +765,7 @@ describe('ItemCardList Component', () => {
         />
       )
 
-      const titleLinks = screen.getAllByTestId('item-title-link')
+      const titleLinks = screen.getAllByTestId('link')
       const externalLink = titleLinks.find((link) => link.getAttribute('href') === mockIssue.url)
 
       expect(externalLink).toHaveAttribute('target', '_blank')

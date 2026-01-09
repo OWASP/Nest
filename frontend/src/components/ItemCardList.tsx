@@ -63,7 +63,6 @@ const ItemCardList = ({
                     <Link
                       className="shrink-0 text-blue-400 hover:underline"
                       href={`/members/${item?.author?.login}`}
-                      data-testid="item-avatar-link"
                     >
                       <Image
                         height={24}
@@ -84,7 +83,6 @@ const ItemCardList = ({
                     className="text-blue-400 hover:underline"
                     href={item?.url || ''}
                     target="_blank"
-                    data-testid="item-title-link"
                   >
                     <TruncatedText text={item.title || item.name} />
                   </Link>

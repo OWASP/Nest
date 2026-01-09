@@ -26,7 +26,6 @@ const LeadersList = ({ leaders }: LeadersListProps) => {
             aria-label={`View profile of ${leader}`}
             className="text-gray-600 hover:underline dark:text-gray-400"
             title={leader}
-            data-testid="leader-link"
           >
             {leader}
           </Link>

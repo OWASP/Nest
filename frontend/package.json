@@ -15,7 +15,7 @@
     "start": "next start",
     "test:e2e": "npx playwright test",
     "test:unit": "tsc --noEmit && NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest",
-    "test:a11y": "NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest __tests__/accessibility/components --coverage=false"
+    "test:a11y": "NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest __tests__/a11y/components --coverage=false"
   },
   "dependencies": {
     "@apollo/client": "^4.0.11",

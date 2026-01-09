@@ -3,6 +3,34 @@ import { render, screen } from 'wrappers/testUtil'
 import type { LeadersListProps } from 'types/leaders'
 import LeadersList from 'components/LeadersList'
 
+jest.mock('next/link', () => {
+  return function MockLink({
+    children,
+    href,
+    'aria-label': ariaLabel,
+    className,
+    title,
+  }: {
+    children: React.ReactNode
+    href: string
+    'aria-label'?: string
+    className?: string
+    title?: string
+  }) {
+    return (
+      <a
+        href={href}
+        aria-label={ariaLabel}
+        className={className}
+        title={title}
+        data-testid="leader-link"
+      >
+        {children}
+      </a>
+    )
+  }
+})
+
 // Mock TruncatedText component
 jest.mock('components/TruncatedText', () => ({
   TruncatedText: ({ children }: { children: React.ReactNode }) => (

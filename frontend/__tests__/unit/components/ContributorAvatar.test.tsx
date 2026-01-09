@@ -3,6 +3,24 @@ import React from 'react'
 import { Contributor } from 'types/contributor'
 import ContributorAvatar from 'components/ContributorAvatar'
 
+jest.mock('next/link', () => {
+  return ({
+    children,
+    href,
+    target,
+    rel,
+  }: {
+    children: React.ReactNode
+    href: string
+    target?: string
+    rel?: string
+  }) => (
+    <a href={href} target={target} rel={rel} data-testid="contributor-link">
+      {children}
+    </a>
+  )
+})
+
 jest.mock('@heroui/tooltip', () => ({
   Tooltip: ({
     children,

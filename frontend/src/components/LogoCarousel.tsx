@@ -35,7 +35,6 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-full w-full flex-col items-center justify-center"
-                data-testid="sponsor-link"
               >
                 <div className="relative mb-4 flex h-16 w-full items-center justify-center">
                   {sponsor.imageUrl ? (
@@ -63,7 +62,6 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
             className="text-primary font-medium hover:underline"
             target="_blank"
             rel="noopener noreferrer"
-            data-testid="sponsor-link"
           >
             this page
           </Link>{' '}
@@ -76,7 +74,6 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
             className="text-primary font-medium hover:underline"
             target="_blank"
             rel="noopener noreferrer"
-            data-testid="sponsor-link"
           >
             click here
           </Link>

@@ -8,7 +8,7 @@ const defaultProps = {
   isLoaded: true,
   placeholder: 'Search...',
   indexes: ['chapters', 'users', 'projects'],
-  initialValue: '',
+  initialValue: 'test-value',
   eventData: [],
 }
 

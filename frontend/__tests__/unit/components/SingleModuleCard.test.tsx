@@ -7,6 +7,36 @@ import { ExperienceLevelEnum, ProgramStatusEnum } from 'types/__generated__/grap
 import type { Module } from 'types/mentorship'
 import SingleModuleCard from 'components/SingleModuleCard'
 
+jest.mock('next/link', () => ({
+  __esModule: true,
+  default: ({
+    children,
+    href,
+    target,
+    rel,
+    className,
+    ...props
+  }: {
+    children: React.ReactNode
+    href: string
+    target?: string
+    rel?: string
+    className?: string
+    [key: string]: unknown
+  }) => (
+    <a
+      href={href}
+      target={target}
+      rel={rel}
+      className={className}
+      {...props}
+      data-testid="module-link"
+    >
+      {children}
+    </a>
+  ),
+}))
+
 // Mock dependencies
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),

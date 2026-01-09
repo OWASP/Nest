@@ -40,6 +40,7 @@ const config: Config = {
     '^.+\\.tsx?$': '@swc/jest',
   },
   moduleNameMapper: {
+    '^@a11y/(.*)$': '<rootDir>/__tests__/a11y/$1',
     '^@unit/(.*)$': '<rootDir>/__tests__/unit/$1',
     '^@/(.*)$': '<rootDir>/src/$1',
     '\\.(scss|sass|css)$': 'identity-obj-proxy',

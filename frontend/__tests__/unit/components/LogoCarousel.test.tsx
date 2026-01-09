@@ -3,6 +3,28 @@ import React from 'react'
 import { Sponsor } from 'types/home'
 import MovingLogos from 'components/LogoCarousel'
 
+jest.mock('next/link', () => {
+  return function MockLink({
+    href,
+    children,
+    target,
+    rel,
+    className,
+  }: {
+    href: string
+    children: React.ReactNode
+    target?: string
+    rel?: string
+    className?: string
+  }) {
+    return (
+      <a href={href} target={target} rel={rel} className={className} data-testid="sponsor-link">
+        {children}
+      </a>
+    )
+  }
+})
+
 jest.mock('next/image', () => {
   return function MockImage({
     src,

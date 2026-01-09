@@ -50,7 +50,6 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1"
-            data-testid="module-link"
           >
             <h1
               className="max-w-full text-base font-semibold break-words text-blue-400 hover:text-blue-600 sm:text-lg sm:break-normal lg:text-2xl"

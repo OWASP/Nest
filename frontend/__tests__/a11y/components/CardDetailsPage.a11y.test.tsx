@@ -1,5 +1,5 @@
+import { mockChapterData } from '@a11y/data/mockChapterData'
 import { render } from '@testing-library/react'
-import { mockChapterData } from '@unit/data/mockChapterData'
 import { axe, toHaveNoViolations } from 'jest-axe'
 import React from 'react'
 import { FaCode, FaTags } from 'react-icons/fa6'
