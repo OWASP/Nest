@@ -1,6 +1,5 @@
-import { dirname } from 'path'
+import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
-import path from 'path'
 
 import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
