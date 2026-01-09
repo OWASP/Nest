@@ -1,34 +1,9 @@
 import { render } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
-import { ReactNode } from 'react'
 import type { Release as ReleaseType } from 'types/release'
 import Release from 'components/Release'
 
 expect.extend(toHaveNoViolations)
-
-const mockRouterPush = jest.fn()
-jest.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: mockRouterPush,
-  }),
-}))
-
-jest.mock('next/link', () => ({
-  __esModule: true,
-  default: ({
-    children,
-    href,
-    ...props
-  }: {
-    children: ReactNode
-    href: string
-    [key: string]: unknown
-  }) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
-}))
 
 const release: ReleaseType = {
   name: 'v1.0 The First Release',

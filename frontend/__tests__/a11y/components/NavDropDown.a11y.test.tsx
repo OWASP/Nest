@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
 import type { Link as LinkType } from 'types/link'
 import NavDropDown from 'components/NavDropDown'
@@ -34,6 +34,10 @@ describe('NavDropDown a11y', () => {
 
     const button = screen.getByRole('button')
     fireEvent.click(button)
+
+    await waitFor(() => {
+      expect(screen.getByText('Getting Started')).toBeInTheDocument()
+    })
 
     const results = await axe(container)
 

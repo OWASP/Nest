@@ -107,7 +107,7 @@ describe('SkeletonBase a11y', () => {
 
   it('should not have any accessibility violations for organizations-details index', async () => {
     const { container } = render(
-      <SkeletonBase indexName="organizations-details`" {...defaultProps} />
+      <SkeletonBase indexName="organizations-details" {...defaultProps} />
     )
 
     const results = await axe(container, {

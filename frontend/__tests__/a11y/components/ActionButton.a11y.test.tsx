@@ -1,26 +1,8 @@
 import { render } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
-import React from 'react'
 import ActionButton from 'components/ActionButton'
 
 expect.extend(toHaveNoViolations)
-
-jest.mock('next/link', () => ({
-  __esModule: true,
-  default: ({
-    children,
-    href,
-    ...props
-  }: {
-    children: React.ReactNode
-    href: string
-    [key: string]: unknown
-  }) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
-}))
 
 describe('ActionButton Accessibility', () => {
   it('should not have any accessibility violations when no url is provided', async () => {

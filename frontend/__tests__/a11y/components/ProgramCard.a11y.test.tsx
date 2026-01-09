@@ -1,17 +1,10 @@
 import { render } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
-import { ReactNode } from 'react'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
 import { Program } from 'types/mentorship'
 import ProgramCard from 'components/ProgramCard'
 
 expect.extend(toHaveNoViolations)
-
-jest.mock('next/link', () => {
-  return ({ children, href }: { children: ReactNode; href: string }) => {
-    return <a href={href}>{children}</a>
-  }
-})
 
 jest.mock('hooks/useUpdateProgramStatus', () => ({
   useUpdateProgramStatus: () => ({ updateProgramStatus: jest.fn() }),

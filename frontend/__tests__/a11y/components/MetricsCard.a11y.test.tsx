@@ -1,27 +1,9 @@
 import { render } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
-import { ReactNode } from 'react'
 import { HealthMetricsProps } from 'types/healthMetrics'
 import MetricsCard from 'components/MetricsCard'
 
 expect.extend(toHaveNoViolations)
-
-jest.mock('next/link', () => ({
-  __esModule: true,
-  default: ({
-    children,
-    href,
-    ...props
-  }: {
-    children: ReactNode
-    href: string
-    [key: string]: unknown
-  }) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
-}))
 
 const makeMetric = (overrides: Partial<HealthMetricsProps> = {}): HealthMetricsProps => ({
   projectKey: 'test-project',

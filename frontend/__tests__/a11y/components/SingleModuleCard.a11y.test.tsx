@@ -7,26 +7,6 @@ import SingleModuleCard from 'components/SingleModuleCard'
 
 expect.extend(toHaveNoViolations)
 
-jest.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: jest.fn(),
-    back: jest.fn(),
-    forward: jest.fn(),
-    refresh: jest.fn(),
-    replace: jest.fn(),
-    prefetch: jest.fn(),
-  }),
-  usePathname: () => '/my/mentorship/programs/test-program',
-}))
-
-jest.mock('next-auth/react', () => ({
-  useSession: () => ({
-    data: null,
-    status: 'unauthenticated',
-    update: jest.fn(),
-  }),
-}))
-
 jest.mock('next/link', () => ({
   __esModule: true,
   default: ({
