@@ -5,8 +5,7 @@ import upperFirst from 'lodash/upperFirst'
 import millify from 'millify'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { FaMapSigns, FaTools } from 'react-icons/fa'
 import { FaCircleCheck, FaClock, FaScroll, FaBullseye, FaUser, FaUsersGear } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
@@ -271,20 +270,12 @@ const About = () => {
                 className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
               />
 
-              <h3 className="text-lg font-semibold text-blue-400">
-                {milestone.title}
-              </h3>
-              <h4 className="mb-1 font-medium text-gray-400">
-                {milestone.year}
-              </h4>
-              <p className="text-gray-600 dark:text-gray-300">
-                {milestone.description}
-              </p>
+              <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
+              <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
+              <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
             </div>
           )}
         />
-
-
 
         <div className="grid gap-0 md:grid-cols-4 md:gap-6">
           {[

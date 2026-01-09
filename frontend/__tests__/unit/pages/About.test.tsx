@@ -66,10 +66,7 @@ jest.mock('utils/aboutData', () => ({
     ways: ['Way 1', 'Way 2'],
     callToAction: 'Test call to action',
   },
-  projectStory: [
-    'Test story paragraph 1',
-    'Test story paragraph 2',
-  ],
+  projectStory: ['Test story paragraph 1', 'Test story paragraph 2'],
   projectTimeline: [
     { title: 'Timeline Event 1', description: 'Timeline description 1', year: '2020' },
     { title: 'Timeline Event 2', description: 'Timeline description 2', year: '2021' },
@@ -125,7 +122,6 @@ jest.mock('utils/aboutData', () => ({
     },
   ],
 }))
-
 
 jest.mock('components/MarkdownWrapper', () => ({
   __esModule: true,

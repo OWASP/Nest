@@ -39,7 +39,7 @@ const ToggleableList = <T,>({
       <div className="flex flex-wrap gap-2">
         {visibleItems.map((item, index) => (
           <div
-            key={index}
+            key={JSON.stringify(item)}
             aria-disabled={isDisabled}
             className={isDisabled ? 'pointer-events-none opacity-60' : undefined}
           >
