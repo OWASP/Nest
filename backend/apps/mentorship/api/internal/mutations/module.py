@@ -402,16 +402,27 @@ class ModuleMutation:
 
         if input_data.mentor_logins is not None:
             if not is_program_admin:
-                msg = "Only program admins can modify mentor assignments."
-                logger.warning(
-                    "Unauthorized mentor assignment attempt: Non-admin mentor '%s' "
-                    "tried to modify mentors for module '%s'.",
-                    user.username,
-                    module.name,
-                )
-                raise PermissionDenied(msg)
-            mentors_to_set = resolve_mentors_from_logins(input_data.mentor_logins)
-            module.mentors.set(mentors_to_set)
+                current_logins = {
+                    login.lower()
+                    for login in module.mentors.values_list("github_user__login", flat=True)
+                }
+                requested_logins = {login.lower() for login in input_data.mentor_logins}
+
+                if requested_logins != current_logins:
+                    msg = "Only program admins can modify mentor assignments."
+                    logger.warning(
+                        "Unauthorized mentor assignment attempt: Non-admin mentor '%s' "
+                        "tried to modify mentors for module '%s'.",
+                        user.username,
+                        module.name,
+                    )
+                    raise PermissionDenied(msg)
+                # Mentor list unchanged; skip the update
+                input_data.mentor_logins = None
+
+            if input_data.mentor_logins is not None:
+                mentors_to_set = resolve_mentors_from_logins(input_data.mentor_logins)
+                module.mentors.set(mentors_to_set)
 
         module.save()
 
@@ -457,19 +468,23 @@ class ModuleMutation:
                 key=module_key, program__key=program_key
             )
         except Module.DoesNotExist as e:
-            msg = "Module not found."
-            raise ObjectDoesNotExist(msg) from e
+            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG) from e
 
-        try:
+        admin_as_mentor = None
+        with contextlib.suppress(Mentor.DoesNotExist):
             admin_as_mentor = Mentor.objects.get(nest_user=user)
-        except Mentor.DoesNotExist as err:
+
+        if admin_as_mentor is None:
+            with contextlib.suppress(AttributeError, Mentor.DoesNotExist):
+                admin_as_mentor = Mentor.objects.get(github_user=user.github_user)
+
+        if admin_as_mentor is None:
             msg = "Only mentors can delete modules."
             logger.warning(
                 "User '%s' is not a mentor and cannot delete modules.",
                 user.username,
-                exc_info=True,
             )
-            raise PermissionDenied(msg) from err
+            raise PermissionDenied(msg)
 
         if not module.program.admins.filter(id=admin_as_mentor.id).exists():
             msg = "Only program admins can delete modules."

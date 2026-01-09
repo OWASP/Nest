@@ -145,8 +145,6 @@ const EditModulePage = () => {
         if (err.message.includes('Permission') || err.message.includes('not have permission')) {
           errorMessage =
             'You do not have permission to edit this module. Only program admins and assigned mentors can edit modules.'
-        } else if (err.message.includes('mentor')) {
-          errorMessage = err.message
         }
       }
 
