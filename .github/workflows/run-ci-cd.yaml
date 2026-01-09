@@ -620,7 +620,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           target: 'https://nest.owasp.dev'
           allow_issue_writing: false
-          fail_action: false
+          fail_action: true
           cmd_options: '-a -c .zapconfig -r report_html.html'
 
       - name: Upload report
@@ -963,7 +963,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           target: 'https://nest.owasp.org'
           allow_issue_writing: false
-          fail_action: false
+          fail_action: true
           cmd_options: '-a -c .zapconfig -r report_html.html'
 
       - name: Upload report
