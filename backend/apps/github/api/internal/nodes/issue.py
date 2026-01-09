@@ -50,7 +50,7 @@ class IssueNode(strawberry.relay.Node):
         """Return True if this issue has at least one merged pull request."""
         return root.pull_requests.filter(state="closed", merged_at__isnull=False).exists()
 
-    @strawberry_django.field(prefetch_related=["participant_interests"])
+    @strawberry_django.field(prefetch_related=["participant_interests__user"])
     def interested_users(self, root: Issue) -> list[UserNode]:
         """Return all users who have expressed interest in this issue."""
         return [
