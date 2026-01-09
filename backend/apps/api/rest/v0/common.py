@@ -1,6 +1,13 @@
 """Common schemas and filters for the API."""
 
-from ninja import Field, FilterSchema
+from ninja import Field, FilterSchema, Schema
+
+
+class Leader(Schema):
+    """Schema for Leader."""
+
+    key: str | None = None
+    name: str
 
 
 class LocationFilter(FilterSchema):

@@ -68,3 +68,55 @@ export const formatDateForInput = (dateStr: string | number) => {
   }
   return date.toISOString().slice(0, 10)
 }
+
+export interface DateRangeOptions {
+  years?: number
+  months?: number
+  days?: number
+}
+
+export interface DateRangeResult {
+  startDate: string
+  endDate: string
+}
+
+function calculateDaysToSubtract(dayOfWeek: number): number {
+  return dayOfWeek === 0 ? -1 : -(dayOfWeek + 1)
+}
+
+function adjustDateForYearOnly(today: Date, endDate: Date, startDate: Date): void {
+  const todayDayOfWeek = today.getDay()
+  const daysToSubtract = calculateDaysToSubtract(todayDayOfWeek)
+
+  endDate.setDate(endDate.getDate() + daysToSubtract)
+  startDate.setTime(endDate.getTime())
+  startDate.setDate(startDate.getDate() - 363) // 364 days including start day
+}
+
+function calculateStartDate(today: Date, years: number, months: number, days: number): Date {
+  const startDate = new Date(today)
+  startDate.setFullYear(today.getFullYear() - years)
+  startDate.setMonth(today.getMonth() - months)
+  startDate.setDate(today.getDate() - days)
+  return startDate
+}
+
+export function getDateRange(options: DateRangeOptions = {}): DateRangeResult {
+  const { years = 0, months = 0, days = 0 } = options
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const endDate = new Date(today)
+  const startDate = calculateStartDate(today, years, months, days)
+
+  const isYearOnly = years > 0 && months === 0 && days === 0
+  if (isYearOnly) {
+    adjustDateForYearOnly(today, endDate, startDate)
+  }
+
+  return {
+    startDate: startDate.toISOString().split('T')[0],
+    endDate: endDate.toISOString().split('T')[0],
+  }
+}

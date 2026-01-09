@@ -75,17 +75,12 @@ jest.mock('@heroui/react', () => ({
     </div>
   ),
   DropdownSection: ({ children, title }: { children: React.ReactNode; title: string }) => (
-    <div
-      data-testid="dropdown-section"
-      data-title={title}
-      role="group"
-      aria-labelledby={`section-${title}`}
-    >
-      <div id={`section-${title}`} className="section-title">
+    <fieldset data-testid="dropdown-section" data-title={title}>
+      <legend id={`section-${title}`} className="section-title">
         {title}
-      </div>
+      </legend>
       {children}
-    </div>
+    </fieldset>
   ),
   DropdownItem: (props: { children: React.ReactNode }) => {
     const itemText = typeof props.children === 'string' ? props.children : 'item'
@@ -308,7 +303,7 @@ describe('ProjectsDashboardDropDown Component', () => {
 
       expect(activeItem).toBeDefined()
 
-      fireEvent.click(activeItem!)
+      fireEvent.click(activeItem)
       expect(mockOnAction).toHaveBeenCalledWith('Active')
     })
 
@@ -322,7 +317,7 @@ describe('ProjectsDashboardDropDown Component', () => {
 
       expect(activeItem).toBeDefined()
 
-      fireEvent.keyDown(activeItem!, { key: 'Enter' })
+      fireEvent.keyDown(activeItem, { key: 'Enter' })
       expect(mockOnAction).toHaveBeenCalledWith('Active')
     })
 
@@ -338,8 +333,8 @@ describe('ProjectsDashboardDropDown Component', () => {
       expect(activeItem).toBeDefined()
       expect(inactiveItem).toBeDefined()
 
-      fireEvent.click(activeItem!)
-      fireEvent.click(inactiveItem!)
+      fireEvent.click(activeItem)
+      fireEvent.click(inactiveItem)
 
       expect(mockOnAction).toHaveBeenCalledTimes(2)
       expect(mockOnAction).toHaveBeenCalledWith('Active')
