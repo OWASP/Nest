@@ -9,6 +9,7 @@ type ToggleableListProps<T> = {
   icon?: IconType
   limit?: number
   isDisabled?: boolean
+  keyExtractor?: (item: T, index: number) => string | number
   renderItem: (item: T, index: number, visibleCount: number) => React.ReactNode
 }
 
@@ -18,6 +19,7 @@ const ToggleableList = <T,>({
   icon,
   limit = 10,
   isDisabled = false,
+  keyExtractor,
   renderItem,
 }: ToggleableListProps<T>) => {
   const [showAll, setShowAll] = useState(false)
@@ -39,7 +41,7 @@ const ToggleableList = <T,>({
       <div className="flex flex-wrap gap-2">
         {visibleItems.map((item, index) => (
           <div
-            key={JSON.stringify(item)}
+            key={keyExtractor ? keyExtractor(item, index) : index}
             aria-disabled={isDisabled}
             className={isDisabled ? 'pointer-events-none opacity-60' : undefined}
           >

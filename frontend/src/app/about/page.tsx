@@ -6,8 +6,9 @@ import millify from 'millify'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { FaClock } from 'react-icons/fa'
 import { FaMapSigns, FaTools } from 'react-icons/fa'
-import { FaCircleCheck, FaClock, FaScroll, FaBullseye, FaUser, FaUsersGear } from 'react-icons/fa6'
+import { FaCircleCheck, FaScroll, FaBullseye, FaUser, FaUsersGear } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { IconWrapper } from 'wrappers/IconWrapper'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
@@ -256,9 +257,13 @@ const About = () => {
             <ShowMoreButton onToggle={() => setStoryExpanded(!storyExpanded)} />
           )}
         </SecondaryCard>
+
         <ToggleableList
           items={[...projectTimeline].reverse()}
           limit={4}
+          label="Project Timeline"
+          icon={FaClock}
+          keyExtractor={(item) => `${item.year}-${item.title}`}
           renderItem={(milestone, index, visibleCount) => (
             <div className="relative pl-10">
               {index !== visibleCount - 1 && (
