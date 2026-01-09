@@ -1,11 +1,13 @@
 """Strawberry extensions."""
 
+import asyncio
 import hashlib
 import json
 from functools import lru_cache
 
 from django.conf import settings
 from django.core.cache import cache
+from django.db.models import QuerySet
 from strawberry.extensions import SchemaExtension
 from strawberry.permission import PermissionExtension
 from strawberry.schema import Schema
@@ -30,6 +32,9 @@ def get_protected_fields(schema: Schema) -> tuple[str, ...]:
         for field in fields
         if any(isinstance(ext, PermissionExtension) for ext in field.extensions)
     )
+
+
+CACHE_MISS = object()
 
 
 class CacheExtension(SchemaExtension):
@@ -57,21 +62,18 @@ class CacheExtension(SchemaExtension):
         from apps.mentorship.models import Program
         from apps.mentorship.models.mentor import Mentor
 
-        try:
-            mentor = Mentor.objects.get(github_user=user.github_user)
-            program = Program.objects.prefetch_related("admins", "modules__mentors").get(
-                key=program_key
-            )
-        except (Mentor.DoesNotExist, Program.DoesNotExist):
+        github_user = getattr(user, "github_user", None)
+        mentor = Mentor.objects.filter(github_user=github_user).first() if github_user else None
+        if not mentor:
             return "public"
 
-        if program.admins.filter(id=mentor.id).exists():
-            return "admin"
+        from django.db.models import Q
 
-        is_mentor = any(
-            module.mentors.filter(id=mentor.id).exists() for module in program.modules.all()
-        )
-        return "admin" if is_mentor else "public"
+        is_admin_or_mentor = Program.objects.filter(
+            Q(key=program_key) & (Q(admins=mentor) | Q(modules__mentors=mentor))
+        ).exists()
+
+        return "admin" if is_admin_or_mentor else "public"
 
     def generate_key(self, field_name: str, field_args: dict, role: str | None = None) -> str:
         """Generate a unique cache key for a query.
@@ -85,9 +87,7 @@ class CacheExtension(SchemaExtension):
             str: The unique cache key.
 
         """
-        cache_data = {"field": field_name, "args": field_args}
-        if role:
-            cache_data["role"] = role
+        cache_data = {"field": field_name, "args": field_args, "role": role}
 
         key = json.dumps(cache_data, sort_keys=True)
         return (
@@ -108,10 +108,17 @@ class CacheExtension(SchemaExtension):
             role = self._get_user_role(info, kwargs)
 
         cache_key = self.generate_key(info.field_name, kwargs, role)
-        cached_result = cache.get(cache_key)
-        if cached_result is not None:
+        cached_result = cache.get(cache_key, CACHE_MISS)
+        if cached_result is not CACHE_MISS:
             return cached_result
 
         result = _next(root, info, *args, **kwargs)
+
+        if asyncio.iscoroutine(result):
+            return result
+
+        if isinstance(result, QuerySet):
+            result = list(result)
+
         cache.set(cache_key, result, settings.GRAPHQL_RESOLVER_CACHE_TIME_SECONDS)
         return result

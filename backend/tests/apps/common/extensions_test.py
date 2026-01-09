@@ -152,10 +152,13 @@ class TestResolve:
         mock_cache.get.assert_called_once()
         mock_next.assert_not_called()
 
+    @patch("apps.common.extensions.CACHE_MISS", new_callable=lambda: object())
     @patch("apps.common.extensions.cache")
-    def test_caches_result_on_miss(self, mock_cache, extension, mock_info, mock_next):
+    def test_caches_result_on_miss(
+        self, mock_cache, mock_cache_miss, extension, mock_info, mock_next
+    ):
         """Test that result is cached on cache miss."""
-        mock_cache.get.return_value = None
+        mock_cache.get.return_value = mock_cache_miss
 
         extension.resolve(mock_next, None, mock_info, key="germany")
 

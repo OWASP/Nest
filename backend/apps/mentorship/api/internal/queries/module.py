@@ -17,19 +17,20 @@ def _is_program_admin_or_mentor(user, program) -> bool:
     if not user or not user.is_authenticated:
         return False
 
+    if not user.github_user:
+        return False
+
+    from django.db.models import Q
+
     try:
         mentor = Mentor.objects.get(github_user=user.github_user)
 
-        if program.admins.filter(id=mentor.id).exists():
-            return True
+        return Program.objects.filter(
+            Q(id=program.id) & (Q(admins=mentor) | Q(modules__mentors=mentor))
+        ).exists()
 
-        for module in program.modules.all():
-            if module.mentors.filter(id=mentor.id).exists():
-                return True
     except Mentor.DoesNotExist:
-        pass
-
-    return False
+        return False
 
 
 @strawberry.type
