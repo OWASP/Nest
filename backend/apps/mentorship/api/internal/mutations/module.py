@@ -81,13 +81,21 @@ class ModuleMutation:
         try:
             program = Program.objects.get(key=input_data.program_key)
             project = Project.objects.get(id=input_data.project_id)
-            creator_as_mentor = Mentor.objects.get(nest_user=user)
         except (Program.DoesNotExist, Project.DoesNotExist) as e:
             msg = f"{e.__class__.__name__} matching query does not exist."
             raise ObjectDoesNotExist(msg) from e
-        except Mentor.DoesNotExist as e:
+
+        creator_as_mentor = None
+        with contextlib.suppress(Mentor.DoesNotExist):
+            creator_as_mentor = Mentor.objects.get(nest_user=user)
+
+        if creator_as_mentor is None and hasattr(user, "github_user"):
+            with contextlib.suppress(Mentor.DoesNotExist):
+                creator_as_mentor = Mentor.objects.get(github_user=user.github_user)
+
+        if creator_as_mentor is None:
             msg = "Only mentors can create modules."
-            raise PermissionDenied(msg) from e
+            raise PermissionDenied(msg)
 
         if not program.admins.filter(id=creator_as_mentor.id).exists():
             raise PermissionDenied
