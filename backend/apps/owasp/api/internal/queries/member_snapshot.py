@@ -45,9 +45,7 @@ class MemberSnapshotQuery:
         except User.DoesNotExist:
             return None
 
-    @strawberry_django.field(
-        select_related=["github_user"], prefetch_related=["issues", "pull_requests", "messages"]
-    )
+    @strawberry_django.field(prefetch_related=["issues", "pull_requests", "messages"])
     def member_snapshots(
         self, user_login: str | None = None, limit: int = 10
     ) -> list[MemberSnapshotNode]:
@@ -61,7 +59,7 @@ class MemberSnapshotQuery:
             List of MemberSnapshotNode objects
 
         """
-        query = MemberSnapshot.objects.all()
+        query = MemberSnapshot.objects.all().select_related("github_user")
 
         if user_login:
             try:

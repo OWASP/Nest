@@ -197,10 +197,21 @@ class Project(
     @property
     def issues(self):
         """Return issues."""
-        return Issue.objects.filter(
-            repository__in=self.repositories.all(),
-        ).select_related(
-            "repository",
+        return (
+            Issue.objects.filter(
+                repository__in=self.repositories.all(),
+            )
+            .select_related(
+                "repository",
+                "author",
+                "level",
+                "milestone",
+                "repository",
+            )
+            .prefetch_related(
+                "labels",
+                "assignees",
+            )
         )
 
     @property
@@ -252,10 +263,12 @@ class Project(
     @property
     def pull_requests(self):
         """Return pull requests."""
-        return PullRequest.objects.filter(
-            repository__in=self.repositories.all(),
-        ).select_related(
-            "repository",
+        return (
+            PullRequest.objects.filter(
+                repository__in=self.repositories.all(),
+            )
+            .select_related("author", "repository", "repository__organization", "milestone")
+            .prefetch_related("labels", "assignees")
         )
 
     @property
@@ -277,17 +290,22 @@ class Project(
             is_draft=False,
             published_at__isnull=False,
             repository__in=self.repositories.all(),
-        ).select_related(
-            "repository",
-        )
+        ).select_related("author", "repository", "repository__organization")
 
     @property
     def recent_milestones(self):
         """Return recent milestones."""
-        return Milestone.objects.filter(
-            repository__in=self.repositories.all(),
-        ).select_related(
-            "repository",
+        return (
+            Milestone.objects.filter(
+                repository__in=self.repositories.all(),
+            )
+            .select_related(
+                "repository",
+                "author",
+            )
+            .prefetch_related(
+                "labels",
+            )
         )
 
     @property

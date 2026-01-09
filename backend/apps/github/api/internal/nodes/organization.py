@@ -40,9 +40,9 @@ class OrganizationNode(strawberry.relay.Node):
     """GitHub organization node."""
 
     @strawberry_django.field
-    def stats(self) -> OrganizationStatsNode:
+    def stats(self, root: Organization) -> OrganizationStatsNode:
         """Resolve organization stats."""
-        repositories = Repository.objects.filter(organization=self)
+        repositories = Repository.objects.filter(organization=root)
 
         total_repositories = repositories.count()
         aggregated_stats = repositories.aggregate(
@@ -71,6 +71,6 @@ class OrganizationNode(strawberry.relay.Node):
         )
 
     @strawberry_django.field
-    def url(self) -> str:
+    def url(self, root: Organization) -> str:
         """Resolve organization URL."""
-        return self.url
+        return root.url

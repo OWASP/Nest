@@ -16,13 +16,7 @@ class IssueQuery:
     """GraphQL query class for retrieving GitHub issues."""
 
     @strawberry_django.field(
-        select_related=[
-            "author",
-            "milestone",
-            "level",
-            "repository",
-            "repository__organization",
-        ],
+        select_related=["author", "repository", "milestone", "level", "repository__organization"],
         prefetch_related=["labels", "assignees"],
     )
     def recent_issues(
@@ -48,7 +42,6 @@ class IssueQuery:
         queryset = Issue.objects.order_by(
             "-created_at",
         )
-
         filters = {}
 
         if login:

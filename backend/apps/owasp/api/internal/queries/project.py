@@ -36,7 +36,7 @@ class ProjectQuery:
 
     @strawberry_django.field(
         select_related=["owasp_repository"],
-        prefetch_related=["organizations", "owners", "repositories"],
+        prefetch_related=["organizations", "owners", "repositories", "entity_leaders"],
     )
     def recent_projects(self, limit: int = 8) -> list[ProjectNode]:
         """Resolve recent projects.

@@ -11,7 +11,7 @@ from apps.owasp.models.committee import Committee
 class CommitteeQuery:
     """Committee queries."""
 
-    @strawberry_django.field
+    @strawberry_django.field(prefetch_related=["entity_leaders"])
     def committee(self, key: str) -> CommitteeNode | None:
         """Resolve committee by key.
 

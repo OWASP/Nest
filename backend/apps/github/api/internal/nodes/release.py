@@ -20,35 +20,34 @@ from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 class ReleaseNode(strawberry.relay.Node):
     """GitHub release node."""
 
-    @strawberry_django.field
-    def author(self) -> UserNode | None:
-        """Resolve author."""
-        return self.author
+    author: UserNode | None = strawberry_django.field()
 
-    @strawberry_django.field
-    def organization_name(self) -> str | None:
+    @strawberry_django.field(select_related=["repository__organization"])
+    def organization_name(self, root: Release) -> str | None:
         """Resolve organization name."""
         return (
-            self.repository.organization.login
-            if self.repository and self.repository.organization
+            root.repository.organization.login
+            if root.repository and root.repository.organization
             else None
         )
 
-    @strawberry_django.field
-    def project_name(self) -> str | None:
+    @strawberry_django.field(
+        select_related=["repository"], prefetch_related=["repository__project_set"]
+    )
+    def project_name(self, root: Release) -> str | None:
         """Resolve project name."""
         return (
-            self.repository.project.name.lstrip(OWASP_ORGANIZATION_NAME)
-            if self.repository and self.repository.project
+            root.repository.project.name.lstrip(OWASP_ORGANIZATION_NAME)
+            if root.repository and root.repository.project
             else None
         )
 
-    @strawberry_django.field
-    def repository_name(self) -> str | None:
+    @strawberry_django.field(select_related=["repository"])
+    def repository_name(self, root: Release) -> str | None:
         """Resolve repository name."""
-        return self.repository.name if self.repository else None
+        return root.repository.name if root.repository else None
 
     @strawberry_django.field
-    def url(self) -> str:
+    def url(self, root: Release) -> str:
         """Resolve URL."""
-        return self.url
+        return root.url

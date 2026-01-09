@@ -24,31 +24,31 @@ class MemberSnapshotNode(strawberry.relay.Node):
     """Member snapshot node."""
 
     @strawberry_django.field
-    def commits_count(self) -> int:
+    def commits_count(self, root: MemberSnapshot) -> int:
         """Resolve commits count."""
-        return self.commits_count
+        return root.commits_count
 
-    @strawberry_django.field
-    def github_user(self) -> UserNode:
+    @strawberry_django.field(select_related=["github_user"])
+    def github_user(self, root: MemberSnapshot) -> UserNode:
         """Resolve GitHub user."""
-        return self.github_user
+        return root.github_user
 
     @strawberry_django.field
-    def issues_count(self) -> int:
+    def issues_count(self, root: MemberSnapshot) -> int:
         """Resolve issues count."""
-        return self.issues_count
+        return root.issues_count
 
     @strawberry_django.field
-    def pull_requests_count(self) -> int:
+    def pull_requests_count(self, root: MemberSnapshot) -> int:
         """Resolve pull requests count."""
-        return self.pull_requests_count
+        return root.pull_requests_count
 
     @strawberry_django.field
-    def messages_count(self) -> int:
+    def messages_count(self, root: MemberSnapshot) -> int:
         """Resolve Slack messages count."""
-        return self.messages_count
+        return root.messages_count
 
     @strawberry_django.field
-    def total_contributions(self) -> int:
+    def total_contributions(self, root: MemberSnapshot) -> int:
         """Resolve total contributions."""
-        return self.total_contributions
+        return root.total_contributions

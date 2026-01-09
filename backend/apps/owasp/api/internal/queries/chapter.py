@@ -21,7 +21,10 @@ class ChapterQuery:
         except Chapter.DoesNotExist:
             return None
 
-    @strawberry_django.field
+    @strawberry_django.field(
+        select_related=["owasp_repository"],
+        prefetch_related=["leaders", "suggested_leaders", "entity_leaders"],
+    )
     def recent_chapters(self, limit: int = 8) -> list[ChapterNode]:
         """Resolve recent chapters."""
         return (

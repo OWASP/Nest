@@ -11,32 +11,32 @@ from apps.owasp.api.internal.nodes.entity_member import EntityMemberNode
 class GenericEntityNode(strawberry.relay.Node):
     """Base node class for OWASP entities with common fields and resolvers."""
 
-    @strawberry_django.field
-    def entity_leaders(self) -> list[EntityMemberNode]:
+    @strawberry_django.field(prefetch_related=["entity_leaders"])
+    def entity_leaders(self, root) -> list[EntityMemberNode]:
         """Resolve entity leaders."""
-        return self.entity_leaders
+        return root.entity_leaders
 
     @strawberry_django.field
-    def leaders(self) -> list[str]:
+    def leaders(self, root) -> list[str]:
         """Resolve leaders."""
-        return self.idx_leaders
+        return root.idx_leaders
 
     @strawberry_django.field
-    def related_urls(self) -> list[str]:
+    def related_urls(self, root) -> list[str]:
         """Resolve related URLs."""
-        return self.related_urls
+        return root.related_urls
 
     @strawberry_django.field
-    def top_contributors(self) -> list[RepositoryContributorNode]:
+    def top_contributors(self, root) -> list[RepositoryContributorNode]:
         """Resolve top contributors."""
-        return [RepositoryContributorNode(**tc) for tc in self.idx_top_contributors]
+        return [RepositoryContributorNode(**tc) for tc in root.idx_top_contributors]
 
     @strawberry_django.field
-    def updated_at(self) -> float:
+    def updated_at(self, root) -> float:
         """Resolve updated at."""
-        return self.idx_updated_at
+        return root.idx_updated_at
 
     @strawberry_django.field
-    def url(self) -> str:
+    def url(self, root) -> str:
         """Resolve URL."""
-        return self.idx_url
+        return root.idx_url

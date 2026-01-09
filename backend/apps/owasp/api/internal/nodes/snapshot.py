@@ -28,32 +28,26 @@ class SnapshotNode(strawberry.relay.Node):
     new_chapters: list[ChapterNode] = strawberry_django.field()
 
     @strawberry_django.field
-    def key(self) -> str:
+    def key(self, root: Snapshot) -> str:
         """Resolve key."""
-        return self.key
+        return root.key
 
-    @strawberry_django.field(
-        select_related=["author", "repository", "level", "milestone"],
-        prefetch_related=["labels", "assignees"],
-    )
-    def new_issues(self) -> list[IssueNode]:
+    @strawberry_django.field(prefetch_related=["new_issues"])
+    def new_issues(self, root: Snapshot) -> list[IssueNode]:
         """Resolve new issues."""
-        return self.new_issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
+        return root.new_issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
 
-    @strawberry_django.field(
-        select_related=["owasp_repository"],
-        prefetch_related=["owners", "organizations", "repositories"],
-    )
-    def new_projects(self) -> list[ProjectNode]:
+    @strawberry_django.field(prefetch_related=["new_projects"])
+    def new_projects(self, root: Snapshot) -> list[ProjectNode]:
         """Resolve new projects."""
-        return self.new_projects.order_by("-created_at")
+        return root.new_projects.order_by("-created_at")
 
-    @strawberry_django.field(select_related=["author", "repository", "repository__organization"])
-    def new_releases(self) -> list[ReleaseNode]:
+    @strawberry_django.field(prefetch_related=["new_releases"])
+    def new_releases(self, root: Snapshot) -> list[ReleaseNode]:
         """Resolve new releases."""
-        return self.new_releases.order_by("-published_at")
+        return root.new_releases.order_by("-published_at")
 
-    @strawberry_django.field
-    def new_users(self) -> list[UserNode]:
+    @strawberry_django.field(prefetch_related=["new_users"])
+    def new_users(self, root: Snapshot) -> list[UserNode]:
         """Resolve new users."""
-        return self.new_users.order_by("-created_at")
+        return root.new_users.order_by("-created_at")

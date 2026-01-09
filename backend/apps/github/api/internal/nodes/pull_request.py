@@ -19,26 +19,23 @@ from apps.github.models.pull_request import PullRequest
 class PullRequestNode(strawberry.relay.Node):
     """GitHub pull request node."""
 
-    @strawberry_django.field
-    def author(self) -> UserNode | None:
-        """Resolve author."""
-        return self.author
+    author: UserNode | None = strawberry_django.field()
 
-    @strawberry_django.field
-    def organization_name(self) -> str | None:
+    @strawberry_django.field(select_related=["repository__organization"])
+    def organization_name(self, root: PullRequest) -> str | None:
         """Resolve organization name."""
         return (
-            self.repository.organization.login
-            if self.repository and self.repository.organization
+            root.repository.organization.login
+            if root.repository and root.repository.organization
             else None
         )
 
-    @strawberry_django.field
-    def repository_name(self) -> str | None:
+    @strawberry_django.field(select_related=["repository"])
+    def repository_name(self, root: PullRequest) -> str | None:
         """Resolve repository name."""
-        return self.repository.name if self.repository else None
+        return root.repository.name if root.repository else None
 
     @strawberry_django.field
-    def url(self) -> str:
+    def url(self, root: PullRequest) -> str:
         """Resolve URL."""
-        return str(self.url) if self.url else ""
+        return str(root.url) if root.url else ""

@@ -37,7 +37,9 @@ class RepositoryQuery:
         except Repository.DoesNotExist:
             return None
 
-    @strawberry_django.field(select_related=["organization", "owner"])
+    @strawberry_django.field(
+        select_related=["organization", "owner"],
+    )
     def repositories(
         self,
         organization: str,

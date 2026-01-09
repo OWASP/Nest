@@ -34,30 +34,30 @@ class ChapterNode(GenericEntityNode):
     """Chapter node."""
 
     @strawberry_django.field
-    def contribution_stats(self) -> strawberry.scalars.JSON | None:
+    def contribution_stats(self, root: Chapter) -> strawberry.scalars.JSON | None:
         """Resolve contribution stats with camelCase keys."""
-        return deep_camelize(self.contribution_stats)
+        return deep_camelize(root.contribution_stats)
 
     @strawberry_django.field
-    def created_at(self) -> float:
+    def created_at(self, root: Chapter) -> float:
         """Resolve created at."""
-        return self.idx_created_at
+        return root.idx_created_at
 
     @strawberry_django.field
-    def geo_location(self) -> GeoLocationType | None:
+    def geo_location(self, root: Chapter) -> GeoLocationType | None:
         """Resolve geographic location."""
         return (
-            GeoLocationType(lat=self.latitude, lng=self.longitude)
-            if self.latitude is not None and self.longitude is not None
+            GeoLocationType(lat=root.latitude, lng=root.longitude)
+            if root.latitude is not None and root.longitude is not None
             else None
         )
 
     @strawberry_django.field
-    def key(self) -> str:
+    def key(self, root: Chapter) -> str:
         """Resolve key."""
-        return self.idx_key
+        return root.idx_key
 
     @strawberry_django.field
-    def suggested_location(self) -> str | None:
+    def suggested_location(self, root: Chapter) -> str | None:
         """Resolve suggested location."""
-        return self.idx_suggested_location
+        return root.idx_suggested_location
