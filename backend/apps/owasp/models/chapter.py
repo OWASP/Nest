@@ -64,6 +64,19 @@ class Chapter(
     latitude = models.FloatField(verbose_name="Latitude", blank=True, null=True)
     longitude = models.FloatField(verbose_name="Longitude", blank=True, null=True)
 
+    contribution_data = models.JSONField(
+        verbose_name="Contribution Data",
+        default=dict,
+        blank=True,
+        help_text="Daily contribution counts (YYYY-MM-DD -> count mapping)",
+    )
+    contribution_stats = models.JSONField(
+        verbose_name="Contribution Statistics",
+        default=dict,
+        blank=True,
+        help_text="Detailed contribution breakdown (commits, issues, pull requests, releases)",
+    )
+
     # GRs.
     members = GenericRelation("owasp.EntityMember")
 

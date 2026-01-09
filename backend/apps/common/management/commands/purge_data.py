@@ -1,7 +1,5 @@
 """A command to purge OWASP Nest data."""
 
-# ruff: noqa: SLF001 https://docs.astral.sh/ruff/rules/private-member-access/
-
 from django.apps import apps
 from django.core.management.base import BaseCommand
 from django.db import connection
