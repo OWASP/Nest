@@ -621,7 +621,7 @@ jobs:
           target: 'https://nest.owasp.dev'
           allow_issue_writing: false
           fail_action: false
-          cmd_options: '-a -c .zapconfig -r report_html.html '
+          cmd_options: '-a -c .zapconfig -r report_html.html'
 
       - name: Upload report
         if: always()
@@ -964,7 +964,7 @@ jobs:
           target: 'https://nest.owasp.org'
           allow_issue_writing: false
           fail_action: false
-          cmd_options: '-a -c .zapconfig -r report_html.html '
+          cmd_options: '-a -c .zapconfig -r report_html.html'
 
       - name: Upload report
         if: always()
