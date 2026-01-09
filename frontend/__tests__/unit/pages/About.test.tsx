@@ -66,10 +66,17 @@ jest.mock('utils/aboutData', () => ({
     ways: ['Way 1', 'Way 2'],
     callToAction: 'Test call to action',
   },
-  projectStory: ['Test story paragraph 1', 'Test story paragraph 2'],
+  projectStory: [
+    'Test story paragraph 1',
+    'Test story paragraph 2',
+  ],
   projectTimeline: [
-    { title: 'Timeline Event 1', description: 'Timeline description 1', year: '2023' },
-    { title: 'Timeline Event 2', description: 'Timeline description 2', year: '2024' },
+    { title: 'Timeline Event 1', description: 'Timeline description 1', year: '2020' },
+    { title: 'Timeline Event 2', description: 'Timeline description 2', year: '2021' },
+    { title: 'Timeline Event 3', description: 'Timeline description 3', year: '2022' },
+    { title: 'Timeline Event 4', description: 'Timeline description 4', year: '2023' },
+    { title: 'Timeline Event 5', description: 'Timeline description 5', year: '2024' },
+    { title: 'Timeline Event 6', description: 'Timeline description 6', year: '2025' },
   ],
   technologies: [
     {
@@ -118,6 +125,7 @@ jest.mock('utils/aboutData', () => ({
     },
   ],
 }))
+
 
 jest.mock('components/MarkdownWrapper', () => ({
   __esModule: true,
@@ -687,6 +695,6 @@ describe('About Component', () => {
     // Timeline milestones contain years like 2020, 2021, etc.
     const milestoneYears = await screen.findAllByText(/20\d{2}/)
 
-    expect(milestoneYears.length).toBeLessThanOrEqual(6)
+    expect(milestoneYears.length).toBeLessThanOrEqual(4)
   })
 })

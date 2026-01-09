@@ -260,11 +260,9 @@ const About = () => {
         <ToggleableList
           items={[...projectTimeline].reverse()}
           limit={4}
-          label={<AnchorTitle title="Project Timeline" />}
-          icon={FaClock}
-          renderItem={(milestone, index, items) => (
-            <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
-              {index !== items.length - 1 && (
+          renderItem={(milestone, index, visibleCount) => (
+            <div className="relative pl-10">
+              {index !== visibleCount - 1 && (
                 <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-400" />
               )}
 
@@ -273,12 +271,19 @@ const About = () => {
                 className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
               />
 
-              <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
-              <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
-              <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
+              <h3 className="text-lg font-semibold text-blue-400">
+                {milestone.title}
+              </h3>
+              <h4 className="mb-1 font-medium text-gray-400">
+                {milestone.year}
+              </h4>
+              <p className="text-gray-600 dark:text-gray-300">
+                {milestone.description}
+              </p>
             </div>
           )}
         />
+
 
         <div className="grid gap-0 md:grid-cols-4 md:gap-6">
           {[

@@ -9,7 +9,7 @@ type ToggleableListProps<T> = {
   icon?: IconType
   limit?: number
   isDisabled?: boolean
-  renderItem: (item: T, index: number, items: T[]) => React.ReactNode
+  renderItem: (item: T, index: number, visibleCount: number) => React.ReactNode
 }
 
 const ToggleableList = <T,>({
@@ -42,16 +42,17 @@ const ToggleableList = <T,>({
             aria-disabled={isDisabled}
             className={isDisabled ? 'pointer-events-none opacity-60' : undefined}
           >
-            {renderItem(item, index, items)}
+            {renderItem(item, index, visibleItems.length)}
           </div>
         ))}
       </div>
 
       {items.length > limit && !isDisabled && (
-        <ShowMoreButton onToggle={() => setShowAll(!showAll)} />
+        <ShowMoreButton onToggle={() => setShowAll((v) => !v)} />
       )}
     </div>
   )
 }
 
 export default ToggleableList
+
