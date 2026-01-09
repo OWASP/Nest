@@ -6,8 +6,7 @@ import millify from 'millify'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { FaClock } from 'react-icons/fa'
-import { FaMapSigns, FaTools } from 'react-icons/fa'
+import { FaMapSigns,FaTools,FaClock } from 'react-icons/fa'
 import { FaCircleCheck, FaScroll, FaBullseye, FaUser, FaUsersGear } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { IconWrapper } from 'wrappers/IconWrapper'
@@ -254,7 +253,10 @@ const About = () => {
           ))}
 
           {projectStory.length > 3 && (
-            <ShowMoreButton onToggle={() => setStoryExpanded(!storyExpanded)} />
+            <ShowMoreButton
+              expanded={storyExpanded}
+              onToggle={() => setStoryExpanded((v) => !v)}
+            />
           )}
         </SecondaryCard>
 

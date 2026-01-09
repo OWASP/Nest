@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { IconType } from 'react-icons'
 import { IconWrapper } from 'wrappers/IconWrapper'
 import ShowMoreButton from 'components/ShowMoreButton'
@@ -23,26 +23,41 @@ const ToggleableList = <T,>({
   renderItem,
 }: ToggleableListProps<T>) => {
   const [showAll, setShowAll] = useState(false)
+  const containerRef = useRef<HTMLDivElement | null>(null)
 
-  const visibleItems = showAll ? items : items.slice(0, limit)
+  const safeLimit = Number.isFinite(limit) && limit > 0 ? limit : items.length
+  const visibleItems = showAll ? items : items.slice(0, safeLimit)
   const visibleCount = visibleItems.length
+
+  useEffect(() => {
+    if (containerRef.current) {
+      if (isDisabled) {
+        containerRef.current.setAttribute('inert', '')
+      } else {
+        containerRef.current.removeAttribute('inert')
+      }
+    }
+  }, [isDisabled])
 
   return (
     <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
       {label && (
         <h2 className="mb-4 text-2xl font-semibold">
-          <div className="flex items-center">
+          <span className="flex items-center">
             {icon && <IconWrapper icon={icon} className="mr-2 h-5 w-5" />}
             <span>{label}</span>
-          </div>
+          </span>
         </h2>
       )}
 
-      <div className="flex flex-wrap gap-2">
+      <div
+        ref={containerRef}
+        className="flex flex-wrap gap-2"
+        aria-disabled={isDisabled}
+      >
         {visibleItems.map((item, index) => (
           <div
-            key={keyExtractor ? keyExtractor(item, index) : index}
-            aria-disabled={isDisabled}
+            key={keyExtractor ? keyExtractor(item, index) : `${index}`}
             className={isDisabled ? 'pointer-events-none opacity-60' : undefined}
           >
             {renderItem(item, index, visibleCount)}
@@ -50,8 +65,11 @@ const ToggleableList = <T,>({
         ))}
       </div>
 
-      {items.length > limit && !isDisabled && (
-        <ShowMoreButton onToggle={() => setShowAll((v) => !v)} />
+      {items.length > safeLimit && !isDisabled && (
+        <ShowMoreButton
+          expanded={showAll}
+          onToggle={() => setShowAll((v) => !v)}
+        />
       )}
     </div>
   )
