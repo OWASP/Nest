@@ -1,8 +1,7 @@
 import { screen, fireEvent, render, waitFor } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
 import * as L from 'leaflet'
-import { useEffect } from 'react'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Chapter } from 'types/chapter'
 import ChapterMap from 'components/ChapterMap'
 
