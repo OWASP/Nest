@@ -100,6 +100,7 @@ const DetailsCard = ({
   userSummary,
 }: DetailsCardProps) => {
   const { data } = useSession()
+  const session = data as ExtendedSession | null
 
   // compute styles based on type prop
   const typeStylesMap = {
@@ -126,7 +127,7 @@ const DetailsCard = ({
               )}
               {type === 'module' &&
                 accessLevel === 'admin' &&
-                admins?.some((admin) => admin.login === (data as ExtendedSession)?.user?.login) && (
+                admins?.some((admin) => admin.login === session?.user?.login) && (
                   <EntityActions type="module" programKey={programKey} moduleKey={entityKey} />
                 )}
               {!isActive && <StatusBadge status="inactive" size="md" />}
