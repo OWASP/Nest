@@ -99,8 +99,7 @@ const DetailsCard = ({
   type,
   userSummary,
 }: DetailsCardProps) => {
-  const { data } = useSession()
-  const session = data as ExtendedSession | null
+  const { data: session } = useSession() as { data: ExtendedSession | null }
 
   // compute styles based on type prop
   const typeStylesMap = {
