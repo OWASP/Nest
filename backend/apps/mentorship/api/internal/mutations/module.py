@@ -1,5 +1,6 @@
 """GraphQL mutations for mentorship modules in the mentorship app."""
 
+import contextlib
 import logging
 from datetime import datetime
 
@@ -341,27 +342,17 @@ class ModuleMutation:
         except Module.DoesNotExist as e:
             raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG) from e
 
-        try:
+        editor_as_mentor = None
+        with contextlib.suppress(Mentor.DoesNotExist):
             editor_as_mentor = Mentor.objects.get(nest_user=user)
-        except Mentor.DoesNotExist:
-            try:
-                github_user = user.github_user
-                editor_as_mentor, _ = Mentor.objects.get_or_create(
-                    github_user=github_user, defaults={"nest_user": user}
-                )
-            except Exception as err:
-                msg = (
-                    f"User '{user.username}' is not registered as a mentor. "
-                    "Only mentors can edit modules."
-                )
-                logger.warning(
-                    "Failed to find or create mentor for user '%s' (ID: %s): %s",
-                    user.username,
-                    user.id,
-                    str(err),
-                    exc_info=True,
-                )
-                raise PermissionDenied(msg) from err
+
+        if editor_as_mentor is None:
+            with contextlib.suppress(AttributeError, Mentor.DoesNotExist):
+                editor_as_mentor = Mentor.objects.get(github_user=user.github_user)
+
+        if editor_as_mentor is None:
+            msg = "Only mentors can edit modules."
+            raise PermissionDenied(msg)
 
         is_program_admin = module.program.admins.filter(id=editor_as_mentor.id).exists()
         is_module_mentor = module.mentors.filter(id=editor_as_mentor.id).exists()
