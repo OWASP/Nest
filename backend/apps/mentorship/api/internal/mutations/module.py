@@ -346,8 +346,8 @@ class ModuleMutation:
         with contextlib.suppress(Mentor.DoesNotExist):
             editor_as_mentor = Mentor.objects.get(nest_user=user)
 
-        if editor_as_mentor is None:
-            with contextlib.suppress(AttributeError, Mentor.DoesNotExist):
+        if editor_as_mentor is None and hasattr(user, "github_user"):
+            with contextlib.suppress(Mentor.DoesNotExist):
                 editor_as_mentor = Mentor.objects.get(github_user=user.github_user)
 
         if editor_as_mentor is None:
@@ -474,8 +474,8 @@ class ModuleMutation:
         with contextlib.suppress(Mentor.DoesNotExist):
             admin_as_mentor = Mentor.objects.get(nest_user=user)
 
-        if admin_as_mentor is None:
-            with contextlib.suppress(AttributeError, Mentor.DoesNotExist):
+        if admin_as_mentor is None and hasattr(user, "github_user"):
+            with contextlib.suppress(Mentor.DoesNotExist):
                 admin_as_mentor = Mentor.objects.get(github_user=user.github_user)
 
         if admin_as_mentor is None:
