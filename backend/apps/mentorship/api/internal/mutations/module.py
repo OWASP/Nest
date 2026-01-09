@@ -1,5 +1,6 @@
 """GraphQL mutations for mentorship modules in the mentorship app."""
 
+import contextlib
 import logging
 from datetime import datetime
 
@@ -80,13 +81,21 @@ class ModuleMutation:
         try:
             program = Program.objects.get(key=input_data.program_key)
             project = Project.objects.get(id=input_data.project_id)
-            creator_as_mentor = Mentor.objects.get(nest_user=user)
         except (Program.DoesNotExist, Project.DoesNotExist) as e:
             msg = f"{e.__class__.__name__} matching query does not exist."
             raise ObjectDoesNotExist(msg) from e
-        except Mentor.DoesNotExist as e:
+
+        creator_as_mentor = None
+        with contextlib.suppress(Mentor.DoesNotExist):
+            creator_as_mentor = Mentor.objects.get(nest_user=user)
+
+        if creator_as_mentor is None and hasattr(user, "github_user"):
+            with contextlib.suppress(Mentor.DoesNotExist):
+                creator_as_mentor = Mentor.objects.get(github_user=user.github_user)
+
+        if creator_as_mentor is None:
             msg = "Only mentors can create modules."
-            raise PermissionDenied(msg) from e
+            raise PermissionDenied(msg)
 
         if not program.admins.filter(id=creator_as_mentor.id).exists():
             raise PermissionDenied
@@ -141,7 +150,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
+            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
@@ -151,11 +160,12 @@ class ModuleMutation:
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
-            raise ObjectDoesNotExist(msg="Assignee not found.")
+            msg = "Assignee not found."
+            raise ObjectDoesNotExist(msg)
 
         issue = module.issues.filter(number=issue_number).first()
         if issue is None:
-            raise ObjectDoesNotExist(msg=ISSUE_NOT_FOUND_MSG)
+            raise ObjectDoesNotExist(ISSUE_NOT_FOUND_MSG)
 
         issue.assignees.add(gh_user)
 
@@ -183,7 +193,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
+            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
@@ -193,11 +203,13 @@ class ModuleMutation:
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
-            raise ObjectDoesNotExist(msg="Assignee not found.")
+            msg = "Assignee not found."
+            raise ObjectDoesNotExist(msg)
 
         issue = module.issues.filter(number=issue_number).first()
         if issue is None:
-            raise ObjectDoesNotExist(msg=f"Issue {issue_number} not found in this module.")
+            msg = f"Issue {issue_number} not found in this module."
+            raise ObjectDoesNotExist(msg)
 
         issue.assignees.remove(gh_user)
 
@@ -223,7 +235,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
+            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
@@ -238,7 +250,7 @@ class ModuleMutation:
             .first()
         )
         if issue is None:
-            raise ObjectDoesNotExist(msg=ISSUE_NOT_FOUND_MSG)
+            raise ObjectDoesNotExist(ISSUE_NOT_FOUND_MSG)
 
         assignees = issue.assignees.all()
         if not assignees.exists():
@@ -285,7 +297,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
+            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
@@ -300,7 +312,7 @@ class ModuleMutation:
             .first()
         )
         if issue is None:
-            raise ObjectDoesNotExist(msg=ISSUE_NOT_FOUND_MSG)
+            raise ObjectDoesNotExist(ISSUE_NOT_FOUND_MSG)
 
         assignees = issue.assignees.all()
         if not assignees.exists():
@@ -323,7 +335,15 @@ class ModuleMutation:
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
     def update_module(self, info: strawberry.Info, input_data: UpdateModuleInput) -> ModuleNode:
-        """Update an existing mentorship module. User must be an admin of the program."""
+        """Update an existing mentorship module.
+
+        User must either be:
+        - An admin of the program, or
+        - A mentor explicitly assigned to this module
+
+        Admins can edit any field and manage mentor assignments.
+        Module mentors can edit module details but cannot modify mentor assignments.
+        """
         user = info.context.request.user
 
         try:
@@ -331,21 +351,35 @@ class ModuleMutation:
                 key=input_data.key, program__key=input_data.program_key
             )
         except Module.DoesNotExist as e:
-            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG) from e
+            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e
 
-        try:
-            creator_as_mentor = Mentor.objects.get(nest_user=user)
-        except Mentor.DoesNotExist as err:
+        editor_as_mentor = None
+        with contextlib.suppress(Mentor.DoesNotExist):
+            editor_as_mentor = Mentor.objects.get(nest_user=user)
+
+        if editor_as_mentor is None and hasattr(user, "github_user"):
+            with contextlib.suppress(Mentor.DoesNotExist):
+                editor_as_mentor = Mentor.objects.get(github_user=user.github_user)
+
+        if editor_as_mentor is None:
             msg = "Only mentors can edit modules."
-            logger.warning(
-                "User '%s' is not a mentor and cannot edit modules.",
-                user.username,
-                exc_info=True,
-            )
-            raise PermissionDenied(msg) from err
+            raise PermissionDenied(msg)
 
-        if not module.program.admins.filter(id=creator_as_mentor.id).exists():
-            raise PermissionDenied
+        is_program_admin = module.program.admins.filter(id=editor_as_mentor.id).exists()
+        is_module_mentor = module.mentors.filter(id=editor_as_mentor.id).exists()
+
+        if not (is_program_admin or is_module_mentor):
+            msg = (
+                "You do not have permission to edit this module. "
+                "Only program admins and module mentors can edit modules."
+            )
+            logger.warning(
+                "Unauthorized edit attempt: User '%s' is neither a program admin "
+                "nor a module mentor for module '%s'.",
+                user.username,
+                module.name,
+            )
+            raise PermissionDenied(msg)
 
         started_at, ended_at = _validate_module_dates(
             input_data.started_at,
@@ -378,8 +412,28 @@ class ModuleMutation:
             raise ObjectDoesNotExist(msg) from err
 
         if input_data.mentor_logins is not None:
-            mentors_to_set = resolve_mentors_from_logins(input_data.mentor_logins)
-            module.mentors.set(mentors_to_set)
+            if not is_program_admin:
+                current_logins = {
+                    login.lower()
+                    for login in module.mentors.values_list("github_user__login", flat=True)
+                }
+                requested_logins = {login.lower() for login in input_data.mentor_logins}
+
+                if requested_logins != current_logins:
+                    msg = "Only program admins can modify mentor assignments."
+                    logger.warning(
+                        "Unauthorized mentor assignment attempt: Non-admin mentor '%s' "
+                        "tried to modify mentors for module '%s'.",
+                        user.username,
+                        module.name,
+                    )
+                    raise PermissionDenied(msg)
+                # Mentor list unchanged; skip the update
+                input_data.mentor_logins = None
+
+            if input_data.mentor_logins is not None:
+                mentors_to_set = resolve_mentors_from_logins(input_data.mentor_logins)
+                module.mentors.set(mentors_to_set)
 
         module.save()
 
@@ -400,4 +454,77 @@ class ModuleMutation:
 
         module.program.save(update_fields=["experience_levels"])
 
+        logger.info(
+            "User '%s' successfully updated module '%s' in program '%s'.",
+            user.username,
+            module.name,
+            module.program.key,
+        )
+
         return module
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
+    def delete_module(
+        self,
+        info: strawberry.Info,
+        program_key: str,
+        module_key: str,
+    ) -> str:
+        """Delete a mentorship module. User must be an admin of the program."""
+        user = info.context.request.user
+
+        try:
+            module = Module.objects.select_related("program").get(
+                key=module_key, program__key=program_key
+            )
+        except Module.DoesNotExist as e:
+            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e
+
+        admin_as_mentor = None
+        with contextlib.suppress(Mentor.DoesNotExist):
+            admin_as_mentor = Mentor.objects.get(nest_user=user)
+
+        if admin_as_mentor is None and hasattr(user, "github_user"):
+            with contextlib.suppress(Mentor.DoesNotExist):
+                admin_as_mentor = Mentor.objects.get(github_user=user.github_user)
+
+        if admin_as_mentor is None:
+            msg = "Only mentors can delete modules."
+            logger.warning(
+                "User '%s' is not a mentor and cannot delete modules.",
+                user.username,
+            )
+            raise PermissionDenied(msg)
+
+        if not module.program.admins.filter(id=admin_as_mentor.id).exists():
+            msg = "Only program admins can delete modules."
+            raise PermissionDenied(msg)
+
+        program = module.program
+        module_name = module.name
+
+        # Clean up experience levels if this module is the only one using it
+        experience_level_to_remove = module.experience_level
+        if (
+            experience_level_to_remove in program.experience_levels
+            and not Module.objects.filter(
+                program=program, experience_level=experience_level_to_remove
+            )
+            .exclude(id=module.id)
+            .exists()
+        ):
+            program.experience_levels.remove(experience_level_to_remove)
+            program.save(update_fields=["experience_levels"])
+
+        # Delete the module
+        module.delete()
+
+        logger.info(
+            "User '%s' deleted module '%s' from program '%s'.",
+            user.username,
+            module_name,
+            program_key,
+        )
+
+        return f"Module '{module_name}' has been deleted successfully."
