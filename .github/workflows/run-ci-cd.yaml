@@ -621,15 +621,14 @@ jobs:
           target: 'https://nest.owasp.dev'
           allow_issue_writing: false
           fail_action: false
-          cmd_options: '-a -c .zapconfig -r report.html '
+          cmd_options: '-a -c .zapconfig -r report_html.html'
 
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: zap-baseline-scan-report-${{ github.run_id }}
-          path: report.html
-
+          path: report_html.html
 
   build-production-images:
     name: Build Production Images
@@ -965,11 +964,11 @@ jobs:
           target: 'https://nest.owasp.org'
           allow_issue_writing: false
           fail_action: false
-          cmd_options: '-a -c .zapconfig -r report.html '
+          cmd_options: '-a -c .zapconfig -r report_html.html'
 
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: zap-baseline-scan-report-${{ github.run_id }}
-          path: report.html
+          path: report_html.html

@@ -65,12 +65,10 @@ class CacheExtension(SchemaExtension):
         except (Mentor.DoesNotExist, Program.DoesNotExist):
             return "public"
 
-        if program.admins.filter(id=mentor.id).exists():
+        if mentor in program.admins.all():
             return "admin"
 
-        is_mentor = any(
-            module.mentors.filter(id=mentor.id).exists() for module in program.modules.all()
-        )
+        is_mentor = any(mentor in module.mentors.all() for module in program.modules.all())
         return "admin" if is_mentor else "public"
 
     def generate_key(self, field_name: str, field_args: dict, role: str | None = None) -> str:

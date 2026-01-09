@@ -66,16 +66,17 @@ class ModuleQuery:
                     .order_by("started_at")
                 )
 
+            msg = f"Program with key '{program_key}' not found."
             logger.warning(
                 "Attempted to access modules for unpublished program '%s' (status: %s)",
                 program_key,
                 program.status,
             )
+            raise ObjectDoesNotExist(msg)
 
         except Program.DoesNotExist:
-            pass
-
-        return []
+            msg = f"Program with key '{program_key}' not found."
+            raise ObjectDoesNotExist(msg) from None
 
     @strawberry.field
     def get_project_modules(self, project_key: str) -> list[ModuleNode]:
