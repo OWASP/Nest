@@ -783,7 +783,6 @@ jobs:
         uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1
         with:
           cache: true
-          version: v0.62.1
 
       - name: Scan backend image
         continue-on-error: true
