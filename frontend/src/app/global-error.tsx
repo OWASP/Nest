@@ -28,7 +28,7 @@ export const ERROR_CONFIGS: Record<string, ErrorDisplayProps> = {
 export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ statusCode, title, message }) => {
   const router = useRouter()
   return (
-    <div className="flex flex-1 flex-col items-center justify-center overflow-hidden py-9">
+    <main className="flex flex-1 flex-col items-center justify-center py-9">
       <div className="flex flex-1 flex-col items-center justify-center px-4">
         <div className="w-full max-w-md text-center">
           <h1 className="font-poppins text-8xl font-semibold text-black dark:text-white">
@@ -47,7 +47,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ statusCode, title, m
           </Button>
         </div>
       </div>
-    </div>
+    </main>
   )
 }
 
