@@ -70,11 +70,6 @@ class IssueIndexMixin:
         return self.project.idx_tags if self.project else []
 
     @property
-    def idx_tags(self) -> list[str]:
-        """Return tags for indexing (from project)."""
-        return self.project.idx_tags if self.project else []
-
-    @property
     def idx_project_topics(self) -> list[str]:
         """Return project topics for indexing."""
         return self.project.idx_topics if self.project else []

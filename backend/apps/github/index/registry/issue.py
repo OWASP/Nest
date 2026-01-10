@@ -30,7 +30,6 @@ class IssueIndex(IndexBase):
         "idx_repository_stars_count",
         "idx_repository_topics",
         "idx_summary",
-        "idx_tags",
         "idx_title",
         "idx_updated_at",
         "idx_url",
