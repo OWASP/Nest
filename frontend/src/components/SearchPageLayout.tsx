@@ -65,7 +65,7 @@ const SearchPageLayout = ({
             />
           )}
         </>
-      ):(
+      ) : (
         <SkeletonBase indexName={indexName} loadingImageUrl={loadingImageUrl} />
       )}
     </div>
