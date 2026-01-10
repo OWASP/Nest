@@ -19,12 +19,12 @@ export type CardProps = {
   button: Button
   icons?: Icon
   isActive?: boolean
+  labels?: string[]
   level?: Level
   projectLink?: string
   projectName?: string
   social?: { title: string; icon: IconType; url: string }[]
   summary: string
-  tags?: string[]
   title: string
   timeline?: {
     start: string
