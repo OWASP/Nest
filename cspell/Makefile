@@ -1,10 +1,9 @@
 check-spelling: cspell-check
 
 cspell-install:
-	@DOCKER_BUILDKIT=1 docker build \
-		--cache-from cspell \
-		cspell \
-		-t cspell
+	@docker image inspect cspell:ci >/dev/null 2>&1 && \
+	docker tag cspell:ci cspell || \
+	docker build -t cspell cspell
 
 cspell-check: CMD="--no-progress -r /nest"
 cspell-check: cspell-install cspell-run
