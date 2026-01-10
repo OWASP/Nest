@@ -83,12 +83,13 @@ describe('SnapshotDetailsPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: mockError,
+      loading: false,
     })
 
     render(<SnapshotDetailsPage />)
 
-    await waitFor(() => screen.getByText('Snapshot not found'))
-    expect(screen.getByText('Snapshot not found')).toBeInTheDocument()
+    await waitFor(() => screen.getByText('Error loading snapshot'))
+    expect(screen.getByText('Error loading snapshot')).toBeInTheDocument()
     expect(addToast).toHaveBeenCalledWith({
       description: 'An unexpected server error occurred.',
       title: 'Server Error',
@@ -97,6 +98,19 @@ describe('SnapshotDetailsPage', () => {
       color: 'danger',
       variant: 'solid',
     })
+  })
+
+  test('displays "Snapshot not found" when data is null without error', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: null,
+      error: null,
+      loading: false,
+    })
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => screen.getByText('Snapshot not found'))
+    expect(screen.getByText('Snapshot not found')).toBeInTheDocument()
   })
 
   test('navigates to project page when project card is clicked', async () => {

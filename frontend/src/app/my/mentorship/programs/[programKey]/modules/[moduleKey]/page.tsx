@@ -15,9 +15,12 @@ const ModuleDetailsPage = () => {
   const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
   const [module, setModule] = useState<Module | null>(null)
   const [admins, setAdmins] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
 
-  const { data, error } = useQuery(GetProgramAdminsAndModulesDocument, {
+  const {
+    data,
+    error,
+    loading: isLoading,
+  } = useQuery(GetProgramAdminsAndModulesDocument, {
     variables: {
       programKey,
       moduleKey,
@@ -28,10 +31,8 @@ const ModuleDetailsPage = () => {
     if (data?.getModule) {
       setModule(data.getModule)
       setAdmins(data.getProgram.admins)
-      setIsLoading(false)
     } else if (error) {
       handleAppError(error)
-      setIsLoading(false)
     }
   }, [data, error])
 

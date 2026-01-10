@@ -3,10 +3,9 @@
 import { useQuery } from '@apollo/client/react'
 import capitalize from 'lodash/capitalize'
 import { useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
-import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -14,31 +13,40 @@ import { getSimpleDuration } from 'components/ModuleCard'
 
 const ModuleDetailsPage = () => {
   const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
-  const [module, setModule] = useState<Module | null>(null)
-  const [admins, setAdmins] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
 
-  const { data, error } = useQuery(GetProgramAdminsAndModulesDocument, {
+  const {
+    data,
+    error,
+    loading: isLoading,
+  } = useQuery(GetProgramAdminsAndModulesDocument, {
     variables: {
       programKey,
       moduleKey,
     },
   })
 
+  const programModule = data?.getModule
+  const admins = data?.getProgram?.admins
+
   useEffect(() => {
-    if (data?.getModule) {
-      setModule(data.getModule)
-      setAdmins(data.getProgram.admins)
-      setIsLoading(false)
-    } else if (error) {
+    if (error) {
       handleAppError(error)
-      setIsLoading(false)
     }
-  }, [data, error])
+  }, [error])
 
   if (isLoading) return <LoadingSpinner />
 
-  if (!module) {
+  if (error) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading module"
+        message="An error occurred while loading the module data"
+      />
+    )
+  }
+
+  if (!data || !programModule) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -49,12 +57,12 @@ const ModuleDetailsPage = () => {
   }
 
   const moduleDetails = [
-    { label: 'Experience Level', value: capitalize(module.experienceLevel) },
-    { label: 'Start Date', value: formatDate(module.startedAt) },
-    { label: 'End Date', value: formatDate(module.endedAt) },
+    { label: 'Experience Level', value: capitalize(programModule.experienceLevel) },
+    { label: 'Start Date', value: formatDate(programModule.startedAt) },
+    { label: 'End Date', value: formatDate(programModule.endedAt) },
     {
       label: 'Duration',
-      value: getSimpleDuration(module.startedAt, module.endedAt),
+      value: getSimpleDuration(programModule.startedAt, programModule.endedAt),
     },
   ]
 
@@ -62,11 +70,11 @@ const ModuleDetailsPage = () => {
     <DetailsCard
       admins={admins}
       details={moduleDetails}
-      domains={module.domains}
-      mentors={module.mentors}
-      summary={module.description}
-      tags={module.tags}
-      title={module.name}
+      domains={programModule.domains}
+      mentors={programModule.mentors}
+      summary={programModule.description}
+      tags={programModule.tags}
+      title={programModule.name}
       type="module"
     />
   )

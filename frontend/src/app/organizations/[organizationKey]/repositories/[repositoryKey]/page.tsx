@@ -21,8 +21,11 @@ const RepositoryDetailsPage = () => {
   const [repository, setRepository] = useState(null)
   const [topContributors, setTopContributors] = useState<Contributor[]>([])
   const [recentPullRequests, setRecentPullRequests] = useState(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const { data, error: graphQLRequestError } = useQuery(GetRepositoryDataDocument, {
+  const {
+    data,
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetRepositoryDataDocument, {
     variables: { repositoryKey: repositoryKey, organizationKey: organizationKey },
   })
   useEffect(() => {
@@ -30,11 +33,9 @@ const RepositoryDetailsPage = () => {
       setRepository(data.repository)
       setTopContributors(data.topContributors)
       setRecentPullRequests(data.recentPullRequests)
-      setIsLoading(false)
     }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
   }, [data, graphQLRequestError, repositoryKey])
 

@@ -53,14 +53,51 @@ describe('ModuleDetailsPage', () => {
     expect(container.innerHTML).toContain('LoadingSpinner')
   })
 
-  it('calls error handler on GraphQL error', async () => {
+  it('calls error handler and displays error message on GraphQL error', async () => {
     const error = new Error('Query failed')
-    mockUseQuery.mockReturnValue({ error, loading: false })
+    mockUseQuery.mockReturnValue({ error, loading: false, data: null })
 
     render(<ModuleDetailsPage />)
 
     await waitFor(() => {
+      expect(screen.getByText('Error loading module')).toBeInTheDocument()
+    })
+
+    await waitFor(() => {
       expect(handleAppError).toHaveBeenCalledWith(error)
+    })
+  })
+
+  it('displays "Module Not Found" when data is null without error', async () => {
+    mockUseQuery.mockReturnValue({
+      loading: false,
+      error: null,
+      data: null,
+    })
+
+    render(<ModuleDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Module Not Found')).toBeInTheDocument()
+    })
+  })
+
+  it('displays "Module Not Found" when data exists but getModule is null', async () => {
+    mockUseQuery.mockReturnValue({
+      loading: false,
+      error: null,
+      data: {
+        getModule: null,
+        getProgram: {
+          admins: [],
+        },
+      },
+    })
+
+    render(<ModuleDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Module Not Found')).toBeInTheDocument()
     })
   })
 

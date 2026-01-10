@@ -26,17 +26,18 @@ import ProjectTypeDashboardCard from 'components/ProjectTypeDashboardCard'
 
 const ProjectsDashboardPage: FC = () => {
   const [stats, setStats] = useState<ProjectHealthStats>()
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const { data, error: graphQLRequestError } = useQuery(GetProjectHealthStatsDocument)
+  const {
+    data,
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetProjectHealthStatsDocument)
 
   useEffect(() => {
     if (data) {
       setStats(data.projectHealthStats)
-      setIsLoading(false)
     }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
   }, [data, graphQLRequestError])
 

@@ -85,7 +85,7 @@ export const mockSnapshotDetailsData = {
             name: '',
           },
         ],
-        updatedAt: 1727353371.0,
+        updatedAt: 1727353371,
         url: 'https://owasp.org/www-chapter-sivagangai',
         relatedUrls: [],
         geoLocation: {
