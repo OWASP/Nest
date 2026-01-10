@@ -3,26 +3,32 @@
 import enum
 
 import strawberry
+import strawberry_django
 from django.db.models import OuterRef, Subquery
 
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.models.generic_issue_model import GenericIssueModel
 from apps.github.models.milestone import Milestone
 
+MAX_LIMIT = 1000
+
 
 @strawberry.enum
-class MilestoneStateEnum(enum.Enum):
+class MilestoneStateEnum(str, enum.Enum):
     """Milestone state filter options."""
 
-    CLOSED = GenericIssueModel.State.CLOSED
-    OPEN = GenericIssueModel.State.OPEN
+    CLOSED = GenericIssueModel.State.CLOSED.value
+    OPEN = GenericIssueModel.State.OPEN.value
 
 
 @strawberry.type
 class MilestoneQuery:
     """Github Milestone Queries."""
 
-    @strawberry.field
+    @strawberry_django.field(
+        select_related=["author__owasp_profile", "repository__organization"],
+        prefetch_related=["issues", "labels", "pull_requests"],
+    )
     def recent_milestones(
         self,
         *,
@@ -53,15 +59,6 @@ class MilestoneQuery:
             case _:
                 milestones = Milestone.objects.all()
 
-        milestones = milestones.select_related(
-            "author",
-            "repository",
-            "repository__organization",
-        ).prefetch_related(
-            "issues",
-            "labels",
-            "pull_requests",
-        )
         if login:
             milestones = milestones.filter(
                 author__login=login,
@@ -82,6 +79,10 @@ class MilestoneQuery:
                 id__in=Subquery(latest_milestone_per_author),
             )
 
-        return milestones.order_by(
-            "-created_at",
-        )[:limit]
+        return (
+            milestones.order_by(
+                "-created_at",
+            )[:limit]
+            if (limit := min(limit, MAX_LIMIT)) > 0
+            else []
+        )

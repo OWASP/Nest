@@ -33,17 +33,21 @@ class TestMemberSnapshotQuery:
             mock_user_cls.objects.get.return_value = mock_user
 
             mock_queryset = Mock()
+            mock_queryset.select_related.return_value = mock_queryset
+            mock_queryset.prefetch_related.return_value = mock_queryset
             mock_queryset.filter.return_value = mock_queryset
             mock_queryset.order_by.return_value = mock_queryset
             mock_queryset.first.return_value = mock_snapshot
 
-            mock_snapshot_cls.objects.filter.return_value = mock_queryset
+            mock_snapshot_cls.objects = mock_queryset
 
             result = query.member_snapshot(user_login="testuser", start_year=2025)
 
             mock_user_cls.objects.get.assert_called_once_with(login="testuser")
-            mock_snapshot_cls.objects.filter.assert_called_once_with(github_user=mock_user)
-            mock_queryset.filter.assert_called_once_with(start_at__year=2025)
+            # select_related and prefetch_related are called, then filter twice
+            mock_queryset.select_related.assert_called_once()
+            mock_queryset.prefetch_related.assert_called_once()
+            assert mock_queryset.filter.call_count == 2
             assert result == mock_snapshot
 
     def test_member_snapshots_all(self):

@@ -23,32 +23,29 @@ class TestPullRequestQuery:
     def mock_queryset(self):
         """Mock queryset with all necessary methods."""
         queryset = MagicMock()
-        queryset.select_related.return_value = queryset
         queryset.exclude.return_value = queryset
         queryset.order_by.return_value = queryset
         queryset.filter.return_value = queryset
+        queryset.annotate.return_value = queryset
         queryset.__getitem__.return_value = []
         return queryset
 
     @patch("apps.github.models.pull_request.PullRequest.objects")
     def test_recent_pull_requests_basic(self, mock_objects, mock_queryset, mock_pull_request):
         """Test fetching recent pull requests with default parameters."""
-        mock_objects.select_related.return_value = mock_queryset
+        mock_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
 
         result = PullRequestQuery().recent_pull_requests()
 
         assert result == [mock_pull_request]
-        mock_objects.select_related.assert_called_once_with(
-            "author", "repository", "repository__organization"
-        )
-        mock_queryset.exclude.assert_called_once_with(author__is_bot=True)
+        mock_objects.exclude.assert_called_once_with(author__is_bot=True)
         mock_queryset.order_by.assert_called_once_with("-created_at")
 
     @patch("apps.github.models.pull_request.PullRequest.objects")
     def test_recent_pull_requests_with_login(self, mock_objects, mock_queryset, mock_pull_request):
         """Test filtering pull requests by login."""
-        mock_objects.select_related.return_value = mock_queryset
+        mock_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
 
         result = PullRequestQuery().recent_pull_requests(login="alice")
@@ -61,7 +58,7 @@ class TestPullRequestQuery:
         self, mock_objects, mock_queryset, mock_pull_request
     ):
         """Test filtering pull requests by organization."""
-        mock_objects.select_related.return_value = mock_queryset
+        mock_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
 
         result = PullRequestQuery().recent_pull_requests(organization="owasp")
@@ -79,7 +76,7 @@ class TestPullRequestQuery:
         mock_project.repositories.values_list.return_value = [1, 2, 3]
         mock_project_objects.filter.return_value.first.return_value = mock_project
 
-        mock_pr_objects.select_related.return_value = mock_queryset
+        mock_pr_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
 
         result = PullRequestQuery().recent_pull_requests(project="test-project")
@@ -93,7 +90,7 @@ class TestPullRequestQuery:
         self, mock_objects, mock_queryset, mock_pull_request
     ):
         """Test filtering pull requests by repository."""
-        mock_objects.select_related.return_value = mock_queryset
+        mock_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
 
         result = PullRequestQuery().recent_pull_requests(repository="test-repo")
@@ -101,28 +98,23 @@ class TestPullRequestQuery:
         assert result == [mock_pull_request]
         mock_queryset.filter.assert_called_with(repository__key__iexact="test-repo")
 
-    @patch("apps.github.api.internal.queries.pull_request.Subquery")
     @patch("apps.github.models.pull_request.PullRequest.objects")
-    def test_recent_pull_requests_distinct(
-        self, mock_objects, mock_subquery, mock_queryset, mock_pull_request
-    ):
-        """Test distinct filtering with Subquery for pull requests."""
-        mock_objects.select_related.return_value = mock_queryset
+    def test_recent_pull_requests_distinct(self, mock_objects, mock_queryset, mock_pull_request):
+        """Test distinct filtering with Window/Rank for pull requests."""
+        mock_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
-
-        mock_subquery_instance = Mock()
-        mock_subquery.return_value = mock_subquery_instance
 
         result = PullRequestQuery().recent_pull_requests(distinct=True)
 
         assert result == [mock_pull_request]
+        mock_queryset.annotate.assert_called_once()
         mock_queryset.filter.assert_called()
-        mock_subquery.assert_called_once()
+        assert mock_queryset.order_by.call_count == 2  # Once initially, once after filter
 
     @patch("apps.github.models.pull_request.PullRequest.objects")
     def test_recent_pull_requests_with_limit(self, mock_objects, mock_queryset, mock_pull_request):
         """Test limiting the number of pull requests returned."""
-        mock_objects.select_related.return_value = mock_queryset
+        mock_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
 
         result = PullRequestQuery().recent_pull_requests(limit=3)
@@ -135,7 +127,7 @@ class TestPullRequestQuery:
         self, mock_objects, mock_queryset, mock_pull_request
     ):
         """Test pull requests with multiple filters applied."""
-        mock_objects.select_related.return_value = mock_queryset
+        mock_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
 
         result = PullRequestQuery().recent_pull_requests(
@@ -143,39 +135,33 @@ class TestPullRequestQuery:
         )
 
         assert result == [mock_pull_request]
-        assert mock_queryset.filter.call_count >= 3
+        # login+organization applied together, repository applied separately = 2 calls
+        assert mock_queryset.filter.call_count == 2
         mock_queryset.__getitem__.assert_called_with(slice(None, 2))
 
-    @patch("apps.github.api.internal.queries.pull_request.OuterRef")
-    @patch("apps.github.api.internal.queries.pull_request.Subquery")
     @patch("apps.github.models.pull_request.PullRequest.objects")
     def test_recent_pull_requests_distinct_with_filters(
-        self, mock_objects, mock_subquery, mock_outer_ref, mock_queryset, mock_pull_request
+        self, mock_objects, mock_queryset, mock_pull_request
     ):
         """Test distinct filtering with additional filters."""
-        mock_objects.select_related.return_value = mock_queryset
+        mock_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
-
-        mock_subquery_instance = Mock()
-        mock_subquery.return_value = mock_subquery_instance
-        mock_outer_ref_instance = Mock()
-        mock_outer_ref.return_value = mock_outer_ref_instance
 
         result = PullRequestQuery().recent_pull_requests(
             distinct=True, login="alice", organization="owasp"
         )
 
         assert result == [mock_pull_request]
-        mock_queryset.filter.assert_called()
-        mock_subquery.assert_called_once()
-        mock_outer_ref.assert_called_once_with("author_id")
+        mock_queryset.annotate.assert_called_once()
+        # One filter for login+organization combined, one for rank=1
+        assert mock_queryset.filter.call_count == 2
 
     @patch("apps.github.models.pull_request.PullRequest.objects")
     def test_recent_pull_requests_with_multiple_filters_no_project(
         self, mock_objects, mock_queryset, mock_pull_request
     ):
         """Test pull requests with multiple filters (no project to avoid DB issues)."""
-        mock_objects.select_related.return_value = mock_queryset
+        mock_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
 
         result = PullRequestQuery().recent_pull_requests(
@@ -183,30 +169,22 @@ class TestPullRequestQuery:
         )
 
         assert result == [mock_pull_request]
-        # Verify filters were applied
-        assert mock_queryset.filter.call_count >= 3  # login, organization, repository
+        # Verify filters were applied: login+organization together, repository separately
+        assert mock_queryset.filter.call_count == 2
 
-    @patch("apps.github.api.internal.queries.pull_request.OuterRef")
-    @patch("apps.github.api.internal.queries.pull_request.Subquery")
     @patch("apps.github.models.pull_request.PullRequest.objects")
     def test_recent_pull_requests_distinct_comprehensive(
-        self, mock_objects, mock_subquery, mock_outer_ref, mock_queryset, mock_pull_request
+        self, mock_objects, mock_queryset, mock_pull_request
     ):
         """Test distinct filtering with multiple filters."""
-        mock_objects.select_related.return_value = mock_queryset
+        mock_objects.exclude.return_value = mock_queryset
         mock_queryset.__getitem__.return_value = [mock_pull_request]
-
-        mock_subquery_instance = Mock()
-        mock_subquery.return_value = mock_subquery_instance
-        mock_outer_ref_instance = Mock()
-        mock_outer_ref.return_value = mock_outer_ref_instance
 
         result = PullRequestQuery().recent_pull_requests(
             distinct=True, login="alice", organization="owasp", repository="test-repo"
         )
 
         assert result == [mock_pull_request]
-        mock_subquery.assert_called_once()
-        mock_outer_ref.assert_called_once_with("author_id")
-        # Verify multiple filters were applied
-        assert mock_queryset.filter.call_count >= 4  # login, org, repo, distinct
+        mock_queryset.annotate.assert_called_once()
+        # One filter for login+organization, one for repository, one for rank=1
+        assert mock_queryset.filter.call_count == 3

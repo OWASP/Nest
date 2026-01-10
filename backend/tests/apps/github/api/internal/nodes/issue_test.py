@@ -3,9 +3,10 @@
 from unittest.mock import Mock
 
 from apps.github.api.internal.nodes.issue import IssueNode
+from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
-class TestIssueNode:
+class TestIssueNode(GraphQLNodeBaseTest):
     """Test cases for IssueNode class."""
 
     def test_issue_node_type(self):
@@ -38,7 +39,8 @@ class TestIssueNode:
         mock_author = Mock()
         mock_issue.author = mock_author
 
-        result = IssueNode.author(mock_issue)
+        field = self._get_field_by_name("author", IssueNode)
+        result = field.base_resolver.wrapped_func(mock_issue)
         assert result == mock_author
 
     def test_organization_name_with_organization(self):
@@ -50,7 +52,8 @@ class TestIssueNode:
         mock_repository.organization = mock_organization
         mock_issue.repository = mock_repository
 
-        result = IssueNode.organization_name(mock_issue)
+        field = self._get_field_by_name("organization_name", IssueNode)
+        result = field.base_resolver.wrapped_func(mock_issue)
         assert result == "test-org"
 
     def test_organization_name_without_organization(self):
@@ -60,7 +63,8 @@ class TestIssueNode:
         mock_repository.organization = None
         mock_issue.repository = mock_repository
 
-        result = IssueNode.organization_name(mock_issue)
+        field = self._get_field_by_name("organization_name", IssueNode)
+        result = field.base_resolver.wrapped_func(mock_issue)
         assert result is None
 
     def test_organization_name_without_repository(self):
@@ -68,7 +72,8 @@ class TestIssueNode:
         mock_issue = Mock()
         mock_issue.repository = None
 
-        result = IssueNode.organization_name(mock_issue)
+        field = self._get_field_by_name("organization_name", IssueNode)
+        result = field.base_resolver.wrapped_func(mock_issue)
         assert result is None
 
     def test_repository_name_with_repository(self):
@@ -78,7 +83,8 @@ class TestIssueNode:
         mock_repository.name = "test-repo"
         mock_issue.repository = mock_repository
 
-        result = IssueNode.repository_name(mock_issue)
+        field = self._get_field_by_name("repository_name", IssueNode)
+        result = field.base_resolver.wrapped_func(mock_issue)
         assert result == "test-repo"
 
     def test_repository_name_without_repository(self):
@@ -86,5 +92,6 @@ class TestIssueNode:
         mock_issue = Mock()
         mock_issue.repository = None
 
-        result = IssueNode.repository_name(mock_issue)
+        field = self._get_field_by_name("repository_name", IssueNode)
+        result = field.base_resolver.wrapped_func(mock_issue)
         assert result is None

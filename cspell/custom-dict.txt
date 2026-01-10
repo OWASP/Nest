@@ -64,6 +64,7 @@ dismissable
 dockerhub
 dsn
 env
+euo
 facebookexternalhit
 gamesec
 geocoders
@@ -131,6 +132,7 @@ rsc
 saft
 sakanashi
 samm
+schemathesis
 seo
 skillstruck
 slackbot
@@ -138,6 +140,7 @@ slideshare
 speakerdeck
 superfences
 tiktok
+trgm
 trivyignores
 tsc
 unassigning

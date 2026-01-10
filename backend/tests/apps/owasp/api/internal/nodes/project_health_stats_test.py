@@ -6,9 +6,10 @@ import pytest
 from strawberry.types.base import StrawberryList
 
 from apps.owasp.api.internal.nodes.project_health_stats import ProjectHealthStatsNode
+from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
-class TestHealthStatsNode:
+class TestHealthStatsNode(GraphQLNodeBaseTest):
     def test_project_health_stats_node_inheritance(self):
         assert hasattr(ProjectHealthStatsNode, "__strawberry_definition__")
 
@@ -32,16 +33,6 @@ class TestHealthStatsNode:
         }
         assert expected_field_names == field_names
 
-    def _get_field_by_name(self, name):
-        return next(
-            (
-                field
-                for field in ProjectHealthStatsNode.__strawberry_definition__.fields
-                if field.name == name
-            ),
-            None,
-        )
-
     @pytest.mark.parametrize(
         ("field_name", "expected_type"),
         [
@@ -59,7 +50,7 @@ class TestHealthStatsNode:
         ],
     )
     def test_field_types(self, field_name, expected_type):
-        field = self._get_field_by_name(field_name)
+        field = self._get_field_by_name(field_name, ProjectHealthStatsNode)
         assert field is not None, f"Field {field_name} not found in HealthStatsNode."
 
         origin = get_origin(expected_type)

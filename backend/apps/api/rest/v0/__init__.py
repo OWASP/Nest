@@ -4,6 +4,7 @@ from typing import Any
 
 from django.conf import settings
 from ninja import NinjaAPI, Swagger
+from ninja.errors import ValidationError
 from ninja.pagination import RouterPaginated
 from ninja.throttling import AuthRateThrottle
 
@@ -68,6 +69,7 @@ elif settings.IS_E2E_ENVIRONMENT:
         ],
         "throttle": [],
     }
+
 elif settings.IS_FUZZ_ENVIRONMENT:
     api_settings_customization = {
         "auth": None,
@@ -101,6 +103,16 @@ elif settings.IS_LOCAL_ENVIRONMENT:
     }
 
 api = NinjaAPI(**{**api_settings, **api_settings_customization})
+
+
+@api.exception_handler(ValidationError)
+def validation_exception_handler(request, exc):
+    """Handle validation exceptions."""
+    return api.create_response(
+        request,
+        {"message": "Invalid request", "errors": exc.errors},
+        status=400,
+    )
 
 
 @api.get("/", include_in_schema=False)

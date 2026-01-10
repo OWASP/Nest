@@ -179,15 +179,19 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
 
         # Aggregate total contributions for users.
         top_contributors = (
-            queryset.values(
-                "user__avatar_url",
-                "user__login",
-                "user__name",
+            (
+                queryset.values(
+                    "user__avatar_url",
+                    "user__login",
+                    "user__name",
+                )
+                .annotate(
+                    total_contributions=Sum("contributions_count"),
+                )
+                .order_by("-total_contributions")[:limit]
             )
-            .annotate(
-                total_contributions=Sum("contributions_count"),
-            )
-            .order_by("-total_contributions")[:limit]
+            if limit > 0
+            else []
         )
 
         return [

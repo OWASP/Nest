@@ -54,7 +54,9 @@ class Organization(
         """Return organization related projects."""
         return (
             apps.get_model("owasp", "Project")  # Dynamic import.
-            .objects.filter(
+            .objects.select_related("owasp_repository")
+            .prefetch_related("organizations", "owners", "repositories")
+            .filter(
                 repositories__in=self.repositories.all(),
             )
             .distinct()
