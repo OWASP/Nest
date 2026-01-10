@@ -26,7 +26,6 @@ const Card = ({
   timeline,
   labels,
 }: CardProps) => {
-  console.log(labels)
   return (
     <div className="mx-auto mt-4 mb-2 flex w-full max-w-[95%] flex-col items-start rounded-md border-1 border-gray-200 bg-white p-4 md:max-w-6xl dark:border-gray-700 dark:bg-[#212529]">
       {/* Card Header with Badge and Title */}
