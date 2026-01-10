@@ -120,7 +120,6 @@ def get_params_for_index(index_name: str) -> dict:
                 "idx_project_url",
                 "idx_repository_languages",
                 "idx_summary",
-                "idx_tags",
                 "idx_title",
                 "idx_updated_at",
                 "idx_url",
