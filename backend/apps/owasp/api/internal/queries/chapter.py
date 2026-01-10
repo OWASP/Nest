@@ -29,7 +29,6 @@ class ChapterQuery:
         prefetch_related=[
             "leaders__owasp_profile",
             "suggested_leaders__owasp_profile",
-            "entity_leaders__member__owasp_profile",
             "members__owasp_profile",
         ],
     )

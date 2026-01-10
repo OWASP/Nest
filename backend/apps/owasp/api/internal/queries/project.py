@@ -43,7 +43,6 @@ class ProjectQuery:
             "organizations",
             "owners__owasp_profile",
             "repositories__organization",
-            "entity_leaders__member__owasp_profile",
         ],
     )
     def recent_projects(self, limit: int = 8) -> list[ProjectNode]:
