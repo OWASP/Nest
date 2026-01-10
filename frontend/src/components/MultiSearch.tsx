@@ -13,6 +13,7 @@ import type { Organization } from 'types/organization'
 import type { Project } from 'types/project'
 import type { MultiSearchBarProps, Suggestion } from 'types/search'
 import type { User } from 'types/user'
+type AlgoliaHit = Chapter | Event | Organization | Project | User;
 
 const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   isLoaded,
@@ -47,11 +48,11 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         if (query.length > 0) {
           const results = await Promise.all(
             indexes.map(async (index) => {
-              const data = await fetchAlgoliaData(index, query, pageCount, suggestionCount)
-              return {
+                const data = await fetchAlgoliaData<AlgoliaHit>(index, query, pageCount, suggestionCount)
+                return {
                 indexName: index,
-                hits: data.hits as Chapter[] | Event[] | Organization[] | Project[] | User[],
-                totalPages: data.totalPages || 0,
+                hits: data.hits,
+                totalPages: data.totalPages ?? 0,
               }
             })
           )
@@ -264,12 +265,12 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                 <ul>
                   {suggestion.hits.map((hit, subIndex) => {
                     const keyId =
-                      ('key' in hit && hit.key) ||
-                      ('login' in hit && hit.login) ||
-                      ('url' in hit && hit.url) ||
+                      ('key' in hit && hit.key) ??
+                      ('login' in hit && hit.login) ??
+                      ('url' in hit && hit.url) ??
                       subIndex
 
-                    const displayName = hit.name || ('login' in hit ? hit.login : '')
+                    const displayName = hit.name ?? ('login' in hit ? hit.login : '')
 
                     return (
                       <li
