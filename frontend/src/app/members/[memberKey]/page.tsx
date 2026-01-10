@@ -45,13 +45,13 @@ const UserDetailsPage: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const result = await fetchHeatmapData(memberKey as string)
+      const result = await fetchHeatmapData(memberKey)
       if (!result) {
         setIsPrivateContributor(true)
         return
       }
       if (result?.contributions) {
-        setUsername(memberKey as string)
+        setUsername(memberKey)
         setData(result as HeatmapData)
       }
     }
