@@ -114,8 +114,8 @@ jobs:
           file: cspell/Dockerfile
           tags: cspell:ci
           load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=cspell
+          cache-to: type=gha,scope=cspell,mode=max
 
       - name: Run cspell
         run: |
