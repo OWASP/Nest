@@ -86,9 +86,9 @@ class Organization(
         return set(Organization.objects.values_list("login", flat=True))
 
     @staticmethod
-    def bulk_save(organizations) -> None:  # type: ignore[override]
+    def bulk_save(organizations, fields=None) -> None:  # type: ignore[override]
         """Bulk save organizations."""
-        BulkSaveModel.bulk_save(Organization, organizations)
+        BulkSaveModel.bulk_save(Organization, organizations, fields=fields)
 
     @staticmethod
     def update_data(gh_organization, *, save: bool = True) -> Organization:
