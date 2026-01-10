@@ -100,7 +100,7 @@ const DetailsCard = ({
   type,
   userSummary,
 }: DetailsCardProps) => {
-  const { data } = useSession()
+  const { data: session } = useSession() as { data: ExtendedSession | null }
 
   // compute styles based on type prop
   const typeStylesMap: Partial<Record<CardType, string>> = {
@@ -127,9 +127,8 @@ const DetailsCard = ({
               )}
               {type === 'module' &&
                 accessLevel === 'admin' &&
-                admins?.some(
-                  (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
-                ) && <EntityActions type="module" programKey={programKey} moduleKey={entityKey} />}
+                 admins?.some((admin) => admin.login === session?.user?.login) && (
+                  <EntityActions type="module" programKey={programKey} moduleKey={entityKey} />)}
               {!isActive && <StatusBadge status="inactive" size="md" />}
               {isArchived && type === 'repository' && <StatusBadge status="archived" size="md" />}
               {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
@@ -160,7 +159,7 @@ const DetailsCard = ({
               detail?.label === 'Leaders' ? (
                 <div key={detail.label} className="flex flex-row gap-1 pb-1">
                   <strong>{detail.label}:</strong>{' '}
-                  <LeadersList leaders={detail?.value != null ? String(detail.value) : 'Unknown'} />
+                  <LeadersList leaders={String(detail?.value ?? 'Unknown')} />
                 </div>
               ) : (
                 <div key={detail.label} className="pb-1">
