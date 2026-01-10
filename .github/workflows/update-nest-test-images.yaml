@@ -5,6 +5,10 @@ on:
     - cron: 30 0 * * *
   workflow_dispatch:
 
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+
 permissions: {}
 
 env:

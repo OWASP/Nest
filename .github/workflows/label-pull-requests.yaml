@@ -3,6 +3,10 @@ name: Label Pull Requests
 on:
   - pull_request_target
 
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+
 permissions: {}
 
 jobs:

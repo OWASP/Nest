@@ -6,6 +6,10 @@ on:
       - edited
       - opened
 
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.issue.number || github.ref }}
+
 permissions: {}
 
 jobs:
