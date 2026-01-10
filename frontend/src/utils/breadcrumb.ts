@@ -1,7 +1,7 @@
 /**
  * Formats a breadcrumb title by protecting dates, splitting by hyphens,
  * and capitalizing each segment.
- * * @param text - The raw breadcrumb string (ex: "2026-01-10-project-updates")
+ * @param text - The raw breadcrumb string (ex: "2026-01-10-project-updates")
  * @returns The formatted title (ex: "2026-01-10 Project Updates")
  */
 export function formatBreadcrumbTitle(text: string): string {
