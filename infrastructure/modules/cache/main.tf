@@ -43,7 +43,7 @@ resource "random_password" "redis_auth_token" {
   count  = 1
   length = 32
   # Redis auth token has specific requirements for special characters.
-  override_special = "!&#$^<>-"
+  override_special = "!$^-"
   special          = true
 }
 

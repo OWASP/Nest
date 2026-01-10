@@ -1,3 +1,9 @@
+variable "assign_public_ip" {
+  description = "Whether to assign public IPs to ECS tasks."
+  type        = bool
+  default     = false
+}
+
 variable "aws_region" {
   description = "The AWS region for the CloudWatch logs."
   type        = string
@@ -62,8 +68,8 @@ variable "memory" {
   type        = string
 }
 
-variable "private_subnet_ids" {
-  description = "A list of private subnet IDs for the task."
+variable "subnet_ids" {
+  description = "Subnet IDs for the task (can be public or private)."
   type        = list(string)
 }
 
@@ -92,4 +98,10 @@ variable "task_role_arn" {
   description = "The ARN of the IAM role for the task."
   type        = string
   default     = null
+}
+
+variable "use_fargate_spot" {
+  description = "Whether to use Fargate Spot capacity provider."
+  type        = bool
+  default     = false
 }

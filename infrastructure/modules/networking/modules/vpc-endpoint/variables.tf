@@ -8,6 +8,42 @@ variable "common_tags" {
   type        = map(string)
 }
 
+variable "create_cloudwatch_logs" {
+  description = "Whether to create CloudWatch Logs VPC endpoint."
+  type        = bool
+  default     = true
+}
+
+variable "create_ecr_api" {
+  description = "Whether to create ECR API VPC endpoint."
+  type        = bool
+  default     = true
+}
+
+variable "create_ecr_dkr" {
+  description = "Whether to create ECR DKR VPC endpoint."
+  type        = bool
+  default     = true
+}
+
+variable "create_s3" {
+  description = "Whether to create S3 VPC endpoint (Gateway, free)."
+  type        = bool
+  default     = true
+}
+
+variable "create_secretsmanager" {
+  description = "Whether to create Secrets Manager VPC endpoint."
+  type        = bool
+  default     = true
+}
+
+variable "create_ssm" {
+  description = "Whether to create SSM VPC endpoint."
+  type        = bool
+  default     = true
+}
+
 variable "environment" {
   description = "The environment (e.g., staging, production)."
   type        = string

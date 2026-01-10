@@ -1,3 +1,9 @@
+variable "assign_public_ip" {
+  description = "Whether to assign public IPs to ECS tasks (required for public subnets)."
+  type        = bool
+  default     = false
+}
+
 variable "aws_region" {
   description = "The AWS region."
   type        = string
@@ -77,8 +83,8 @@ variable "migrate_task_memory" {
   default     = "1024"
 }
 
-variable "private_subnet_ids" {
-  description = "A list of private subnet IDs."
+variable "subnet_ids" {
+  description = "Subnet IDs for ECS tasks (can be public or private)."
   type        = list(string)
 }
 
@@ -97,6 +103,12 @@ variable "sync_data_task_memory" {
   description = "The memory for the sync-data task."
   type        = string
   default     = "1024"
+}
+
+variable "use_fargate_spot" {
+  description = "Whether to use Fargate Spot capacity provider for cost savings."
+  type        = bool
+  default     = false
 }
 
 variable "update_project_health_metrics_task_cpu" {
