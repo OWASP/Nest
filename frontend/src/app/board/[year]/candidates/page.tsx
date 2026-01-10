@@ -477,13 +477,13 @@ const BoardCandidatesPage = () => {
                     (
                     {ledChapters.length > 0 && (
                       <>
-                        {ledChapters.length} chapter{ledChapters.length !== 1 ? 's' : ''}
+                        {ledChapters.length} chapter{ledChapters.length === 1 ? '' : 's'}
                       </>
                     )}
                     {ledChapters.length > 0 && ledProjects.length > 0 && ', '}
                     {ledProjects.length > 0 && (
                       <>
-                        {ledProjects.length} project{ledProjects.length !== 1 ? 's' : ''}
+                        {ledProjects.length} project{ledProjects.length === 1 ? '' : 's'}
                       </>
                     )}
                     )
