@@ -51,5 +51,5 @@ class UserBadge(BulkSaveModel, TimestampedModel):
 
     @staticmethod
     def bulk_save(user_badges, fields=None) -> None:  # type: ignore[override]
-        """Bulk save organizations."""
+        """Bulk save user badges."""
         BulkSaveModel.bulk_save(UserBadge, user_badges, fields=fields)
