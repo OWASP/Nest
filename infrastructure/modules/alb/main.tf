@@ -13,6 +13,27 @@ terraform {
   }
 }
 
+locals {
+  backend_paths = [
+    "/a",
+    "/a/*",
+    "/api/*",
+    "/csrf",
+    "/csrf/*",
+    "/graphql",
+    "/graphql/*",
+    "/idx",
+    "/idx/*",
+    "/integrations",
+    "/integrations/*",
+    "/sitemap",
+    "/sitemap.xml",
+    "/status",
+    "/status/*",
+  ]
+  backend_path_chunks = chunklist(local.backend_paths, 5)
+}
+
 data "aws_elb_service_account" "main" {}
 
 data "aws_iam_policy_document" "alb_logs" {
@@ -29,22 +50,56 @@ data "aws_iam_policy_document" "alb_logs" {
   }
 }
 
+resource "aws_acm_certificate" "main" {
+  count       = var.enable_https && var.domain_name != null ? 1 : 0
+  domain_name = var.domain_name
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-${var.environment}-alb-cert"
+  })
+  validation_method = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_lambda_permission" "alb" {
+  count         = var.lambda_arn != null ? 1 : 0
+  action        = "lambda:InvokeFunction"
+  function_name = var.lambda_function_name
+  principal     = "elasticloadbalancing.amazonaws.com"
+  source_arn    = aws_lb_target_group.lambda[0].arn
+  statement_id  = "AllowALBInvoke"
+}
+
 resource "aws_lb" "main" {
   depends_on                 = [aws_s3_bucket_policy.alb_logs]
+  drop_invalid_header_fields = true
   enable_deletion_protection = false
   internal                   = false
   load_balancer_type         = "application"
-  name                       = "${var.project_name}-${var.environment}-frontend-alb"
+  name                       = "${var.project_name}-${var.environment}-alb"
   security_groups            = [var.alb_sg_id]
   subnets                    = var.public_subnet_ids
   tags = merge(var.common_tags, {
-    Name = "${var.project_name}-${var.environment}-frontend-alb"
+    Name = "${var.project_name}-${var.environment}-alb"
   })
 
   access_logs {
     bucket  = aws_s3_bucket.alb_logs.id
     enabled = true
-    prefix  = "frontend-alb"
+    prefix  = "alb"
+  }
+
+  lifecycle {
+    precondition {
+      condition     = var.enable_https ? var.domain_name != null : true
+      error_message = "domain_name must be provided when enable_https is true."
+    }
+    precondition {
+      condition     = var.lambda_arn != null ? var.lambda_function_name != null : true
+      error_message = "lambda_function_name must be provided when lambda_arn is set."
+    }
   }
 }
 
@@ -56,7 +111,7 @@ resource "aws_lb_listener" "http" {
   tags              = var.common_tags
 
   default_action {
-    target_group_arn = aws_lb_target_group.main.arn
+    target_group_arn = aws_lb_target_group.frontend.arn
     type             = "forward"
   }
 }
@@ -80,7 +135,7 @@ resource "aws_lb_listener" "http_redirect" {
 }
 
 resource "aws_lb_listener" "https" {
-  certificate_arn   = var.acm_certificate_arn
+  certificate_arn   = var.enable_https ? aws_acm_certificate.main[0].arn : null
   count             = var.enable_https ? 1 : 0
   load_balancer_arn = aws_lb.main.arn
   port              = 443
@@ -89,15 +144,51 @@ resource "aws_lb_listener" "https" {
   tags              = var.common_tags
 
   default_action {
-    target_group_arn = aws_lb_target_group.main.arn
+    target_group_arn = aws_lb_target_group.frontend.arn
     type             = "forward"
   }
 }
 
-resource "aws_lb_target_group" "main" {
+resource "aws_lb_listener_rule" "backend_http" {
+  for_each     = var.lambda_arn != null && !var.enable_https ? { for idx, chunk in local.backend_path_chunks : idx => chunk } : {}
+  listener_arn = aws_lb_listener.http[0].arn
+  priority     = 100 + each.key
+  tags         = var.common_tags
+
+  action {
+    target_group_arn = aws_lb_target_group.lambda[0].arn
+    type             = "forward"
+  }
+
+  condition {
+    path_pattern {
+      values = each.value
+    }
+  }
+}
+
+resource "aws_lb_listener_rule" "backend_https" {
+  for_each     = var.lambda_arn != null && var.enable_https ? { for idx, chunk in local.backend_path_chunks : idx => chunk } : {}
+  listener_arn = aws_lb_listener.https[0].arn
+  priority     = 100 + each.key
+  tags         = var.common_tags
+
+  action {
+    target_group_arn = aws_lb_target_group.lambda[0].arn
+    type             = "forward"
+  }
+
+  condition {
+    path_pattern {
+      values = each.value
+    }
+  }
+}
+
+resource "aws_lb_target_group" "frontend" {
   deregistration_delay = 30
   name                 = "${var.project_name}-${var.environment}-frontend-tg"
-  port                 = 3000
+  port                 = var.frontend_port
   protocol             = "HTTP"
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-frontend-tg"
@@ -110,11 +201,27 @@ resource "aws_lb_target_group" "main" {
     healthy_threshold   = 2
     interval            = 30
     matcher             = "200-299"
-    path                = var.health_check_path
+    path                = var.frontend_health_check_path
     protocol            = "HTTP"
     timeout             = 5
     unhealthy_threshold = 3
   }
+}
+
+resource "aws_lb_target_group" "lambda" {
+  count       = var.lambda_arn != null ? 1 : 0
+  name        = "${var.project_name}-${var.environment}-lambda-tg"
+  target_type = "lambda"
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-${var.environment}-lambda-tg"
+  })
+}
+
+resource "aws_lb_target_group_attachment" "lambda" {
+  count            = var.lambda_arn != null ? 1 : 0
+  target_group_arn = aws_lb_target_group.lambda[0].arn
+  target_id        = var.lambda_arn
+  depends_on       = [aws_lambda_permission.alb]
 }
 
 resource "aws_s3_bucket" "alb_logs" { # NOSONAR

@@ -11,33 +11,6 @@ terraform {
 
 data "aws_caller_identity" "current" {}
 
-module "alb" {
-  source = "./modules/alb"
-
-  acm_certificate_arn = var.enable_https && var.domain_name != null ? aws_acm_certificate.frontend[0].arn : null
-  alb_sg_id           = var.alb_sg_id
-  common_tags         = var.common_tags
-  enable_https        = var.enable_https
-  environment         = var.environment
-  health_check_path   = var.health_check_path
-  project_name        = var.project_name
-  public_subnet_ids   = var.public_subnet_ids
-  vpc_id              = var.vpc_id
-}
-
-resource "aws_acm_certificate" "frontend" {
-  count       = var.enable_https && var.domain_name != null ? 1 : 0
-  domain_name = var.domain_name
-  tags = merge(var.common_tags, {
-    Name = "${var.project_name}-${var.environment}-frontend-cert"
-  })
-  validation_method = "DNS"
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
 resource "aws_appautoscaling_policy" "frontend_cpu" {
   count              = var.enable_auto_scaling ? 1 : 0
   name               = "${var.project_name}-${var.environment}-frontend-cpu-scaling"
@@ -124,17 +97,22 @@ resource "aws_ecs_service" "frontend" {
   cluster                           = aws_ecs_cluster.frontend.id
   desired_count                     = var.desired_count
   health_check_grace_period_seconds = 60
-  launch_type                       = "FARGATE"
   name                              = "${var.project_name}-${var.environment}-frontend-service"
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-frontend-service"
   })
   task_definition = aws_ecs_task_definition.frontend.arn
 
+  capacity_provider_strategy {
+    base              = 0
+    capacity_provider = var.use_fargate_spot ? "FARGATE_SPOT" : "FARGATE"
+    weight            = 1
+  }
+
   load_balancer {
     container_name   = "frontend"
     container_port   = 3000
-    target_group_arn = module.alb.target_group_arn
+    target_group_arn = var.target_group_arn
   }
 
   network_configuration {

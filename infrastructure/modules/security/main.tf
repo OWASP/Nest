@@ -16,6 +16,13 @@ resource "aws_security_group" "alb" {
     Name = "${var.project_name}-${var.environment}-alb-sg"
   })
   vpc_id = var.vpc_id
+
+  lifecycle {
+    precondition {
+      condition     = var.create_vpc_endpoint_rules ? var.vpc_endpoint_sg_id != null : true
+      error_message = "vpc_endpoint_sg_id must be provided when create_vpc_endpoint_rules is true."
+    }
+  }
 }
 
 resource "aws_security_group" "ecs" {
@@ -114,6 +121,7 @@ resource "aws_security_group_rule" "ecs_egress_all" {
 }
 
 resource "aws_security_group_rule" "ecs_to_vpc_endpoints" {
+  count                    = var.create_vpc_endpoint_rules ? 1 : 0
   description              = "Allow HTTPS to VPC endpoints"
   from_port                = 443
   protocol                 = "tcp"
@@ -144,6 +152,7 @@ resource "aws_security_group_rule" "frontend_https" {
 }
 
 resource "aws_security_group_rule" "frontend_to_vpc_endpoints" {
+  count                    = var.create_vpc_endpoint_rules ? 1 : 0
   description              = "Allow HTTPS to VPC endpoints"
   from_port                = 443
   protocol                 = "tcp"
@@ -164,6 +173,7 @@ resource "aws_security_group_rule" "lambda_egress_all" {
 }
 
 resource "aws_security_group_rule" "lambda_to_vpc_endpoints" {
+  count                    = var.create_vpc_endpoint_rules ? 1 : 0
   description              = "Allow HTTPS to VPC endpoints"
   from_port                = 443
   protocol                 = "tcp"

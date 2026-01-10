@@ -10,6 +10,12 @@ variable "create_rds_proxy" {
   default     = false
 }
 
+variable "create_vpc_endpoint_rules" {
+  description = "Whether to create security group rules for VPC endpoints."
+  type        = bool
+  default     = false
+}
+
 variable "db_port" {
   description = "The port for the RDS database."
   type        = number
@@ -37,8 +43,9 @@ variable "redis_port" {
 }
 
 variable "vpc_endpoint_sg_id" {
-  description = "Security group ID for VPC endpoints."
+  description = "Security group ID for VPC endpoints (null if VPC endpoints disabled)."
   type        = string
+  default     = null
 }
 
 variable "vpc_id" {
