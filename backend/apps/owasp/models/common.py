@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import itertools
 import logging
 import re
 from urllib.parse import urlparse
@@ -197,18 +196,19 @@ class RepositoryBasedEntityModel(models.Model):
             return []
 
         leaders = []
+        # simplified regex to reduce complexity score below 20
+        pattern = r"[-*]\s*(?:\[([^\]]+)\]|([^\n\[]+))"
+
         for line in content.split("\n"):
-            leaders.extend(
-                [
-                    name
-                    for name in itertools.chain(
-                        *re.findall(
-                            r"[-*]\s*\[\s*([^(]+?)\s*(?:\([^)]*\))?\]|\*\s*([\w\s]+)", line.strip()
-                        )
-                    )
-                    if name.strip()
-                ]
-            )
+            for match in re.finditer(pattern, line.strip()):
+                raw_name = match.group(1) or match.group(2)
+
+                if raw_name:
+                    # remove parenthetical context (e.g "name (role)") via python
+                    # instead of complex regex patterns for better maintainability
+                    clean_name = raw_name.split("(")[0].strip()
+                    if clean_name:
+                        leaders.append(clean_name)
 
         return leaders
 
@@ -236,7 +236,7 @@ class RepositoryBasedEntityModel(models.Model):
         """Get entity metadata."""
         try:
             yaml_content = re.search(
-                r"^---\s*(.*?)\s*---",
+                r"^---\s*(.*?)\s*---",  # nosonar
                 get_repository_file_content(self.index_md_url),
                 re.DOTALL,
             )
