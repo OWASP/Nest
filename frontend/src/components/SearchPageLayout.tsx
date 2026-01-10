@@ -49,9 +49,7 @@ const SearchPageLayout = ({
           initialValue={searchQuery}
         />
       </div>
-      {!isLoaded ? (
-        <SkeletonBase indexName={indexName} loadingImageUrl={loadingImageUrl} />
-      ) : (
+      {isLoaded ? (
         <>
           <div>
             {totalPages !== 0 && <div className="flex justify-end">{sortChildren}</div>}
@@ -67,6 +65,8 @@ const SearchPageLayout = ({
             />
           )}
         </>
+      ) : (
+        <SkeletonBase indexName={indexName} loadingImageUrl={loadingImageUrl} />
       )}
     </div>
   )
