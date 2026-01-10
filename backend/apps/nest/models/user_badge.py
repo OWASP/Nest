@@ -48,3 +48,8 @@ class UserBadge(BulkSaveModel, TimestampedModel):
     def __str__(self) -> str:
         """Return a human-readable representation of the user badge."""
         return f"{self.user.login} - {self.badge.name}"
+
+    @staticmethod
+    def bulk_save(user_badges, fields=None) -> None:  # type: ignore[override]
+        """Bulk save organizations."""
+        BulkSaveModel.bulk_save(UserBadge, user_badges, fields=fields)

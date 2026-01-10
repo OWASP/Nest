@@ -7,7 +7,7 @@ import pytest
 from django.core.management import call_command
 from django.test import SimpleTestCase
 
-from apps.nest.management.commands.nest_update_project_leader_badge import Command
+from apps.nest.management.commands.nest_update_project_leader_badges import Command
 
 
 class TestProjectLeaderBadgeCommand(SimpleTestCase):
@@ -15,10 +15,10 @@ class TestProjectLeaderBadgeCommand(SimpleTestCase):
         assert Command.badge_name == "OWASP Project Leader"
         assert Command.badge_weight == 90
 
-    @patch("apps.nest.management.commands.nest_update_project_leader_badge.User")
-    @patch("apps.nest.management.commands.nest_update_project_leader_badge.EntityMember")
-    @patch("apps.nest.management.commands.nest_update_project_leader_badge.Project")
-    @patch("apps.nest.management.commands.nest_update_project_leader_badge.ContentType")
+    @patch("apps.nest.management.commands.nest_update_project_leader_badges.User")
+    @patch("apps.nest.management.commands.nest_update_project_leader_badges.EntityMember")
+    @patch("apps.nest.management.commands.nest_update_project_leader_badges.Project")
+    @patch("apps.nest.management.commands.nest_update_project_leader_badges.ContentType")
     @patch("apps.nest.management.commands.base_badge_command.UserBadge")
     @patch("apps.nest.management.commands.base_badge_command.Badge")
     def test_command_runs(
@@ -40,13 +40,13 @@ class TestProjectLeaderBadgeCommand(SimpleTestCase):
         mock_user_badge.objects.filter.return_value.exclude.return_value.count.return_value = 0
 
         out = StringIO()
-        call_command("nest_update_project_leader_badge", stdout=out)
+        call_command("nest_update_project_leader_badges", stdout=out)
         assert "Project Leader" in out.getvalue()
 
-    @patch("apps.nest.management.commands.nest_update_project_leader_badge.ContentType")
+    @patch("apps.nest.management.commands.nest_update_project_leader_badges.ContentType")
     @patch("apps.nest.management.commands.base_badge_command.Badge")
     @patch(
-        "apps.nest.management.commands.nest_update_project_leader_badge.EntityMember.objects.filter",
+        "apps.nest.management.commands.nest_update_project_leader_badges.EntityMember.objects.filter",
         side_effect=Exception("error"),
     )
     def test_handles_errors(self, mock_filter, mock_badge, mock_content_type):
@@ -56,4 +56,4 @@ class TestProjectLeaderBadgeCommand(SimpleTestCase):
         mock_content_type.objects.get_for_model.return_value = MagicMock()
 
         with pytest.raises(Exception, match="error"):
-            call_command("nest_update_project_leader_badge", stdout=StringIO())
+            call_command("nest_update_project_leader_badges", stdout=StringIO())

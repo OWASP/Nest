@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 
 from django.core.management.base import BaseCommand
 from django.db.models import QuerySet
+from django.template.defaultfilters import pluralize
 
 from apps.github.models.user import User
 from apps.nest.models.badge import Badge
@@ -49,8 +50,8 @@ class BaseBadgeCommand(BaseCommand, ABC):
             if created:
                 self._log(f"Created badge: '{badge.name}'")
             else:
-                badge.description = self.badge_description
                 badge.css_class = self.badge_css_class
+                badge.description = self.badge_description
                 badge.weight = self.badge_weight
                 badge.save(update_fields=["css_class", "description", "weight"])
 
@@ -63,18 +64,11 @@ class BaseBadgeCommand(BaseCommand, ABC):
             new_badges = [
                 UserBadge(user=user, badge=badge, is_active=True) for user in users_to_add_ids
             ]
-
-            added_count = 0
-            if new_badges:
-                added_count = UserBadge.bulk_save(
-                    UserBadge,
-                    new_badges,
-                    fields=["is_active"],
-                )
-                added_count = len(new_badges)
-
-            user_word = "user" if added_count == 1 else "users"
-            self._log(f"Added '{self.badge_name}' badge to {added_count} {user_word}")
+            UserBadge.bulk_save(new_badges, fields=["is_active"])
+            added_count = len(new_badges)
+            self._log(
+                f"Added '{self.badge_name}' badge to {added_count} user{pluralize(added_count)}"
+            )
 
             users_to_remove = UserBadge.objects.filter(
                 badge=badge,
@@ -84,8 +78,10 @@ class BaseBadgeCommand(BaseCommand, ABC):
             removed_count = users_to_remove.count()
             if removed_count:
                 users_to_remove.update(is_active=False)
-                user_word = "user" if removed_count == 1 else "users"
-                self._log(f"Removed '{self.badge_name}' badge from {removed_count} {user_word}")
+                self._log(
+                    f"Removed '{self.badge_name}' badge from {removed_count} "
+                    f"user{pluralize(removed_count)}"
+                )
 
             self.stdout.write(self.style.SUCCESS(f"{self.badge_name} synced successfully"))
         except Exception:
