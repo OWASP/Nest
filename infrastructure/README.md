@@ -101,7 +101,7 @@ Follow these steps to set up the infrastructure:
 
 ## Setting up Zappa
 
-The Django backend deployment is managed by Zappa. This includes the API Gateway, IAM roles, and Lambda Function provision.
+The Django backend deployment is managed by Zappa. This includes the IAM roles, and Lambda Function provision.
 
 1. **Change Directory**:
 
@@ -110,9 +110,6 @@ The Django backend deployment is managed by Zappa. This includes the API Gateway
     ```bash
     cd ../../backend/
     ```
-
-  > [!NOTE]
-  > The following steps assume the current working directory is `backend/`
 
 2. **Setup Dependencies**:
 
@@ -154,13 +151,26 @@ The Django backend deployment is managed by Zappa. This includes the API Gateway
   > [!NOTE]
   > If the deployment is successful but returns a `5xx` error, resolve the issues and use `zappa undeploy staging` & `zappa deploy staging`. The command `zappa update staging` may not work.
 
-  Once deployed, use the URL provided by Zappa to test the API.
+6. **Configure ALB Routing**:
+  - Run `zappa status staging` to get Zappa details.
+  - Update `terraform.tfvars` with the Lambda details:
 
-## Setup Database
+    ```hcl
+    lambda_arn           = "arn:aws:lambda:us-east-2:000000000000:function:nest-backend-staging"
+    lambda_function_name = "nest-backend-staging"
+    ```
 
-Migrate and load data into the new database.
+  - Apply the changes to create ALB routing:
 
-1. **Setup ECR Image**:
+    ```bash
+    cd ../infrastructure/staging/
+    terraform apply
+    ```
+
+## Populate ECR Repositories
+ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
+
+1. **Login to ECR**:
 
   - Login to the Elastic Container Registry using the following command:
 
@@ -174,10 +184,12 @@ Migrate and load data into the new database.
     aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 000000000000.dkr.ecr.us-east-2.amazonaws.com
     ```
 
+2. **Upload backend image to ECR**:
+
   - Build the backend image using the following command:
 
     ```bash
-    docker build -t owasp-nest-staging-backend:latest -f docker/Dockerfile .
+    docker build -t owasp-nest-staging-backend:latest -f docker/backend/Dockerfile backend/
     ```
 
   - Tag the image:
@@ -198,48 +210,16 @@ Migrate and load data into the new database.
     docker push 000000000000.dkr.ecr.us-east-2.amazonaws.com/owasp-nest-staging-backend:latest
     ```
 
-2. **Upload Fixture to S3**:
-
-  - Upload the fixture present in `backend/data` to `nest-fixtures` bucket using the following command:
-
-    ```bash
-    aws s3 cp data/nest.json.gz s3://owasp-nest-fixtures-<id>/
-    ```
-
-3. **Run ECS Tasks**:
-
-  - Head over to Elastic Container Service in the AWS Console.
-  - Click on `owasp-nest-staging-migrate` in `Task Definitions` section.
-  - Select the task definition revision.
-  - Click Deploy > Run Task.
-  - Use the following configuration:
-    - Environment: Cluster: owasp-nest-staging-tasks-cluster
-    - Networking:
-      - VPC: owasp-nest-staging-vpc
-      - Subnets: subnets will be auto-selected due to VPC selection.
-      - Security group name: select the ECS security group (e.g. `owasp-nest-staging-ecs-sg`).
-  - Click "Create"
-  - The task is now running... Click on the task ID to view Logs, Status, etc.
-  - Follow the same steps for `owasp-nest-staging-load-data` and `owasp-nest-staging-index-data`.
-
-### Setup Frontend
-
-1. **Setup Frontend Image**:
-
-  - Change the directory to `frontend/` using the following command:
-
-    ```bash
-    cd frontend/
-    ```
+3. **Upload frontend image to ECR**:
 
   - Build the frontend image using the following command:
 
     > [!NOTE]
-    > Make sure to update the `.env` file with correct `NEXT_PUBLIC_*` variables.
+    > Make sure to update the frontend `.env` file with correct `NEXT_PUBLIC_*` variables.
     > These are injected at build time.
 
     ```bash
-    docker build -t owasp-nest-staging-frontend:latest -f docker/Dockerfile .
+    docker build -t owasp-nest-staging-frontend:latest -f docker/frontend/Dockerfile frontend/
     ```
 
   - Tag the image:
@@ -260,26 +240,41 @@ Migrate and load data into the new database.
     docker push 000000000000.dkr.ecr.us-east-2.amazonaws.com/owasp-nest-staging-frontend:latest
     ```
 
-2. **Deploy Frontend Infrastructure**:
+## Setup Database
+Migrate and load data into the new database.
 
-  > [!IMPORTANT]
-  > Make sure to push the frontend Docker image before running `terraform apply`, as it runs frontend ECS tasks.
+1. **Upload Fixture to S3**:
 
-  - Run Terraform apply:
+  - Upload the fixture present in `backend/data` to `nest-fixtures` bucket using the following command:
 
     ```bash
-    terraform apply
+    aws s3 cp data/nest.json.gz s3://owasp-nest-fixtures-<id>/
     ```
 
-  > [!NOTE]
-  > On first apply, there may be an error 400 when creating the HTTPS Listener for ALB. This is expected because the ACM certificate is not yet validated.
+2. **Run ECS Tasks**:
 
-3. **Validate ACM Certificate**:
+  - Head over to Elastic Container Service in the AWS Console.
+  - Click on `owasp-nest-staging-migrate` in `Task Definitions` section.
+  - Select the task definition revision.
+  - Click Deploy > Run Task.
+  - Use the following configuration:
+    - Environment: Cluster: owasp-nest-staging-tasks-cluster
+    - Networking:
+      - VPC: owasp-nest-staging-vpc
+      - Subnets: subnets will be auto-selected due to VPC selection.
+      - Security group name: select the ECS security group (e.g. `owasp-nest-staging-ecs-sg`).
+  - Click "Create"
+  - The task is now running... Click on the task ID to view Logs, Status, etc.
+  - Follow the same steps for `owasp-nest-staging-load-data` and `owasp-nest-staging-index-data`.
+
+## Configure Domain and Frontend
+
+1. **Validate ACM Certificate**:
 
   - Get the DNS validation records:
 
     ```bash
-    terraform output frontend_acm_validation_records
+    terraform output acm_certificate_domain_validation_options
     ```
 
   - Add the CNAME records to your DNS provider.
@@ -290,11 +285,13 @@ Migrate and load data into the new database.
     terraform apply
     ```
 
-4. **Configure Frontend Parameters**:
+  - Add a CNAME record and point the domain to the frontend ALB.
 
-  - Update the frontend server parameters using the Lambda URL from Terraform outputs.
+2. **Configure Frontend Parameters**:
 
-5. **Restart Frontend ECS Tasks**:
+  - Update the frontend server (`NEXT_SERVER_*`) parameters using the Lambda URL from Terraform outputs.
+
+3. **Restart Frontend ECS Tasks**:
 
   - Force a new deployment to pick up the updated configuration:
 
@@ -341,3 +338,9 @@ Migrate and load data into the new database.
   ```bash
   zappa update staging
   ```
+
+## Known Issues
+There's a known issue with Zappa removing permissions and disconnecting the externally managed
+API Gateway on each `update` or `deploy` action.
+The temporary fix is to run `terraform apply` right after these actions.
+Reference: https://github.com/zappa/Zappa/issues/939

@@ -16,6 +16,17 @@ resource "aws_ecs_cluster" "main" {
   tags = var.common_tags
 }
 
+resource "aws_ecs_cluster_capacity_providers" "main" {
+  capacity_providers = ["FARGATE", "FARGATE_SPOT"]
+  cluster_name       = aws_ecs_cluster.main.name
+
+  default_capacity_provider_strategy {
+    base              = 0
+    capacity_provider = var.use_fargate_spot ? "FARGATE_SPOT" : "FARGATE"
+    weight            = 1
+  }
+}
+
 resource "aws_ecr_lifecycle_policy" "main" {
   repository = aws_ecr_repository.main.name
 
@@ -208,6 +219,7 @@ resource "aws_iam_role_policy_attachment" "event_bridge_policy_attachment" {
 module "sync_data_task" {
   source = "./modules/task"
 
+  assign_public_ip             = var.assign_public_ip
   aws_region                   = var.aws_region
   command                      = ["/bin/sh", "-c", "EXEC_MODE=direct make sync-data"]
   common_tags                  = var.common_tags
@@ -219,17 +231,19 @@ module "sync_data_task" {
   event_bridge_role_arn        = aws_iam_role.event_bridge_role.arn
   image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
   memory                       = var.sync_data_task_memory
-  private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
   schedule_expression          = "cron(17 05 * * ? *)"
   security_group_ids           = [var.ecs_sg_id]
+  subnet_ids                   = var.subnet_ids
   task_name                    = "sync-data"
+  use_fargate_spot             = var.use_fargate_spot
 }
 
 module "owasp_update_project_health_metrics_task" {
   source = "./modules/task"
 
-  aws_region = var.aws_region
+  assign_public_ip = var.assign_public_ip
+  aws_region       = var.aws_region
   command = [
     "/bin/sh",
     "-c",
@@ -248,16 +262,18 @@ module "owasp_update_project_health_metrics_task" {
   event_bridge_role_arn        = aws_iam_role.event_bridge_role.arn
   image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
   memory                       = var.update_project_health_metrics_task_memory
-  private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
   schedule_expression          = "cron(17 17 * * ? *)"
   security_group_ids           = [var.ecs_sg_id]
+  subnet_ids                   = var.subnet_ids
   task_name                    = "owasp-update-project-health-metrics"
+  use_fargate_spot             = var.use_fargate_spot
 }
 
 module "owasp_update_project_health_scores_task" {
   source = "./modules/task"
 
+  assign_public_ip             = var.assign_public_ip
   aws_region                   = var.aws_region
   command                      = ["/bin/sh", "-c", "EXEC_MODE=direct make owasp-update-project-health-scores"]
   common_tags                  = var.common_tags
@@ -269,16 +285,18 @@ module "owasp_update_project_health_scores_task" {
   event_bridge_role_arn        = aws_iam_role.event_bridge_role.arn
   image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
   memory                       = var.update_project_health_scores_task_memory
-  private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
   schedule_expression          = "cron(22 17 * * ? *)"
   security_group_ids           = [var.ecs_sg_id]
+  subnet_ids                   = var.subnet_ids
   task_name                    = "owasp-update-project-health-scores"
+  use_fargate_spot             = var.use_fargate_spot
 }
 
 module "migrate_task" {
   source = "./modules/task"
 
+  assign_public_ip             = var.assign_public_ip
   aws_region                   = var.aws_region
   command                      = ["/bin/sh", "-c", "EXEC_MODE=direct make migrate"]
   common_tags                  = var.common_tags
@@ -289,16 +307,18 @@ module "migrate_task" {
   environment                  = var.environment
   image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
   memory                       = var.migrate_task_memory
-  private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
   security_group_ids           = [var.ecs_sg_id]
+  subnet_ids                   = var.subnet_ids
   task_name                    = "migrate"
+  use_fargate_spot             = false
 }
 
 module "load_data_task" {
   source = "./modules/task"
 
-  aws_region = var.aws_region
+  assign_public_ip = var.assign_public_ip
+  aws_region       = var.aws_region
   command = [
     "/bin/sh",
     "-c",
@@ -320,16 +340,18 @@ module "load_data_task" {
   environment                  = var.environment
   image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
   memory                       = var.load_data_task_memory
-  private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
   security_group_ids           = [var.ecs_sg_id]
+  subnet_ids                   = var.subnet_ids
   task_name                    = "load-data"
   task_role_arn                = aws_iam_role.ecs_task_role.arn
+  use_fargate_spot             = false
 }
 
 module "index_data_task" {
   source = "./modules/task"
 
+  assign_public_ip             = var.assign_public_ip
   aws_region                   = var.aws_region
   command                      = ["/bin/sh", "-c", "EXEC_MODE=direct make index-data"]
   common_tags                  = var.common_tags
@@ -340,8 +362,9 @@ module "index_data_task" {
   environment                  = var.environment
   image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
   memory                       = var.index_data_task_memory
-  private_subnet_ids           = var.private_subnet_ids
   project_name                 = var.project_name
   security_group_ids           = [var.ecs_sg_id]
+  subnet_ids                   = var.subnet_ids
   task_name                    = "index-data"
+  use_fargate_spot             = false
 }

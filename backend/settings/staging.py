@@ -43,11 +43,6 @@ class Staging(Base):
     CORS_ALLOWED_ORIGINS = ALLOWED_ORIGINS
     CSRF_TRUSTED_ORIGINS = ALLOWED_ORIGINS
 
-    CSRF_COOKIE_HTTPONLY = values.BooleanValue(environ_name="CSRF_COOKIE_HTTPONLY", default=False)
-    CSRF_COOKIE_SAMESITE = values.Value(environ_name="CSRF_COOKIE_SAMESITE", default="Lax")
-    CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_SAMESITE = values.Value(environ_name="SESSION_COOKIE_SAMESITE", default="Lax")
-
     IS_STAGING_ENVIRONMENT = True
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True

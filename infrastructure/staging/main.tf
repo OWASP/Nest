@@ -17,6 +17,23 @@ locals {
   }
 }
 
+module "alb" {
+  source = "../modules/alb"
+
+  alb_sg_id                  = module.security.alb_sg_id
+  common_tags                = local.common_tags
+  domain_name                = var.domain_name
+  enable_https               = var.domain_name != null
+  environment                = var.environment
+  frontend_health_check_path = "/"
+  frontend_port              = 3000
+  lambda_arn                 = var.lambda_arn
+  lambda_function_name       = var.lambda_function_name
+  project_name               = var.project_name
+  public_subnet_ids          = module.networking.public_subnet_ids
+  vpc_id                     = module.networking.vpc_id
+}
+
 module "cache" {
   source = "../modules/cache"
 
@@ -57,27 +74,26 @@ module "database" {
 module "ecs" {
   source = "../modules/ecs"
 
+  assign_public_ip              = var.ecs_use_public_subnets
   aws_region                    = var.aws_region
   common_tags                   = local.common_tags
   container_parameters_arns     = module.parameters.django_ssm_parameter_arns
   ecs_sg_id                     = module.security.ecs_sg_id
   environment                   = var.environment
-  fixtures_read_only_policy_arn = module.storage.fixtures_read_only_policy_arn
   fixtures_bucket_name          = module.storage.fixtures_s3_bucket_name
-  private_subnet_ids            = module.networking.private_subnet_ids
+  fixtures_read_only_policy_arn = module.storage.fixtures_read_only_policy_arn
   project_name                  = var.project_name
+  subnet_ids                    = var.ecs_use_public_subnets ? module.networking.public_subnet_ids : module.networking.private_subnet_ids
+  use_fargate_spot              = var.ecs_use_fargate_spot
 }
 
 module "frontend" {
   source = "../modules/frontend"
 
-  alb_sg_id                = module.security.alb_sg_id
   aws_region               = var.aws_region
   common_tags              = local.common_tags
   desired_count            = var.frontend_desired_count
-  domain_name              = var.frontend_domain_name
   enable_auto_scaling      = var.frontend_enable_auto_scaling
-  enable_https             = var.frontend_enable_https
   environment              = var.environment
   frontend_parameters_arns = module.parameters.frontend_ssm_parameter_arns
   frontend_sg_id           = module.security.frontend_sg_id
@@ -85,26 +101,37 @@ module "frontend" {
   min_count                = var.frontend_min_count
   private_subnet_ids       = module.networking.private_subnet_ids
   project_name             = var.project_name
-  public_subnet_ids        = module.networking.public_subnet_ids
-  vpc_id                   = module.networking.vpc_id
+  target_group_arn         = module.alb.frontend_target_group_arn
+  use_fargate_spot         = var.frontend_use_fargate_spot
 }
 
 module "networking" {
   source = "../modules/networking"
 
-  aws_region           = var.aws_region
-  availability_zones   = var.availability_zones
-  common_tags          = local.common_tags
-  environment          = var.environment
-  private_subnet_cidrs = var.private_subnet_cidrs
-  project_name         = var.project_name
-  public_subnet_cidrs  = var.public_subnet_cidrs
-  vpc_cidr             = var.vpc_cidr
+  aws_region                          = var.aws_region
+  availability_zones                  = var.availability_zones
+  common_tags                         = local.common_tags
+  create_vpc_cloudwatch_logs_endpoint = var.create_vpc_cloudwatch_logs_endpoint
+  create_vpc_ecr_api_endpoint         = var.create_vpc_ecr_api_endpoint
+  create_vpc_ecr_dkr_endpoint         = var.create_vpc_ecr_dkr_endpoint
+  create_vpc_s3_endpoint              = var.create_vpc_s3_endpoint
+  create_vpc_secretsmanager_endpoint  = var.create_vpc_secretsmanager_endpoint
+  create_vpc_ssm_endpoint             = var.create_vpc_ssm_endpoint
+  environment                         = var.environment
+  private_subnet_cidrs                = var.private_subnet_cidrs
+  project_name                        = var.project_name
+  public_subnet_cidrs                 = var.public_subnet_cidrs
+  vpc_cidr                            = var.vpc_cidr
 }
 
 module "parameters" {
   source = "../modules/parameters"
 
+  allowed_hosts = join(",", [
+    var.domain_name != null ? var.domain_name : module.alb.alb_dns_name,
+    "zappa",
+  ])
+  allowed_origins    = var.domain_name != null ? "https://${var.domain_name}" : "http://${module.alb.alb_dns_name}"
   common_tags        = local.common_tags
   db_host            = module.database.db_proxy_endpoint
   db_name            = var.db_name
@@ -112,6 +139,7 @@ module "parameters" {
   db_port            = var.db_port
   db_user            = var.db_user
   environment        = var.environment
+  nextauth_url       = var.domain_name != null ? "https://${var.domain_name}" : "http://${module.alb.alb_dns_name}"
   project_name       = var.project_name
   redis_host         = module.cache.redis_primary_endpoint
   redis_password_arn = module.cache.redis_password_arn
@@ -120,14 +148,15 @@ module "parameters" {
 module "security" {
   source = "../modules/security"
 
-  common_tags        = local.common_tags
-  create_rds_proxy   = var.create_rds_proxy
-  db_port            = var.db_port
-  environment        = var.environment
-  project_name       = var.project_name
-  redis_port         = var.redis_port
-  vpc_endpoint_sg_id = module.networking.vpc_endpoint_security_group_id
-  vpc_id             = module.networking.vpc_id
+  common_tags               = local.common_tags
+  create_rds_proxy          = var.create_rds_proxy
+  create_vpc_endpoint_rules = var.create_vpc_ssm_endpoint || var.create_vpc_cloudwatch_logs_endpoint || var.create_vpc_ecr_api_endpoint || var.create_vpc_ecr_dkr_endpoint || var.create_vpc_secretsmanager_endpoint
+  db_port                   = var.db_port
+  environment               = var.environment
+  project_name              = var.project_name
+  redis_port                = var.redis_port
+  vpc_endpoint_sg_id        = module.networking.vpc_endpoint_security_group_id
+  vpc_id                    = module.networking.vpc_id
 }
 
 module "storage" {

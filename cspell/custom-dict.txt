@@ -111,6 +111,7 @@ graphiql
 graphqler
 gunicorn
 hackathon
+hcl
 heroui
 hsl
 ics

@@ -65,18 +65,25 @@ resource "aws_cloudwatch_event_rule" "task" {
 resource "aws_cloudwatch_event_target" "task" {
   count = var.schedule_expression != null ? 1 : 0
 
-  rule      = aws_cloudwatch_event_rule.task[0].name
-  target_id = "${var.project_name}-${var.environment}-${var.task_name}-target"
   arn       = var.ecs_cluster_arn
   role_arn  = var.event_bridge_role_arn
+  rule      = aws_cloudwatch_event_rule.task[0].name
+  target_id = "${var.project_name}-${var.environment}-${var.task_name}-target"
 
   ecs_target {
+    launch_type         = null
     task_definition_arn = aws_ecs_task_definition.task.arn
-    launch_type         = "FARGATE"
+
+    capacity_provider_strategy {
+      base              = 0
+      capacity_provider = var.use_fargate_spot ? "FARGATE_SPOT" : "FARGATE"
+      weight            = 1
+    }
+
     network_configuration {
-      subnets          = var.private_subnet_ids
+      assign_public_ip = var.assign_public_ip
       security_groups  = var.security_group_ids
-      assign_public_ip = false
+      subnets          = var.subnet_ids
     }
   }
 }

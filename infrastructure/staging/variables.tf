@@ -1,19 +1,55 @@
-variable "aws_region" {
-  description = "The AWS region to deploy resources in."
-  type        = string
-  default     = "us-east-2"
-}
-
 variable "availability_zones" {
   description = "A list of availability zones for the VPC."
   type        = list(string)
   default     = ["us-east-2a", "us-east-2b", "us-east-2c"]
 }
 
+variable "aws_region" {
+  description = "The AWS region to deploy resources in."
+  type        = string
+  default     = "us-east-2"
+}
+
 variable "create_rds_proxy" {
   description = "Whether to create an RDS proxy."
   type        = bool
+  default     = false
+}
+
+variable "create_vpc_cloudwatch_logs_endpoint" {
+  description = "Whether to create CloudWatch Logs VPC endpoint."
+  type        = bool
+  default     = false
+}
+
+variable "create_vpc_ecr_api_endpoint" {
+  description = "Whether to create ECR API VPC endpoint."
+  type        = bool
+  default     = false
+}
+
+variable "create_vpc_ecr_dkr_endpoint" {
+  description = "Whether to create ECR DKR VPC endpoint."
+  type        = bool
+  default     = false
+}
+
+variable "create_vpc_s3_endpoint" {
+  description = "Whether to create S3 VPC endpoint (Gateway, free)."
+  type        = bool
   default     = true
+}
+
+variable "create_vpc_secretsmanager_endpoint" {
+  description = "Whether to create Secrets Manager VPC endpoint."
+  type        = bool
+  default     = false
+}
+
+variable "create_vpc_ssm_endpoint" {
+  description = "Whether to create SSM VPC endpoint."
+  type        = bool
+  default     = false
 }
 
 variable "db_allocated_storage" {
@@ -93,6 +129,24 @@ variable "db_user" {
   default     = "owasp_nest_db_user"
 }
 
+variable "domain_name" {
+  description = "The domain name for the site."
+  type        = string
+  default     = null
+}
+
+variable "ecs_use_fargate_spot" {
+  description = "Whether to use Fargate Spot for backend ECS tasks."
+  type        = bool
+  default     = true
+}
+
+variable "ecs_use_public_subnets" {
+  description = "Whether to run ECS tasks in public subnets (requires assign_public_ip)."
+  type        = bool
+  default     = true
+}
+
 variable "environment" {
   description = "The environment (e.g., staging, production)."
   type        = string
@@ -115,20 +169,8 @@ variable "frontend_desired_count" {
   default     = 2
 }
 
-variable "frontend_domain_name" {
-  description = "The domain name for frontend (required for HTTPS)"
-  type        = string
-  default     = null
-}
-
 variable "frontend_enable_auto_scaling" {
   description = "Whether to enable auto scaling for frontend."
-  type        = bool
-  default     = false
-}
-
-variable "frontend_enable_https" {
-  description = "Whether to enable HTTPS listener on ALB."
   type        = bool
   default     = false
 }
@@ -143,6 +185,24 @@ variable "frontend_min_count" {
   description = "The minimum number of tasks for auto scaling."
   type        = number
   default     = 2
+}
+
+variable "frontend_use_fargate_spot" {
+  description = "Whether to use Fargate Spot for frontend tasks."
+  type        = bool
+  default     = true
+}
+
+variable "lambda_arn" {
+  description = "The ARN of the Zappa Lambda function for backend routing."
+  type        = string
+  default     = null
+}
+
+variable "lambda_function_name" {
+  description = "The name of the Zappa Lambda function."
+  type        = string
+  default     = null
 }
 
 variable "private_subnet_cidrs" {
