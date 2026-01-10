@@ -57,10 +57,6 @@ jest.mock('components/Modal', () => {
   return ModalMock
 })
 
-jest.mock('next/link', () => {
-  return ({ children }) => children
-})
-
 describe('Home', () => {
   let mockRouter: { push: jest.Mock }
 

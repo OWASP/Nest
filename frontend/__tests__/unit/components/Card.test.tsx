@@ -3,16 +3,6 @@ import React, { ReactNode } from 'react'
 import { FaLeaf, FaFire, FaCrown, FaStar, FaGithub, FaTwitter } from 'react-icons/fa6'
 import type { CardProps } from 'types/card'
 import Card from 'components/Card'
-
-// Define proper types for mock props
-interface MockLinkProps {
-  children: ReactNode
-  href: string
-  target?: string
-  rel?: string
-  className?: string
-}
-
 interface MockTooltipProps {
   children: ReactNode
   content: string
@@ -47,16 +37,6 @@ interface MockMarkdownProps {
   content: string
   className?: string
 }
-
-jest.mock('next/link', () => {
-  return function MockedLink({ children, href, ...props }: MockLinkProps) {
-    return (
-      <a href={href} {...props}>
-        {children}
-      </a>
-    )
-  }
-})
 
 jest.mock('@heroui/tooltip', () => ({
   Tooltip: ({ children, content, id }: MockTooltipProps) => (

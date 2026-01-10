@@ -54,12 +54,6 @@ jest.mock('@heroui/tooltip', () => ({
 
 jest.mock('components/EntityActions', () => jest.requireActual('components/EntityActions'))
 
-jest.mock('next/link', () => {
-  return ({ children, href }: { children: React.ReactNode; href: string }) => {
-    return <a href={href}>{children}</a>
-  }
-})
-
 describe('ProgramCard', () => {
   const mockPush = jest.fn()
 

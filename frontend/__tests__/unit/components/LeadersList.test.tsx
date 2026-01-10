@@ -3,7 +3,6 @@ import { render, screen } from 'wrappers/testUtil'
 import type { LeadersListProps } from 'types/leaders'
 import LeadersList from 'components/LeadersList'
 
-// Mock Next.js Link component
 jest.mock('next/link', () => {
   return function MockLink({
     children,

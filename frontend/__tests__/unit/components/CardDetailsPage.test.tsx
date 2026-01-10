@@ -4,23 +4,6 @@ import '@testing-library/jest-dom'
 import { FaCode, FaTags } from 'react-icons/fa6'
 import type { DetailsCardProps } from 'types/card'
 import CardDetailsPage, { type CardType } from 'components/CardDetailsPage'
-jest.mock('next/link', () => {
-  const MockLink = ({
-    children,
-    href,
-    ...props
-  }: {
-    children: React.ReactNode
-    href: string
-    [key: string]: unknown
-  }) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  )
-  MockLink.displayName = 'MockLink'
-  return MockLink
-})
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({

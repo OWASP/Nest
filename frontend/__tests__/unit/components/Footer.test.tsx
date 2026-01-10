@@ -6,16 +6,6 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import React, { ReactNode } from 'react'
 
-// Define proper types for mock props
-interface MockLinkProps {
-  children: ReactNode
-  href: string
-  target?: string
-  rel?: string
-  className?: string
-  'aria-label'?: string
-}
-
 interface MockButtonProps {
   children: ReactNode
   onPress?: () => void
@@ -24,16 +14,6 @@ interface MockButtonProps {
   'aria-expanded'?: boolean
   'aria-controls'?: string
 }
-
-jest.mock('next/link', () => {
-  return function MockedLink({ children, href, ...props }: MockLinkProps) {
-    return (
-      <a href={href} {...props}>
-        {children}
-      </a>
-    )
-  }
-})
 
 jest.mock('@heroui/button', () => ({
   Button: ({ children, onPress, className, disableAnimation, ...props }: MockButtonProps) => (

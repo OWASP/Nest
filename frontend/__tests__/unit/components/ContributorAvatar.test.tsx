@@ -3,22 +3,6 @@ import React from 'react'
 import { Contributor } from 'types/contributor'
 import ContributorAvatar from 'components/ContributorAvatar'
 
-jest.mock('@heroui/tooltip', () => ({
-  Tooltip: ({
-    children,
-    content,
-    id,
-  }: {
-    children: React.ReactNode
-    content: string
-    id: string
-  }) => (
-    <div data-testid={id} title={content}>
-      {children}
-    </div>
-  ),
-}))
-
 jest.mock('next/link', () => {
   return ({
     children,
@@ -36,6 +20,22 @@ jest.mock('next/link', () => {
     </a>
   )
 })
+
+jest.mock('@heroui/tooltip', () => ({
+  Tooltip: ({
+    children,
+    content,
+    id,
+  }: {
+    children: React.ReactNode
+    content: string
+    id: string
+  }) => (
+    <div data-testid={id} title={content}>
+      {children}
+    </div>
+  ),
+}))
 
 jest.mock('next/image', () => {
   return ({

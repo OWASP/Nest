@@ -5,24 +5,6 @@ import '@testing-library/jest-dom'
 import type { Link as LinkType } from 'types/link'
 import NavDropdown from 'components/NavDropDown'
 
-// Mock Next.js Link component
-jest.mock('next/link', () => {
-  return ({ href, children, ...props }) => {
-    return (
-      <a
-        href={href}
-        {...props}
-        onClick={(e) => {
-          e.preventDefault()
-          props.onClick?.(e)
-        }}
-      >
-        {children}
-      </a>
-    )
-  }
-})
-
 jest.mock('react-icons/fa', () => ({
   FaChevronDown: (props: React.SVGProps<SVGSVGElement>) => (
     <svg data-testid="chevron-icon" className={props.className} {...props} />

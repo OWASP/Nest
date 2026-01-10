@@ -13,6 +13,7 @@ const ShowMoreButton = ({ onToggle }: { onToggle: () => void }) => {
   return (
     <div className="mt-4 flex justify-start">
       <Button
+        data-testid="show-more-button"
         type="button"
         disableAnimation
         onPress={handleToggle}
