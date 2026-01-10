@@ -107,5 +107,5 @@ export const getSimpleDuration = (start: string | number, end: string | number):
   const days = Math.floor(ms / (1000 * 60 * 60 * 24))
 
   const weeks = Math.ceil(days / 7)
-  return `${weeks} week${weeks !== 1 ? 's' : ''}`
+  return `${weeks} week${weeks === 1 ? '' : 's'}`
 }
