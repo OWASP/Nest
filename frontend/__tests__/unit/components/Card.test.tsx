@@ -488,27 +488,27 @@ describe('Card', () => {
     expect(screen.getByTestId('social-icon')).toBeInTheDocument()
     expect(screen.getByTestId('contributor-avatar')).toBeInTheDocument()
   })
-  it('render tags when provided', () => {
-    const propsWithTags = {
+  it('render labels when provided', () => {
+    const propsWithLabels = {
       ...baseProps,
-      tags: ['good first issue', 'help wanted'],
+      labels: ['good first issue', 'help wanted'],
     }
-    render(<Card {...propsWithTags} />)
+    render(<Card {...propsWithLabels} />)
     expect(screen.getByText('good first issue')).toBeInTheDocument()
     expect(screen.getByText('help wanted')).toBeInTheDocument()
   })
 
-  it('displays only first 3 tags when more than 3 tags are provided', () => {
-    const propsWithManyTags = {
+  it('displays only first 3 labels when more than 3 labels are provided', () => {
+    const propsWithManyLabels = {
       ...baseProps,
-      tags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],
+      labels: ['label1', 'label2', 'label3', 'label4', 'label5'],
     }
-    render(<Card {...propsWithManyTags} />)
-    expect(screen.getByText('tag1')).toBeInTheDocument()
-    expect(screen.getByText('tag2')).toBeInTheDocument()
-    expect(screen.getByText('tag3')).toBeInTheDocument()
+    render(<Card {...propsWithManyLabels} />)
+    expect(screen.getByText('label1')).toBeInTheDocument()
+    expect(screen.getByText('label2')).toBeInTheDocument()
+    expect(screen.getByText('label3')).toBeInTheDocument()
 
-    expect(screen.queryByText('tag4')).not.toBeInTheDocument()
-    expect(screen.queryByText('tag5')).not.toBeInTheDocument()
+    expect(screen.queryByText('label4')).not.toBeInTheDocument()
+    expect(screen.queryByText('label5')).not.toBeInTheDocument()
   })
 })
