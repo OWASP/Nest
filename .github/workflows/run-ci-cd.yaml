@@ -134,13 +134,18 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1
+        with:
+          cache: true
+
       - name: Run Trivy Repository Scan
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
           scan-type: repo
+          skip-setup-trivy: true
           trivy-config: trivy.yaml
           trivyignores: trivyignore.yaml
-          version: latest
 
   scan-ci-dependencies:
     name: Run CI Dependencies Scan
@@ -155,13 +160,18 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1
+        with:
+          cache: true
+
       - name: Run Trivy Filesystem Scan
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
           scan-type: fs
+          skip-setup-trivy: true
           trivy-config: trivy.yaml
           trivyignores: trivyignore.yaml
-          version: latest
 
   run-backend-tests:
     name: Run backend tests
