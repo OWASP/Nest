@@ -1,3 +1,9 @@
+# ============================
+# ZAP Baseline Scan Suppressions
+# Purpose: Ignore non-actionable or framework/browser-controlled warnings.
+# Only real vulnerabilities will fail CI.
+# ============================
+
 # Rule description: comment.
 # rule_id<TAB>ACTION<TAB>(URL regex pattern)
 
@@ -6,3 +12,32 @@
 
 # PII disclosure: false positive credicard number.
 10062	IGNORE	https://nest.owasp.(dev|org)/sitemap.xml
+
+# Sub Resource Integrity Attribute Missing: Next.js internal chunks do not support SRI
+90003	IGNORE	https://nest.owasp.(dev|org)/_next/static/chunks/[a-f0-9]{16}.js
+
+# Insufficient Site Isolation Against Spectre: COOP/COEP not enforced for SPA, breaks site
+90004	IGNORE	https://nest.owasp.(dev|org)/.*
+
+# Sec-Fetch-Dest Header Missing: browser-controlled, cannot enforce server-side
+90005	IGNORE	https://nest.owasp.(dev|org)/.*
+
+# Base64 Disclosure: false positives due to Next.js hydration / CSS inlined assets
+10094	IGNORE	https://nest.owasp.(dev|org)/_next/static/chunks/[a-f0-9]{16}.js
+
+# Non-Storable Content: informational only, not a vulnerability
+10049	IGNORE	https://nest.owasp.(dev|org)/.*
+
+# Re-examine Cache-Control Directives: informational for SPA / framework-managed caching
+10015	IGNORE	https://nest.owasp.(dev|org)/.*
+
+# Content-Type Header Missing: harmless on 308 redirects
+10019	IGNORE	https://nest.owasp.(dev|org)/.*
+
+# CSP: Failure to Define Directive with No Fallback
+# Advisory-only; CSP is defined at framework/app level
+10055	IGNORE	https://nest.owasp.(dev|org)/.*
+
+# Session Management Response Identified
+# Informational detection; no insecure session behavior observed
+10112	IGNORE	https://nest.owasp.(dev|org)/csrf/
