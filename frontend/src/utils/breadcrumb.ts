@@ -11,7 +11,7 @@ const DATE_PATTERN = /\d{4}-\d{1,2}(?:-\d{1,2})?/g
 export function formatBreadcrumbTitle(text: string): string {
   if (!text) return ''
 
-  const protectedText = text.replace(DATE_PATTERN, (match) => match.replaceAll('-', DATE_TOKEN))
+  const protectedText = text.replaceAll(DATE_PATTERN, (match) => match.replaceAll('-', DATE_TOKEN))
 
   return protectedText
     .split('-')
