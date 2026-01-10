@@ -46,5 +46,5 @@ class Query(
 schema = strawberry.Schema(
     mutation=Mutation,
     query=Query,
-    extensions=[CacheExtension, QueryDepthLimiter(max_depth=5), DjangoOptimizerExtension()],
+    extensions=[CacheExtension, QueryDepthLimiter(max_depth=7), DjangoOptimizerExtension()],
 )

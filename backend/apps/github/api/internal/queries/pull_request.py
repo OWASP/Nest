@@ -17,7 +17,12 @@ class PullRequestQuery:
     """Pull request queries."""
 
     @strawberry_django.field(
-        select_related=["author", "repository", "milestone", "repository__organization"],
+        select_related=[
+            "author__owasp_profile",
+            "milestone__author__owasp_profile",
+            "repository__organization",
+            "milestone__repository__organization",
+        ],
         prefetch_related=[
             "assignees",
             "labels",

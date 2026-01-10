@@ -43,7 +43,7 @@ class IssueNode(strawberry.relay.Node):
     @strawberry_django.field(prefetch_related=["labels"])
     def labels(self, root: Issue) -> list[str]:
         """Resolve label names for the issue."""
-        return list(root.labels.values_list("name", flat=True))
+        return [label.name for label in root.labels.all()]
 
     @strawberry_django.field(prefetch_related=["pull_requests"])
     def is_merged(self, root: Issue) -> bool:

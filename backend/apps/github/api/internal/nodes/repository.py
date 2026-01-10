@@ -59,7 +59,7 @@ class RepositoryNode(strawberry.relay.Node):
         """Resolve latest release."""
         return root.latest_release
 
-    @strawberry_django.field(select_related=["project"])
+    @strawberry_django.field(prefetch_related=["project_set"])
     def project(
         self, root: Repository
     ) -> Annotated["ProjectNode", strawberry.lazy("apps.owasp.api.internal.nodes.project")] | None:

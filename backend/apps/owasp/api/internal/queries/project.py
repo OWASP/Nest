@@ -35,8 +35,11 @@ class ProjectQuery:
             return None
 
     @strawberry_django.field(
-        select_related=["owasp_repository"],
-        prefetch_related=["organizations", "owners", "repositories", "entity_leaders"],
+        select_related=[
+            "owasp_repository__organization",
+            "owasp_repository__owner__owasp_profile",
+        ],
+        prefetch_related=["organizations", "owners__owasp_profile", "repositories__organization"],
     )
     def recent_projects(self, limit: int = 8) -> list[ProjectNode]:
         """Resolve recent projects.
@@ -55,8 +58,11 @@ class ProjectQuery:
         )
 
     @strawberry_django.field(
-        select_related=["owasp_repository"],
-        prefetch_related=["organizations", "owners", "repositories"],
+        select_related=[
+            "owasp_repository__organization",
+            "owasp_repository__owner__owasp_profile",
+        ],
+        prefetch_related=["organizations", "owners__owasp_profile", "repositories__organization"],
     )
     def search_projects(self, query: str) -> list[ProjectNode]:
         """Search active projects by name (case-insensitive, partial match)."""

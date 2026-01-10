@@ -22,8 +22,11 @@ class ChapterQuery:
             return None
 
     @strawberry_django.field(
-        select_related=["owasp_repository"],
-        prefetch_related=["leaders", "suggested_leaders", "entity_leaders"],
+        select_related=[
+            "owasp_repository__organization",
+            "owasp_repository__owner__owasp_profile",
+        ],
+        prefetch_related=["leaders", "suggested_leaders"],
     )
     def recent_chapters(self, limit: int = 8) -> list[ChapterNode]:
         """Resolve recent chapters."""

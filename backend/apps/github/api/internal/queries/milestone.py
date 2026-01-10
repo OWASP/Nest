@@ -26,7 +26,7 @@ class MilestoneQuery:
     """Github Milestone Queries."""
 
     @strawberry_django.field(
-        select_related=["author", "repository", "repository__organization"],
+        select_related=["author__owasp_profile", "repository__organization"],
         prefetch_related=["issues", "labels", "pull_requests"],
     )
     def recent_milestones(

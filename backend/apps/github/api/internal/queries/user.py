@@ -37,7 +37,7 @@ class UserQuery:
             .order_by("-contributions_count")
         ]
 
-    @strawberry_django.field
+    @strawberry_django.field(select_related=["owasp_profile"])
     def user(
         self,
         login: str,
