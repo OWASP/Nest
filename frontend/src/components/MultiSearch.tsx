@@ -265,9 +265,9 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                 <ul>
                   {suggestion.hits.map((hit, subIndex) => {
                     const keyId =
-                      ('key' in hit && hit.key) ??
-                      ('login' in hit && hit.login) ??
-                      ('url' in hit && hit.url) ??
+                      ('key' in hit ? hit.key: null) ??
+                      ('login' in hit ? hit.login: null) ??
+                      ('url' in hit ? hit.url: null) ??
                       subIndex
 
                     const displayName = hit.name ?? ('login' in hit ? hit.login : '')
