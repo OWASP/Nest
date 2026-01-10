@@ -22,14 +22,14 @@ from apps.owasp.models.sponsor import Sponsor
 logger = logging.getLogger(__name__)
 
 AUDIO_CODEC = "copy"
-AUDIO_EXTENSION = ".mp3"
+AUDIO_EXTENSION = "mp3"
 ELEVENLABS_SPEED = 0.85
-IMAGE_EXTENSION = ".png"
+IMAGE_EXTENSION = "png"
 IMAGE_FORMAT = "PNG"
 PDF_RENDER_SCALE = 2
 RELEASES_LIMIT = 12
 TRANSCRIPT_NAMES_LIMIT = 3
-VIDEO_EXTENSION = ".mkv"
+VIDEO_EXTENSION = "mkv"
 VIDEO_FRAMERATE = 60
 
 
@@ -46,26 +46,24 @@ class Slide:
     @property
     def audio_path(self) -> Path:
         """Return audio file path."""
-        return self.output_dir / f"{self.name}{AUDIO_EXTENSION}"
+        return self.output_dir / f"{self.name}.{AUDIO_EXTENSION}"
 
     @property
     def image_path(self) -> Path:
         """Return image file path."""
-        return self.output_dir / f"{self.name}{IMAGE_EXTENSION}"
+        return self.output_dir / f"{self.name}.{IMAGE_EXTENSION}"
 
     @property
     def video_path(self) -> Path:
         """Return video file path."""
-        return self.output_dir / f"{self.name}{VIDEO_EXTENSION}"
+        return self.output_dir / f"{self.name}.{VIDEO_EXTENSION}"
 
     def render_and_save_image(self) -> None:
         """Render an HTML template as an image."""
         page = None
         pdf = None
         try:
-            html_content = render_to_string(self.template_name, self.context)
-
-            html = HTML(string=html_content)
+            html = HTML(string=render_to_string(self.template_name, self.context))
 
             pdf = pdfium.PdfDocument(html.write_pdf())
             page = pdf[0]
@@ -98,8 +96,8 @@ class Slide:
             ffmpeg.Error: If video generation fails.
 
         """
-        image_stream = ffmpeg.input(self.image_path, loop=1, framerate=VIDEO_FRAMERATE)
         audio_stream = ffmpeg.input(self.audio_path)
+        image_stream = ffmpeg.input(self.image_path, loop=1, framerate=VIDEO_FRAMERATE)
 
         try:
             ffmpeg.output(
@@ -190,8 +188,8 @@ class SlideBuilder:
                 "sponsors": sponsors,
                 "title": "OWASP Foundation Sponsors",
             },
-            output_dir=self.output_dir,
             name="sponsors",
+            output_dir=self.output_dir,
             template_name="video/slides/sponsors.html",
             transcript="A HUGE thanks to the sponsors who make our work possible!",
         )
@@ -207,7 +205,6 @@ class SlideBuilder:
             return None
 
         project_count = new_projects.count()
-
         projects_data = [
             {
                 "contributors_count": project.contributors_count,
@@ -226,8 +223,8 @@ class SlideBuilder:
                 "projects": projects_data,
                 "title": f"{project_count} New Projects",
             },
-            output_dir=self.output_dir,
             name="projects",
+            output_dir=self.output_dir,
             template_name="video/slides/projects.html",
             transcript=f"So... this time we've welcomed {project_count} new projects! "
             f"including Owasp {formatted_project_names}.",
@@ -242,7 +239,6 @@ class SlideBuilder:
             return None
 
         chapter_count = new_chapters.count()
-
         chapters = [
             {
                 "location": c.suggested_location,
@@ -301,8 +297,8 @@ class SlideBuilder:
                 "releases": releases_data,
                 "title": f"{release_count} New Releases",
             },
-            output_dir=self.output_dir,
             name="releases",
+            output_dir=self.output_dir,
             template_name="video/slides/releases.html",
             transcript=f"There were {release_count} new releases across our projects this time... "
             f"with {formatted_names} leading the way.",
@@ -312,8 +308,8 @@ class SlideBuilder:
         """Add a thank you slide."""
         return Slide(
             context={},
-            output_dir=self.output_dir,
             name="thank_you",
+            output_dir=self.output_dir,
             template_name="video/slides/thank_you.html",
             transcript="Thanks for tuning in!... Visit Nest dot Owasp dot org "
             "for more community updates!... See you next time!!",
@@ -353,7 +349,7 @@ class VideoGenerator:
             slide.generate_and_save_audio(self.eleven_labs)
             slide.generate_and_save_video()
 
-        output_path = output_dir / f"{filename}{VIDEO_EXTENSION}"
+        output_path = output_dir / f"{filename}.{VIDEO_EXTENSION}"
         self.merge_videos(output_path)
 
         return output_path
@@ -370,14 +366,14 @@ class VideoGenerator:
         """
         inputs = [ffmpeg.input(str(slide.video_path)) for slide in self.slides]
 
-        video_streams = [inp.video for inp in inputs]
         audio_streams = [inp.audio for inp in inputs]
+        video_streams = [inp.video for inp in inputs]
 
-        joined_video = ffmpeg.concat(*video_streams, v=1, a=0)
-        joined_audio = ffmpeg.concat(*audio_streams, v=0, a=1)
+        merged_audio = ffmpeg.concat(*audio_streams, v=0, a=1)
+        merged_video = ffmpeg.concat(*video_streams, v=1, a=0)
 
         try:
-            ffmpeg.output(joined_video, joined_audio, str(output_path)).overwrite_output().run(
+            ffmpeg.output(merged_video, merged_audio, str(output_path)).overwrite_output().run(
                 capture_stdout=True, capture_stderr=True
             )
         except ffmpeg.Error:

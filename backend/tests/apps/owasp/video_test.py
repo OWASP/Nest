@@ -26,17 +26,17 @@ class TestSlide:
 
     def test_audio_path(self, slide, tmp_path):
         """Test audio_path property returns correct path."""
-        expected = tmp_path / f"test_slide{AUDIO_EXTENSION}"
+        expected = tmp_path / f"test_slide.{AUDIO_EXTENSION}"
         assert slide.audio_path == expected
 
     def test_image_path(self, slide, tmp_path):
         """Test image_path property returns correct path."""
-        expected = tmp_path / f"test_slide{IMAGE_EXTENSION}"
+        expected = tmp_path / f"test_slide.{IMAGE_EXTENSION}"
         assert slide.image_path == expected
 
     def test_video_path(self, slide, tmp_path):
         """Test video_path property returns correct path."""
-        expected = tmp_path / f"test_slide{VIDEO_EXTENSION}"
+        expected = tmp_path / f"test_slide.{VIDEO_EXTENSION}"
         assert slide.video_path == expected
 
     @patch("apps.owasp.video.pdfium.PdfDocument")
