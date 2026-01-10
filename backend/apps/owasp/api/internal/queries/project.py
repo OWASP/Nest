@@ -39,7 +39,12 @@ class ProjectQuery:
             "owasp_repository__organization",
             "owasp_repository__owner__owasp_profile",
         ],
-        prefetch_related=["organizations", "owners__owasp_profile", "repositories__organization"],
+        prefetch_related=[
+            "organizations",
+            "owners__owasp_profile",
+            "repositories__organization",
+            "entity_leaders__member__owasp_profile",
+        ],
     )
     def recent_projects(self, limit: int = 8) -> list[ProjectNode]:
         """Resolve recent projects.

@@ -26,7 +26,12 @@ class ChapterQuery:
             "owasp_repository__organization",
             "owasp_repository__owner__owasp_profile",
         ],
-        prefetch_related=["leaders", "suggested_leaders"],
+        prefetch_related=[
+            "leaders__owasp_profile",
+            "suggested_leaders__owasp_profile",
+            "entity_leaders__member__owasp_profile",
+            "members__owasp_profile",
+        ],
     )
     def recent_chapters(self, limit: int = 8) -> list[ChapterNode]:
         """Resolve recent chapters."""

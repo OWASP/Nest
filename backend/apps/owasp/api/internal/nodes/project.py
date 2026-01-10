@@ -9,6 +9,7 @@ from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
+from apps.github.models.milestone import Milestone
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
 from apps.owasp.api.internal.nodes.project_health_metrics import (
     ProjectHealthMetricsNode,
@@ -92,11 +93,21 @@ class ProjectNode(GenericEntityNode):
         """Resolve recent issues."""
         return root.issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
 
-    @strawberry_django.field
+    @strawberry_django.field(prefetch_related=["repositories"])
     def recent_milestones(self, root: Project, limit: int = 5) -> list[MilestoneNode]:
         """Resolve recent milestones."""
         return (
-            root.recent_milestones.order_by("-created_at")[:limit]
+            Milestone.objects.filter(
+                repository__in=root.repositories.all(),
+            )
+            .select_related(
+                "repository__organization",
+                "author__owasp_profile",
+            )
+            .prefetch_related(
+                "labels",
+            )
+            .order_by("-created_at")[:limit]
             if (limit := min(limit, MAX_LIMIT)) > 0
             else []
         )

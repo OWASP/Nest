@@ -2,6 +2,7 @@
 
 import strawberry
 import strawberry_django
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 
 from apps.owasp.models.enums.project import ProjectLevel
@@ -19,4 +20,7 @@ class ProjectHealthMetricsFilter:
     # Q is the return type for the filter
     def level(self, value: str, prefix: str):
         """Filter by project level."""
+        if value and value not in ProjectLevel.values:
+            message = f"Invalid project level: {value}."
+            raise ValidationError(message)
         return Q(project__level=ProjectLevel(value)) if value else Q()
