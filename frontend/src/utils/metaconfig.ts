@@ -65,17 +65,19 @@ export function generateSeoMetadata({
   }
 }
 
-export function getStaticMetadata(pageKey, canonicalPath?: string): Metadata {
+type MetadataPageKey = keyof typeof METADATA_CONFIG
+
+export function getStaticMetadata(pageKey: MetadataPageKey, canonicalPath?: string): Metadata {
   if (!METADATA_CONFIG[pageKey]) {
     throw new Error(`No metadata configuration found for key: ${pageKey}`)
   }
   const config = METADATA_CONFIG[pageKey]
 
   return generateSeoMetadata({
-    canonicalPath: canonicalPath || `/${pageKey.toLowerCase()}`,
+    canonicalPath: canonicalPath || `/${String(pageKey).toLowerCase()}`,
     description: config.description,
     keywords: config.keywords,
     title: config.pageTitle,
-    type: config.type,
+    type: config.type as 'website' | 'article' | 'profile',
   })
 }

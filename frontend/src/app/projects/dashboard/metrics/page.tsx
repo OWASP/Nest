@@ -159,26 +159,33 @@ const MetricsPage: FC = () => {
     },
   }
 
-  let currentFilters = {}
   const orderingParam = searchParams.get('order')
   const { field, direction, urlKey } = parseOrderParam(orderingParam)
   const currentOrdering = buildGraphQLOrdering(field, direction)
+  type HealthFilterKey = keyof typeof healthFiltersMapping
+  type LevelFilterKey = keyof typeof levelFiltersMapping
 
-  const healthFilter = searchParams.get('health')
-  const levelFilter = searchParams.get('level')
-  const currentFilterKeys = []
-  if (healthFilter) {
+  const healthFilterRaw = searchParams.get('health')
+  const levelFilterRaw = searchParams.get('level')
+
+  const currentFilterKeys: string[] = []
+  let currentFilters = {}
+
+  if (healthFilterRaw && healthFilterRaw in healthFiltersMapping) {
+    const key = healthFilterRaw as HealthFilterKey
     currentFilters = {
-      ...healthFiltersMapping[healthFilter],
+      ...healthFiltersMapping[key],
     }
-    currentFilterKeys.push(healthFilter)
+    currentFilterKeys.push(key)
   }
-  if (levelFilter) {
+
+  if (levelFilterRaw && levelFilterRaw in levelFiltersMapping) {
+    const key = levelFilterRaw as LevelFilterKey
     currentFilters = {
       ...currentFilters,
-      ...levelFiltersMapping[levelFilter],
+      ...levelFiltersMapping[key],
     }
-    currentFilterKeys.push(levelFilter)
+    currentFilterKeys.push(key)
   }
 
   const [metrics, setMetrics] = useState<HealthMetricsProps[]>([])
@@ -283,11 +290,13 @@ const MetricsPage: FC = () => {
               let newFilters = { ...currentFilters }
               const newParams = new URLSearchParams(searchParams.toString())
               if (key in healthFiltersMapping) {
+                const healthKey = key as HealthFilterKey
                 newParams.set('health', key)
-                newFilters = { ...newFilters, ...healthFiltersMapping[key] }
+                newFilters = { ...newFilters, ...healthFiltersMapping[healthKey] }
               } else if (key in levelFiltersMapping) {
+                const levelKey = key as LevelFilterKey
                 newParams.set('level', key)
-                newFilters = { ...newFilters, ...levelFiltersMapping[key] }
+                newFilters = { ...newFilters, ...levelFiltersMapping[levelKey] }
               } else {
                 newParams.delete('health')
                 newParams.delete('level')

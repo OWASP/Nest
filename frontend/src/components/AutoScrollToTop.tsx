@@ -1,9 +1,9 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { useEffect } from 'react'
+import { FC, useEffect } from 'react'
 
-export default function AutoScrollToTop() {
+const AutoScrollToTop: FC = () => {
   const pathname = usePathname()
 
   useEffect(() => {
@@ -12,3 +12,5 @@ export default function AutoScrollToTop() {
 
   return null
 }
+
+export default AutoScrollToTop
