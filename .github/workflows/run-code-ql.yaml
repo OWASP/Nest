@@ -12,13 +12,13 @@ on:
       - main
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   code-ql:
     name: CodeQL
     permissions:
+      contents: read
       security-events: write
     runs-on: ubuntu-latest
     strategy:

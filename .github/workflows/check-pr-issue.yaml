@@ -5,15 +5,15 @@ on:
     types:
       - opened
 
-permissions:
-  contents: read
-  issues: read
-  pull-requests: write
+permissions: {}
 
 jobs:
   check-pr-issue:
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: write
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
         with:

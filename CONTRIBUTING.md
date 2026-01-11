@@ -223,28 +223,16 @@ Follow these steps to set up the OWASP Nest application:
 
 1. **Create Environment Files**:
 
-   - Create a local environment file in the `backend` directory:
+   - Copy the contents from the template file into your new backend local environment file:
 
      ```bash
-     touch backend/.env
+     cp backend/.env.example backend/.env
      ```
 
-   - Copy the contents from the template file into your new local environment file:
+   - Copy the contents from the template file into your new frontend local environment file:
 
      ```bash
-     cat backend/.env.example > backend/.env
-     ```
-
-   - Create a local environment file in the `frontend` directory:
-
-     ```bash
-     touch frontend/.env
-     ```
-
-   - Copy the contents from the template file into your new local environment file:
-
-     ```bash
-     cat frontend/.env.example > frontend/.env
+     cp frontend/.env.example frontend/.env
      ```
 
 Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order Mark)**. This is crucial to prevent "Unexpected character" errors during application execution or Docker image building.
@@ -262,7 +250,8 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 1. **Set Up Algolia**:
 
    - Go to [Algolia](https://www.algolia.com/) and create a free account.
-   - After creating an account, create an Algolia app.
+   - An Algolia app is automatically created for you when you sign up.
+   - During the sign up process, you may be asked to import data. You can skip this step.
    - Update your `backend/.env` file with the following keys from your Algolia app (use **write** API key for backend):
 
    ```plaintext
@@ -270,7 +259,7 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
    DJANGO_ALGOLIA_WRITE_API_KEY=<your-algolia-write-api-key>
    ```
 
-   - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
+   - Note: The default write API key should have index write permissions (addObject permission). If you do not use the default write API key, ensure that your API key has this permission.
    - If you encounter any issues, you can refer directly to Algolia's [documentation](https://www.algolia.com/doc/guides/getting-started/quick-start/)
 
 1. **Run the Application**:
@@ -426,6 +415,82 @@ If you are adding new functionality, include relevant test cases.
 ---
 
 ## Contributing Workflow
+
+The following diagram illustrates the complete contribution workflow:
+
+```mermaid
+flowchart TD
+    Start([Start]) --> CreateIssue[Create New Issue]
+    Start --> FindIssue[Find Existing Issue]
+    CreateIssue --> GetAssigned["**Get Assigned to Issue**<br/>PRs will be automatically<br/>closed if you're not assigned"]
+    FindIssue --> GetAssigned
+    GetAssigned --> ResolveIssue[**Resolve Issue**<br/>work on code/docs/tests updates]
+
+    ResolveIssue --> RunChecks{**Run `make check-test`**<br/>locally! This is a required step -- you will not be assigned to new issues if you ignore this}
+    RunChecks -->|Fails| WP1[ ]
+    RunChecks -->|Passes| PushChanges[**Push Changes to<br/>GitHub Fork Branch**]
+    WP1 -.-> ResolveIssue
+
+    PushChanges --> HasPR{PR Exists?}
+    HasPR -->|No| CreateDraftPR[Create Draft PR]
+    HasPR -->|Yes| WaitAutoChecks[**Wait for Automated<br/>Checks to Finish**]
+    CreateDraftPR --> WaitAutoChecks
+
+    WaitAutoChecks --> CheckAutoTools{All **CodeRabbit and <br/>SonarQube** Comments<br/>Resolved?}
+    CheckAutoTools -->|No| MarkDraft[Make Sure PR Is **Marked as a Draft**]
+    CheckAutoTools -->|Yes| MarkReady[Mark PR as Ready<br/>for Review]
+    MarkDraft --> WP2[ ]
+    WP2 -.-> ResolveIssue
+
+    MarkReady --> RequestReview[Request Review from<br/>Project Maintainers]
+    RequestReview --> WaitMaintainer[Wait for Maintainers'<br/>Comments]
+
+    WaitMaintainer --> HasMaintainerComments{**Maintainers' Comments<br/>Resolved**?}
+    HasMaintainerComments -->|No| MarkDraft
+    HasMaintainerComments -->|Yes| CheckCI{**CI/CD<br/>Passing?**}
+
+    CheckCI -->|Yes| ReadyMerge([PR Ready for Merge])
+    CheckCI -->|No| MarkDraft
+
+    style Start fill:#4caf50,stroke:#2e7d32,stroke-width:2px,color:#ffffff
+    style ReadyMerge fill:#4caf50,stroke:#2e7d32,stroke-width:2px,color:#ffffff
+    style ResolveIssue fill:#ff9800,stroke:#f57c00,stroke-width:2px,color:#000000
+    style RunChecks fill:#2196f3,stroke:#1565c0,stroke-width:2px,color:#ffffff
+    style CheckAutoTools fill:#2196f3,stroke:#1565c0,stroke-width:2px,color:#ffffff
+    style HasMaintainerComments fill:#2196f3,stroke:#1565c0,stroke-width:2px,color:#ffffff
+    style CheckCI fill:#2196f3,stroke:#1565c0,stroke-width:2px,color:#ffffff
+    style MarkDraft fill:#ff9800,stroke:#f57c00,stroke-width:2px,color:#000000
+    style MarkReady fill:#4caf50,stroke:#2e7d32,stroke-width:2px,color:#ffffff
+    style CreateDraftPR fill:#ff9800,stroke:#f57c00,stroke-width:2px,color:#000000
+    style WP1 fill:transparent,stroke:transparent,color:transparent,width:0px,height:0px
+    style WP2 fill:transparent,stroke:transparent,color:transparent,width:0px,height:0px
+
+    linkStyle 0 stroke:#4caf50,stroke-width:2px
+    linkStyle 1 stroke:#4caf50,stroke-width:2px
+    linkStyle 2 stroke:#4caf50,stroke-width:2px
+    linkStyle 3 stroke:#4caf50,stroke-width:2px
+    linkStyle 4 stroke:#4caf50,stroke-width:2px
+    linkStyle 5 stroke:#4caf50,stroke-width:2px
+    linkStyle 6 stroke:#f44336,stroke-width:2px
+    linkStyle 7 stroke:#4caf50,stroke-width:2px
+    linkStyle 8 stroke:#f44336,stroke-width:2px
+    linkStyle 9 stroke:#4caf50,stroke-width:2px
+    linkStyle 10 stroke:#9e9e9e,stroke-width:2px
+    linkStyle 11 stroke:#4caf50,stroke-width:2px
+    linkStyle 12 stroke:#4caf50,stroke-width:2px
+    linkStyle 13 stroke:#4caf50,stroke-width:2px
+    linkStyle 14 stroke:#f44336,stroke-width:2px
+    linkStyle 15 stroke:#4caf50,stroke-width:2px
+    linkStyle 16 stroke:#f44336,stroke-width:2px
+    linkStyle 17 stroke:#f44336,stroke-width:2px
+    linkStyle 18 stroke:#4caf50,stroke-width:2px
+    linkStyle 19 stroke:#4caf50,stroke-width:2px
+    linkStyle 20 stroke:#4caf50,stroke-width:2px
+    linkStyle 21 stroke:#f44336,stroke-width:2px
+    linkStyle 22 stroke:#4caf50,stroke-width:2px
+    linkStyle 23 stroke:#4caf50,stroke-width:2px
+    linkStyle 24 stroke:#f44336,stroke-width:2px
+```
 
 ### 1. Find Something to Work On
 

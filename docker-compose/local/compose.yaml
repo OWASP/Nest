@@ -8,14 +8,14 @@ services:
       '
     image: nest-local-backend
     build:
-      context: ../backend
-      dockerfile: docker/Dockerfile.local
+      context: ../../backend
+      dockerfile: ../docker/backend/Dockerfile.local
     depends_on:
       cache:
         condition: service_healthy
       db:
         condition: service_healthy
-    env_file: ../backend/.env
+    env_file: ../../backend/.env
     environment:
       DJANGO_DB_HOST: ${DJANGO_DB_HOST:-db}
       DJANGO_DB_NAME: ${DJANGO_DB_NAME:-nest_db_dev}
@@ -29,7 +29,7 @@ services:
     ports:
       - 8000:8000
     volumes:
-      - ../backend:/home/owasp
+      - ../../backend:/home/owasp
       - backend-venv:/home/owasp/.venv
 
   cache:
@@ -38,7 +38,7 @@ services:
         redis-server --requirepass $$REDIS_PASSWORD --maxmemory 25mb --maxmemory-policy allkeys-lru
       '
     container_name: nest-cache
-    image: redis:7.2.7-alpine3.21
+    image: redis:8.0.5-alpine3.21
     environment:
       REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-cache-password}
     healthcheck:
@@ -75,14 +75,14 @@ services:
         mkdocs serve -a 0.0.0.0:8001
       '
     build:
-      context: ..
-      dockerfile: docs/docker/Dockerfile.local
+      context: ../../
+      dockerfile: docker/docs/Dockerfile.local
     networks:
       - nest-network
     ports:
       - 8001:8001
     volumes:
-      - ../docs:/home/owasp/docs
+      - ../../docs:/home/owasp/docs
       - docs-venv:/home/owasp/.venv
 
   frontend:
@@ -92,8 +92,8 @@ services:
         pnpm run dev
       '
     build:
-      context: ../frontend
-      dockerfile: docker/Dockerfile.local
+      context: ../../frontend
+      dockerfile: ../docker/frontend/Dockerfile.local
     depends_on:
       - backend
     environment:
@@ -104,7 +104,7 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - ../frontend:/home/owasp
+      - ../../frontend:/home/owasp
       - frontend-next:/home/owasp/.next
       - frontend-node-modules:/home/owasp/node_modules
 
@@ -122,7 +122,7 @@ services:
         condition: service_healthy
       db:
         condition: service_healthy
-    env_file: ../backend/.env
+    env_file: ../../backend/.env
     environment:
       DJANGO_DB_HOST: ${DJANGO_DB_HOST:-db}
       DJANGO_DB_NAME: ${DJANGO_DB_NAME:-nest_db_dev}
@@ -134,7 +134,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - ../backend:/home/owasp
+      - ../../backend:/home/owasp
       - backend-venv:/home/owasp/.venv
 
 networks:

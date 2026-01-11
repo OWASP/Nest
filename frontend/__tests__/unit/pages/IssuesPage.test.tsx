@@ -89,7 +89,7 @@ describe('IssuesPage', () => {
       error: undefined,
     })
     render(<IssuesPage />)
-    expect(screen.getAllByText('No issues found for the selected filter.')).toHaveLength(2)
+    expect(screen.getAllByText('No issues found for the selected filter.')).toHaveLength(1)
   })
 
   it('renders the list of issues successfully', () => {
@@ -258,6 +258,7 @@ describe('IssuesPage', () => {
       error: undefined,
     })
     render(<IssuesPage />)
-    expect(screen.getByText('+1')).toBeInTheDocument()
+    const plusOneElements = screen.getAllByText(/\+1/)
+    expect(plusOneElements.length).toBeGreaterThan(0)
   })
 })

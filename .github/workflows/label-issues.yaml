@@ -6,11 +6,12 @@ on:
       - edited
       - opened
 
-permissions:
-  issues: write
+permissions: {}
 
 jobs:
   label:
+    permissions:
+      issues: write
     runs-on: ubuntu-latest
     steps:
       - name: Apply Labels to Issues
