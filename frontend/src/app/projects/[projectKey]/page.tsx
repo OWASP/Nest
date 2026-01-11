@@ -100,32 +100,37 @@ const ProjectDetailsPage = () => {
     project.contributionStats,
     project.contributionData
   )
+  const hasContributions =
+  project.contributionData?.some((c) => c.count > 0)
 
-  return (
-    <DetailsCard
-      contributionData={project.contributionData}
-      contributionStats={contributionStats}
-      details={projectDetails}
-      endDate={endDate}
-      entityKey={project.key}
-      entityLeaders={project.entityLeaders}
-      healthMetricsData={project.healthMetricsList}
-      isActive={project.isActive}
-      languages={project.languages}
-      pullRequests={project.recentPullRequests}
-      recentIssues={project.recentIssues}
-      recentMilestones={project.recentMilestones}
-      recentReleases={project.recentReleases}
-      repositories={project.repositories}
-      startDate={startDate}
-      stats={projectStats}
-      summary={project.summary}
-      title={project.name}
-      topContributors={topContributors}
-      topics={project.topics}
-      type="project"
-    />
-  )
+return (
+  <DetailsCard
+    {...(hasContributions && {
+      contributionData: project.contributionData,
+      contributionStats,
+    })}
+    details={projectDetails}
+    endDate={endDate}
+    entityKey={project.key}
+    entityLeaders={project.entityLeaders}
+    healthMetricsData={project.healthMetricsList}
+    isActive={project.isActive}
+    languages={project.languages}
+    pullRequests={project.recentPullRequests}
+    recentIssues={project.recentIssues}
+    recentMilestones={project.recentMilestones}
+    recentReleases={project.recentReleases}
+    repositories={project.repositories}
+    startDate={startDate}
+    stats={projectStats}
+    summary={project.summary}
+    title={project.name}
+    topContributors={topContributors}
+    topics={project.topics}
+    type="project"
+  />
+)
+
 }
 
 export default ProjectDetailsPage
