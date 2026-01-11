@@ -161,7 +161,7 @@ describe('ProjectsDashboardDropDown Component', () => {
       ) {
         return
       }
-      return
+      
     })
   })
 
