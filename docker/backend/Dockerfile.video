@@ -1,4 +1,4 @@
-FROM nest-backend:latest
+FROM nest-backend:base
 
 USER root
 

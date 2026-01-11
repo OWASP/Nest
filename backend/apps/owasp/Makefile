@@ -30,7 +30,7 @@ owasp-enrich-projects:
 owasp-generate-community-snapshot-video:
 	@docker build \
 		-f docker/backend/Dockerfile backend/ \
-		-t nest-backend
+		-t nest-backend:base
 	@docker build \
 		-f docker/backend/Dockerfile.video backend/ \
 		-t nest-video-backend
