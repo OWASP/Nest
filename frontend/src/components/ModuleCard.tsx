@@ -71,10 +71,15 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
   const mentors = module.mentors || []
   const mentees = module.mentees || []
 
+  const mentorsWithAvatars = mentors.filter((m) => m?.avatarUrl)
+  const menteesWithAvatars = mentees.filter((m) => m?.avatarUrl)
+
+  const hasContributors = mentorsWithAvatars.length > 0 || menteesWithAvatars.length > 0
+
   return (
     <div className="flex h-auto min-h-[12rem] w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <Link
-        href={`${pathname}/modules/${module.key}`}
+        href={`${pathname}/modules/${module.key || module.id}`}
         className="text-start font-semibold text-blue-400 hover:underline"
       >
         <TruncatedText text={module?.name} />
@@ -87,13 +92,13 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
         value={getSimpleDuration(module.startedAt, module.endedAt)}
       />
 
-      <div className="mt-auto flex gap-4 w-full">
-        {mentors.length > 0 && (
-          <div className="flex-1 flex flex-col gap-2">
-            <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Mentors</span>
-            <div className="flex flex-wrap gap-1">
-              {mentors.slice(0, 4).map((contributor) => (
-                contributor?.avatarUrl && (
+      {hasContributors && (
+        <div className="mt-auto flex gap-4 w-full">
+          {mentorsWithAvatars.length > 0 && (
+            <div className="flex-1 flex flex-col gap-2">
+              <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Mentors</span>
+              <div className="flex flex-wrap gap-1">
+                {mentorsWithAvatars.slice(0, 4).map((contributor) => (
                   <Image
                     key={contributor.login}
                     alt={contributor.name || contributor.login}
@@ -103,20 +108,20 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
                     title={contributor.name || contributor.login}
                     width={24}
                   />
-                )
-              ))}
-              {mentors.length > 4 && (
-                <span className="text-xs font-medium text-gray-400 self-center">+{mentors.length - 4}</span>
-              )}
+                ))}
+                {mentorsWithAvatars.length > 4 && (
+                  <span className="text-xs font-medium text-gray-400 self-center">
+                    +{mentorsWithAvatars.length - 4}
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-        )}
-        {mentees.length > 0 && (
-          <div className="flex-1 flex flex-col gap-2 border-l-1 border-gray-100 pl-4 dark:border-gray-700">
-            <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Mentees</span>
-            <div className="flex flex-wrap gap-1">
-              {mentees.slice(0, 4).map((contributor) => (
-                contributor?.avatarUrl && (
+          )}
+          {menteesWithAvatars.length > 0 && (
+            <div className={`flex-1 flex flex-col gap-2 ${mentorsWithAvatars.length > 0 ? 'border-l-1 border-gray-100 pl-4 dark:border-gray-700' : ''}`}>
+              <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Mentees</span>
+              <div className="flex flex-wrap gap-1">
+                {menteesWithAvatars.slice(0, 4).map((contributor) => (
                   <Image
                     key={contributor.login}
                     alt={contributor.name || contributor.login}
@@ -126,15 +131,17 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
                     title={contributor.name || contributor.login}
                     width={24}
                   />
-                )
-              ))}
-              {mentees.length > 4 && (
-                <span className="text-xs font-medium text-gray-400 self-center">+{mentees.length - 4}</span>
-              )}
+                ))}
+                {menteesWithAvatars.length > 4 && (
+                  <span className="text-xs font-medium text-gray-400 self-center">
+                    +{menteesWithAvatars.length - 4}
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {isAdmin && module.labels && module.labels.length > 0 && (
         <div className="mt-2">
@@ -159,7 +166,7 @@ export const getSimpleDuration = (start: string | number, end: string | number):
 
   const ms = endDate.getTime() - startDate.getTime()
   const days = Math.floor(ms / (1000 * 60 * 60 * 24))
-
   const weeks = Math.ceil(days / 7)
-  return `${weeks} week${weeks !== 1 ? 's' : ''}`
+
+  return `${weeks} week${weeks === 1 ? '' : 's'}`
 }
