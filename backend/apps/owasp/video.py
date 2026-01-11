@@ -9,10 +9,10 @@ from typing import Any
 import ffmpeg
 import pypdfium2 as pdfium
 from django.db.models import QuerySet
-from django.template.loader import render_to_string
 from weasyprint import HTML
 
 from apps.common.eleven_labs import ElevenLabs
+from apps.common.template_loader import video_env
 from apps.github.models.release import Release
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.project import Project
@@ -63,7 +63,7 @@ class Slide:
         page = None
         pdf = None
         try:
-            html = HTML(string=render_to_string(self.template_name, self.context))
+            html = HTML(string=video_env.get_template(self.template_name).render(self.context))
 
             pdf = pdfium.PdfDocument(html.write_pdf())
             page = pdf[0]
@@ -162,7 +162,7 @@ class SlideBuilder:
             },
             name="intro",
             output_dir=self.output_dir,
-            template_name="video/slides/intro.html",
+            template_name="slides/intro.jinja",
             transcript=f"Hey, everyone... Welcome to the Owasp Nest {name} community snapshot...",
         )
 
@@ -190,7 +190,7 @@ class SlideBuilder:
             },
             name="sponsors",
             output_dir=self.output_dir,
-            template_name="video/slides/sponsors.html",
+            template_name="slides/sponsors.jinja",
             transcript="A HUGE thanks to the sponsors who make our work possible!",
         )
 
@@ -225,7 +225,7 @@ class SlideBuilder:
             },
             name="projects",
             output_dir=self.output_dir,
-            template_name="video/slides/projects.html",
+            template_name="slides/projects.jinja",
             transcript=f"So... this time we've welcomed {project_count} new projects! "
             f"including Owasp {formatted_project_names}.",
         )
@@ -256,7 +256,7 @@ class SlideBuilder:
             },
             output_dir=self.output_dir,
             name="chapters",
-            template_name="video/slides/chapters.html",
+            template_name="slides/chapters.jinja",
             transcript=f"We've also welcomed {chapter_count} new chapters! "
             f"including {formatted_names}.",
         )
@@ -299,7 +299,7 @@ class SlideBuilder:
             },
             name="releases",
             output_dir=self.output_dir,
-            template_name="video/slides/releases.html",
+            template_name="slides/releases.jinja",
             transcript=f"There were {release_count} new releases across our projects this time... "
             f"with {formatted_names} leading the way.",
         )
@@ -310,7 +310,7 @@ class SlideBuilder:
             context={},
             name="thank_you",
             output_dir=self.output_dir,
-            template_name="video/slides/thank_you.html",
+            template_name="slides/thank_you.jinja",
             transcript="Thanks for tuning in!... Visit Nest dot Owasp dot org "
             "for more community updates!... See you next time!!",
         )

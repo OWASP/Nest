@@ -41,12 +41,14 @@ class TestSlide:
 
     @patch("apps.owasp.video.pdfium.PdfDocument")
     @patch("apps.owasp.video.HTML")
-    @patch("apps.owasp.video.render_to_string")
+    @patch("apps.owasp.video.video_env")
     def test_render_and_save_image_success(
-        self, mock_render, mock_html, mock_pdfium, slide, tmp_path
+        self, mock_video_env, mock_html, mock_pdfium, slide, tmp_path
     ):
         """Test render_and_save_image creates image file."""
-        mock_render.return_value = "<html></html>"
+        mock_template = Mock()
+        mock_template.render.return_value = "<html></html>"
+        mock_video_env.get_template.return_value = mock_template
         mock_html.return_value.write_pdf.return_value = b"pdf_content"
 
         mock_bitmap = Mock()
@@ -62,7 +64,8 @@ class TestSlide:
 
         slide.render_and_save_image()
 
-        mock_render.assert_called_once_with(slide.template_name, slide.context)
+        mock_video_env.get_template.assert_called_once_with(slide.template_name)
+        mock_template.render.assert_called_once_with(slide.context)
         mock_pil_image.save.assert_called_once()
         mock_page.close.assert_called_once()
         mock_pdf.close.assert_called_once()
@@ -159,7 +162,7 @@ class TestSlideBuilder:
 
         assert isinstance(slide, Slide)
         assert slide.name == "intro"
-        assert slide.template_name == "video/slides/intro.html"
+        assert slide.template_name == "slides/intro.jinja"
         assert slide.transcript is not None
 
     def test_add_intro_slide_multi_snapshot(self, tmp_path):
@@ -308,7 +311,7 @@ class TestSlideBuilder:
 
         assert isinstance(slide, Slide)
         assert slide.name == "thank_you"
-        assert slide.template_name == "video/slides/thank_you.html"
+        assert slide.template_name == "slides/thank_you.jinja"
 
 
 class TestVideoGenerator:
