@@ -157,6 +157,7 @@ xdg
 xdist
 xoxb
 xsser
+zapconfig
 zaproxy
 zsc
 éàëîôû
