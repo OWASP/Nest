@@ -30,15 +30,15 @@ export const formatDateRange = (startDate: number | string, endDate: number | st
 
   if (
     start.getTime() === end.getTime() ||
-    (start.getFullYear() === end.getFullYear() &&
-      start.getMonth() === end.getMonth() &&
-      start.getDate() === end.getDate())
+    (start.getUTCFullYear() === end.getUTCFullYear() &&
+      start.getUTCMonth() === end.getUTCMonth() &&
+      start.getUTCDate() === end.getUTCDate())
   ) {
     return formatDate(startDate)
   }
 
-  const sameMonth = start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()
-  const sameYear = start.getFullYear() === end.getFullYear()
+  const sameMonth = start.getUTCMonth() === end.getUTCMonth() && start.getUTCFullYear() === end.getUTCFullYear()
+  const sameYear = start.getUTCFullYear() === end.getUTCFullYear()
 
   if (sameMonth) {
     // Format as "Month Day - Day, Year" (e.g., "Sep 1 - 4, 2025")
@@ -86,19 +86,19 @@ function calculateDaysToSubtract(dayOfWeek: number): number {
 }
 
 function adjustDateForYearOnly(today: Date, endDate: Date, startDate: Date): void {
-  const todayDayOfWeek = today.getDay()
+  const todayDayOfWeek = today.getUTCDay()
   const daysToSubtract = calculateDaysToSubtract(todayDayOfWeek)
 
-  endDate.setDate(endDate.getDate() + daysToSubtract)
+  endDate.setUTCDate(endDate.getUTCDate() + daysToSubtract)
   startDate.setTime(endDate.getTime())
-  startDate.setDate(startDate.getDate() - 363) // 364 days including start day
+  startDate.setUTCDate(startDate.getUTCDate() - 363) // 364 days including start day
 }
 
 function calculateStartDate(today: Date, years: number, months: number, days: number): Date {
   const startDate = new Date(today)
-  startDate.setFullYear(today.getFullYear() - years)
-  startDate.setMonth(today.getMonth() - months)
-  startDate.setDate(today.getDate() - days)
+  startDate.setUTCFullYear(today.getUTCFullYear() - years)
+  startDate.setUTCMonth(today.getUTCMonth() - months)
+  startDate.setUTCDate(today.getUTCDate() - days)
   return startDate
 }
 
@@ -106,7 +106,7 @@ export function getDateRange(options: DateRangeOptions = {}): DateRangeResult {
   const { years = 0, months = 0, days = 0 } = options
 
   const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  today.setUTCHours(0, 0, 0, 0)
 
   const endDate = new Date(today)
   const startDate = calculateStartDate(today, years, months, days)
