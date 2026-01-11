@@ -38,11 +38,13 @@ class ProjectQuery:
         select_related=[
             "owasp_repository__organization",
             "owasp_repository__owner__owasp_profile",
+            "owasp_repository__owner__user_badges__badge",
         ],
         prefetch_related=[
             "organizations",
-            "owners__owasp_profile",
+            "owners",
             "repositories__organization",
+            "entity_leaders__member",
         ],
     )
     def recent_projects(self, limit: int = 8) -> list[ProjectNode]:
@@ -65,8 +67,14 @@ class ProjectQuery:
         select_related=[
             "owasp_repository__organization",
             "owasp_repository__owner__owasp_profile",
+            "owasp_repository__owner__user_badges__badge",
         ],
-        prefetch_related=["organizations", "owners__owasp_profile", "repositories__organization"],
+        prefetch_related=[
+            "organizations",
+            "owners",
+            "repositories__organization",
+            "entity_leaders__member",
+        ],
     )
     def search_projects(self, query: str) -> list[ProjectNode]:
         """Search active projects by name (case-insensitive, partial match)."""

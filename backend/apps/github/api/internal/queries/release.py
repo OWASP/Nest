@@ -15,7 +15,13 @@ MAX_LIMIT = 1000
 class ReleaseQuery:
     """GraphQL query class for retrieving recent GitHub releases."""
 
-    @strawberry_django.field(select_related=["author__owasp_profile", "repository__organization"])
+    @strawberry_django.field(
+        select_related=[
+            "author__owasp_profile",
+            "repository__organization",
+            "author__user_badges__badge",
+        ]
+    )
     def recent_releases(
         self,
         *,

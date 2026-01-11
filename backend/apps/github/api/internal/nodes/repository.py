@@ -66,12 +66,12 @@ class RepositoryNode(strawberry.relay.Node):
         """Resolve project."""
         return root.project
 
-    @strawberry_django.field(prefetch_related=["recent_milestones"])
+    @strawberry_django.field(prefetch_related=["milestones"])
     def recent_milestones(self, root: Repository, limit: int = 5) -> list[MilestoneNode]:
         """Resolve recent milestones."""
         return root.recent_milestones.order_by("-created_at")[:limit]
 
-    @strawberry_django.field(prefetch_related=["published_releases"])
+    @strawberry_django.field(prefetch_related=["releases"])
     def releases(self, root: Repository) -> list[ReleaseNode]:
         """Resolve recent releases."""
         # TODO(arkid15r): rename this to recent_releases.

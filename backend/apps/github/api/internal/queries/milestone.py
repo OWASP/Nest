@@ -27,7 +27,12 @@ class MilestoneQuery:
 
     @strawberry_django.field(
         select_related=["author__owasp_profile", "repository__organization"],
-        prefetch_related=["issues", "labels", "pull_requests"],
+        prefetch_related=[
+            "issues__author__user_badges__badge",
+            "labels",
+            "pull_requests__repository__organization",
+            "pull_requests__author__user_badges__badge",
+        ],
     )
     def recent_milestones(
         self,

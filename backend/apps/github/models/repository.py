@@ -11,7 +11,6 @@ from github.GithubException import GithubException
 from apps.common.models import TimestampedModel
 from apps.github.constants import OWASP_LOGIN
 from apps.github.models.common import NodeModel
-from apps.github.models.milestone import Milestone
 from apps.github.models.mixins import RepositoryIndexMixin
 from apps.github.utils import (
     check_funding_policy_compliance,
@@ -175,9 +174,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     @property
     def recent_milestones(self):
         """Repository recent milestones."""
-        return Milestone.objects.filter(
-            repository=self,
-        ).order_by("-created_at")
+        return self.milestones.order_by("-created_at")
 
     @property
     def top_languages(self) -> list[str]:

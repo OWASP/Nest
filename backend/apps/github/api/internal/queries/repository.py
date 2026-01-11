@@ -38,7 +38,7 @@ class RepositoryQuery:
             return None
 
     @strawberry_django.field(
-        select_related=["organization", "owner__owasp_profile"],
+        select_related=["organization", "owner__owasp_profile", "owner__user_badges__badge"],
     )
     def repositories(
         self,
