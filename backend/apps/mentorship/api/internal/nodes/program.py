@@ -4,11 +4,13 @@ from datetime import datetime
 
 import strawberry
 
+from apps.github.api.internal.nodes.user import UserNode
+from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.nodes.enum import (
     ExperienceLevelEnum,
     ProgramStatusEnum,
 )
-from apps.mentorship.api.internal.nodes.mentor import MentorNode
+from apps.mentorship.models.program_admin import ProgramAdmin
 
 
 @strawberry.type
@@ -29,9 +31,17 @@ class ProgramNode:
     tags: list[str] | None = None
 
     @strawberry.field
-    def admins(self) -> list[MentorNode] | None:
+    def admins(self) -> list[UserNode] | None:
         """Get the list of program administrators."""
-        return self.admins.all()
+        github_user_ids = (
+            ProgramAdmin.objects.filter(program=self)
+            .filter(user__github_user_id__isnull=False)
+            .values_list("user__github_user_id", flat=True)
+            .distinct()
+        )
+
+        github_users = list(GithubUser.objects.filter(id__in=github_user_ids))
+        return github_users if github_users else None
 
 
 @strawberry.type

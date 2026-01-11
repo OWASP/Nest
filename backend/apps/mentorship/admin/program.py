@@ -3,6 +3,15 @@
 from django.contrib import admin
 
 from apps.mentorship.models import Program
+from apps.mentorship.models.program_admin import ProgramAdmin as ProgramAdminThroughModel
+
+
+class ProgramAdminInline(admin.TabularInline):
+    """Inline admin for ProgramAdmin through model."""
+
+    model = ProgramAdminThroughModel
+    extra = 1
+    autocomplete_fields = ("user",)
 
 
 class ProgramAdmin(admin.ModelAdmin):
@@ -22,7 +31,7 @@ class ProgramAdmin(admin.ModelAdmin):
 
     list_filter = ("status",)
 
-    filter_horizontal = ("admins",)
+    inlines = (ProgramAdminInline,)
 
 
 admin.site.register(Program, ProgramAdmin)

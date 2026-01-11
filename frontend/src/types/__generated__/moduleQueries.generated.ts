@@ -22,7 +22,7 @@ export type GetProgramAdminsAndModulesQueryVariables = Types.Exact<{
 }>;
 
 
-export type GetProgramAdminsAndModulesQuery = { getProgram: { __typename: 'ProgramNode', id: string, admins: Array<{ __typename: 'MentorNode', id: string, login: string, name: string, avatarUrl: string }> | null }, getModule: { __typename: 'ModuleNode', id: string, key: string, name: string, description: string, tags: Array<string> | null, labels: Array<string> | null, projectId: string | null, projectName: string | null, domains: Array<string> | null, experienceLevel: Types.ExperienceLevelEnum, startedAt: any, endedAt: any, mentors: Array<{ __typename: 'MentorNode', id: string, login: string, name: string, avatarUrl: string }>, mentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> } };
+export type GetProgramAdminsAndModulesQuery = { getProgram: { __typename: 'ProgramNode', id: string, admins: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> | null }, getModule: { __typename: 'ModuleNode', id: string, key: string, name: string, description: string, tags: Array<string> | null, labels: Array<string> | null, projectId: string | null, projectName: string | null, domains: Array<string> | null, experienceLevel: Types.ExperienceLevelEnum, startedAt: any, endedAt: any, mentors: Array<{ __typename: 'MentorNode', id: string, login: string, name: string, avatarUrl: string }>, mentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> } };
 
 export type GetModuleIssuesQueryVariables = Types.Exact<{
   programKey: Types.Scalars['String']['input'];

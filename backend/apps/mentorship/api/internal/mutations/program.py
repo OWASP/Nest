@@ -6,7 +6,7 @@ import strawberry
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import transaction
 
-from apps.mentorship.api.internal.mutations.module import resolve_mentors_from_logins
+from apps.mentorship.api.internal.mutations.module import resolve_users_from_logins
 from apps.mentorship.api.internal.nodes.enum import ProgramStatusEnum
 from apps.mentorship.api.internal.nodes.program import (
     CreateProgramInput,
@@ -14,7 +14,8 @@ from apps.mentorship.api.internal.nodes.program import (
     UpdateProgramInput,
     UpdateProgramStatusInput,
 )
-from apps.mentorship.models import Mentor, Program
+from apps.mentorship.models import Program
+from apps.mentorship.models.program_admin import ProgramAdmin
 from apps.nest.api.internal.permissions import IsAuthenticated
 
 logger = logging.getLogger(__name__)
@@ -29,12 +30,6 @@ class ProgramMutation:
     def create_program(self, info: strawberry.Info, input_data: CreateProgramInput) -> ProgramNode:
         """Create a new mentorship program."""
         user = info.context.request.user
-
-        mentor, created = Mentor.objects.get_or_create(
-            nest_user=user, defaults={"github_user": user.github_user}
-        )
-        if created:
-            logger.info("Created a new mentor profile for user '%s'.", user.username)
 
         if input_data.ended_at <= input_data.started_at:
             msg = "End date must be after start date."
@@ -57,7 +52,7 @@ class ProgramMutation:
             status=ProgramStatusEnum.DRAFT.value,
         )
 
-        program.admins.set([mentor])
+        ProgramAdmin.objects.create(program=program, user=user, role=ProgramAdmin.AdminRole.OWNER)
 
         logger.info(
             "User '%s' successfully created program '%s' (ID: %s).",
@@ -81,18 +76,7 @@ class ProgramMutation:
             logger.warning(msg, exc_info=True)
             raise ObjectDoesNotExist(msg) from err
 
-        try:
-            admin = Mentor.objects.get(nest_user=user)
-        except Mentor.DoesNotExist as err:
-            msg = "You must be a mentor to update a program."
-            logger.warning(
-                "User '%s' is not a mentor and cannot update programs.",
-                user.username,
-                exc_info=True,
-            )
-            raise PermissionDenied(msg) from err
-
-        if not program.admins.filter(id=admin.id).exists():
+        if not program.admins.filter(id=user.id).exists():
             msg = "You must be an admin of this program to update it."
             logger.warning(
                 "Permission denied for user '%s' to update program '%s'.",
@@ -130,7 +114,7 @@ class ProgramMutation:
         program.save()
 
         if input_data.admin_logins is not None:
-            admins_to_set = resolve_mentors_from_logins(input_data.admin_logins)
+            admins_to_set = resolve_users_from_logins(input_data.admin_logins)
             program.admins.set(admins_to_set)
 
         return program
@@ -149,13 +133,7 @@ class ProgramMutation:
             msg = f"Program with key '{input_data.key}' not found."
             raise ObjectDoesNotExist(msg) from e
 
-        try:
-            mentor = Mentor.objects.get(nest_user=user)
-        except Mentor.DoesNotExist as e:
-            msg = "You must be a mentor to update a program."
-            raise PermissionDenied(msg) from e
-
-        if not program.admins.filter(id=mentor.id).exists():
+        if not program.admins.filter(id=user.id).exists():
             raise PermissionDenied
 
         program.status = input_data.status.value
