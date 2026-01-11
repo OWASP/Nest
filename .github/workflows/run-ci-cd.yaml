@@ -314,6 +314,7 @@ jobs:
       release_version: ${{ steps.set.outputs.release_version }}
     permissions: {}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Set release version
         id: set
