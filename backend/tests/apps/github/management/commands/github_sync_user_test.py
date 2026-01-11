@@ -155,12 +155,12 @@ class TestGithubSyncUserCommand:
         mock_parser.add_argument.assert_any_call(
             "--start-at",
             type=str,
-            help="Start date (YYYY-MM-DD). Defaults to January 1st of current year.",
+            help="Start date (YYYY-MM-DD). Defaults to 365 days ago from today.",
         )
         mock_parser.add_argument.assert_any_call(
             "--end-at",
             type=str,
-            help="End date (YYYY-MM-DD). Defaults to October 1st of current year.",
+            help="End date (YYYY-MM-DD). Defaults to today.",
         )
         mock_parser.add_argument.assert_any_call(
             "--skip-sync",
