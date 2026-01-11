@@ -5,6 +5,38 @@ const isLocal = process.env.NEXT_PUBLIC_ENVIRONMENT === 'local'
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin',
+          },
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'require-corp',
+          },
+          {
+            key: 'Cross-Origin-Resource-Policy',
+            value: 'same-origin',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: https:",
+              "font-src 'self'",
+              "connect-src 'self' https:",
+            ].join('; '),
+          },
+        ],
+      },
+    ]
+  },
   images: {
     // This is a list of remote patterns that Next.js will use to determine
     // if an image is allowed to be loaded from a remote source.
