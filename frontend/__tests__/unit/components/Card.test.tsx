@@ -79,7 +79,7 @@ jest.mock('wrappers/FontAwesomeIconWrapper', () => {
   return function FontAwesomeIconWrapper({ icon, className }: MockFontAwesomeIconProps) {
     return (
       <span data-testid="font-awesome-wrapper" className={className}>
-        {String(icon)}
+        {typeof icon === 'string' ? icon : 'mock-icon'}
       </span>
     )
   }
