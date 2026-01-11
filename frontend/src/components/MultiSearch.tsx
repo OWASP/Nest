@@ -62,7 +62,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           if (filteredEvents.length > 0) {
             results.push({
               indexName: 'events',
-              hits: filteredEvents.slice(0, suggestionCount) as Event[],
+              hits: filteredEvents.slice(0, suggestionCount),
               totalPages: 1,
             })
           }
