@@ -1,5 +1,5 @@
-import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import type React from 'react'
 import { useState } from 'react'
@@ -36,7 +36,7 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
 
   return (
     <div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
         {displayedModule.map((module) => {
           return <ModuleItem key={module.key || module.id} module={module} isAdmin={isAdmin} />
         })}
@@ -67,21 +67,75 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
 
 const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) => {
   const pathname = usePathname()
+
+  const mentors = module.mentors || []
+  const mentees = module.mentees || []
+
   return (
-    <div className="flex h-46 w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+    <div className="flex h-auto min-h-[12rem] w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <Link
         href={`${pathname}/modules/${module.key}`}
         className="text-start font-semibold text-blue-400 hover:underline"
       >
         <TruncatedText text={module?.name} />
       </Link>
-      <TextInfoItem icon={FaTurnUp} label="Level" value={upperFirst(module.experienceLevel)} />
+      <TextInfoItem icon={FaTurnUp} label="Level" value={String(module.experienceLevel).toUpperCase()} />
       <TextInfoItem icon={FaCalendar} label="Start" value={formatDate(module.startedAt)} />
       <TextInfoItem
         icon={FaHourglassHalf}
         label="Duration"
         value={getSimpleDuration(module.startedAt, module.endedAt)}
       />
+
+      <div className="mt-auto flex gap-4 w-full">
+        {mentors.length > 0 && (
+          <div className="flex-1 flex flex-col gap-2">
+            <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Mentors</span>
+            <div className="flex flex-wrap gap-1">
+              {mentors.slice(0, 4).map((contributor) => (
+                contributor?.avatarUrl && (
+                  <Image
+                    key={contributor.login}
+                    alt={contributor.name || contributor.login}
+                    className="rounded-full border-1 border-gray-200 dark:border-gray-700"
+                    height={24}
+                    src={`${contributor.avatarUrl}&s=60`}
+                    title={contributor.name || contributor.login}
+                    width={24}
+                  />
+                )
+              ))}
+              {mentors.length > 4 && (
+                <span className="text-xs font-medium text-gray-400 self-center">+{mentors.length - 4}</span>
+              )}
+            </div>
+          </div>
+        )}
+        {mentees.length > 0 && (
+          <div className="flex-1 flex flex-col gap-2 border-l-1 border-gray-100 pl-4 dark:border-gray-700">
+            <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Mentees</span>
+            <div className="flex flex-wrap gap-1">
+              {mentees.slice(0, 4).map((contributor) => (
+                contributor?.avatarUrl && (
+                  <Image
+                    key={contributor.login}
+                    alt={contributor.name || contributor.login}
+                    className="rounded-full border-1 border-gray-200 dark:border-gray-700"
+                    height={24}
+                    src={`${contributor.avatarUrl}&s=60`}
+                    title={contributor.name || contributor.login}
+                    width={24}
+                  />
+                )
+              ))}
+              {mentees.length > 4 && (
+                <span className="text-xs font-medium text-gray-400 self-center">+{mentees.length - 4}</span>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
       {isAdmin && module.labels && module.labels.length > 0 && (
         <div className="mt-2">
           <LabelList labels={module.labels} maxVisible={3} />
@@ -105,7 +159,7 @@ export const getSimpleDuration = (start: string | number, end: string | number):
 
   const ms = endDate.getTime() - startDate.getTime()
   const days = Math.floor(ms / (1000 * 60 * 60 * 24))
-  const weeks = Math.ceil(days / 7)
 
-  return `${weeks} week${weeks === 1 ? '' : 's'}`
+  const weeks = Math.ceil(days / 7)
+  return `${weeks} week${weeks !== 1 ? 's' : ''}`
 }
