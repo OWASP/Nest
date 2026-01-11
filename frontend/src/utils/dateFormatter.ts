@@ -16,6 +16,7 @@ export const formatDate = (input: number | string) => {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
+    timeZone: 'UTC',
   })
 }
 
@@ -42,16 +43,16 @@ export const formatDateRange = (startDate: number | string, endDate: number | st
   if (sameMonth) {
     // Format as "Month Day - Day, Year" (e.g., "Sep 1 - 4, 2025")
     return (
-      `${start.toLocaleDateString('en-US', { month: 'short' })} ` +
-      `${start.getDate()} — ${end.getDate()}, ${start.getFullYear()}`
+      `${start.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' })} ` +
+      `${start.getUTCDate()} — ${end.getUTCDate()}, ${start.getUTCFullYear()}`
     )
   } else if (sameYear) {
     // Different months but same year (e.g., "Sep 29 - Oct 2, 2025")
-    const startMonth = start.toLocaleDateString('en-US', { month: 'short' })
-    const endMonth = end.toLocaleDateString('en-US', { month: 'short' })
-    const startDay = start.getDate()
-    const endDay = end.getDate()
-    const year = start.getFullYear()
+    const startMonth = start.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' })
+    const endMonth = end.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' })
+    const startDay = start.getUTCDate()
+    const endDay = end.getUTCDate()
+    const year = start.getUTCFullYear()
 
     return `${startMonth} ${startDay} — ${endMonth} ${endDay}, ${year}`
   } else {
