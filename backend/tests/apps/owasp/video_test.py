@@ -20,7 +20,7 @@ class TestSlide:
             context={"title": "Test Slide"},
             name="test_slide",
             output_dir=tmp_path,
-            template_name="video/slides/intro.html",
+            template_name="slides/intro.jinja",
             transcript="Test transcript",
         )
 
