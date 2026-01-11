@@ -1,6 +1,10 @@
 import { CodegenConfig } from '@graphql-codegen/cli'
 
 const PUBLIC_API_URL = process.env.PUBLIC_API_URL || 'http://localhost:8000'
+type CsrfResponse = {
+  csrftoken?: string
+}
+
 
 export default async function graphqlCodegenConfig(): Promise<CodegenConfig> {
   let response: Response
@@ -9,17 +13,38 @@ export default async function graphqlCodegenConfig(): Promise<CodegenConfig> {
     response = await fetch(`${PUBLIC_API_URL}/csrf/`, {
       method: 'GET',
     })
-  } catch {
-    /* eslint-disable no-console */
-    console.log('Failed to fetch CSRF token: make sure the backend is running.')
-    throw new Error('Failed to fetch CSRF token')
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('Failed to fetch CSRF token: make sure the backend is running.', err)
+    throw new Error('Failed to fetch CSRF token', { cause: err })
   }
 
   if (!response.ok) {
     throw new Error(`Failed to fetch CSRF token: ${response.status} ${response.statusText}`)
   }
 
-  const csrfToken = (await response.json()).csrftoken
+  let body: unknown
+
+  try {
+    body = await response.json()
+  } catch (err) {
+    throw new Error(
+      `Failed to parse CSRF token response: ${response.status} ${response.statusText}`,
+      { cause: err }
+    )
+  }
+
+  const data = body as CsrfResponse
+
+  const csrfToken =
+  typeof data.csrftoken === 'string' && data.csrftoken.trim() !== ''
+    ? data.csrftoken
+    : null
+
+
+  if (!csrfToken) {
+    throw new Error("Failed to fetch CSRF token: missing or invalid 'csrftoken' in response body")
+  }
 
   return {
     documents: ['src/**/*.{ts,tsx}', '!src/types/__generated__/**'],
