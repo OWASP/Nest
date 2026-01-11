@@ -100,6 +100,9 @@ const DetailsCard = ({
   userSummary,
 }: DetailsCardProps) => {
   const { data: session } = useSession() as { data: ExtendedSession | null }
+  const hasContributions =
+    !!contributionStats ||
+    (contributionData != null && Object.keys(contributionData).length > 0)
 
   // compute styles based on type prop
   const typeStylesMap = {
@@ -260,7 +263,7 @@ const DetailsCard = ({
           </>
         )}
         {entityLeaders && entityLeaders.length > 0 && <Leaders users={entityLeaders} />}
-        {(type === 'project' || type === 'chapter') && (contributionData || contributionStats) && (
+        {(type === 'project' || type === 'chapter') && hasContributions && (
           <div className="mb-8">
             <div className="rounded-lg bg-gray-100 px-4 pt-6 shadow-md sm:px-6 lg:px-10 dark:bg-gray-800">
               {contributionStats && (
