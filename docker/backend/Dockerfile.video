@@ -27,7 +27,8 @@ RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     apk add ffmpeg \
     # WeasyPrint dependencies: https://doc.courtbouillon.org/weasyprint/stable/first_steps.html
     so:libfontconfig.so.1 so:libgobject-2.0.so.0 so:libharfbuzz-subset.so.0 \
-    so:libharfbuzz.so.0 so:libpango-1.0.so.0 so:libpangoft2-1.0.so.0 ttf-freefont
+    so:libharfbuzz.so.0 so:libpango-1.0.so.0 so:libpangoft2-1.0.so.0 ttf-freefont && \
+    chown -R owasp:owasp /home/owasp
 
 WORKDIR /home/owasp
 
