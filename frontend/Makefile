@@ -54,8 +54,15 @@ shell-frontend:
 
 test-frontend: \
 	test-frontend-unit \
-	test-frontend-e2e \
-	test-frontend-a11y
+	test-frontend-a11y \
+	test-frontend-e2e
+
+test-frontend-a11y:
+	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
+		--cache-from nest-test-frontend-a11y \
+		-f docker/frontend/Dockerfile.a11y.test frontend \
+		-t nest-test-frontend-a11y
+	@docker run --env-file frontend/.env.example --rm nest-test-frontend-a11y pnpm run test:a11y
 
 test-frontend-e2e:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
@@ -70,13 +77,6 @@ test-frontend-unit:
 		-f docker/frontend/Dockerfile.unit.test frontend \
 		-t nest-test-frontend-unit
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-unit pnpm run test:unit
-
-test-frontend-a11y:
-	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
-		--cache-from nest-test-frontend-a11y \
-		-f docker/frontend/Dockerfile.a11y.test frontend \
-		-t nest-test-frontend-a11y
-	@docker run --env-file frontend/.env.example --rm nest-test-frontend-a11y pnpm run test:a11y
 
 update-frontend-dependencies:
 	cd frontend && pnpm update
