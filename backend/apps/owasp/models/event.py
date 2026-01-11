@@ -144,7 +144,11 @@ class Event(BulkSaveModel, TimestampedModel):
                         return start_date.replace(day=int(day_val))
 
                 default_dt = datetime.combine(start_date, datetime.min.time())
-                return parser.parse(end_str, default=default_dt).date()
+                end_date = parser.parse(end_str, default=default_dt).date()
+                # Handle year crossover: if end_date is before start_date, assume next year
+                if end_date < start_date:
+                    end_date = end_date.replace(year=end_date.year + 1)
+                return end_date
 
             return parser.parse(clean_dates.strip()).date()
 
