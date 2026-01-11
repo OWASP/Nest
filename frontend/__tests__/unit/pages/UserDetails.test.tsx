@@ -5,7 +5,7 @@ import { screen, waitFor } from '@testing-library/react'
 import { render } from 'wrappers/testUtil'
 import '@testing-library/jest-dom'
 import UserDetailsPage from 'app/members/[memberKey]/page'
-import { drawContributions, fetchHeatmapData } from 'utils/helpers/githubHeatmap'
+import { fetchHeatmapData } from 'utils/helpers/githubHeatmap'
 
 // Mock Apollo Client
 jest.mock('@apollo/client/react', () => ({
@@ -56,8 +56,16 @@ jest.mock('next/navigation', () => ({
 // Mock GitHub heatmap utilities
 jest.mock('utils/helpers/githubHeatmap', () => ({
   fetchHeatmapData: jest.fn(),
-  drawContributions: jest.fn(() => {}),
 }))
+
+jest.mock('components/ContributionHeatmap', () => {
+  const MockContributionHeatmap = () => <div data-testid="contribution-heatmap">Heatmap</div>
+  MockContributionHeatmap.displayName = 'MockContributionHeatmap'
+  return {
+    __esModule: true,
+    default: MockContributionHeatmap,
+  }
+})
 
 jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
@@ -71,9 +79,12 @@ describe('UserDetailsPage', () => {
       error: null,
     })
     ;(fetchHeatmapData as jest.Mock).mockResolvedValue({
-      contributions: { years: [{ year: '2023' }] },
+      years: [{ year: '2023' }],
+      contributions: [
+        { date: '2023-01-01', count: 5, intensity: '2' },
+        { date: '2023-01-02', count: 3, intensity: '1' },
+      ],
     })
-    ;(drawContributions as jest.Mock).mockImplementation(() => {})
   })
 
   afterEach(() => {
@@ -272,19 +283,19 @@ describe('UserDetailsPage', () => {
       loading: false,
     })
     ;(fetchHeatmapData as jest.Mock).mockResolvedValue({
-      years: [{ year: '2023' }], // Provide years data to satisfy condition in component
+      years: [{ year: '2023' }],
+      contributions: [
+        { date: '2023-01-01', count: 5, intensity: '2' },
+        { date: '2023-01-02', count: 3, intensity: '1' },
+      ],
     })
 
     render(<UserDetailsPage />)
 
     // Wait for useEffect to process the fetchHeatmapData result
     await waitFor(() => {
-      const heatmapContainer = screen
-        .getByAltText('Heatmap Background')
-        .closest(String.raw`div.hidden.lg\:block`)
-      expect(heatmapContainer).toBeInTheDocument()
-      expect(heatmapContainer).toHaveClass('hidden')
-      expect(heatmapContainer).toHaveClass('lg:block')
+      const heatmap = screen.getByTestId('contribution-heatmap')
+      expect(heatmap).toBeInTheDocument()
     })
   })
 
@@ -298,8 +309,8 @@ describe('UserDetailsPage', () => {
     render(<UserDetailsPage />)
 
     await waitFor(() => {
-      const heatmapTitle = screen.queryByText('Contribution Heatmap')
-      expect(heatmapTitle).not.toBeInTheDocument()
+      const heatmap = screen.queryByTestId('contribution-heatmap')
+      expect(heatmap).not.toBeInTheDocument()
     })
   })
 
