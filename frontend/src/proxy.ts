@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 import crypto from 'crypto'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // --- Exclude API and auth callback routes ---
   const excludedPaths = ['/api', '/auth/callback']
   if (excludedPaths.some(p => request.nextUrl.pathname.startsWith(p))) {
