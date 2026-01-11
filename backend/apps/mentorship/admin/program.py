@@ -9,10 +9,10 @@ from apps.mentorship.models.program_admin import ProgramAdmin as ProgramAdminThr
 class ProgramAdminInline(admin.TabularInline):
     """Inline admin for ProgramAdmin through model."""
 
-    model = ProgramAdminThroughModel
+    autocomplete_fields = ("admin",)
     extra = 1
     fields = ("admin", "role")
-    autocomplete_fields = ("admin",)
+    model = ProgramAdminThroughModel
 
 
 class ProgramAdmin(admin.ModelAdmin):

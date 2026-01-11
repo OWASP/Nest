@@ -9,10 +9,10 @@ from apps.mentorship.models.module import Module
 class MentorModuleInline(admin.TabularInline):
     """Inline admin for MentorModule through model."""
 
-    model = MentorModule
+    autocomplete_fields = ("mentor",)
     extra = 1
     fields = ("mentor",)
-    autocomplete_fields = ("mentor",)
+    model = MentorModule
 
 
 class ModuleAdmin(admin.ModelAdmin):
