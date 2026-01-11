@@ -2,7 +2,7 @@ import { CodegenConfig } from '@graphql-codegen/cli'
 
 const PUBLIC_API_URL = process.env.PUBLIC_API_URL || 'http://localhost:8000'
 
-export default async function (): Promise<CodegenConfig> {
+export default async function graphqlCodegenConfig(): Promise<CodegenConfig> {
   let response: Response
 
   try {
