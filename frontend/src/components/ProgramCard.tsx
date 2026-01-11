@@ -35,7 +35,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, href, accessLevel, i
     ],
   })
 
-  const roleClass = {
+  const roleClass: Record<string, string> = {
     admin: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
     mentor: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
     default: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',

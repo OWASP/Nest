@@ -1,5 +1,6 @@
 import upperFirst from 'lodash/upperFirst'
 import { useSession } from 'next-auth/react'
+import React from 'react'
 import {
   FaCircleInfo,
   FaChartPie,
@@ -102,7 +103,7 @@ const DetailsCard = ({
   const { data: session } = useSession() as { data: ExtendedSession | null }
 
   // compute styles based on type prop
-  const typeStylesMap = {
+  const typeStylesMap: Partial<Record<CardType, string>> = {
     chapter: 'gap-2 md:col-span-3',
     module: 'gap-2 md:col-span-7',
     program: 'gap-2 md:col-span-7',
@@ -363,7 +364,11 @@ const DetailsCard = ({
 
 export default DetailsCard
 
-export const SocialLinks = ({ urls }) => {
+interface SocialLinksProps {
+  urls: string[]
+}
+
+export const SocialLinks: React.FC<SocialLinksProps> = ({ urls }) => {
   if (!urls || urls.length === 0) return null
   return (
     <div>

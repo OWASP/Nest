@@ -13,6 +13,7 @@ import type { Organization } from 'types/organization'
 import type { Project } from 'types/project'
 import type { MultiSearchBarProps, Suggestion } from 'types/search'
 import type { User } from 'types/user'
+type AlgoliaHit = Chapter | Event | Organization | Project | User;
 
 const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   isLoaded,
@@ -47,11 +48,11 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         if (query.length > 0) {
           const results = await Promise.all(
             indexes.map(async (index) => {
-              const data = await fetchAlgoliaData(index, query, pageCount, suggestionCount)
-              return {
+                const data = await fetchAlgoliaData<AlgoliaHit>(index, query, pageCount, suggestionCount)
+                return {
                 indexName: index,
-                hits: data.hits as Chapter[] | Event[] | Organization[] | Project[] | User[],
-                totalPages: data.totalPages || 0,
+                hits: data.hits,
+                totalPages: data.totalPages ?? 0,
               }
             })
           )
@@ -262,26 +263,37 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                 className="border-b-1 border-b-gray-200 text-gray-600 last:border-b-0 dark:border-b-gray-700 dark:text-gray-300"
               >
                 <ul>
-                  {suggestion.hits.map((hit, subIndex) => (
-                    <li
-                      key={`${hit.key || hit.login || hit.url}-${subIndex}`}
-                      className={`flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                        highlightedIndex?.index === index && highlightedIndex?.subIndex === subIndex
-                          ? 'bg-gray-100 dark:bg-gray-700'
-                          : ''
-                      }`}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => handleSuggestionClick(hit, suggestion.indexName)}
-                        onKeyDown={(e) => handleSuggestionKeyDown(e, hit, suggestion.indexName)}
-                        className="flex w-full cursor-pointer items-center overflow-hidden border-none bg-transparent p-0 text-left focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
+                  {suggestion.hits.map((hit, subIndex) => {
+                    const keyId =
+                      ('key' in hit ? hit.key: null) ??
+                      ('login' in hit ? hit.login: null) ??
+                      ('url' in hit ? hit.url: null) ??
+                      subIndex
+
+                    const displayName = hit.name ?? ('login' in hit ? hit.login : '')
+
+                    return (
+                      <li
+                        key={`${keyId}-${subIndex}`}
+                        className={`flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                          highlightedIndex?.index === index &&
+                          highlightedIndex?.subIndex === subIndex
+                            ? 'bg-gray-100 dark:bg-gray-700'
+                            : ''
+                        }`}
                       >
-                        {getIconForIndex(suggestion.indexName)}
-                        <span className="block max-w-full truncate">{hit.name || hit.login}</span>
-                      </button>
-                    </li>
-                  ))}
+                        <button
+                          type="button"
+                          onClick={() => handleSuggestionClick(hit, suggestion.indexName)}
+                          onKeyDown={(e) => handleSuggestionKeyDown(e, hit, suggestion.indexName)}
+                          className="flex w-full cursor-pointer items-center overflow-hidden border-none bg-transparent p-0 text-left focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
+                        >
+                          {getIconForIndex(suggestion.indexName)}
+                          <span className="block max-w-full truncate">{displayName}</span>
+                        </button>
+                      </li>
+                    )
+                  })}
                 </ul>
               </div>
             ))}

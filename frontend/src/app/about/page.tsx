@@ -321,11 +321,11 @@ const useLeadersData = () => {
     if (error2) handleAppError(error2)
     if (error3) handleAppError(error3)
   }, [error1, error2, error3])
-
+  type LeaderUsername = keyof typeof leaders
   const leadersData = [leader1Data?.user, leader2Data?.user, leader3Data?.user]
     .filter(Boolean)
     .map((user) => ({
-      description: leaders[user.login],
+      description: leaders[user.login as LeaderUsername] || '',
       memberName: user.name || user.login,
       member: user,
     }))
