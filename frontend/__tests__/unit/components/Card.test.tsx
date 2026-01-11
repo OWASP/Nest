@@ -487,4 +487,27 @@ describe('Card', () => {
     expect(screen.getByTestId('social-icon')).toBeInTheDocument()
     expect(screen.getByTestId('contributor-avatar')).toBeInTheDocument()
   })
+  it('render tags when provided', () => {
+    const propsWithTags = {
+      ...baseProps,
+      tags: ['good first issue', 'help wanted'],
+    }
+    render(<Card {...propsWithTags} />)
+    expect(screen.getByText('good first issue')).toBeInTheDocument()
+    expect(screen.getByText('help wanted')).toBeInTheDocument()
+  })
+
+  it('displays only first 3 tags when more than 3 tags are provided', () => {
+    const propsWithManyTags = {
+      ...baseProps,
+      tags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],
+    }
+    render(<Card {...propsWithManyTags} />)
+    expect(screen.getByText('tag1')).toBeInTheDocument()
+    expect(screen.getByText('tag2')).toBeInTheDocument()
+    expect(screen.getByText('tag3')).toBeInTheDocument()
+
+    expect(screen.queryByText('tag4')).not.toBeInTheDocument()
+    expect(screen.queryByText('tag5')).not.toBeInTheDocument()
+  })
 })

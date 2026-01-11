@@ -18,6 +18,7 @@ export type Issue = {
   repositoryName?: string | null
   state?: string
   summary?: string
+  tags?: string[]
   title: string
   updatedAt?: string | number
   url: string

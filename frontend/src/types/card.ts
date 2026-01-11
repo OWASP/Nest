@@ -26,6 +26,7 @@ export type CardProps = {
   projectName?: string
   social?: { title: string; icon: IconType; url: string }[]
   summary: string
+  tags?: string[]
   title: string
   timeline?: {
     start: string

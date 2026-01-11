@@ -24,6 +24,7 @@ const Card = ({
   social,
   tooltipLabel,
   timeline,
+  tags,
 }: CardProps) => {
   return (
     <div className="mx-auto mt-4 mb-2 flex w-full max-w-[95%] flex-col items-start rounded-md border-1 border-gray-200 bg-white p-4 md:max-w-6xl dark:border-gray-700 dark:bg-[#212529]">
@@ -126,8 +127,23 @@ const Card = ({
           </div>
         )}
 
-        {/* Flexible bottom row with contributors and action button */}
+        {/* Flexible bottom row with tags, contributors and action button */}
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
+          {/* Tags Section */}
+          {tags && tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {tags.slice(0, 3).map((tag, index) => (
+                <span
+                  key={tag}
+                  className={`flex items-center justify-center gap-2 rounded-md border border-1 bg-transparent px-2 py-1 whitespace-nowrap text-zinc-300 transition-all hover:text-white ${
+                    index >= 2 ? 'hidden sm:flex' : ''
+                  }`}
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
           {/* Contributors section */}
           <div className="flex flex-wrap items-center gap-2">
             {topContributors?.map((contributor, index) => (
