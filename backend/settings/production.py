@@ -54,5 +54,3 @@ class Production(Base):
 
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
-
-    CSRF_COOKIE_SAMESITE = "Strict"
