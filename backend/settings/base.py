@@ -50,6 +50,7 @@ class Base(Configuration):
         "django_rq",
         "ninja",
         "storages",
+        "django_extensions",
     )
 
     LOCAL_APPS = (
