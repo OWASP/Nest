@@ -16,7 +16,7 @@ class ProgramAdmin(TimestampedModel):
     class Meta:
         db_table = "mentorship_program_admins"
         verbose_name_plural = "Program admins"
-        unique_together = ("program", "user")
+        unique_together = ("program", "admin")
 
     # FKs.
     program = models.ForeignKey(
@@ -26,10 +26,10 @@ class ProgramAdmin(TimestampedModel):
         related_name="program_admins",
     )
 
-    user = models.ForeignKey(
-        "nest.User",
+    admin = models.ForeignKey(
+        "mentorship.Admin",
         on_delete=models.CASCADE,
-        verbose_name="User",
+        verbose_name="Admin",
         related_name="program_admin_roles",
     )
 
@@ -44,7 +44,7 @@ class ProgramAdmin(TimestampedModel):
         """Return a human-readable representation of the program admin.
 
         Returns:
-            str: User and program with role.
+            str: Admin and program with role.
 
         """
-        return f"{self.user} - {self.program} ({self.role})"
+        return f"{self.admin} - {self.program} ({self.role})"

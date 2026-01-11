@@ -11,7 +11,8 @@ class ProgramAdminInline(admin.TabularInline):
 
     model = ProgramAdminThroughModel
     extra = 1
-    autocomplete_fields = ("user",)
+    fields = ("admin", "role")
+    autocomplete_fields = ("admin",)
 
 
 class ProgramAdmin(admin.ModelAdmin):

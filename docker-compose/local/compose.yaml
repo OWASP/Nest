@@ -66,7 +66,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - db-data-admin-update:/var/lib/postgresql/data
+      - db-data-mentorship-admin:/var/lib/postgresql/data
 
   docs:
     container_name: nest-docs
@@ -143,7 +143,7 @@ networks:
 volumes:
   backend-venv:
   cache-data:
-  db-data-admin-update:
+  db-data-mentorship-admin:
   docs-venv:
   frontend-next:
   frontend-node-modules:

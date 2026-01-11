@@ -38,28 +38,6 @@ def resolve_mentors_from_logins(logins: list[str]) -> set[Mentor]:
     return mentors
 
 
-def resolve_users_from_logins(logins: list[str]) -> set:
-    """Resolve a list of GitHub logins to a set of nest User objects."""
-    from apps.nest.models import User
-
-    users = set()
-    for login in logins:
-        try:
-            github_user = GithubUser.objects.get(login__iexact=login.lower())
-            nest_user, _ = User.objects.get_or_create(
-                username=login.lower(), defaults={"github_user": github_user}
-            )
-            if not nest_user.github_user:
-                nest_user.github_user = github_user
-                nest_user.save()
-            users.add(nest_user)
-        except GithubUser.DoesNotExist as e:
-            msg = f"GitHub user '{login}' not found."
-            logger.warning(msg, exc_info=True)
-            raise ValueError(msg) from e
-    return users
-
-
 def _validate_module_dates(started_at, ended_at, program_started_at, program_ended_at) -> tuple:
     """Validate and normalize module start/end dates against program constraints."""
     if started_at is None or ended_at is None:

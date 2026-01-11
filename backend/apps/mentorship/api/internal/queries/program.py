@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
 from apps.mentorship.api.internal.nodes.program import PaginatedPrograms, ProgramNode
-from apps.mentorship.models import Program
+from apps.mentorship.models import Admin, Program
 from apps.mentorship.models.program_admin import ProgramAdmin
 from apps.nest.api.internal.permissions import IsAuthenticated
 
@@ -23,7 +23,9 @@ class ProgramQuery:
     def get_program(self, program_key: str) -> ProgramNode:
         """Get a program by Key."""
         try:
-            program = Program.objects.prefetch_related("admins__github_user").get(key=program_key)
+            program = Program.objects.prefetch_related(
+                "admins__github_user", "admins__nest_user"
+            ).get(key=program_key)
         except Program.DoesNotExist as err:
             msg = f"Program with key '{program_key}' not found."
             logger.warning(msg, exc_info=True)
@@ -42,8 +44,11 @@ class ProgramQuery:
         """Get paginated programs where the current user is admin or mentor."""
         user = info.context.request.user
 
-        admin_program_ids = ProgramAdmin.objects.filter(user=user).values_list(
-            "program_id", flat=True
+        admin = Admin.objects.filter(nest_user=user).first()
+        admin_program_ids = (
+            ProgramAdmin.objects.filter(admin=admin).values_list("program_id", flat=True)
+            if admin
+            else []
         )
 
         query = Q(id__in=admin_program_ids)
@@ -52,7 +57,9 @@ class ProgramQuery:
 
         queryset = (
             Program.objects.prefetch_related(
-                "admins__github_user", "modules__mentors__github_user"
+                "admins__github_user",
+                "admins__nest_user",
+                "modules__mentors__github_user",
             )
             .filter(query)
             .distinct()
@@ -70,7 +77,7 @@ class ProgramQuery:
 
         results = []
         for program in paginated_programs:
-            is_admin = program.admins.filter(id=user.id).exists()
+            is_admin = admin and program.admins.filter(id=admin.id).exists()
             program.user_role = "admin" if is_admin else "mentor"
             results.append(program)
 

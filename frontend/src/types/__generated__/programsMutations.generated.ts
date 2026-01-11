@@ -6,14 +6,14 @@ export type UpdateProgramMutationVariables = Types.Exact<{
 }>;
 
 
-export type UpdateProgramMutation = { updateProgram: { __typename: 'ProgramNode', description: string, domains: Array<string> | null, endedAt: any, experienceLevels: Array<Types.ExperienceLevelEnum> | null, id: string, key: string, menteesLimit: number | null, name: string, startedAt: any, status: Types.ProgramStatusEnum, tags: Array<string> | null, admins: Array<{ __typename: 'UserNode', avatarUrl: string, id: string, login: string, name: string }> | null } };
+export type UpdateProgramMutation = { updateProgram: { __typename: 'ProgramNode', description: string, domains: Array<string> | null, endedAt: any, experienceLevels: Array<Types.ExperienceLevelEnum> | null, id: string, key: string, menteesLimit: number | null, name: string, startedAt: any, status: Types.ProgramStatusEnum, tags: Array<string> | null, admins: Array<{ __typename: 'AdminNode', avatarUrl: string, id: string, login: string, name: string }> | null } };
 
 export type CreateProgramMutationVariables = Types.Exact<{
   input: Types.CreateProgramInput;
 }>;
 
 
-export type CreateProgramMutation = { createProgram: { __typename: 'ProgramNode', description: string, domains: Array<string> | null, endedAt: any, experienceLevels: Array<Types.ExperienceLevelEnum> | null, id: string, key: string, menteesLimit: number | null, name: string, startedAt: any, tags: Array<string> | null, admins: Array<{ __typename: 'UserNode', avatarUrl: string, login: string, name: string }> | null } };
+export type CreateProgramMutation = { createProgram: { __typename: 'ProgramNode', description: string, domains: Array<string> | null, endedAt: any, experienceLevels: Array<Types.ExperienceLevelEnum> | null, id: string, key: string, menteesLimit: number | null, name: string, startedAt: any, tags: Array<string> | null, admins: Array<{ __typename: 'AdminNode', avatarUrl: string, login: string, name: string }> | null } };
 
 export type UpdateProgramStatusMutationVariables = Types.Exact<{
   inputData: Types.UpdateProgramStatusInput;
