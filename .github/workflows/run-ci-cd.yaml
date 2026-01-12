@@ -104,6 +104,19 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+
+      - name: Build cspell image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        with:
+          cache-from: type=gha,scope=cspell
+          cache-to: type=gha,scope=cspell,mode=max
+          context: cspell
+          file: cspell/Dockerfile
+          load: true
+          tags: cspell:ci
+
       - name: Run cspell
         run: |
           make check-spelling
@@ -121,13 +134,18 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1
+        with:
+          cache: true
+
       - name: Run Trivy Repository Scan
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
           scan-type: repo
+          skip-setup-trivy: true
           trivy-config: trivy.yaml
           trivyignores: trivyignore.yaml
-          version: latest
 
   scan-ci-dependencies:
     name: Run CI Dependencies Scan
@@ -142,13 +160,18 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1
+        with:
+          cache: true
+
       - name: Run Trivy Filesystem Scan
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
           scan-type: fs
+          skip-setup-trivy: true
           trivy-config: trivy.yaml
           trivyignores: trivyignore.yaml
-          version: latest
 
   run-backend-tests:
     name: Run backend tests
@@ -396,6 +419,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1
+        with:
+          cache: true
+
       - name: Scan backend image
         continue-on-error: true
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
@@ -403,9 +431,9 @@ jobs:
           exit-code: 1
           image-ref: owasp/nest:backend-staging
           scan-type: image
+          skip-setup-trivy: true
           trivy-config: trivy.yaml
           trivyignores: trivyignore.yaml
-          version: latest
 
       - name: Scan frontend image
         continue-on-error: true
@@ -760,7 +788,6 @@ jobs:
         uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1
         with:
           cache: true
-          version: v0.62.1
 
       - name: Scan backend image
         continue-on-error: true
