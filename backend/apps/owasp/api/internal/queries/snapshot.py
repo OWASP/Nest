@@ -26,13 +26,11 @@ class SnapshotQuery:
 
     @strawberry_django.field(
         prefetch_related=[
-            "new_users__user_badges__badge",
-            "new_projects__owasp_repository",
-            "new_chapters__owasp_repository",
-            "new_issues__repository",
-            "new_issues__labels",
-            "new_releases__author__user_badges__badge",
-            "new_releases__repository",
+            "new_users",
+            "new_projects",
+            "new_chapters",
+            "new_issues",
+            "new_releases",
         ],
     )
     def snapshots(self, limit: int = 12) -> list[SnapshotNode]:
