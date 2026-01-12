@@ -276,7 +276,7 @@ const DetailsCard = ({
           hasActualContributions(contributionData, contributionStats) && (
             <div className="mb-8">
               <div className="rounded-lg bg-gray-100 px-4 pt-6 shadow-md sm:px-6 lg:px-10 dark:bg-gray-800">
-                {contributionStats && (
+                {contributionStats && contributionStats.total > 0 && (
                   <ContributionStats
                     title={`${type === 'project' ? 'Project' : 'Chapter'} Contribution Activity`}
                     stats={contributionStats}
