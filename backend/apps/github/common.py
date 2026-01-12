@@ -79,7 +79,7 @@ def sync_repository(
         until = (
             latest_updated_milestone.updated_at
             if (latest_updated_milestone := repository.latest_updated_milestone)
-            else timezone.now() - td(days=30)
+            else timezone.now() - td(days=365)
         )
 
         for gh_milestone in gh_repository.get_milestones(**kwargs):
@@ -102,7 +102,7 @@ def sync_repository(
 
         # GitHub repository issues.
         project_track_issues = repository.project.track_issues if repository.project else True
-        month_ago = timezone.now() - td(days=30)
+        year_ago = timezone.now() - td(days=365)
 
         if repository.track_issues and project_track_issues:
             kwargs = {
@@ -113,7 +113,7 @@ def sync_repository(
             until = (
                 latest_updated_issue.updated_at
                 if (latest_updated_issue := repository.latest_updated_issue)
-                else month_ago
+                else year_ago
             )
             for gh_issue in gh_repository.get_issues(**kwargs):
                 if gh_issue.pull_request:  # Skip pull requests.
@@ -164,7 +164,7 @@ def sync_repository(
         until = (
             latest_updated_pull_request.updated_at
             if (latest_updated_pull_request := repository.latest_updated_pull_request)
-            else month_ago
+            else year_ago
         )
         for gh_pull_request in gh_repository.get_pulls(**kwargs):
             if gh_pull_request.updated_at < until:
