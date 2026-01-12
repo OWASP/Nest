@@ -31,16 +31,6 @@ class TestMilestoneNode(GraphQLNodeBaseTest):
         }
         assert field_names == expected_field_names
 
-    def test_author_field(self):
-        """Test author field resolution."""
-        mock_milestone = Mock()
-        mock_author = Mock()
-        mock_milestone.author = mock_author
-
-        field = self._get_field_by_name("author", MilestoneNode)
-        result = field.base_resolver.wrapped_func(mock_milestone)
-        assert result == mock_author
-
     def test_organization_name_with_organization(self):
         """Test organization_name field when organization exists."""
         mock_milestone = Mock()
@@ -51,7 +41,7 @@ class TestMilestoneNode(GraphQLNodeBaseTest):
         mock_milestone.repository = mock_repository
 
         field = self._get_field_by_name("organization_name", MilestoneNode)
-        result = field.base_resolver.wrapped_func(mock_milestone)
+        result = field.base_resolver.wrapped_func(None, mock_milestone)
         assert result == "test-org"
 
     def test_organization_name_without_organization(self):
@@ -62,7 +52,7 @@ class TestMilestoneNode(GraphQLNodeBaseTest):
         mock_milestone.repository = mock_repository
 
         field = self._get_field_by_name("organization_name", MilestoneNode)
-        result = field.base_resolver.wrapped_func(mock_milestone)
+        result = field.base_resolver.wrapped_func(None, mock_milestone)
         assert result is None
 
     def test_organization_name_without_repository(self):
@@ -71,7 +61,7 @@ class TestMilestoneNode(GraphQLNodeBaseTest):
         mock_milestone.repository = None
 
         field = self._get_field_by_name("organization_name", MilestoneNode)
-        result = field.base_resolver.wrapped_func(mock_milestone)
+        result = field.base_resolver.wrapped_func(None, mock_milestone)
         assert result is None
 
     def test_progress_with_issues(self):
@@ -81,7 +71,7 @@ class TestMilestoneNode(GraphQLNodeBaseTest):
         mock_milestone.open_issues_count = 3
 
         field = self._get_field_by_name("progress", MilestoneNode)
-        result = field.base_resolver.wrapped_func(mock_milestone)
+        result = field.base_resolver.wrapped_func(None, mock_milestone)
         assert math.isclose(result, 70.0)
 
     def test_progress_without_issues(self):
@@ -91,7 +81,7 @@ class TestMilestoneNode(GraphQLNodeBaseTest):
         mock_milestone.open_issues_count = 0
 
         field = self._get_field_by_name("progress", MilestoneNode)
-        result = field.base_resolver.wrapped_func(mock_milestone)
+        result = field.base_resolver.wrapped_func(None, mock_milestone)
         assert math.isclose(result, 0.0)
 
     def test_repository_name_with_repository(self):
@@ -102,7 +92,7 @@ class TestMilestoneNode(GraphQLNodeBaseTest):
         mock_milestone.repository = mock_repository
 
         field = self._get_field_by_name("repository_name", MilestoneNode)
-        result = field.base_resolver.wrapped_func(mock_milestone)
+        result = field.base_resolver.wrapped_func(None, mock_milestone)
         assert result == "test-repo"
 
     def test_repository_name_without_repository(self):
@@ -111,5 +101,5 @@ class TestMilestoneNode(GraphQLNodeBaseTest):
         mock_milestone.repository = None
 
         field = self._get_field_by_name("repository_name", MilestoneNode)
-        result = field.base_resolver.wrapped_func(mock_milestone)
+        result = field.base_resolver.wrapped_func(None, mock_milestone)
         assert result is None

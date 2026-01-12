@@ -33,7 +33,7 @@ class TestMemberSnapshotNode(GraphQLNodeBaseTest):
         mock_snapshot.commits_count = 42
 
         field = self._get_field_by_name("commits_count", MemberSnapshotNode)
-        result = field.base_resolver.wrapped_func(mock_snapshot)
+        result = field.base_resolver.wrapped_func(None, mock_snapshot)
 
         assert result == 42
 
@@ -44,7 +44,7 @@ class TestMemberSnapshotNode(GraphQLNodeBaseTest):
         mock_snapshot.github_user = mock_user
 
         field = self._get_field_by_name("github_user", MemberSnapshotNode)
-        result = field.base_resolver.wrapped_func(mock_snapshot)
+        result = field.base_resolver.wrapped_func(None, mock_snapshot)
 
         assert result == mock_user
 
@@ -54,7 +54,7 @@ class TestMemberSnapshotNode(GraphQLNodeBaseTest):
         mock_snapshot.issues_count = 15
 
         field = self._get_field_by_name("issues_count", MemberSnapshotNode)
-        result = field.base_resolver.wrapped_func(mock_snapshot)
+        result = field.base_resolver.wrapped_func(None, mock_snapshot)
 
         assert result == 15
 
@@ -64,7 +64,7 @@ class TestMemberSnapshotNode(GraphQLNodeBaseTest):
         mock_snapshot.pull_requests_count = 23
 
         field = self._get_field_by_name("pull_requests_count", MemberSnapshotNode)
-        result = field.base_resolver.wrapped_func(mock_snapshot)
+        result = field.base_resolver.wrapped_func(None, mock_snapshot)
 
         assert result == 23
 
@@ -74,7 +74,7 @@ class TestMemberSnapshotNode(GraphQLNodeBaseTest):
         mock_snapshot.messages_count = 100
 
         field = self._get_field_by_name("messages_count", MemberSnapshotNode)
-        result = field.base_resolver.wrapped_func(mock_snapshot)
+        result = field.base_resolver.wrapped_func(None, mock_snapshot)
 
         assert result == 100
 
@@ -84,6 +84,6 @@ class TestMemberSnapshotNode(GraphQLNodeBaseTest):
         mock_snapshot.total_contributions = 80
 
         field = self._get_field_by_name("total_contributions", MemberSnapshotNode)
-        result = field.base_resolver.wrapped_func(mock_snapshot)
+        result = field.base_resolver.wrapped_func(None, mock_snapshot)
 
         assert result == 80

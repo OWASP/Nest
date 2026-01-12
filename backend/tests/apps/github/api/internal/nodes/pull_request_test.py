@@ -27,16 +27,6 @@ class TestPullRequestNode(GraphQLNodeBaseTest):
         }
         assert field_names == expected_field_names
 
-    def test_author_field(self):
-        """Test author field resolution."""
-        mock_pr = Mock()
-        mock_author = Mock()
-        mock_pr.author = mock_author
-
-        field = self._get_field_by_name("author", PullRequestNode)
-        result = field.base_resolver.wrapped_func(mock_pr)
-        assert result == mock_author
-
     def test_organization_name_with_organization(self):
         """Test organization_name field when organization exists."""
         mock_pr = Mock()
@@ -47,7 +37,7 @@ class TestPullRequestNode(GraphQLNodeBaseTest):
         mock_pr.repository = mock_repository
 
         field = self._get_field_by_name("organization_name", PullRequestNode)
-        result = field.base_resolver.wrapped_func(mock_pr)
+        result = field.base_resolver.wrapped_func(None, mock_pr)
         assert result == "test-org"
 
     def test_organization_name_without_organization(self):
@@ -58,7 +48,7 @@ class TestPullRequestNode(GraphQLNodeBaseTest):
         mock_pr.repository = mock_repository
 
         field = self._get_field_by_name("organization_name", PullRequestNode)
-        result = field.base_resolver.wrapped_func(mock_pr)
+        result = field.base_resolver.wrapped_func(None, mock_pr)
         assert result is None
 
     def test_organization_name_without_repository(self):
@@ -67,7 +57,7 @@ class TestPullRequestNode(GraphQLNodeBaseTest):
         mock_pr.repository = None
 
         field = self._get_field_by_name("organization_name", PullRequestNode)
-        result = field.base_resolver.wrapped_func(mock_pr)
+        result = field.base_resolver.wrapped_func(None, mock_pr)
         assert result is None
 
     def test_repository_name_with_repository(self):
@@ -78,7 +68,7 @@ class TestPullRequestNode(GraphQLNodeBaseTest):
         mock_pr.repository = mock_repository
 
         field = self._get_field_by_name("repository_name", PullRequestNode)
-        result = field.base_resolver.wrapped_func(mock_pr)
+        result = field.base_resolver.wrapped_func(None, mock_pr)
         assert result == "test-repo"
 
     def test_repository_name_without_repository(self):
@@ -87,7 +77,7 @@ class TestPullRequestNode(GraphQLNodeBaseTest):
         mock_pr.repository = None
 
         field = self._get_field_by_name("repository_name", PullRequestNode)
-        result = field.base_resolver.wrapped_func(mock_pr)
+        result = field.base_resolver.wrapped_func(None, mock_pr)
         assert result is None
 
     def test_url_with_url(self):
@@ -96,7 +86,7 @@ class TestPullRequestNode(GraphQLNodeBaseTest):
         mock_pr.url = "https://github.com/test-org/test-repo/pull/123"
 
         field = self._get_field_by_name("url", PullRequestNode)
-        result = field.base_resolver.wrapped_func(mock_pr)
+        result = field.base_resolver.wrapped_func(None, mock_pr)
         assert result == "https://github.com/test-org/test-repo/pull/123"
 
     def test_url_without_url(self):
@@ -105,5 +95,5 @@ class TestPullRequestNode(GraphQLNodeBaseTest):
         mock_pr.url = None
 
         field = self._get_field_by_name("url", PullRequestNode)
-        result = field.base_resolver.wrapped_func(mock_pr)
+        result = field.base_resolver.wrapped_func(None, mock_pr)
         assert result == ""

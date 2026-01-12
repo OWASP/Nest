@@ -99,7 +99,7 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         mock_repository.issues = mock_issues
 
         field = self._get_field_by_name("issues", RepositoryNode)
-        field.base_resolver.wrapped_func(mock_repository)
+        field.base_resolver.wrapped_func(None, mock_repository)
         mock_issues.order_by.assert_called_with("-created_at")
 
     def test_languages_method(self):
@@ -108,7 +108,7 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         mock_repository.languages = {"Python": 1000, "JavaScript": 500}
 
         field = self._get_field_by_name("languages", RepositoryNode)
-        result = field.base_resolver.wrapped_func(mock_repository)
+        result = field.base_resolver.wrapped_func(None, mock_repository)
         assert result == ["Python", "JavaScript"]
 
     def test_latest_release_method(self):
@@ -117,18 +117,8 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         mock_repository.latest_release = "v1.0.0"
 
         field = self._get_field_by_name("latest_release", RepositoryNode)
-        result = field.base_resolver.wrapped_func(mock_repository)
+        result = field.base_resolver.wrapped_func(None, mock_repository)
         assert result == "v1.0.0"
-
-    def test_organization_method(self):
-        """Test organization method resolution."""
-        mock_repository = Mock()
-        mock_organization = Mock()
-        mock_repository.organization = mock_organization
-
-        field = self._get_field_by_name("organization", RepositoryNode)
-        result = field.base_resolver.wrapped_func(mock_repository)
-        assert result == mock_organization
 
     def test_project_method(self):
         """Test project method resolution."""
@@ -137,7 +127,7 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         mock_repository.project = mock_project
 
         field = self._get_field_by_name("project", RepositoryNode)
-        result = field.base_resolver.wrapped_func(mock_repository)
+        result = field.base_resolver.wrapped_func(None, mock_repository)
         assert result == mock_project
 
     def test_recent_milestones_method(self):
@@ -149,7 +139,7 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
 
         field = self._get_field_by_name("recent_milestones", RepositoryNode)
         resolver = field.base_resolver.wrapped_func
-        resolver(mock_repository, limit=3)
+        resolver(None, mock_repository, limit=3)
         mock_milestones.order_by.assert_called_with("-created_at")
 
     def test_releases_method(self):
@@ -161,7 +151,7 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
 
         field = self._get_field_by_name("releases", RepositoryNode)
         resolver = field.base_resolver.wrapped_func
-        resolver(mock_repository)
+        resolver(None, mock_repository)
         mock_releases.order_by.assert_called_with("-published_at")
 
     def test_top_contributors_method(self):
@@ -185,7 +175,7 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         ]
 
         field = self._get_field_by_name("top_contributors", RepositoryNode)
-        result = field.base_resolver.wrapped_func(mock_repository)
+        result = field.base_resolver.wrapped_func(None, mock_repository)
         assert len(result) == 2
         assert all(isinstance(c, RepositoryContributorNode) for c in result)
 
@@ -195,7 +185,7 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         mock_repository.topics = ["security", "python", "django"]
 
         field = self._get_field_by_name("topics", RepositoryNode)
-        result = field.base_resolver.wrapped_func(mock_repository)
+        result = field.base_resolver.wrapped_func(None, mock_repository)
         assert result == ["security", "python", "django"]
 
     def test_url_method(self):
@@ -204,7 +194,7 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         mock_repository.url = "https://github.com/test-org/test-repo"
 
         field = self._get_field_by_name("url", RepositoryNode)
-        result = field.base_resolver.wrapped_func(mock_repository)
+        result = field.base_resolver.wrapped_func(None, mock_repository)
         assert result == "https://github.com/test-org/test-repo"
 
     def test_is_archived_field_exists(self):

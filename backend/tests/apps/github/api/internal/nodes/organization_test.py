@@ -72,7 +72,7 @@ class TestOrganizationNode(GraphQLNodeBaseTest):
 
         # Call stats method
         field = self._get_field_by_name("stats", OrganizationNode)
-        result = field.base_resolver.wrapped_func(mock_organization)
+        result = field.base_resolver.wrapped_func(None, mock_organization)
 
         # Verify result
         assert isinstance(result, OrganizationStatsNode)
@@ -108,7 +108,7 @@ class TestOrganizationNode(GraphQLNodeBaseTest):
 
         # Call stats method
         field = self._get_field_by_name("stats", OrganizationNode)
-        result = field.base_resolver.wrapped_func(mock_organization)
+        result = field.base_resolver.wrapped_func(None, mock_organization)
 
         # Verify result with default values
         assert isinstance(result, OrganizationStatsNode)
@@ -124,7 +124,7 @@ class TestOrganizationNode(GraphQLNodeBaseTest):
         mock_organization.url = "https://github.com/test-org"
 
         field = self._get_field_by_name("url", OrganizationNode)
-        result = field.base_resolver.wrapped_func(mock_organization)
+        result = field.base_resolver.wrapped_func(None, mock_organization)
         assert result == "https://github.com/test-org"
 
 

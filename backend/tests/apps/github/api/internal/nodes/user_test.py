@@ -55,7 +55,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_user.idx_created_at = 1234567890.0
 
         field = self._get_field_by_name("created_at", UserNode)
-        result = field.base_resolver.wrapped_func(mock_user)
+        result = field.base_resolver.wrapped_func(None, mock_user)
         assert math.isclose(result, 1234567890.0)
 
     def test_issues_count_field(self):
@@ -64,7 +64,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_user.idx_issues_count = 42
 
         field = self._get_field_by_name("issues_count", UserNode)
-        result = field.base_resolver.wrapped_func(mock_user)
+        result = field.base_resolver.wrapped_func(None, mock_user)
         assert result == 42
 
     def test_releases_count_field(self):
@@ -73,7 +73,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_user.idx_releases_count = 15
 
         field = self._get_field_by_name("releases_count", UserNode)
-        result = field.base_resolver.wrapped_func(mock_user)
+        result = field.base_resolver.wrapped_func(None, mock_user)
         assert result == 15
 
     def test_updated_at_field(self):
@@ -82,7 +82,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_user.idx_updated_at = 1234567890.0
 
         field = self._get_field_by_name("updated_at", UserNode)
-        result = field.base_resolver.wrapped_func(mock_user)
+        result = field.base_resolver.wrapped_func(None, mock_user)
         assert math.isclose(result, 1234567890.0)
 
     def test_url_field(self):
@@ -91,7 +91,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_user.url = "https://github.com/testuser"
 
         field = self._get_field_by_name("url", UserNode)
-        result = field.base_resolver.wrapped_func(mock_user)
+        result = field.base_resolver.wrapped_func(None, mock_user)
         assert result == "https://github.com/testuser"
 
     def test_badge_count_field(self):
@@ -102,7 +102,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_user.user_badges = mock_badges_queryset
 
         field = self._get_field_by_name("badge_count", UserNode)
-        result = field.base_resolver.wrapped_func(mock_user)
+        result = field.base_resolver.wrapped_func(None, mock_user)
         assert result == 3
         mock_badges_queryset.filter.assert_called_once_with(is_active=True)
         mock_badges_queryset.filter.return_value.count.assert_called_once()
@@ -117,7 +117,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_user.user_badges = mock_badges_queryset
 
         field = self._get_field_by_name("badges", UserNode)
-        result = field.base_resolver.wrapped_func(mock_user)
+        result = field.base_resolver.wrapped_func(None, mock_user)
         assert result == []
         mock_badges_queryset.filter.assert_called_once_with(is_active=True)
         mock_filter.select_related.assert_called_once_with("badge")
@@ -137,7 +137,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_user.user_badges = mock_badges_queryset
 
         field = self._get_field_by_name("badges", UserNode)
-        result = field.base_resolver.wrapped_func(mock_user)
+        result = field.base_resolver.wrapped_func(None, mock_user)
         assert result == [mock_badge]
         mock_badges_queryset.filter.assert_called_once_with(is_active=True)
         mock_filter.select_related.assert_called_once_with("badge")
@@ -190,7 +190,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_user.user_badges = mock_badges_queryset
 
         field = self._get_field_by_name("badges", UserNode)
-        result = field.base_resolver.wrapped_func(mock_user)
+        result = field.base_resolver.wrapped_func(None, mock_user)
 
         # Verify the badges are returned in the correct order
         expected_badges = [
@@ -216,7 +216,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_user.owasp_profile = mock_profile
 
         field = self._get_field_by_name("first_owasp_contribution_at", UserNode)
-        result = field.base_resolver.wrapped_func(mock_user)
+        result = field.base_resolver.wrapped_func(None, mock_user)
 
         assert result == mock_profile.first_contribution_at.timestamp()
 
@@ -225,7 +225,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_user = Mock(spec=[])
 
         field = self._get_field_by_name("first_owasp_contribution_at", UserNode)
-        result = field.base_resolver.wrapped_func(mock_user)
+        result = field.base_resolver.wrapped_func(None, mock_user)
 
         assert result is None
 
@@ -238,7 +238,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_user.owasp_profile = mock_profile
 
         field = self._get_field_by_name("is_owasp_board_member", UserNode)
-        result = field.base_resolver.wrapped_func(mock_user)
+        result = field.base_resolver.wrapped_func(None, mock_user)
 
         assert result is True
 
@@ -247,7 +247,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_user = Mock(spec=[])
 
         field = self._get_field_by_name("is_owasp_board_member", UserNode)
-        result = field.base_resolver.wrapped_func(mock_user)
+        result = field.base_resolver.wrapped_func(None, mock_user)
 
         assert result is False
 
@@ -260,7 +260,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_user.owasp_profile = mock_profile
 
         field = self._get_field_by_name("is_former_owasp_staff", UserNode)
-        result = field.base_resolver.wrapped_func(mock_user)
+        result = field.base_resolver.wrapped_func(None, mock_user)
 
         assert result is True
 
@@ -269,7 +269,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_user = Mock(spec=[])
 
         field = self._get_field_by_name("is_former_owasp_staff", UserNode)
-        result = field.base_resolver.wrapped_func(mock_user)
+        result = field.base_resolver.wrapped_func(None, mock_user)
 
         assert result is False
 
@@ -282,7 +282,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_user.owasp_profile = mock_profile
 
         field = self._get_field_by_name("is_gsoc_mentor", UserNode)
-        result = field.base_resolver.wrapped_func(mock_user)
+        result = field.base_resolver.wrapped_func(None, mock_user)
 
         assert result is True
 
@@ -291,7 +291,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_user = Mock(spec=[])
 
         field = self._get_field_by_name("is_gsoc_mentor", UserNode)
-        result = field.base_resolver.wrapped_func(mock_user)
+        result = field.base_resolver.wrapped_func(None, mock_user)
 
         assert result is False
 
@@ -304,7 +304,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_user.owasp_profile = mock_profile
 
         field = self._get_field_by_name("linkedin_page_id", UserNode)
-        result = field.base_resolver.wrapped_func(mock_user)
+        result = field.base_resolver.wrapped_func(None, mock_user)
 
         assert result == "john-doe-123"
 
@@ -317,7 +317,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_user.owasp_profile = mock_profile
 
         field = self._get_field_by_name("linkedin_page_id", UserNode)
-        result = field.base_resolver.wrapped_func(mock_user)
+        result = field.base_resolver.wrapped_func(None, mock_user)
 
         assert result == ""
 
@@ -326,6 +326,6 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_user = Mock(spec=[])
 
         field = self._get_field_by_name("linkedin_page_id", UserNode)
-        result = field.base_resolver.wrapped_func(mock_user)
+        result = field.base_resolver.wrapped_func(None, mock_user)
 
         assert result == ""

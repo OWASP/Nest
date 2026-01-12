@@ -31,7 +31,7 @@ class CommitteeNode(GenericEntityNode):
         return root.owasp_repository.open_issues_count
 
     @strawberry_django.field
-    def repositories_count(self) -> int:
+    def repositories_count(self, root: Committee) -> int:
         """Resolve repositories count."""
         return 1
 

@@ -17,7 +17,7 @@ class TestCommitteeNode(GraphQLNodeBaseTest):
         mock_committee.owasp_repository = mock_repo
 
         field = self._get_field_by_name("contributors_count", CommitteeNode)
-        result = field.base_resolver.wrapped_func(mock_committee)
+        result = field.base_resolver.wrapped_func(None, mock_committee)
 
         assert result == 42
 
@@ -27,7 +27,7 @@ class TestCommitteeNode(GraphQLNodeBaseTest):
         mock_committee.idx_created_at = 1234567890.0
 
         field = self._get_field_by_name("created_at", CommitteeNode)
-        result = field.base_resolver.wrapped_func(mock_committee)
+        result = field.base_resolver.wrapped_func(None, mock_committee)
 
         assert math.isclose(result, 1234567890.0)
 
@@ -40,7 +40,7 @@ class TestCommitteeNode(GraphQLNodeBaseTest):
         mock_committee.owasp_repository = mock_repo
 
         field = self._get_field_by_name("forks_count", CommitteeNode)
-        result = field.base_resolver.wrapped_func(mock_committee)
+        result = field.base_resolver.wrapped_func(None, mock_committee)
 
         assert result == 15
 
@@ -53,7 +53,7 @@ class TestCommitteeNode(GraphQLNodeBaseTest):
         mock_committee.owasp_repository = mock_repo
 
         field = self._get_field_by_name("issues_count", CommitteeNode)
-        result = field.base_resolver.wrapped_func(mock_committee)
+        result = field.base_resolver.wrapped_func(None, mock_committee)
 
         assert result == 23
 
@@ -62,7 +62,7 @@ class TestCommitteeNode(GraphQLNodeBaseTest):
         mock_committee = Mock()
 
         field = self._get_field_by_name("repositories_count", CommitteeNode)
-        result = field.base_resolver.wrapped_func(mock_committee)
+        result = field.base_resolver.wrapped_func(None, mock_committee)
 
         assert result == 1
 
@@ -75,6 +75,6 @@ class TestCommitteeNode(GraphQLNodeBaseTest):
         mock_committee.owasp_repository = mock_repo
 
         field = self._get_field_by_name("stars_count", CommitteeNode)
-        result = field.base_resolver.wrapped_func(mock_committee)
+        result = field.base_resolver.wrapped_func(None, mock_committee)
 
         assert result == 100

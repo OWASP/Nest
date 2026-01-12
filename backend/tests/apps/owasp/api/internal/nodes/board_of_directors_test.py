@@ -30,7 +30,7 @@ class TestBoardOfDirectorsNode(GraphQLNodeBaseTest):
         mock_board.owasp_url = "https://board.owasp.org/elections/2025_elections"
 
         field = self._get_field_by_name("owasp_url", BoardOfDirectorsNode)
-        result = field.base_resolver.wrapped_func(mock_board)
+        result = field.base_resolver.wrapped_func(None, mock_board)
 
         assert result == "https://board.owasp.org/elections/2025_elections"
 
@@ -43,7 +43,7 @@ class TestBoardOfDirectorsNode(GraphQLNodeBaseTest):
         mock_board.get_candidates.return_value = [mock_candidate1, mock_candidate2]
 
         field = self._get_field_by_name("candidates", BoardOfDirectorsNode)
-        result = field.base_resolver.wrapped_func(mock_board)
+        result = field.base_resolver.wrapped_func(None, mock_board)
 
         assert result == [mock_candidate1, mock_candidate2]
         mock_board.get_candidates.assert_called_once()
@@ -57,7 +57,7 @@ class TestBoardOfDirectorsNode(GraphQLNodeBaseTest):
         mock_board.get_members.return_value = [mock_member1, mock_member2]
 
         field = self._get_field_by_name("members", BoardOfDirectorsNode)
-        result = field.base_resolver.wrapped_func(mock_board)
+        result = field.base_resolver.wrapped_func(None, mock_board)
 
         assert result == [mock_member1, mock_member2]
         mock_board.get_members.assert_called_once()

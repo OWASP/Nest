@@ -129,7 +129,7 @@ class TestProjectNode(GraphQLNodeBaseTest):
         instance.contribution_stats = mock_project.contribution_stats
 
         field = self._get_field_by_name("contribution_stats", ProjectNode)
-        result = field.base_resolver.wrapped_func(instance)
+        result = field.base_resolver.wrapped_func(None, instance)
 
         assert result is not None
         assert result["commits"] == 100

@@ -59,6 +59,7 @@ class TestMemberSnapshotQuery:
             "apps.owasp.api.internal.queries.member_snapshot.MemberSnapshot"
         ) as mock_snapshot_cls:
             mock_queryset = Mock()
+            mock_queryset.select_related.return_value = mock_queryset
             mock_queryset.order_by.return_value = mock_queryset
             mock_queryset.__getitem__ = Mock(return_value=mock_snapshots)
 
@@ -67,6 +68,7 @@ class TestMemberSnapshotQuery:
             result = query.member_snapshots(limit=10)
 
             mock_snapshot_cls.objects.all.assert_called_once()
+            mock_queryset.select_related.assert_called_once_with("github_user")
             mock_queryset.order_by.assert_called_once_with("-start_at")
             mock_queryset.__getitem__.assert_called_once_with(slice(None, 10, None))
             assert result == mock_snapshots
@@ -86,6 +88,7 @@ class TestMemberSnapshotQuery:
             mock_user_cls.objects.get.return_value = mock_user
 
             mock_queryset = Mock()
+            mock_queryset.select_related.return_value = mock_queryset
             mock_queryset.filter.return_value = mock_queryset
             mock_queryset.order_by.return_value = mock_queryset
             mock_queryset.__getitem__ = Mock(return_value=mock_snapshots)
@@ -95,6 +98,7 @@ class TestMemberSnapshotQuery:
             result = query.member_snapshots(user_login="testuser", limit=5)
 
             mock_user_cls.objects.get.assert_called_once_with(login="testuser")
+            mock_queryset.select_related.assert_called_once_with("github_user")
             mock_queryset.filter.assert_called_once_with(github_user=mock_user)
             assert result == mock_snapshots
 
