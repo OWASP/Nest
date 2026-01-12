@@ -107,6 +107,11 @@ const DetailsCard = ({
     module: 'gap-2 md:col-span-7',
     program: 'gap-2 md:col-span-7',
   }
+
+  const hasContributions =
+  (contributionStats && contributionStats.total > 0) ||
+  (contributionData && Object.keys(contributionData).length > 0)
+
   const secondaryCardStyles = typeStylesMap[type] ?? 'gap-2 md:col-span-5'
 
   return (
@@ -260,7 +265,7 @@ const DetailsCard = ({
           </>
         )}
         {entityLeaders && entityLeaders.length > 0 && <Leaders users={entityLeaders} />}
-        {(type === 'project' || type === 'chapter') && (contributionData || contributionStats) && (
+        {(type === 'project' || type === 'chapter') && hasContributions && (
           <div className="mb-8">
             <div className="rounded-lg bg-gray-100 px-4 pt-6 shadow-md sm:px-6 lg:px-10 dark:bg-gray-800">
               {contributionStats && (
