@@ -1,4 +1,4 @@
-import { mockProjectDetailsData } from '@a11y/data/mockProjectDetailsData'
+import { mockProjectDetailsData } from '@mockData/mockProjectDetailsData'
 import { render } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
 import Leaders from 'components/Leaders'

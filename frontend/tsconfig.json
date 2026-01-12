@@ -22,8 +22,8 @@
       }
     ],
     "paths": {
-      "@a11y/*": ["__tests__/a11y/*"],
       "@e2e/*": ["__tests__/e2e/*"],
+      "@mockData/*": ["__tests__/mockData/*"],
       "@unit/*": ["__tests__/unit/*"],
       "*": ["./src/*"],
       "app/*": ["src/app/*"],

@@ -1,4 +1,4 @@
-import { mockChapterData } from '@a11y/data/mockChapterData'
+import { mockChapterData } from '@mockData/mockChapterData'
 import { screen, fireEvent, render, waitFor } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
 import * as L from 'leaflet'

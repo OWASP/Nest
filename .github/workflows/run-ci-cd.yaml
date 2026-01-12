@@ -332,6 +332,7 @@ jobs:
       github.ref == 'refs/heads/main'
     needs:
       - run-backend-tests
+      - run-frontend-a11y-tests
       - run-frontend-e2e-tests
       - run-frontend-unit-tests
       - set-release-version
@@ -701,6 +702,7 @@ jobs:
       github.event.action == 'published'
     needs:
       - run-backend-tests
+      - run-frontend-a11y-tests
       - run-frontend-e2e-tests
       - run-frontend-unit-tests
       - set-release-version
