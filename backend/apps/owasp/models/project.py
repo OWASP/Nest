@@ -26,10 +26,10 @@ from apps.owasp.models.enums.project import (
 )
 from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins.project import ProjectIndexMixin
-from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 if TYPE_CHECKING:
     from apps.owasp.models.entity_member import EntityMember
+    from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 MAX_LEADERS_COUNT = 5
 
@@ -222,9 +222,7 @@ class Project(
     @property
     def last_health_metrics(self) -> ProjectHealthMetrics | None:
         """Return last health metrics for the project."""
-        return (
-            ProjectHealthMetrics.objects.filter(project=self).order_by("-nest_created_at").first()
-        )
+        return self.health_metrics.order_by("-nest_created_at").first()
 
     @property
     def leaders_count(self) -> int:
