@@ -21,7 +21,6 @@ interface MockTooltipProps {
   children: ReactNode
   content: string
   id?: string
-  placement?: string
   showArrow?: boolean
 }
 
@@ -64,7 +63,7 @@ jest.mock('next/link', () => {
 jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: ({ icon, className }: MockFontAwesomeIconProps) => (
     <span data-testid="font-awesome-icon" className={className}>
-      {String(icon)}
+      {typeof icon === 'string' ? icon : 'mock-icon'}
     </span>
   ),
 }))
@@ -81,7 +80,7 @@ jest.mock('wrappers/FontAwesomeIconWrapper', () => {
   return function FontAwesomeIconWrapper({ icon, className }: MockFontAwesomeIconProps) {
     return (
       <span data-testid="font-awesome-wrapper" className={className}>
-        {String(icon)}
+        {typeof icon === 'string' ? icon : 'mock-icon'}
       </span>
     )
   }
