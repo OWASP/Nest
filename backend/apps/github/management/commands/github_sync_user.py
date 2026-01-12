@@ -1,7 +1,7 @@
 """A command to sync GitHub user commits, pull requests, and issues across OWASP organizations."""
 
 import logging
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 
 from django.core.management.base import BaseCommand
 from github.GithubException import GithubException
@@ -39,12 +39,12 @@ class Command(BaseCommand):
         parser.add_argument(
             "--start-at",
             type=str,
-            help="Start date (YYYY-MM-DD). Defaults to 365 days ago.",
+            help="Start date (YYYY-MM-DD). Defaults to January 1st of current year.",
         )
         parser.add_argument(
             "--end-at",
             type=str,
-            help="End date (YYYY-MM-DD).  Defaults to today.",
+            help="End date (YYYY-MM-DD). Defaults to October 1st of current year.",
         )
         parser.add_argument(
             "--skip-sync",
@@ -204,9 +204,10 @@ class Command(BaseCommand):
             self.populate_first_contribution_only(username, user, gh)
             return
 
-        #Default to last 365 days
-        default_end = datetime.now(UTC)
-        default_start = default_end - timedelta(days=365)
+        # Default to current year: Jan 1 to Oct 1
+        current_year = datetime.now(UTC).year
+        default_start = datetime(current_year, 1, 1, tzinfo=UTC)
+        default_end = datetime(current_year, 10, 1, tzinfo=UTC)
 
         end_at = self.parse_date(options.get("end_at"), default_end)
         start_at = self.parse_date(options.get("start_at"), default_start)
