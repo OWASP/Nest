@@ -305,7 +305,7 @@ describe('ChapterMap', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
       const overlay = getByText('Unlock map').closest('button')
-      fireEvent.keyDown(overlay!, { key: 'Enter' })
+      fireEvent.keyDown(overlay, { key: 'Enter' })
 
       expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
     })
@@ -314,7 +314,7 @@ describe('ChapterMap', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
 
       const overlay = getByText('Unlock map').closest('button')
-      fireEvent.keyDown(overlay!, { key: ' ' })
+      fireEvent.keyDown(overlay, { key: ' ' })
 
       expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
     })
