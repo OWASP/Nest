@@ -100,7 +100,6 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -121,6 +120,7 @@ jobs:
       - name: Run cspell
         run: |
           make check-spelling
+    timeout-minutes: 10
 
   scan-code:
     name: Run Code Scan
@@ -131,7 +131,6 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -147,6 +146,8 @@ jobs:
           scan-type: repo
           skip-setup-trivy: true
           trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
+    timeout-minutes: 10
 
   scan-ci-dependencies:
     name: Run CI Dependencies Scan
@@ -157,7 +158,6 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -173,6 +173,8 @@ jobs:
           scan-type: fs
           skip-setup-trivy: true
           trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
+    timeout-minutes: 10
 
   run-backend-tests:
     name: Run backend tests
@@ -182,7 +184,6 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -207,6 +208,7 @@ jobs:
       - name: Run backend tests
         run: |
           docker run -e DJANGO_SETTINGS_MODULE=settings.test --env-file backend/.env.example owasp/nest:test-backend-latest pytest
+    timeout-minutes: 10
 
   run-frontend-unit-tests:
     name: Run frontend unit tests
@@ -216,7 +218,6 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -241,6 +242,7 @@ jobs:
       - name: Run frontend unit tests
         run: |
           docker run --env-file frontend/.env.example owasp/nest:test-frontend-unit-latest pnpm run test:unit
+    timeout-minutes: 10
 
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
@@ -250,7 +252,6 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -273,6 +274,7 @@ jobs:
       - name: Run frontend end-to-end tests
         run: |
           docker run --env-file frontend/.env.example owasp/nest:test-frontend-e2e-latest pnpm run test:e2e
+    timeout-minutes: 10
 
   run-frontend-a11y-tests:
     name: Run frontend accessibility tests
@@ -314,7 +316,6 @@ jobs:
       release_version: ${{ steps.set.outputs.release_version }}
     permissions: {}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
       - name: Set release version
         id: set
@@ -324,6 +325,7 @@ jobs:
           else
             echo "release_version=$(date '+%y.%-m.%-d')-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
           fi
+    timeout-minutes: 15
 
   build-staging-images:
     name: Build Staging Images
@@ -342,7 +344,6 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -444,6 +445,7 @@ jobs:
             echo "**Backend:** ${{ steps.backend-size.outputs.human_readable }}"
             echo "**Frontend:** ${{ steps.frontend-size.outputs.human_readable }}"
           } >> $GITHUB_STEP_SUMMARY
+    timeout-minutes: 15
 
   scan-staging-images:
     name: Scan Staging Images
@@ -452,7 +454,6 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -479,6 +480,8 @@ jobs:
           scan-type: image
           skip-setup-trivy: true
           trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
+    timeout-minutes: 10
 
   deploy-staging-nest:
     name: Deploy Nest Staging
@@ -497,7 +500,6 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -598,6 +600,7 @@ jobs:
       - name: Run Nest deploy
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml staging/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+    timeout-minutes: 10
 
   deploy-staging-nest-proxy:
     name: Deploy Staging Nest Proxy
@@ -614,7 +617,6 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -634,6 +636,7 @@ jobs:
       - name: Run proxy deploy
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml staging/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+    timeout-minutes: 10
 
   run-staging-lighthouse-ci:
     name: Run Lighthouse CI
@@ -642,7 +645,6 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -666,6 +668,7 @@ jobs:
         run: |
           pnpm run lighthouse-ci
         working-directory: frontend
+    timeout-minutes: 20
 
   run-staging-zap-baseline-scan:
     name: Run staging ZAP baseline scan
@@ -674,7 +677,6 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -694,6 +696,7 @@ jobs:
         with:
           name: zap-baseline-scan-report-${{ github.run_id }}
           path: report_html.html
+    timeout-minutes: 20
 
   build-production-images:
     name: Build Production Images
@@ -712,7 +715,6 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -810,6 +812,7 @@ jobs:
             echo "**Backend:** ${{ steps.backend-size.outputs.human_readable }}"
             echo "**Frontend:** ${{ steps.frontend-size.outputs.human_readable }}"
           } >> $GITHUB_STEP_SUMMARY
+    timeout-minutes: 15
 
   scan-production-images:
     name: Scan Production Images
@@ -818,7 +821,6 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -845,6 +847,8 @@ jobs:
           scan-type: image
           skip-setup-trivy: true
           trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
+    timeout-minutes: 10
 
   deploy-production-nest:
     name: Deploy Nest to Production
@@ -863,7 +867,6 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -975,6 +978,7 @@ jobs:
       - name: Run Nest deploy
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml production/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+    timeout-minutes: 10
 
   deploy-production-nest-proxy:
     name: Deploy Production Nest Proxy
@@ -991,7 +995,6 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -1011,6 +1014,7 @@ jobs:
       - name: Run proxy deploy
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml production/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+    timeout-minutes: 10
 
   run-production-zap-baseline-scan:
     name: Run production ZAP baseline scan
@@ -1019,7 +1023,6 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     steps:
       - name: Check out repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
@@ -1039,3 +1042,4 @@ jobs:
         with:
           name: zap-baseline-scan-report-${{ github.run_id }}
           path: report_html.html
+    timeout-minutes: 20
