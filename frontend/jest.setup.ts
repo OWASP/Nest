@@ -38,10 +38,10 @@ jest.mock('next/navigation', () => {
 
   return {
     ...actual,
-    useRouter: jest.fn(() => mockRouter),
-    useSearchParams: jest.fn(() => new URLSearchParams()),
     useParams: jest.fn(() => ({})),
     usePathname: jest.fn(() => '/'),
+    useRouter: jest.fn(() => mockRouter),
+    useSearchParams: jest.fn(() => new URLSearchParams()),
   }
 })
 
