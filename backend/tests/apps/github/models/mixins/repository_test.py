@@ -9,6 +9,7 @@ CONTRIBUTORS_COUNT = 5
 FORKS_COUNT = 5
 OPEN_ISSUES_COUNT = 5
 STARS_COUNT = 5
+SUBSCRIBERS_COUNT = 5
 
 
 @pytest.fixture
@@ -22,6 +23,7 @@ def repository_index_mixin_instance():
     instance.open_issues_count = OPEN_ISSUES_COUNT
     instance.pushed_at = datetime(2021, 1, 1, tzinfo=UTC)
     instance.stars_count = STARS_COUNT
+    instance.subscribers_count = SUBSCRIBERS_COUNT
     instance.topics = ["Topic1", "Topic2"]
     instance.created_at = datetime(2020, 1, 1, tzinfo=UTC)
     instance.size = 1024
@@ -116,7 +118,7 @@ class TestRepositoryIndexMixin:
             ("idx_created_at", datetime(2020, 1, 1, tzinfo=UTC).timestamp()),
             ("idx_has_funding_yml", True),
             ("idx_license", "MIT"),
-            ("idx_subscribers_count", STARS_COUNT),
+            ("idx_subscribers_count", SUBSCRIBERS_COUNT),
             ("idx_commits_count", 100),
             ("idx_size", 1024),
             ("idx_key", "nest/key"),
