@@ -301,6 +301,7 @@ jobs:
           load: true
           platforms: linux/amd64
           tags: owasp/nest:test-frontend-a11y-latest
+
       - name: Run frontend a11y tests
         run: |
           docker run --env-file frontend/.env.example owasp/nest:test-frontend-a11y-latest pnpm run test:a11y
