@@ -17,7 +17,6 @@ import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import ContributionHeatmap from 'components/ContributionHeatmap'
-import ContributionStats from 'components/ContributionStats'
 import EntityActions from 'components/EntityActions'
 import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
@@ -102,9 +101,7 @@ const DetailsCard = ({
   const { data: session } = useSession() as { data: ExtendedSession | null }
 
   const hasContributions =
-  !!contributionStats ||
-  (contributionData != null && Object.keys(contributionData).length > 0)
-
+    !!contributionStats || (contributionData != null && Object.keys(contributionData).length > 0)
 
   // compute styles based on type prop
   const typeStylesMap = {
@@ -265,33 +262,19 @@ const DetailsCard = ({
           </>
         )}
         {entityLeaders && entityLeaders.length > 0 && <Leaders users={entityLeaders} />}
-<<<<<<< HEAD
-        {(type === 'project' || type === 'chapter') && (contributionData || contributionStats) && (
-=======
         {(type === 'project' || type === 'chapter') && hasContributions && (
->>>>>>> b0752637 (Hide contribution section when no contributions exist)
           <div className="mb-8">
             <div className="rounded-lg bg-gray-100 px-4 pt-6 shadow-md sm:px-6 lg:px-10 dark:bg-gray-800">
-              {contributionStats && (
-                <ContributionStats
-                  title={`${type === 'project' ? 'Project' : 'Chapter'} Contribution Activity`}
-                  stats={contributionStats}
-                />
-              )}
               {contributionData &&
                 Object.keys(contributionData).length > 0 &&
                 startDate &&
                 endDate && (
-                  <div className="flex w-full items-center justify-center">
-                    <div className="w-full">
-                      <ContributionHeatmap
-                        contributionData={contributionData}
-                        startDate={startDate}
-                        endDate={endDate}
-                        unit="contribution"
-                      />
-                    </div>
-                  </div>
+                  <ContributionHeatmap
+                    contributionData={contributionData}
+                    startDate={startDate}
+                    endDate={endDate}
+                    unit="contribution"
+                  />
                 )}
             </div>
           </div>
