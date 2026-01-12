@@ -1,5 +1,6 @@
-import Link from 'next/link'
+import { capitalize } from 'lodash'
 import Image from 'next/image'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type React from 'react'
 import { useState } from 'react'
@@ -84,7 +85,7 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
       >
         <TruncatedText text={module?.name} />
       </Link>
-      <TextInfoItem icon={FaTurnUp} label="Level" value={String(module.experienceLevel).toUpperCase()} />
+      <TextInfoItem icon={FaTurnUp} label="Level" value={capitalize(module.experienceLevel)} />
       <TextInfoItem icon={FaCalendar} label="Start" value={formatDate(module.startedAt)} />
       <TextInfoItem
         icon={FaHourglassHalf}
@@ -93,10 +94,12 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
       />
 
       {hasContributors && (
-        <div className="mt-auto flex gap-4 w-full">
+        <div className="mt-auto flex w-full gap-4">
           {mentorsWithAvatars.length > 0 && (
-            <div className="flex-1 flex flex-col gap-2">
-              <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Mentors</span>
+            <div className="flex flex-1 flex-col gap-2">
+              <span className="text-xs font-medium tracking-wider text-gray-400 uppercase">
+                Mentors
+              </span>
               <div className="flex flex-wrap gap-1">
                 {mentorsWithAvatars.slice(0, 4).map((contributor) => (
                   <Image
@@ -110,7 +113,7 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
                   />
                 ))}
                 {mentorsWithAvatars.length > 4 && (
-                  <span className="text-xs font-medium text-gray-400 self-center">
+                  <span className="self-center text-xs font-medium text-gray-400">
                     +{mentorsWithAvatars.length - 4}
                   </span>
                 )}
@@ -118,8 +121,12 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
             </div>
           )}
           {menteesWithAvatars.length > 0 && (
-            <div className={`flex-1 flex flex-col gap-2 ${mentorsWithAvatars.length > 0 ? 'border-l-1 border-gray-100 pl-4 dark:border-gray-700' : ''}`}>
-              <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Mentees</span>
+            <div
+              className={`flex flex-1 flex-col gap-2 ${mentorsWithAvatars.length > 0 ? 'border-l-1 border-gray-100 pl-4 dark:border-gray-700' : ''}`}
+            >
+              <span className="text-xs font-medium tracking-wider text-gray-400 uppercase">
+                Mentees
+              </span>
               <div className="flex flex-wrap gap-1">
                 {menteesWithAvatars.slice(0, 4).map((contributor) => (
                   <Image
@@ -133,7 +140,7 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
                   />
                 ))}
                 {menteesWithAvatars.length > 4 && (
-                  <span className="text-xs font-medium text-gray-400 self-center">
+                  <span className="self-center text-xs font-medium text-gray-400">
                     +{menteesWithAvatars.length - 4}
                   </span>
                 )}
