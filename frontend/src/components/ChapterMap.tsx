@@ -10,10 +10,12 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import type { Chapter } from 'types/chapter'
 import type { UserLocation } from 'utils/geolocationUtils'
-import 'leaflet.markercluster'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
+
+// Note: Removed 'leaflet.markercluster' side-effect import as
+// react-leaflet-cluster manages this dependency internally for React.
 
 const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
   const map = useMap()

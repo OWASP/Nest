@@ -87,10 +87,9 @@ services:
 
   frontend:
     container_name: nest-frontend
-    command: >
-      sh -c '
-        pnpm run dev
-      '
+    command: pnpm run dev
+    stdin_open: true
+    tty: true
     build:
       context: ../../frontend
       dockerfile: ../docker/frontend/Dockerfile.local

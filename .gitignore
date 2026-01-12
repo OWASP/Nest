@@ -38,6 +38,7 @@ frontend/playwright/.cache/
 frontend/pnpm-debug.log*
 frontend/test-results/
 frontend/yarn-debug.log*
+pnpm-workspace.yaml
 frontend/yarn-error.log*
 logs
 node_modules/
