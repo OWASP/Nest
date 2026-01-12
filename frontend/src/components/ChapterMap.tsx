@@ -22,12 +22,22 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
     if (!map) return
     if (isMapActive) {
       map.scrollWheelZoom.enable()
+      map.dragging.enable()
+      map.touchZoom.enable()
+      map.doubleClickZoom.enable()
+      map.keyboard.enable()
+
       if (!zoomControlRef.current) {
         zoomControlRef.current = L.control.zoom({ position: 'topleft' })
         zoomControlRef.current.addTo(map)
       }
     } else {
       map.scrollWheelZoom.disable()
+      map.dragging.disable()
+      map.touchZoom.disable()
+      map.doubleClickZoom.disable()
+      map.keyboard.disable()
+
       if (zoomControlRef.current) {
         zoomControlRef.current.remove()
         zoomControlRef.current = null
@@ -39,6 +49,10 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
     return () => {
       if (!map) return
       map.scrollWheelZoom.disable()
+      map.dragging.disable()
+      map.touchZoom.disable()
+      map.doubleClickZoom.disable()
+      map.keyboard.disable()
       if (zoomControlRef.current) {
         zoomControlRef.current.remove()
         zoomControlRef.current = null
@@ -61,6 +75,14 @@ const MapViewUpdater = ({
 
   useEffect(() => {
     if (!map) return
+    const container = map.getContainer()
+    const width = container.clientWidth
+    const height = container.clientHeight
+    const aspectRatio = width / height
+
+    const dynamicMinZoom = aspectRatio > 2 ? 1 : 2
+    map.setMinZoom(dynamicMinZoom)
+
     if (userLocation && validGeoLocData.length > 0) {
       const maxNearestChapters = 5
       const localChapters = validGeoLocData.slice(0, maxNearestChapters)
@@ -76,7 +98,8 @@ const MapViewUpdater = ({
       ]
       const localBounds = L.latLngBounds(locationsForBounds)
       const maxZoom = 12
-      map.fitBounds(localBounds, { maxZoom: maxZoom })
+      const padding = 50
+      map.fitBounds(localBounds, { maxZoom: maxZoom, padding: [padding, padding] })
     } else if (showLocal && validGeoLocData.length > 0) {
       const maxNearestChapters = 5
       const localChapters = validGeoLocData.slice(0, maxNearestChapters - 1)
@@ -87,6 +110,7 @@ const MapViewUpdater = ({
         ])
       )
       const maxZoom = 7
+      const padding = 50
       const nearestChapter = validGeoLocData[0]
       map.setView(
         [
@@ -95,9 +119,9 @@ const MapViewUpdater = ({
         ],
         maxZoom
       )
-      map.fitBounds(localBounds, { maxZoom: maxZoom })
+      map.fitBounds(localBounds, { maxZoom: maxZoom, padding: [padding, padding] })
     } else {
-      map.setView([20, 0], 2)
+      map.setView([20, 0], Math.max(dynamicMinZoom, 2))
     }
   }, [userLocation, showLocal, validGeoLocData, map])
 
@@ -167,11 +191,14 @@ const ChapterMap = ({
         scrollWheelZoom={isMapActive}
         style={{ height: '100%', width: '100%' }}
         zoomControl={false}
+        minZoom={1}
+        maxZoom={18}
+        worldCopyJump={true}
         maxBounds={[
-          [-90, -180],
-          [90, 180],
+          [-85, -Infinity],
+          [85, Infinity],
         ]}
-        maxBoundsViscosity={1}
+        maxBoundsViscosity={0.5}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
