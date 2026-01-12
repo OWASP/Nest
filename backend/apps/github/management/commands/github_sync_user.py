@@ -44,7 +44,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--end-at",
             type=str,
-            help="End date (YYYY-MM-DD). Defaults to today.",
+            help="End date (YYYY-MM-DD).  Defaults to today.",
         )
         parser.add_argument(
             "--skip-sync",
@@ -204,7 +204,7 @@ class Command(BaseCommand):
             self.populate_first_contribution_only(username, user, gh)
             return
 
-        # Default to last 365 days
+        #Default to last 365 days
         default_end = datetime.now(UTC)
         default_start = default_end - timedelta(days=365)
 
