@@ -57,6 +57,18 @@ const showIssuesAndMilestones = (type: CardType): boolean =>
 const showPullRequestsAndReleases = (type: CardType): boolean =>
   ['organization', 'project', 'repository', 'user'].includes(type)
 
+const hasActualContributions = (
+  contributionData?: Record<string, number> | null,
+  contributionStats?: { total?: number } | null
+): boolean => {
+  const hasStats = contributionStats && (contributionStats.total ?? 0) > 0
+  const hasData =
+    contributionData &&
+    Object.keys(contributionData).length > 0 &&
+    Object.values(contributionData).some((count) => count > 0)
+  return Boolean(hasStats || hasData)
+}
+
 const DetailsCard = ({
   description,
   details,
@@ -260,33 +272,34 @@ const DetailsCard = ({
           </>
         )}
         {entityLeaders && entityLeaders.length > 0 && <Leaders users={entityLeaders} />}
-        {(type === 'project' || type === 'chapter') && (contributionData || contributionStats) && (
-          <div className="mb-8">
-            <div className="rounded-lg bg-gray-100 px-4 pt-6 shadow-md sm:px-6 lg:px-10 dark:bg-gray-800">
-              {contributionStats && (
-                <ContributionStats
-                  title={`${type === 'project' ? 'Project' : 'Chapter'} Contribution Activity`}
-                  stats={contributionStats}
-                />
-              )}
-              {contributionData &&
-                Object.keys(contributionData).length > 0 &&
-                startDate &&
-                endDate && (
-                  <div className="flex w-full items-center justify-center">
-                    <div className="w-full">
-                      <ContributionHeatmap
-                        contributionData={contributionData}
-                        startDate={startDate}
-                        endDate={endDate}
-                        unit="contribution"
-                      />
-                    </div>
-                  </div>
+        {(type === 'project' || type === 'chapter') &&
+          hasActualContributions(contributionData, contributionStats) && (
+            <div className="mb-8">
+              <div className="rounded-lg bg-gray-100 px-4 pt-6 shadow-md sm:px-6 lg:px-10 dark:bg-gray-800">
+                {contributionStats && (
+                  <ContributionStats
+                    title={`${type === 'project' ? 'Project' : 'Chapter'} Contribution Activity`}
+                    stats={contributionStats}
+                  />
                 )}
+                {contributionData &&
+                  Object.keys(contributionData).length > 0 &&
+                  startDate &&
+                  endDate && (
+                    <div className="flex w-full items-center justify-center">
+                      <div className="w-full">
+                        <ContributionHeatmap
+                          contributionData={contributionData}
+                          startDate={startDate}
+                          endDate={endDate}
+                          unit="contribution"
+                        />
+                      </div>
+                    </div>
+                  )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
         {topContributors && (
           <TopContributorsList
             contributors={topContributors}
