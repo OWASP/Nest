@@ -15,7 +15,6 @@ from apps.owasp.api.internal.nodes.project_health_metrics import (
     ProjectHealthMetricsNode,
 )
 from apps.owasp.models.project import Project
-from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 RECENT_ISSUES_LIMIT = 5
 RECENT_RELEASES_LIMIT = 5
@@ -49,29 +48,21 @@ class ProjectNode(GenericEntityNode):
         """Resolve contribution stats with camelCase keys."""
         return deep_camelize(root.contribution_stats)
 
-    @strawberry_django.field
+    @strawberry_django.field(prefetch_related=["health_metrics"])
     def health_metrics_list(
         self, root: Project, limit: int = 30
     ) -> list[ProjectHealthMetricsNode]:
         """Resolve project health metrics."""
         return (
-            ProjectHealthMetrics.objects.select_related("project")
-            .filter(project=root)
-            .order_by("nest_created_at")[:limit]
+            root.health_metrics.order_by("nest_created_at")[:limit]
             if (limit := min(limit, MAX_LIMIT)) > 0
             else []
         )
 
-    @strawberry_django.field
+    @strawberry_django.field(prefetch_related=["health_metrics"])
     def health_metrics_latest(self, root: Project) -> ProjectHealthMetricsNode | None:
         """Resolve latest project health metrics."""
-        # strawberry_django.field optimization works with QuerySets only.
-        return (
-            ProjectHealthMetrics.objects.select_related("project")
-            .filter(project=root)
-            .order_by("-nest_created_at")
-            .first()
-        )
+        return root.health_metrics.order_by("-nest_created_at").first()
 
     @strawberry_django.field
     def issues_count(self, root: Project) -> int:
