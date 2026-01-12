@@ -77,6 +77,17 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
 
   const hasContributors = mentorsWithAvatars.length > 0 || menteesWithAvatars.length > 0
 
+  const getAvatarUrlWithSize = (avatarUrl: string): string => {
+    try {
+      const url = new URL(avatarUrl)
+      url.searchParams.set('s', '60')
+      return url.toString()
+    } catch {
+      const separator = avatarUrl.includes('?') ? '&' : '?'
+      return `${avatarUrl}${separator}s=60`
+    }
+  }
+
   return (
     <div className="flex h-auto min-h-[12rem] w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
       <Link
@@ -107,7 +118,7 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
                     alt={contributor.name || contributor.login}
                     className="rounded-full border-1 border-gray-200 dark:border-gray-700"
                     height={24}
-                    src={`${contributor.avatarUrl}&s=60`}
+                    src={getAvatarUrlWithSize(contributor.avatarUrl)}
                     title={contributor.name || contributor.login}
                     width={24}
                   />
@@ -134,7 +145,7 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
                     alt={contributor.name || contributor.login}
                     className="rounded-full border-1 border-gray-200 dark:border-gray-700"
                     height={24}
-                    src={`${contributor.avatarUrl}&s=60`}
+                    src={getAvatarUrlWithSize(contributor.avatarUrl)}
                     title={contributor.name || contributor.login}
                     width={24}
                   />
