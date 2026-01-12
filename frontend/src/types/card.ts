@@ -85,14 +85,6 @@ export interface DetailsCardProps {
   tags?: string[]
   type: CardType
   userSummary?: JSX.Element
-
-  /**
-   * Added to support hiding contribution UI when no contributions exist
-   */
-  contributionStats?: unknown
-  contributionData?: Record<string, unknown>
-  startDate?: string
-  endDate?: string
 }
 
 export interface UserCardProps {
