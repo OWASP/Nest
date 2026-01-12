@@ -78,7 +78,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           </div>
         </Link>
         {/* Desktop Header Links */}
-        <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium md:block">
+        <div className="hidden flex-1 justify-between rounded-lg pl-2 lg:pl-6 font-medium md:block">
           <div className="flex justify-start pl-6">
             {headerLinks
               .filter((link) => {
@@ -95,7 +95,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                     key={link.text}
                     href={link.href || '/'}
                     className={cn(
-                      'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                      'navlink px-2 py-2 text-sm md:text-xs lg:text-base text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
                       pathname === link.href && 'font-bold text-blue-800 dark:text-white'
                     )}
                     aria-current="page"
@@ -106,7 +106,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               })}
           </div>
         </div>
-        <div className="flex items-center justify-normal gap-4">
+        <div className="flex shrink-0 items-center gap-2 md:gap-1 lg:gap-4">
           <NavButton
             href="https://github.com/OWASP/Nest"
             defaultIcon={FaRegStar}

@@ -33,7 +33,7 @@ export default function NavDropdown({ link, pathname }: NavDropDownProps) {
     <div
       ref={dropdownRef}
       className={cn(
-        'dropdown navlink relative px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+        'dropdown navlink relative px-2 py-2 text-sm md:text-xs lg:text-base text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
         link.submenu?.map((sub) => sub.href).includes(pathname) &&
           'font-bold text-blue-800 dark:text-white'
       )}
