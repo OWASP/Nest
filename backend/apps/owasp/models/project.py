@@ -206,7 +206,6 @@ class Project(
                 "author",
                 "level",
                 "milestone",
-                "repository",
             )
             .prefetch_related(
                 "labels",
