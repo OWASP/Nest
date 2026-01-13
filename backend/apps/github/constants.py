@@ -11,3 +11,4 @@ GITHUB_USER_RE = re.compile("^https://github.com/([^/]+)/?$")
 OWASP_FOUNDATION_LOGIN = "OWASPFoundation"
 OWASP_GITHUB_IO = "owasp.github.io"
 OWASP_LOGIN = "owasp"
+GITHUB_COMMITS_BULK_SAVE_CHUNK_SIZE = 50

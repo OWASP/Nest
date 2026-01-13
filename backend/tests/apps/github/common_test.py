@@ -15,6 +15,7 @@ def mock_common_deps(mocker):
         "Organization": mocker.patch("apps.github.common.Organization"),
         "User": mocker.patch("apps.github.common.User"),
         "Repository": mocker.patch("apps.github.common.Repository"),
+        "Commit": mocker.patch("apps.github.common.Commit"),
         "Milestone": mocker.patch("apps.github.common.Milestone"),
         "Issue": mocker.patch("apps.github.common.Issue"),
         "PullRequest": mocker.patch("apps.github.common.PullRequest"),
