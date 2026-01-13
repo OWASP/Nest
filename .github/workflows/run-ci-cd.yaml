@@ -1,4 +1,4 @@
-name: Run CI/CD
+﻿name: Run CI/CD
 
 on:
   merge_group:
@@ -144,9 +144,7 @@ jobs:
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
           scan-type: repo
-          skip-setup-trivy: true
           trivy-config: trivy.yaml
-          trivyignores: trivyignore.yaml
     timeout-minutes: 10
 
   scan-ci-dependencies:
@@ -171,9 +169,7 @@ jobs:
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
           scan-type: fs
-          skip-setup-trivy: true
           trivy-config: trivy.yaml
-          trivyignores: trivyignore.yaml
     timeout-minutes: 10
 
   run-backend-tests:
@@ -478,9 +474,7 @@ jobs:
           exit-code: 1
           image-ref: owasp/nest:frontend-staging
           scan-type: image
-          skip-setup-trivy: true
           trivy-config: trivy.yaml
-          trivyignores: trivyignore.yaml
     timeout-minutes: 10
 
   deploy-staging-nest:
@@ -835,7 +829,6 @@ jobs:
         with:
           exit-code: 1
           image-ref: owasp/nest:backend-production
-          scan-type: image
           skip-setup-trivy: true
           trivy-config: trivy.yaml
 
@@ -844,10 +837,8 @@ jobs:
         with:
           exit-code: 1
           image-ref: owasp/nest:frontend-production
-          scan-type: image
           skip-setup-trivy: true
           trivy-config: trivy.yaml
-          trivyignores: trivyignore.yaml
     timeout-minutes: 10
 
   deploy-production-nest:
