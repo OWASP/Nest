@@ -109,8 +109,8 @@ const DetailsCard = ({
   }
 
   const hasContributions =
-  (contributionStats && contributionStats.total > 0) ||
-  (contributionData && Object.keys(contributionData).length > 0)
+    (contributionStats && contributionStats.total > 0) ||
+    (contributionData && Object.keys(contributionData).length > 0)
 
   const secondaryCardStyles = typeStylesMap[type] ?? 'gap-2 md:col-span-5'
 
