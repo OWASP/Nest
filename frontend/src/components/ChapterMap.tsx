@@ -251,26 +251,28 @@ const ChapterMap = ({
         )}
       </MapContainer>
       {!isMapActive && (
-        <button
-          type="button"
-          tabIndex={0}
-          className="pointer-events-none absolute inset-0 z-[500] flex cursor-pointer items-center justify-center rounded-[inherit] bg-black/10"
-          onClick={() => {
-            setIsMapActive(true)
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
+        <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-black/10">
+          <button
+            type="button"
+            tabIndex={0}
+            className="pointer-events-none absolute inset-0 z-[500] flex cursor-pointer items-center justify-center rounded-[inherit] bg-black/10"
+            onClick={() => {
               setIsMapActive(true)
-            }
-          }}
-          aria-label="Unlock map"
-        >
-          <p className="pointer-events-auto flex items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white">
-            <FaUnlock aria-hidden="true" />
-            Unlock map
-          </p>
-        </button>
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                setIsMapActive(true)
+              }
+            }}
+            aria-label="Unlock map"
+          >
+            <p className="pointer-events-auto flex items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white">
+              <FaUnlock aria-hidden="true" />
+              Unlock map
+            </p>
+          </button>
+        </div>
       )}
       {isMapActive && (
         <div className="absolute top-20 left-3 z-[999] w-fit">
