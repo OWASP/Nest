@@ -133,11 +133,7 @@ variable "project_name" {
 variable "proxy_security_group_ids" {
   description = "A list of security group IDs to associate with the RDS proxy."
   type        = list(string)
-
-  validation {
-    condition     = length(var.proxy_security_group_ids) > 0
-    error_message = "proxy_security_group_ids must contain at least one security group."
-  }
+  default     = []
 }
 
 variable "secret_recovery_window_in_days" {
@@ -146,8 +142,8 @@ variable "secret_recovery_window_in_days" {
   default     = 7
 
   validation {
-    condition     = var.secret_recovery_window_in_days >= 0 && var.secret_recovery_window_in_days <= 30
-    error_message = "secret_recovery_window_in_days must be between 0 and 30."
+    condition     = var.secret_recovery_window_in_days == 0 || (var.secret_recovery_window_in_days >= 7 && var.secret_recovery_window_in_days <= 30)
+    error_message = "secret_recovery_window_in_days must be 0 or between 7 and 30."
   }
 }
 

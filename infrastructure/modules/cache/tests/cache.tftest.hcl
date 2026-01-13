@@ -1,6 +1,7 @@
 variables {
   common_tags           = { Environment = "test", Project = "nest" }
   environment           = "test"
+  log_retention_in_days = 30
   project_name          = "nest"
   redis_engine_version  = "7.0"
   redis_node_type       = "cache.t3.micro"
@@ -122,7 +123,7 @@ run "test_subnet_group_uses_provided_subnets" {
   command = plan
 
   assert {
-    condition     = tolist(aws_elasticache_subnet_group.main.subnet_ids) == var.subnet_ids
+    condition     = toset(aws_elasticache_subnet_group.main.subnet_ids) == toset(var.subnet_ids)
     error_message = "Subnet group must use the provided subnet IDs."
   }
 }

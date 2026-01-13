@@ -1,16 +1,15 @@
 variables {
-  common_tags              = { Environment = "test", Project = "nest" }
-  create_rds_proxy         = false
-  db_allocated_storage     = 20
-  db_engine_version        = "16.4"
-  db_instance_class        = "db.t3.micro"
-  db_name                  = "nest_db"
-  db_subnet_ids            = ["subnet-12345678"]
-  db_user                  = "nest_user"
-  environment              = "test"
-  project_name             = "nest"
-  proxy_security_group_ids = ["sg-proxy12345"]
-  security_group_ids       = ["sg-12345678"]
+  common_tags          = { Environment = "test", Project = "nest" }
+  create_rds_proxy     = false
+  db_allocated_storage = 20
+  db_engine_version    = "16.4"
+  db_instance_class    = "db.t3.micro"
+  db_name              = "nest_db"
+  db_subnet_ids        = ["subnet-12345678"]
+  db_user              = "nest_user"
+  environment          = "test"
+  project_name         = "nest"
+  security_group_ids   = ["sg-12345678"]
 }
 
 run "test_database_not_publicly_accessible" {
@@ -75,7 +74,8 @@ run "test_proxy_created_when_enabled" {
   command = plan
 
   variables {
-    create_rds_proxy = true
+    create_rds_proxy         = true
+    proxy_security_group_ids = ["sg-proxy12345"]
   }
 
   assert {
@@ -88,7 +88,8 @@ run "test_proxy_engine_family" {
   command = plan
 
   variables {
-    create_rds_proxy = true
+    create_rds_proxy         = true
+    proxy_security_group_ids = ["sg-proxy12345"]
   }
 
   assert {
@@ -110,7 +111,8 @@ run "test_proxy_requires_tls" {
   command = plan
 
   variables {
-    create_rds_proxy = true
+    create_rds_proxy         = true
+    proxy_security_group_ids = ["sg-proxy12345"]
   }
 
   assert {
@@ -143,5 +145,14 @@ run "test_storage_encrypted" {
   assert {
     condition     = aws_db_instance.main.storage_encrypted
     error_message = "Database storage must be encrypted."
+  }
+}
+
+run "test_subnet_group_uses_provided_subnets" {
+  command = plan
+
+  assert {
+    condition     = toset(aws_db_subnet_group.main.subnet_ids) == toset(var.db_subnet_ids)
+    error_message = "Subnet group must use the provided subnet IDs."
   }
 }

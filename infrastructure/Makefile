@@ -1,7 +1,5 @@
-MODULES_DIR := infrastructure/modules
-
 test-infrastructure:
-	@for dir in $(MODULES_DIR)/*/; do \
+	@for dir in infrastructure/modules/*/; do \
 		if [ -d "$$dir/tests" ]; then \
 			echo "Testing $$dir..."; \
 			terraform -chdir="$$dir" init -backend=false -input=false && \
