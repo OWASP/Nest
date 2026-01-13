@@ -31,11 +31,14 @@ const MenteeProfilePage = () => {
     GetModuleMenteeDetailsQuery['getMenteeModuleIssues']
   >([])
 
-  const [isLoading, setIsLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [currentPage, setCurrentPage] = useState(1)
 
-  const { data, error } = useQuery(GetModuleMenteeDetailsDocument, {
+  const {
+    data,
+    error,
+    loading: isLoading,
+  } = useQuery(GetModuleMenteeDetailsDocument, {
     variables: {
       programKey,
       moduleKey,
@@ -52,9 +55,6 @@ const MenteeProfilePage = () => {
     }
     if (error) {
       handleAppError(error)
-    }
-    if (data || error) {
-      setIsLoading(false)
     }
   }, [data, error])
 

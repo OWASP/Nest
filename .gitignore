@@ -30,6 +30,7 @@ backend/fuzzing_results/
 *.pdf
 *.pem
 backend/data/backup*
+backend/generated_videos/
 backend/staticfiles
 design/
 frontend/blob-report/

@@ -1,5 +1,5 @@
+import { mockChapterDetailsData } from '@mockData/mockChapterDetailsData'
 import { test, expect } from '@playwright/test'
-import { mockChapterDetailsData } from '@unit/data/mockChapterDetailsData'
 
 test.describe('Chapter Details Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -32,14 +32,19 @@ test.describe('Chapter Details Page', () => {
   })
 
   test('should have map with geolocation', async ({ page }) => {
-    await expect(page.locator('#chapter-map')).toBeVisible()
-    await expect(page.locator('#chapter-map').locator('img').nth(1)).toBeVisible()
+    const unlockButton = page.getByRole('button', { name: 'Unlock map' })
+    await expect(unlockButton).toBeVisible()
 
-    await page.getByRole('button', { name: 'Unlock map' }).click()
+    await unlockButton.click()
 
     await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Zoom out' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Marker' })).toBeVisible()
+
+    const marker = page.locator('.leaflet-marker-icon').first()
+    await marker.click()
+
+    const popupButton = page.getByRole('button', { name: 'OWASP Test Chapter' })
+    await expect(popupButton).toBeVisible()
   })
 
   test('should have top contributors', async ({ page }) => {
