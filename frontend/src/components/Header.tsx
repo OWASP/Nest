@@ -58,7 +58,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
 
   return (
     <header className="bg-owasp-blue fixed inset-x-0 top-0 z-50 w-full shadow-md dark:bg-slate-800">
-      <div className="flex h-16 w-full items-center px-4 max-md:justify-between" id="navbar-sticky">
+      <div className="flex h-16 w-full items-center px-4 max-lg:justify-between" id="navbar-sticky">
         {/* Logo */}
         <Link href="/" onClick={() => setMobileMenuOpen(false)}>
           <div className="flex h-full items-center">
@@ -78,7 +78,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           </div>
         </Link>
         {/* Desktop Header Links */}
-        <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium md:block">
+        <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium lg:block">
           <div className="flex justify-start pl-6">
             {headerLinks
               .filter((link) => {
@@ -128,7 +128,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           />
           {!isMobile && <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />}
           <ModeToggle />
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <Button
               onPress={toggleMobileMenu}
               className="flex h-11 w-11 items-center justify-center bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus:outline-hidden"
