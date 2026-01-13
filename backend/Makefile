@@ -28,7 +28,7 @@ clean-backend-docker:
 	@docker container rm -f nest-worker >/dev/null 2>&1 || true
 	@docker image rm -f nest-backend:base >/dev/null 2>&1 || true
 	@docker image rm -f nest-local-backend >/dev/null 2>&1 || true
-	@docker image rm -f nest-video-backend >/dev/null 2>&1 || true
+	@docker image rm -f nest-snapshot-video >/dev/null 2>&1 || true
 	@docker volume rm -f nest-local_backend-venv >/dev/null 2>&1 || true
 	@docker volume rm -f nest-local_cache-data >/dev/null 2>&1 || true
 
