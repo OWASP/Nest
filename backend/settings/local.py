@@ -25,3 +25,5 @@ class Local(Base):
     SLACK_EVENTS_ENABLED = True
     
     CSRF_COOKIE_SAMESITE = "Lax"
+    CSRF_COOKIE_SECURE = False
++   SESSION_COOKIE_SECURE = False
