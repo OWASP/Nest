@@ -28,11 +28,11 @@ class MockQuerySet:
         """Return count of items."""
         return len(self._items)
 
-    def iterator(self, chunk_size=None):
+    def iterator(self, **kwargs):
         """Mock iterator method."""
         return iter(self._items)
 
-    def values(self, *fields):
+    def values(self, *args, **kwargs):
         """Mock values method."""
         return self
 
@@ -68,20 +68,16 @@ class TestAggregateContributionsCommand:
                 "apps.github.management.commands.github_aggregate_contributions.timezone.now"
             ) as mock_tz_now,
         ):
-            # Mock timezone.now() to return a fixed date
             mock_tz_now.return_value = fixed_now
 
-            # Mock empty querysets
             mock_commit.objects.filter.return_value = MockQuerySet([])
             mock_pr.objects.filter.return_value = MockQuerySet([])
             mock_issue.objects.filter.return_value = MockQuerySet([])
 
             result = command._aggregate_user_contributions(mock_user, start_date)
 
-            # Should have 30 days of data (Jan 1 to Jan 30)
             assert isinstance(result, dict)
             assert len(result) == 30
-            # All values should be 0
             assert all(count == 0 for count in result.values())
 
     def test_aggregate_user_contributions_with_data(self):
@@ -105,32 +101,28 @@ class TestAggregateContributionsCommand:
                 "apps.github.management.commands.github_aggregate_contributions.timezone"
             ) as mock_tz,
         ):
-            # Mock timezone.now() to return a fixed date
             mock_tz.now.return_value = datetime(2024, 1, 5, tzinfo=UTC)
 
-            # Mock querysets with data
             mock_commit.objects.filter.return_value = MockQuerySet(
                 [
-                    {"created_at": datetime(2024, 1, 1, 10, 0, tzinfo=UTC), "count": 2},
-                    {"created_at": datetime(2024, 1, 2, 10, 0, tzinfo=UTC), "count": 1},
+                    {"date": datetime(2024, 1, 1, 10, 0, tzinfo=UTC).date(), "count": 2},
+                    {"date": datetime(2024, 1, 2, 10, 0, tzinfo=UTC).date(), "count": 1},
                 ]
             )
             mock_pr.objects.filter.return_value = MockQuerySet(
-                [{"created_at": datetime(2024, 1, 1, 11, 0, tzinfo=UTC), "count": 1}]
+                [{"date": datetime(2024, 1, 1, 11, 0, tzinfo=UTC).date(), "count": 1}]
             )
             mock_issue.objects.filter.return_value = MockQuerySet(
-                [{"created_at": datetime(2024, 1, 3, 12, 0, tzinfo=UTC), "count": 3}]
+                [{"date": datetime(2024, 1, 3, 12, 0, tzinfo=UTC).date(), "count": 3}]
             )
 
             result = command._aggregate_user_contributions(mock_user, start_date)
 
-            # Should have 5 days of data
             assert isinstance(result, dict)
             assert len(result) == 5
-            # Check specific dates
-            assert result["2024-01-01"] == 3  # 2 commits + 1 PR
-            assert result["2024-01-02"] == 1  # 1 commit
-            assert result["2024-01-03"] == 3  # 3 issues
+            assert result["2024-01-01"] == 3
+            assert result["2024-01-02"] == 1
+            assert result["2024-01-03"] == 3
             assert result["2024-01-04"] == 0
             assert result["2024-01-05"] == 0
 
@@ -179,7 +171,6 @@ class TestAggregateContributionsCommand:
 
             command.handle(user="nonexistent", days=365, batch_size=100)
 
-            # Should write error message
             assert any("not found" in str(call) for call in command.stdout.write.call_args_list)
 
     def test_handle_all_users(self):
@@ -212,10 +203,8 @@ class TestAggregateContributionsCommand:
 
             command.handle(user=None, days=365, batch_size=100)
 
-            # Both users should be saved
             assert mock_user1.save.call_count == 1
             assert mock_user2.save.call_count == 1
-            # Both should have contribution data
             assert mock_user1.contribution_data == {"2024-01-01": 5}
             assert mock_user2.contribution_data == {"2024-01-01": 5}
 
@@ -247,12 +236,10 @@ class TestAggregateContributionsCommand:
 
             command.handle(user=None, days=90, batch_size=100)
 
-            # Verify aggregate was called
             assert mock_aggregate.called
             call_args = mock_aggregate.call_args[0]
             start_date = call_args[1]
             expected_start = datetime(2024, 1, 31, tzinfo=UTC) - timedelta(days=90)
-            # Allow 1 second tolerance
             assert abs((expected_start - start_date).total_seconds()) < 1
 
     def test_contribution_data_date_format(self):
@@ -283,11 +270,8 @@ class TestAggregateContributionsCommand:
 
             result = command._aggregate_user_contributions(mock_user, start_date)
 
-            # Verify all keys are in YYYY-MM-DD format
             for date_str in result:
-                # Should not raise exception
-                datetime.strptime(date_str, "%Y-%m-%d").astimezone(UTC)
-                # Should match expected format
+                datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=UTC)
                 assert len(date_str) == 10
                 assert date_str[4] == "-"
                 assert date_str[7] == "-"

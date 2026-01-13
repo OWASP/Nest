@@ -5,6 +5,7 @@ from typing import Any
 
 from django.core.management.base import BaseCommand
 from django.db.models import Count
+from django.db.models.functions import TruncDate
 from django.utils import timezone
 
 from apps.github.models.commit import Commit
@@ -42,7 +43,7 @@ class Command(BaseCommand):
         """Handle the command execution."""
         user_login = options.get("user")
         days = options.get("days", 365)
-        batch_size = options.get("batch_size", 1000)
+        batch_size = options.get("batch_size", 100)
 
         start_date = timezone.now() - timedelta(days=days)
 
@@ -104,12 +105,13 @@ class Command(BaseCommand):
                 author=user,
                 created_at__gte=start_date,
             )
-            .values("created_at")
+            .annotate(date=TruncDate("created_at"))
+            .values("date")
             .annotate(count=Count("id"))
         )
 
         for commit in commits:
-            date_str = commit["created_at"].strftime("%Y-%m-%d")
+            date_str = commit["date"].strftime("%Y-%m-%d")
             contribution_data[date_str] = contribution_data.get(date_str, 0) + commit["count"]
 
         prs = (
@@ -117,12 +119,13 @@ class Command(BaseCommand):
                 author=user,
                 created_at__gte=start_date,
             )
-            .values("created_at")
+            .annotate(date=TruncDate("created_at"))
+            .values("date")
             .annotate(count=Count("id"))
         )
 
         for pr in prs:
-            date_str = pr["created_at"].strftime("%Y-%m-%d")
+            date_str = pr["date"].strftime("%Y-%m-%d")
             contribution_data[date_str] = contribution_data.get(date_str, 0) + pr["count"]
 
         issues = (
@@ -130,12 +133,13 @@ class Command(BaseCommand):
                 author=user,
                 created_at__gte=start_date,
             )
-            .values("created_at")
+            .annotate(date=TruncDate("created_at"))
+            .values("date")
             .annotate(count=Count("id"))
         )
 
         for issue in issues:
-            date_str = issue["created_at"].strftime("%Y-%m-%d")
+            date_str = issue["date"].strftime("%Y-%m-%d")
             contribution_data[date_str] = contribution_data.get(date_str, 0) + issue["count"]
 
         return contribution_data
