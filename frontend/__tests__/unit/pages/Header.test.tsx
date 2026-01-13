@@ -105,7 +105,7 @@ jest.mock('components/UserMenu', () => {
 
 // Mock constants
 jest.mock('utils/constants', () => ({
-  desktopViewMinWidth: 768,
+  desktopViewMinWidth: 1024,
   headerLinks: [
     {
       text: 'Home',
