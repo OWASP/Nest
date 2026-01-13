@@ -224,9 +224,23 @@ jobs:
       - name: Generate per-app model graphs
         working-directory: backend
         run: |
-          set +e
+          set -e
 
-          APPS=$(poetry run python manage.py showmigrations | awk '{print $1}' | sort -u)
+          APPS=$(poetry run python - <<'PY'
+          from django.conf import settings
+          import django
+          django.setup()
+
+          apps = [
+              a for a in settings.INSTALLED_APPS
+              if not a.startswith("django.")
+              and not a.startswith("django.contrib.")
+          ]
+
+          for a in apps:
+              print(a)
+          PY
+          )
 
           for app in $APPS; do
             poetry run python manage.py graph_models "$app" \
@@ -238,8 +252,6 @@ jobs:
               --output "model-graphs/apps/${app}_relations.svg" \
               --format svg || true
           done
-
-          set -e
 
       - name: Generate inter-app model graphs
         working-directory: backend
