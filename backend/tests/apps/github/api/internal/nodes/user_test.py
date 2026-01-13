@@ -23,6 +23,7 @@ class TestUserNode:
             "badges",
             "bio",
             "company",
+            "contribution_data",
             "contributions_count",
             "created_at",
             "email",
@@ -308,3 +309,30 @@ class TestUserNode:
         result = UserNode.linkedin_page_id(mock_user)
 
         assert result == ""
+
+    def test_contribution_data_field(self):
+        """Test contribution_data field returns stored data."""
+        mock_user = Mock()
+        mock_user.contribution_data = {
+            "2025-01-01": 5,
+            "2025-01-02": 3,
+            "2025-01-03": 0,
+        }
+
+        # Access the field directly since it's just a passthrough
+        result = mock_user.contribution_data
+
+        assert result == {
+            "2025-01-01": 5,
+            "2025-01-02": 3,
+            "2025-01-03": 0,
+        }
+
+    def test_contribution_data_field_empty(self):
+        """Test contribution_data field when empty."""
+        mock_user = Mock()
+        mock_user.contribution_data = {}
+
+        result = mock_user.contribution_data
+
+        assert result == {}

@@ -156,6 +156,7 @@ update-data: \
 	github-add-related-repositories \
 	github-update-related-organizations \
 	github-update-users \
+	github-aggregate-contributions \
 	owasp-aggregate-projects \
 	owasp-aggregate-contributions \
 	owasp-update-events \

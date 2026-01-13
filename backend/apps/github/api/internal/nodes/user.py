@@ -13,6 +13,7 @@ from apps.nest.api.internal.nodes.badge import BadgeNode
         "avatar_url",
         "bio",
         "company",
+        "contribution_data",
         "contributions_count",
         "email",
         "followers_count",

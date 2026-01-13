@@ -281,8 +281,8 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
     }
 
     if (variant === 'medium') {
-      const pixelPerWeek = 15.5
-      const padding = 40
+      const pixelPerWeek = 16
+      const padding = 45
       const calculatedWidth = weeksCount * pixelPerWeek + padding
       return Math.max(500, calculatedWidth)
     }

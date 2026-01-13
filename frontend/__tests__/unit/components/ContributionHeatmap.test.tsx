@@ -626,6 +626,13 @@ describe('ContributionHeatmap', () => {
       expect(chart).toHaveAttribute('data-height', '195')
     })
 
+    it('renders medium variant with medium dimensions', () => {
+      renderWithTheme(<ContributionHeatmap {...defaultProps} variant="medium" />)
+      const chart = screen.getByTestId('mock-heatmap-chart')
+      // Verify medium dimensions (172px height for medium variant)
+      expect(chart).toHaveAttribute('data-height', '172')
+    })
+
     it('renders compact variant with smaller dimensions', () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} variant="compact" />)
       const chart = screen.getByTestId('mock-heatmap-chart')
@@ -651,6 +658,15 @@ describe('ContributionHeatmap', () => {
       expect(chartContainer).toBeInTheDocument()
     })
 
+    it('applies medium variant container styling', () => {
+      const { container } = renderWithTheme(
+        <ContributionHeatmap {...defaultProps} title="Medium" variant="medium" />
+      )
+      // Verify medium variant uses inline-block class
+      const chartContainer = container.querySelector('.inline-block')
+      expect(chartContainer).toBeInTheDocument()
+    })
+
     it('defaults to default variant when no variant is specified', () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} />)
       const chart = screen.getByTestId('mock-heatmap-chart')
@@ -667,7 +683,7 @@ describe('ContributionHeatmap', () => {
 
       rerender(
         <ThemeProvider attribute="class">
-          <ContributionHeatmap {...defaultProps} title="Test Title" variant="compact" />
+          <ContributionHeatmap {...defaultProps} title="Test Title" variant="medium" />
         </ThemeProvider>
       )
       title = screen.getByText('Test Title')

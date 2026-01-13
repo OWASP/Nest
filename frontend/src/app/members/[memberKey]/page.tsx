@@ -3,14 +3,13 @@ import { useQuery } from '@apollo/client/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { FaCodeMerge, FaFolderOpen, FaPersonWalkingArrowRight, FaUserPlus } from 'react-icons/fa6'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 import { GetUserDataDocument } from 'types/__generated__/userQueries.generated'
 import { Badge } from 'types/badge'
 import { formatDate } from 'utils/dateFormatter'
-import { fetchHeatmapData } from 'utils/helpers/githubHeatmap'
 import Badges from 'components/Badges'
 import DetailsCard from 'components/CardDetailsPage'
 import ContributionHeatmap from 'components/ContributionHeatmap'
@@ -18,12 +17,6 @@ import MemberDetailsPageSkeleton from 'components/skeletons/MemberDetailsPageSke
 
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams<{ memberKey: string }>()
-  const [contributionData, setContributionData] = useState<Record<string, number>>({})
-  const [dateRange, setDateRange] = useState<{ startDate: string; endDate: string }>({
-    startDate: '',
-    endDate: '',
-  })
-  const [isPrivateContributor, setIsPrivateContributor] = useState(false)
 
   const {
     data: graphQLData,
@@ -46,31 +39,25 @@ const UserDetailsPage: React.FC = () => {
     }
   }, [graphQLRequestError, memberKey])
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await fetchHeatmapData(memberKey)
-      if (!result) {
-        setIsPrivateContributor(true)
-        return
-      }
-      if (result?.contributions && Array.isArray(result.contributions)) {
-        const transformedData: Record<string, number> = {}
-        result.contributions.forEach((contribution) => {
-          transformedData[contribution.date] = contribution.count
-        })
-        setContributionData(transformedData)
-
-        if (result.contributions.length > 0) {
-          const dates = result.contributions.map((c) => c.date).sort((a, b) => a.localeCompare(b))
-          setDateRange({
-            startDate: dates[0],
-            endDate: dates.at(-1) ?? '',
-          })
-        }
-      }
+  const contributionData: Record<string, number> = useMemo(() => {
+    if (user?.contributionData && typeof user.contributionData === 'object') {
+      return user.contributionData as Record<string, number>
     }
-    fetchData()
-  }, [memberKey, user])
+    return {}
+  }, [user?.contributionData])
+
+  const dateRange = useMemo(() => {
+    const dates = Object.keys(contributionData).sort((a, b) => a.localeCompare(b))
+    if (dates.length === 0) {
+      return { startDate: '', endDate: '' }
+    }
+    return {
+      startDate: dates[0],
+      endDate: dates.at(-1) ?? '',
+    }
+  }, [contributionData])
+
+  const hasContributionData = Object.keys(contributionData).length > 0
 
   const formattedBio = user?.bio?.split(' ').map((word, index) => {
     const mentionMatch = word.match(/^@([\w-]+(?:\.[\w-]+)*)([^\w@])?$/)
@@ -176,22 +163,18 @@ const UserDetailsPage: React.FC = () => {
           </div>
           <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
         </div>
-        {!isPrivateContributor &&
-          contributionData &&
-          Object.keys(contributionData).length > 0 &&
-          dateRange.startDate &&
-          dateRange.endDate && (
-            <div className="w-full lg:block">
-              <div className="overflow-x-auto rounded-lg bg-white dark:bg-gray-800">
-                <ContributionHeatmap
-                  contributionData={contributionData}
-                  startDate={dateRange.startDate}
-                  endDate={dateRange.endDate}
-                  variant="medium"
-                />
-              </div>
+        {hasContributionData && dateRange.startDate && dateRange.endDate && (
+          <div className="w-full lg:block">
+            <div className="overflow-x-auto rounded-lg bg-white dark:bg-gray-800">
+              <ContributionHeatmap
+                contributionData={contributionData}
+                startDate={dateRange.startDate}
+                endDate={dateRange.endDate}
+                variant="medium"
+              />
             </div>
-          )}
+          </div>
+        )}
       </div>
     </div>
   )
