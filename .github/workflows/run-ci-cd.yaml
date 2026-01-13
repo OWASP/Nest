@@ -145,7 +145,6 @@ jobs:
           scan-type: repo
           skip-setup-trivy: true
           trivy-config: trivy.yaml
-          trivyignores: trivyignore.yaml
 
   scan-ci-dependencies:
     name: Run CI Dependencies Scan
@@ -171,7 +170,6 @@ jobs:
           scan-type: fs
           skip-setup-trivy: true
           trivy-config: trivy.yaml
-          trivyignores: trivyignore.yaml
 
   run-backend-tests:
     name: Run backend tests
@@ -425,7 +423,6 @@ jobs:
           cache: true
 
       - name: Scan backend image
-        continue-on-error: true
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
           exit-code: 1
@@ -433,18 +430,15 @@ jobs:
           scan-type: image
           skip-setup-trivy: true
           trivy-config: trivy.yaml
-          trivyignores: trivyignore.yaml
 
       - name: Scan frontend image
-        continue-on-error: true
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
           exit-code: 1
           image-ref: owasp/nest:frontend-staging
           scan-type: image
+          skip-setup-trivy: true
           trivy-config: trivy.yaml
-          trivyignores: trivyignore.yaml
-          version: latest
 
   deploy-staging-nest:
     name: Deploy Nest Staging
@@ -790,24 +784,22 @@ jobs:
           cache: true
 
       - name: Scan backend image
-        continue-on-error: true
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
           exit-code: 1
           image-ref: owasp/nest:backend-production
+          scan-type: image
           skip-setup-trivy: true
           trivy-config: trivy.yaml
-          trivyignores: trivyignore.yaml
 
       - name: Scan frontend image
-        continue-on-error: true
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
           exit-code: 1
           image-ref: owasp/nest:frontend-production
+          scan-type: image
           skip-setup-trivy: true
           trivy-config: trivy.yaml
-          trivyignores: trivyignore.yaml
 
   deploy-production-nest:
     name: Deploy Nest to Production
