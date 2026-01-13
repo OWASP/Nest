@@ -29,9 +29,9 @@ const OrganizationDetailsPage = () => {
 
   if (isLoading) {
     return (
-      <div role="status">
+      <output>
         <OrganizationDetailsPageSkeleton />
-      </div>
+      </output>
     )
   }
 

@@ -83,9 +83,9 @@ const UserDetailsPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div role="status">
+      <output>
         <MemberDetailsPageSkeleton />
-      </div>
+      </output>
     )
   }
 
