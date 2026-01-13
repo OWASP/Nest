@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
+import { mockAboutData } from '@mockData/mockAboutData'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { mockAboutData } from '@unit/data/mockAboutData'
 import { useRouter } from 'next/navigation'
 import React, { act } from 'react'
 import { render } from 'wrappers/testUtil'

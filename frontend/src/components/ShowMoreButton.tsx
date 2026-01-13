@@ -13,10 +13,11 @@ const ShowMoreButton = ({ onToggle }: { onToggle: () => void }) => {
   return (
     <div className="mt-4 flex justify-start">
       <Button
+        data-testid="show-more-button"
         type="button"
         disableAnimation
         onPress={handleToggle}
-        className="flex items-center bg-transparent px-0 text-blue-400 hover:underline focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
+        className="flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
       >
         {isExpanded ? (
           <>

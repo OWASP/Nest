@@ -99,7 +99,7 @@ const DetailsCard = ({
   type,
   userSummary,
 }: DetailsCardProps) => {
-  const { data } = useSession()
+  const { data: session } = useSession() as { data: ExtendedSession | null }
 
   // compute styles based on type prop
   const typeStylesMap = {
@@ -107,6 +107,11 @@ const DetailsCard = ({
     module: 'gap-2 md:col-span-7',
     program: 'gap-2 md:col-span-7',
   }
+
+  const hasContributions =
+    (contributionStats && contributionStats.total > 0) ||
+    (contributionData && Object.keys(contributionData).length > 0)
+
   const secondaryCardStyles = typeStylesMap[type] ?? 'gap-2 md:col-span-5'
 
   return (
@@ -126,9 +131,9 @@ const DetailsCard = ({
               )}
               {type === 'module' &&
                 accessLevel === 'admin' &&
-                admins?.some(
-                  (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
-                ) && <EntityActions type="module" programKey={programKey} moduleKey={entityKey} />}
+                admins?.some((admin) => admin.login === session?.user?.login) && (
+                  <EntityActions type="module" programKey={programKey} moduleKey={entityKey} />
+                )}
               {!isActive && <StatusBadge status="inactive" size="md" />}
               {isArchived && type === 'repository' && <StatusBadge status="archived" size="md" />}
               {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
@@ -159,7 +164,7 @@ const DetailsCard = ({
               detail?.label === 'Leaders' ? (
                 <div key={detail.label} className="flex flex-row gap-1 pb-1">
                   <strong>{detail.label}:</strong>{' '}
-                  <LeadersList leaders={detail?.value != null ? String(detail.value) : 'Unknown'} />
+                  <LeadersList leaders={detail?.value == null ? 'Unknown' : String(detail.value)} />
                 </div>
               ) : (
                 <div key={detail.label} className="pb-1">
@@ -260,7 +265,7 @@ const DetailsCard = ({
           </>
         )}
         {entityLeaders && entityLeaders.length > 0 && <Leaders users={entityLeaders} />}
-        {(type === 'project' || type === 'chapter') && (contributionData || contributionStats) && (
+        {(type === 'project' || type === 'chapter') && hasContributions && (
           <div className="mb-8">
             <div className="rounded-lg bg-gray-100 px-4 pt-6 shadow-md sm:px-6 lg:px-10 dark:bg-gray-800">
               {contributionStats && (

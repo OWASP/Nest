@@ -1,6 +1,6 @@
 import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
+import { mockOrganizationData } from '@mockData/mockOrganizationData'
 import { test, expect } from '@playwright/test'
-import { mockOrganizationData } from '@unit/data/mockOrganizationData'
 
 test.describe('Organization Page', () => {
   test.beforeEach(async ({ page }) => {
