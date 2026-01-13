@@ -118,6 +118,13 @@
   "engines": {
     "node": "^24.0.0"
   },
+  "packageManager": "pnpm@10.24.0",
+  "pnpm": {
+    "overrides": {
+      "glob": "^11.1.0",
+      "test-exclude": "^7.0.1"
+    }
+  },
   "prettier": {
     "arrowParens": "always",
     "endOfLine": "lf",
@@ -129,6 +136,5 @@
     "singleQuote": true,
     "tabWidth": 2,
     "trailingComma": "es5"
-  },
-  "packageManager": "pnpm@10.24.0"
+  }
 }
