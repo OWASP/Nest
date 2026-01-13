@@ -79,8 +79,8 @@ class Command(BaseCommand):
             if metric.level_non_compliant:
                 self.stdout.write(
                     self.style.WARNING(
-                        f"Level mismatch: {project.name}"
-                        f"local={project.level}"
+                        f"Level mismatch: {project.name} "
+                        f"local={project.level} "
                         f"official={expected_level}"
                     )
                 )
