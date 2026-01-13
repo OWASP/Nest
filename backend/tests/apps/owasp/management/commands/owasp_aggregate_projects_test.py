@@ -76,8 +76,17 @@ class TestOwaspAggregateProjects:
         with (
             mock.patch.object(Project, "active_projects", mock_active_projects),
             mock.patch("builtins.print") as mock_print,
+            mock.patch(
+                "apps.owasp.management.commands.owasp_aggregate_projects.call_command"
+            ) as mock_call_command,
         ):
             command.handle(offset=offset)
+
+        if offset == 0:
+            mock_call_command.assert_any_call("owasp_update_project_level_compliance")
+            mock_call_command.assert_any_call("owasp_update_project_health_scores")
+        else:
+            mock_call_command.assert_not_called()
 
         assert mock_bulk_save.called
         assert mock_print.call_count == projects - offset
