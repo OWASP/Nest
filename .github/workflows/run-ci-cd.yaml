@@ -145,7 +145,6 @@ jobs:
           scan-type: repo
           skip-setup-trivy: true
           trivy-config: trivy.yaml
-          trivyignores: trivyignore.yaml
 
   scan-ci-dependencies:
     name: Run CI Dependencies Scan
@@ -171,7 +170,6 @@ jobs:
           scan-type: fs
           skip-setup-trivy: true
           trivy-config: trivy.yaml
-          trivyignores: trivyignore.yaml
 
   run-backend-tests:
     name: Run backend tests
@@ -430,10 +428,9 @@ jobs:
           exit-code: 1
           image-ref: owasp/nest:backend-staging
           scan-type: image
-          severity: 'CRITICAL,HIGH'
+          severity: CRITICAL,HIGH
           skip-setup-trivy: true
           trivy-config: trivy.yaml
-          trivyignores: trivyignore.yaml
 
       - name: Scan frontend image
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
@@ -441,10 +438,8 @@ jobs:
           exit-code: 1
           image-ref: owasp/nest:frontend-staging
           scan-type: image
-          severity: 'CRITICAL,HIGH'
           skip-setup-trivy: true
           trivy-config: trivy.yaml
-          trivyignores: trivyignore.yaml
 
   deploy-staging-nest:
     name: Deploy Nest Staging
@@ -795,10 +790,8 @@ jobs:
           exit-code: 1
           image-ref: owasp/nest:backend-production
           scan-type: image
-          severity: 'CRITICAL,HIGH'
           skip-setup-trivy: true
           trivy-config: trivy.yaml
-          trivyignores: trivyignore.yaml
 
       - name: Scan frontend image
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
@@ -806,10 +799,9 @@ jobs:
           exit-code: 1
           image-ref: owasp/nest:frontend-production
           scan-type: image
-          severity: 'CRITICAL,HIGH'
+          severity: CRITICAL,HIGH
           skip-setup-trivy: true
           trivy-config: trivy.yaml
-          trivyignores: trivyignore.yaml
 
   deploy-production-nest:
     name: Deploy Nest to Production

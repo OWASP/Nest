@@ -13,7 +13,6 @@ scan:
 severity:
   - CRITICAL
   - HIGH
-  - MEDIUM
 
 timeout: 10m
 

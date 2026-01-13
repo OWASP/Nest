@@ -119,7 +119,6 @@ scan-backend-image: build-backend-local-image
 		--config trivy.yaml \
 		--docker-host $$(docker context inspect --format '{{.Endpoints.docker.Host}}' 2>/dev/null) \
 		--exit-code 1 \
-		--ignorefile trivyignore.yaml \
 		--severity CRITICAL,HIGH \
 		nest-backend-local
 
