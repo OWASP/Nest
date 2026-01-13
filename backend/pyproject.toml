@@ -65,6 +65,13 @@ pytest-mock = "^3.0"
 pytest-xdist = "^3.0"
 python-dotenv = "^1.0.1"
 
+[tool.poetry.group.video.dependencies]
+elevenlabs = "^2.27.0"
+ffmpeg-python = "^0.2.0"
+pillow = "^12.1.0"
+pypdfium2 = "^5.2.0"
+weasyprint = "^67.0"
+
 [tool.ruff]
 target-version = "py313"
 

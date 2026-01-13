@@ -1,5 +1,5 @@
+import { mockRepositoryData } from '@mockData/mockRepositoryData'
 import { test, expect } from '@playwright/test'
-import { mockRepositoryData } from '@unit/data/mockRepositoryData'
 
 test.describe('Repository Details Page', () => {
   test.beforeEach(async ({ page }) => {
