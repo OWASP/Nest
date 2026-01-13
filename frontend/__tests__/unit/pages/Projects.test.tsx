@@ -1,5 +1,5 @@
+import mockProjectData from '@mockData/mockProjectData'
 import { waitFor, screen, fireEvent } from '@testing-library/react'
-import mockProjectData from '@unit/data/mockProjectData'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import ProjectsPage from 'app/projects/page'

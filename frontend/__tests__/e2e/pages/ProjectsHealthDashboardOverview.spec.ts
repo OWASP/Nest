@@ -1,6 +1,6 @@
 import { mockDashboardCookies } from '@e2e/helpers/mockDashboardCookies'
+import { mockProjectsDashboardOverviewData } from '@mockData/mockProjectsDashboardOverviewData'
 import { test, expect } from '@playwright/test'
-import { mockProjectsDashboardOverviewData } from '@unit/data/mockProjectsDashboardOverviewData'
 import millify from 'millify'
 
 test.describe('Projects Health Dashboard Overview', () => {

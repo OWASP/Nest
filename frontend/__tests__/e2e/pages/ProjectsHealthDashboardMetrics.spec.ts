@@ -1,6 +1,6 @@
 import { mockDashboardCookies } from '@e2e/helpers/mockDashboardCookies'
+import { mockHealthMetricsData } from '@mockData/mockProjectsHealthMetricsData'
 import { test, expect } from '@playwright/test'
-import { mockHealthMetricsData } from '@unit/data/mockProjectsHealthMetricsData'
 test.describe('Projects Health Dashboard Metrics', () => {
   test('renders 404 when user is not OWASP staff', async ({ page }) => {
     await mockDashboardCookies(page, mockHealthMetricsData, false)

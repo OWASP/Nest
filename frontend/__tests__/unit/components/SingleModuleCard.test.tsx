@@ -7,16 +7,6 @@ import { ExperienceLevelEnum, ProgramStatusEnum } from 'types/__generated__/grap
 import type { Module } from 'types/mentorship'
 import SingleModuleCard from 'components/SingleModuleCard'
 
-// Mock dependencies
-jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(),
-  usePathname: jest.fn(),
-}))
-
-jest.mock('next-auth/react', () => ({
-  useSession: jest.fn(),
-}))
-
 jest.mock('next/link', () => ({
   __esModule: true,
   default: ({
@@ -45,6 +35,16 @@ jest.mock('next/link', () => ({
       {children}
     </a>
   ),
+}))
+
+// Mock dependencies
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+  usePathname: jest.fn(),
+}))
+
+jest.mock('next-auth/react', () => ({
+  useSession: jest.fn(),
 }))
 
 jest.mock('react-icons/hi', () => ({
