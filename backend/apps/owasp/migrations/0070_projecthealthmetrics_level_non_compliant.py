@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('owasp', '0069_alter_project_contribution_data_and_more'),
+        ("owasp", "0069_alter_project_contribution_data_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='projecthealthmetrics',
-            name='level_non_compliant',
-            field=models.BooleanField(default=False, verbose_name='Is level non-compliant'),
+            model_name="projecthealthmetrics",
+            name="level_non_compliant",
+            field=models.BooleanField(default=False, verbose_name="Is level non-compliant"),
         ),
     ]

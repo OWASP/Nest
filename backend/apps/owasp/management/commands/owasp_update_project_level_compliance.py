@@ -1,12 +1,16 @@
-from decimal import Decimal
-import re
-import requests
+"""A command to detect non-compliant OWASP project levels."""
 
+import logging
+import re
+from decimal import Decimal, InvalidOperation
+
+import requests
 from django.core.management.base import BaseCommand
 
 from apps.owasp.models import ProjectHealthMetrics
 from apps.owasp.utils.project_level import map_level
 
+logger = logging.getLogger(__name__)
 
 LEVELS_URL = (
     "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_data/project_levels.json"
@@ -14,12 +18,13 @@ LEVELS_URL = (
 
 
 def clean_name(name: str) -> str:
+    """Normalize project names for matching with OWASP official data."""
     name = name.lower().replace("owasp", "")
     return re.sub(r"[^a-z0-9]+", "", name)
 
 
 class Command(BaseCommand):
-    help = "Update project level compliance"
+    help = "Update project level compliance."
 
     def handle(self, *args, **options):
         self.stdout.write("Updating project level compliance...")
@@ -29,20 +34,24 @@ class Command(BaseCommand):
 
         official = response.json()
 
-        by_repo = {}
-        by_name = {}
+        by_repo: dict[str, Decimal] = {}
+        by_name: dict[str, Decimal] = {}
 
         for item in official:
+            raw_level = item.get("level")
             try:
-                level = Decimal(item.get("level"))
-            except Exception:
+                level = Decimal(str(raw_level))
+            except (InvalidOperation, TypeError, ValueError):
+                logger.debug("Skipping invalid project level: %s", raw_level)
                 continue
 
-            if item.get("repo"):
-                by_repo[item["repo"].lower()] = level
+            repo = item.get("repo")
+            if repo:
+                by_repo[repo.lower()] = level
 
-            if item.get("name"):
-                by_name[clean_name(item["name"])] = level
+            name = item.get("name")
+            if name:
+                by_name[clean_name(name)] = level
 
         metrics = ProjectHealthMetrics.objects.select_related("project")
 
@@ -50,8 +59,8 @@ class Command(BaseCommand):
 
         for metric in metrics:
             project = metric.project
-            official_level = None
 
+            official_level = None
             if project.repo_url:
                 slug = project.repo_url.rstrip("/").split("/")[-1].lower()
                 official_level = by_repo.get(slug)
@@ -62,11 +71,11 @@ class Command(BaseCommand):
             if official_level is None:
                 continue
 
-            expected = int(official_level)
-            if expected is None:
+            expected_level = map_level(official_level)
+            if expected_level is None:
                 continue
 
-            metric.level_non_compliant = project.level != expected
+            metric.level_non_compliant = project.level != expected_level
             updated_metrics.append(metric)
 
         if updated_metrics:
@@ -75,6 +84,4 @@ class Command(BaseCommand):
                 update_fields=["level_non_compliant"],
             )
 
-        self.stdout.write(
-            f"Project level compliance updated for {len(updated_metrics)} metrics."
-        )
+        self.stdout.write(f"Project level compliance updated for {len(updated_metrics)} metrics.")
